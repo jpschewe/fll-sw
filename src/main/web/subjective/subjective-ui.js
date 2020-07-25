@@ -483,8 +483,8 @@ function createNewScore() {
 }
 
 /**
- * Save the state of the current page to the specified score object. If null, do
- * nothing.
+ * Save the state of the current page's goals to the specified score object. If
+ * null, do nothing.
  */
 function saveToScoreObject(score) {
   if (null == score) {
@@ -706,67 +706,76 @@ function populateEnterScoreRubricTitles(table, hidden) {
   return totalColumns;
 }
 
-$(document).on(
-    "pagebeforeshow",
-    "#enter-score-page",
-    function(event) {
+$(document)
+    .on(
+        "pagebeforeshow",
+        "#enter-score-page",
+        function(event) {
 
-      var currentTeam = $.subjective.getCurrentTeam();
-      $("#enter-score_team-number").text(currentTeam.teamNumber);
-      $("#enter-score_team-name").text(currentTeam.teamName);
+          var currentTeam = $.subjective.getCurrentTeam();
+          $("#enter-score_team-number").text(currentTeam.teamNumber);
+          $("#enter-score_team-name").text(currentTeam.teamName);
 
-      var score = $.subjective.getScore(currentTeam.teamNumber);
-      if (null != score) {
-        $("#enter-score-note-text").val(score.note);
-      } else {
-        $("#enter-score-note-text").val("");
-      }
-
-      var table = $("#enter-score_score-table");
-      table.empty();
-
-      var totalColumns = populateEnterScoreRubricTitles(table, true);
-
-      // put rubric titles in the top header
-      var headerTable = $("#enter-score_score-table_header");
-      headerTable.empty();
-      populateEnterScoreRubricTitles(headerTable, false)
-
-      var prevCategory = null;
-      $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
-        if (goal.enumerated) {
-          alert("Enumerated goals not supported: " + goal.name);
-        } else {
-          var subscore = null;
-          if ($.subjective.isScoreCompleted(score)) {
-            subscore = score.standardSubScores[goal.name];
+          var score = $.subjective.getScore(currentTeam.teamNumber);
+          if (null != score) {
+            $("#enter-score-note-text").val(score.note);
+            $("#enter-score-comment-great-job-text").val(score.commentGreatJob);
+            $("#enter-score-comment-think-about-text").val(
+                score.commentThinkAbout);
+          } else {
+            $("#enter-score-note-text").val("");
+            $("#enter-score-comment-great-job-text").val("");
+            $("#enter-score-comment-think-about-text").val("");
           }
 
-          if (prevCategory != goal.category) {
-            if (goal.category != null && "" != goal.category) {
-              var bar = $("<tr><td colspan='" + totalColumns
-                  + "' class='ui-bar-a'>" + goal.category + "</td></tr>");
-              table.append(bar);
-            }
-          }
+          var table = $("#enter-score_score-table");
+          table.empty();
 
-          createScoreRows(table, totalColumns, goal, subscore);
+          var totalColumns = populateEnterScoreRubricTitles(table, true);
 
-          prevCategory = goal.category;
-        }
-      });
+          // put rubric titles in the top header
+          var headerTable = $("#enter-score_score-table_header");
+          headerTable.empty();
+          populateEnterScoreRubricTitles(headerTable, false)
 
-      // read the intial value
-      recomputeTotal();
+          var prevCategory = null;
+          $.each($.subjective.getCurrentCategory().goals,
+              function(index, goal) {
+                if (goal.enumerated) {
+                  alert("Enumerated goals not supported: " + goal.name);
+                } else {
+                  var subscore = null;
+                  if ($.subjective.isScoreCompleted(score)) {
+                    subscore = score.standardSubScores[goal.name];
+                  }
 
-      $("#enter-score-page").trigger("create");
+                  if (prevCategory != goal.category) {
+                    if (goal.category != null && "" != goal.category) {
+                      var bar = $("<tr><td colspan='" + totalColumns
+                          + "' class='ui-bar-a'>" + goal.category
+                          + "</td></tr>");
+                      table.append(bar);
+                    }
+                  }
 
-      // events need to be added after the page create
-      $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
-        addEventsToSlider(goal);
-      });
+                  createScoreRows(table, totalColumns, goal, subscore);
 
-    });
+                  prevCategory = goal.category;
+                }
+              });
+
+          // read the intial value
+          recomputeTotal();
+
+          $("#enter-score-page").trigger("create");
+
+          // events need to be added after the page create
+          $.each($.subjective.getCurrentCategory().goals,
+              function(index, goal) {
+                addEventsToSlider(goal);
+              });
+
+        });
 
 function saveScore() {
   var currentTeam = $.subjective.getCurrentTeam();
@@ -778,9 +787,10 @@ function saveScore() {
   score.deleted = false;
   score.noShow = false;
 
-  var text = $("#enter-score-note-text").val();
-  score.note = text;
+  score.note = $("#enter-score-note-text").val();
   $.subjective.log("note text: " + score.note);
+  score.commentGreatJob = $("#enter-score-comment-great-job-text").val();
+  score.commentThinkAbout = $("#enter-score-comment-think-about-text").val();
 
   saveToScoreObject(score);
 
