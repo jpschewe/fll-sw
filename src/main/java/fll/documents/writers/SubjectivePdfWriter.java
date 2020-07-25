@@ -30,8 +30,6 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.io.ByteStreams;
-
 import fll.Utilities;
 import fll.documents.elements.RowElement;
 import fll.documents.elements.SheetElement;
@@ -113,9 +111,7 @@ public class SubjectivePdfWriter {
                                 .getResourceAsStream("fll/resources/documents/FLLHeader.png");
         ByteArrayOutputStream output = new ByteArrayOutputStream()) {
       Objects.requireNonNull(input);
-      // TODO JDK 9 has StreamsTransfer.transferTo, so can use
-      // input.transferTo(output)
-      ByteStreams.copy(input, output);
+      input.transferTo(output);
 
       final String encoded = encoder.encodeToString(output.toByteArray());
       return encoded;
