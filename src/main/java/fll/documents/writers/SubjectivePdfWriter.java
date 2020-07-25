@@ -7,12 +7,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.LocalTime;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.xml.transform.TransformerException;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -27,6 +29,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.SubjectiveScore;
 import fll.Utilities;
 import fll.documents.elements.RowElement;
 import fll.documents.elements.SheetElement;
@@ -62,24 +65,18 @@ public class SubjectivePdfWriter {
 
   private final SheetElement sheetElement;
 
-  private final String scheduleColumn;
-
   /**
    * @param description the challenge description
    * @param sheet information about the rubric
-   * @param scheduleColumn the column in the schedule used to find the times,
-   *          may be null
    * @param tournamentName the name of the tournament to display on the sheets
    */
   public SubjectivePdfWriter(@Nonnull final ChallengeDescription description,
                              @Nonnull final String tournamentName,
-                             @Nonnull final SheetElement sheet,
-                             final String scheduleColumn) {
+                             @Nonnull final SheetElement sheet) {
     this.description = description;
     this.tournamentName = tournamentName;
     this.sheetElement = sheet;
     this.scoreCategory = sheetElement.getSheetData();
-    this.scheduleColumn = scheduleColumn;
 
     // uses hard coded constants to make the colors look like FIRST and default
     // to blue.
@@ -119,7 +116,10 @@ public class SubjectivePdfWriter {
   }
 
   private Element createHeader(final Document document,
-                               final TeamScheduleInfo teamInfo) {
+                               final int teamNumber,
+                               final String teamName,
+                               final String awardGroup,
+                               final @Nullable LocalTime scheduledTime) {
     final Element header = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
     final Element pageHeaderTable = FOPUtils.createBasicTable(document);
@@ -177,16 +177,15 @@ public class SubjectivePdfWriter {
     categoryTitle.setAttribute("font-size", "20pt");
     categoryTitle.appendChild(document.createTextNode(scoreCategory.getTitle()));
 
-    final Element teamNumber = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
-    categoryTeamNumberBlock.appendChild(teamNumber);
-    teamNumber.setAttribute("font-size", "12pt");
-    teamNumber.appendChild(document.createTextNode(String.format("    Team Number: %d", teamInfo.getTeamNumber())));
+    final Element teamNumberEle = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+    categoryTeamNumberBlock.appendChild(teamNumberEle);
+    teamNumberEle.setAttribute("font-size", "12pt");
+    teamNumberEle.appendChild(document.createTextNode(String.format("    Team Number: %d", teamNumber)));
 
     final String scheduledTimeStr;
-    if (null == scheduleColumn) {
+    if (null == scheduledTime) {
       scheduledTimeStr = "N/A";
     } else {
-      final LocalTime scheduledTime = teamInfo.getSubjectiveTimeByName(scheduleColumn).getTime();
       scheduledTimeStr = TournamentSchedule.formatTime(scheduledTime);
     }
     final Element timeCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
@@ -199,14 +198,13 @@ public class SubjectivePdfWriter {
     tableBody.appendChild(row2);
 
     final Element roomCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                            String.format("Judging Room: %s",
-                                                                          teamInfo.getAwardGroup()));
+                                                            String.format("Judging Room: %s", awardGroup));
     row2.appendChild(roomCell);
     roomCell.setAttribute("font-size", "10pt");
     roomCell.setAttribute("font-weight", "bold");
 
     final Element teamNameCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
-                                                                String.format("Name: %s", teamInfo.getTeamName()));
+                                                                String.format("Name: %s", teamName));
     row2.appendChild(teamNameCell);
     teamNameCell.setAttribute("font-size", "12pt");
     teamNameCell.setAttribute("font-weight", "bold");
@@ -287,10 +285,10 @@ public class SubjectivePdfWriter {
                                     final double commentHeight) {
     try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-      final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement, null);
+      final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement);
 
       try {
-        final Document document = writer.createDocument(schedule, pointSize, commentHeight);
+        final Document document = writer.createDocumentForSchedule(schedule, null, pointSize, commentHeight);
         final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
         FOPUtils.renderPdf(fopFactory, document, out);
@@ -326,6 +324,7 @@ public class SubjectivePdfWriter {
 
     // The 2 sets of loops are setup to balance comments and point size. We want to
     // have more comment space, but not have too small of a font.
+    // Comment height is in inches.
     for (int pointSize = 10; pointSize >= 8; --pointSize) {
       for (double commentHeight = 5; commentHeight > 3; commentHeight -= 0.2) {
         if (checkPages(description, tournamentName, sheetElement, schedule, pointSize, commentHeight)) {
@@ -361,12 +360,12 @@ public class SubjectivePdfWriter {
    * @throws IOException if there is an error writing the document to
    *           {@code stream}
    */
-  public static void createDocument(@Nonnull final OutputStream stream,
-                                    @Nonnull final ChallengeDescription description,
-                                    @Nonnull final String tournamentName,
-                                    @Nonnull final SheetElement sheetElement,
-                                    final String schedulerColumn,
-                                    @Nonnull final List<TeamScheduleInfo> schedule)
+  public static void createDocumentForSchedule(@Nonnull final OutputStream stream,
+                                               @Nonnull final ChallengeDescription description,
+                                               @Nonnull final String tournamentName,
+                                               @Nonnull final SheetElement sheetElement,
+                                               final String schedulerColumn,
+                                               @Nonnull final List<TeamScheduleInfo> schedule)
       throws IOException {
 
     final Pair<Integer, Double> parameters = determineParameters(description, tournamentName, sheetElement);
@@ -375,11 +374,10 @@ public class SubjectivePdfWriter {
 
     LOGGER.debug("Point size: {} comment height: {}", pointSize, commentHeight);
 
-    final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement,
-                                                               schedulerColumn);
+    final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement);
 
     try {
-      final Document document = writer.createDocument(schedule, pointSize, commentHeight);
+      final Document document = writer.createDocumentForSchedule(schedule, schedulerColumn, pointSize, commentHeight);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
       FOPUtils.renderPdf(fopFactory, document, stream);
     } catch (FOPException | TransformerException e) {
@@ -392,10 +390,8 @@ public class SubjectivePdfWriter {
 
   private static final Margins MARGINS = new Margins(0.20, FOOTER_HEIGHT, 0.45, 0.45);
 
-  private Document createDocument(final List<TeamScheduleInfo> schedule,
-                                  final int pointSize,
-                                  final double commentHeight) {
-    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
+  private Element createBaseDocument(final Document document,
+                                     final int pointSize) {
 
     final Element rootElement = FOPUtils.createRoot(document);
     document.appendChild(rootElement);
@@ -421,11 +417,99 @@ public class SubjectivePdfWriter {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
+    return documentBody;
+  }
+
+  /**
+   * Create the PDF document for the specified team and scores. It is assumed that
+   * {@code score} is consistent with {@code sheetElement}.
+   *
+   * @param description the challenge description
+   * @param stream where to write the document
+   * @param sheetElement describes the category to write
+   * @param scores the team scores to populate the sheet with
+   * @param teamNumber the team number
+   * @param teamName the team name
+   * @param awardGroup the award group the team is in
+   * @param scheduledTime the time that the judging session was scheduled at, may
+   *          be null
+   * @param tournamentName tournament name to display on the sheets
+   * @throws IOException if there is an error writing the document to
+   *           {@code stream}
+   */
+  public static void createDocumentForScores(final OutputStream stream,
+                                             final ChallengeDescription description,
+                                             final String tournamentName,
+                                             final SheetElement sheetElement,
+                                             final Collection<SubjectiveScore> scores,
+                                             final int teamNumber,
+                                             final String teamName,
+                                             final String awardGroup,
+                                             final @Nullable LocalTime scheduledTime)
+      throws IOException {
+
+    final Pair<Integer, Double> parameters = determineParameters(description, tournamentName, sheetElement);
+    final int pointSize = parameters.getLeft();
+    final double commentHeight = parameters.getRight();
+
+    LOGGER.debug("Point size: {} comment height: {}", pointSize, commentHeight);
+
+    final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement);
+
+    try {
+      final Document document = writer.createDocumentForScores(scores, teamNumber, teamName, awardGroup, scheduledTime,
+                                                               pointSize);
+      final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
+      FOPUtils.renderPdf(fopFactory, document, stream);
+    } catch (FOPException | TransformerException e) {
+      throw new FLLInternalException("Error creating the subjective schedule PDF", e);
+    }
+  }
+
+  private Document createDocumentForScores(final Collection<SubjectiveScore> scores,
+                                           final int teamNumber,
+                                           final String teamName,
+                                           final String awardGroup,
+                                           final @Nullable LocalTime scheduledTime,
+                                           final int pointSize) {
+    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
+    final Element documentBody = createBaseDocument(document, pointSize);
+
+    final int[] columnWidths = getTableColumnInformation(sheetElement.getRubricRangeTitles());
+
+    for (final SubjectiveScore score : scores) {
+      final Element sheet = createSheet(document, teamNumber, teamName, awardGroup, scheduledTime, pointSize,
+                                        Double.NaN /* ignored when there is a score */, columnWidths, score);
+      documentBody.appendChild(sheet);
+    }
+
+    return document;
+  }
+
+  private Document createDocumentForSchedule(final List<TeamScheduleInfo> schedule,
+                                             final @Nullable String scheduleColumn,
+                                             final int pointSize,
+                                             final double commentHeight) {
+    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
+
+    final Element documentBody = createBaseDocument(document, pointSize);
+
     final int[] columnWidths = getTableColumnInformation(sheetElement.getRubricRangeTitles());
 
     // Go through all of the team schedules and put them all into a pdf
     for (final TeamScheduleInfo teamInfo : schedule) {
-      final Element sheet = createSheet(document, teamInfo, pointSize, commentHeight, columnWidths);
+      final int teamNumber = teamInfo.getTeamNumber();
+      final String teamName = teamInfo.getTeamName();
+      final String awardGroup = teamInfo.getAwardGroup();
+      final LocalTime scheduledTime;
+      if (null == scheduleColumn) {
+        scheduledTime = null;
+      } else {
+        scheduledTime = teamInfo.getSubjectiveTimeByName(scheduleColumn).getTime();
+      }
+
+      final Element sheet = createSheet(document, teamNumber, teamName, awardGroup, scheduledTime, pointSize,
+                                        commentHeight, columnWidths, null);
       documentBody.appendChild(sheet);
     }
 
@@ -433,21 +517,25 @@ public class SubjectivePdfWriter {
   }
 
   private Element createSheet(final Document document,
-                              final TeamScheduleInfo teamInfo,
+                              final int teamNumber,
+                              final String teamName,
+                              final String awardGroup,
+                              final @Nullable LocalTime scheduledTime,
                               final int fontSize,
                               final double commentHeight,
-                              final int[] columnWidths) {
+                              final int[] columnWidths,
+                              final @Nullable SubjectiveScore score) {
     final Element sheet = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     sheet.setAttribute("page-break-after", "always");
 
-    final Element header = createHeader(document, teamInfo);
+    final Element header = createHeader(document, teamNumber, teamName, awardGroup, scheduledTime);
     sheet.appendChild(header);
     header.setAttribute("space-after", "5");
 
-    final Element rubric = createRubric(document, fontSize, columnWidths);
+    final Element rubric = createRubric(document, fontSize, columnWidths, score);
     sheet.appendChild(rubric);
 
-    final Element comments = createCommentsBlock(document, commentHeight);
+    final Element comments = createCommentsBlock(document, commentHeight, score);
     sheet.appendChild(comments);
     comments.setAttribute("space-before", "3");
 
@@ -456,7 +544,8 @@ public class SubjectivePdfWriter {
 
   private Element createRubric(final Document document,
                                final int fontSize,
-                               final int[] columnWidths) {
+                               final int[] columnWidths,
+                               final @Nullable SubjectiveScore score) {
     final Element rubric = FOPUtils.createBasicTable(document);
 
     for (final int width : columnWidths) {
@@ -469,7 +558,7 @@ public class SubjectivePdfWriter {
     tableBody.appendChild(createRubricHeaderRow(document, tableBody));
 
     for (final String category : sheetElement.getCategories()) {
-      addRubricCategory(document, tableBody, fontSize, sheetElement.getTableElement(category));
+      addRubricCategory(document, tableBody, fontSize, sheetElement.getTableElement(category), score);
     }
 
     return rubric;
@@ -544,7 +633,8 @@ public class SubjectivePdfWriter {
   private void addRubricCategory(final Document document,
                                  final Element tableBody,
                                  final int fontSize,
-                                 final TableElement tableData) {
+                                 final TableElement tableData,
+                                 final @Nullable SubjectiveScore score) {
 
     // This is the 90 degree turned title for the left side of the table
     final Element goalGroupCell = createGoalGroupCell(document, fontSize, tableData.getSubjectiveCatetory());
@@ -612,8 +702,24 @@ public class SubjectivePdfWriter {
       final Element rubricRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
       tableBody.appendChild(rubricRow);
 
+      final AbstractGoal goal = rowElement.getGoal();
+      if (goal.isEnumerated()) {
+        throw new IllegalArgumentException("Enumerated goals aren't supported");
+      }
+
+      final double goalScore;
+      if (null == score) {
+        // will compare to false for all ranges
+        goalScore = Double.NaN;
+      } else {
+        goalScore = score.getStandardSubScores().get(goal.getName());
+      }
+
       for (final RubricRange rubricRange : sortedRubricRanges) {
-        final Element rangeCell = createRubricRangeCell(document, rubricRange);
+        final boolean checked = rubricRange.getMin() <= goalScore
+            && goalScore <= rubricRange.getMax();
+
+        final Element rangeCell = createRubricRangeCell(document, rubricRange, checked);
 
         rubricRow.appendChild(rangeCell);
         rangeCell.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
@@ -627,7 +733,8 @@ public class SubjectivePdfWriter {
   }
 
   private Element createRubricRangeCell(final Document document,
-                                        final RubricRange rubricRange) {
+                                        final RubricRange rubricRange,
+                                        final boolean checked) {
 
     final Element rangeCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
 
@@ -639,7 +746,11 @@ public class SubjectivePdfWriter {
     final Element inlineCheckbox = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
     block.appendChild(inlineCheckbox);
     FOPUtils.addBorders(inlineCheckbox, 1, 1, 1, 1);
-    inlineCheckbox.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(4)));
+    if (checked) {
+      inlineCheckbox.appendChild(document.createTextNode("X"));
+    } else {
+      inlineCheckbox.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(4)));
+    }
 
     // add rubric description, if there is one
     final String rawShortDescription = rubricRange.getShortDescription();
@@ -684,8 +795,13 @@ public class SubjectivePdfWriter {
     return headerRow;
   }
 
+  /**
+   * @param height height of comments section in inches, if a score is specified,
+   *          this is ignored
+   */
   private Element createCommentsBlock(final Document document,
-                                      final double height) {
+                                      final double height,
+                                      final @Nullable SubjectiveScore score) {
     final Element commentsTable = FOPUtils.createBasicTable(document);
 
     commentsTable.appendChild(FOPUtils.createTableColumn(document, 1));
@@ -728,26 +844,44 @@ public class SubjectivePdfWriter {
     // empty space
     final Element rowElement = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
     tableBody.appendChild(rowElement);
-    rowElement.setAttribute("height", String.format("%fin", height));
 
-    final Element left = FOPUtils.createTableCell(document, null, String.valueOf(Utilities.NON_BREAKING_SPACE));
+    final String commentGreatJob;
+    final String commentThinkAbout;
+    if (null == score) {
+      rowElement.setAttribute("height", String.format("%fin", height));
+      commentGreatJob = String.valueOf(Utilities.NON_BREAKING_SPACE);
+      commentThinkAbout = String.valueOf(Utilities.NON_BREAKING_SPACE);
+    } else {
+      commentGreatJob = score.getCommentGreatJob();
+      commentThinkAbout = score.getCommentThinkAbout();
+
+      rowElement.setAttribute("font-style", "italic");
+    }
+
+    final Element left = FOPUtils.createTableCell(document, null, commentGreatJob == null ? "" : commentGreatJob);
     rowElement.appendChild(left);
     FOPUtils.addRightBorder(left, 1);
+    left.setAttribute("padding-right", RUBRIC_TABLE_PADDING);
+    left.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
 
-    final Element right = FOPUtils.createTableCell(document, null, String.valueOf(Utilities.NON_BREAKING_SPACE));
+    final Element right = FOPUtils.createTableCell(document, null, commentThinkAbout == null ? "" : commentThinkAbout);
     rowElement.appendChild(right);
+    right.setAttribute("padding-right", RUBRIC_TABLE_PADDING);
+    right.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
 
-    // use back if needed
-    final Element useBackRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
-    tableBody.appendChild(useBackRow);
+    if (null == score) {
+      // use back if needed
+      final Element useBackRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+      tableBody.appendChild(useBackRow);
 
-    final Element useBackCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                         "Judges: Use the back for additional comments if needed!");
-    useBackRow.appendChild(useBackCell);
-    useBackCell.setAttribute("number-columns-spanned", "2");
-    useBackCell.setAttribute("font-size", "8pt");
-    useBackCell.setAttribute("font-style", "italic");
-    useBackCell.setAttribute("color", lightGray);
+      final Element useBackCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                           "Judges: Use the back for additional comments if needed!");
+      useBackRow.appendChild(useBackCell);
+      useBackCell.setAttribute("number-columns-spanned", "2");
+      useBackCell.setAttribute("font-size", "8pt");
+      useBackCell.setAttribute("font-style", "italic");
+      useBackCell.setAttribute("color", lightGray);
+    }
 
     return commentsTable;
   }

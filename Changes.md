@@ -1,3 +1,4 @@
+* #843 - Add the ability to generate PDF files with the subjective category results and comments
 * #842 - Add the ability to enter comments in the subjective web application.
 * #840 - Fix use of user provided constraint change times
 * #837 - Fix errors around editing restrictions in the challenge description editor
