@@ -853,7 +853,7 @@ public class TournamentSchedule implements Serializable {
    * @param directory the directory to put the files in
    * @param baseFilename the base filename
    * @throws IOException if there is an error writing the schedules
-   * @throws IllegalArgumentExcption if directory doesn't exist and can't be
+   * @throws IllegalArgumentException if directory doesn't exist and can't be
    *           created or exists and isn't a directory
    */
   public void outputDetailedSchedules(final SchedParams params,
