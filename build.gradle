@@ -230,7 +230,7 @@ dependencies {
 
 tasks.withType(Tar){
     compression = Compression.GZIP
-    extension = "tar.gz"
+    archiveExtension = "tar.gz"
 }
 
 javadoc {
@@ -518,12 +518,12 @@ gitProperties {
 }
 
 tasks.register("writeLaunchJar", Jar) {
-    destinationDir = project.buildDir
+    destinationDirectory = project.buildDir
     archiveFileName = "fll-sw.jar"
     manifest {
         attributes(
         "Implementation-Title": project.name,
-        "Implementation-Version": version,
+        "Implementation-Version": archiveVersion,
         "Main-Class": project.mainClassName,
         "Class-Path": "classes/\n " + configurations.runtimeClasspath.collect { "lib/" + it.getName() }.join(" \n "))
     }
@@ -721,7 +721,7 @@ installMacDist.doFirst {
 
 
 checkstyle {
-    configDir = file("$projectDir")
+    configDirectory = file("$projectDir")
     configFile = file("checkstyle.xml")
     showViolations = true
     ignoreFailures = true
