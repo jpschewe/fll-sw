@@ -111,9 +111,10 @@ public final class UploadTeams extends BaseFLLServlet {
    * @param session used to store the list of columns in a format suitable for
    *          use in selection form elements. The attribute name is
    *          columnSelectOptions.
+   * @param sheetName the name of the sheet in the spreadsheet file
    * @throws SQLException if an error occurs talking to the database
    * @throws IOException if an error occurs reading from file
-   * @throws InvalidFormatException
+   * @throws InvalidFormatException if there is a problem reading the file
    */
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
                                 "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate the list of columns to create AllTeams table")
@@ -493,7 +494,7 @@ public final class UploadTeams extends BaseFLLServlet {
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
                                 "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for AllTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
-  static private void updateTournamentTeams(final Connection connection,
+  private static void updateTournamentTeams(final Connection connection,
                                             final String teamNumberColumn,
                                             final String tournamentColumn,
                                             final String eventDivisionColumn,
@@ -591,7 +592,7 @@ public final class UploadTeams extends BaseFLLServlet {
     if (null == str
         || "".equals(str)) {
       return "EMPTYHEADER_"
-          + _emptyHeaderCount++;
+          + emptyHeaderCount++;
     } else if ("constraint".equalsIgnoreCase(str)) {
       return "CONSTRAINT_";
     } else {
@@ -603,7 +604,7 @@ public final class UploadTeams extends BaseFLLServlet {
     }
   }
 
-  private static int _emptyHeaderCount = 0;
+  private static int emptyHeaderCount = 0;
 
   private static final Pattern ILLEGAL_CHAR_PATTERN = Pattern.compile("[^A-Za-z0-9_]");
 

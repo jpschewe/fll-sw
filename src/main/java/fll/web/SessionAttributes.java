@@ -5,6 +5,7 @@
  */
 package fll.web;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -78,7 +79,7 @@ public final class SessionAttributes {
    * @param session where to get the information from
    * @return may be null
    */
-  public static String getDisplayName(final HttpSession session) {
+  public static @Nullable String getDisplayName(final HttpSession session) {
     return getAttribute(session, DISPLAY_NAME, String.class);
   }
 
@@ -92,9 +93,9 @@ public final class SessionAttributes {
    * @param <T> the expected type
    * @return the attribute value
    */
-  public static <T> T getAttribute(final HttpSession session,
-                                   final String attribute,
-                                   final Class<T> clazz) {
+  public static @Nullable <T> T getAttribute(final HttpSession session,
+                                             final String attribute,
+                                             final Class<T> clazz) {
     final Object o = session.getAttribute(attribute);
     if (o == null
         || clazz.isInstance(o)) {
