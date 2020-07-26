@@ -39,9 +39,9 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
-   * Protected for testing.
+   * package for testing.
    */
-  protected static final int BASE_NUM_COLUMNS_LEFT_OF_SCORES = 5;
+  /* package */ static final int BASE_NUM_COLUMNS_LEFT_OF_SCORES = 5;
 
   public int getNumColumnsLeftOfScores() {
     if (null != schedule) {
