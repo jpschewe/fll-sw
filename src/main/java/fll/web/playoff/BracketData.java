@@ -881,7 +881,7 @@ public class BracketData extends BracketInfo {
    * Calls {@link #outputBrackets(TopRightCornerStyle)} with
    * {@link TopRightCornerStyle#MEET_TOP_OF_CELL}.
    * 
-   * @return see {@link #outputBrackets(TopRightCornerStyle)
+   * @return see {@link #outputBrackets(TopRightCornerStyle)}
    * @throws SQLException on a database error
    */
   @JsonIgnore
@@ -893,7 +893,7 @@ public class BracketData extends BracketInfo {
    * Calls {@link #outputBrackets(TopRightCornerStyle)} with
    * {@link TopRightCornerStyle#MEET_BOTTOM_OF_CELL}.
    * 
-   * @return see {@link #outputBrackets(TopRightCornerStyle)
+   * @return see {@link #outputBrackets(TopRightCornerStyle)}
    * @throws SQLException on a database error
    */
   @JsonIgnore
