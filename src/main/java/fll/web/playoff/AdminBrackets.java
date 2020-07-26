@@ -16,8 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
@@ -29,7 +27,10 @@ import fll.web.ApplicationAttributes;
 /**
  * Data for adminbrackets.jsp.
  */
-public class AdminBrackets {
+public final class AdminBrackets {
+
+  private AdminBrackets() {
+  }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 

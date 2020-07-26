@@ -118,8 +118,8 @@ public final class FOPUtils {
   /**
    * @param document used to create the elements
    * @param name the name of the page master
-   * @see #createSimplePageMaster(Document, Element, String, double, double,
-   *      double, double, double, double, double, double)
+   * @see #createSimplePageMaster(Document, String, Dimension2D, Margins, double,
+   *      double)
    * @throws IllegalArgumentException see
    *           {@link #createSimplePageMaster(Document, String, Dimension2D, Margins, double, double)}
    * @see #STANDARD_MARGINS
