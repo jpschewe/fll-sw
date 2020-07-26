@@ -232,7 +232,6 @@ public class H2HUpdateWebSocket {
    * @param score the score for the team, may be null
    * @param performanceScoreType used to format the score
    * @param table the table for the team, may be null
-   * @param connection the database connection
    */
   private static void updateBracket(final String bracketName,
                                     final int dbLine,

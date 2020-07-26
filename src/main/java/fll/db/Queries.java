@@ -119,7 +119,7 @@ public final class Queries {
    * @return see {@link #getAwardGroups(Connection, int)}
    * @see #getAwardGroups(Connection, int)
    * @see #getCurrentTournament(Connection)
-   * @throws SQLExceptionon a database error
+   * @throws SQLException on a database error
    */
   public static List<String> getAwardGroups(final Connection connection) throws SQLException {
     final int currentTournament = getCurrentTournament(connection);
@@ -1710,40 +1710,6 @@ public final class Queries {
   }
 
   /**
-   * Get the previous tournament for this team, given the current tournament.
-   *
-   * @param connection the database connection
-   * @param teamNumber the team number
-   * @param currentTournament the current tournament to use to find the previous
-   *          tournament, generally this is the return value of
-   *          getTeamCurrentTournament
-   * @return the tournament ID, or null if no such tournament exists
-   * @see #getTeamCurrentTournament(Connection, int)
-   * @throws SQLException on a database error
-   */
-  public static @Nullable Integer getTeamPrevTournament(final Connection connection,
-                                                        final int teamNumber,
-                                                        final int currentTournament)
-      throws SQLException {
-    try (PreparedStatement prep = connection.prepareStatement("SELECT Tournaments.tournament_id" //
-        + " FROM TournamentTeams, Tournaments" //
-        + " WHERE TournamentTeams.TeamNumber = ?" //
-        + " AND TournamentTeams.Tournament = Tournaments.tournament_id" //
-        + " AND Tournaments.NextTournament = ?")) {
-      prep.setInt(1, teamNumber);
-      prep.setInt(2, currentTournament);
-      try (ResultSet rs = prep.executeQuery()) {
-        if (rs.next()) {
-          return rs.getInt(1);
-        } else {
-          return null;
-        }
-      }
-    }
-
-  }
-
-  /**
    * Add a team to the database.
    *
    * @param connection the database connection
@@ -2101,29 +2067,13 @@ public final class Queries {
 
   /**
    * Colors for index into a list.
-   * Below are the colors used.
-   * <table>
-   * <tr>
-   * <td>
-   * <td bgcolor="#800000">0 - #800000</td>
-   * </tr>
-   * <tr>
-   * <td>
-   * <td bgcolor="#008000">1 - #008000</td>
-   * </tr>
-   * <tr>
-   * <td>
-   * <td bgcolor="#CC6600">2 - #CC6600</td>
-   * </tr>
-   * <tr>
-   * <td>
-   * <td bgcolor="#FF00FF">3 - #FF00FF</td>
-   * </tr>
-   * <tr>
-   * <td>
-   * <td>continue at the top</td>
-   * </tr>
-   * </table>
+   * Below are the colors used in order.
+   * <ol>
+   * <li>#800000</li>
+   * <li>#008000</li>
+   * <li>#CC6600</li>
+   * <li>#FF00FF</li>
+   * </ol>
    *
    * @param index the division index
    * @return color in a format suitable for use in an HTML document
