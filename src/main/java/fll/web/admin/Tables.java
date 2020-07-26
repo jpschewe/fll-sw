@@ -28,9 +28,7 @@ import net.mtu.eggplant.util.Pair;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * Java code used in tables.jsp
- *
- * @version $Revision$
+ * Java code used in tables.jsp.
  */
 public final class Tables {
 
@@ -39,7 +37,14 @@ public final class Tables {
   }
 
   /**
-   * Generate the tables page
+   * Generate the tables page.
+   * 
+   * @param out where to write data
+   * @param application application variables
+   * @param session session variables
+   * @param request the HTTP request with parameters
+   * @param response the going back to the user
+   * @throws SQLException on a database error
    */
   public static void generatePage(final JspWriter out,
                                   final ServletContext application,
@@ -300,7 +305,7 @@ public final class Tables {
    * @return true if the tables have been assigned
    * @throws SQLException
    */
-  static public boolean tablesAssigned(final Connection connection,
+  public static boolean tablesAssigned(final Connection connection,
                                        final int tournamentID)
       throws SQLException {
     PreparedStatement prep = null;
