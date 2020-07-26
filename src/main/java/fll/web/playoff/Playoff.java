@@ -1193,15 +1193,15 @@ public final class Playoff {
   }
 
   /**
-   * Protected for testing.
+   * Package visibility for testing.
    *
    * @param challenge the challenge description
    * @param simpleGoals populated with simple goal initial values
    * @param enumGoals populated with enum goal initial values
    */
-  protected static void populateInitialScoreMaps(final ChallengeDescription challenge,
-                                                 final Map<String, Double> simpleGoals,
-                                                 final Map<String, String> enumGoals) {
+  /* package */ static void populateInitialScoreMaps(final ChallengeDescription challenge,
+                                                     final Map<String, Double> simpleGoals,
+                                                     final Map<String, String> enumGoals) {
     for (final AbstractGoal agoal : challenge.getPerformance().getGoals()) {
       if (agoal instanceof Goal) {
         final Goal goal = (Goal) agoal;
