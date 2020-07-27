@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.Collection;
 import java.util.Map;
 
@@ -442,9 +440,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     row2.appendChild(title);
     FOPUtils.addBottomBorder(title, ScheduleWriter.THICK_BORDER_WIDTH);
 
-    final Element date = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
-                                                  tournament.getDate()
-                                                            .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)));
+    final Element date = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, tournament.getDateString());
     row2.appendChild(date);
     FOPUtils.addBottomBorder(date, ScheduleWriter.THICK_BORDER_WIDTH);
 

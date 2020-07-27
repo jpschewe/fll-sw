@@ -478,10 +478,19 @@ public class SubjectivePdfWriter {
 
     final int[] columnWidths = getTableColumnInformation(sheetElement.getRubricRangeTitles());
 
-    for (final SubjectiveScore score : scores) {
-      final Element sheet = createSheet(document, teamNumber, teamName, awardGroup, scheduledTime, pointSize,
-                                        Double.NaN /* ignored when there is a score */, columnWidths, score);
-      documentBody.appendChild(sheet);
+    if (scores.isEmpty()) {
+      final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      documentBody.appendChild(block);
+      block.appendChild(document.createTextNode("Team "
+          + teamName
+          + " does not have results for category "
+          + sheetElement.getSheetData().getTitle()));
+    } else {
+      for (final SubjectiveScore score : scores) {
+        final Element sheet = createSheet(document, teamNumber, teamName, awardGroup, scheduledTime, pointSize,
+                                          Double.NaN /* ignored when there is a score */, columnWidths, score);
+        documentBody.appendChild(sheet);
+      }
     }
 
     return document;
