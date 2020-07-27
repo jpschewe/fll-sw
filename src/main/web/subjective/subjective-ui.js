@@ -499,6 +499,9 @@ function saveToScoreObject(score) {
       score.standardSubScores[goal.name] = subscore;
 
       var goalComment = $("#enter-score-comment-" + goal.name + "-text").val();
+      if (null == score.goalComments) {
+        score.goalComments = {};
+      }
       score.goalComments[goal.name] = goalComment;
     }
   });
