@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -81,7 +82,7 @@ public class TeamResults extends BaseFLLServlet {
 
       try (ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream())) {
         // go for speed and not compression
-        zipOut.setMethod(ZipOutputStream.STORED);
+        zipOut.setLevel(Deflater.NO_COMPRESSION);
 
         for (final Map.Entry<Integer, TournamentTeam> entry : teams.entrySet()) {
           final TournamentTeam team = entry.getValue();
