@@ -37,12 +37,9 @@ public class SubjectiveScore {
     judge = null;
     teamNumber = Team.NULL_TEAM_NUMBER;
     note = null;
-    standardSubScores = new HashMap<String, Double>();
-    enumSubScores = new HashMap<String, String>();
     scoreOnServer = false;
     commentGreatJob = null;
     commentThinkAbout = null;
-    goalComments = new HashMap<String, String>();
   }
 
   private boolean scoreOnServer;
@@ -142,7 +139,7 @@ public class SubjectiveScore {
     teamNumber = v;
   }
 
-  private final Map<String, Double> standardSubScores;
+  private final Map<String, Double> standardSubScores = new HashMap<>();
 
   /**
    * The scores for goals that are not enumerated.
@@ -164,7 +161,7 @@ public class SubjectiveScore {
     }
   }
 
-  private final Map<String, String> enumSubScores;
+  private final Map<String, String> enumSubScores = new HashMap<>();
 
   /**
    * The scores for goals that are enumerated.
@@ -235,7 +232,7 @@ public class SubjectiveScore {
     commentThinkAbout = v;
   }
 
-  private final Map<String, String> goalComments;
+  private final Map<String, String> goalComments = new HashMap<>();
 
   /**
    * The comments specific to each goal.
