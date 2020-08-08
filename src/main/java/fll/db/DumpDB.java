@@ -31,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 
 import com.opencsv.CSVWriter;
@@ -183,15 +182,11 @@ public final class DumpDB extends BaseFLLServlet {
     if (null != bugReports) {
       for (final File f : bugReports) {
         if (f.isFile()) {
-          FileInputStream fis = null;
-          try {
-            zipOut.putNextEntry(new ZipEntry(directory
-                + f.getName()));
-            fis = new FileInputStream(f);
-            IOUtils.copy(fis, zipOut);
+          zipOut.putNextEntry(new ZipEntry(directory
+              + f.getName()));
+          try (FileInputStream fis = new FileInputStream(f)) {
+            fis.transferTo(zipOut);
             fis.close();
-          } finally {
-            IOUtils.closeQuietly(fis);
           }
         }
       }

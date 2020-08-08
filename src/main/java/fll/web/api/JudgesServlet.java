@@ -24,12 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.ComparisonUtils;
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
-import org.apache.commons.io.IOUtils;
-
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -37,8 +31,9 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.Utilities;
 import fll.db.Queries;
-
 import fll.web.ApplicationAttributes;
+import net.mtu.eggplant.util.ComparisonUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * GET: {judges}
@@ -98,7 +93,7 @@ public class JudgesServlet extends HttpServlet {
       final int currentTournament = Queries.getCurrentTournament(connection);
 
       final StringWriter debugWriter = new StringWriter();
-      IOUtils.copy(request.getReader(), debugWriter);
+      request.getReader().transferTo(debugWriter);
 
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Read data: "
