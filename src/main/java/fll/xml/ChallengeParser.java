@@ -27,7 +27,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -299,8 +298,6 @@ public final class ChallengeParser {
   } // end validateDocument
 
   private static void validateCategory(final Element categoryElement) throws ParseException {
-    validateGoalGrouping(categoryElement);
-
     // get all nodes named goal at any level under category element
     final Map<String, Element> simpleGoals = new HashMap<>();
     for (final Element goalElement : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("goal"))) {
@@ -320,32 +317,6 @@ public final class ChallengeParser {
     checkForCircularDependencies(computedGoals);
 
     validateGoalRefs(categoryElement, allGoals);
-  }
-
-  private static void validateGoalGrouping(final Element categoryElement) {
-
-    final Set<String> seenGoalGroupNames = new HashSet<>();
-    String prevGoalGroupName = null;
-    for (final Element childNode : new NodelistElementCollectionAdapter(categoryElement.getChildNodes())) {
-      if ("goal".equals(childNode.getNodeName())
-          || "computedGoal".equals(childNode.getNodeName())) {
-
-        final String goalGroupName = childNode.getAttribute(AbstractGoal.CATEGORY_ATTRIBUTE);
-        if (!goalGroupName.trim().isEmpty()) {
-
-          if (!Objects.equals(prevGoalGroupName, goalGroupName)) {
-            // start of a goal group
-            if (seenGoalGroupNames.contains(goalGroupName)) {
-              throw new GoalGroupSplitException(goalGroupName);
-            }
-
-            seenGoalGroupNames.add(goalGroupName);
-          }
-        }
-
-        prevGoalGroupName = goalGroupName;
-      } // if goal type
-    } // foreach child
   }
 
   private static void validateGoalRefs(final Element categoryElement,
