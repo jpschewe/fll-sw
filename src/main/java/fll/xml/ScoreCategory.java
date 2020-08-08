@@ -30,6 +30,9 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
  */
 public abstract class ScoreCategory implements Evaluatable, Serializable, GoalScope {
 
+  /**
+   * XML attribute name used for the weight of a score category.
+   */
   public static final String WEIGHT_ATTRIBUTE = "weight";
 
   protected ScoreCategory(final Element ele) {
