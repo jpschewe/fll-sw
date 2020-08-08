@@ -32,7 +32,6 @@ import org.w3c.dom.Element;
 
 import fll.SubjectiveScore;
 import fll.Utilities;
-import fll.documents.elements.RowElement;
 import fll.documents.elements.SheetElement;
 import fll.documents.elements.TableElement;
 import fll.scheduler.TeamScheduleInfo;
@@ -659,12 +658,12 @@ public class SubjectivePdfWriter {
         * 2));
 
     boolean firstRow = true;
-    final List<RowElement> rows = tableData.getRowElements();
-    for (final RowElement rowElement : rows) {
+    final List<Goal> goals = tableData.getRowElements();
+    for (final Goal goal : goals) {
       final Element instructionsRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
       tableBody.appendChild(instructionsRow);
 
-      final List<RubricRange> sortedRubricRanges = rowElement.getSortedRubricRanges();
+      final List<RubricRange> sortedRubricRanges = goal.getRubric();
 
       if (firstRow) {
         // need to put the goal group name in the first row
@@ -690,9 +689,9 @@ public class SubjectivePdfWriter {
 
       final Element topicArea = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
       topicBlock.appendChild(topicArea);
-      topicArea.appendChild(document.createTextNode(rowElement.getRowTitle()));
+      topicArea.appendChild(document.createTextNode(goal.getTitle()));
 
-      if (rowElement.getGoal().isRequired()) {
+      if (goal.isRequired()) {
         final Element required = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
         topicBlock.appendChild(required);
         required.setAttribute("color", "red");
@@ -700,7 +699,7 @@ public class SubjectivePdfWriter {
       }
 
       final Element topicInstructions = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
-                                                                 rowElement.getDescription());
+                                                                 goal.getDescription());
       instructionsRow.appendChild(topicInstructions);
       topicInstructions.setAttribute("background-color", backgroundColor);
       topicInstructions.setAttribute("number-columns-spanned", String.valueOf(sortedRubricRanges.size()
@@ -715,7 +714,6 @@ public class SubjectivePdfWriter {
       final Element rubricRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
       tableBody.appendChild(rubricRow);
 
-      final AbstractGoal goal = rowElement.getGoal();
       if (goal.isEnumerated()) {
         throw new IllegalArgumentException("Enumerated goals aren't supported");
       }

@@ -109,7 +109,7 @@ public class SheetElement {
           tableElement = new TableElement(tableCategory);
           tables.put(tableCategory, tableElement);
         }
-        tableElement.addRowElement(new RowElement(goal));
+        tableElement.addGoal(goal);
       }
     }
     
