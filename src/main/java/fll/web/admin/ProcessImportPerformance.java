@@ -25,7 +25,6 @@ import org.apache.commons.fileupload.FileUploadException;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.ImportDB;
-import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;

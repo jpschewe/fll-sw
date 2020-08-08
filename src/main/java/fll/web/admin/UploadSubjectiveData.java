@@ -190,7 +190,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
         try {
           input = new FileInputStream(file);
           output = new FileOutputStream(copy);
-          IOUtils.copy(input, output);
+          input.transferTo(output);
         } finally {
           IOUtils.closeQuietly(input);
           IOUtils.closeQuietly(output);
@@ -396,7 +396,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
             || (scoreElement.hasAttribute("modified")
                 && "true".equalsIgnoreCase(scoreElement.getAttribute("modified")))) {
           final int teamNumber = Utilities.getIntegerNumberFormat().parse(scoreElement.getAttribute("teamNumber"))
-                                                                         .intValue();
+                                          .intValue();
 
           if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Saving score data for team: "

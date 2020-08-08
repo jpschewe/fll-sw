@@ -45,7 +45,6 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -148,7 +147,7 @@ public final class ChallengeParser {
   public static Document parse(final Reader stream) throws ChallengeXMLException {
     try {
       final StringWriter writer = new StringWriter();
-      IOUtils.copy(stream, writer);
+      stream.transferTo(writer);
       String content = writer.toString();
 
       int schemaVersion = determineSchemaVersion(content);

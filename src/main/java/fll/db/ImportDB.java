@@ -38,7 +38,6 @@ import java.util.zip.ZipInputStream;
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -368,7 +367,7 @@ public final class ImportDB {
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
 
         final StringWriter writer = new StringWriter();
-        IOUtils.copy(reader, writer);
+        reader.transferTo(writer);
         final String content = writer.toString();
         tableData.put(tablename, content);
       } else if (name.endsWith(".types")) {
