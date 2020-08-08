@@ -1,7 +1,7 @@
 package fll.documents.elements;
 
 import java.util.Collections;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +33,7 @@ public class SheetElement {
   /**
    * Category -> TableElement
    */
-  private final Hashtable<String, TableElement> tables = new Hashtable<String, TableElement>();
+  private final Map<String, TableElement> tables = new HashMap<>();
 
   /**
    * The categories for this ScoreCategory in order found.
@@ -42,11 +42,12 @@ public class SheetElement {
 
   private final SubjectiveScoreCategory sheetData;
 
+  // Checker Framework - once set, never null
   private List<String> mMasterRubricRangeTitles = null;
-  
+
   /**
-   * 
-   * @return The titles of all ranges in the rubric sorted from lowest range to highest range
+   * @return The titles of all ranges in the rubric sorted from lowest range to
+   *         highest range
    */
   public List<String> getRubricRangeTitles() {
     return mMasterRubricRangeTitles;
@@ -56,11 +57,17 @@ public class SheetElement {
     return this.sheetData;
   }
 
+  /**
+   * @param sheetData category to create the sheet for
+   * @throws FLLRuntimeException if all goals in the
+   *           {@link SubjectiveScoreCategory} don't have
+   *           the same rubric titles
+   */
   public SheetElement(final SubjectiveScoreCategory sheetData) {
     // Sheet name will be Programming, Project, Robot Design or Core Values
     this.sheetName = sheetData.getName();
     this.sheetData = sheetData;
-    
+
     processSheet();
   }
 
@@ -104,16 +111,12 @@ public class SheetElement {
           categories.add(tableCategory);
         }
 
-        TableElement tableElement = tables.get(tableCategory);
-        if (null == tableElement) {
-          tableElement = new TableElement(tableCategory);
-          tables.put(tableCategory, tableElement);
-        }
+        final TableElement tableElement = tables.computeIfAbsent(tableCategory, tc -> new TableElement(tc));
         tableElement.addGoal(goal);
       }
     }
-    
-    if(null == mMasterRubricRangeTitles) {
+
+    if (null == mMasterRubricRangeTitles) {
       mMasterRubricRangeTitles = new LinkedList<>();
     }
   }
@@ -140,7 +143,9 @@ public class SheetElement {
     final StringBuilder str = new StringBuilder();
     for (final Map.Entry<String, TableElement> entry : tables.entrySet()) {
       str.append("Table["
-          + entry.getKey() + "]: " + entry.getValue());
+          + entry.getKey()
+          + "]: "
+          + entry.getValue());
       str.append(System.lineSeparator());
     }
     str.append("Subjective Category: "
