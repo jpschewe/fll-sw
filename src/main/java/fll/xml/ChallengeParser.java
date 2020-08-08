@@ -120,7 +120,7 @@ public final class ChallengeParser {
   /**
    * Current version of the schema.
    */
-  public static final int CURRENT_SCHEMA_VERSION = 2;
+  public static final int CURRENT_SCHEMA_VERSION = 3;
 
   /**
    * The XML attribute used to store the {@link ScoreType}.
@@ -162,6 +162,11 @@ public final class ChallengeParser {
       schemaVersion = determineSchemaVersion(content);
       if (schemaVersion == 1) {
         content = transform1To2(content);
+      }
+
+      schemaVersion = determineSchemaVersion(content);
+      if (schemaVersion == 2) {
+        content = transform2To3(content);
       }
 
       schemaVersion = determineSchemaVersion(content);
@@ -243,6 +248,12 @@ public final class ChallengeParser {
     final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
     return applyTransform(content, classLoader.getResourceAsStream("fll/resources/schema1-to-schema2.xsl"));
+  }
+
+  private static String transform2To3(final String content) {
+    final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+    return applyTransform(content, classLoader.getResourceAsStream("fll/resources/schema2-to-schema3.xsl"));
   }
 
   /**
