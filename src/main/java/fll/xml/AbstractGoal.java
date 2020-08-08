@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
@@ -50,17 +51,12 @@ public abstract class AbstractGoal implements Serializable {
    */
   public static final String DESCRIPTION_TAG_NAME = "description";
 
-  private final PropertyChangeSupport propChangeSupport;
+  private final PropertyChangeSupport propChangeSupport = new PropertyChangeSupport(this);
 
   /**
    * Default constructor for creating a new goal.
    */
   public AbstractGoal() {
-    mName = null;
-    mTitle = null;
-    mDescription = null;
-    mCategory = null;
-    propChangeSupport = new PropertyChangeSupport(this);
   }
 
   /**
@@ -69,8 +65,6 @@ public abstract class AbstractGoal implements Serializable {
    * @param ele the XML element to parse
    */
   public AbstractGoal(@Nonnull final Element ele) {
-    this();
-
     mName = ele.getAttribute(NAME_ATTRIBUTE);
     mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
 
@@ -101,12 +95,12 @@ public abstract class AbstractGoal implements Serializable {
     mCategory = null;
   }
 
-  private String mCategory;
+  private @Nullable String mCategory;
 
   /**
    * @return the category of the goal, may be null
    */
-  public String getCategory() {
+  public @Nullable String getCategory() {
     return mCategory;
   }
 
@@ -114,13 +108,13 @@ public abstract class AbstractGoal implements Serializable {
    * @param v see {@link #getCategory()}
    *          Fires property change event.
    */
-  public void setCategory(final String v) {
+  public void setCategory(final @Nullable String v) {
     final String old = mCategory;
     mCategory = v;
     this.propChangeSupport.firePropertyChange("category", old, v);
   }
 
-  private String mName;
+  private String mName = "no_name";
 
   /**
    * @return the name of the goal
@@ -140,12 +134,12 @@ public abstract class AbstractGoal implements Serializable {
     this.propChangeSupport.firePropertyChange("name", old, v);
   }
 
-  private String mTitle;
+  private @Nullable String mTitle;
 
   /**
    * @return the title of the goal, may be null.
    */
-  public String getTitle() {
+  public @Nullable String getTitle() {
     return mTitle;
   }
 
@@ -153,16 +147,16 @@ public abstract class AbstractGoal implements Serializable {
    * @param v see {@link #getTitle()}
    *          Fires property change event.
    */
-  public void setTitle(final String v) {
+  public void setTitle(final @Nullable String v) {
     final String old = mTitle;
     mTitle = v;
     this.propChangeSupport.firePropertyChange("title", old, v);
   }
 
-  private String mDescription;
+  private @Nullable String mDescription;
 
   /**
-   * @return the description, may be null
+   * @return the description
    */
   public String getDescription() {
     return null == mDescription ? null : mDescription.trim().replaceAll("\\s+", " ");
@@ -172,7 +166,7 @@ public abstract class AbstractGoal implements Serializable {
    * @param v see {@link #getDescription()}
    *          Fires property change event.
    */
-  public void setDescription(final String v) {
+  public void setDescription(final @Nullable String v) {
     final String old = mDescription;
     mDescription = v;
     this.propChangeSupport.firePropertyChange("description", old, v);

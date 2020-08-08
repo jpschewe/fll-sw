@@ -3,19 +3,19 @@ package fll.documents.elements;
 import java.util.ArrayList;
 import java.util.List;
 
+import fll.xml.Goal;
+
 /**
  * This class represents a single table of the many tables on a subjective score
  * sheet.
- * The single table consists of n-rows, each one being a RowElement
- * 
- * @see fll.documents.elements.RowElement
+ * The single table consists of n-rows, each one being a {@link Goal}.
  */
 public class TableElement {
 
   // Example, MN Programming, or Strategy and Innovations
   private final String tableCategory;
 
-  private final List<RowElement> rows = new ArrayList<RowElement>();
+  private final List<Goal> goals = new ArrayList<>();
 
   public TableElement(final String tableCategory) {
     this.tableCategory = tableCategory;
@@ -31,17 +31,17 @@ public class TableElement {
     return this.tableCategory;
   }
 
-  public void addRowElement(RowElement element) {
-    this.rows.add(element);
+  public void addGoal(final Goal element) {
+    this.goals.add(element);
   }
 
-  public List<RowElement> getRowElements() {
-    return this.rows;
+  public List<Goal> getRowElements() {
+    return this.goals;
   }
 
   public String toString() {
     final StringBuilder result = new StringBuilder();
-    for (RowElement rowElement : rows) {
+    for (final Goal rowElement : goals) {
       result.append(rowElement);
       result.append(System.lineSeparator());
     }
