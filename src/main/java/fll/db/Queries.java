@@ -406,7 +406,7 @@ public final class Queries {
         + (verified ? "1" : "0"));
 
     // now do each goal
-    for (final AbstractGoal element : performanceElement.getGoals()) {
+    for (final AbstractGoal element : performanceElement.getAllGoals()) {
       if (!element.isComputed()) {
         final String name = element.getName();
 
@@ -556,7 +556,7 @@ public final class Queries {
     }
 
     // now do each goal
-    for (final AbstractGoal element : performanceElement.getGoals()) {
+    for (final AbstractGoal element : performanceElement.getAllGoals()) {
       if (!element.isComputed()) {
         final String name = element.getName();
 

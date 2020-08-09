@@ -102,7 +102,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
               final Map<String, Double> standardSubScores = new HashMap<>();
               final Map<String, String> enumSubScores = new HashMap<>();
               final Map<String, String> goalComments = new HashMap<>();
-              for (final AbstractGoal goal : sc.getGoals()) {
+              for (final AbstractGoal goal : sc.getAllGoals()) {
                 if (goal.isEnumerated()) {
                   final String value = rs.getString(goal.getName());
                   enumSubScores.put(goal.getName(), value);
@@ -164,7 +164,8 @@ public class SubjectiveScoresServlet extends HttpServlet {
         LOGGER.trace("Read data: "
             + debugWriter.toString());
       }
-      System.out.println("Read: " + debugWriter.toString());
+      System.out.println("Read: "
+          + debugWriter.toString());
 
       final Reader reader = new StringReader(debugWriter.toString());
 
@@ -250,7 +251,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
                   final Map<String, Double> standardSubScores = score.getStandardSubScores();
                   final Map<String, String> enumSubScores = score.getEnumSubScores();
                   final Map<String, String> goalComments = score.getGoalComments();
-                  for (final AbstractGoal goalDescription : categoryDescription.getGoals()) {
+                  for (final AbstractGoal goalDescription : categoryDescription.getAllGoals()) {
                     if (!goalDescription.isComputed()) {
 
                       // goal score
@@ -339,7 +340,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
   private PreparedStatement createInsertStatement(final Connection connection,
                                                   final SubjectiveScoreCategory categoryDescription)
       throws SQLException {
-    final List<AbstractGoal> goalDescriptions = categoryDescription.getGoals();
+    final List<AbstractGoal> goalDescriptions = categoryDescription.getAllGoals();
 
     final StringBuffer insertSQLColumns = new StringBuffer();
     insertSQLColumns.append("INSERT INTO "

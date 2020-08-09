@@ -23,7 +23,6 @@ import javax.sql.DataSource;
 import fll.Tournament;
 import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
-import fll.documents.elements.SheetElement;
 import fll.documents.writers.SubjectivePdfWriter;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
@@ -84,17 +83,14 @@ public class SubjectiveSheets extends BaseFLLServlet {
               + category.getName()
               + "'");
         } else {
-
-          final SheetElement sheetElement = new SheetElement(category);
-
           response.reset();
           response.setContentType("application/pdf");
           response.setHeader("Content-Disposition",
                              String.format("filename=\"subjective-%s.pdf\"", subjectiveCategoryName));
 
           SubjectivePdfWriter.createDocumentForSchedule(response.getOutputStream(), description, tournament.getName(),
-                                             sheetElement, categoryMapping.get().getScheduleColumn(),
-                                             schedule.getSchedule());
+                                                        category, categoryMapping.get().getScheduleColumn(),
+                                                        schedule.getSchedule());
         }
       } catch (final SQLException sqle) {
         LOGGER.error(sqle.getMessage(), sqle);

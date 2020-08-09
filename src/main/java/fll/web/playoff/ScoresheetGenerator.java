@@ -11,9 +11,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.transform.TransformerException;
@@ -37,6 +38,8 @@ import fll.web.report.FinalComputedScores;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.EnumeratedValue;
+import fll.xml.GoalElement;
+import fll.xml.GoalGroup;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreType;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -602,8 +605,6 @@ public class ScoresheetGenerator {
   private Element createGoalsTable(final Document document) {
 
     final PerformanceScoreCategory performanceElement = description.getPerformance();
-    // use ArrayList as we will be doing indexed access in the loop
-    final List<AbstractGoal> goals = new ArrayList<>(performanceElement.getGoals());
 
     final Element goalsTable = FOPUtils.createBasicTable(document);
     goalsTable.setAttribute("font-size", "10pt");
@@ -615,172 +616,185 @@ public class ScoresheetGenerator {
     final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     goalsTable.appendChild(tableBody);
 
-    String prevCategory = null;
-    for (int goalIndex = 0; goalIndex < goals.size(); ++goalIndex) {
-      final AbstractGoal goal = goals.get(goalIndex);
-      if (!goal.isComputed()) {
-        final Element row = FOPUtils.createTableRow(document);
+    boolean firstRow = true;
+    for (final GoalElement ge : performanceElement.getGoalElements()) {
+      if (ge.isGoal()) {
+        final AbstractGoal goal = (AbstractGoal) ge;
+        if (!goal.isComputed()) {
+          final Element row = outputGoal(document, goal, "");
+          tableBody.appendChild(row);
+
+          if (firstRow) {
+            FOPUtils.addTopBorder(row, 1);
+            firstRow = false;
+          }
+        }
+      } else if (ge.isGoalGroup()) {
+        final GoalGroup group = (GoalGroup) ge;
+        final Element row = outputGoalGroup(document, group);
         tableBody.appendChild(row);
+        FOPUtils.addTopBorder(row, 1);
 
-        final String category = goal.getCategory();
-
-        // add category cell if needed
-        if (!StringUtils.equals(prevCategory, category)) {
-          if (!StringUtils.isEmpty(category)) {
-
-            // find out how many future goals have the same category
-            int categoryRowSpan = 1;
-            for (int otherIndex = goalIndex
-                + 1; otherIndex < goals.size(); ++otherIndex) {
-              final AbstractGoal otherGoal = goals.get(otherIndex);
-              if (!otherGoal.isComputed()) {
-                if (StringUtils.equals(category, otherGoal.getCategory())) {
-                  ++categoryRowSpan;
-                } else {
-                  break;
-                }
-              }
-            }
-
-            // One should be able to just use the reference-orientation property on the
-            // text cell. However when this is done the cells aren't properly sized and the
-            // text gets put in the wrong place.
-            //
-            // Jon Schewe sent an email to the Apache FOP list 5/9/2020 and didn't find an
-            // answer.
-            // http://mail-archives.apache.org/mod_mbox/xmlgraphics-fop-users/202005.mbox/%3Cd8da02c550c0271943a651c13d7218377efc7137.camel%40mtu.net%3E
-            // Bug https://issues.apache.org/jira/browse/FOP-2946 is open for this
-            final Element categoryCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
-            row.appendChild(categoryCell);
-            categoryCell.setAttribute("number-rows-spanned", String.valueOf(categoryRowSpan));
-
-            final Element categoryCellContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
-            categoryCell.appendChild(categoryCellContainer);
-            final Element categoryCellBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-            categoryCellContainer.appendChild(categoryCellBlock);
-            final Element categoryCellForeign = FOPUtils.createXslFoElement(document, "instream-foreign-object");
-            categoryCellBlock.appendChild(categoryCellForeign);
-            categoryCellForeign.setAttribute("content-height", "scale-to-fit");
-            categoryCellForeign.setAttribute("content-width", "scale-to-fit");
-            categoryCellForeign.setAttribute("height", "100%");
-            categoryCellForeign.setAttribute("width", "100%");
-
-            final Element svg = document.createElementNS(FOPUtils.SVG_NAMESPACE, "svg");
-            categoryCellForeign.appendChild(svg);
-            final int svgWidth = 25;
-            final int svgHeight = 25;
-            svg.setAttribute("width", String.valueOf(svgWidth));
-            svg.setAttribute("height", String.valueOf(svgHeight));
-            svg.setAttribute("viewBox", String.format("0 0 %d %d", svgWidth, svgHeight));
-
-            final Element text = document.createElementNS(FOPUtils.SVG_NAMESPACE, "text");
-            svg.appendChild(text);
-            text.setAttribute("style", "fill: black; font-family:Helvetica; font-size: 12px; font-style:normal;");
-            text.setAttribute("x", String.valueOf(svgWidth
-                / 2));
-            text.setAttribute("y", String.valueOf(svgHeight
-                / 2));
-            text.setAttribute("transform", String.format("rotate(-90, %d, %d)", svgWidth
-                / 2, svgHeight
-                    / 2));
-
-            final Element tspan = document.createElementNS(FOPUtils.SVG_NAMESPACE, "tspan");
-            text.appendChild(tspan);
-            tspan.setAttribute("text-anchor", "middle");
-            tspan.appendChild(document.createTextNode(category));
-          }
-
-          // first row in a new category, which may be empty
-          FOPUtils.addTopBorder(row, 1);
-        }
-
-        // This is the text for the left hand "label" cell
-        final Element goalLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, goal.getTitle());
-        row.appendChild(goalLabel);
-        goalLabel.setAttribute("padding-top", "2pt");
-        goalLabel.setAttribute("padding-bottom", "2pt");
-        goalLabel.setAttribute("padding-right", "9pt");
-
-        if (StringUtils.isEmpty(category)) {
-          // category column and goal label column
-          goalLabel.setAttribute("number-columns-spanned", "2");
-        }
-
-        // define the value cell
-        final double min = goal.getMin();
-        final String minStr = FP.equals(min, Math.round(min), FinalComputedScores.TIE_TOLERANCE)
-            ? String.valueOf((int) min)
-            : String.valueOf(min);
-        final double max = goal.getMax();
-        final String maxStr = FP.equals(max, Math.round(max), FinalComputedScores.TIE_TOLERANCE)
-            ? String.valueOf((int) max)
-            : String.valueOf(max);
-
-        // If element has child nodes, then we have an enumerated list
-        // of choices. Otherwise it is either yes/no or a numeric field.
-        final Element goalValue;
-        if (goal.isEnumerated()) {
-          final StringBuilder choices = new StringBuilder();
-
-          // replace spaces with "no-break" spaces
-          boolean first = true;
-          final List<EnumeratedValue> values = goal.getSortedValues();
-          for (final EnumeratedValue value : values) {
-            if (!first) {
-              choices.append(" /"
-                  + Utilities.NON_BREAKING_SPACE);
-            } else {
-              first = false;
-            }
-            choices.append(value.getTitle().toUpperCase().replace(' ', Utilities.NON_BREAKING_SPACE));
-          }
-          goalValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, choices.toString());
-        } else {
-          if (goal.isYesNo()) {
-            // order of yes/no needs to match ScoreEntry.generateYesNoButtons
-            goalValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, "NO / YES");
-          } else {
-            goalValue = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
-
-            final String range = "("
-                + minStr
-                + " - "
-                + maxStr
-                + ")";
-            final Element t = FOPUtils.createBasicTable(document);
-            goalValue.appendChild(t);
-            t.setAttribute("width", "100pt");
-            t.setAttribute("font-size", "8pt");
-            t.appendChild(FOPUtils.createTableColumn(document, 1));
-            t.appendChild(FOPUtils.createTableColumn(document, 1));
-
-            final Element tBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
-            t.appendChild(tBody);
-
-            final Element tRow = FOPUtils.createTableRow(document);
-            tBody.appendChild(tRow);
-
-            final Element r = FOPUtils.createTableCell(document, null, "");
-            tRow.appendChild(r);
-            FOPUtils.addBorders(r, 1, 1, 1, 1);
-
-            final Element q = FOPUtils.createTableCell(document, null, range);
-            tRow.appendChild(q);
-            FOPUtils.addBorders(q, 1, 1, 1, 1);
-          }
-        }
-        goalValue.setAttribute("font-family", "Courier");
-        goalValue.setAttribute("padding-top", "2pt");
-        goalValue.setAttribute("padding-bottom", "2pt");
-        row.appendChild(goalValue);
-
-        // setup for next loop
-        prevCategory = category;
-      } // if not computed goal
-
-    } // foreach goal
+        firstRow = false;
+      } else {
+        throw new FLLInternalException("Unknown goal element type: "
+            + ge.getClass());
+      }
+    } // foreach goal element
 
     return goalsTable;
+  }
+
+  private Element outputGoalGroup(final Document document,
+                                  final GoalGroup group) {
+    final String goalGroupTitle = group.getTitle();
+    final List<AbstractGoal> nonComputedGoals = group.getGoals().stream()
+                                                     .filter(Predicate.not(AbstractGoal::isComputed))
+                                                     .collect(Collectors.toList());
+    final Element row = FOPUtils.createTableRow(document);
+
+    if (!StringUtils.isBlank(goalGroupTitle)) {
+      final int categoryRowSpan = nonComputedGoals.size();
+
+      // One should be able to just use the reference-orientation property on the
+      // text cell. However when this is done the cells aren't properly sized and the
+      // text gets put in the wrong place.
+      //
+      // Jon Schewe sent an email to the Apache FOP list 5/9/2020 and didn't find an
+      // answer.
+      // http://mail-archives.apache.org/mod_mbox/xmlgraphics-fop-users/202005.mbox/%3Cd8da02c550c0271943a651c13d7218377efc7137.camel%40mtu.net%3E
+      // Bug https://issues.apache.org/jira/browse/FOP-2946 is open for this
+      final Element categoryCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+      row.appendChild(categoryCell);
+      categoryCell.setAttribute("number-rows-spanned", String.valueOf(categoryRowSpan));
+
+      final Element categoryCellContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+      categoryCell.appendChild(categoryCellContainer);
+      final Element categoryCellBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      categoryCellContainer.appendChild(categoryCellBlock);
+      final Element categoryCellForeign = FOPUtils.createXslFoElement(document, "instream-foreign-object");
+      categoryCellBlock.appendChild(categoryCellForeign);
+      categoryCellForeign.setAttribute("content-height", "scale-to-fit");
+      categoryCellForeign.setAttribute("content-width", "scale-to-fit");
+      categoryCellForeign.setAttribute("height", "100%");
+      categoryCellForeign.setAttribute("width", "100%");
+
+      final Element svg = document.createElementNS(FOPUtils.SVG_NAMESPACE, "svg");
+      categoryCellForeign.appendChild(svg);
+      final int svgWidth = 25;
+      final int svgHeight = 25;
+      svg.setAttribute("width", String.valueOf(svgWidth));
+      svg.setAttribute("height", String.valueOf(svgHeight));
+      svg.setAttribute("viewBox", String.format("0 0 %d %d", svgWidth, svgHeight));
+
+      final Element text = document.createElementNS(FOPUtils.SVG_NAMESPACE, "text");
+      svg.appendChild(text);
+      text.setAttribute("style", "fill: black; font-family:Helvetica; font-size: 12px; font-style:normal;");
+      text.setAttribute("x", String.valueOf(svgWidth
+          / 2));
+      text.setAttribute("y", String.valueOf(svgHeight
+          / 2));
+      text.setAttribute("transform", String.format("rotate(-90, %d, %d)", svgWidth
+          / 2, svgHeight
+              / 2));
+
+      final Element tspan = document.createElementNS(FOPUtils.SVG_NAMESPACE, "tspan");
+      text.appendChild(tspan);
+      tspan.setAttribute("text-anchor", "middle");
+      tspan.appendChild(document.createTextNode(goalGroupTitle));
+    } // non-blank goal group title
+
+    for (final AbstractGoal goal : nonComputedGoals) {
+      outputGoal(document, goal, goalGroupTitle);
+    }
+
+    return row;
+  }
+
+  private Element outputGoal(final Document document,
+                             final AbstractGoal goal,
+                             final String goalGroupTitle) {
+    final Element row = FOPUtils.createTableRow(document);
+
+    // This is the text for the left hand "label" cell
+    final Element goalLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, goal.getTitle());
+    row.appendChild(goalLabel);
+    goalLabel.setAttribute("padding-top", "2pt");
+    goalLabel.setAttribute("padding-bottom", "2pt");
+    goalLabel.setAttribute("padding-right", "9pt");
+
+    if (StringUtils.isBlank(goalGroupTitle)) {
+      // category column and goal label column
+      goalLabel.setAttribute("number-columns-spanned", "2");
+    }
+
+    // define the value cell
+    final double min = goal.getMin();
+    final String minStr = FP.equals(min, Math.round(min), FinalComputedScores.TIE_TOLERANCE) ? String.valueOf((int) min)
+        : String.valueOf(min);
+    final double max = goal.getMax();
+    final String maxStr = FP.equals(max, Math.round(max), FinalComputedScores.TIE_TOLERANCE) ? String.valueOf((int) max)
+        : String.valueOf(max);
+
+    // If element has child nodes, then we have an enumerated list
+    // of choices. Otherwise it is either yes/no or a numeric field.
+    final Element goalValue;
+    if (goal.isEnumerated()) {
+      final StringBuilder choices = new StringBuilder();
+
+      // replace spaces with "no-break" spaces
+      boolean first = true;
+      final List<EnumeratedValue> values = goal.getSortedValues();
+      for (final EnumeratedValue value : values) {
+        if (!first) {
+          choices.append(" /"
+              + Utilities.NON_BREAKING_SPACE);
+        } else {
+          first = false;
+        }
+        choices.append(value.getTitle().toUpperCase().replace(' ', Utilities.NON_BREAKING_SPACE));
+      }
+      goalValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, choices.toString());
+    } else {
+      if (goal.isYesNo()) {
+        // order of yes/no needs to match ScoreEntry.generateYesNoButtons
+        goalValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, "NO / YES");
+      } else {
+        goalValue = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+
+        final String range = "("
+            + minStr
+            + " - "
+            + maxStr
+            + ")";
+        final Element t = FOPUtils.createBasicTable(document);
+        goalValue.appendChild(t);
+        t.setAttribute("width", "100pt");
+        t.setAttribute("font-size", "8pt");
+        t.appendChild(FOPUtils.createTableColumn(document, 1));
+        t.appendChild(FOPUtils.createTableColumn(document, 1));
+
+        final Element tBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+        t.appendChild(tBody);
+
+        final Element tRow = FOPUtils.createTableRow(document);
+        tBody.appendChild(tRow);
+
+        final Element r = FOPUtils.createTableCell(document, null, "");
+        tRow.appendChild(r);
+        FOPUtils.addBorders(r, 1, 1, 1, 1);
+
+        final Element q = FOPUtils.createTableCell(document, null, range);
+        tRow.appendChild(q);
+        FOPUtils.addBorders(q, 1, 1, 1, 1);
+      }
+    }
+    goalValue.setAttribute("font-family", "Courier");
+    goalValue.setAttribute("padding-top", "2pt");
+    goalValue.setAttribute("padding-bottom", "2pt");
+    row.appendChild(goalValue);
+
+    return row;
   }
 
   private final int numSheets;

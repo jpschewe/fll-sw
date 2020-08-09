@@ -52,7 +52,6 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
-import fll.documents.elements.SheetElement;
 import fll.documents.writers.SubjectivePdfWriter;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
@@ -921,7 +920,6 @@ public class TournamentSchedule implements Serializable {
 
     // setup the sheets from the sucked in xml
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
-      final SheetElement sheetElement = createSubjectiveSheetElement(category);
       final String suffix = filenameSuffixes.get(category);
 
       final String filename = dir
@@ -939,21 +937,13 @@ public class TournamentSchedule implements Serializable {
         Collections.sort(schedule, new SubjectiveComparatorByAwardGroup(subjectiveStation));
       }
 
-      final ScoreCategory scoreCategory = sheetElement.getSheetData();
-      final String schedulerColumn = categoryToSchedule.get(scoreCategory);
+      final String schedulerColumn = categoryToSchedule.get(category);
 
       try (OutputStream stream = new FileOutputStream(filename)) {
-        SubjectivePdfWriter.createDocumentForSchedule(stream, description, tournamentName, sheetElement,
-                                                      schedulerColumn, schedule);
+        SubjectivePdfWriter.createDocumentForSchedule(stream, description, tournamentName, category, schedulerColumn,
+                                                      schedule);
       }
     }
-  }
-
-  public static SheetElement createSubjectiveSheetElement(final SubjectiveScoreCategory sc) {
-    // Get the info from the .xml sheet for the specific subjective category
-    // An sc == a subjective category
-    final SheetElement sheet = new SheetElement(sc);
-    return sheet;
   }
 
   /**

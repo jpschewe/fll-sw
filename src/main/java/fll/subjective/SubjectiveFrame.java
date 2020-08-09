@@ -380,7 +380,7 @@ public final class SubjectiveFrame extends JFrame {
     setupTabReturnBehavior(table);
 
     int goalIndex = 0;
-    for (final AbstractGoal goal : subjectiveCategory.getGoals()) {
+    for (final AbstractGoal goal : subjectiveCategory.getAllGoals()) {
       final TableColumn column = table.getColumnModel().getColumn(goalIndex
           + tableModel.getNumColumnsLeftOfScores());
       if (goal.isEnumerated()) {
@@ -593,7 +593,7 @@ public final class SubjectiveFrame extends JFrame {
       final String category = subjectiveCategory.getName();
       final String categoryTitle = subjectiveCategory.getTitle();
 
-      final List<AbstractGoal> goals = subjectiveCategory.getGoals();
+      final List<AbstractGoal> goals = subjectiveCategory.getAllGoals();
       final List<Element> scoreElements = SubjectiveTableModel.getScoreElements(_scoreDocument, category);
       for (final Element scoreElement : scoreElements) {
         int numValues = 0;

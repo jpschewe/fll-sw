@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -66,12 +67,24 @@ import net.mtu.eggplant.xml.XMLUtils;
 @WebServlet("/admin/subjective-data.fll")
 public class DownloadSubjectiveData extends BaseFLLServlet {
 
+  /**
+   * Name of XML element that stores a subjective category.
+   */
   public static final String SUBJECTIVE_CATEGORY_NODE_NAME = "subjectiveCategory";
 
+  /**
+   * Name of the XML element that contains an individual score.
+   */
   public static final String SCORE_NODE_NAME = "score";
 
+  /**
+   * Name of the XML element that contains the scores.
+   */
   public static final String SCORES_NODE_NAME = "scores";
 
+  /**
+   * Name of the XML element that contains a score for a goal.
+   */
   public static final String SUBSCORE_NODE_NAME = "subscore";
 
   /**
@@ -147,6 +160,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
    *          information
    * @param currentTournament the tournament to generate the document for, used
    *          for deciding which set of judges to use
+   * @param challengeDescription description of the challenge
    * @return the document
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
@@ -210,7 +224,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
               prep2.setString(3, judge);
               rs2 = prep2.executeQuery();
               if (rs2.next()) {
-                for (final AbstractGoal goalDescription : categoryDescription.getGoals()) {
+                for (final AbstractGoal goalDescription : categoryDescription.getAllGoals()) {
                   final String goalName = goalDescription.getName();
                   final String value = rs2.getString(goalName);
                   if (!rs2.wasNull()) {
@@ -243,12 +257,19 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
    * 
    * @param stream where to write the scores file
    * @throws IOException
+   * @param connection database connection
+   * @param challengeDocument XML version of the challenge description to be
+   *          written
+   * @param challengeDescription description of the challenge
+   * @param scheduleColumnMappings mappings from schedule columns to category
+   *          names
+   * @param schedule tournament schedule
    */
   public static void writeSubjectiveData(final Connection connection,
                                          final Document challengeDocument,
                                          final ChallengeDescription challengeDescription,
-                                         final TournamentSchedule schedule,
-                                         final Collection<CategoryColumnMapping> scheduleColumnMappings,
+                                         final @Nullable TournamentSchedule schedule,
+                                         final @Nullable Collection<CategoryColumnMapping> scheduleColumnMappings,
                                          final OutputStream stream)
       throws IOException, SQLException {
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
@@ -298,6 +319,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
   /**
    * Validate the subjective XML document.
    * 
+   * @param document the document to check
    * @throws SAXException on an error
    */
   public static void validateXML(final org.w3c.dom.Document document) throws SAXException {
@@ -320,9 +342,8 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
         // JPS 2013-07-03
         final java.io.File temp = java.io.File.createTempFile("fll", "xml");
         XMLUtils.writeXML(document,
-                                  new java.io.OutputStreamWriter(new java.io.FileOutputStream(temp),
-                                                                 Utilities.DEFAULT_CHARSET),
-                                  Utilities.DEFAULT_CHARSET.name());
+                          new java.io.OutputStreamWriter(new java.io.FileOutputStream(temp), Utilities.DEFAULT_CHARSET),
+                          Utilities.DEFAULT_CHARSET.name());
         final InputStream scoreStream = new java.io.FileInputStream(temp);
         final Document tempDocument = XMLUtils.parseXMLDocument(scoreStream);
         if (!temp.delete()) {

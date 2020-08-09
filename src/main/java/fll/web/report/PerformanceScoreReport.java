@@ -237,7 +237,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     final PerformanceScoreCategory performance = challenge.getPerformance();
 
     final DatabaseTeamScore[] scores = getScores(connection, tournament, team, numSeedingRounds);
-    for (final AbstractGoal goal : performance.getGoals()) {
+    for (final AbstractGoal goal : performance.getAllGoals()) {
       final double bestScore = bestScoreForGoal(scores, goal);
 
       final Element row = FOPUtils.createTableRow(document);
@@ -261,7 +261,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
             || score.isNoShow()) {
           row.appendChild(createCell(document, ""));
         } else {
-          final double computedValue = goal.getComputedScore(score);
+          final double computedValue = goal.evaluate(score);
 
           final StringBuilder cellStr = new StringBuilder();
           if (!goal.isComputed()) {
@@ -376,7 +376,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     double bestScore = Double.MAX_VALUE
         * -1;
     for (final TeamScore score : scores) {
-      final double computedValue = goal.getComputedScore(score);
+      final double computedValue = goal.evaluate(score);
       bestScore = Math.max(bestScore, computedValue);
     }
     return bestScore;
