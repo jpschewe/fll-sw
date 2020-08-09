@@ -25,7 +25,7 @@ import fll.web.playoff.TeamScore;
 /**
  * Base type for goals in the challenge description.
  */
-public abstract class AbstractGoal extends GoalElement implements Serializable, Evaluatable {
+public abstract class AbstractGoal extends GoalElement {
 
   /**
    * XML attribute for goal name.

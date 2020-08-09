@@ -32,7 +32,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 /**
  * Editor for {@link GoalGroup} objects.
  */
-/* package */ class GoalGroupEditor extends GoalElementEditor implements Validatable {
+/* package */ class GoalGroupEditor extends GoalElementEditor {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
