@@ -109,8 +109,8 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
    * @param v the element to add
    * @throws IndexOutOfBoundsException if the index is out of range
    */
-  public void addGoal(final int index,
-                      final GoalElement v)
+  public void addGoalElement(final int index,
+                             final GoalElement v)
       throws IndexOutOfBoundsException {
     goalElements.add(index, v);
   }
@@ -121,7 +121,7 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
    * @param v the element to remove
    * @return if the element was removed
    */
-  public boolean removeGoal(final GoalElement v) {
+  public boolean removeGoalElement(final GoalElement v) {
     return goalElements.remove(v);
   }
 
@@ -132,7 +132,7 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
    * @return the removed goal
    * @throws IndexOutOfBoundsException if the index is out of range
    */
-  public GoalElement removeGoal(final int index) throws IndexOutOfBoundsException {
+  public GoalElement removeGoalElement(final int index) throws IndexOutOfBoundsException {
     return goalElements.remove(index);
   }
 
