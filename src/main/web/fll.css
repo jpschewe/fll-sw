@@ -14,16 +14,14 @@ fll:before {
 		" - Scores sorted by " attr(winner)
 }
 
+goalGroup:before {
+    content: "Goal Group: '" attr(title) "' - " attr(description);
+    font-size: 150%;
+}
+
 goal:before {
 	content: "Goal: '" attr(title) "' [" attr(name) "] min: " attr(min)
 		" max: " attr(max) " multiplier: " attr(multiplier);
-	font-size: 120%;
-}
-
-goal[category]:before {
-	content: "Goal: '" attr(title) "' [" attr(name) "] category: '"
-		attr(category) "' min: " attr(min) " max: " attr(max) " multiplier: "
-		attr(multiplier);
 	font-size: 120%;
 }
 
