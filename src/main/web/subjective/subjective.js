@@ -618,7 +618,7 @@
       var retval = 0;
 
       if (!score.deleted && !score.noShow) {
-        $.each(_currentCategory.goals, function(index, goal) {
+        $.each(_currentCategory.allGoals, function(index, goal) {
           if (goal.enumerated) {
             alert("Enumerated goals are not yet supported");
           } else {
