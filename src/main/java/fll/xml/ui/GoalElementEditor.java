@@ -64,6 +64,11 @@ import fll.xml.GoalElement;
     goalElementValid = new ValidityPanel();
     add(goalElementValid, gbc);
 
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    add(new JLabel("Title: "), gbc);
+
     mTitleEditor = FormatterUtils.createStringField();
     gbc = new GridBagConstraints();
     gbc.weightx = 1;
