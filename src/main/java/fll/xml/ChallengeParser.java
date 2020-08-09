@@ -570,7 +570,7 @@ public final class ChallengeParser {
   private static Map<String, String> gatherColumnDefinitions(final ScoreCategory element) {
     final Map<String, String> goalDefs = new HashMap<>();
 
-    for (final AbstractGoal goal : element.getGoals()) {
+    for (final AbstractGoal goal : element.getAllGoals()) {
       if (!goal.isComputed()) {
         final String columnDefinition = GenerateDB.generateGoalColumnDefinition(goal);
         final String goalName = goal.getName();

@@ -60,7 +60,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
- * Java code behind uploading subjective scores
+ * Java code behind uploading subjective scores.
  */
 @WebServlet("/admin/UploadSubjectiveData")
 public final class UploadSubjectiveData extends BaseFLLServlet {
@@ -242,6 +242,13 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
 
   /**
    * Save the subjective data in scoreDocument to the database.
+   * 
+   * @param scoreDocument where the scores are
+   * @param currentTournament tournament id
+   * @param challengeDescription description of the challenge
+   * @param connection database connection
+   * @param overwrite if true, store all scores, even if the "modified" flag is
+   *          not set
    */
   public static void saveSubjectiveData(final Document scoreDocument,
                                         final int currentTournament,
@@ -321,7 +328,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
                                      final String categoryName,
                                      final ScoreCategory categoryElement)
       throws SQLException {
-    final List<AbstractGoal> goalDescriptions = categoryElement.getGoals();
+    final List<AbstractGoal> goalDescriptions = categoryElement.getAllGoals();
     PreparedStatement prep = null;
     try {
       final StringBuffer sql = new StringBuffer();
@@ -353,7 +360,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
                                        final String categoryName,
                                        final ScoreCategory categoryElement)
       throws SQLException, ParseException {
-    final List<AbstractGoal> goalDescriptions = categoryElement.getGoals();
+    final List<AbstractGoal> goalDescriptions = categoryElement.getAllGoals();
 
     PreparedStatement insertPrep = null;
     PreparedStatement updatePrep = null;

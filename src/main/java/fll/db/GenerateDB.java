@@ -248,7 +248,7 @@ public final class GenerateDB {
         performanceColumns.append("Bye,");
         createStatement.append(" Bye boolean DEFAULT FALSE NOT NULL,");
         createStatement.append(" Verified boolean DEFAULT FALSE NOT NULL,");
-        for (final AbstractGoal element : performanceElement.getGoals()) {
+        for (final AbstractGoal element : performanceElement.getAllGoals()) {
           if (!element.isComputed()) {
             final String columnDefinition = generateGoalColumnDefinition(element);
             createStatement.append(" "
@@ -292,7 +292,7 @@ public final class GenerateDB {
         createStatement.append(" Tournament INTEGER NOT NULL,");
         createStatement.append(" Judge VARCHAR(64) NOT NULL,");
         createStatement.append(" NoShow boolean DEFAULT FALSE NOT NULL,");
-        for (final AbstractGoal element : categoryElement.getGoals()) {
+        for (final AbstractGoal element : categoryElement.getAllGoals()) {
           final String columnDefinition = generateGoalColumnDefinition(element);
           createStatement.append(" "
               + columnDefinition
