@@ -14,7 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
