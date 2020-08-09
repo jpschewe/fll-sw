@@ -63,8 +63,6 @@ public abstract class AbstractGoal extends GoalElement implements Serializable, 
     this();
 
     mName = name;
-    mTitle = null;
-    mDescription = null;
   }
 
   private String mName = "no_name";
@@ -85,25 +83,6 @@ public abstract class AbstractGoal extends GoalElement implements Serializable, 
     final String old = mName;
     mName = v;
     firePropertyChange("name", old, v);
-  }
-
-  private @Nullable String mTitle;
-
-  /**
-   * @return the title of the goal, may be null.
-   */
-  public @Nullable String getTitle() {
-    return mTitle;
-  }
-
-  /**
-   * @param v see {@link #getTitle()}
-   *          Fires property change event.
-   */
-  public void setTitle(final @Nullable String v) {
-    final String old = mTitle;
-    mTitle = v;
-    firePropertyChange("title", old, v);
   }
 
   private @Nullable String mDescription;
