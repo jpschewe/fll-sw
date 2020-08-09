@@ -47,9 +47,6 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
       } else if (GoalGroup.TAG_NAME.equals(goalEle.getNodeName())) {
         final GoalGroup group = new GoalGroup(goalEle, this);
         goalElements.add(group);
-      } else {
-        throw new FLLInternalException("Found unexpected tag in score category: "
-            + goalEle.getNodeName());
       }
     }
   }
