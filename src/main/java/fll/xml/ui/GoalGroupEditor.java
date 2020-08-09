@@ -63,7 +63,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
     GridBagConstraints gbc;
     gbc = new GridBagConstraints();
     gbc.weightx = 1;
-    gbc.weightx = 1;
+    gbc.weighty = 1;
     gbc.anchor = GridBagConstraints.FIRST_LINE_START;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.BOTH;
