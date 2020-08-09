@@ -69,7 +69,6 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.BOTH;
     add(container, gbc);
-    setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
     final Box buttonBox = Box.createHorizontalBox();
     container.add(buttonBox);
