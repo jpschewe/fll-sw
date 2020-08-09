@@ -23,14 +23,12 @@ public interface GoalScope {
    * @throws ScopeException if the goal cannot be found
    */
   @Nonnull
-  public AbstractGoal getGoal(final String name) throws ScopeException;
+  AbstractGoal getGoal(String name) throws ScopeException;
 
   /**
-   * 
    * @return all goals currently known to the scope
    */
   @Nonnull
-  public Collection<AbstractGoal> getAllGoals();
-  
-  
+  Collection<AbstractGoal> getAllGoals();
+
 }

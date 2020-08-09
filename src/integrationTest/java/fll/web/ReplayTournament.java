@@ -33,9 +33,12 @@ import fll.util.GuiExceptionHandler;
 import net.mtu.eggplant.util.BasicFileFilter;
 
 /**
- *
+ * Replay a tournament.
  */
-public class ReplayTournament {
+public final class ReplayTournament {
+
+  private ReplayTournament() {
+  }
 
   private static final Preferences PREFS = Preferences.userNodeForPackage(ReplayTournament.class);
 
@@ -62,9 +65,7 @@ public class ReplayTournament {
 
       // ask which tournament from the database
 
-      Class.forName("org.hsqldb.jdbcDriver").newInstance();
-
-      try (final Connection testDataConn = DriverManager.getConnection("jdbc:hsqldb:mem:replay")) {
+      try (Connection testDataConn = DriverManager.getConnection("jdbc:hsqldb:mem:replay")) {
         loadDatabase(testDataConn, database);
 
         // choose output directory
@@ -136,7 +137,7 @@ public class ReplayTournament {
   private static void loadDatabase(final Connection testDataConn,
                                    final Path database)
       throws IOException, SQLException {
-    try (final InputStream dbResourceStream = new FileInputStream(database.toFile())) {
+    try (InputStream dbResourceStream = new FileInputStream(database.toFile())) {
       final ZipInputStream zipStream = new ZipInputStream(dbResourceStream);
       final ImportDB.ImportResult result = ImportDB.loadFromDumpIntoNewDB(zipStream, testDataConn);
       TestUtils.deleteImportData(result);

@@ -24,8 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import org.apache.commons.io.IOUtils;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -82,7 +80,7 @@ public class SubjectiveChallengeAwardWinnersServlet extends HttpServlet {
     final ServletContext application = getServletContext();
 
     final StringWriter debugWriter = new StringWriter();
-    IOUtils.copy(request.getReader(), debugWriter);
+    request.getReader().transferTo(debugWriter);
 
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Read data: "

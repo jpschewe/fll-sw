@@ -7,6 +7,7 @@
 package fll.xml.ui;
 
 import java.awt.BorderLayout;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,11 +20,8 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
-
 import fll.xml.ComputedGoal;
 import fll.xml.GoalScope;
 import fll.xml.Variable;
@@ -144,7 +142,7 @@ public class VariableListEditor extends JPanel {
    * 
    * @param messages add any errors to the list
    */
-  /* package */ void gatherValidityMessages(final List<String> messages) {
+  /* package */ void gatherValidityMessages(final Collection<String> messages) {
     final Set<String> variableNames = new HashSet<>();
 
     editors.forEach(e -> {

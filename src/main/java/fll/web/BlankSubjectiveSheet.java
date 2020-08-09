@@ -21,7 +21,6 @@ import javax.sql.DataSource;
 
 import fll.Tournament;
 import fll.db.Queries;
-import fll.documents.elements.SheetElement;
 import fll.documents.writers.SubjectivePdfWriter;
 import fll.scheduler.TeamScheduleInfo;
 import fll.util.FLLRuntimeException;
@@ -56,8 +55,6 @@ public class BlankSubjectiveSheet extends HttpServlet {
 
         final SubjectiveScoreCategory category = challengeDescription.getSubjectiveCategoryByName(subjectiveCategoryName);
 
-        final SheetElement sheetElement = new SheetElement(category);
-
         final TeamScheduleInfo dummy = new TeamScheduleInfo(111111);
         dummy.setTeamName("Really long team name, something that is really really long");
         dummy.setOrganization("Some organization");
@@ -67,8 +64,9 @@ public class BlankSubjectiveSheet extends HttpServlet {
         final Tournament tournament = Tournament.findTournamentByID(connection,
                                                                     Queries.getCurrentTournament(connection));
 
-        SubjectivePdfWriter.createDocumentForSchedule(response.getOutputStream(), challengeDescription, tournament.getName(),
-                                           sheetElement, null, Collections.singletonList(dummy));
+        SubjectivePdfWriter.createDocumentForSchedule(response.getOutputStream(), challengeDescription,
+                                                      tournament.getName(), category, null,
+                                                      Collections.singletonList(dummy));
 
       } else {
         throw new FLLRuntimeException("You must specify a subjective category name in the URL");

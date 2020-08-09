@@ -21,6 +21,9 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 public class ComputedGoal extends AbstractGoal implements VariableScope {
 
+  /**
+   * XML element tag used by this class.
+   */
   public static final String TAG_NAME = "computedGoal";
 
   public ComputedGoal(final Element ele,
@@ -91,10 +94,14 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
 
   private final SwitchStatement mSwitch;
 
+  /**
+   * @return the switch statement for this goal
+   */
   public SwitchStatement getSwitch() {
     return mSwitch;
   }
 
+  @Override
   public Variable getVariable(final String name) throws ScopeException {
     for (final Variable var : mVariables) {
       if (var.getName().equals(name)) {
@@ -106,13 +113,15 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
         + "'");
   }
 
+  @Override
   public double getRawScore(final TeamScore teamScore) {
     final double score = getSwitch().evaluate(teamScore);
     return applyScoreType(score);
 
   }
 
-  public double getComputedScore(final TeamScore teamScore) {
+  @Override
+  public double evaluate(final TeamScore teamScore) {
     return getRawScore(teamScore);
   }
 

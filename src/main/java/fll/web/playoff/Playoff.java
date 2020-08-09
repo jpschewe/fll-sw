@@ -1202,7 +1202,7 @@ public final class Playoff {
   /* package */ static void populateInitialScoreMaps(final ChallengeDescription challenge,
                                                      final Map<String, Double> simpleGoals,
                                                      final Map<String, String> enumGoals) {
-    for (final AbstractGoal agoal : challenge.getPerformance().getGoals()) {
+    for (final AbstractGoal agoal : challenge.getPerformance().getAllGoals()) {
       if (agoal instanceof Goal) {
         final Goal goal = (Goal) agoal;
         if (!goal.isComputed()) {

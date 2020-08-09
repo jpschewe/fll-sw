@@ -119,7 +119,7 @@ public class FullTournamentTest {
    * Load the test data into the specified database.
    */
   private static void loadTestData(final Connection testDataConn) throws SQLException, IOException {
-    try (final InputStream dbResourceStream = FullTournamentTest.class.getResourceAsStream("data/99-final.flldb")) {
+    try (InputStream dbResourceStream = FullTournamentTest.class.getResourceAsStream("data/99-final.flldb")) {
       assertNotNull(dbResourceStream, "Missing test data");
       final ZipInputStream zipStream = new ZipInputStream(dbResourceStream);
       final ImportDB.ImportResult result = ImportDB.loadFromDumpIntoNewDB(zipStream, testDataConn);
@@ -148,9 +148,7 @@ public class FullTournamentTest {
       throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, ParseException,
       SQLException, InterruptedException, SAXException {
     try {
-      Class.forName("org.hsqldb.jdbcDriver").newInstance();
-
-      try (final Connection testDataConn = DriverManager.getConnection("jdbc:hsqldb:mem:full-tournament-test")) {
+      try (Connection testDataConn = DriverManager.getConnection("jdbc:hsqldb:mem:full-tournament-test")) {
         assertNotNull(testDataConn, "Error connecting to test data database");
 
         loadTestData(testDataConn);
@@ -183,15 +181,6 @@ public class FullTournamentTest {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     } catch (final IOException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final ClassNotFoundException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final InstantiationException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final IllegalAccessException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     } catch (final ParseException e) {
@@ -290,9 +279,9 @@ public class FullTournamentTest {
      */
     final int maxRuns;
     try (
-        final PreparedStatement maxRunPrep = testDataConn.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?")) {
+        PreparedStatement maxRunPrep = testDataConn.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?")) {
       maxRunPrep.setInt(1, sourceTournament.getTournamentID());
-      try (final ResultSet maxRunResult = maxRunPrep.executeQuery()) {
+      try (ResultSet maxRunResult = maxRunPrep.executeQuery()) {
         assertTrue(maxRunResult.next(), "No performance scores in test data");
         maxRuns = maxRunResult.getInt(1);
       }
@@ -302,7 +291,7 @@ public class FullTournamentTest {
     final PerformanceScoreCategory performanceElement = description.getPerformance();
 
     try (
-        final PreparedStatement prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?")) {
+        PreparedStatement prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?")) {
 
       boolean initializedPlayoff = false;
       prep.setInt(1, sourceTournament.getTournamentID());
@@ -330,7 +319,7 @@ public class FullTournamentTest {
         }
 
         prep.setInt(2, runNumber);
-        try (final ResultSet rs = prep.executeQuery()) {
+        try (ResultSet rs = prep.executeQuery()) {
           // for each score in a run
           while (rs.next()) {
             final int teamNumber = rs.getInt(1);
@@ -469,8 +458,8 @@ public class FullTournamentTest {
 
     final WebElement sidea0 = selenium.findElement(By.name("SideA0"));
     final WebElement sideb0 = selenium.findElement(By.name("SideB0"));
-    if (StringUtils.isEmpty(sidea0.getAttribute("value"))
-        && StringUtils.isEmpty(sideb0.getAttribute("value"))) {
+    if (StringUtils.isBlank(sidea0.getAttribute("value"))
+        && StringUtils.isBlank(sideb0.getAttribute("value"))) {
       // Table labels should be assigned by the schedule, but may not be. If
       // they're not assigned, then assign them.
       sidea0.sendKeys("red");
@@ -853,12 +842,12 @@ public class FullTournamentTest {
             + teamNumberColumn);
       }
 
-      try (final PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM "
+      try (PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM "
           + category
           + " WHERE Tournament = ?")) {
         prep.setInt(1, sourceTournament.getTournamentID());
 
-        try (final ResultSet rs = prep.executeQuery()) {
+        try (ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
             final int teamNumber = rs.getInt("TeamNumber");
 
@@ -899,7 +888,7 @@ public class FullTournamentTest {
               assertTrue(columnIndex >= 0, "Can't find No Show column in subjective table model");
               tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);
             } else {
-              for (final AbstractGoal goalElement : subjectiveElement.getGoals()) {
+              for (final AbstractGoal goalElement : subjectiveElement.getAllGoals()) {
                 if (!goalElement.isComputed()) {
                   final String goalName = goalElement.getName();
                   final String goalTitle = goalElement.getTitle();
@@ -942,12 +931,12 @@ public class FullTournamentTest {
     }
 
     try (
-        final PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?")) {
+        PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?")) {
       prep.setInt(1, sourceTournament.getTournamentID());
       prep.setInt(2, runNumber);
       prep.setInt(3, teamNumber);
 
-      try (final ResultSet rs = prep.executeQuery()) {
+      try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
           if (rs.getBoolean("BYE")) {
             LOGGER.info("Run is a bye, not entering a score");
@@ -974,7 +963,7 @@ public class FullTournamentTest {
           } else {
             // walk over challenge descriptor to get all element names and then
             // use the values from rs
-            for (final AbstractGoal element : performanceElement.getGoals()) {
+            for (final AbstractGoal element : performanceElement.getAllGoals()) {
               if (!element.isComputed()) {
                 final Goal goal = (Goal) element;
                 final String name = goal.getName();
@@ -1073,12 +1062,12 @@ public class FullTournamentTest {
     }
 
     try (
-        final PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?")) {
+        PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?")) {
       prep.setInt(1, sourceTournament.getTournamentID());
       prep.setInt(2, runNumber);
       prep.setInt(3, teamNumber);
 
-      try (final ResultSet rs = prep.executeQuery()) {
+      try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
           if (rs.getBoolean("NoShow")) {
             // no shows don't need verifying
@@ -1096,7 +1085,7 @@ public class FullTournamentTest {
 
             // walk over challenge descriptor to get all element names and then
             // use the values from rs
-            for (final AbstractGoal element : performanceElement.getGoals()) {
+            for (final AbstractGoal element : performanceElement.getAllGoals()) {
               if (!element.isComputed()) {
                 final Goal goal = (Goal) element;
                 final String name = goal.getName();

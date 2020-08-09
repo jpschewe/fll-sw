@@ -491,7 +491,7 @@ function saveToScoreObject(score) {
     return;
   }
 
-  $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
+  $.each($.subjective.getCurrentCategory().allGoals, function(index, goal) {
     if (goal.enumerated) {
       alert("Enumerated goals not supported: " + goal.name);
     } else {
@@ -522,7 +522,7 @@ function recomputeTotal() {
   var score = $.subjective.getScore(currentTeam.teamNumber);
 
   var total = 0;
-  $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
+  $.each($.subjective.getCurrentCategory().allGoals, function(index, goal) {
     if (goal.enumerated) {
       alert("Enumerated goals not supported: " + goal.name);
     } else {
@@ -720,7 +720,7 @@ function createScoreRows(table, totalColumns, goal, subscore) {
  * @returns total number of columns to represent all scores in the rubric ranges
  */
 function populateEnterScoreRubricTitles(table, hidden) {
-  var firstGoal = $.subjective.getCurrentCategory().goals[0];
+  var firstGoal = $.subjective.getCurrentCategory().allGoals[0];
 
   var ranges = firstGoal.rubric;
   ranges.sort(rangeSort);
@@ -743,6 +743,33 @@ function populateEnterScoreRubricTitles(table, hidden) {
   table.append(row);
 
   return totalColumns;
+}
+
+/**
+ * Create rows for a goal group and it's goals.
+ */
+function createGoalGroupRows(table, totalColumns, score, goalGroup) {
+  var groupText = goalGroup.title;
+  if (goalGroup.description) {
+    groupText = groupText + " - " + goalGroup.description;
+  }
+  
+  var bar = $("<tr><td colspan='" + totalColumns + "' class='ui-bar-a'>"
+      + groupText + "</td></tr>");
+  table.append(bar);
+
+  $.each(goalGroup.goals, function(index, goal) {
+    if (goal.enumerated) {
+      alert("Enumerated goals not supported: " + goal.name);
+    } else {
+      var goalScore = null;
+      if ($.subjective.isScoreCompleted(score)) {
+        goalScore = score.standardSubScores[goal.name];
+      }
+      createScoreRows(table, totalColumns, goal, goalScore);
+    }
+  });
+
 }
 
 $(document)
@@ -779,31 +806,23 @@ $(document)
           headerTable.empty();
           populateEnterScoreRubricTitles(headerTable, false)
 
-          var prevCategory = null;
-          $.each($.subjective.getCurrentCategory().goals,
-              function(index, goal) {
-                if (goal.enumerated) {
-                  alert("Enumerated goals not supported: " + goal.name);
-                } else {
-                  var subscore = null;
-                  if ($.subjective.isScoreCompleted(score)) {
-                    subscore = score.standardSubScores[goal.name];
-                  }
-
-                  if (prevCategory != goal.category) {
-                    if (goal.category != null && "" != goal.category) {
-                      var bar = $("<tr><td colspan='" + totalColumns
-                          + "' class='ui-bar-a'>" + goal.category
-                          + "</td></tr>");
-                      table.append(bar);
-                    }
-                  }
-
-                  createScoreRows(table, totalColumns, goal, subscore);
-
-                  prevCategory = goal.category;
+          $.each($.subjective.getCurrentCategory().goalElements, function(
+              index, ge) {
+            if (ge.goalGroup) {
+              createGoalGroupRows(table, totalColumns, score, ge)
+            } else if (ge.goal) {
+              if (ge.enumerated) {
+                alert("Enumerated goals not supported: " + goal.name);
+              } else {
+                var goalScore = null;
+                if ($.subjective.isScoreCompleted(score)) {
+                  goalScore = score.standardSubScores[goal.name];
                 }
-              });
+
+                createScoreRows(table, totalColumns, ge, goalScore);
+              }
+            }
+          });
 
           // read the intial value
           recomputeTotal();
@@ -811,7 +830,7 @@ $(document)
           $("#enter-score-page").trigger("create");
 
           // events need to be added after the page create
-          $.each($.subjective.getCurrentCategory().goals,
+          $.each($.subjective.getCurrentCategory().allGoals,
               function(index, goal) {
                 addEventsToSlider(goal);
 
