@@ -8,7 +8,6 @@ package fll.xml.ui;
 
 import java.awt.GridBagConstraints;
 import java.util.Collection;
-import java.util.List;
 
 import javax.annotation.Nonnull;
 
@@ -26,6 +25,7 @@ public class ComputedGoalEditor extends AbstractGoalEditor {
 
   /**
    * @param goal the goal to edit
+   * @param goalScope used for looking up goals
    */
   public ComputedGoalEditor(@Nonnull final ComputedGoal goal,
                             @Nonnull final GoalScope goalScope) {
@@ -62,7 +62,7 @@ public class ComputedGoalEditor extends AbstractGoalEditor {
   }
 
   @Override
-  protected void gatherValidityMessages(final List<String> messages) {
+  protected void gatherValidityMessages(final Collection<String> messages) {
     super.gatherValidityMessages(messages);
 
     variableListEditor.gatherValidityMessages(messages);

@@ -144,7 +144,8 @@ public abstract class AbstractGoal extends GoalElement implements Serializable, 
   public abstract double evaluate(TeamScore teamScore);
 
   /**
-   * @return true if this is a computed goal
+   * @return true if this is a computed goal and can be safely cast to
+   *         {@link ComputedGoal}
    */
   public abstract boolean isComputed();
 

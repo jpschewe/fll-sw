@@ -28,6 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 
 import fll.Utilities;
+import fll.util.FLLInternalException;
 import fll.util.FormatterUtils;
 import fll.xml.AbstractConditionStatement;
 import fll.xml.AbstractGoal;
@@ -37,6 +38,8 @@ import fll.xml.ComputedGoal;
 import fll.xml.ConditionStatement;
 import fll.xml.EnumConditionStatement;
 import fll.xml.Goal;
+import fll.xml.GoalElement;
+import fll.xml.GoalGroup;
 import fll.xml.GoalRef;
 import fll.xml.ScopeException;
 import fll.xml.ScoreCategory;
@@ -56,7 +59,7 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
 
   private final JFormattedTextField mWeight;
 
-  private final List<AbstractGoalEditor> mGoalEditors = new LinkedList<>();
+  private final List<GoalElementEditor> mGoalElementEditors = new LinkedList<>();
 
   private final Box mGoalEditorContainer;
 
@@ -105,6 +108,10 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
     buttonBox.add(addComputedGoal);
     addComputedGoal.addActionListener(l -> addNewComputedGoal());
 
+    final JButton addGoalGroup = new JButton("Add Goal Group");
+    buttonBox.add(addGoalGroup);
+    addGoalGroup.addActionListener(l -> addNewGoalGroup());
+
     buttonBox.add(Box.createHorizontalGlue());
 
     mGoalEditorContainer = Box.createVerticalBox();
@@ -140,16 +147,16 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
       }
 
       // update editor list
-      final AbstractGoalEditor editor = mGoalEditors.remove(oldIndex);
-      mGoalEditors.add(newIndex, editor);
+      final GoalElementEditor editor = mGoalElementEditors.remove(oldIndex);
+      mGoalElementEditors.add(newIndex, editor);
 
       // update the UI
       mGoalEditorContainer.add(e.getComponent(), newIndex);
       mGoalEditorContainer.validate();
 
       // update the order in the challenge description
-      final AbstractGoal goal = mCategory.removeGoal(oldIndex);
-      mCategory.addGoal(newIndex, goal);
+      final GoalElement goal = mCategory.removeGoalElement(oldIndex);
+      mCategory.addGoalElement(newIndex, goal);
     };
 
     mGoalDeleteListener = e -> {
@@ -169,10 +176,10 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
       }
 
       // update editor list
-      mGoalEditors.remove(index);
+      mGoalElementEditors.remove(index);
 
       // update the challenge description
-      mCategory.removeGoal(index);
+      mCategory.removeGoalElement(index);
 
       // update the UI
       GuiUtils.removeFromContainer(mGoalEditorContainer, index);
@@ -180,7 +187,7 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
 
     mWeight.setValue(mCategory.getWeight());
 
-    mCategory.getGoals().forEach(this::addGoal);
+    mCategory.getGoalElements().forEach(this::addGoalElement);
 
   }
 
@@ -192,36 +199,51 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
   }
 
   private void addNewGoal() {
-    final String name = String.format("goal_%d", mCategory.getGoals().size());
-    final String title = String.format("Goal %d", mCategory.getGoals().size());
+    final String name = String.format("goal_%d", mCategory.getGoalElements().size());
+    final String title = String.format("Goal %d", mCategory.getGoalElements().size());
     final Goal newGoal = new Goal(name);
     newGoal.setTitle(title);
-    mCategory.addGoal(newGoal);
-    addGoal(newGoal);
+    mCategory.addGoalElement(newGoal);
+    addGoalElement(newGoal);
   }
 
   private void addNewComputedGoal() {
-    final String name = String.format("goal_%d", mCategory.getGoals().size());
-    final String title = String.format("Goal %d", mCategory.getGoals().size());
+    final String name = String.format("goal_%d", mCategory.getGoalElements().size());
+    final String title = String.format("Goal %d", mCategory.getGoalElements().size());
     final ComputedGoal newGoal = new ComputedGoal(name, mCategory);
     newGoal.setTitle(title);
-    mCategory.addGoal(newGoal);
-    addGoal(newGoal);
+    mCategory.addGoalElement(newGoal);
+    addGoalElement(newGoal);
   }
 
-  private void addGoal(final AbstractGoal goal) {
+  private void addNewGoalGroup() {
+    final GoalGroup group = new GoalGroup();
+    final String title = String.format("Group %d", mCategory.getGoalElements().size());
+    group.setTitle(title);
+    mCategory.addGoalElement(group);
+    addGoalElement(group);
+  }
 
-    final AbstractGoalEditor editor;
-    if (goal instanceof Goal) {
-      editor = new GoalEditor((Goal) goal);
-    } else if (goal instanceof ComputedGoal) {
-      editor = new ComputedGoalEditor((ComputedGoal) goal, mCategory);
+  private void addGoalElement(final GoalElement ge) {
+
+    final GoalElementEditor editor;
+    if (ge.isGoal()) {
+      final AbstractGoal goal = (AbstractGoal) ge;
+      if (goal.isComputed()) {
+        editor = new ComputedGoalEditor((ComputedGoal) goal, mCategory);
+      } else {
+        editor = new GoalEditor((Goal) goal);
+      }
+    } else if (ge.isGoalGroup()) {
+      final GoalGroup group = (GoalGroup) ge;
+      editor = new GoalGroupEditor(group, mCategory);
     } else {
-      throw new RuntimeException("Unexpected goal class: "
-          + goal.getClass());
+      throw new FLLInternalException("Unknown goal element class: "
+          + ge.getClass());
     }
+
     editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
-    final MovableExpandablePanel panel = new MovableExpandablePanel(goal.getTitle(), editor, true, true);
+    final MovableExpandablePanel panel = new MovableExpandablePanel(ge.getTitle(), editor, true, true);
     editor.addPropertyChangeListener("title", e -> {
       final String newTitle = (String) e.getNewValue();
       panel.setTitle(newTitle);
@@ -229,7 +251,7 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
     panel.addMoveEventListener(mGoalMoveListener);
     panel.addDeleteEventListener(mGoalDeleteListener);
 
-    mGoalEditors.add(editor);
+    mGoalElementEditors.add(editor);
 
     GuiUtils.addToContainer(mGoalEditorContainer, panel);
   }
@@ -244,7 +266,20 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
       LOGGER.debug("Got parse exception committing changes, assuming bad value and ignoring", e);
     }
 
-    mGoalEditors.forEach(e -> e.commitChanges());
+    mGoalElementEditors.forEach(e -> e.commitChanges());
+  }
+
+  private void checkUniqueGoalnames(final Collection<String> messages) {
+    final Set<String> goalNames = new HashSet<>();
+    for (final AbstractGoal goal : mCategory.getAllGoals()) {
+      final String name = goal.getName();
+
+      final boolean newName = goalNames.add(name);
+      if (!newName) {
+        messages.add(String.format("Goal names must be unique in a category, the name \"%s\" is used more than once",
+                                   name));
+      }
+    }
   }
 
   /**
@@ -258,25 +293,17 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
    * @param messages put invalid messages in the list.
    */
   protected void gatherValidityMessages(final Collection<String> messages) {
+    checkUniqueGoalnames(messages);
+    checkCircularReferences(messages);
 
-    final Set<String> goalNames = new HashSet<>();
-    for (final AbstractGoalEditor editor : mGoalEditors) {
-      final String name = editor.getGoal().getName();
+    for (final GoalElementEditor editor : mGoalElementEditors) {
+      final String name = editor.getGoalElement().getTitle();
 
       final boolean editorValid = editor.checkValidity(messages);
       if (!editorValid) {
-        messages.add(String.format("Goal \"%s\" has invalid elements", name));
-      }
-
-      final boolean newName = goalNames.add(name);
-      if (!newName) {
-        messages.add(String.format("Goal names must be unique in a category, the name \"%s\" is used more than once",
-                                   name));
+        messages.add(String.format("Goal Element \"%s\" has invalid elements", name));
       }
     }
-
-    checkCircularReferences(messages);
-
   }
 
   @Override
@@ -422,7 +449,7 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
 
     // compute direct references
     final Map<ComputedGoal, Set<ComputedGoal>> referenceMap = new HashMap<>();
-    for (final AbstractGoal ag : mCategory.getGoals()) {
+    for (final AbstractGoal ag : mCategory.getAllGoals()) {
       if (ag.isComputed()) {
         final ComputedGoal goal = (ComputedGoal) ag;
         final Set<ComputedGoal> refs = getReferencedComputedGoals(goal);
