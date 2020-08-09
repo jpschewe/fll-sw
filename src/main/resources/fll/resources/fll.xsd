@@ -112,7 +112,8 @@
                     unique.
                 </xsd:documentation>
             </xsd:annotation>
-            <xsd:selector xpath="./goal|./computedGoal" />
+            <xsd:selector
+                xpath="./goal|./computedGoal|./goalGroup/goal|./goalGroup/computedGoal" />
             <xsd:field xpath="@name" />
         </xsd:key>
         <xsd:keyref name="performanceGoalRef"
@@ -139,7 +140,7 @@
                     <xsd:sequence minOccurs="0"
                         maxOccurs="unbounded">
                         <xsd:element ref="goal"
-                            maxOccurs="unbounded" />
+                            minOccurs="0" maxOccurs="unbounded" />
                         <xsd:element ref="computedGoal"
                             minOccurs="0" maxOccurs="unbounded" />
                         <xsd:element ref="goalGroup"
@@ -173,7 +174,8 @@
                     category.
                 </xsd:documentation>
             </xsd:annotation>
-            <xsd:selector xpath="./goal|./computedGoal" />
+            <xsd:selector
+                xpath="./goal|./computedGoal|./goalGroup/goal|./goalGroup/computedGoal" />
             <xsd:field xpath="@name" />
         </xsd:key>
         <xsd:keyref name="subjectiveGoalRef"
