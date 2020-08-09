@@ -294,7 +294,7 @@ public class SubjectiveScore {
           final Map<String, Double> standardSubScores = new HashMap<>();
           final Map<String, String> enumSubScores = new HashMap<>();
           final Map<String, String> goalComments = new HashMap<>();
-          for (final AbstractGoal goal : category.getGoals()) {
+          for (final AbstractGoal goal : category.getAllGoals()) {
             if (goal.isEnumerated()) {
               final String value = rs.getString(goal.getName());
               enumSubScores.put(goal.getName(), value);

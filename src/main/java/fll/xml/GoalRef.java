@@ -109,7 +109,7 @@ public class GoalRef implements Evaluatable, Serializable {
     double value;
     switch (getScoreType()) {
     case COMPUTED:
-      value = getGoal().getComputedScore(teamScore);
+      value = getGoal().evaluate(teamScore);
       break;
     case RAW:
       value = getGoal().getRawScore(teamScore);

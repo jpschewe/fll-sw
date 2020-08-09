@@ -69,7 +69,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     if (null != scheduleColumnMappings) {
       this.scheduleColumnMappings.addAll(scheduleColumnMappings);
     }
-    this.goals = new LinkedList<>(this.subjectiveCategory.getGoals());
+    this.goals = new LinkedList<>(this.subjectiveCategory.getAllGoals());
     final List<Element> scoreElements = getScoreElements(this.scoreDocument, this.subjectiveCategory.getName());
     this.scoreElements = new Element[scoreElements.size()];
     for (int i = 0; i < scoreElements.size(); i++) {
@@ -248,7 +248,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           // have an entry in scoreEle
 
           if (goalDescription.isComputed()) {
-            return goalDescription.getComputedScore(getTeamScore(row));
+            return goalDescription.evaluate(getTeamScore(row));
           } else if (null == SubjectiveUtils.getSubscoreElement(scoreEle, goalName)) {
             return null;
           } else if (goalDescription.isEnumerated()) {

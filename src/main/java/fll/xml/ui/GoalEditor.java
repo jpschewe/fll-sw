@@ -10,8 +10,8 @@ import java.awt.CardLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.swing.JCheckBox;
@@ -20,10 +20,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-
-
 import fll.util.FormatterUtils;
-
 import fll.xml.EnumeratedValue;
 import fll.xml.Goal;
 import fll.xml.ScoreType;
@@ -292,7 +289,7 @@ public class GoalEditor extends AbstractGoalEditor {
     return (Goal) super.getGoal();
   }
 
-  private void checkCountValid(final List<String> messages) {
+  private void checkCountValid(final Collection<String> messages) {
     if (getGoal().getMin() >= getGoal().getMax()) {
       messages.add("Minimum value must be less than maximum value");
     }
@@ -302,7 +299,7 @@ public class GoalEditor extends AbstractGoalEditor {
     }
   }
 
-  private void checkEnumeratedValid(final List<String> messages) {
+  private void checkEnumeratedValid(final Collection<String> messages) {
     if (Double.isNaN(getGoal().getInitialValue())) {
       messages.add("One initial value must be set");
     }
@@ -319,7 +316,7 @@ public class GoalEditor extends AbstractGoalEditor {
   }
 
   @Override
-  protected void gatherValidityMessages(final List<String> messages) {
+  protected void gatherValidityMessages(final Collection<String> messages) {
     super.gatherValidityMessages(messages);
 
     if (!mEnumerated.isSelected()) {

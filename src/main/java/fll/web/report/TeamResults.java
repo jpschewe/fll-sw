@@ -37,7 +37,6 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
-import fll.documents.elements.SheetElement;
 import fll.documents.writers.SubjectivePdfWriter;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
@@ -111,8 +110,6 @@ public class TeamResults extends BaseFLLServlet {
     final String directory = String.valueOf(team.getTeamNumber());
 
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
-      final SheetElement sheetElement = new SheetElement(category);
-
       final Optional<CategoryColumnMapping> categoryMapping = scheduleColumnMappings.stream()
                                                                                     .filter(m -> m.getCategoryName()
                                                                                                   .equals(category.getName()))
@@ -137,7 +134,7 @@ public class TeamResults extends BaseFLLServlet {
         scheduledTime = schedInfo.getSubjectiveTimeByName(scheduleColumn).getTime();
       }
 
-      SubjectivePdfWriter.createDocumentForScores(zipOut, description, tournament.getName(), sheetElement, scores,
+      SubjectivePdfWriter.createDocumentForScores(zipOut, description, tournament.getName(), category, scores,
                                                   team.getTeamNumber(), team.getTeamName(), team.getAwardGroup(),
                                                   scheduledTime);
 

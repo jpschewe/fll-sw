@@ -38,7 +38,6 @@ import java.util.zip.ZipInputStream;
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -368,7 +367,7 @@ public final class ImportDB {
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
 
         final StringWriter writer = new StringWriter();
-        IOUtils.copy(reader, writer);
+        reader.transferTo(writer);
         final String content = writer.toString();
         tableData.put(tablename, content);
       } else if (name.endsWith(".types")) {
@@ -497,7 +496,7 @@ public final class ImportDB {
     performance.put("Verified".toLowerCase(), "boolean");
 
     final PerformanceScoreCategory performanceElement = description.getPerformance();
-    for (final AbstractGoal element : performanceElement.getGoals()) {
+    for (final AbstractGoal element : performanceElement.getAllGoals()) {
       if (!element.isComputed()) {
         final String goalName = element.getName();
         final String type = GenerateDB.getTypeForGoalColumn(element);
@@ -520,7 +519,7 @@ public final class ImportDB {
       subjective.put("Judge".toLowerCase(), "varchar(64)");
       subjective.put("NoShow".toLowerCase(), "boolean");
 
-      for (final AbstractGoal element : categoryElement.getGoals()) {
+      for (final AbstractGoal element : categoryElement.getAllGoals()) {
         if (!element.isComputed()) {
           final String goalName = element.getName();
           final String type = GenerateDB.getTypeForGoalColumn(element);
@@ -914,7 +913,7 @@ public final class ImportDB {
         String tableName = categoryElement.getName();
 
         // add _comment for each goal
-        for (final AbstractGoal element : categoryElement.getGoals()) {
+        for (final AbstractGoal element : categoryElement.getAllGoals()) {
           final String goalName = element.getName();
 
           stmt.executeUpdate(String.format("ALTER TABLE %s ADD COLUMN %s_comment longvarchar DEFAULT NULL", tableName,
@@ -1813,7 +1812,7 @@ public final class ImportDB {
         columns.append(" Tournament,");
         columns.append(" TeamNumber,");
         columns.append(" NoShow,");
-        final List<AbstractGoal> goals = categoryElement.getGoals();
+        final List<AbstractGoal> goals = categoryElement.getAllGoals();
         int numColumns = 5;
         for (final AbstractGoal element : goals) {
           if (!element.isComputed()) {
@@ -1934,7 +1933,7 @@ public final class ImportDB {
       // Note: If TimeStamp is no longer the 3rd element, then the hack below
       // needs to be modified
       columns.append(" TimeStamp,");
-      final List<AbstractGoal> goals = performanceElement.getGoals();
+      final List<AbstractGoal> goals = performanceElement.getAllGoals();
       int numColumns = 7;
       for (final AbstractGoal element : goals) {
         if (!element.isComputed()) {
