@@ -161,7 +161,7 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
 
     mGoalDeleteListener = e -> {
       final int confirm = JOptionPane.showConfirmDialog(ScoreCategoryEditor.this,
-                                                        "Are you sure that you want to delete the goal?",
+                                                        "Are you sure that you want to delete the goal element?",
                                                         "Confirm Delete", JOptionPane.YES_NO_OPTION);
       if (confirm != JOptionPane.YES_OPTION) {
         return;
