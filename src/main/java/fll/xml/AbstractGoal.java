@@ -34,11 +34,6 @@ public abstract class AbstractGoal extends GoalElement implements Serializable, 
   public static final String NAME_ATTRIBUTE = "name";
 
   /**
-   * XML tag for goal description.
-   */
-  public static final String DESCRIPTION_TAG_NAME = "description";
-
-  /**
    * Default constructor for creating a new goal.
    */
   public AbstractGoal() {
@@ -82,25 +77,6 @@ public abstract class AbstractGoal extends GoalElement implements Serializable, 
   public void setName(@Nonnull final String v) {
     final String old = mName;
     mName = v;
-    firePropertyChange("name", old, v);
-  }
-
-  private @Nullable String mDescription;
-
-  /**
-   * @return the description
-   */
-  public String getDescription() {
-    return null == mDescription ? null : mDescription.trim().replaceAll("\\s+", " ");
-  }
-
-  /**
-   * @param v see {@link #getDescription()}
-   *          Fires property change event.
-   */
-  public void setDescription(final @Nullable String v) {
-    final String old = mDescription;
-    mDescription = v;
     firePropertyChange("name", old, v);
   }
 
