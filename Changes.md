@@ -1,3 +1,4 @@
+* #844 - Output GoalGroup description on the subjective PDF files
 * #511 - Add GoalGroup as a first class object. This allows it to have a description and cleans up the XML document.
 * #845 - Add the ability to specify comments per goal in the subjective web app.
 * #843 - Add the ability to generate PDF files with the subjective category results and comments
