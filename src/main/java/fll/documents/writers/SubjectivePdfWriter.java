@@ -760,7 +760,7 @@ public class SubjectivePdfWriter {
 
     final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     rangeCell.appendChild(block);
-    block.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_CENTER);
+    block.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_LEFT);
 
     // add checkbox
     final Element inlineCheckbox = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
