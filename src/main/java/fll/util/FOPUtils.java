@@ -61,9 +61,19 @@ public final class FOPUtils {
   public static final String XSL_FO_NAMESPACE = "http://www.w3.org/1999/XSL/Format";
 
   /**
-   * Prefix with colon.
+   * Namespace for XSL-FO extensions.
    */
-  public static final String XSL_FO_PREFIX = "fo:";
+  public static final String XSL_FOX_NAMESPACE = "http://xmlgraphics.apache.org/fop/extensions";
+
+  /**
+   * Extension prefix.
+   */
+  public static final String XSL_FOX_PREFIX = "fox";
+
+  /**
+   * Prefix for XSL-FO elements.
+   */
+  public static final String XSL_FO_PREFIX = "fo";
 
   /**
    * Static content tag.
@@ -80,6 +90,7 @@ public final class FOPUtils {
   public static Element createRoot(final Document document) {
     final Element rootElement = createXslFoElement(document, "root");
     rootElement.setAttribute("xmlns:fo", XSL_FO_NAMESPACE);
+    rootElement.setAttribute("xmlns:fox", XSL_FOX_NAMESPACE);
 
     // get rid of warnings about not being able to find fonts
     rootElement.setAttribute("font-family", "Times");
@@ -96,7 +107,22 @@ public final class FOPUtils {
    */
   public static Element createXslFoElement(final Document document,
                                            final String elementName) {
-    final Element ele = document.createElementNS(XSL_FO_NAMESPACE, String.format("%s%s", XSL_FO_PREFIX, elementName));
+    final Element ele = document.createElementNS(XSL_FO_NAMESPACE, String.format("%s:%s", XSL_FO_PREFIX, elementName));
+    return ele;
+  }
+
+  /**
+   * Helper to create elements with correct prefix. This is used for elements
+   * using the XSL-FO extensions.
+   * 
+   * @param document used to create the element
+   * @param elementName the name of the element
+   * @return the new element
+   */
+  public static Element createXslFoxElement(final Document document,
+                                            final String elementName) {
+    final Element ele = document.createElementNS(XSL_FOX_NAMESPACE,
+                                                 String.format("%s:%s", XSL_FOX_PREFIX, elementName));
     return ele;
   }
 
@@ -576,6 +602,21 @@ public final class FOPUtils {
                                 final String color,
                                 final String side) {
     element.setAttribute(String.format("border-%s", side), String.format("%fpt solid %s", width, color));
+  }
+
+  /**
+   * Set all borders to the same width.
+   * 
+   * @param element the element to add borders to
+   * @param width the width
+   * @see #addTopBorder(Element, double)
+   * @see #addBottomBorder(Element, double)
+   * @see #addLeftBorder(Element, double)
+   * @see #addRightBorder(Element, double)
+   */
+  public static void addBorders(final Element element,
+                                final double width) {
+    addBorders(element, width, width, width, width);
   }
 
   /**
