@@ -5,8 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.util.Base64;
 import java.util.Collection;
@@ -48,6 +46,8 @@ import net.mtu.eggplant.xml.XMLUtils;
 
 public class SubjectivePdfWriter {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
+  private static final String CORNER_RADIUS = "5pt";
 
   private final ChallengeDescription description;
 
@@ -581,6 +581,7 @@ public class SubjectivePdfWriter {
                                final int[] columnWidths,
                                final @Nullable SubjectiveScore score) {
     final Element rubric = FOPUtils.createBasicTable(document);
+    rubric.setAttribute("border-collapse", "separate");
 
     for (final int width : columnWidths) {
       rubric.appendChild(FOPUtils.createTableColumn(document, width));
@@ -591,22 +592,23 @@ public class SubjectivePdfWriter {
 
     tableBody.appendChild(createRubricHeaderRow(document, tableBody));
 
+    List<Element> lastRowCells = null;
     for (final GoalElement ge : scoreCategory.getGoalElements()) {
       if (ge.isGoalGroup()) {
         final GoalGroup goalGroup = (GoalGroup) ge;
-        addRubricGoalGroup(document, tableBody, columnWidths.length, fontSize, goalGroup);
+        lastRowCells = addRubricGoalGroup(document, tableBody, columnWidths.length, fontSize, goalGroup);
 
         for (final AbstractGoal abstractGoal : goalGroup.getGoals()) {
           if (!abstractGoal.isComputed()) {
             final Goal goal = (Goal) abstractGoal;
-            addRubricGoal(document, tableBody, goal, score);
+            lastRowCells = addRubricGoal(document, tableBody, goal, score);
           }
         }
       } else if (ge.isGoal()) {
         final AbstractGoal abstractGoal = (AbstractGoal) ge;
         if (!abstractGoal.isComputed()) {
           final Goal goal = (Goal) abstractGoal;
-          addRubricGoal(document, tableBody, goal, score);
+          lastRowCells = addRubricGoal(document, tableBody, goal, score);
         }
       } else {
         throw new FLLInternalException("Unexpected goal element type: "
@@ -614,14 +616,30 @@ public class SubjectivePdfWriter {
       }
     }
 
+    if (null != lastRowCells) {
+      boolean first = true;
+      Element lastCell = null;
+      for (final Element cell : lastRowCells) {
+        FOPUtils.addBottomBorder(cell, 1);
+        if (first) {
+          cell.setAttribute(String.format("%s:border-after-start-radius", FOPUtils.XSL_FOX_PREFIX), CORNER_RADIUS);
+          first = false;
+        }
+        lastCell = cell;
+      }
+      if (null != lastCell) {
+        lastCell.setAttribute(String.format("%s:border-after-end-radius", FOPUtils.XSL_FOX_PREFIX), CORNER_RADIUS);
+      }
+    }
+
     return rubric;
   }
 
-  private void addRubricGoalGroup(final Document document,
-                                  final Element tableBody,
-                                  final int numColumns,
-                                  final int fontSize,
-                                  final GoalGroup goalGroup) {
+  private List<Element> addRubricGoalGroup(final Document document,
+                                           final Element tableBody,
+                                           final int numColumns,
+                                           final int fontSize,
+                                           final GoalGroup goalGroup) {
 
     final String backgroundColor = String.format("#%02x%02x%02x", sheetColor.getRed(), sheetColor.getGreen(),
                                                  sheetColor.getBlue());
@@ -638,7 +656,9 @@ public class SubjectivePdfWriter {
     cell.setAttribute("number-columns-spanned", String.valueOf(numColumns));
     cell.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
     cell.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
-    FOPUtils.addBorders(cell, 1);
+    FOPUtils.addLeftBorder(cell, 1);
+    FOPUtils.addTopBorder(cell, 1);
+    FOPUtils.addRightBorder(cell, 1);
 
     final Element goalGroupTitleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     cell.appendChild(goalGroupTitleBlock);
@@ -655,14 +675,15 @@ public class SubjectivePdfWriter {
       goalGroupDescriptionBlock.appendChild(document.createTextNode(goalGroupDescription));
     }
 
+    return Collections.singletonList(cell);
   }
 
   private static final String RUBRIC_TABLE_PADDING = "2pt";
 
-  private void addRubricGoal(final Document document,
-                             final Element tableBody,
-                             final Goal goal,
-                             final @Nullable SubjectiveScore score) {
+  private List<Element> addRubricGoal(final Document document,
+                                      final Element tableBody,
+                                      final Goal goal,
+                                      final @Nullable SubjectiveScore score) {
 
     final Map<String, Double> standardSubScores = null == score ? Collections.emptyMap() : score.getStandardSubScores();
     final Map<String, String> goalComments = null == score ? Collections.emptyMap() : score.getGoalComments();
@@ -686,6 +707,8 @@ public class SubjectivePdfWriter {
       goalScore = standardSubScores.get(goal.getName());
     }
 
+    final List<Element> cells = new LinkedList<>();
+    Element lastCell = null;
     for (final RubricRange rubricRange : sortedRubricRanges) {
       final boolean checked = rubricRange.getMin() <= goalScore
           && goalScore <= rubricRange.getMax();
@@ -715,9 +738,17 @@ public class SubjectivePdfWriter {
       rubricRow.appendChild(rangeCell);
       rangeCell.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
       rangeCell.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
-      FOPUtils.addBorders(rangeCell, 1);
+      FOPUtils.addLeftBorder(rangeCell, 1);
+      FOPUtils.addTopBorder(rangeCell, 1);
+
+      cells.add(rangeCell);
+      lastCell = rangeCell;
+    }
+    if (null != lastCell) {
+      FOPUtils.addRightBorder(lastCell, 1);
     }
 
+    return cells;
   }
 
   private Element createRubricRangeCell(final Document document,
@@ -772,6 +803,8 @@ public class SubjectivePdfWriter {
     headerRow.setAttribute("font-size", "10pt");
     headerRow.setAttribute("font-weight", "bold");
 
+    Element lastCell = null;
+    boolean first = true;
     for (final String title : masterRubricRangeTitles) {
       final Element titleCell;
       if (null == title) {
@@ -779,8 +812,18 @@ public class SubjectivePdfWriter {
       } else {
         titleCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, title);
       }
-      FOPUtils.addBorders(titleCell, 1);
       headerRow.appendChild(titleCell);
+      FOPUtils.addLeftBorder(titleCell, 1);
+      FOPUtils.addTopBorder(titleCell, 1);
+      if (first) {
+        titleCell.setAttribute(String.format("%s:border-before-start-radius", FOPUtils.XSL_FOX_PREFIX), CORNER_RADIUS);
+        first = false;
+      }
+      lastCell = titleCell;
+    }
+    if (null != lastCell) {
+      lastCell.setAttribute(String.format("%s:border-before-end-radius", FOPUtils.XSL_FOX_PREFIX), CORNER_RADIUS);
+      FOPUtils.addRightBorder(lastCell, 1);
     }
 
     return headerRow;
