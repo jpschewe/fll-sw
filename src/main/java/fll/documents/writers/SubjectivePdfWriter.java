@@ -278,19 +278,14 @@ public class SubjectivePdfWriter {
   }
 
   private static int[] getTableColumnInformation(final List<String> rubricTitles) {
-    final List<Integer> colWidthsList = new LinkedList<>();
-    colWidthsList.add(4); // goal group
-
-    rubricTitles.stream().forEach(title -> {
+    final int[] colWidths = rubricTitles.stream().mapToInt(title -> {
       if (title.length() <= 2) {
         // likely "ND", save some space
-        colWidthsList.add(4);
+        return 4;
       } else {
-        colWidthsList.add(23);
+        return 23;
       }
-    });
-
-    final int[] colWidths = colWidthsList.stream().mapToInt(Integer::intValue).toArray();
+    }).toArray();
 
     return colWidths;
   }
