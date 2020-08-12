@@ -579,6 +579,21 @@ public final class FOPUtils {
   }
 
   /**
+   * Set all borders to the same width.
+   * 
+   * @param element the element to add borders to
+   * @param width the width
+   * @see #addTopBorder(Element, double)
+   * @see #addBottomBorder(Element, double)
+   * @see #addLeftBorder(Element, double)
+   * @see #addRightBorder(Element, double)
+   */
+  public static void addBorders(final Element element,
+                                final double width) {
+    addBorders(element, width, width, width, width);
+  }
+
+  /**
    * Set all borders.
    * 
    * @param element element to add the borders to

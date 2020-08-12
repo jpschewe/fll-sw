@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.util.Base64;
 import java.util.Collection;
@@ -14,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,11 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
-import org.apache.fop.fonts.Font;
-import org.apache.fop.fonts.FontInfo;
-import org.apache.fop.fonts.FontMetrics;
-import org.apache.fop.fonts.FontTriplet;
-import org.apache.fop.fonts.base14.Helvetica;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -564,6 +560,7 @@ public class SubjectivePdfWriter {
                               final @Nullable SubjectiveScore score) {
     final Element sheet = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     sheet.setAttribute("page-break-after", "always");
+    sheet.setAttribute("font-size", String.format("%dpt", fontSize));
 
     final Element header = createHeader(document, teamNumber, teamName, awardGroup, scheduledTime);
     sheet.appendChild(header);
@@ -596,14 +593,20 @@ public class SubjectivePdfWriter {
 
     for (final GoalElement ge : scoreCategory.getGoalElements()) {
       if (ge.isGoalGroup()) {
-        final GoalGroup group = (GoalGroup) ge;
-        addRubricCategory(document, tableBody, fontSize, group, score);
+        final GoalGroup goalGroup = (GoalGroup) ge;
+        addRubricGoalGroup(document, tableBody, columnWidths.length, fontSize, goalGroup);
+
+        for (final AbstractGoal abstractGoal : goalGroup.getGoals()) {
+          if (!abstractGoal.isComputed()) {
+            final Goal goal = (Goal) abstractGoal;
+            addRubricGoal(document, tableBody, goal, score);
+          }
+        }
       } else if (ge.isGoal()) {
-        // goal outside of a group gets a group of it's own
         final AbstractGoal abstractGoal = (AbstractGoal) ge;
         if (!abstractGoal.isComputed()) {
           final Goal goal = (Goal) abstractGoal;
-          addRubricCategory(document, tableBody, fontSize, "", Collections.singletonList(goal), score);
+          addRubricGoal(document, tableBody, goal, score);
         }
       } else {
         throw new FLLInternalException("Unexpected goal element type: "
@@ -614,208 +617,106 @@ public class SubjectivePdfWriter {
     return rubric;
   }
 
+  private void addRubricGoalGroup(final Document document,
+                                  final Element tableBody,
+                                  final int numColumns,
+                                  final int fontSize,
+                                  final GoalGroup goalGroup) {
+
+    final String backgroundColor = String.format("#%02x%02x%02x", sheetColor.getRed(), sheetColor.getGreen(),
+                                                 sheetColor.getBlue());
+
+    final Element row = FOPUtils.createTableRow(document);
+    tableBody.appendChild(row);
+
+    // This is the title row with the background color
+    final Element cell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+    row.appendChild(cell);
+    FOPUtils.addTopBorder(cell, 1);
+
+    cell.setAttribute("background-color", backgroundColor);
+    cell.setAttribute("number-columns-spanned", String.valueOf(numColumns));
+    cell.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
+    cell.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
+    FOPUtils.addBorders(cell, 1);
+
+    final Element goalGroupTitleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    cell.appendChild(goalGroupTitleBlock);
+    goalGroupTitleBlock.setAttribute("font-weight", "bold");
+    goalGroupTitleBlock.setAttribute("font-size", String.valueOf(fontSize
+        + 2));
+    goalGroupTitleBlock.appendChild(document.createTextNode(goalGroup.getTitle()));
+
+    final String goalGroupDescription = goalGroup.getDescription();
+    if (!StringUtils.isBlank(goalGroupDescription)) {
+      final Element goalGroupDescriptionBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      cell.appendChild(goalGroupDescriptionBlock);
+      goalGroupDescriptionBlock.setAttribute("font-size", String.valueOf(fontSize));
+      goalGroupDescriptionBlock.appendChild(document.createTextNode(goalGroupDescription));
+    }
+
+  }
+
   private static final String RUBRIC_TABLE_PADDING = "2pt";
 
-  // ideally the width of the string should be used, but for some reason that is
-  // too small
-  private static final double STRING_WIDTH_MULTIPLIER = 1.25;
-
-  private Element createGoalGroupCell(final Document document,
-                                      final int fontSize,
-                                      final String goalGroupTitle) {
-    if (StringUtils.isBlank(goalGroupTitle)) {
-      return FOPUtils.createTableCell(document, null, String.valueOf(Utilities.NON_BREAKING_SPACE));
-    } else {
-      // Ideally we should not need to determine how big to make the block-container.
-      // Bug https://issues.apache.org/jira/browse/FOP-2946 is open for this
-      final Element goalGroupCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
-
-      final Element categoryCellContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
-      goalGroupCell.appendChild(categoryCellContainer);
-      categoryCellContainer.setAttribute("reference-orientation", "90");
-      final Pair<Integer, Integer> stringParameters = determineStringParameters(goalGroupTitle, "Helvetica", true,
-                                                                                false, fontSize);
-      LOGGER.trace("String '{}' width: {} height: {} font-size: {}", goalGroupTitle, stringParameters.getLeft(),
-                   stringParameters.getRight(), fontSize);
-
-      final int containerWidth = (int) Math.ceil(stringParameters.getLeft()
-          * STRING_WIDTH_MULTIPLIER);
-      categoryCellContainer.setAttribute("inline-progression-dimension", String.format("%dpx", containerWidth));
-
-      final Element categoryCellBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-      categoryCellContainer.appendChild(categoryCellBlock);
-      categoryCellBlock.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
-      categoryCellBlock.setAttribute("font-weight", "bold");
-
-      categoryCellBlock.appendChild(document.createTextNode(goalGroupTitle));
-
-      return goalGroupCell;
-    }
-  }
-
-  /**
-   * @param text the text to get the width and height of
-   * @param fontFamily the family of the font
-   * @param bold true if a bold font
-   * @param italic true if an italic font
-   * @param fontSize the size of the font in points
-   * @return (width, height) in pixels
-   */
-  public static Pair<Integer, Integer> determineStringParameters(final String text,
-                                                                 final String fontFamily,
-                                                                 final boolean bold,
-                                                                 final boolean italic,
-                                                                 final int fontSize) {
-    final FontTriplet triplet = new FontTriplet(fontFamily, //
-                                                italic ? Font.STYLE_ITALIC : Font.STYLE_NORMAL, //
-                                                bold ? Font.WEIGHT_NORMAL : Font.WEIGHT_BOLD, //
-                                                Font.PRIORITY_DEFAULT);
-    final FontInfo fontInfo = new FontInfo();
-
-    final String key = fontInfo.getInternalFontKey(triplet);
-
-    final FontMetrics metrics = new Helvetica();
-
-    final Font font = new Font(key, triplet, metrics, fontSize);
-
-    final int textWidth = font.getWordWidth(text);
-    final int textHeight = font.getXHeight();
-
-    return Pair.of(textWidth, textHeight);
-  }
-
-  private void addRubricCategory(final Document document,
-                                 final Element tableBody,
-                                 final int fontSize,
-                                 final GoalGroup goalGroup,
-                                 final @Nullable SubjectiveScore score) {
-    final List<Goal> goals = goalGroup.getGoals().stream().filter(Predicate.not(AbstractGoal::isComputed))
-                                      .map(Goal.class::cast).collect(Collectors.toList());
-    final String goalGroupTitle = goalGroup.getTitle();
-    addRubricCategory(document, tableBody, fontSize, goalGroupTitle, goals, score);
-  }
-
-  private void addRubricCategory(final Document document,
-                                 final Element tableBody,
-                                 final int fontSize,
-                                 final String goalGroupTitle,
-                                 final List<Goal> goals,
-                                 final @Nullable SubjectiveScore score) {
+  private void addRubricGoal(final Document document,
+                             final Element tableBody,
+                             final Goal goal,
+                             final @Nullable SubjectiveScore score) {
 
     final Map<String, Double> standardSubScores = null == score ? Collections.emptyMap() : score.getStandardSubScores();
     final Map<String, String> goalComments = null == score ? Collections.emptyMap() : score.getGoalComments();
 
-    // This is the 90 degree turned title for the left side of the table
-    final Element goalGroupCell = createGoalGroupCell(document, fontSize, goalGroupTitle);
-    FOPUtils.addBottomBorder(goalGroupCell, 1);
-    FOPUtils.addRightBorder(goalGroupCell, 1);
-    // This is the total number of columns for this table. Each subsection of
-    // the table is 2 rows (colored title row, description row)
-    goalGroupCell.setAttribute("number-rows-spanned", String.valueOf(goals.size()
-        * 2));
+    final List<RubricRange> sortedRubricRanges = goal.getRubric();
 
-    boolean firstRow = true;
-    for (final Goal goal : goals) {
-      final Element instructionsRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
-      tableBody.appendChild(instructionsRow);
+    // These are the cells with the descriptions for each level of
+    // accomplishment
+    final Element rubricRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+    tableBody.appendChild(rubricRow);
 
-      final List<RubricRange> sortedRubricRanges = goal.getRubric();
+    if (goal.isEnumerated()) {
+      throw new IllegalArgumentException("Enumerated goals aren't supported");
+    }
 
-      if (firstRow) {
-        // need to put the goal group name in the first row
-        instructionsRow.appendChild(goalGroupCell);
-        firstRow = false;
-      }
+    final double goalScore;
+    if (null == score) {
+      // will compare to false for all ranges
+      goalScore = Double.NaN;
+    } else {
+      goalScore = standardSubScores.get(goal.getName());
+    }
 
-      final String backgroundColor = String.format("#%02x%02x%02x", sheetColor.getRed(), sheetColor.getGreen(),
-                                                   sheetColor.getBlue());
+    for (final RubricRange rubricRange : sortedRubricRanges) {
+      final boolean checked = rubricRange.getMin() <= goalScore
+          && goalScore <= rubricRange.getMax();
 
-      // This is the title row with the background color
-      final Element topicCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
-      instructionsRow.appendChild(topicCell);
-      FOPUtils.addBottomBorder(topicCell, 1);
-      topicCell.setAttribute("background-color", backgroundColor);
-      topicCell.setAttribute("number-columns-spanned", "2");
-      topicCell.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
-      topicCell.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
-
-      final Element topicBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-      topicCell.appendChild(topicBlock);
-      topicBlock.setAttribute("font-weight", "bold");
-
-      final Element topicArea = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
-      topicBlock.appendChild(topicArea);
-      topicArea.appendChild(document.createTextNode(goal.getTitle()));
-
-      if (goal.isRequired()) {
-        final Element required = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
-        topicBlock.appendChild(required);
-        required.setAttribute("color", "red");
-        required.appendChild(document.createTextNode(" *"));
-      }
-
-      final Element topicInstructions = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
-                                                                 goal.getDescription());
-      instructionsRow.appendChild(topicInstructions);
-      topicInstructions.setAttribute("background-color", backgroundColor);
-      topicInstructions.setAttribute("number-columns-spanned", String.valueOf(sortedRubricRanges.size()
-          - 2));
-      topicInstructions.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
-      topicInstructions.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
-      FOPUtils.addBottomBorder(topicInstructions, 1);
-      FOPUtils.addRightBorder(topicInstructions, 1);
-
-      // These are the cells with the descriptions for each level of
-      // accomplishment
-      final Element rubricRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
-      tableBody.appendChild(rubricRow);
-
-      if (goal.isEnumerated()) {
-        throw new IllegalArgumentException("Enumerated goals aren't supported");
-      }
-
-      final double goalScore;
-      if (null == score) {
-        // will compare to false for all ranges
-        goalScore = Double.NaN;
-      } else {
-        goalScore = standardSubScores.get(goal.getName());
-      }
-
-      for (final RubricRange rubricRange : sortedRubricRanges) {
-        final boolean checked = rubricRange.getMin() <= goalScore
-            && goalScore <= rubricRange.getMax();
-
-        final String goalComment;
-        if (null != score
-            && sortedRubricRanges.get(sortedRubricRanges.size()
-                - 1).equals(rubricRange)) {
-          // last range is where the goal comment is output
-          final String rawComment = goalComments.get(goal.getName());
-          if (null != rawComment) {
-            final String trimmed = rawComment.trim();
-            if (trimmed.isBlank()) {
-              goalComment = null;
-            } else {
-              goalComment = trimmed;
-            }
-          } else {
+      final String goalComment;
+      if (null != score
+          && sortedRubricRanges.get(sortedRubricRanges.size()
+              - 1).equals(rubricRange)) {
+        // last range is where the goal comment is output
+        final String rawComment = goalComments.get(goal.getName());
+        if (null != rawComment) {
+          final String trimmed = rawComment.trim();
+          if (trimmed.isBlank()) {
             goalComment = null;
+          } else {
+            goalComment = trimmed;
           }
         } else {
           goalComment = null;
         }
-
-        final Element rangeCell = createRubricRangeCell(document, rubricRange, checked, goalComment);
-
-        rubricRow.appendChild(rangeCell);
-        rangeCell.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
-        rangeCell.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
-        FOPUtils.addBottomBorder(rangeCell, 1);
-        FOPUtils.addRightBorder(rangeCell, 1);
+      } else {
+        goalComment = null;
       }
 
-    } // foreach row
+      final Element rangeCell = createRubricRangeCell(document, rubricRange, checked, goalComment);
+
+      rubricRow.appendChild(rangeCell);
+      rangeCell.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
+      rangeCell.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
+      FOPUtils.addBorders(rangeCell, 1);
+    }
 
   }
 
@@ -871,11 +772,6 @@ public class SubjectivePdfWriter {
     headerRow.setAttribute("font-size", "10pt");
     headerRow.setAttribute("font-weight", "bold");
 
-    // goal group
-    final Element goalGroup = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "");
-    headerRow.appendChild(goalGroup);
-    FOPUtils.addBottomBorder(goalGroup, 1);
-
     for (final String title : masterRubricRangeTitles) {
       final Element titleCell;
       if (null == title) {
@@ -883,7 +779,7 @@ public class SubjectivePdfWriter {
       } else {
         titleCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, title);
       }
-      FOPUtils.addBottomBorder(titleCell, 1);
+      FOPUtils.addBorders(titleCell, 1);
       headerRow.appendChild(titleCell);
     }
 
