@@ -21,9 +21,9 @@ var _extraAwardWinners = [];
 // list of AwardWinnerData
 var _extraAwardWinnerData = [];
 
-// list of AwardWinner
+// list of OverallAwardWinner
 var _overallAwardWinners = [];
-// list of AwardWinnerData
+// list of OverallAwardWinnerData
 var _overallAwardWinnerData = [];
 
 // name -> ScoreCategory
