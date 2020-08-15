@@ -28,19 +28,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
-import fll.db.AwardWinner;
+import fll.db.OverallAwardWinner;
 import fll.db.Queries;
 import fll.db.AwardWinners;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 
 /**
- * Get and set extra subjective award winners.
- * The gets/sets a {@link Collection} of {@link AwardWinner} objects.
+ * Get and set overall non-numeric award winners.
+ * The gets/sets a {@link Collection} of {@link OverallAwardWinner} objects.
  * Post result is of type {@link PostResult}.
  */
-@WebServlet("/api/SubjectiveExtraAwardWinners")
-public class SubjectiveExtraAwardWinnersServlet extends HttpServlet {
+@WebServlet("/api/NonNumericOverallAwardWinners")
+public class NonNumericOverallAwardWinnersServlet extends HttpServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -52,7 +52,6 @@ public class SubjectiveExtraAwardWinnersServlet extends HttpServlet {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
       response.reset();
@@ -60,8 +59,7 @@ public class SubjectiveExtraAwardWinnersServlet extends HttpServlet {
       final PrintWriter writer = response.getWriter();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
-      final Collection<AwardWinner> winners = AwardWinners.getExtraAwardWinners(connection,
-                                                                                          currentTournament);
+      final Collection<OverallAwardWinner> winners = AwardWinners.getOverallAwardWinners(connection, currentTournament);
 
       jsonMapper.writeValue(writer, winners);
     } catch (final SQLException e) {
@@ -95,16 +93,19 @@ public class SubjectiveExtraAwardWinnersServlet extends HttpServlet {
 
       final int currentTournament = Queries.getCurrentTournament(connection);
 
-      final Collection<AwardWinner> winners = jsonMapper.readValue(reader,
-                                                                   AwardWinner.AwardWinnerCollectionTypeInformation.INSTANCE);
+      final Collection<OverallAwardWinner> winners = jsonMapper.readValue(reader,
+                                                                          OverallAwardWinner.OverallAwardWinnerCollectionTypeInformation.INSTANCE);
 
-      AwardWinners.storeExtraAwardWinners(connection, currentTournament, winners);
+      AwardWinners.storeOverallAwardWinners(connection, currentTournament, winners);
+
       final PostResult result = new PostResult(true, Optional.empty());
       jsonMapper.writeValue(writer, result);
 
     } catch (final SQLException e) {
       final PostResult result = new PostResult(false, Optional.ofNullable(e.getMessage()));
       jsonMapper.writeValue(writer, result);
+
+      throw new FLLRuntimeException(e);
     } catch (final JsonProcessingException e) {
       final PostResult result = new PostResult(false, Optional.ofNullable(e.getMessage()));
       jsonMapper.writeValue(writer, result);
