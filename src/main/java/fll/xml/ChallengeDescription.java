@@ -24,12 +24,24 @@ import net.mtu.eggplant.xml.XMLUtils;
  */
 public class ChallengeDescription implements Serializable {
 
+  /**
+   * XML attribute for {@link #getTitle()}.
+   */
   public static final String TITLE_ATTRIBUTE = "title";
 
+  /**
+   * XML attribute for {@link #getRevision()}.
+   */
   public static final String REVISION_ATTRIBUTE = "revision";
 
+  /**
+   * XML attribute for {@link #getCopyright()}.
+   */
   public static final String COPYRIGHT_ATTRIBUTE = "copyright";
 
+  /**
+   * XML attribute for the schema version.
+   */
   public static final String SCHEMA_VERSION_ATTRIBUTE = "schemaVersion";
 
   /**
@@ -261,11 +273,10 @@ public class ChallengeDescription implements Serializable {
   }
 
   /**
-   *
    * @param str remove carriage returns and multiple spaces
    * @return string without the line endings and multiple spaces in a row
    */
-  /*package*/ static String removeExtraWhitespace(final String str) {
+  /* package */ static String removeExtraWhitespace(final String str) {
     if (null == str) {
       return str;
     }
