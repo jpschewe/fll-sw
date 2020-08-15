@@ -25,7 +25,7 @@ public class SubjectiveScoreCategory extends ScoreCategory {
 
   private static final String NAME_ATTRIBUTE = "name";
 
-  private static final String TITLE_ATTRIBUTE = "title";
+  private static final String TITLE_ATTRIBUTE = ChallengeDescription.TITLE_ATTRIBUTE;
 
   /**
    * The XML attribute to write the description to.
