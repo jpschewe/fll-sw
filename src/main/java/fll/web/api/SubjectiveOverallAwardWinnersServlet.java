@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fll.Utilities;
 import fll.db.OverallAwardWinner;
 import fll.db.Queries;
-import fll.db.SubjectiveAwardWinners;
+import fll.db.AwardWinners;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 
@@ -59,7 +59,7 @@ public class SubjectiveOverallAwardWinnersServlet extends HttpServlet {
       final PrintWriter writer = response.getWriter();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
-      final Collection<OverallAwardWinner> winners = SubjectiveAwardWinners.getOverallAwardWinners(connection,
+      final Collection<OverallAwardWinner> winners = AwardWinners.getOverallAwardWinners(connection,
                                                                                                    currentTournament);
 
       jsonMapper.writeValue(writer, winners);
@@ -97,7 +97,7 @@ public class SubjectiveOverallAwardWinnersServlet extends HttpServlet {
       final Collection<OverallAwardWinner> winners = jsonMapper.readValue(reader,
                                                                           OverallAwardWinner.OverallAwardWinnerCollectionTypeInformation.INSTANCE);
 
-      SubjectiveAwardWinners.storeOverallAwardWinners(connection, currentTournament, winners);
+      AwardWinners.storeOverallAwardWinners(connection, currentTournament, winners);
 
       final PostResult result = new PostResult(true, Optional.empty());
       jsonMapper.writeValue(writer, result);
