@@ -64,13 +64,17 @@
 
     <xsd:element name="nonNumericCategory">
         <xsd:complexType>
+            <xsd:attribute name="name" type="databaseName"
+                use="required" />
             <xsd:attribute name="title" type="xsd:string" />
             <xsd:attribute name="perAwardGroup"
                 type="xsd:boolean">
                 <xsd:annotation>
                     <xsd:documentation>
-                        If true the the winners of the category are per award group. If
-                        false the winners are per tournament.
+                        If true the the winners of the
+                        category are per award group. If
+                        false the
+                        winners are per tournament.
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:attribute>

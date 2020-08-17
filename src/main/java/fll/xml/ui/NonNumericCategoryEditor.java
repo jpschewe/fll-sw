@@ -30,6 +30,8 @@ import fll.xml.NonNumericCategory;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  private final JFormattedTextField nameEditor;
+
   private final JFormattedTextField titleEditor;
 
   private final JCheckBox perAwardGroupEditor;
@@ -49,6 +51,29 @@ import fll.xml.NonNumericCategory;
     gbc.anchor = GridBagConstraints.FIRST_LINE_START;
     validPanel = new ValidityPanel();
     add(validPanel, gbc);
+
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    add(new JLabel("Name: "), gbc);
+
+    nameEditor = FormatterUtils.createDatabaseNameField();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    add(nameEditor, gbc);
+
+    nameEditor.setColumns(40);
+    nameEditor.setMaximumSize(nameEditor.getPreferredSize());
+
+    nameEditor.addPropertyChangeListener("value", e -> {
+      if (null != this.category) {
+        final String newName = nameEditor.getText();
+        this.category.setName(newName);
+      }
+    });
 
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
@@ -112,6 +137,12 @@ import fll.xml.NonNumericCategory;
    */
   public void commitChanges() {
     try {
+      nameEditor.commitEdit();
+    } catch (final ParseException e) {
+      LOGGER.debug("Got parse exception committing changes to name, assuming bad value and ignoring", e);
+    }
+
+    try {
       titleEditor.commitEdit();
     } catch (final ParseException e) {
       LOGGER.debug("Got parse exception committing changes to title, assuming bad value and ignoring", e);
@@ -121,6 +152,10 @@ import fll.xml.NonNumericCategory;
   @Override
   public boolean checkValidity(final Collection<String> messagesToDisplay) {
     final List<String> messages = new LinkedList<>();
+
+    if (StringUtils.isBlank(nameEditor.getText())) {
+      messages.add("The category must have a name");
+    }
 
     if (StringUtils.isBlank(titleEditor.getText())) {
       messages.add("The non-numeric category must have a title");
