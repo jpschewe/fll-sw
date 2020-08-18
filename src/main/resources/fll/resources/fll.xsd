@@ -64,6 +64,11 @@
 
     <xsd:element name="nonNumericCategory">
         <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="description"
+                    minOccurs="0" maxOccurs="1" type="xsd:string" />
+            </xsd:sequence>
+
             <xsd:attribute name="name" type="databaseName"
                 use="required" />
             <xsd:attribute name="title" type="xsd:string" />

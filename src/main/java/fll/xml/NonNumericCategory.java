@@ -93,6 +93,22 @@ public class NonNumericCategory {
     perAwardGroup = v;
   }
 
+  private String description;
+
+  /**
+   * @return description of the category
+   */
+  public String getDescription() {
+    return description;
+  }
+
+  /**
+   * @param v see {@link #getDescription()}
+   */
+  public void setDescription(final String v) {
+    description = ChallengeDescription.removeExtraWhitespace(v);
+  }
+
   /**
    * @param doc the XML document used to create elements
    * @return an XML element representing the current state of this object
@@ -102,6 +118,12 @@ public class NonNumericCategory {
     ele.setAttribute(PER_AWARD_GROUP_ATTRIBUTE, Boolean.toString(perAwardGroup));
     ele.setAttribute(ChallengeDescription.TITLE_ATTRIBUTE, title);
     ele.setAttribute(SubjectiveScoreCategory.NAME_ATTRIBUTE, name);
+
+    if (null != description) {
+      final Element descriptionEle = doc.createElement(RubricRange.DESCRIPTION_TAG_NAME);
+      descriptionEle.appendChild(doc.createTextNode(description));
+      ele.appendChild(descriptionEle);
+    }
 
     return ele;
   }

@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import org.apache.commons.lang3.StringUtils;
 
 import fll.util.FormatterUtils;
+import fll.util.TextAreaEditor;
 import fll.xml.NonNumericCategory;
 
 /**
@@ -35,6 +36,8 @@ import fll.xml.NonNumericCategory;
   private final JFormattedTextField titleEditor;
 
   private final JCheckBox perAwardGroupEditor;
+
+  private final TextAreaEditor description;
 
   private final ValidityPanel validPanel;
 
@@ -102,6 +105,20 @@ import fll.xml.NonNumericCategory;
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    add(new JLabel("Description: "), gbc);
+
+    this.description = new TextAreaEditor(2, 40);
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    add(description, gbc);
+    description.setText(this.category.getDescription());
+
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
     add(new JLabel("Per award group: "), gbc);
 
     perAwardGroupEditor = new JCheckBox();
@@ -116,6 +133,7 @@ import fll.xml.NonNumericCategory;
       this.category.setPerAwardGroup(perAwardGroupEditor.isSelected());
     });
     perAwardGroupEditor.setToolTipText("If checked, winners of this non-numeric category are per award group, otherwise they are for the whole tournament");
+
   }
 
   protected void fireTitleChange(final String oldTitle,
@@ -147,6 +165,9 @@ import fll.xml.NonNumericCategory;
     } catch (final ParseException e) {
       LOGGER.debug("Got parse exception committing changes to title, assuming bad value and ignoring", e);
     }
+
+    category.setDescription(description.getText());
+
   }
 
   @Override
