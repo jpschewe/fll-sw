@@ -344,13 +344,9 @@ public class ChallengeDescription implements Serializable {
   /* package */ static String removeExtraWhitespace(final String str) {
     if (null == str) {
       return str;
+    } else {
+      return str.replaceAll("\\s+", " ");
     }
-
-    String result = str.trim();
-    result = result.replace('\r', ' ');
-    result = result.replace('\n', ' ');
-    result = result.replaceAll("\\s+", " ");
-    return result;
   }
 
 }
