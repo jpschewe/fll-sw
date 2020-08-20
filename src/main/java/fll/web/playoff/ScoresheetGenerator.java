@@ -769,8 +769,7 @@ public class ScoresheetGenerator {
       final List<EnumeratedValue> values = goal.getSortedValues();
       for (final EnumeratedValue value : values) {
         if (!first) {
-          choices.append(" /"
-              + Utilities.NON_BREAKING_SPACE);
+          choices.append(" / ");
         } else {
           first = false;
         }
