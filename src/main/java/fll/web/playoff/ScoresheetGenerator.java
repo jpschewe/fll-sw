@@ -621,7 +621,7 @@ public class ScoresheetGenerator {
       if (ge.isGoal()) {
         final AbstractGoal goal = (AbstractGoal) ge;
         if (!goal.isComputed()) {
-          final Element row = outputGoal(document, goal, "");
+          final Element row = outputGoal(document, goal, "", null);
           tableBody.appendChild(row);
 
           if (firstRow) {
@@ -631,9 +631,7 @@ public class ScoresheetGenerator {
         }
       } else if (ge.isGoalGroup()) {
         final GoalGroup group = (GoalGroup) ge;
-        final Element row = outputGoalGroup(document, group);
-        tableBody.appendChild(row);
-        FOPUtils.addTopBorder(row, 1);
+        outputGoalGroup(document, group, tableBody);
 
         firstRow = false;
       } else {
@@ -645,13 +643,15 @@ public class ScoresheetGenerator {
     return goalsTable;
   }
 
-  private Element outputGoalGroup(final Document document,
-                                  final GoalGroup group) {
+  private void outputGoalGroup(final Document document,
+                               final GoalGroup group,
+                               final Element tableBody) {
     final String goalGroupTitle = group.getTitle();
     final List<AbstractGoal> nonComputedGoals = group.getGoals().stream()
                                                      .filter(Predicate.not(AbstractGoal::isComputed))
                                                      .collect(Collectors.toList());
     final Element row = FOPUtils.createTableRow(document);
+    FOPUtils.addTopBorder(row, 1);
 
     if (!StringUtils.isBlank(goalGroupTitle)) {
       final int categoryRowSpan = nonComputedGoals.size();
@@ -704,17 +704,39 @@ public class ScoresheetGenerator {
       tspan.appendChild(document.createTextNode(goalGroupTitle));
     } // non-blank goal group title
 
+    boolean firstGoal = true;
     for (final AbstractGoal goal : nonComputedGoals) {
-      outputGoal(document, goal, goalGroupTitle);
+      final Element rowToAppendTo;
+      if (firstGoal) {
+        rowToAppendTo = row;
+        firstGoal = false;
+      } else {
+        rowToAppendTo = null;
+      }
+      final Element goalRow = outputGoal(document, goal, goalGroupTitle, rowToAppendTo);
+      tableBody.appendChild(goalRow);
     }
-
-    return row;
   }
 
+  /**
+   * @param document used to create elements
+   * @param goal the goal to output
+   * @param goalGroupTitle the goal group that this goal is a member of, if blank
+   *          or null then the goal is not in a goal group
+   * @param rowToAppendTo if not null, then use this row rather than creating a
+   *          new one
+   * @return the row to add to the table body
+   */
   private Element outputGoal(final Document document,
                              final AbstractGoal goal,
-                             final String goalGroupTitle) {
-    final Element row = FOPUtils.createTableRow(document);
+                             final String goalGroupTitle,
+                             final Element rowToAppendTo) {
+    final Element row;
+    if (null == rowToAppendTo) {
+      row = FOPUtils.createTableRow(document);
+    } else {
+      row = rowToAppendTo;
+    }
 
     // This is the text for the left hand "label" cell
     final Element goalLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, goal.getTitle());
