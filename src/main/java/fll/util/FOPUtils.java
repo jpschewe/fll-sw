@@ -398,7 +398,7 @@ public final class FOPUtils {
   public static final String BLOCK_TAG = "block";
 
   /**
-   * Create a basic table cell.
+   * Create a basic table cell that wraps it's text.
    * Borders are not set.
    * 
    * @param document used to create elements
