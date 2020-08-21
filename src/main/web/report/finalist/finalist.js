@@ -1231,37 +1231,6 @@
 
     },
 
-    handleCacheEvent : function(e) {
-      $.finalist.log("cache event: " + e.type);
-      var appCache = window.applicationCache;
-      switch (appCache.status) {
-      case appCache.UNCACHED: // UNCACHED == 0
-        $.finalist.log('cache state:UNCACHED');
-        break;
-      case appCache.IDLE: // IDLE == 1
-        $.finalist.log('cache state:IDLE');
-        $("#cache-ready").show();
-        break;
-      case appCache.CHECKING: // CHECKING == 2
-        $.finalist.log('cache state:CHECKING');
-        break;
-      case appCache.DOWNLOADING: // DOWNLOADING == 3
-        $.finalist.log('cache state:DOWNLOADING');
-        break;
-      case appCache.UPDATEREADY: // UPDATEREADY == 4
-        $.finalist.log('cache state:UPDATEREADY');
-        $("#cache-ready").show();
-        break;
-      case appCache.OBSOLETE: // OBSOLETE == 5
-        $.finalist.log('cache state:OBSOLETE');
-        break;
-      default:
-        return 'cache state:UKNOWN CACHE STATUS';
-        break;
-      }
-      ;
-    },
-
     log : function(str) {
       if (typeof (console) != 'undefined') {
         console.log(str);
