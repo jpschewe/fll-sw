@@ -723,7 +723,7 @@
     },
 
     /**
-     * Remove the speciifed category.
+     * Remove the specified category.
      * 
      * @param category
      *          a category object
