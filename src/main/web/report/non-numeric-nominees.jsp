@@ -31,6 +31,8 @@
 	
 <%FinalistLoad.outputTeamVariables(out, application);%>
 	
+<%FinalistLoad.outputCategories(out, application);%>
+
 <%FinalistLoad.outputNonNumericNominees(out, application);%>
 	$.finalist.setTournament(_loadingTournament);
 

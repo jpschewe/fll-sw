@@ -33,10 +33,6 @@ $(document).ready(
 
       updateTeams();
 
-      $("#add-category").click(function() {
-        addCategory();
-      });
-
       $.finalist.displayNavbar();
     }); // end ready function
 
@@ -121,24 +117,6 @@ function addCategoryElement(category) {
   addButton.click(function() {
     addTeam(category);
   });
-}
-
-/**
- * Add a new empty category to the page.
- * 
- * @return the category index
- */
-function addCategory() {
-  var category = $.finalist.addCategory("", false);
-  if (null == category) {
-    return;
-  }
-  $.finalist.setCategoryName(category, "Category " + category.catId);
-
-  addCategoryElement(category);
-
-  addTeam(category);
-  return category;
 }
 
 function teamNumId(category, teamIdx) {
