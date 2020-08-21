@@ -27,6 +27,7 @@ import fll.web.WebUtils;
 import fll.web.playoff.Playoff;
 import fll.web.report.FinalComputedScores;
 import fll.xml.ChallengeDescription;
+import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
 
@@ -170,6 +171,19 @@ public final class FinalistLoad {
       output.format("  %s = $.finalist.addCategory(%s, true);%n", catVarName, quotedCatTitle);
       output.format("}%n");
     }
+    
+    for (final NonNumericCategory subjectiveElement : description.getNonNumericCategories()) {
+      final String categoryName = subjectiveElement.getName();
+      final String categoryTitle = subjectiveElement.getTitle();
+      final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);
+
+      final String catVarName = getCategoryVarName(categoryName);
+      output.format("var %s = $.finalist.getCategoryByName(%s);%n", catVarName, quotedCatTitle);
+      output.format("if (null == %s) {%n", catVarName);
+      output.format("  %s = $.finalist.addCategory(%s, false);%n", catVarName, quotedCatTitle);
+      output.format("}%n");
+    }
+    
   }
 
   /**
