@@ -682,7 +682,8 @@
       var prevScores = {};
       $.finalist.sortTeamsByCategory(teams, currentCategory);
       $.each(teams, function(i, team) {
-        if ($.finalist.isTeamInDivision(team, currentDivision)) {
+        if (currentCategory.overall
+            || $.finalist.isTeamInDivision(team, currentDivision)) {
           if (!checkedEnoughTeams) {
             var group = team.judgingGroup;
             prevScore = prevScores[group];
@@ -892,7 +893,7 @@
           // clear the schedule for the current division
           _schedules[$.finalist.getCurrentDivision()] = null;
         }
-        
+
         category.teams.push(teamNum);
         _save();
       }
@@ -938,7 +939,7 @@
       var toRemove = [];
       $.each(category.teams, function(index, teamNum) {
         var team = $.finalist.lookupTeam(teamNum);
-        if ($.finalist.isTeamInDivision(team, division)) {
+        if (category.overall || $.finalist.isTeamInDivision(team, division)) {
           toRemove.push(teamNum);
         }
       });
@@ -1012,7 +1013,7 @@
       $.each($.finalist.getAllScheduledCategories(), function(i, category) {
         $.each(category.teams, function(j, teamNum) {
           var team = $.finalist.lookupTeam(teamNum);
-          if ($.finalist.isTeamInDivision(team, division)) {
+          if (category.overall || $.finalist.isTeamInDivision(team, division)) {
             if (null == finalistsCount[teamNum]) {
               finalistsCount[teamNum] = [];
             }

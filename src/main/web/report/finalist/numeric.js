@@ -32,7 +32,8 @@ function initializeFinalistCounts(teams) {
 
 function createTeamTable(teams, currentDivision, currentCategory) {
   $.each(teams, function(i, team) {
-    if ($.finalist.isTeamInDivision(team, currentDivision)) {
+    if (currentCategory.overall
+        || $.finalist.isTeamInDivision(team, currentDivision)) {
       var row = $("<tr></tr>");
       $("#data").append(row);
 
