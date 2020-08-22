@@ -201,29 +201,36 @@ public final class FinalistLoad {
   public static void outputNonNumericNominees(final Writer writer,
                                               final ServletContext application)
       throws SQLException {
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
+    final List<NonNumericCategory> challengeNonNumericCategories = description.getNonNumericCategories();
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
       final int tournament = Queries.getCurrentTournament(connection);
       final Formatter output = new Formatter(writer);
 
-      final int varIndex = 0;
       for (final String category : NonNumericNominees.getCategories(connection, tournament)) {
-        final String categoryVar = "categoryVar"
-            + varIndex;
+        output.format("{%n"); // scope to simplify variable names
+        final String categoryVar = "category";
         final String quotedCatTitle = WebUtils.quoteJavascriptString(category);
 
         output.format("var %s = $.finalist.getCategoryByName(%s);%n", categoryVar, quotedCatTitle);
-        output.format("if (null == %s) {%n", categoryVar);
-        // 8/22/2020 JPS - this isn't needed other than support for old databases where
-        // the non-numeric categories are not in the challenge description. All of these
-        // categories are per award group.
-        output.format("  %s = $.finalist.addCategory(%s, false, false);%n", categoryVar, quotedCatTitle);
-        output.format("}%n");
+
+        if (!challengeNonNumericCategories.stream().anyMatch(c -> c.getTitle().equals(category))) {
+          // 8/22/2020 JPS - this isn't needed other than support for old databases where
+          // the non-numeric categories are not in the challenge description. All of these
+          // categories are per award group.
+
+          output.format("if (null == %s) {%n", categoryVar);
+          output.format("  %s = $.finalist.addCategory(%s, false, false);%n", categoryVar, quotedCatTitle);
+          output.format("}%n");
+        }
 
         for (final int teamNumber : NonNumericNominees.getNominees(connection, tournament, category)) {
           output.format("$.finalist.addTeamToCategory(%s, %d);%n", categoryVar, teamNumber);
         }
+        output.format("}%n");
       }
     }
   }
