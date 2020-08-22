@@ -38,20 +38,24 @@ $(document).ready(
 
 function updateTeams() {
   $("#categories").empty();
+  $("#overall-categories").empty();
+
   $.each($.finalist.getNonNumericCategories(), function(i, category) {
     addCategoryElement(category);
-    addedCategory = true;
 
     var addedTeam = false;
-    $.each(category.teams, function(j, teamNum) {
-      var team = $.finalist.lookupTeam(teamNum);
-      if ($.finalist.isTeamInDivision(team, $.finalist.getCurrentDivision())) {
-        addedTeam = true;
-        var teamIdx = addTeam(category);
-        populateTeamInformation(category, teamIdx, team);
-      }
+    $.each(category.teams,
+        function(j, teamNum) {
+          var team = $.finalist.lookupTeam(teamNum);
+          if (category.overall
+              || $.finalist.isTeamInDivision(team, $.finalist
+                  .getCurrentDivision())) {
+            addedTeam = true;
+            var teamIdx = addTeam(category);
+            populateTeamInformation(category, teamIdx, team);
+          }
 
-    });
+        });
     if (!addedTeam) {
       addTeam(category);
     }
@@ -64,7 +68,11 @@ function checkCategoryEmpty(category) {
 
 function addCategoryElement(category) {
   var catEle = $("<li></li>");
-  $("#categories").append(catEle);
+  if (category.overall) {
+    $("#overall-categories").append(catEle);
+  } else {
+    $("#categories").append(catEle);
+  }
 
   var scheduledCheckbox = $("<input type='checkbox' id='scheduled_"
       + category.catId + "'/>");
@@ -151,7 +159,9 @@ function addTeam(category) {
       $.finalist.removeTeamFromCategory(category, prevTeam);
       $("#" + teamNameId(category.catId, teamIdx)).val("");
       $("#" + teamOrgId(category.catId, teamIdx)).val("");
-    } else {
+    } else if (teamNum != prevTeam) {
+      $.finalist.removeTeamFromCategory(category, prevTeam);
+
       var team = $.finalist.lookupTeam(teamNum);
       if (typeof (team) == 'undefined') {
         alert("Team number " + teamNum + " does not exist");

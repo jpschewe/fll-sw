@@ -160,29 +160,30 @@ public final class FinalistLoad {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final Formatter output = new Formatter(writer);
 
-    for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
-      final String categoryName = subjectiveElement.getName();
-      final String categoryTitle = subjectiveElement.getTitle();
+    for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+      final String categoryName = category.getName();
+      final String categoryTitle = category.getTitle();
       final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);
 
       final String catVarName = getCategoryVarName(categoryName);
       output.format("var %s = $.finalist.getCategoryByName(%s);%n", catVarName, quotedCatTitle);
       output.format("if (null == %s) {%n", catVarName);
-      output.format("  %s = $.finalist.addCategory(%s, true);%n", catVarName, quotedCatTitle);
+      output.format("  %s = $.finalist.addCategory(%s, true, false);%n", catVarName, quotedCatTitle);
       output.format("}%n");
       // all subjective categories are scheduled
       output.format("$.finalist.setCategoryScheduled(%s, true);%n", catVarName);
     }
 
-    for (final NonNumericCategory subjectiveElement : description.getNonNumericCategories()) {
-      final String categoryName = subjectiveElement.getName();
-      final String categoryTitle = subjectiveElement.getTitle();
+    for (final NonNumericCategory category : description.getNonNumericCategories()) {
+      final String categoryName = category.getName();
+      final String categoryTitle = category.getTitle();
       final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);
 
       final String catVarName = getCategoryVarName(categoryName);
       output.format("var %s = $.finalist.getCategoryByName(%s);%n", catVarName, quotedCatTitle);
       output.format("if (null == %s) {%n", catVarName);
-      output.format("  %s = $.finalist.addCategory(%s, false);%n", catVarName, quotedCatTitle);
+      output.format("  %s = $.finalist.addCategory(%s, false, %b);%n", catVarName, quotedCatTitle,
+                    !category.getPerAwardGroup());
       output.format("}%n");
     }
 
@@ -210,10 +211,14 @@ public final class FinalistLoad {
       for (final String category : NonNumericNominees.getCategories(connection, tournament)) {
         final String categoryVar = "categoryVar"
             + varIndex;
+        final String quotedCatTitle = WebUtils.quoteJavascriptString(category);
 
-        output.format("var %s = $.finalist.getCategoryByName(\"%s\");%n", categoryVar, category);
+        output.format("var %s = $.finalist.getCategoryByName(%s);%n", categoryVar, quotedCatTitle);
         output.format("if (null == %s) {%n", categoryVar);
-        output.format("  %s = $.finalist.addCategory(\"%s\", false);%n", categoryVar, category);
+        // 8/22/2020 JPS - this isn't needed other than support for old databases where
+        // the non-numeric categories are not in the challenge description. All of these
+        // categories are per award group.
+        output.format("  %s = $.finalist.addCategory(%s, false, false);%n", categoryVar, quotedCatTitle);
         output.format("}%n");
 
         for (final int teamNumber : NonNumericNominees.getNominees(connection, tournament, category)) {
@@ -309,19 +314,6 @@ public final class FinalistLoad {
         output.format("var division = '%s';%n", division);
 
         final FinalistSchedule schedule = new FinalistSchedule(connection, tournament, division);
-
-        for (final String categoryTitle : schedule.getCategories()) {
-          final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);
-
-          output.format("{%n"); // scope so that variable names are easy
-          output.format("  var category = $.finalist.getCategoryByName(%s);%n", quotedCatTitle);
-          output.format("  if (null == category) {%n");
-          // will be non-numeric because all numeric categories were added earlier
-          output.format("    category = $.finalist.addCategory(%s, false);%n", quotedCatTitle);
-          output.format("  }%n");
-          output.format("}%n");
-        }
-
         for (final Map.Entry<String, String> entry : schedule.getRooms().entrySet()) {
           final String categoryTitle = entry.getKey();
           final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);

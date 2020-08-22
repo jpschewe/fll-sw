@@ -211,8 +211,11 @@
    *          the name of the category
    * @param numeric
    *          boolean stating if this is a numeric or non-numeric category
+   * @param overall
+   *          true if a category that is awarded for the tournament rather than
+   *          an award group
    */
-  function Category(name, numeric) {
+  function Category(name, numeric, overall) {
     var category_id;
     // find the next available id
     for (category_id = 0; category_id < Number.MAX_VALUE
@@ -228,6 +231,8 @@
     this.catId = category_id;
     this.teams = []; // all teams reguardless of division
     this.room = {}; // division -> room
+    this.scheduled = false;
+    this.overall = overall;
 
     _categories[this.catId] = this;
     _save();
@@ -711,15 +716,18 @@
      *          the name of the category
      * @param numeric
      *          boolean if this is a numeric category or not
+     * @param overall
+     *          if true, this is a category that is awarded globally rather than
+     *          by award group
      * @returns the new category or Null if there is a duplicate
      */
-    addCategory : function(categoryName, numeric) {
+    addCategory : function(categoryName, numeric, overall) {
       if (_check_duplicate_category(categoryName)) {
         alert("There already exists a category with the name '" + categoryName
             + "'");
         return null;
       } else {
-        var newCategory = new Category(categoryName, numeric);
+        var newCategory = new Category(categoryName, numeric, overall);
         return newCategory;
       }
     },
@@ -875,9 +883,16 @@
       teamNum = parseInt(teamNum, 10);
       var index = category.teams.indexOf(teamNum);
       if (-1 == index) {
-        // clear the schedule for the current division
-        _schedules[$.finalist.getCurrentDivision()] = null;
-
+        if (category.overall) {
+          // clear schedule for all categories
+          $.each($.finalist.getDivisions(), function(i, division) {
+            _schedules[division] = null;
+          });
+        } else {
+          // clear the schedule for the current division
+          _schedules[$.finalist.getCurrentDivision()] = null;
+        }
+        
         category.teams.push(teamNum);
         _save();
       }
@@ -897,8 +912,15 @@
       teamNum = parseInt(teamNum, 10);
       var index = category.teams.indexOf(teamNum);
       if (index != -1) {
-        // clear the schedule for the current division
-        _schedules[$.finalist.getCurrentDivision()] = null;
+        if (category.overall) {
+          // clear all schedules
+          $.each($.finalist.getDivisions(), function(i, division) {
+            _schedules[division] = null;
+          });
+        } else {
+          // clear the schedule for the current division
+          _schedules[$.finalist.getCurrentDivision()] = null;
+        }
 
         category.teams.splice(index, 1);
         if (save) {
