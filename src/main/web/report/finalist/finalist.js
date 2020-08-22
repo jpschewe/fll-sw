@@ -78,6 +78,7 @@
     $.jStorage.set(STORAGE_PREFIX + "_playoffEndMinute", _playoffEndMinute);
 
     $.jStorage.set(STORAGE_PREFIX + "_schedules", _schedules);
+
   }
 
   /**
@@ -156,6 +157,7 @@
     if (null != value) {
       _schedules = value;
     }
+
   }
 
   /**
@@ -804,6 +806,31 @@
     },
 
     /**
+     * Get the all categories to be scheduled.
+     * 
+     * @returns {Array} sorted by name
+     */
+    getAllScheduledCategories : function() {
+      var categories = [];
+      $.each(_categories, function(i, category) {
+        if ($.finalist.isCategoryScheduled(category)) {
+          categories.push(category);
+        }
+      });
+
+      categories.sort(function(a, b) {
+        if (a.name == b.name) {
+          return 0;
+        } else if (a.name < b.name) {
+          return -1;
+        } else {
+          return 1;
+        }
+      });
+      return categories;
+    },
+
+    /**
      * Get a category by id
      * 
      * @param toFind
@@ -955,12 +982,12 @@
     /**
      * @param division
      *          the division to work with
-     * @return map with key of team number and value is an array of categories
-     *         that the team is being judged in
+     * @return map with key of team number and value is an array of scheduled
+     *         categories that the team is being judged in
      */
     getTeamToCategoryMap : function(division) {
       var finalistsCount = {};
-      $.each($.finalist.getAllCategories(), function(i, category) {
+      $.each($.finalist.getAllScheduledCategories(), function(i, category) {
         $.each(category.teams, function(j, teamNum) {
           var team = $.finalist.lookupTeam(teamNum);
           if ($.finalist.isTeamInDivision(team, division)) {
@@ -1018,26 +1045,34 @@
         var team = $.finalist.lookupTeam(teamNum);
         var teamCategories = finalistsCount[teamNum];
         $.each(teamCategories, function(j, category) {
-          var scheduled = false;
-          $.each(schedule, function(k, slot) {
-            if (!scheduled && !$.finalist.isTimeslotBusy(slot, category.catId)
-                && !$.finalist.isTeamInTimeslot(slot, teamNum)
-                && !$.finalist.hasPlayoffConflict(team, slot)) {
-              $.finalist.addTeamToTimeslot(slot, category.catId, teamNum);
-              scheduled = true;
-            }
-          }); // foreach timeslot
-          while (!scheduled) {
-            var newSlot = new Timeslot(nextTime, slotDuration);
-            schedule.push(newSlot);
 
-            nextTime = $.finalist.addMinutesToTime(nextTime, slotDuration);
+          if ($.finalist.isCategoryScheduled(category)) {
 
-            if (!$.finalist.hasPlayoffConflict(team, newSlot)) {
-              scheduled = true;
-              $.finalist.addTeamToTimeslot(newSlot, category.catId, teamNum);
+            var scheduled = false;
+            $.each(schedule, function(k, slot) {
+              if (!scheduled
+                  && !$.finalist.isTimeslotBusy(slot, category.catId)
+                  && !$.finalist.isTeamInTimeslot(slot, teamNum)
+                  && !$.finalist.hasPlayoffConflict(team, slot)) {
+                $.finalist.addTeamToTimeslot(slot, category.catId, teamNum);
+                scheduled = true;
+              }
+            }); // foreach timeslot
+
+            while (!scheduled) {
+              var newSlot = new Timeslot(nextTime, slotDuration);
+              schedule.push(newSlot);
+
+              nextTime = $.finalist.addMinutesToTime(nextTime, slotDuration);
+
+              if (!$.finalist.hasPlayoffConflict(team, newSlot)) {
+                scheduled = true;
+                $.finalist.addTeamToTimeslot(newSlot, category.catId, teamNum);
+              }
             }
-          }
+
+          } // category is scheduled
+
         }); // foreach category
       }); // foreach sorted team
 
@@ -1236,6 +1271,26 @@
         console.log(str);
       }
     },
+
+    /**
+     * @param category
+     *          the category
+     * @param isScheduled
+     *          true if this category should be considered in the schedule
+     */
+    setCategoryScheduled : function(category, isScheduled) {
+      category.scheduled = isScheduled;
+      _save();
+    },
+
+    /**
+     * @param category
+     *          the category to check
+     * @return is this category to be put in the schedule
+     */
+    isCategoryScheduled : function(category) {
+      return category.scheduled;
+    }
 
   };
 
