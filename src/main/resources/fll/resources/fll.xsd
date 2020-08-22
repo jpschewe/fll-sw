@@ -144,6 +144,12 @@
         </xsd:key>
         <xsd:keyref name="performanceGoalRef"
             refer="performanceGoalKey">
+            <xsd:annotation>
+                <xsd:documentation>
+                    Goal refs must reference a goal in
+                    the category.
+                </xsd:documentation>
+            </xsd:annotation>
             <xsd:selector xpath=".//goalRef|.//enumGoalRef" />
             <xsd:field xpath="@goal" />
         </xsd:keyref>
@@ -206,6 +212,12 @@
         </xsd:key>
         <xsd:keyref name="subjectiveGoalRef"
             refer="subjectiveGoalKey">
+            <xsd:annotation>
+                <xsd:documentation>
+                    Goal refs must reference a goal in
+                    the category.
+                </xsd:documentation>
+            </xsd:annotation>
             <xsd:selector xpath=".//goalRef|.//enumGoalRef" />
             <xsd:field xpath="@goal" />
         </xsd:keyref>
