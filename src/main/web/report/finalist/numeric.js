@@ -21,7 +21,7 @@ function initializeFinalistCounts(teams) {
   $.each(teams, function(i, team) {
     // initialize to 0
     var numFinalists = 0;
-    $.each($.finalist.getAllCategories(), function(j, category) {
+    $.each($.finalist.getAllScheduledCategories(), function(j, category) {
       if ($.finalist.isTeamInCategory(category, team.num)) {
         numFinalists = numFinalists + 1;
       }

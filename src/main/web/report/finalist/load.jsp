@@ -33,6 +33,7 @@
     if (null == championship) {
       championship = $.finalist.addCategory($.finalist.CHAMPIONSHIP_NAME, true);
     }
+    $.finalist.setCategoryScheduled(championship, true);
 <%FinalistLoad.outputCategoryScores(out, application);%>
   
 <%FinalistLoad.outputNonNumericNominees(out, application);%>

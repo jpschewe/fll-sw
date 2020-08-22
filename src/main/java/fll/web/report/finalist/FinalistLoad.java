@@ -170,8 +170,10 @@ public final class FinalistLoad {
       output.format("if (null == %s) {%n", catVarName);
       output.format("  %s = $.finalist.addCategory(%s, true);%n", catVarName, quotedCatTitle);
       output.format("}%n");
+      // all subjective categories are scheduled
+      output.format("$.finalist.setCategoryScheduled(%s, true);%n", catVarName);
     }
-    
+
     for (final NonNumericCategory subjectiveElement : description.getNonNumericCategories()) {
       final String categoryName = subjectiveElement.getName();
       final String categoryTitle = subjectiveElement.getTitle();
@@ -183,7 +185,7 @@ public final class FinalistLoad {
       output.format("  %s = $.finalist.addCategory(%s, false);%n", catVarName, quotedCatTitle);
       output.format("}%n");
     }
-    
+
   }
 
   /**
@@ -323,15 +325,16 @@ public final class FinalistLoad {
         for (final Map.Entry<String, String> entry : schedule.getRooms().entrySet()) {
           final String categoryTitle = entry.getKey();
           final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);
+          final String room = entry.getValue();
 
           output.format("{%n"); // scope so that variable names are easy
+
           output.format("  var category = $.finalist.getCategoryByName(%s);%n", quotedCatTitle);
-          output.format("  if (null == category) {%n");
-          // will be non-numeric because all numeric categories were added earlier
-          output.format("    category = $.finalist.addCategory(%s, false);%n", quotedCatTitle);
-          output.format("  }%n");
-          output.format("  $.finalist.setRoom(category, division, %s);%n",
-                        WebUtils.quoteJavascriptString(entry.getValue()));
+          output.format("  $.finalist.setRoom(category, division, %s);%n", WebUtils.quoteJavascriptString(room));
+
+          // any category in the schedule should be scheduled
+          output.format("$.finalist.setCategoryScheduled(category, true);%n");
+
           output.format("}%n");
         }
 

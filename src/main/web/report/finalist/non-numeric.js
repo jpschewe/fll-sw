@@ -66,21 +66,17 @@ function addCategoryElement(category) {
   var catEle = $("<li></li>");
   $("#categories").append(catEle);
 
-  var nameEle = $("<input class='category_name' type='text' id='name_"
+  var scheduledCheckbox = $("<input type='checkbox' id='scheduled_"
       + category.catId + "'/>");
-  catEle.append(nameEle);
-  nameEle.change(function() {
-    var newName = nameEle.val();
-    if (null == newName || "" == newName) {
-      alert("All categories must have non-empty names");
-      nameEle.val(category.name);
-    }
-    if (!$.finalist.setCategoryName(category, newName)) {
-      alert("There already exists a category with the name '" + newName + "'");
-      nameEle.val(category.name);
-    }
+  catEle.append(scheduledCheckbox);
+  scheduledCheckbox.change(function() {
+    $.finalist.setCategoryScheduled(category, $(this).prop("checked"));
+    roomEle.prop("disabled", !(scheduledCheckbox.prop("checked")));
   });
-  nameEle.val(category.name);
+  scheduledCheckbox.attr("checked", $.finalist.isCategoryScheduled(category));
+
+  catEle.append(category.name);
+  catEle.append(" - ")
 
   catEle.append("Room number: ");
   var roomEle = $("<input type='text' id='room_" + category.catId + "'/>");
@@ -90,24 +86,8 @@ function addCategoryElement(category) {
     $.finalist.setRoom(category, $.finalist.getCurrentDivision(), roomNumber);
   });
   roomEle.val($.finalist.getRoom(category, $.finalist.getCurrentDivision()));
+  roomEle.prop("disabled", !$.finalist.isCategoryScheduled(category));
 
-  var deleteButton = $("<button id='delete_" + category.catId + "'>Delete</button>");
-  catEle.append(deleteButton);
-  deleteButton.click(function() {
-    // check all teams being empty
-    var categoryIsEmpty = checkCategoryEmpty(category);
-    if(!categoryIsEmpty) {
-      var reallyDelete = confirm("Are you sure you want to delete category " + category.name + "?");
-      if(reallyDelete) {
-        $.finalist.removeCategory(category);
-        catEle.remove();
-      }
-    } else {
-      $.finalist.removeCategory(category);
-      catEle.remove();
-    }
-  });
-  
   var teamList = $("<ul id='category_" + category.catId + "'></ul>");
   catEle.append(teamList);
 
@@ -117,6 +97,7 @@ function addCategoryElement(category) {
   addButton.click(function() {
     addTeam(category);
   });
+
 }
 
 function teamNumId(category, teamIdx) {
@@ -144,8 +125,7 @@ function populateTeamInformation(category, teamIdx, team) {
   $("#" + teamNumId(category.catId, teamIdx)).data('oldVal', team.num);
   $("#" + teamNameId(category.catId, teamIdx)).val(team.name);
   $("#" + teamOrgId(category.catId, teamIdx)).val(team.org);
-  $("#" + teamJudgingStationId(category.catId, teamIdx)).val(
-      team.judgingGroup);
+  $("#" + teamJudgingStationId(category.catId, teamIdx)).val(team.judgingGroup);
 }
 
 /**
@@ -195,14 +175,15 @@ function addTeam(category) {
   var judgingStationEle = $("<input id='"
       + teamJudgingStationId(category.catId, teamIdx) + "' readonly/>");
   teamEle.append(judgingStationEle);
-  
-  var deleteButton = $("<button id='" + teamDeleteId(category.catId, teamIdx) + "'>Delete</button>");
+
+  var deleteButton = $("<button id='" + teamDeleteId(category.catId, teamIdx)
+      + "'>Delete</button>");
   teamEle.append(deleteButton);
   deleteButton.click(function() {
     var teamNum = numEle.val();
-    if("" != teamNum) {
+    if ("" != teamNum) {
       var reallyDelete = confirm("Are you sure you want to delete this team?");
-      if(reallyDelete) {
+      if (reallyDelete) {
         $.finalist.removeTeamFromCategory(category, teamNum);
         teamEle.remove();
       }
