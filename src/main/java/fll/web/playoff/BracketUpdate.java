@@ -8,7 +8,7 @@ package fll.web.playoff;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Team;
 import fll.xml.ScoreType;

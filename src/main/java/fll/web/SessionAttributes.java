@@ -5,7 +5,7 @@
  */
 package fll.web;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import javax.servlet.http.HttpSession;
 
 /**

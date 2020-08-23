@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;

@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import javax.xml.transform.TransformerException;
 
 import org.apache.commons.lang3.StringUtils;
