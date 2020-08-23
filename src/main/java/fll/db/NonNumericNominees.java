@@ -15,8 +15,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -82,16 +80,12 @@ public class NonNumericNominees {
                                    final int tournamentId,
                                    final String category)
       throws SQLException {
-    PreparedStatement delete = null;
-    try {
-      delete = connection.prepareStatement("DELETE FROM non_numeric_nominees"//
-          + " WHERE tournament = ?"//
-          + " AND category = ?");
+    try (PreparedStatement delete = connection.prepareStatement("DELETE FROM non_numeric_nominees"//
+        + " WHERE tournament = ?"//
+        + " AND category = ?")) {
       delete.setInt(1, tournamentId);
       delete.setString(2, category);
       delete.executeUpdate();
-    } finally {
-      SQLFunctions.close(delete);
     }
   }
 
@@ -129,42 +123,38 @@ public class NonNumericNominees {
                                  final String category,
                                  final Set<Integer> teamNumbers)
       throws SQLException {
-    PreparedStatement check = null;
-    ResultSet checkResult = null;
-    PreparedStatement insert = null;
     final boolean autoCommit = connection.getAutoCommit();
     try {
       connection.setAutoCommit(false);
 
-      check = connection.prepareStatement("SELECT team_number FROM non_numeric_nominees" //
+      try (PreparedStatement check = connection.prepareStatement("SELECT team_number FROM non_numeric_nominees" //
           + " WHERE tournament = ?" //
           + "   AND category = ?" //
           + "   AND team_number = ?");
-      check.setInt(1, tournamentId);
-      check.setString(2, category);
+          PreparedStatement insert = connection.prepareStatement("INSERT INTO non_numeric_nominees" //
+              + " (tournament, category, team_number) VALUES(?, ?, ?)")) {
 
-      insert = connection.prepareStatement("INSERT INTO non_numeric_nominees" //
-          + " (tournament, category, team_number) VALUES(?, ?, ?)");
-      insert.setInt(1, tournamentId);
-      insert.setString(2, category);
+        check.setInt(1, tournamentId);
+        check.setString(2, category);
 
-      for (final int teamNumber : teamNumbers) {
-        check.setInt(3, teamNumber);
-        insert.setInt(3, teamNumber);
+        insert.setInt(1, tournamentId);
+        insert.setString(2, category);
 
-        checkResult = check.executeQuery();
-        if (!checkResult.next()) {
-          insert.executeUpdate();
+        for (final int teamNumber : teamNumbers) {
+          check.setInt(3, teamNumber);
+          insert.setInt(3, teamNumber);
+
+          try (ResultSet checkResult = check.executeQuery()) {
+            if (!checkResult.next()) {
+              insert.executeUpdate();
+            }
+          }
         }
-      }
 
-      connection.commit();
+        connection.commit();
+      } // allocation of PreparedStatements
     } finally {
       connection.setAutoCommit(autoCommit);
-
-      SQLFunctions.close(checkResult);
-      SQLFunctions.close(check);
-      SQLFunctions.close(insert);
     }
   }
 
@@ -180,19 +170,15 @@ public class NonNumericNominees {
                                           final int tournamentId)
       throws SQLException {
     final Set<String> result = new HashSet<>();
-    PreparedStatement get = null;
-    ResultSet rs = null;
-    try {
-      get = connection.prepareStatement("SELECT DISTINCT category FROM non_numeric_nominees WHERE tournament = ?");
+    try (
+        PreparedStatement get = connection.prepareStatement("SELECT DISTINCT category FROM non_numeric_nominees WHERE tournament = ?")) {
       get.setInt(1, tournamentId);
-      rs = get.executeQuery();
-      while (rs.next()) {
-        final String category = rs.getString(1);
-        result.add(category);
+      try (ResultSet rs = get.executeQuery()) {
+        while (rs.next()) {
+          final String category = rs.getString(1);
+          result.add(category);
+        }
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(get);
     }
     return result;
   }
@@ -211,22 +197,17 @@ public class NonNumericNominees {
                                          final String category)
       throws SQLException {
     final Set<Integer> result = new HashSet<>();
-    PreparedStatement get = null;
-    ResultSet rs = null;
-    try {
-      get = connection.prepareStatement("SELECT DISTINCT team_number FROM non_numeric_nominees"
-          + " WHERE tournament = ?" //
-          + " AND category = ?");
+    try (PreparedStatement get = connection.prepareStatement("SELECT DISTINCT team_number FROM non_numeric_nominees"
+        + " WHERE tournament = ?" //
+        + " AND category = ?")) {
       get.setInt(1, tournamentId);
       get.setString(2, category);
-      rs = get.executeQuery();
-      while (rs.next()) {
-        final int team = rs.getInt(1);
-        result.add(team);
+      try (ResultSet rs = get.executeQuery()) {
+        while (rs.next()) {
+          final int team = rs.getInt(1);
+          result.add(team);
+        }
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(get);
     }
 
     return result;
