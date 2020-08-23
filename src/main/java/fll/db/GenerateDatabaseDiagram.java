@@ -21,7 +21,6 @@ import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.xml.ChallengeParser;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.SchemaAnalyzer;
 import net.sourceforge.schemaspy.model.InvalidConfigurationException;
@@ -29,7 +28,10 @@ import net.sourceforge.schemaspy.model.InvalidConfigurationException;
 /**
  * Generate a schema diagram of our example database.
  */
-public class GenerateDatabaseDiagram {
+public final class GenerateDatabaseDiagram {
+
+  private GenerateDatabaseDiagram() {
+  }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -43,11 +45,9 @@ public class GenerateDatabaseDiagram {
     }
 
     final String dbname = "generate_schema";
-    Connection connection = null;
-    try {
-      // generate example database
-      final DataSource datasource = Utilities.createMemoryDataSource(dbname);
-      connection = datasource.getConnection();
+    final DataSource datasource = Utilities.createMemoryDataSource(dbname);
+
+    try (Connection connection = datasource.getConnection()) {
 
       final String baseDir = "fll/resources/challenge-descriptors/";
       final String challengeName = "example-database.xml";
@@ -75,9 +75,6 @@ public class GenerateDatabaseDiagram {
       LOGGER.fatal("Error talking to the database", e);
     } catch (final Exception e) {
       LOGGER.fatal("Error creating the diagram", e);
-    } finally {
-      // clean up database
-      SQLFunctions.close(connection);
     }
 
   }
