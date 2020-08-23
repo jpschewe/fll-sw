@@ -246,7 +246,7 @@ public class ChallengeDescription implements Serializable {
     return null;
   }
 
-  private final List<NonNumericCategory> nonNumericCategories = new LinkedList<>();
+  private final LinkedList<NonNumericCategory> nonNumericCategories = new LinkedList<>();
 
   /**
    * @return unmodifiable list
