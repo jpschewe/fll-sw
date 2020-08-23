@@ -57,7 +57,7 @@ public class NonNumericCategory implements Serializable {
   }
 
   /**
-   * @param v see {@Link #getName()}
+   * @param v see {@link #getName()}
    */
   public void setName(final String v) {
     name = v;

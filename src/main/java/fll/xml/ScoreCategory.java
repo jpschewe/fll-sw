@@ -52,7 +52,8 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
   }
 
   /**
-   * Default constructor creates an object with no {@link #getGoals()} and a
+   * Default constructor creates an object with no {@link #getGoalElements()} and
+   * a
    * {@link #getWeight()} of 1.
    */
   protected ScoreCategory() {
