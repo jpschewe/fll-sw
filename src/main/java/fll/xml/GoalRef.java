@@ -22,11 +22,14 @@ import fll.web.playoff.TeamScore;
  */
 public class GoalRef implements Evaluatable, Serializable {
 
+  /**
+   * XML tag name used for this class.
+   */
   public static final String TAG_NAME = "goalRef";
 
-  public static final String SCORE_TYPE_ATTRIBUTE = "scoreType";
+  private static final String SCORE_TYPE_ATTRIBUTE = "scoreType";
 
-  public static final String GOAL_ATTRIBUTE = "goal";
+  private static final String GOAL_ATTRIBUTE = "goal";
 
   public GoalRef(@Nonnull final Element ele,
                  @Nonnull final GoalScope scope) {
@@ -77,7 +80,7 @@ public class GoalRef implements Evaluatable, Serializable {
   }
 
   /**
-   * Resolve the goal name against the goal scope
+   * Resolve the goal name against the goal scope.
    * 
    * @return the goal
    * @throws ScopeException if the goal cannot be found
