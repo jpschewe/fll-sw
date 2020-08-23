@@ -238,6 +238,10 @@ javadoc {
     failOnError = false
 }
 
+compileJava {
+    options.compilerArgs << '-Xmaxwarns' << '10000'
+}
+
 tasks.register("distributionDependencies") {
     doFirst {
       println("Distribution dependnecies")
