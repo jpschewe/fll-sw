@@ -25,7 +25,6 @@ import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -85,6 +84,9 @@ public final class GenerateDB {
    *
    * @param document and XML document that describes a tournament
    * @param connection connection to the database to create the tables in
+   * @throws SQLException on a database error
+   * @throws UnsupportedEncodingException if the challenge description cannot be
+   *           decoded
    */
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
                                 "OBL_UNSATISFIED_OBLIGATION" }, justification = "Need dynamic data for default values, Bug in findbugs - ticket:2924739")
@@ -92,10 +94,7 @@ public final class GenerateDB {
                                 final Connection connection)
       throws SQLException, UnsupportedEncodingException {
 
-    Statement stmt = null;
-    PreparedStatement prep = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
 
       // write to disk regularly in case of a crash
       stmt.executeUpdate("SET WRITE_DELAY 100 MILLIS");
@@ -127,22 +126,22 @@ public final class GenerateDB {
           + ")");
 
       // add the bye team so that references work
-      prep = connection.prepareStatement("INSERT INTO Teams(TeamNumber, TeamName) VALUES(?, ?)");
-      prep.setInt(1, Team.BYE.getTeamNumber());
-      prep.setString(2, Team.BYE.getTeamName());
-      prep.executeUpdate();
+      try (
+          PreparedStatement prep = connection.prepareStatement("INSERT INTO Teams(TeamNumber, TeamName) VALUES(?, ?)")) {
+        prep.setInt(1, Team.BYE.getTeamNumber());
+        prep.setString(2, Team.BYE.getTeamName());
+        prep.executeUpdate();
 
-      // add the tie team so that references work
-      prep.setInt(1, Team.TIE.getTeamNumber());
-      prep.setString(2, Team.TIE.getTeamName());
-      prep.executeUpdate();
+        // add the tie team so that references work
+        prep.setInt(1, Team.TIE.getTeamNumber());
+        prep.setString(2, Team.TIE.getTeamName());
+        prep.executeUpdate();
 
-      // add the null team so that references work
-      prep.setInt(1, Team.NULL.getTeamNumber());
-      prep.setString(2, Team.NULL.getTeamName());
-      prep.executeUpdate();
-
-      SQLFunctions.close(prep);
+        // add the null team so that references work
+        prep.setInt(1, Team.NULL.getTeamNumber());
+        prep.setString(2, Team.NULL.getTeamName());
+        prep.executeUpdate();
+      }
 
       // Table structure for table 'tablenames'
       stmt.executeUpdate("DROP TABLE IF EXISTS tablenames CASCADE");
@@ -361,7 +360,7 @@ public final class GenerateDB {
 
       // current tournament teams
       stmt.executeUpdate("DROP VIEW IF EXISTS current_tournament_teams");
-      prep = connection.prepareStatement("CREATE VIEW current_tournament_teams AS "//
+      try (PreparedStatement prep = connection.prepareStatement("CREATE VIEW current_tournament_teams AS "//
           + " SELECT * FROM TournamentTeams" //
           + " WHERE Tournament IN " //
           + " (SELECT CONVERT(param_value, INTEGER) " // " +
@@ -369,8 +368,9 @@ public final class GenerateDB {
           + "      WHERE param = '"
           + GlobalParameters.CURRENT_TOURNAMENT
           + "'"//
-          + "  )");
-      prep.executeUpdate();
+          + "  )")) {
+        prep.executeUpdate();
+      }
 
       // verified performance scores
       stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
@@ -380,9 +380,6 @@ public final class GenerateDB {
 
       setDefaultParameters(connection, TournamentParameters.RUNNING_HEAD_2_HEAD_DEFAULT);
 
-    } finally {
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(prep);
     }
 
   }
@@ -399,10 +396,7 @@ public final class GenerateDB {
   /* package */static void createNonNumericNomineesTables(final Connection connection,
                                                           final boolean createConstraints)
       throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
-
+    try (Statement stmt = connection.createStatement()) {
       stmt.executeUpdate("DROP TABLE IF EXISTS non_numeric_nominees CASCADE");
 
       final StringBuilder sql = new StringBuilder();
@@ -418,8 +412,6 @@ public final class GenerateDB {
       sql.append(")");
       stmt.executeUpdate(sql.toString());
 
-    } finally {
-      SQLFunctions.close(stmt);
     }
   }
 
@@ -434,10 +426,7 @@ public final class GenerateDB {
   /* package */static void createFinalistScheduleTables(final Connection connection,
                                                         final boolean createConstraints)
       throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
-
+    try (Statement stmt = connection.createStatement()) {
       stmt.executeUpdate("DROP TABLE IF EXISTS finalist_schedule");
       stmt.executeUpdate("DROP TABLE IF EXISTS finalist_categories");
       final StringBuilder sql = new StringBuilder();
@@ -468,10 +457,6 @@ public final class GenerateDB {
       }
       scheduleSql.append(")");
       stmt.executeUpdate(scheduleSql.toString());
-
-    } finally {
-      SQLFunctions.close(stmt);
-      stmt = null;
     }
   }
 
@@ -479,11 +464,10 @@ public final class GenerateDB {
    * Create the 'authentication' table. Drops the table if it exists.
    * 
    * @param connection database connection
+   * @throws SQLException on a database error
    */
   public static void createAuthentication(final Connection connection) throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
 
       stmt.executeUpdate("DROP TABLE IF EXISTS fll_authentication CASCADE");
       connection.commit();
@@ -492,8 +476,6 @@ public final class GenerateDB {
           + " ,fll_pass char(32)"//
           + " ,CONSTRAINT fll_authentication_pk PRIMARY KEY (fll_user)" //
           + ")");
-    } finally {
-      SQLFunctions.close(stmt);
     }
   }
 
@@ -501,11 +483,10 @@ public final class GenerateDB {
    * Create the 'valid_login' table. Drops the table if it exists.
    * 
    * @param connection database connection
+   * @throws SQLException on a database error
    */
   public static void createValidLogin(final Connection connection) throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
 
       stmt.executeUpdate("DROP TABLE IF EXISTS valid_login CASCADE");
       stmt.executeUpdate("CREATE TABLE valid_login ("
@@ -513,16 +494,12 @@ public final class GenerateDB {
           + " ,magic_key varchar(64) NOT NULL" //
           + " ,CONSTRAINT valid_login_pk PRIMARY KEY (fll_user, magic_key)" //
           + ")");
-    } finally {
-      SQLFunctions.close(stmt);
     }
   }
 
   /** Table structure for table 'tournament_parameters' */
   /* package */static void tournamentParameters(final Connection connection) throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
       stmt.executeUpdate("DROP TABLE IF EXISTS tournament_parameters CASCADE");
       stmt.executeUpdate("CREATE TABLE tournament_parameters ("
           + "  param varchar(64) NOT NULL" //
@@ -531,8 +508,6 @@ public final class GenerateDB {
           + " ,CONSTRAINT tournament_parameters_pk PRIMARY KEY  (param, tournament)" //
           + " ,CONSTRAINT tournament_parameters_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)" //
           + ")");
-    } finally {
-      SQLFunctions.close(stmt);
     }
   }
 
@@ -540,9 +515,7 @@ public final class GenerateDB {
    * Create Tournaments table.
    */
   /* package */static void tournaments(final Connection connection) throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
 
       stmt.executeUpdate("DROP TABLE IF EXISTS Tournaments CASCADE");
 
@@ -566,8 +539,6 @@ public final class GenerateDB {
       // add internal tournament for default values and such
       createInternalTournament(connection);
 
-    } finally {
-      SQLFunctions.close(stmt);
     }
   }
 
@@ -575,14 +546,11 @@ public final class GenerateDB {
                                        final int tournament,
                                        final String newName)
       throws SQLException {
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("UPDATE Tournaments SET Name = ? WHERE tournament_id = ?");
+    try (
+        PreparedStatement prep = connection.prepareStatement("UPDATE Tournaments SET Name = ? WHERE tournament_id = ?")) {
       prep.setString(1, newName);
       prep.setInt(2, tournament);
       prep.executeUpdate();
-    } finally {
-      SQLFunctions.close(prep);
     }
   }
 
@@ -590,45 +558,36 @@ public final class GenerateDB {
    * Create the "internal" tournament used for default parameters, if needed.
    */
   /* package */static void createInternalTournament(final Connection connection) throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      // make sure another tournament with the internal name doesn't exist
-      prep = connection.prepareStatement("SELECT tournament_id FROM Tournaments WHERE Name = ?");
+    // make sure another tournament with the internal name doesn't exist
+    try (PreparedStatement prep = connection.prepareStatement("SELECT tournament_id FROM Tournaments WHERE Name = ?")) {
       prep.setString(1, INTERNAL_TOURNAMENT_NAME);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        final int importedInternal = rs.getInt(1);
-        if (importedInternal != INTERNAL_TOURNAMENT_ID) {
-          renameTournament(connection, importedInternal, "Imported-"
-              + INTERNAL_TOURNAMENT_NAME);
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          final int importedInternal = rs.getInt(1);
+          if (importedInternal != INTERNAL_TOURNAMENT_ID) {
+            renameTournament(connection, importedInternal, "Imported-"
+                + INTERNAL_TOURNAMENT_NAME);
+          }
         }
       }
-      SQLFunctions.close(rs);
-      rs = null;
-      SQLFunctions.close(prep);
-      prep = null;
-
-      // check if a tournament exists with the internal id
-      prep = connection.prepareStatement("SELECT Name FROM Tournaments WHERE tournament_id = ?");
-      prep.setInt(1, INTERNAL_TOURNAMENT_ID);
-      rs = prep.executeQuery();
-      if (!rs.next()) {
-        SQLFunctions.close(prep);
-        prep = null;
-        SQLFunctions.close(rs);
-        rs = null;
-
-        // need to create
-        prep = connection.prepareStatement("INSERT INTO Tournaments (tournament_id, Name) VALUES(?, ?)");
-        prep.setInt(1, INTERNAL_TOURNAMENT_ID);
-        prep.setString(2, INTERNAL_TOURNAMENT_NAME);
-        prep.executeUpdate();
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
+
+    // check if a tournament exists with the internal id
+    try (PreparedStatement prep = connection.prepareStatement("SELECT Name FROM Tournaments WHERE tournament_id = ?")) {
+      prep.setInt(1, INTERNAL_TOURNAMENT_ID);
+      try (ResultSet rs = prep.executeQuery()) {
+        if (!rs.next()) {
+
+          // need to create
+          try (
+              PreparedStatement prepInsert = connection.prepareStatement("INSERT INTO Tournaments (tournament_id, Name) VALUES(?, ?)")) {
+            prepInsert.setInt(1, INTERNAL_TOURNAMENT_ID);
+            prepInsert.setString(2, INTERNAL_TOURNAMENT_NAME);
+            prepInsert.executeUpdate();
+          } // allocate insert
+        } // if tournament does not exist
+      } // allocate result set
+    } // allocate check
   }
 
   /**
@@ -643,12 +602,11 @@ public final class GenerateDB {
       throws SQLException {
     createInternalTournament(connection);
 
-    PreparedStatement globalInsert = null;
-    boolean check;
-    try {
+    try (
+        PreparedStatement globalInsert = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)")) {
       // Global Parameters
-      globalInsert = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
 
+      boolean check;
       check = GlobalParameters.globalParameterExists(connection, GlobalParameters.CURRENT_TOURNAMENT);
       if (!check) {
         final Tournament dummyTournament = Tournament.findTournamentByName(connection, DUMMY_TOURNAMENT_NAME);
@@ -692,24 +650,25 @@ public final class GenerateDB {
       if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.RUNNING_HEAD_2_HEAD)) {
         TournamentParameters.setDefaultRunningHeadToHead(connection, headToHead);
       }
-
-    } finally {
-      SQLFunctions.close(globalInsert);
     }
   }
 
+  /**
+   * Replace the challenge document in the database. It is assumed that the
+   * document is compatible with the database.
+   * 
+   * @param document the new document to put in the database
+   * @param connection the database connection
+   * @throws SQLException on a database error
+   */
   public static void insertOrUpdateChallengeDocument(final Document document,
                                                      final Connection connection)
       throws SQLException {
-    PreparedStatement challengePrep = null;
-    try {
-      final boolean check = GlobalParameters.globalParameterExists(connection, GlobalParameters.CHALLENGE_DOCUMENT);
-      if (check) {
-        challengePrep = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?");
-      } else {
-        challengePrep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
-      }
+    final boolean check = GlobalParameters.globalParameterExists(connection, GlobalParameters.CHALLENGE_DOCUMENT);
 
+    try (PreparedStatement challengePrep = check //
+        ? connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?") //
+        : connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)")) {
       challengePrep.setString(2, GlobalParameters.CHALLENGE_DOCUMENT);
 
       // get the challenge descriptor put in the database
@@ -722,20 +681,13 @@ public final class GenerateDB {
       final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
       challengePrep.setAsciiStream(1, bais, bytes.length);
       challengePrep.executeUpdate();
-      SQLFunctions.close(challengePrep);
-    } finally {
-      SQLFunctions.close(challengePrep);
     }
   }
 
   /* package */static void createGlobalParameters(final Document document,
                                                   final Connection connection)
       throws SQLException {
-    Statement stmt = null;
-    PreparedStatement insertPrep = null;
-    PreparedStatement deletePrep = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
 
       stmt.executeUpdate("DROP TABLE IF EXISTS global_parameters CASCADE");
 
@@ -744,22 +696,21 @@ public final class GenerateDB {
           + " ,param_value longvarchar NOT NULL" //
           + " ,CONSTRAINT global_parameters_pk PRIMARY KEY (param)" //
           + ")");
+    }
 
-      // set database version
-      deletePrep = connection.prepareStatement("DELETE FROM global_parameters WHERE param = ?");
+    // set database version
+    try (PreparedStatement deletePrep = connection.prepareStatement("DELETE FROM global_parameters WHERE param = ?")) {
       deletePrep.setString(1, GlobalParameters.DATABASE_VERSION);
       deletePrep.executeUpdate();
-      insertPrep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
+    }
+
+    try (
+        PreparedStatement insertPrep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)")) {
       insertPrep.setInt(1, DATABASE_VERSION);
       insertPrep.setString(2, GlobalParameters.DATABASE_VERSION);
       insertPrep.executeUpdate();
 
       insertOrUpdateChallengeDocument(document, connection);
-
-    } finally {
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(insertPrep);
-      SQLFunctions.close(deletePrep);
     }
   }
 
@@ -788,9 +739,7 @@ public final class GenerateDB {
   public static String generateGoalColumnDefinition(final AbstractGoal goalElement) {
     final String goalName = goalElement.getName();
 
-    String definition = goalName;
-    definition += " "
-        + getTypeForGoalColumn(goalElement);
+    final String definition = String.format("%s %s", goalName, getTypeForGoalColumn(goalElement));
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("GoalColumnDefinition: "
@@ -803,9 +752,7 @@ public final class GenerateDB {
   /* package */static void createTableDivision(final Connection connection,
                                                final boolean createConstraints)
       throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
 
       stmt.executeUpdate("DROP TABLE IF EXISTS table_division CASCADE");
       final StringBuilder sql = new StringBuilder();
@@ -819,10 +766,6 @@ public final class GenerateDB {
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
-
-    } finally {
-      SQLFunctions.close(stmt);
-      stmt = null;
     }
   }
 
@@ -836,9 +779,7 @@ public final class GenerateDB {
   /* package */static void createScheduleTables(final Connection connection,
                                                 final boolean createConstraints)
       throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
 
       stmt.executeUpdate("DROP TABLE IF EXISTS schedule CASCADE");
       final StringBuilder sql = new StringBuilder();
@@ -883,10 +824,6 @@ public final class GenerateDB {
       }
       subjectiveSql.append(")");
       stmt.executeUpdate(subjectiveSql.toString());
-
-    } finally {
-      SQLFunctions.close(stmt);
-      stmt = null;
     }
   }
 
@@ -993,9 +930,7 @@ public final class GenerateDB {
    */
   /* package */static void createSubjectiveCategoryScheduleColumnMappingTables(final Connection connection)
       throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
 
       stmt.executeUpdate("DROP TABLE IF EXISTS category_schedule_column CASCADE");
       final StringBuilder sql = new StringBuilder();
@@ -1007,9 +942,6 @@ public final class GenerateDB {
       sql.append(")");
       stmt.executeUpdate(sql.toString());
 
-    } finally {
-      SQLFunctions.close(stmt);
-      stmt = null;
     }
   }
 
@@ -1019,9 +951,7 @@ public final class GenerateDB {
    * @param connection
    */
   /* package */ static void createPlayoffBracketTeams(final Connection connection) throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
 
       stmt.executeUpdate("DROP TABLE IF EXISTS playoff_bracket_teams CASCADE");
       final StringBuilder sql = new StringBuilder();
@@ -1033,9 +963,6 @@ public final class GenerateDB {
       sql.append(")");
       stmt.executeUpdate(sql.toString());
 
-    } finally {
-      SQLFunctions.close(stmt);
-      stmt = null;
     }
   }
 
