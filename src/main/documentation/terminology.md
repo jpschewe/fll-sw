@@ -28,8 +28,8 @@ See the diagram at the bottom of this page for some examples.
 Score Categories
 ================
 
-There are 2 types of scoring categories.
-Performance and subjective.
+There are 3 types of scoring categories.
+Performance, subjective and non-numeric.
 Categories are made up of goals.
 All scores for the goals in a category are added together to determine the raw score for a category.
 Each category has a weight that determines how much that score contributes to a team's overall score.
@@ -53,15 +53,20 @@ Goals in a subjective category are scored within a range by a judge.
 Each judge may use different parts of the range and therefore may come up with a different score for the same team than another judge.
 For this reason, to determine the winner in a subjective category a single judge must see all teams in an award group or finalist judging must be used.
 
+Non-numeric
+-----------
+
+These categories are awarded based on criteria other than a score sheet.
+Non-numeric categories may be awarded per award group or overall; this is specified when defining the non-numeric category in the challenge description.
+
+
 
 Grouping goals
 ==============
 
-Each score category contains one or more goals. 
-The goals may also be grouped into goal categories.
-In the challenge description setting the "category" attribute of a goal specifies the name of the grouping for the goals.
-One should order the goals so that all goals in the same group are next to each other. 
-This may be enforced in the future version of the software.
+Goals can be part of a goal group.
+When editing the challenge description goals can exist outside of a goal group, directly in the category.
+They can also exist inside a goal group.
 
 This grouping can be useful for making it clear which goals are related to each other on the performance score sheets.
 This grouping is also used on the subjective score sheets to create sub-categories that are sometimes used to give extra awards.

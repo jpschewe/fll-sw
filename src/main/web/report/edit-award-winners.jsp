@@ -20,15 +20,6 @@
 
 <script type='text/javascript' src="edit-award-winners.js"></script>
 
-<!-- short term hack to get non-numeric nominee categories loaded, intend to have permanent fix with #810 -->
-<%
-fll.web.report.EditAwardWinners.populateContext(application, pageContext);
-%>
-<script type='text/javascript'>
-var nonNumericCategories = ${nonNumericCategories};
-</script>
-<!-- end hack -->
-
 </head>
 
 <body>
@@ -49,18 +40,15 @@ var nonNumericCategories = ${nonNumericCategories};
         defined in the challenge description.</p>
     <ul id="challenge-award-winners"></ul>
 
-    <h2>Extra awards per award group</h2>
+    <h2>Non-Numeric awards per award group</h2>
     <p>Specify the winners of additional awards that are per award
         group.</p>
-    <button id="extra-award-winners_add-category">Add Category</button>
-    <ul id="extra-award-winners"></ul>
+    <ul id="non-numeric-award-winners"></ul>
 
-    <h2>Extra overall awards</h2>
+    <h2>Non-Numeric overall awards</h2>
     <p>Specify the winners of awards that are not per award group
         (judges, etc.)</p>
-    <button id="overall-award-winners_add-category">Add
-        Category</button>
-    <ul id="overall-award-winners"></ul>
+    <ul id="non-numeric-overall-award-winners"></ul>
 
     <h2>Advancing Teams</h2>
     <p>Specify the teams advancing to the next tournament. The group

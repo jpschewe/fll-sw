@@ -18,15 +18,15 @@ import java.util.List;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
- * Methods to loading and storing {@link AwardWinner} and
+ * Methods for loading and storing {@link AwardWinner} and
  * {@link OverallAwardWinner}.
  */
-public final class SubjectiveAwardWinners {
-  private SubjectiveAwardWinners() {
+public final class AwardWinners {
+  private AwardWinners() {
   }
 
   /**
-   * Store the winners of awards specified in the challenge description.
+   * Store the winners of awards for the subjective categories.
    * 
    * @param connection where to store
    * @param tournamentId the tournament

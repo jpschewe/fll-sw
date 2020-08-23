@@ -78,6 +78,7 @@
     $.jStorage.set(STORAGE_PREFIX + "_playoffEndMinute", _playoffEndMinute);
 
     $.jStorage.set(STORAGE_PREFIX + "_schedules", _schedules);
+
   }
 
   /**
@@ -156,6 +157,7 @@
     if (null != value) {
       _schedules = value;
     }
+
   }
 
   /**
@@ -209,8 +211,11 @@
    *          the name of the category
    * @param numeric
    *          boolean stating if this is a numeric or non-numeric category
+   * @param overall
+   *          true if a category that is awarded for the tournament rather than
+   *          an award group
    */
-  function Category(name, numeric) {
+  function Category(name, numeric, overall) {
     var category_id;
     // find the next available id
     for (category_id = 0; category_id < Number.MAX_VALUE
@@ -226,6 +231,8 @@
     this.catId = category_id;
     this.teams = []; // all teams reguardless of division
     this.room = {}; // division -> room
+    this.scheduled = false;
+    this.overall = overall;
 
     _categories[this.catId] = this;
     _save();
@@ -675,7 +682,8 @@
       var prevScores = {};
       $.finalist.sortTeamsByCategory(teams, currentCategory);
       $.each(teams, function(i, team) {
-        if ($.finalist.isTeamInDivision(team, currentDivision)) {
+        if (currentCategory.overall
+            || $.finalist.isTeamInDivision(team, currentDivision)) {
           if (!checkedEnoughTeams) {
             var group = team.judgingGroup;
             prevScore = prevScores[group];
@@ -709,21 +717,24 @@
      *          the name of the category
      * @param numeric
      *          boolean if this is a numeric category or not
+     * @param overall
+     *          if true, this is a category that is awarded globally rather than
+     *          by award group
      * @returns the new category or Null if there is a duplicate
      */
-    addCategory : function(categoryName, numeric) {
+    addCategory : function(categoryName, numeric, overall) {
       if (_check_duplicate_category(categoryName)) {
         alert("There already exists a category with the name '" + categoryName
             + "'");
         return null;
       } else {
-        var newCategory = new Category(categoryName, numeric);
+        var newCategory = new Category(categoryName, numeric, overall);
         return newCategory;
       }
     },
 
     /**
-     * Remove the speciifed category.
+     * Remove the specified category.
      * 
      * @param category
      *          a category object
@@ -804,6 +815,31 @@
     },
 
     /**
+     * Get the all categories to be scheduled.
+     * 
+     * @returns {Array} sorted by name
+     */
+    getAllScheduledCategories : function() {
+      var categories = [];
+      $.each(_categories, function(i, category) {
+        if ($.finalist.isCategoryScheduled(category)) {
+          categories.push(category);
+        }
+      });
+
+      categories.sort(function(a, b) {
+        if (a.name == b.name) {
+          return 0;
+        } else if (a.name < b.name) {
+          return -1;
+        } else {
+          return 1;
+        }
+      });
+      return categories;
+    },
+
+    /**
      * Get a category by id
      * 
      * @param toFind
@@ -848,8 +884,15 @@
       teamNum = parseInt(teamNum, 10);
       var index = category.teams.indexOf(teamNum);
       if (-1 == index) {
-        // clear the schedule for the current division
-        _schedules[$.finalist.getCurrentDivision()] = null;
+        if (category.overall) {
+          // clear schedule for all categories
+          $.each($.finalist.getDivisions(), function(i, division) {
+            _schedules[division] = null;
+          });
+        } else {
+          // clear the schedule for the current division
+          _schedules[$.finalist.getCurrentDivision()] = null;
+        }
 
         category.teams.push(teamNum);
         _save();
@@ -870,8 +913,15 @@
       teamNum = parseInt(teamNum, 10);
       var index = category.teams.indexOf(teamNum);
       if (index != -1) {
-        // clear the schedule for the current division
-        _schedules[$.finalist.getCurrentDivision()] = null;
+        if (category.overall) {
+          // clear all schedules
+          $.each($.finalist.getDivisions(), function(i, division) {
+            _schedules[division] = null;
+          });
+        } else {
+          // clear the schedule for the current division
+          _schedules[$.finalist.getCurrentDivision()] = null;
+        }
 
         category.teams.splice(index, 1);
         if (save) {
@@ -889,7 +939,7 @@
       var toRemove = [];
       $.each(category.teams, function(index, teamNum) {
         var team = $.finalist.lookupTeam(teamNum);
-        if ($.finalist.isTeamInDivision(team, division)) {
+        if (category.overall || $.finalist.isTeamInDivision(team, division)) {
           toRemove.push(teamNum);
         }
       });
@@ -955,15 +1005,15 @@
     /**
      * @param division
      *          the division to work with
-     * @return map with key of team number and value is an array of categories
-     *         that the team is being judged in
+     * @return map with key of team number and value is an array of scheduled
+     *         categories that the team is being judged in
      */
     getTeamToCategoryMap : function(division) {
       var finalistsCount = {};
-      $.each($.finalist.getAllCategories(), function(i, category) {
+      $.each($.finalist.getAllScheduledCategories(), function(i, category) {
         $.each(category.teams, function(j, teamNum) {
           var team = $.finalist.lookupTeam(teamNum);
-          if ($.finalist.isTeamInDivision(team, division)) {
+          if (category.overall || $.finalist.isTeamInDivision(team, division)) {
             if (null == finalistsCount[teamNum]) {
               finalistsCount[teamNum] = [];
             }
@@ -1018,26 +1068,34 @@
         var team = $.finalist.lookupTeam(teamNum);
         var teamCategories = finalistsCount[teamNum];
         $.each(teamCategories, function(j, category) {
-          var scheduled = false;
-          $.each(schedule, function(k, slot) {
-            if (!scheduled && !$.finalist.isTimeslotBusy(slot, category.catId)
-                && !$.finalist.isTeamInTimeslot(slot, teamNum)
-                && !$.finalist.hasPlayoffConflict(team, slot)) {
-              $.finalist.addTeamToTimeslot(slot, category.catId, teamNum);
-              scheduled = true;
-            }
-          }); // foreach timeslot
-          while (!scheduled) {
-            var newSlot = new Timeslot(nextTime, slotDuration);
-            schedule.push(newSlot);
 
-            nextTime = $.finalist.addMinutesToTime(nextTime, slotDuration);
+          if ($.finalist.isCategoryScheduled(category)) {
 
-            if (!$.finalist.hasPlayoffConflict(team, newSlot)) {
-              scheduled = true;
-              $.finalist.addTeamToTimeslot(newSlot, category.catId, teamNum);
+            var scheduled = false;
+            $.each(schedule, function(k, slot) {
+              if (!scheduled
+                  && !$.finalist.isTimeslotBusy(slot, category.catId)
+                  && !$.finalist.isTeamInTimeslot(slot, teamNum)
+                  && !$.finalist.hasPlayoffConflict(team, slot)) {
+                $.finalist.addTeamToTimeslot(slot, category.catId, teamNum);
+                scheduled = true;
+              }
+            }); // foreach timeslot
+
+            while (!scheduled) {
+              var newSlot = new Timeslot(nextTime, slotDuration);
+              schedule.push(newSlot);
+
+              nextTime = $.finalist.addMinutesToTime(nextTime, slotDuration);
+
+              if (!$.finalist.hasPlayoffConflict(team, newSlot)) {
+                scheduled = true;
+                $.finalist.addTeamToTimeslot(newSlot, category.catId, teamNum);
+              }
             }
-          }
+
+          } // category is scheduled
+
         }); // foreach category
       }); // foreach sorted team
 
@@ -1231,42 +1289,31 @@
 
     },
 
-    handleCacheEvent : function(e) {
-      $.finalist.log("cache event: " + e.type);
-      var appCache = window.applicationCache;
-      switch (appCache.status) {
-      case appCache.UNCACHED: // UNCACHED == 0
-        $.finalist.log('cache state:UNCACHED');
-        break;
-      case appCache.IDLE: // IDLE == 1
-        $.finalist.log('cache state:IDLE');
-        $("#cache-ready").show();
-        break;
-      case appCache.CHECKING: // CHECKING == 2
-        $.finalist.log('cache state:CHECKING');
-        break;
-      case appCache.DOWNLOADING: // DOWNLOADING == 3
-        $.finalist.log('cache state:DOWNLOADING');
-        break;
-      case appCache.UPDATEREADY: // UPDATEREADY == 4
-        $.finalist.log('cache state:UPDATEREADY');
-        $("#cache-ready").show();
-        break;
-      case appCache.OBSOLETE: // OBSOLETE == 5
-        $.finalist.log('cache state:OBSOLETE');
-        break;
-      default:
-        return 'cache state:UKNOWN CACHE STATUS';
-        break;
-      }
-      ;
-    },
-
     log : function(str) {
       if (typeof (console) != 'undefined') {
         console.log(str);
       }
     },
+
+    /**
+     * @param category
+     *          the category
+     * @param isScheduled
+     *          true if this category should be considered in the schedule
+     */
+    setCategoryScheduled : function(category, isScheduled) {
+      category.scheduled = isScheduled;
+      _save();
+    },
+
+    /**
+     * @param category
+     *          the category to check
+     * @return is this category to be put in the schedule
+     */
+    isCategoryScheduled : function(category) {
+      return category.scheduled;
+    }
 
   };
 

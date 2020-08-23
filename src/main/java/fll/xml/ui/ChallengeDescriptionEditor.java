@@ -34,6 +34,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.FormatterUtils;
 import fll.xml.ChallengeDescription;
+import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
 import fll.xml.ui.MovableExpandablePanel.DeleteEventListener;
@@ -81,6 +82,16 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
   private final ValidityPanel performanceValid;
 
   private final ValidityPanel subjectiveValid;
+
+  private final List<NonNumericCategoryEditor> nonNumericCategoryEditors = new LinkedList<>();
+
+  private final JComponent nonNumericCategoryContainer;
+
+  private final MoveEventListener nonNumericCategoryMoveListener;
+
+  private final DeleteEventListener nonNumericCategoryDeleteListener;
+
+  private final ValidityPanel nonNumericCategoriesValid;
 
   /**
    * Number of columns for a short text field.
@@ -319,6 +330,99 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
 
     mDescription.getSubjectiveCategories().forEach(this::addSubjectiveCategory);
 
+    // non-numeric categories
+
+    final Box nonNumericCategoriesTopContainer = Box.createVerticalBox();
+    topPanel.add(nonNumericCategoriesTopContainer);
+    nonNumericCategoriesTopContainer.setBorder(BorderFactory.createTitledBorder("Non-Numeric"));
+
+    nonNumericCategoriesValid = new ValidityPanel();
+    nonNumericCategoriesTopContainer.add(nonNumericCategoriesValid);
+
+    final Box nonNumericCategoriesButtonBox = Box.createHorizontalBox();
+    nonNumericCategoriesTopContainer.add(nonNumericCategoriesButtonBox);
+
+    final JButton addNonNumericCategory = new JButton("Add Non-Numeric Category");
+    nonNumericCategoriesButtonBox.add(addNonNumericCategory);
+    addNonNumericCategory.addActionListener(l -> addNewNonNumericCategory());
+
+    nonNumericCategoriesButtonBox.add(Box.createHorizontalGlue());
+
+    nonNumericCategoryContainer = Box.createVerticalBox();
+    nonNumericCategoriesTopContainer.add(nonNumericCategoryContainer);
+
+    nonNumericCategoryMoveListener = e -> {
+      final int oldIndex = Utilities.getIndexOfComponent(nonNumericCategoryContainer, e.getComponent());
+      if (oldIndex < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of move event in non-numeric container");
+        }
+        return;
+      }
+
+      final int newIndex;
+      if (e.getDirection() == MoveDirection.DOWN) {
+        newIndex = oldIndex
+            + 1;
+      } else {
+        newIndex = oldIndex
+            - 1;
+      }
+
+      if (newIndex < 0
+          || newIndex >= nonNumericCategoryContainer.getComponentCount()) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("NonNumeric: Can't move component outside the container oldIndex: "
+              + oldIndex
+              + " newIndex: "
+              + newIndex);
+        }
+        return;
+      }
+
+      // update editor list
+      final NonNumericCategoryEditor editor = nonNumericCategoryEditors.remove(oldIndex);
+      nonNumericCategoryEditors.add(newIndex, editor);
+
+      // update the UI
+      nonNumericCategoryContainer.add(editor, newIndex);
+      nonNumericCategoryContainer.validate();
+
+      // update the order in the challenge description
+      final NonNumericCategory category = mDescription.removeNonNumericCategory(oldIndex);
+      mDescription.addNonNumericCategory(newIndex, category);
+    };
+
+    nonNumericCategoryDeleteListener = e -> {
+      final int confirm = JOptionPane.showConfirmDialog(ChallengeDescriptionEditor.this,
+                                                        "Are you sure that you want to delete the non-numeric category?",
+                                                        "Confirm Delete", JOptionPane.YES_NO_OPTION);
+      if (confirm != JOptionPane.YES_OPTION) {
+        return;
+      }
+
+      final int index = Utilities.getIndexOfComponent(nonNumericCategoryContainer, e.getComponent());
+      if (index < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of delete event in non-numeric category container");
+        }
+        return;
+      }
+
+      // update editor list
+      nonNumericCategoryEditors.remove(index);
+
+      // update the challenge description
+      mDescription.removeNonNumericCategory(index);
+
+      // update the UI
+      GuiUtils.removeFromContainer(nonNumericCategoryContainer, index);
+    };
+
+    mDescription.getNonNumericCategories().forEach(this::addNonNumericCategory);
+
+    // end non-numeric categories
+
     // fill in the bottom of the panel
     topPanel.add(Box.createVerticalGlue());
 
@@ -352,6 +456,34 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     mSubjectiveEditors.add(editor);
   }
 
+  private void addNewNonNumericCategory() {
+    final String name = String.format("name_%d", nonNumericCategoryEditors.size());
+    final String title = String.format("Category %d", nonNumericCategoryEditors.size());
+
+    final NonNumericCategory cat = new NonNumericCategory(name, title, true);
+    mDescription.addNonNumericCategory(cat);
+
+    addNonNumericCategory(cat);
+  }
+
+  private void addNonNumericCategory(final NonNumericCategory cat) {
+    final NonNumericCategoryEditor editor = new NonNumericCategoryEditor(cat);
+    editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
+
+    final MovableExpandablePanel container = new MovableExpandablePanel(cat.getTitle(), editor, true, true);
+    container.addMoveEventListener(nonNumericCategoryMoveListener);
+    container.addDeleteEventListener(nonNumericCategoryDeleteListener);
+
+    editor.addPropertyChangeListener("title", e -> {
+      final String newTitle = (String) e.getNewValue();
+      container.setTitle(newTitle);
+    });
+
+    GuiUtils.addToContainer(nonNumericCategoryContainer, container);
+
+    nonNumericCategoryEditors.add(editor);
+  }
+
   /**
    * Force any pending edits to complete.
    */
@@ -382,6 +514,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
 
     mPerformanceEditor.commitChanges();
     mSubjectiveEditors.forEach(e -> e.commitChanges());
+    nonNumericCategoryEditors.forEach(e -> e.commitChanges());
   }
 
   @Override
@@ -430,6 +563,30 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
       subjectiveValid.setInvalid(message);
     } else {
       subjectiveValid.setValid();
+    }
+
+    final Collection<String> nonNumericCategoryInvalidMessages = new LinkedList<>();
+    final Set<String> nonNumericCategoryTitles = new HashSet<>();
+    for (final NonNumericCategoryEditor editor : nonNumericCategoryEditors) {
+      final String title = editor.getNonNumericCategory().getTitle();
+
+      final boolean editorValid = editor.checkValidity(nonNumericCategoryInvalidMessages);
+      if (!editorValid) {
+        nonNumericCategoryInvalidMessages.add(String.format("Category \"%s\" has invalid elements", title));
+        valid = false;
+      }
+
+      final boolean newTitle = nonNumericCategoryTitles.add(title);
+      if (!newTitle) {
+        nonNumericCategoryInvalidMessages.add(String.format("The non-numeric category title \"%s\" is used more than once",
+                                                            title));
+      }
+    }
+    if (!nonNumericCategoryInvalidMessages.isEmpty()) {
+      final String message = String.join("<br/>", nonNumericCategoryInvalidMessages);
+      nonNumericCategoriesValid.setInvalid(message);
+    } else {
+      nonNumericCategoriesValid.setValid();
     }
 
     return valid;

@@ -39,7 +39,7 @@ import fll.Utilities;
 import fll.db.AdvancingTeam;
 import fll.db.AwardWinner;
 import fll.db.OverallAwardWinner;
-import fll.db.SubjectiveAwardWinners;
+import fll.db.AwardWinners;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
@@ -177,7 +177,7 @@ public class AwardsReport extends BaseFLLServlet {
                                              final Tournament tournament,
                                              final List<String> sortedAwardGroups)
       throws SQLException {
-    final List<AwardWinner> winners = SubjectiveAwardWinners.getChallengeAwardWinners(connection,
+    final List<AwardWinner> winners = AwardWinners.getChallengeAwardWinners(connection,
                                                                                       tournament.getTournamentID());
 
     addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups);
@@ -189,7 +189,7 @@ public class AwardsReport extends BaseFLLServlet {
                                          final Tournament tournament,
                                          final List<String> sortedAwardGroups)
       throws SQLException {
-    final List<AwardWinner> winners = SubjectiveAwardWinners.getExtraAwardWinners(connection,
+    final List<AwardWinner> winners = AwardWinners.getExtraAwardWinners(connection,
                                                                                   tournament.getTournamentID());
 
     addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups);
@@ -224,7 +224,7 @@ public class AwardsReport extends BaseFLLServlet {
                                            final Element documentBody,
                                            final Tournament tournament)
       throws SQLException {
-    final List<OverallAwardWinner> winners = SubjectiveAwardWinners.getOverallAwardWinners(connection,
+    final List<OverallAwardWinner> winners = AwardWinners.getOverallAwardWinners(connection,
                                                                                            tournament.getTournamentID());
 
     final Map<String, List<OverallAwardWinner>> organizedWinners = new HashMap<>();

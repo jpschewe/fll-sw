@@ -3,8 +3,6 @@
 <head>
 <title>Finalist Scheduling</title>
 
-<script type="text/javascript" src='../../scripts/appcache-support.js'></script>
-
 <script type='text/javascript' src='../../extlib/jquery-1.11.1.min.js'></script>
 <script type='text/javascript'
     src='../../extlib/jquery.json-2.5-pre.min.js'></script>
@@ -17,10 +15,20 @@
     <div id='navbar'></div>
     <hr />
 
-    <h1>Non Numeric Subjective Categories</h1>
+    <h1>Non Numeric Categories</h1>
 
     <p>This page allows you to select teams that are nominated for
         awards that do not have scores in the database.</p>
+
+    <p>The checkbox next to the category specifies if the category
+        should be scheduled for finalist judging. If this tournament
+        does not have finalist judging this checkbox can be ignored.</p>
+
+    <h2>Overall</h2>
+    <p>These categories are awarded for the whole tournament rather
+        than per award group.</p>
+    <ul id='overall-categories'>
+    </ul>
 
     <h2>
         Award Group:
@@ -29,10 +37,6 @@
 
     <ul id='categories'>
     </ul>
-
-
-    <button id='add-category'>Add Category</button>
-
 
 
 </body>

@@ -17,17 +17,20 @@ var _challengeAwardWinners = [];
 var _challengeAwardWinnerData = [];
 
 // list of AwardWinner
-var _extraAwardWinners = [];
+var _nonNumericAwardWinners = [];
 // list of AwardWinnerData
-var _extraAwardWinnerData = [];
+var _nonNumericAwardWinnerData = [];
 
-// list of AwardWinner
-var _overallAwardWinners = [];
-// list of AwardWinnerData
-var _overallAwardWinnerData = [];
+// list of OverallAwardWinner
+var _nonNumericOverallAwardWinners = [];
+// list of OverallAwardWinnerData
+var _nonNumericOverallAwardWinnerData = [];
 
 // name -> ScoreCategory
 var _subjectiveCategories = {};
+
+// name -> NonNumericCategory
+var _nonNumericCategories = {};
 
 // list of names
 var _awardGroups = [];
@@ -92,22 +95,10 @@ $(document).ready(function() {
 
   $("#store_winners").click(function() {
     storeChallengeWinners();
-    storeExtraWinners();
-    storeOverallWinners();
+    storeNonNumericWinners();
+    storeNonNumericOverallWinners();
     storeAdvancingTeams();
     storeSortedGroups();
-  });
-
-  var extraCategoryCount = 1;
-  $("#extra-award-winners_add-category").click(function() {
-    addExtraCategory("Category " + extraCategoryCount);
-    extraCategoryCount = extraCategoryCount + 1;
-  });
-
-  var overallCategoryCount = 1;
-  $("#overall-award-winners_add-category").click(function() {
-    addOverallCategory("Category " + overallCategoryCount);
-    overallCategoryCount = overallCategoryCount + 1;
   });
 
   var advancingGroupCount = 1;
@@ -143,9 +134,9 @@ function storeChallengeWinners() {
   }
 }
 
-function storeExtraWinners() {
+function storeNonNumericWinners() {
   var winners = [];
-  $.each(_extraAwardWinnerData, function(i, data) {
+  $.each(_nonNumericAwardWinnerData, function(i, data) {
     var winner = createAwardWinner(data);
     if (winner) {
       winners.push(winner);
@@ -155,7 +146,7 @@ function storeExtraWinners() {
   if (winners.length) {
     // send to server
     var jsonData = JSON.stringify(winners);
-    $.post("/api/SubjectiveExtraAwardWinners", jsonData, function(response) {
+    $.post("/api/NonNumericAwardWinners", jsonData, function(response) {
       if (!response.success) {
         alert("Error sending extra award winners: " + response.message);
       }
@@ -165,9 +156,9 @@ function storeExtraWinners() {
   }
 }
 
-function storeOverallWinners() {
+function storeNonNumericOverallWinners() {
   var winners = [];
-  $.each(_overallAwardWinnerData, function(i, data) {
+  $.each(_nonNumericOverallAwardWinnerData, function(i, data) {
     var winner = createOverallAwardWinner(data);
     if (winner) {
       winners.push(winner);
@@ -177,7 +168,7 @@ function storeOverallWinners() {
   if (winners.length) {
     // send to server
     var jsonData = JSON.stringify(winners);
-    $.post("/api/SubjectiveOverallAwardWinners", jsonData, function(response) {
+    $.post("/api/NonNumericOverallAwardWinners", jsonData, function(response) {
       if (!response.success) {
         alert("Error sending overall award winners: " + response.message);
       }
@@ -211,8 +202,8 @@ function storeAdvancingTeams() {
 
 function initPage() {
   initChallengeWinners();
-  initExtraWinners();
-  initOverallWinners();
+  initNonNumericWinners();
+  initNonNumericOverallWinners();
   initAdvancingTeams();
 }
 
@@ -268,167 +259,105 @@ function initChallengeWinners() {
 
 }
 
-/**
- * 
- * @param name
- *          the name of the category (may be null)
- */
-function addExtraCategory(name) {
-  var categoryItem = $("<li></li>");
-  $("#extra-award-winners").append(categoryItem);
+function initNonNumericWinners() {
+  _nonNumericAwardWinnerData = [];
+  $("#non-numeric-award-winners").empty();
 
-  var categoryEle = $("<input type='text' />");
-  categoryItem.append(categoryEle);
-  categoryEle.val(name);
-  categoryEle.data('oldVal', name);
-  categoryEle.change(function() {
-    var newName = $(this).val();
-    var oldValue = $(this).data('oldVal');
-    if (null == newName || "" == newName) {
-      $(this).val(oldValue);
-      alert("All categories must have non-empty names");
-    } else {
-      $(this).data('oldVal', newName);
-    }
-  });
+  $.each(_nonNumericCategories, function(i, category) {
+    if (category.perAwardGroup) {
+      var name = category.title;
 
-  var categoryList = $("<ul></ul>");
-  categoryItem.append(categoryList);
+      var categoryNameFunc = function() {
+        return category.title;
+      };
 
-  var nameFunc = function() {
-    return categoryEle.val();
-  };
+      var categoryItem = $("<li>" + name + "</li>");
+      $("#non-numeric-award-winners").append(categoryItem);
+      var categoryList = $("<ul></ul>");
+      categoryItem.append(categoryList);
 
-  $.each(_awardGroups, function(i, awardGroup) {
-    var awardGroupItem = $("<li>" + awardGroup + "</li>");
-    categoryList.append(awardGroupItem);
+      $.each(_awardGroups, function(i, awardGroup) {
+        var awardGroupItem = $("<li>" + awardGroup + "</li>");
+        categoryList.append(awardGroupItem);
 
-    var addTeamButton = $("<button>Add Team</button>");
-    awardGroupItem.append(addTeamButton);
+        var addTeamButton = $("<button>Add Team</button>");
+        awardGroupItem.append(addTeamButton);
 
-    var teamList = $("<ul></ul>");
-    awardGroupItem.append(teamList);
+        var teamList = $("<ul></ul>");
+        awardGroupItem.append(teamList);
 
-    addTeamButton.click(function() {
-      addTeam(null, _extraAwardWinnerData, nameFunc, awardGroup, teamList);
-    });
+        addTeamButton.click(function() {
+          addTeam(null, _nonNumericAwardWinnerData, categoryNameFunc,
+              awardGroup, teamList);
+        });
 
-    var enterNewTeam = true;
-    if (name) {
-      $.each(_extraAwardWinners,
-          function(i, winner) {
-            if (winner.name == name && winner.awardGroup == awardGroup) {
-              addTeam(winner, _extraAwardWinnerData, nameFunc, awardGroup,
-                  teamList);
-              enterNewTeam = false;
-            }
-          }); // foreach loaded winner
-    }
+        var enterNewTeam = true;
+        $.each(_nonNumericAwardWinnerData, function(i, winner) {
+          if (winner.name == name && winner.awardGroup == awardGroup) {
+            addTeam(winner, _nonNumericAwardWinnerData, categoryNameFunc,
+                awardGroup, teamList);
+            enterNewTeam = false;
+          }
+        }); // foreach loaded winner
 
-    if (enterNewTeam) {
-      // add an empty team if there weren't any loaded from the server
-      addTeam(null, _extraAwardWinnerData, nameFunc, awardGroup, teamList);
-    }
-  }); // foreach award group
+        if (enterNewTeam) {
+          // add an empty team if there weren't any loaded from the server
+          addTeam(null, _nonNumericAwardWinnerData, categoryNameFunc,
+              awardGroup, teamList);
+        }
+
+      }); // foreach award group
+    } // per award group
+  }); // foreach category
 
 }
 
-function initExtraWinners() {
-  _extraAwardWinnerData = [];
-  $("#extra-award-winners").empty();
+function initNonNumericOverallWinners() {
+  _nonNumericOverallAwardWinnerData = [];
+  $("#non-numeric-overall-award-winners").empty();
 
-  var knownCategories = [];
-  $.each(_extraAwardWinners, function(i, winner) {
-    if (!knownCategories.includes(winner.name)) {
-      knownCategories.push(winner.name);
-    }
-  });
+  $.each(_nonNumericCategories, function(i, category) {
+    if (!category.perAwardGroup) {
+      var name = category.title;
 
-  if (nonNumericCategories) {
-    $.each(nonNumericCategories, function(i, categoryName) {
-      if (!knownCategories.includes(categoryName)) {
-        knownCategories.push(categoryName);
+      var categoryNameFunc = function() {
+        return category.title;
+      };
+
+      var categoryItem = $("<li>" + name + "</li>");
+      $("#non-numeric-overall-award-winners").append(categoryItem);
+      var categoryList = $("<ul></ul>");
+      categoryItem.append(categoryList);
+
+      var addTeamButton = $("<button>Add Team</button>");
+      categoryItem.append(addTeamButton);
+
+      var teamList = $("<ul></ul>");
+      categoryItem.append(teamList);
+
+      addTeamButton.click(function() {
+        addTeam(null, _nonNumericOverallAwardWinnerData, categoryNameFunc,
+            null, teamList);
+      });
+
+      var enterNewTeam = true;
+      $.each(_nonNumericOverallAwardWinnerData, function(i, winner) {
+        if (winner.name == name && winner.awardGroup == awardGroup) {
+          addTeam(winner, _nonNumericOverallAwardWinnerData, categoryNameFunc,
+              null, teamList);
+          enterNewTeam = false;
+        }
+      }); // foreach loaded winner
+
+      if (enterNewTeam) {
+        // add an empty team if there weren't any loaded from the server
+        addTeam(null, _nonNumericOverallAwardWinnerData, categoryNameFunc,
+            null, teamList);
       }
-    });
-  }
+    } // overall award
 
-  $.each(knownCategories, function(i, category) {
-    addExtraCategory(category);
-  });
-}
+  }); // foreach category
 
-/**
- * 
- * @param name
- *          the name of the category (may be null)
- */
-function addOverallCategory(name) {
-  var categoryItem = $("<li></li>");
-  $("#overall-award-winners").append(categoryItem);
-
-  var categoryEle = $("<input type='text' />");
-  categoryItem.append(categoryEle);
-  categoryEle.val(name);
-  categoryEle.data('oldVal', name);
-  categoryEle.change(function() {
-    var newName = $(this).val();
-    var oldValue = $(this).data('oldVal');
-    if (null == newName || "" == newName) {
-      alert("All categories must have non-empty names");
-      $(this).val(oldValue);
-    } else {
-      $(this).data('oldVal', newName);
-    }
-  });
-
-  var categoryList = $("<ul></ul>");
-  categoryItem.append(categoryList);
-
-  var nameFunc = function() {
-    return categoryEle.val();
-  };
-
-  var addTeamButton = $("<button>Add Team</button>");
-  categoryItem.append(addTeamButton);
-
-  var teamList = $("<ul></ul>");
-  categoryItem.append(teamList);
-
-  addTeamButton.click(function() {
-    addTeam(null, _overallAwardWinnerData, nameFunc, null, teamList);
-  });
-
-  var enterNewTeam = true;
-  if (name) {
-    $.each(_overallAwardWinners, function(i, winner) {
-      if (winner.name == name) {
-        addTeam(winner, _overallAwardWinnerData, nameFunc, null, teamList);
-        enterNewTeam = false;
-      }
-    }); // foreach loaded winner
-  }
-
-  if (enterNewTeam) {
-    // add an empty team if there weren't any loaded from the server
-    addTeam(null, _overallAwardWinnerData, nameFunc, null, teamList);
-  }
-
-}
-
-function initOverallWinners() {
-  _overallAwardWinnerData = [];
-  $("#overall-award-winners").empty();
-
-  var knownCategories = [];
-  $.each(_overallAwardWinners, function(i, winner) {
-    if (!knownCategories.includes(winner.name)) {
-      knownCategories.push(winner.name);
-    }
-  });
-
-  $.each(knownCategories, function(i, category) {
-    addOverallCategory(category);
-  });
 }
 
 /**
@@ -551,6 +480,17 @@ function loadSubjectiveCategories() {
   });
 }
 
+function loadNonNumericCategories() {
+  _nonNumericCategories = {};
+
+  return $.getJSON("/api/ChallengeDescription/NonNumericCategories", function(
+      categories) {
+    $.each(categories, function(i, category) {
+      _nonNumericCategories[category.name] = category;
+    });
+  });
+}
+
 function loadChallengeAwardWinners() {
   _challengeAwardWinners = [];
 
@@ -560,18 +500,18 @@ function loadChallengeAwardWinners() {
 }
 
 function loadExtraAwardWinners() {
-  _extraAwardWinners = [];
+  _nonNumericAwardWinners = [];
 
-  return $.getJSON("/api/SubjectiveExtraAwardWinners", function(winners) {
-    _extraAwardWinners = winners;
+  return $.getJSON("/api/NonNumericAwardWinners", function(winners) {
+    _nonNumericAwardWinners = winners;
   });
 }
 
 function loadOverallAwardWinners() {
-  _overallAwardWinners = [];
+  _nonNumericOverallAwardWinners = [];
 
-  return $.getJSON("/api/SubjectiveOverallAwardWinners", function(winners) {
-    _overallAwardWinners = winners;
+  return $.getJSON("/api/NonNumericOverallAwardWinners", function(winners) {
+    _nonNumericOverallAwardWinners = winners;
   });
 }
 
@@ -615,6 +555,12 @@ function loadFromServer(doneCallback, failCallback) {
     failCallback("Subjective Categories");
   });
   waitList.push(subjectiveCategoriesPromise);
+
+  var nonNumericCategoriesPromise = loadNonNumericCategories();
+  nonNumericCategoriesPromise.fail(function() {
+    failCallback("Non-numeric Categories");
+  });
+  waitList.push(nonNumericCategoriesPromise);
 
   var tournamentPromise = loadTournament();
   tournamentPromise.fail(function() {

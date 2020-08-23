@@ -23,9 +23,12 @@ public class SubjectiveScoreCategory extends ScoreCategory {
    */
   public static final String TAG_NAME = "subjectiveCategory";
 
-  private static final String NAME_ATTRIBUTE = "name";
+  /**
+   * XML attribute to store the name.
+   */
+  /* package */ static final String NAME_ATTRIBUTE = "name";
 
-  private static final String TITLE_ATTRIBUTE = "title";
+  private static final String TITLE_ATTRIBUTE = ChallengeDescription.TITLE_ATTRIBUTE;
 
   /**
    * The XML attribute to write the description to.
