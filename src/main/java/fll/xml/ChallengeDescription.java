@@ -24,12 +24,24 @@ import net.mtu.eggplant.xml.XMLUtils;
  */
 public class ChallengeDescription implements Serializable {
 
+  /**
+   * XML attribute for {@link #getTitle()}.
+   */
   public static final String TITLE_ATTRIBUTE = "title";
 
+  /**
+   * XML attribute for {@link #getRevision()}.
+   */
   public static final String REVISION_ATTRIBUTE = "revision";
 
+  /**
+   * XML attribute for {@link #getCopyright()}.
+   */
   public static final String COPYRIGHT_ATTRIBUTE = "copyright";
 
+  /**
+   * XML attribute for the schema version.
+   */
   public static final String SCHEMA_VERSION_ATTRIBUTE = "schemaVersion";
 
   /**
@@ -52,11 +64,16 @@ public class ChallengeDescription implements Serializable {
     final Element performanceElement = (Element) ele.getElementsByTagName(PerformanceScoreCategory.TAG_NAME).item(0);
     mPerformance = new PerformanceScoreCategory(performanceElement);
 
-    mSubjectiveCategories = new LinkedList<>();
     for (final Element subjEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(SubjectiveScoreCategory.TAG_NAME))) {
       final SubjectiveScoreCategory subj = new SubjectiveScoreCategory(subjEle);
       mSubjectiveCategories.add(subj);
     }
+
+    for (final Element catEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(NonNumericCategory.TAG_NAME))) {
+      final NonNumericCategory cat = new NonNumericCategory(catEle);
+      nonNumericCategories.add(cat);
+    }
+
   }
 
   /**
@@ -73,7 +90,6 @@ public class ChallengeDescription implements Serializable {
     mWinner = WinnerType.HIGH;
     mCopyright = null;
     mPerformance = new PerformanceScoreCategory();
-    mSubjectiveCategories = new LinkedList<>();
   }
 
   private String mCopyright;
@@ -162,7 +178,7 @@ public class ChallengeDescription implements Serializable {
     mPerformance = v;
   }
 
-  private final List<SubjectiveScoreCategory> mSubjectiveCategories;
+  private final List<SubjectiveScoreCategory> mSubjectiveCategories = new LinkedList<>();
 
   /**
    * @return unmodifiable list
@@ -230,6 +246,62 @@ public class ChallengeDescription implements Serializable {
     return null;
   }
 
+  private final LinkedList<NonNumericCategory> nonNumericCategories = new LinkedList<>();
+
+  /**
+   * @return unmodifiable list
+   */
+  public List<NonNumericCategory> getNonNumericCategories() {
+    return nonNumericCategories;
+  }
+
+  /**
+   * Add a subjective category to the end of the list.
+   * Since {@link ScoreCategory} is mutable, this does not check that the names
+   * are unique. That needs to be done by a higher level class.
+   *
+   * @param v the category to add
+   */
+  public void addNonNumericCategory(final NonNumericCategory v) {
+    nonNumericCategories.add(v);
+  }
+
+  /**
+   * Add a non-numeric category at the specified index.
+   * Since {@link NonNumericCategory} is mutable, this does not check that the
+   * titles
+   * are unique. That needs to be done by a higher level class.
+   *
+   * @param v the category to add
+   * @param index the index to add the category at
+   */
+  public void addNonNumericCategory(final int index,
+                                    final NonNumericCategory v)
+      throws IndexOutOfBoundsException {
+    nonNumericCategories.add(index, v);
+  }
+
+  /**
+   * Remove a non-numeric category.
+   *
+   * @param v the category to remove
+   * @return if the category was removed
+   * @see List#remove(Object)
+   */
+  public boolean removeNonNumericCategory(final NonNumericCategory v) {
+    return nonNumericCategories.remove(v);
+  }
+
+  /**
+   * Remove the non-numeric category at the specified index.
+   *
+   * @param index the index to remove the element from
+   * @return the category that was removed
+   */
+  public NonNumericCategory removeNonNumericCategory(final int index) throws IndexOutOfBoundsException {
+    return nonNumericCategories.remove(index);
+  }
+
   /**
    * Create the XML for the current state of this challenge description.
    *
@@ -257,24 +329,24 @@ public class ChallengeDescription implements Serializable {
       fll.appendChild(subjEle);
     }
 
+    for (final NonNumericCategory cat : nonNumericCategories) {
+      final Element catEle = cat.toXml(document);
+      fll.appendChild(catEle);
+    }
+
     return document;
   }
 
   /**
-   *
    * @param str remove carriage returns and multiple spaces
    * @return string without the line endings and multiple spaces in a row
    */
-  /*package*/ static String removeExtraWhitespace(final String str) {
+  /* package */ static String removeExtraWhitespace(final String str) {
     if (null == str) {
       return str;
+    } else {
+      return str.replaceAll("\\s+", " ");
     }
-
-    String result = str.trim();
-    result = result.replace('\r', ' ');
-    result = result.replace('\n', ' ');
-    result = result.replaceAll("\\s+", " ");
-    return result;
   }
 
 }

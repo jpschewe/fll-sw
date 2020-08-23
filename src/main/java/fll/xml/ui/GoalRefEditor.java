@@ -29,7 +29,7 @@ import fll.xml.GoalScoreType;
  */
 @SuppressFBWarnings(value = { "SE_BAD_FIELD",
                               "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
-class GoalRefEditor extends JPanel {
+/* package */ class GoalRefEditor extends JPanel {
 
   private final GoalRef goalRef;
 
@@ -38,7 +38,7 @@ class GoalRefEditor extends JPanel {
   /**
    * @param ref the object to edit
    */
-  public GoalRefEditor(@Nonnull final GoalRef ref) {
+  /* package */ GoalRefEditor(@Nonnull final GoalRef ref) {
     this.goalRef = ref;
 
     setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));

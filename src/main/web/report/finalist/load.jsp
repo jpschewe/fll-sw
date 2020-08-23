@@ -31,8 +31,9 @@
   var championship = $.finalist
         .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
     if (null == championship) {
-      championship = $.finalist.addCategory($.finalist.CHAMPIONSHIP_NAME, true);
+      championship = $.finalist.addCategory($.finalist.CHAMPIONSHIP_NAME, true, false);
     }
+    $.finalist.setCategoryScheduled(championship, true);
 <%FinalistLoad.outputCategoryScores(out, application);%>
   
 <%FinalistLoad.outputNonNumericNominees(out, application);%>

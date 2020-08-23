@@ -22,13 +22,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fll.Utilities;
 import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
-import fll.xml.SubjectiveScoreCategory;
+import fll.xml.NonNumericCategory;
 
 /**
- * Get {@link ChallengeDescription#getSubjectiveCategories()}.
+ * Get {@link ChallengeDescription#getNonNumericCategories()}.
  */
-@WebServlet("/api/ChallengeDescription/SubjectiveCategories/*")
-public class SubjectiveCategories extends HttpServlet {
+@WebServlet("/api/ChallengeDescription/NonNumericCategories/*")
+public class NonNumericCategories extends HttpServlet {
 
   @Override
   protected final void doGet(final HttpServletRequest request,
@@ -43,7 +43,7 @@ public class SubjectiveCategories extends HttpServlet {
     final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-    final List<SubjectiveScoreCategory> categories = challengeDescription.getSubjectiveCategories();
+    final List<NonNumericCategory> categories = challengeDescription.getNonNumericCategories();
 
     jsonMapper.writeValue(writer, categories);
   }

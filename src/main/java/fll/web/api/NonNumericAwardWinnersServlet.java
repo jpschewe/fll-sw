@@ -30,17 +30,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fll.Utilities;
 import fll.db.AwardWinner;
 import fll.db.Queries;
-import fll.db.SubjectiveAwardWinners;
+import fll.db.AwardWinners;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 
 /**
- * Get and set extra subjective award winners.
+ * Get and set non-numeric award winners that are per award group.
  * The gets/sets a {@link Collection} of {@link AwardWinner} objects.
  * Post result is of type {@link PostResult}.
  */
-@WebServlet("/api/SubjectiveExtraAwardWinners")
-public class SubjectiveExtraAwardWinnersServlet extends HttpServlet {
+@WebServlet("/api/NonNumericAwardWinners")
+public class NonNumericAwardWinnersServlet extends HttpServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -60,8 +60,7 @@ public class SubjectiveExtraAwardWinnersServlet extends HttpServlet {
       final PrintWriter writer = response.getWriter();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
-      final Collection<AwardWinner> winners = SubjectiveAwardWinners.getExtraAwardWinners(connection,
-                                                                                          currentTournament);
+      final Collection<AwardWinner> winners = AwardWinners.getExtraAwardWinners(connection, currentTournament);
 
       jsonMapper.writeValue(writer, winners);
     } catch (final SQLException e) {
@@ -98,7 +97,7 @@ public class SubjectiveExtraAwardWinnersServlet extends HttpServlet {
       final Collection<AwardWinner> winners = jsonMapper.readValue(reader,
                                                                    AwardWinner.AwardWinnerCollectionTypeInformation.INSTANCE);
 
-      SubjectiveAwardWinners.storeExtraAwardWinners(connection, currentTournament, winners);
+      AwardWinners.storeExtraAwardWinners(connection, currentTournament, winners);
       final PostResult result = new PostResult(true, Optional.empty());
       jsonMapper.writeValue(writer, result);
 

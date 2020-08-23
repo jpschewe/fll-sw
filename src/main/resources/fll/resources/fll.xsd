@@ -7,6 +7,8 @@
                 <xsd:element ref="Performance" />
                 <xsd:element ref="subjectiveCategory"
                     minOccurs="0" maxOccurs="unbounded" />
+                <xsd:element ref="nonNumericCategory"
+                    minOccurs="0" maxOccurs="unbounded" />
             </xsd:sequence>
 
             <xsd:attribute name="schemaVersion"
@@ -54,6 +56,30 @@
                         for a
                         golf tournament or
                         drag race times.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="nonNumericCategory">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="description"
+                    minOccurs="0" maxOccurs="1" type="xsd:string" />
+            </xsd:sequence>
+
+            <xsd:attribute name="name" type="databaseName"
+                use="required" />
+            <xsd:attribute name="title" type="xsd:string" />
+            <xsd:attribute name="perAwardGroup"
+                type="xsd:boolean">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        If true the the winners of the
+                        category are per award group. If
+                        false the
+                        winners are per tournament.
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:attribute>
@@ -118,6 +144,12 @@
         </xsd:key>
         <xsd:keyref name="performanceGoalRef"
             refer="performanceGoalKey">
+            <xsd:annotation>
+                <xsd:documentation>
+                    Goal refs must reference a goal in
+                    the category.
+                </xsd:documentation>
+            </xsd:annotation>
             <xsd:selector xpath=".//goalRef|.//enumGoalRef" />
             <xsd:field xpath="@goal" />
         </xsd:keyref>
@@ -180,6 +212,12 @@
         </xsd:key>
         <xsd:keyref name="subjectiveGoalRef"
             refer="subjectiveGoalKey">
+            <xsd:annotation>
+                <xsd:documentation>
+                    Goal refs must reference a goal in
+                    the category.
+                </xsd:documentation>
+            </xsd:annotation>
             <xsd:selector xpath=".//goalRef|.//enumGoalRef" />
             <xsd:field xpath="@goal" />
         </xsd:keyref>
