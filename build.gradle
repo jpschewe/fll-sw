@@ -236,6 +236,7 @@ tasks.withType(Tar){
 javadoc {
     // TODO: Need to fix the errors eventually
     failOnError = false
+    options.addStringOption('Xmaxwarns', '10000')
 }
 
 compileJava {
