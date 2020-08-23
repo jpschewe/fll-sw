@@ -76,7 +76,7 @@ public final class GenerateDB {
   /**
    * Name of the performance table.
    */
-  public static final String PERFORMANCE_TABLE_NAME = "Performance";
+  public static final String PERFORMANCE_TABLE_NAME = PerformanceScoreCategory.CATEGORY_NAME;
 
   /**
    * Generate a completely new DB from document. This also stores the document

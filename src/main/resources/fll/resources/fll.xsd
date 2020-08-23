@@ -60,6 +60,40 @@
                 </xsd:annotation>
             </xsd:attribute>
         </xsd:complexType>
+        <xsd:key name="nonNumericCategoryKey">
+            <xsd:annotation>
+                <xsd:documentation>
+                    Used to allow subjective categories
+                    to reference non-numeric categories.
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:selector xpath="./nonNumericCategory" />
+            <xsd:field xpath="@name" />
+        </xsd:key>
+        <xsd:key name="categoryKey">
+            <xsd:annotation>
+                <xsd:documentation>
+                    All category names must be
+                    unique.
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:selector
+                xpath="./subjectiveCategory|./Performance|./nonNumericCategory" />
+            <xsd:field xpath="@name" />
+        </xsd:key>
+        <xsd:keyref name="subjectiveNonNumericRef"
+            refer="performanceGoalKey">
+            <xsd:annotation>
+                <xsd:documentation>
+                    Subjective categories may reference
+                    non-numeric categories.
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:selector
+                xpath="./subjectiveCategory/nominates" />
+            <xsd:field xpath="@nonNumericCategoryName" />
+        </xsd:keyref>
+
     </xsd:element>
 
     <xsd:element name="nonNumericCategory">
@@ -107,6 +141,9 @@
                         minOccurs="0" maxOccurs="1" />
                 </xsd:sequence>
             </xsd:sequence>
+            <xsd:attribute name="name" type="databaseName"
+                fixed="performance" />
+
             <xsd:attribute name="minimumScore"
                 type="xsd:decimal" default="0">
                 <xsd:annotation>
@@ -179,6 +216,26 @@
                             minOccurs="0" maxOccurs="unbounded" />
                     </xsd:sequence>
                 </xsd:sequence>
+
+                <xsd:element name="nominates" minOccurs="0"
+                    maxOccurs="1">
+                    <xsd:complexType>
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                A subjective category can
+                                reference one or more non-numeric
+                                categories to specify that teams may be
+                                nominated for these non-numeric
+                                categories during judging for the
+                                subjective category.
+                            </xsd:documentation>
+                        </xsd:annotation>
+
+                        <xsd:attribute
+                            name="nonNumericCategoryName"
+                            type="databaseName" use="required" />
+                    </xsd:complexType>
+                </xsd:element>
             </xsd:sequence>
             <xsd:attribute name="name" type="databaseName"
                 use="required" />
@@ -221,6 +278,19 @@
             <xsd:selector xpath=".//goalRef|.//enumGoalRef" />
             <xsd:field xpath="@goal" />
         </xsd:keyref>
+
+        <xsd:key name="nonNumericCategoryRefKey">
+            <xsd:annotation>
+                <xsd:documentation>
+                    Ensure that the same non-numeric
+                    category is not referenced multiple times in a
+                    subjective category.
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:selector xpath="./nominates" />
+            <xsd:field xpath="@nonNumericCategoryName" />
+        </xsd:key>
+
     </xsd:element>
 
     <xsd:element name="rubric">

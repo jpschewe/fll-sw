@@ -6,6 +6,11 @@
 
 package fll.xml;
 
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.annotation.Nonnull;
 
 import org.w3c.dom.Document;
@@ -55,6 +60,12 @@ public class SubjectiveScoreCategory extends ScoreCategory {
       scoreSheetInstructions = ChallengeDescription.removeExtraWhitespace(descriptionEle.getTextContent());
     } else {
       scoreSheetInstructions = DEFAULT_SCORE_SHEET_TEXT;
+    }
+
+    final NodelistElementCollectionAdapter nominatesElements = new NodelistElementCollectionAdapter(ele.getElementsByTagName(Nominates.TAG_NAME));
+    for (final Element e : nominatesElements) {
+      final Nominates nominates = new Nominates(e);
+      this.nominates.add(nominates);
     }
 
   }
@@ -120,6 +131,44 @@ public class SubjectiveScoreCategory extends ScoreCategory {
     this.scoreSheetInstructions = v;
   }
 
+  private final HashSet<Nominates> nominates = new HashSet<>();
+
+  /**
+   * @return read-only collection of the non-numeric category names that this
+   *         category can nominate teams for
+   */
+  public Set<Nominates> getNominates() {
+    return Collections.unmodifiableSet(nominates);
+  }
+
+  /**
+   * @param v the new value {@link #getNominates()}
+   */
+  public void setNominates(final Set<Nominates> v) {
+    this.nominates.clear();
+    this.nominates.addAll(v);
+  }
+
+  /**
+   * @param v the value to add
+   * @return see {@link Set#add(Object)}
+   */
+  public boolean addNominates(final Nominates v) {
+    return this.nominates.add(v);
+  }
+
+  /**
+   * @param v the value to remove
+   * @return see {@link Set#remove(Object)}
+   */
+  public boolean removeNominates(final Nominates v) {
+    return this.nominates.remove(v);
+  }
+
+  /**
+   * @param doc used to create elements
+   * @return an XML element representing this subjective category
+   */
   public Element toXml(final Document doc) {
     final Element ele = doc.createElement(TAG_NAME);
 
@@ -132,7 +181,79 @@ public class SubjectiveScoreCategory extends ScoreCategory {
     ele.setAttribute(NAME_ATTRIBUTE, mName);
     ele.setAttribute(TITLE_ATTRIBUTE, mTitle);
 
+    for (final Nominates nom : this.nominates) {
+      final Element e = nom.toXml(doc);
+      ele.appendChild(e);
+    }
+
     return ele;
+  }
+
+  /**
+   * Represents a subjective category being able to nominate teams for a
+   * non-numeric category.
+   */
+  public static final class Nominates implements Serializable {
+
+    private static final String TAG_NAME = "nominates";
+
+    private static final String NON_NUMERIC_CATEGORY_REF_ATTRIBUTE = "nonNumericCategoryName";
+
+    /**
+     * @param ele XML element to read information from
+     */
+    public Nominates(final Element ele) {
+      this.nonNumericCategoryName = ele.getAttribute(NON_NUMERIC_CATEGORY_REF_ATTRIBUTE);
+    }
+
+    private String nonNumericCategoryName;
+
+    /**
+     * @return the {@link NonNumericCategory#getName()} for the referenced
+     *         non-numeric category
+     */
+    public String getNonNumericCategoryName() {
+      return nonNumericCategoryName;
+    }
+
+    /**
+     * @param v see {@link #getNonNumericCategoryName()}
+     */
+    public void setNonNumericCategoryName(final String v) {
+      this.nonNumericCategoryName = v;
+    }
+
+    /**
+     * @param doc used to create elements
+     * @return an XML element representing this object
+     */
+    public Element toXml(final Document doc) {
+      final Element ele = doc.createElement(Nominates.TAG_NAME);
+
+      ele.setAttribute(Nominates.NON_NUMERIC_CATEGORY_REF_ATTRIBUTE, nonNumericCategoryName);
+
+      return ele;
+    }
+
+    @Override
+    public int hashCode() {
+      return nonNumericCategoryName.hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (null == o) {
+        return false;
+      } else if (this == o) {
+        return true;
+      } else if (Nominates.class.equals(o.getClass())) {
+        final Nominates other = (Nominates) o;
+        return nonNumericCategoryName.equals(other.nonNumericCategoryName);
+      } else {
+        return false;
+      }
+    }
+
   }
 
 }
