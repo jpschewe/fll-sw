@@ -6,13 +6,15 @@
 
 package fll.xml;
 
+import java.io.Serializable;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
  * A category that doesn't have a score.
  */
-public class NonNumericCategory {
+public class NonNumericCategory implements Serializable {
 
   /**
    * Name of the XML tag used for this class.
