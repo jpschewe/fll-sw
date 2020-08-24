@@ -18,10 +18,15 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.NonNumericNominees;
+import fll.db.NonNumericNominees.Nominee;
 import fll.db.Queries;
+import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
 import fll.web.playoff.Playoff;
@@ -203,6 +208,7 @@ public final class FinalistLoad {
       throws SQLException {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final List<NonNumericCategory> challengeNonNumericCategories = description.getNonNumericCategories();
+    final ObjectMapper mapper = new ObjectMapper();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
@@ -227,11 +233,17 @@ public final class FinalistLoad {
           output.format("}%n");
         }
 
-        for (final int teamNumber : NonNumericNominees.getNominees(connection, tournament, category)) {
-          output.format("$.finalist.addTeamToCategory(%s, %d);%n", categoryVar, teamNumber);
+        for (final Nominee nominee : NonNumericNominees.getNominees(connection, tournament, category)) {
+          output.format("$.finalist.addTeamToCategory(%s, %d);%n", categoryVar, nominee.getTeamNumber());
+
+          final String judgesStr = mapper.writeValueAsString(nominee.getJudges());
+          output.format("$.finalist.setNominatingJudges(%s, %d, %s);%n", categoryVar, nominee.getTeamNumber(),
+                        judgesStr);
         }
         output.format("}%n");
-      }
+      } // foreach category
+    } catch (final JsonProcessingException e) {
+      throw new FLLInternalException("Error converting judges to JSON", e);
     }
   }
 

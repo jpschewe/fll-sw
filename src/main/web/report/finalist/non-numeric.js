@@ -124,6 +124,10 @@ function teamJudgingStationId(category, teamIdx) {
   return "judgingStation_" + category + "_" + teamIdx;
 }
 
+function teamJudgesId(category, teamIdx) {
+  return "judges_" + category + "_" + teamIdx;
+}
+
 function teamDeleteId(category, teamIdx) {
   return "delete_" + category + "_" + teamIdx;
 }
@@ -134,6 +138,15 @@ function populateTeamInformation(category, teamIdx, team) {
   $("#" + teamNameId(category.catId, teamIdx)).val(team.name);
   $("#" + teamOrgId(category.catId, teamIdx)).val(team.org);
   $("#" + teamJudgingStationId(category.catId, teamIdx)).val(team.judgingGroup);
+  
+  var judges = $.finalist.getNominatingJudges(category, team.num);
+  var judgesStr;
+  if(!judges) {
+    judgesStr = "";
+  } else {
+    judgesStr = judges.filter(x => x).join(", ");    
+  }
+  $("#" + teamJudgesId(category.catId, teamIdx)).val(judgesStr);
 }
 
 /**
@@ -159,6 +172,7 @@ function addTeam(category) {
       $.finalist.removeTeamFromCategory(category, prevTeam);
       $("#" + teamNameId(category.catId, teamIdx)).val("");
       $("#" + teamOrgId(category.catId, teamIdx)).val("");
+      $("#" + teamJudgingStationId(category.catId, teamIdx)).val("");
     } else if (teamNum != prevTeam) {
       $.finalist.removeTeamFromCategory(category, prevTeam);
 
@@ -185,6 +199,10 @@ function addTeam(category) {
   var judgingStationEle = $("<input id='"
       + teamJudgingStationId(category.catId, teamIdx) + "' readonly/>");
   teamEle.append(judgingStationEle);
+
+  var judgesEle = $("<input id='"
+      + teamJudgesId(category.catId, teamIdx) + "' readonly/>");
+  teamEle.append(judgesEle);
 
   var deleteButton = $("<button id='" + teamDeleteId(category.catId, teamIdx)
       + "'>Delete</button>");

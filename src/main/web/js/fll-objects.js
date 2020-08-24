@@ -29,9 +29,17 @@ function FinalistCategory(categoryName, room) {
 /**
  * Needs to match fll.db.NonNumericNominees.
  */
-function NonNumericNominees(categoryName, teamNumbers) {
+function NonNumericNominees(categoryName, nominees) {
   this.categoryName = categoryName;
-  this.teamNumbers = teamNumbers;
+  this.nominees = nominees;
+}
+
+/**
+ * Needs to match fll.db.NonNumericNominees.Nominee
+ */
+function Nominee(teamNumber, judges) {
+  this.teamNumber = teamNumber;
+  this.judges = judges;
 }
 
 /**
