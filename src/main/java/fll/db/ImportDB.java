@@ -649,6 +649,11 @@ public final class ImportDB {
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 24) {
+      upgrade23To24(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
           + dbVersion);
@@ -930,6 +935,18 @@ public final class ImportDB {
     } // allocate statement
 
     setDBVersion(connection, 23);
+  }
+
+  private static void upgrade23To24(final Connection connection) throws SQLException {
+    LOGGER.trace("Upgrading database from 23 to 24");
+
+    if (!checkForColumnInTable(connection, "non_numeric_nominees", "judge")) {
+      try (Statement stmt = connection.createStatement()) {
+        stmt.executeUpdate("ALTER TABLE non_numeric_nominees ADD COLUMN judge VARCHAR(64) DEFAULT NULL");
+      }
+    }
+
+    setDBVersion(connection, 24);
   }
 
   /**
