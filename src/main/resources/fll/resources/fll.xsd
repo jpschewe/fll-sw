@@ -82,7 +82,7 @@
             <xsd:field xpath="@name" />
         </xsd:key>
         <xsd:keyref name="subjectiveNonNumericRef"
-            refer="performanceGoalKey">
+            refer="nonNumericCategoryKey">
             <xsd:annotation>
                 <xsd:documentation>
                     Subjective categories may reference
