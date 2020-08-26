@@ -49,7 +49,7 @@ public class RubricRange implements Serializable {
   /**
    * The XML attribute to write the description to.
    */
-  public static final String DESCRIPTION_TAG_NAME = "description";
+  public static final String DESCRIPTION_TAG_NAME = GoalElement.DESCRIPTION_TAG_NAME;
 
   /**
    * The XML element to write the short description to.
