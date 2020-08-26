@@ -8,7 +8,8 @@ package fll.xml;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -131,14 +132,15 @@ public class SubjectiveScoreCategory extends ScoreCategory {
     this.scoreSheetInstructions = v;
   }
 
-  private final HashSet<Nominates> nominates = new HashSet<>();
+  private final LinkedList<Nominates> nominates = new LinkedList<>();
 
   /**
    * @return read-only collection of the non-numeric category names that this
-   *         category can nominate teams for
+   *         category can nominate teams for in the order specified in the
+   *         challenge description
    */
-  public Set<Nominates> getNominates() {
-    return Collections.unmodifiableSet(nominates);
+  public List<Nominates> getNominates() {
+    return Collections.unmodifiableList(nominates);
   }
 
   /**

@@ -238,12 +238,7 @@ public class ChallengeDescription implements Serializable {
    * @return the category or null if not found
    */
   public SubjectiveScoreCategory getSubjectiveCategoryByName(final String name) {
-    for (final SubjectiveScoreCategory cat : mSubjectiveCategories) {
-      if (name.equals(cat.getName())) {
-        return cat;
-      }
-    }
-    return null;
+    return mSubjectiveCategories.stream().filter(c -> c.getName().equals(name)).findAny().orElse(null);
   }
 
   private final LinkedList<NonNumericCategory> nonNumericCategories = new LinkedList<>();
@@ -253,6 +248,14 @@ public class ChallengeDescription implements Serializable {
    */
   public List<NonNumericCategory> getNonNumericCategories() {
     return nonNumericCategories;
+  }
+
+  /**
+   * @param name category name
+   * @return the category or null if not found
+   */
+  public NonNumericCategory getNonNumericCategoryByName(final String name) {
+    return nonNumericCategories.stream().filter(c -> c.getName().equals(name)).findAny().orElse(null);
   }
 
   /**

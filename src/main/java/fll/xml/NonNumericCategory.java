@@ -11,6 +11,8 @@ import java.io.Serializable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+
 /**
  * A category that doesn't have a score.
  */
@@ -32,6 +34,15 @@ public class NonNumericCategory implements Serializable {
     this.name = ele.getAttribute(SubjectiveScoreCategory.NAME_ATTRIBUTE);
     title = ele.getAttribute(ChallengeDescription.TITLE_ATTRIBUTE);
     perAwardGroup = Boolean.valueOf(ele.getAttribute(PER_AWARD_GROUP_ATTRIBUTE));
+
+    final NodelistElementCollectionAdapter elements = new NodelistElementCollectionAdapter(ele.getElementsByTagName(GoalElement.DESCRIPTION_TAG_NAME));
+    if (elements.hasNext()) {
+      final Element descriptionEle = elements.next();
+      description = ChallengeDescription.removeExtraWhitespace(descriptionEle.getTextContent());
+    } else {
+      description = "";
+    }
+
   }
 
   /**
