@@ -199,30 +199,37 @@ public class SubjectiveScoreCategory extends ScoreCategory {
 
     private static final String TAG_NAME = "nominates";
 
-    private static final String NON_NUMERIC_CATEGORY_REF_ATTRIBUTE = "nonNumericCategoryName";
+    private static final String NON_NUMERIC_CATEGORY_REF_ATTRIBUTE = "nonNumericCategoryTitle";
 
     /**
      * @param ele XML element to read information from
      */
     public Nominates(final Element ele) {
-      this.nonNumericCategoryName = ele.getAttribute(NON_NUMERIC_CATEGORY_REF_ATTRIBUTE);
+      this.nonNumericCategoryTitle = ele.getAttribute(NON_NUMERIC_CATEGORY_REF_ATTRIBUTE);
     }
 
-    private String nonNumericCategoryName;
+    /**
+     * @param nonNumericCategoryTitle see {@link #getNonNumericCategoryTitle()}
+     */
+    public Nominates(final String nonNumericCategoryTitle) {
+      this.nonNumericCategoryTitle = nonNumericCategoryTitle;
+    }
+
+    private String nonNumericCategoryTitle;
 
     /**
-     * @return the {@link NonNumericCategory#getName()} for the referenced
+     * @return the {@link NonNumericCategory#getTitle()} for the referenced
      *         non-numeric category
      */
-    public String getNonNumericCategoryName() {
-      return nonNumericCategoryName;
+    public String getNonNumericCategoryTitle() {
+      return nonNumericCategoryTitle;
     }
 
     /**
-     * @param v see {@link #getNonNumericCategoryName()}
+     * @param v see {@link #getNonNumericCategoryTitle()}
      */
     public void setNonNumericCategoryName(final String v) {
-      this.nonNumericCategoryName = v;
+      this.nonNumericCategoryTitle = v;
     }
 
     /**
@@ -232,14 +239,14 @@ public class SubjectiveScoreCategory extends ScoreCategory {
     public Element toXml(final Document doc) {
       final Element ele = doc.createElement(Nominates.TAG_NAME);
 
-      ele.setAttribute(Nominates.NON_NUMERIC_CATEGORY_REF_ATTRIBUTE, nonNumericCategoryName);
+      ele.setAttribute(Nominates.NON_NUMERIC_CATEGORY_REF_ATTRIBUTE, nonNumericCategoryTitle);
 
       return ele;
     }
 
     @Override
     public int hashCode() {
-      return nonNumericCategoryName.hashCode();
+      return nonNumericCategoryTitle.hashCode();
     }
 
     @Override
@@ -250,7 +257,7 @@ public class SubjectiveScoreCategory extends ScoreCategory {
         return true;
       } else if (Nominates.class.equals(o.getClass())) {
         final Nominates other = (Nominates) o;
-        return nonNumericCategoryName.equals(other.nonNumericCategoryName);
+        return nonNumericCategoryTitle.equals(other.nonNumericCategoryTitle);
       } else {
         return false;
       }

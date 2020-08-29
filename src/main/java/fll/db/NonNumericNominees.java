@@ -31,22 +31,22 @@ import fll.xml.NonNumericCategory;
 public class NonNumericNominees {
 
   /**
-   * @param categoryName see {@link NonNumericCategory#getTitle()}
+   * @param categoryTitle see {@link NonNumericCategory#getTitle()}
    * @param nominees see {@link #getNominees()}
    */
-  public NonNumericNominees(@JsonProperty("categoryName") final String categoryName,
+  public NonNumericNominees(@JsonProperty("categoryTitle") final String categoryTitle,
                             @JsonProperty("nominees") final Collection<Nominee> nominees) {
-    this.mCategoryName = categoryName;
+    this.mCategoryTitle = categoryTitle;
     this.nominees = new HashSet<>(nominees);
   }
 
-  private final String mCategoryName;
+  private final String mCategoryTitle;
 
   /**
-   * @return Name of the category for these nominees.
+   * @return title of the category for these nominees.
    */
-  public String getCategoryName() {
-    return mCategoryName;
+  public String getCategoryTitle() {
+    return mCategoryTitle;
   }
 
   /**
@@ -60,7 +60,7 @@ public class NonNumericNominees {
   public void store(final Connection connection,
                     final int tournamentId)
       throws SQLException {
-    storeNominees(connection, tournamentId, mCategoryName, nominees);
+    storeNominees(connection, tournamentId, mCategoryTitle, nominees);
   }
 
   private final Set<Nominee> nominees;

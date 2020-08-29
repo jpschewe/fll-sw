@@ -68,9 +68,9 @@
                 </xsd:documentation>
             </xsd:annotation>
             <xsd:selector xpath="./nonNumericCategory" />
-            <xsd:field xpath="@name" />
+            <xsd:field xpath="@title" />
         </xsd:key>
-        <xsd:key name="categoryKey">
+        <xsd:key name="categoryNameKey">
             <xsd:annotation>
                 <xsd:documentation>
                     All category names must be
@@ -78,8 +78,19 @@
                 </xsd:documentation>
             </xsd:annotation>
             <xsd:selector
-                xpath="./subjectiveCategory|./Performance|./nonNumericCategory" />
+                xpath="./subjectiveCategory|./Performance" />
             <xsd:field xpath="@name" />
+        </xsd:key>
+        <xsd:key name="categoryTitleKey">
+            <xsd:annotation>
+                <xsd:documentation>
+                    All category titles must be
+                    unique.
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:selector
+                xpath="./subjectiveCategory|./Performance|./nonNumericCategory" />
+            <xsd:field xpath="@title" />
         </xsd:key>
         <xsd:keyref name="subjectiveNonNumericRef"
             refer="nonNumericCategoryKey">
@@ -91,7 +102,7 @@
             </xsd:annotation>
             <xsd:selector
                 xpath="./subjectiveCategory/nominates" />
-            <xsd:field xpath="@nonNumericCategoryName" />
+            <xsd:field xpath="@nonNumericCategoryTitle" />
         </xsd:keyref>
 
     </xsd:element>
@@ -103,9 +114,8 @@
                     minOccurs="0" maxOccurs="1" type="xsd:string" />
             </xsd:sequence>
 
-            <xsd:attribute name="name" type="databaseName"
+            <xsd:attribute name="title" type="xsd:string"
                 use="required" />
-            <xsd:attribute name="title" type="xsd:string" />
             <xsd:attribute name="perAwardGroup"
                 type="xsd:boolean">
                 <xsd:annotation>
@@ -143,6 +153,8 @@
             </xsd:sequence>
             <xsd:attribute name="name" type="databaseName"
                 fixed="performance" />
+            <xsd:attribute name="title" type="xsd:string"
+                fixed="Performance" />
 
             <xsd:attribute name="minimumScore"
                 type="xsd:decimal" default="0">
@@ -232,8 +244,8 @@
                         </xsd:annotation>
 
                         <xsd:attribute
-                            name="nonNumericCategoryName"
-                            type="databaseName" use="required" />
+                            name="nonNumericCategoryTitle"
+                            type="xsd:string" use="required" />
                     </xsd:complexType>
                 </xsd:element>
             </xsd:sequence>
@@ -288,7 +300,7 @@
                 </xsd:documentation>
             </xsd:annotation>
             <xsd:selector xpath="./nominates" />
-            <xsd:field xpath="@nonNumericCategoryName" />
+            <xsd:field xpath="@nonNumericCategoryTitle" />
         </xsd:key>
 
     </xsd:element>

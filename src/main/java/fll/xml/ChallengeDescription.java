@@ -251,11 +251,11 @@ public class ChallengeDescription implements Serializable {
   }
 
   /**
-   * @param name category name
+   * @param title category title
    * @return the category or null if not found
    */
-  public NonNumericCategory getNonNumericCategoryByName(final String name) {
-    return nonNumericCategories.stream().filter(c -> c.getName().equals(name)).findAny().orElse(null);
+  public NonNumericCategory getNonNumericCategoryByTitle(final String title) {
+    return nonNumericCategories.stream().filter(c -> c.getTitle().equals(title)).findAny().orElse(null);
   }
 
   /**

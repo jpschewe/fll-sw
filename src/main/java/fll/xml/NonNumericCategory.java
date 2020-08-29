@@ -31,7 +31,6 @@ public class NonNumericCategory implements Serializable {
    * @param ele the XML element to parse
    */
   public NonNumericCategory(final Element ele) {
-    this.name = ele.getAttribute(SubjectiveScoreCategory.NAME_ATTRIBUTE);
     title = ele.getAttribute(ChallengeDescription.TITLE_ATTRIBUTE);
     perAwardGroup = Boolean.valueOf(ele.getAttribute(PER_AWARD_GROUP_ATTRIBUTE));
 
@@ -46,32 +45,13 @@ public class NonNumericCategory implements Serializable {
   }
 
   /**
-   * @param name see {@link #getName()}
    * @param title see {@link #getTitle()}
    * @param perAwardGroup see {@link #getPerAwardGroup()}
    */
-  public NonNumericCategory(final String name,
-                            final String title,
+  public NonNumericCategory(final String title,
                             final boolean perAwardGroup) {
-    this.name = name;
     this.title = title;
     this.perAwardGroup = perAwardGroup;
-  }
-
-  private String name;
-
-  /**
-   * @return name for use in the database
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * @param v see {@link #getName()}
-   */
-  public void setName(final String v) {
-    name = v;
   }
 
   private String title;
@@ -130,7 +110,6 @@ public class NonNumericCategory implements Serializable {
     final Element ele = doc.createElement(TAG_NAME);
     ele.setAttribute(PER_AWARD_GROUP_ATTRIBUTE, Boolean.toString(perAwardGroup));
     ele.setAttribute(ChallengeDescription.TITLE_ATTRIBUTE, title);
-    ele.setAttribute(SubjectiveScoreCategory.NAME_ATTRIBUTE, name);
 
     if (null != description) {
       final Element descriptionEle = doc.createElement(RubricRange.DESCRIPTION_TAG_NAME);
