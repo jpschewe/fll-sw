@@ -6,8 +6,12 @@
 
 package fll.xml;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -24,6 +28,32 @@ public class NonNumericCategory implements Serializable {
   public static final String TAG_NAME = "nonNumericCategory";
 
   private static final String PER_AWARD_GROUP_ATTRIBUTE = "perAwardGroup";
+
+  private final PropertyChangeSupport propChangeSupport = new PropertyChangeSupport(this);
+
+  protected final void firePropertyChange(final String property,
+                                          final @Nullable Object oldValue,
+                                          final @Nullable Object newValue) {
+    propChangeSupport.firePropertyChange(property, oldValue, newValue);
+  }
+
+  /**
+   * Add a listener for property change events.
+   *
+   * @param listener the listener to add
+   */
+  public final void addPropertyChangeListener(@NonNull final PropertyChangeListener listener) {
+    this.propChangeSupport.addPropertyChangeListener(listener);
+  }
+
+  /**
+   * Remove a property change listener.
+   *
+   * @param listener the listener to remove
+   */
+  public final void removePropertyChangeListener(@NonNull final PropertyChangeListener listener) {
+    this.propChangeSupport.removePropertyChangeListener(listener);
+  }
 
   /**
    * Parse the object from an XML element.
@@ -64,10 +94,14 @@ public class NonNumericCategory implements Serializable {
   }
 
   /**
+   * Fires property change event.
+   * 
    * @param v see {@link #getTitle()}
    */
   public void setTitle(final String v) {
+    final String old = title;
     title = v;
+    firePropertyChange("title", old, v);
   }
 
   private boolean perAwardGroup = true;

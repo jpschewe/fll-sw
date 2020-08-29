@@ -439,7 +439,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
   }
 
   private void addSubjectiveCategory(final SubjectiveScoreCategory cat) {
-    final SubjectiveCategoryEditor editor = new SubjectiveCategoryEditor(cat);
+    final SubjectiveCategoryEditor editor = new SubjectiveCategoryEditor(cat, mDescription);
     editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
 
     final MovableExpandablePanel container = new MovableExpandablePanel(cat.getTitle(), editor, true, true);
