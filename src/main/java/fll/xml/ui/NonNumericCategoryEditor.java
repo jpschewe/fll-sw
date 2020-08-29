@@ -37,7 +37,7 @@ import fll.xml.NonNumericCategory;
 
   private final TextAreaEditor description;
 
-  private final ValidityPanel validPanel;
+  private final ValidityPanel validPanel;  
 
   /* package */ NonNumericCategoryEditor(final NonNumericCategory category) {
     super(new GridBagLayout());
