@@ -20,6 +20,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import fll.Tournament;
 import fll.xml.NonNumericCategory;
 
 /**
@@ -113,7 +114,7 @@ public class NonNumericNominees {
   }
 
   /**
-   * Get all non-numeric categories know for the specified tournament.
+   * Get all non-numeric categories known for the specified tournament.
    * 
    * @param connection the database to get the categories from
    * @param tournamentId the tournament to get the categories for
@@ -169,6 +170,39 @@ public class NonNumericNominees {
           }
           final Nominee nominee = new Nominee(team, judges);
           result.add(nominee);
+        } // foreach result
+      } // allocate query
+    } // allocate prepared statement
+
+    return result;
+  }
+
+  /**
+   * Get the nominees by the specified judge for a team.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament
+   * @param judge the judge
+   * @param teamNumber the team number
+   * @return the titles of the non-numeric categories
+   */
+  public static Set<String> getNomineesByJudgeForTeam(final Connection connection,
+                                                      final Tournament tournament,
+                                                      final String judge,
+                                                      final int teamNumber)
+      throws SQLException {
+    final Set<String> result = new HashSet<>();
+    try (PreparedStatement get = connection.prepareStatement("SELECT category FROM non_numeric_nominees"
+        + " WHERE tournament = ?" //
+        + " AND judge = ?" //
+        + " AND team_number = ?")) {
+      get.setInt(1, tournament.getTournamentID());
+      get.setString(2, judge);
+      get.setInt(3, teamNumber);
+      try (ResultSet rs = get.executeQuery()) {
+        while (rs.next()) {
+          final String category = rs.getString("category");
+          result.add(category);
         } // foreach result
       } // allocate query
     } // allocate prepared statement
