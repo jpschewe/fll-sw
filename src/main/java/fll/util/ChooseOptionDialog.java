@@ -23,7 +23,7 @@ import javax.swing.ListCellRenderer;
  * Choose a single option from a list of options.
  * This is a modal dialog.
  * 
- * @param E the type of objects in the dialog
+ * @param <E> the type of objects in the dialog
  */
 public class ChooseOptionDialog<E> extends JDialog {
 

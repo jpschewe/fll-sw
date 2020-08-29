@@ -68,8 +68,9 @@ public abstract class GoalElement implements Serializable, Evaluatable {
   }
 
   /**
+   * Fires property change event.
+   * 
    * @param v see {@link #getTitle()}
-   *          Fires property change event.
    */
   public void setTitle(final @Nullable String v) {
     final String old = mTitle;
