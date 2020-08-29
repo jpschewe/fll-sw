@@ -320,10 +320,10 @@ public class SubjectivePdfWriter {
         final Element row = FOPUtils.createTableRow(document);
         tableBody.appendChild(row);
 
-        final NonNumericCategory category = description.getNonNumericCategoryByName(nominates.getNonNumericCategoryName());
+        final NonNumericCategory category = description.getNonNumericCategoryByTitle(nominates.getNonNumericCategoryTitle());
         if (null == category) {
-          throw new FLLInternalException("There is no non-numeric category with name "
-              + nominates.getNonNumericCategoryName()
+          throw new FLLInternalException("There is no non-numeric category with title "
+              + nominates.getNonNumericCategoryTitle()
               + ". This should have been caught when parsing the challenge description");
         }
 

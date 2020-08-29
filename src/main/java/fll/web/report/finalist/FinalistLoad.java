@@ -180,15 +180,15 @@ public final class FinalistLoad {
     }
 
     for (final NonNumericCategory category : description.getNonNumericCategories()) {
-      final String categoryName = category.getName();
       final String categoryTitle = category.getTitle();
       final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);
 
-      final String catVarName = getCategoryVarName(categoryName);
-      output.format("var %s = $.finalist.getCategoryByName(%s);%n", catVarName, quotedCatTitle);
-      output.format("if (null == %s) {%n", catVarName);
-      output.format("  %s = $.finalist.addCategory(%s, false, %b);%n", catVarName, quotedCatTitle,
+      output.format("{%n");
+      output.format("var category = $.finalist.getCategoryByName(%s);%n", quotedCatTitle);
+      output.format("if (null == category) {%n");
+      output.format("  category = $.finalist.addCategory(%s, false, %b);%n", quotedCatTitle,
                     !category.getPerAwardGroup());
+      output.format("}%n");
       output.format("}%n");
     }
 
