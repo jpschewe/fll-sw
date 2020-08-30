@@ -1837,10 +1837,16 @@ public final class ImportDB {
                 + element.getName()
                 + ",");
             ++numColumns;
+
+            columns.append(" "
+                + GenerateDB.getGoalCommentColumnName(element));
+            ++numColumns;
           }
         }
         columns.append(" note,");
         columns.append(" Judge");
+        columns.append(" comment_great_job");
+        columns.append(" comment_think_about");
 
         importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,
                      sourceTournamentID);
