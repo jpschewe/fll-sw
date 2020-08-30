@@ -261,22 +261,27 @@ function populateChooseJudge() {
   $("#choose-judge_judges").empty();
   $("#choose-judge_judges")
       .append(
-          "<input type='radio' name='judge' id='choose-judge_new-judge' value='new-judge'>");
+          "<input type='radio' name='judge' value='new-judge' id='choose-judge_new-judge'>");
   $("#choose-judge_judges").append(
       "<label for='choose-judge_new-judge'>New Judge</label>");
 
   var currentJudge = $.subjective.getCurrentJudge();
   var currentJudgeValid = false;
+  var seenJudges = [];
   var judges = $.subjective.getPossibleJudges();
-  $.each(judges, function(i, judge) {
-    if (null != currentJudge && currentJudge.id == judge.id) {
-      currentJudgeValid = true;
+  $.each(judges, function(index, judge) {
+    if (!seenJudges.includes(judge.id)) {
+      seenJudges.push(judge.id);
+
+      if (null != currentJudge && currentJudge.id == judge.id) {
+        currentJudgeValid = true;
+      }
+      $("#choose-judge_judges").append(
+          "<input type='radio' name='judge' id='choose-judge_" + index
+              + "' value='" + judge.id + "'>");
+      $("#choose-judge_judges").append(
+          "<label for='choose-judge_" + index + "'>" + judge.id + "</label>");
     }
-    $("#choose-judge_judges").append(
-        "<input type='radio' name='judge' id='choose-judge_" + judge.id
-            + "' value='" + judge.id + "'>");
-    $("#choose-judge_judges").append(
-        "<label for='choose-judge_" + judge.id + "'>" + judge.id + "</label>");
   });
   if (!currentJudgeValid) {
     currentJudge = null;
