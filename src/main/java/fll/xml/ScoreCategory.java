@@ -73,7 +73,6 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
   /**
    * All goals in the category and it's groups.
    */
-  @NonNull
   @Override
   public List<AbstractGoal> getAllGoals() {
     final List<AbstractGoal> retval = new LinkedList<>();
