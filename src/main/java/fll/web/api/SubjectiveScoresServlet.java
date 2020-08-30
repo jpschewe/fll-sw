@@ -39,6 +39,7 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.NonNumericNominees;
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.admin.UploadSubjectiveData;
 import fll.xml.AbstractGoal;
@@ -142,6 +143,11 @@ public class SubjectiveScoresServlet extends HttpServlet {
       for (final Map.Entry<String, Map<String, Map<Integer, SubjectiveScore>>> catEntry : allScores.entrySet()) {
         final String category = catEntry.getKey();
         final SubjectiveScoreCategory categoryDescription = challengeDescription.getSubjectiveCategoryByName(category);
+        if (null == categoryDescription) {
+          throw new FLLRuntimeException("Category with name '"
+              + category
+              + "' is not known");
+        }
 
         try (PreparedStatement deletePrep = connection.prepareStatement("DELETE FROM "
             + category //
