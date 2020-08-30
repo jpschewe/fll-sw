@@ -1844,8 +1844,8 @@ public final class ImportDB {
           }
         }
         columns.append(" note,");
-        columns.append(" Judge");
-        columns.append(" comment_great_job");
+        columns.append(" Judge,");
+        columns.append(" comment_great_job,");
         columns.append(" comment_think_about");
 
         importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,
