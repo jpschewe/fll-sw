@@ -162,9 +162,12 @@ public class ChallengeDescription implements Serializable {
     mWinner = v;
   }
 
-  private @Nullable PerformanceScoreCategory mPerformance;
+  private PerformanceScoreCategory mPerformance;
 
-  public @Nullable PerformanceScoreCategory getPerformance() {
+  /**
+   * @return description of the performance category
+   */
+  public PerformanceScoreCategory getPerformance() {
     return mPerformance;
   }
 
@@ -172,9 +175,9 @@ public class ChallengeDescription implements Serializable {
    * Since {@link PerformanceScoreCategory} is mutable, this should not be
    * needed except to add or remove the performance element.
    *
-   * @param v setting the value to null will remove the element
+   * @param v see {@link #getPerformance()}
    */
-  public void setPerformance(final @Nullable PerformanceScoreCategory v) {
+  public void setPerformance(final PerformanceScoreCategory v) {
     mPerformance = v;
   }
 
