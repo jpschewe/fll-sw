@@ -221,9 +221,9 @@ public final class GenerateDB {
       final StringBuilder createStatement = new StringBuilder();
 
       // performance
-      final StringBuilder performanceColumns = new StringBuilder(); // used for
-      // view
-      // below
+
+      // used for view below
+      final StringBuilder performanceColumns = new StringBuilder();
       {
         final PerformanceScoreCategory performanceElement = description.getPerformance();
         final String tableName = PERFORMANCE_TABLE_NAME;
