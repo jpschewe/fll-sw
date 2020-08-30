@@ -211,6 +211,60 @@ public class NonNumericNominees {
   }
 
   /**
+   * Store operation for
+   * {@link #getNomineesByJudgeForTeam(Connection, Tournament, String, int)}.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament
+   * @param judge the judge
+   * @param teamNumber the team number
+   * @param nominations the new value for nominations
+   * @throws SQLException on a database error
+   */
+  public static void storeNomineesByJudgeForTeam(final Connection connection,
+                                                 final Tournament tournament,
+                                                 final String judge,
+                                                 final int teamNumber,
+                                                 final Set<String> nominations)
+      throws SQLException {
+    final boolean autoCommit = connection.getAutoCommit();
+    try {
+      connection.setAutoCommit(false);
+
+      try (PreparedStatement delete = connection.prepareStatement("DELETE FROM non_numeric_nominees" //
+          + " WHERE tournament = ?" //
+          + " AND judge = ?" //
+          + " AND team_number = ?")) {
+        delete.setInt(1, tournament.getTournamentID());
+        delete.setString(2, judge);
+        delete.setInt(3, teamNumber);
+        delete.executeUpdate();
+      }
+
+      if (!nominations.isEmpty()) {
+        try (PreparedStatement insert = connection.prepareStatement("INSERT INTO non_numeric_nominees" //
+            + " (tournament, judge, team_number, category)" //
+            + " VALUES(?, ?, ?, ?)"//
+        )) {
+          insert.setInt(1, tournament.getTournamentID());
+          insert.setString(2, judge);
+          insert.setInt(3, teamNumber);
+          for (final String nomination : nominations) {
+            insert.setString(4, nomination);
+            insert.addBatch();
+          }
+
+          insert.executeBatch();
+        }
+      }
+
+      connection.commit();
+    } finally {
+      connection.setAutoCommit(autoCommit);
+    }
+  }
+
+  /**
    * A single nominee.
    */
   public static final class Nominee {

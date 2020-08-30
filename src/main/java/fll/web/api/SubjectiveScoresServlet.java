@@ -16,9 +16,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -36,7 +38,7 @@ import fll.SubjectiveScore;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;
-import fll.db.Queries;
+import fll.db.NonNumericNominees;
 import fll.web.ApplicationAttributes;
 import fll.web.admin.UploadSubjectiveData;
 import fll.xml.AbstractGoal;
@@ -63,7 +65,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
-      final int currentTournament = Queries.getCurrentTournament(connection);
+      final Tournament currentTournament = Tournament.getCurrentTournament(connection);
 
       // category->judge->teamNumber->score
       final Map<String, Map<String, Map<Integer, SubjectiveScore>>> allScores = new HashMap<String, Map<String, Map<Integer, SubjectiveScore>>>();
@@ -76,50 +78,16 @@ public class SubjectiveScoresServlet extends HttpServlet {
         try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
             + sc.getName()
             + " WHERE Tournament = ?")) {
-          prep.setInt(1, currentTournament);
+          prep.setInt(1, currentTournament.getTournamentID());
 
           try (ResultSet rs = prep.executeQuery()) {
             while (rs.next()) {
-              final SubjectiveScore score = new SubjectiveScore();
-              score.setScoreOnServer(true);
+              final SubjectiveScore score = SubjectiveScore.fromResultSet(connection, sc, currentTournament, rs);
 
-              final String judge = rs.getString("Judge");
-              final Map<Integer, SubjectiveScore> judgeScores;
-              if (categoryScores.containsKey(judge)) {
-                judgeScores = categoryScores.get(judge);
-              } else {
-                judgeScores = new HashMap<Integer, SubjectiveScore>();
-                categoryScores.put(judge, judgeScores);
-              }
-
-              score.setTeamNumber(rs.getInt("TeamNumber"));
-              score.setJudge(judge);
-              score.setNoShow(rs.getBoolean("NoShow"));
-              score.setNote(rs.getString("note"));
-              score.setCommentGreatJob(rs.getString("comment_great_job"));
-              score.setCommentThinkAbout(rs.getString("comment_think_about"));
-
-              final Map<String, Double> standardSubScores = new HashMap<>();
-              final Map<String, String> enumSubScores = new HashMap<>();
-              final Map<String, String> goalComments = new HashMap<>();
-              for (final AbstractGoal goal : sc.getAllGoals()) {
-                if (goal.isEnumerated()) {
-                  final String value = rs.getString(goal.getName());
-                  enumSubScores.put(goal.getName(), value);
-                } else {
-                  final double value = rs.getDouble(goal.getName());
-                  standardSubScores.put(goal.getName(), value);
-                }
-
-                final String commentColumn = GenerateDB.getGoalCommentColumnName(goal);
-                final String comment = rs.getString(commentColumn);
-                goalComments.put(goal.getName(), comment);
-              } // foreach goal
-              score.setStandardSubScores(standardSubScores);
-              score.setEnumSubScores(enumSubScores);
-              score.setGoalComments(goalComments);
-
+              final Map<Integer, SubjectiveScore> judgeScores = categoryScores.computeIfAbsent(score.getJudge(),
+                                                                                               k -> new HashMap<>());
               judgeScores.put(score.getTeamNumber(), score);
+
             } // foreach result
 
             allScores.put(sc.getName(), categoryScores);
@@ -155,7 +123,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-      final int currentTournament = Queries.getCurrentTournament(connection);
+      final Tournament currentTournament = Tournament.getCurrentTournament(connection);
 
       final StringWriter debugWriter = new StringWriter();
       request.getReader().transferTo(debugWriter);
@@ -186,13 +154,13 @@ public class SubjectiveScoresServlet extends HttpServlet {
                 + "(TeamNumber, Tournament, Judge, NoShow) VALUES(?, ?, ?, ?)");
 
             PreparedStatement insertPrep = createInsertStatement(connection, categoryDescription);) {
-          deletePrep.setInt(2, currentTournament);
+          deletePrep.setInt(2, currentTournament.getTournamentID());
 
-          noShowPrep.setInt(2, currentTournament);
+          noShowPrep.setInt(2, currentTournament.getTournamentID());
           noShowPrep.setBoolean(4, true);
 
           final int columnIndexOfFirstGoal = 8;
-          insertPrep.setInt(2, currentTournament);
+          insertPrep.setInt(2, currentTournament.getTournamentID());
           insertPrep.setBoolean(4, false);
 
           for (final Map.Entry<String, Map<Integer, SubjectiveScore>> judgeEntry : catEntry.getValue().entrySet()) {
@@ -302,6 +270,17 @@ public class SubjectiveScoresServlet extends HttpServlet {
                   insertPrep.executeUpdate();
                 } // update score
 
+                final Set<String> nominations;
+                if (score.getDeleted()) {
+                  nominations = Collections.emptySet();
+                } else if (score.getNoShow()) {
+                  nominations = Collections.emptySet();
+                } else {
+                  nominations = score.getNonNumericNominations();
+                }
+                NonNumericNominees.storeNomineesByJudgeForTeam(connection, currentTournament, judgeId, teamNumber,
+                                                               nominations);
+
               } // is modified
             } // foreach team score
           } // foreach judge
@@ -310,9 +289,10 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
       } // foreach category
 
-      UploadSubjectiveData.removeNullSubjectiveRows(connection, currentTournament, challengeDescription);
+      UploadSubjectiveData.removeNullSubjectiveRows(connection, currentTournament.getTournamentID(),
+                                                    challengeDescription);
 
-      final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
+      final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament.getTournamentID());
       tournament.recordSubjectiveModified(connection);
 
       final UploadResult result = new UploadResult(true, "Successfully uploaded scores", numModified);
