@@ -71,6 +71,11 @@ public class SubjectiveSheets extends BaseFLLServlet {
         final Tournament tournament = Tournament.findTournamentByID(connection, currentTournamentID);
 
         final SubjectiveScoreCategory category = description.getSubjectiveCategoryByName(subjectiveCategoryName);
+        if (null == category) {
+          throw new FLLRuntimeException("A subjective category with name '"
+              + subjectiveCategoryName
+              + "' does not exist");
+        }
 
         final Collection<CategoryColumnMapping> mappings = CategoryColumnMapping.load(connection, currentTournamentID);
 

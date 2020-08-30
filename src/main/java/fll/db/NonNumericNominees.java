@@ -20,6 +20,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.xml.NonNumericCategory;
 
@@ -82,6 +83,7 @@ public class NonNumericNominees {
    * @param nominees see {@link #getNominees()}
    * @throws SQLException on a database error
    */
+  @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "SpotBugs doesn't appear to handle Nullable annotation inside generic type")
   private static void storeNominees(final Connection connection,
                                     final int tournamentId,
                                     final String category,
@@ -287,7 +289,7 @@ public class NonNumericNominees {
       return teamNumber;
     }
 
-    private final Set<String> judges = new HashSet<>();
+    private final Set<@Nullable String> judges = new HashSet<>();
 
     /**
      * The judges that have nominated this team. Null is a valid judge meaning that
