@@ -43,7 +43,10 @@ import fll.xml.SubjectiveScoreCategory;
  * Do first part of summarizing scores and gather information to show the user
  * about where we are.
  */
-public class SummarizePhase1 {
+public final class SummarizePhase1 {
+
+  private SummarizePhase1() {
+  }
 
   /**
    * Page key for judge information. Type is a {@link Map} of station to
@@ -74,7 +77,7 @@ public class SummarizePhase1 {
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
-    try (final Connection connection = datasource.getConnection()) {
+    try (Connection connection = datasource.getConnection()) {
       final int tournamentID = Queries.getCurrentTournament(connection);
 
       Queries.updateScoreTotals(challengeDescription, connection);
@@ -91,11 +94,11 @@ public class SummarizePhase1 {
       final Map<String, Set<String>> seenCategoryNames = new HashMap<>();
       final SortedMap<String, SortedSet<JudgeSummary>> summary = new TreeMap<>();
 
-      try (final PreparedStatement getJudges = connection.prepareStatement("SELECT id, category, station from Judges"
+      try (PreparedStatement getJudges = connection.prepareStatement("SELECT id, category, station from Judges"
           + " WHERE Tournament = ?"
           + " ORDER BY station ASC, category ASC")) {
         getJudges.setInt(1, tournamentID);
-        try (final ResultSet judges = getJudges.executeQuery()) {
+        try (ResultSet judges = getJudges.executeQuery()) {
           while (judges.next()) {
             final String judge = judges.getString(1);
             final String categoryName = judges.getString(2);
@@ -105,7 +108,13 @@ public class SummarizePhase1 {
             final int numActual = getNumScoresEntered(connection, judge, categoryName, station, tournamentID);
 
             if (numActual > 0) {
-              final String categoryTitle = challengeDescription.getSubjectiveCategoryByName(categoryName).getTitle();
+              final SubjectiveScoreCategory category = challengeDescription.getSubjectiveCategoryByName(categoryName);
+              if (null == category) {
+                throw new FLLInternalException("Category with name '"
+                    + categoryName
+                    + "' is not known");
+              }
+              final String categoryTitle = category.getTitle();
 
               final SortedSet<JudgeSummary> value = summary.computeIfAbsent(station, k -> new TreeSet<>());
               value.add(new JudgeSummary(judge, categoryTitle, station, numExpected, numActual));
@@ -148,7 +157,13 @@ public class SummarizePhase1 {
       missingNames.removeAll(seenCategories);
 
       for (final String missingName : missingNames) {
-        final String title = challengeDescription.getSubjectiveCategoryByName(missingName).getTitle();
+        final SubjectiveScoreCategory category = challengeDescription.getSubjectiveCategoryByName(missingName);
+        if (null == category) {
+          throw new FLLRuntimeException("Category with name '"
+              + missingName
+              + "' is not known");
+        }
+        final String title = category.getTitle();
         final int expected = getNumScoresExpected(connection, tournamentID, judgingGroup);
 
         summary.computeIfAbsent(judgingGroup, k -> new TreeSet<>())

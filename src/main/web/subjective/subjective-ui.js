@@ -261,22 +261,27 @@ function populateChooseJudge() {
   $("#choose-judge_judges").empty();
   $("#choose-judge_judges")
       .append(
-          "<input type='radio' name='judge' id='choose-judge_new-judge' value='new-judge'>");
+          "<input type='radio' name='judge' value='new-judge' id='choose-judge_new-judge'>");
   $("#choose-judge_judges").append(
       "<label for='choose-judge_new-judge'>New Judge</label>");
 
   var currentJudge = $.subjective.getCurrentJudge();
   var currentJudgeValid = false;
+  var seenJudges = [];
   var judges = $.subjective.getPossibleJudges();
-  $.each(judges, function(i, judge) {
-    if (null != currentJudge && currentJudge.id == judge.id) {
-      currentJudgeValid = true;
+  $.each(judges, function(index, judge) {
+    if (!seenJudges.includes(judge.id)) {
+      seenJudges.push(judge.id);
+
+      if (null != currentJudge && currentJudge.id == judge.id) {
+        currentJudgeValid = true;
+      }
+      $("#choose-judge_judges").append(
+          "<input type='radio' name='judge' id='choose-judge_" + index
+              + "' value='" + judge.id + "'>");
+      $("#choose-judge_judges").append(
+          "<label for='choose-judge_" + index + "'>" + judge.id + "</label>");
     }
-    $("#choose-judge_judges").append(
-        "<input type='radio' name='judge' id='choose-judge_" + judge.id
-            + "' value='" + judge.id + "'>");
-    $("#choose-judge_judges").append(
-        "<label for='choose-judge_" + judge.id + "'>" + judge.id + "</label>");
   });
   if (!currentJudgeValid) {
     currentJudge = null;
@@ -753,7 +758,7 @@ function createGoalGroupRows(table, totalColumns, score, goalGroup) {
   if (goalGroup.description) {
     groupText = groupText + " - " + goalGroup.description;
   }
-  
+
   var bar = $("<tr><td colspan='" + totalColumns + "' class='ui-bar-a'>"
       + groupText + "</td></tr>");
   table.append(bar);
@@ -824,24 +829,45 @@ $(document)
             }
           });
 
+          // add the non-numeric categories that teams can be nominated for
+          $("#enter-score_nominates").empty();
+          $("#enter-score_nominates").hide();
+          var hideNominates = true;
+          $.each($.subjective.getCurrentCategory().nominates, function(index,
+              nominate) {
+            $("#enter-score_nominates").show();
+
+            var label = $("<label>" + nominate.nonNumericCategoryTitle
+                + "</label>");
+            $("#enter-score_nominates").append(label);
+            var checkbox = $("<input type='checkbox' id='enter-score_nominate_"
+                + index + "' />");
+            if (null != score
+                && score.nonNumericNominations
+                    .includes(nominate.nonNumericCategoryTitle)) {
+              checkbox.prop("checked", true);
+            }
+            label.append(checkbox);
+          });
+
           // read the intial value
           recomputeTotal();
 
           $("#enter-score-page").trigger("create");
 
           // events need to be added after the page create
-          $.each($.subjective.getCurrentCategory().allGoals,
-              function(index, goal) {
-                addEventsToSlider(goal);
+          $.each($.subjective.getCurrentCategory().allGoals, function(index,
+              goal) {
+            addEventsToSlider(goal);
 
-                if (null != score) {
-                  $("#enter-score-comment-" + goal.name + "-text").val(
-                      score.goalComments[goal.name]);
-                } else {
-                  $("#enter-score-comment-" + goal.name + "-text").val("");
-                }
+            if (null != score) {
+              $("#enter-score-comment-" + goal.name + "-text").val(
+                  score.goalComments[goal.name]);
+            } else {
+              $("#enter-score-comment-" + goal.name + "-text").val("");
+            }
 
-              });
+          });
 
         });
 
@@ -863,6 +889,18 @@ function saveScore() {
   saveToScoreObject(score);
 
   $.subjective.saveScore(score);
+
+  // save non-numeric nominations
+  score.nonNumericNominations = [];
+  $.each($.subjective.getCurrentCategory().nominates,
+      function(index, nominate) {
+        $("#enter-score_nominates").show();
+
+        var checkbox = $("#enter-score_nominate_" + index);
+        if (checkbox.prop("checked")) {
+          score.nonNumericNominations.push(nominate.nonNumericCategoryTitle);
+        }
+      });
 
   $.mobile.navigate($.subjective.getScoreEntryBackPage());
 }

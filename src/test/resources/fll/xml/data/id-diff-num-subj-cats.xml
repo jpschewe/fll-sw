@@ -231,7 +231,7 @@
 
   <subjectiveCategory
     name="teamwork2"
-    title="Teamwork"
+    title="Teamwork2"
     weight="1.0">
     <goal
       initialValue="0"

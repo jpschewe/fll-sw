@@ -649,6 +649,11 @@ public final class ImportDB {
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 24) {
+      upgrade23To24(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
           + dbVersion);
@@ -930,6 +935,18 @@ public final class ImportDB {
     } // allocate statement
 
     setDBVersion(connection, 23);
+  }
+
+  private static void upgrade23To24(final Connection connection) throws SQLException {
+    LOGGER.trace("Upgrading database from 23 to 24");
+
+    if (!checkForColumnInTable(connection, "non_numeric_nominees", "judge")) {
+      try (Statement stmt = connection.createStatement()) {
+        stmt.executeUpdate("ALTER TABLE non_numeric_nominees ADD COLUMN judge VARCHAR(64) DEFAULT NULL");
+      }
+    }
+
+    setDBVersion(connection, 24);
   }
 
   /**
@@ -1809,21 +1826,35 @@ public final class ImportDB {
         SQLFunctions.close(destPrep);
 
         final StringBuilder columns = new StringBuilder();
+        int numColumns = 0;
         columns.append(" Tournament,");
+        ++numColumns;
         columns.append(" TeamNumber,");
+        ++numColumns;
         columns.append(" NoShow,");
+        ++numColumns;
         final List<AbstractGoal> goals = categoryElement.getAllGoals();
-        int numColumns = 5;
         for (final AbstractGoal element : goals) {
           if (!element.isComputed()) {
             columns.append(" "
                 + element.getName()
                 + ",");
             ++numColumns;
+
+            columns.append(" "
+                + GenerateDB.getGoalCommentColumnName(element)
+                + ",");
+            ++numColumns;
           }
         }
         columns.append(" note,");
-        columns.append(" Judge");
+        ++numColumns;
+        columns.append(" Judge,");
+        ++numColumns;
+        columns.append(" comment_great_job,");
+        ++numColumns;
+        columns.append(" comment_think_about");
+        ++numColumns;
 
         importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,
                      sourceTournamentID);
@@ -2074,15 +2105,16 @@ public final class ImportDB {
       SQLFunctions.close(destPrep);
 
       // insert
-      destPrep = destinationConnection.prepareStatement("INSERT INTO non_numeric_nominees (tournament, category, team_number) VALUES(?, ?, ?)");
+      destPrep = destinationConnection.prepareStatement("INSERT INTO non_numeric_nominees (tournament, category, team_number, judge) VALUES(?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT category, team_number FROM non_numeric_nominees WHERE tournament = ?");
+      sourcePrep = sourceConnection.prepareStatement("SELECT category, team_number, judge FROM non_numeric_nominees WHERE tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
         destPrep.setString(2, sourceRS.getString(1));
         destPrep.setInt(3, sourceRS.getInt(2));
+        destPrep.setString(4, sourceRS.getString(3));
         destPrep.executeUpdate();
       }
 

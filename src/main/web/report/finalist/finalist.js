@@ -233,6 +233,7 @@
     this.room = {}; // division -> room
     this.scheduled = false;
     this.overall = overall;
+    this.judges = {}; // teamNumber -> [judges]
 
     _categories[this.catId] = this;
     _save();
@@ -924,6 +925,8 @@
         }
 
         category.teams.splice(index, 1);
+        delete category.judges[teamNum];
+        
         if (save) {
           _save();
         }
@@ -1313,6 +1316,39 @@
      */
     isCategoryScheduled : function(category) {
       return category.scheduled;
+    },
+
+    /**
+     * Get the judges that nominated a team for a category.
+     */
+    getNominatingJudges : function(category, teamNumber) {
+      return category.judges[teamNumber];
+    },
+
+    setNominatingJudges : function(category, teamNumber, judges) {
+      category.judges[teamNumber] = judges;
+      _save();
+    },
+
+    /**
+     * Convert the non-numeric nominee information into a list of
+     * NonNumericNominees objects. This is to prepare to send the data to the
+     * server.
+     */
+    prepareNonNumericNomineesToSend : function() {
+      var allNonNumericNominees = [];
+      $.each($.finalist.getNonNumericCategories(), function(i, category) {
+        var categoryNominees = [];
+        $.each(category.teams, function(j, teamNumber) {
+          var judges = $.finalist.getNominatingJudges(category, teamNumber);
+          var nominee = new Nominee(teamNumber, judges);
+          categoryNominees.push(nominee);
+        }); // foreach team
+        var nominees = new NonNumericNominees(category.name, categoryNominees);
+        allNonNumericNominees.push(nominees);
+      }); // foreach category
+
+      return allNonNumericNominees;
     }
 
   };

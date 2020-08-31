@@ -13,15 +13,19 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.GenerateDB;
+import fll.db.NonNumericNominees;
 import fll.xml.AbstractGoal;
 import fll.xml.Goal;
+import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
 
 /**
@@ -237,10 +241,10 @@ public class SubjectiveScore {
   /**
    * The comments specific to each goal.
    * 
-   * @return goal name, comment
+   * @return goal name, comment (read-only)
    */
   public Map<String, String> getGoalComments() {
-    return goalComments;
+    return Collections.unmodifiableMap(goalComments);
   }
 
   /**
@@ -251,6 +255,23 @@ public class SubjectiveScore {
     if (null != v) {
       goalComments.putAll(v);
     }
+  }
+
+  private final Set<String> nonNumericNominations = new HashSet<>();
+
+  /**
+   * @return unmodifiable list of {@link NonNumericCategory#getTitle()}
+   */
+  public Set<String> getNonNumericNominations() {
+    return Collections.unmodifiableSet(nonNumericNominations);
+  }
+
+  /**
+   * @param v see {@link #getNonNumericNominations()}
+   */
+  public void setNonNumericNominations(final Set<String> v) {
+    nonNumericNominations.clear();
+    nonNumericNominations.addAll(v);
   }
 
   /**
@@ -279,37 +300,7 @@ public class SubjectiveScore {
 
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
-          final SubjectiveScore score = new SubjectiveScore();
-          score.setScoreOnServer(true);
-
-          final String judge = rs.getString("Judge");
-
-          score.setTeamNumber(rs.getInt("TeamNumber"));
-          score.setJudge(judge);
-          score.setNoShow(rs.getBoolean("NoShow"));
-          score.setNote(rs.getString("note"));
-          score.setCommentGreatJob(rs.getString("comment_great_job"));
-          score.setCommentThinkAbout(rs.getString("comment_think_about"));
-
-          final Map<String, Double> standardSubScores = new HashMap<>();
-          final Map<String, String> enumSubScores = new HashMap<>();
-          final Map<String, String> goalComments = new HashMap<>();
-          for (final AbstractGoal goal : category.getAllGoals()) {
-            if (goal.isEnumerated()) {
-              final String value = rs.getString(goal.getName());
-              enumSubScores.put(goal.getName(), value);
-            } else {
-              final double value = rs.getDouble(goal.getName());
-              standardSubScores.put(goal.getName(), value);
-            }
-
-            final String commentColumn = GenerateDB.getGoalCommentColumnName(goal);
-            final String comment = rs.getString(commentColumn);
-            goalComments.put(goal.getName(), comment);
-          } // foreach goal
-          score.setStandardSubScores(standardSubScores);
-          score.setEnumSubScores(enumSubScores);
-          score.setGoalComments(goalComments);
+          final SubjectiveScore score = fromResultSet(connection, category, tournament, rs);
 
           scores.add(score);
         } // foreach result
@@ -318,6 +309,62 @@ public class SubjectiveScore {
     } // allocate prep
 
     return scores;
+  }
+
+  /**
+   * Populate a {@link SubjectiveScore} object from the specified database result.
+   * One needs to select all columns from the category table for this method to
+   * work properly.
+   * 
+   * @param connection database connection
+   * @param category category
+   * @param tournament the tournament
+   * @param rs the database result to read from
+   * @return a newly created object
+   * @throws SQLException on a database error
+   */
+  public static SubjectiveScore fromResultSet(final Connection connection,
+                                              final SubjectiveScoreCategory category,
+                                              final Tournament tournament,
+                                              final ResultSet rs)
+      throws SQLException {
+    final SubjectiveScore score = new SubjectiveScore();
+    score.setScoreOnServer(true);
+
+    final String judge = rs.getString("Judge");
+
+    score.setTeamNumber(rs.getInt("TeamNumber"));
+    score.setJudge(judge);
+    score.setNoShow(rs.getBoolean("NoShow"));
+    score.setNote(rs.getString("note"));
+    score.setCommentGreatJob(rs.getString("comment_great_job"));
+    score.setCommentThinkAbout(rs.getString("comment_think_about"));
+
+    final Map<String, Double> standardSubScores = new HashMap<>();
+    final Map<String, String> enumSubScores = new HashMap<>();
+    final Map<String, String> goalComments = new HashMap<>();
+    for (final AbstractGoal goal : category.getAllGoals()) {
+      if (goal.isEnumerated()) {
+        final String value = rs.getString(goal.getName());
+        enumSubScores.put(goal.getName(), value);
+      } else {
+        final double value = rs.getDouble(goal.getName());
+        standardSubScores.put(goal.getName(), value);
+      }
+
+      final String commentColumn = GenerateDB.getGoalCommentColumnName(goal);
+      final String comment = rs.getString(commentColumn);
+      goalComments.put(goal.getName(), comment);
+    } // foreach goal
+    score.setStandardSubScores(standardSubScores);
+    score.setEnumSubScores(enumSubScores);
+    score.setGoalComments(goalComments);
+
+    final Set<String> nominatedCategories = NonNumericNominees.getNomineesByJudgeForTeam(connection, tournament,
+                                                                                         score.getJudge(),
+                                                                                         score.getTeamNumber());
+    score.setNonNumericNominations(nominatedCategories);
+    return score;
   }
 
 }

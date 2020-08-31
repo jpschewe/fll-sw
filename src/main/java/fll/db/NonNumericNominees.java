@@ -13,38 +13,43 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Tournament;
+import fll.xml.NonNumericCategory;
+
 /**
- * Keep track of non-numeric subjective nominees.
- * The subjective categories defined here are those that are not listed in the
- * challenge descriptor.
+ * Keep track of non-numeric nominees for a category.
  * Each instance represents a category and the teams in that category.
  * Mirrors javascript class in fll-objects.js. Property names need to match the
  * javascript/JSON.
  */
 public class NonNumericNominees {
 
-  public NonNumericNominees(@JsonProperty("categoryName") final String categoryName,
-                            @JsonProperty("teamNumbers") final Collection<Integer> teamNumbers) {
-    mCategoryName = categoryName;
-    mTeamNumbers = new HashSet<>(teamNumbers);
+  /**
+   * @param categoryTitle see {@link NonNumericCategory#getTitle()}
+   * @param nominees see {@link #getNominees()}
+   */
+  public NonNumericNominees(@JsonProperty("categoryTitle") final String categoryTitle,
+                            @JsonProperty("nominees") final Collection<Nominee> nominees) {
+    this.mCategoryTitle = categoryTitle;
+    this.nominees = new HashSet<>(nominees);
   }
 
-  private final String mCategoryName;
+  private final String mCategoryTitle;
 
   /**
-   * @return Name of the category for these nominees.
+   * @return title of the category for these nominees.
    */
-  public String getCategoryName() {
-    return mCategoryName;
+  public String getCategoryTitle() {
+    return mCategoryTitle;
   }
-
-  private final Set<Integer> mTeamNumbers;
 
   /**
    * Store this instance in the database. This replaces any nominees
@@ -57,119 +62,61 @@ public class NonNumericNominees {
   public void store(final Connection connection,
                     final int tournamentId)
       throws SQLException {
-    clearNominees(connection, tournamentId, mCategoryName);
-    addNominees(connection, tournamentId, mCategoryName, mTeamNumbers);
+    storeNominees(connection, tournamentId, mCategoryTitle, nominees);
   }
 
+  private final Set<Nominee> nominees;
+
   /**
-   * Numbers of the teams that are the nominees.
-   * 
    * @return read-only set
    */
-  public Set<Integer> getTeamNumbers() {
-    return Collections.unmodifiableSet(mTeamNumbers);
+  public Set<Nominee> getNominees() {
+    return Collections.unmodifiableSet(nominees);
   }
 
   /**
-   * Clear the nominees for the specified category at the tournament.
-   * 
-   * @param connection database connection
-   * @param tournamentId the tournament
-   * @param category the category
-   * @throws SQLException
-   */
-  public static void clearNominees(final Connection connection,
-                                   final int tournamentId,
-                                   final String category)
-      throws SQLException {
-    PreparedStatement delete = null;
-    try {
-      delete = connection.prepareStatement("DELETE FROM non_numeric_nominees"//
-          + " WHERE tournament = ?"//
-          + " AND category = ?");
-      delete.setInt(1, tournamentId);
-      delete.setString(2, category);
-      delete.executeUpdate();
-    } finally {
-      SQLFunctions.close(delete);
-    }
-  }
-
-  /**
-   * Add a nominee to the database. If they already are a nominee, this function
-   * does nothing.
-   * 
-   * @param connection database connection
-   * @param tournamentId passed through
-   * @param category passed through
-   * @param teamNumber passed as a singleton set
-   * @throws SQLException on a database error
-   * @see #addNominees(Connection, int, String, Set)
-   */
-  public static void addNominee(final Connection connection,
-                                final int tournamentId,
-                                final String category,
-                                final int teamNumber)
-      throws SQLException {
-    addNominees(connection, tournamentId, category, Collections.singleton(teamNumber));
-  }
-
-  /**
-   * Add a set of nominees to the database. If the nominee already exsts, there
-   * is no error.
+   * Replace the nominees in the database for the specified category.
    * 
    * @param connection database to add the nominees to
    * @param tournamentId the tournament to add the nominees to
    * @param category the category the nominees are for
-   * @param teamNumbers the teams that are nominees
+   * @param nominees see {@link #getNominees()}
    * @throws SQLException on a database error
    */
-  public static void addNominees(final Connection connection,
-                                 final int tournamentId,
-                                 final String category,
-                                 final Set<Integer> teamNumbers)
+  @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "SpotBugs doesn't appear to handle Nullable annotation inside generic type")
+  private static void storeNominees(final Connection connection,
+                                    final int tournamentId,
+                                    final String category,
+                                    final Set<Nominee> nominees)
       throws SQLException {
-    PreparedStatement check = null;
-    ResultSet checkResult = null;
-    PreparedStatement insert = null;
-    final boolean autoCommit = connection.getAutoCommit();
-    try {
-      connection.setAutoCommit(false);
+    try (PreparedStatement delete = connection.prepareStatement("DELETE FROM non_numeric_nominees"//
+        + " WHERE tournament = ?"//
+        + " AND category = ?")) {
+      delete.setInt(1, tournamentId);
+      delete.setString(2, category);
+      delete.executeUpdate();
+    }
 
-      check = connection.prepareStatement("SELECT team_number FROM non_numeric_nominees" //
-          + " WHERE tournament = ?" //
-          + "   AND category = ?" //
-          + "   AND team_number = ?");
-      check.setInt(1, tournamentId);
-      check.setString(2, category);
+    try (PreparedStatement insert = connection.prepareStatement("INSERT INTO non_numeric_nominees" //
+        + " (tournament, category, team_number, judge) VALUES(?, ?, ?, ?)")) {
 
-      insert = connection.prepareStatement("INSERT INTO non_numeric_nominees" //
-          + " (tournament, category, team_number) VALUES(?, ?, ?)");
       insert.setInt(1, tournamentId);
       insert.setString(2, category);
 
-      for (final int teamNumber : teamNumbers) {
-        check.setInt(3, teamNumber);
-        insert.setInt(3, teamNumber);
+      for (final Nominee nominee : nominees) {
+        insert.setInt(3, nominee.getTeamNumber());
 
-        checkResult = check.executeQuery();
-        if (!checkResult.next()) {
+        for (final String judge : nominee.getJudges()) {
+          insert.setString(4, judge);
           insert.executeUpdate();
-        }
-      }
+        } // foreach judge
+      } // foreach nominee
 
-      connection.commit();
-    } finally {
-      connection.setAutoCommit(autoCommit);
-
-      SQLFunctions.close(checkResult);
-      SQLFunctions.close(check);
-      SQLFunctions.close(insert);
-    }
+    } // allocation of PreparedStatement
   }
 
   /**
-   * Get all subjective categories know for the specified tournament.
+   * Get all non-numeric categories known for the specified tournament.
    * 
    * @param connection the database to get the categories from
    * @param tournamentId the tournament to get the categories for
@@ -180,19 +127,15 @@ public class NonNumericNominees {
                                           final int tournamentId)
       throws SQLException {
     final Set<String> result = new HashSet<>();
-    PreparedStatement get = null;
-    ResultSet rs = null;
-    try {
-      get = connection.prepareStatement("SELECT DISTINCT category FROM non_numeric_nominees WHERE tournament = ?");
+    try (
+        PreparedStatement get = connection.prepareStatement("SELECT DISTINCT category FROM non_numeric_nominees WHERE tournament = ?")) {
       get.setInt(1, tournamentId);
-      rs = get.executeQuery();
-      while (rs.next()) {
-        final String category = rs.getString(1);
-        result.add(category);
+      try (ResultSet rs = get.executeQuery()) {
+        while (rs.next()) {
+          final String category = rs.getString(1);
+          result.add(category);
+        }
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(get);
     }
     return result;
   }
@@ -206,30 +149,177 @@ public class NonNumericNominees {
    * @return teams that are nominees in the category
    * @throws SQLException on a database error
    */
-  public static Set<Integer> getNominees(final Connection connection,
+  public static Set<Nominee> getNominees(final Connection connection,
                                          final int tournamentId,
                                          final String category)
       throws SQLException {
-    final Set<Integer> result = new HashSet<>();
-    PreparedStatement get = null;
-    ResultSet rs = null;
-    try {
-      get = connection.prepareStatement("SELECT DISTINCT team_number FROM non_numeric_nominees"
-          + " WHERE tournament = ?" //
-          + " AND category = ?");
+    final Set<Nominee> result = new HashSet<>();
+    try (
+        PreparedStatement get = connection.prepareStatement("SELECT team_number, array_agg(judge) AS judges FROM non_numeric_nominees"
+            + " WHERE tournament = ?" //
+            + " AND category = ?" //
+            + " GROUP BY team_number")) {
       get.setInt(1, tournamentId);
       get.setString(2, category);
-      rs = get.executeQuery();
-      while (rs.next()) {
-        final int team = rs.getInt(1);
-        result.add(team);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(get);
-    }
+      try (ResultSet rs = get.executeQuery()) {
+        while (rs.next()) {
+          final int team = rs.getInt("team_number");
+          final Set<String> judges = new HashSet<>();
+          try (ResultSet arrayRs = rs.getArray("judges").getResultSet()) {
+            while (arrayRs.next()) {
+              judges.add(arrayRs.getString(2));
+            }
+          }
+          final Nominee nominee = new Nominee(team, judges);
+          result.add(nominee);
+        } // foreach result
+      } // allocate query
+    } // allocate prepared statement
 
     return result;
   }
 
+  /**
+   * Get the nominees by the specified judge for a team.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament
+   * @param judge the judge
+   * @param teamNumber the team number
+   * @return the titles of the non-numeric categories
+   */
+  public static Set<String> getNomineesByJudgeForTeam(final Connection connection,
+                                                      final Tournament tournament,
+                                                      final String judge,
+                                                      final int teamNumber)
+      throws SQLException {
+    final Set<String> result = new HashSet<>();
+    try (PreparedStatement get = connection.prepareStatement("SELECT category FROM non_numeric_nominees"
+        + " WHERE tournament = ?" //
+        + " AND judge = ?" //
+        + " AND team_number = ?")) {
+      get.setInt(1, tournament.getTournamentID());
+      get.setString(2, judge);
+      get.setInt(3, teamNumber);
+      try (ResultSet rs = get.executeQuery()) {
+        while (rs.next()) {
+          final String category = rs.getString("category");
+          result.add(category);
+        } // foreach result
+      } // allocate query
+    } // allocate prepared statement
+
+    return result;
+  }
+
+  /**
+   * Store operation for
+   * {@link #getNomineesByJudgeForTeam(Connection, Tournament, String, int)}.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament
+   * @param judge the judge
+   * @param teamNumber the team number
+   * @param nominations the new value for nominations
+   * @throws SQLException on a database error
+   */
+  public static void storeNomineesByJudgeForTeam(final Connection connection,
+                                                 final Tournament tournament,
+                                                 final String judge,
+                                                 final int teamNumber,
+                                                 final Set<String> nominations)
+      throws SQLException {
+    final boolean autoCommit = connection.getAutoCommit();
+    try {
+      connection.setAutoCommit(false);
+
+      try (PreparedStatement delete = connection.prepareStatement("DELETE FROM non_numeric_nominees" //
+          + " WHERE tournament = ?" //
+          + " AND judge = ?" //
+          + " AND team_number = ?")) {
+        delete.setInt(1, tournament.getTournamentID());
+        delete.setString(2, judge);
+        delete.setInt(3, teamNumber);
+        delete.executeUpdate();
+      }
+
+      if (!nominations.isEmpty()) {
+        try (PreparedStatement insert = connection.prepareStatement("INSERT INTO non_numeric_nominees" //
+            + " (tournament, judge, team_number, category)" //
+            + " VALUES(?, ?, ?, ?)"//
+        )) {
+          insert.setInt(1, tournament.getTournamentID());
+          insert.setString(2, judge);
+          insert.setInt(3, teamNumber);
+          for (final String nomination : nominations) {
+            insert.setString(4, nomination);
+            insert.addBatch();
+          }
+
+          insert.executeBatch();
+        }
+      }
+
+      connection.commit();
+    } finally {
+      connection.setAutoCommit(autoCommit);
+    }
+  }
+
+  /**
+   * A single nominee.
+   */
+  public static final class Nominee {
+    /**
+     * @param teamNumber see {@link #getTeamNumber()}
+     * @param judges see {@link #getJudges()}
+     */
+    public Nominee(final @JsonProperty("teamNumber") int teamNumber,
+                   final @JsonProperty("judges") Set<@Nullable String> judges) {
+      this.judges.addAll(judges);
+      this.teamNumber = teamNumber;
+    }
+
+    private final int teamNumber;
+
+    /**
+     * @return the team being nominated
+     */
+    public int getTeamNumber() {
+      return teamNumber;
+    }
+
+    private final Set<@Nullable String> judges = new HashSet<>();
+
+    /**
+     * The judges that have nominated this team. Null is a valid judge meaning that
+     * the team has been nominated outside of a context where a judge name is
+     * available.
+     * 
+     * @return read-only set of the judges that have nominated this team
+     */
+    public Set<@Nullable String> getJudges() {
+      return Collections.unmodifiableSet(this.judges);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(teamNumber, judges);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (null == o) {
+        return false;
+      } else if (this == o) {
+        return true;
+      } else if (Nominee.class.equals(o.getClass())) {
+        final Nominee other = (Nominee) o;
+        return this.teamNumber == other.teamNumber
+            && this.judges.equals(other.judges);
+      } else {
+        return false;
+      }
+    }
+  }
 }

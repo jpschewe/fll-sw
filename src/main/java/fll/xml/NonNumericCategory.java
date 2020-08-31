@@ -6,10 +6,16 @@
 
 package fll.xml;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * A category that doesn't have a score.
@@ -23,44 +29,59 @@ public class NonNumericCategory implements Serializable {
 
   private static final String PER_AWARD_GROUP_ATTRIBUTE = "perAwardGroup";
 
+  private final PropertyChangeSupport propChangeSupport = new PropertyChangeSupport(this);
+
+  protected final void firePropertyChange(final String property,
+                                          final @Nullable Object oldValue,
+                                          final @Nullable Object newValue) {
+    propChangeSupport.firePropertyChange(property, oldValue, newValue);
+  }
+
+  /**
+   * Add a listener for property change events.
+   *
+   * @param listener the listener to add
+   */
+  public final void addPropertyChangeListener(@NonNull final PropertyChangeListener listener) {
+    this.propChangeSupport.addPropertyChangeListener(listener);
+  }
+
+  /**
+   * Remove a property change listener.
+   *
+   * @param listener the listener to remove
+   */
+  public final void removePropertyChangeListener(@NonNull final PropertyChangeListener listener) {
+    this.propChangeSupport.removePropertyChangeListener(listener);
+  }
+
   /**
    * Parse the object from an XML element.
    * 
    * @param ele the XML element to parse
    */
   public NonNumericCategory(final Element ele) {
-    this.name = ele.getAttribute(SubjectiveScoreCategory.NAME_ATTRIBUTE);
     title = ele.getAttribute(ChallengeDescription.TITLE_ATTRIBUTE);
     perAwardGroup = Boolean.valueOf(ele.getAttribute(PER_AWARD_GROUP_ATTRIBUTE));
+
+    final NodelistElementCollectionAdapter elements = new NodelistElementCollectionAdapter(ele.getElementsByTagName(GoalElement.DESCRIPTION_TAG_NAME));
+    if (elements.hasNext()) {
+      final Element descriptionEle = elements.next();
+      description = ChallengeDescription.removeExtraWhitespace(descriptionEle.getTextContent());
+    } else {
+      description = "";
+    }
+
   }
 
   /**
-   * @param name see {@link #getName()}
    * @param title see {@link #getTitle()}
    * @param perAwardGroup see {@link #getPerAwardGroup()}
    */
-  public NonNumericCategory(final String name,
-                            final String title,
+  public NonNumericCategory(final String title,
                             final boolean perAwardGroup) {
-    this.name = name;
     this.title = title;
     this.perAwardGroup = perAwardGroup;
-  }
-
-  private String name;
-
-  /**
-   * @return name for use in the database
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * @param v see {@link #getName()}
-   */
-  public void setName(final String v) {
-    name = v;
   }
 
   private String title;
@@ -73,10 +94,14 @@ public class NonNumericCategory implements Serializable {
   }
 
   /**
+   * Fires property change event.
+   * 
    * @param v see {@link #getTitle()}
    */
   public void setTitle(final String v) {
+    final String old = title;
     title = v;
+    firePropertyChange("title", old, v);
   }
 
   private boolean perAwardGroup = true;
@@ -119,7 +144,6 @@ public class NonNumericCategory implements Serializable {
     final Element ele = doc.createElement(TAG_NAME);
     ele.setAttribute(PER_AWARD_GROUP_ATTRIBUTE, Boolean.toString(perAwardGroup));
     ele.setAttribute(ChallengeDescription.TITLE_ATTRIBUTE, title);
-    ele.setAttribute(SubjectiveScoreCategory.NAME_ATTRIBUTE, name);
 
     if (null != description) {
       final Element descriptionEle = doc.createElement(RubricRange.DESCRIPTION_TAG_NAME);

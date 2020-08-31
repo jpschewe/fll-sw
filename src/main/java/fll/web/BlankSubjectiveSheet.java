@@ -54,6 +54,11 @@ public class BlankSubjectiveSheet extends HttpServlet {
         response.setHeader("Content-Disposition", String.format("filename=subjective-%s.pdf", subjectiveCategoryName));
 
         final SubjectiveScoreCategory category = challengeDescription.getSubjectiveCategoryByName(subjectiveCategoryName);
+        if (null == category) {
+          throw new FLLRuntimeException("Catgory with name '"
+              + subjectiveCategoryName
+              + "' does not exist");
+        }
 
         final TeamScheduleInfo dummy = new TeamScheduleInfo(111111);
         dummy.setTeamName("Really long team name, something that is really really long");

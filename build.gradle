@@ -202,6 +202,8 @@ dependencies {
     // xml APIs are part of the JDK
     exclude(group: "xml-apis", module: "xml-apis")
   }
+  
+  implementation(group: "org.checkerframework", name: "checker-qual", version: "3.6.0")
     
   implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.20")
   

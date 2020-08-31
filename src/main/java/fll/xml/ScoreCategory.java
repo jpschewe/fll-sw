@@ -13,8 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -187,7 +186,7 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
    * @return goal group to score, empty map if no score or a no show or no groups
    *         defined
    */
-  @Nonnull
+  @NonNull
   public Map<String, Double> getGoalGroupScores(final TeamScore teamScore) {
     final Map<String, Double> goalGroupScores = new HashMap<>();
 

@@ -1,3 +1,4 @@
+* #846 - Add support for nominating teams for non-numeric categories during subjective judging
 * #810 - Add support for non-numeric categories in the challenge description.
 * #844 - Output GoalGroup description on the subjective PDF files
 * #511 - Add GoalGroup as a first class object. This allows it to have a description and cleans up the XML document.

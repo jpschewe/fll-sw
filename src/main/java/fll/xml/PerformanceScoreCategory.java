@@ -24,11 +24,17 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
  */
 public class PerformanceScoreCategory extends ScoreCategory {
 
+  /**
+   * XML tag used for the category.
+   */
   public static final String TAG_NAME = "Performance";
 
-  public static final String TIE_BREAKER_TAG_NAME = "tiebreaker";
+  /**
+   * XML tag for tie breakers.
+   */
+  private static final String TIE_BREAKER_TAG_NAME = "tiebreaker";
 
-  public static final String MINIMUM_SCORE_ATTRIBUTE = "minimumScore";
+  private static final String MINIMUM_SCORE_ATTRIBUTE = "minimumScore";
 
   public PerformanceScoreCategory(final Element ele) {
     super(ele);
@@ -192,8 +198,7 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
     populateXml(doc, ele);
 
-    ele.setAttribute(MINIMUM_SCORE_ATTRIBUTE,
-                     Utilities.getXmlFloatingPointNumberFormat().format(mMinimumScore));
+    ele.setAttribute(MINIMUM_SCORE_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mMinimumScore));
 
     for (final Restriction restrict : mRestrictions) {
       final Element restrictEle = restrict.toXml(doc);
