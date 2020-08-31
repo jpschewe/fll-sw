@@ -1826,11 +1826,14 @@ public final class ImportDB {
         SQLFunctions.close(destPrep);
 
         final StringBuilder columns = new StringBuilder();
+        int numColumns = 0;
         columns.append(" Tournament,");
+        ++numColumns;
         columns.append(" TeamNumber,");
+        ++numColumns;
         columns.append(" NoShow,");
+        ++numColumns;
         final List<AbstractGoal> goals = categoryElement.getAllGoals();
-        int numColumns = 5;
         for (final AbstractGoal element : goals) {
           if (!element.isComputed()) {
             columns.append(" "
@@ -1839,14 +1842,19 @@ public final class ImportDB {
             ++numColumns;
 
             columns.append(" "
-                + GenerateDB.getGoalCommentColumnName(element));
+                + GenerateDB.getGoalCommentColumnName(element)
+                + ",");
             ++numColumns;
           }
         }
         columns.append(" note,");
+        ++numColumns;
         columns.append(" Judge,");
+        ++numColumns;
         columns.append(" comment_great_job,");
+        ++numColumns;
         columns.append(" comment_think_about");
+        ++numColumns;
 
         importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,
                      sourceTournamentID);
