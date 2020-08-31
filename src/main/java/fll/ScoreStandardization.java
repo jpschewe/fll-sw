@@ -164,6 +164,10 @@ public final class ScoreStandardization {
 
   /**
    * Populate the standardized_score column of subjective_computed_scores.
+   * 
+   * @param connection database connection
+   * @param tournament ID of tournament to work on
+   * @throws SQLException on a database error
    */
   public static void standardizeSubjectiveScores(final Connection connection,
                                                  final int tournament)
@@ -245,6 +249,7 @@ public final class ScoreStandardization {
    * Updates overall_scores with the sum of the the scores times the weights for
    * the given tournament.
    *
+   * @param description challenge description
    * @param connection database connection
    * @param tournament the tournament to add scores for
    * @throws SQLException on an error talking to the database
@@ -252,12 +257,13 @@ public final class ScoreStandardization {
   public static void updateTeamTotalScores(final Connection connection,
                                            final ChallengeDescription description,
                                            final int tournament)
-      throws SQLException  {
+      throws SQLException {
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection, tournament);
 
     final Map<String, Double> categoryWeights = new HashMap<>();
     final ScoreCategory performanceCategory = description.getPerformance();
     categoryWeights.put(performanceCategory.getName(), performanceCategory.getWeight());
+
     description.getSubjectiveCategories().forEach(cat -> categoryWeights.put(cat.getName(), cat.getWeight()));
 
     final Tournament currentTournament = Tournament.findTournamentByID(connection, tournament);
@@ -305,7 +311,7 @@ public final class ScoreStandardization {
   }
 
   /**
-   * Do a simple check of the summarized score data consistency
+   * Do a simple check of the summarized score data consistency.
    *
    * @param connection connection to the database
    * @return null if the data is consistent, otherwise an error message

@@ -19,8 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -44,7 +42,8 @@ public class StoreNonNumericNominees extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
 
@@ -75,7 +74,8 @@ public class StoreNonNumericNominees extends BaseFLLServlet {
 
     } catch (final SQLException e) {
       message.append("<p class='error'>Error saving non-numeric nominees into the database: "
-          + e.getMessage() + "</p>");
+          + e.getMessage()
+          + "</p>");
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving subjective data into the database", e);
     }
@@ -85,7 +85,13 @@ public class StoreNonNumericNominees extends BaseFLLServlet {
 
   }
 
-  private static final class NonNumericNomineesTypeInformation extends TypeReference<Collection<NonNumericNominees>> {
+  /**
+   * JSON type information for a {@link Collection} of {@link NonNumericNominees}.
+   */
+  public static final class NonNumericNomineesTypeInformation extends TypeReference<Collection<NonNumericNominees>> {
+    /**
+     * Singleton instance.
+     */
     public static final NonNumericNomineesTypeInformation INSTANCE = new NonNumericNomineesTypeInformation();
   }
 

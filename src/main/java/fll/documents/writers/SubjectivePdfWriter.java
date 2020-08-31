@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.SQLException;
 import java.time.LocalTime;
 import java.util.Base64;
 import java.util.Collection;
@@ -16,7 +17,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.xml.transform.TransformerException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +24,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -40,6 +41,7 @@ import fll.xml.ChallengeDescription;
 import fll.xml.Goal;
 import fll.xml.GoalElement;
 import fll.xml.GoalGroup;
+import fll.xml.NonNumericCategory;
 import fll.xml.RubricRange;
 import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -152,7 +154,8 @@ public class SubjectivePdfWriter {
                                final int teamNumber,
                                final String teamName,
                                final String awardGroup,
-                               final @Nullable LocalTime scheduledTime) {
+                               final @Nullable LocalTime scheduledTime,
+                               final @Nullable SubjectiveScore score) {
     final Element header = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
     final Element pageHeaderTable = FOPUtils.createBasicTable(document);
@@ -247,12 +250,7 @@ public class SubjectivePdfWriter {
     tournamentCell.setAttribute("font-size", "6pt");
     tournamentCell.setAttribute("font-style", "italic");
 
-    // add the instructions to the header
-    final Element directionsBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    header.appendChild(directionsBlock);
-    directionsBlock.setAttribute("font-size", "9pt");
-    directionsBlock.setAttribute("font-weight", "bold");
-    directionsBlock.appendChild(document.createTextNode(scoreCategory.getScoreSheetInstructions()));
+    addInstructions(document, header, score);
 
     final boolean somethingRequired = scoreCategory.getGoalElements().stream()//
                                                    .filter(GoalElement::isGoal)//
@@ -271,6 +269,113 @@ public class SubjectivePdfWriter {
     }
 
     return header;
+  }
+
+  private void addInstructions(final Document document,
+                               final Element header,
+                               final @Nullable SubjectiveScore score) {
+    final Element directionsContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
+    // "Instructions\n in bold"
+    final Element instructionsText = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    directionsContainer.appendChild(instructionsText);
+    instructionsText.setAttribute("font-weight", "bold");
+    instructionsText.appendChild(document.createTextNode("Instructions"));
+
+    // "instructions text"
+    final Element directionsBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    directionsContainer.appendChild(directionsBlock);
+    directionsBlock.appendChild(document.createTextNode(scoreCategory.getScoreSheetInstructions()));
+
+    final List<SubjectiveScoreCategory.Nominates> categoriesCanNominate = scoreCategory.getNominates();
+    if (!categoriesCanNominate.isEmpty()) {
+      final Element instructionsTable = FOPUtils.createBasicTable(document);
+      header.appendChild(instructionsTable);
+      instructionsTable.appendChild(FOPUtils.createTableColumn(document, 25)); // instructions
+      instructionsTable.appendChild(FOPUtils.createTableColumn(document, 25)); // categories and checkbox
+      instructionsTable.appendChild(FOPUtils.createTableColumn(document, 50)); // category descriptions
+
+      final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+      instructionsTable.appendChild(tableBody);
+
+      final Element row1 = FOPUtils.createTableRow(document);
+      tableBody.appendChild(row1);
+
+      final Element directionsCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+      row1.appendChild(directionsCell);
+      directionsCell.appendChild(directionsContainer);
+      directionsCell.setAttribute("number-rows-spanned", String.valueOf(categoriesCanNominate.size()
+          + 1));
+      directionsCell.setAttribute("padding-right", "5pt");
+
+      final String verticalPadding = "3pt";
+
+      final Element nominateInstructions = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                                    "If the team is a candidate for one of these awards, please tick the appropriate box:");
+      row1.appendChild(nominateInstructions);
+      // span checkbox and description
+      nominateInstructions.setAttribute("number-columns-spanned", "2");
+      nominateInstructions.setAttribute("padding-bottom", verticalPadding);
+
+      // row per award, top border if not first
+      boolean first = true;
+      for (final SubjectiveScoreCategory.Nominates nominates : categoriesCanNominate) {
+        final Element row = FOPUtils.createTableRow(document);
+        tableBody.appendChild(row);
+
+        final NonNumericCategory category = description.getNonNumericCategoryByTitle(nominates.getNonNumericCategoryTitle());
+        if (null == category) {
+          throw new FLLInternalException("There is no non-numeric category with title "
+              + nominates.getNonNumericCategoryTitle()
+              + ". This should have been caught when parsing the challenge description");
+        }
+
+        final Element checkboxCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+        row.appendChild(checkboxCell);
+        checkboxCell.setAttribute("padding-top", verticalPadding);
+        checkboxCell.setAttribute("padding-bottom", verticalPadding);
+        checkboxCell.setAttribute("display-align", "center");
+
+        final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        checkboxCell.appendChild(block);
+        block.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_LEFT);
+
+        // add checkbox
+        final Element inlineCheckbox = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+        block.appendChild(inlineCheckbox);
+        FOPUtils.addBorders(inlineCheckbox, 1, 1, 1, 1);
+        if (null != score
+            && score.getNonNumericNominations().contains(category.getTitle())) {
+          inlineCheckbox.appendChild(document.createTextNode(String.format("%cX%c", Utilities.NON_BREAKING_SPACE,
+                                                                           Utilities.NON_BREAKING_SPACE)));
+        } else {
+          inlineCheckbox.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(4)));
+        }
+        final Element title = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+        block.appendChild(title);
+        title.setAttribute("font-weight", "bold");
+        title.appendChild(document.createTextNode(" "
+            + category.getTitle()));
+
+        final Element descriptionCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                                 category.getDescription());
+        row.appendChild(descriptionCell);
+        descriptionCell.setAttribute("padding-top", verticalPadding);
+        descriptionCell.setAttribute("padding-bottom", verticalPadding);
+        descriptionCell.setAttribute("display-align", "center");
+
+        if (first) {
+          first = false;
+        } else {
+          FOPUtils.addTopBorder(checkboxCell, 1);
+          FOPUtils.addTopBorder(descriptionCell, 1);
+        }
+      }
+
+    } else {
+      // add the instructions to the header
+      header.appendChild(directionsContainer);
+    }
   }
 
   private static int[] getTableColumnInformation(final List<String> rubricTitles) {
@@ -313,6 +418,10 @@ public class SubjectivePdfWriter {
 
       try {
         final Document document = writer.createDocumentForSchedule(schedule, null, pointSize, commentHeight);
+        try (java.io.Writer w = java.nio.file.Files.newBufferedWriter(java.nio.file.Paths.get("subjective.fo"))) {
+          net.mtu.eggplant.xml.XMLUtils.writeXML(document, w);
+        }
+
         final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
         FOPUtils.renderPdf(fopFactory, document, out);
@@ -447,9 +556,10 @@ public class SubjectivePdfWriter {
   /**
    * Create the PDF document for the specified team and scores. It is assumed that
    * {@code score} is consistent with {@code sheetElement}.
-   *
-   * @param description the challenge description
+   * 
    * @param stream where to write the document
+   * @param description the challenge description
+   * @param tournamentName tournament name to display on the sheets
    * @param category the category to write
    * @param scores the team scores to populate the sheet with
    * @param teamNumber the team number
@@ -457,9 +567,9 @@ public class SubjectivePdfWriter {
    * @param awardGroup the award group the team is in
    * @param scheduledTime the time that the judging session was scheduled at, may
    *          be null
-   * @param tournamentName tournament name to display on the sheets
    * @throws IOException if there is an error writing the document to
    *           {@code stream}
+   * @throws SQLException if there is an error reading from the database
    */
   public static void createDocumentForScores(final OutputStream stream,
                                              final ChallengeDescription description,
@@ -470,7 +580,7 @@ public class SubjectivePdfWriter {
                                              final String teamName,
                                              final String awardGroup,
                                              final @Nullable LocalTime scheduledTime)
-      throws IOException {
+      throws IOException, SQLException {
 
     final Pair<Integer, Double> parameters = determineParameters(description, tournamentName, category);
     final int pointSize = parameters.getLeft();
@@ -495,7 +605,8 @@ public class SubjectivePdfWriter {
                                            final String teamName,
                                            final String awardGroup,
                                            final @Nullable LocalTime scheduledTime,
-                                           final int pointSize) {
+                                           final int pointSize)
+      throws SQLException {
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
     final Element documentBody = createBaseDocument(document, pointSize);
 
@@ -562,7 +673,7 @@ public class SubjectivePdfWriter {
     sheet.setAttribute("page-break-after", "always");
     sheet.setAttribute("font-size", String.format("%dpt", fontSize));
 
-    final Element header = createHeader(document, teamNumber, teamName, awardGroup, scheduledTime);
+    final Element header = createHeader(document, teamNumber, teamName, awardGroup, scheduledTime, score);
     sheet.appendChild(header);
     header.setAttribute("space-after", "5");
 
@@ -767,7 +878,9 @@ public class SubjectivePdfWriter {
     block.appendChild(inlineCheckbox);
     FOPUtils.addBorders(inlineCheckbox, 1, 1, 1, 1);
     if (checked) {
-      inlineCheckbox.appendChild(document.createTextNode("X"));
+      inlineCheckbox.appendChild(document.createTextNode(String.format("%cX%c", Utilities.NON_BREAKING_SPACE,
+                                                                       Utilities.NON_BREAKING_SPACE)));
+
     } else {
       inlineCheckbox.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(4)));
     }

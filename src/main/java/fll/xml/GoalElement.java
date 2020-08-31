@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
@@ -68,8 +68,9 @@ public abstract class GoalElement implements Serializable, Evaluatable {
   }
 
   /**
+   * Fires property change event.
+   * 
    * @param v see {@link #getTitle()}
-   *          Fires property change event.
    */
   public void setTitle(final @Nullable String v) {
     final String old = mTitle;

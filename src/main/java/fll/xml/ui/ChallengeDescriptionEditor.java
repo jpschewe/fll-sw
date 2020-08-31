@@ -439,7 +439,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
   }
 
   private void addSubjectiveCategory(final SubjectiveScoreCategory cat) {
-    final SubjectiveCategoryEditor editor = new SubjectiveCategoryEditor(cat);
+    final SubjectiveCategoryEditor editor = new SubjectiveCategoryEditor(cat, mDescription);
     editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
 
     final MovableExpandablePanel container = new MovableExpandablePanel(cat.getTitle(), editor, true, true);
@@ -457,10 +457,9 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
   }
 
   private void addNewNonNumericCategory() {
-    final String name = String.format("name_%d", nonNumericCategoryEditors.size());
     final String title = String.format("Category %d", nonNumericCategoryEditors.size());
 
-    final NonNumericCategory cat = new NonNumericCategory(name, title, true);
+    final NonNumericCategory cat = new NonNumericCategory(title, true);
     mDescription.addNonNumericCategory(cat);
 
     addNonNumericCategory(cat);

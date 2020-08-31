@@ -55,7 +55,9 @@ public class CheckScheduleExists extends BaseFLLServlet {
     uploadScheduleData.setScheduleFile(new File(fileName));
 
     final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
-    uploadScheduleData.setSelectedSheet(sheetName);
+    if (null != sheetName) {
+      uploadScheduleData.setSelectedSheet(sheetName);
+    }
 
     LOGGER.debug("File: {} Sheet: {}", uploadScheduleData.getScheduleFile(), uploadScheduleData.getSelectedSheet());
 

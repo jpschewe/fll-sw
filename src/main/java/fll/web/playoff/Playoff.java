@@ -21,7 +21,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 

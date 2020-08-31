@@ -51,9 +51,9 @@ import fll.xml.VariableScope;
    * @param variableScope where to find variables, null if variables are not
    *          allowed
    */
-  public TermEditor(@Nonnull final Term term,
-                    @Nonnull final GoalScope goalScope,
-                    final VariableScope variableScope) {
+  /* package */ TermEditor(@Nonnull final Term term,
+                           @Nonnull final GoalScope goalScope,
+                           final VariableScope variableScope) {
     this.term = term;
     this.goalScope = goalScope;
     this.variableScope = variableScope;

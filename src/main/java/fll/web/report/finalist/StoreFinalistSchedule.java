@@ -19,8 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,6 +29,7 @@ import fll.util.FLLRuntimeException;
 
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.web.report.StoreNonNumericNominees;
 
 /**
  * Store the data from the finalist scheduling.
@@ -44,7 +43,8 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
 
@@ -87,10 +87,15 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
                                                                   FinalistScheduleTypeInformation.INSTANCE);
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Sched Data has "
-            + rows.size() + " rows");
+            + rows.size()
+            + " rows");
         for (final FinalistDBRow row : rows) {
           LOGGER.trace("row category: "
-              + row.getCategoryName() + " time: " + row.getTime() + " team: " + row.getTeamNumber());
+              + row.getCategoryName()
+              + " time: "
+              + row.getTime()
+              + " team: "
+              + row.getTeamNumber());
         }
       }
 
@@ -98,14 +103,15 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
                                                                            FinalistCategoriesTypeInformation.INSTANCE);
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Category Data has "
-            + rows.size() + " rows");
+            + rows.size()
+            + " rows");
       }
 
       final FinalistSchedule schedule = new FinalistSchedule(tournament, division, categories, rows);
       schedule.store(connection);
 
       final Collection<NonNumericNominees> nominees = jsonMapper.readValue(nomineesStr,
-                                                                           NonNumericNomineesTypeInformation.INSTANCE);
+                                                                           StoreNonNumericNominees.NonNumericNomineesTypeInformation.INSTANCE);
       for (final NonNumericNominees nominee : nominees) {
         nominee.store(connection, tournament);
       }
@@ -114,7 +120,8 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
 
     } catch (final SQLException e) {
       message.append("<p class='error'>Error saving finalist schedule into the database: "
-          + e.getMessage() + "</p>");
+          + e.getMessage()
+          + "</p>");
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving subjective data into the database", e);
     }
@@ -130,10 +137,6 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
 
   private static final class FinalistCategoriesTypeInformation extends TypeReference<Collection<FinalistCategory>> {
     public static final FinalistCategoriesTypeInformation INSTANCE = new FinalistCategoriesTypeInformation();
-  }
-
-  private static final class NonNumericNomineesTypeInformation extends TypeReference<Collection<NonNumericNominees>> {
-    public static final NonNumericNomineesTypeInformation INSTANCE = new NonNumericNomineesTypeInformation();
   }
 
 }

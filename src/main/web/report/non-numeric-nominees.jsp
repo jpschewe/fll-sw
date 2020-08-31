@@ -42,16 +42,8 @@
 	}
 
 	function storeNominees() {
-		var nonNumericNominees = [];
-		$.each($.finalist.getNonNumericCategories(), function(i, category) {
-			var teamNumbers = [];
-			$.each(category.teams, function(j, team) {
-				teamNumbers.push(team);
-			}); // foreach team
-			var nominees = new NonNumericNominees(category.name, teamNumbers);
-			nonNumericNominees.push(nominees);
-		}); // foreach category
-		$('#non-numeric-nominees_data').val($.toJSON(nonNumericNominees));
+        var allNonNumericNominees = $.finalist.prepareNonNumericNomineesToSend();
+        $('#non-numeric-nominees_data').val($.toJSON(allNonNumericNominees));
 	}
 
 	$(document).ready(function() {
