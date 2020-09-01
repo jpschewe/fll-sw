@@ -10,10 +10,12 @@ import java.time.LocalTime;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
@@ -65,10 +67,39 @@ public class SubjectivePdfWriter {
 
   private final SubjectiveScoreCategory scoreCategory;
 
-  private final List<String> masterRubricRangeTitles;
+  private static final class RubricMetaData {
 
-  private static List<String> computeRubricRangeTitles(final SubjectiveScoreCategory category) {
-    List<String> masterRubricRangeTitles = null;
+    /**
+     * @param title title
+     * @param shortDescription short description if all goals have the same short
+     *          description otherwise null
+     */
+    RubricMetaData(final String title,
+                   final @Nullable String shortDescription) {
+      this.title = title;
+      this.shortDescription = shortDescription;
+    }
+
+    private final String title;
+
+    public String getTitle() {
+      return title;
+    }
+
+    private final @Nullable String shortDescription;
+
+    /**
+     * @return if not null, then all goals have this short description
+     */
+    public @Nullable String getShortDescription() {
+      return shortDescription;
+    }
+  }
+
+  private final List<RubricMetaData> masterRubricRangeMetaData;
+
+  private static List<RubricMetaData> computeRubricRangeTitles(final SubjectiveScoreCategory category) {
+    List<RubricMetaData> masterRubricRangeMetaData = null;
 
     // Go through the sheet (ScoreCategory) and put all the rows (abstractGoal)
     // into the right tables (GoalGRoup)
@@ -76,25 +107,45 @@ public class SubjectivePdfWriter {
       if (abstractGoal instanceof Goal) {
         final Goal goal = (Goal) abstractGoal;
 
-        // getRubric returns a sorted list, so we can just add the titles in order
-        final List<String> rubricRangeTitles = new LinkedList<>();
-        for (final RubricRange range : goal.getRubric()) {
-          rubricRangeTitles.add(range.getTitle());
-        }
+        if (null == masterRubricRangeMetaData) {
+          masterRubricRangeMetaData = new LinkedList<>();
+          for (final RubricRange range : goal.getRubric()) {
+            final boolean allSameShortDescription = allShortDescriptionsSame(category, range.getTitle());
+            final RubricMetaData meta;
+            if (allSameShortDescription) {
+              meta = new RubricMetaData(range.getTitle(), range.getShortDescription());
+            } else {
+              meta = new RubricMetaData(range.getTitle(), null);
+            }
+            masterRubricRangeMetaData.add(meta);
+          }
+        } else {
+          // check that the titles match
+          final List<RubricRange> rubric = goal.getRubric();
+          if (rubric.size() != masterRubricRangeMetaData.size()) {
+            throw new FLLRuntimeException("Rubric range titles not consistent across all goals in score category: "
+                + category.getTitle());
+          }
 
-        if (null == masterRubricRangeTitles) {
-          masterRubricRangeTitles = rubricRangeTitles;
-        } else if (!masterRubricRangeTitles.equals(rubricRangeTitles)) {
-          throw new FLLRuntimeException("Rubric range titles not consistent across all goals in score category: "
-              + category.getTitle());
+          final Iterator<RubricMetaData> metaIter = masterRubricRangeMetaData.iterator();
+          final Iterator<RubricRange> rubricIter = goal.getRubric().iterator();
+          while (metaIter.hasNext()
+              && rubricIter.hasNext()) {
+            final RubricMetaData meta = metaIter.next();
+            final RubricRange range = rubricIter.next();
+            if (!meta.getTitle().equals(range.getTitle())) {
+              throw new FLLRuntimeException("Rubric range titles not consistent across all goals in score category: "
+                  + category.getTitle());
+            }
+          }
         }
-      }
+      } // goal
     }
 
-    if (null == masterRubricRangeTitles) {
+    if (null == masterRubricRangeMetaData) {
       return Collections.emptyList();
     } else {
-      return Collections.unmodifiableList(masterRubricRangeTitles);
+      return Collections.unmodifiableList(masterRubricRangeMetaData);
     }
   }
 
@@ -111,7 +162,7 @@ public class SubjectivePdfWriter {
     this.description = description;
     this.tournamentName = tournamentName;
     this.scoreCategory = scoreCategory;
-    this.masterRubricRangeTitles = computeRubricRangeTitles(scoreCategory);
+    this.masterRubricRangeMetaData = computeRubricRangeTitles(scoreCategory);
 
     // uses hard coded constants to make the colors look like FIRST and default
     // to blue.
@@ -378,9 +429,9 @@ public class SubjectivePdfWriter {
     }
   }
 
-  private static int[] getTableColumnInformation(final List<String> rubricTitles) {
-    final int[] colWidths = rubricTitles.stream().mapToInt(title -> {
-      if (title.length() <= 2) {
+  private static int[] getTableColumnInformation(final List<RubricMetaData> rubricMetaDta) {
+    final int[] colWidths = rubricMetaDta.stream().mapToInt(meta -> {
+      if (meta.getTitle().length() <= 2) {
         // likely "ND", save some space
         return 4;
       } else {
@@ -610,7 +661,7 @@ public class SubjectivePdfWriter {
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
     final Element documentBody = createBaseDocument(document, pointSize);
 
-    final int[] columnWidths = getTableColumnInformation(masterRubricRangeTitles);
+    final int[] columnWidths = getTableColumnInformation(masterRubricRangeMetaData);
 
     if (scores.isEmpty()) {
       final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
@@ -638,7 +689,7 @@ public class SubjectivePdfWriter {
 
     final Element documentBody = createBaseDocument(document, pointSize);
 
-    final int[] columnWidths = getTableColumnInformation(masterRubricRangeTitles);
+    final int[] columnWidths = getTableColumnInformation(masterRubricRangeMetaData);
 
     // Go through all of the team schedules and put them all into a pdf
     for (final TeamScheduleInfo teamInfo : schedule) {
@@ -685,6 +736,29 @@ public class SubjectivePdfWriter {
     comments.setAttribute("space-before", "3");
 
     return sheet;
+  }
+
+  private static @Nullable String findRangeShortDescriptionWithTitle(final String title,
+                                                                     final Goal goal) {
+    return goal.getRubric().stream().filter(r -> title.equals(r.getTitle())).map(RubricRange::getShortDescription)
+               .findFirst().orElse(null);
+  }
+
+  /**
+   * Check that the rubric ranges with {@code title} in all goals have the same
+   * {@link RubricRange#getShortDescription()}.
+   * 
+   * @param title the title to look for
+   * @return true if all of the short descriptions are the same
+   */
+  private static boolean allShortDescriptionsSame(final SubjectiveScoreCategory scoreCategory,
+                                                  final String title) {
+    return scoreCategory.getAllGoals().stream()//
+                        .filter(Goal.class::isInstance)//
+                        .map(Goal.class::cast)//
+                        .map(g -> findRangeShortDescriptionWithTitle(title, g))//
+                        .distinct()//
+                        .count() <= 1;
   }
 
   private Element createRubric(final Document document,
@@ -886,15 +960,18 @@ public class SubjectivePdfWriter {
     }
 
     // add rubric description, if there is one
-    final String rawShortDescription = rubricRange.getShortDescription();
-    if (null != rawShortDescription) {
-      final String shortDescription = rawShortDescription.trim().replaceAll("\\s+", " ");
-      if (!shortDescription.isEmpty()) {
-        final StringBuilder rubricDescription = new StringBuilder();
-        rubricDescription.append(" ");
-        rubricDescription.append(shortDescription);
-        block.appendChild(document.createTextNode(rubricDescription.toString()));
-      }
+    final Optional<RubricMetaData> metaData = masterRubricRangeMetaData.stream()
+                                                                       .filter(md -> md.getTitle()
+                                                                                       .equals(rubricRange.getTitle()))
+                                                                       .findFirst();
+    if (!metaData.isPresent()) {
+      throw new FLLInternalException("Cannot find rubric metadata for range with title "
+          + rubricRange.getTitle());
+    }
+
+    if (null == metaData.get().getShortDescription()) {
+      block.appendChild(document.createTextNode(" "
+          + rubricRange.getShortDescription()));
     }
 
     if (null != goalComment) {
@@ -914,25 +991,33 @@ public class SubjectivePdfWriter {
     final Element headerRow = FOPUtils.createTableRow(document);
     tableBody.appendChild(headerRow);
     headerRow.setAttribute("font-size", "10pt");
-    headerRow.setAttribute("font-weight", "bold");
 
     Element lastCell = null;
     boolean first = true;
-    for (final String title : masterRubricRangeTitles) {
-      final Element titleCell;
-      if (null == title) {
-        titleCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "");
-      } else {
-        titleCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, title);
+    for (final RubricMetaData rubricMetaData : masterRubricRangeMetaData) {
+      final Element cell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+      headerRow.appendChild(cell);
+      final Element blockContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+      cell.appendChild(blockContainer);
+
+      final Element titleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      blockContainer.appendChild(titleBlock);
+      titleBlock.appendChild(document.createTextNode(rubricMetaData.getTitle()));
+      titleBlock.setAttribute("font-weight", "bold");
+
+      if (null != rubricMetaData.getShortDescription()) {
+        final Element descriptionBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        blockContainer.appendChild(descriptionBlock);
+        descriptionBlock.appendChild(document.createTextNode(rubricMetaData.getShortDescription()));
       }
-      headerRow.appendChild(titleCell);
-      FOPUtils.addLeftBorder(titleCell, 1);
-      FOPUtils.addTopBorder(titleCell, 1);
+
+      FOPUtils.addLeftBorder(cell, 1);
+      FOPUtils.addTopBorder(cell, 1);
       if (first) {
-        titleCell.setAttribute(String.format("%s:border-before-start-radius", FOPUtils.XSL_FOX_PREFIX), CORNER_RADIUS);
+        cell.setAttribute(String.format("%s:border-before-start-radius", FOPUtils.XSL_FOX_PREFIX), CORNER_RADIUS);
         first = false;
       }
-      lastCell = titleCell;
+      lastCell = cell;
     }
     if (null != lastCell) {
       lastCell.setAttribute(String.format("%s:border-before-end-radius", FOPUtils.XSL_FOX_PREFIX), CORNER_RADIUS);

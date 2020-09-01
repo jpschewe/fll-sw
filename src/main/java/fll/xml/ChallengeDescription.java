@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
@@ -349,7 +350,8 @@ public class ChallengeDescription implements Serializable {
    * @param str remove carriage returns and multiple spaces
    * @return string without the line endings and multiple spaces in a row
    */
-  /* package */ static String removeExtraWhitespace(final String str) {
+  @EnsuresNonNullIf(expression = "str != null", result = true)
+  /* package */ static @Nullable String removeExtraWhitespace(final @Nullable String str) {
     if (null == str) {
       return str;
     } else {
