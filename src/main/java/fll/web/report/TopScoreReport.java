@@ -22,7 +22,10 @@ import fll.xml.ChallengeDescription;
 /**
  * Gather data for topScoreReport.jsp.
  */
-public class TopScoreReport {
+public final class TopScoreReport {
+
+  private TopScoreReport() {
+  }
 
   /**
    * @param application application context
