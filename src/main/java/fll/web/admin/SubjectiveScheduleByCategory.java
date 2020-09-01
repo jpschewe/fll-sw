@@ -28,7 +28,8 @@ import fll.web.WebUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * @see TournamentSchedule#outputSubjectiveSchedulesByCategory(java.io.OutputStream)
+ * @see ScheduleWriter#outputSubjectiveSchedulesByCategory(TournamentSchedule,
+ *      java.io.OutputStream)
  */
 @WebServlet("/admin/SubjectiveScheduleByCategory")
 public class SubjectiveScheduleByCategory extends BaseFLLServlet {
@@ -39,7 +40,8 @@ public class SubjectiveScheduleByCategory extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {

@@ -109,7 +109,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
       final String categoryTitle = subjectiveElement.getTitle();
       columnNames.add(categoryTitle);
 
-      final List<AbstractGoal> goals = subjectiveElement.getGoals();
+      final List<AbstractGoal> goals = subjectiveElement.getAllGoals();
       final Element categoryElement = SubjectiveUtils.getCategoryNode(scoresElement, category);
       for (final Element scoreElement : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName(DownloadSubjectiveData.SCORE_NODE_NAME))) {
         int numValues = 0;

@@ -326,12 +326,12 @@ public class TableOptimizer {
   }
 
   /**
-   * Compute permutations of the integers [0, numElements]
+   * Compute permutations of the integers [0, numElements].
    *
    * @param numElements how many elements to be permuted
    * @return all possible orderings
    */
-  static public List<List<Integer>> permutate(final int numElements) {
+  public static List<List<Integer>> permutate(final int numElements) {
     final List<Integer> allElements = new ArrayList<>();
     for (int i = 0; i < numElements; ++i) {
       allElements.add(i);
@@ -356,7 +356,7 @@ public class TableOptimizer {
    * @param order
    * @param permutations the resulting permutations
    */
-  static private void permutate(final int arrayCount,
+  private static void permutate(final int arrayCount,
                                 final List<Integer> elements,
                                 final List<Integer> order,
                                 final List<List<Integer>> permutations) {

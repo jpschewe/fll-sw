@@ -39,7 +39,7 @@ import fll.Utilities;
 import fll.db.AdvancingTeam;
 import fll.db.AwardWinner;
 import fll.db.OverallAwardWinner;
-import fll.db.SubjectiveAwardWinners;
+import fll.db.AwardWinners;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
@@ -177,7 +177,7 @@ public class AwardsReport extends BaseFLLServlet {
                                              final Tournament tournament,
                                              final List<String> sortedAwardGroups)
       throws SQLException {
-    final List<AwardWinner> winners = SubjectiveAwardWinners.getChallengeAwardWinners(connection,
+    final List<AwardWinner> winners = AwardWinners.getChallengeAwardWinners(connection,
                                                                                       tournament.getTournamentID());
 
     addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups);
@@ -189,7 +189,7 @@ public class AwardsReport extends BaseFLLServlet {
                                          final Tournament tournament,
                                          final List<String> sortedAwardGroups)
       throws SQLException {
-    final List<AwardWinner> winners = SubjectiveAwardWinners.getExtraAwardWinners(connection,
+    final List<AwardWinner> winners = AwardWinners.getExtraAwardWinners(connection,
                                                                                   tournament.getTournamentID());
 
     addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups);
@@ -224,7 +224,7 @@ public class AwardsReport extends BaseFLLServlet {
                                            final Element documentBody,
                                            final Tournament tournament)
       throws SQLException {
-    final List<OverallAwardWinner> winners = SubjectiveAwardWinners.getOverallAwardWinners(connection,
+    final List<OverallAwardWinner> winners = AwardWinners.getOverallAwardWinners(connection,
                                                                                            tournament.getTournamentID());
 
     final Map<String, List<OverallAwardWinner>> organizedWinners = new HashMap<>();
@@ -290,9 +290,8 @@ public class AwardsReport extends BaseFLLServlet {
         tableBody.appendChild(descriptionRow);
 
         final Element descriptionCell = FOPUtils.createTableCell(document, null,
-                                                                 String.format("%s%s%s",
-                                                                               Utilities.NON_BREAKING_SPACE_CODE,
-                                                                               Utilities.NON_BREAKING_SPACE_CODE,
+                                                                 String.format("%c%c%s", Utilities.NON_BREAKING_SPACE,
+                                                                               Utilities.NON_BREAKING_SPACE,
                                                                                winner.getDescription()));
         descriptionRow.appendChild(descriptionCell);
 
@@ -367,9 +366,9 @@ public class AwardsReport extends BaseFLLServlet {
               tableBody.appendChild(descriptionRow);
 
               final Element descriptionCell = FOPUtils.createTableCell(document, null,
-                                                                       String.format("%s%s%s",
-                                                                                     Utilities.NON_BREAKING_SPACE_CODE,
-                                                                                     Utilities.NON_BREAKING_SPACE_CODE,
+                                                                       String.format("%c%c%s",
+                                                                                     Utilities.NON_BREAKING_SPACE,
+                                                                                     Utilities.NON_BREAKING_SPACE,
                                                                                      winner.getDescription()));
               descriptionRow.appendChild(descriptionCell);
 
@@ -411,7 +410,7 @@ public class AwardsReport extends BaseFLLServlet {
 
     categoryTitleBlock.appendChild(document.createTextNode("Robot Performance Award - top score from regular match play"));
 
-    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMap(connection, description);
+    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
 
     final Element table = FOPUtils.createBasicTable(document);
     documentBody.appendChild(table);
@@ -613,7 +612,7 @@ public class AwardsReport extends BaseFLLServlet {
     // add some spacing
     final Element emptyRow = FOPUtils.createTableRow(document);
     tableBody.appendChild(emptyRow);
-    final Element emptyCell = FOPUtils.createTableCell(document, null, Utilities.NON_BREAKING_SPACE_CODE);
+    final Element emptyCell = FOPUtils.createTableCell(document, null, String.valueOf(Utilities.NON_BREAKING_SPACE));
     emptyRow.appendChild(emptyCell);
     emptyCell.setAttribute("number-columns-spanned", String.valueOf(columnsInTable));
 

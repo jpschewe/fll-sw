@@ -90,8 +90,8 @@ public final class Tournament implements Serializable {
    * @see StoreTournamentData#DATE_FORMATTER
    */
   @JsonIgnore
-  public @Nullable String getDateString() {
-    return null == date ? null : StoreTournamentData.DATE_FORMATTER.format(date);
+  public String getDateString() {
+    return null == date ? "" : StoreTournamentData.DATE_FORMATTER.format(date);
   }
 
   private final String level;

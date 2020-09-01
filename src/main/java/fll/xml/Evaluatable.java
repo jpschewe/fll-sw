@@ -19,6 +19,6 @@ public interface Evaluatable {
    * @param teamScore the individual score elements for a team
    * @return the score
    */
-  public double evaluate(final TeamScore teamScore);
+  double evaluate(TeamScore teamScore);
 
 }

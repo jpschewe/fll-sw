@@ -13,17 +13,15 @@ import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 
-
-
 import fll.Tournament;
-import fll.db.Queries;
-
 import fll.web.SessionAttributes;
 
 /**
  * Populate page context for selectTournament.jsp.
  */
-public class SelectTournament {
+public final class SelectTournament {
+  private SelectTournament() {
+  }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -39,7 +37,7 @@ public class SelectTournament {
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
       page.setAttribute("tournaments", tournaments);
 
-      final String selectedTournamentName = Queries.getCurrentTournamentName(connection);
+      final String selectedTournamentName = Tournament.getCurrentTournament(connection).getName();
       page.setAttribute("selectedTournament", selectedTournamentName);
 
       if (sessionInfo.isImportSubjective()) {

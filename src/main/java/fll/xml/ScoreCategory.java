@@ -7,20 +7,18 @@
 package fll.xml;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.Utilities;
+import fll.util.FLLInternalException;
 import fll.web.playoff.TeamScore;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
@@ -30,92 +28,109 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
  */
 public abstract class ScoreCategory implements Evaluatable, Serializable, GoalScope {
 
+  /**
+   * XML attribute name used for the weight of a score category.
+   */
   public static final String WEIGHT_ATTRIBUTE = "weight";
 
   protected ScoreCategory(final Element ele) {
     mWeight = Double.valueOf(ele.getAttribute(WEIGHT_ATTRIBUTE));
 
-    mGoals = new LinkedList<>();
     for (final Element goalEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
       if (Goal.TAG_NAME.equals(goalEle.getNodeName())) {
         final Goal goal = new Goal(goalEle);
-        mGoals.add(goal);
+        goalElements.add(goal);
       } else if (ComputedGoal.TAG_NAME.equals(goalEle.getNodeName())) {
         final ComputedGoal compGoal = new ComputedGoal(goalEle, this);
-        mGoals.add(compGoal);
+        goalElements.add(compGoal);
+      } else if (GoalGroup.TAG_NAME.equals(goalEle.getNodeName())) {
+        final GoalGroup group = new GoalGroup(goalEle, this);
+        goalElements.add(group);
       }
     }
   }
 
   /**
-   * Default constructor creates an object with no {@link #getGoals()} and a
+   * Default constructor creates an object with no {@link #getGoalElements()} and
+   * a
    * {@link #getWeight()} of 1.
    */
   protected ScoreCategory() {
-    mGoals = new LinkedList<>();
     mWeight = 1;
   }
 
-  private final List<AbstractGoal> mGoals;
+  private final List<GoalElement> goalElements = new LinkedList<>();
 
   /**
-   * The goals for the category in the order they should be displayed.
+   * The goal elements for the category in the order they should be displayed.
    *
    * @return unmodifiable list
    */
-  public List<AbstractGoal> getGoals() {
-    return Collections.unmodifiableList(mGoals);
+  public List<GoalElement> getGoalElements() {
+    return Collections.unmodifiableList(goalElements);
   }
 
   /**
-   * @see fll.xml.GoalScope#getAllGoals()
+   * All goals in the category and it's groups.
    */
   @Override
-  public Collection<AbstractGoal> getAllGoals() {
-    return getGoals();
+  public List<AbstractGoal> getAllGoals() {
+    final List<AbstractGoal> retval = new LinkedList<>();
+    goalElements.stream().forEach(ge -> {
+      if (ge.isGoal()) {
+        retval.add((AbstractGoal) ge);
+      } else if (ge.isGoalGroup()) {
+        retval.addAll(((GoalGroup) ge).getGoals());
+      } else {
+        throw new FLLInternalException("Unknown GoalElement class: "
+            + ge.getClass());
+      }
+    });
+
+    return retval;
   }
 
   /**
-   * Add the specified goal to the end of the list.
+   * Add the specified element to the end of the list.
    *
-   * @param v the new goal
+   * @param v the new element
    */
-  public void addGoal(final AbstractGoal v) {
-    mGoals.add(v);
+  public void addGoalElement(final GoalElement v) {
+    goalElements.add(v);
   }
 
   /**
-   * Add a goal at the specified index.
+   * Add a element at the specified index.
    *
    * @param index the index to add the goal at
-   * @param v the goal to add
+   * @param v the element to add
    * @throws IndexOutOfBoundsException if the index is out of range
    */
-  public void addGoal(final int index,
-                      final AbstractGoal v)
+  public void addGoalElement(final int index,
+                             final GoalElement v)
       throws IndexOutOfBoundsException {
-    mGoals.add(index, v);
+    goalElements.add(index, v);
   }
 
   /**
-   * Remove the specified goal from the list.
+   * Remove the specified element from the list.
    *
-   * @param v the goal to remove
-   * @return if the goal was removed
+   * @param v the element to remove
+   * @return if the element was removed
    */
-  public boolean removeGoal(final AbstractGoal v) {
-    return mGoals.remove(v);
+  public boolean removeGoalElement(final GoalElement v) {
+    return goalElements.remove(v);
   }
 
   /**
-   * Remove the goal at the specified index.
+   * Remove the element at the specified index.
    *
    * @param index the index of the goal to remove
    * @return the removed goal
    * @throws IndexOutOfBoundsException if the index is out of range
    */
-  public AbstractGoal removeGoal(final int index) throws IndexOutOfBoundsException {
-    return mGoals.remove(index);
+  public GoalElement removeGoalElement(final int index) throws IndexOutOfBoundsException {
+    return goalElements.remove(index);
   }
 
   private double mWeight;
@@ -130,9 +145,22 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
 
   @Override
   public AbstractGoal getGoal(final String name) {
-    for (final AbstractGoal goal : mGoals) {
-      if (goal.getName().equals(name)) {
-        return goal;
+    for (final GoalElement ge : goalElements) {
+      if (ge.isGoal()) {
+        final AbstractGoal goal = (AbstractGoal) ge;
+        if (goal.getName().equals(name)) {
+          return goal;
+        }
+      } else if (ge.isGoalGroup()) {
+        final GoalGroup group = (GoalGroup) ge;
+        for (final AbstractGoal goal : group.getGoals()) {
+          if (goal.getName().equals(name)) {
+            return goal;
+          }
+        }
+      } else {
+        throw new FLLInternalException("Unexpected goal element type: "
+            + ge.getClass());
       }
     }
     throw new ScopeException("Cannot find goal named '"
@@ -148,22 +176,7 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
       return 0D;
     }
 
-    double total = 0;
-    for (final AbstractGoal g : getGoals()) {
-      final double goalScore = g.getComputedScore(teamScore);
-      total += goalScore;
-    }
-    return total;
-  }
-
-  /**
-   * Get all goal groups defined for this category.
-   *
-   * @return a newly created collection
-   */
-  @Nonnull
-  public Collection<String> getGoalGroups() {
-    return getGoals().stream().map(AbstractGoal::getCategory).filter(x -> null != x).collect(Collectors.toSet());
+    return goalElements.stream().mapToDouble(g -> g.evaluate(teamScore)).sum();
   }
 
   /**
@@ -173,7 +186,7 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
    * @return goal group to score, empty map if no score or a no show or no groups
    *         defined
    */
-  @Nonnull
+  @NonNull
   public Map<String, Double> getGoalGroupScores(final TeamScore teamScore) {
     final Map<String, Double> goalGroupScores = new HashMap<>();
 
@@ -183,13 +196,11 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
       return goalGroupScores;
     }
 
-    for (final AbstractGoal g : getGoals()) {
-      final double goalScore = g.getComputedScore(teamScore);
-
-      final String goalGroup = g.getCategory();
-      if (null != goalGroup
-          && !goalGroup.trim().isEmpty()) {
-        goalGroupScores.merge(goalGroup, goalScore, Double::sum);
+    for (final GoalElement ge : goalElements) {
+      if (ge.isGoalGroup()) {
+        final GoalGroup group = (GoalGroup) ge;
+        final double groupScore = group.evaluate(teamScore);
+        goalGroupScores.merge(group.getTitle(), groupScore, Double::sum);
       }
     }
     return goalGroupScores;
@@ -204,17 +215,32 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
    * @return not null
    */
   public ScoreType getScoreType() {
-    final boolean hasFloatingPointGoals = getGoals().stream().anyMatch(g -> g.getScoreType() == ScoreType.FLOAT);
-    return hasFloatingPointGoals ? ScoreType.FLOAT : ScoreType.INTEGER;
+    for (final GoalElement ge : goalElements) {
+      if (ge.isGoal()) {
+        if (((AbstractGoal) ge).getScoreType() == ScoreType.FLOAT) {
+          return ScoreType.FLOAT;
+        }
+      } else if (ge.isGoalGroup()) {
+        for (final AbstractGoal goal : ((GoalGroup) ge).getGoals()) {
+          if (goal.getScoreType() == ScoreType.FLOAT) {
+            return ScoreType.FLOAT;
+          }
+        }
+      } else {
+        throw new FLLInternalException("Unexpected goal element class: "
+            + ge.getClass());
+      }
+    }
+    return ScoreType.INTEGER;
   }
 
   public void populateXml(final Document doc,
                           final Element ele) {
     ele.setAttribute(WEIGHT_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mWeight));
 
-    for (final AbstractGoal goal : mGoals) {
-      final Element goalEle = goal.toXml(doc);
-      ele.appendChild(goalEle);
+    for (final GoalElement ge : goalElements) {
+      final Element gele = ge.toXml(doc);
+      ele.appendChild(gele);
     }
   }
 

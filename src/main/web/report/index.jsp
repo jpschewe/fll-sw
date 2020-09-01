@@ -44,9 +44,17 @@
         </li>
 
         <li>
-            <a href="topScoreReport.jsp">Top performance scores</a>.
-            This creates a text report of the top regular match play
-            round scores by award group.
+            <a href="topScoreReportPerAwardGroup.jsp">Top
+                performance scores by award group</a>. This creates a text
+            report of the top regular match play round scores by award
+            group.
+        </li>
+
+        <li>
+            <a href="topScoreReportPerJudgingStation.jsp">Top
+                performance scores by judging station</a>. This creates a
+            text report of the top regular match play round scores by
+            judging station.
         </li>
 
         <li>
@@ -101,6 +109,32 @@
             <a href="AwardsReport" target="_blank">Report of winners
                 for the tournament.</a> This can be published on the web or
             used for the awards ceremony.
+        </li>
+
+        <li>
+            <a href="TeamResults" target="_blank">Team Results</a>. This
+            is a zip file containing the results to return to the teams.
+            This will take some time to generate, be patient.
+            <ul>
+                <li>
+                    <form action='TeamResults' method='post'
+                        target="_blank">
+                        Results for a single team
+                        <select name='TeamNumber'>
+                            <c:forEach items="${tournamentTeams}"
+                                var="team">
+                                <option
+                                    value='<c:out value="${team.teamNumber}"/>'>
+                                    <c:out value="${team.teamNumber}" />
+                                    -
+                                    <c:out value="${team.teamName}" />
+                                </option>
+                            </c:forEach>
+                        </select>
+                        <input type='submit' value='Get Results' />
+                    </form>
+                </li>
+            </ul>
         </li>
 
     </ol>

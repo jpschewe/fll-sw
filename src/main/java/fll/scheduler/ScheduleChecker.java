@@ -6,7 +6,6 @@
 
 package fll.scheduler;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.Collection;
@@ -371,7 +370,6 @@ public class ScheduleChecker {
    * Verify the schedule.
    *
    * @return the constraint violations found, empty if no violations
-   * @throws IOException
    */
   public List<ConstraintViolation> verifySchedule() {
     final List<ConstraintViolation> constraintViolations = new LinkedList<>();

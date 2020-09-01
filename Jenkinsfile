@@ -48,10 +48,12 @@ pipeline {
 
     stage('Tests') {
       steps {
-        // runs all of the test tasks
-        fllSwGradle('cobertura')
-        junit testResults: "build/test-results/*est/TEST-*.xml", keepLongStdio: true
-        step $class: 'CoberturaPublisher', coberturaReportFile: 'build/reports/cobertura/coverage.xml'                
+        timeout(time: 3, unit: 'HOURS') {      
+          // runs all of the test tasks
+          fllSwGradle('cobertura')
+          junit testResults: "build/test-results/*est/TEST-*.xml", keepLongStdio: true
+          step $class: 'CoberturaPublisher', coberturaReportFile: 'build/reports/cobertura/coverage.xml'
+        }                
       }
     }
 
@@ -68,8 +70,10 @@ pipeline {
       steps {
         throttle(['fll-sw']) { 
           timestamps {
-            fllSwGradle('distZip')
-            stash name: 'build_data', includes: 'build/**', excludes: "build/tmp/**"
+            timeout(time: 3, unit: 'HOURS') {
+              fllSwGradle('distZip')
+              stash name: 'build_data', includes: 'build/**', excludes: "build/tmp/**"
+            }
           } // timestamps
         } // throttle
       } // steps           
@@ -80,7 +84,9 @@ pipeline {
         throttle(['fll-sw']) { 
           timestamps {
             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
-              fllSwGradle('windowsDistZip')
+              timeout(time: 3, unit: 'HOURS') {
+                fllSwGradle('windowsDistZip')                                        
+              }
             }
             stash name: 'windows_distribution', includes: 'build/distributions/*'
           } // timestamps
@@ -95,7 +101,9 @@ pipeline {
           timestamps {
             unstash name: 'build_data'
             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
-              fllSwGradle('linuxDistTar')
+              timeout(time: 3, unit: 'HOURS') {
+                fllSwGradle('linuxDistTar')
+              }
             }
             stash name: 'linux_distribution', includes: 'build/distributions/*'
           } // timestamps
@@ -109,7 +117,9 @@ pipeline {
           timestamps {
             unstash name: 'build_data'
             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
-              fllSwGradle('macDistTar')
+              timeout(time: 3, unit: 'HOURS') {
+                fllSwGradle('macDistTar')
+              }
             }
             stash name: 'mac_distribution', includes: 'build/distributions/*'
           } // timestamps

@@ -39,7 +39,6 @@ import fll.web.admin.UploadSubjectiveData;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.SubjectiveScoreCategory;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -53,11 +52,11 @@ public class SubjectiveScoresTest {
 
   /**
    * Try deleting scores and making sure the file can still be uploaded into a
-   * database
+   * database.
    * 
-   * @throws SQLException
-   * @throws IOException
-   * @throws ParseException
+   * @throws SQLException test error
+   * @throws IOException test error
+   * @throws ParseException test error
    */
   @Test
   public void testDeleteScores() throws SAXException, SQLException, IOException, ParseException {
@@ -77,11 +76,7 @@ public class SubjectiveScoresTest {
     final int teamNumber = 1;
     final String category = "teamwork";
     final String division = "div";
-    Connection connection = null;
-    PreparedStatement prep = null;
-    try {
-      connection = datasource.getConnection();
-
+    try (Connection connection = datasource.getConnection();) {
       // setup the database with a team and some judges
       GenerateDB.generateDB(challengeDocument, connection);
       Tournament.createTournament(connection, tournamentName, tournamentName, null, null, null);
@@ -90,15 +85,17 @@ public class SubjectiveScoresTest {
           + teamNumber, "org"));
       Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), division, division);
 
-      prep = connection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES(?, ?, ?, ?)");
-      prep.setInt(4, tournament.getTournamentID());
-      for (final Element subjectiveElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement()
-                                                                                                   .getElementsByTagName("subjectiveCategory"))) {
-        final String categoryName = subjectiveElement.getAttribute("name");
-        prep.setString(1, "jon");
-        prep.setString(2, categoryName);
-        prep.setString(3, division);
-        prep.executeUpdate();
+      try (
+          PreparedStatement prep = connection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES(?, ?, ?, ?)")) {
+        prep.setInt(4, tournament.getTournamentID());
+        for (final Element subjectiveElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement()
+                                                                                                     .getElementsByTagName("subjectiveCategory"))) {
+          final String categoryName = subjectiveElement.getAttribute("name");
+          prep.setString(1, "jon");
+          prep.setString(2, categoryName);
+          prep.setString(3, division);
+          prep.executeUpdate();
+        }
       }
       Queries.setCurrentTournament(connection, tournament.getTournamentID());
 
@@ -143,9 +140,6 @@ public class SubjectiveScoresTest {
                                               false);
 
     } finally {
-      SQLFunctions.close(prep);
-      SQLFunctions.close(connection);
-
       if (!tempFile.delete()) {
         tempFile.deleteOnExit();
       }

@@ -33,29 +33,29 @@ $(document).ready(
 
       updateTeams();
 
-      $("#add-category").click(function() {
-        addCategory();
-      });
-
       $.finalist.displayNavbar();
     }); // end ready function
 
 function updateTeams() {
   $("#categories").empty();
+  $("#overall-categories").empty();
+
   $.each($.finalist.getNonNumericCategories(), function(i, category) {
     addCategoryElement(category);
-    addedCategory = true;
 
     var addedTeam = false;
-    $.each(category.teams, function(j, teamNum) {
-      var team = $.finalist.lookupTeam(teamNum);
-      if ($.finalist.isTeamInDivision(team, $.finalist.getCurrentDivision())) {
-        addedTeam = true;
-        var teamIdx = addTeam(category);
-        populateTeamInformation(category, teamIdx, team);
-      }
+    $.each(category.teams,
+        function(j, teamNum) {
+          var team = $.finalist.lookupTeam(teamNum);
+          if (category.overall
+              || $.finalist.isTeamInDivision(team, $.finalist
+                  .getCurrentDivision())) {
+            addedTeam = true;
+            var teamIdx = addTeam(category);
+            populateTeamInformation(category, teamIdx, team);
+          }
 
-    });
+        });
     if (!addedTeam) {
       addTeam(category);
     }
@@ -68,23 +68,23 @@ function checkCategoryEmpty(category) {
 
 function addCategoryElement(category) {
   var catEle = $("<li></li>");
-  $("#categories").append(catEle);
+  if (category.overall) {
+    $("#overall-categories").append(catEle);
+  } else {
+    $("#categories").append(catEle);
+  }
 
-  var nameEle = $("<input class='category_name' type='text' id='name_"
+  var scheduledCheckbox = $("<input type='checkbox' id='scheduled_"
       + category.catId + "'/>");
-  catEle.append(nameEle);
-  nameEle.change(function() {
-    var newName = nameEle.val();
-    if (null == newName || "" == newName) {
-      alert("All categories must have non-empty names");
-      nameEle.val(category.name);
-    }
-    if (!$.finalist.setCategoryName(category, newName)) {
-      alert("There already exists a category with the name '" + newName + "'");
-      nameEle.val(category.name);
-    }
+  catEle.append(scheduledCheckbox);
+  scheduledCheckbox.change(function() {
+    $.finalist.setCategoryScheduled(category, $(this).prop("checked"));
+    roomEle.prop("disabled", !(scheduledCheckbox.prop("checked")));
   });
-  nameEle.val(category.name);
+  scheduledCheckbox.attr("checked", $.finalist.isCategoryScheduled(category));
+
+  catEle.append(category.name);
+  catEle.append(" - ")
 
   catEle.append("Room number: ");
   var roomEle = $("<input type='text' id='room_" + category.catId + "'/>");
@@ -94,24 +94,8 @@ function addCategoryElement(category) {
     $.finalist.setRoom(category, $.finalist.getCurrentDivision(), roomNumber);
   });
   roomEle.val($.finalist.getRoom(category, $.finalist.getCurrentDivision()));
+  roomEle.prop("disabled", !$.finalist.isCategoryScheduled(category));
 
-  var deleteButton = $("<button id='delete_" + category.catId + "'>Delete</button>");
-  catEle.append(deleteButton);
-  deleteButton.click(function() {
-    // check all teams being empty
-    var categoryIsEmpty = checkCategoryEmpty(category);
-    if(!categoryIsEmpty) {
-      var reallyDelete = confirm("Are you sure you want to delete category " + category.name + "?");
-      if(reallyDelete) {
-        $.finalist.removeCategory(category);
-        catEle.remove();
-      }
-    } else {
-      $.finalist.removeCategory(category);
-      catEle.remove();
-    }
-  });
-  
   var teamList = $("<ul id='category_" + category.catId + "'></ul>");
   catEle.append(teamList);
 
@@ -121,24 +105,7 @@ function addCategoryElement(category) {
   addButton.click(function() {
     addTeam(category);
   });
-}
 
-/**
- * Add a new empty category to the page.
- * 
- * @return the category index
- */
-function addCategory() {
-  var category = $.finalist.addCategory("", false);
-  if (null == category) {
-    return;
-  }
-  $.finalist.setCategoryName(category, "Category " + category.catId);
-
-  addCategoryElement(category);
-
-  addTeam(category);
-  return category;
 }
 
 function teamNumId(category, teamIdx) {
@@ -157,6 +124,10 @@ function teamJudgingStationId(category, teamIdx) {
   return "judgingStation_" + category + "_" + teamIdx;
 }
 
+function teamJudgesId(category, teamIdx) {
+  return "judges_" + category + "_" + teamIdx;
+}
+
 function teamDeleteId(category, teamIdx) {
   return "delete_" + category + "_" + teamIdx;
 }
@@ -166,8 +137,16 @@ function populateTeamInformation(category, teamIdx, team) {
   $("#" + teamNumId(category.catId, teamIdx)).data('oldVal', team.num);
   $("#" + teamNameId(category.catId, teamIdx)).val(team.name);
   $("#" + teamOrgId(category.catId, teamIdx)).val(team.org);
-  $("#" + teamJudgingStationId(category.catId, teamIdx)).val(
-      team.judgingGroup);
+  $("#" + teamJudgingStationId(category.catId, teamIdx)).val(team.judgingGroup);
+  
+  var judges = $.finalist.getNominatingJudges(category, team.num);
+  var judgesStr;
+  if(!judges) {
+    judgesStr = "";
+  } else {
+    judgesStr = judges.filter(x => x).join(", ");    
+  }
+  $("#" + teamJudgesId(category.catId, teamIdx)).val(judgesStr);
 }
 
 /**
@@ -193,7 +172,10 @@ function addTeam(category) {
       $.finalist.removeTeamFromCategory(category, prevTeam);
       $("#" + teamNameId(category.catId, teamIdx)).val("");
       $("#" + teamOrgId(category.catId, teamIdx)).val("");
-    } else {
+      $("#" + teamJudgingStationId(category.catId, teamIdx)).val("");
+    } else if (teamNum != prevTeam) {
+      $.finalist.removeTeamFromCategory(category, prevTeam);
+
       var team = $.finalist.lookupTeam(teamNum);
       if (typeof (team) == 'undefined') {
         alert("Team number " + teamNum + " does not exist");
@@ -217,14 +199,19 @@ function addTeam(category) {
   var judgingStationEle = $("<input id='"
       + teamJudgingStationId(category.catId, teamIdx) + "' readonly/>");
   teamEle.append(judgingStationEle);
-  
-  var deleteButton = $("<button id='" + teamDeleteId(category.catId, teamIdx) + "'>Delete</button>");
+
+  var judgesEle = $("<input id='"
+      + teamJudgesId(category.catId, teamIdx) + "' readonly/>");
+  teamEle.append(judgesEle);
+
+  var deleteButton = $("<button id='" + teamDeleteId(category.catId, teamIdx)
+      + "'>Delete</button>");
   teamEle.append(deleteButton);
   deleteButton.click(function() {
     var teamNum = numEle.val();
-    if("" != teamNum) {
+    if ("" != teamNum) {
       var reallyDelete = confirm("Are you sure you want to delete this team?");
-      if(reallyDelete) {
+      if (reallyDelete) {
         $.finalist.removeTeamFromCategory(category, teamNum);
         teamEle.remove();
       }

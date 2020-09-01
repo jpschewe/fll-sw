@@ -8,19 +8,26 @@ package fll.xml.ui;
 
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.LinkedList;
 
 import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 import org.apache.commons.lang3.StringUtils;
 
+import fll.util.ChooseOptionDialog;
 import fll.util.FormatterUtils;
 import fll.util.TextAreaEditor;
+import fll.xml.ChallengeDescription;
+import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
 
 /**
- *
+ * Editor for {@link SubjectiveScoreCategory} objects.
  */
 public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
 
@@ -34,9 +41,19 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
 
   private final TextAreaEditor mScoreSheetInstructions;
 
-  public SubjectiveCategoryEditor(final SubjectiveScoreCategory category) {
+  private final JComponent nominatesContainer;
+
+  private final ChallengeDescription description;
+
+  /**
+   * @param category the object to edit
+   * @param description used to lookup non-numeric categories
+   */
+  public SubjectiveCategoryEditor(final SubjectiveScoreCategory category,
+                                  final ChallengeDescription description) {
     super(category);
-    mSubjectiveCategory = category;
+    this.mSubjectiveCategory = category;
+    this.description = description;
 
     final Box titleContainer = Box.createHorizontalBox();
     add(titleContainer, 1); // add at particular index to get above weight
@@ -86,6 +103,21 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
     mScoreSheetInstructions = new TextAreaEditor(4, 40);
     scoreSheetInstructionsContainer.add(mScoreSheetInstructions);
     mScoreSheetInstructions.setText(mSubjectiveCategory.getScoreSheetInstructions());
+
+    final Box buttonBar = Box.createHorizontalBox();
+    this.add(buttonBar);
+
+    final JButton addGoal = new JButton("Add Nominates");
+    buttonBar.add(addGoal);
+    addGoal.addActionListener(l -> addNewNominates());
+    addGoal.setToolTipText("Add a non-numeric category to nominate teams for during judging of this subjective category");
+
+    buttonBar.add(Box.createHorizontalGlue());
+
+    nominatesContainer = Box.createVerticalBox();
+    this.add(nominatesContainer);
+
+    mSubjectiveCategory.getNominates().forEach(this::addNominates);
 
     mTitleEditor.setValue(mSubjectiveCategory.getTitle());
     mNameEditor.setValue(mSubjectiveCategory.getName());
@@ -137,6 +169,40 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
     if (StringUtils.isBlank(mScoreSheetInstructions.getText())) {
       messages.add("The instructions must not be empty");
     }
+  }
+
+  private void addNewNominates() {
+    final Collection<NonNumericCategory> categories = description.getNonNumericCategories();
+    final ChooseOptionDialog<NonNumericCategory> dialog = new ChooseOptionDialog<>(JOptionPane.getRootFrame(),
+                                                                                   new LinkedList<>(categories),
+                                                                                   new NonNumericCategoryCellRenderer());
+    dialog.setVisible(true);
+    final NonNumericCategory selected = dialog.getSelectedValue();
+    if (null != selected) {
+      final SubjectiveScoreCategory.Nominates ref = new SubjectiveScoreCategory.Nominates(selected.getTitle());
+      this.mSubjectiveCategory.addNominates(ref);
+      addNominates(ref);
+    }
+  }
+
+  private void addNominates(final SubjectiveScoreCategory.Nominates nominates) {
+    final Box row = Box.createHorizontalBox();
+
+    row.add(new JLabel("  "));
+
+    final NominatesEditor editor = new NominatesEditor(nominates, description);
+    row.add(editor);
+
+    final JButton delete = new JButton("Delete Nominates");
+    delete.addActionListener(l -> {
+      mSubjectiveCategory.removeNominates(nominates);
+      GuiUtils.removeFromContainer(nominatesContainer, row);
+    });
+    row.add(delete);
+
+    row.add(Box.createHorizontalGlue());
+
+    GuiUtils.addToContainer(nominatesContainer, row);
   }
 
 }

@@ -1,3 +1,13 @@
+* #819 - Add report of performance scores by judging station
+* #849 - If all rubric range short descriptions are the same in a category, display it at the top of the subjective PDF
+* #846 - Add support for nominating teams for non-numeric categories during subjective judging
+* #810 - Add support for non-numeric categories in the challenge description.
+* #844 - Output GoalGroup description on the subjective PDF files
+* #511 - Add GoalGroup as a first class object. This allows it to have a description and cleans up the XML document.
+* #845 - Add the ability to specify comments per goal in the subjective web app.
+* #843 - Add the ability to generate PDF files with the subjective category results and comments
+* #842 - Add the ability to enter comments in the subjective web application.
+* #840 - Fix use of user provided constraint change times
 * #837 - Fix errors around editing restrictions in the challenge description editor
 * #839 - Allow the application to run headless
 * #838 - Allow one to specify the port for the web server

@@ -45,7 +45,7 @@ public class CommitTeam extends BaseFLLServlet {
   public static final String TEAM_NAME = "teamName";
 
   /**
-   * Value is String
+   * Value is String.
    */
   public static final String ORGANIZATION = "organization";
 
@@ -79,8 +79,7 @@ public class CommitTeam extends BaseFLLServlet {
     try {
       connection = datasource.getConnection();
       // parse the numbers first so that we don't get a partial commit
-      final int teamNumber = Utilities.getIntegerNumberFormat().parse(request.getParameter("teamNumber"))
-                                                                     .intValue();
+      final int teamNumber = Utilities.getIntegerNumberFormat().parse(request.getParameter("teamNumber")).intValue();
 
       String redirect = null;
       if (null != request.getParameter("delete")) {
@@ -183,13 +182,13 @@ public class CommitTeam extends BaseFLLServlet {
                 final String prevEventDivision = Queries.getEventDivision(connection, teamNumber,
                                                                           tournament.getTournamentID());
                 if (!eventDivision.equals(prevEventDivision)) {
-                  Queries.setEventDivision(connection, teamNumber, tournament.getTournamentID(), eventDivision);
+                  Queries.updateTeamEventDivision(connection, teamNumber, tournament.getTournamentID(), eventDivision);
                 }
 
                 final String prevJudgingGroup = Queries.getJudgingGroup(connection, teamNumber,
                                                                         tournament.getTournamentID());
                 if (!judgingGroup.equals(prevJudgingGroup)) {
-                  Queries.setJudgingGroup(connection, teamNumber, tournament.getTournamentID(), judgingGroup);
+                  Queries.updateTeamJudgingGroups(connection, teamNumber, tournament.getTournamentID(), judgingGroup);
                 }
               }
 

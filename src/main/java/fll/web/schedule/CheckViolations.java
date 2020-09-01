@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -24,7 +23,6 @@ import fll.db.Queries;
 import fll.scheduler.ConstraintViolation;
 import fll.scheduler.SchedParams;
 import fll.scheduler.ScheduleChecker;
-import fll.scheduler.SubjectiveStation;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -56,14 +54,9 @@ public class CheckViolations extends BaseFLLServlet {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-
-      final List<SubjectiveStation> subjectiveStations = uploadScheduleData.getSubjectiveStations();
-
       final int tournamentID = Queries.getCurrentTournament(connection);
       final Collection<ConstraintViolation> violations = schedule.compareWithDatabase(connection, tournamentID);
-      final SchedParams schedParams = new SchedParams(subjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
-                                                      SchedParams.MINIMUM_CHANGETIME_MINUTES,
-                                                      SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES);
+      final SchedParams schedParams = uploadScheduleData.getSchedParams();
       final ScheduleChecker checker = new ScheduleChecker(schedParams, schedule);
       violations.addAll(checker.verifySchedule());
       if (violations.isEmpty()) {

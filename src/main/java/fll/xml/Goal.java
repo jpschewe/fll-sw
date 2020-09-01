@@ -28,16 +28,44 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
  */
 public class Goal extends AbstractGoal {
 
+  /**
+   * XML element tag used by this class.
+   */
   public static final String TAG_NAME = "goal";
 
+  /**
+   * XML attribute used for the minimum value.
+   * 
+   * @see #getMin()
+   */
   public static final String MIN_ATTRIBUTE = "min";
 
+  /**
+   * XML attribute used for the maximum value.
+   * 
+   * @see #getMax()
+   */
   public static final String MAX_ATTRIBUTE = "max";
 
+  /**
+   * XML attribute used for the multiplier.
+   * 
+   * @see #getMultiplier()
+   */
   public static final String MULTIPLIER_ATTRIBUTE = "multiplier";
 
+  /**
+   * XML attribute used for the initial value.
+   * 
+   * @see #getInitialValue()
+   */
   public static final String INITIAL_VALUE_ATTRIBUTE = "initialValue";
 
+  /**
+   * XML attribute used for the required value.
+   * 
+   * @see #isRequired()
+   */
   public static final String REQUIRED_ATTRIBUTE = "required";
 
   private static final Logger LOGGER = LogManager.getLogger();
@@ -142,7 +170,7 @@ public class Goal extends AbstractGoal {
   }
 
   /**
-   * Remove a rubric range
+   * Remove a rubric range.
    *
    * @param v the rubric range to remove
    * @return if the rubric range was removed
@@ -302,7 +330,7 @@ public class Goal extends AbstractGoal {
   }
 
   @Override
-  public double getComputedScore(final TeamScore teamScore) {
+  public double evaluate(final TeamScore teamScore) {
     final double rawScore = getRawScore(teamScore);
     return rawScore
         * getMultiplier();
@@ -340,8 +368,7 @@ public class Goal extends AbstractGoal {
       ele.setAttribute(MAX_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mMax));
       ele.setAttribute(MULTIPLIER_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mMultiplier));
     }
-    ele.setAttribute(INITIAL_VALUE_ATTRIBUTE,
-                     Utilities.getXmlFloatingPointNumberFormat().format(mInitialValue));
+    ele.setAttribute(INITIAL_VALUE_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mInitialValue));
 
     ele.setAttribute(ChallengeParser.SCORE_TYPE_ATTRIBUTE, mScoreType.toXmlString());
     ele.setAttribute(REQUIRED_ATTRIBUTE, Boolean.toString(mRequired));

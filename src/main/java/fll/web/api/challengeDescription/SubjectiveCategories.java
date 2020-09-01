@@ -24,12 +24,16 @@ import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 
+/**
+ * Get {@link ChallengeDescription#getSubjectiveCategories()}.
+ */
 @WebServlet("/api/ChallengeDescription/SubjectiveCategories/*")
 public class SubjectiveCategories extends HttpServlet {
 
   @Override
   protected final void doGet(final HttpServletRequest request,
-                             final HttpServletResponse response) throws IOException, ServletException {
+                             final HttpServletResponse response)
+      throws IOException, ServletException {
     final ServletContext application = getServletContext();
 
     response.reset();

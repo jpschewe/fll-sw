@@ -44,6 +44,8 @@ import fll.xml.EnumConditionStatement;
 import fll.xml.EnumeratedValue;
 import fll.xml.FloatingPointType;
 import fll.xml.Goal;
+import fll.xml.GoalElement;
+import fll.xml.GoalGroup;
 import fll.xml.GoalRef;
 import fll.xml.GoalScoreType;
 import fll.xml.InequalityComparison;
@@ -93,6 +95,7 @@ public final class ScoreEntry {
    * @throws IOException if there is an error writing to the output stream
    * @throws ParseException if there is an error parsing values from the contexts
    * @throws SQLException if there is a problem talking to the database
+   * @param pageContext used to get the edit flag
    */
   public static void generateInit(final JspWriter writer,
                                   final ServletContext application,
@@ -110,6 +113,9 @@ public final class ScoreEntry {
   /**
    * Generate the isConsistent method for the goals in the performance element
    * of document.
+   * 
+   * @param writer where to write the HTML
+   * @param application used to get the challenge description
    */
   public static void generateIsConsistent(final JspWriter writer,
                                           final ServletContext application)
@@ -120,7 +126,7 @@ public final class ScoreEntry {
     writer.println("function isConsistent() {");
 
     // check all goal min and max values
-    for (final AbstractGoal element : performanceElement.getGoals()) {
+    for (final AbstractGoal element : performanceElement.getAllGoals()) {
       if (!element.isComputed()) {
         final Goal goal = (Goal) element;
         final String name = goal.getName();
@@ -174,7 +180,7 @@ public final class ScoreEntry {
     final PerformanceScoreCategory performanceElement = description.getPerformance();
     final Formatter formatter = new Formatter(writer);
 
-    for (final AbstractGoal goal : performanceElement.getGoals()) {
+    for (final AbstractGoal goal : performanceElement.getAllGoals()) {
       if (goal.isComputed()) {
         // generate the method to update the computed goal variables
         final String goalName = goal.getName();
@@ -256,7 +262,10 @@ public final class ScoreEntry {
   }
 
   /**
-   * Generate the body of the refresh function
+   * Generate the body of the refresh function.
+   * 
+   * @param writer where to write the HTML
+   * @param application used to get the challenge descrption
    */
   public static void generateRefreshBody(final Writer writer,
                                          final ServletContext application)
@@ -271,7 +280,7 @@ public final class ScoreEntry {
     final PerformanceScoreCategory performanceElement = description.getPerformance();
 
     // output the assignments of each element
-    for (final AbstractGoal agoal : performanceElement.getGoals()) {
+    for (final AbstractGoal agoal : performanceElement.getAllGoals()) {
       if (agoal.isComputed()) {
         // output calls to the computed goal methods
 
@@ -371,8 +380,9 @@ public final class ScoreEntry {
    * Output the body for the check_restrictions method.
    *
    * @param writer where to write
-   * @throws IOException
-   * @throws ParseException
+   * @param application used to get the challenge description
+   * @throws IOException on an error writing to {@code writer}
+   * @throws ParseException on an error processing the goal elements
    */
   public static void generateCheckRestrictionsBody(final Writer writer,
                                                    final ServletContext application)
@@ -407,6 +417,9 @@ public final class ScoreEntry {
   /**
    * Generate init for new scores, initializes all variables to their default
    * values.
+   * 
+   * @param writer where to write the HTML
+   * @param application used to get the challenge description
    */
   public static void generateInitForNewScore(final JspWriter writer,
                                              final ServletContext application)
@@ -414,7 +427,7 @@ public final class ScoreEntry {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final PerformanceScoreCategory performanceElement = description.getPerformance();
 
-    for (final AbstractGoal element : performanceElement.getGoals()) {
+    for (final AbstractGoal element : performanceElement.getAllGoals()) {
       if (!element.isComputed()) {
         final Goal goal = (Goal) element;
         final String name = goal.getName();
@@ -462,6 +475,8 @@ public final class ScoreEntry {
   /**
    * Generates the portion of the score entry form where the user checks whether
    * the score has been double-checked or not.
+   * 
+   * @param writer where to write the HTML
    */
   public static void generateVerificationInput(final JspWriter writer) throws IOException {
     writer.println("<!-- Score Verification -->");
@@ -476,80 +491,101 @@ public final class ScoreEntry {
 
   /**
    * Generate the score entry form.
+   * 
+   * @param writer where to write the HTML
+   * @param application used to get the challenge description
    */
   public static void generateScoreEntry(final JspWriter writer,
                                         final ServletContext application)
       throws IOException {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
 
-    String prevCategory = null;
     final PerformanceScoreCategory performanceElement = description.getPerformance();
-    for (final AbstractGoal goalEle : performanceElement.getGoals()) {
-      final String name = goalEle.getName();
-      final String title = goalEle.getTitle();
-      final String category = goalEle.getCategory();
-
-      try {
-
-        if (!StringUtils.equals(prevCategory, category)) {
-          writer.println("<tr><td colspan='4' class='goal-group-spacer'>&nbsp;</td></tr>");
-          if (!StringUtils.isEmpty(category)) {
-            writer.println("<tr>");
-            writer.println("<td colspan='2' class='center truncate'><b>"
-                + category
-                + "</b></td>");
-            // repeat category over the count and score columns
-            writer.println("<td colspan='2' class='center truncate'><b>"
-                + category
-                + "</b></td>");
-            writer.println("</tr>");
-          }
-        }
-
-        writer.println("<!-- "
-            + name
-            + " -->");
-        writer.println("<tr>");
-        writer.println("  <td class='goal-title'>");
-        writer.println("    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-            + title
-            + ":");
-        writer.println("  </td>");
-
-        if (goalEle.isComputed()) {
-          writer.println("  <td colspan='2' align='center'><b>Computed Goal</b></td>");
-        } else {
-          if (goalEle.isEnumerated()) {
-            // enumerated
-            writer.println("  <td>");
-            generateEnumeratedGoalButtons(goalEle, name, writer);
-            writer.println("  </td>");
-          } else {
-            writer.println("  <td>");
-            generateSimpleGoalButtons(goalEle, name, writer);
-            writer.println("  </td>");
-          } // end simple goal
-        } // goal
-
-        // computed score
-        writer.println("  <td align='right'>");
-        writer.println("    <input type='text' name='score_"
-            + name
-            + "' size='3' align='right' readonly tabindex='-1'>");
-        writer.println("  </td>");
-
-        writer.println("</tr>");
-        writer.println("<!-- end "
-            + name
-            + " -->");
-        writer.newLine();
-      } catch (final ParseException pe) {
-        throw new RuntimeException("FATAL: min/max not parsable for goal: "
-            + name);
+    for (final GoalElement goalEle : performanceElement.getGoalElements()) {
+      if (goalEle.isGoalGroup()) {
+        generateGoalGroup(writer, (GoalGroup) goalEle);
+      } else if (goalEle.isGoal()) {
+        generateGoalEntry(writer, (AbstractGoal) goalEle);
+      } else {
+        throw new FLLInternalException("Unexpected goal element type: "
+            + goalEle.getClass());
       }
+    }
+  }
 
-      prevCategory = category;
-    } // end foreach child of performance
+  private static void generateGoalGroup(final JspWriter writer,
+                                        final GoalGroup group)
+      throws IOException {
+    final String category = group.getTitle();
+
+    writer.println("<tr><td colspan='4' class='goal-group-spacer'>&nbsp;</td></tr>");
+    if (!StringUtils.isBlank(category)) {
+      writer.println("<tr>");
+      writer.println("<td colspan='2' class='center truncate'><b>"
+          + category
+          + "</b></td>");
+      // repeat category over the count and score columns
+      writer.println("<td colspan='2' class='center truncate'><b>"
+          + category
+          + "</b></td>");
+      writer.println("</tr>");
+    }
+
+    for (final AbstractGoal goal : group.getGoals()) {
+      generateGoalEntry(writer, goal);
+    }
+
+  }
+
+  private static void generateGoalEntry(final JspWriter writer,
+                                        final AbstractGoal goal)
+      throws IOException {
+    final String name = goal.getName();
+    final String title = goal.getTitle();
+
+    try {
+
+      writer.println("<!-- "
+          + name
+          + " -->");
+      writer.println("<tr>");
+      writer.println("  <td class='goal-title'>");
+      writer.println("    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+          + title
+          + ":");
+      writer.println("  </td>");
+
+      if (goal.isComputed()) {
+        writer.println("  <td colspan='2' align='center'><b>Computed Goal</b></td>");
+      } else {
+        if (goal.isEnumerated()) {
+          // enumerated
+          writer.println("  <td>");
+          generateEnumeratedGoalButtons(goal, name, writer);
+          writer.println("  </td>");
+        } else {
+          writer.println("  <td>");
+          generateSimpleGoalButtons(goal, name, writer);
+          writer.println("  </td>");
+        } // end simple goal
+      } // goal
+
+      // computed score
+      writer.println("  <td align='right'>");
+      writer.println("    <input type='text' name='score_"
+          + name
+          + "' size='3' align='right' readonly tabindex='-1'>");
+      writer.println("  </td>");
+
+      writer.println("</tr>");
+      writer.println("<!-- end "
+          + name
+          + " -->");
+      writer.newLine();
+    } catch (final ParseException pe) {
+      throw new RuntimeException("FATAL: min/max not parsable for goal: "
+          + name);
+    }
   }
 
   /**
@@ -698,6 +734,10 @@ public final class ScoreEntry {
   /**
    * Generate the initial assignment of the global variables for editing a
    * team's score.
+   * 
+   * @param writer where to write the HTML
+   * @param application used to get the challenge description
+   * @param session used to get information about the current score entry
    */
   public static void generateInitForScoreEdit(final JspWriter writer,
                                               final ServletContext application,
@@ -727,7 +767,7 @@ public final class ScoreEntry {
       rs = prep.executeQuery();
       if (rs.next()) {
         final PerformanceScoreCategory performanceElement = description.getPerformance();
-        for (final AbstractGoal element : performanceElement.getGoals()) {
+        for (final AbstractGoal element : performanceElement.getAllGoals()) {
           if (!element.isComputed()) {
             final Goal goal = (Goal) element;
             final String name = goal.getName();
@@ -827,6 +867,9 @@ public final class ScoreEntry {
   /**
    * Name of the element that stores the textual value of the specified yes/no
    * value.
+   * 
+   * @param goalName the goal name
+   * @return id to use for the yes/no radio buttons
    */
   public static String getElementNameForYesNoDisplay(final String goalName) {
     return goalName
@@ -836,6 +879,10 @@ public final class ScoreEntry {
   /**
    * The ID assigned to the radio button for a particular value of an enumerated
    * goal.
+   * 
+   * @param goalName the goal name
+   * @param value the enumerated value
+   * @return id to use for the enum radio button
    */
   public static String getIDForEnumRadio(final String goalName,
                                          final String value) {

@@ -10,6 +10,7 @@ import java.io.Serializable;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -49,7 +50,7 @@ public class RubricRange implements Serializable {
   /**
    * The XML attribute to write the description to.
    */
-  public static final String DESCRIPTION_TAG_NAME = "description";
+  public static final String DESCRIPTION_TAG_NAME = GoalElement.DESCRIPTION_TAG_NAME;
 
   /**
    * The XML element to write the short description to.
@@ -77,7 +78,7 @@ public class RubricRange implements Serializable {
 
   /**
    * Default constructor. {@link #getDescription()} is null,
-   * {@link #getShortDescription()} is null, {@link #getMin()} is 0,
+   * {@link #getShortDescription()} is "", {@link #getMin()} is 0,
    * {@link #getMax()} is 1.
    *
    * @param title the title of the range
@@ -87,7 +88,7 @@ public class RubricRange implements Serializable {
     mMin = 0;
     mMax = 1;
     mDescription = null;
-    mShortDescription = null;
+    mShortDescription = "";
   }
 
   private String mTitle;
@@ -106,7 +107,7 @@ public class RubricRange implements Serializable {
     mTitle = v;
   }
 
-  private String mDescription;
+  private @Nullable String mDescription;
 
   /**
    * The long description, may be null.
@@ -115,21 +116,21 @@ public class RubricRange implements Serializable {
    *
    * @return the long description
    */
-  public String getDescription() {
+  public @Nullable String getDescription() {
     return mDescription;
   }
 
   /**
    * @param v see {@link #getDescription()}
    */
-  public void setDescription(final String v) {
+  public void setDescription(final @Nullable String v) {
     mDescription = ChallengeDescription.removeExtraWhitespace(v);
   }
 
   private String mShortDescription;
 
   /**
-   * @return Short description, typically 1 line. May be null.
+   * @return Short description, typically 1 line.
    */
   public String getShortDescription() {
     return mShortDescription;
@@ -153,8 +154,7 @@ public class RubricRange implements Serializable {
     final StringBuilder sb = new StringBuilder();
     final String shortDescription = getShortDescription();
 
-    if (null != shortDescription
-        && !shortDescription.trim().isEmpty()) {
+    if (!shortDescription.trim().isEmpty()) {
       sb.append(shortDescription.trim());
       if (!shortDescription.endsWith(".")
           && !shortDescription.endsWith("!")

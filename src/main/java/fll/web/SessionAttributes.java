@@ -80,7 +80,7 @@ public final class SessionAttributes {
    * @param session where to get the information from
    * @return may be null
    */
-  public static String getDisplayName(final HttpSession session) {
+  public static @Nullable String getDisplayName(final HttpSession session) {
     return getAttribute(session, DISPLAY_NAME, String.class);
   }
 

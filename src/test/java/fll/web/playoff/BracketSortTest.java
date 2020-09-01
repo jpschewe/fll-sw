@@ -68,7 +68,6 @@ public class BracketSortTest {
       final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
 
       // create in memory test database instance
-      Class.forName("org.hsqldb.jdbcDriver").newInstance();
       connection = DriverManager.getConnection("jdbc:hsqldb:mem:flldb-testAlphaTeam");
       GenerateDB.generateDB(document, connection);
 
