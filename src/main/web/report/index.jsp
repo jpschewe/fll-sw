@@ -44,9 +44,17 @@
         </li>
 
         <li>
-            <a href="topScoreReport.jsp">Top performance scores</a>.
-            This creates a text report of the top regular match play
-            round scores by award group.
+            <a href="topScoreReportPerAwardGroup.jsp">Top
+                performance scores by award group</a>. This creates a text
+            report of the top regular match play round scores by award
+            group.
+        </li>
+
+        <li>
+            <a href="topScoreReportPerJudgingStation.jsp">Top
+                performance scores by judging station</a>. This creates a
+            text report of the top regular match play round scores by
+            judging station.
         </li>
 
         <li>

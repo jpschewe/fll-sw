@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-	fll.web.report.TopScoreReport.populateContext(application, pageContext);
+	fll.web.report.TopScoreReport.populateContextPerAwardGroup(application, pageContext);
 %>
 
 
