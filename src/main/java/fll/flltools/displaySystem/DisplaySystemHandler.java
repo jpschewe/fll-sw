@@ -157,7 +157,7 @@ public class DisplaySystemHandler extends Thread {
 
                   final String awardGroupName = awardGroups.get(currentAwardGroupIndex);
 
-                  payload = Top10.getTableAsList(connection, description, awardGroupName);
+                  payload = Top10.getTableAsListForAwardGroup(connection, description, awardGroupName);
 
                   showingMostRecent = false;
                 }

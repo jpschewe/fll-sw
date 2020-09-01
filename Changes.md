@@ -1,3 +1,4 @@
+* #819 - Add report of performance scores by judging station
 * #849 - If all rubric range short descriptions are the same in a category, display it at the top of the subjective PDF
 * #846 - Add support for nominating teams for non-numeric categories during subjective judging
 * #810 - Add support for non-numeric categories in the challenge description.
