@@ -221,7 +221,7 @@ public class FinalistSchedule implements Serializable {
       deleteCategoriesPrep.setString(2, getDivision());
       deleteCategoriesPrep.executeUpdate();
 
-      insertCategoriesPrep = connection.prepareStatement("INSERT INTO finalist_categories (tournament, division, category, room) VALUES(?, ?, ?, ?, ?)");
+      insertCategoriesPrep = connection.prepareStatement("INSERT INTO finalist_categories (tournament, division, category, room) VALUES(?, ?, ?, ?)");
       insertCategoriesPrep.setInt(1, getTournament());
       insertCategoriesPrep.setString(2, getDivision());
 

@@ -10,8 +10,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
+import java.util.Collection;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -94,8 +93,9 @@ public class PerformanceScoreReport extends BaseFLLServlet {
       final OutputStream stream = response.getOutputStream();
 
       try {
+        final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection);
 
-        final Document document = createDocument(connection, challengeDescription, tournament);
+        final Document document = createDocument(connection, challengeDescription, tournament, teams.values());
 
         final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
@@ -112,9 +112,18 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     }
   }
 
-  private Document createDocument(final Connection connection,
-                                  final ChallengeDescription challengeDescription,
-                                  final Tournament tournament)
+  /**
+   * @param connection database connection
+   * @param challengeDescription challenge description
+   * @param tournament tournament
+   * @param teams the teams to output the details for
+   * @return the document to be rendered
+   * @throws SQLException if there is a database error
+   */
+  public static Document createDocument(final Connection connection,
+                                        final ChallengeDescription challengeDescription,
+                                        final Tournament tournament,
+                                        final Collection<TournamentTeam> teams)
       throws SQLException {
     final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
 
@@ -132,7 +141,6 @@ public class PerformanceScoreReport extends BaseFLLServlet {
                                                                FOPUtils.STANDARD_FOOTER_HEIGHT);
     layoutMasterSet.appendChild(pageMaster);
 
-    final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection);
     if (teams.isEmpty()) {
       final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
       rootElement.appendChild(pageSequence);
@@ -151,9 +159,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
 
       block.appendChild(document.createTextNode("No teams in the tournament."));
     } else {
-      for (final Map.Entry<Integer, TournamentTeam> entry : teams.entrySet()) {
-        final TournamentTeam team = entry.getValue();
-
+      for (final TournamentTeam team : teams) {
         final Element teamPageSequence = createTeamPageSequence(connection, document, pageMasterName, tournament,
                                                                 challengeDescription, numSeedingRounds, team);
         rootElement.appendChild(teamPageSequence);
@@ -163,13 +169,13 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     return document;
   }
 
-  private Element createTeamPageSequence(final Connection connection,
-                                         final Document document,
-                                         final String pageMasterName,
-                                         final Tournament tournament,
-                                         final ChallengeDescription challenge,
-                                         final int numSeedingRounds,
-                                         final TournamentTeam team)
+  private static Element createTeamPageSequence(final Connection connection,
+                                                final Document document,
+                                                final String pageMasterName,
+                                                final Tournament tournament,
+                                                final ChallengeDescription challenge,
+                                                final int numSeedingRounds,
+                                                final TournamentTeam team)
       throws SQLException {
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
 
@@ -191,12 +197,12 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     return pageSequence;
   }
 
-  private Element outputTeam(final Connection connection,
-                             final Document document,
-                             final Tournament tournament,
-                             final ChallengeDescription challenge,
-                             final int numSeedingRounds,
-                             final TournamentTeam team)
+  private static Element outputTeam(final Connection connection,
+                                    final Document document,
+                                    final Tournament tournament,
+                                    final ChallengeDescription challenge,
+                                    final int numSeedingRounds,
+                                    final TournamentTeam team)
       throws SQLException {
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     container.setAttribute("font-family", SCORE_FONT_FAMILY);
@@ -231,7 +237,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     final PerformanceScoreCategory performance = challenge.getPerformance();
 
     final DatabaseTeamScore[] scores = getScores(connection, tournament, team, numSeedingRounds);
-    for (final AbstractGoal goal : performance.getGoals()) {
+    for (final AbstractGoal goal : performance.getAllGoals()) {
       final double bestScore = bestScoreForGoal(scores, goal);
 
       final Element row = FOPUtils.createTableRow(document);
@@ -255,7 +261,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
             || score.isNoShow()) {
           row.appendChild(createCell(document, ""));
         } else {
-          final double computedValue = goal.getComputedScore(score);
+          final double computedValue = goal.evaluate(score);
 
           final StringBuilder cellStr = new StringBuilder();
           if (!goal.isComputed()) {
@@ -351,8 +357,8 @@ public class PerformanceScoreReport extends BaseFLLServlet {
   /**
    * @return best total score
    */
-  private double bestTotalScore(final PerformanceScoreCategory performance,
-                                final TeamScore[] scores) {
+  private static double bestTotalScore(final PerformanceScoreCategory performance,
+                                       final TeamScore[] scores) {
     double bestScore = Double.MAX_VALUE
         * -1;
     for (final TeamScore score : scores) {
@@ -365,21 +371,21 @@ public class PerformanceScoreReport extends BaseFLLServlet {
   /**
    * @return the best score for the specified goal
    */
-  private double bestScoreForGoal(final TeamScore[] scores,
-                                  final AbstractGoal goal) {
+  private static double bestScoreForGoal(final TeamScore[] scores,
+                                         final AbstractGoal goal) {
     double bestScore = Double.MAX_VALUE
         * -1;
     for (final TeamScore score : scores) {
-      final double computedValue = goal.getComputedScore(score);
+      final double computedValue = goal.evaluate(score);
       bestScore = Math.max(bestScore, computedValue);
     }
     return bestScore;
   }
 
-  private DatabaseTeamScore[] getScores(final Connection connection,
-                                        final Tournament tournament,
-                                        final TournamentTeam team,
-                                        final int numSeedingRounds)
+  private static DatabaseTeamScore[] getScores(final Connection connection,
+                                               final Tournament tournament,
+                                               final TournamentTeam team,
+                                               final int numSeedingRounds)
       throws SQLException {
     final DatabaseTeamScore[] scores = new DatabaseTeamScore[numSeedingRounds];
     for (int runNumber = 1; runNumber <= numSeedingRounds; ++runNumber) {
@@ -390,8 +396,8 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     return scores;
   }
 
-  private Element createCell(final Document document,
-                             final String text) {
+  private static Element createCell(final Document document,
+                                    final String text) {
     final Element cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, text);
     FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
                         ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
@@ -401,10 +407,10 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     return cell;
   }
 
-  private Element createHeader(final Document document,
-                               final String challengeName,
-                               final Tournament tournament,
-                               final TournamentTeam team) {
+  private static Element createHeader(final Document document,
+                                      final String challengeName,
+                                      final Tournament tournament,
+                                      final TournamentTeam team) {
     final Element staticContent = FOPUtils.createXslFoElement(document, "static-content");
     staticContent.setAttribute("flow-name", "xsl-region-before");
     staticContent.setAttribute("font-weight", TITLE_FONT_WEIGHT);
@@ -434,9 +440,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     row2.appendChild(title);
     FOPUtils.addBottomBorder(title, ScheduleWriter.THICK_BORDER_WIDTH);
 
-    final Element date = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
-                                                  tournament.getDate()
-                                                            .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)));
+    final Element date = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, tournament.getDateString());
     row2.appendChild(date);
     FOPUtils.addBottomBorder(date, ScheduleWriter.THICK_BORDER_WIDTH);
 

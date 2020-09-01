@@ -18,15 +18,21 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.NonNumericNominees;
+import fll.db.NonNumericNominees.Nominee;
 import fll.db.Queries;
+import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
 import fll.web.playoff.Playoff;
 import fll.web.report.FinalComputedScores;
 import fll.xml.ChallengeDescription;
+import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
 
@@ -143,7 +149,7 @@ public final class FinalistLoad {
   public static String currentTournament(final ServletContext application) throws SQLException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-      final String name = Queries.getCurrentTournamentName(connection);
+      final String name = Tournament.getCurrentTournament(connection).getName();
       return WebUtils.quoteJavascriptString(name);
     }
   }
@@ -159,17 +165,33 @@ public final class FinalistLoad {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final Formatter output = new Formatter(writer);
 
-    for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
-      final String categoryName = subjectiveElement.getName();
-      final String categoryTitle = subjectiveElement.getTitle();
+    for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+      final String categoryName = category.getName();
+      final String categoryTitle = category.getTitle();
       final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);
 
       final String catVarName = getCategoryVarName(categoryName);
       output.format("var %s = $.finalist.getCategoryByName(%s);%n", catVarName, quotedCatTitle);
       output.format("if (null == %s) {%n", catVarName);
-      output.format("  %s = $.finalist.addCategory(%s, true);%n", catVarName, quotedCatTitle);
+      output.format("  %s = $.finalist.addCategory(%s, true, false);%n", catVarName, quotedCatTitle);
+      output.format("}%n");
+      // all subjective categories are scheduled
+      output.format("$.finalist.setCategoryScheduled(%s, true);%n", catVarName);
+    }
+
+    for (final NonNumericCategory category : description.getNonNumericCategories()) {
+      final String categoryTitle = category.getTitle();
+      final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);
+
+      output.format("{%n");
+      output.format("var category = $.finalist.getCategoryByName(%s);%n", quotedCatTitle);
+      output.format("if (null == category) {%n");
+      output.format("  category = $.finalist.addCategory(%s, false, %b);%n", quotedCatTitle,
+                    !category.getPerAwardGroup());
+      output.format("}%n");
       output.format("}%n");
     }
+
   }
 
   /**
@@ -184,26 +206,44 @@ public final class FinalistLoad {
   public static void outputNonNumericNominees(final Writer writer,
                                               final ServletContext application)
       throws SQLException {
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
+    final List<NonNumericCategory> challengeNonNumericCategories = description.getNonNumericCategories();
+    final ObjectMapper mapper = new ObjectMapper();
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
       final int tournament = Queries.getCurrentTournament(connection);
       final Formatter output = new Formatter(writer);
 
-      final int varIndex = 0;
       for (final String category : NonNumericNominees.getCategories(connection, tournament)) {
-        final String categoryVar = "categoryVar"
-            + varIndex;
+        output.format("{%n"); // scope to simplify variable names
+        final String categoryVar = "category";
+        final String quotedCatTitle = WebUtils.quoteJavascriptString(category);
 
-        output.format("var %s = $.finalist.getCategoryByName(\"%s\");%n", categoryVar, category);
-        output.format("if (null == %s) {%n", categoryVar);
-        output.format("  %s = $.finalist.addCategory(\"%s\", false);%n", categoryVar, category);
-        output.format("}%n");
+        output.format("var %s = $.finalist.getCategoryByName(%s);%n", categoryVar, quotedCatTitle);
 
-        for (final int teamNumber : NonNumericNominees.getNominees(connection, tournament, category)) {
-          output.format("$.finalist.addTeamToCategory(%s, %d);%n", categoryVar, teamNumber);
+        if (!challengeNonNumericCategories.stream().anyMatch(c -> c.getTitle().equals(category))) {
+          // 8/22/2020 JPS - this isn't needed other than support for old databases where
+          // the non-numeric categories are not in the challenge description. All of these
+          // categories are per award group.
+
+          output.format("if (null == %s) {%n", categoryVar);
+          output.format("  %s = $.finalist.addCategory(%s, false, false);%n", categoryVar, quotedCatTitle);
+          output.format("}%n");
         }
-      }
+
+        for (final Nominee nominee : NonNumericNominees.getNominees(connection, tournament, category)) {
+          output.format("$.finalist.addTeamToCategory(%s, %d);%n", categoryVar, nominee.getTeamNumber());
+
+          final String judgesStr = mapper.writeValueAsString(nominee.getJudges());
+          output.format("$.finalist.setNominatingJudges(%s, %d, %s);%n", categoryVar, nominee.getTeamNumber(),
+                        judgesStr);
+        }
+        output.format("}%n");
+      } // foreach category
+    } catch (final JsonProcessingException e) {
+      throw new FLLInternalException("Error converting judges to JSON", e);
     }
   }
 
@@ -293,31 +333,19 @@ public final class FinalistLoad {
         output.format("var division = '%s';%n", division);
 
         final FinalistSchedule schedule = new FinalistSchedule(connection, tournament, division);
-
-        for (final String categoryTitle : schedule.getCategories()) {
-          final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);
-
-          output.format("{%n"); // scope so that variable names are easy
-          output.format("  var category = $.finalist.getCategoryByName(%s);%n", quotedCatTitle);
-          output.format("  if (null == category) {%n");
-          // will be non-numeric because all numeric categories were added earlier
-          output.format("    category = $.finalist.addCategory(%s, false);%n", quotedCatTitle);
-          output.format("  }%n");
-          output.format("}%n");
-        }
-
         for (final Map.Entry<String, String> entry : schedule.getRooms().entrySet()) {
           final String categoryTitle = entry.getKey();
           final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);
+          final String room = entry.getValue();
 
           output.format("{%n"); // scope so that variable names are easy
+
           output.format("  var category = $.finalist.getCategoryByName(%s);%n", quotedCatTitle);
-          output.format("  if (null == category) {%n");
-          // will be non-numeric because all numeric categories were added earlier
-          output.format("    category = $.finalist.addCategory(%s, false);%n", quotedCatTitle);
-          output.format("  }%n");
-          output.format("  $.finalist.setRoom(category, division, %s);%n",
-                        WebUtils.quoteJavascriptString(entry.getValue()));
+          output.format("  $.finalist.setRoom(category, division, %s);%n", WebUtils.quoteJavascriptString(room));
+
+          // any category in the schedule should be scheduled
+          output.format("$.finalist.setCategoryScheduled(category, true);%n");
+
           output.format("}%n");
         }
 

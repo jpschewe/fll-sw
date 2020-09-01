@@ -27,7 +27,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -45,7 +44,6 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import org.apache.commons.io.IOUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -64,7 +62,7 @@ import net.mtu.eggplant.xml.XMLUtils;
 public final class ChallengeParser {
 
   /**
-   * The expected namespace for FLL documents
+   * The expected namespace for FLL documents.
    */
   public static final String FLL_NAMESPACE = "http://www.hightechkids.org";
 
@@ -118,10 +116,19 @@ public final class ChallengeParser {
    */
   public static final double INITIAL_VALUE_TOLERANCE = 1E-4;
 
-  public static final int CURRENT_SCHEMA_VERSION = 2;
+  /**
+   * Current version of the schema.
+   */
+  public static final int CURRENT_SCHEMA_VERSION = 3;
 
+  /**
+   * The XML attribute used to store the {@link ScoreType}.
+   */
   public static final String SCORE_TYPE_ATTRIBUTE = "scoreType";
 
+  /**
+   * The XML attribute used to store the {@link WinnerType}.
+   */
   public static final String WINNER_ATTRIBUTE = "winner";
 
   private ChallengeParser() {
@@ -140,7 +147,7 @@ public final class ChallengeParser {
   public static Document parse(final Reader stream) throws ChallengeXMLException {
     try {
       final StringWriter writer = new StringWriter();
-      IOUtils.copy(stream, writer);
+      stream.transferTo(writer);
       String content = writer.toString();
 
       int schemaVersion = determineSchemaVersion(content);
@@ -154,6 +161,11 @@ public final class ChallengeParser {
       schemaVersion = determineSchemaVersion(content);
       if (schemaVersion == 1) {
         content = transform1To2(content);
+      }
+
+      schemaVersion = determineSchemaVersion(content);
+      if (schemaVersion == 2) {
+        content = transform2To3(content);
       }
 
       schemaVersion = determineSchemaVersion(content);
@@ -237,6 +249,12 @@ public final class ChallengeParser {
     return applyTransform(content, classLoader.getResourceAsStream("fll/resources/schema1-to-schema2.xsl"));
   }
 
+  private static String transform2To3(final String content) {
+    final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+    return applyTransform(content, classLoader.getResourceAsStream("fll/resources/schema2-to-schema3.xsl"));
+  }
+
   /**
    * Determine the version of the schema used in the XML document.
    *
@@ -281,8 +299,6 @@ public final class ChallengeParser {
   } // end validateDocument
 
   private static void validateCategory(final Element categoryElement) throws ParseException {
-    validateGoalGrouping(categoryElement);
-
     // get all nodes named goal at any level under category element
     final Map<String, Element> simpleGoals = new HashMap<>();
     for (final Element goalElement : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("goal"))) {
@@ -302,32 +318,6 @@ public final class ChallengeParser {
     checkForCircularDependencies(computedGoals);
 
     validateGoalRefs(categoryElement, allGoals);
-  }
-
-  private static void validateGoalGrouping(final Element categoryElement) {
-
-    final Set<String> seenGoalGroupNames = new HashSet<>();
-    String prevGoalGroupName = null;
-    for (final Element childNode : new NodelistElementCollectionAdapter(categoryElement.getChildNodes())) {
-      if ("goal".equals(childNode.getNodeName())
-          || "computedGoal".equals(childNode.getNodeName())) {
-
-        final String goalGroupName = childNode.getAttribute(AbstractGoal.CATEGORY_ATTRIBUTE);
-        if (!goalGroupName.trim().isEmpty()) {
-
-          if (!Objects.equals(prevGoalGroupName, goalGroupName)) {
-            // start of a goal group
-            if (seenGoalGroupNames.contains(goalGroupName)) {
-              throw new GoalGroupSplitException(goalGroupName);
-            }
-
-            seenGoalGroupNames.add(goalGroupName);
-          }
-        }
-
-        prevGoalGroupName = goalGroupName;
-      } // if goal type
-    } // foreach child
   }
 
   private static void validateGoalRefs(final Element categoryElement,
@@ -581,7 +571,7 @@ public final class ChallengeParser {
   private static Map<String, String> gatherColumnDefinitions(final ScoreCategory element) {
     final Map<String, String> goalDefs = new HashMap<>();
 
-    for (final AbstractGoal goal : element.getGoals()) {
+    for (final AbstractGoal goal : element.getAllGoals()) {
       if (!goal.isComputed()) {
         final String columnDefinition = GenerateDB.generateGoalColumnDefinition(goal);
         final String goalName = goal.getName();

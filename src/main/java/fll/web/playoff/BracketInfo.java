@@ -15,7 +15,7 @@ public class BracketInfo {
 
   /**
    * @param bracketName see {@link #getBracketName()}
-   * @param firstRound see {@Link #getFirstRound()}
+   * @param firstRound see {@link #getFirstRound()}
    * @param lastRound see {@link #getLastRound()}
    */
   public BracketInfo(@JsonProperty("bracketName") final String bracketName,

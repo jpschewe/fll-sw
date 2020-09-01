@@ -113,7 +113,7 @@ public class ScoreTest {
       final Map<String, String> enumGoals = new HashMap<String, String>();
 
       ComputedGoal computed = null;
-      for (final AbstractGoal g : performanceElement.getGoals()) {
+      for (final AbstractGoal g : performanceElement.getAllGoals()) {
         if (g.isComputed()
             && "computed".equals(g.getName())) {
           computed = (ComputedGoal) g;
@@ -126,7 +126,7 @@ public class ScoreTest {
       simpleGoals.put("flags_rows", 3.0);
       enumGoals.put("robot_type", "rcx");
       DummyTeamScore dummyTeamScore = new DummyTeamScore(0, 1, simpleGoals, enumGoals);
-      assertEquals(269, computed.getComputedScore(dummyTeamScore), 0);
+      assertEquals(269, computed.evaluate(dummyTeamScore), 0);
       double score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(384, score, 0);
 
@@ -135,7 +135,7 @@ public class ScoreTest {
       simpleGoals.put("flags_rows", 3.0);
       enumGoals.put("robot_type", "nxt");
       dummyTeamScore = new DummyTeamScore(1, 1, simpleGoals, enumGoals);
-      assertEquals(0, computed.getComputedScore(dummyTeamScore), 0);
+      assertEquals(0, computed.evaluate(dummyTeamScore), 0);
       score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(115, score, 0);
 
@@ -144,7 +144,7 @@ public class ScoreTest {
       simpleGoals.put("flags_rows", 1.0);
       enumGoals.put("robot_type", "rcx");
       dummyTeamScore = new DummyTeamScore(2, 1, simpleGoals, enumGoals);
-      assertEquals(131, computed.getComputedScore(dummyTeamScore), 0);
+      assertEquals(131, computed.evaluate(dummyTeamScore), 0);
       score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(216, score, 0);
 
@@ -153,7 +153,7 @@ public class ScoreTest {
       simpleGoals.put("flags_rows", 1.0);
       enumGoals.put("robot_type", "nxt");
       dummyTeamScore = new DummyTeamScore(3, 1, simpleGoals, enumGoals);
-      assertEquals(0, computed.getComputedScore(dummyTeamScore), 0);
+      assertEquals(0, computed.evaluate(dummyTeamScore), 0);
       score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(85, score, 0);
     }

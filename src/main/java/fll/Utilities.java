@@ -139,12 +139,6 @@ public final class Utilities {
    */
   public static final char NON_BREAKING_SPACE = '\u00a0';
 
-  /**
-   * The code for a unicode non-breaking space. To be used where the raw character
-   * cannot be input.
-   */
-  public static final String NON_BREAKING_SPACE_CODE = "\u00a0";
-
   private Utilities() {
   }
 

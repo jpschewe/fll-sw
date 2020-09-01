@@ -51,7 +51,6 @@ import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
-import fll.documents.elements.SheetElement;
 import fll.documents.writers.SubjectivePdfWriter;
 import fll.scheduler.TeamScheduleInfo;
 import fll.util.GuiExceptionHandler;
@@ -468,8 +467,6 @@ public class ChallengeDescriptionFrame extends JFrame {
       }
 
       for (SubjectiveScoreCategory category : challengeDescription.getSubjectiveCategories()) {
-        final SheetElement sheetElement = new SheetElement(category);
-
         final TeamScheduleInfo dummy = new TeamScheduleInfo(111111);
         dummy.setTeamName("Really long team name, something that is really really long");
         dummy.setOrganization("Some organization");
@@ -481,8 +478,8 @@ public class ChallengeDescriptionFrame extends JFrame {
             + ".pdf";
 
         try (OutputStream out = Files.newOutputStream(outputDirectory.resolve(filename))) {
-          SubjectivePdfWriter.createDocument(out, challengeDescription, tournamentName, sheetElement, null,
-                                             Collections.singletonList(dummy));
+          SubjectivePdfWriter.createDocumentForSchedule(out, challengeDescription, tournamentName, category, null,
+                                                        Collections.singletonList(dummy));
         } catch (final IOException e) {
           LOGGER.error("Error writing subjective score sheet {}", category.getName(), e);
           JOptionPane.showMessageDialog(this, "Error writing the subjective score sheet "

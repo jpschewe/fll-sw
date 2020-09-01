@@ -12,10 +12,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -42,6 +43,7 @@ import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
+import fll.xml.GoalElement;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -151,8 +153,13 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
         prep.setString(2, catName);
         prep.setInt(4, tournament.getTournamentID());
 
-        final Set<String> goalGroups = new HashSet<>(catElement.getGoalGroups());
-        goalGroups.add(""); // raw category
+        // the raw category is added in the stream pipeline because there is no
+        // guarantee that the resulting set is mutable
+        final Set<String> goalGroups = Stream.concat(Stream.of(""), // raw category
+                                                     catElement.getGoalElements().stream()
+                                                               .filter(GoalElement::isGoalGroup)
+                                                               .map(GoalElement::getTitle))
+                                             .distinct().collect(Collectors.toSet());
         for (final String goalGroup : goalGroups) {
           prep.setString(3, goalGroup);
 
@@ -180,7 +187,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
               try (ResultSet rs = prep.executeQuery()) {
                 while (rs.next()) {
                   haveData = true;
-                  
+
                   final Element tableRow = FOPUtils.createTableRow(document);
                   tableBody.appendChild(tableRow);
                   FOPUtils.keepWithPrevious(tableRow);
@@ -243,11 +250,11 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                 } // foreach result
               } // allocate rs
 
-              if(haveData) {
+              if (haveData) {
                 // only add the table if there is data
                 documentBody.appendChild(table);
               }
-              
+
             } // foreach station
           } // foreach division
         } // foreach goal group

@@ -122,7 +122,7 @@ public class GatherBugReport extends BaseFLLServlet {
 
       zipOut.putNextEntry(new ZipEntry("database.flldb"));
       fis = new FileInputStream(temp);
-      IOUtils.copy(fis, zipOut);
+      fis.transferTo(zipOut);
       fis.close();
 
       if (!temp.delete()) {
@@ -163,7 +163,7 @@ public class GatherBugReport extends BaseFLLServlet {
           if (Files.isRegularFile(path)) {
             zipOut.putNextEntry(new ZipEntry(logsDirectory.resolve(path.getFileName()).toString()));
             try (InputStream is = Files.newInputStream(path)) {
-              IOUtils.copy(is, zipOut);
+              is.transferTo(zipOut);
             }
           }
         }

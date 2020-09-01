@@ -22,9 +22,9 @@ import javax.sql.DataSource;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.ImportDB;
-import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -78,7 +78,7 @@ public class ProcessImportPerformance extends BaseFLLServlet {
           try (ZipInputStream zipfile = new ZipInputStream(dumpFileItem.getInputStream())) {
             ImportDB.loadDatabaseDump(zipfile, memConnection);
 
-            final String sourceTournamentName = Queries.getCurrentTournamentName(memConnection);
+            final String sourceTournamentName = Tournament.getCurrentTournament(memConnection).getName();
 
             final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
             try (Connection destConnection = destDataSource.getConnection()) {
@@ -87,7 +87,7 @@ public class ProcessImportPerformance extends BaseFLLServlet {
 
                 // check that the current tournament is the same in the imported database
                 // and this database
-                final String destTournamentName = Queries.getCurrentTournamentName(destConnection);
+                final String destTournamentName = Tournament.getCurrentTournament(destConnection).getName();
                 if (!destTournamentName.equals(sourceTournamentName)) {
                   message.append(String.format("<p class='error'>The tournament being imported is %s, but the selected tournament is %s. Import of performance data cannot continue.</p>",
                                                sourceTournamentName, destTournamentName));

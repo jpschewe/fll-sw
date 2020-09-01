@@ -66,7 +66,7 @@ function updateHeader() {
 
   headerRow.append($("<div class='rTableHead'>Head to Head</div>"));
 
-  $.each($.finalist.getAllCategories(), function(i, category) {
+  $.each($.finalist.getAllScheduledCategories(), function(i, category) {
     var room = $.finalist.getRoom(category, $.finalist.getCurrentDivision());
     var header;
     if (room == undefined || "" == room) {
@@ -203,7 +203,7 @@ function updateScheduleToSend() {
 
   var schedRows = [];
   $.each(schedule, function(i, slot) {
-    $.each($.finalist.getAllCategories(), function(i, category) {
+    $.each($.finalist.getAllScheduledCategories(), function(i, category) {
       var teamNum = slot.categories[category.catId];
       if (teamNum != null) {
         var dbrow = new FinalistDBRow(category.name, slot.time.hour,
@@ -384,7 +384,7 @@ function addRowForSlot(slot) {
 
   var categoriesToCells = {};
   var teamsInSlot = {};
-  $.each($.finalist.getAllCategories(), function(i, category) {
+  $.each($.finalist.getAllScheduledCategories(), function(i, category) {
     var cell = createTimeslotCell(slot, category);
     row.append(cell);
 
@@ -413,7 +413,8 @@ function updatePage() {
   updateHeader();
 
   schedule = $.finalist.getSchedule($.finalist.getCurrentDivision());
-  finalistsCount = $.finalist.getTeamToCategoryMap($.finalist.getCurrentDivision());
+  finalistsCount = $.finalist.getTeamToCategoryMap($.finalist
+      .getCurrentDivision());
 
   $("#schedule_body").empty();
   $.each(schedule, function(i, slot) {
@@ -421,9 +422,9 @@ function updatePage() {
   }); // foreach timeslot
 
   var categoryRows = [];
-  $.each($.finalist.getAllCategories(), function(i, category) {
-    var cat = new FinalistCategory(category.name, $.finalist
-        .getRoom(category, $.finalist.getCurrentDivision()));
+  $.each($.finalist.getAllScheduledCategories(), function(i, category) {
+    var cat = new FinalistCategory(category.name, $.finalist.getRoom(category,
+        $.finalist.getCurrentDivision()));
     categoryRows.push(cat);
   }); // foreach category
   $('#category_data').val($.toJSON(categoryRows));
@@ -451,16 +452,8 @@ $(document).ready(
       handleDivisionChange();
 
       // doesn't depend on the division, so can be done only once
-      var nonNumericNominees = [];
-      $.each($.finalist.getNonNumericCategories(), function(i, category) {
-        var teamNumbers = [];
-        $.each(category.teams, function(j, team) {
-          teamNumbers.push(team);
-        }); // foreach team
-        var nominees = new NonNumericNominees(category.name, teamNumbers);
-        nonNumericNominees.push(nominees);
-      }); // foreach category
-      $('#non-numeric-nominees_data').val($.toJSON(nonNumericNominees));
+      var allNonNumericNominees = $.finalist.prepareNonNumericNomineesToSend();
+      $('#non-numeric-nominees_data').val($.toJSON(allNonNumericNominees));
 
       // update the schedule data before submitting the form
       $('#get_sched_data').submit(updateScheduleToSend);

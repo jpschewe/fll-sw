@@ -138,7 +138,7 @@ public class ChooseChallengeDescriptor extends JDialog {
         }
 
         final String text = mFileField.getText();
-        if (!StringUtils.isEmpty(text)) {
+        if (!StringUtils.isBlank(text)) {
           final File file = new File(text);
           if (file.exists()) {
             try {

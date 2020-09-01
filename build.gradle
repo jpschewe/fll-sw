@@ -27,14 +27,14 @@ plugins {
     id "org.unbroken-dome.test-sets" version "3.0.1"
     id "eclipse"
     id "org.kordamp.markdown.convert" version "1.2.0"       
-    id "com.github.spotbugs" version "4.3.0"
+    id "com.github.spotbugs" version "4.4.4"
     id "org.myire.munge" version "1.0" // transformer for spotbugs XML
     id "de.aaschmid.cpd" version "3.1"
     id "edu.sc.seis.launch4j" version "2.4.6"
     id "net.saliman.cobertura" version "3.0.0"
     id "com.gorylenko.gradle-git-properties" version "2.2.2"
-    id "com.github.ben-manes.versions" version "0.28.0" // adds dependencyUpdates task
-    id "de.undercouch.download" version "4.0.4" // file download
+    id "com.github.ben-manes.versions" version "0.29.0" // adds dependencyUpdates task
+    id "de.undercouch.download" version "4.1.1" // file download
     id "checkstyle"
         
     // Checker Framework pluggable type-checking
@@ -65,6 +65,12 @@ eclipse {
                 // add web as resource entry
                 node.appendNode( "classpathentry", [ kind: "src", path: "src/main/web", output: "bin/web"]) 
             }
+                                                                                                                                    
+            // remove entries added due to issue with testsets                                                                      
+            // https://github.com/unbroken-dome/gradle-testsets-plugin/issues/77                                                    
+            whenMerged {                                                                                                            
+                entries.removeAll{it.kind == "lib" && (it.path.endsWith("build/classes/java/test") || it.path.endsWith("build/resources/test"))}
+            }                                                                                                                       
         }
     }
 }
@@ -97,13 +103,13 @@ repositories {
 }
 
 ext {
-    jackson_version = "2.11.0"
+    jackson_version = "2.11.1"
     slf4j_version = "1.7.30"
-    tomcat_version = "9.0.35"
+    tomcat_version = "9.0.37"
     poi_version = "4.1.2"
     junit_version = "5.6.2"
     log4j_version = "2.13.3"
-    spotbugs_version = "4.0.3"
+    spotbugs_version = "4.0.6"
 
     web_build_dir = new File(project.buildDir, "web")
     documentation_build_dir = new File(project.buildDir, "gen-documentation")    
@@ -130,9 +136,11 @@ ext {
 
 group = "fll"
 
-// set version of Java that the source confirms to. 
-// The bytecode will be for this version of Java as well, unless targetCompatibility is specified.
-sourceCompatibility = 1.8
+java {
+    // set version of Java that the source confirms to. 
+    // The bytecode will be for this version of Java as well, unless targetCompatibility is specified.
+    sourceCompatibility = JavaVersion.VERSION_11
+}
 
 dependencies {
   implementation(group: "org.apache.tomcat.embed", name: "tomcat-embed-core", version: project.tomcat_version)
@@ -144,9 +152,9 @@ dependencies {
   implementation(group: "javax.servlet", name: "javax.servlet-api", version: "4.0.1")
   runtimeOnly(group: "javax.servlet", name: "jstl", version: "1.2")
 
-  implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.10")
+  implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.11")
   implementation(group: "commons-cli", name: "commons-cli", version: "1.4")
-  implementation(group: "org.hsqldb", name: "hsqldb", version: "2.5.0")
+  implementation(group: "org.hsqldb", name: "hsqldb", version: "2.5.1")
     
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-slf4j-impl", version: project.log4j_version)
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-jcl", version: project.log4j_version)
@@ -167,7 +175,7 @@ dependencies {
 
   implementation(group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0")
             
-  implementation(group: "dnsjava", name: "dnsjava", version: "3.1.0")
+  implementation(group: "dnsjava", name: "dnsjava", version: "3.2.2")
     
   implementation(group: "commons-fileupload", name: "commons-fileupload", version: "1.4")
     
@@ -193,9 +201,14 @@ dependencies {
     
     // references old version of the servlet API
     exclude(group: "javax.servlet", module: "servlet-api")
-  }
     
-  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.19")
+    // xml APIs are part of the JDK
+    exclude(group: "xml-apis", module: "xml-apis")
+  }
+  
+  implementation(group: "org.checkerframework", name: "checker-qual", version: "3.6.0")
+    
+  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.20")
   
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-api", version: project.junit_version)
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-params", version: project.junit_version)
@@ -207,9 +220,13 @@ dependencies {
   integrationTestImplementation(sourceSets.test.output)
         
   integrationTestImplementation(group: "org.easytesting", name: "fest-swing", version: "1.2.1")
-  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.40.0")
+  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.42.0") {
+      
+    // xml APIs are part of the JDK
+    exclude(group: "xml-apis", module: "xml-apis")
+  }
   integrationTestImplementation(group: "org.seleniumhq.selenium", name: "selenium-server", version: "3.141.59")
-  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "4.0.0")
+  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "4.1.0")
   
   // make selenium log to log4j
   integrationTestImplementation(group: "org.apache.logging.log4j", name: "log4j-jul", version: project.log4j_version)
@@ -218,12 +235,17 @@ dependencies {
 
 tasks.withType(Tar){
     compression = Compression.GZIP
-    extension = "tar.gz"
+    archiveExtension = "tar.gz"
 }
 
 javadoc {
     // TODO: Need to fix the errors eventually
     failOnError = false
+    options.addStringOption('Xmaxwarns', '10000')
+}
+
+compileJava {
+    options.compilerArgs << '-Xmaxwarns' << '10000'
 }
 
 tasks.register("distributionDependencies") {
@@ -506,12 +528,12 @@ gitProperties {
 }
 
 tasks.register("writeLaunchJar", Jar) {
-    destinationDir = project.buildDir
+    destinationDirectory = project.buildDir
     archiveFileName = "fll-sw.jar"
     manifest {
         attributes(
         "Implementation-Title": project.name,
-        "Implementation-Version": version,
+        "Implementation-Version": archiveVersion,
         "Main-Class": project.mainClassName,
         "Class-Path": "classes/\n " + configurations.runtimeClasspath.collect { "lib/" + it.getName() }.join(" \n "))
     }
@@ -709,7 +731,7 @@ installMacDist.doFirst {
 
 
 checkstyle {
-    configDir = file("$projectDir")
+    configDirectory = file("$projectDir")
     configFile = file("checkstyle.xml")
     showViolations = true
     ignoreFailures = true
@@ -722,7 +744,7 @@ checkerFramework {
     ]
     extraJavacArgs = [
         "-AonlyDefs=^fll\\.(documents|flltools)",
-        "-Awarns",  
+        //"-Awarns",  
         "-Xmaxwarns", "10000",
         "-AstubWarnIfNotFound"
     ]

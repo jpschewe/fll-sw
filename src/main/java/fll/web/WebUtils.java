@@ -45,9 +45,9 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public final class WebUtils {
 
-  private static Logger LOGGER = LoggerFactory.getLogger(WebUtils.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(WebUtils.class);
 
-  private static final Pattern needsEscape = Pattern.compile("[\'\"\\\\]");
+  private static final Pattern NEEDS_ESCAPE = Pattern.compile("[\'\"\\\\]");
 
   private WebUtils() {
     // no instances
@@ -261,7 +261,7 @@ public final class WebUtils {
         || "".equals(str)) {
       return "\"\"";
     } else {
-      final Matcher escapeMatcher = WebUtils.needsEscape.matcher(str);
+      final Matcher escapeMatcher = WebUtils.NEEDS_ESCAPE.matcher(str);
       return '"'
           + escapeMatcher.replaceAll("\\\\$0")
           + '"';

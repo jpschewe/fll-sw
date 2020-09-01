@@ -38,7 +38,7 @@ table.score-entry {
 	border-collapse: collapse;
 }
 
-td.center {
+.center {
 	text-align: center;
 }
 

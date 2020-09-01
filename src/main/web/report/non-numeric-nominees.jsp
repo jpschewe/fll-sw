@@ -5,6 +5,9 @@
 <!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
 <html>
 <head>
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/style/fll-sw.css'/>" />
+
 <title>Non-Numeric Nominees</title>
 
 <script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
@@ -13,6 +16,7 @@
 <script type='text/javascript' src='../extlib/jstorage-0.4.11.min.js'></script>
 <script type='text/javascript' src='../js/fll-objects.js'></script>
 <script type='text/javascript' src='finalist/finalist.js'></script>
+<script type='text/javascript' src='finalist/non-numeric.js'></script>
 
 
 <script type='text/javascript'>
@@ -31,29 +35,15 @@
 	
 <%FinalistLoad.outputTeamVariables(out, application);%>
 	
+<%FinalistLoad.outputCategories(out, application);%>
+
 <%FinalistLoad.outputNonNumericNominees(out, application);%>
 	$.finalist.setTournament(_loadingTournament);
-
-		// make sure the navbar isn't shown
-		$("#nominees_content").load(function() {
-			$("#nominees_content").contents().find("#navbar").hide();
-		});
-
-		$("#nominees_content").attr('src', 'finalist/non-numeric.html');
-
 	}
 
 	function storeNominees() {
-		var nonNumericNominees = [];
-		$.each($.finalist.getNonNumericCategories(), function(i, category) {
-			var teamNumbers = [];
-			$.each(category.teams, function(j, team) {
-				teamNumbers.push(team);
-			}); // foreach team
-			var nominees = new NonNumericNominees(category.name, teamNumbers);
-			nonNumericNominees.push(nominees);
-		}); // foreach category
-		$('#non-numeric-nominees_data').val($.toJSON(nonNumericNominees));
+        var allNonNumericNominees = $.finalist.prepareNonNumericNomineesToSend();
+        $('#non-numeric-nominees_data').val($.toJSON(allNonNumericNominees));
 	}
 
 	$(document).ready(function() {
@@ -82,5 +72,27 @@
   <button id="nominees_store">Store Nominees</button>
  </form>
 
- <iframe width="100%" height="90%" frameBorder="0" id="nominees_content"> </iframe>
+   <h1>Non Numeric Categories</h1>
+
+    <p>This page allows you to select teams that are nominated for
+        awards that do not have scores in the database.</p>
+
+    <p>The checkbox next to the category specifies if the category
+        should be scheduled for finalist judging. If this tournament
+        does not have finalist judging this checkbox can be ignored.</p>
+
+    <h2>Overall</h2>
+    <p>These categories are awarded for the whole tournament rather
+        than per award group.</p>
+    <ul id='overall-categories'>
+    </ul>
+
+    <h2>
+        Award Group:
+        <select id='divisions'></select>
+    </h2>
+
+    <ul id='categories'>
+    </ul>
+
 </html>

@@ -28,7 +28,8 @@ import fll.web.WebUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * @see TournamentSchedule#outputPerformanceScheduleByTime(java.io.OutputStream)
+ * @see ScheduleWriter#outputPerformanceScheduleByTime(TournamentSchedule,
+ *      java.io.OutputStream)
  */
 @WebServlet("/admin/PerformanceSchedule")
 public class PerformanceSchedule extends BaseFLLServlet {

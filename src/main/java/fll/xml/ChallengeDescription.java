@@ -11,8 +11,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,22 +26,22 @@ import net.mtu.eggplant.xml.XMLUtils;
 public class ChallengeDescription implements Serializable {
 
   /**
-   * XML attribute for title.
+   * XML attribute for {@link #getTitle()}.
    */
   public static final String TITLE_ATTRIBUTE = "title";
 
   /**
-   * XML attribute for revision.
+   * XML attribute for {@link #getRevision()}.
    */
   public static final String REVISION_ATTRIBUTE = "revision";
 
   /**
-   * XML attribute for copyright.
+   * XML attribute for {@link #getCopyright()}.
    */
   public static final String COPYRIGHT_ATTRIBUTE = "copyright";
 
   /**
-   * XML attribute for schema version.
+   * XML attribute for the schema version.
    */
   public static final String SCHEMA_VERSION_ATTRIBUTE = "schemaVersion";
 
@@ -65,11 +65,16 @@ public class ChallengeDescription implements Serializable {
     final Element performanceElement = (Element) ele.getElementsByTagName(PerformanceScoreCategory.TAG_NAME).item(0);
     mPerformance = new PerformanceScoreCategory(performanceElement);
 
-    mSubjectiveCategories = new LinkedList<>();
     for (final Element subjEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(SubjectiveScoreCategory.TAG_NAME))) {
       final SubjectiveScoreCategory subj = new SubjectiveScoreCategory(subjEle);
       mSubjectiveCategories.add(subj);
     }
+
+    for (final Element catEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(NonNumericCategory.TAG_NAME))) {
+      final NonNumericCategory cat = new NonNumericCategory(catEle);
+      nonNumericCategories.add(cat);
+    }
+
   }
 
   /**
@@ -80,16 +85,15 @@ public class ChallengeDescription implements Serializable {
    *
    * @param title the title of the challenge
    */
-  public ChallengeDescription(@Nonnull final String title) {
+  public ChallengeDescription(@NonNull final String title) {
     mTitle = title;
     mRevision = "";
     mWinner = WinnerType.HIGH;
     mCopyright = null;
     mPerformance = new PerformanceScoreCategory();
-    mSubjectiveCategories = new LinkedList<>();
   }
 
-  private String mCopyright;
+  private @Nullable String mCopyright;
 
   /**
    * Copyright statement for the challenge.
@@ -103,7 +107,7 @@ public class ChallengeDescription implements Serializable {
   /**
    * @param v see {@link #getCopyright()}
    */
-  public void setCopyright(final String v) {
+  public void setCopyright(final @Nullable String v) {
     mCopyright = v;
   }
 
@@ -115,7 +119,7 @@ public class ChallengeDescription implements Serializable {
    *
    * @return the title of the tournament
    */
-  @Nonnull
+  @NonNull
   public String getTitle() {
     return mTitle;
   }
@@ -123,7 +127,7 @@ public class ChallengeDescription implements Serializable {
   /**
    * @param v see {@link #getTitle()}
    */
-  public void setTitle(@Nonnull final String v) {
+  public void setTitle(@NonNull final String v) {
     Objects.requireNonNull(v);
     mTitle = v;
   }
@@ -136,7 +140,7 @@ public class ChallengeDescription implements Serializable {
    *
    * @return the revision of the description
    */
-  @Nonnull
+  @NonNull
   public String getRevision() {
     return mRevision;
   }
@@ -144,7 +148,7 @@ public class ChallengeDescription implements Serializable {
   /**
    * @param v see {@link #setRevision(String)}
    */
-  public void setRevision(@Nonnull final String v) {
+  public void setRevision(@NonNull final String v) {
     Objects.requireNonNull(v);
     mRevision = v;
   }
@@ -161,6 +165,9 @@ public class ChallengeDescription implements Serializable {
 
   private PerformanceScoreCategory mPerformance;
 
+  /**
+   * @return description of the performance category
+   */
   public PerformanceScoreCategory getPerformance() {
     return mPerformance;
   }
@@ -169,13 +176,13 @@ public class ChallengeDescription implements Serializable {
    * Since {@link PerformanceScoreCategory} is mutable, this should not be
    * needed except to add or remove the performance element.
    *
-   * @param v setting the value to null will remove the element
+   * @param v see {@link #getPerformance()}
    */
   public void setPerformance(final PerformanceScoreCategory v) {
     mPerformance = v;
   }
 
-  private final List<SubjectiveScoreCategory> mSubjectiveCategories;
+  private final List<SubjectiveScoreCategory> mSubjectiveCategories = new LinkedList<>();
 
   /**
    * @return unmodifiable list
@@ -234,13 +241,72 @@ public class ChallengeDescription implements Serializable {
    * @param name category name
    * @return the category or null if not found
    */
-  public SubjectiveScoreCategory getSubjectiveCategoryByName(final String name) {
-    for (final SubjectiveScoreCategory cat : mSubjectiveCategories) {
-      if (name.equals(cat.getName())) {
-        return cat;
-      }
-    }
-    return null;
+  public @Nullable SubjectiveScoreCategory getSubjectiveCategoryByName(final String name) {
+    return mSubjectiveCategories.stream().filter(c -> c.getName().equals(name)).findAny().orElse(null);
+  }
+
+  private final LinkedList<NonNumericCategory> nonNumericCategories = new LinkedList<>();
+
+  /**
+   * @return unmodifiable list
+   */
+  public List<NonNumericCategory> getNonNumericCategories() {
+    return nonNumericCategories;
+  }
+
+  /**
+   * @param title category title
+   * @return the category or null if not found
+   */
+  public @Nullable NonNumericCategory getNonNumericCategoryByTitle(final String title) {
+    return nonNumericCategories.stream().filter(c -> c.getTitle().equals(title)).findAny().orElse(null);
+  }
+
+  /**
+   * Add a subjective category to the end of the list.
+   * Since {@link ScoreCategory} is mutable, this does not check that the names
+   * are unique. That needs to be done by a higher level class.
+   *
+   * @param v the category to add
+   */
+  public void addNonNumericCategory(final NonNumericCategory v) {
+    nonNumericCategories.add(v);
+  }
+
+  /**
+   * Add a non-numeric category at the specified index.
+   * Since {@link NonNumericCategory} is mutable, this does not check that the
+   * titles
+   * are unique. That needs to be done by a higher level class.
+   *
+   * @param v the category to add
+   * @param index the index to add the category at
+   */
+  public void addNonNumericCategory(final int index,
+                                    final NonNumericCategory v)
+      throws IndexOutOfBoundsException {
+    nonNumericCategories.add(index, v);
+  }
+
+  /**
+   * Remove a non-numeric category.
+   *
+   * @param v the category to remove
+   * @return if the category was removed
+   * @see List#remove(Object)
+   */
+  public boolean removeNonNumericCategory(final NonNumericCategory v) {
+    return nonNumericCategories.remove(v);
+  }
+
+  /**
+   * Remove the non-numeric category at the specified index.
+   *
+   * @param index the index to remove the element from
+   * @return the category that was removed
+   */
+  public NonNumericCategory removeNonNumericCategory(final int index) throws IndexOutOfBoundsException {
+    return nonNumericCategories.remove(index);
   }
 
   /**
@@ -262,12 +328,19 @@ public class ChallengeDescription implements Serializable {
       fll.setAttribute(COPYRIGHT_ATTRIBUTE, mCopyright);
     }
 
-    final Element performanceElement = mPerformance.toXml(document);
-    fll.appendChild(performanceElement);
+    if (null != mPerformance) {
+      final Element performanceElement = mPerformance.toXml(document);
+      fll.appendChild(performanceElement);
+    }
 
     for (final SubjectiveScoreCategory cat : mSubjectiveCategories) {
       final Element subjEle = cat.toXml(document);
       fll.appendChild(subjEle);
+    }
+
+    for (final NonNumericCategory cat : nonNumericCategories) {
+      final Element catEle = cat.toXml(document);
+      fll.appendChild(catEle);
     }
 
     return document;
@@ -277,16 +350,13 @@ public class ChallengeDescription implements Serializable {
    * @param str remove carriage returns and multiple spaces
    * @return string without the line endings and multiple spaces in a row
    */
-  /* package */ static String removeExtraWhitespace(final @Nullable String str) {
+  @EnsuresNonNullIf(expression = "str != null", result = true)
+  /* package */ static @Nullable String removeExtraWhitespace(final @Nullable String str) {
     if (null == str) {
       return str;
+    } else {
+      return str.replaceAll("\\s+", " ");
     }
-
-    String result = str.trim();
-    result = result.replace('\r', ' ');
-    result = result.replace('\n', ' ');
-    result = result.replaceAll("\\s+", " ");
-    return result;
   }
 
 }

@@ -21,7 +21,7 @@ function initializeFinalistCounts(teams) {
   $.each(teams, function(i, team) {
     // initialize to 0
     var numFinalists = 0;
-    $.each($.finalist.getAllCategories(), function(j, category) {
+    $.each($.finalist.getAllScheduledCategories(), function(j, category) {
       if ($.finalist.isTeamInCategory(category, team.num)) {
         numFinalists = numFinalists + 1;
       }
@@ -32,7 +32,8 @@ function initializeFinalistCounts(teams) {
 
 function createTeamTable(teams, currentDivision, currentCategory) {
   $.each(teams, function(i, team) {
-    if ($.finalist.isTeamInDivision(team, currentDivision)) {
+    if (currentCategory.overall
+        || $.finalist.isTeamInDivision(team, currentDivision)) {
       var row = $("<tr></tr>");
       $("#data").append(row);
 

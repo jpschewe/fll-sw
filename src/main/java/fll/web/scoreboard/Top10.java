@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -25,7 +24,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
@@ -128,11 +130,11 @@ public class Top10 extends BaseFLLServlet {
                          Queries.getColorForIndex(allAwardGroups.indexOf(awardGroupName)), awardGroupName);
         formatter.format("</tr>%n");
 
-        processScores(connection, description, awardGroupName, (teamName,
-                                                                teamNumber,
-                                                                organization,
-                                                                formattedScore,
-                                                                rank) -> {
+        processScoresForAwardGroup(connection, description, awardGroupName, (teamName,
+                                                                             teamNumber,
+                                                                             organization,
+                                                                             formattedScore,
+                                                                             rank) -> {
           formatter.format("<tr>%n");
           formatter.format("<td class='center'>%d</td>%n", rank);
           formatter.format("<td class='right'>%d</td>%n", teamNumber);
@@ -170,11 +172,11 @@ public class Top10 extends BaseFLLServlet {
    * Used for processing the result of a score query.
    */
   private interface ProcessScoreEntry {
-    void execute(final String teamName,
-                 final int teamNumber,
-                 final String organization,
-                 @Nonnull final String formattedScore,
-                 final int rank);
+    void execute(String teamName,
+                 int teamNumber,
+                 String organization,
+                 @NonNull String formattedScore,
+                 int rank);
   }
 
   /**
@@ -183,18 +185,46 @@ public class Top10 extends BaseFLLServlet {
    * @return awardGroup to sorted scores
    * @throws SQLException if there is a problem talking to the database
    */
-  public static Map<String, List<ScoreEntry>> getTableAsMap(@Nonnull final Connection connection,
-                                                            @Nonnull final ChallengeDescription description)
+  public static Map<String, List<ScoreEntry>> getTableAsMapByAwardGroup(@NonNull final Connection connection,
+                                                                        @NonNull final ChallengeDescription description)
       throws SQLException {
     final Map<String, List<ScoreEntry>> data = new HashMap<>();
     final List<String> awardGroups = Queries.getAwardGroups(connection);
     for (final String ag : awardGroups) {
       final List<ScoreEntry> scores = new LinkedList<>();
-      processScores(connection, description, ag, (teamName,
-                                                  teamNumber,
-                                                  organization,
-                                                  formattedScore,
-                                                  rank) -> {
+      processScoresForAwardGroup(connection, description, ag, (teamName,
+                                                               teamNumber,
+                                                               organization,
+                                                               formattedScore,
+                                                               rank) -> {
+        final ScoreEntry row = new ScoreEntry(teamName, teamNumber, organization, formattedScore, rank);
+        scores.add(row);
+      });
+      data.put(ag, scores);
+    }
+    return data;
+  }
+
+  /**
+   * @param connection database connection
+   * @param description challenge description
+   * @param tournament the tournament to get scores for
+   * @return judging station to sorted scores
+   * @throws SQLException if there is a problem talking to the database
+   */
+  public static Map<String, List<ScoreEntry>> getTableAsMapByJudgingStation(@NonNull final Connection connection,
+                                                                            @NonNull final ChallengeDescription description,
+                                                                            final Tournament tournament)
+      throws SQLException {
+    final Map<String, List<ScoreEntry>> data = new HashMap<>();
+    final List<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
+    for (final String ag : judgingStations) {
+      final List<ScoreEntry> scores = new LinkedList<>();
+      processScoresForJudgingStation(connection, description, ag, (teamName,
+                                                                   teamNumber,
+                                                                   organization,
+                                                                   formattedScore,
+                                                                   rank) -> {
         final ScoreEntry row = new ScoreEntry(teamName, teamNumber, organization, formattedScore, rank);
         scores.add(row);
       });
@@ -217,7 +247,7 @@ public class Top10 extends BaseFLLServlet {
     public ScoreEntry(final String teamName,
                       final int teamNumber,
                       final String organization,
-                      @Nonnull final String formattedScore,
+                      @NonNull final String formattedScore,
                       final int rank) {
       this.teamName = teamName;
       this.teamNumber = teamNumber;
@@ -249,7 +279,7 @@ public class Top10 extends BaseFLLServlet {
     /**
      * @return score formatted for display
      */
-    @Nonnull
+    @NonNull
     public String getFormattedScore() {
       return formattedScore;
     }
@@ -283,16 +313,16 @@ public class Top10 extends BaseFLLServlet {
    * @return payload for the set array message
    * @throws SQLException on a database error
    */
-  public static SetArray.Payload getTableAsList(@Nonnull final Connection connection,
-                                                @Nonnull final ChallengeDescription description,
-                                                @Nonnull final String awardGroupName)
+  public static SetArray.Payload getTableAsListForAwardGroup(@NonNull final Connection connection,
+                                                             @NonNull final ChallengeDescription description,
+                                                             @NonNull final String awardGroupName)
       throws SQLException {
     final List<List<String>> data = new LinkedList<>();
-    processScores(connection, description, awardGroupName, (teamName,
-                                                            teamNumber,
-                                                            organization,
-                                                            formattedScore,
-                                                            rank) -> {
+    processScoresForAwardGroup(connection, description, awardGroupName, (teamName,
+                                                                         teamNumber,
+                                                                         organization,
+                                                                         formattedScore,
+                                                                         rank) -> {
       final List<String> row = new LinkedList<>();
 
       row.add(String.valueOf(rank));
@@ -318,11 +348,28 @@ public class Top10 extends BaseFLLServlet {
 
   }
 
+  private static void processScoresForAwardGroup(@NonNull final Connection connection,
+                                                 final ChallengeDescription challengeDescription,
+                                                 @NonNull final String awardGroupName,
+                                                 @NonNull final ProcessScoreEntry processor)
+      throws SQLException {
+    processScores(connection, challengeDescription, "event_division", awardGroupName, processor);
+  }
+
+  private static void processScoresForJudgingStation(@NonNull final Connection connection,
+                                                     final ChallengeDescription challengeDescription,
+                                                     @NonNull final String judgingStation,
+                                                     @NonNull final ProcessScoreEntry processor)
+      throws SQLException {
+    processScores(connection, challengeDescription, "judging_station", judgingStation, processor);
+  }
+
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Determine sort order based upon winner criteria")
-  private static void processScores(@Nonnull final Connection connection,
+  private static void processScores(@NonNull final Connection connection,
                                     final ChallengeDescription challengeDescription,
-                                    @Nonnull final String awardGroupName,
-                                    @Nonnull final ProcessScoreEntry processor)
+                                    final String divisionColumn, // event_division or judging_station
+                                    @NonNull final String awardGroupName,
+                                    @NonNull final ProcessScoreEntry processor)
       throws SQLException {
     final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
     final WinnerType winnerCriteria = challengeDescription.getWinner();
@@ -343,7 +390,9 @@ public class Top10 extends BaseFLLServlet {
             + "  GROUP BY TeamNumber) AS T2"
             + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams"
             + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber" //
-            + " AND current_tournament_teams.event_division = ?"
+            + " AND current_tournament_teams."
+            + divisionColumn
+            + " = ?"
             + " ORDER BY T2.MaxOfComputedScore "
             + winnerCriteria.getSortString())) {
       prep.setInt(1, currentTournament);

@@ -13,8 +13,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
+import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.db.CategoryColumnMapping;
@@ -46,7 +47,7 @@ public class UploadScheduleData implements Serializable {
   /**
    * @param v see {@link #getScheduleFile()}
    */
-  public void setScheduleFile(@Nonnull final File v) {
+  public void setScheduleFile(@NonNull final File v) {
     scheduleFile = v;
   }
 
@@ -55,21 +56,22 @@ public class UploadScheduleData implements Serializable {
    */
   public static final String CSV_SHEET_NAME = "csv";
 
-  private String selectedSheet = null;
+  private @MonotonicNonNull String selectedSheet = null;
 
   /**
    * If {@link #getScheduleFile()} is a spreadsheet, then the selected sheet name.
    *
    * @return null until set
    */
-  public String getSelectedSheet() {
+  public @Nullable String getSelectedSheet() {
     return selectedSheet;
   }
 
   /**
    * @param v see {@link #getSelectedSheet()}
    */
-  public void setSelectedSheet(@Nonnull final String v) {
+  @EnsuresNonNull("selectedSheet")
+  public void setSelectedSheet(@NonNull final String v) {
     selectedSheet = v;
   }
 
@@ -79,7 +81,7 @@ public class UploadScheduleData implements Serializable {
    * @return the violations found in the uploaded schedule, initially empty,
    *         unmodifiable collection
    */
-  @Nonnull
+  @NonNull
   public Collection<ConstraintViolation> getViolations() {
     return Collections.unmodifiableCollection(violations);
   }
@@ -87,7 +89,7 @@ public class UploadScheduleData implements Serializable {
   /**
    * @param v see {@link #getViolations()}
    */
-  public void setViolations(@Nonnull final Collection<ConstraintViolation> v) {
+  public void setViolations(@NonNull final Collection<ConstraintViolation> v) {
     violations.clear();
     violations.addAll(v);
   }
@@ -105,7 +107,7 @@ public class UploadScheduleData implements Serializable {
   /**
    * @param v see {@link #getSchedule()}
    */
-  public void setSchedule(@Nonnull final TournamentSchedule v) {
+  public void setSchedule(@NonNull final TournamentSchedule v) {
     schedule = v;
   }
 
@@ -115,7 +117,7 @@ public class UploadScheduleData implements Serializable {
    * @return the mappings of categories to schedule columns, initially empty,
    *         unmodifiable collection
    */
-  @Nonnull
+  @NonNull
   public Collection<CategoryColumnMapping> getCategoryColumnMappings() {
     return Collections.unmodifiableCollection(categoryColumnMappings);
   }
@@ -123,26 +125,35 @@ public class UploadScheduleData implements Serializable {
   /**
    * @param v see {@link #getCategoryColumnMappings()}
    */
-  public void setCategoryColumnMappings(@Nonnull final Collection<CategoryColumnMapping> v) {
+  public void setCategoryColumnMappings(@NonNull final Collection<CategoryColumnMapping> v) {
     categoryColumnMappings.clear();
     categoryColumnMappings.addAll(v);
   }
 
-  private @Nullable LinkedList<SubjectiveStation> subjectiveStations = null;
-
   /**
-   * @return the subjective stations for the schedule, initially null
+   * @return the subjective stations for the schedule.
+   * @see SchedParams#getSubjectiveStations()
    */
-  public @Nullable List<SubjectiveStation> getSubjectiveStations() {
-    return subjectiveStations;
+  public List<SubjectiveStation> getSubjectiveStations() {
+    return schedParams.getSubjectiveStations();
   }
 
   /**
    * @param v see {@link #getSubjectiveStations()}
    */
   public void setSubjectiveStations(final List<SubjectiveStation> v) {
-    subjectiveStations = null == v ? null : new LinkedList<>(v);
+    schedParams.setSubjectiveStations(v);
+    subjectiveStationsSet = true;
   }
+
+  /**
+   * @return if {@link #setSubjectiveStations(List)} has been called
+   */
+  public boolean isSubjectiveStationsSet() {
+    return subjectiveStationsSet;
+  }
+
+  private boolean subjectiveStationsSet = false;
 
   private final LinkedList<String> unusedHeaders = new LinkedList<>();
 
@@ -150,7 +161,7 @@ public class UploadScheduleData implements Serializable {
    * @return the unused headers from the schedule, initially empty, unmodifiable
    *         list
    */
-  @Nonnull
+  @NonNull
   public List<String> getUnusedHeaders() {
     return Collections.unmodifiableList(unusedHeaders);
   }
@@ -158,8 +169,7 @@ public class UploadScheduleData implements Serializable {
   /**
    * @param v see {@link #getUnusedHeaders()}
    */
-  @Nonnull
-  public void setUnusedHeaders(final List<String> v) {
+  public void setUnusedHeaders(final @NonNull List<String> v) {
     unusedHeaders.clear();
     unusedHeaders.addAll(v);
   }
@@ -174,7 +184,7 @@ public class UploadScheduleData implements Serializable {
    * @return the sched params, not that it is mutable and NOT a copy of the
    *         internal data
    */
-  @Nonnull
+  @NonNull
   public SchedParams getSchedParams() {
     return schedParams;
   }
@@ -182,7 +192,7 @@ public class UploadScheduleData implements Serializable {
   /**
    * @param v the new object to use, see {@link #getSchedParams()}
    */
-  public void setSchedParams(@Nonnull final SchedParams v) {
+  public void setSchedParams(@NonNull final SchedParams v) {
     schedParams = v;
   }
 
