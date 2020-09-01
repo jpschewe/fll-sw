@@ -38,7 +38,7 @@ plugins {
     id "checkstyle"
         
     // Checker Framework pluggable type-checking
-    id "org.checkerframework" version "0.5.5"
+    id "org.checkerframework" version "0.5.9"
 }
 
 // needs to use old plugin mechanism otherwise I can't set the extra properties
