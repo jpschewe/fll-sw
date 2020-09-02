@@ -37,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fll.db.Queries;
-import fll.util.FLLRuntimeException;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
