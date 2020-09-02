@@ -16,11 +16,8 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import javax.sql.DataSource;
 
-
-
 import fll.Utilities;
 import fll.flltools.MhubMessageHandler;
-
 
 /**
  * Take care of initializing some variables in the servlet context.
@@ -82,7 +79,7 @@ public class FLLContextListener implements ServletContextListener {
     final String database = application.getRealPath("/WEB-INF/flldb");
 
     // initialize the datasource
-    if (null == ApplicationAttributes.getDataSource(application)) {
+    if (null == ApplicationAttributes.getAttribute(application, ApplicationAttributes.DATASOURCE, DataSource.class)) {
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Datasource not available, creating");
       }

@@ -113,11 +113,33 @@ public final class ApplicationAttributes {
   }
 
   /**
+   * Get an application attribute and throw a {@link NullPointerException} if it's
+   * null.
+   *
+   * @param application where to get the attribute from
+   * @param attribute the name of the attribute to retrieve
+   * @param <T> the type of value stored in the attribute
+   * @param clazz the type of value stored in the attribute
+   * @return the attribute value
+   * @see #getAttribute(ServletContext, String, Class)
+   */
+  public static <T> T getNonNullAttribute(final ServletContext application,
+                                          final String attribute,
+                                          final Class<T> clazz) {
+    final T retval = getAttribute(application, attribute, clazz);
+    if (null == retval) {
+      throw new NullPointerException(String.format("Session attribute %s is null when it's not expected to be",
+                                                   attribute));
+    }
+    return retval;
+  }
+
+  /**
    * @param application application variable store
    * @return the database connection
    */
-  public static @Nullable DataSource getDataSource(final ServletContext application) {
-    return getAttribute(application, ApplicationAttributes.DATASOURCE, DataSource.class);
+  public static DataSource getDataSource(final ServletContext application) {
+    return getNonNullAttribute(application, ApplicationAttributes.DATASOURCE, DataSource.class);
   }
 
 }
