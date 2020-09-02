@@ -14,59 +14,78 @@ import java.sql.SQLException;
 
 import javax.annotation.Nonnull;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
 import fll.xml.ChallengeParser;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * Constants for the global parameters in the database
+ * Constants for the global parameters in the database.
  */
 public final class GlobalParameters {
+  /**
+   * Parameter name for current tournament.
+   */
   public static final String CURRENT_TOURNAMENT = "CurrentTournament";
 
+  /**
+   * Parameter name for {@link #getStandardizedMean(Connection)}.
+   */
   public static final String STANDARDIZED_MEAN = "StandardizedMean";
 
+  /**
+   * Default value for {@link #getStandardizedMean(Connection).
+   */
   public static final double STANDARDIZED_MEAN_DEFAULT = 100;
 
+  /**
+   * Parameter name for {@link #getStandardizedSigma(Connection)}.
+   */
   public static final String STANDARDIZED_SIGMA = "StandardizedSigma";
 
+  /**
+   * Default value for {@link #getStandardizedSigma(Connection)}.
+   */
   public static final double STANDARDIZED_SIGMA_DEFAULT = 20;
 
+  /**
+   * Parameter name for {@link #getChallengeDocument(Connection)}.
+   */
   public static final String CHALLENGE_DOCUMENT = "ChallengeDocument";
 
-  public static final int SCORESHEET_LAYOUT_NUP_DEFAULT = 2;
-
+  /**
+   * Parameter name for division flip rate on the score board.
+   */
   public static final String DIVISION_FLIP_RATE = "DivisionFlipRate";
 
+  /**
+   * Default value for {@link #DIVISION_FLIP_RATE}.
+   */
   public static final int DIVISION_FLIP_RATE_DEFAULT = 30;
 
   private GlobalParameters() {
     // no instances
   }
 
+  /**
+   * Parameter name for database version.
+   */
   public static final String DATABASE_VERSION = "DatabaseVersion";
 
   /**
    * @param connection
    * @return the prepared statement for getting a global parameter with the
    *         values already filled in
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
   private static PreparedStatement getGlobalParameterStmt(final Connection connection,
                                                           final String paramName)
       throws SQLException {
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("SELECT param_value FROM global_parameters WHERE param = ?");
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT param_value FROM global_parameters WHERE param = ?")) {
       prep.setString(1, paramName);
       return prep;
-    } catch (final SQLException e) {
-      SQLFunctions.close(prep);
-      throw e;
     }
   }
 
@@ -76,27 +95,22 @@ public final class GlobalParameters {
    * @param connection the database connection
    * @param parameter the parameter name
    * @return the value
-   * @throws SQLException
+   * @throws SQLException on a database error
    * @throws IllegalArgumentException if the parameter cannot be found
    */
   public static double getDoubleGlobalParameter(final Connection connection,
                                                 final String parameter)
       throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = getGlobalParameterStmt(connection, parameter);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        return rs.getDouble(1);
-      } else {
-        throw new IllegalArgumentException("Can't find '"
-            + parameter
-            + "' in global_parameters");
+    try (PreparedStatement prep = getGlobalParameterStmt(connection, parameter)) {
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          return rs.getDouble(1);
+        } else {
+          throw new IllegalArgumentException("Can't find '"
+              + parameter
+              + "' in global_parameters");
+        }
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
   }
 
@@ -106,17 +120,13 @@ public final class GlobalParameters {
    * @param connection the database connection
    * @param parameter the parameter name
    * @return the value
-   * @throws SQLException
+   * @throws SQLException on a database error
    * @throws IllegalArgumentException if the parameter cannot be found
    */
   public static int getIntGlobalParameter(final Connection connection,
                                           final String parameter)
       throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = getGlobalParameterStmt(connection, parameter);
-      rs = prep.executeQuery();
+    try (PreparedStatement prep = getGlobalParameterStmt(connection, parameter); ResultSet rs = prep.executeQuery()) {
       if (rs.next()) {
         return rs.getInt(1);
       } else {
@@ -124,16 +134,16 @@ public final class GlobalParameters {
             + parameter
             + "' in global_parameters");
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
   }
 
   /**
    * Get a string global parameter.
    *
+   * @param connection database connection
+   * @param parameter the parameter name to find
    * @return the value of the parameter, may be null
+   * @throws SQLException on a database error
    * @throws IllegalArgumentException if the parameter cannot be found
    */
   public static String getStringGlobalParameter(final Connection connection,
@@ -154,19 +164,17 @@ public final class GlobalParameters {
 
   /**
    * Check if a value exists for a global parameter.
+   * 
+   * @param connection database connection
+   * @param paramName the parameter name
+   * @return if the parameter exists
+   * @throws SQLException on a database error
    */
   public static boolean globalParameterExists(final Connection connection,
                                               final String paramName)
       throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = getGlobalParameterStmt(connection, paramName);
-      rs = prep.executeQuery();
+    try (PreparedStatement prep = getGlobalParameterStmt(connection, paramName); ResultSet rs = prep.executeQuery()) {
       return rs.next();
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
   }
 
@@ -180,82 +188,141 @@ public final class GlobalParameters {
    * @throws FLLRuntimeException if the document cannot be found
    * @throws SQLException on a database error
    */
-  public static @Nullable Document getChallengeDocument(final Connection connection)
-      throws SQLException, RuntimeException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-
-      prep = getGlobalParameterStmt(connection, CHALLENGE_DOCUMENT);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        return ChallengeParser.parse(new InputStreamReader(rs.getAsciiStream(1), Utilities.DEFAULT_CHARSET));
-      } else {
-        throw new FLLRuntimeException("Could not find challenge document in database");
+  public static Document getChallengeDocument(final Connection connection) throws SQLException, RuntimeException {
+    try (PreparedStatement prep = getGlobalParameterStmt(connection, CHALLENGE_DOCUMENT)) {
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          return ChallengeParser.parse(new InputStreamReader(rs.getAsciiStream(1), Utilities.DEFAULT_CHARSET));
+        } else {
+          throw new FLLRuntimeException("Could not find challenge document in database");
+        }
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
   }
 
+  /**
+   * @param connection database connection
+   * @param paramName parameter name
+   * @param paramValue parameter value
+   * @throws SQLException on a database error
+   */
   public static void setStringGlobalParameter(final Connection connection,
                                               final String paramName,
                                               final String paramValue)
       throws SQLException {
     final boolean exists = globalParameterExists(connection, paramName);
-    PreparedStatement prep = null;
-    try {
-      if (!exists) {
-        prep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
-      } else {
-        prep = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?");
-      }
-      prep.setString(1, paramValue);
-      prep.setString(2, paramName);
-      prep.executeUpdate();
-    } finally {
-      SQLFunctions.close(prep);
+    if (!exists) {
+      insertStringGlobalParameter(connection, paramName, paramValue);
+    } else {
+      updateStringGlobalParameter(connection, paramName, paramValue);
     }
   }
 
+  private static void insertStringGlobalParameter(final Connection connection,
+                                                  final String paramName,
+                                                  final String paramValue)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)")) {
+      prep.setString(1, paramValue);
+      prep.setString(2, paramName);
+      prep.executeUpdate();
+    }
+  }
+
+  private static void updateStringGlobalParameter(final Connection connection,
+                                                  final String paramName,
+                                                  final String paramValue)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?")) {
+      prep.setString(1, paramValue);
+      prep.setString(2, paramName);
+      prep.executeUpdate();
+    }
+  }
+
+  /**
+   * @param connection database connection
+   * @param paramName parameter name
+   * @param paramValue parameter value
+   * @throws SQLException on a database error
+   */
   public static void setDoubleGlobalParameter(final Connection connection,
                                               final String paramName,
                                               final double paramValue)
       throws SQLException {
     final boolean exists = globalParameterExists(connection, paramName);
-    PreparedStatement prep = null;
-    try {
-      if (!exists) {
-        prep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
-      } else {
-        prep = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?");
-      }
-      prep.setDouble(1, paramValue);
-      prep.setString(2, paramName);
-      prep.executeUpdate();
-    } finally {
-      SQLFunctions.close(prep);
+    if (!exists) {
+      insertDoubleGlobalParameter(connection, paramName, paramValue);
+    } else {
+      updateDoubleGlobalParameter(connection, paramName, paramValue);
     }
   }
 
+  private static void insertDoubleGlobalParameter(final Connection connection,
+                                                  final String paramName,
+                                                  final double paramValue)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)")) {
+      prep.setDouble(1, paramValue);
+      prep.setString(2, paramName);
+      prep.executeUpdate();
+    }
+  }
+
+  private static void updateDoubleGlobalParameter(final Connection connection,
+                                                  final String paramName,
+                                                  final double paramValue)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?")) {
+      prep.setDouble(1, paramValue);
+      prep.setString(2, paramName);
+      prep.executeUpdate();
+    }
+  }
+
+  /**
+   * @param connection database connection
+   * @param paramName parameter name
+   * @param paramValue parameter value
+   * @throws SQLException on a database error
+   */
   public static void setIntGlobalParameter(final Connection connection,
                                            final String paramName,
                                            final int paramValue)
       throws SQLException {
     final boolean exists = globalParameterExists(connection, paramName);
-    PreparedStatement prep = null;
-    try {
-      if (!exists) {
-        prep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
-      } else {
-        prep = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?");
-      }
+    if (!exists) {
+      insertIntGlobalParameter(connection, paramName, paramValue);
+    } else {
+      updateIntGlobalParameter(connection, paramName, paramValue);
+    }
+  }
+
+  private static void insertIntGlobalParameter(final Connection connection,
+                                               final String paramName,
+                                               final int paramValue)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)")) {
       prep.setInt(1, paramValue);
       prep.setString(2, paramName);
       prep.executeUpdate();
-    } finally {
-      SQLFunctions.close(prep);
+    }
+  }
+
+  private static void updateIntGlobalParameter(final Connection connection,
+                                               final String paramName,
+                                               final int paramValue)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?")) {
+      prep.setInt(1, paramValue);
+      prep.setString(2, paramName);
+      prep.executeUpdate();
     }
   }
 
@@ -265,17 +332,13 @@ public final class GlobalParameters {
    * @param connection the database connection
    * @param parameter the parameter name
    * @return the value
-   * @throws SQLException
+   * @throws SQLException on a database error
    * @throws IllegalArgumentException if the parameter cannot be found
    */
   public static boolean getBooleanGlobalParameter(final Connection connection,
                                                   final String parameter)
       throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = getGlobalParameterStmt(connection, parameter);
-      rs = prep.executeQuery();
+    try (PreparedStatement prep = getGlobalParameterStmt(connection, parameter); ResultSet rs = prep.executeQuery()) {
       if (rs.next()) {
         return rs.getBoolean(1);
       } else {
@@ -283,29 +346,48 @@ public final class GlobalParameters {
             + parameter
             + "' in global_parameters");
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
   }
 
+  /**
+   * @param connection database connection
+   * @param paramName parameter name
+   * @param paramValue parameter value
+   * @throws SQLException on a database error
+   */
   public static void setBooleanGlobalParameter(final Connection connection,
                                                final String paramName,
                                                final boolean paramValue)
       throws SQLException {
     final boolean exists = globalParameterExists(connection, paramName);
-    PreparedStatement prep = null;
-    try {
-      if (!exists) {
-        prep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
-      } else {
-        prep = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?");
-      }
+    if (!exists) {
+      insertBooleanGlobalParameter(connection, paramName, paramValue);
+    } else {
+      updateBooleanGlobalParameter(connection, paramName, paramValue);
+    }
+  }
+
+  private static void insertBooleanGlobalParameter(final Connection connection,
+                                                   final String paramName,
+                                                   final boolean paramValue)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)")) {
       prep.setBoolean(1, paramValue);
       prep.setString(2, paramName);
       prep.executeUpdate();
-    } finally {
-      SQLFunctions.close(prep);
+    }
+  }
+
+  private static void updateBooleanGlobalParameter(final Connection connection,
+                                                   final String paramName,
+                                                   final boolean paramValue)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?")) {
+      prep.setBoolean(1, paramValue);
+      prep.setString(2, paramName);
+      prep.executeUpdate();
     }
   }
 
@@ -337,8 +419,14 @@ public final class GlobalParameters {
     return getDoubleGlobalParameter(connection, STANDARDIZED_SIGMA);
   }
 
+  /**
+   * Parameter name for {@link #getAllTeamsMsPerRow(Connection)}.
+   */
   public static final String ALL_TEAMS_MS_PER_ROW = "AllTeamsMsPerRow";
 
+  /**
+   * Default value for {@link #ALL_TEAMS_MS_PER_ROW}.
+   */
   public static final int ALL_TEAMS_MS_PER_ROW_DEFAULT = 1000;
 
   /**
@@ -371,8 +459,14 @@ public final class GlobalParameters {
     setIntGlobalParameter(connection, ALL_TEAMS_MS_PER_ROW, value);
   }
 
+  /**
+   * Parameter name for {@link #getHeadToHeadMsPerRow(Connection)}.
+   */
   public static final String HEAD_TO_HEAD_MS_PER_ROW = "HeadToHeadMsPerRow";
 
+  /**
+   * Default value for {@Link #HEAD_TO_HEAD_MS_PER_ROW}.
+   */
   public static final int HEAD_TO_HEAD_MS_PER_ROW_DEFAULT = 1000;
 
   /**
