@@ -284,8 +284,7 @@ public final class ImportDB {
       throws SQLException {
     // add the tournament to the tournaments table if it doesn't already
     // exist
-    final Tournament destTournament = Tournament.findTournamentByName(destConnection, sourceTournament.getName());
-    if (null == destTournament) {
+    if (!Tournament.doesTournamentExist(destConnection, sourceTournament.getName())) {
       Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getDescription(),
                                   sourceTournament.getDate(), sourceTournament.getLevel(),
                                   sourceTournament.getNextLevel());
@@ -1309,8 +1308,7 @@ public final class ImportDB {
       // add all tournaments back
       for (final Map.Entry<String, String> entry : nameLocation.entrySet()) {
         if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(entry.getKey())) {
-          final Tournament tournament = Tournament.findTournamentByName(connection, entry.getKey());
-          if (null == tournament) {
+          if (!Tournament.doesTournamentExist(connection, entry.getKey())) {
             Tournament.createTournament(connection, entry.getKey(), entry.getValue(), null, null, null);
           }
         }
@@ -2201,16 +2199,14 @@ public final class ImportDB {
       throws SQLException {
 
     // check that the tournament exists
-    final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
-    if (null == destTournament) {
+    if (!Tournament.doesTournamentExist(destConnection, tournament)) {
       LOGGER.error("Tournament: "
           + tournament
           + " doesn't exist in the destination database!");
       return true;
     }
 
-    final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournament);
-    if (null == sourceTournament) {
+    if (!Tournament.doesTournamentExist(sourceConnection, tournament)) {
       LOGGER.error("Tournament: "
           + tournament
           + " doesn't exist in the source database!");
@@ -2474,21 +2470,11 @@ public final class ImportDB {
     final List<Team> missingTeams = new LinkedList<>();
 
     final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournament);
-    if (null == sourceTournament) {
-      throw new FLLInternalException("Could not find tournament with name '"
-          + tournament
-          + "' in the source database. This should have been checked in a previous import step.");
-    }
 
     final Map<Integer, TournamentTeam> sourceTeams = Queries.getTournamentTeams(sourceConnection,
                                                                                 sourceTournament.getTournamentID());
 
     final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
-    if (null == destTournament) {
-      throw new FLLInternalException("Could not find tournament with name '"
-          + tournament
-          + "' in the destination database. This should have been checked in a previous import step.");
-    }
 
     final Collection<Integer> destTeams = Queries.getAllTeamNumbers(destConnection);
 

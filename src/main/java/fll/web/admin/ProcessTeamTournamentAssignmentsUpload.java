@@ -241,20 +241,16 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
           final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumStr).intValue();
 
           final String tournamentName = data[tournamentColumnIdx];
-          Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
-          if (null == tournament) {
+          final Tournament tournament;
+          if (!Tournament.doesTournamentExist(connection, tournamentName)) {
             // create the tournament
             Tournament.createTournament(connection, tournamentName, tournamentName, null, null, null);
             tournament = Tournament.findTournamentByName(connection, tournamentName);
-            if (null == tournament) {
-              throw new FLLInternalException("Created tournament '"
-                  + tournamentName
-                  + "', but can't find it.");
-            } else {
-              message.append("<p>Created tournament '"
-                  + tournamentName
-                  + "'</p>");
-            }
+            message.append("<p>Created tournament '"
+                + tournamentName
+                + "'</p>");
+          } else {
+            tournament = Tournament.findTournamentByName(connection, tournamentName);
           }
 
           final String eventDivision;
