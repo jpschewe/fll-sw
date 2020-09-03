@@ -51,7 +51,6 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.TeamPropertyDifference.TeamProperty;
-import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.GatherBugReport;
 import fll.web.developer.importdb.ImportDBDump;
@@ -2473,8 +2472,6 @@ public final class ImportDB {
 
     final Map<Integer, TournamentTeam> sourceTeams = Queries.getTournamentTeams(sourceConnection,
                                                                                 sourceTournament.getTournamentID());
-
-    final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
 
     final Collection<Integer> destTeams = Queries.getAllTeamNumbers(destConnection);
 
