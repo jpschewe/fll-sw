@@ -49,8 +49,8 @@ public final class ApplicationAttributes {
    * @param application application variable store
    * @return the stored challenge description XML
    */
-  public static @Nullable Document getChallengeDocument(final ServletContext application) {
-    return getAttribute(application, CHALLENGE_DOCUMENT, Document.class);
+  public static Document getChallengeDocument(final ServletContext application) {
+    return getNonNullAttribute(application, CHALLENGE_DOCUMENT, Document.class);
   }
 
   /**

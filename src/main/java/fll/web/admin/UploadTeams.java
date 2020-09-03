@@ -132,6 +132,10 @@ public final class UploadTeams extends BaseFLLServlet {
     // parse out the first line as the names of the columns
     // final List<String> columnNames = splitLine(reader.readLine());
     final String[] columnNames = reader.readNext();
+    if (null == columnNames) {
+      LOGGER.warn("No Data in uploaded file");
+      return;
+    }
 
     // build the SQL for inserting a row into the temporary table
     final StringBuffer insertPrepSQL = new StringBuffer();

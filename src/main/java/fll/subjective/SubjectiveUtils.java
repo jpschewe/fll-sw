@@ -165,10 +165,6 @@ public final class SubjectiveUtils {
     // masterScoreCategory and compareScoreCategory are "subjectiveCategory"
     final String categoryName = masterScoreCategory.getAttribute("name");
     final Element compareScoreCategory = getCategoryNode(compareScoresElement, categoryName);
-    if (null == compareScoreCategory) {
-      throw new RuntimeException("Compare score document doesn't have scores for category: "
-          + categoryName);
-    }
 
     final Element categoryDescription = fll.xml.ChallengeParser.getSubjectiveCategoryByName(challengeDocument,
                                                                                             categoryName);
@@ -266,15 +262,17 @@ public final class SubjectiveUtils {
    * @param categoryName the name of the category to find
    * @return null if not found
    */
-  public static @Nullable Element getCategoryNode(final Element scoresElement,
-                                                  final String categoryName) {
+  public static Element getCategoryNode(final Element scoresElement,
+                                        final String categoryName) {
     for (final Element scoreCategory : new NodelistElementCollectionAdapter(scoresElement.getChildNodes())) {
       final String name = scoreCategory.getAttribute("name");
       if (categoryName.equals(name)) {
         return scoreCategory;
       }
     }
-    return null;
+
+    throw new RuntimeException("Score document doesn't have scores for category: "
+        + categoryName);
   }
 
   /**

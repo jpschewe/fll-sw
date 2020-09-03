@@ -635,7 +635,7 @@ public class Launcher extends JFrame {
   /**
    * @return the directory or null if not found
    */
-  private Path getSponsorLogosDirectory() {
+  private @Nullable Path getSponsorLogosDirectory() {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
     if (null == webroot) {
@@ -654,7 +654,7 @@ public class Launcher extends JFrame {
   /**
    * @return the directory or null if not found
    */
-  private Path getSlideshowDirectory() {
+  private @Nullable Path getSlideshowDirectory() {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
     if (null == webroot) {

@@ -193,12 +193,12 @@ public class EnumConditionStatement extends AbstractConditionStatement {
    */
   @Override
   public boolean isTrue(final TeamScore teamScore) {
-    if (null == getLeftGoalRef()
-        && null == getLeftString()) {
+    if (null == mLeftGoalRef
+        && null == mLeftString) {
       throw new NullPointerException("Left goal ref OR left string must be non-null");
     }
-    if (null == getRightGoalRef()
-        && null == getRightString()) {
+    if (null == mRightGoalRef
+        && null == mRightString) {
       throw new NullPointerException("Right goal ref OR right string must be non-null");
     }
 
@@ -206,14 +206,14 @@ public class EnumConditionStatement extends AbstractConditionStatement {
     if (null != getLeftGoal()) {
       leftStr = teamScore.getEnumRawScore(getLeftGoal().getName());
     } else {
-      leftStr = getLeftString();
+      leftStr = mLeftString;
     }
 
     final String rightStr;
     if (null != getRightGoal()) {
       rightStr = teamScore.getEnumRawScore(getRightGoal().getName());
     } else {
-      rightStr = getRightString();
+      rightStr = mRightString;
     }
 
     final boolean result = leftStr.equalsIgnoreCase(rightStr);

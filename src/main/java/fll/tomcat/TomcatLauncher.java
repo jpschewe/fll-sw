@@ -28,6 +28,8 @@ import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.util.FLLRuntimeException;
+
 /**
  * Launcher for embedded tomcat.
  */
@@ -106,7 +108,9 @@ public class TomcatLauncher {
         + classesPath.toAbsolutePath().toString());
 
     final Path webRoot = findWebappRoot(classesPath);
-    Objects.requireNonNull(webRoot, "Could not find web root");
+    if (null == webRoot) {
+      throw new FLLRuntimeException("Could not find web root");
+    }
     LOGGER.info("Using web root: "
         + webRoot.toAbsolutePath().toString());
 
