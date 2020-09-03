@@ -259,7 +259,7 @@ public class InitFilter implements Filter {
         }
 
         // load the challenge descriptor
-        if (null == ApplicationAttributes.getAttribute(application, ApplicationAttributes.CHALLENGE_DESCRIPTION,
+        if (null == ApplicationAttributes.getAttribute(application, ApplicationAttributes.CHALLENGE_DOCUMENT,
                                                        Document.class)) {
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Loading challenge descriptor");
