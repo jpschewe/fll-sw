@@ -16,6 +16,7 @@ import javax.annotation.Nonnull;
 
 import org.w3c.dom.Document;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
 import fll.xml.ChallengeParser;
@@ -79,14 +80,13 @@ public final class GlobalParameters {
    *         values already filled in
    * @throws SQLException on a database error
    */
+  @SuppressFBWarnings(value = "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE", justification = "All callers clean up the PreparedStatement")
   private static PreparedStatement getGlobalParameterStmt(final Connection connection,
                                                           final String paramName)
       throws SQLException {
-    try (
-        PreparedStatement prep = connection.prepareStatement("SELECT param_value FROM global_parameters WHERE param = ?")) {
-      prep.setString(1, paramName);
-      return prep;
-    }
+    final PreparedStatement prep = connection.prepareStatement("SELECT param_value FROM global_parameters WHERE param = ?");
+    prep.setString(1, paramName);
+    return prep;
   }
 
   /**
