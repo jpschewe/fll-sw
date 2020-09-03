@@ -30,6 +30,7 @@ import javax.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
@@ -131,6 +132,10 @@ public final class UploadTeams extends BaseFLLServlet {
     // parse out the first line as the names of the columns
     // final List<String> columnNames = splitLine(reader.readLine());
     final String[] columnNames = reader.readNext();
+    if (null == columnNames) {
+      LOGGER.warn("No Data in uploaded file");
+      return;
+    }
 
     // build the SQL for inserting a row into the temporary table
     final StringBuffer insertPrepSQL = new StringBuffer();
@@ -547,9 +552,11 @@ public final class UploadTeams extends BaseFLLServlet {
         while (rs.next()) {
           final int teamNumber = rs.getInt(1);
           final String tournamentName = rs.getString(2);
-          Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
-          if (null == tournament) {
+          final Tournament tournament;
+          if (!Tournament.doesTournamentExist(connection, tournamentName)) {
             Tournament.createTournament(connection, tournamentName, tournamentName, null, null, null);
+            tournament = Tournament.findTournamentByName(connection, tournamentName);
+          } else {
             tournament = Tournament.findTournamentByName(connection, tournamentName);
           }
 
@@ -588,7 +595,7 @@ public final class UploadTeams extends BaseFLLServlet {
    * Create a string that's a valid column name.
    * </ul>
    */
-  private static String sanitizeColumnName(final String str) {
+  private static String sanitizeColumnName(final @Nullable String str) {
     if (null == str
         || "".equals(str)) {
       return "EMPTYHEADER_"

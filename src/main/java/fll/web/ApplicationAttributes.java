@@ -8,6 +8,7 @@ package fll.web;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
 import fll.xml.ChallengeDescription;
@@ -49,7 +50,7 @@ public final class ApplicationAttributes {
    * @return the stored challenge description XML
    */
   public static Document getChallengeDocument(final ServletContext application) {
-    return getAttribute(application, CHALLENGE_DOCUMENT, Document.class);
+    return getNonNullAttribute(application, CHALLENGE_DOCUMENT, Document.class);
   }
 
   /**
@@ -98,9 +99,9 @@ public final class ApplicationAttributes {
    * @param <T> the expected type
    * @return the value
    */
-  public static <T> T getAttribute(final ServletContext application,
-                                   final String attribute,
-                                   final Class<T> clazz) {
+  public static <T> @Nullable T getAttribute(final ServletContext application,
+                                             final String attribute,
+                                             final Class<T> clazz) {
     final Object o = application.getAttribute(attribute);
     if (o == null
         || clazz.isInstance(o)) {
@@ -112,11 +113,33 @@ public final class ApplicationAttributes {
   }
 
   /**
+   * Get an application attribute and throw a {@link NullPointerException} if it's
+   * null.
+   *
+   * @param application where to get the attribute from
+   * @param attribute the name of the attribute to retrieve
+   * @param <T> the type of value stored in the attribute
+   * @param clazz the type of value stored in the attribute
+   * @return the attribute value
+   * @see #getAttribute(ServletContext, String, Class)
+   */
+  public static <T> T getNonNullAttribute(final ServletContext application,
+                                          final String attribute,
+                                          final Class<T> clazz) {
+    final T retval = getAttribute(application, attribute, clazz);
+    if (null == retval) {
+      throw new NullPointerException(String.format("Session attribute %s is null when it's not expected to be",
+                                                   attribute));
+    }
+    return retval;
+  }
+
+  /**
    * @param application application variable store
    * @return the database connection
    */
   public static DataSource getDataSource(final ServletContext application) {
-    return getAttribute(application, ApplicationAttributes.DATASOURCE, DataSource.class);
+    return getNonNullAttribute(application, ApplicationAttributes.DATASOURCE, DataSource.class);
   }
 
 }

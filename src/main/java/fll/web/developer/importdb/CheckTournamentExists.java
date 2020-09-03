@@ -17,8 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import fll.Tournament;
 
 import fll.web.ApplicationAttributes;
@@ -62,9 +60,12 @@ public class CheckTournamentExists extends BaseFLLServlet {
       sessionInfo.setImportFinalist(null != request.getParameter("importFinalist"));
 
       if (LOG.isDebugEnabled()) {
-        LOG.debug("subjective: " + request.getParameter("importSubjective"));
-        LOG.debug("performance: " + request.getParameter("importPerformance"));
-        LOG.debug("finalist: " + request.getParameter("importFinalist"));
+        LOG.debug("subjective: "
+            + request.getParameter("importSubjective"));
+        LOG.debug("performance: "
+            + request.getParameter("importPerformance"));
+        LOG.debug("finalist: "
+            + request.getParameter("importFinalist"));
         LOG.debug("import subjective: "
             + sessionInfo.isImportSubjective()
             + " performance: "
@@ -80,8 +81,7 @@ public class CheckTournamentExists extends BaseFLLServlet {
       // Check if the tournament exists
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       try (Connection connection = datasource.getConnection()) {
-        final Tournament tournament = Tournament.findTournamentByName(connection, selectedTournament);
-        if (null == tournament) {
+        if (!Tournament.doesTournamentExist(connection, selectedTournament)) {
           session.setAttribute(SessionAttributes.REDIRECT_URL, "promptCreateTournament.jsp");
         } else {
           session.setAttribute(SessionAttributes.REDIRECT_URL, "FindMissingTeams");

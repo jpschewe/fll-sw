@@ -27,6 +27,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.Utilities;
 import fll.util.FLLInternalException;
 import fll.util.FormatterUtils;
@@ -320,7 +322,7 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
     }
   }
 
-  private static void getReferencedComputedGoals(final BasicPolynomial poly,
+  private static void getReferencedComputedGoals(final @Nullable BasicPolynomial poly,
                                                  final Set<ComputedGoal> referenced) {
     if (null == poly) {
       return;
@@ -333,7 +335,7 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
     } // foreach term
   }
 
-  private static void getReferencedComputedGoals(final CaseStatement caseStatement,
+  private static void getReferencedComputedGoals(final @Nullable CaseStatement caseStatement,
                                                  final Set<ComputedGoal> referenced) {
     if (null == caseStatement) {
       return;
@@ -350,8 +352,12 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
 
   }
 
-  private static void getReferencedComputedGoals(final GoalRef gr,
+  private static void getReferencedComputedGoals(final @Nullable GoalRef gr,
                                                  final Set<ComputedGoal> referenced) {
+    if (null == gr) {
+      return;
+    }
+
     try {
       final AbstractGoal goal = gr.getGoal();
       if (goal.isComputed()) {
@@ -364,7 +370,7 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
     }
   }
 
-  private static void getReferencedComputedGoals(final AbstractConditionStatement cond,
+  private static void getReferencedComputedGoals(final @Nullable AbstractConditionStatement cond,
                                                  final Set<ComputedGoal> referenced) {
     if (null == cond) {
       return;
@@ -384,7 +390,7 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
     }
   }
 
-  private static void getReferencedComputedGoals(final SwitchStatement sw,
+  private static void getReferencedComputedGoals(final @Nullable SwitchStatement sw,
                                                  final Set<ComputedGoal> referenced) {
     if (null == sw) {
       return;

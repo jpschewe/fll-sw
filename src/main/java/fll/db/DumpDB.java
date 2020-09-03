@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
 import com.opencsv.CSVWriter;
@@ -90,7 +91,7 @@ public final class DumpDB extends BaseFLLServlet {
    */
   public static void exportDatabase(final HttpServletResponse response,
                                     final ServletContext application,
-                                    final String label,
+                                    final @Nullable String label,
                                     final Document challengeDocument,
                                     final Connection connection)
       throws SQLException, IOException {

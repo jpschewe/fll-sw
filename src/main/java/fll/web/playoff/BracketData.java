@@ -14,6 +14,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,7 +24,6 @@ import fll.Team;
 import fll.db.Queries;
 import fll.db.TableInformation;
 import fll.db.TournamentParameters;
-
 import net.mtu.eggplant.util.StringUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -90,7 +90,7 @@ public class BracketData extends BracketInfo {
 
     private final String table;
 
-    public String getTable() {
+    public @Nullable String getTable() {
       return table;
     }
 
@@ -1408,7 +1408,7 @@ public class BracketData extends BracketInfo {
    */
   private String getDisplayString(final int currentTournament,
                                   final int runNumber,
-                                  final Team team,
+                                  final @Nullable Team team,
                                   final boolean showScore,
                                   final boolean showOnlyVerifiedScores)
       throws IllegalArgumentException, SQLException {

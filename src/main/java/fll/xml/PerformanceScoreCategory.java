@@ -6,6 +6,8 @@
 
 package fll.xml;
 
+import static org.checkerframework.checker.nullness.NullnessUtil.castNonNull;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -50,7 +52,7 @@ public class PerformanceScoreCategory extends ScoreCategory {
     mTiebreaker = new LinkedList<>();
     final NodeList tiebreakerElements = ele.getElementsByTagName(TIE_BREAKER_TAG_NAME);
     if (0 != tiebreakerElements.getLength()) {
-      final Element tiebreakerElement = (Element) tiebreakerElements.item(0);
+      final Element tiebreakerElement = (Element) castNonNull(tiebreakerElements.item(0));
       for (final Element testElement : new NodelistElementCollectionAdapter(tiebreakerElement.getChildNodes())) {
         final TiebreakerTest tie = new TiebreakerTest(testElement, this);
         mTiebreaker.add(tie);

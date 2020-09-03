@@ -1,5 +1,7 @@
 package fll.documents.writers;
 
+import static org.checkerframework.checker.nullness.NullnessUtil.castNonNull;
+
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,7 +20,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import javax.annotation.Nonnull;
 import javax.xml.transform.TransformerException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -156,9 +157,9 @@ public class SubjectivePdfWriter {
    * @throws FLLInternalException if the rubric titles are not consistent across
    *           the goals in the category
    */
-  public SubjectivePdfWriter(@Nonnull final ChallengeDescription description,
-                             @Nonnull final String tournamentName,
-                             @Nonnull final SubjectiveScoreCategory scoreCategory) {
+  public SubjectivePdfWriter(final ChallengeDescription description,
+                             final String tournamentName,
+                             final SubjectiveScoreCategory scoreCategory) {
     this.description = description;
     this.tournamentName = tournamentName;
     this.scoreCategory = scoreCategory;
@@ -186,10 +187,13 @@ public class SubjectivePdfWriter {
 
     final Base64.Encoder encoder = Base64.getEncoder();
 
-    try (
-        InputStream input = this.getClass().getClassLoader()
-                                .getResourceAsStream("fll/resources/documents/FLLHeader.png");
+    final ClassLoader loader = castNonNull(this.getClass().getClassLoader());
+    try (InputStream input = loader.getResourceAsStream("fll/resources/documents/FLLHeader.png");
         ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+      if (null == input) {
+        throw new FLLInternalException("Cannot find FLLHeader.png");
+      }
+
       Objects.requireNonNull(input);
       input.transferTo(output);
 
@@ -494,9 +498,9 @@ public class SubjectivePdfWriter {
    * @param tournamentName displayed on the sheets
    * @return point size to use and the number of rows for the comment sheet
    */
-  private static Pair<Integer, Double> determineParameters(@Nonnull final ChallengeDescription description,
-                                                           @Nonnull final String tournamentName,
-                                                           @Nonnull final SubjectiveScoreCategory category) {
+  private static Pair<Integer, Double> determineParameters(final ChallengeDescription description,
+                                                           final String tournamentName,
+                                                           final SubjectiveScoreCategory category) {
 
     final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1);
     teamInfo.setDivision("dummy");
@@ -544,12 +548,12 @@ public class SubjectivePdfWriter {
    * @throws IOException if there is an error writing the document to
    *           {@code stream}
    */
-  public static void createDocumentForSchedule(@Nonnull final OutputStream stream,
-                                               @Nonnull final ChallengeDescription description,
-                                               @Nonnull final String tournamentName,
-                                               @Nonnull final SubjectiveScoreCategory category,
-                                               final String schedulerColumn,
-                                               @Nonnull final List<TeamScheduleInfo> schedule)
+  public static void createDocumentForSchedule(final OutputStream stream,
+                                               final ChallengeDescription description,
+                                               final String tournamentName,
+                                               final SubjectiveScoreCategory category,
+                                               final @Nullable String schedulerColumn,
+                                               final List<TeamScheduleInfo> schedule)
       throws IOException {
 
     final Pair<Integer, Double> parameters = determineParameters(description, tournamentName, category);
@@ -738,10 +742,10 @@ public class SubjectivePdfWriter {
     return sheet;
   }
 
-  private static @Nullable String findRangeShortDescriptionWithTitle(final String title,
+  private static Optional<String> findRangeShortDescriptionWithTitle(final String title,
                                                                      final Goal goal) {
     return goal.getRubric().stream().filter(r -> title.equals(r.getTitle())).map(RubricRange::getShortDescription)
-               .findFirst().orElse(null);
+               .findFirst();
   }
 
   /**
@@ -757,6 +761,8 @@ public class SubjectivePdfWriter {
                         .filter(Goal.class::isInstance)//
                         .map(Goal.class::cast)//
                         .map(g -> findRangeShortDescriptionWithTitle(title, g))//
+                        .filter(Optional::isPresent) //
+                        .map(Optional::get) //
                         .distinct()//
                         .count() <= 1;
   }
@@ -889,7 +895,12 @@ public class SubjectivePdfWriter {
       // will compare to false for all ranges
       goalScore = Double.NaN;
     } else {
-      goalScore = standardSubScores.get(goal.getName());
+      final String goalName = goal.getName();
+      if (standardSubScores.containsKey(goalName)) {
+        goalScore = standardSubScores.get(goalName);
+      } else {
+        goalScore = Double.NaN;
+      }
     }
 
     final List<Element> cells = new LinkedList<>();
@@ -1005,10 +1016,11 @@ public class SubjectivePdfWriter {
       titleBlock.appendChild(document.createTextNode(rubricMetaData.getTitle()));
       titleBlock.setAttribute("font-weight", "bold");
 
-      if (null != rubricMetaData.getShortDescription()) {
+      final String shortDescription = rubricMetaData.getShortDescription();
+      if (null != shortDescription) {
         final Element descriptionBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
         blockContainer.appendChild(descriptionBlock);
-        descriptionBlock.appendChild(document.createTextNode(rubricMetaData.getShortDescription()));
+        descriptionBlock.appendChild(document.createTextNode(shortDescription));
       }
 
       FOPUtils.addLeftBorder(cell, 1);

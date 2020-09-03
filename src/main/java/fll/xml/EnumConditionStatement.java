@@ -6,6 +6,7 @@
 
 package fll.xml;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -84,7 +85,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
    *
    * @return the left string to compare against, may be null.
    */
-  public String getLeftString() {
+  public @Nullable String getLeftString() {
     return mLeftString;
   }
 
@@ -95,7 +96,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
     mLeftString = v;
   }
 
-  private GoalRef mLeftGoalRef;
+  private @Nullable GoalRef mLeftGoalRef;
 
   /**
    * Left goal reference, may be null, but then leftString cannot be null at
@@ -103,7 +104,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
    *
    * @return the reference to the left goal, may be null
    */
-  public GoalRef getLeftGoalRef() {
+  public @Nullable GoalRef getLeftGoalRef() {
     return mLeftGoalRef;
   }
 
@@ -138,7 +139,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
    *
    * @return the right string
    */
-  public String getRightString() {
+  public @Nullable String getRightString() {
     return mRightString;
   }
 
@@ -149,7 +150,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
     mRightString = v;
   }
 
-  private GoalRef mRightGoalRef;
+  private @Nullable GoalRef mRightGoalRef;
 
   /**
    * Right goal reference, may be null, but then right string cannot be null at
@@ -157,7 +158,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
    *
    * @return the reference to the right goal, may be null
    */
-  public GoalRef getRightGoalRef() {
+  public @Nullable GoalRef getRightGoalRef() {
     return mRightGoalRef;
   }
 
@@ -192,12 +193,12 @@ public class EnumConditionStatement extends AbstractConditionStatement {
    */
   @Override
   public boolean isTrue(final TeamScore teamScore) {
-    if (null == getLeftGoalRef()
-        && null == getLeftString()) {
+    if (null == mLeftGoalRef
+        && null == mLeftString) {
       throw new NullPointerException("Left goal ref OR left string must be non-null");
     }
-    if (null == getRightGoalRef()
-        && null == getRightString()) {
+    if (null == mRightGoalRef
+        && null == mRightString) {
       throw new NullPointerException("Right goal ref OR right string must be non-null");
     }
 
@@ -205,14 +206,14 @@ public class EnumConditionStatement extends AbstractConditionStatement {
     if (null != getLeftGoal()) {
       leftStr = teamScore.getEnumRawScore(getLeftGoal().getName());
     } else {
-      leftStr = getLeftString();
+      leftStr = mLeftString;
     }
 
     final String rightStr;
     if (null != getRightGoal()) {
       rightStr = teamScore.getEnumRawScore(getRightGoal().getName());
     } else {
-      rightStr = getRightString();
+      rightStr = mRightString;
     }
 
     final boolean result = leftStr.equalsIgnoreCase(rightStr);

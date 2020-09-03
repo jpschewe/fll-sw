@@ -11,6 +11,8 @@ import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.Objects;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Represents performance judging time.
  */
@@ -50,7 +52,7 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
   private final int side;
 
   /**
-   * One based side number
+   * One based side number.
    */
   public int getSide() {
     return side;
@@ -68,7 +70,7 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
   }
 
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(final @Nullable Object o) {
     if (o == null) {
       return false;
     } else if (this == o) {

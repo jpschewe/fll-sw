@@ -64,7 +64,6 @@ public abstract class AbstractGoal extends GoalElement {
   /**
    * @return the name of the goal
    */
-  @Nonnull
   public String getName() {
     return mName;
   }
@@ -73,7 +72,7 @@ public abstract class AbstractGoal extends GoalElement {
    * @param v see {@link #getName()}
    *          Fires property change event.
    */
-  public void setName(@Nonnull final String v) {
+  public void setName(final String v) {
     final String old = mName;
     mName = v;
     firePropertyChange("name", old, v);

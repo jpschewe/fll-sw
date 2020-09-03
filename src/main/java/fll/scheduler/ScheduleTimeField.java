@@ -21,10 +21,9 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.MaskFormatter;
 
-
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.FLLInternalException;
-
 
 /**
  * Field for displaying schedule times.
@@ -105,7 +104,7 @@ import fll.util.FLLInternalException;
    * @param raw the raw string
    * @return the string without the leading underscore, may be null
    */
-  private static String getTimeText(final String raw) {
+  private static @Nullable String getTimeText(final @Nullable String raw) {
     if (null == raw) {
       return null;
     } else {

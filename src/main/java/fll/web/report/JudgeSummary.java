@@ -11,6 +11,8 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Information about how many teams a judge has seen. Used for display when
  * summarizing scores.
@@ -30,7 +32,7 @@ public final class JudgeSummary implements Serializable, Comparable<JudgeSummary
   /**
    * @return the judge, may be null
    */
-  public String getJudge() {
+  public @Nullable String getJudge() {
     return mJudge;
   }
 
@@ -98,17 +100,18 @@ public final class JudgeSummary implements Serializable, Comparable<JudgeSummary
   public int compareTo(final JudgeSummary o) {
     if (getGroup().equals(o.getGroup())) {
       if (getCategory().equals(o.getCategory())) {
-        if (null == getJudge()) {
-          if (null == o.getJudge()) {
+        final String thisJudge = getJudge();
+        final String otherJudge = o.getJudge();
+        if (null == thisJudge) {
+          if (null == otherJudge) {
             return 0;
           } else {
-            // multiply by -1 to invert the result so that it's from the perspective of this
-            // rather than o.
-            return o.getJudge().compareTo(getJudge())
-                * -1;
+            return 1;
           }
+        } else if (null == otherJudge) {
+          return -1;
         } else {
-          return getJudge().compareTo(o.getJudge());
+          return thisJudge.compareTo(otherJudge);
         }
       } else {
         return getCategory().compareTo(o.getCategory());
