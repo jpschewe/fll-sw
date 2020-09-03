@@ -50,10 +50,10 @@ public class SetCurrentTournament extends BaseFLLServlet {
       if (null != currentTournamentParam
           && !"".equals(currentTournamentParam)) {
         final int newTournamentID = Integer.parseInt(currentTournamentParam);
-        final Tournament newTournament = Tournament.findTournamentByID(connection, newTournamentID);
-        if (null == newTournament) {
+        if (!Tournament.doesTournamentExist(connection, newTournamentID)) {
           message.append(String.format("<p class='error'>Tournament with id %d is unknown</p>", newTournamentID));
         } else {
+          final Tournament newTournament = Tournament.findTournamentByID(connection, newTournamentID);
           Queries.setCurrentTournament(connection, newTournamentID);
           message.append(String.format("<p id='success'><i>Tournament changed to %s</i></p>", newTournament.getName()));
         }
