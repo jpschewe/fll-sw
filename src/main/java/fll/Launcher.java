@@ -673,7 +673,7 @@ public class Launcher extends JFrame {
   /**
    * @return the directory or null if not found
    */
-  private Path getCustomDirectory() {
+  private @Nullable Path getCustomDirectory() {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
     if (null == webroot) {
