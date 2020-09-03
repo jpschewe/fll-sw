@@ -36,7 +36,7 @@ import fll.web.SessionAttributes;
 import fll.web.UploadSpreadsheet;
 
 /**
- * Handle bulk team information changes
+ * Handle bulk team information changes.
  */
 @WebServlet("/admin/ProcessTeamInformationUpload")
 public final class ProcessTeamInformationUpload extends BaseFLLServlet {
@@ -57,7 +57,7 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
-    try (final Connection connection = datasource.getConnection()) {
+    try (Connection connection = datasource.getConnection()) {
       if (!Files.exists(file)
           || !Files.isReadable(file)) {
         throw new FLLInternalException("Cannot read file: "
@@ -93,7 +93,7 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
   }
 
   /**
-   * Make the changes
+   * Make the changes.
    */
   public static void processFile(final Connection connection,
                                  final StringBuilder message,
@@ -113,8 +113,13 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
 
     // parse out the first non-blank line as the names of the columns
     String[] columnNames = reader.readNext();
-    while (columnNames.length < 1) {
+    while (null != columnNames
+        && columnNames.length < 1) {
       columnNames = reader.readNext();
+    }
+    if (null == columnNames) {
+      LOGGER.warn("No data in file");
+      return;
     }
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Column names size: "

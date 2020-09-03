@@ -352,8 +352,12 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
 
   }
 
-  private static void getReferencedComputedGoals(final GoalRef gr,
+  private static void getReferencedComputedGoals(final @Nullable GoalRef gr,
                                                  final Set<ComputedGoal> referenced) {
+    if (null == gr) {
+      return;
+    }
+
     try {
       final AbstractGoal goal = gr.getGoal();
       if (goal.isComputed()) {

@@ -996,7 +996,8 @@ public final class ScoreEntry {
       if (null != childEle.getResultPoly()) {
         final ComplexPolynomial resultPoly = childEle.getResultPoly();
         formatter.format("%s%s = %s;%n", generateIndentSpace(indent
-            + INDENT_LEVEL), getVarNameForComputedScore(goalName), polyToString(resultPoly));
+            + INDENT_LEVEL), getVarNameForComputedScore(goalName),
+                         null == resultPoly ? "NULL" : polyToString(resultPoly));
       } else if (null != childEle.getResultSwitch()) {
         generateSwitch(formatter, childEle.getResultSwitch(), goalName, indent
             + INDENT_LEVEL);

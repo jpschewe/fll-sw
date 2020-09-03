@@ -147,8 +147,13 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
 
     // parse out the first non-blank line as the names of the columns
     String[] columnNames = reader.readNext();
-    while (columnNames.length < 1) {
+    while (null != columnNames
+        && columnNames.length < 1) {
       columnNames = reader.readNext();
+    }
+    if (null == columnNames) {
+      LOGGER.warn("No data in file");
+      return;
     }
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("sheetName: "

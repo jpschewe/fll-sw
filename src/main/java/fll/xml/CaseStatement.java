@@ -14,6 +14,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 import fll.web.playoff.TeamScore;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
@@ -98,7 +99,7 @@ public class CaseStatement implements Evaluatable, Serializable {
     mCondition = v;
   }
 
-  private ComplexPolynomial mResultPoly;
+  private @Nullable ComplexPolynomial mResultPoly;
 
   /**
    * May be null, but then resultSwitch cannot be null at evaluation time.
@@ -116,7 +117,7 @@ public class CaseStatement implements Evaluatable, Serializable {
     mResultPoly = v;
   }
 
-  private SwitchStatement mResultSwitch;
+  private @Nullable SwitchStatement mResultSwitch;
 
   /**
    * May be null, but then {@link #getResultPoly()} cannot be null at evaluation
@@ -142,17 +143,17 @@ public class CaseStatement implements Evaluatable, Serializable {
    */
   @Override
   public double evaluate(final TeamScore teamScore) {
-    Objects.requireNonNull(getCondition(), "Condition must not be null");
-    if (null == getResultPoly()
-        && null == getResultSwitch()) {
+    Objects.requireNonNull(mCondition, "Condition must not be null");
+    if (null == mResultPoly
+        && null == mResultSwitch) {
       throw new NullPointerException("Both result poly and result switch cannot be null");
     }
 
     if (getCondition().isTrue(teamScore)) {
-      if (null != getResultPoly()) {
-        return getResultPoly().evaluate(teamScore);
+      if (null != mResultPoly) {
+        return mResultPoly.evaluate(teamScore);
       } else {
-        return getResultSwitch().evaluate(teamScore);
+        return mResultSwitch.evaluate(teamScore);
       }
     } else {
       return 0;
@@ -190,14 +191,16 @@ public class CaseStatement implements Evaluatable, Serializable {
    * @return score type for the statement
    */
   public ScoreType getScoreType() {
-    if (null != getResultPoly()) {
-      if (FloatingPointType.DECIMAL.equals(getResultPoly().getFloatingPoint())) {
+    if (null != mResultPoly) {
+      if (FloatingPointType.DECIMAL.equals(mResultPoly.getFloatingPoint())) {
         return ScoreType.FLOAT;
       } else {
         return ScoreType.INTEGER;
       }
+    } else if (null != mResultSwitch) {
+      return mResultSwitch.getScoreType();
     } else {
-      return getResultSwitch().getScoreType();
+      throw new FLLRuntimeException("Invalid state of case statement, both switch and poly are null");
     }
   }
 
