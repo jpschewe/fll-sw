@@ -36,7 +36,7 @@ public final class GlobalParameters {
   public static final String STANDARDIZED_MEAN = "StandardizedMean";
 
   /**
-   * Default value for {@link #getStandardizedMean(Connection).
+   * Default value for {@link #getStandardizedMean(Connection)}.
    */
   public static final double STANDARDIZED_MEAN_DEFAULT = 100;
 
@@ -465,7 +465,7 @@ public final class GlobalParameters {
   public static final String HEAD_TO_HEAD_MS_PER_ROW = "HeadToHeadMsPerRow";
 
   /**
-   * Default value for {@Link #HEAD_TO_HEAD_MS_PER_ROW}.
+   * Default value for {@link #HEAD_TO_HEAD_MS_PER_ROW}.
    */
   public static final int HEAD_TO_HEAD_MS_PER_ROW_DEFAULT = 1000;
 
