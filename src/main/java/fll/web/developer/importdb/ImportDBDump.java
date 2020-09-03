@@ -16,6 +16,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
 import fll.Utilities;
@@ -138,8 +139,8 @@ public class ImportDBDump extends BaseFLLServlet {
    * @return message to the user if there are errors, null if everything is OK
    * @throws SQLException if there is an error talking to the database
    */
-  public static String checkChallengeDescriptors(final Connection sourceConnection,
-                                                 final Connection destConnection)
+  public static @Nullable String checkChallengeDescriptors(final Connection sourceConnection,
+                                                           final Connection destConnection)
       throws SQLException {
     final Document sourceDoc = GlobalParameters.getChallengeDocument(sourceConnection);
     final Document destDoc = GlobalParameters.getChallengeDocument(destConnection);

@@ -11,6 +11,7 @@ import java.beans.PropertyChangeSupport;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -26,7 +27,7 @@ public class Variable extends BasicPolynomial {
   private final PropertyChangeSupport propChangeSupport;
 
   public Variable(final Element ele,
-                  final GoalScope goalScope) {
+                  final @UnderInitialization GoalScope goalScope) {
     super(ele, goalScope);
 
     mName = ele.getAttribute("name");

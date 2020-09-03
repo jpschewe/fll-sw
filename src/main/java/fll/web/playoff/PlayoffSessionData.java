@@ -15,6 +15,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
@@ -133,7 +135,7 @@ public final class PlayoffSessionData implements Serializable {
     mBracket = v;
   }
 
-  public String getBracket() {
+  public @Nullable String getBracket() {
     return mBracket;
   }
 

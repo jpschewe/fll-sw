@@ -25,10 +25,10 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -2571,7 +2571,7 @@ public final class Queries {
    */
   public static boolean performanceScoreExists(final Connection connection,
                                                final int tournament,
-                                               final Team team,
+                                               final @Nullable Team team,
                                                final int runNumber)
       throws SQLException {
     if (null == team) {
@@ -2587,7 +2587,7 @@ public final class Queries {
    * @param date value to be converted
    * @return converted value
    */
-  public static Time dateToTime(final Date date) {
+  public static Time dateToTime(final @Nullable Date date) {
     if (null == date) {
       return null;
     } else {
@@ -2601,7 +2601,7 @@ public final class Queries {
    * @param t value to be converted
    * @return {@link java.util.Date}
    */
-  public static Date timeToDate(final Time t) {
+  public static Date timeToDate(final @Nullable Time t) {
     if (null == t) {
       return null;
     } else {

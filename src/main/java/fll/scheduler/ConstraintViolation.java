@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * A schedule constraint violation.
  */
@@ -50,7 +52,7 @@ public final class ConstraintViolation implements Serializable {
    * @return if a performance problem, the time of the performance,
    *         otherwise null
    */
-  public LocalTime getPerformance() {
+  public @Nullable LocalTime getPerformance() {
     return performance;
   }
 

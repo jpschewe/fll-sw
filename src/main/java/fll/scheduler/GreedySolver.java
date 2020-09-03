@@ -36,6 +36,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.opencsv.CSVWriter;
 
@@ -115,18 +116,18 @@ public class GreedySolver {
 
   private final File datafile;
 
-  private File mBestSchedule = null;
+  private @Nullable File mBestSchedule = null;
 
   /**
-   * File that contains the best schedule found.
+   * @return File that contains the best schedule found.
    */
-  public File getBestSchedule() {
+  public @Nullable File getBestSchedule() {
     return mBestSchedule;
   }
 
   private int solutionsFound = 0;
 
-  private ObjectiveValue bestObjective = null;
+  private @Nullable ObjectiveValue bestObjective = null;
 
   private final boolean optimize;
 

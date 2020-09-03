@@ -17,6 +17,8 @@ import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -70,7 +72,7 @@ public final class Tournament implements Serializable {
   /**
    * @return a longer description of the tournament
    */
-  public String getDescription() {
+  public @Nullable String getDescription() {
     return description;
   }
 
@@ -112,13 +114,21 @@ public final class Tournament implements Serializable {
 
   /**
    * Create a tournament.
+   * 
+   * @param connection database connection
+   * @param tournamentName see {@link #getName()}
+   * @param description see {@link #getDescription()}
+   * @param date see {@link #getDate()}
+   * @param level see {@link #getLevel()}
+   * @param nextLevel see {@link #getNextLevel()}
+   * @throws SQLException on a database error
    */
   public static void createTournament(final Connection connection,
                                       final String tournamentName,
                                       final String description,
-                                      final LocalDate date,
-                                      final String level,
-                                      final String nextLevel)
+                                      final @Nullable LocalDate date,
+                                      final @Nullable String level,
+                                      final @Nullable String nextLevel)
       throws SQLException {
     try (
         PreparedStatement prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location, tournament_date, level, next_level) VALUES (?, ?, ?, ?, ?)")) {
@@ -150,7 +160,9 @@ public final class Tournament implements Serializable {
    * excludes the
    * internal tournament.
    * 
+   * @param connection database connection
    * @return list of tournament tournaments
+   * @throws SQLException on a database error
    */
   public static List<Tournament> getTournaments(final Connection connection) throws SQLException {
     final List<Tournament> retval = new LinkedList<Tournament>();
@@ -192,12 +204,13 @@ public final class Tournament implements Serializable {
    * 
    * @param connection the database connection
    * @param name the name of a tournament to find
-   * @return the Tournament, or null if it cannot be found
-   * @throws SQLException
+   * @return the Tournament
+   * @throws SQLException on a database error
+   * @throws UnknownTournamentException if the tournament cannot be found
    */
   public static Tournament findTournamentByName(final Connection connection,
                                                 final String name)
-      throws SQLException {
+      throws SQLException, UnknownTournamentException {
     try (
         PreparedStatement prep = connection.prepareStatement("SELECT tournament_id, Location, tournament_date, level, next_level FROM Tournaments WHERE Name = ?")) {
       prep.setString(1, name);
@@ -212,8 +225,42 @@ public final class Tournament implements Serializable {
 
           return new Tournament(id, name, location, date, level, nextLevel);
         } else {
-          return null;
+          throw new UnknownTournamentException(name);
         }
+      }
+    }
+  }
+
+  /**
+   * @param connection database connection
+   * @param id tournament id
+   * @return if a tournament with the specified {@code id} exists
+   */
+  public static boolean doesTournamentExist(final Connection connection,
+                                            final int id)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT Name, Location, tournament_date, level, next_level FROM Tournaments WHERE tournament_id = ?")) {
+      prep.setInt(1, id);
+      try (ResultSet rs = prep.executeQuery()) {
+        return rs.next();
+      }
+    }
+  }
+
+  /**
+   * @param connection database connection
+   * @param name tournament name
+   * @return if a tournament with the specified {@code name} exists
+   */
+  public static boolean doesTournamentExist(final Connection connection,
+                                            final String name)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT Name, Location, tournament_date, level, next_level FROM Tournaments WHERE Name = ?")) {
+      prep.setString(1, name);
+      try (ResultSet rs = prep.executeQuery()) {
+        return rs.next();
       }
     }
   }
@@ -223,12 +270,13 @@ public final class Tournament implements Serializable {
    * 
    * @param connection the database connection
    * @param tournamentID the ID to find
-   * @return the Tournament, or null if it cannot be found
-   * @throws SQLException
+   * @return the Tournament
+   * @throws SQLException on a database error
+   * @throws UnknownTournamentException when the tournament is not found
    */
   public static Tournament findTournamentByID(final Connection connection,
                                               final int tournamentID)
-      throws SQLException {
+      throws SQLException, UnknownTournamentException {
     try (
         PreparedStatement prep = connection.prepareStatement("SELECT Name, Location, tournament_date, level, next_level FROM Tournaments WHERE tournament_id = ?")) {
       prep.setInt(1, tournamentID);
@@ -242,7 +290,7 @@ public final class Tournament implements Serializable {
           final String nextLevel = rs.getString(5);
           return new Tournament(tournamentID, name, location, date, level, nextLevel);
         } else {
-          return null;
+          throw new UnknownTournamentException(tournamentID);
         }
       }
     }
@@ -273,8 +321,9 @@ public final class Tournament implements Serializable {
   /**
    * Check if this tournament needs the score summarization code to run.
    * 
+   * @param connection database connection
    * @return true if an update is needed
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
   public boolean checkTournamentNeedsSummaryUpdate(final Connection connection) throws SQLException {
     try (
@@ -335,7 +384,8 @@ public final class Tournament implements Serializable {
    * Note that the performance seeding rounds have been modified for this
    * tournament.
    * 
-   * @throws SQLException
+   * @param connection database connection
+   * @throws SQLException on a database error
    */
   public void recordPerformanceSeedingModified(final Connection connection) throws SQLException {
     try (PreparedStatement prep = connection.prepareStatement("UPDATE Tournaments" //
@@ -350,7 +400,8 @@ public final class Tournament implements Serializable {
    * Note that the subjective scores have been modified for this
    * tournament.
    * 
-   * @throws SQLException
+   * @param connection database connection
+   * @throws SQLException on a database error
    */
   public void recordSubjectiveModified(final Connection connection) throws SQLException {
     try (PreparedStatement prep = connection.prepareStatement("UPDATE Tournaments" //
@@ -364,7 +415,8 @@ public final class Tournament implements Serializable {
   /**
    * Note that the summarized scores have been computed for this tournament.
    * 
-   * @throws SQLException
+   * @param connection database connection
+   * @throws SQLException on a database error
    */
   public void recordScoreSummariesUpdated(final Connection connection) throws SQLException {
     try (PreparedStatement prep = connection.prepareStatement("UPDATE Tournaments" //
@@ -440,15 +492,16 @@ public final class Tournament implements Serializable {
    * @param date see {@link #getDate()}
    * @param level see {@link #getLevel()}
    * @param nextLevel see {@link #getNextLevel()}
+   * @param connection dadtabase connection
    * @throws SQLException on a database error
    */
   public static void updateTournament(final Connection connection,
                                       final int tournamentID,
                                       final String name,
                                       final String location,
-                                      final LocalDate date,
-                                      final String level,
-                                      final String nextLevel)
+                                      final @Nullable LocalDate date,
+                                      final @Nullable String level,
+                                      final @Nullable String nextLevel)
       throws SQLException {
     try (PreparedStatement updatePrep = connection.prepareStatement("UPDATE Tournaments SET" //
         + " Name = ?" //

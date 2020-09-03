@@ -22,6 +22,8 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.ChooseOptionDialog;
 import fll.util.FormatterUtils;
@@ -38,7 +40,7 @@ import fll.xml.ScopeException;
                               "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
 class EnumStringEditor extends JPanel implements Validatable {
 
-  private GoalRef goalRef;
+  private @Nullable GoalRef goalRef;
 
   private String string;
 

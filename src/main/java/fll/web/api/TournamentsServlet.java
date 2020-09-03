@@ -26,24 +26,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * [Tournament]
+ * Get list of {@link Tournament} objects.
  */
 @WebServlet("/api/Tournaments/*")
 public class TournamentsServlet extends HttpServlet {
 
   @Override
   protected final void doGet(final HttpServletRequest request,
-                             final HttpServletResponse response) throws IOException, ServletException {
+                             final HttpServletResponse response)
+      throws IOException, ServletException {
     final ServletContext application = getServletContext();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
@@ -69,13 +68,8 @@ public class TournamentsServlet extends HttpServlet {
         }
 
         final Tournament tournament = Tournament.findTournamentByID(connection, id);
-        if (null != tournament) {
-          jsonMapper.writeValue(writer, tournament);
-          return;
-        } else {
-          throw new RuntimeException("No tournament found with id "
-              + id);
-        }
+        jsonMapper.writeValue(writer, tournament);
+        return;
 
       }
 
@@ -83,9 +77,7 @@ public class TournamentsServlet extends HttpServlet {
 
       jsonMapper.writeValue(writer, tournaments);
     } catch (final SQLException e) {
-      throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
+      throw new FLLRuntimeException(e);
     }
 
   }
@@ -94,6 +86,9 @@ public class TournamentsServlet extends HttpServlet {
    * Type information for reading a collection of tournament objects.
    */
   public static final class TournamentsTypeInformation extends TypeReference<Collection<Tournament>> {
+    /**
+     * Singleton instance.
+     */
     public static final TournamentsTypeInformation INSTANCE = new TournamentsTypeInformation();
   }
 

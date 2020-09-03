@@ -13,6 +13,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -27,7 +28,7 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
   public static final String TAG_NAME = "computedGoal";
 
   public ComputedGoal(final Element ele,
-                      final GoalScope goalScope) {
+                      final @UnderInitialization GoalScope goalScope) {
     super(ele);
 
     this.goalScope = goalScope;

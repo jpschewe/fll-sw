@@ -11,6 +11,7 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -32,7 +33,7 @@ public class GoalRef implements Evaluatable, Serializable {
   private static final String GOAL_ATTRIBUTE = "goal";
 
   public GoalRef(@Nonnull final Element ele,
-                 @Nonnull final GoalScope scope) {
+                 @Nonnull final @UnderInitialization GoalScope scope) {
     mScoreType = GoalScoreType.fromString(ele.getAttribute(SCORE_TYPE_ATTRIBUTE));
 
     mGoalScope = scope;
@@ -45,7 +46,7 @@ public class GoalRef implements Evaluatable, Serializable {
    * @param scoreType see {@link #getScoreType()}
    */
   public GoalRef(@Nonnull final String goalName,
-                 @Nonnull final GoalScope scope,
+                 @Nonnull final @UnderInitialization GoalScope scope,
                  @Nonnull final GoalScoreType scoreType) {
     mScoreType = scoreType;
     mGoalScope = scope;

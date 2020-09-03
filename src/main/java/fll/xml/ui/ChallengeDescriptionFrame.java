@@ -46,6 +46,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileFilter;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -129,11 +130,11 @@ public class ChallengeDescriptionFrame extends JFrame {
     }
   }
 
-  private File mCurrentFile = null;
+  private @Nullable File mCurrentFile = null;
 
   private final JScrollPane scroller;
 
-  private ChallengeDescriptionEditor editor = null;
+  private @Nullable ChallengeDescriptionEditor editor = null;
 
   private static final int VERTICAL_SCROLL_INCREMENT = 20;
 
@@ -302,7 +303,7 @@ public class ChallengeDescriptionFrame extends JFrame {
    * @param file the file where the challenge is saved
    */
   private void setCurrentFile(final File file,
-                              final ChallengeDescription description) {
+                              final @Nullable ChallengeDescription description) {
     mCurrentFile = file;
 
     if (null == description) {

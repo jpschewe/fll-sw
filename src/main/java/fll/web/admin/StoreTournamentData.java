@@ -126,8 +126,8 @@ public class StoreTournamentData extends BaseFLLServlet {
         }
       } else if (null == name
           || "".equals(name)) {
-        final Tournament tournament = Tournament.findTournamentByID(connection, key);
-        if (null != tournament) {
+        if (Tournament.doesTournamentExist(connection, key)) {
+          final Tournament tournament = Tournament.findTournamentByID(connection, key);
           if (key == currentTournament) {
             message.append("<p class='warning'>Unable to delete tournament '"
                 + tournament.getName()

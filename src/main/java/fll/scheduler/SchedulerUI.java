@@ -77,6 +77,7 @@ import javax.swing.table.TableCellRenderer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -166,8 +167,8 @@ public class SchedulerUI extends JFrame {
     super(BASE_TITLE);
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-    _progressDialog = new ProgressDialog(SchedulerUI.this, "Please Wait");
-    _progressDialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+    progressDialog = new ProgressDialog(SchedulerUI.this, "Please Wait");
+    progressDialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
     setJMenuBar(createMenubar());
 
@@ -294,8 +295,8 @@ public class SchedulerUI extends JFrame {
       }
     }
 
-    try (final Writer writer = new OutputStreamWriter(new FileOutputStream(mScheduleDescriptionFile),
-                                                      Utilities.DEFAULT_CHARSET)) {
+    try (Writer writer = new OutputStreamWriter(new FileOutputStream(mScheduleDescriptionFile),
+                                                Utilities.DEFAULT_CHARSET)) {
       final SolverParams params = mScheduleDescriptionEditor.getParams();
       final List<String> errors = params.isValid();
       if (!errors.isEmpty()) {
@@ -370,17 +371,17 @@ public class SchedulerUI extends JFrame {
       final SchedulerWorker worker = new SchedulerWorker();
 
       // make sure the task doesn't start until the window is up
-      _progressDialog.addComponentListener(new ComponentAdapter() {
+      progressDialog.addComponentListener(new ComponentAdapter() {
         @Override
         public void componentShown(final ComponentEvent e) {
-          _progressDialog.removeComponentListener(this);
+          progressDialog.removeComponentListener(this);
           worker.execute();
         }
       });
 
-      _progressDialog.setLocationRelativeTo(SchedulerUI.this);
-      _progressDialog.setNote("Running Scheduler");
-      _progressDialog.setVisible(true);
+      progressDialog.setLocationRelativeTo(SchedulerUI.this);
+      progressDialog.setNote("Running Scheduler");
+      progressDialog.setVisible(true);
 
     } catch (final IOException e) {
       final Formatter errorFormatter = new Formatter();
@@ -405,24 +406,24 @@ public class SchedulerUI extends JFrame {
   private final class SchedulerWorker extends SwingWorker<Integer, Void> {
     private final GreedySolver solver;
 
-    public SchedulerWorker() throws IOException, ParseException, InvalidParametersException {
+    SchedulerWorker() throws IOException, ParseException, InvalidParametersException {
       this.solver = new GreedySolver(mScheduleDescriptionFile, false);
     }
 
     @Override
     protected Integer doInBackground() {
-      return solver.solve(_progressDialog);
+      return solver.solve(progressDialog);
     }
 
     @Override
     protected void done() {
-      _progressDialog.setVisible(false);
+      progressDialog.setVisible(false);
 
       try {
         final int numSolutions = this.get();
 
         if (numSolutions < 1) {
-          if (_progressDialog.isCanceled()) {
+          if (progressDialog.isCanceled()) {
             JOptionPane.showMessageDialog(SchedulerUI.this, "Scheduler was canceled");
             return;
           }
@@ -467,26 +468,26 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private final ProgressDialog _progressDialog;
+  private final ProgressDialog progressDialog;
 
   private final class OptimizerWorker extends SwingWorker<Void, Void> {
     private final TableOptimizer optimizer;
 
-    public OptimizerWorker(final TableOptimizer optimizer) {
+    OptimizerWorker(final TableOptimizer optimizer) {
       this.optimizer = optimizer;
     }
 
     @Override
     protected Void doInBackground() {
       // see if we can get a better solution
-      optimizer.optimize(_progressDialog);
+      optimizer.optimize(progressDialog);
 
       return null;
     }
 
     @Override
     protected void done() {
-      _progressDialog.setVisible(false);
+      progressDialog.setVisible(false);
 
       try {
         this.get();
@@ -568,7 +569,7 @@ public class SchedulerUI extends JFrame {
 
   private void loadScheduleDescription(final File file) {
     final Properties properties = new Properties();
-    try (final Reader reader = new InputStreamReader(new FileInputStream(file), Utilities.DEFAULT_CHARSET)) {
+    try (Reader reader = new InputStreamReader(new FileInputStream(file), Utilities.DEFAULT_CHARSET)) {
       properties.load(reader);
     } catch (final IOException e) {
       final Formatter errorFormatter = new Formatter();
@@ -884,17 +885,17 @@ public class SchedulerUI extends JFrame {
       final OptimizerWorker optimizerWorker = new OptimizerWorker(optimizer);
 
       // make sure the task doesn't start until the window is up
-      _progressDialog.addComponentListener(new ComponentAdapter() {
+      progressDialog.addComponentListener(new ComponentAdapter() {
         @Override
         public void componentShown(final ComponentEvent e) {
-          _progressDialog.removeComponentListener(this);
+          progressDialog.removeComponentListener(this);
           optimizerWorker.execute();
         }
       });
 
-      _progressDialog.setLocationRelativeTo(SchedulerUI.this);
-      _progressDialog.setNote("Running Table Optimizer");
-      _progressDialog.setVisible(true);
+      progressDialog.setLocationRelativeTo(SchedulerUI.this);
+      progressDialog.setNote("Running Table Optimizer");
+      progressDialog.setVisible(true);
     } catch (final IllegalArgumentException e) {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(e, e);
@@ -914,7 +915,7 @@ public class SchedulerUI extends JFrame {
    *          otherwise prompt the user for the subjective stations
    */
   private void loadScheduleFile(final File selectedFile,
-                                final List<SubjectiveStation> subjectiveStations) {
+                                final @Nullable List<SubjectiveStation> subjectiveStations) {
     FileInputStream fis = null;
     try {
       final boolean csv = !ExcelCellReader.isExcelFile(selectedFile);
@@ -1075,11 +1076,13 @@ public class SchedulerUI extends JFrame {
   /**
    * If there is more than 1 sheet, prompt, otherwise just use the sheet.
    *
+   * @param selectedFile the file to read
    * @return the sheet name or null if the user canceled
-   * @throws IOException
-   * @throws InvalidFormatException
+   * @throws IOException if there is an error reading the file
+   * @throws InvalidFormatException if there is an error decoding the file
    */
-  public static String promptForSheetName(final File selectedFile) throws InvalidFormatException, IOException {
+  public static @Nullable String promptForSheetName(final File selectedFile)
+      throws InvalidFormatException, IOException {
     final List<String> sheetNames = ExcelCellReader.getAllSheetNames(selectedFile);
     if (sheetNames.size() == 1) {
       return sheetNames.get(0);
@@ -1343,15 +1346,17 @@ public class SchedulerUI extends JFrame {
     }
   };
 
-  private File mScheduleDescriptionFile = null;
+  private @Nullable File mScheduleDescriptionFile = null;
 
-  private File mScheduleFile;
+  // the default value should not be used as the actions are disabled to prevent
+  // this
+  private File mScheduleFile = new File("dummy.csv");
 
   protected File getScheduleFile() {
     return mScheduleFile;
   }
 
-  private String mScheduleSheetName;
+  private @Nullable String mScheduleSheetName;
 
   protected String getCurrentSheetName() {
     return mScheduleSheetName;

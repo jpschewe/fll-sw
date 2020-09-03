@@ -9,16 +9,18 @@ package fll.flltools;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import javax.annotation.Nonnull;
-
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.db.GlobalParameters;
 
 /**
  * Parameters for working with mhub at https://github.com/FirstLegoLeague/mhub.
  */
-public class MhubParameters {
+public final class MhubParameters {
+
+  private MhubParameters() {
+  }
 
   /**
    * Key for {@link GlobalParameters} for the mhub hostname.
@@ -29,10 +31,10 @@ public class MhubParameters {
    * Default value for the host property. This is null, meaning don't talk to
    * mhub.
    */
-  public static final String DEFAULT_HOST = null;
+  public static final @Nullable String DEFAULT_HOST = null;
 
   /**
-   * Key for {@link GlobalParameters} for the mhub port;
+   * Key for {@link GlobalParameters} for the mhub port.
    */
   public static final String PORT_KEY = "mhub.port";
 
@@ -55,7 +57,7 @@ public class MhubParameters {
    * @return the hostname to talk to mhub at, or null to not talk to mhub
    * @param connection the connection to the database
    */
-  public static String getHostname(@Nonnull final Connection connection) throws SQLException {
+  public static @Nullable String getHostname(final Connection connection) throws SQLException {
     if (GlobalParameters.globalParameterExists(connection, HOST_KEY)) {
       final String value = GlobalParameters.getStringGlobalParameter(connection, HOST_KEY);
       if (StringUtils.isBlank(value)) {
@@ -74,8 +76,8 @@ public class MhubParameters {
    * @throws SQLException if there is a problem talking to the database
    * @see #getHostname(Connection)
    */
-  public static void setHostname(@Nonnull final Connection connection,
-                                 final String hostname)
+  public static void setHostname(final Connection connection,
+                                 final @Nullable String hostname)
       throws SQLException {
     if (null == hostname) {
       // global_parameters table doesn't allow null values
@@ -90,7 +92,7 @@ public class MhubParameters {
    * @return the port number that mhub is listening on
    * @throws SQLException
    */
-  public static int getPort(@Nonnull final Connection connection) throws SQLException {
+  public static int getPort(final Connection connection) throws SQLException {
     if (GlobalParameters.globalParameterExists(connection, PORT_KEY)) {
       return GlobalParameters.getIntGlobalParameter(connection, PORT_KEY);
     } else {
@@ -104,7 +106,7 @@ public class MhubParameters {
    * @param connection the database connection
    * @see #getPort(Connection)
    */
-  public static void setPort(@Nonnull final Connection connection,
+  public static void setPort(final Connection connection,
                              final int port)
       throws SQLException {
     GlobalParameters.setIntGlobalParameter(connection, PORT_KEY, port);
@@ -116,7 +118,7 @@ public class MhubParameters {
    * @throws SQLException if there is a database error
    * @see fll.flltools.displaySystem.list.BaseListMessage
    */
-  public static String getDisplayNode(@Nonnull final Connection connection) throws SQLException {
+  public static String getDisplayNode(final Connection connection) throws SQLException {
     if (GlobalParameters.globalParameterExists(connection, DISPLAY_NODE_KEY)) {
       return GlobalParameters.getStringGlobalParameter(connection, DISPLAY_NODE_KEY);
     } else {
@@ -130,7 +132,7 @@ public class MhubParameters {
    * @throws SQLException if there is a database error
    * @see #getDisplayNode(Connection)
    */
-  public static void setDisplayNode(@Nonnull final Connection connection,
+  public static void setDisplayNode(final Connection connection,
                                     final String node)
       throws SQLException {
     if (StringUtils.isBlank(node)) {

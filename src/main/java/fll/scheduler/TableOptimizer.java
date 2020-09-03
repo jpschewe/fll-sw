@@ -28,6 +28,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Utilities;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
@@ -56,7 +57,7 @@ public class TableOptimizer {
 
   private File mBestScheduleOutputFile = null;
 
-  private Map<PerformanceTime, TeamScheduleInfo> bestPermutation = null;
+  private @Nullable Map<PerformanceTime, TeamScheduleInfo> bestPermutation = null;
 
   private int bestScore;
 
@@ -303,8 +304,8 @@ public class TableOptimizer {
    * @return the team number or null if the index is
    *         larger than the list of teams
    */
-  private static TeamScheduleInfo getTeam(final List<TeamScheduleInfo> teams,
-                                          final int teamIndex) {
+  private static @Nullable TeamScheduleInfo getTeam(final List<TeamScheduleInfo> teams,
+                                                    final int teamIndex) {
     if (teamIndex < teams.size()) {
       return teams.get(teamIndex);
     } else {

@@ -18,10 +18,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.FLLRuntimeException;
 
@@ -78,8 +79,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   /**
    * Create a string that's a valid HTML name.
    */
-  @CheckForNull
-  private static String sanitizeDisplayName(final String str) {
+  private static @Nullable String sanitizeDisplayName(final @Nullable String str) {
     if (null == str
         || "".equals(str)) {
       return null;
@@ -109,9 +109,9 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * @param name the name to set for the display, may be different from what is
    *          stored
    */
-  public static void appendDisplayName(@Nonnull final ServletContext application,
-                                       @Nonnull final HttpSession session,
-                                       final String name) {
+  public static void appendDisplayName(final ServletContext application,
+                                       final HttpSession session,
+                                       final @Nullable String name) {
     session.removeAttribute(SessionAttributes.DISPLAY_NAME);
 
     final String sanitized = sanitizeDisplayName(name);
@@ -174,9 +174,8 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * @param displayName the name of the display, may be null
    * @return a non-null {@link DisplayInfo} object
    */
-  @Nonnull
-  public static DisplayInfo getInfoForDisplay(@Nonnull final ServletContext application,
-                                              final String displayName) {
+  public static DisplayInfo getInfoForDisplay(final ServletContext application,
+                                              final @Nullable String displayName) {
     final DisplayInfo display = getNamedDisplay(application, displayName);
     if (null == display
         || display.isFollowDefault()) {
@@ -258,9 +257,8 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * @param name the name of the display to find
    * @return the display or null if not known
    */
-  @CheckForNull
-  public static DisplayInfo getNamedDisplay(@Nonnull final ServletContext application,
-                                            final String name) {
+  public static @Nullable DisplayInfo getNamedDisplay(@Nonnull final ServletContext application,
+                                                      final String name) {
     final Collection<DisplayInfo> displayInformation = getDisplayInformation(application);
     for (final DisplayInfo info : displayInformation) {
       if (info.getName().equals(name)) {

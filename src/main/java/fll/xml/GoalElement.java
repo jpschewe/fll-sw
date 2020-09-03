@@ -61,9 +61,9 @@ public abstract class GoalElement implements Serializable, Evaluatable {
   private @Nullable String mTitle;
 
   /**
-   * @return the title of the goal, may be null.
+   * @return the title of the goal.
    */
-  public @Nullable String getTitle() {
+  public String getTitle() {
     return mTitle;
   }
 
@@ -72,7 +72,7 @@ public abstract class GoalElement implements Serializable, Evaluatable {
    * 
    * @param v see {@link #getTitle()}
    */
-  public void setTitle(final @Nullable String v) {
+  public void setTitle(final String v) {
     final String old = mTitle;
     mTitle = v;
     firePropertyChange("title", old, v);

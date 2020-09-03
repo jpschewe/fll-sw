@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -569,7 +570,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     return -1;
   }
 
-  private final TournamentSchedule schedule;
+  private final @Nullable TournamentSchedule schedule;
 
   private final Collection<CategoryColumnMapping> scheduleColumnMappings = new LinkedList<>();
 

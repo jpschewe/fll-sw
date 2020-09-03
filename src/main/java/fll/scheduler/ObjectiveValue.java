@@ -156,7 +156,10 @@ import java.util.Arrays;
         + this.latestPerformanceTime);
     for (int group = 0; group < this.numTeams.length; ++group) {
       writer.println("group "
-          + group + " numTeams: " + this.numTeams[group] + " latestSubjectiveTime: "
+          + group
+          + " numTeams: "
+          + this.numTeams[group]
+          + " latestSubjectiveTime: "
           + this.latestSubjectiveTime[group]);
     }
     writer.println("Warnings: "

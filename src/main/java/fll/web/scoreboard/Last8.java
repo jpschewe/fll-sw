@@ -23,6 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.Utilities;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
@@ -168,10 +170,10 @@ public class Last8 extends BaseFLLServlet {
 
   private interface ProcessScoreEntry {
     void execute(final int teamNumber,
-                 final String teamName,
-                 final String organization,
-                 @Nonnull final String awardGroup,
-                 @Nonnull final String formattedScore);
+                 final @Nullable String teamName,
+                 final @Nullable String organization,
+                 final String awardGroup,
+                 final String formattedScore);
   }
 
   /**

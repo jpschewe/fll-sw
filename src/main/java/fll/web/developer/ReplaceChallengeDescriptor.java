@@ -19,16 +19,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
-
 import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.GenerateDB;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.UploadProcessor;
@@ -42,17 +38,16 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Top of ReplaceChallengeDescriptor.doPost");
     }
 
     final StringBuilder message = new StringBuilder();
 
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
       final Document curDoc = ApplicationAttributes.getChallengeDocument(application);
 
@@ -77,15 +72,15 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
       }
     } catch (final FileUploadException fue) {
       message.append("<p class='error'>Error handling the file upload: "
-          + fue.getMessage() + "</p>");
+          + fue.getMessage()
+          + "</p>");
       LOGGER.error(fue, fue);
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
-          + sqle.getMessage() + "</p>");
+          + sqle.getMessage()
+          + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
     if (LOGGER.isTraceEnabled()) {

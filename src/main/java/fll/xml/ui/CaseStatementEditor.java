@@ -80,9 +80,10 @@ public final class CaseStatementEditor extends JPanel implements Validatable {
     resultTypeBox.add(Box.createHorizontalGlue());
 
     final boolean showResultPoly = null == stmt.getResultSwitch();
-    final ComplexPolynomial resultPoly = null == stmt.getResultPoly() ? new ComplexPolynomial() : stmt.getResultPoly();
-    final SwitchStatement resultSwitch = null == stmt.getResultSwitch() ? new SwitchStatement()
-        : stmt.getResultSwitch();
+    final ComplexPolynomial stmtResultPoly = stmt.getResultPoly();
+    final ComplexPolynomial resultPoly = null == stmtResultPoly ? new ComplexPolynomial() : stmtResultPoly;
+    final SwitchStatement stmtSwitch = stmt.getResultSwitch();
+    final SwitchStatement resultSwitch = null == stmtSwitch ? new SwitchStatement() : stmtSwitch;
 
     final CardLayout resultLayout = new CardLayout();
     final JPanel resultPanel = new JPanel(resultLayout);

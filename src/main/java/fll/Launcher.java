@@ -47,6 +47,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.scheduler.SchedulerUI;
@@ -542,7 +543,7 @@ public class Launcher extends JFrame {
     }
   }
 
-  private TomcatLauncher webserverLauncher = null;
+  private @Nullable TomcatLauncher webserverLauncher = null;
 
   private void startWebserver(final boolean loadFrontPage) {
     if (null == webserverLauncher) {
@@ -613,7 +614,7 @@ public class Launcher extends JFrame {
    *
    * @return null if the file cannot be found
    */
-  private Path getFLLHtmlFile() {
+  private @Nullable Path getFLLHtmlFile() {
     final Path classesPath = TomcatLauncher.getClassesPath();
 
     final String[] possibleLocations = { //
@@ -634,7 +635,7 @@ public class Launcher extends JFrame {
   /**
    * @return the directory or null if not found
    */
-  private Path getSponsorLogosDirectory() {
+  private @Nullable Path getSponsorLogosDirectory() {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
     if (null == webroot) {
@@ -653,7 +654,7 @@ public class Launcher extends JFrame {
   /**
    * @return the directory or null if not found
    */
-  private Path getSlideshowDirectory() {
+  private @Nullable Path getSlideshowDirectory() {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
     if (null == webroot) {
@@ -672,7 +673,7 @@ public class Launcher extends JFrame {
   /**
    * @return the directory or null if not found
    */
-  private Path getCustomDirectory() {
+  private @Nullable Path getCustomDirectory() {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
     if (null == webroot) {
@@ -710,7 +711,7 @@ public class Launcher extends JFrame {
    *
    * @return null if the file cannot be found
    */
-  private Path getDocsHtmlFile() {
+  private @Nullable Path getDocsHtmlFile() {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final String[] possibleLocations = { //
                                          "../web/documentation", // distribution

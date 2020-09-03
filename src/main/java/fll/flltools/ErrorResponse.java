@@ -6,6 +6,8 @@
 
 package fll.flltools;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -29,18 +31,18 @@ public class ErrorResponse extends BaseMessage {
    * @param seq see {@link #getSeq()}
    */
   public ErrorResponse(@JsonProperty("message") final String message,
-                       @JsonProperty("seq") final Integer seq) {
+                       @JsonProperty("seq") final @Nullable Integer seq) {
     super(MhubMessageType.ERROR_RESPONSE);
     this.seq = seq;
     this.message = message;
   }
 
-  private final Integer seq;
+  private final @Nullable Integer seq;
 
   /**
    * @return the sequence number, may be null
    */
-  public Integer getSeq() {
+  public @Nullable Integer getSeq() {
     return seq;
   }
 
