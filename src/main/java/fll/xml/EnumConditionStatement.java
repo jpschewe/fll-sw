@@ -77,7 +77,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
     mRightString = null;
   }
 
-  private String mLeftString;
+  private @Nullable String mLeftString;
 
   /**
    * Left string, may be null, but then leftGoal cannot not null at evaluation
@@ -92,7 +92,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
   /**
    * @param v see {@link #getLeftString()}
    */
-  public void setLeftString(final String v) {
+  public void setLeftString(final @Nullable String v) {
     mLeftString = v;
   }
 
@@ -111,20 +111,20 @@ public class EnumConditionStatement extends AbstractConditionStatement {
   /**
    * @param v see {@link #getLeftGoalRef()}
    */
-  public void setLeftGoalRef(final GoalRef v) {
+  public void setLeftGoalRef(final @Nullable GoalRef v) {
     mLeftGoalRef = v;
   }
 
   /**
    * Left goal, may be null, but then {@link #getLeftString()} must not be null at
-   * evalution time.
+   * evaluation time.
    * If {@link #getLeftGoalRef()} is not null, resolves the goal reference to a
    * goal.
    *
    * @see GoalRef#getGoal()
    * @return the left goal
    */
-  public AbstractGoal getLeftGoal() {
+  public @Nullable AbstractGoal getLeftGoal() {
     if (null == mLeftGoalRef) {
       return null;
     } else {
@@ -132,7 +132,24 @@ public class EnumConditionStatement extends AbstractConditionStatement {
     }
   }
 
-  private String mRightString;
+  /**
+   * @return the left goal name or the left string, whichever is not null
+   * @throws IllegalArgumentException if both {@link #getLeftGoal()}
+   *           and{@link #getLeftString()} are null
+   */
+  public String getLeftGoalNameOrString() {
+    final AbstractGoal leftGoal = getLeftGoal();
+    final String leftRawString = getLeftString();
+    if (null != leftGoal) {
+      return leftGoal.getName();
+    } else if (null != leftRawString) {
+      return leftRawString;
+    } else {
+      throw new IllegalArgumentException("Right goal ref OR right string must be non-null");
+    }
+  }
+
+  private @Nullable String mRightString;
 
   /**
    * Right string, may be null, but then rightGoal is not null.
@@ -146,7 +163,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
   /**
    * @param v see {@link #getRightString()}
    */
-  public void setRightString(final String v) {
+  public void setRightString(final @Nullable String v) {
     mRightString = v;
   }
 
@@ -165,7 +182,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
   /**
    * @param v see {@link #getRightGoalRef()}
    */
-  public void setRightGoalRef(final GoalRef v) {
+  public void setRightGoalRef(final @Nullable GoalRef v) {
     mRightGoalRef = v;
   }
 
@@ -178,11 +195,28 @@ public class EnumConditionStatement extends AbstractConditionStatement {
    * @return the goal for the right side of the conditional
    * @see GoalRef#getGoal()
    */
-  public AbstractGoal getRightGoal() {
+  public @Nullable AbstractGoal getRightGoal() {
     if (null == mRightGoalRef) {
       return null;
     } else {
       return mRightGoalRef.getGoal();
+    }
+  }
+
+  /**
+   * @return the right goal name or the right string, whichever is not null
+   * @throws IllegalArgumentException if both {@link #getRightGoal()}
+   *           and{@link #getRightString()} are null
+   */
+  public String getRightGoalNameOrString() {
+    final AbstractGoal rightGoal = getRightGoal();
+    final String rightRawString = getRightString();
+    if (null != rightGoal) {
+      return rightGoal.getName();
+    } else if (null != rightRawString) {
+      return rightRawString;
+    } else {
+      throw new IllegalArgumentException("Right goal ref OR right string must be non-null");
     }
   }
 
@@ -195,26 +229,16 @@ public class EnumConditionStatement extends AbstractConditionStatement {
   public boolean isTrue(final TeamScore teamScore) {
     if (null == mLeftGoalRef
         && null == mLeftString) {
-      throw new NullPointerException("Left goal ref OR left string must be non-null");
+      throw new IllegalArgumentException("Left goal ref OR left string must be non-null");
     }
     if (null == mRightGoalRef
         && null == mRightString) {
-      throw new NullPointerException("Right goal ref OR right string must be non-null");
+      throw new IllegalArgumentException("Right goal ref OR right string must be non-null");
     }
 
-    final String leftStr;
-    if (null != getLeftGoal()) {
-      leftStr = teamScore.getEnumRawScore(getLeftGoal().getName());
-    } else {
-      leftStr = mLeftString;
-    }
+    final String leftStr = getLeftGoalNameOrString();
 
-    final String rightStr;
-    if (null != getRightGoal()) {
-      rightStr = teamScore.getEnumRawScore(getRightGoal().getName());
-    } else {
-      rightStr = mRightString;
-    }
+    final String rightStr = getRightGoalNameOrString();
 
     final boolean result = leftStr.equalsIgnoreCase(rightStr);
     switch (getComparison()) {

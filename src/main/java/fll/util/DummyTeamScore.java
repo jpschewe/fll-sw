@@ -8,6 +8,8 @@ package fll.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.web.playoff.Playoff;
 import fll.web.playoff.TeamScore;
 
@@ -56,7 +58,7 @@ public class DummyTeamScore extends TeamScore {
   }
 
   @Override
-  public String getEnumRawScore(final String goalName) {
+  public @Nullable String getEnumRawScore(final String goalName) {
     if (!scoreExists()) {
       return null;
     } else {
