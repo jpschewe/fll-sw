@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
-import java.util.Objects;
 
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Valve;
