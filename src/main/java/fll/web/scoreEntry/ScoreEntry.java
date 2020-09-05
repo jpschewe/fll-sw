@@ -1137,21 +1137,24 @@ public final class ScoreEntry {
                        polyToString(cond.getRight()));
     } else if (ele instanceof EnumConditionStatement) {
       final EnumConditionStatement cond = (EnumConditionStatement) ele;
+
+      final String leftRawStr = cond.getLeftGoalNameOrString();
       final String leftStr;
       if (null != cond.getLeftGoal()) {
-        leftStr = getVarNameForRawScore(cond.getLeftGoal().getName());
+        leftStr = getVarNameForRawScore(leftRawStr);
       } else {
         leftStr = "'"
-            + cond.getLeftString()
+            + leftRawStr
             + "'";
       }
 
+      final String rightRawStr = cond.getRightGoalNameOrString();
       final String rightStr;
       if (null != cond.getRightGoal()) {
-        rightStr = getVarNameForRawScore(cond.getRightGoal().getName());
+        rightStr = getVarNameForRawScore(rightRawStr);
       } else {
         rightStr = "'"
-            + cond.getLeftString()
+            + rightRawStr
             + "'";
       }
 

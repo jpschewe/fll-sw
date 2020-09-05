@@ -7,6 +7,8 @@ package fll.web.playoff;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * A team score in an HTTP request.
  */
@@ -16,32 +18,26 @@ public final class HttpTeamScore extends TeamScore {
                        final int runNumber,
                        final HttpServletRequest request) {
     super(teamNumber, runNumber);
-    _request = request;
+    this.request = request;
   }
 
-  /**
-   * @see fll.web.playoff.TeamScore#getEnumRawScore(java.lang.String)
-   */
   @Override
-  public String getEnumRawScore(final String goalName) {
+  public @Nullable String getEnumRawScore(final String goalName) {
     if (!scoreExists()) {
       return null;
     } else {
-      return _request.getParameter(goalName);
+      return request.getParameter(goalName);
     }
   }
 
-  /**
-   * @see fll.web.playoff.TeamScore#getRawScore(java.lang.String)
-   */
   @Override
   public double getRawScore(final String goalName) {
     if (!scoreExists()) {
       return Double.NaN;
-    } else if (null == _request.getParameter(goalName)) {
+    } else if (null == request.getParameter(goalName)) {
       return Double.NaN;
     } else {
-      return Double.parseDouble(_request.getParameter(goalName));
+      return Double.parseDouble(request.getParameter(goalName));
     }
   }
 
@@ -53,12 +49,13 @@ public final class HttpTeamScore extends TeamScore {
     if (!scoreExists()) {
       return false;
     } else {
-      final String noShow = _request.getParameter("NoShow");
+      final String noShow = request.getParameter("NoShow");
       if (null == noShow) {
         throw new RuntimeException("Missing parameter: NoShow");
       }
       return noShow.equalsIgnoreCase("true")
-          || noShow.equalsIgnoreCase("t") || noShow.equals("1");
+          || noShow.equalsIgnoreCase("t")
+          || noShow.equals("1");
     }
   }
 
@@ -69,22 +66,20 @@ public final class HttpTeamScore extends TeamScore {
     } else if (!scoreExists()) {
       return false;
     } else {
-      final String noShow = _request.getParameter("Bye");
+      final String noShow = request.getParameter("Bye");
       if (null == noShow) {
         throw new RuntimeException("Missing parameter: Bye");
       }
       return noShow.equalsIgnoreCase("true")
-          || noShow.equalsIgnoreCase("t") || noShow.equals("1");
+          || noShow.equalsIgnoreCase("t")
+          || noShow.equals("1");
     }
   }
 
-  /*
-   * @see fll.web.playoff.TeamScore#scoreExists()
-   */
   @Override
   public boolean scoreExists() {
     return true;
   }
 
-  private final HttpServletRequest _request;
+  private final HttpServletRequest request;
 }

@@ -7,6 +7,7 @@ package fll.subjective;
 
 import java.text.ParseException;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Element;
 
 import fll.Utilities;
@@ -31,7 +32,7 @@ import fll.web.playoff.TeamScore;
   }
 
   @Override
-  public String getEnumRawScore(final String goalName) {
+  public @Nullable String getEnumRawScore(final String goalName) {
     if (!scoreExists()) {
       return null;
     } else {
