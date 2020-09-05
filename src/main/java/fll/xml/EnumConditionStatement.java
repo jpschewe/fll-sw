@@ -19,15 +19,18 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
  */
 public class EnumConditionStatement extends AbstractConditionStatement {
 
+  /**
+   * XML tag used for this class.
+   */
   public static final String TAG_NAME = "enumCondition";
 
-  public static final String ENUM_GOAL_REF_TAG_NAME = "enumGoalRef";
+  private static final String ENUM_GOAL_REF_TAG_NAME = "enumGoalRef";
 
-  public static final String STRING_CONSTANT_TAG_NAME = "stringConstant";
+  private static final String STRING_CONSTANT_TAG_NAME = "stringConstant";
 
-  public static final String GOAL_ATTRIBUTE = "goal";
+  private static final String GOAL_ATTRIBUTE = "goal";
 
-  public static final String VALUE_ATTRIBUTE = "value";
+  private static final String VALUE_ATTRIBUTE = "value";
 
   /**
    * @param ele the element to parse
