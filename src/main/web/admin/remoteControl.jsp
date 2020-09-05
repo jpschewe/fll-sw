@@ -170,7 +170,7 @@
                 <th>
                     Scoreboard
                     <br />
-                    Select the award groups to show on the display (non
+                    Select the judging groups to show on the display (non
                     checked is the same as all checked)
                 </th>
                 <c:forEach items="${displayInformation}"
@@ -190,26 +190,26 @@
                             </c:otherwise>
                         </c:choose>
                         <br />
-                        <!-- choose award groups -->
-                        <c:forEach items="${allAwardGroups}"
-                            var="awardGroup" varStatus="agIterStatus">
+                        <!-- choose judging groups -->
+                        <c:forEach items="${allJudgingGroups}"
+                            var="judgingGroup" varStatus="jgIterStatus">
                             <c:choose>
                                 <c:when
-                                    test="${ displayInfo.determineScoreboardAwardGroups(allAwardGroups).contains(awardGroup) }">
+                                    test="${ displayInfo.determineScoreboardJudgingGroups(allJudgingGroups).contains(judgingGroup) }">
                                     <input type="checkbox"
-                                        name="${displayInfo.awardGroupsFormParamName}"
-                                        id="${displayInfo.awardGroupsFormParamName}${agIterStatus.index}"
-                                        value="${awardGroup}" checked />
+                                        name="${displayInfo.judgingGroupsFormParamName}"
+                                        id="${displayInfo.judgingGroupsFormParamName}${jgIterStatus.index}"
+                                        value="${judgingGroup}" checked />
                                 </c:when>
                                 <c:otherwise>
                                     <input type="checkbox"
-                                        name="${displayInfo.awardGroupsFormParamName}"
-                                        id="${displayInfo.awardGroupsFormParamName}${agIterStatus.index}"
-                                        value="${awardGroup}" />
+                                        name="${displayInfo.judgingGroupsFormParamName}"
+                                        id="${displayInfo.judgingGroupsFormParamName}${jgIterStatus.index}"
+                                        value="${judgingGroup}" />
                                 </c:otherwise>
                             </c:choose>
                             <label
-                                for="${displayInfo.awardGroupsFormParamName}${agIterStatus.index}">${awardGroup}</label>
+                                for="${displayInfo.judgingGroupsFormParamName}${jgIterStatus.index}">${judgingGroup}</label>
                             <br />
                         </c:forEach>
                     </td>

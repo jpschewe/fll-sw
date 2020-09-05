@@ -32,7 +32,6 @@ import fll.flltools.displaySystem.list.SetArray;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.DisplayInfo;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
 
@@ -58,7 +57,6 @@ public class Last8 extends BaseFLLServlet {
     final Formatter formatter = new Formatter(response.getWriter());
     final String showOrgStr = request.getParameter("showOrganization");
     final boolean showOrg = null == showOrgStr ? true : Boolean.parseBoolean(showOrgStr);
-    final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
 
     formatter.format("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">%n");
     formatter.format("<html>%n");
@@ -92,31 +90,27 @@ public class Last8 extends BaseFLLServlet {
     // scores here
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-      final List<String> awardGroups = displayInfo.determineScoreboardAwardGroups(Queries.getAwardGroups(connection));
-
       processScores(application, (teamNumber,
                                   teamName,
                                   organization,
                                   awardGroup,
                                   formattedScore) -> {
-        if (awardGroups.contains(awardGroup)) {
-          formatter.format("<tr>%n");
-          formatter.format("<td class='left'>%d</td>%n", teamNumber);
-          if (null == teamName) {
-            teamName = "&nbsp;";
+        formatter.format("<tr>%n");
+        formatter.format("<td class='left'>%d</td>%n", teamNumber);
+        if (null == teamName) {
+          teamName = "&nbsp;";
+        }
+        formatter.format("<td class='left truncate'>%s</td>%n", teamName);
+        if (showOrg) {
+          if (null == organization) {
+            organization = "&nbsp;";
           }
-          formatter.format("<td class='left truncate'>%s</td>%n", teamName);
-          if (showOrg) {
-            if (null == organization) {
-              organization = "&nbsp;";
-            }
-            formatter.format("<td class='left truncate'>%s</td>%n", organization);
-          }
-          formatter.format("<td class='right truncate'>%s</td>%n", awardGroup);
+          formatter.format("<td class='left truncate'>%s</td>%n", organization);
+        }
+        formatter.format("<td class='right truncate'>%s</td>%n", awardGroup);
 
-          formatter.format("<td class='right'>%s</td>", formattedScore);
-          formatter.format("</tr>%n");
-        } // included award group
+        formatter.format("<td class='right'>%s</td>", formattedScore);
+        formatter.format("</tr>%n");
       });
     } catch (final SQLException e) {
       throw new FLLInternalException("Got an error getting the most recent scores from the database", e);
@@ -169,11 +163,11 @@ public class Last8 extends BaseFLLServlet {
   }
 
   private interface ProcessScoreEntry {
-    void execute(final int teamNumber,
-                 final @Nullable String teamName,
-                 final @Nullable String organization,
-                 final String awardGroup,
-                 final String formattedScore);
+    void execute(int teamNumber,
+                 @Nullable String teamName,
+                 @Nullable String organization,
+                 String awardGroup,
+                 String formattedScore);
   }
 
   /**

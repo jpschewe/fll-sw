@@ -127,9 +127,16 @@ TABLE.B {
           <tr
             class='left'
             bgcolor='${teamHeaderColor[team.teamNumber] }'>
-            <td width='25%'>&nbsp;&nbsp;${team.awardGroup }&nbsp;&nbsp;
-            </td>
-            <td class='right'>Team&nbsp;#:&nbsp;${team.teamNumber}&nbsp;&nbsp;
+                        <c:choose>
+                            <c:when
+                                test="${team.awardGroup != team.judgingGroup }">
+                                <td width='25%'>&nbsp;&nbsp;${team.awardGroup }&nbsp;&nbsp;(${team.judgingGroup })</td>
+                            </c:when>
+                            <c:otherwise>
+                                <td width='25%'>&nbsp;&nbsp;${team.awardGroup }&nbsp;&nbsp;</td>
+                            </c:otherwise>
+                        </c:choose>
+                        <td class='right'>Team&nbsp;#:&nbsp;${team.teamNumber}&nbsp;&nbsp;
             </td>
           </tr>
           <tr class='left'>
