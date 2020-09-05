@@ -230,15 +230,6 @@ public class EnumConditionStatement extends AbstractConditionStatement {
    */
   @Override
   public boolean isTrue(final TeamScore teamScore) {
-    if (null == mLeftGoalRef
-        && null == mLeftString) {
-      throw new IllegalArgumentException("Left goal ref OR left string must be non-null");
-    }
-    if (null == mRightGoalRef
-        && null == mRightString) {
-      throw new IllegalArgumentException("Right goal ref OR right string must be non-null");
-    }
-
     final String leftStr = getLeftGoalNameOrString();
 
     final String rightStr = getRightGoalNameOrString();
