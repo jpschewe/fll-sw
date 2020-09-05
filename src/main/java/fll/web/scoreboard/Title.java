@@ -15,16 +15,17 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
+import fll.Tournament;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 
 /**
- * Helper for award-group-title.jsp.
+ * Helper for title.jsp.
  */
-public final class AwardGroupTitle {
+public final class Title {
 
-  private AwardGroupTitle() {
+  private Title() {
   }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
@@ -41,19 +42,19 @@ public final class AwardGroupTitle {
                                      final PageContext pageContext) {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
+      final Tournament tournament = Tournament.getCurrentTournament(connection);
 
       final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
-      final List<String> allAwardGroups = Queries.getAwardGroups(connection);
-      final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
 
-      final String awardGroupTitle = String.join(", ", awardGroupsToDisplay);
+      final List<String> allJudgingGroups = Queries.getJudgingStations(connection, tournament.getTournamentID());
+      final List<String> judgingGroupsToDisplay = displayInfo.determineScoreboardJudgingGroups(allJudgingGroups);
 
-      pageContext.setAttribute("awardGroupTitle", awardGroupTitle);
+      final String judgingGroupTitle = String.join(", ", judgingGroupsToDisplay);
 
+      pageContext.setAttribute("judgeGroupTitle", judgingGroupTitle);
     } catch (final SQLException sqle) {
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
-
     }
   }
 

@@ -117,8 +117,8 @@ public class RemoteControlPost extends BaseFLLServlet {
         }
         display.setBrackets(brackets);
 
-        final List<String> awardGroupsToDisplay = Arrays.asList(request.getParameterValues(display.getAwardGroupsFormParamName()));
-        display.setScoreboardAwardGroups(awardGroupsToDisplay);
+        final List<String> judgingGroupsToDisplay = Arrays.asList(request.getParameterValues(display.getJudgingGroupsFormParamName()));
+        display.setScoreboardJudgingGroups(judgingGroupsToDisplay);
       }
     }
 

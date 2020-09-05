@@ -648,44 +648,46 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
   } // class H2HBracketDisplay
 
-  private final List<String> scoreboardAwardGroups = new LinkedList<>();
+  private final List<String> scoreboardJudgingGroups = new LinkedList<>();
 
   /**
-   * @return the award groups to display on the score board, may be empty meaning
+   * @return the judging groups to display on the score board, may be empty
+   *         meaning
    *         display all
    */
   @NonNull
-  public List<String> getScoreboardAwardGroups() {
-    return Collections.unmodifiableList(scoreboardAwardGroups);
+  public List<String> getScoreboardJudgingGroups() {
+    return Collections.unmodifiableList(scoreboardJudgingGroups);
   }
 
   /**
-   * @param v see {@link #getScoreboardAwardGroups()}
+   * @param v see {@link #getScoreboardJudgingGroups()}
    */
-  public void setScoreboardAwardGroups(final List<String> v) {
-    scoreboardAwardGroups.clear();
-    scoreboardAwardGroups.addAll(v);
+  public void setScoreboardJudgingGroups(final List<String> v) {
+    scoreboardJudgingGroups.clear();
+    scoreboardJudgingGroups.addAll(v);
   }
 
   /**
-   * Helper function for {@link #getScoreboardAwardGroups()} that handles the
-   * configured value being empty or not matching any of the award groups for the
+   * Helper function for {@link #getScoreboardJudgingGroups()} that handles the
+   * configured value being empty or not matching any of the judging groups for
+   * the
    * tournament.
    *
-   * @param allAwardGroups filter from this list
-   * @return the configured award groups or all if none are configured
+   * @param allJudgingGroups filter from this list
+   * @return the configured judging groups or all if none are configured
    */
   @NonNull
-  public List<String> determineScoreboardAwardGroups(final List<String> allAwardGroups) {
-    final List<String> configuredGroups = getScoreboardAwardGroups();
+  public List<String> determineScoreboardJudgingGroups(final List<String> allJudgingGroups) {
+    final List<String> configuredGroups = getScoreboardJudgingGroups();
     if (configuredGroups.isEmpty()) {
-      return allAwardGroups;
+      return allJudgingGroups;
     } else {
       // filter to those selected
-      final List<String> filtered = allAwardGroups.stream().filter(v -> configuredGroups.contains(v))
-                                                  .collect(Collectors.toList());
+      final List<String> filtered = allJudgingGroups.stream().filter(v -> configuredGroups.contains(v))
+                                                    .collect(Collectors.toList());
       if (filtered.isEmpty()) {
-        return allAwardGroups;
+        return allJudgingGroups;
       } else {
         return filtered;
       }
@@ -695,9 +697,9 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   /**
    * @return the parameter name for the remote page
    */
-  public String getAwardGroupsFormParamName() {
+  public String getJudgingGroupsFormParamName() {
     return getFormParamPrefix()
-        + "awardGroups";
+        + "judgingGroups";
   }
 
 }

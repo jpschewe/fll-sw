@@ -15,28 +15,29 @@ import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
+import fll.Tournament;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.playoff.Playoff;
 import fll.web.report.finalist.FinalistSchedule;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Context information for remoteControl.jsp.
  */
-public class RemoteControl {
+public final class RemoteControl {
+
+  private RemoteControl() {
+  }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   public static void populateContext(final ServletContext application,
                                      final PageContext pageContext) {
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
-      final int currentTournament = Queries.getCurrentTournament(connection);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
+      final Tournament currentTournament = Tournament.getCurrentTournament(connection);
 
-      final List<String> divisions = Playoff.getPlayoffBrackets(connection, currentTournament);
+      final List<String> divisions = Playoff.getPlayoffBrackets(connection, currentTournament.getTournamentID());
       pageContext.setAttribute("divisions", divisions);
 
       if (null == application.getAttribute("playoffDivision")
@@ -53,18 +54,19 @@ public class RemoteControl {
         application.setAttribute(ApplicationAttributes.DISPLAY_PAGE, "welcome");
       }
 
-      pageContext.setAttribute("numPlayoffRounds", Queries.getNumPlayoffRounds(connection, currentTournament));
+      pageContext.setAttribute("numPlayoffRounds",
+                               Queries.getNumPlayoffRounds(connection, currentTournament.getTournamentID()));
 
-      final Collection<String> finalistDivisions = FinalistSchedule.getAllDivisions(connection, currentTournament);
+      final Collection<String> finalistDivisions = FinalistSchedule.getAllDivisions(connection,
+                                                                                    currentTournament.getTournamentID());
       pageContext.setAttribute("finalistDivisions", finalistDivisions);
 
-      pageContext.setAttribute("allAwardGroups", Queries.getAwardGroups(connection, currentTournament));
+      pageContext.setAttribute("allJudgingGroups",
+                               Queries.getJudgingStations(connection, currentTournament.getTournamentID()));
 
     } catch (final SQLException e) {
       LOGGER.error(e.getMessage(), e);
       throw new RuntimeException(e.getMessage(), e);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 }

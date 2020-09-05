@@ -35,7 +35,9 @@ import fll.xml.ScoreType;
 /**
  * Support for allteams.jsp.
  */
-public class AllTeams {
+public final class AllTeams {
+  private AllTeams() {
+  }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -51,8 +53,8 @@ public class AllTeams {
 
     int numScores = 0;
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    try (final Connection connection = datasource.getConnection();
-        final PreparedStatement prep = connection.prepareStatement("SELECT " //
+    try (Connection connection = datasource.getConnection();
+        PreparedStatement prep = connection.prepareStatement("SELECT " //
             + " verified_performance.RunNumber, verified_performance.NoShow, verified_performance.ComputedTotal"
             + " FROM verified_performance" //
             + " WHERE verified_performance.Tournament = ?" //
@@ -67,8 +69,9 @@ public class AllTeams {
       final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection, tournamentId);
 
       final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
-      final List<String> allAwardGroups = Queries.getAwardGroups(connection);
-      final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
+      final List<String> allAwardGroups = Queries.getAwardGroups(connection, tournamentId);
+      final List<String> allJudgingGroups = Queries.getJudgingStations(connection, tournamentId);
+      final List<String> judgingGroupsToDisplay = displayInfo.determineScoreboardJudgingGroups(allJudgingGroups);
 
       prep.setInt(1, tournamentId);
       prep.setBoolean(3, !runningHeadToHead);
@@ -80,14 +83,14 @@ public class AllTeams {
       for (final Map.Entry<Integer, TournamentTeam> entry : tournamentTeams.entrySet()) {
         final TournamentTeam team = entry.getValue();
 
-        if (awardGroupsToDisplay.contains(team.getAwardGroup())) {
+        if (judgingGroupsToDisplay.contains(team.getJudgingGroup())) {
           final String headerColor = Queries.getColorForIndex(allAwardGroups.indexOf(team.getAwardGroup()));
           teamHeaderColor.put(entry.getKey(), headerColor);
 
           prep.setInt(2, entry.getKey());
 
           final List<ComputedPerformanceScore> teamScores = new LinkedList<>();
-          try (final ResultSet rs = prep.executeQuery()) {
+          try (ResultSet rs = prep.executeQuery()) {
             while (rs.next()) {
               final ComputedPerformanceScore score = new ComputedPerformanceScore(floatingPointScores, rs.getInt(1),
                                                                                   rs.getBoolean(2), rs.getDouble(3));
@@ -101,7 +104,7 @@ public class AllTeams {
             teamsWithScores.add(entry.getValue());
             scores.put(entry.getKey(), teamScores);
           }
-        } // if in displayed award groups
+        } // if in displayed judging groups
 
       } // foreach tournament team
 
