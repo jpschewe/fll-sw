@@ -145,7 +145,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
     } else if (null != leftRawString) {
       return leftRawString;
     } else {
-      throw new IllegalArgumentException("Right goal ref OR right string must be non-null");
+      throw new IllegalArgumentException("Left goal ref OR right string must be non-null");
     }
   }
 
@@ -236,9 +236,21 @@ public class EnumConditionStatement extends AbstractConditionStatement {
       throw new IllegalArgumentException("Right goal ref OR right string must be non-null");
     }
 
-    final String leftStr = getLeftGoalNameOrString();
+    final String leftRawStr = getLeftGoalNameOrString();
+    final String leftStr;
+    if (null != getLeftGoal()) {
+      leftStr = teamScore.getEnumRawScore(leftRawStr);
+    } else {
+      leftStr = leftRawStr;
+    }
 
-    final String rightStr = getRightGoalNameOrString();
+    final String rightRawStr = getRightGoalNameOrString();
+    final String rightStr;
+    if (null != getRightGoal()) {
+      rightStr = teamScore.getEnumRawScore(rightRawStr);
+    } else {
+      rightStr = rightRawStr;
+    }
 
     final boolean result = leftStr.equalsIgnoreCase(rightStr);
     switch (getComparison()) {
