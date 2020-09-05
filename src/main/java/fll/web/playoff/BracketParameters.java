@@ -21,8 +21,6 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-
-
 import fll.db.TableInformation;
 import fll.util.FLLRuntimeException;
 
@@ -47,6 +45,10 @@ public class BracketParameters extends BaseFLLServlet {
    * <li>defaultSort - BracketSortType</li>
    * <li>tableInfo - List&lt;TableInformation&gt;</li>
    * </ul>
+   * 
+   * @param application the application context
+   * @param session the session context
+   * @param pageContext the page context
    */
   public static void populateContext(final ServletContext application,
                                      final HttpSession session,

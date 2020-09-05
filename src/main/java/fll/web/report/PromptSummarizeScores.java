@@ -24,7 +24,6 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Support for and handle the result from promptSummarizeScores.jsp.
@@ -64,6 +63,9 @@ public class PromptSummarizeScores extends BaseFLLServlet {
    * the session variable SUMMARY_REDIRECT to point to
    * redirect.
    *
+   * @param response used to send a redirect
+   * @param application the application context
+   * @param session the session context
    * @param redirect the page to visit once the scores have been summarized
    * @return if the summary scores need to be updated, the calling method should
    *         return immediately if this is true as a redirect has been executed.
@@ -76,10 +78,8 @@ public class PromptSummarizeScores extends BaseFLLServlet {
       LOGGER.trace("top check if summary updated");
     }
 
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
       final int tournamentId = Queries.getCurrentTournament(connection);
       final Tournament tournament = Tournament.findTournamentByID(connection, tournamentId);
@@ -111,8 +111,6 @@ public class PromptSummarizeScores extends BaseFLLServlet {
     } catch (final IOException e) {
       LOGGER.error(e, e);
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }

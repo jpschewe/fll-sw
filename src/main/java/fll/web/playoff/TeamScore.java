@@ -5,6 +5,8 @@
  */
 package fll.web.playoff;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Represents a score for a team. Only the values of simple goals are available
  * through this object.
@@ -28,12 +30,13 @@ public abstract class TeamScore {
   /**
    * Create a performance TeamScore for the specified team and run number.
    *
+   * @param teamNumber the team the score is for
    * @param runNumber 1-based run number
    */
   public TeamScore(final int teamNumber,
                    final int runNumber) {
-    _teamNumber = teamNumber;
-    _runNumber = runNumber;
+    this.teamNumber = teamNumber;
+    this.runNumber = runNumber;
   }
 
   /**
@@ -42,10 +45,10 @@ public abstract class TeamScore {
    * @return the team
    */
   public final int getTeamNumber() {
-    return _teamNumber;
+    return teamNumber;
   }
 
-  private final int _teamNumber;
+  private final int teamNumber;
 
   /**
    * Check if the score exists. If it doesn't exist, the other score methods
@@ -77,10 +80,10 @@ public abstract class TeamScore {
    * @return the run for the scores
    */
   public final int getRunNumber() {
-    return _runNumber;
+    return runNumber;
   }
 
-  private final int _runNumber;
+  private final int runNumber;
 
   /**
    * The raw score for a particular simple goal, as a double.
@@ -88,7 +91,7 @@ public abstract class TeamScore {
    * @param goalName the goal to get the score for
    * @return the score, NaN if there is no score for the specified name
    */
-  public abstract double getRawScore(final String goalName);
+  public abstract double getRawScore(String goalName);
 
   /**
    * The raw score for a particular enumerated goal, as a String.
@@ -96,6 +99,6 @@ public abstract class TeamScore {
    * @param goalName the goal to get the score for
    * @return the score, null if there is no score for the specified name
    */
-  public abstract String getEnumRawScore(String goalName);
+  public abstract @Nullable String getEnumRawScore(String goalName);
 
 }

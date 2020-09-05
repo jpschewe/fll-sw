@@ -10,6 +10,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
@@ -18,8 +20,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * is valid.
  */
 public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
-
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final boolean closeResultSet;
 
@@ -37,14 +37,16 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
       throws SQLException {
     super(teamNumber);
 
-    _result = rs;
-    _scoreExists = true;
+    result = rs;
+    scoreExists = true;
     closeResultSet = false;
   }
 
   /**
    * Create a database team score object for a performance score.
    *
+   * @param categoryName the category to delete the score from
+   * @param tournament the tournament
    * @param connection the connection to get the data from
    * @param teamNumber passed to superclass
    * @param runNumber passed to superclass
@@ -58,8 +60,8 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
       throws SQLException {
     super(teamNumber, runNumber);
 
-    _result = createResultSet(connection, tournament, categoryName);
-    _scoreExists = _result.next();
+    result = createResultSet(connection, tournament, categoryName);
+    scoreExists = result.next();
     closeResultSet = true;
   }
 
@@ -79,13 +81,13 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
       throws SQLException {
     super(teamNumber, runNumber);
 
-    _result = rs;
-    _scoreExists = true;
+    result = rs;
+    scoreExists = true;
     closeResultSet = false;
   }
 
   @Override
-  public String getEnumRawScore(final String goalName) {
+  public @Nullable String getEnumRawScore(final String goalName) {
     if (!scoreExists()) {
       return null;
     } else {
@@ -146,27 +148,18 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
    */
   @Override
   public boolean scoreExists() {
-    return _scoreExists;
+    return scoreExists;
   }
 
-  private final boolean _scoreExists;
+  private final boolean scoreExists;
 
-  @Override
-  protected void finalize() {
-    try {
-      close();
-    } catch (final SQLException e) {
-      LOGGER.error("Error cleaning up", e);
-    }
-  }
-
-  private final ResultSet _result;
+  private final ResultSet result;
 
   private ResultSet getResultSet() {
-    return _result;
+    return result;
   }
 
-  private PreparedStatement _prep = null;
+  private @Nullable PreparedStatement prep = null;
 
   /**
    * Create the result set.
@@ -178,18 +171,18 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
       throws SQLException {
     ResultSet result;
     if (NON_PERFORMANCE_RUN_NUMBER == getRunNumber()) {
-      _prep = connection.prepareStatement("SELECT * FROM "
+      prep = connection.prepareStatement("SELECT * FROM "
           + categoryName
           + " WHERE TeamNumber = ? AND Tournament = ?");
     } else {
-      _prep = connection.prepareStatement("SELECT * FROM "
+      prep = connection.prepareStatement("SELECT * FROM "
           + categoryName
           + " WHERE TeamNumber = ? AND Tournament = ? AND RunNumber = ?");
-      _prep.setInt(3, getRunNumber());
+      prep.setInt(3, getRunNumber());
     }
-    _prep.setInt(1, getTeamNumber());
-    _prep.setInt(2, tournament);
-    result = _prep.executeQuery();
+    prep.setInt(1, getTeamNumber());
+    prep.setInt(2, tournament);
+    result = prep.executeQuery();
     return result;
   }
 
@@ -197,12 +190,12 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
   @Override
   public void close() throws SQLException {
     if (closeResultSet) {
-      _result.close();
+      result.close();
     }
 
-    if (null != _prep) {
-      _prep.close();
-      _prep = null;
+    if (null != prep) {
+      prep.close();
+      prep = null;
     }
   }
   // end AutoCloseable
