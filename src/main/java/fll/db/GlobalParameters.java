@@ -75,9 +75,10 @@ public final class GlobalParameters {
   public static final String DATABASE_VERSION = "DatabaseVersion";
 
   /**
-   * @param connection
+   * @param connection database connection
    * @return the prepared statement for getting a global parameter with the
-   *         values already filled in
+   *         values already filled in, the calling method must close this on all
+   *         execution paths
    * @throws SQLException on a database error
    */
   @SuppressFBWarnings(value = "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE", justification = "All callers clean up the PreparedStatement")

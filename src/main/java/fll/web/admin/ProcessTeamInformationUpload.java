@@ -95,13 +95,13 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
   /**
    * Make the changes.
    */
-  public static void processFile(final Connection connection,
-                                 final StringBuilder message,
-                                 final Path file,
-                                 final String sheetName,
-                                 final String teamNumberColumnName,
-                                 final String teamNameColumnName,
-                                 final String organizationColumnName)
+  private static void processFile(final Connection connection,
+                                  final StringBuilder message,
+                                  final Path file,
+                                  final String sheetName,
+                                  final String teamNumberColumnName,
+                                  final String teamNameColumnName,
+                                  final String organizationColumnName)
       throws SQLException, IOException, ParseException, InvalidFormatException {
 
     if (LOGGER.isTraceEnabled()) {
