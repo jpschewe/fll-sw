@@ -36,7 +36,6 @@ import fll.flltools.displaySystem.list.SetArray;
 import fll.util.FP;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.DisplayInfo;
 import fll.web.SessionAttributes;
 import fll.web.report.FinalComputedScores;
 import fll.xml.ChallengeDescription;
@@ -75,7 +74,6 @@ public class Top10 extends BaseFLLServlet {
     final String showOrgStr = request.getParameter("showOrganization");
     final boolean showOrg = null == showOrgStr ? true : Boolean.parseBoolean(showOrgStr);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
 
     try (Connection connection = datasource.getConnection()) {
@@ -89,8 +87,7 @@ public class Top10 extends BaseFLLServlet {
       ++awardGroupIndex;
 
       final List<String> allAwardGroups = Queries.getAwardGroups(connection);
-      final List<String> awardGroups = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
-      if (awardGroupIndex >= awardGroups.size()) {
+      if (awardGroupIndex >= allAwardGroups.size()) {
         awardGroupIndex = 0;
       }
       session.setAttribute("divisionIndex", Integer.valueOf(awardGroupIndex));
@@ -118,8 +115,8 @@ public class Top10 extends BaseFLLServlet {
       formatter.format("<col width='70px' />%n");
       formatter.format("</colgroup>%n");
 
-      if (!awardGroups.isEmpty()) {
-        final String awardGroupName = awardGroups.get(awardGroupIndex);
+      if (!allAwardGroups.isEmpty()) {
+        final String awardGroupName = allAwardGroups.get(awardGroupIndex);
 
         formatter.format("<tr>%n");
         int numColumns = 5;
