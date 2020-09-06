@@ -161,8 +161,7 @@ public class CaseStatement implements Evaluatable, Serializable {
   }
 
   /**
-   * Computed the value based on {@link #getResultPoly()} and
-   * {@link #getResultSwitch()}.
+   * Computed the value based on {@link #getResult()}.
    * 
    * @return score type for the statement
    */
