@@ -9,10 +9,11 @@ package fll.xml.ui;
 import java.awt.BorderLayout;
 import java.util.Collection;
 
-import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import fll.xml.EnumConditionStatement;
 import fll.xml.GoalScope;
@@ -23,14 +24,14 @@ import fll.xml.InequalityComparison;
  */
 /* package */ class EnumConditionStatementEditor extends JPanel implements Validatable {
 
-  private final EnumStringEditor leftEditor;
+  private final StringValueEditor leftEditor;
 
-  private final EnumStringEditor rightEditor;
+  private final StringValueEditor rightEditor;
 
   private final EnumConditionStatement stmt;
 
-  public EnumConditionStatementEditor(@Nonnull final EnumConditionStatement stmt,
-                                      @Nonnull final GoalScope goalScope) {
+  EnumConditionStatementEditor(@NonNull final EnumConditionStatement stmt,
+                               @NonNull final GoalScope goalScope) {
     super(new BorderLayout());
     this.stmt = stmt;
 
@@ -39,7 +40,7 @@ import fll.xml.InequalityComparison;
     final Box container = Box.createVerticalBox();
     add(container, BorderLayout.CENTER);
 
-    leftEditor = new EnumStringEditor(stmt.getLeftGoalRef(), stmt.getLeftString(), goalScope);
+    leftEditor = new StringValueEditor(stmt.getLeft(), goalScope);
     container.add(leftEditor);
 
     final JComboBox<InequalityComparison> comparisonEditor = new JComboBox<>(new InequalityComparison[] { InequalityComparison.EQUAL_TO,
@@ -49,7 +50,7 @@ import fll.xml.InequalityComparison;
       stmt.setComparison(comparisonEditor.getItemAt(comparisonEditor.getSelectedIndex()));
     });
 
-    rightEditor = new EnumStringEditor(stmt.getRightGoalRef(), stmt.getRightString(), goalScope);
+    rightEditor = new StringValueEditor(stmt.getRight(), goalScope);
     container.add(rightEditor);
 
     container.add(Box.createVerticalGlue());
@@ -59,10 +60,8 @@ import fll.xml.InequalityComparison;
    * Force any pending edits to complete.
    */
   public void commitChanges() {
-    stmt.setLeftGoalRef(leftEditor.getGoalRef());
-    stmt.setLeftString(leftEditor.getString());
-    stmt.setRightGoalRef(rightEditor.getGoalRef());
-    stmt.setRightString(rightEditor.getString());
+    stmt.setLeft(leftEditor.getStringValue());
+    stmt.setRight(rightEditor.getStringValue());
   }
 
   @Override

@@ -10,11 +10,11 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -26,23 +26,23 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.ChooseOptionDialog;
+import fll.util.FLLInternalException;
 import fll.util.FormatterUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.GoalRef;
 import fll.xml.GoalScope;
 import fll.xml.GoalScoreType;
-import fll.xml.ScopeException;
+import fll.xml.StringConstant;
+import fll.xml.StringValue;
 
 /**
- * Editor to allow one to pick a string or an enumerated goal.
+ * Editor for {@link StringValue}.
  */
 @SuppressFBWarnings(value = { "SE_BAD_FIELD",
                               "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
-class EnumStringEditor extends JPanel implements Validatable {
+class StringValueEditor extends JPanel implements Validatable {
 
-  private @Nullable GoalRef goalRef;
-
-  private String string;
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final JButton goalEditor;
 
@@ -58,12 +58,11 @@ class EnumStringEditor extends JPanel implements Validatable {
 
   private final GoalScope goalScope;
 
-  public EnumStringEditor(final GoalRef goalRef,
-                          final String str,
-                          @Nonnull final GoalScope goalScope) {
+  private @Nullable AbstractGoal selectedGoal;
+
+  StringValueEditor(final StringValue value,
+                    final GoalScope goalScope) {
     super(new BorderLayout());
-    this.goalRef = goalRef;
-    this.string = str;
     this.goalScope = goalScope;
 
     decision = new JCheckBox("String");
@@ -73,10 +72,11 @@ class EnumStringEditor extends JPanel implements Validatable {
     final JPanel panel = new JPanel(layout);
     add(panel, BorderLayout.CENTER);
 
-    goalEditor = new JButton(null == this.goalRef ? NO_GOAL : this.goalRef.getGoalName());
+    goalEditor = new JButton(value.isGoalRef() ? NO_GOAL : value.getRawStringValue());
 
-    if (null != this.goalRef) {
-      this.goalRef.getGoal().addPropertyChangeListener(nameListener);
+    if (value.isGoalRef()) {
+      final GoalRef goalRef = (GoalRef) value;
+      goalRef.getGoal().addPropertyChangeListener(nameListener);
     }
 
     goalEditor.setToolTipText("Click to change the referenced goal");
@@ -90,14 +90,14 @@ class EnumStringEditor extends JPanel implements Validatable {
       dialog.setVisible(true);
       final AbstractGoal selected = dialog.getSelectedValue();
       if (null != selected) {
-        if (null != this.goalRef) {
-          this.goalRef.getGoal().removePropertyChangeListener(nameListener);
+        if (null != this.selectedGoal) {
+          this.selectedGoal.removePropertyChangeListener(nameListener);
         }
 
-        this.goalRef = new GoalRef(selected.getName(), goalScope, GoalScoreType.RAW);
+        this.selectedGoal = selected;
         goalEditor.setText(selected.getTitle());
 
-        this.goalRef.getGoal().addPropertyChangeListener(nameListener);
+        this.selectedGoal.addPropertyChangeListener(nameListener);
       }
     });
 
@@ -112,44 +112,36 @@ class EnumStringEditor extends JPanel implements Validatable {
     decision.addActionListener(e -> {
       if (decision.isSelected()) {
         layout.show(panel, STRING_PANEL);
-        this.goalRef = null;
-        goalEditor.setText(NO_GOAL);
       } else {
         layout.show(panel, GOAL_PANEL);
-        this.string = null;
-        stringEditor.setText(null);
       }
     });
 
     // initial setup
-    if (null != str) {
+    if (value.isStringConstant()) {
       decision.doClick();
     }
   }
 
   /**
-   * @return the referenced goal or null. If null, then {@link #getString()}
-   *         should not return null.
+   * @return the value being edited
    */
-  public GoalRef getGoalRef() {
-    return goalRef;
-  }
-
-  /**
-   * @return the string. If null, then {@link #getGoalRef()} should not return
-   *         null.
-   */
-  public String getString() {
-    return string;
+  public StringValue getStringValue() {
+    if (decision.isSelected()) {
+      return new StringConstant(stringEditor.getText());
+    } else {
+      if (null != selectedGoal) {
+        return new GoalRef(selectedGoal.getName(), goalScope, GoalScoreType.RAW);
+      } else {
+        throw new FLLInternalException("Invalid state. Editor has goal selected, but there is no goal");
+      }
+    }
   }
 
   private final PropertyChangeListener nameListener = new PropertyChangeListener() {
     @Override
     public void propertyChange(final PropertyChangeEvent evt) {
-      if ("name".equals(evt.getPropertyName())) {
-        final String newName = (String) evt.getNewValue();
-        goalRef.setGoalName(newName);
-      } else if ("title".equals(evt.getPropertyName())) {
+      if ("title".equals(evt.getPropertyName())) {
         final String newTitle = (String) evt.getNewValue();
         goalEditor.setText(newTitle);
       }
@@ -161,15 +153,29 @@ class EnumStringEditor extends JPanel implements Validatable {
     boolean valid = true;
 
     if (!decision.isSelected()) {
-      try {
-        goalScope.getGoal(goalRef.getGoalName());
-      } catch (final ScopeException e) {
-        messagesToDisplay.add(String.format("Goal %s is not known. It may have been deleted.", goalRef.getGoalName()));
+      if (null == selectedGoal) {
+        messagesToDisplay.add("You must select a goal to reference");
         valid = false;
+      } else {
+        if (!goalScope.getAllGoals().contains(selectedGoal)) {
+          messagesToDisplay.add(String.format("Goal %s is not known. It may have been deleted.",
+                                              selectedGoal.getName()));
+          valid = false;
+        }
       }
     }
 
     return valid;
   }
 
+  /**
+   * Force any pending edits to complete.
+   */
+  public void commitChanges() {
+    try {
+      stringEditor.commitEdit();
+    } catch (final ParseException e) {
+      LOGGER.debug("Got parse exception committing changes to string constant, assuming bad value and ignoring", e);
+    }
+  }
 }

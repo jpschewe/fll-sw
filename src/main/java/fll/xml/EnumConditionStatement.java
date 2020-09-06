@@ -6,7 +6,6 @@
 
 package fll.xml;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -45,206 +44,71 @@ public class EnumConditionStatement extends AbstractConditionStatement {
     if (leftEles.hasNext()) {
       final Element e = leftEles.next();
       // enum goals are referenced by raw value
-      mLeftGoalRef = new GoalRef(e.getAttribute(GOAL_ATTRIBUTE), goalScope, GoalScoreType.RAW);
-      mLeftString = null;
+      left = new GoalRef(e.getAttribute(GOAL_ATTRIBUTE), goalScope, GoalScoreType.RAW);
     } else {
       final Element e = new NodelistElementCollectionAdapter(leftEle.getElementsByTagName(STRING_CONSTANT_TAG_NAME)).next();
-      mLeftString = e.getAttribute(VALUE_ATTRIBUTE);
-      mLeftGoalRef = null;
+      left = new StringConstant(e.getAttribute(VALUE_ATTRIBUTE));
     }
 
     final Element rightEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName(ConditionStatement.RIGHT_TAG_NAME)).next();
     final NodelistElementCollectionAdapter rightEles = new NodelistElementCollectionAdapter(rightEle.getElementsByTagName(ENUM_GOAL_REF_TAG_NAME));
     if (rightEles.hasNext()) {
       final Element e = rightEles.next();
-      mRightGoalRef = new GoalRef(e.getAttribute(GOAL_ATTRIBUTE), goalScope, GoalScoreType.RAW);
-      mRightString = null;
+      right = new GoalRef(e.getAttribute(GOAL_ATTRIBUTE), goalScope, GoalScoreType.RAW);
     } else {
       final Element e = new NodelistElementCollectionAdapter(rightEle.getElementsByTagName(STRING_CONSTANT_TAG_NAME)).next();
-      mRightString = e.getAttribute(VALUE_ATTRIBUTE);
-      mRightGoalRef = null;
+      right = new StringConstant(e.getAttribute(VALUE_ATTRIBUTE));
     }
   }
 
   /**
-   * Default constructor. This has {@link #getLeftString()},
-   * {@link #getLeftGoalRef()}, {@link #getRightGoalRef()},
-   * {@link #getRightString()} all set to null.
-   * The object cannot be evaluated in this state.
+   * @param left see {@link #getLeft()}
+   * @param right see {@link #getRight()}
    */
-  public EnumConditionStatement() {
+  public EnumConditionStatement(final StringValue left,
+                                final StringValue right) {
     super();
-    mLeftGoalRef = null;
-    mLeftString = null;
-    mRightGoalRef = null;
-    mRightString = null;
+    this.right = right;
+    this.left = left;
   }
 
-  private @Nullable String mLeftString;
+  private StringValue left;
 
   /**
-   * Left string, may be null, but then leftGoal cannot not null at evaluation
-   * time.
-   *
-   * @return the left string to compare against, may be null.
+   * @return the left side of the inequality
    */
-  public @Nullable String getLeftString() {
-    return mLeftString;
+  public StringValue getLeft() {
+    return left;
   }
 
   /**
-   * @param v see {@link #getLeftString()}
+   * @param v see {@link #getLeft()}
    */
-  public void setLeftString(final @Nullable String v) {
-    mLeftString = v;
+  public void setLeft(final StringValue v) {
+    left = v;
   }
 
-  private @Nullable GoalRef mLeftGoalRef;
+  private StringValue right;
 
   /**
-   * Left goal reference, may be null, but then leftString cannot be null at
-   * evaluation time.
-   *
-   * @return the reference to the left goal, may be null
+   * @return the right side of the inequality
    */
-  public @Nullable GoalRef getLeftGoalRef() {
-    return mLeftGoalRef;
+  public StringValue getRight() {
+    return right;
   }
 
   /**
-   * @param v see {@link #getLeftGoalRef()}
+   * @param v see {@link #getRight()}
    */
-  public void setLeftGoalRef(final @Nullable GoalRef v) {
-    mLeftGoalRef = v;
+  public void setRight(final StringValue v) {
+    right = v;
   }
 
-  /**
-   * Left goal, may be null, but then {@link #getLeftString()} must not be null at
-   * evaluation time.
-   * If {@link #getLeftGoalRef()} is not null, resolves the goal reference to a
-   * goal.
-   *
-   * @see GoalRef#getGoal()
-   * @return the left goal
-   */
-  public @Nullable AbstractGoal getLeftGoal() {
-    if (null == mLeftGoalRef) {
-      return null;
-    } else {
-      return mLeftGoalRef.getGoal();
-    }
-  }
-
-  /**
-   * @return the left goal name or the left string, whichever is not null
-   * @throws IllegalArgumentException if both {@link #getLeftGoal()}
-   *           and{@link #getLeftString()} are null
-   */
-  public String getLeftGoalNameOrString() {
-    final AbstractGoal leftGoal = getLeftGoal();
-    final String leftRawString = getLeftString();
-    if (null != leftGoal) {
-      return leftGoal.getName();
-    } else if (null != leftRawString) {
-      return leftRawString;
-    } else {
-      throw new IllegalArgumentException("Left goal ref OR right string must be non-null");
-    }
-  }
-
-  private @Nullable String mRightString;
-
-  /**
-   * Right string, may be null, but then rightGoal is not null.
-   *
-   * @return the right string
-   */
-  public @Nullable String getRightString() {
-    return mRightString;
-  }
-
-  /**
-   * @param v see {@link #getRightString()}
-   */
-  public void setRightString(final @Nullable String v) {
-    mRightString = v;
-  }
-
-  private @Nullable GoalRef mRightGoalRef;
-
-  /**
-   * Right goal reference, may be null, but then right string cannot be null at
-   * evaluation time.
-   *
-   * @return the reference to the right goal, may be null
-   */
-  public @Nullable GoalRef getRightGoalRef() {
-    return mRightGoalRef;
-  }
-
-  /**
-   * @param v see {@link #getRightGoalRef()}
-   */
-  public void setRightGoalRef(final @Nullable GoalRef v) {
-    mRightGoalRef = v;
-  }
-
-  /**
-   * Right goal, may be null, but then {@link #getRightString()} must not null at
-   * evalution time.
-   * If {@link #getRightGoalRef()} is not null, resolves the goal reference to a
-   * goal.
-   *
-   * @return the goal for the right side of the conditional
-   * @see GoalRef#getGoal()
-   */
-  public @Nullable AbstractGoal getRightGoal() {
-    if (null == mRightGoalRef) {
-      return null;
-    } else {
-      return mRightGoalRef.getGoal();
-    }
-  }
-
-  /**
-   * @return the right goal name or the right string, whichever is not null
-   * @throws IllegalArgumentException if both {@link #getRightGoal()}
-   *           and{@link #getRightString()} are null
-   */
-  public String getRightGoalNameOrString() {
-    final AbstractGoal rightGoal = getRightGoal();
-    final String rightRawString = getRightString();
-    if (null != rightGoal) {
-      return rightGoal.getName();
-    } else if (null != rightRawString) {
-      return rightRawString;
-    } else {
-      throw new IllegalArgumentException("Right goal ref OR right string must be non-null");
-    }
-  }
-
-  /**
-   * @see fll.xml.AbstractConditionStatement#isTrue(fll.web.playoff.TeamScore)
-   * @throws NullPointerException if both left goal ref and left string are null
-   *           or both right goal ref and right string are null
-   */
   @Override
   public boolean isTrue(final TeamScore teamScore) {
-    final String leftRawStr = getLeftGoalNameOrString();
-    final String leftStr;
-    if (null != getLeftGoal()) {
-      leftStr = teamScore.getEnumRawScore(leftRawStr);
-    } else {
-      leftStr = leftRawStr;
-    }
+    final String leftStr = getLeft().getStringValue(teamScore);
 
-    final String rightRawStr = getRightGoalNameOrString();
-    final String rightStr;
-    if (null != getRightGoal()) {
-      rightStr = teamScore.getEnumRawScore(rightRawStr);
-    } else {
-      rightStr = rightRawStr;
-    }
+    final String rightStr = getRight().getStringValue(teamScore);
 
     final boolean result = leftStr.equalsIgnoreCase(rightStr);
     switch (getComparison()) {
@@ -264,12 +128,13 @@ public class EnumConditionStatement extends AbstractConditionStatement {
 
     final Element leftEle = doc.createElement(ConditionStatement.LEFT_TAG_NAME);
     final Element leftChild;
-    if (null != mLeftGoalRef) {
+
+    if (left.isGoalRef()) {
       leftChild = doc.createElement(ENUM_GOAL_REF_TAG_NAME);
-      leftChild.setAttribute(GOAL_ATTRIBUTE, mLeftGoalRef.getGoalName());
+      leftChild.setAttribute(GOAL_ATTRIBUTE, left.getRawStringValue());
     } else {
       leftChild = doc.createElement(STRING_CONSTANT_TAG_NAME);
-      leftChild.setAttribute(VALUE_ATTRIBUTE, mLeftString);
+      leftChild.setAttribute(VALUE_ATTRIBUTE, left.getRawStringValue());
     }
     leftEle.appendChild(leftChild);
     ele.appendChild(leftEle);
@@ -278,12 +143,16 @@ public class EnumConditionStatement extends AbstractConditionStatement {
 
     final Element rightEle = doc.createElement(ConditionStatement.RIGHT_TAG_NAME);
     final Element rightChild;
-    if (null != mRightGoalRef) {
+
+    final StringValue right = getRight();
+    if (right.isGoalRef()) {
+      final GoalRef rightGoalRef = (GoalRef) right;
       rightChild = doc.createElement(ENUM_GOAL_REF_TAG_NAME);
-      rightChild.setAttribute(GOAL_ATTRIBUTE, mRightGoalRef.getGoalName());
+      rightChild.setAttribute(GOAL_ATTRIBUTE, rightGoalRef.getGoalName());
     } else {
+      final StringConstant rightString = (StringConstant) right;
       rightChild = doc.createElement(STRING_CONSTANT_TAG_NAME);
-      rightChild.setAttribute(VALUE_ATTRIBUTE, mLeftString);
+      rightChild.setAttribute(VALUE_ATTRIBUTE, rightString.getValue());
     }
     rightEle.appendChild(rightChild);
     ele.appendChild(rightEle);
