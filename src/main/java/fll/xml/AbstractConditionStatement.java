@@ -100,6 +100,6 @@ public abstract class AbstractConditionStatement implements Serializable {
     }
   }
 
-  public abstract Element toXml(final Document doc);
+  public abstract Element toXml(Document doc);
 
 }

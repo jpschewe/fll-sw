@@ -20,8 +20,14 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 public class CaseStatement implements Evaluatable, Serializable {
 
+  /**
+   * XML tag used for this class.
+   */
   public static final String TAG_NAME = "case";
 
+  /**
+   * XML tag used for the result.
+   */
   public static final String RESULT_TAG_NAME = "result";
 
   /**
@@ -33,7 +39,7 @@ public class CaseStatement implements Evaluatable, Serializable {
    */
   public CaseStatement(final Element ele,
                        final GoalScope goalScope,
-                       final VariableScope variableScope) {
+                       final @Nullable VariableScope variableScope) {
     final NodelistElementCollectionAdapter children = new NodelistElementCollectionAdapter(ele.getChildNodes());
     final Element condEle = children.next();
     if (ConditionStatement.TAG_NAME.equals(condEle.getNodeName())) {
@@ -70,11 +76,11 @@ public class CaseStatement implements Evaluatable, Serializable {
   }
 
   /**
-   * Default constructor. All values are null, they must be set before
+   * Default constructor. Result values are null, they must be set before
    * {@link #evaluate(TeamScore)} is called.
    */
   public CaseStatement() {
-    mCondition = null;
+    mCondition = new ConditionStatement();
     mResultPoly = null;
     mResultSwitch = null;
   }

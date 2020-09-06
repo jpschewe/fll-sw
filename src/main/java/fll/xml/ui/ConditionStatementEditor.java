@@ -9,10 +9,11 @@ package fll.xml.ui;
 import java.awt.BorderLayout;
 import java.util.Collection;
 
-import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.xml.ConditionStatement;
 import fll.xml.GoalScope;
@@ -28,9 +29,9 @@ import fll.xml.VariableScope;
 
   private final PolynomialEditor rightEditor;
 
-  public ConditionStatementEditor(@Nonnull final ConditionStatement stmt,
-                                  @Nonnull final GoalScope goalScope,
-                                  final VariableScope variableScope) {
+  ConditionStatementEditor(final ConditionStatement stmt,
+                           final GoalScope goalScope,
+                           final @Nullable VariableScope variableScope) {
     super(new BorderLayout());
 
     final Box container = Box.createVerticalBox();

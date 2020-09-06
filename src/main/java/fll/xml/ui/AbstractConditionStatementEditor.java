@@ -10,15 +10,17 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.util.Collection;
 
-import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.xml.AbstractConditionStatement;
 import fll.xml.ConditionStatement;
 import fll.xml.EnumConditionStatement;
 import fll.xml.GoalScope;
+import fll.xml.StringConstant;
 import fll.xml.VariableScope;
 
 /**
@@ -48,22 +50,22 @@ public class AbstractConditionStatementEditor extends JPanel implements Validata
     return stmt;
   }
 
-  public AbstractConditionStatementEditor(@Nonnull final AbstractConditionStatement stmt,
-                                          @Nonnull final GoalScope goalScope,
-                                          final VariableScope variableScope) {
+  public AbstractConditionStatementEditor(final AbstractConditionStatement stmt,
+                                          final GoalScope goalScope,
+                                          final @Nullable VariableScope variableScope) {
     super(new BorderLayout());
     this.stmt = stmt;
     final ConditionStatement condStmt;
     final EnumConditionStatement enumStmt;
     if (stmt instanceof ConditionStatement) {
       condStmt = (ConditionStatement) stmt;
-      enumStmt = new EnumConditionStatement();
+      enumStmt = new EnumConditionStatement(new StringConstant("missing value"), new StringConstant("missing value"));
     } else if (stmt instanceof EnumConditionStatement) {
       condStmt = new ConditionStatement();
       enumStmt = (EnumConditionStatement) stmt;
     } else {
       throw new IllegalArgumentException("Unknown condition statement class: "
-          + stmt.getClass());
+          + stmt);
     }
 
     enumCondition = new JCheckBox("Enumeration Comparison");
