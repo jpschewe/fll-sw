@@ -52,6 +52,7 @@ import fll.xml.InequalityComparison;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.Restriction;
 import fll.xml.ScoreType;
+import fll.xml.StringValue;
 import fll.xml.SwitchStatement;
 import fll.xml.Term;
 import fll.xml.Variable;
@@ -1122,8 +1123,8 @@ public final class ScoreEntry {
   /**
    * @param formatter where to write
    * @param ifPrefix what goes before "if", either spaces or "else"
-   * @param ele
-   * @throws ParseException
+   * @param ele condition statement
+   * @throws ParseException if there is an error parsing the polynomials
    */
   private static void generateCondition(final Formatter formatter,
                                         final String ifPrefix,
@@ -1138,23 +1139,23 @@ public final class ScoreEntry {
     } else if (ele instanceof EnumConditionStatement) {
       final EnumConditionStatement cond = (EnumConditionStatement) ele;
 
-      final String leftRawStr = cond.getLeftGoalNameOrString();
+      final StringValue left = cond.getLeft();
       final String leftStr;
-      if (null != cond.getLeftGoal()) {
-        leftStr = getVarNameForRawScore(leftRawStr);
+      if (left.isGoalRef()) {
+        leftStr = getVarNameForRawScore(left.getRawStringValue());
       } else {
         leftStr = "'"
-            + leftRawStr
+            + left.getRawStringValue()
             + "'";
       }
 
-      final String rightRawStr = cond.getRightGoalNameOrString();
+      final StringValue right = cond.getRight();
       final String rightStr;
-      if (null != cond.getRightGoal()) {
-        rightStr = getVarNameForRawScore(rightRawStr);
+      if (right.isGoalRef()) {
+        rightStr = getVarNameForRawScore(right.getRawStringValue());
       } else {
         rightStr = "'"
-            + rightRawStr
+            + right.getRawStringValue()
             + "'";
       }
 

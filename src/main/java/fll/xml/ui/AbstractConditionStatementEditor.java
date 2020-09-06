@@ -10,15 +10,17 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.util.Collection;
 
-import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import fll.xml.AbstractConditionStatement;
 import fll.xml.ConditionStatement;
 import fll.xml.EnumConditionStatement;
 import fll.xml.GoalScope;
+import fll.xml.StringConstant;
 import fll.xml.VariableScope;
 
 /**
@@ -48,8 +50,8 @@ public class AbstractConditionStatementEditor extends JPanel implements Validata
     return stmt;
   }
 
-  public AbstractConditionStatementEditor(@Nonnull final AbstractConditionStatement stmt,
-                                          @Nonnull final GoalScope goalScope,
+  public AbstractConditionStatementEditor(@NonNull final AbstractConditionStatement stmt,
+                                          @NonNull final GoalScope goalScope,
                                           final VariableScope variableScope) {
     super(new BorderLayout());
     this.stmt = stmt;
@@ -57,7 +59,7 @@ public class AbstractConditionStatementEditor extends JPanel implements Validata
     final EnumConditionStatement enumStmt;
     if (stmt instanceof ConditionStatement) {
       condStmt = (ConditionStatement) stmt;
-      enumStmt = new EnumConditionStatement();
+      enumStmt = new EnumConditionStatement(new StringConstant("missing value"), new StringConstant("missing value"));
     } else if (stmt instanceof EnumConditionStatement) {
       condStmt = new ConditionStatement();
       enumStmt = (EnumConditionStatement) stmt;
