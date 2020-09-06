@@ -45,6 +45,7 @@ import fll.xml.GoalGroup;
 import fll.xml.GoalRef;
 import fll.xml.ScopeException;
 import fll.xml.ScoreCategory;
+import fll.xml.StringValue;
 import fll.xml.SwitchStatement;
 import fll.xml.Term;
 import fll.xml.Variable;
@@ -352,12 +353,8 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
 
   }
 
-  private static void getReferencedComputedGoals(final @Nullable GoalRef gr,
+  private static void getReferencedComputedGoals(final GoalRef gr,
                                                  final Set<ComputedGoal> referenced) {
-    if (null == gr) {
-      return;
-    }
-
     try {
       final AbstractGoal goal = gr.getGoal();
       if (goal.isComputed()) {
@@ -382,8 +379,16 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
       getReferencedComputedGoals(c.getRight(), referenced);
     } else if (cond instanceof EnumConditionStatement) {
       final EnumConditionStatement c = (EnumConditionStatement) cond;
-      getReferencedComputedGoals(c.getLeftGoalRef(), referenced);
-      getReferencedComputedGoals(c.getRightGoalRef(), referenced);
+
+      final StringValue left = c.getLeft();
+      if (left.isGoalRef()) {
+        getReferencedComputedGoals((GoalRef) left, referenced);
+      }
+
+      final StringValue right = c.getRight();
+      if (right.isGoalRef()) {
+        getReferencedComputedGoals((GoalRef) right, referenced);
+      }
     } else {
       throw new IllegalArgumentException("Unknown condition type: "
           + cond.getClass());
