@@ -45,7 +45,7 @@ import fll.xml.VariableScope;
 
   private final GoalScope goalScope;
 
-  private final VariableScope variableScope;
+  private final @Nullable VariableScope variableScope;
 
   private final ValidityPanel polyValid;
 

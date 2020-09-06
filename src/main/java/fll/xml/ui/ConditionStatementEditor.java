@@ -31,7 +31,7 @@ import fll.xml.VariableScope;
 
   ConditionStatementEditor(final ConditionStatement stmt,
                            final GoalScope goalScope,
-                           final @Nullable VariableScope variableScope) {
+                           final VariableScope variableScope) {
     super(new BorderLayout());
 
     final Box container = Box.createVerticalBox();

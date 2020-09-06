@@ -14,6 +14,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -49,7 +50,7 @@ public class BasicPolynomial implements Evaluatable, CaseStatementResult, Serial
    */
   protected BasicPolynomial(final Element ele,
                             final @UnderInitialization GoalScope goalScope,
-                            final @UnderInitialization VariableScope variableScope) {
+                            final @UnderInitialization @Nullable VariableScope variableScope) {
     mTerms = new LinkedList<>();
     for (final Element termEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(Term.TAG_NAME))) {
       final Term term = new Term(termEle, goalScope, variableScope);

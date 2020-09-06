@@ -52,7 +52,7 @@ public class AbstractConditionStatementEditor extends JPanel implements Validata
 
   public AbstractConditionStatementEditor(final AbstractConditionStatement stmt,
                                           final GoalScope goalScope,
-                                          final @Nullable VariableScope variableScope) {
+                                          final VariableScope variableScope) {
     super(new BorderLayout());
     this.stmt = stmt;
     final ConditionStatement condStmt;
