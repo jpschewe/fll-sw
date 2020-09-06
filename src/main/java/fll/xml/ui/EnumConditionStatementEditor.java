@@ -60,6 +60,8 @@ import fll.xml.InequalityComparison;
    * Force any pending edits to complete.
    */
   public void commitChanges() {
+    leftEditor.commitChanges();
+    rightEditor.commitChanges();
     stmt.setLeft(leftEditor.getStringValue());
     stmt.setRight(rightEditor.getStringValue());
   }

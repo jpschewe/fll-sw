@@ -336,9 +336,7 @@ public class DummyServletContext implements ServletContext {
     return null;
   }
 
-  /**
-   * @see javax.servlet.ServletContext#getServlet(java.lang.String)
-   */
+  @SuppressWarnings("deprecation")
   @Override
   @Deprecated
   public Servlet getServlet(final String arg0) throws ServletException {
@@ -358,6 +356,7 @@ public class DummyServletContext implements ServletContext {
    */
   @Override
   @Deprecated
+  @SuppressWarnings("deprecation")
   public Enumeration<String> getServletNames() {
     return null;
   }
@@ -383,6 +382,7 @@ public class DummyServletContext implements ServletContext {
    */
   @Override
   @Deprecated
+  @SuppressWarnings("deprecation")
   public Enumeration<Servlet> getServlets() {
     return null;
   }
@@ -408,6 +408,7 @@ public class DummyServletContext implements ServletContext {
    */
   @Override
   @Deprecated
+  @SuppressWarnings("deprecation")
   public void log(final Exception arg0,
                   final String arg1) {
   }

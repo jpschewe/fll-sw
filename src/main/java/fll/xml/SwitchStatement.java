@@ -22,7 +22,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 /**
  * A switch statement in the challenge description.
  */
-public class SwitchStatement implements Evaluatable, Serializable {
+public class SwitchStatement implements Evaluatable, CaseStatementResult, Serializable {
 
   /**
    * XML tag for the switch statement.
@@ -185,10 +185,9 @@ public class SwitchStatement implements Evaluatable, Serializable {
   }
 
   /**
-   * Computed based on the cases
-   * 
-   * @return score type of the switch statement
+   * Computed based on the cases.
    */
+  @Override
   public ScoreType getScoreType() {
     final boolean hasFloatingPointCases = getCases().stream().anyMatch(g -> g.getScoreType() == ScoreType.FLOAT);
     if (!hasFloatingPointCases) {
