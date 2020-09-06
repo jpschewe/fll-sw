@@ -29,6 +29,11 @@ public final class CaseStatementEditor extends JPanel implements Validatable {
 
   private final CaseStatementResultEditor resultEditor;
 
+  /**
+   * @param stmt the object to edit
+   * @param goalScope used to find goals
+   * @param variableScope used to find variables
+   */
   public CaseStatementEditor(final CaseStatement stmt,
                              final GoalScope goalScope,
                              final VariableScope variableScope) {
