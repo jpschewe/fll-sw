@@ -56,9 +56,9 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
   private final PolynomialEditor otherwiseEditor;
 
-  public SwitchStatementEditor(final SwitchStatement switchStmt,
-                               final GoalScope goalScope,
-                               final VariableScope variableScope) {
+  SwitchStatementEditor(final SwitchStatement switchStmt,
+                        final GoalScope goalScope,
+                        final VariableScope variableScope) {
     super(new BorderLayout());
     this.goalScope = goalScope;
     this.variableScope = variableScope;

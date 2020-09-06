@@ -11,11 +11,12 @@ import java.awt.CardLayout;
 import java.awt.Font;
 import java.util.Collection;
 
-import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.xml.CaseStatement;
 import fll.xml.ComplexPolynomial;
@@ -36,15 +37,15 @@ public final class CaseStatementEditor extends JPanel implements Validatable {
 
   private static final String RESULT_SWITCH_PANEL = "resultSwitch";
 
-  final JCheckBox resultType;
+  private final JCheckBox resultType;
 
-  final PolynomialEditor resultPolyEditor;
+  private final PolynomialEditor resultPolyEditor;
 
-  final SwitchStatementEditor resultSwitchEditor;
+  private final SwitchStatementEditor resultSwitchEditor;
 
-  public CaseStatementEditor(@Nonnull final CaseStatement stmt,
-                             @Nonnull final GoalScope goalScope,
-                             final VariableScope variableScope) {
+  public CaseStatementEditor(final CaseStatement stmt,
+                             final GoalScope goalScope,
+                             final @Nullable VariableScope variableScope) {
     super(new BorderLayout());
     this.stmt = stmt;
 
