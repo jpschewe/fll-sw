@@ -24,7 +24,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 /**
  * Polynomial that references goals.
  */
-public class BasicPolynomial implements Evaluatable, Serializable {
+public class BasicPolynomial implements Evaluatable, CaseStatementResult, Serializable {
 
   /**
    * XML attribute for storing the {@link #getFloatingPoint()} data.
@@ -185,6 +185,18 @@ public class BasicPolynomial implements Evaluatable, Serializable {
     }
 
     ele.setAttribute(FLOATING_POINT_ATTRIBUTE, mFloatingPoint.toXmlString());
+  }
+
+  /**
+   * @return score type of the polynomial
+   * @see #getFloatingPoint()
+   */
+  public ScoreType getScoreType() {
+    if (FloatingPointType.DECIMAL.equals(getFloatingPoint())) {
+      return ScoreType.FLOAT;
+    } else {
+      return ScoreType.INTEGER;
+    }
   }
 
 }
