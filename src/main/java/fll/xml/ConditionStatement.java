@@ -20,10 +20,19 @@ import fll.web.playoff.TeamScore;
  */
 public class ConditionStatement extends AbstractConditionStatement {
 
+  /**
+   * XML tag used for the class.
+   */
   public static final String TAG_NAME = "condition";
 
+  /**
+   * XML tag used for {@link #getLeft()}.
+   */
   public static final String LEFT_TAG_NAME = "left";
 
+  /**
+   * XML tag used for {@link #getRight()}.
+   */
   public static final String RIGHT_TAG_NAME = "right";
 
   public ConditionStatement(final Element ele,
@@ -40,7 +49,6 @@ public class ConditionStatement extends AbstractConditionStatement {
 
   /**
    * Default constructor with empty left and right polynomials.
-   * 
    */
   public ConditionStatement() {
     super();
