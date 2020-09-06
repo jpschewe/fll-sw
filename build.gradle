@@ -744,7 +744,7 @@ checkerFramework {
     ]
     extraJavacArgs = [
         "-AonlyDefs=^fll\\.(documents|flltools)",
-        //"-Awarns",  
+        "-Awarns",  
         "-Xmaxwarns", "10000",
         "-AstubWarnIfNotFound"
     ]
