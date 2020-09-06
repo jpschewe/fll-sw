@@ -7,21 +7,15 @@
 package fll.xml.ui;
 
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
 import java.awt.Font;
 import java.util.Collection;
 
 import javax.swing.Box;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 import fll.xml.CaseStatement;
-import fll.xml.ComplexPolynomial;
 import fll.xml.GoalScope;
-import fll.xml.SwitchStatement;
 import fll.xml.VariableScope;
 
 /**
@@ -33,19 +27,11 @@ public final class CaseStatementEditor extends JPanel implements Validatable {
 
   private final CaseStatement stmt;
 
-  private static final String RESULT_POLY_PANEL = "resultPoly";
-
-  private static final String RESULT_SWITCH_PANEL = "resultSwitch";
-
-  private final JCheckBox resultType;
-
-  private final PolynomialEditor resultPolyEditor;
-
-  private final SwitchStatementEditor resultSwitchEditor;
+  private final CaseStatementResultEditor resultEditor;
 
   public CaseStatementEditor(final CaseStatement stmt,
                              final GoalScope goalScope,
-                             final @Nullable VariableScope variableScope) {
+                             final VariableScope variableScope) {
     super(new BorderLayout());
     this.stmt = stmt;
 
@@ -73,44 +59,8 @@ public final class CaseStatementEditor extends JPanel implements Validatable {
     thenBox.add(thenLabel);
     thenBox.add(Box.createHorizontalGlue());
 
-    final Box resultTypeBox = Box.createHorizontalBox();
-    container.add(resultTypeBox);
-    resultType = new JCheckBox("If/Then");
-    resultType.setToolTipText("Check this if the result is a series of if/then statements");
-    resultTypeBox.add(resultType);
-    resultTypeBox.add(Box.createHorizontalGlue());
-
-    final boolean showResultPoly = null == stmt.getResultSwitch();
-    final ComplexPolynomial stmtResultPoly = stmt.getResultPoly();
-    final ComplexPolynomial resultPoly = null == stmtResultPoly ? new ComplexPolynomial() : stmtResultPoly;
-    final SwitchStatement stmtSwitch = stmt.getResultSwitch();
-    final SwitchStatement resultSwitch = null == stmtSwitch ? new SwitchStatement() : stmtSwitch;
-
-    final CardLayout resultLayout = new CardLayout();
-    final JPanel resultPanel = new JPanel(resultLayout);
-    container.add(resultPanel);
-
-    resultPolyEditor = new PolynomialEditor(resultPoly, goalScope, variableScope);
-    resultPanel.add(resultPolyEditor, RESULT_POLY_PANEL);
-
-    resultSwitchEditor = new SwitchStatementEditor(resultSwitch, goalScope, variableScope);
-    resultPanel.add(resultSwitchEditor, RESULT_SWITCH_PANEL);
-
-    resultType.addActionListener(e -> {
-      if (resultType.isSelected()) {
-        resultLayout.show(resultPanel, RESULT_SWITCH_PANEL);
-        stmt.setResultPoly(null);
-        stmt.setResultSwitch(resultSwitch);
-      } else {
-        resultLayout.show(resultPanel, RESULT_POLY_PANEL);
-        stmt.setResultPoly(resultPoly);
-        stmt.setResultSwitch(null);
-      }
-    });
-
-    if (!showResultPoly) {
-      resultType.doClick();
-    }
+    resultEditor = new CaseStatementResultEditor(stmt.getResult(), goalScope, variableScope);
+    container.add(resultEditor);
 
   }
 
@@ -118,7 +68,11 @@ public final class CaseStatementEditor extends JPanel implements Validatable {
    * Save all changes.
    */
   public void commitChanges() {
+    conditionEditor.commitChanges();
+    resultEditor.commitChanges();
+
     stmt.setCondition(conditionEditor.getStatement());
+    stmt.setResult(resultEditor.getResult());
   }
 
   @Override
@@ -128,13 +82,8 @@ public final class CaseStatementEditor extends JPanel implements Validatable {
     final boolean conditionValid = conditionEditor.checkValidity(messages);
     valid &= conditionValid;
 
-    if (resultType.isSelected()) {
-      final boolean resultSwitchValid = resultSwitchEditor.checkValidity(messages);
-      valid &= resultSwitchValid;
-    } else {
-      final boolean resultValid = resultPolyEditor.checkValidity(messages);
-      valid &= resultValid;
-    }
+    final boolean resultValid = resultEditor.checkValidity(messages);
+    valid &= resultValid;
 
     return valid;
   }

@@ -16,8 +16,6 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 
@@ -168,10 +166,13 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
   private void addNewCaseStatement() {
     final CaseStatement stmt = new CaseStatement();
     addCaseStatement(stmt);
+    this.switchStmt.addCase(stmt);
   }
 
   private void addCaseStatement(final CaseStatement stmt) {
     final CaseStatementEditor editor = new CaseStatementEditor(stmt, goalScope, variableScope);
+    stmtEditors.add(editor);
+
     final MovableExpandablePanel exPanel = new MovableExpandablePanel("If/then", editor, true, true);
     GuiUtils.addToContainer(stmtContainer, exPanel);
 

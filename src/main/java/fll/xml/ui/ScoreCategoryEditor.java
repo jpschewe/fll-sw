@@ -36,6 +36,8 @@ import fll.xml.AbstractConditionStatement;
 import fll.xml.AbstractGoal;
 import fll.xml.BasicPolynomial;
 import fll.xml.CaseStatement;
+import fll.xml.CaseStatementResult;
+import fll.xml.ComplexPolynomial;
 import fll.xml.ComputedGoal;
 import fll.xml.ConditionStatement;
 import fll.xml.EnumConditionStatement;
@@ -323,12 +325,8 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
     }
   }
 
-  private static void getReferencedComputedGoals(final @Nullable BasicPolynomial poly,
+  private static void getReferencedComputedGoals(final BasicPolynomial poly,
                                                  final Set<ComputedGoal> referenced) {
-    if (null == poly) {
-      return;
-    }
-
     for (final Term t : poly.getTerms()) {
       for (final GoalRef gr : t.getGoals()) {
         getReferencedComputedGoals(gr, referenced);
@@ -344,11 +342,13 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
 
     getReferencedComputedGoals(caseStatement.getCondition(), referenced);
 
-    if (null != caseStatement.getResultPoly()) {
-      getReferencedComputedGoals(caseStatement.getResultPoly(), referenced);
-    }
-    if (null != caseStatement.getResultSwitch()) {
-      getReferencedComputedGoals(caseStatement.getResultSwitch(), referenced);
+    final CaseStatementResult result = caseStatement.getResult();
+    if (result instanceof ComplexPolynomial) {
+      final ComplexPolynomial resultPoly = (ComplexPolynomial) result;
+      getReferencedComputedGoals(resultPoly, referenced);
+    } else if (result instanceof SwitchStatement) {
+      final SwitchStatement resultSwitch = (SwitchStatement) result;
+      getReferencedComputedGoals(resultSwitch, referenced);
     }
 
   }
@@ -395,12 +395,8 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
     }
   }
 
-  private static void getReferencedComputedGoals(final @Nullable SwitchStatement sw,
+  private static void getReferencedComputedGoals(final SwitchStatement sw,
                                                  final Set<ComputedGoal> referenced) {
-    if (null == sw) {
-      return;
-    }
-
     for (final CaseStatement cstmt : sw.getCases()) {
       getReferencedComputedGoals(cstmt, referenced);
     }

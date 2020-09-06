@@ -20,7 +20,7 @@ public class ComplexPolynomial extends BasicPolynomial {
   }
 
   /**
-   * see {@link BasicPolynomial#BasicPolynomial()}
+   * see {@link BasicPolynomial#BasicPolynomial()}.
    */
   public ComplexPolynomial() {
     super();
