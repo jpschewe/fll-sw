@@ -7,14 +7,12 @@
 package fll.xml;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.util.FLLInternalException;
-import fll.util.FLLRuntimeException;
 import fll.web.playoff.TeamScore;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
@@ -58,11 +56,9 @@ public class CaseStatement implements Evaluatable, Serializable {
 
     final Element resultEle = children.next();
     if (RESULT_TAG_NAME.equals(resultEle.getNodeName())) {
-      mResultPoly = new ComplexPolynomial(resultEle, goalScope, variableScope);
-      mResultSwitch = null;
+      mResult = new ComplexPolynomial(resultEle, goalScope, variableScope);
     } else if (SwitchStatement.TAG_NAME.equals(resultEle.getNodeName())) {
-      mResultSwitch = new SwitchStatement(resultEle, goalScope, variableScope);
-      mResultPoly = null;
+      mResult = new SwitchStatement(resultEle, goalScope, variableScope);
     } else {
       throw new FLLInternalException("Expecting '"
           + SwitchStatement.TAG_NAME
@@ -76,13 +72,15 @@ public class CaseStatement implements Evaluatable, Serializable {
   }
 
   /**
-   * Default constructor. Result values are null, they must be set before
-   * {@link #evaluate(TeamScore)} is called.
+   * Default constructor creates an empty condition and uses a polynomial as the
+   * result.
+   * 
+   * @see ConditionStatement#ConditionStatement()
+   * @see ComplexPolynomial#ComplexPolynomial()
    */
   public CaseStatement() {
     mCondition = new ConditionStatement();
-    mResultPoly = null;
-    mResultSwitch = null;
+    mResult = new ComplexPolynomial();
   }
 
   private AbstractConditionStatement mCondition;
@@ -105,62 +103,28 @@ public class CaseStatement implements Evaluatable, Serializable {
     mCondition = v;
   }
 
-  private @Nullable ComplexPolynomial mResultPoly;
+  private CaseStatementResult mResult;
 
   /**
-   * May be null, but then resultSwitch cannot be null at evaluation time.
+   * The result of the case statement.
    *
-   * @return the polynomial that defines the result
+   * @return the result of the case statement if true
    */
-  public @Nullable ComplexPolynomial getResultPoly() {
-    return mResultPoly;
+  public CaseStatementResult getResult() {
+    return mResult;
   }
 
   /**
-   * @param v see {@link #getResultPoly()}
+   * @param v see {@link #getResult()}
    */
-  public void setResultPoly(final ComplexPolynomial v) {
-    mResultPoly = v;
+  public void setResult(final CaseStatementResult v) {
+    mResult = v;
   }
 
-  private @Nullable SwitchStatement mResultSwitch;
-
-  /**
-   * May be null, but then {@link #getResultPoly()} cannot be null at evaluation
-   * time.
-   *
-   * @return the switch statement that defines the result
-   */
-  public @Nullable SwitchStatement getResultSwitch() {
-    return mResultSwitch;
-  }
-
-  /**
-   * @param v see {@link #getResultSwitch()}
-   */
-  public void setResultSwitch(final SwitchStatement v) {
-    mResultSwitch = v;
-  }
-
-  /**
-   * @see fll.xml.Evaluatable#evaluate(fll.web.playoff.TeamScore)
-   * @throws NullPointerException if the {@link #getCondition()} is null or both
-   *           {@link #getResultPoly()} and {@link #getResultSwitch()} are null.
-   */
   @Override
   public double evaluate(final TeamScore teamScore) {
-    Objects.requireNonNull(mCondition, "Condition must not be null");
-    if (null == mResultPoly
-        && null == mResultSwitch) {
-      throw new NullPointerException("Both result poly and result switch cannot be null");
-    }
-
     if (getCondition().isTrue(teamScore)) {
-      if (null != mResultPoly) {
-        return mResultPoly.evaluate(teamScore);
-      } else {
-        return mResultSwitch.evaluate(teamScore);
-      }
+      return mResult.evaluate(teamScore);
     } else {
       return 0;
     }
@@ -179,11 +143,17 @@ public class CaseStatement implements Evaluatable, Serializable {
     ele.appendChild(conditionElement);
 
     final Element resultEle;
-    if (null != mResultPoly) {
+    final Evaluatable result = getResult();
+    if (result instanceof ComplexPolynomial) {
+      final ComplexPolynomial resultPoly = (ComplexPolynomial) result;
       resultEle = doc.createElement(RESULT_TAG_NAME);
-      mResultPoly.populateXml(doc, resultEle);
+      resultPoly.populateXml(doc, resultEle);
+    } else if (result instanceof SwitchStatement) {
+      final SwitchStatement resultSwitch = (SwitchStatement) result;
+      resultEle = resultSwitch.toXml(doc);
     } else {
-      resultEle = mResultSwitch.toXml(doc);
+      throw new FLLInternalException("Unexpected result object type for CastStatement: "
+          + result);
     }
     ele.appendChild(resultEle);
 
@@ -197,17 +167,7 @@ public class CaseStatement implements Evaluatable, Serializable {
    * @return score type for the statement
    */
   public ScoreType getScoreType() {
-    if (null != mResultPoly) {
-      if (FloatingPointType.DECIMAL.equals(mResultPoly.getFloatingPoint())) {
-        return ScoreType.FLOAT;
-      } else {
-        return ScoreType.INTEGER;
-      }
-    } else if (null != mResultSwitch) {
-      return mResultSwitch.getScoreType();
-    } else {
-      throw new FLLRuntimeException("Invalid state of case statement, both switch and poly are null");
-    }
+    return mResult.getScoreType();
   }
 
 }

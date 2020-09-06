@@ -35,6 +35,7 @@ import fll.xml.AbstractConditionStatement;
 import fll.xml.AbstractGoal;
 import fll.xml.BasicPolynomial;
 import fll.xml.CaseStatement;
+import fll.xml.CaseStatementResult;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.ComplexPolynomial;
@@ -994,13 +995,15 @@ public final class ScoreEntry {
       generateCondition(formatter, ifPrefix, condition);
 
       formatter.format(" {%n");
-      if (null != childEle.getResultPoly()) {
-        final ComplexPolynomial resultPoly = childEle.getResultPoly();
+      final CaseStatementResult caseResult = childEle.getResult();
+      if (caseResult instanceof ComplexPolynomial) {
+        final ComplexPolynomial resultPoly = (ComplexPolynomial) caseResult;
         formatter.format("%s%s = %s;%n", generateIndentSpace(indent
             + INDENT_LEVEL), getVarNameForComputedScore(goalName),
                          null == resultPoly ? "NULL" : polyToString(resultPoly));
-      } else if (null != childEle.getResultSwitch()) {
-        generateSwitch(formatter, childEle.getResultSwitch(), goalName, indent
+      } else if (caseResult instanceof SwitchStatement) {
+        final SwitchStatement resultSwitch = (SwitchStatement) caseResult;
+        generateSwitch(formatter, resultSwitch, goalName, indent
             + INDENT_LEVEL);
       } else {
         throw new FLLInternalException("Expected case statement to have result poly or result switch, but found neight");

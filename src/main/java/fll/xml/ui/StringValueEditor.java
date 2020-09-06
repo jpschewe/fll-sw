@@ -108,6 +108,7 @@ class StringValueEditor extends JPanel implements Validatable {
 
     stringEditor = FormatterUtils.createStringField();
     panel.add(stringEditor, STRING_PANEL);
+    stringEditor.setText(value.getRawStringValue());
 
     decision.addActionListener(e -> {
       if (decision.isSelected()) {
