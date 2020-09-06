@@ -538,7 +538,7 @@ public final class TournamentParameters {
    * @param connection the database connection
    * @return the default value
    * @throws SQLException on a database error
-   * @see {@link #getRunningHeadToHead(Connection, int)}
+   * @see #getRunningHeadToHead(Connection, int)
    */
   public static boolean getDefaultRuningHeadToHead(final Connection connection) throws SQLException {
     return getBooleanTournamentParameterDefault(connection, RUNNING_HEAD_2_HEAD);
