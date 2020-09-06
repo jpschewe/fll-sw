@@ -14,7 +14,7 @@ import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.xml.AbstractConditionStatement;
 import fll.xml.ConditionStatement;
@@ -50,9 +50,9 @@ public class AbstractConditionStatementEditor extends JPanel implements Validata
     return stmt;
   }
 
-  public AbstractConditionStatementEditor(@NonNull final AbstractConditionStatement stmt,
-                                          @NonNull final GoalScope goalScope,
-                                          final VariableScope variableScope) {
+  public AbstractConditionStatementEditor(final AbstractConditionStatement stmt,
+                                          final GoalScope goalScope,
+                                          final @Nullable VariableScope variableScope) {
     super(new BorderLayout());
     this.stmt = stmt;
     final ConditionStatement condStmt;
@@ -65,7 +65,7 @@ public class AbstractConditionStatementEditor extends JPanel implements Validata
       enumStmt = (EnumConditionStatement) stmt;
     } else {
       throw new IllegalArgumentException("Unknown condition statement class: "
-          + stmt.getClass());
+          + stmt);
     }
 
     enumCondition = new JCheckBox("Enumeration Comparison");

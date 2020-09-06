@@ -9,7 +9,6 @@ package fll.xml.ui;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -17,6 +16,8 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.xml.AbstractGoal;
 import fll.xml.BasicPolynomial;
@@ -53,9 +54,9 @@ import fll.xml.VariableScope;
    * @param goalScope where to find goals for the polynomial
    * @param variableScope where to find variables for the polynomial, may be null
    */
-  public PolynomialEditor(@Nonnull final BasicPolynomial poly,
-                          @Nonnull final GoalScope goalScope,
-                          final VariableScope variableScope) {
+  PolynomialEditor(final BasicPolynomial poly,
+                   final GoalScope goalScope,
+                   final @Nullable VariableScope variableScope) {
     super();
     this.poly = poly;
     this.goalScope = goalScope;
