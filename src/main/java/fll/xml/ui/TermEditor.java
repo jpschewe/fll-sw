@@ -9,7 +9,6 @@ package fll.xml.ui;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -18,6 +17,9 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
 import fll.util.ChooseOptionDialog;
 import fll.util.FormatterUtils;
@@ -39,7 +41,7 @@ import fll.xml.VariableScope;
 
   private final GoalScope goalScope;
 
-  private final VariableScope variableScope;
+  private final @Nullable VariableScope variableScope;
 
   private final JFormattedTextField coefficient;
 
@@ -51,9 +53,9 @@ import fll.xml.VariableScope;
    * @param variableScope where to find variables, null if variables are not
    *          allowed
    */
-  /* package */ TermEditor(@Nonnull final Term term,
-                           @Nonnull final GoalScope goalScope,
-                           final VariableScope variableScope) {
+  /* package */ TermEditor(final Term term,
+                           final GoalScope goalScope,
+                           final @Nullable VariableScope variableScope) {
     this.term = term;
     this.goalScope = goalScope;
     this.variableScope = variableScope;
@@ -68,7 +70,7 @@ import fll.xml.VariableScope;
     addGoal.addActionListener(l -> addNewGoalRef());
     addGoal.setToolTipText("Add a reference to a goal");
 
-    if (null != variableScope) {
+    if (null != this.variableScope) {
       final JButton addVariable = new JButton("Add Variable");
       buttonBar.add(addVariable);
       addVariable.addActionListener(l -> addNewVariableRef());
@@ -101,7 +103,7 @@ import fll.xml.VariableScope;
       addGoalRef(goalRef);
     });
 
-    if (null != variableScope) {
+    if (null != this.variableScope) {
       term.getVariables().forEach(varRef -> {
         addVariableRef(varRef);
       });
@@ -147,6 +149,7 @@ import fll.xml.VariableScope;
     GuiUtils.addToContainer(refContainer, row);
   }
 
+  @RequiresNonNull("variableScope")
   private void addNewVariableRef() {
     final Collection<Variable> variables = variableScope.getAllVariables();
     final ChooseOptionDialog<Variable> dialog = new ChooseOptionDialog<>(JOptionPane.getRootFrame(),

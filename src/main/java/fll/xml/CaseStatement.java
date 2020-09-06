@@ -37,7 +37,7 @@ public class CaseStatement implements Evaluatable, Serializable {
    */
   public CaseStatement(final Element ele,
                        final GoalScope goalScope,
-                       final @Nullable VariableScope variableScope) {
+                       final VariableScope variableScope) {
     final NodelistElementCollectionAdapter children = new NodelistElementCollectionAdapter(ele.getChildNodes());
     final Element condEle = children.next();
     if (ConditionStatement.TAG_NAME.equals(condEle.getNodeName())) {
