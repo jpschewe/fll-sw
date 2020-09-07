@@ -1383,23 +1383,6 @@ public final class Queries {
   }
 
   /**
-   * Defaults to current tournament.
-   *
-   * @param description see
-   *          {@link #updateScoreTotals(ChallengeDescription, Connection, int)}
-   * @param connection database connection
-   * @throws SQLException on a database error
-   * @see #updateScoreTotals(ChallengeDescription, Connection, int)
-   * @see #getCurrentTournament(Connection)
-   */
-  public static void updateScoreTotals(final ChallengeDescription description,
-                                       final Connection connection)
-      throws SQLException {
-    final int tournament = getCurrentTournament(connection);
-    updateScoreTotals(description, connection, tournament);
-  }
-
-  /**
    * Total the scores in the database for the specified tournament.
    *
    * @param description describes the scoring for the challenge

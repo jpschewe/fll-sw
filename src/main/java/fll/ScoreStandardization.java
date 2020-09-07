@@ -9,7 +9,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -145,7 +144,7 @@ public final class ScoreStandardization {
    */
   public static void summarizeScores(final Connection connection,
                                      final int tournament)
-      throws SQLException, ParseException, TooFewScoresException {
+      throws SQLException, TooFewScoresException {
     if (tournament != Queries.getCurrentTournament(connection)) {
       throw new FLLRuntimeException("Cannot compute summarized scores for a tournament other than the current tournament");
     }
