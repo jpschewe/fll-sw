@@ -28,7 +28,10 @@ import fll.xml.ChallengeDescription;
 /**
  * Populate context for admin index.
  */
-public class AdminIndex {
+public final class AdminIndex {
+
+  private AdminIndex() {
+  }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
