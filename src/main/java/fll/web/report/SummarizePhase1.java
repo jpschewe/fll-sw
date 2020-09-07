@@ -11,7 +11,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -80,7 +79,7 @@ public final class SummarizePhase1 {
     try (Connection connection = datasource.getConnection()) {
       final int tournamentID = Queries.getCurrentTournament(connection);
 
-      Queries.updateScoreTotals(challengeDescription, connection);
+      Queries.updateScoreTotals(challengeDescription, connection, tournamentID);
 
       try {
         ScoreStandardization.standardizeSubjectiveScores(connection, tournamentID);
@@ -134,8 +133,6 @@ public final class SummarizePhase1 {
 
     } catch (final SQLException e) {
       throw new FLLRuntimeException("There was an error talking to the database", e);
-    } catch (final ParseException e) {
-      throw new FLLInternalException("There was an error parsing the challenge description", e);
     }
   }
 
