@@ -227,7 +227,6 @@ public final class GenerateDB {
       {
         final PerformanceScoreCategory performanceElement = description.getPerformance();
         final String tableName = PERFORMANCE_TABLE_NAME;
-        stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max CASCADE");
         stmt.executeUpdate("DROP TABLE IF EXISTS "
             + tableName
             + " CASCADE");
@@ -328,6 +327,20 @@ public final class GenerateDB {
 
       // --------------- create views ---------------
 
+      // number of seeding rounds for each tournament
+      stmt.executeUpdate("DROP VIEW IF EXISTS tournament_seeding_rounds");
+      stmt.executeUpdate("CREATE VIEW tournament_seeding_rounds AS" //
+          + " SELECT T1.tournament_id, " //
+          + "      (SELECT TP3.param_value FROM tournament_parameters AS TP3" //
+          + "   WHERE TP3.param = 'SeedingRounds'" //
+          + "      AND TP3.tournament = ( " //
+          + "      SELECT MAX(TP2.tournament) FROM tournament_parameters AS TP2 " //
+          + "           WHERE TP2.param = '"
+          + TournamentParameters.SEEDING_ROUNDS
+          + "' " //
+          + "           AND TP2.tournament IN (-1, T1.tournament_id ) )) as seeding_rounds" //
+          + "      FROM tournaments as T1");
+
       // max seeding round score for the current tournament
       stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
       stmt.executeUpdate("CREATE VIEW performance_seeding_max AS "//
@@ -344,9 +357,13 @@ public final class GenerateDB {
           + " AND RunNumber <= ("//
           // compute the run number for the current tournament
           + "   SELECT CONVERT(param_value, INTEGER) FROM tournament_parameters" //
-          + "     WHERE param = 'SeedingRounds' AND tournament = ("
+          + "     WHERE param = '"
+          + TournamentParameters.SEEDING_ROUNDS
+          + "' AND tournament = ("
           + "       SELECT MAX(tournament) FROM tournament_parameters"//
-          + "         WHERE param = 'SeedingRounds'"//
+          + "         WHERE param = '"
+          + TournamentParameters.SEEDING_ROUNDS
+          + "'"//
           // -1 is to use the default if no value has been set for this specific
           // tournament
           + "           AND ( tournament = -1 OR tournament IN ("//
