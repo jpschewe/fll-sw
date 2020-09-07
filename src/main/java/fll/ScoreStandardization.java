@@ -13,8 +13,6 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
@@ -310,42 +308,6 @@ public final class ScoreStandardization {
 
       currentTournament.recordScoreSummariesUpdated(connection);
     } // PreparedStatements
-  }
-
-  /**
-   * Do a simple check of the summarized score data consistency.
-   *
-   * @param connection connection to the database
-   * @return null if the data is consistent, otherwise an error message
-   * @throws SQLException on an error talking to the database
-   */
-  public static @Nullable String checkDataConsistency(final Connection connection) throws SQLException {
-    // Statement stmt = null;
-    // ResultSet rs = null;
-    // ResultSet rs2 = null;
-    // try {
-    // stmt = connection.createStatement();
-    // rs = stmt.executeQuery("SELECT TeamNumber, Tournament, Category,
-    // Count(Category) AS CountOfRecords FROM Scores GROUP BY TeamNumber,
-    // Tournament, Category HAVING Count(Category) <> 1");
-    // if(rs.next()) {
-    // final StringBuffer errorStr = new StringBuffer();
-    // errorStr.append("Summarized Data appears to be inconsistent: " +
-    // System.getProperty("line.separator"));
-
-    // return errorStr.toString();
-    // } else {
-    // return null;
-    // }
-    // } finally {
-    // SQLFunctions.closeResultSet(rs);
-    // SQLFunctions.closeResultSet(rs2);
-    // SQLFuctions.closeStatement(stmt);
-    // }
-    // TODO issue:64 need some better error reporting here. See the Access VB
-    // code.
-    // I'm not sure the best way to select from a ResultSet...
-    return null;
   }
 
 }
