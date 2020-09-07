@@ -296,7 +296,7 @@ public final class ImportDB {
    * @param reader where to read the data from
    * @return key is column name, value is type
    */
-  public static Map<String, String> loadTypeInfo(final Reader reader) throws IOException {
+  private static Map<String, String> loadTypeInfo(final Reader reader) throws IOException {
     try {
       final CSVReader csvreader = new CSVReader(reader);
       final Map<String, String> columnTypes = new HashMap<>();
@@ -1428,19 +1428,11 @@ public final class ImportDB {
     Queries.updateScoreTotals(description, destinationConnection, destTournamentID);
   }
 
-  /**
-   * @param sourceConnection
-   * @param destinationConnection
-   * @param description
-   * @param sourceTournamentID
-   * @param destTournamentID
-   * @throws SQLException
-   */
-  public static void importSubjectiveData(final Connection sourceConnection,
-                                          final Connection destinationConnection,
-                                          final ChallengeDescription description,
-                                          final int sourceTournamentID,
-                                          final int destTournamentID)
+  private static void importSubjectiveData(final Connection sourceConnection,
+                                           final Connection destinationConnection,
+                                           final ChallengeDescription description,
+                                           final int sourceTournamentID,
+                                           final int destTournamentID)
       throws SQLException {
     importJudges(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importSubjective(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, description);
@@ -1450,19 +1442,11 @@ public final class ImportDB {
     importAwardReportGroupSort(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
   }
 
-  /**
-   * @param sourceConnection
-   * @param destinationConnection
-   * @param description
-   * @param sourceTournamentID
-   * @param destTournamentID
-   * @throws SQLException
-   */
-  public static void importPerformanceData(final Connection sourceConnection,
-                                           final Connection destinationConnection,
-                                           final ChallengeDescription description,
-                                           final int sourceTournamentID,
-                                           final int destTournamentID)
+  private static void importPerformanceData(final Connection sourceConnection,
+                                            final Connection destinationConnection,
+                                            final ChallengeDescription description,
+                                            final int sourceTournamentID,
+                                            final int destTournamentID)
       throws SQLException {
     importPerformance(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, description);
 
@@ -1470,17 +1454,10 @@ public final class ImportDB {
     importPlayoffTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
   }
 
-  /**
-   * @param sourceConnection
-   * @param destinationConnection
-   * @param sourceTournamentID
-   * @param destTournamentID
-   * @throws SQLException
-   */
-  public static void importTournamentData(final Connection sourceConnection,
-                                          final Connection destinationConnection,
-                                          final int sourceTournamentID,
-                                          final int destTournamentID)
+  private static void importTournamentData(final Connection sourceConnection,
+                                           final Connection destinationConnection,
+                                           final int sourceTournamentID,
+                                           final int destTournamentID)
       throws SQLException {
     // Tournaments table isn't imported as it's expected to already be populated
     // with the tournament
