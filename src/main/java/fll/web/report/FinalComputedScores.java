@@ -159,6 +159,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       prep = connection.prepareStatement("SELECT TeamNumber FROM performance_seeding_max, TournamentTeams" //
           + " WHERE performance_seeding_max.TeamNumber = TournamentTeams.TeamNumber" //
           + "  AND TournamentTeams.Tournament = ?" //
+          + "  AND TournamentTeams.Tournament = performance_seeding_max.tournament" //
           + "  AND TournamentTeams.event_division = ?" //
           + " ORDER by performance_seeding_max.score "
           + winnerCriteria.getSortString());
@@ -591,7 +592,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
           insertRawSubjectiveScoreColumns(connection, tournament, winnerCriteria.getSortString(), document,
                                           subjectiveCategories, teamNumber, row1);
 
-          insertRawPerformanceScore(connection, performanceCategory.getScoreType(), document, teamNumber, row1);
+          insertRawPerformanceScore(connection, tournament, performanceCategory.getScoreType(), document, teamNumber,
+                                    row1);
 
           // The "Overall score" column is not filled in for raw scores
           row1.appendChild(FOPUtils.createTableCell(document, null, ""));
@@ -708,16 +710,20 @@ public final class FinalComputedScores extends BaseFLLServlet {
   }
 
   private void insertRawPerformanceScore(final Connection connection,
+                                         final Tournament tournament,
                                          final ScoreType performanceScoreType,
                                          final Document document,
                                          final int teamNumber,
                                          final Element row)
       throws SQLException {
-    try (PreparedStatement scorePrep = connection.prepareStatement("SELECT score FROM performance_seeding_max"
-        + " WHERE TeamNumber = ?")) {
+    try (PreparedStatement scorePrep = connection.prepareStatement("SELECT score" //
+        + " FROM performance_seeding_max"
+        + " WHERE TeamNumber = ?"//
+        + " AND performance_seeding_max.tournament = ?")) {
 
       // Column for the highest performance score of the seeding rounds
       scorePrep.setInt(1, teamNumber);
+      scorePrep.setInt(2, tournament.getTournamentID());
 
       try (ResultSet rawScoreRS = scorePrep.executeQuery()) {
         final double rawScore;

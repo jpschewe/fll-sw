@@ -50,7 +50,10 @@ public final class ScoreStandardization {
         + " Avg(Score) AS sg_mean," //
         + " Count(Score) AS sg_count," //
         + " stddev_pop(Score) AS sg_stdev" //
-        + " FROM performance_seeding_max")) {
+        + " FROM performance_seeding_max" //
+        + " WHERE performance_seeding_max.tournament = ?")) {
+      getParams.setInt(1, tournament);
+
       try (ResultSet params = getParams.executeQuery()) {
         if (params.next()) {
           final int sgCount = params.getInt(2);
@@ -74,7 +77,7 @@ public final class ScoreStandardization {
             }
 
             try (
-                PreparedStatement select = connection.prepareStatement("SELECT TeamNumber, ((Score - ?) * ?) + ? FROM performance_seeding_max");
+                PreparedStatement select = connection.prepareStatement("SELECT TeamNumber, ((Score - ?) * ?) + ? FROM performance_seeding_max WHERE performance_seeding_max.tournament = ?");
                 PreparedStatement insert = connection.prepareStatement("INSERT INTO final_scores (category, goal_group, tournament, team_number, final_score) VALUES(?, ?, ?, ?, ?)")) {
               insert.setString(1, PerformanceScoreCategory.CATEGORY_NAME);
               insert.setString(2, "");
@@ -84,6 +87,7 @@ public final class ScoreStandardization {
               select.setDouble(2, sigma
                   / sgStdev);
               select.setDouble(3, mean);
+              select.setInt(4, tournament);
 
               try (ResultSet perfStdScores = select.executeQuery()) {
                 while (perfStdScores.next()) {
@@ -145,9 +149,6 @@ public final class ScoreStandardization {
   public static void summarizeScores(final Connection connection,
                                      final int tournament)
       throws SQLException, TooFewScoresException {
-    if (tournament != Queries.getCurrentTournament(connection)) {
-      throw new FLLRuntimeException("Cannot compute summarized scores for a tournament other than the current tournament");
-    }
 
     // delete all final scores for the tournament
     try (PreparedStatement deletePrep = connection.prepareStatement("DELETE FROM final_scores WHERE tournament = ?")) {

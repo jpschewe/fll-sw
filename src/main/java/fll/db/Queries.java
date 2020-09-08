@@ -1232,6 +1232,7 @@ public final class Queries {
             + " WHERE score IS NOT NULL" // exclude no shows
             + " AND performance_seeding_max.TeamNumber = TournamentTeams.TeamNumber" //
             + " AND TournamentTeams.tournament = ?" //
+            + " AND TournamentTeams.tournament = performance_seeding_max.tournament" //
             + " AND TournamentTeams.TeamNumber IN ( "
             + teamNumbersStr
             + " )" //

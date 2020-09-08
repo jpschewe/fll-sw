@@ -341,39 +341,16 @@ public final class GenerateDB {
           + "           AND TP2.tournament IN (-1, T1.tournament_id ) )) as seeding_rounds" //
           + "      FROM tournaments as T1");
 
-      // max seeding round score for the current tournament
+      // max seeding round score for all tournaments
       stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
       stmt.executeUpdate("CREATE VIEW performance_seeding_max AS "//
-          + " SELECT TeamNumber, Max(ComputedTotal) AS Score, AVG(ComputedTotal) AS average" //
-          + " FROM Performance" //
-          + " WHERE " //
-          + " tournament IN "
-          + " (SELECT CONVERT(param_value, INTEGER) " // " +
-          + "      FROM global_parameters " //
-          + "      WHERE param = '"
-          + GlobalParameters.CURRENT_TOURNAMENT
-          + "'"//
-          + "  )"
-          + " AND RunNumber <= ("//
-          // compute the run number for the current tournament
-          + "   SELECT CONVERT(param_value, INTEGER) FROM tournament_parameters" //
-          + "     WHERE param = '"
-          + TournamentParameters.SEEDING_ROUNDS
-          + "' AND tournament = ("
-          + "       SELECT MAX(tournament) FROM tournament_parameters"//
-          + "         WHERE param = '"
-          + TournamentParameters.SEEDING_ROUNDS
-          + "'"//
-          // -1 is to use the default if no value has been set for this specific
-          // tournament
-          + "           AND ( tournament = -1 OR tournament IN ("//
-          // current tournament
-          + "             SELECT CONVERT(param_value, INTEGER) FROM global_parameters"//
-          + "               WHERE  param = '"
-          + GlobalParameters.CURRENT_TOURNAMENT
-          + "'  )"//
-          + "        ) )"
-          + " ) GROUP BY TeamNumber, Tournament");
+          + "    SELECT MAX(Performance.TeamNumber) AS TeamNumber" //
+          + "         , MAX(Performance.ComputedTotal) AS score" //
+          + "         , AVG(Performance.ComputedTotal) AS average" //
+          + "         , Performance.tournament" //
+          + "    FROM Performance, tournament_seeding_rounds AS TSR" //
+          + "    WHERE Performance.RunNumber <= TSR.seeding_rounds" //
+          + "    GROUP BY Performance.tournament, Performance.TeamNumber");
 
       // verified performance scores
       stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
