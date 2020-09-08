@@ -9,11 +9,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.db.GlobalParameters;
 import fll.db.Queries;
@@ -53,7 +50,10 @@ public final class ScoreStandardization {
         + " Avg(Score) AS sg_mean," //
         + " Count(Score) AS sg_count," //
         + " stddev_pop(Score) AS sg_stdev" //
-        + " FROM performance_seeding_max")) {
+        + " FROM performance_seeding_max" //
+        + " WHERE performance_seeding_max.tournament = ?")) {
+      getParams.setInt(1, tournament);
+
       try (ResultSet params = getParams.executeQuery()) {
         if (params.next()) {
           final int sgCount = params.getInt(2);
@@ -77,7 +77,7 @@ public final class ScoreStandardization {
             }
 
             try (
-                PreparedStatement select = connection.prepareStatement("SELECT TeamNumber, ((Score - ?) * ?) + ? FROM performance_seeding_max");
+                PreparedStatement select = connection.prepareStatement("SELECT TeamNumber, ((Score - ?) * ?) + ? FROM performance_seeding_max WHERE performance_seeding_max.tournament = ?");
                 PreparedStatement insert = connection.prepareStatement("INSERT INTO final_scores (category, goal_group, tournament, team_number, final_score) VALUES(?, ?, ?, ?, ?)")) {
               insert.setString(1, PerformanceScoreCategory.CATEGORY_NAME);
               insert.setString(2, "");
@@ -87,6 +87,7 @@ public final class ScoreStandardization {
               select.setDouble(2, sigma
                   / sgStdev);
               select.setDouble(3, mean);
+              select.setInt(4, tournament);
 
               try (ResultSet perfStdScores = select.executeQuery()) {
                 while (perfStdScores.next()) {
@@ -106,10 +107,12 @@ public final class ScoreStandardization {
               } // select team scores
             } // allocate statements
           } else {
-            throw new TooFewScoresException("Not enough scores for in category: Performance");
+            throw new TooFewScoresException("Not enough scores for in category: Performance. Tournament: "
+                + tournament);
           } // sgCount
         } else {
-          throw new TooFewScoresException("No performance scores for standardization");
+          throw new TooFewScoresException("No performance scores for standardization. Tournament: "
+              + tournament);
         } // params check
       } // select params
     } // allocate params stmt
@@ -147,10 +150,7 @@ public final class ScoreStandardization {
    */
   public static void summarizeScores(final Connection connection,
                                      final int tournament)
-      throws SQLException, ParseException, TooFewScoresException {
-    if (tournament != Queries.getCurrentTournament(connection)) {
-      throw new FLLRuntimeException("Cannot compute summarized scores for a tournament other than the current tournament");
-    }
+      throws SQLException, TooFewScoresException {
 
     // delete all final scores for the tournament
     try (PreparedStatement deletePrep = connection.prepareStatement("DELETE FROM final_scores WHERE tournament = ?")) {
@@ -310,42 +310,6 @@ public final class ScoreStandardization {
 
       currentTournament.recordScoreSummariesUpdated(connection);
     } // PreparedStatements
-  }
-
-  /**
-   * Do a simple check of the summarized score data consistency.
-   *
-   * @param connection connection to the database
-   * @return null if the data is consistent, otherwise an error message
-   * @throws SQLException on an error talking to the database
-   */
-  public static @Nullable String checkDataConsistency(final Connection connection) throws SQLException {
-    // Statement stmt = null;
-    // ResultSet rs = null;
-    // ResultSet rs2 = null;
-    // try {
-    // stmt = connection.createStatement();
-    // rs = stmt.executeQuery("SELECT TeamNumber, Tournament, Category,
-    // Count(Category) AS CountOfRecords FROM Scores GROUP BY TeamNumber,
-    // Tournament, Category HAVING Count(Category) <> 1");
-    // if(rs.next()) {
-    // final StringBuffer errorStr = new StringBuffer();
-    // errorStr.append("Summarized Data appears to be inconsistent: " +
-    // System.getProperty("line.separator"));
-
-    // return errorStr.toString();
-    // } else {
-    // return null;
-    // }
-    // } finally {
-    // SQLFunctions.closeResultSet(rs);
-    // SQLFunctions.closeResultSet(rs2);
-    // SQLFuctions.closeStatement(stmt);
-    // }
-    // TODO issue:64 need some better error reporting here. See the Access VB
-    // code.
-    // I'm not sure the best way to select from a ResultSet...
-    return null;
   }
 
 }

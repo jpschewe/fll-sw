@@ -227,7 +227,6 @@ public final class GenerateDB {
       {
         final PerformanceScoreCategory performanceElement = description.getPerformance();
         final String tableName = PERFORMANCE_TABLE_NAME;
-        stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max CASCADE");
         stmt.executeUpdate("DROP TABLE IF EXISTS "
             + tableName
             + " CASCADE");
@@ -328,49 +327,30 @@ public final class GenerateDB {
 
       // --------------- create views ---------------
 
-      // max seeding round score for the current tournament
+      // number of seeding rounds for each tournament
+      stmt.executeUpdate("DROP VIEW IF EXISTS tournament_seeding_rounds");
+      stmt.executeUpdate("CREATE VIEW tournament_seeding_rounds AS" //
+          + " SELECT T1.tournament_id, " //
+          + "      (SELECT TP3.param_value FROM tournament_parameters AS TP3" //
+          + "   WHERE TP3.param = 'SeedingRounds'" //
+          + "      AND TP3.tournament = ( " //
+          + "      SELECT MAX(TP2.tournament) FROM tournament_parameters AS TP2 " //
+          + "           WHERE TP2.param = '"
+          + TournamentParameters.SEEDING_ROUNDS
+          + "' " //
+          + "           AND TP2.tournament IN (-1, T1.tournament_id ) )) as seeding_rounds" //
+          + "      FROM tournaments as T1");
+
+      // max seeding round score for all tournaments
       stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
       stmt.executeUpdate("CREATE VIEW performance_seeding_max AS "//
-          + " SELECT TeamNumber, Max(ComputedTotal) As Score, AVG(ComputedTotal) As average" //
-          + " FROM Performance" //
-          + " WHERE " //
-          + " tournament IN "
-          + " (SELECT CONVERT(param_value, INTEGER) " // " +
-          + "      FROM global_parameters " //
-          + "      WHERE param = '"
-          + GlobalParameters.CURRENT_TOURNAMENT
-          + "'"//
-          + "  )"
-          + " AND RunNumber <= ("//
-          // compute the run number for the current tournament
-          + "   SELECT CONVERT(param_value, INTEGER) FROM tournament_parameters" //
-          + "     WHERE param = 'SeedingRounds' AND tournament = ("
-          + "       SELECT MAX(tournament) FROM tournament_parameters"//
-          + "         WHERE param = 'SeedingRounds'"//
-          // -1 is to use the default if no value has been set for this specific
-          // tournament
-          + "           AND ( tournament = -1 OR tournament IN ("//
-          // current tournament
-          + "             SELECT CONVERT(param_value, INTEGER) FROM global_parameters"//
-          + "               WHERE  param = '"
-          + GlobalParameters.CURRENT_TOURNAMENT
-          + "'  )"//
-          + "        ) )"
-          + " ) GROUP BY TeamNumber, Tournament");
-
-      // current tournament teams
-      stmt.executeUpdate("DROP VIEW IF EXISTS current_tournament_teams");
-      try (PreparedStatement prep = connection.prepareStatement("CREATE VIEW current_tournament_teams AS "//
-          + " SELECT * FROM TournamentTeams" //
-          + " WHERE Tournament IN " //
-          + " (SELECT CONVERT(param_value, INTEGER) " // " +
-          + "      FROM global_parameters " //
-          + "      WHERE param = '"
-          + GlobalParameters.CURRENT_TOURNAMENT
-          + "'"//
-          + "  )")) {
-        prep.executeUpdate();
-      }
+          + "    SELECT MAX(Performance.TeamNumber) AS TeamNumber" //
+          + "         , MAX(Performance.ComputedTotal) AS score" //
+          + "         , AVG(Performance.ComputedTotal) AS average" //
+          + "         , Performance.tournament" //
+          + "    FROM Performance, tournament_seeding_rounds AS TSR" //
+          + "    WHERE Performance.RunNumber <= TSR.seeding_rounds" //
+          + "    GROUP BY Performance.tournament, Performance.TeamNumber");
 
       // verified performance scores
       stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
@@ -405,7 +385,6 @@ public final class GenerateDB {
       sql.append(" ,category LONGVARCHAR NOT NULL");
       sql.append(" ,team_number INTEGER NOT NULL");
       sql.append(" ,judge VARCHAR(64) DEFAULT NULL");
-      sql.append(" ,CONSTRAINT non_numeric_nominees_pk PRIMARY KEY (tournament, category, team_number, judge)");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT non_numeric_nominees_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
         sql.append(" ,CONSTRAINT non_numeric_nominees_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");

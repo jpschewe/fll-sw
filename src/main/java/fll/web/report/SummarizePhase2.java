@@ -49,22 +49,14 @@ public class SummarizePhase2 extends BaseFLLServlet {
 
       ScoreStandardization.updateTeamTotalScores(connection, description, currentTournament);
 
-      final String errorMsg = ScoreStandardization.checkDataConsistency(connection);
-      if (null == errorMsg) {
-        SessionAttributes.appendToMessage(session, "<p id='success'><i>Successfully summarized scores</i></p>");
+      SessionAttributes.appendToMessage(session, "<p id='success'><i>Successfully summarized scores</i></p>");
 
-        final String redirect = SessionAttributes.getAttribute(session, PromptSummarizeScores.SUMMARY_REDIRECT_KEY,
-                                                               String.class);
-        if (null == redirect) {
-          response.sendRedirect(response.encodeRedirectURL("index.jsp"));
-        } else {
-          response.sendRedirect(response.encodeRedirectURL(redirect));
-        }
-      } else {
-        SessionAttributes.appendToMessage(session, "<font class='error'>"
-            + errorMsg
-            + "</font>");
+      final String redirect = SessionAttributes.getAttribute(session, PromptSummarizeScores.SUMMARY_REDIRECT_KEY,
+                                                             String.class);
+      if (null == redirect) {
         response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+      } else {
+        response.sendRedirect(response.encodeRedirectURL(redirect));
       }
     } catch (final SQLException e) {
       LOGGER.error(e, e);

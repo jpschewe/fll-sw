@@ -190,14 +190,15 @@ public class Last8 extends BaseFLLServlet {
       try (PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamNumber"
           + ", Teams.Organization" //
           + ", Teams.TeamName" //
-          + ", current_tournament_teams.event_division" //
+          + ", TournamentTeams.event_division" //
           + ", verified_performance.Bye" //
           + ", verified_performance.NoShow" //
           + ", verified_performance.ComputedTotal" //
-          + " FROM Teams,verified_performance,current_tournament_teams"//
+          + " FROM Teams,verified_performance,TournamentTeams"//
           + " WHERE verified_performance.Tournament = ?" //
           + "  AND Teams.TeamNumber = verified_performance.TeamNumber" //
-          + "  AND Teams.TeamNumber = current_tournament_teams.TeamNumber" //
+          + "  AND Teams.TeamNumber = TournamentTeams.TeamNumber" //
+          + "  AND TournamentTeams.tournament = verified_performance.Tournament" //
           + "  AND verified_performance.Bye = False" //
           + "  AND (? OR verified_performance.RunNumber <= ?)"
           + " ORDER BY verified_performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 20")) {

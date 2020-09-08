@@ -385,17 +385,19 @@ public class Top10 extends BaseFLLServlet {
             + "   AND Bye = False" //
             + "   AND (? OR RunNumber <= ?)" //
             + "  GROUP BY TeamNumber) AS T2"
-            + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams"
-            + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber" //
-            + " AND current_tournament_teams."
+            + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, TournamentTeams"
+            + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber" //
+            + " AND TournamentTeams."
             + divisionColumn
-            + " = ?"
+            + " = ?" //
+            + " AND TournamentTeams.tournament = ?" //
             + " ORDER BY T2.MaxOfComputedScore "
             + winnerCriteria.getSortString())) {
       prep.setInt(1, currentTournament);
       prep.setBoolean(2, !runningHeadToHead);
       prep.setInt(3, numSeedingRounds);
       prep.setString(4, awardGroupName);
+      prep.setInt(5, currentTournament);
       try (ResultSet rs = prep.executeQuery()) {
 
         double prevScore = -1;
