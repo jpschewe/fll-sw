@@ -1,3 +1,4 @@
+* #816 - Add a report showing teams advancing to another tournament and their scores
 * #820 - Filter all teams on scoreboard by judging group
 * #819 - Add report of performance scores by judging station
 * #849 - If all rubric range short descriptions are the same in a category, display it at the top of the subjective PDF

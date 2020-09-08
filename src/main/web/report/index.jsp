@@ -187,6 +187,19 @@
 
     </ul>
 
+    <h2>Cross-tournament reports</h2>
+    <p>Reports that use data across multiple tournaments.</p>
+    <ul>
+        <li>
+            <a href="TournamentAdvancement" target="_blank">Tournament
+                advancement report</a> - this is a CSV file that contains
+            information about the teams that are advancing from each
+            tournament. For this to work all of the databases need to be
+            merged and the award winners need to be specified for each
+            tournament.
+        </li>
+    </ul>
+
     <h2>Other useful reports</h2>
     <p>Some reports that are handy for intermediate reporting and
         checking of the current tournament state.</p>
