@@ -344,7 +344,7 @@ public final class GenerateDB {
       // max seeding round score for the current tournament
       stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
       stmt.executeUpdate("CREATE VIEW performance_seeding_max AS "//
-          + " SELECT TeamNumber, Max(ComputedTotal) As Score, AVG(ComputedTotal) As average" //
+          + " SELECT TeamNumber, Max(ComputedTotal) AS Score, AVG(ComputedTotal) AS average" //
           + " FROM Performance" //
           + " WHERE " //
           + " tournament IN "
@@ -374,20 +374,6 @@ public final class GenerateDB {
           + "'  )"//
           + "        ) )"
           + " ) GROUP BY TeamNumber, Tournament");
-
-      // current tournament teams
-      stmt.executeUpdate("DROP VIEW IF EXISTS current_tournament_teams");
-      try (PreparedStatement prep = connection.prepareStatement("CREATE VIEW current_tournament_teams AS "//
-          + " SELECT * FROM TournamentTeams" //
-          + " WHERE Tournament IN " //
-          + " (SELECT CONVERT(param_value, INTEGER) " // " +
-          + "      FROM global_parameters " //
-          + "      WHERE param = '"
-          + GlobalParameters.CURRENT_TOURNAMENT
-          + "'"//
-          + "  )")) {
-        prep.executeUpdate();
-      }
 
       // verified performance scores
       stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");

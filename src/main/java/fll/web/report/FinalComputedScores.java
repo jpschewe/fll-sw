@@ -547,11 +547,13 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                                                                            awardGroup);
 
     try (
-        PreparedStatement overallPrep = connection.prepareStatement("SELECT Teams.Organization, Teams.TeamName, Teams.TeamNumber, overall_score, current_tournament_teams.judging_station" //
-            + " FROM overall_scores, Teams, current_tournament_teams WHERE overall_scores.tournament = ?"//
-            + " AND current_tournament_teams.event_division = ?"//
-            + " AND current_tournament_teams.TeamNumber = Teams.TeamNumber" //
-            + " AND current_tournament_teams.TeamNumber = overall_scores.team_number" //
+        PreparedStatement overallPrep = connection.prepareStatement("SELECT Teams.Organization, Teams.TeamName, Teams.TeamNumber, overall_score, TournamentTeams.judging_station" //
+            + " FROM overall_scores, Teams, TournamentTeams" //
+            + " WHERE overall_scores.tournament = ?"//
+            + " AND TournamentTeams.tournament = overall_scores.tournament" //
+            + " AND TournamentTeams.event_division = ?"//
+            + " AND TournamentTeams.TeamNumber = Teams.TeamNumber" //
+            + " AND TournamentTeams.TeamNumber = overall_scores.team_number" //
             + " ORDER BY overall_scores.overall_score "
             + winnerCriteria.getSortString() //
             + ", Teams.TeamNumber" //
