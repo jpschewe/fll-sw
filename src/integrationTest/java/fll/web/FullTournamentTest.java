@@ -663,11 +663,12 @@ public class FullTournamentTest {
     final double scoreFP = 1E-1; // just check to one decimal place
 
     final String sqlTemplate = "SELECT overall_scores.team_number, overall_scores.overall_score" //
-        + " FROM overall_scores, current_tournament_teams, Tournaments" //
-        + " WHERE overall_scores.team_number = current_tournament_teams.TeamNumber" //
+        + " FROM overall_scores, TournamentTeams, Tournaments" //
+        + " WHERE overall_scores.team_number = TournamentTeams.TeamNumber" //
         + " AND Tournaments.Name = '%s'"
         + " AND overall_scores.tournament = Tournaments.tournament_id" //
-        + " AND current_tournament_teams.event_division = '%s'" //
+        + " AND TournamentTeams.tournament = Tournaments.tournament_id" //
+        + " AND TournamentTeams.event_division = '%s'" //
         + " ORDER BY overall_scores.overall_score DESC";
 
     // division 1

@@ -1215,6 +1215,7 @@ public final class Queries {
                                                   final WinnerType winnerCriteria,
                                                   final Collection<? extends Team> teams)
       throws SQLException, RuntimeException {
+    final Tournament tournament = Tournament.getCurrentTournament(connection);
 
     final List<Integer> teamNumbers = new LinkedList<>();
     for (final Team t : teams) {
@@ -1227,10 +1228,11 @@ public final class Queries {
 
     try (
         PreparedStatement prep = connection.prepareStatement("SELECT performance_seeding_max.TeamNumber, performance_seeding_max.Score as score, RAND() as random"
-            + " FROM performance_seeding_max, current_tournament_teams" //
+            + " FROM performance_seeding_max, TournamentTeams" //
             + " WHERE score IS NOT NULL" // exclude no shows
-            + " AND performance_seeding_max.TeamNumber = current_tournament_teams.TeamNumber" //
-            + " AND current_tournament_teams.TeamNumber IN ( "
+            + " AND performance_seeding_max.TeamNumber = TournamentTeams.TeamNumber" //
+            + " AND TournamentTeams.tournament = ?" //
+            + " AND TournamentTeams.TeamNumber IN ( "
             + teamNumbersStr
             + " )" //
             + " ORDER BY score "
@@ -1238,6 +1240,7 @@ public final class Queries {
             + ", performance_seeding_max.average "
             + winnerCriteria.getSortString() //
             + ", random")) {
+      prep.setInt(1, tournament.getTournamentID());
 
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
