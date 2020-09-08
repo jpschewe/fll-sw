@@ -107,10 +107,12 @@ public final class ScoreStandardization {
               } // select team scores
             } // allocate statements
           } else {
-            throw new TooFewScoresException("Not enough scores for in category: Performance");
+            throw new TooFewScoresException("Not enough scores for in category: Performance. Tournament: "
+                + tournament);
           } // sgCount
         } else {
-          throw new TooFewScoresException("No performance scores for standardization");
+          throw new TooFewScoresException("No performance scores for standardization. Tournament: "
+              + tournament);
         } // params check
       } // select params
     } // allocate params stmt
