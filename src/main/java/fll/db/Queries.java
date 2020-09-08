@@ -1215,6 +1215,7 @@ public final class Queries {
                                                   final WinnerType winnerCriteria,
                                                   final Collection<? extends Team> teams)
       throws SQLException, RuntimeException {
+    final Tournament tournament = Tournament.getCurrentTournament(connection);
 
     final List<Integer> teamNumbers = new LinkedList<>();
     for (final Team t : teams) {
@@ -1227,10 +1228,12 @@ public final class Queries {
 
     try (
         PreparedStatement prep = connection.prepareStatement("SELECT performance_seeding_max.TeamNumber, performance_seeding_max.Score as score, RAND() as random"
-            + " FROM performance_seeding_max, current_tournament_teams" //
+            + " FROM performance_seeding_max, TournamentTeams" //
             + " WHERE score IS NOT NULL" // exclude no shows
-            + " AND performance_seeding_max.TeamNumber = current_tournament_teams.TeamNumber" //
-            + " AND current_tournament_teams.TeamNumber IN ( "
+            + " AND performance_seeding_max.TeamNumber = TournamentTeams.TeamNumber" //
+            + " AND TournamentTeams.tournament = ?" //
+            + " AND TournamentTeams.tournament = performance_seeding_max.tournament" //
+            + " AND TournamentTeams.TeamNumber IN ( "
             + teamNumbersStr
             + " )" //
             + " ORDER BY score "
@@ -1238,6 +1241,7 @@ public final class Queries {
             + ", performance_seeding_max.average "
             + winnerCriteria.getSortString() //
             + ", random")) {
+      prep.setInt(1, tournament.getTournamentID());
 
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
@@ -1380,23 +1384,6 @@ public final class Queries {
         }
       }
     }
-  }
-
-  /**
-   * Defaults to current tournament.
-   *
-   * @param description see
-   *          {@link #updateScoreTotals(ChallengeDescription, Connection, int)}
-   * @param connection database connection
-   * @throws SQLException on a database error
-   * @see #updateScoreTotals(ChallengeDescription, Connection, int)
-   * @see #getCurrentTournament(Connection)
-   */
-  public static void updateScoreTotals(final ChallengeDescription description,
-                                       final Connection connection)
-      throws SQLException {
-    final int tournament = getCurrentTournament(connection);
-    updateScoreTotals(description, connection, tournament);
   }
 
   /**

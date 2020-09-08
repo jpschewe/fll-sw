@@ -66,7 +66,7 @@ public class AdvancingTeam implements Serializable {
    * @param connection database connection
    * @param tournamentId the tournament to load teams for
    * @return the advancing teams sorted by group and then team number
-   * @throws SQLException on a database err
+   * @throws SQLException on a database error
    */
   public static List<AdvancingTeam> loadAdvancingTeams(final Connection connection,
                                                        final int tournamentId)

@@ -26,26 +26,26 @@ public class TournamentTeam extends Team {
                         @JsonProperty("awardGroup") final String awardGroup,
                         @JsonProperty("judgingGroup") final String judgingGroup) {
     super(teamNumber, org, name);
-    _awardGroup = awardGroup;
-    _judgingGroup = judgingGroup;
+    this.awardGroup = awardGroup;
+    this.judgingGroup = judgingGroup;
   }
 
-  private final String _awardGroup;
+  private final String awardGroup;
 
   /**
    * @return The award group that the team is in.
    */
   public String getAwardGroup() {
-    return _awardGroup;
+    return awardGroup;
   }
 
-  private final String _judgingGroup;
+  private final String judgingGroup;
 
   /**
    * @return The judging group for the team.
    */
   public String getJudgingGroup() {
-    return _judgingGroup;
+    return judgingGroup;
   }
 
   /**
@@ -58,7 +58,8 @@ public class TournamentTeam extends Team {
    * @throws SQLException
    */
   public static void filterTeamsToEventDivision(final List<TournamentTeam> teams,
-                                                final String divisionStr) throws SQLException, RuntimeException {
+                                                final String divisionStr)
+      throws SQLException, RuntimeException {
     final Iterator<TournamentTeam> iter = teams.iterator();
     while (iter.hasNext()) {
       final TournamentTeam t = iter.next();
