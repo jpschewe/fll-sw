@@ -137,7 +137,8 @@ public class GatherBugReport extends BaseFLLServlet {
   }
 
   /**
-   * Prefix used in the zip files for logs.
+   * Prefix used in the zip files for logs. Has trailing Unix slash, which is also
+   * appropriate for zip files.
    */
   public static final String LOGS_DIRECTORY = "logs/";
 
@@ -161,7 +162,7 @@ public class GatherBugReport extends BaseFLLServlet {
       try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(logsDirectory)) {
         for (final Path path : directoryStream) {
           if (Files.isRegularFile(path)) {
-            zipOut.putNextEntry(new ZipEntry(logsDirectory.resolve(path.getFileName()).toString()));
+            zipOut.putNextEntry(new ZipEntry(normalizePathname(logsDirectory.resolve(path.getFileName()).toString())));
             try (InputStream is = Files.newInputStream(path)) {
               is.transferTo(zipOut);
             }
@@ -170,6 +171,17 @@ public class GatherBugReport extends BaseFLLServlet {
       }
     }
 
+  }
+
+  /**
+   * Handle windows path names and make them match the zip file spec which is '/'.
+   */
+  private static String normalizePathname(final String name) {
+    if (File.separatorChar != '/') {
+      return name.replace('\\', '/');
+    } else {
+      return name;
+    }
   }
 
 }
