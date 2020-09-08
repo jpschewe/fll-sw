@@ -52,7 +52,8 @@ import net.mtu.eggplant.xml.XMLUtils;
 public final class DumpDB extends BaseFLLServlet {
 
   /**
-   * Prefix used in the zip files for bugs.
+   * Prefix used in the zip files for bugs. Has trailing Unix slash, which is also
+   * appropriate for zip files.
    */
   public static final String BUGS_DIRECTORY = "bugs/";
 
