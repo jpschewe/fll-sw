@@ -115,6 +115,14 @@ $(document).ready(
         return;
       }
 
+      $("#deselect-all").click(function() {
+        $(":checkbox").each(function() {
+          if ($(this).prop('checked')) {
+            $(this).trigger('click');
+          }
+        });
+      });
+
       $("#category-name").text(currentCategory.name);
 
       var roomEle = $("#room");
