@@ -375,6 +375,20 @@
       return time.hour.toString().padL(2, "0") + ":"
           + time.minute.toString().padL(2, "0");
     },
+    
+    /**
+     * Mark a category as not visited so that the list of selected teams can be recomputed.
+     */
+    unsetCategoryVisited : function(category, division) {
+      var visited = _categoriesVisited[division];
+      if (null != visited) {
+        var index = visited.indexOf(category.catId);
+        if (index >= 0) {
+          visited.splice(index, 1);
+          _categoriesVisited[division] = visited;
+        }
+      }      
+    },
 
     setCategoryVisited : function(category, division) {
       var visited = _categoriesVisited[division];
