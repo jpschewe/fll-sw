@@ -1,3 +1,4 @@
+* #824 - Add next and previous buttons to finalist scheduling
 * #831 - Add buttons to make fixing mistakes in finalist scheduling easier
 * #816 - Add a report showing teams advancing to another tournament and their scores
 * #820 - Filter all teams on scoreboard by judging group

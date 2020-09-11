@@ -433,6 +433,13 @@ function updatePage() {
 
 $(document).ready(
     function() {
+      $("#previous").click(
+          function() {
+            var championshipCategory = $.finalist
+                .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
+            $.finalist.setCurrentCategoryId(championshipCategory.catId);
+            location.href = "numeric.html";
+          });
 
       $("#divisions").empty();
       $.each($.finalist.getDivisions(), function(i, division) {
