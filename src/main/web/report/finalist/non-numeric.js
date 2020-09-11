@@ -16,6 +16,28 @@ function handleDivisionChange() {
 $(document).ready(
     function() {
 
+      $("#previous").click(function() {
+        location.href="params.html";
+      });
+      $("#next").click(function() {
+        // find the first numeric category
+        var first=null;
+        $.each($.finalist.getNumericCategories(), function(i, category) {
+          if (category.name != $.finalist.CHAMPIONSHIP_NAME) {
+            if(null == first) {
+              first = category;
+            }
+          }
+        });
+        if(null != first) {
+          $.finalist.setCurrentCategoryId(first.catId);    
+          location.href="numeric.html";
+        } else {
+          alert("Internal error, cannot find next category");
+        }
+      });
+
+
       $("#divisions").empty();
       $.each($.finalist.getDivisions(), function(i, division) {
         var selected = "";
@@ -46,16 +68,16 @@ function updateTeams() {
     var addedTeam = false;
     $.each(category.teams,
         function(j, teamNum) {
-          var team = $.finalist.lookupTeam(teamNum);
-          if (category.overall
-              || $.finalist.isTeamInDivision(team, $.finalist
-                  .getCurrentDivision())) {
-            addedTeam = true;
-            var teamIdx = addTeam(category);
-            populateTeamInformation(category, teamIdx, team);
-          }
+      var team = $.finalist.lookupTeam(teamNum);
+      if (category.overall
+          || $.finalist.isTeamInDivision(team, $.finalist
+              .getCurrentDivision())) {
+        addedTeam = true;
+        var teamIdx = addTeam(category);
+        populateTeamInformation(category, teamIdx, team);
+      }
 
-        });
+    });
     if (!addedTeam) {
       addTeam(category);
     }
@@ -138,7 +160,7 @@ function populateTeamInformation(category, teamIdx, team) {
   $("#" + teamNameId(category.catId, teamIdx)).val(team.name);
   $("#" + teamOrgId(category.catId, teamIdx)).val(team.org);
   $("#" + teamJudgingStationId(category.catId, teamIdx)).val(team.judgingGroup);
-  
+
   var judges = $.finalist.getNominatingJudges(category, team.num);
   var judgesStr;
   if(!judges) {
