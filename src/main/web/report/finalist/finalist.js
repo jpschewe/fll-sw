@@ -376,6 +376,21 @@
           + time.minute.toString().padL(2, "0");
     },
 
+    /**
+     * Mark a category as not visited so that the list of selected teams can be
+     * recomputed.
+     */
+    unsetCategoryVisited : function(category, division) {
+      var visited = _categoriesVisited[division];
+      if (null != visited) {
+        var index = visited.indexOf(category.catId);
+        if (index >= 0) {
+          visited.splice(index, 1);
+          _categoriesVisited[division] = visited;
+        }
+      }
+    },
+
     setCategoryVisited : function(category, division) {
       var visited = _categoriesVisited[division];
       if (null == visited) {
@@ -689,23 +704,25 @@
             var group = team.judgingGroup;
             prevScore = prevScores[group];
             curScore = $.finalist.getCategoryScore(team, currentCategory);
-            if (prevScore == undefined) {
-              $.finalist.addTeamToCategory(currentCategory, team.num);
-            } else if (scoreGroups[group] > 0) {
-              if (Math.abs(prevScore - curScore) < 1) {
+            if (curScore != undefined && curScore > 0) {
+              if (prevScore == undefined) {
                 $.finalist.addTeamToCategory(currentCategory, team.num);
-              } else {
-                scoreGroups[group] = scoreGroups[group] - 1;
+              } else if (scoreGroups[group] > 0) {
+                if (Math.abs(prevScore - curScore) < 1) {
+                  $.finalist.addTeamToCategory(currentCategory, team.num);
+                } else {
+                  scoreGroups[group] = scoreGroups[group] - 1;
 
-                checkedEnoughTeams = true;
-                $.each(scoreGroups, function(key, value) {
-                  if (value > 0) {
-                    checkedEnoughTeams = false;
-                  }
-                });
+                  checkedEnoughTeams = true;
+                  $.each(scoreGroups, function(key, value) {
+                    if (value > 0) {
+                      checkedEnoughTeams = false;
+                    }
+                  });
+                }
               }
-            }
-            prevScores[group] = curScore;
+              prevScores[group] = curScore;
+            }// valid curScore
           } // checked enough teams
         } // if current division
       }); // foreach team
@@ -926,7 +943,7 @@
 
         category.teams.splice(index, 1);
         delete category.judges[teamNum];
-        
+
         if (save) {
           _save();
         }
