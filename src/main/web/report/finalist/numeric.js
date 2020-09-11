@@ -115,6 +115,27 @@ $(document).ready(
         return;
       }
 
+      $("#deselect-all").click(function() {
+        $(":checkbox").each(function() {
+          if ($(this).prop('checked')) {
+            $(this).trigger('click');
+          }
+        });
+      });
+
+      $("#reselect").click(
+          function() {
+            var teams = $.finalist.getAllTeams();
+            var scoreGroups = $.finalist.getScoreGroups(teams, division);
+            var division = $.finalist.getCurrentDivision();
+
+            $.finalist.unsetCategoryVisited(currentCategory, division);
+
+            $.finalist.initializeTeamsInNumericCategory(division,
+                currentCategory, teams, scoreGroups);
+            updatePage();
+          });
+
       $("#category-name").text(currentCategory.name);
 
       var roomEle = $("#room");
