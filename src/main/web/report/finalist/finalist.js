@@ -1267,7 +1267,7 @@
       $.each($.finalist.getNumericCategories(), function(i, category) {
         if (category.name != $.finalist.CHAMPIONSHIP_NAME) {
           if (window.location.pathname.match(/\/numeric.html$/)
-              && window.location.search == "?" + category.catId) {
+              && $.finalist.getCurrentCategoryId() == category.catId) {
             element = $("<span></span>");
           } else {
             element = $("<a href='numeric.html'></a>");
@@ -1286,7 +1286,7 @@
       var championshipCategory = $.finalist
           .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
       if (window.location.pathname.match(/\/numeric.html$/)
-          && window.location.search == "?" + championshipCategory.catId) {
+          && $.finalist.getCurrentCategoryId() == championshipCategory.catId) {
         element = $("<span></span>");
       } else {
         element = $("<a href='numeric.html'></a>");
