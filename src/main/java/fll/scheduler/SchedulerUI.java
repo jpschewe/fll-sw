@@ -78,7 +78,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
@@ -818,8 +817,7 @@ public class SchedulerUI extends JFrame {
                                                                       "What is the name of the tournament to put on the score sheets?");
             if (null != tournamentName) {
 
-              final Document document = ChallengeParser.parse(descriptorReader);
-              final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+              final ChallengeDescription description = ChallengeParser.parse(descriptorReader);
 
               final File scoresheetFile = new File(directory, baseFilename
                   + "-scoresheets.pdf");

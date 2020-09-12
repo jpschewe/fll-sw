@@ -33,7 +33,6 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.w3c.dom.Document;
 
 import fll.TestUtils;
 import fll.Tournament;
@@ -43,6 +42,7 @@ import fll.db.Queries;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -52,9 +52,9 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 @ExtendWith(TestUtils.InitializeLogging.class)
 public class TournamentScheduleTest {
 
-  public static final String RESEARCH_HEADER = "Research";
+  private static final String RESEARCH_HEADER = "Research";
 
-  public static final String TECHNICAL_HEADER = "Technical";
+  private static final String TECHNICAL_HEADER = "Technical";
 
   @Test
   public void testForNoSchedule() throws SQLException, UnsupportedEncodingException {
@@ -65,11 +65,12 @@ public class TournamentScheduleTest {
     try {
       final InputStream stream = TournamentScheduleTest.class.getResourceAsStream("/fll/db/data/challenge-test.xml");
       assertNotNull(stream);
-      final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
+      final ChallengeDescription description = ChallengeParser.parse(new InputStreamReader(stream,
+                                                                                           Utilities.DEFAULT_CHARSET));
 
       memConnection = DriverManager.getConnection(url);
 
-      GenerateDB.generateDB(document, memConnection);
+      GenerateDB.generateDB(description, memConnection);
       final boolean exists = TournamentSchedule.scheduleExistsInDatabase(memConnection, 1);
       assertFalse(exists);
 
@@ -90,11 +91,12 @@ public class TournamentScheduleTest {
     try {
       final InputStream stream = TournamentScheduleTest.class.getResourceAsStream("/fll/db/data/challenge-test.xml");
       assertNotNull(stream);
-      final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
+      final ChallengeDescription description = ChallengeParser.parse(new InputStreamReader(stream,
+                                                                                           Utilities.DEFAULT_CHARSET));
 
       memConnection = DriverManager.getConnection(url);
 
-      GenerateDB.generateDB(document, memConnection);
+      GenerateDB.generateDB(description, memConnection);
 
       Tournament.createTournament(memConnection, tournamentName, null, null, null, null);
       final Tournament tournament = Tournament.findTournamentByName(memConnection, tournamentName);

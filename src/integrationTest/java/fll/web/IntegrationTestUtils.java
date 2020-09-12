@@ -379,7 +379,9 @@ public final class IntegrationTestUtils {
   /**
    * Defaults filePrefix to "fll".
    *
+   * @param driver used to get the screen shot
    * @see #storeScreenshot(String, WebDriver)
+   * @throws IOException if there is an error getting the screen shot
    */
   public static void storeScreenshot(final WebDriver driver) throws IOException {
     storeScreenshot("fll", driver);
@@ -389,8 +391,8 @@ public final class IntegrationTestUtils {
    * Store screenshot and other information for debugging the error.
    *
    * @param filePrefix prefix for the files that are created
-   * @param driver
-   * @throws IOException
+   * @param driver used to get the screen shot
+   * @throws IOException if there is an error getting the screen shot
    */
   public static void storeScreenshot(final String filePrefix,
                                      final WebDriver driver)

@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.w3c.dom.Document;
 
 import fll.Team;
 import fll.TestUtils;
@@ -59,14 +58,13 @@ public class BracketSortTest {
     // load in data/alpha-team-sort.xml
     final InputStream challengeDocIS = BracketSortTest.class.getResourceAsStream("data/alpha-team-sort.xml");
     assertNotNull(challengeDocIS);
-    final Document document = ChallengeParser.parse(new InputStreamReader(challengeDocIS, Utilities.DEFAULT_CHARSET));
-    assertNotNull(document);
-
-    final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+    final ChallengeDescription description = ChallengeParser.parse(new InputStreamReader(challengeDocIS,
+                                                                                         Utilities.DEFAULT_CHARSET));
+    assertNotNull(description);
 
     // create in memory test database instance
     try (Connection connection = DriverManager.getConnection("jdbc:hsqldb:mem:flldb-testAlphaTeam")) {
-      GenerateDB.generateDB(document, connection);
+      GenerateDB.generateDB(description, connection);
 
       final int tournament = Queries.getCurrentTournament(connection);
 

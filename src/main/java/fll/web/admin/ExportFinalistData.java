@@ -18,11 +18,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.w3c.dom.Document;
-
 import fll.db.DumpDB;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.xml.ChallengeDescription;
 
 /**
  * Export the database using a name with the tournament name, date and label
@@ -39,9 +38,9 @@ public class ExportFinalistData extends BaseFLLServlet {
       throws IOException, ServletException {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     try (Connection connection = datasource.getConnection()) {
-      DumpDB.exportDatabase(response, application, "_finalist", challengeDocument, connection);
+      DumpDB.exportDatabase(response, application, "_finalist", challengeDescription, connection);
     } catch (final SQLException sqle) {
       throw new RuntimeException(sqle);
     }

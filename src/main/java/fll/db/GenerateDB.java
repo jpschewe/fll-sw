@@ -15,8 +15,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.w3c.dom.Document;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
@@ -79,10 +77,11 @@ public final class GenerateDB {
   public static final String PERFORMANCE_TABLE_NAME = PerformanceScoreCategory.CATEGORY_NAME;
 
   /**
-   * Generate a completely new DB from document. This also stores the document
+   * Generate a completely new DB from a challenge description. This also stores
+   * the description
    * in the database for later use.
    *
-   * @param document and XML document that describes a tournament
+   * @param description tournament description
    * @param connection connection to the database to create the tables in
    * @throws SQLException on a database error
    * @throws UnsupportedEncodingException if the challenge description cannot be
@@ -90,7 +89,7 @@ public final class GenerateDB {
    */
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
                                 "OBL_UNSATISFIED_OBLIGATION" }, justification = "Need dynamic data for default values, Bug in findbugs - ticket:2924739")
-  public static void generateDB(final Document document,
+  public static void generateDB(final ChallengeDescription description,
                                 final Connection connection)
       throws SQLException, UnsupportedEncodingException {
 
@@ -103,9 +102,7 @@ public final class GenerateDB {
       // threads
       stmt.executeUpdate("SET DATABASE TRANSACTION CONTROL MVCC");
 
-      createGlobalParameters(document, connection);
-
-      final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+      createGlobalParameters(description, connection);
 
       // authentication tables
       createAuthentication(connection);
@@ -634,14 +631,14 @@ public final class GenerateDB {
   }
 
   /**
-   * Replace the challenge document in the database. It is assumed that the
-   * document is compatible with the database.
+   * Replace the challenge description in the database. It is assumed that it
+   * is compatible with the database.
    * 
-   * @param document the new document to put in the database
+   * @param description to put in the database
    * @param connection the database connection
    * @throws SQLException on a database error
    */
-  public static void insertOrUpdateChallengeDocument(final Document document,
+  public static void insertOrUpdateChallengeDocument(final ChallengeDescription description,
                                                      final Connection connection)
       throws SQLException {
     final boolean check = GlobalParameters.globalParameterExists(connection, GlobalParameters.CHALLENGE_DOCUMENT);
@@ -655,7 +652,7 @@ public final class GenerateDB {
       // dump the document into a byte array so we can push it into the
       // database
       final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      XMLUtils.writeXML(document, new OutputStreamWriter(baos, Utilities.DEFAULT_CHARSET),
+      XMLUtils.writeXML(description.toXml(), new OutputStreamWriter(baos, Utilities.DEFAULT_CHARSET),
                         Utilities.DEFAULT_CHARSET.name());
       final byte[] bytes = baos.toByteArray();
       final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
@@ -664,7 +661,7 @@ public final class GenerateDB {
     }
   }
 
-  /* package */static void createGlobalParameters(final Document document,
+  /* package */static void createGlobalParameters(final ChallengeDescription description,
                                                   final Connection connection)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
@@ -690,7 +687,7 @@ public final class GenerateDB {
       insertPrep.setString(2, GlobalParameters.DATABASE_VERSION);
       insertPrep.executeUpdate();
 
-      insertOrUpdateChallengeDocument(document, connection);
+      insertOrUpdateChallengeDocument(description, connection);
     }
   }
 

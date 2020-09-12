@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.w3c.dom.Document;
 
 import fll.TestUtils;
 import fll.Utilities;
@@ -46,9 +45,8 @@ public class ScoreTest {
 
   private PerformanceScoreCategory loadDocumentAndGetPerformanceElemnt(final InputStream stream) {
     assertNotNull(stream);
-    final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
-    assertNotNull(document);
-    final ChallengeDescription desc = new ChallengeDescription(document.getDocumentElement());
+    final ChallengeDescription desc = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
+    assertNotNull(desc);
     final PerformanceScoreCategory performanceElement = desc.getPerformance();
     assertNotNull(performanceElement);
     return performanceElement;

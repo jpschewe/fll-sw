@@ -23,8 +23,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import org.w3c.dom.Document;
-
 import fll.Utilities;
 import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
@@ -86,9 +84,7 @@ public final class SetupIndex {
       for (final URL url : urls) {
         try (InputStream stream = url.openStream()) {
           try (Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET)) {
-            final Document document = ChallengeParser.parse(reader);
-
-            final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+            final ChallengeDescription description = ChallengeParser.parse(reader);
 
             descriptions.add(new DescriptionInfo(url, description));
           }

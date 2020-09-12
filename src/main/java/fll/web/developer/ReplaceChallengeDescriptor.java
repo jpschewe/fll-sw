@@ -21,13 +21,13 @@ import javax.sql.DataSource;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
-import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.UploadProcessor;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 
 @WebServlet("/developer/ReplaceChallengeDescriptor")
@@ -49,7 +49,7 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
-      final Document curDoc = ApplicationAttributes.getChallengeDocument(application);
+      final ChallengeDescription curDescription = ApplicationAttributes.getChallengeDescription(application);
 
       // must be first to ensure the form parameters are set
       UploadProcessor.processUpload(request);
@@ -57,13 +57,13 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
       // create a new empty database from an XML descriptor
       final FileItem xmlFileItem = (FileItem) request.getAttribute("xmldoc");
 
-      final Document newDoc = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
-                                                                          Utilities.DEFAULT_CHARSET));
+      final ChallengeDescription newDescription = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
+                                                                                              Utilities.DEFAULT_CHARSET));
 
-      final String compareMessage = ChallengeParser.compareStructure(curDoc, newDoc);
+      final String compareMessage = ChallengeParser.compareStructure(curDescription, newDescription);
       if (null == compareMessage) {
-        GenerateDB.insertOrUpdateChallengeDocument(newDoc, connection);
-        application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, newDoc);
+        GenerateDB.insertOrUpdateChallengeDocument(newDescription, connection);
+        application.setAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION, newDescription);
         message.append("<p><i>Successfully replaced challenge descriptor</i></p>");
       } else {
         message.append("<p class='error'>");

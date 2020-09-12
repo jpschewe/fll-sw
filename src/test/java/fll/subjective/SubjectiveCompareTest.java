@@ -25,6 +25,7 @@ import org.xml.sax.SAXException;
 import fll.TestUtils;
 import fll.Utilities;
 import fll.web.admin.DownloadSubjectiveData;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -34,18 +35,18 @@ import net.mtu.eggplant.xml.XMLUtils;
 @ExtendWith(TestUtils.InitializeLogging.class)
 public class SubjectiveCompareTest {
 
-  private Document challengeDocument;
+  private ChallengeDescription description;
 
   @BeforeEach
   public void setUp() {
     final InputStream stream = SubjectiveCompareTest.class.getResourceAsStream("challenge.xml");
     assertNotNull(stream);
-    challengeDocument = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
+    description = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
   }
 
   @AfterEach
   public void tearDown() {
-    challengeDocument = null;
+    description = null;
   }
 
   private Document loadDocument(final String resourceName) throws SAXException, IOException {
@@ -68,7 +69,7 @@ public class SubjectiveCompareTest {
   @Test
   public void simpleTestWithNoDifferences() throws SAXException, IOException {
     final Document scoreDocument = loadDocument("master-score.xml");
-    final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(challengeDocument,
+    final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(description.toXml(),
                                                                                               scoreDocument,
                                                                                               scoreDocument);
     assertNotNull(diffs);
@@ -85,7 +86,7 @@ public class SubjectiveCompareTest {
   public void simpleTestWithOneDifference() throws SAXException, IOException {
     final Document masterDocument = loadDocument("master-score.xml");
     final Document compareDocument = loadDocument("single-diff.xml");
-    final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(challengeDocument,
+    final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(description.toXml(),
                                                                                               masterDocument,
                                                                                               compareDocument);
     assertNotNull(diffs);

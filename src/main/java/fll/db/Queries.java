@@ -29,7 +29,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
@@ -869,8 +868,7 @@ public final class Queries {
       deletePrep.executeUpdate();
 
       if (runNumber > numSeedingRounds) {
-        final Document document = GlobalParameters.getChallengeDocument(connection);
-        final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+        final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
         final PerformanceScoreCategory performance = description.getPerformance();
         final ScoreType performanceScoreType = performance.getScoreType();
 
@@ -934,8 +932,7 @@ public final class Queries {
 
     }
 
-    final Document document = GlobalParameters.getChallengeDocument(connection);
-    final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+    final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
     final PerformanceScoreCategory performance = description.getPerformance();
     final ScoreType performanceScoreType = performance.getScoreType();
 
@@ -1000,8 +997,7 @@ public final class Queries {
       throws SQLException {
     final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, bracketName);
 
-    final Document document = GlobalParameters.getChallengeDocument(connection);
-    final ChallengeDescription challengeDescription = new ChallengeDescription(document.getDocumentElement());
+    final ChallengeDescription challengeDescription = GlobalParameters.getChallengeDescription(connection);
     final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
 
     final Collection<BracketUpdate> updates = new LinkedList<>();

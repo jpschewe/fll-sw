@@ -16,7 +16,6 @@ import java.text.ParseException;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.w3c.dom.Document;
 
 import fll.db.GlobalParameters;
 import fll.xml.ChallengeDescription;
@@ -46,10 +45,8 @@ public final class UnfinishedTestFinish extends UnfinishedBaseTest {
   @ParameterizedTest
   @MethodSource("names")
   public void test(final String bracketName) throws SQLException, ParseException {
-    final Document document = GlobalParameters.getChallengeDocument(connection);
-    assertThat(document, notNullValue());
-
-    final ChallengeDescription challenge = new ChallengeDescription(document.getDocumentElement());
+    final ChallengeDescription challenge = GlobalParameters.getChallengeDescription(connection);
+    assertThat(challenge, notNullValue());
 
     final boolean before = Playoff.isPlayoffBracketUnfinished(connection, tournament.getTournamentID(), bracketName);
     assertThat(before, is(true));
