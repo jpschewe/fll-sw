@@ -14,11 +14,10 @@ import java.sql.SQLException;
 
 import javax.annotation.Nonnull;
 
-import org.w3c.dom.Document;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 
 /**
@@ -180,16 +179,17 @@ public final class GlobalParameters {
   }
 
   /**
-   * Get the challenge document out of the database. This method doesn't
+   * Get the challenge description out of the database. This method doesn't
    * validate the document, since it's assumed that the document was validated
    * before it was put in the database.
    *
    * @param connection connection to the database
-   * @return the document
-   * @throws FLLRuntimeException if the document cannot be found
+   * @return the description
+   * @throws FLLRuntimeException if the description cannot be found
    * @throws SQLException on a database error
    */
-  public static Document getChallengeDocument(final Connection connection) throws SQLException, RuntimeException {
+  public static ChallengeDescription getChallengeDescription(final Connection connection)
+      throws SQLException, RuntimeException {
     try (PreparedStatement prep = getGlobalParameterStmt(connection, CHALLENGE_DOCUMENT)) {
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {

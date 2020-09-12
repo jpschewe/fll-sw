@@ -25,6 +25,7 @@ import org.xml.sax.SAXException;
 
 import fll.Utilities;
 import fll.web.admin.DownloadSubjectiveData;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
@@ -72,8 +73,8 @@ public final class SubjectiveUtils {
       masterScoreStream.close();
 
       final InputStream masterChallengeStream = masterZipfile.getInputStream(masterZipfile.getEntry("challenge.xml"));
-      final Document masterChallengeDoc = ChallengeParser.parse(new InputStreamReader(masterChallengeStream,
-                                                                                      Utilities.DEFAULT_CHARSET));
+      final ChallengeDescription masterDescription = ChallengeParser.parse(new InputStreamReader(masterChallengeStream,
+                                                                                                 Utilities.DEFAULT_CHARSET));
       masterChallengeStream.close();
 
       compareZipfile = new ZipFile(compareFile);
@@ -87,16 +88,16 @@ public final class SubjectiveUtils {
       compareScoreStream.close();
 
       final InputStream compareChallengeStream = compareZipfile.getInputStream(compareZipfile.getEntry("challenge.xml"));
-      final Document compareChallengeDoc = ChallengeParser.parse(new InputStreamReader(compareChallengeStream,
-                                                                                       Utilities.DEFAULT_CHARSET));
+      final ChallengeDescription compareDescription = ChallengeParser.parse(new InputStreamReader(compareChallengeStream,
+                                                                                                  Utilities.DEFAULT_CHARSET));
       compareChallengeStream.close();
 
       compareZipfile.close();
 
-      if (!XMLUtils.compareDocuments(masterChallengeDoc, compareChallengeDoc)) {
+      if (!XMLUtils.compareDocuments(masterDescription.toXml(), compareDescription.toXml())) {
         return null;
       } else {
-        return compareScoreDocuments(masterChallengeDoc, masterScoreDocument, compareScoreDocument);
+        return compareScoreDocuments(masterDescription.toXml(), masterScoreDocument, compareScoreDocument);
       }
     } finally {
       if (null != masterZipfile) {

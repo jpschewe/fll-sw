@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -40,6 +39,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -113,10 +113,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
-      final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+    try (Connection connection = datasource.getConnection()) {
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
       final int currentTournament = Queries.getCurrentTournament(connection);
@@ -142,12 +139,10 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
       response.setHeader("Content-Disposition", "attachment; filename=\""
           + filename
           + "\"");
-      writeSubjectiveData(connection, challengeDocument, challengeDescription, schedule, scheduleColumnMappings,
+      writeSubjectiveData(connection, challengeDescription, schedule, scheduleColumnMappings,
                           response.getOutputStream());
     } catch (final SQLException e) {
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
@@ -255,18 +250,16 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
   /**
    * Write out the subjective scores data for the current tournament.
    * 
-   * @param stream where to write the scores file
-   * @throws IOException
    * @param connection database connection
-   * @param challengeDocument XML version of the challenge description to be
-   *          written
    * @param challengeDescription description of the challenge
+   * @param schedule tournament schedule
    * @param scheduleColumnMappings mappings from schedule columns to category
    *          names
-   * @param schedule tournament schedule
+   * @param stream where to write the scores file
+   * @throws IOException if there is an error writing the data
+   * @throws SQLException if there is an error talking to the database
    */
   public static void writeSubjectiveData(final Connection connection,
-                                         final Document challengeDocument,
                                          final ChallengeDescription challengeDescription,
                                          final @Nullable TournamentSchedule schedule,
                                          final @Nullable Collection<CategoryColumnMapping> scheduleColumnMappings,
@@ -297,7 +290,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
     final Writer writer = new OutputStreamWriter(zipOut, Utilities.DEFAULT_CHARSET);
 
     zipOut.putNextEntry(new ZipEntry(CHALLENGE_ENTRY_NAME));
-    XMLUtils.writeXML(challengeDocument, writer, Utilities.DEFAULT_CHARSET.name());
+    XMLUtils.writeXML(challengeDescription.toXml(), writer, Utilities.DEFAULT_CHARSET.name());
     zipOut.closeEntry();
 
     final Document scoreDocument = createSubjectiveScoresDocument(challengeDescription, tournamentTeams.values(),

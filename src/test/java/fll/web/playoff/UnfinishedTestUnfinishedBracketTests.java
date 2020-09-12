@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.w3c.dom.Document;
 
 import fll.Team;
 import fll.db.GlobalParameters;
@@ -73,10 +72,8 @@ public final class UnfinishedTestUnfinishedBracketTests extends UnfinishedBaseTe
    */
   @Test
   public void testDummyScore() throws SQLException, RuntimeException {
-    final Document document = GlobalParameters.getChallengeDocument(connection);
-    assertThat(document, notNullValue());
-
-    final ChallengeDescription challenge = new ChallengeDescription(document.getDocumentElement());
+    final ChallengeDescription challenge = GlobalParameters.getChallengeDescription(connection);
+    assertThat(challenge, notNullValue());
 
     final Map<String, Double> simpleGoals = new HashMap<>();
     final Map<String, String> enumGoals = new HashMap<>();

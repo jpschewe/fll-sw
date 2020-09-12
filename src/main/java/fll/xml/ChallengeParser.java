@@ -96,10 +96,10 @@ public final class ChallengeParser {
    * reading.
    *
    * @param stream a stream containing document
-   * @return not null
+   * @return the parsed challenge description
    * @throws ChallengeXMLException on error
    */
-  public static Document parse(final Reader stream) throws ChallengeXMLException {
+  public static ChallengeDescription parse(final Reader stream) throws ChallengeXMLException {
     try {
       final StringWriter writer = new StringWriter();
       stream.transferTo(writer);
@@ -142,7 +142,9 @@ public final class ChallengeParser {
       // challenge descriptor specific checks
       validateDocument(document);
 
-      return document;
+      final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+
+      return description;
     } catch (final SAXParseException spe) {
       throw new ChallengeXMLException(String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software or an improperly formatted challenge descriptor or attempting to parse a file that is not a challenge descriptor.",
                                                     spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage()),
@@ -422,12 +424,6 @@ public final class ChallengeParser {
     }
   }
 
-  public static @Nullable String compareStructure(final Document curDoc,
-                                                  final Document newDoc) {
-    return compareStructure(new ChallengeDescription(curDoc.getDocumentElement()),
-                            new ChallengeDescription(newDoc.getDocumentElement()));
-  }
-
   /**
    * If the new document differs from the current document in a way that the
    * database structure will be modified.
@@ -436,8 +432,8 @@ public final class ChallengeParser {
    * @param newDoc the document to check against
    * @return null if everything checks out OK, otherwise the error message
    */
-  public static String compareStructure(final ChallengeDescription curDoc,
-                                        final ChallengeDescription newDoc) {
+  public static @Nullable String compareStructure(final ChallengeDescription curDoc,
+                                                  final ChallengeDescription newDoc) {
     final PerformanceScoreCategory curPerfElement = curDoc.getPerformance();
     final PerformanceScoreCategory newPerfElement = newDoc.getPerformance();
 

@@ -32,7 +32,6 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.w3c.dom.Document;
 
 import com.opencsv.CSVWriter;
 
@@ -42,6 +41,7 @@ import fll.Utilities;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.GatherBugReport;
+import fll.xml.ChallengeDescription;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -69,10 +69,10 @@ public final class DumpDB extends BaseFLLServlet {
     final String label = "";
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+    final ChallengeDescription challengeDescription= ApplicationAttributes.getChallengeDescription(application);
     try (Connection connection = datasource.getConnection()) {
 
-      exportDatabase(response, application, label, challengeDocument, connection);
+      exportDatabase(response, application, label, challengeDescription, connection);
     } catch (final SQLException sqle) {
       throw new RuntimeException(sqle);
     }
@@ -85,7 +85,7 @@ public final class DumpDB extends BaseFLLServlet {
    * @param application used to get some information for the dump
    * @param label the label to use, may be null. Appended to the end of the
    *          filename before the suffix.
-   * @param challengeDocument the challenge document
+   * @param challengeDescription the challenge 
    * @param connection database connection
    * @throws SQLException if there is an error reading from the database
    * @throws IOException if there is an error writing to the response
@@ -93,7 +93,7 @@ public final class DumpDB extends BaseFLLServlet {
   public static void exportDatabase(final HttpServletResponse response,
                                     final ServletContext application,
                                     final @Nullable String label,
-                                    final Document challengeDocument,
+                                    final ChallengeDescription challengeDescription,
                                     final Connection connection)
       throws SQLException, IOException {
     final int tournamentId = Queries.getCurrentTournament(connection);
@@ -111,7 +111,7 @@ public final class DumpDB extends BaseFLLServlet {
 
     final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
     try {
-      DumpDB.dumpDatabase(zipOut, connection, challengeDocument, application);
+      DumpDB.dumpDatabase(zipOut, connection, challengeDescription, application);
     } finally {
       zipOut.close();
     }
@@ -122,7 +122,7 @@ public final class DumpDB extends BaseFLLServlet {
    *
    * @param output where to dump the database
    * @param connection the database connection to dump
-   * @param challengeDocument the challenge document to write out
+   * @param description the challenge to write out
    * @param application if not null, then add the log files and bug reports to the
    *          database
    * @throws SQLException on a database error
@@ -130,7 +130,7 @@ public final class DumpDB extends BaseFLLServlet {
    */
   public static void dumpDatabase(final ZipOutputStream output,
                                   final Connection connection,
-                                  final Document challengeDocument,
+                                  final ChallengeDescription description,
                                   final ServletContext application)
       throws SQLException, IOException {
     try (Statement stmt = connection.createStatement();
@@ -138,7 +138,7 @@ public final class DumpDB extends BaseFLLServlet {
 
       // output the challenge descriptor
       output.putNextEntry(new ZipEntry("challenge.xml"));
-      XMLUtils.writeXML(challengeDocument, outputWriter, Utilities.DEFAULT_CHARSET.name());
+      XMLUtils.writeXML(description.toXml(), outputWriter, Utilities.DEFAULT_CHARSET.name());
       output.closeEntry();
 
       // can't use Queries.getTablesInDB because it lowercases names and we need

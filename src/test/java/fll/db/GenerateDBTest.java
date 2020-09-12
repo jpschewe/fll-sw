@@ -18,10 +18,10 @@ import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.w3c.dom.Document;
 
 import fll.TestUtils;
 import fll.Utilities;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 
 /**
@@ -41,8 +41,9 @@ public class GenerateDBTest {
   public void testCreateDB() throws SQLException, IOException {
     try (InputStream stream = GenerateDBTest.class.getResourceAsStream("data/challenge-test.xml")) {
       assertNotNull(stream);
-      final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
-      assertNotNull(document);
+      final ChallengeDescription description = ChallengeParser.parse(new InputStreamReader(stream,
+                                                                                           Utilities.DEFAULT_CHARSET));
+      assertNotNull(description);
 
       final File tempFile = File.createTempFile("flltest", null);
       final String database = tempFile.getAbsolutePath();
@@ -50,9 +51,9 @@ public class GenerateDBTest {
       final DataSource datasource = Utilities.createFileDataSource(database);
 
       try (Connection connection = datasource.getConnection()) {
-        GenerateDB.generateDB(document, connection);
+        GenerateDB.generateDB(description, connection);
 
-        GenerateDB.generateDB(document, connection);
+        GenerateDB.generateDB(description, connection);
       } finally {
         if (!tempFile.delete()) {
           tempFile.deleteOnExit();

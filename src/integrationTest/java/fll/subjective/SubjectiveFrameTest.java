@@ -44,8 +44,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.TestUtils;
@@ -57,7 +55,7 @@ import fll.db.Queries;
 import fll.web.IntegrationTestUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeDescription;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+import fll.xml.SubjectiveScoreCategory;
 
 /**
  * Some basic tests for the subjective app.
@@ -88,7 +86,7 @@ public class SubjectiveFrameTest {
 
   private File subjectiveScores;
 
-  private Document document;
+  private ChallengeDescription description;
 
   @BeforeEach
   public void setUp() throws IOException, SQLException {
@@ -103,7 +101,7 @@ public class SubjectiveFrameTest {
                                                                                 connection);
       TestUtils.deleteImportData(importResult);
 
-      document = GlobalParameters.getChallengeDocument(connection);
+      description = GlobalParameters.getChallengeDescription(connection);
 
       // set the right tournament
       final String tournamentName = "11-21 Plymouth Middle";
@@ -127,10 +125,9 @@ public class SubjectiveFrameTest {
       // create the subjective datafile
       subjectiveScores = File.createTempFile("testStartupState", ".fll");
       try (FileOutputStream fileStream = new FileOutputStream(subjectiveScores)) {
-        final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
         // If the schedule gets added, then make sure that the column offset in
         // testBackspaceClears gets modified
-        DownloadSubjectiveData.writeSubjectiveData(connection, document, description, null, null, fileStream);
+        DownloadSubjectiveData.writeSubjectiveData(connection, description, null, null, fileStream);
       }
 
       final SubjectiveFrame frame = GuiActionRunner.execute(new GuiQuery<SubjectiveFrame>() {
@@ -184,9 +181,8 @@ public class SubjectiveFrameTest {
       expectedRowCounts.put("Design", 41);
       expectedRowCounts.put("Programming", 29);
       expectedRowCounts.put("Research Project Assessment", 58);
-      for (final Element categoryDescription : new NodelistElementCollectionAdapter(document.getDocumentElement()
-                                                                                            .getElementsByTagName("subjectiveCategory"))) {
-        final String title = categoryDescription.getAttribute("title");
+      for (final SubjectiveScoreCategory subjCat : description.getSubjectiveCategories()) {
+        final String title = subjCat.getTitle();
 
         tabbedPane.selectTab(title);
         final JTableFixture table = window.table();

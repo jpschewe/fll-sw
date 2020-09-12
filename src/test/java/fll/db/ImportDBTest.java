@@ -22,10 +22,10 @@ import java.util.zip.ZipOutputStream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.w3c.dom.Document;
 
 import fll.TestUtils;
 import fll.Utilities;
+import fll.xml.ChallengeDescription;
 
 /**
  * @author jpschewe
@@ -117,9 +117,9 @@ public class ImportDBTest {
         final FileOutputStream fos = new FileOutputStream(temp);
         final ZipOutputStream zipOut = new ZipOutputStream(fos);
 
-        final Document challengeDocument = GlobalParameters.getChallengeDocument(connection);
-        assertNotNull(challengeDocument);
-        DumpDB.dumpDatabase(zipOut, connection, challengeDocument, null);
+        final ChallengeDescription challengeDescription = GlobalParameters.getChallengeDescription(connection);
+        assertNotNull(challengeDescription);
+        DumpDB.dumpDatabase(zipOut, connection, challengeDescription, null);
         fos.close();
 
         // load from temp file
