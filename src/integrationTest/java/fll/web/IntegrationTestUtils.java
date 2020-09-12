@@ -92,8 +92,14 @@ public final class IntegrationTestUtils {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  /**
+   * Username used for integration tests.
+   */
   public static final String TEST_USERNAME = "fll";
 
+  /**
+   * Password used for integration tests.
+   */
   public static final String TEST_PASSWORD = "Lego";
 
   /**
@@ -116,6 +122,10 @@ public final class IntegrationTestUtils {
 
   /**
    * Check if an element exists.
+   * 
+   * @param selenium web browser driver
+   * @param search what to search for
+   * @return if the element is found
    */
   public static boolean isElementPresent(final WebDriver selenium,
                                          final By search) {
@@ -164,6 +174,8 @@ public final class IntegrationTestUtils {
 
   /**
    * Assert that the current page is not the error handler page.
+   * 
+   * @param selenium web browser driver
    */
   public static void assertNoException(final WebDriver selenium) {
     assertFalse(isElementPresent(selenium, By.id("exception-handler")), "Error loading page");
@@ -456,7 +468,7 @@ public final class IntegrationTestUtils {
   /**
    * Login to software.
    *
-   * @param selenium browser driver.
+   * @param driver browser driver
    * @param seleniumWait wait for elements
    */
   public static void login(final WebDriver driver,
@@ -531,6 +543,12 @@ public final class IntegrationTestUtils {
    * Add a team to a tournament.
    *
    * @param seleniumWait used to wait for elements
+   * @param selenium web browser driver
+   * @param teamNumber team number
+   * @param teamName team name
+   * @param organization organization
+   * @param division award group
+   * @param tournamentName tournament
    */
   public static void addTeam(final WebDriver selenium,
                              final WebDriverWait seleniumWait,
@@ -616,20 +634,26 @@ public final class IntegrationTestUtils {
   /**
    * Create firefox web driver used for most integration tests.
    *
-   * @see #createWebDriver(WebDriverType)
+   * @return {@link #createWebDriver(WebDriverType)}
    */
   public static WebDriver createWebDriver() {
     return createWebDriver(WebDriverType.FIREFOX);
   }
 
   public enum WebDriverType {
-    FIREFOX, CHROME
+    /** firefox web browser. */
+    FIREFOX,
+    /** chrome web browser. */
+    CHROME
   }
 
   private static Set<WebDriverType> mInitializedWebDrivers = new HashSet<>();
 
   /**
    * Create a web driver and set appropriate timeouts on it.
+   * 
+   * @return web browser driver
+   * @param type which browser to use
    */
   public static WebDriver createWebDriver(final WebDriverType type) {
     final WebDriver selenium;
@@ -745,32 +769,6 @@ public final class IntegrationTestUtils {
   }
 
   /**
-   * Try harder to find elements.
-   */
-  public static WebElement findElement(final WebDriver selenium,
-                                       final By by,
-                                       final int maxAttempts) {
-    int attempts = 0;
-    WebElement e = null;
-    while (e == null
-        && attempts <= maxAttempts) {
-      try {
-        e = selenium.findElement(by);
-      } catch (final NoSuchElementException ex) {
-        ++attempts;
-        e = null;
-        if (attempts >= maxAttempts) {
-          throw ex;
-        } else {
-          LOGGER.warn("Trouble finding element, trying again", ex);
-        }
-      }
-    }
-
-    return e;
-  }
-
-  /**
    * Change the number of seeding rounds for the current tournament.
    *
    * @param selenium the driver
@@ -794,11 +792,12 @@ public final class IntegrationTestUtils {
   }
 
   /**
-   * Get the id of the current tournament
+   * Get the id of the current tournament.
    *
    * @param seleniumWait wait for elements
    * @param selenium browser driver
    * @throws IOException test error
+   * @return id of current tournament
    */
   public static int getCurrentTournamentId(final WebDriver selenium,
                                            final WebDriverWait seleniumWait)
@@ -823,7 +822,7 @@ public final class IntegrationTestUtils {
    * If the content type doesn't match an assertion violation will be thrown.
    *
    * @param urlToLoad the page to load
-   * @param the expected content type.
+   * @param expectedContentType the expected content type.
    *          If the expected type is null, skip this check.
    * @param destination where to save the file. If null don't save the file.
    *          Any existing file will be
@@ -834,7 +833,7 @@ public final class IntegrationTestUtils {
                                   final Path destination)
       throws ClientProtocolException, IOException {
 
-    try (final CloseableHttpClient client = HttpClientBuilder.create().build()) {
+    try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
       final BasicHttpContext localContext = new BasicHttpContext();
 
       // if (this.mimicWebDriverCookieState) {
@@ -860,7 +859,7 @@ public final class IntegrationTestUtils {
         }
 
         if (null != destination) {
-          try (final InputStream stream = response.getEntity().getContent()) {
+          try (InputStream stream = response.getEntity().getContent()) {
             Files.copy(stream, destination, StandardCopyOption.REPLACE_EXISTING);
           } // try create stream
         } // non-null destination

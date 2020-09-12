@@ -40,7 +40,6 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
@@ -225,7 +224,7 @@ public final class ImportDB {
    * <p>
    * Once the database has been loaded it will be upgraded to the current
    * version using
-   * {@link #upgradeDatabase(Connection, Document, ChallengeDescription)}.
+   * {@link #upgradeDatabase(Connection, ChallengeDescription)}.
    * </p>
    * <p>
    * The created database does not have constraints, nor does it have the
