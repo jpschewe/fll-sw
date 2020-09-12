@@ -1,124 +1,204 @@
 <?xml version="1.0"?>
-<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="FLL
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    title="FLL
 2005 Challenge: Ocean Odyssey"
-xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
-schemaVersion="1">
+    xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+    schemaVersion="1">
 
-	<Performance minimumScore="0" weight="1.0">
+    <Performance minimumScore="0" weight="1.0">
 
-		<goal initialValue="0" max="1" min="0" multiplier="40" name="pump_station" title="Protect the Pump Station"/>
+        <goal initialValue="0" max="1" min="0" multiplier="40"
+            name="pump_station" title="Protect the Pump Station" />
 
-		<goal initialValue="0" max="1" min="0" multiplier="30" name="flags" title="Transect Flags: Any Flags"/>
+        <goal initialValue="0" max="1" min="0" multiplier="30"
+            name="flags" title="Transect Flags: Any Flags" />
 
-		<goal initialValue="0" max="3" min="0" multiplier="15" name="flags_rows" title="Transect Flags: Number of Rows"/>
+        <goal initialValue="0" max="3" min="0" multiplier="15"
+            name="flags_rows" title="Transect Flags: Number of Rows" />
 
-		<goal initialValue="0" max="1" min="0" multiplier="1" name="archaeological" title="Archaeological Artifacts">
-			<value score="35" title="In Base" value="in_base"/>
-			<value score="25" title="Off Ship" value="off_ship"/>
-			<value score="0" title="No" value="no"/>
-		</goal>
-
-
-		<goal initialValue="0" max="1" min="0" multiplier="25" name="dolphin" title="Release Dolphin"/>
-
-		<goal initialValue="0" max="1" min="0" multiplier="35" name="sample_species" title="Sample Species (Grey Fish Only)"/>
-
-		<goal initialValue="0" max="1" min="0" multiplier="1" name="submarine" title="Deploy The Submarine">
-			<value score="40" title="Yes Upright" value="upright"/>
-			<value score="35" title="Yes Not Upright" value="yes"/>
-			<value score="0" title="No" value="no"/>
-		</goal>
+        <goal initialValue="0" max="1" min="0" multiplier="1"
+            name="archaeological" title="Archaeological Artifacts">
+            <value score="35" title="In Base" value="in_base" />
+            <value score="25" title="Off Ship" value="off_ship" />
+            <value score="0" title="No" value="no" />
+        </goal>
 
 
-		<goal initialValue="0" max="1" min="0" multiplier="40" name="artifical_reef" title="Artifical Reef"/>
+        <goal initialValue="0" max="1" min="0" multiplier="25"
+            name="dolphin" title="Release Dolphin" />
 
-		<goal initialValue="0" max="1" min="0" multiplier="40" name="pipeline" title="Service The Pipeline"/>
+        <goal initialValue="0" max="1" min="0" multiplier="35"
+            name="sample_species"
+            title="Sample Species (Grey Fish Only)" />
 
-		<goal initialValue="0" max="1" min="0" multiplier="30" name="shipping_container" title="Shipping Container at Base"/>
-
-		<goal initialValue="0" max="8" min="0" multiplier="5" name="crates_base" title="Crates in Base"/>
-
-		<goal initialValue="0" max="8" min="0" multiplier="2" name="crates" title="Crates Elsewhere on Table"/>
-
-		<restriction lowerBound="0" message="There are a maximum of 8 crates on the table" upperBound="8">
-			<term><constant value="1"/><goalRef goal="crates_base" scoreType="raw"/></term>
-			<term><constant value="1"/><goalRef goal="crates" scoreType="raw"/></term>
-		</restriction>
-
-		<tiebreaker>
-			<test winner="HIGH">
-				<term><goalRef goal="crates_base" scoreType="computed"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="crates" scoreType="computed"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="dolphin" scoreType="computed"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="flags_rows" scoreType="computed"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="flags" scoreType="computed"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="submarine" scoreType="computed"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="archaeological" scoreType="computed"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="shipping_container" scoreType="computed"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="pump_station" scoreType="computed"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="pipeline" scoreType="computed"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="sample_species" scoreType="computed"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="artifical_reef" scoreType="computed"/></term>
-			</test>
-		</tiebreaker>
-
-	</Performance>
-
-	<subjectiveCategory name="teamwork" title="Teamwork" weight="1.0">
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="roles" title="Roles and Responsibilities"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="professionalism" title="Gracious Professionalism"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="dynamics" title="Problem Solving &amp; Team Dynamics &amp; Communications"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="confidence" title="Confidence &amp; Enthusiasm"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="fll_values" title="FLL Values"/>
-	</subjectiveCategory>
+        <goal initialValue="0" max="1" min="0" multiplier="1"
+            name="submarine" title="Deploy The Submarine">
+            <value score="40" title="Yes Upright" value="upright" />
+            <value score="35" title="Yes Not Upright" value="yes" />
+            <value score="0" title="No" value="no" />
+        </goal>
 
 
-	<subjectiveCategory name="robustdesign" title="Robust Design" weight="0.5">
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="strategy" title="Strategy, Process, Problem Solving"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="locomotion" title="Locomotion and Navigation"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="design_kids" title="Kids Did the Work"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="structural" title="Structural"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="overall_design" title="Overall Design"/>
-	</subjectiveCategory>
+        <goal initialValue="0" max="1" min="0" multiplier="40"
+            name="artifical_reef" title="Artifical Reef" />
+
+        <goal initialValue="0" max="1" min="0" multiplier="40"
+            name="pipeline" title="Service The Pipeline" />
+
+        <goal initialValue="0" max="1" min="0" multiplier="30"
+            name="shipping_container" title="Shipping Container at Base" />
+
+        <goal initialValue="0" max="8" min="0" multiplier="5"
+            name="crates_base" title="Crates in Base" />
+
+        <goal initialValue="0" max="8" min="0" multiplier="2"
+            name="crates" title="Crates Elsewhere on Table" />
+
+        <restriction lowerBound="0"
+            message="There are a maximum of 8 crates on the table"
+            upperBound="8">
+            <term>
+                <constant value="1" />
+                <goalRef goal="crates_base" scoreType="raw" />
+            </term>
+            <term>
+                <constant value="1" />
+                <goalRef goal="crates" scoreType="raw" />
+            </term>
+        </restriction>
+
+        <tiebreaker>
+            <test winner="HIGH">
+                <term>
+                    <goalRef goal="crates_base"
+                        scoreType="computed" />
+                </term>
+            </test>
+            <test winner="HIGH">
+                <term>
+                    <goalRef goal="crates" scoreType="computed" />
+                </term>
+            </test>
+            <test winner="HIGH">
+                <term>
+                    <goalRef goal="dolphin" scoreType="computed" />
+                </term>
+            </test>
+            <test winner="HIGH">
+                <term>
+                    <goalRef goal="flags_rows"
+                        scoreType="computed" />
+                </term>
+            </test>
+            <test winner="HIGH">
+                <term>
+                    <goalRef goal="flags" scoreType="computed" />
+                </term>
+            </test>
+            <test winner="HIGH">
+                <term>
+                    <goalRef goal="submarine"
+                        scoreType="computed" />
+                </term>
+            </test>
+            <test winner="HIGH">
+                <term>
+                    <goalRef goal="archaeological"
+                        scoreType="computed" />
+                </term>
+            </test>
+            <test winner="HIGH">
+                <term>
+                    <goalRef goal="shipping_container"
+                        scoreType="computed" />
+                </term>
+            </test>
+            <test winner="HIGH">
+                <term>
+                    <goalRef goal="pump_station"
+                        scoreType="computed" />
+                </term>
+            </test>
+            <test winner="HIGH">
+                <term>
+                    <goalRef goal="pipeline"
+                        scoreType="computed" />
+                </term>
+            </test>
+            <test winner="HIGH">
+                <term>
+                    <goalRef goal="sample_species"
+                        scoreType="computed" />
+                </term>
+            </test>
+            <test winner="HIGH">
+                <term>
+                    <goalRef goal="artifical_reef"
+                        scoreType="computed" />
+                </term>
+            </test>
+        </tiebreaker>
+
+    </Performance>
+
+    <subjectiveCategory name="teamwork"
+        title="Teamwork" weight="1.0">
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="roles" title="Roles and Responsibilities" />
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="professionalism" title="Gracious Professionalism" />
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="dynamics"
+            title="Problem Solving &amp; Team Dynamics &amp; Communications" />
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="confidence" title="Confidence &amp; Enthusiasm" />
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="fll_values" title="FLL Values" />
+    </subjectiveCategory>
 
 
-	<subjectiveCategory name="programming" title="Robust Programming" weight="0.5">
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="useoflanguage" title="Use of Language"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="modularity" title="Modularity/Abstraction"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="sensorcontrol" title="Sensor Control"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="design" title="Design"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="programming_kids" title="Kids Did the Work"/>
-	</subjectiveCategory>
+    <subjectiveCategory name="robustdesign"
+        title="Robust Design" weight="0.5">
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="strategy" title="Strategy, Process, Problem Solving" />
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="locomotion" title="Locomotion and Navigation" />
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="design_kids" title="Kids Did the Work" />
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="structural" title="Structural" />
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="overall_design" title="Overall Design" />
+    </subjectiveCategory>
 
-	<subjectiveCategory name="research" title="Research Project Assessment" weight="1.0">
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="questions" title="Questions, Language Use"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="completeness" title="Completeness, Teamwork"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="background" title="Background, Data, and Graphics"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="analysis" title="Analysis and Conclusions"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="style" title="Style"/>
-	</subjectiveCategory>
+
+    <subjectiveCategory name="programming"
+        title="Robust Programming" weight="0.5">
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="useoflanguage" title="Use of Language" />
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="modularity" title="Modularity/Abstraction" />
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="sensorcontrol" title="Sensor Control" />
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="design" title="Design" />
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="programming_kids" title="Kids Did the Work" />
+    </subjectiveCategory>
+
+    <subjectiveCategory name="research"
+        title="Research Project Assessment" weight="1.0">
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="questions" title="Questions, Language Use" />
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="completeness" title="Completeness, Teamwork" />
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="background" title="Background, Data, and Graphics" />
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="analysis" title="Analysis and Conclusions" />
+        <goal initialValue="0" max="20" min="1" multiplier="1"
+            name="style" title="Style" />
+    </subjectiveCategory>
 
 
 </fll>

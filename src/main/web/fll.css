@@ -1,17 +1,17 @@
 * {
-	display: block;
-	margin: 10pt;
-	font-family: Comic SANS MS, fantasy, times, serif;
-	text-align: left;
+    display: block;
+    margin: 10pt;
+    font-family: Comic SANS MS, fantasy, times, serif;
+    text-align: left;
 }
 
 fll:before {
-	margin-bottom: 200%;
-	font-size: 200%;
-	text-align: center;
-	content: attr(title) " Revision: " attr(revision)
-		" - Playoff brackets sorted by " attr(bracketSort)
-		" - Scores sorted by " attr(winner)
+    margin-bottom: 200%;
+    font-size: 200%;
+    text-align: center;
+    content: attr(title) " Revision: " attr(revision)
+        " - Playoff brackets sorted by " attr(bracketSort)
+        " - Scores sorted by " attr(winner)
 }
 
 goalGroup:before {
@@ -20,200 +20,202 @@ goalGroup:before {
 }
 
 goal:before {
-	content: "Goal: '" attr(title) "' [" attr(name) "] min: " attr(min)
-		" max: " attr(max) " multiplier: " attr(multiplier);
-	font-size: 120%;
+    content: "Goal: '" attr(title) "' [" attr(name) "] min: " attr(min)
+        " max: " attr(max) " multiplier: " attr(multiplier);
+    font-size: 120%;
 }
 
 description {
-	display: block
+    display: block
 }
 
 rubric {
-	display: table;
-	border: 2px solid;
+    display: table;
+    border: 2px solid;
 }
 
 rubric * {
-	display: table-cell;
-	padding: 5px;
+    display: table-cell;
+    padding: 5px;
 }
 
 range:before {
-	content: attr(title) " (" attr(min) " - " attr(max) ") '" attr(shortDescription) "'";
-	font-weight: bold;
-	text-align: center;
-	display: table-caption;
+    content: attr(title) " (" attr(min) " - " attr(max) ") '"
+        attr(shortDescription) "'";
+    font-weight: bold;
+    text-align: center;
+    display: table-caption;
 }
 
 range {
-	border: 2px solid;
+    border: 2px solid;
 }
 
 value:before {
-	content: "    Enum Value: '" attr(title) "' [" attr(value) "] score: "
-		attr(score);
+    content: "    Enum Value: '" attr(title) "' [" attr(value) "] score: "
+        attr(score);
 }
 
 stringConstant:before {
-	content: "'" attr(value) "'";
+    content: "'" attr(value) "'";
 }
 
 enumGoalRef:before {
-	content: attr(goal);
+    content: attr(goal);
 }
 
 computedGoal:before {
-	content: "Computed Goal: '" attr(title) "' [" attr(name) "]";
-	font-size: 120%;
+    content: "Computed Goal: '" attr(title) "' [" attr(name) "]";
+    font-size: 120%;
 }
 
 default:before {
-	content: "} else {";
+    content: "} else {";
 }
 
 default:after {
-	content: "}";
+    content: "}";
 }
 
 enumCondition * {
-	display: inline;
-	margin-right: 0pt;
-	margin-left: 0pt;
+    display: inline;
+    margin-right: 0pt;
+    margin-left: 0pt;
 }
 
 enumCondition:after {
-	content: ") {";
+    content: ") {";
 }
 
 case>* {
-	display: inline;
-	margin-right: 0pt;
-	margin-left: 0pt;
+    display: inline;
+    margin-right: 0pt;
+    margin-left: 0pt;
 }
 
 condition * {
-	display: inline;
-	margin-right: 0pt;
-	margin-left: 0pt;
+    display: inline;
+    margin-right: 0pt;
+    margin-left: 0pt;
 }
 
 case:first-child:before {
-	content: "if (";
+    content: "if (";
 }
 
 case:before {
-	content: "} else if (";
+    content: "} else if (";
 }
 
 condition:after {
-	content: ") {";
+    content: ") {";
 }
 
 equal-to:before {
-	content: " == ";
+    content: " == ";
 }
 
 not-equal-to:before {
-	content: " != ";
+    content: " != ";
 }
 
 less-than:before {
-	content: " < ";
+    content: " < ";
 }
 
 less-than-or-equal:before {
-	content: " <= ";
+    content: " <= ";
 }
 
 greater-than:before {
-	content: " > ";
+    content: " > ";
 }
 
 greater-than-or-equal:before {
-	content: " >= ";
+    content: " >= ";
 }
 
 restriction * {
-	display: inline;
-	margin-right: 0pt;
-	margin-left: 0pt;
+    display: inline;
+    margin-right: 0pt;
+    margin-left: 0pt;
 }
 
 restriction:before {
-	content: "Restriction '" attr(message) "': " attr(lowerBound) " <= ";
+    content: "Restriction '" attr(message) "': " attr(lowerBound) " <= ";
 }
 
 restriction:after {
-	content: " <= " attr(upperBound);
+    content: " <= " attr(upperBound);
 }
 
 tiebreaker:before {
-	content: "Tiebreaker";
-	counter-reset: tiebreaker;
+    content: "Tiebreaker";
+    counter-reset: tiebreaker;
 }
 
 test:before {
-	content: counter(tiebreaker) ". Team with the " attr(winner)
-		" score wins";
-	counter-increment: tiebreaker;
+    content: counter(tiebreaker) ". Team with the " attr(winner)
+        " score wins";
+    counter-increment: tiebreaker;
 }
 
 Performance:before {
-	content: "Performance - weight: " attr(weight);
-	font-size: 120%;
-	font-weight: bold;
+    content: "Performance - weight: " attr(weight);
+    font-size: 120%;
+    font-weight: bold;
 }
 
 subjectiveCategory:before {
-	content: attr(title) " - weight: " attr(weight);
-	font-size: 120%;
-	font-weight: bold;
+    content: attr(title) " - weight: " attr(weight);
+    font-size: 120%;
+    font-weight: bold;
 }
 
 term:before {
-	content: attr(floatingPointType) "(";
+    content: attr(floatingPointType) "(";
 }
 
-term:not(:last-child ):after {
-	content: ") + ";
+term:not (:last-child ):after {
+    content: ") + ";
 }
 
 term:last-child:after {
-	content: ") ";
+    content: ") ";
 }
 
 term * {
-	display: inline;
+    display: inline;
 }
 
 goalRef:before {
-	content: attr(scoreType) "(" attr(goal) ")";
+    content: attr(scoreType) "(" attr(goal) ")";
 }
 
-goalRef:not(:last-child ):after {
-	content: " x ";
+goalRef:not (:last-child ):after {
+    content: " x ";
 }
 
 constant:before {
-	content: attr(value);
+    content: attr(value);
 }
 
-constant:not(:last-child):after {
-	content: " x ";
+constant:not (:last-child ):after {
+    content: " x ";
 }
 
 variableRef:before {
-	content: attr(variable);
+    content: attr(variable);
 }
 
-variableRef:not(:last-child ):after {
-	content: " x ";
+variableRef:not (:last-child ):after {
+    content: " x ";
 }
 
 variable * {
     display: inline;
 }
+
 variable:before {
-	content: attr(name) " = ";
+    content: attr(name) " = ";
 }

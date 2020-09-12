@@ -6,19 +6,15 @@
 <%@ page import="fll.web.playoff.RemoteControlBrackets"%>
 
 <%
-  RemoteControlBrackets.populateContext(application, session, pageContext);
+RemoteControlBrackets.populateContext(application, session, pageContext);
 %>
 
 <html>
 <head>
-<link
-  rel="stylesheet"
-  type="text/css"
-  href="<c:url value='/style/fll-sw.css'/>" />
-<link
-  rel="stylesheet"
-  type="text/css"
-  href="<c:url value='/scoreboard/score_style.css'/>" />
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/style/fll-sw.css'/>" />
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/scoreboard/score_style.css'/>" />
 
 <style type='text/css'>
 TD.Leaf {
@@ -55,28 +51,24 @@ SPAN.TIE {
     padding-right: 5%;
 }
 </style>
-<script
-  type="text/javascript"
-  src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-<script
-  type="text/javascript"
-  src="<c:url value='/extlib/jquery.scrollTo-2.1.2.min.js'/>"></script>
-  
+<script type="text/javascript"
+    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+<script type="text/javascript"
+    src="<c:url value='/extlib/jquery.scrollTo-2.1.2.min.js'/>"></script>
+
 <script type="text/javascript">
-  var allBracketData = ${allBracketDataJson};
+  var allBracketData = $
+  {
+    allBracketDataJson
+  };
   var scrollDuration = parseInt("${scrollDuration}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
   var maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
 </script>
 
-<script
-  type='text/javascript'
-  src='h2hutils.js'></script>
-<script
-  type='text/javascript'
-  src='remoteControlBrackets.js'></script>
+<script type='text/javascript' src='h2hutils.js'></script>
+<script type='text/javascript' src='remoteControlBrackets.js'></script>
 
 <script type="text/javascript">
-
   function scrollToBottom() {
     $.scrollTo($("#bottom"), {
       duration : scrollDuration,
@@ -102,26 +94,24 @@ SPAN.TIE {
 </script>
 </head>
 <body>
-  <span id="top">&nbsp;</span>
+    <span id="top">&nbsp;</span>
 
     <br />
-    <c:forEach
-      items="${allBracketData}"
-      var="bracketData">
+    <c:forEach items="${allBracketData}" var="bracketData">
 
-      <div class='center'>Head to Head Round
-        ${bracketData.firstRound}, Head to Head Bracket
-        ${bracketData.bracketName}</div>
-      <br />
+        <div class='center'>Head to Head Round
+            ${bracketData.firstRound}, Head to Head Bracket
+            ${bracketData.bracketName}</div>
+        <br />
                         
    ${bracketData.displayBracketOutput}
      <c:if test="${allBracketData.size() > 1}">
-        <br />
-        <br />
-        <hr />
-        <br />
-        <br />
-      </c:if>
+            <br />
+            <br />
+            <hr />
+            <br />
+            <br />
+        </c:if>
     </c:forEach>
     <span id="bottom">&nbsp;</span>
 

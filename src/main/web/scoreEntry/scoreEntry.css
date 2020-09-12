@@ -1,39 +1,39 @@
 TD {
-	font-family: arial
+    font-family: arial
 }
 
 table .score-entry {
-	width: 100%;
+    width: 100%;
 }
 
 #floating-messages {
-	position: fixed;
-	top: 0px;
-	left: 0%;
-	z-index: 99;
+    position: fixed;
+    top: 0px;
+    left: 0%;
+    z-index: 99;
 }
 
 #score-errors {
-	font-size: 200%;
-	border: 1px solid black;
-	padding: 5px;
-	background-color: red;
+    font-size: 200%;
+    border: 1px solid black;
+    padding: 5px;
+    background-color: red;
 }
 
 #verification-warning {
-	font-size: 200%;
-	border: 1px solid black;
-	padding: 5px;
-	background-color: yellow;
+    font-size: 200%;
+    border: 1px solid black;
+    padding: 5px;
+    background-color: yellow;
 }
 
 td .goal-title {
-	font-size: medium;
-	font-weight: bold;
-	text-align: right;
+    font-size: medium;
+    font-weight: bold;
+    text-align: right;
 }
 
 .goal-group-spacer {
     background-color: black;
-    line-height: 2px;    
+    line-height: 2px;
 }
