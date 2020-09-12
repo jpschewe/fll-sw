@@ -23,11 +23,9 @@ import org.w3c.dom.Document;
 import fll.TestUtils;
 import fll.Utilities;
 import fll.xml.ChallengeParser;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Test generating various databases.
- * 
  */
 @ExtendWith(TestUtils.InitializeLogging.class)
 public class GenerateDBTest {
@@ -51,15 +49,11 @@ public class GenerateDBTest {
 
       final DataSource datasource = Utilities.createFileDataSource(database);
 
-      Connection connection = null;
-      try {
-        connection = datasource.getConnection();
+      try (Connection connection = datasource.getConnection()) {
         GenerateDB.generateDB(document, connection);
 
         GenerateDB.generateDB(document, connection);
       } finally {
-        SQLFunctions.close(connection);
-
         if (!tempFile.delete()) {
           tempFile.deleteOnExit();
         }
