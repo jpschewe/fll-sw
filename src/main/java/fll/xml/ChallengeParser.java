@@ -6,10 +6,8 @@
 package fll.xml;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -67,49 +65,6 @@ public final class ChallengeParser {
   public static final String FLL_NAMESPACE = "http://www.hightechkids.org";
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
-  /**
-   * Parse the specified XML document and report errors.
-   *
-   * @param args the location of the document to parse
-   *          <ul>
-   *          <li>arg[0] - the location of the document to parse
-   *          </ul>
-   */
-  public static void main(final String[] args) {
-    if (args.length < 1) {
-      LOGGER.fatal("Usage: ChallengeParser <xml file>");
-      System.exit(1);
-    }
-    final File challengeFile = new File(args[0]);
-    if (!challengeFile.exists()) {
-      LOGGER.fatal(challengeFile.getAbsolutePath()
-          + " doesn't exist");
-      System.exit(1);
-    }
-    if (!challengeFile.canRead()) {
-      LOGGER.fatal(challengeFile.getAbsolutePath()
-          + " is not readable");
-      System.exit(1);
-    }
-    if (!challengeFile.isFile()) {
-      LOGGER.fatal(challengeFile.getAbsolutePath()
-          + " is not a file");
-      System.exit(1);
-    }
-    try {
-      final Reader input = new InputStreamReader(new FileInputStream(challengeFile), Utilities.DEFAULT_CHARSET);
-      final Document challengeDocument = ChallengeParser.parse(input);
-
-      final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
-
-      LOGGER.info("Title: "
-          + description.getTitle());
-    } catch (final Throwable e) {
-      LOGGER.fatal(e, e);
-      System.exit(1);
-    }
-  }
 
   /**
    * Used to compare the initial value against enum values and min/maxes.
