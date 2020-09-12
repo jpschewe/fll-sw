@@ -8,7 +8,6 @@ package fll.xml;
 
 import java.io.Serializable;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
