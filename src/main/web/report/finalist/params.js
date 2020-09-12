@@ -90,7 +90,8 @@ function populateHeadToHeadTimes() {
                 .getPlayoffEndMinute(division));
 
             var paragraph = $("<p></p>");
-            paragraph.append("<b>Head to Head bracket " + division + " times</b><br/>");
+            paragraph.append("<b>Head to Head bracket " + division
+                + " times</b><br/>");
             paragraph.append("Start: ");
             paragraph.append(startHourElement);
             paragraph.append(" : ");
@@ -175,6 +176,10 @@ $(document).ready(
         var divIndex = $(this).val();
         var div = $.finalist.getDivisionByIndex(divIndex);
         $.finalist.setCurrentDivision(div);
+      });
+
+      $("#next").click(function() {
+        location.href = "non-numeric.html";
       });
 
       populateHeadToHeadTimes();
