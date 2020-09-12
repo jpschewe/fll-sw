@@ -106,63 +106,134 @@ function updatePage() {
   initializeFinalistCounts(teams);
 }
 
-$(document).ready(
-    function() {
-      var categoryId = $.finalist.getCurrentCategoryId();
-      var currentCategory = $.finalist.getCategoryById(categoryId);
-      if (null == currentCategory) {
-        alert("Invalid category ID found: " + categoryId);
-        return;
-      }
+$(document)
+    .ready(
+        function() {
+          $("#previous")
+              .click(
+                  function() {
+                    var prev = null;
+                    var foundCurrent = false;
+                    $
+                        .each(
+                            $.finalist.getNumericCategories(),
+                            function(i, category) {
+                              if (category.name != $.finalist.CHAMPIONSHIP_NAME) {
+                                if ($.finalist.getCurrentCategoryId() == category.catId) {
+                                  foundCurrent = true;
+                                } // current category
+                                if (!foundCurrent) {
+                                  prev = category;
+                                }
+                              } // not championship
+                            });
 
-      $("#deselect-all").click(function() {
-        $(":checkbox").each(function() {
-          if ($(this).prop('checked')) {
-            $(this).trigger('click');
+                    if (foundCurrent) {
+                      if (null == prev) {
+                        location.href = "non-numeric.html";
+                      } else {
+                        $.finalist.setCurrentCategoryId(prev.catId);
+                        location.href = "numeric.html";
+                      }
+                    } else {
+                      var championshipCategory = $.finalist
+                          .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
+                      if ($.finalist.getCurrentCategoryId() == championshipCategory.catId) {
+                        $.finalist.setCurrentCategoryId(prev.catId);
+                        location.href = "numeric.html";
+                      }
+                    }
+
+                  });
+
+          $("#next")
+              .click(
+                  function() {
+                    var championshipCategory = $.finalist
+                        .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
+                    if ($.finalist.getCurrentCategoryId() == championshipCategory.catId) {
+                      location.href = "schedule.html";
+                    } else {
+                      var foundCurrent = false;
+                      var next = null;
+                      $
+                          .each(
+                              $.finalist.getNumericCategories(),
+                              function(i, category) {
+                                if (category.name != $.finalist.CHAMPIONSHIP_NAME) {
+                                  if (foundCurrent && null == next) {
+                                    next = category;
+                                  } else if ($.finalist.getCurrentCategoryId() == category.catId) {
+                                    foundCurrent = true;
+                                  }
+                                }
+                              });
+                      if (null == next) {
+                        $.finalist
+                            .setCurrentCategoryId(championshipCategory.catId);
+                        location.href = "numeric.html";
+                      } else {
+                        $.finalist.setCurrentCategoryId(next.catId);
+                        location.href = "numeric.html";
+                      }
+                    }
+                  });
+
+          var categoryId = $.finalist.getCurrentCategoryId();
+          var currentCategory = $.finalist.getCategoryById(categoryId);
+          if (null == currentCategory) {
+            alert("Invalid category ID found: " + categoryId);
+            return;
           }
-        });
-      });
 
-      $("#reselect").click(
-          function() {
-            var teams = $.finalist.getAllTeams();
-            var scoreGroups = $.finalist.getScoreGroups(teams, division);
-            var division = $.finalist.getCurrentDivision();
-
-            $.finalist.unsetCategoryVisited(currentCategory, division);
-
-            $.finalist.initializeTeamsInNumericCategory(division,
-                currentCategory, teams, scoreGroups);
-            updatePage();
+          $("#deselect-all").click(function() {
+            $(":checkbox").each(function() {
+              if ($(this).prop('checked')) {
+                $(this).trigger('click');
+              }
+            });
           });
 
-      $("#category-name").text(currentCategory.name);
+          $("#reselect").click(
+              function() {
+                var teams = $.finalist.getAllTeams();
+                var scoreGroups = $.finalist.getScoreGroups(teams, division);
+                var division = $.finalist.getCurrentDivision();
 
-      var roomEle = $("#room");
-      roomEle.change(function() {
-        var roomNumber = roomEle.val();
-        $.finalist.setRoom(currentCategory, $.finalist.getCurrentDivision(),
-            roomNumber);
-      });
-      roomEle.val($.finalist.getRoom(currentCategory, $.finalist
-          .getCurrentDivision()));
+                $.finalist.unsetCategoryVisited(currentCategory, division);
 
-      $("#divisions").empty();
-      $.each($.finalist.getDivisions(), function(i, division) {
-        var selected = "";
-        if (division == $.finalist.getCurrentDivision()) {
-          selected = " selected ";
-        }
-        var divisionOption = $("<option value='" + i + "'" + selected + ">"
-            + division + "</option>");
-        $("#divisions").append(divisionOption);
-      }); // foreach division
-      $("#divisions").change(function() {
-        handleDivisionChange();
-      });
-      handleDivisionChange();
+                $.finalist.initializeTeamsInNumericCategory(division,
+                    currentCategory, teams, scoreGroups);
+                updatePage();
+              });
 
-      updatePage();
+          $("#category-name").text(currentCategory.name);
 
-      $.finalist.displayNavbar();
-    }); // end ready function
+          var roomEle = $("#room");
+          roomEle.change(function() {
+            var roomNumber = roomEle.val();
+            $.finalist.setRoom(currentCategory,
+                $.finalist.getCurrentDivision(), roomNumber);
+          });
+          roomEle.val($.finalist.getRoom(currentCategory, $.finalist
+              .getCurrentDivision()));
+
+          $("#divisions").empty();
+          $.each($.finalist.getDivisions(), function(i, division) {
+            var selected = "";
+            if (division == $.finalist.getCurrentDivision()) {
+              selected = " selected ";
+            }
+            var divisionOption = $("<option value='" + i + "'" + selected + ">"
+                + division + "</option>");
+            $("#divisions").append(divisionOption);
+          }); // foreach division
+          $("#divisions").change(function() {
+            handleDivisionChange();
+          });
+          handleDivisionChange();
+
+          updatePage();
+
+          $.finalist.displayNavbar();
+        }); // end ready function
