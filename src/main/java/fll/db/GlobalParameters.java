@@ -50,7 +50,7 @@ public final class GlobalParameters {
   public static final double STANDARDIZED_SIGMA_DEFAULT = 20;
 
   /**
-   * Parameter name for {@link #getChallengeDocument(Connection)}.
+   * Parameter name for {@link #getChallengeDescription(Connection)}.
    */
   public static final String CHALLENGE_DOCUMENT = "ChallengeDocument";
 

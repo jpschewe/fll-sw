@@ -335,7 +335,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * @param winnerCriteria from {@link ChallengeDescription#getWinner()}
    * @param tournament the tournament to get scores for
    * @param awardGroup the award group to get scores for
-   * @return team number -> {rank, score}
+   * @return team number, {rank, score}
    * @throws SQLException on a database error
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Winner criteria determines the sort")
@@ -485,7 +485,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * @param winnerCriteria from {@link ChallengeDescription#getWinner()}
    * @param tournament the tournament to get scores for
    * @param awardGroup the award group to get scores for
-   * @return category -> Judging Group -> team number -> {rank, score}
+   * @return category, Judging Group, team number, {rank, score}
    * @throws SQLException on a database error
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name and winner criteria determines the sort")
