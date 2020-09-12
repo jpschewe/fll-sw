@@ -2,7 +2,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-	fll.web.admin.RemoteControl.populateContext(application, pageContext);
+fll.web.admin.RemoteControl.populateContext(application, pageContext);
 %>
 
 <html>
@@ -170,8 +170,8 @@
                 <th>
                     Scoreboard
                     <br />
-                    Select the judging groups to show on the display (non
-                    checked is the same as all checked)
+                    Select the judging groups to show on the display
+                    (non checked is the same as all checked)
                 </th>
                 <c:forEach items="${displayInformation}"
                     var="displayInfo">

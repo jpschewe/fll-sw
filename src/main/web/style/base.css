@@ -11,47 +11,46 @@
 }
 
 .help {
-	background-color: #fafafa;
-	border: 1px solid black;
-	width: 80%;
-	padding: 3px;
-	font-family: sans-serif;
-	font-size: 10pt;
+    background-color: #fafafa;
+    border: 1px solid black;
+    width: 80%;
+    padding: 3px;
+    font-family: sans-serif;
+    font-size: 10pt;
 }
 
 .error {
-	color: red;
-	font-weight: bold;
-	background-color: black;
+    color: red;
+    font-weight: bold;
+    background-color: black;
 }
 
 .warning {
-	color: yellow;
-	font-weight: bold;
-	background-color: black;
+    color: yellow;
+    font-weight: bold;
+    background-color: black;
 }
 
 .success, #success {
-	background-color: #00FF00;
+    background-color: #00FF00;
 }
 
 .status-message {
-	font-size: 120%;
-    background-color: #ADD8E6;	 
+    font-size: 120%;
+    background-color: #ADD8E6;
 }
 
 .hard-violation {
-	background-color: red;
+    background-color: red;
 }
 
 .soft-violation {
-	background-color: yellow;
+    background-color: yellow;
 }
 
 .bold {
-  font-weight: bold;
+    font-weight: bold;
 }
-  
 
 .truncate {
     max-width: 1px;
@@ -59,43 +58,42 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-  
 
 /* use div tags for tables */
 .rTable {
-	display: table;
-	width: 100%;
+    display: table;
+    width: 100%;
 }
 
 .rTableRow {
-	display: table-row;
+    display: table-row;
 }
 
 .rTableHeading {
-	display: table-header-group;
-	background-color: #ddd;
+    display: table-header-group;
+    background-color: #ddd;
 }
 
 .rTableCell, .rTableHead {
-	display: table-cell;
-	padding: 3px 10px;
-	border: 1px solid #999999;
+    display: table-cell;
+    padding: 3px 10px;
+    border: 1px solid #999999;
 }
 
 .rTableHeading {
-	display: table-header-group;
-	background-color: #ddd;
-	font-weight: bold;
+    display: table-header-group;
+    background-color: #ddd;
+    font-weight: bold;
 }
 
 .rTableFoot {
-	display: table-footer-group;
-	font-weight: bold;
-	background-color: #ddd;
+    display: table-footer-group;
+    font-weight: bold;
+    background-color: #ddd;
 }
 
 .rTableBody {
-	display: table-row-group;
+    display: table-row-group;
 }
 
 /* end table tags */

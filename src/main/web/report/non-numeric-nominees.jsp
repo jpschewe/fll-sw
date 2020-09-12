@@ -12,7 +12,7 @@
 
 <script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
 <script type='text/javascript'
- src='../extlib/jquery.json-2.5-pre.min.js'></script>
+    src='../extlib/jquery.json-2.5-pre.min.js'></script>
 <script type='text/javascript' src='../extlib/jstorage-0.4.11.min.js'></script>
 <script type='text/javascript' src='../js/fll-objects.js'></script>
 <script type='text/javascript' src='finalist/finalist.js'></script>
@@ -20,59 +20,60 @@
 
 
 <script type='text/javascript'>
-	function loadData() {
-		console.log("Loading data");
+  function loadData() {
+    console.log("Loading data");
 
-		var _loadingTournament =
+    var _loadingTournament =
 <%=FinalistLoad.currentTournament(application)%>
-	;
-		var tournament = $.finalist.getTournament();
-		if (tournament != _loadingTournament) {
-			console.log("Clearing data for old tournament: " + tournament);
-			$.finalist.clearAllData();
-		}
+  ;
+    var tournament = $.finalist.getTournament();
+    if (tournament != _loadingTournament) {
+      console.log("Clearing data for old tournament: " + tournament);
+      $.finalist.clearAllData();
+    }
 <%FinalistLoad.outputDivisions(out, application);%>
-	
+  
 <%FinalistLoad.outputTeamVariables(out, application);%>
-	
+  
 <%FinalistLoad.outputCategories(out, application);%>
-
+  
 <%FinalistLoad.outputNonNumericNominees(out, application);%>
-	$.finalist.setTournament(_loadingTournament);
-	}
+  $.finalist.setTournament(_loadingTournament);
+  }
 
-	function storeNominees() {
-        var allNonNumericNominees = $.finalist.prepareNonNumericNomineesToSend();
-        $('#non-numeric-nominees_data').val($.toJSON(allNonNumericNominees));
-	}
+  function storeNominees() {
+    var allNonNumericNominees = $.finalist.prepareNonNumericNomineesToSend();
+    $('#non-numeric-nominees_data').val($.toJSON(allNonNumericNominees));
+  }
 
-	$(document).ready(function() {
-		loadData();
+  $(document).ready(function() {
+    loadData();
 
-		$("#nominees_store").click(function() {
-			storeNominees();
-			$("#nominees_form").submit();
-		});
-	});
+    $("#nominees_store").click(function() {
+      storeNominees();
+      $("#nominees_form").submit();
+    });
+  });
 </script>
 
 </head>
 
 <body>
 
- <div class='status-message'>${message}</div>
- <%-- clear out the message, so that we don't see it again --%>
- <c:remove var="message" />
+    <div class='status-message'>${message}</div>
+    <%-- clear out the message, so that we don't see it again --%>
+    <c:remove var="message" />
 
- <form id='nominees_form' method='POST' action='StoreNonNumericNominees'>
+    <form id='nominees_form' method='POST'
+        action='StoreNonNumericNominees'>
 
-  <input type='hidden' id='non-numeric-nominees_data'
-   name='non-numeric-nominees_data' />
+        <input type='hidden' id='non-numeric-nominees_data'
+            name='non-numeric-nominees_data' />
 
-  <button id="nominees_store">Store Nominees</button>
- </form>
+        <button id="nominees_store">Store Nominees</button>
+    </form>
 
-   <h1>Non Numeric Categories</h1>
+    <h1>Non Numeric Categories</h1>
 
     <p>This page allows you to select teams that are nominated for
         awards that do not have scores in the database.</p>
@@ -94,5 +95,4 @@
 
     <ul id='categories'>
     </ul>
-
 </html>

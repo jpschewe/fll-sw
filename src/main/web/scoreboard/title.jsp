@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-	fll.web.scoreboard.Title.populateContext(application, session, pageContext);
+fll.web.scoreboard.Title.populateContext(application, session, pageContext);
 %>
 
 <html>
