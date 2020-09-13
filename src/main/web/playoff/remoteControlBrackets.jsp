@@ -57,10 +57,7 @@ SPAN.TIE {
     src="<c:url value='/extlib/jquery.scrollTo-2.1.2.min.js'/>"></script>
 
 <script type="text/javascript">
-  var allBracketData = $
-  {
-    allBracketDataJson
-  };
+  var allBracketData = ${allBracketDataJson};
   var scrollDuration = parseInt("${scrollDuration}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
   var maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
 </script>
