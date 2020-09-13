@@ -6,15 +6,13 @@
 
 package fll.xml;
 
-import fll.util.FLLRuntimeException;
-
 /**
  * Thrown when the dependency tree of a computed goal has a loop.
  */
-public class CircularComputedGoalException extends FLLRuntimeException {
+public class CircularComputedGoalException extends ChallengeValidationException {
 
   /**
-   * @param message passed to parent class
+   * @param message {@link #getMessage()}
    */
   public CircularComputedGoalException(final String message) {
     super(message);
