@@ -18,8 +18,6 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Team;
@@ -33,7 +31,10 @@ import fll.web.DisplayInfo;
 /**
  * Data for remoteControlBrackets.jsp.
  */
-public class RemoteControlBrackets {
+public final class RemoteControlBrackets {
+
+  private RemoteControlBrackets() {
+  }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -49,8 +50,7 @@ public class RemoteControlBrackets {
 
     // can't close the database connection here as it's used inside
     // bracketData to create the output, which is called after this scope exits
-    try {
-      final Connection connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       pageContext.setAttribute("maxNameLength", Team.MAX_TEAM_NAME_LEN);
 

@@ -58,8 +58,8 @@ SPAN.TIE {
 
 <script type="text/javascript">
   var allBracketData = ${allBracketDataJson};
-  var scrollDuration = parseInt("${scrollDuration}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
-  var maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
+  var scrollDuration = parseInt("${scrollDuration}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
+  var maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
 </script>
 
 <script type='text/javascript' src='h2hutils.js'></script>
