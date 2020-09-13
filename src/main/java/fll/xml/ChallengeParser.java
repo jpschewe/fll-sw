@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.xml.XMLConstants;
@@ -50,6 +51,7 @@ import org.xml.sax.SAXParseException;
 
 import fll.Utilities;
 import fll.db.GenerateDB;
+import fll.util.FLLRuntimeException;
 import fll.util.FP;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -97,9 +99,12 @@ public final class ChallengeParser {
    *
    * @param stream a stream containing document
    * @return the parsed challenge description
-   * @throws ChallengeXMLException on error
+   * @throws ChallengeXMLException on error with the XML
+   * @throws ChallengeValidationException on an error doing additional validation
+   *           of the challenge
    */
-  public static ChallengeDescription parse(final Reader stream) throws ChallengeXMLException {
+  public static ChallengeDescription parse(final Reader stream)
+      throws ChallengeXMLException, ChallengeValidationException {
     try {
       final StringWriter writer = new StringWriter();
       stream.transferTo(writer);
@@ -143,6 +148,8 @@ public final class ChallengeParser {
       validateDocument(document);
 
       final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+
+      validateDescription(description);
 
       return description;
     } catch (final SAXParseException spe) {
@@ -235,13 +242,77 @@ public final class ChallengeParser {
   }
 
   /**
+   * Do validation of the description that can't be done by the XML parser.
+   * 
+   * @param description the challenge description to validate
+   * @throws RuntimeException if an error occurs
+   */
+  private static void validateDescription(final ChallengeDescription description) throws ChallengeValidationException {
+    description.getSubjectiveCategories().forEach(ChallengeParser::validateSubjectiveCategory);
+
+  }
+
+  private static void validateSubjectiveCategory(final SubjectiveScoreCategory category)
+      throws ChallengeValidationException {
+    validateCategoryRubric(category);
+  }
+
+  private static void validateCategoryRubric(final SubjectiveScoreCategory category)
+      throws ChallengeValidationException {
+    final List<Goal> goals = category.getAllGoals().stream() //
+                                     .filter(Goal.class::isInstance) //
+                                     .map(Goal.class::cast) //
+                                     .collect(Collectors.toList());
+    if (goals.isEmpty()) {
+      // nothing to check
+      return;
+    }
+
+    final Goal firstGoal = goals.get(0);
+    final List<RubricRange> firstRubricRange = firstGoal.getRubric();
+    for (final Goal compareGoal : goals) {
+      final List<RubricRange> compareRubricRange = compareGoal.getRubric();
+      if (firstRubricRange.size() != compareRubricRange.size()) {
+        throw new ChallengeValidationException(String.format("Rubric range size not the same between goal %s and %s",
+                                                             firstGoal.getTitle(), compareGoal.getTitle()));
+      }
+
+      final Iterator<RubricRange> firstIter = firstRubricRange.iterator();
+      final Iterator<RubricRange> compareIter = compareRubricRange.iterator();
+      while (firstIter.hasNext()
+          && compareIter.hasNext()) {
+        final RubricRange firstRange = firstIter.next();
+        final RubricRange compareRange = compareIter.next();
+        if (!firstRange.getTitle().equals(compareRange.getTitle())) {
+          throw new ChallengeValidationException(String.format("Rubric range titles not the same between goal %s (%s) and goal %s (%s)",
+                                                               firstGoal.getTitle(), firstRange.getTitle(),
+                                                               compareGoal.getTitle(), compareRange.getTitle()));
+        }
+
+        if (firstRange.getMin() != compareRange.getMin()) {
+          throw new ChallengeValidationException(String.format("Rubric range min not the same between goal %s (%d) and goal %s (%d)",
+                                                               firstGoal.getTitle(), firstRange.getMin(),
+                                                               compareGoal.getTitle(), compareRange.getMin()));
+        }
+
+        if (firstRange.getMax() != compareRange.getMax()) {
+          throw new ChallengeValidationException(String.format("Rubric range max not the same between goal %s (%d) and goal %s (%d)",
+                                                               firstGoal.getTitle(), firstRange.getMax(),
+                                                               compareGoal.getTitle(), compareRange.getMax()));
+        }
+
+      }
+    }
+  }
+
+  /**
    * Do validation of the document that cannot be done by the XML parser.
    *
    * @param document the document to validate
    * @throws ParseException if there is a problem parsing the document
    * @throws RuntimeException if an error occurs
    */
-  private static void validateDocument(final Document document) throws ParseException {
+  private static void validateDocument(final Document document) throws ParseException, RuntimeException {
     final Element rootElement = document.getDocumentElement();
     if (!"fll".equals(rootElement.getTagName())) {
       throw new ChallengeXMLException("Not a fll challenge description file");
