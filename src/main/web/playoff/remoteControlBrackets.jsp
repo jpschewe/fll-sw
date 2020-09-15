@@ -22,37 +22,37 @@
 
 <style type='text/css'>
 TD.Leaf {
-	color: #ffffff;
-	background-color: #000000
+    color: #ffffff;
+    background-color: #000000
 }
 
 TD.Bridge {
-	background-color: #808080
+    background-color: #808080
 }
 
 SPAN.TeamNumber {
-	color: #ff8080;
+    color: #ff8080;
 }
 
 SPAN.TeamName {
-	color: #ffffff;
+    color: #ffffff;
 }
 
 SPAN.TeamScore {
-	color: #ffffff;
-	font-weight: bold;
+    color: #ffffff;
+    font-weight: bold;
 }
 
 SPAN.TIE {
-	color: #ff0000;
+    color: #ff0000;
 }
 
 .TABLE_ASSIGNMENT {
-	font-family: monospace;
-	font-size: small;
-	background-color: white;
-	padding-left: 5%;
-	padding-right: 5%;
+    font-family: monospace;
+    font-size: small;
+    background-color: white;
+    padding-left: 5%;
+    padding-right: 5%;
 }
 </style>
 <script
