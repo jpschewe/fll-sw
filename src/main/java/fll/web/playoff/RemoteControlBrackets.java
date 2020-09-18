@@ -48,8 +48,6 @@ public final class RemoteControlBrackets {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
-    // can't close the database connection here as it's used inside
-    // bracketData to create the output, which is called after this scope exits
     try (Connection connection = datasource.getConnection()) {
 
       pageContext.setAttribute("maxNameLength", Team.MAX_TEAM_NAME_LEN);
@@ -64,7 +62,7 @@ public final class RemoteControlBrackets {
                                                         4, false, true, h2hBracket.getIndex());
 
         bracketData.addBracketLabels(h2hBracket.getFirstRound());
-        bracketData.addStaticTableLabels();
+        bracketData.addStaticTableLabels(connection);
 
         numRows += bracketData.getNumRows();
 

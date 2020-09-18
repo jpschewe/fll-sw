@@ -141,7 +141,7 @@ FONT.TIE {
             boxes checked.</b>
 
 
-        <%=bracketInfo.outputBrackets(BracketData.TopRightCornerStyle.MEET_BOTTOM_OF_CELL)%>
+        <%=bracketInfo.getBracketOutputMeetBottomOfCell()%>
 
         <p>
             <a href="index.jsp">Return to Head to head menu</a>

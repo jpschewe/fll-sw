@@ -40,11 +40,7 @@ public final class AdminBrackets {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
-    // can't close the database connection here as it's used inside
-    // bracketInfo to create the output, which is called after this scope exits
-    try {
-
-      final Connection connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final String divisionStr = request.getParameter("division");
       if (null == divisionStr) {
@@ -94,7 +90,7 @@ public final class AdminBrackets {
       for (int i = 1; i < lastColumn; i++) {
         bracketInfo.addBracketLabels(i);
       }
-      bracketInfo.addStaticTableLabels();
+      bracketInfo.addStaticTableLabels(connection);
 
       pageContext.setAttribute("bracketInfo", bracketInfo);
 
