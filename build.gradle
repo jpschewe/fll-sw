@@ -160,6 +160,7 @@ dependencies {
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-jcl", version: project.log4j_version)
   implementation(group: "org.apache.logging.log4j", name: "log4j-api", version: project.log4j_version)
   implementation(group: "org.apache.logging.log4j", name: "log4j-core", version: project.log4j_version)
+  implementation(group: "org.apache.logging.log4j", name: "log4j-web", version: project.log4j_version)
     
   implementation(group: "org.slf4j", name: "slf4j-api", version: project.slf4j_version)
     
