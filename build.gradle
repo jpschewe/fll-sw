@@ -349,12 +349,12 @@ distributionDependencies.dependsOn(markdownToHtml)
 // write log4j config for JspC
 tasks.register("writeJspcProperties", WriteProperties) {
     outputFile = new File(project.buildDir, "log4j.jspc.properties")
-    property("log4j.rootLogger", "WARN, stdout")
-    property("log4j.logger.org.apache", "INFO, stdout")
-    property("log4j.appender.stdout", "org.apache.log4j.ConsoleAppender")
-    property("log4j.appender.stdout.Target", "System.out")
-    property("log4j.appender.stdout.layout", "org.apache.log4j.PatternLayout")
-    property("log4j.appender.stdout.layout.ConversionPattern", "%d [%C] %m%n")
+    property("log4j.rootLogger", "WARN, jspout")
+    property("log4j.logger.org.apache", "INFO, jspout")
+    property("log4j.appender.jspout", "org.apache.log4j.ConsoleAppender")
+    property("log4j.appender.jspout.target", "System.out")
+    property("log4j.appender.jspout.layout", "org.apache.log4j.PatternLayout")
+    property("log4j.appender.jspout.layout.ConversionPattern", "%d [%C] %m%n")
 }
 
 // call JspC to test compile the JSP files
@@ -381,7 +381,7 @@ tasks.register("jspToJava", JavaExec) {
 
     classpath = configurations.jspc + sourceSets.main.runtimeClasspath
     main = "org.apache.jasper.JspC"
-    jvmArgs "-Dlog4j.configuration=file:$buildDir/log4j.jspc.properties"
+    jvmArgs = ["-Dlog4j.configuration=$buildDir/log4j.jspc.properties"] //, "-Dlog4j.debug"] 
 
     args "-webapp", jspSrc,
             "-d", jspJavaSrc,
