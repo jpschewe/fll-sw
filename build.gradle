@@ -117,6 +117,7 @@ ext {
     jspSrc = "src/main/web"
     jspJavaSrc = new File(project.buildDir, "jsp-java-source")
     jspPackage = "fll.jsp"
+    jspJavaClasses = new File(project.buildDir, "jsp-java-classes")
 
     mainClassName = "fll.Launcher"
     
@@ -396,7 +397,19 @@ tasks.register("jspToJava", JavaExec) {
         file("$jspJavaSrc/WEB-INF/web.xml").text = mergedXML
     }
 }
-check.dependsOn(jspToJava)
+
+tasks.register("jspToClasses", JavaCompile) {
+    dependsOn(jspToJava)
+    
+    group = "Build"
+    description = "Test compile JSP files"
+
+    source(jspJavaSrc)
+    destinationDir(jspJavaClasses)
+
+    classpath = configurations.jspc + sourceSets.main.runtimeClasspath
+}
+check.dependsOn(jspToClasses)
 
 
 cpdCheck {
