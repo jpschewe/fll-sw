@@ -51,7 +51,6 @@ import org.xml.sax.SAXParseException;
 
 import fll.Utilities;
 import fll.db.GenerateDB;
-import fll.util.FLLRuntimeException;
 import fll.util.FP;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -252,7 +251,13 @@ public final class ChallengeParser {
 
   }
 
-  private static void validateSubjectiveCategory(final SubjectiveScoreCategory category)
+  /**
+   * Run validity checks on the specified subjective category.
+   * 
+   * @param category the category to check
+   * @throws ChallengeValidationException if there is an error
+   */
+  public static void validateSubjectiveCategory(final SubjectiveScoreCategory category)
       throws ChallengeValidationException {
     validateCategoryRubric(category);
   }

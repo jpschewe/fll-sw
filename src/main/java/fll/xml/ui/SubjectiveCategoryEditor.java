@@ -23,6 +23,8 @@ import fll.util.ChooseOptionDialog;
 import fll.util.FormatterUtils;
 import fll.util.TextAreaEditor;
 import fll.xml.ChallengeDescription;
+import fll.xml.ChallengeParser;
+import fll.xml.ChallengeValidationException;
 import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
 
@@ -168,6 +170,12 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
 
     if (StringUtils.isBlank(mScoreSheetInstructions.getText())) {
       messages.add("The instructions must not be empty");
+    }
+
+    try {
+      ChallengeParser.validateSubjectiveCategory(mSubjectiveCategory);
+    } catch (final ChallengeValidationException e) {
+      messages.add(e.getMessage());
     }
   }
 
