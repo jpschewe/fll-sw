@@ -29,6 +29,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
+import fll.db.DelayedPerformance;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
@@ -371,9 +372,11 @@ public class Top10 extends BaseFLLServlet {
     final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
     final WinnerType winnerCriteria = challengeDescription.getWinner();
 
-    final int currentTournament = Queries.getCurrentTournament(connection);
-    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
-    final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, currentTournament);
+    final Tournament currentTournament = Tournament.getCurrentTournament(connection);
+    final int currentTournamentId = currentTournament.getTournamentID();
+    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournamentId);
+    final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, currentTournamentId);
+    final int maxRunNumberToDisplay = DelayedPerformance.getMaxRunNumberToDisplay(connection, currentTournament);
 
     try (
         PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore" //
@@ -384,6 +387,7 @@ public class Top10 extends BaseFLLServlet {
             + "   AND NoShow = False" //
             + "   AND Bye = False" //
             + "   AND (? OR RunNumber <= ?)" //
+            + "   AND RunNumber <= ?" //
             + "  GROUP BY TeamNumber) AS T2"
             + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, TournamentTeams"
             + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber" //
@@ -393,11 +397,12 @@ public class Top10 extends BaseFLLServlet {
             + " AND TournamentTeams.tournament = ?" //
             + " ORDER BY T2.MaxOfComputedScore "
             + winnerCriteria.getSortString())) {
-      prep.setInt(1, currentTournament);
+      prep.setInt(1, currentTournamentId);
       prep.setBoolean(2, !runningHeadToHead);
       prep.setInt(3, numSeedingRounds);
-      prep.setString(4, awardGroupName);
-      prep.setInt(5, currentTournament);
+      prep.setInt(4, maxRunNumberToDisplay);
+      prep.setString(5, awardGroupName);
+      prep.setInt(6, currentTournamentId);
       try (ResultSet rs = prep.executeQuery()) {
 
         double prevScore = -1;
