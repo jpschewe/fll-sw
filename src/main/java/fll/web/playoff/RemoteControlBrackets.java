@@ -27,6 +27,7 @@ import fll.util.FLLInternalException;
 
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
+import fll.web.playoff.BracketData.TopRightCornerStyle;
 
 /**
  * Data for remoteControlBrackets.jsp.
@@ -65,6 +66,8 @@ public final class RemoteControlBrackets {
         bracketData.addStaticTableLabels(connection);
 
         numRows += bracketData.getNumRows();
+
+        bracketData.generateBracketOutput(connection, TopRightCornerStyle.MEET_TOP_OF_CELL);
 
         allBracketData.add(bracketData);
       }

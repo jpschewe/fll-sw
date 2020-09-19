@@ -77,7 +77,7 @@ FONT.TIE {
 
     <h2>Playoff Bracket: ${bracketInfo.bracketName}</h2>
 
-    ${bracketInfo.bracketOutputMeetBottomOfCell}
+    ${bracketInfo.bracketOutput}
 
 </body>
 </html>

@@ -101,7 +101,7 @@ SPAN.TIE {
             ${bracketData.bracketName}</div>
         <br />
                         
-   ${bracketData.bracketOutputMeetTopOfCell}
+   ${bracketData.bracketOutput}
      <c:if test="${allBracketData.size() > 1}">
             <br />
             <br />
