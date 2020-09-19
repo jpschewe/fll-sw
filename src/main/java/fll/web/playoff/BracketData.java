@@ -825,7 +825,7 @@ public class BracketData extends BracketInfo {
    * 
    * @return javascript to live inside a function
    */
-  public String outputTableSyncFunctions() {
+  public String getTableSyncFunctionsOutput() {
     final StringBuilder sb = new StringBuilder();
 
     for (int round = getFirstRound(); round <= getLastRound(); round++) {

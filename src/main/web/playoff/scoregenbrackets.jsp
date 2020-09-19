@@ -14,42 +14,14 @@
 
 
 <%
-/*
-Parameters:
-division - String for the division
-firstRound - Integer first round to display
-lastRond - Integer last round to display
-*/
-
 fll.web.playoff.ScoregenBrackets.populateContext(application, request, pageContext);
-%>
-
-<%
-final DataSource datasource = ApplicationAttributes.getDataSource(application);
-final Connection connection = datasource.getConnection();
-final int currentTournament = Queries.getCurrentTournament(connection);
-
-final String divisionStr = (String) pageContext.getAttribute("division");
-
-final int firstRound = (Integer) request.getAttribute("firstRound");
-final int lastRound = (Integer) request.getAttribute("lastRound");
-
-final BracketData bracketInfo = new BracketData(connection, divisionStr, firstRound, lastRound, 4, true, false);
-
-final int numMatches = bracketInfo.addBracketLabelsAndScoreGenFormElements(connection, currentTournament, divisionStr);
-
-bracketInfo.generateBracketOutput(connection, TopRightCornerStyle.MEET_BOTTOM_OF_CELL);
-
-final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection, currentTournament,
-        bracketInfo.getBracketName());
-pageContext.setAttribute("tableInfo", tableInfo);
 %>
 
 <html>
 <head>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
-<title>${division}-HeadtoheadBracket</title>
+<title>${division} - Head to head Bracket</title>
 
 <style type='text/css'>
 TD.Leaf {
@@ -116,7 +88,8 @@ FONT.TIE {
   }
 
   $(document).ready(function() {
-<%=bracketInfo.outputTableSyncFunctions()%>
+    <%-- must be on 1 line --%>
+    ${bracketInfo.tableSyncFunctionsOutput}
   });
 </script>
 
@@ -133,8 +106,8 @@ FONT.TIE {
 
     <form name='printScoreSheets' method='post'
         action='ScoresheetServlet' target='_new'>
-        <input type='hidden' name='division' value='<%=divisionStr%>' />
-        <input type='hidden' name='numMatches' value='<%=numMatches%>' />
+        <input type='hidden' name='division' value='${division}' />
+        <input type='hidden' name='numMatches' value='${numMatches}' />
         <input type='submit' value='Print scoresheets'
             id='print_scoresheets'
             onclick='return checkSomethingToPrint()' />
@@ -143,7 +116,7 @@ FONT.TIE {
             boxes checked.</b>
 
 
-        <%=bracketInfo.getBracketOutput()%>
+        ${bracketInfo.bracketOutput}
 
         <p>
             <a href="index.jsp">Return to Head to head menu</a>
