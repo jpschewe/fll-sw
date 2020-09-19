@@ -238,7 +238,7 @@ public final class ChallengeParser {
    * Do validation of the document that cannot be done by the XML parser.
    *
    * @param document the document to validate
-   * @throws ParseException
+   * @throws ParseException if there is a problem parsing the document
    * @throws RuntimeException if an error occurs
    */
   private static void validateDocument(final Document document) throws ParseException {
