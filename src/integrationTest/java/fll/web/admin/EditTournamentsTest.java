@@ -24,12 +24,18 @@ import fll.web.InitializeDatabaseTest;
 import fll.web.IntegrationTestUtils;
 
 /**
- * Test editing the tournaments list
+ * Test editing the tournaments list.
  */
 @ExtendWith(TestUtils.InitializeLogging.class)
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class EditTournamentsTest {
 
+  /**
+   * @param selenium web browser driver
+   * @param seleniumWait browser wait object
+   * @throws IOException test error
+   * @throws InterruptedException test error
+   */
   @Test
   public void testAddTournament(final WebDriver selenium,
                                 final WebDriverWait seleniumWait)
