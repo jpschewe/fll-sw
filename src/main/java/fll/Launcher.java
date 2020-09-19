@@ -598,8 +598,7 @@ public class Launcher extends JFrame {
       JOptionPane.showMessageDialog(this, "Cannot find fll-sw.html, you will need to open this is your browser.");
       return;
     }
-    // FIXME how to pass parameter?
-    // ?port={port}
+
     try {
       final Path modifiedForPort = createFllFileWithPort(fllHtml, port);
       Desktop.getDesktop().browse(modifiedForPort.toUri());
