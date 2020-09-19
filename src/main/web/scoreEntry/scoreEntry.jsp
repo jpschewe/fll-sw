@@ -30,11 +30,11 @@
 <!-- a couple of things come from the JSP, so need to be inline -->
 <style type='text/css'>
 table#top_info {
-	background-color: ${top_info_color};
+    background-color: ${top_info_color};
 
 }
 body {
-	background-color: ${body_background};
+    background-color: ${body_background};
 }
 </style>
 
@@ -343,9 +343,9 @@ function check_restrictions() {
   </form>
   <!-- end score entry form -->
 
-	<div id="yesno-dialog">
-		<p id='yesno-dialog_text'></p>
-	</div>
+    <div id="yesno-dialog">
+        <p id='yesno-dialog_text'></p>
+    </div>
 
 </body>
 </html>

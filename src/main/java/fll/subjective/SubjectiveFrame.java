@@ -92,7 +92,7 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
- * Application to enter subjective scores with
+ * Application to enter subjective scores.
  */
 public final class SubjectiveFrame extends JFrame {
 
@@ -267,7 +267,7 @@ public final class SubjectiveFrame extends JFrame {
    * @throws IOException if there is an error loading the file
    */
   public void load(final File file) throws IOException {
-    _file = file;
+    this.file = file;
 
     ZipFile zipfile = null;
     try {
@@ -277,18 +277,16 @@ public final class SubjectiveFrame extends JFrame {
       if (null == challengeEntry) {
         throw new FLLRuntimeException("Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
       }
-      final InputStream challengeStream = zipfile.getInputStream(challengeEntry);
-      _challengeDocument = ChallengeParser.parse(new InputStreamReader(challengeStream, Utilities.DEFAULT_CHARSET));
-      challengeStream.close();
-
-      _challengeDescription = new ChallengeDescription(_challengeDocument.getDocumentElement());
+      try (InputStream challengeStream = zipfile.getInputStream(challengeEntry)) {
+        challengeDescription = ChallengeParser.parse(new InputStreamReader(challengeStream, Utilities.DEFAULT_CHARSET));
+      }
 
       final ZipEntry scoreEntry = zipfile.getEntry(DownloadSubjectiveData.SCORE_ENTRY_NAME);
       if (null == scoreEntry) {
         throw new FLLRuntimeException("Unable to find score data in file, you probably choose the wrong file or it is corrupted");
       }
       final InputStream scoreStream = zipfile.getInputStream(scoreEntry);
-      _scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
+      scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
       scoreStream.close();
 
       final ZipEntry scheduleEntry = zipfile.getEntry(DownloadSubjectiveData.SCHEDULE_ENTRY_NAME);
@@ -296,12 +294,12 @@ public final class SubjectiveFrame extends JFrame {
         ObjectInputStream scheduleStream = null;
         try {
           scheduleStream = new ObjectInputStream(zipfile.getInputStream(scheduleEntry));
-          _schedule = (TournamentSchedule) scheduleStream.readObject();
+          schedule = (TournamentSchedule) scheduleStream.readObject();
         } finally {
           IOUtils.closeQuietly(scheduleStream);
         }
       } else {
-        _schedule = null;
+        schedule = null;
       }
 
       final ZipEntry mappingEntry = zipfile.getEntry(DownloadSubjectiveData.MAPPING_ENTRY_NAME);
@@ -312,12 +310,12 @@ public final class SubjectiveFrame extends JFrame {
           // ObjectStream isn't type safe
           @SuppressWarnings("unchecked")
           final Collection<CategoryColumnMapping> mappings = (Collection<CategoryColumnMapping>) mappingStream.readObject();
-          _scheduleColumnMappings = mappings;
+          scheduleColumnMappings = mappings;
         } finally {
           IOUtils.closeQuietly(mappingStream);
         }
       } else {
-        _scheduleColumnMappings = null;
+        scheduleColumnMappings = null;
       }
 
     } catch (final ClassNotFoundException e) {
@@ -344,7 +342,7 @@ public final class SubjectiveFrame extends JFrame {
     }
 
     // get the name and location of the tournament
-    final Element top = _scoreDocument.getDocumentElement();
+    final Element top = scoreDocument.getDocumentElement();
     final String tournamentName = top.getAttribute("tournamentName");
     if (top.hasAttribute("tournamentDescription")) {
       final String tournamentDescription = top.getAttribute("tournamentDescription");
@@ -358,8 +356,8 @@ public final class SubjectiveFrame extends JFrame {
 
   private void createSubjectiveTable(final JTabbedPane tabbedPane,
                                      final SubjectiveScoreCategory subjectiveCategory) {
-    final SubjectiveTableModel tableModel = new SubjectiveTableModel(_scoreDocument, subjectiveCategory, _schedule,
-                                                                     _scheduleColumnMappings);
+    final SubjectiveTableModel tableModel = new SubjectiveTableModel(scoreDocument, subjectiveCategory, schedule,
+                                                                     scheduleColumnMappings);
     final JTable table = new JTable(tableModel);
     table.setDefaultRenderer(Date.class, DateRenderer.INSTANCE);
 
@@ -370,7 +368,7 @@ public final class SubjectiveFrame extends JFrame {
     table.setAutoCreateRowSorter(true);
 
     final String title = subjectiveCategory.getTitle();
-    _tables.put(title, table);
+    tables.put(title, table);
     final JScrollPane tableScroller = new JScrollPane(table);
     tableScroller.setPreferredSize(new Dimension(640, 480));
     tabbedPane.addTab(title, tableScroller);
@@ -403,7 +401,7 @@ public final class SubjectiveFrame extends JFrame {
 
     private final Action oldTabAction;
 
-    public TabAction(final JTable table) {
+    TabAction(final JTable table) {
       final InputMap im = table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
       // Have the enter key work the same as the tab key
@@ -594,7 +592,7 @@ public final class SubjectiveFrame extends JFrame {
       final String categoryTitle = subjectiveCategory.getTitle();
 
       final List<AbstractGoal> goals = subjectiveCategory.getAllGoals();
-      final List<Element> scoreElements = SubjectiveTableModel.getScoreElements(_scoreDocument, category);
+      final List<Element> scoreElements = SubjectiveTableModel.getScoreElements(scoreDocument, category);
       for (final Element scoreElement : scoreElements) {
         int numValues = 0;
         for (final AbstractGoal goal : goals) {
@@ -653,7 +651,7 @@ public final class SubjectiveFrame extends JFrame {
    * Stop the cell editors to ensure data is flushed
    */
   private void stopCellEditors() {
-    final Iterator<JTable> iter = _tables.values().iterator();
+    final Iterator<JTable> iter = tables.values().iterator();
     while (iter.hasNext()) {
       final JTable table = iter.next();
       final int editingColumn = table.getEditingColumn();
@@ -675,14 +673,14 @@ public final class SubjectiveFrame extends JFrame {
   public void save() throws IOException {
     if (validateData()) {
 
-      final ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(_file));
+      final ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(file));
       final Writer writer = new OutputStreamWriter(zipOut, Utilities.DEFAULT_CHARSET);
 
       zipOut.putNextEntry(new ZipEntry("challenge.xml"));
-      XMLUtils.writeXML(_challengeDocument, writer, Utilities.DEFAULT_CHARSET.name());
+      XMLUtils.writeXML(challengeDescription.toXml(), writer, Utilities.DEFAULT_CHARSET.name());
       zipOut.closeEntry();
       zipOut.putNextEntry(new ZipEntry("score.xml"));
-      XMLUtils.writeXML(_scoreDocument, writer, Utilities.DEFAULT_CHARSET.name());
+      XMLUtils.writeXML(scoreDocument, writer, Utilities.DEFAULT_CHARSET.name());
       zipOut.closeEntry();
 
       zipOut.close();
@@ -734,10 +732,10 @@ public final class SubjectiveFrame extends JFrame {
    */
   private static final String INITIAL_DIRECTORY_PREFERENCE_KEY = "InitialDirectory";
 
-  private final Map<String, JTable> _tables = new HashMap<>();
+  private final Map<String, JTable> tables = new HashMap<>();
 
   public JTable getTableForTitle(final String title) {
-    final JTable table = _tables.get(title);
+    final JTable table = tables.get(title);
     if (null == table) {
       return null;
     } else {
@@ -760,29 +758,27 @@ public final class SubjectiveFrame extends JFrame {
     }
   }
 
-  private File _file;
+  private File file;
 
   private File getFile() {
-    return _file;
+    return file;
   }
 
-  private ChallengeDescription _challengeDescription;
+  private ChallengeDescription challengeDescription;
 
   /* package */ChallengeDescription getChallengeDescription() {
-    return _challengeDescription;
+    return challengeDescription;
   }
 
-  private Document _challengeDocument;
-
-  private Document _scoreDocument;
+  private Document scoreDocument;
 
   /* package */Document getScoreDocument() {
-    return _scoreDocument;
+    return scoreDocument;
   }
 
-  private TournamentSchedule _schedule;
+  private TournamentSchedule schedule;
 
-  private Collection<CategoryColumnMapping> _scheduleColumnMappings;
+  private Collection<CategoryColumnMapping> scheduleColumnMappings;
 
   private final JTabbedPane tabbedPane;
 
@@ -795,7 +791,7 @@ public final class SubjectiveFrame extends JFrame {
    * called.
    */
   private static final class SelectTextField extends JTextField {
-    public SelectTextField() {
+    SelectTextField() {
       super();
     }
 

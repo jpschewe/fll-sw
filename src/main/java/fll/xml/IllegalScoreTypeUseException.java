@@ -6,16 +6,14 @@
 
 package fll.xml;
 
-import fll.util.FLLRuntimeException;
-
 /**
  * Thrown when a score type is used improperly such as "raw" used on enumerated
  * or computed goals.
  */
-public class IllegalScoreTypeUseException extends FLLRuntimeException {
+public class IllegalScoreTypeUseException extends ChallengeValidationException {
 
   /**
-   * @param message passed to the parent class
+   * @param message {@link #getMessage()}
    */
   public IllegalScoreTypeUseException(final String message) {
     super(message);

@@ -17,9 +17,8 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.w3c.dom.Document;
-
 import fll.Utilities;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.SchemaAnalyzer;
@@ -57,9 +56,9 @@ public final class GenerateDatabaseDiagram {
 
       final InputStream stream = challengeUrl.openStream();
       final Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET);
-      final Document document = ChallengeParser.parse(reader);
+      final ChallengeDescription description = ChallengeParser.parse(reader);
 
-      GenerateDB.generateDB(document, connection);
+      GenerateDB.generateDB(description, connection);
 
       final SchemaAnalyzer analyzer = new SchemaAnalyzer();
       final Config config = new HsqlMemConfig();

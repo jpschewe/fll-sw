@@ -6,10 +6,8 @@
 package fll.xml;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -30,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.xml.XMLConstants;
@@ -69,49 +68,6 @@ public final class ChallengeParser {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
-   * Parse the specified XML document and report errors.
-   *
-   * @param args the location of the document to parse
-   *          <ul>
-   *          <li>arg[0] - the location of the document to parse
-   *          </ul>
-   */
-  public static void main(final String[] args) {
-    if (args.length < 1) {
-      LOGGER.fatal("Usage: ChallengeParser <xml file>");
-      System.exit(1);
-    }
-    final File challengeFile = new File(args[0]);
-    if (!challengeFile.exists()) {
-      LOGGER.fatal(challengeFile.getAbsolutePath()
-          + " doesn't exist");
-      System.exit(1);
-    }
-    if (!challengeFile.canRead()) {
-      LOGGER.fatal(challengeFile.getAbsolutePath()
-          + " is not readable");
-      System.exit(1);
-    }
-    if (!challengeFile.isFile()) {
-      LOGGER.fatal(challengeFile.getAbsolutePath()
-          + " is not a file");
-      System.exit(1);
-    }
-    try {
-      final Reader input = new InputStreamReader(new FileInputStream(challengeFile), Utilities.DEFAULT_CHARSET);
-      final Document challengeDocument = ChallengeParser.parse(input);
-
-      final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
-
-      LOGGER.info("Title: "
-          + description.getTitle());
-    } catch (final Throwable e) {
-      LOGGER.fatal(e, e);
-      System.exit(1);
-    }
-  }
-
-  /**
    * Used to compare the initial value against enum values and min/maxes.
    */
   public static final double INITIAL_VALUE_TOLERANCE = 1E-4;
@@ -141,10 +97,13 @@ public final class ChallengeParser {
    * reading.
    *
    * @param stream a stream containing document
-   * @return not null
-   * @throws ChallengeXMLException on error
+   * @return the parsed challenge description
+   * @throws ChallengeXMLException on error with the XML
+   * @throws ChallengeValidationException on an error doing additional validation
+   *           of the challenge
    */
-  public static Document parse(final Reader stream) throws ChallengeXMLException {
+  public static ChallengeDescription parse(final Reader stream)
+      throws ChallengeXMLException, ChallengeValidationException {
     try {
       final StringWriter writer = new StringWriter();
       stream.transferTo(writer);
@@ -187,7 +146,11 @@ public final class ChallengeParser {
       // challenge descriptor specific checks
       validateDocument(document);
 
-      return document;
+      final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+
+      validateDescription(description);
+
+      return description;
     } catch (final SAXParseException spe) {
       throw new ChallengeXMLException(String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software or an improperly formatted challenge descriptor or attempting to parse a file that is not a challenge descriptor.",
                                                     spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage()),
@@ -278,13 +241,83 @@ public final class ChallengeParser {
   }
 
   /**
+   * Do validation of the description that can't be done by the XML parser.
+   * 
+   * @param description the challenge description to validate
+   * @throws RuntimeException if an error occurs
+   */
+  private static void validateDescription(final ChallengeDescription description) throws ChallengeValidationException {
+    description.getSubjectiveCategories().forEach(ChallengeParser::validateSubjectiveCategory);
+
+  }
+
+  /**
+   * Run validity checks on the specified subjective category.
+   * 
+   * @param category the category to check
+   * @throws ChallengeValidationException if there is an error
+   */
+  public static void validateSubjectiveCategory(final SubjectiveScoreCategory category)
+      throws ChallengeValidationException {
+    validateCategoryRubric(category);
+  }
+
+  private static void validateCategoryRubric(final SubjectiveScoreCategory category)
+      throws ChallengeValidationException {
+    final List<Goal> goals = category.getAllGoals().stream() //
+                                     .filter(Goal.class::isInstance) //
+                                     .map(Goal.class::cast) //
+                                     .collect(Collectors.toList());
+    if (goals.isEmpty()) {
+      // nothing to check
+      return;
+    }
+
+    final Goal firstGoal = goals.get(0);
+    final List<RubricRange> firstRubricRange = firstGoal.getRubric();
+    for (final Goal compareGoal : goals) {
+      final List<RubricRange> compareRubricRange = compareGoal.getRubric();
+      if (firstRubricRange.size() != compareRubricRange.size()) {
+        throw new ChallengeValidationException(String.format("Rubric range size not the same between goal %s and %s",
+                                                             firstGoal.getTitle(), compareGoal.getTitle()));
+      }
+
+      final Iterator<RubricRange> firstIter = firstRubricRange.iterator();
+      final Iterator<RubricRange> compareIter = compareRubricRange.iterator();
+      while (firstIter.hasNext()
+          && compareIter.hasNext()) {
+        final RubricRange firstRange = firstIter.next();
+        final RubricRange compareRange = compareIter.next();
+        if (!firstRange.getTitle().equals(compareRange.getTitle())) {
+          throw new ChallengeValidationException(String.format("Rubric range titles not the same between goal %s (%s) and goal %s (%s)",
+                                                               firstGoal.getTitle(), firstRange.getTitle(),
+                                                               compareGoal.getTitle(), compareRange.getTitle()));
+        }
+
+        if (firstRange.getMin() != compareRange.getMin()) {
+          throw new ChallengeValidationException(String.format("Rubric range min not the same between goal %s (%d) and goal %s (%d)",
+                                                               firstGoal.getTitle(), firstRange.getMin(),
+                                                               compareGoal.getTitle(), compareRange.getMin()));
+        }
+
+        if (firstRange.getMax() != compareRange.getMax()) {
+          throw new ChallengeValidationException(String.format("Rubric range max not the same between goal %s (%d) and goal %s (%d)",
+                                                               firstGoal.getTitle(), firstRange.getMax(),
+                                                               compareGoal.getTitle(), compareRange.getMax()));
+        }
+
+      }
+    }
+  }
+
+  /**
    * Do validation of the document that cannot be done by the XML parser.
    *
    * @param document the document to validate
-   * @throws ParseException
+   * @throws ParseException if there is a problem parsing the document
    * @throws RuntimeException if an error occurs
    */
-  private static void validateDocument(final Document document) throws ParseException {
+  private static void validateDocument(final Document document) throws ParseException, RuntimeException {
     final Element rootElement = document.getDocumentElement();
     if (!"fll".equals(rootElement.getTagName())) {
       throw new ChallengeXMLException("Not a fll challenge description file");
@@ -467,12 +500,6 @@ public final class ChallengeParser {
     }
   }
 
-  public static @Nullable String compareStructure(final Document curDoc,
-                                                  final Document newDoc) {
-    return compareStructure(new ChallengeDescription(curDoc.getDocumentElement()),
-                            new ChallengeDescription(newDoc.getDocumentElement()));
-  }
-
   /**
    * If the new document differs from the current document in a way that the
    * database structure will be modified.
@@ -481,8 +508,8 @@ public final class ChallengeParser {
    * @param newDoc the document to check against
    * @return null if everything checks out OK, otherwise the error message
    */
-  public static String compareStructure(final ChallengeDescription curDoc,
-                                        final ChallengeDescription newDoc) {
+  public static @Nullable String compareStructure(final ChallengeDescription curDoc,
+                                                  final ChallengeDescription newDoc) {
     final PerformanceScoreCategory curPerfElement = curDoc.getPerformance();
     final PerformanceScoreCategory newPerfElement = newDoc.getPerformance();
 

@@ -34,6 +34,8 @@ public final class TestUtils {
 
   /**
    * Delete all files that would be associated with the specified database.
+   * 
+   * @param database the database to delete
    */
   public static void deleteDatabase(final String database) {
     for (final String extension : Utilities.HSQL_DB_EXTENSIONS) {

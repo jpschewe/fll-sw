@@ -22,8 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.w3c.dom.Document;
-
 import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.util.FLLRuntimeException;
@@ -259,24 +257,14 @@ public class InitFilter implements Filter {
         }
 
         // load the challenge descriptor
-        if (null == ApplicationAttributes.getAttribute(application, ApplicationAttributes.CHALLENGE_DOCUMENT,
-                                                       Document.class)) {
+        if (null == ApplicationAttributes.getAttribute(application, ApplicationAttributes.CHALLENGE_DESCRIPTION,
+                                                       ChallengeDescription.class)) {
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Loading challenge descriptor");
           }
           try {
-            final Document document = GlobalParameters.getChallengeDocument(connection);
-            if (null == document) {
-              LOGGER.warn("Could not find challenge descriptor");
-              SessionAttributes.appendToMessage(session,
-                                                "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
-              response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-                  + "/setup/index.jsp"));
-              return false;
-            }
-            application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, document);
+            final ChallengeDescription challengeDescription = GlobalParameters.getChallengeDescription(connection);
 
-            final ChallengeDescription challengeDescription = new ChallengeDescription(document.getDocumentElement());
             application.setAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION, challengeDescription);
           } catch (final FLLRuntimeException e) {
             LOGGER.error("Error getting challenge document", e);

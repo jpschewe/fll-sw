@@ -25,7 +25,6 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import fll.TestUtils;
@@ -39,7 +38,6 @@ import fll.web.admin.UploadSubjectiveData;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.SubjectiveScoreCategory;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -63,10 +61,9 @@ public class SubjectiveScoresTest {
     // create database
     final InputStream stream = SubjectiveScoresTest.class.getResourceAsStream("challenge.xml");
     assertNotNull(stream);
-    final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
-    assertNotNull(challengeDocument);
-
-    final ChallengeDescription challenge = new ChallengeDescription(challengeDocument.getDocumentElement());
+    final ChallengeDescription challenge = ChallengeParser.parse(new InputStreamReader(stream,
+                                                                                       Utilities.DEFAULT_CHARSET));
+    assertNotNull(challenge);
 
     final File tempFile = File.createTempFile("flltest", null);
     final String database = tempFile.getAbsolutePath();
@@ -78,7 +75,7 @@ public class SubjectiveScoresTest {
     final String division = "div";
     try (Connection connection = datasource.getConnection();) {
       // setup the database with a team and some judges
-      GenerateDB.generateDB(challengeDocument, connection);
+      GenerateDB.generateDB(challenge, connection);
       Tournament.createTournament(connection, tournamentName, tournamentName, null, null, null);
       Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
       assertNull(Queries.addTeam(connection, teamNumber, "team"
@@ -88,9 +85,8 @@ public class SubjectiveScoresTest {
       try (
           PreparedStatement prep = connection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES(?, ?, ?, ?)")) {
         prep.setInt(4, tournament.getTournamentID());
-        for (final Element subjectiveElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement()
-                                                                                                     .getElementsByTagName("subjectiveCategory"))) {
-          final String categoryName = subjectiveElement.getAttribute("name");
+        for (final SubjectiveScoreCategory subjCategory : challenge.getSubjectiveCategories()) {
+          final String categoryName = subjCategory.getName();
           prep.setString(1, "jon");
           prep.setString(2, categoryName);
           prep.setString(3, division);

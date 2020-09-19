@@ -18,16 +18,14 @@ import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.w3c.dom.Document;
 
 import fll.TestUtils;
 import fll.Utilities;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Test generating various databases.
- * 
  */
 @ExtendWith(TestUtils.InitializeLogging.class)
 public class GenerateDBTest {
@@ -43,23 +41,20 @@ public class GenerateDBTest {
   public void testCreateDB() throws SQLException, IOException {
     try (InputStream stream = GenerateDBTest.class.getResourceAsStream("data/challenge-test.xml")) {
       assertNotNull(stream);
-      final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
-      assertNotNull(document);
+      final ChallengeDescription description = ChallengeParser.parse(new InputStreamReader(stream,
+                                                                                           Utilities.DEFAULT_CHARSET));
+      assertNotNull(description);
 
       final File tempFile = File.createTempFile("flltest", null);
       final String database = tempFile.getAbsolutePath();
 
       final DataSource datasource = Utilities.createFileDataSource(database);
 
-      Connection connection = null;
-      try {
-        connection = datasource.getConnection();
-        GenerateDB.generateDB(document, connection);
+      try (Connection connection = datasource.getConnection()) {
+        GenerateDB.generateDB(description, connection);
 
-        GenerateDB.generateDB(document, connection);
+        GenerateDB.generateDB(description, connection);
       } finally {
-        SQLFunctions.close(connection);
-
         if (!tempFile.delete()) {
           tempFile.deleteOnExit();
         }

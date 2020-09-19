@@ -96,10 +96,8 @@ public class ChallengeDescriptionFrame extends JFrame {
         // {
         InputStream stream = ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2014-world_class.xml")) {
 
-      final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(stream,
-                                                                                     Utilities.DEFAULT_CHARSET));
-
-      final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
+      final ChallengeDescription description = ChallengeParser.parse(new InputStreamReader(stream,
+                                                                                           Utilities.DEFAULT_CHARSET));
 
       final ChallengeDescriptionFrame editor = new ChallengeDescriptionFrame();
       editor.setCurrentFile(null, description);
@@ -272,9 +270,7 @@ public class ChallengeDescriptionFrame extends JFrame {
 
       try (Reader stream = new InputStreamReader(new FileInputStream(file), Utilities.DEFAULT_CHARSET)) {
 
-        final Document challengeDocument = ChallengeParser.parse(stream);
-
-        final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
+        final ChallengeDescription description = ChallengeParser.parse(stream);
 
         setCurrentFile(file, description);
       } catch (final IOException e) {

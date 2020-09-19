@@ -1,3 +1,5 @@
+* #737 - Validate that all goals of a subjective category have the same rubric range titles
+* #739 - Validate that all goals of a subjective category have the same rubric range min and max values
 * #824 - Add next and previous buttons to finalist scheduling
 * #831 - Add buttons to make fixing mistakes in finalist scheduling easier
 * #816 - Add a report showing teams advancing to another tournament and their scores

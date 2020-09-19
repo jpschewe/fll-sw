@@ -116,6 +116,8 @@ public class ScheduledBreakModel extends AbstractTableModel {
 
   /**
    * Specify the judging groups for the model.
+   * 
+   * @param data the new data for the model
    */
   public void setData(final List<ScheduledBreak> data) {
     this.breaks.clear();

@@ -16,7 +16,6 @@ import java.text.ParseException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.w3c.dom.Document;
 
 import fll.TestUtils;
 import fll.Utilities;
@@ -39,20 +38,20 @@ public class ScoreEntryTest {
   private static class TestServletContext extends DummyServletContext {
     @Override
     public Object getAttribute(final String attr) {
-      if (ApplicationAttributes.CHALLENGE_DOCUMENT.equals(attr)) {
-        final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml");
-        assertNotNull(stream);
-        final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
-        assertNotNull(document);
-        return document;
-      } else if (ApplicationAttributes.CHALLENGE_DESCRIPTION.equals(attr)) {
-        final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml");
-        assertNotNull(stream);
-        final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
-        assertNotNull(document);
-        return new ChallengeDescription(document.getDocumentElement());
-      } else {
-        return null;
+      try {
+        if (ApplicationAttributes.CHALLENGE_DESCRIPTION.equals(attr)) {
+          try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml")) {
+            assertNotNull(stream);
+            final ChallengeDescription description = ChallengeParser.parse(new InputStreamReader(stream,
+                                                                                                 Utilities.DEFAULT_CHARSET));
+            assertNotNull(description);
+            return description;
+          }
+        } else {
+          return null;
+        }
+      } catch (final IOException e) {
+        throw new RuntimeException("Internal test error", e);
       }
     }
   }

@@ -14,8 +14,6 @@ import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 import fll.xml.AbstractConditionStatement;
 import fll.xml.ConditionStatement;
 import fll.xml.EnumConditionStatement;

@@ -113,6 +113,8 @@ public class JudgingGroupModel extends AbstractTableModel {
 
   /**
    * Specify the judging groups for the model.
+   * 
+   * @param data the new data for the model
    */
   public void setData(final Map<String, Integer> data) {
     this.judges.clear();

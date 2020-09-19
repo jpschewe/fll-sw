@@ -17,7 +17,6 @@ import javax.sql.DataSource;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.GlobalParameters;
@@ -26,6 +25,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 
 /**
@@ -142,8 +142,8 @@ public class ImportDBDump extends BaseFLLServlet {
   public static @Nullable String checkChallengeDescriptors(final Connection sourceConnection,
                                                            final Connection destConnection)
       throws SQLException {
-    final Document sourceDoc = GlobalParameters.getChallengeDocument(sourceConnection);
-    final Document destDoc = GlobalParameters.getChallengeDocument(destConnection);
+    final ChallengeDescription sourceDoc = GlobalParameters.getChallengeDescription(sourceConnection);
+    final ChallengeDescription destDoc = GlobalParameters.getChallengeDescription(destConnection);
     final String compareMessage = ChallengeParser.compareStructure(destDoc, sourceDoc);
     return compareMessage;
   }
