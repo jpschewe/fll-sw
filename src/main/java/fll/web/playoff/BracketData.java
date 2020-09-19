@@ -348,9 +348,17 @@ public class BracketData extends BracketInfo {
 
   private final int bracketIndex;
 
-  private final String bracketOutputMeetBottomOfCell;
+  private String bracketOutput = "";
 
-  private final String bracketOutputMeetTopOfCell;
+  /**
+   * @return the string that was generated with
+   *         {@link #generateBracketOutput(Connection, TopRightCornerStyle)} or
+   *         the empty string if the method has not been called.
+   */
+  @JsonIgnore
+  public String getBracketOutput() {
+    return bracketOutput;
+  }
 
   /**
    * @return If this object is in a list, the index in the list.
@@ -502,9 +510,6 @@ public class BracketData extends BracketInfo {
       SQLFunctions.close(minRunNumber);
       SQLFunctions.close(minRunNumberPrep);
     }
-
-    this.bracketOutputMeetBottomOfCell = outputBrackets(pConnection, TopRightCornerStyle.MEET_BOTTOM_OF_CELL);
-    this.bracketOutputMeetTopOfCell = outputBrackets(pConnection, TopRightCornerStyle.MEET_TOP_OF_CELL);
   }
 
   /**
@@ -851,15 +856,16 @@ public class BracketData extends BracketInfo {
   }
 
   /**
-   * Output the full brackets.
+   * Generate the bracket output. This method is to be called once the object is
+   * configured. The result of this method can be retrieved later with
+   * {@link #getBracketOutput()}.
    * 
    * @param connection database connection
    * @param topRightCornerStyle how to connect the top right corner
-   * @return HTML table
    * @throws SQLException on a database error
    */
-  private String outputBrackets(Connection connection,
-                                final TopRightCornerStyle topRightCornerStyle)
+  public void generateBracketOutput(final Connection connection,
+                                    final TopRightCornerStyle topRightCornerStyle)
       throws SQLException {
     final StringBuilder sb = new StringBuilder();
 
@@ -883,29 +889,7 @@ public class BracketData extends BracketInfo {
 
     sb.append("</table>\n");
 
-    return sb.toString();
-  }
-
-  /**
-   * Gets output of {@link #outputBrackets(Connection, TopRightCornerStyle)} with
-   * {@link TopRightCornerStyle#MEET_TOP_OF_CELL}.
-   * 
-   * @return see {@link #outputBrackets(Connection, TopRightCornerStyle)}
-   */
-  @JsonIgnore
-  public String getBracketOutputMeetTopOfCell() {
-    return bracketOutputMeetTopOfCell;
-  }
-
-  /**
-   * Gets output of {@link #outputBrackets(Connection, TopRightCornerStyle)} with
-   * {@link TopRightCornerStyle#MEET_BOTTOM_OF_CELL}.
-   * 
-   * @return see {@link #outputBrackets(Connection, TopRightCornerStyle)}
-   */
-  @JsonIgnore
-  public String getBracketOutputMeetBottomOfCell() {
-    return bracketOutputMeetBottomOfCell;
+    bracketOutput = sb.toString();
   }
 
   private void outputTableSelect(final StringBuilder sb,
@@ -1125,7 +1109,7 @@ public class BracketData extends BracketInfo {
    * If this function is used, addBracketLabelsAndScoreGenFormElements must not
    * be used.
    * 
-   * @param roundNumber
+   * @param roundNumber the round number to set the labels for
    */
   public void addBracketLabels(final int roundNumber) {
     final SortedMap<Integer, BracketDataType> roundData = bracketData.get(roundNumber);

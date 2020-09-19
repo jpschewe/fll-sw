@@ -23,6 +23,7 @@ import fll.db.Queries;
 import fll.util.FLLInternalException;
 
 import fll.web.ApplicationAttributes;
+import fll.web.playoff.BracketData.TopRightCornerStyle;
 
 /**
  * Data for adminbrackets.jsp.
@@ -91,6 +92,8 @@ public final class AdminBrackets {
         bracketInfo.addBracketLabels(i);
       }
       bracketInfo.addStaticTableLabels(connection);
+
+      bracketInfo.generateBracketOutput(connection, TopRightCornerStyle.MEET_BOTTOM_OF_CELL);
 
       pageContext.setAttribute("bracketInfo", bracketInfo);
 

@@ -1,7 +1,7 @@
+<%@page import="fll.web.playoff.BracketData.TopRightCornerStyle"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%@ page import="fll.web.playoff.BracketData"%>
-
 <%@ page import="fll.web.ApplicationAttributes"%>
 <%@ page import="fll.db.Queries"%>
 <%@ page import="fll.db.TableInformation"%>
@@ -37,6 +37,8 @@ final int lastRound = (Integer) request.getAttribute("lastRound");
 final BracketData bracketInfo = new BracketData(connection, divisionStr, firstRound, lastRound, 4, true, false);
 
 final int numMatches = bracketInfo.addBracketLabelsAndScoreGenFormElements(connection, currentTournament, divisionStr);
+
+bracketInfo.generateBracketOutput(connection, TopRightCornerStyle.MEET_BOTTOM_OF_CELL);
 
 final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection, currentTournament,
         bracketInfo.getBracketName());
@@ -141,7 +143,7 @@ FONT.TIE {
             boxes checked.</b>
 
 
-        <%=bracketInfo.getBracketOutputMeetBottomOfCell()%>
+        <%=bracketInfo.getBracketOutput()%>
 
         <p>
             <a href="index.jsp">Return to Head to head menu</a>
