@@ -177,8 +177,7 @@ public class AwardsReport extends BaseFLLServlet {
                                              final Tournament tournament,
                                              final List<String> sortedAwardGroups)
       throws SQLException {
-    final List<AwardWinner> winners = AwardWinners.getChallengeAwardWinners(connection,
-                                                                                      tournament.getTournamentID());
+    final List<AwardWinner> winners = AwardWinners.getChallengeAwardWinners(connection, tournament.getTournamentID());
 
     addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups);
   }
@@ -189,8 +188,7 @@ public class AwardsReport extends BaseFLLServlet {
                                          final Tournament tournament,
                                          final List<String> sortedAwardGroups)
       throws SQLException {
-    final List<AwardWinner> winners = AwardWinners.getExtraAwardWinners(connection,
-                                                                                  tournament.getTournamentID());
+    final List<AwardWinner> winners = AwardWinners.getExtraAwardWinners(connection, tournament.getTournamentID());
 
     addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups);
   }
@@ -225,7 +223,7 @@ public class AwardsReport extends BaseFLLServlet {
                                            final Tournament tournament)
       throws SQLException {
     final List<OverallAwardWinner> winners = AwardWinners.getOverallAwardWinners(connection,
-                                                                                           tournament.getTournamentID());
+                                                                                 tournament.getTournamentID());
 
     final Map<String, List<OverallAwardWinner>> organizedWinners = new HashMap<>();
     for (final OverallAwardWinner winner : winners) {
@@ -304,7 +302,6 @@ public class AwardsReport extends BaseFLLServlet {
 
   /**
    * @param categoryWinners awardGroup to list of winners
-   * @param sortedGroups TODO
    */
   private Element addSubjectiveAwardGroupWinners(final Connection connection,
                                                  final Document document,

@@ -35,9 +35,10 @@ public class TestPlayoffs {
    * particular playoff round results in an error message and the user being
    * sent back to the select team page.
    *
-   * @param seleniumWait TODO
-   * @throws IOException
-   * @throws InterruptedException
+   * @param selenium the browser driver
+   * @param seleniumWait used to wait for elements
+   * @throws IOException if there is an error interacting with the browser
+   * @throws InterruptedException if there is an error waiting for an element
    */
   @Test
   public void testNotAdvanced(final WebDriver selenium,
