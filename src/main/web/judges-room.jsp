@@ -1,9 +1,9 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-	fll.web.MainIndex.populateContext(request, application, pageContext);
-	fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
-	fll.web.report.ReportIndex.populateContext(application, session, pageContext);
+fll.web.MainIndex.populateContext(request, application, pageContext);
+fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
+fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 %>
 
 <html>

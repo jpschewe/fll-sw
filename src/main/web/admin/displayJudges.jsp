@@ -5,65 +5,64 @@
 <head>
 <title>Judge Assignments</title>
 <link rel="stylesheet" type="text/css"
- href="<c:url value='/style/fll-sw.css'/>" />
+    href="<c:url value='/style/fll-sw.css'/>" />
 
 <script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
 
 <script type='text/javascript'>
-$(document).ready(function() {
+  $(document).ready(function() {
 
     $("#commit").click(function() {
-    	location.href='CommitJudges';
+      location.href = 'CommitJudges';
     });
 
     $("#cancel").click(function() {
-        location.href='index.jsp';
+      location.href = 'index.jsp';
     });
 
-}); // end ready function
-
+  }); // end ready function
 </script>
 
 </head>
 
 <body>
- <h1>
-  ${challengeDescription.title } (Judge Assignment Verification)
- </h1>
+    <h1>${challengeDescription.title } (Judge Assignment
+        Verification)</h1>
 
 
- <div class='status-message'>${message}</div>
- <%-- clear out the message, so that we don't see it again --%>
- <c:remove var="message" />
+    <div class='status-message'>${message}</div>
+    <%-- clear out the message, so that we don't see it again --%>
+    <c:remove var="message" />
 
-<p>Please verify that these judges look correct and then commit the changes. 
-If changes need to be made to the judges, press the back button.</p>
+    <p>Please verify that these judges look correct and then commit
+        the changes. If changes need to be made to the judges, press the
+        back button.</p>
 
- <table border='1' id='data'>
-  <tr>
-   <th>ID</th>
-   <th>Category</th>
-   <th>Judging Group</th>
-  </tr>
+    <table border='1' id='data'>
+        <tr>
+            <th>ID</th>
+            <th>Category</th>
+            <th>Judging Group</th>
+        </tr>
 
-  <c:forEach items="${JUDGES }" var="judge">
+        <c:forEach items="${JUDGES }" var="judge">
 
-   <tr>
+            <tr>
 
-    <td>${judge.id }</td>
-    <td>${judge.category }</td>
-    <td>${judge.group }</td>
+                <td>${judge.id }</td>
+                <td>${judge.category }</td>
+                <td>${judge.group }</td>
 
-   </tr>
+            </tr>
 
-  </c:forEach>
+        </c:forEach>
 
- </table>
+    </table>
 
-<br/>
- <button id='commit'>Commit the judges</button>
- 
- <button id='cancel'>Cancel</button>
- 
+    <br />
+    <button id='commit'>Commit the judges</button>
+
+    <button id='cancel'>Cancel</button>
+
 </body>
 </html>

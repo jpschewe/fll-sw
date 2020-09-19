@@ -9,7 +9,6 @@ import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.w3c.dom.Document;
 
 import fll.xml.ChallengeDescription;
 
@@ -37,20 +36,6 @@ public final class ApplicationAttributes {
 
   private ApplicationAttributes() {
     // no instances
-  }
-
-  /**
-   * {@link org.w3c.dom.Document} that holds the current challenge descriptor.
-   * See {@link #getChallengeDocument(ServletContext)}.
-   */
-  public static final String CHALLENGE_DOCUMENT = "challengeDocument";
-
-  /**
-   * @param application application variable store
-   * @return the stored challenge description XML
-   */
-  public static Document getChallengeDocument(final ServletContext application) {
-    return getNonNullAttribute(application, CHALLENGE_DOCUMENT, Document.class);
   }
 
   /**

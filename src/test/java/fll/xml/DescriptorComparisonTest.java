@@ -15,7 +15,6 @@ import java.io.InputStreamReader;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.w3c.dom.Document;
 
 import fll.TestUtils;
 import fll.Utilities;
@@ -114,21 +113,22 @@ public class DescriptorComparisonTest {
       assertNotNull(curDocStream, "Could not find '"
           + curDocRes
           + "'");
-      final Document curDoc = ChallengeParser.parse(new InputStreamReader(curDocStream, Utilities.DEFAULT_CHARSET));
-      assertNotNull(curDoc, "Error parsing '"
+      final ChallengeDescription curDescription = ChallengeParser.parse(new InputStreamReader(curDocStream,
+                                                                                             Utilities.DEFAULT_CHARSET));
+      assertNotNull(curDescription, "Error parsing '"
           + curDocRes
           + "'");
       try (InputStream newDocStream = DescriptorComparisonTest.class.getResourceAsStream(newDocRes)) {
         assertNotNull(newDocStream, "Could not find '"
             + newDocRes
             + "'");
-        final Document newDoc = ChallengeParser.parse(new InputStreamReader(newDocStream, Utilities.DEFAULT_CHARSET));
-        assertNotNull(newDoc, "Error parsing '"
+        final ChallengeDescription newDescription = ChallengeParser.parse(new InputStreamReader(newDocStream,
+                                                                                                Utilities.DEFAULT_CHARSET));
+        assertNotNull(newDescription, "Error parsing '"
             + newDocRes
             + "'");
 
-        final String message = ChallengeParser.compareStructure(new ChallengeDescription(curDoc.getDocumentElement()),
-                                                                new ChallengeDescription(newDoc.getDocumentElement()));
+        final String message = ChallengeParser.compareStructure(curDescription, newDescription);
         if (differencesExpected) {
           assertNotNull(message, "There should be differences");
         } else {

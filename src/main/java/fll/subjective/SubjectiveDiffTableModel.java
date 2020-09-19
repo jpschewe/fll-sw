@@ -15,7 +15,7 @@ import javax.swing.table.AbstractTableModel;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
- * 
+ * Table model for differences in subjective scores.
  */
 public class SubjectiveDiffTableModel extends AbstractTableModel {
 
@@ -46,7 +46,7 @@ public class SubjectiveDiffTableModel extends AbstractTableModel {
   }
 
   @Override
-  @SuppressFBWarnings(value="DB_DUPLICATE_SWITCH_CLAUSES", justification="Duplicate switch clauses causes this method to be consistent with the other methods and adds to clarity")
+  @SuppressFBWarnings(value = "DB_DUPLICATE_SWITCH_CLAUSES", justification = "Duplicate switch clauses causes this method to be consistent with the other methods and adds to clarity")
   public Class<?> getColumnClass(final int column) {
     switch (column) {
     case 0:
@@ -66,24 +66,19 @@ public class SubjectiveDiffTableModel extends AbstractTableModel {
     }
   }
 
-  /**
-   * @see javax.swing.table.TableModel#getColumnCount()
-   */
+  @Override
   public int getColumnCount() {
     return 6;
   }
 
-  /**
-   * @see javax.swing.table.TableModel#getRowCount()
-   */
+  @Override
   public int getRowCount() {
     return diffs.size();
   }
 
-  /**
-   * @see javax.swing.table.TableModel#getValueAt(int, int)
-   */
-  public Object getValueAt(final int rowIndex, final int columnIndex) {
+  @Override
+  public Object getValueAt(final int rowIndex,
+                           final int columnIndex) {
     final SubjectiveScoreDifference diff = getDiffForRow(rowIndex);
     switch (columnIndex) {
     case 0:
@@ -102,7 +97,13 @@ public class SubjectiveDiffTableModel extends AbstractTableModel {
       return null;
     }
   }
-  
+
+  /**
+   * @param row the row to get the difference object for
+   * @return the difference object
+   * @throws IndexOutOfBoundsException if {code row} is outside the bounds of the
+   *           table
+   */
   public SubjectiveScoreDifference getDiffForRow(final int row) {
     return diffs.get(row);
   }

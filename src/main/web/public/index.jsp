@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-	fll.web.PublicIndex.populateContext(application, pageContext);
+fll.web.PublicIndex.populateContext(application, pageContext);
 %>
 
 <html>

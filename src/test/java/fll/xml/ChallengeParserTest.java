@@ -5,6 +5,8 @@
  */
 package fll.xml;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,7 +19,6 @@ import java.util.Collection;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.w3c.dom.Document;
 
 import fll.TestUtils;
 import fll.Utilities;
@@ -411,9 +412,8 @@ public class ChallengeParserTest {
 
       try (InputStream stream = u.openStream();
           Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET)) {
-        final Document document = ChallengeParser.parse(reader);
-        reader.close();
-        new ChallengeDescription(document.getDocumentElement());
+        final ChallengeDescription description = ChallengeParser.parse(reader);
+        assertThat(description, notNullValue());
       }
     }
   }

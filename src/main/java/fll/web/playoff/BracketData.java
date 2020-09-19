@@ -344,11 +344,21 @@ public class BracketData extends BracketInfo {
 
   private final boolean showOnlyVerifiedScores;
 
-  private final Connection connection;
-
   private final int currentTournament;
 
   private final int bracketIndex;
+
+  private String bracketOutput = "";
+
+  /**
+   * @return the string that was generated with
+   *         {@link #generateBracketOutput(Connection, TopRightCornerStyle)} or
+   *         the empty string if the method has not been called.
+   */
+  @JsonIgnore
+  public String getBracketOutput() {
+    return bracketOutput;
+  }
 
   /**
    * @return If this object is in a list, the index in the list.
@@ -409,7 +419,6 @@ public class BracketData extends BracketInfo {
                      final int bracketIndex)
       throws SQLException {
     super(pDivision, pFirstRound < 1 ? 1 : pFirstRound, pLastRound);
-    this.connection = pConnection;
     this.showFinalScores = pShowFinals;
     this.showOnlyVerifiedScores = pShowOnlyVerifiedScores;
     this.bracketIndex = bracketIndex;
@@ -422,12 +431,12 @@ public class BracketData extends BracketInfo {
           + " Value must be a multiple of 2 greater than 0.");
     }
 
-    this.currentTournament = Queries.getCurrentTournament(connection);
+    this.currentTournament = Queries.getCurrentTournament(pConnection);
 
     this.rowsPerTeam = pRowsPerTeam;
-    this.firstRoundSize = Queries.getFirstPlayoffRoundSize(connection, currentTournament, getBracketName());
+    this.firstRoundSize = Queries.getFirstPlayoffRoundSize(pConnection, currentTournament, getBracketName());
 
-    this.finalsRound = Queries.getNumPlayoffRounds(connection, currentTournament, getBracketName());
+    this.finalsRound = Queries.getNumPlayoffRounds(pConnection, currentTournament, getBracketName());
 
     this.bracketData = new TreeMap<Integer, SortedMap<Integer, BracketDataType>>();
     for (int i = getFirstRound(); i <= getLastRound(); i++) {
@@ -439,7 +448,7 @@ public class BracketData extends BracketInfo {
     PreparedStatement minRunNumberPrep = null;
     ResultSet minRunNumber = null;
     try {
-      minRunNumberPrep = connection.prepareStatement("select MIN(run_number) from PlayoffData WHERE event_division = ? AND Tournament = ?");
+      minRunNumberPrep = pConnection.prepareStatement("select MIN(run_number) from PlayoffData WHERE event_division = ? AND Tournament = ?");
       minRunNumberPrep.setString(1, getBracketName());
       minRunNumberPrep.setInt(2, currentTournament);
       minRunNumber = minRunNumberPrep.executeQuery();
@@ -447,10 +456,10 @@ public class BracketData extends BracketInfo {
         baseRunNumber = minRunNumber.getInt(1)
             - 1;
       } else {
-        baseRunNumber = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
+        baseRunNumber = TournamentParameters.getNumSeedingRounds(pConnection, currentTournament);
       }
 
-      stmt = connection.prepareStatement("SELECT PlayoffRound,LineNumber,Team,AssignedTable,Printed" //
+      stmt = pConnection.prepareStatement("SELECT PlayoffRound,LineNumber,Team,AssignedTable,Printed" //
           + " FROM PlayoffData" //
           + " WHERE Tournament= ?" //
           + " AND event_division= ?" //
@@ -470,7 +479,7 @@ public class BracketData extends BracketInfo {
 
         final SortedMap<Integer, BracketDataType> roundData = bracketData.get(round);
 
-        final Team team = Team.getTeamFromDatabase(connection, teamNumber);
+        final Team team = Team.getTeamFromDatabase(pConnection, teamNumber);
         final TeamBracketCell d = new TeamBracketCell(team, table, line, printed);
 
         final int row = getRowNumberForLine(round, line);
@@ -666,11 +675,13 @@ public class BracketData extends BracketInfo {
    * tags for team number, team name, and score have classes of 'TeamNumber',
    * 'TeamName', and 'TeamScore', respectively.
    * 
+   * @param connection database connection
    * @param row Row number of the bracket data we are displaying.
    * @param round Round number (column) of data we are displaying.
    * @throws SQLException If database access fails.
    */
-  private void appendHtmlCell(final StringBuilder sb,
+  private void appendHtmlCell(Connection connection,
+                              final StringBuilder sb,
                               final int row,
                               final int round)
       throws SQLException {
@@ -701,12 +712,12 @@ public class BracketData extends BracketInfo {
           + leafId
           + "'>");
       if (round == finalsRound) {
-        sb.append(getDisplayString(currentTournament, round
+        sb.append(getDisplayString(connection, currentTournament, round
             + baseRunNumber, tbc.getTeam(), showFinalScores, showOnlyVerifiedScores));
       } else if (showFinalScores
           || round != finalsRound
               + 1) {
-        sb.append(getDisplayString(currentTournament, round
+        sb.append(getDisplayString(connection, currentTournament, round
             + baseRunNumber, tbc.getTeam(), true, showOnlyVerifiedScores));
       }
       sb.append("</td>\n");
@@ -814,7 +825,7 @@ public class BracketData extends BracketInfo {
    * 
    * @return javascript to live inside a function
    */
-  public String outputTableSyncFunctions() {
+  public String getTableSyncFunctionsOutput() {
     final StringBuilder sb = new StringBuilder();
 
     for (int round = getFirstRound(); round <= getLastRound(); round++) {
@@ -845,13 +856,17 @@ public class BracketData extends BracketInfo {
   }
 
   /**
-   * Output the full brackets.
+   * Generate the bracket output. This method is to be called once the object is
+   * configured. The result of this method can be retrieved later with
+   * {@link #getBracketOutput()}.
    * 
+   * @param connection database connection
    * @param topRightCornerStyle how to connect the top right corner
-   * @return HTML table
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
-  public String outputBrackets(final TopRightCornerStyle topRightCornerStyle) throws SQLException {
+  public void generateBracketOutput(final Connection connection,
+                                    final TopRightCornerStyle topRightCornerStyle)
+      throws SQLException {
     final StringBuilder sb = new StringBuilder();
 
     sb.append("<table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>\n");
@@ -863,42 +878,18 @@ public class BracketData extends BracketInfo {
 
       // Get each cell. Insert bridge cells between columns.
       for (int i = getFirstRound(); i < getLastRound(); i++) {
-        appendHtmlCell(sb, rowIndex, i);
+        appendHtmlCell(connection, sb, rowIndex, i);
         appendHtmlBridgeCell(sb, rowIndex, i, topRightCornerStyle);
       }
 
-      appendHtmlCell(sb, rowIndex, getLastRound());
+      appendHtmlCell(connection, sb, rowIndex, getLastRound());
 
       sb.append("</tr>\n");
     }
 
     sb.append("</table>\n");
 
-    return sb.toString();
-  }
-
-  /**
-   * Calls {@link #outputBrackets(TopRightCornerStyle)} with
-   * {@link TopRightCornerStyle#MEET_TOP_OF_CELL}.
-   * 
-   * @return see {@link #outputBrackets(TopRightCornerStyle)}
-   * @throws SQLException on a database error
-   */
-  @JsonIgnore
-  public String getDisplayBracketOutput() throws SQLException {
-    return outputBrackets(BracketData.TopRightCornerStyle.MEET_TOP_OF_CELL);
-  }
-
-  /**
-   * Calls {@link #outputBrackets(TopRightCornerStyle)} with
-   * {@link TopRightCornerStyle#MEET_BOTTOM_OF_CELL}.
-   * 
-   * @return see {@link #outputBrackets(TopRightCornerStyle)}
-   * @throws SQLException on a database error
-   */
-  @JsonIgnore
-  public String getAdminBracketOutput() throws SQLException {
-    return outputBrackets(BracketData.TopRightCornerStyle.MEET_BOTTOM_OF_CELL);
+    bracketOutput = sb.toString();
   }
 
   private void outputTableSelect(final StringBuilder sb,
@@ -1118,7 +1109,7 @@ public class BracketData extends BracketInfo {
    * If this function is used, addBracketLabelsAndScoreGenFormElements must not
    * be used.
    * 
-   * @param roundNumber
+   * @param roundNumber the round number to set the labels for
    */
   public void addBracketLabels(final int roundNumber) {
     final SortedMap<Integer, BracketDataType> roundData = bracketData.get(roundNumber);
@@ -1166,9 +1157,10 @@ public class BracketData extends BracketInfo {
    * specified to have fewer than 4 lines per team (i.e. 2 lines per team only)
    * then this function will have no effect.
    * 
-   * @throws SQLException
+   * @param connection database connection
+   * @throws SQLException on a database exception
    */
-  public void addStaticTableLabels() throws SQLException {
+  public void addStaticTableLabels(final Connection connection) throws SQLException {
     if (rowsPerTeam < 4) {
       LOG.warn("Table labels cannot be added to bracket data because there are too few lines per team for them to fit.");
       return; // if there aren't enough rows-per-team to include table labels,
@@ -1399,6 +1391,7 @@ public class BracketData extends BracketInfo {
    * whether to display or hide verified scores. If unverified scores are
    * displayed, they will be shown as red text.
    * 
+   * @param connection database connection
    * @param currentTournament the current tournament
    * @param runNumber the current performance run, used to get the score
    * @param team team to get display string for
@@ -1406,7 +1399,8 @@ public class BracketData extends BracketInfo {
    * @throws IllegalArgumentException if teamNumber is invalid
    * @throws SQLException on a database error
    */
-  private String getDisplayString(final int currentTournament,
+  private String getDisplayString(Connection connection,
+                                  final int currentTournament,
                                   final int runNumber,
                                   final @Nullable Team team,
                                   final boolean showScore,
@@ -1461,12 +1455,6 @@ public class BracketData extends BracketInfo {
       }
       return sb.toString();
     }
-  }
-
-  @Override
-  protected void finalize() throws Throwable {
-    // cleanup connection object
-    connection.close();
   }
 
 }

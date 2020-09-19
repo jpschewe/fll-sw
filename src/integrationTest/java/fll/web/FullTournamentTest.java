@@ -56,7 +56,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import com.diffplug.common.base.Errors;
@@ -218,8 +217,8 @@ public class FullTournamentTest {
       throws IOException, SQLException, ParseException, InterruptedException, SAXException {
     final String safeTestTournamentName = sanitizeFilename(testTournamentName);
 
-    final Document challengeDocument = GlobalParameters.getChallengeDocument(testDataConn);
-    assertNotNull(challengeDocument);
+    final ChallengeDescription challengeDescription = GlobalParameters.getChallengeDescription(testDataConn);
+    assertNotNull(challengeDescription);
 
     assertThat(outputDirectory, notNullValue());
     assertTrue(Files.exists(outputDirectory), "Output directory must exist");
@@ -235,7 +234,7 @@ public class FullTournamentTest {
 
     // --- initialize database ---
     LOGGER.info("Initializing the database");
-    IntegrationTestUtils.initializeDatabase(selenium, seleniumWait, challengeDocument);
+    IntegrationTestUtils.initializeDatabase(selenium, seleniumWait, challengeDescription.toXml());
 
     LOGGER.info("Loading teams");
     loadTeams(selenium, seleniumWait, testDataConn, sourceTournament, outputDirectory);
@@ -288,8 +287,7 @@ public class FullTournamentTest {
       }
     }
 
-    final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
-    final PerformanceScoreCategory performanceElement = description.getPerformance();
+    final PerformanceScoreCategory performanceElement = challengeDescription.getPerformance();
 
     try (
         PreparedStatement prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?")) {
@@ -345,7 +343,8 @@ public class FullTournamentTest {
       checkDisplays(selenium, seleniumWait);
 
       LOGGER.info("Checking the subjective scores");
-      enterSubjectiveScores(selenium, seleniumWait, testDataConn, description, sourceTournament, outputDirectory);
+      enterSubjectiveScores(selenium, seleniumWait, testDataConn, challengeDescription, sourceTournament,
+                            outputDirectory);
 
       LOGGER.info("Writing final datbaase");
       IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT

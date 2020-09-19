@@ -38,7 +38,8 @@ public class DisplayChallengeDescriptor extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     Connection connection = null;
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -46,8 +47,9 @@ public class DisplayChallengeDescriptor extends BaseFLLServlet {
 
       // get challenge document from the database as it will be modified to
       // include the stylesheet information and I don't want to propagate that.
-      final Document challengeDocument = GlobalParameters.getChallengeDocument(connection);
-      final ProcessingInstruction stylesheet = challengeDocument.createProcessingInstruction("xml-stylesheet", "type='text/css' href='fll.css'");
+      final Document challengeDocument = GlobalParameters.getChallengeDescription(connection).toXml();
+      final ProcessingInstruction stylesheet = challengeDocument.createProcessingInstruction("xml-stylesheet",
+                                                                                             "type='text/css' href='fll.css'");
       challengeDocument.insertBefore(stylesheet, challengeDocument.getDocumentElement());
 
       response.reset();

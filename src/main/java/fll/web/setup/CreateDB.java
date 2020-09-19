@@ -24,7 +24,6 @@ import javax.sql.DataSource;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
-import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.GenerateDB;
@@ -33,8 +32,8 @@ import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.UploadProcessor;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Create a new database either from an xml descriptor or from a database dump.
@@ -55,9 +54,7 @@ public class CreateDB extends BaseFLLServlet {
     String redirect;
     final StringBuilder message = new StringBuilder();
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       // must be first to ensure the form parameters are set
       UploadProcessor.processUpload(request);
@@ -66,12 +63,12 @@ public class CreateDB extends BaseFLLServlet {
         final String description = (String) request.getAttribute("description");
         try {
           final URL descriptionURL = new URL(description);
-          final Document document = ChallengeParser.parse(new InputStreamReader(descriptionURL.openStream(),
-                                                                                Utilities.DEFAULT_CHARSET));
+          final ChallengeDescription challengeDescription = ChallengeParser.parse(new InputStreamReader(descriptionURL.openStream(),
+                                                                                                        Utilities.DEFAULT_CHARSET));
 
-          GenerateDB.generateDB(document, connection);
+          GenerateDB.generateDB(challengeDescription, connection);
 
-          application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
+          application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
 
           message.append("<p id='success'><i>Successfully initialized database</i></p>");
           redirect = "/admin/createUsername.jsp";
@@ -89,12 +86,12 @@ public class CreateDB extends BaseFLLServlet {
           message.append("<p class='error'>XML description document not specified</p>");
           redirect = "/setup";
         } else {
-          final Document document = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
-                                                                                Utilities.DEFAULT_CHARSET));
+          final ChallengeDescription challengeDescription = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
+                                                                                                        Utilities.DEFAULT_CHARSET));
 
-          GenerateDB.generateDB(document, connection);
+          GenerateDB.generateDB(challengeDescription, connection);
 
-          application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
+          application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
 
           message.append("<p id='success'><i>Successfully initialized database</i></p>");
           redirect = "/admin/createUsername.jsp";
@@ -120,7 +117,7 @@ public class CreateDB extends BaseFLLServlet {
           }
 
           // remove application variables that depend on the database
-          application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
+          application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
 
           message.append("<p id='success'><i>Successfully initialized database from dump</i></p>");
           redirect = "/admin/createUsername.jsp";
@@ -151,8 +148,6 @@ public class CreateDB extends BaseFLLServlet {
           + "</p>");
       LOG.error(sqle, sqle);
       redirect = "/setup";
-    } finally {
-      SQLFunctions.close(connection);
     }
 
     session.setAttribute("message", message.toString());

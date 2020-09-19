@@ -1,7 +1,7 @@
 body {
-	font-family: 'Arial', 'Helvetica', 'sans-serif';
-	font-size: medium;
-	font-weight: bold;
+    font-family: 'Arial', 'Helvetica', 'sans-serif';
+    font-size: medium;
+    font-weight: bold;
 }
 
 body.scoreboard {
@@ -10,7 +10,7 @@ body.scoreboard {
 }
 
 table.scoreboard {
-	table-layout: fixed;
+    table-layout: fixed;
 }
 
 th.scoreboard {

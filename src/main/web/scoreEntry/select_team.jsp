@@ -19,10 +19,10 @@ function editFlagBoxClicked() {
   var text = document.getElementById('select_number_text');
   if (document.selectTeam.EditFlag.checked) {
     document.selectTeam.RunNumber.disabled=false;
-		text.style.color = "black";
+    text.style.color = "black";
   } else {
     document.selectTeam.RunNumber.disabled=true;
-		text.style.color = "gray";
+    text.style.color = "gray";
   }
 }
 
@@ -90,7 +90,7 @@ $(document).ready(function() {
               <tr>
                 <td valign="middle" align="center">
                   <font face="Arial" size="4">${challengeDescription.title }</font><br>
-									<font face="Arial" size="2">Score Card Entry and Review Page</font>
+                  <font face="Arial" size="2">Score Card Entry and Review Page</font>
                 </td>
               </tr>
             </table>
@@ -143,10 +143,10 @@ $(document).ready(function() {
            <!-- pick run number -->
           <td align='left'>
             <select name='RunNumber' disabled='disabled'>
-			  <option value='0'>Last Run</option>
-	          <c:forEach var="index" begin="1" end="${maxRunNumber}">
-			    <option value='${index }'>${index }</option>
-			  </c:forEach>			
+                <option value='0'>Last Run</option>
+                <c:forEach var="index" begin="1" end="${maxRunNumber}">
+                    <option value='${index }'>${index }</option>
+                </c:forEach>
             </select>
             <b><span id='select_number_text'>Select Run Number for editing</span></b>
           </td>

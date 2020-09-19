@@ -22,7 +22,6 @@ import java.util.zip.ZipInputStream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.w3c.dom.Document;
 
 import fll.TestUtils;
 import fll.Tournament;
@@ -41,10 +40,9 @@ public class TestComputedScores {
   /**
    * Check the score computation that was a problem in 2009 where 0 != 0.
    *
-   * @param args
-   * @throws SQLException
-   * @throws ParseException
-   * @throws IOException
+   * @throws SQLException test error
+   * @throws ParseException test error
+   * @throws IOException test error
    */
   @Test
   public void testFPComputation() throws SQLException, ParseException, IOException {
@@ -69,8 +67,7 @@ public class TestComputedScores {
                                                                                 connection);
       TestUtils.deleteImportData(importResult);
 
-      final Document document = GlobalParameters.getChallengeDocument(connection);
-      final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+      final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
       final PerformanceScoreCategory performanceElement = description.getPerformance();
 
       final Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);

@@ -8,6 +8,7 @@ package fll.web.playoff;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -15,7 +16,9 @@ import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import fll.db.Queries;
+import fll.db.TableInformation;
 import fll.web.ApplicationAttributes;
+import fll.web.playoff.BracketData.TopRightCornerStyle;
 
 /**
  * Helpers for scoregenbrackets.jsp.
@@ -93,6 +96,23 @@ public class ScoregenBrackets {
 
       request.setAttribute("firstRound", Integer.valueOf(firstRound));
       request.setAttribute("lastRound", Integer.valueOf(lastRound));
+
+      final int currentTournament = Queries.getCurrentTournament(connection);
+
+      final BracketData bracketInfo = new BracketData(connection, division, firstRound, lastRound, 4, true, false);
+
+      final int numMatches = bracketInfo.addBracketLabelsAndScoreGenFormElements(connection, currentTournament,
+                                                                                 division);
+      pageContext.setAttribute("numMatches", numMatches);
+
+      bracketInfo.generateBracketOutput(connection, TopRightCornerStyle.MEET_BOTTOM_OF_CELL);
+
+      pageContext.setAttribute("bracketInfo", bracketInfo);
+
+      final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection,
+                                                                                              currentTournament,
+                                                                                              bracketInfo.getBracketName());
+      pageContext.setAttribute("tableInfo", tableInfo);
 
     } catch (final SQLException e) {
       LOGGER.error(e, e);

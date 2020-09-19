@@ -15,7 +15,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -40,7 +40,6 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
@@ -65,113 +64,10 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 /**
  * Import scores from a tournament database
  * into a master score database.
- * <p>
- * Example arguments: jdbc:hsqldb:file:/source;shutdown=true "Centennial Dec10"
- * jdbc:hsqldb:file:/destination;shutdown=true
  */
 public final class ImportDB {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ImportDB.class);
-
-  /**
-   * Import tournament data from one database to another database.
-   *
-   * @param args source tournament destination
-   */
-  public static void main(final String[] args) {
-    try {
-      if (args.length != 3) {
-        LOGGER.error("You must specify <source uri> <tournament> <destination uri>");
-        for (final String arg : args) {
-          LOGGER.error("arg: "
-              + arg);
-        }
-        System.exit(1);
-      } else {
-
-        final String sourceURI = args[0];
-        // remove quotes from tournament if they exist
-        int substringStart = 0;
-        int substringEnd = args[1].length();
-        if (args[1].charAt(0) == '"'
-            || args[1].charAt(0) == '\'') {
-          substringStart = 1;
-        }
-        if (args[1].charAt(substringEnd
-            - 1) == '"'
-            || args[1].charAt(substringEnd
-                - 1) == '\'') {
-          substringEnd = substringEnd
-              - 1;
-        }
-        final String tournament = args[1].substring(substringStart, substringEnd);
-        final String destinationURI = args[2];
-
-        Utilities.loadDBDriver();
-
-        final Connection sourceConnection = DriverManager.getConnection(sourceURI);
-        final Connection destinationConnection = DriverManager.getConnection(destinationURI);
-        Statement stmt1 = null;
-        Statement stmt2 = null;
-        try {
-          try {
-            stmt1 = sourceConnection.createStatement();
-            stmt1.executeUpdate("SET WRITE_DELAY 1 MILLIS");
-          } catch (final SQLException sqle) {
-            LOGGER.info("Source either isn't HSQLDB or there is a problem", sqle);
-          }
-          try {
-            stmt2 = destinationConnection.createStatement();
-            stmt2.executeUpdate("SET WRITE_DELAY 1 MILLIS");
-          } catch (final SQLException sqle) {
-            LOGGER.info("Destination either isn't HSQLDB or there is a problem", sqle);
-          }
-        } finally {
-          SQLFunctions.close(stmt1);
-          SQLFunctions.close(stmt2);
-        }
-
-        final boolean differences = checkForDifferences(sourceConnection, destinationConnection, tournament);
-        if (!differences) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Importing data for "
-                + tournament
-                + " from "
-                + sourceURI
-                + " to "
-                + destinationURI);
-          }
-          importDatabase(sourceConnection, destinationConnection, tournament, true, true, true);
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Data successfully imported");
-          }
-        } else {
-          LOGGER.error("Import aborted due to differences in databases");
-        }
-
-        try {
-          try {
-            stmt1 = sourceConnection.createStatement();
-            stmt1.executeUpdate("SHUTDOWN COMPACT");
-          } catch (final SQLException sqle) {
-            LOGGER.info("Source either isn't HSQLDB or there is a problem", sqle);
-          }
-          try {
-            stmt2 = destinationConnection.createStatement();
-            stmt2.executeUpdate("SHUTDOWN COMPACT");
-          } catch (final SQLException sqle) {
-            LOGGER.info("Destination either isn't HSQLDB or there is a problem", sqle);
-          }
-        } finally {
-          SQLFunctions.close(stmt1);
-          SQLFunctions.close(stmt2);
-        }
-
-      }
-    } catch (final Throwable e) {
-      e.printStackTrace();
-    }
-  }
 
   private ImportDB() {
     // no instances
@@ -207,8 +103,8 @@ public final class ImportDB {
       sourceConnection = memSource.getConnection();
 
       final ImportDB.ImportResult importResult = loadDatabaseDump(zipfile, sourceConnection);
-      final Document challengeDocument = importResult.getChallengeDocument();
-      GenerateDB.generateDB(challengeDocument, destConnection);
+      final ChallengeDescription challengeDescription = importResult.getChallengeDescription();
+      GenerateDB.generateDB(challengeDescription, destConnection);
 
       memStmt = sourceConnection.createStatement();
 
@@ -328,7 +224,7 @@ public final class ImportDB {
    * <p>
    * Once the database has been loaded it will be upgraded to the current
    * version using
-   * {@link #upgradeDatabase(Connection, Document, ChallengeDescription)}.
+   * {@link #upgradeDatabase(Connection, ChallengeDescription)}.
    * </p>
    * <p>
    * The created database does not have constraints, nor does it have the
@@ -347,7 +243,7 @@ public final class ImportDB {
   public static ImportResult loadDatabaseDump(final ZipInputStream zipfile,
                                               final Connection connection)
       throws IOException, SQLException {
-    Document challengeResult = null;
+    ChallengeDescription description = null;
     final Path importDirectory = Paths.get("import_"
         + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")));
     boolean hasBugs = false;
@@ -359,7 +255,7 @@ public final class ImportDB {
       final String name = entry.getName();
       if ("challenge.xml".equals(name)) {
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
-        challengeResult = ChallengeParser.parse(reader);
+        description = ChallengeParser.parse(reader);
       } else if (name.endsWith(".csv")) {
         final String tablename = name.substring(0, name.indexOf(".csv")).toLowerCase();
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
@@ -405,11 +301,10 @@ public final class ImportDB {
       zipfile.closeEntry();
     }
 
-    if (null == challengeResult) {
+    if (null == description) {
       throw new RuntimeException("Cannot find challenge document in the zipfile");
     }
 
-    final ChallengeDescription description = new ChallengeDescription(challengeResult.getDocumentElement());
     if (typeInfo.isEmpty()) {
       // before types were added, assume version 0 types
       createVersion0TypeInfo(typeInfo, description);
@@ -430,9 +325,9 @@ public final class ImportDB {
           + dbVersion);
     }
 
-    upgradeDatabase(connection, challengeResult, description);
+    upgradeDatabase(connection, description);
 
-    return new ImportResult(challengeResult, importDirectory, hasBugs);
+    return new ImportResult(description, importDirectory, hasBugs);
   }
 
   /**
@@ -548,12 +443,11 @@ public final class ImportDB {
    *           some reason
    */
   private static void upgradeDatabase(final Connection connection,
-                                      final Document challengeDocument,
                                       final ChallengeDescription description)
       throws SQLException, IllegalArgumentException {
     int dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 1) {
-      upgrade0To1(connection, challengeDocument);
+      upgrade0To1(connection, description);
     }
 
     // tournament parameters existed after version 1
@@ -685,8 +579,7 @@ public final class ImportDB {
     try {
       stmt = connection.createStatement();
 
-      final Document document = GlobalParameters.getChallengeDocument(connection);
-      final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+      final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
       for (final SubjectiveScoreCategory categoryElement : description.getSubjectiveCategories()) {
         final String tableName = categoryElement.getName();
 
@@ -1273,30 +1166,26 @@ public final class ImportDB {
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon tables in the database")
   private static void upgrade0To1(final Connection connection,
-                                  final Document challengeDocument)
+                                  final ChallengeDescription description)
       throws SQLException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    PreparedStatement stringsToInts = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
 
       stmt.executeUpdate("DROP Table IF EXISTS TournamentParameters");
 
       // add the global_parameters table
-      GenerateDB.createGlobalParameters(challengeDocument, connection);
+      GenerateDB.createGlobalParameters(description, connection);
 
       // ---- switch from string tournament names to integers ----
 
       // get all data from Tournaments table
       final Map<String, String> nameLocation = new HashMap<>();
-      rs = stmt.executeQuery("SELECT Name, Location FROM Tournaments");
-      while (rs.next()) {
-        final String name = rs.getString(1);
-        final String location = rs.getString(2);
-        nameLocation.put(name, location);
+      try (ResultSet rs = stmt.executeQuery("SELECT Name, Location FROM Tournaments")) {
+        while (rs.next()) {
+          final String name = rs.getString(1);
+          final String location = rs.getString(2);
+          nameLocation.put(name, location);
+        }
       }
-      SQLFunctions.close(rs);
 
       // drop Tournaments table
       stmt.executeUpdate("DROP TABLE Tournaments");
@@ -1314,13 +1203,13 @@ public final class ImportDB {
       }
       // get map of names to ids
       final Map<String, Integer> nameID = new HashMap<>();
-      rs = stmt.executeQuery("SELECT Name, tournament_id FROM Tournaments");
-      while (rs.next()) {
-        final String name = rs.getString(1);
-        final int id = rs.getInt(2);
-        nameID.put(name, id);
+      try (ResultSet rs = stmt.executeQuery("SELECT Name, tournament_id FROM Tournaments")) {
+        while (rs.next()) {
+          final String name = rs.getString(1);
+          final int id = rs.getInt(2);
+          nameID.put(name, id);
+        }
       }
-      SQLFunctions.close(rs);
 
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Map from names to tournament IDs: "
@@ -1335,16 +1224,18 @@ public final class ImportDB {
       tablesToModify.add("FinalScores");
       tablesToModify.add("Performance");
       tablesToModify.add("PlayoffData");
-      tablesToModify.addAll(ChallengeParser.getSubjectiveCategoryNames(challengeDocument));
+      tablesToModify.addAll(description.getSubjectiveCategories().stream().map(SubjectiveScoreCategory::getName)
+                                       .collect(Collectors.toList()));
       for (final String table : tablesToModify) {
-        stringsToInts = connection.prepareStatement(String.format("UPDATE %s SET Tournament = ? WHERE Tournament = ?",
-                                                                  table));
-        for (final Map.Entry<String, Integer> entry : nameID.entrySet()) {
-          stringsToInts.setInt(1, entry.getValue());
-          stringsToInts.setString(2, entry.getKey());
-          stringsToInts.executeUpdate();
+        try (
+            PreparedStatement stringsToInts = connection.prepareStatement(String.format("UPDATE %s SET Tournament = ? WHERE Tournament = ?",
+                                                                                        table))) {
+          for (final Map.Entry<String, Integer> entry : nameID.entrySet()) {
+            stringsToInts.setInt(1, entry.getValue());
+            stringsToInts.setString(2, entry.getKey());
+            stringsToInts.executeUpdate();
+          }
         }
-        SQLFunctions.close(stringsToInts);
       }
 
       // create new tournament parameters table
@@ -1354,25 +1245,17 @@ public final class ImportDB {
       // global_parameters, but we need to force it to 1 for later upgrade
       // functions to not be confused
       setDBVersion(connection, 1);
-
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(stringsToInts);
     }
   }
 
   private static void setDBVersion(final Connection connection,
                                    final int version)
       throws SQLException {
-    PreparedStatement setVersion = null;
-    try {
-      setVersion = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?");
+    try (
+        PreparedStatement setVersion = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?")) {
       setVersion.setInt(1, version);
       setVersion.setString(2, GlobalParameters.DATABASE_VERSION);
       setVersion.executeUpdate();
-    } finally {
-      SQLFunctions.close(setVersion);
     }
 
   }
@@ -1402,8 +1285,7 @@ public final class ImportDB {
                                     final boolean importFinalist)
       throws SQLException {
 
-    final Document document = GlobalParameters.getChallengeDocument(destinationConnection);
-    final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+    final ChallengeDescription description = GlobalParameters.getChallengeDescription(destinationConnection);
 
     final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournamentName);
     final int sourceTournamentID = sourceTournament.getTournamentID();
@@ -2496,19 +2378,27 @@ public final class ImportDB {
    */
   public static final class ImportResult {
 
-    public ImportResult(@Nonnull final Document challengeDocument,
+    /**
+     * @param challengeDescription {@link #getChallengeDescription()}
+     * @param importDirectory {@link #getImportDirectory()}
+     * @param hasBugs {@link #hasBugs()}
+     */
+    public ImportResult(@Nonnull final ChallengeDescription challengeDescription,
                         @Nonnull final Path importDirectory,
                         final boolean hasBugs) {
-      this.challengeDocument = challengeDocument;
+      this.challengeDescription = challengeDescription;
       this.importDirectory = importDirectory;
       this.hasBugs = hasBugs;
 
     }
 
-    private final Document challengeDocument;
+    private final ChallengeDescription challengeDescription;
 
-    public Document getChallengeDocument() {
-      return challengeDocument;
+    /**
+     * @return the challenge description read in
+     */
+    public ChallengeDescription getChallengeDescription() {
+      return challengeDescription;
     }
 
     private final Path importDirectory;

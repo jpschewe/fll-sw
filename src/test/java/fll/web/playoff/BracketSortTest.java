@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.w3c.dom.Document;
 
 import fll.Team;
 import fll.TestUtils;
@@ -33,7 +32,6 @@ import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.WinnerType;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Test the various playoff bracket sort methods.
@@ -57,19 +55,16 @@ public class BracketSortTest {
       SQLException, UnsupportedEncodingException {
     final String divisionStr = "1";
     final String[] teamNames = new String[] { "A", "B", "C", "D", "E", "F" };
-    Connection connection = null;
-    try {
-      // load in data/alpha-team-sort.xml
-      final InputStream challengeDocIS = BracketSortTest.class.getResourceAsStream("data/alpha-team-sort.xml");
-      assertNotNull(challengeDocIS);
-      final Document document = ChallengeParser.parse(new InputStreamReader(challengeDocIS, Utilities.DEFAULT_CHARSET));
-      assertNotNull(document);
+    // load in data/alpha-team-sort.xml
+    final InputStream challengeDocIS = BracketSortTest.class.getResourceAsStream("data/alpha-team-sort.xml");
+    assertNotNull(challengeDocIS);
+    final ChallengeDescription description = ChallengeParser.parse(new InputStreamReader(challengeDocIS,
+                                                                                         Utilities.DEFAULT_CHARSET));
+    assertNotNull(description);
 
-      final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
-
-      // create in memory test database instance
-      connection = DriverManager.getConnection("jdbc:hsqldb:mem:flldb-testAlphaTeam");
-      GenerateDB.generateDB(document, connection);
+    // create in memory test database instance
+    try (Connection connection = DriverManager.getConnection("jdbc:hsqldb:mem:flldb-testAlphaTeam")) {
+      GenerateDB.generateDB(description, connection);
 
       final int tournament = Queries.getCurrentTournament(connection);
 
@@ -108,8 +103,6 @@ public class BracketSortTest {
       assertEquals(Team.BYE, order.get(6));
       assertEquals("B", order.get(7).getTeamName());
 
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 }

@@ -31,7 +31,7 @@ import fll.web.IntegrationTestUtils;
 import fll.xml.BracketSortType;
 
 /**
- * Test the AJAX Brackets
+ * Test the AJAX Brackets.
  */
 @ExtendWith(TestUtils.InitializeLogging.class)
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)

@@ -18,14 +18,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-import org.w3c.dom.Document;
-
 import fll.Tournament;
 import fll.db.GlobalParameters;
 import fll.db.ImportDB;
 import fll.db.Queries;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -74,8 +70,7 @@ public class ExecuteImport extends BaseFLLServlet {
         // update score totals
         final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
         final int destTournamentID = destTournament.getTournamentID();
-        final Document document = GlobalParameters.getChallengeDocument(destConnection);
-        final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+        final ChallengeDescription description = GlobalParameters.getChallengeDescription(destConnection);
         Queries.updateScoreTotals(description, destConnection, destTournamentID);
 
         message.append(String.format("<p>Import of tournament %s successful.</p>", tournament));

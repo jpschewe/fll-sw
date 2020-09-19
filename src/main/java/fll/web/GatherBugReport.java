@@ -31,12 +31,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.apache.commons.io.IOUtils;
-import org.w3c.dom.Document;
-
 import fll.Utilities;
 import fll.db.DumpDB;
-import net.mtu.eggplant.util.sql.SQLFunctions;
+import fll.xml.ChallengeDescription;
 
 /**
  * Gather up the data for a bug report.
@@ -51,39 +48,38 @@ public class GatherBugReport extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    ZipOutputStream zipOut = null;
+
     final StringBuilder message = new StringBuilder();
-    try {
-      connection = datasource.getConnection();
-      final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+    try (Connection connection = datasource.getConnection()) {
+      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
       final File fllWebInfDir = new File(application.getRealPath("/WEB-INF"));
       final String nowStr = new SimpleDateFormat("yyyy-MM-dd_HH-mm").format(new Date());
       final File bugReportFile = File.createTempFile("bug_"
           + nowStr, ".zip", fllWebInfDir);
 
-      zipOut = new ZipOutputStream(new FileOutputStream(bugReportFile));
+      try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(bugReportFile))) {
 
-      final String description = request.getParameter("bug_description");
-      if (null != description) {
-        zipOut.putNextEntry(new ZipEntry("bug_description.txt"));
-        zipOut.write(description.getBytes(Utilities.DEFAULT_CHARSET));
+        final String description = request.getParameter("bug_description");
+        if (null != description) {
+          zipOut.putNextEntry(new ZipEntry("bug_description.txt"));
+          zipOut.write(description.getBytes(Utilities.DEFAULT_CHARSET));
+        }
+
+        zipOut.putNextEntry(new ZipEntry("server_info.txt"));
+        zipOut.write(String.format("Java version: %s%nJava vendor: %s%nOS Name: %s%nOS Arch: %s%nOS Version: %s%nServlet API: %d.%d%nServlet container: %s%n",
+                                   System.getProperty("java.vendor"), //
+                                   System.getProperty("java.version"), //
+                                   System.getProperty("os.name"), //
+                                   System.getProperty("os.arch"), //
+                                   System.getProperty("os.version"), //
+                                   application.getMajorVersion(), application.getMinorVersion(), //
+                                   application.getServerInfo())
+                           .getBytes(Utilities.DEFAULT_CHARSET));
+
+        addDatabase(zipOut, connection, challengeDescription);
+        addLogFiles(zipOut);
       }
-
-      zipOut.putNextEntry(new ZipEntry("server_info.txt"));
-      zipOut.write(String.format("Java version: %s%nJava vendor: %s%nOS Name: %s%nOS Arch: %s%nOS Version: %s%nServlet API: %d.%d%nServlet container: %s%n",
-                                 System.getProperty("java.vendor"), //
-                                 System.getProperty("java.version"), //
-                                 System.getProperty("os.name"), //
-                                 System.getProperty("os.arch"), //
-                                 System.getProperty("os.version"), //
-                                 application.getMajorVersion(), application.getMinorVersion(), //
-                                 application.getServerInfo())
-                         .getBytes(Utilities.DEFAULT_CHARSET));
-
-      addDatabase(zipOut, connection, challengeDocument);
-      addLogFiles(zipOut);
 
       message.append(String.format("<i>Bug report saved to '%s', please notify the computer person in charge to look for bug report files.</i>",
                                    bugReportFile.getAbsolutePath()));
@@ -94,9 +90,6 @@ public class GatherBugReport extends BaseFLLServlet {
 
     } catch (final SQLException sqle) {
       throw new RuntimeException(sqle);
-    } finally {
-      SQLFunctions.close(connection);
-      IOUtils.closeQuietly(zipOut);
     }
 
   }
@@ -104,34 +97,27 @@ public class GatherBugReport extends BaseFLLServlet {
   /**
    * Add the database to the zipfile.
    *
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
   private static void addDatabase(final ZipOutputStream zipOut,
                                   final Connection connection,
-                                  final Document challengeDocument)
+                                  final ChallengeDescription description)
       throws IOException, SQLException {
 
-    ZipOutputStream dbZipOut = null;
-    FileInputStream fis = null;
-    try {
-      final File temp = File.createTempFile("database", ".flldb");
+    final File temp = File.createTempFile("database", ".flldb");
 
-      dbZipOut = new ZipOutputStream(new FileOutputStream(temp));
-      DumpDB.dumpDatabase(dbZipOut, connection, challengeDocument, null);
+    try (ZipOutputStream dbZipOut = new ZipOutputStream(new FileOutputStream(temp))) {
+      DumpDB.dumpDatabase(dbZipOut, connection, description, null);
       dbZipOut.close();
+    }
 
-      zipOut.putNextEntry(new ZipEntry("database.flldb"));
-      fis = new FileInputStream(temp);
+    zipOut.putNextEntry(new ZipEntry("database.flldb"));
+    try (FileInputStream fis = new FileInputStream(temp)) {
       fis.transferTo(zipOut);
-      fis.close();
+    }
 
-      if (!temp.delete()) {
-        temp.deleteOnExit();
-      }
-
-    } finally {
-      IOUtils.closeQuietly(dbZipOut);
-      IOUtils.closeQuietly(fis);
+    if (!temp.delete()) {
+      temp.deleteOnExit();
     }
 
   }

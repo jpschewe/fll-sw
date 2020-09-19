@@ -16,11 +16,11 @@ List<String> logoFiles = Utilities.getGraphicFiles(new File(imagePath));
 final int numLogos = logoFiles.size();
 int lastLogoIndex;
 if(numLogos < 1) {
-	lastLogoIndex = -1;
+    lastLogoIndex = -1;
 } else if(null != session.getAttribute("lastLogoIndex")) {
-	lastLogoIndex = ((Integer)session.getAttribute("lastLogoIndex")).intValue();
+    lastLogoIndex = ((Integer)session.getAttribute("lastLogoIndex")).intValue();
 } else {
-	lastLogoIndex = numLogos - 1;
+    lastLogoIndex = numLogos - 1;
 }
 %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
