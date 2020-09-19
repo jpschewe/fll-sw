@@ -2092,8 +2092,6 @@ public final class ImportDB {
       differencesFound = true;
     }
 
-    // TODO issue:116 check documents
-
     return differencesFound;
   }
 
