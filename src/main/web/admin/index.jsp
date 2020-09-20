@@ -274,6 +274,11 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
             </div>
         </li>
 
+        <li>
+            <a href="<c:url value='/admin/delayed_performance.jsp'/>">Setup
+                delay of displaying performance scores</a>
+        </li>
+
     </ol>
 
     <h2>Tournament day</h2>

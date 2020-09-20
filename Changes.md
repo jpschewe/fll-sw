@@ -1,3 +1,4 @@
+* #850 - Add support for delaying the display of performance scores
 * #737 - Validate that all goals of a subjective category have the same rubric range titles
 * #739 - Validate that all goals of a subjective category have the same rubric range min and max values
 * #824 - Add next and previous buttons to finalist scheduling
