@@ -38,6 +38,10 @@ fll.web.admin.StoreDelayedPerformance.populateContext(application, pageContext);
 <p>Scores for the specified performance run number will not be
     displayed until after the specified date and time.</p>
 
+<p>These times only apply to the display of regular match play
+    scores on the main scoreboard. They do not effect the head to head
+    bracket display.</p>
+
 <form action="<c:url value='/admin/StoreDelayedPerformance' />"
     method="POST" name="delayed_performance">
 
