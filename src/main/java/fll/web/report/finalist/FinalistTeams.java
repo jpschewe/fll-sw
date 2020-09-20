@@ -16,28 +16,25 @@ import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-
-
 import fll.Team;
 import fll.TournamentTeam;
 import fll.db.Queries;
-
 import fll.web.ApplicationAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Support for FinalistTeams.jsp.
  */
-public class FinalistTeams {
+public final class FinalistTeams {
+
+  private FinalistTeams() {
+  }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   public static void populateContext(final ServletContext application,
                                      final PageContext pageContext) {
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
       final int tournament = Queries.getCurrentTournament(connection);
 
@@ -54,7 +51,8 @@ public class FinalistTeams {
             teams.add(team);
           } else {
             LOGGER.warn("Cannot find team for number: "
-                + row.getTeamNumber() + " in finalist teams, skipping");
+                + row.getTeamNumber()
+                + " in finalist teams, skipping");
           }
         } // foreach schedule row
 
@@ -65,8 +63,6 @@ public class FinalistTeams {
     } catch (final SQLException e) {
       LOGGER.error(e, e);
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 

@@ -28,22 +28,22 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 public class Team implements Serializable {
 
   /**
-   * Constant to represent the team number for a bye
+   * Constant to represent the team number for a bye.
    */
   public static final int BYE_TEAM_NUMBER = -1;
 
   /**
-   * Constant to represent the team number when there is a tie
+   * Constant to represent the team number when there is a tie.
    */
   public static final int TIE_TEAM_NUMBER = -2;
 
   /**
-   * Constant to represent a NULL team entry in the playoff data table
+   * Constant to represent a NULL team entry in the playoff data table.
    */
   public static final int NULL_TEAM_NUMBER = -3;
 
   /**
-   * Team that represents a BYE
+   * Team that represents a BYE.
    */
   public static final Team BYE = new Team(BYE_TEAM_NUMBER, "INTERNAL", "BYE");
 
@@ -85,12 +85,17 @@ public class Team implements Serializable {
     }
   };
 
+  /**
+   * @param teamNumber {@link #getTeamNumber()}
+   * @param org {@link #getOrganization()}
+   * @param name {@link #getTeamName()}
+   */
   public Team(@JsonProperty("teamNumber") final int teamNumber,
               @JsonProperty("organization") final String org,
               @JsonProperty("teamName") final String name) {
-    _teamNumber = teamNumber;
-    _organization = org;
-    _teamName = name;
+    this.teamNumber = teamNumber;
+    this.organization = org;
+    this.teamName = name;
   }
 
   /**
@@ -138,7 +143,7 @@ public class Team implements Serializable {
     }
   }
 
-  private final int _teamNumber;
+  private final int teamNumber;
 
   /**
    * The team's number. This is the primary key for identifying a team.
@@ -146,10 +151,10 @@ public class Team implements Serializable {
    * @return team number
    */
   public int getTeamNumber() {
-    return _teamNumber;
+    return teamNumber;
   }
 
-  private final String _organization;
+  private final String organization;
 
   /**
    * The organization that the team belongs to, this may be a school or youth
@@ -158,10 +163,10 @@ public class Team implements Serializable {
    * @return organization
    */
   public String getOrganization() {
-    return _organization;
+    return organization;
   }
 
-  private final String _teamName;
+  private final String teamName;
 
   /**
    * The name of the team.
@@ -169,7 +174,7 @@ public class Team implements Serializable {
    * @return name
    */
   public String getTeamName() {
-    return _teamName;
+    return teamName;
   }
 
   /**
@@ -207,7 +212,10 @@ public class Team implements Serializable {
   @Override
   public String toString() {
     return "["
-        + getTeamNumber() + ": " + getTeamName() + "]";
+        + getTeamNumber()
+        + ": "
+        + getTeamName()
+        + "]";
   }
 
   /**
@@ -219,7 +227,8 @@ public class Team implements Serializable {
   }
 
   /**
-   * Check if this an internal team number.
+   * @param number team number to check
+   * @return true if this an internal team number.
    */
   public static boolean isInternalTeamNumber(final int number) {
     return number < 0;

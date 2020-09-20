@@ -65,6 +65,9 @@ public final class FinalistDBRow implements Serializable {
     return teamNumber;
   }
 
+  /**
+   * Singleton instance.
+   */
   public static final TimeSort TIME_SORT_INSTANCE = new TimeSort();
 
   /**
