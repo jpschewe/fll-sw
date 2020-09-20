@@ -79,7 +79,7 @@ public class WebTest {
    * Test changing tournaments to DUMMY and then back to State.
    *
    * @param selenium the browser driver
-   * @param seleniumWait TODO
+   * @param seleniumWait used to wait for elements
    * @throws IOException on test failure
    * @throws InterruptedException on test failure
    */

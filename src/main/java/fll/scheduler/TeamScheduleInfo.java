@@ -37,8 +37,7 @@ public final class TeamScheduleInfo implements Serializable {
    * @return number of regular match play rounds
    */
   public int getNumRegularMatchPlayRounds() {
-    // TODO use Predicate::not when moving to JDK 11+
-    return (int) performances.stream().filter(p -> !p.isPractice()).count();
+    return (int) performances.stream().filter(Predicate.not(PerformanceTime::isPractice)).count();
   }
 
   /**
