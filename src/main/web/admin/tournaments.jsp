@@ -54,7 +54,7 @@ fll.web.admin.Tournaments.populateContext(application, pageContext);
             This field is used in the awards report.</li>
         <li>Next Level - the level of the tournament that teams
             will advance to from this tournament, may be left empty.
-            THis field is used in the awards report.</li>
+            This field is used in the awards report.</li>
     </ul>
 
     <form action="<c:url value='/admin/StoreTournamentData' />"
