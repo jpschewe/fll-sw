@@ -12,7 +12,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -30,9 +35,9 @@ import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Tournament;
+import fll.Utilities;
 import fll.db.Queries;
 import fll.scheduler.ScheduleWriter;
-import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
@@ -105,118 +110,6 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
       throw new RuntimeException(e);
     }
 
-  }
-
-  /**
-   * Create a page for the specified category.
-   */
-  private Element createCategoryPage(final Document document,
-                                     final Connection connection,
-                                     final String category,
-                                     final String room,
-                                     final FinalistSchedule schedule)
-      throws SQLException {
-    final Element page = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
-
-    final Element pageHeader = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
-    page.appendChild(pageHeader);
-    pageHeader.setAttribute("font-family", TITLE_FONT_FAMILY);
-    pageHeader.setAttribute("font-size", TITLE_FONT_SIZE);
-    pageHeader.setAttribute("font-weight", TITLE_FONT_WEIGHT);
-
-    final Element headerBlock1 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    pageHeader.appendChild(headerBlock1);
-    headerBlock1.appendChild(document.createTextNode(String.format("Finalist schedule for %s", category)));
-
-    if (null != room
-        && !"".equals(room)) {
-      final Element headerBlock2 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-      pageHeader.appendChild(headerBlock2);
-      headerBlock2.appendChild(document.createTextNode(String.format("Room: %s", room)));
-    }
-
-    final Element schedTable = FOPUtils.createBasicTable(document);
-    page.appendChild(schedTable);
-
-    schedTable.appendChild(FOPUtils.createTableColumn(document, 125));
-    schedTable.appendChild(FOPUtils.createTableColumn(document, 125));
-    schedTable.appendChild(FOPUtils.createTableColumn(document, 375));
-    schedTable.appendChild(FOPUtils.createTableColumn(document, 375));
-
-    final Element schedTableHeader = FOPUtils.createTableHeader(document);
-    schedTable.appendChild(schedTableHeader);
-    schedTableHeader.setAttribute("font-family", HEADER_FONT_FAMILY);
-    schedTableHeader.setAttribute("font-size", HEADER_FONT_SIZE);
-    schedTableHeader.setAttribute("font-weight", HEADER_FONT_WEIGHT);
-
-    final Element schedTableHeaderRow = FOPUtils.createTableRow(document);
-    schedTableHeader.appendChild(schedTableHeaderRow);
-
-    Element cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Time");
-    schedTableHeaderRow.appendChild(cell);
-    FOPUtils.addBottomBorder(cell, ScheduleWriter.STANDARD_BORDER_WIDTH);
-    FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                        FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
-
-    cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, TournamentSchedule.TEAM_NUMBER_HEADER);
-    schedTableHeaderRow.appendChild(cell);
-    FOPUtils.addBottomBorder(cell, ScheduleWriter.STANDARD_BORDER_WIDTH);
-    FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                        FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
-
-    cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, TournamentSchedule.TEAM_NAME_HEADER);
-    schedTableHeaderRow.appendChild(cell);
-    FOPUtils.addBottomBorder(cell, ScheduleWriter.STANDARD_BORDER_WIDTH);
-    FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                        FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
-
-    cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, TournamentSchedule.ORGANIZATION_HEADER);
-    schedTableHeaderRow.appendChild(cell);
-    FOPUtils.addBottomBorder(cell, ScheduleWriter.STANDARD_BORDER_WIDTH);
-    FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                        FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
-
-    final Element schedTableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
-    schedTable.appendChild(schedTableBody);
-    schedTableBody.setAttribute("font-family", SCHEDULE_FONT_FAMILY);
-    schedTableBody.setAttribute("font-size", SCHEDULE_FONT_SIZE);
-
-    // foreach information output
-    for (final FinalistDBRow row : schedule.getScheduleForCategory(category)) {
-      final Element tableRow = FOPUtils.createTableRow(document);
-      schedTableBody.appendChild(tableRow);
-
-      // time, number, name, organization
-
-      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                      String.format("%d:%02d", row.getHour(), row.getMinute()));
-      tableRow.appendChild(cell);
-      FOPUtils.addBottomBorder(cell, ScheduleWriter.STANDARD_BORDER_WIDTH);
-      FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                          FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
-
-      final Team team = Team.getTeamFromDatabase(connection, row.getTeamNumber());
-      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, String.valueOf(team.getTeamNumber()));
-      tableRow.appendChild(cell);
-      FOPUtils.addBottomBorder(cell, ScheduleWriter.STANDARD_BORDER_WIDTH);
-      FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                          FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
-
-      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, team.getTeamName());
-      tableRow.appendChild(cell);
-      FOPUtils.addBottomBorder(cell, ScheduleWriter.STANDARD_BORDER_WIDTH);
-      FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                          FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
-
-      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, team.getOrganization());
-      tableRow.appendChild(cell);
-      FOPUtils.addBottomBorder(cell, ScheduleWriter.STANDARD_BORDER_WIDTH);
-      FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                          FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
-
-    }
-
-    return page;
   }
 
   private Element createHeader(final Document document,
@@ -296,6 +189,7 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
     final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
                                                                FOPUtils.STANDARD_MARGINS, 0.75, 0);
     layoutMasterSet.appendChild(pageMaster);
+    pageMaster.setAttribute("reference-orientation", "90");
 
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
@@ -306,14 +200,194 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    final Map<String, String> rooms = schedule.getRooms();
-    for (final String categoryTitle : schedule.getCategories()) {
-      final Element ele = createCategoryPage(document, connection, categoryTitle, rooms.get(categoryTitle), schedule);
-      documentBody.appendChild(ele);
-      ele.setAttribute("page-break-after", "always");
-    }
+    final Element mainTable = createMainTable(connection, document, schedule);
+    documentBody.appendChild(mainTable);
 
     return document;
   }
 
+  private Element createMainTable(final Connection connection,
+                                  final Document document,
+                                  final FinalistSchedule schedule) {
+
+    // convert to list to ensure we have a stable iteration order
+    final List<String> categories = new LinkedList<>(schedule.getCategories());
+    final Map<String, String> categoryToRoom = schedule.getRooms();
+
+    final Element mainTable = FOPUtils.createBasicTable(document);
+
+    mainTable.appendChild(FOPUtils.createTableColumn(document, 1));
+    categories.stream().forEach((ignored) -> {
+      mainTable.appendChild(FOPUtils.createTableColumn(document, 2));
+    });
+
+    final Element mainTableHeader = FOPUtils.createTableHeader(document);
+    mainTable.appendChild(mainTableHeader);
+    mainTableHeader.setAttribute("font-family", HEADER_FONT_FAMILY);
+    mainTableHeader.setAttribute("font-size", HEADER_FONT_SIZE);
+    mainTableHeader.setAttribute("font-weight", HEADER_FONT_WEIGHT);
+
+    final Element mainTableHeaderRow = FOPUtils.createTableRow(document);
+    mainTableHeader.appendChild(mainTableHeaderRow);
+
+    final Element timeCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Time");
+    mainTableHeaderRow.appendChild(timeCell);
+    FOPUtils.addBorders(timeCell, ScheduleWriter.STANDARD_BORDER_WIDTH);
+    FOPUtils.addPadding(timeCell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                        FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+
+    categories.stream().forEach((categoryTitle) -> {
+      final Element cell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+      mainTableHeaderRow.appendChild(cell);
+      FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH);
+      FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                          FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+
+      final Element catEle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      cell.appendChild(catEle);
+      catEle.appendChild(document.createTextNode(categoryTitle));
+
+      if (categoryToRoom.containsKey(categoryTitle)) {
+        final Element roomEle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        cell.appendChild(roomEle);
+
+        final String room = categoryToRoom.get(categoryTitle);
+        roomEle.appendChild(document.createTextNode(String.format("Room: %s", room)));
+      }
+
+    });
+
+    final Element mainTableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+    mainTable.appendChild(mainTableBody);
+    mainTableBody.setAttribute("font-family", SCHEDULE_FONT_FAMILY);
+    mainTableBody.setAttribute("font-size", SCHEDULE_FONT_SIZE);
+
+    final SortedMap<TimeSlot, Map<String, FinalistDBRow>> organized = organizeSchedule(schedule);
+    organized.forEach((timeSlot,
+                       timeData) -> {
+      final Element tableRow = FOPUtils.createTableRow(document);
+      mainTableBody.appendChild(tableRow);
+
+      final Element tCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, timeSlot.formattedString());
+      tableRow.appendChild(tCell);
+      FOPUtils.addBorders(tCell, ScheduleWriter.STANDARD_BORDER_WIDTH);
+      FOPUtils.addPadding(tCell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                          FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+
+      categories.stream().forEach((categoryTitle) -> {
+        final Element e = createTeamCell(connection, document, categoryTitle, timeData);
+        tableRow.appendChild(e);
+      });
+
+    });
+
+    return mainTable;
+  }
+
+  private Element createTeamCell(Connection connection,
+                                 Document document,
+                                 String categoryTitle,
+                                 Map<String, FinalistDBRow> timeData) {
+    final Element cell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+    cell.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_CENTER);
+
+    if (timeData.containsKey(categoryTitle)) {
+      final FinalistDBRow scheduleRow = timeData.get(categoryTitle);
+      try {
+        final Team team = Team.getTeamFromDatabase(connection, scheduleRow.getTeamNumber());
+
+        final Element numEle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        cell.appendChild(numEle);
+        numEle.appendChild(document.createTextNode(String.valueOf(team.getTeamNumber())));
+
+        final Element nameEle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        cell.appendChild(nameEle);
+        nameEle.appendChild(document.createTextNode(team.getTeamName()));
+
+        final Element orgEle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        cell.appendChild(orgEle);
+        orgEle.appendChild(document.createTextNode(team.getOrganization()));
+
+      } catch (final SQLException e) {
+        throw new FLLRuntimeException("Error getting information for team "
+            + scheduleRow.getTeamNumber(), e);
+      }
+    } else {
+      final Element e = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      cell.appendChild(e);
+      e.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE)));
+    }
+
+    FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH);
+    FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                        FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+
+    return cell;
+  }
+
+  /**
+   * Organize the data so that all time slots are together with a map of
+   * categories to data for the category at the time. The map is sorted by time.
+   */
+  private SortedMap<TimeSlot, Map<String, FinalistDBRow>> organizeSchedule(final FinalistSchedule schedule) {
+    final SortedMap<TimeSlot, Map<String, FinalistDBRow>> organized = new TreeMap<>();
+
+    schedule.getSchedule().forEach(row -> {
+      final TimeSlot rowTimeSlow = new TimeSlot(row.getHour(), row.getMinute());
+      final Map<String, FinalistDBRow> timeData = organized.computeIfAbsent(rowTimeSlow, k -> new HashMap<>());
+      timeData.put(row.getCategoryName(), row);
+    });
+
+    return organized;
+  }
+
+  private static final class TimeSlot implements Comparable<TimeSlot> {
+    TimeSlot(final int hour,
+             final int minute) {
+      this.hour = hour;
+      this.minute = minute;
+    }
+
+    private final int hour;
+
+    private final int minute;
+
+    @Override
+    public int hashCode() {
+      return hour
+          ^ minute;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (null == o) {
+        return false;
+      } else if (this == o) {
+        return true;
+      } else if (this.getClass().equals(o.getClass())) {
+        final TimeSlot other = (TimeSlot) o;
+        return this.hour == other.hour
+            && this.minute == other.minute;
+      } else {
+        return false;
+      }
+    }
+
+    /**
+     * @return hour and minute formatted for printing
+     */
+    public String formattedString() {
+      return String.format("%02d:%02d", this.hour, this.minute);
+    }
+
+    @Override
+    public int compareTo(final TimeSlot o) {
+      final int hourComparison = Integer.compare(this.hour, o.hour);
+      if (0 == hourComparison) {
+        return Integer.compare(this.minute, o.minute);
+      } else {
+        return hourComparison;
+      }
+    }
+  }
 }

@@ -48,10 +48,8 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
 
     final StringBuilder message = new StringBuilder();
 
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
       final int tournament = Queries.getCurrentTournament(connection);
 
