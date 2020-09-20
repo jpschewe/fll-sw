@@ -33,7 +33,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 24;
+  public static final int DATABASE_VERSION = 25;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -321,6 +321,8 @@ public final class GenerateDB {
       createAdvancingTeamsTable(connection, true);
 
       createAwardGroupOrder(connection, true);
+
+      createDelayedPerformanceTable(connection, true);
 
       // --------------- create views ---------------
 
@@ -1056,6 +1058,27 @@ public final class GenerateDB {
         sql.append(" ,CONSTRAINT award_group_order_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
       }
       sql.append(")");
+      stmt.executeUpdate(sql.toString());
+    }
+  }
+
+  /* package */ static void createDelayedPerformanceTable(final Connection connection,
+                                                          final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("DROP TABLE IF EXISTS delayed_performance");
+
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE delayed_performance (");
+      sql.append("  tournament_id INTEGER NOT NULL");
+      sql.append(" ,run_number INTEGER NOT NULL");
+      sql.append(" ,delayed_until TIMESTAMP NOT NULL");
+      if (createConstraints) {
+        sql.append(" ,CONSTRAINT performance_delay_pk PRIMARY KEY(tournament_id, run_number)");
+        sql.append(" ,CONSTRAINT performance_delay_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+      }
+      sql.append(")");
+
       stmt.executeUpdate(sql.toString());
     }
   }

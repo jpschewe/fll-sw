@@ -162,6 +162,12 @@
                 href="tiki-license.txt">Apache License</a>
         </li>
 
+        <li>
+            <a
+                href="https://www.jqueryscript.net/time-clock/Customizable-jQuery-Timepicker-Plugin-timepicker.html">jQuery
+                timepicker plugin</a> - MIT License
+        </li>
+
     </ul>
 
 

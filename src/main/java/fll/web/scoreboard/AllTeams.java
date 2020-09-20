@@ -21,8 +21,10 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
+import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
+import fll.db.DelayedPerformance;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
@@ -36,6 +38,7 @@ import fll.xml.ScoreType;
  * Support for allteams.jsp.
  */
 public final class AllTeams {
+
   private AllTeams() {
   }
 
@@ -61,12 +64,15 @@ public final class AllTeams {
             + "   AND verified_performance.TeamNumber = ?" //
             + "   AND verified_performance.Bye = False" //
             + "   AND (? OR verified_performance.RunNumber <= ?)" //
+            + "   AND verified_performance.RunNumber <= ?" //
             + " ORDER BY verified_performance.RunNumber")) {
 
-      final int tournamentId = Queries.getCurrentTournament(connection);
+      final Tournament tournament = Tournament.getCurrentTournament(connection);
+      final int tournamentId = tournament.getTournamentID();
       final int numSeedingRuns = TournamentParameters.getNumSeedingRounds(connection, tournamentId);
       final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, tournamentId);
       final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection, tournamentId);
+      final int maxRunNumberToDisplay = DelayedPerformance.getMaxRunNumberToDisplay(connection, tournament);
 
       final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
       final List<String> allAwardGroups = Queries.getAwardGroups(connection, tournamentId);
@@ -76,6 +82,7 @@ public final class AllTeams {
       prep.setInt(1, tournamentId);
       prep.setBoolean(3, !runningHeadToHead);
       prep.setInt(4, numSeedingRuns);
+      prep.setInt(5, maxRunNumberToDisplay);
 
       final List<TournamentTeam> teamsWithScores = new LinkedList<>();
       final Map<Integer, String> teamHeaderColor = new HashMap<>();
