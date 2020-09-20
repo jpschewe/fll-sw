@@ -1306,6 +1306,9 @@ public final class ImportDB {
     final Tournament destTournament = Tournament.findTournamentByName(destinationConnection, tournamentName);
     final int destTournamentID = destTournament.getTournamentID();
 
+    LOGGER.debug("Importing tournament {} sourceId: {} destId: {}", tournamentName, sourceTournamentID,
+                 destTournamentID);
+
     importTournamentData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     if (importPerformance) {
@@ -1357,9 +1360,7 @@ public final class ImportDB {
                                                final int sourceTournamentID,
                                                final int destTournamentID)
       throws SQLException {
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Importing delayed_performance");
-    }
+    LOGGER.debug("Importing delayed_performance");
 
     try (
         PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM delayed_performance WHERE tournament_id = ?")) {
@@ -1368,7 +1369,7 @@ public final class ImportDB {
     }
 
     try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT run_number, delayed_until "
-        + "FROM delayed_performance WHERE tournament_id=?");
+        + "FROM delayed_performance WHERE tournament_id = ?");
         PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO delayed_performance (tournament_id, run_number, delayed_until)"
             + "VALUES (?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
@@ -1377,6 +1378,8 @@ public final class ImportDB {
         while (sourceRS.next()) {
           final int runNumber = sourceRS.getInt(1);
           final Timestamp delayedUntil = sourceRS.getTimestamp(2);
+
+          LOGGER.trace("run {} delayedUntil {}", runNumber, delayedUntil);
 
           destPrep.setInt(2, runNumber);
           destPrep.setTimestamp(3, delayedUntil);
