@@ -25,8 +25,9 @@ import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.Tournament;
 import fll.Utilities;
-import fll.db.Queries;
+import fll.db.DelayedPerformance;
 import fll.db.TournamentParameters;
 import fll.flltools.displaySystem.list.SetArray;
 import fll.util.FLLInternalException;
@@ -181,11 +182,13 @@ public class Last8 extends BaseFLLServlet {
       throws SQLException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-      final int currentTournament = Queries.getCurrentTournament(connection);
-      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
-      final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, currentTournament);
+      final Tournament currentTournament = Tournament.getCurrentTournament(connection);
+      final int currentTournamentId = currentTournament.getTournamentID();
+      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournamentId);
+      final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, currentTournamentId);
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
       final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
+      final int maxRunNumberToDisplay = DelayedPerformance.getMaxRunNumberToDisplay(connection, currentTournament);
 
       try (PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamNumber"
           + ", Teams.Organization" //
@@ -200,11 +203,14 @@ public class Last8 extends BaseFLLServlet {
           + "  AND Teams.TeamNumber = TournamentTeams.TeamNumber" //
           + "  AND TournamentTeams.tournament = verified_performance.Tournament" //
           + "  AND verified_performance.Bye = False" //
-          + "  AND (? OR verified_performance.RunNumber <= ?)"
+          + "  AND (? OR verified_performance.RunNumber <= ?)" //
+          + "  AND verified_performance.RunNumber <= ?" //
           + " ORDER BY verified_performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 20")) {
-        prep.setInt(1, currentTournament);
+        prep.setInt(1, currentTournamentId);
         prep.setBoolean(2, !runningHeadToHead);
         prep.setInt(3, numSeedingRounds);
+        prep.setInt(4, maxRunNumberToDisplay);
+
         try (ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
             final int teamNumber = rs.getInt("TeamNumber");

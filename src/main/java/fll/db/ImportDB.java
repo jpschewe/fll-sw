@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -546,6 +547,11 @@ public final class ImportDB {
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 25) {
+      upgrade24To25(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
           + dbVersion);
@@ -838,6 +844,14 @@ public final class ImportDB {
     }
 
     setDBVersion(connection, 24);
+  }
+
+  private static void upgrade24To25(final Connection connection) throws SQLException {
+    LOGGER.trace("Upgrading database from 24 to 25");
+
+    GenerateDB.createDelayedPerformanceTable(connection, false);
+
+    setDBVersion(connection, 25);
   }
 
   /**
@@ -1292,6 +1306,9 @@ public final class ImportDB {
     final Tournament destTournament = Tournament.findTournamentByName(destinationConnection, tournamentName);
     final int destTournamentID = destTournament.getTournamentID();
 
+    LOGGER.debug("Importing tournament {} sourceId: {} destId: {}", tournamentName, sourceTournamentID,
+                 destTournamentID);
+
     importTournamentData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     if (importPerformance) {
@@ -1334,6 +1351,43 @@ public final class ImportDB {
 
     importPlayoffData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importPlayoffTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+
+    importDelayedPerformance(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+  }
+
+  private static void importDelayedPerformance(final Connection sourceConnection,
+                                               final Connection destinationConnection,
+                                               final int sourceTournamentID,
+                                               final int destTournamentID)
+      throws SQLException {
+    LOGGER.debug("Importing delayed_performance");
+
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM delayed_performance WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT run_number, delayed_until "
+        + "FROM delayed_performance WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO delayed_performance (tournament_id, run_number, delayed_until)"
+            + "VALUES (?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          final int runNumber = sourceRS.getInt(1);
+          final Timestamp delayedUntil = sourceRS.getTimestamp(2);
+
+          LOGGER.trace("run {} delayedUntil {}", runNumber, delayedUntil);
+
+          destPrep.setInt(2, runNumber);
+          destPrep.setTimestamp(3, delayedUntil);
+          destPrep.executeUpdate();
+        }
+      } // result set
+    } // prepared statements
+
   }
 
   private static void importTournamentData(final Connection sourceConnection,
