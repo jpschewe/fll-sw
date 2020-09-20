@@ -6,6 +6,7 @@
 
 package fll.db;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -189,7 +190,8 @@ public final class DelayedPerformance {
 
   }
 
-  private static final class SortByRunNumber implements Comparator<DelayedPerformance> {
+  private static final class SortByRunNumber implements Comparator<DelayedPerformance>, Serializable {
+
     public static final SortByRunNumber INSTANCE = new SortByRunNumber();
 
     @Override
