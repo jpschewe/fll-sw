@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# setup working directory for submodules
+
+debug() { ! "${log_debug-false}" || log "DEBUG: $*" >&2; }
+log() { printf '%s\n' "$*"; }
+warn() { log "WARNING: $*" >&2; }
+error() { log "ERROR: $*" >&2; }
+fatal() { error "$*"; exit 1; }
+try() { "$@" || fatal "'$@' failed"; }
+
+mydir=$(cd "$(dirname "$0")" && pwd -L) || fatal "Unable to determine script directory"
+
+# get git submodules
+# Run a second time if there is an error. This happens when a new submodule is added.
+try git submodule sync --recursive >/dev/null
+try git submodule update --init --recursive >/dev/null || git submodule update --init --recursive >/dev/null
+
+# make sure that submodules are always fetched
+try git config --local fetch.recurseSubmodules yes
+
+# show submodule changes
+try git config --local status.submodulesummary 1
+
+# show submodule log messages
+try git config --local diff.submodule log
+
+# push submodule changes
+try git config --local push.recurseSubmodules check
