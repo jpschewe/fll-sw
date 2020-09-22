@@ -11,6 +11,7 @@ Documentation on the database schema, API, workflows, etc. for the [current rele
   1. Get the source code from git
     * git clone git@github.com:jpschewe/fll-sw (read-only)
     * Or you can create a fork and then submit a pull request when you have changes to merge in
+  1. Setup submodules by executing `./setup`
   1. setup eclipse classpath with `./gradlew eclipseClasspath`
     * When library versions change, it's good to remove the .classpath file and then have gradle recreate it
   1. Build by executing `./gradlew classes`
