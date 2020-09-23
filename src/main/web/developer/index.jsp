@@ -37,18 +37,6 @@ fll.web.developer.DeveloperIndex.populateContext(pageContext);
         </li>
 
         <li>
-            <form id='import' action='importdb/ImportDBDump'
-                method='post' enctype='multipart/form-data'>
-
-                <p>Import data from a database dump into the current
-                    database.</p>
-                <input type='file' size='32' name='dbdump' />
-                <input type='submit' name='importdb'
-                    value='Import Database' />
-            </form>
-        </li>
-
-        <li>
 
             <form id='replace-descriptor'
                 action='ReplaceChallengeDescriptor' method='post'

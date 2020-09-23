@@ -93,29 +93,10 @@ fll.web.MainIndex.populateContext(request, application, pageContext);
         <li>
             <a href="report/index.jsp">Tournament reporting</a>
         </li>
-    </ul>
-
-
-    <h2>Server addresses</h2>
-    <p>These are needed for any computer connecting to the software.</p>
-    <ul>
-        <c:forEach items="${urls}" var="url">
-            <li>
-                <a href="${url }">${url }</a>
-            </li>
-        </c:forEach>
-    </ul>
-
-
-    <h2>Other useful pages</h2>
-    <ul>
-        <li>
-            <a href="DoLogout">Log out</a> Log a computer out so that
-            they need to enter the password again to change scores.
-        </li>
 
         <li>
-            <a href='scoreboard/index.jsp'>Score board</a>
+            <a href='challenge.xml'>Challenge Descriptor</a>. One can
+            use this to see the scoring and the tie breaker.
         </li>
 
         <li>
@@ -130,9 +111,48 @@ fll.web.MainIndex.populateContext(request, application, pageContext);
                     subjective sheet - ${category.title} (PDF)</a>
         </c:forEach>
 
+    </ul>
+
+
+    <h2>Server addresses</h2>
+    <p>These are needed for any computer connecting to the software.</p>
+    <ul>
+        <c:forEach items="${urls}" var="url">
+            <li>
+                <a href="${url }">${url }</a>
+            </li>
+        </c:forEach>
+    </ul>
+
+    <h2>State computer lead</h2>
+    <p>The following links are most useful for the lead for the
+        state/region/partner</p>
+
+    <ul>
+
         <li>
-            <a href='challenge.xml'>Challenge Descriptor</a>. One can
-            use this to see the scoring and the tie breaker.
+            <form id='import'
+                action="<c:url value='/developer/importdb/ImportDBDump'/>"
+                method='post' enctype='multipart/form-data'>
+
+                <p>Merge another database into the current database.</p>
+                <input type='file' size='32' name='dbdump' />
+                <input type='submit' name='importdb'
+                    value='Import Database' />
+            </form>
+        </li>
+
+    </ul>
+
+    <h2>Other useful pages</h2>
+    <ul>
+        <li>
+            <a href="DoLogout">Log out</a> Log a computer out so that
+            they need to enter the password again to change scores.
+        </li>
+
+        <li>
+            <a href='scoreboard/index.jsp'>Score board</a>
         </li>
 
         <li>
