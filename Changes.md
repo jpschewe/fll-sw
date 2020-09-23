@@ -1,3 +1,4 @@
+* #817 - Move database import to the top index
 * #850 - Add support for delaying the display of performance scores
 * #821 - Reformat the finalist team schedule to be similar to the grid used for scheduling
 * #737 - Validate that all goals of a subjective category have the same rubric range titles

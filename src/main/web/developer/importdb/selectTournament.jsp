@@ -63,9 +63,9 @@ fll.web.developer.importdb.SelectTournament.populateContext(session, pageContext
     </form>
 
     <p>
-        If you're don't want to import any of these tournaments you can
-        <a href="<c:url value='/developer/index.jsp'/>">return to
-            the developer index</a>.
+        If you don't want to import any of these tournaments you can <a
+            href="<c:url value='/index.jsp'/>">return to the main
+            index</a>.
     </p>
 
 
