@@ -107,54 +107,11 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
 
         <li>
-            Enter subjective scores. This can be done through the web
-            application for judges using electronic devices. For those
-            not using electronic devices the scores will be entered
-            through the Subjective Java application from the launcher.
-            <ul>
-                <li>
-                    Electronic devices visit <a target="_subjective"
-                        href="<c:url value='/subjective/Auth' />">subjective
-                        web application</a>.
-                </li>
-                <li>
-                    Java application use these links
-                    <ul>
-
-                        <li>
-                            <a
-                                href="<c:url value='/admin/subjective-data.fll' />">Download
-                                the data file for subjective score
-                                entry.</a> Download this file after each
-                            subjective score upload to lessen chance of
-                            data loss due to overwrite.
-                        </li>
-
-                        <li>
-                            <form name='uploadSubjective'
-                                target="_upload_subjective"
-                                ACTION='<c:url value="/admin/UploadSubjectiveData"/> '
-                                METHOD="POST"
-                                ENCTYPE="multipart/form-data">
-                                Upload the data file for subjective
-                                scores.
-
-                                <!-- file to upload -->
-                                <input type="file" size="32"
-                                    name="subjectiveFile" />
-
-                                <!-- subjective file upload button -->
-                                <input id='uploadSubjectiveFile'
-                                    type="submit" value="Upload" />
-
-                            </form>
-                        </li>
-
-                    </ul>
-                </li>
-            </ul>
+            Enter subjective scores. This is done through the <a
+                target="_subjective"
+                href="<c:url value='/subjective/Auth' />">subjective
+                web application</a>.
         </li>
-
 
 
         <li>
