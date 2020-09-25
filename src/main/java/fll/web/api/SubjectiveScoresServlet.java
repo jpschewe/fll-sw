@@ -47,7 +47,7 @@ import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 
 /**
- * Access to subjective scores.
+ * API access to subjective scores.
  * GET: {category, {judge, {teamNumber, SubjectiveScore}}}
  * POST: expects the data from GET and returns UploadResult
  */
