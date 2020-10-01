@@ -25,6 +25,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import fll.Utilities;
+import fll.util.FLLInternalException;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -232,7 +233,18 @@ public final class SubjectiveUtils {
         final String goalTitle = goalDescription.getAttribute("title");
         final String goalName = goalDescription.getAttribute("name");
         final Element masterSubscoreElement = getSubscoreElement(masterScore, goalName);
+        if (null == masterSubscoreElement) {
+          throw new FLLInternalException("Cannot find "
+              + goalName
+              + " in the set of scores of the master document");
+        }
+
         final Element compareSubscoreElement = getSubscoreElement(compareScore, goalName);
+        if (null == compareSubscoreElement) {
+          throw new FLLInternalException("Cannot find "
+              + goalName
+              + " in the set of scores of the compare document");
+        }
 
         if (fll.xml.ChallengeParser.isEnumeratedGoal(goalDescription)) {
           final String masterValueStr = XMLUtils.getStringAttributeValue(masterSubscoreElement, "value");
