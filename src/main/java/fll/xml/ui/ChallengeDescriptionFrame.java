@@ -60,7 +60,6 @@ import fll.xml.ChallengeParser;
 import fll.xml.ChallengeXMLException;
 import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.util.BasicFileFilter;
-import net.mtu.eggplant.util.gui.GraphicsUtils;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -118,7 +117,7 @@ public class ChallengeDescriptionFrame extends JFrame {
         }
       });
 
-      GraphicsUtils.centerWindow(editor);
+      editor.setLocationRelativeTo(null);
       editor.setVisible(true);
     } catch (final Throwable e) {
       JOptionPane.showMessageDialog(null, "Unexpected error: "
@@ -204,8 +203,8 @@ public class ChallengeDescriptionFrame extends JFrame {
 
   private final Action mOpenAction = new AbstractAction("Open...") {
     {
-      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Open16.gif"));
-      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Open24.gif"));
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Open16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Open24.gif"));
       putValue(SHORT_DESCRIPTION, "Open an existing challenge description");
       putValue(MNEMONIC_KEY, KeyEvent.VK_O);
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
@@ -228,8 +227,8 @@ public class ChallengeDescriptionFrame extends JFrame {
 
   private final Action mNewAction = new AbstractAction("New") {
     {
-      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/New16.gif"));
-      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/New24.gif"));
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/New16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/New24.gif"));
       putValue(SHORT_DESCRIPTION, "Create a new challenge description");
       putValue(MNEMONIC_KEY, KeyEvent.VK_N);
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
@@ -319,8 +318,8 @@ public class ChallengeDescriptionFrame extends JFrame {
 
   private final Action mExitAction = new AbstractAction("Exit") {
     {
-      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Stop16.gif"));
-      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Stop24.gif"));
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Stop16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Stop24.gif"));
       putValue(SHORT_DESCRIPTION, "Exit the application");
       putValue(MNEMONIC_KEY, KeyEvent.VK_Q);
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
@@ -342,8 +341,8 @@ public class ChallengeDescriptionFrame extends JFrame {
 
   private final Action mSaveAction = new AbstractAction("Save") {
     {
-      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Save16.gif"));
-      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Save24.gif"));
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Save16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Save24.gif"));
       putValue(SHORT_DESCRIPTION, "Save the challenge description file with the current name");
       putValue(MNEMONIC_KEY, KeyEvent.VK_S);
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
@@ -357,8 +356,8 @@ public class ChallengeDescriptionFrame extends JFrame {
 
   private final Action mSaveAsAction = new AbstractAction("Save As...") {
     {
-      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/SaveAs16.gif"));
-      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/SaveAs24.gif"));
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/SaveAs16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/SaveAs24.gif"));
       putValue(SHORT_DESCRIPTION, "Save the challenge description file with a new name");
       putValue(MNEMONIC_KEY, KeyEvent.VK_A);
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK

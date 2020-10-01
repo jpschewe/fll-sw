@@ -12,6 +12,7 @@ import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Reader;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -41,6 +42,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import javax.sql.DataSource;
+import javax.swing.ImageIcon;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hsqldb.jdbc.JDBCDataSource;
@@ -858,6 +860,32 @@ public final class Utilities {
   public static final class ListOfStringTypeInformation extends TypeReference<List<String>> {
     /** single instance. */
     public static final ListOfStringTypeInformation INSTANCE = new ListOfStringTypeInformation();
+  }
+
+  /**
+   * Create an icon from the resource at path. This uses the
+   * {@link Thread#getContextClassLoader()} if one exists. If not the classloader
+   * of this class will be used to find the reference. If that is null, use the
+   * system classloader.
+   * 
+   * @param path the path to load the icon from
+   * @return the icon or null if the resource is not found
+   */
+  public static @Nullable ImageIcon getIcon(final String path) {
+    ClassLoader cl = Thread.currentThread().getContextClassLoader();
+    if (null == cl) {
+      cl = Utilities.class.getClassLoader();
+    }
+    if (null == cl) {
+      cl = ClassLoader.getSystemClassLoader();
+    }
+
+    final URL url = cl.getResource(path);
+    if (null == url) {
+      return null;
+    } else {
+      return new ImageIcon(url);
+    }
   }
 
 }

@@ -15,6 +15,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Objects;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -32,10 +33,10 @@ import fll.JudgeInformation;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
-import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
+ * Sccess judges information.
  * GET: {judges}
  * POST: expects the data from GET and returns UploadResult
  */
@@ -46,7 +47,8 @@ public class JudgesServlet extends HttpServlet {
 
   @Override
   protected final void doGet(final HttpServletRequest request,
-                             final HttpServletResponse response) throws IOException, ServletException {
+                             final HttpServletResponse response)
+      throws IOException, ServletException {
     final ServletContext application = getServletContext();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -75,7 +77,8 @@ public class JudgesServlet extends HttpServlet {
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon categories")
   @Override
   protected final void doPost(final HttpServletRequest request,
-                              final HttpServletResponse response) throws IOException, ServletException {
+                              final HttpServletResponse response)
+      throws IOException, ServletException {
     final ObjectMapper jsonMapper = Utilities.createJsonMapper();
     response.reset();
     response.setContentType("application/json");
@@ -110,11 +113,10 @@ public class JudgesServlet extends HttpServlet {
       insertJudge.setInt(3, currentTournament);
 
       for (final JudgeInformation judge : judges) {
-
         if (null != judge) {
           JudgeInformation found = null;
           for (final JudgeInformation cjudge : currentJudges) {
-            if (ComparisonUtils.safeEquals(cjudge, judge)) {
+            if (Objects.equals(cjudge, judge)) {
               found = cjudge;
             }
           }

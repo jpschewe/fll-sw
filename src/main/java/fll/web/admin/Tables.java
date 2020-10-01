@@ -21,10 +21,11 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
-import net.mtu.eggplant.util.Pair;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -215,7 +216,7 @@ public final class Tables {
    */
   public static void replaceTablesForTournament(final Connection connection,
                                                 final int tournamentId,
-                                                final List<Pair<String, String>> tables)
+                                                final List<ImmutablePair<String, String>> tables)
       throws SQLException {
     PreparedStatement deleteNames = null;
     PreparedStatement deleteInfo = null;
@@ -232,10 +233,10 @@ public final class Tables {
       insert = connection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) VALUES(?, ?, ?, ?)");
       insert.setInt(1, tournamentId);
       int pairId = 0;
-      for (final Pair<String, String> tableInfo : tables) {
+      for (final ImmutablePair<String, String> tableInfo : tables) {
         insert.setInt(2, pairId);
-        insert.setString(3, tableInfo.getOne());
-        insert.setString(4, tableInfo.getTwo());
+        insert.setString(3, tableInfo.getLeft());
+        insert.setString(4, tableInfo.getRight());
         insert.executeUpdate();
 
         ++pairId;
@@ -261,7 +262,7 @@ public final class Tables {
                                    final Connection connection,
                                    final int tournament)
       throws SQLException, IOException {
-    final List<Pair<String, String>> tables = new LinkedList<>();
+    final List<ImmutablePair<String, String>> tables = new LinkedList<>();
 
     int row = 0;
     String sideA = request.getParameter("SideA"
@@ -276,7 +277,7 @@ public final class Tables {
         // Don't put blank entries in the database
         if (!(sideA.trim().equals("")
             && sideB.trim().equals(""))) {
-          tables.add(new Pair<>(sideA, sideB));
+          tables.add(ImmutablePair.of(sideA, sideB));
         }
       }
 

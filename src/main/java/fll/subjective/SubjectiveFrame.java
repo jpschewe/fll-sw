@@ -88,7 +88,6 @@ import fll.xml.ChallengeParser;
 import fll.xml.EnumeratedValue;
 import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.util.BasicFileFilter;
-import net.mtu.eggplant.util.gui.GraphicsUtils;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -132,7 +131,7 @@ public final class SubjectiveFrame extends JFrame {
           System.exit(0);
         }
       });
-      GraphicsUtils.centerWindow(frame);
+      frame.setLocationRelativeTo(null);
       frame.setVisible(true);
       frame.promptForFile();
 

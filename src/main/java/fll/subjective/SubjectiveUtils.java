@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -27,7 +28,6 @@ import fll.Utilities;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
-import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -223,7 +223,7 @@ public final class SubjectiveUtils {
 
       final Boolean masterNoShow = XMLUtils.getBooleanAttributeValue(masterScore, "NoShow");
       final Boolean compareNoShow = XMLUtils.getBooleanAttributeValue(masterScore, "NoShow");
-      if (!ComparisonUtils.safeEquals(masterNoShow, compareNoShow)) {
+      if (!Objects.equals(masterNoShow, compareNoShow)) {
         diffs.add(new BooleanSubjectiveScoreDifference(categoryTitle, "NoShow", teamNumber, judge, masterNoShow,
                                                        compareNoShow));
       }
@@ -237,14 +237,14 @@ public final class SubjectiveUtils {
         if (fll.xml.ChallengeParser.isEnumeratedGoal(goalDescription)) {
           final String masterValueStr = XMLUtils.getStringAttributeValue(masterSubscoreElement, "value");
           final String compareValueStr = XMLUtils.getStringAttributeValue(compareSubscoreElement, "value");
-          if (!ComparisonUtils.safeEquals(masterValueStr, compareValueStr)) {
+          if (!Objects.equals(masterValueStr, compareValueStr)) {
             diffs.add(new StringSubjectiveScoreDifference(categoryTitle, goalTitle, teamNumber, judge, masterValueStr,
                                                           compareValueStr));
           }
         } else {
           final Double masterValue = XMLUtils.getDoubleAttributeValue(masterSubscoreElement, "value");
           final Double compareValue = XMLUtils.getDoubleAttributeValue(compareSubscoreElement, "value");
-          if (!ComparisonUtils.safeEquals(masterValue, compareValue)) {
+          if (!Objects.equals(masterValue, compareValue)) {
             diffs.add(new DoubleSubjectiveScoreDifference(categoryTitle, goalTitle, teamNumber, judge, masterValue,
                                                           compareValue));
           }
