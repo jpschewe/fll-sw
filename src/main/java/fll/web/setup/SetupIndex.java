@@ -23,11 +23,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
+
 import fll.Utilities;
 import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
-import net.mtu.eggplant.util.ComparisonUtils;
 
 /**
  * Utilities for /setup/index.jsp.
@@ -144,9 +145,9 @@ public final class SetupIndex {
         final String oneRevision = getRevision();
         final String twoRevision = other.getRevision();
 
-        final int titleCompare = ComparisonUtils.compareStrings(oneTitle, twoTitle);
+        final int titleCompare = StringUtils.compare(oneTitle, twoTitle);
         if (0 == titleCompare) {
-          return ComparisonUtils.compareStrings(oneRevision, twoRevision);
+          return StringUtils.compare(oneRevision, twoRevision);
         } else {
           return titleCompare;
         }

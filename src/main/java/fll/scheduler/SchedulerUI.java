@@ -97,7 +97,6 @@ import fll.xml.ChallengeParser;
 import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.util.BasicFileFilter;
-import net.mtu.eggplant.util.gui.GraphicsUtils;
 
 /**
  * UI for the scheduler.
@@ -146,8 +145,7 @@ public class SchedulerUI extends JFrame {
         }
       });
 
-      GraphicsUtils.centerWindow(frame);
-
+      frame.setLocationRelativeTo(null);
       frame.setVisible(true);
     } catch (final Exception e) {
       LOGGER.fatal("Unexpected error", e);
@@ -319,8 +317,8 @@ public class SchedulerUI extends JFrame {
 
   private final Action mSaveScheduleDescriptionAction = new AbstractAction("Save Schedule Description") {
     {
-      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Save16.gif"));
-      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Save24.gif"));
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Save16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Save24.gif"));
       putValue(SHORT_DESCRIPTION, "Save the schedule description file");
       putValue(MNEMONIC_KEY, KeyEvent.VK_S);
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
@@ -334,8 +332,8 @@ public class SchedulerUI extends JFrame {
 
   private final Action mNewScheduleDescriptionAction = new AbstractAction("New Schedule Description") {
     {
-      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/New16.gif"));
-      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/New24.gif"));
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/New16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/New24.gif"));
       putValue(SHORT_DESCRIPTION, "Createa a new schedule description file");
       putValue(MNEMONIC_KEY, KeyEvent.VK_N);
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
@@ -514,8 +512,8 @@ public class SchedulerUI extends JFrame {
 
   private final Action mRunSchedulerAction = new AbstractAction("Run Scheduler") {
     {
-      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/TipOfTheDay16.gif"));
-      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/TipOfTheDay24.gif"));
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/TipOfTheDay16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/TipOfTheDay24.gif"));
       putValue(SHORT_DESCRIPTION, "Run the scheduler on the current description");
       // putValue(MNEMONIC_KEY, KeyEvent.VK_S);
     }
@@ -528,8 +526,8 @@ public class SchedulerUI extends JFrame {
 
   private final Action mOpenScheduleDescriptionAction = new AbstractAction("Open Schedule Description") {
     {
-      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Open16.gif"));
-      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Open24.gif"));
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Open16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Open24.gif"));
       putValue(SHORT_DESCRIPTION, "Open the schedule description file");
       // putValue(MNEMONIC_KEY, KeyEvent.VK_S);
     }
@@ -674,8 +672,8 @@ public class SchedulerUI extends JFrame {
 
   private final Action mReloadFileAction = new AbstractAction("Reload Schedule") {
     {
-      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Refresh16.gif"));
-      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Refresh24.gif"));
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Refresh16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Refresh24.gif"));
       putValue(SHORT_DESCRIPTION, "Reload the file and check for violations");
       // putValue(MNEMONIC_KEY, KeyEvent.VK_X);
     }
@@ -738,8 +736,8 @@ public class SchedulerUI extends JFrame {
 
   private final Action mPreferencesAction = new AbstractAction("Preferences") {
     {
-      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Preferences16.gif"));
-      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Preferences24.gif"));
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Preferences16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Preferences24.gif"));
       putValue(SHORT_DESCRIPTION, "Set scheduling preferences");
       // putValue(MNEMONIC_KEY, KeyEvent.VK_X);
     }
@@ -752,8 +750,8 @@ public class SchedulerUI extends JFrame {
 
   private final Action mExitAction = new AbstractAction("Exit") {
     {
-      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Stop16.gif"));
-      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Stop24.gif"));
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Stop16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Stop24.gif"));
       putValue(SHORT_DESCRIPTION, "Exit the application");
       putValue(MNEMONIC_KEY, KeyEvent.VK_X);
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
@@ -767,8 +765,8 @@ public class SchedulerUI extends JFrame {
 
   private final Action mDisplayGeneralScheduleAction = new AbstractAction("General Schedule") {
     {
-      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/History16.gif"));
-      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/History24.gif"));
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/History16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/History24.gif"));
       putValue(SHORT_DESCRIPTION, "Display the general schedule");
       // putValue(MNEMONIC_KEY, KeyEvent.VK_X);
     }
@@ -782,8 +780,8 @@ public class SchedulerUI extends JFrame {
 
   private final Action mWriteSchedulesAction = new AbstractAction("Write Detailed Schedules") {
     {
-      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Export16.gif"));
-      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Export24.gif"));
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Export16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Export24.gif"));
       putValue(SHORT_DESCRIPTION, "Write out the detailed schedules as a PDF");
       // putValue(MNEMONIC_KEY, KeyEvent.VK_X);
     }
@@ -1029,8 +1027,8 @@ public class SchedulerUI extends JFrame {
 
   private final Action mOpenScheduleAction = new AbstractAction("Open Schedule") {
     {
-      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Open16.gif"));
-      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Open24.gif"));
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Open16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Open24.gif"));
       putValue(SHORT_DESCRIPTION, "Open a schedule file");
       putValue(MNEMONIC_KEY, KeyEvent.VK_O);
     }

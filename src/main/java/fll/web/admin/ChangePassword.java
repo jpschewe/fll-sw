@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Objects;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -27,7 +28,6 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.CookieUtils;
 import fll.web.SessionAttributes;
-import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -74,7 +74,7 @@ public class ChangePassword extends BaseFLLServlet {
       final String passwordHash = Queries.getHashedPassword(connection, user);
       final String oldPassword = request.getParameter("old_password");
       final String hashedOldPass = DigestUtils.md5Hex(oldPassword);
-      if (!ComparisonUtils.safeEquals(passwordHash, hashedOldPass)) {
+      if (!Objects.equals(passwordHash, hashedOldPass)) {
         SessionAttributes.appendToMessage(session, "<p class='error'>Old password is incorrect</p>");
         response.sendRedirect(response.encodeRedirectURL("changePassword.jsp"));
         return;
@@ -82,7 +82,7 @@ public class ChangePassword extends BaseFLLServlet {
 
       final String newPassword = request.getParameter("pass");
       final String newPasswordCheck = request.getParameter("pass_check");
-      if (!ComparisonUtils.safeEquals(newPassword, newPasswordCheck)) {
+      if (!Objects.equals(newPassword, newPasswordCheck)) {
         SessionAttributes.appendToMessage(session, "<p class='error'>New passwords don't match</p>");
         response.sendRedirect(response.encodeRedirectURL("changePassword.jsp"));
         return;
