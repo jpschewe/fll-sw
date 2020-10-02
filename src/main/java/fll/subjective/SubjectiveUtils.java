@@ -22,8 +22,6 @@ import java.util.zip.ZipFile;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import fll.Utilities;
@@ -158,10 +156,6 @@ public final class SubjectiveUtils {
 
     final Collection<SubjectiveScoreDifference> diffs = new LinkedList<SubjectiveScoreDifference>();
     for (final Element masterScoreCategory : new NodelistElementCollectionAdapter(masterScoresElement.getChildNodes())) {
-      System.out.println("Master score category element name: "
-          + masterScoreCategory.getLocalName()
-          + " category name: "
-          + masterScoreCategory.getAttribute("name"));
       compareScoreCategory(challenge, masterScoreCategory, compareScoresElement, diffs);
     }
     return diffs;
@@ -190,11 +184,7 @@ public final class SubjectiveUtils {
       throw new RuntimeException("Score documents have different number of score elements");
     }
     for (final Element masterScore : masterScores) {
-      System.out.println("Master score - team: "
-          + masterScore.getAttribute("teamNumber"));
       final Element compareScore = findCorrespondingScoreElement(masterScore, compareScores);
-      System.out.println("Compare score - team: "
-          + compareScore.getAttribute("teamNumber"));
       diffScores(goals, diffs, category, masterScore, compareScore);
     }
   }
@@ -308,15 +298,8 @@ public final class SubjectiveUtils {
    */
   public static @Nullable Element getSubscoreElement(final Element scoreElement,
                                                      final String goalName) {
-    final NodeList nlist = scoreElement.getElementsByTagName(DownloadSubjectiveData.SUBSCORE_NODE_NAME);
-    for (int i = 0; i < nlist.getLength(); ++i) {
-      final Node n = nlist.item(i);
-      LOGGER.info(n.getLocalName());
-    }
     for (final Element subEle : new NodelistElementCollectionAdapter(scoreElement.getElementsByTagName(DownloadSubjectiveData.SUBSCORE_NODE_NAME))) {
       final String name = subEle.getAttribute("name");
-      LOGGER.info("Checking goal with name: "
-          + name);
       if (goalName.equals(name)) {
         return subEle;
       }
