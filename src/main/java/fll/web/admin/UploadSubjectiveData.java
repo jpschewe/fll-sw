@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -54,7 +55,6 @@ import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
-import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -517,7 +517,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
   private static boolean doesJudgeExist(final Collection<JudgeInformation> currentJudges,
                                         final JudgeInformation judge) {
     for (final JudgeInformation cjudge : currentJudges) {
-      if (ComparisonUtils.safeEquals(cjudge, judge)) {
+      if (Objects.equals(cjudge, judge)) {
         return true;
       }
     }

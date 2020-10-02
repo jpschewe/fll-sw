@@ -15,7 +15,6 @@ import java.util.Comparator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.StringUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -81,7 +80,7 @@ public class Team implements Serializable {
   public static final Comparator<Team> TEAM_NAME_COMPARATOR = new Comparator<Team>() {
     public int compare(final Team one,
                        final Team two) {
-      return ComparisonUtils.compareStrings(one.getTeamName(), two.getTeamName());
+      return one.getTeamName().compareTo(two.getTeamName());
     }
   };
 

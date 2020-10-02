@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -50,7 +51,6 @@ import fll.xml.ScoreType;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.TiebreakerTest;
 import fll.xml.WinnerType;
-import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -2705,7 +2705,7 @@ public final class Queries {
         final String user = rs.getString(1);
         final String compare = rs.getString(2);
         for (final String magicKey : keys) {
-          if (ComparisonUtils.safeEquals(magicKey, compare)) {
+          if (Objects.equals(magicKey, compare)) {
             return user;
           }
         }

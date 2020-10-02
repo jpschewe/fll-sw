@@ -58,7 +58,6 @@ import fll.util.GuiExceptionHandler;
 import fll.xml.ui.ChallengeDescriptionFrame;
 import it.sauronsoftware.junique.AlreadyLockedException;
 import it.sauronsoftware.junique.JUnique;
-import net.mtu.eggplant.util.gui.GraphicsUtils;
 
 /**
  * Launcher for fll-sw applications.
@@ -203,7 +202,7 @@ public class Launcher extends JFrame {
 
         ensureSingleInstance(frame);
 
-        GraphicsUtils.centerWindow(frame);
+        frame.setLocationRelativeTo(null);
 
         frame.setVisible(true);
 
@@ -465,7 +464,7 @@ public class Launcher extends JFrame {
           }
         });
 
-        GraphicsUtils.centerWindow(scheduler);
+        scheduler.setLocationRelativeTo(null);
         scheduler.setVisible(true);
       } catch (final Exception e) {
         LOGGER.fatal("Unexpected error", e);
@@ -499,7 +498,7 @@ public class Launcher extends JFrame {
           }
         });
 
-        GraphicsUtils.centerWindow(subjective);
+        subjective.setLocationRelativeTo(null);
         subjective.setVisible(true);
         subjective.promptForFile();
       } catch (final Exception e) {
@@ -533,7 +532,7 @@ public class Launcher extends JFrame {
           }
         });
 
-        GraphicsUtils.centerWindow(challengeEditor);
+        challengeEditor.setLocationRelativeTo(null);
         challengeEditor.setVisible(true);
       } catch (final Exception e) {
         LOGGER.fatal("Unexpected error", e);

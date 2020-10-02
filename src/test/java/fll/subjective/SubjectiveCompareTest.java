@@ -69,7 +69,7 @@ public class SubjectiveCompareTest {
   @Test
   public void simpleTestWithNoDifferences() throws SAXException, IOException {
     final Document scoreDocument = loadDocument("master-score.xml");
-    final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(description.toXml(),
+    final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(description,
                                                                                               scoreDocument,
                                                                                               scoreDocument);
     assertNotNull(diffs);
@@ -86,7 +86,7 @@ public class SubjectiveCompareTest {
   public void simpleTestWithOneDifference() throws SAXException, IOException {
     final Document masterDocument = loadDocument("master-score.xml");
     final Document compareDocument = loadDocument("single-diff.xml");
-    final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(description.toXml(),
+    final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(description,
                                                                                               masterDocument,
                                                                                               compareDocument);
     assertNotNull(diffs);
