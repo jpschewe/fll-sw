@@ -57,7 +57,7 @@ public final class SubjectiveUtils {
    * @throws ZipException if there is an error in the subjective data file
    * @throws SAXException if there is an error parsing the subjective scores
    *           documents
-   * @see #compareScoreDocuments(Document, Document, Document)
+   * @see #compareScoreDocuments(ChallengeDescription, Document, Document)
    */
   public static @Nullable Collection<SubjectiveScoreDifference> compareSubjectiveFiles(final File masterFile,
                                                                                        final File compareFile)
