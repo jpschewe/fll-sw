@@ -133,8 +133,6 @@ public class SubjectiveScoresServlet extends HttpServlet {
         LOGGER.trace("Read data: "
             + debugWriter.toString());
       }
-      System.out.println("Read: "
-          + debugWriter.toString());
 
       final Reader reader = new StringReader(debugWriter.toString());
 
@@ -253,12 +251,6 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
                       // goal comment
                       final String goalComment = goalComments.get(goalName);
-                      System.out.println("Team "
-                          + teamNumber
-                          + " goal: "
-                          + goalName
-                          + " comment: "
-                          + goalComment);
                       if (null == goalComment) {
                         insertPrep.setNull(goalIndex
                             + columnIndexOfFirstGoal, Types.LONGVARCHAR);
