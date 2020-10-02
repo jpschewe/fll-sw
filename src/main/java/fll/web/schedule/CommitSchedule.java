@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
 import fll.scheduler.TeamScheduleInfo;
@@ -32,7 +34,6 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
 import fll.web.admin.Tables;
-import net.mtu.eggplant.util.Pair;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -73,9 +74,9 @@ public class CommitSchedule extends BaseFLLServlet {
       CategoryColumnMapping.store(connection, tournamentID, categoryColumnMappings);
 
       // store table names
-      final List<Pair<String, String>> tables = new LinkedList<>();
+      final List<ImmutablePair<String, String>> tables = new LinkedList<>();
       for (final String color : schedule.getTableColors()) {
-        tables.add(new Pair<>(color
+        tables.add(ImmutablePair.of(color
             + " 1", color
                 + " 2"));
       }

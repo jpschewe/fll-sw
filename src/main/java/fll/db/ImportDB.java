@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -59,7 +60,6 @@ import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
-import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -2187,11 +2187,11 @@ public final class ImportDB {
         destRS = destPrep.executeQuery();
         if (destRS.next()) {
           final String destName = destRS.getString(1);
-          if (!ComparisonUtils.safeEquals(destName, sourceName)) {
+          if (!Objects.equals(destName, sourceName)) {
             differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.NAME, sourceName, destName));
           }
           final String destOrganization = destRS.getString(2);
-          if (!ComparisonUtils.safeEquals(destOrganization, sourceOrganization)) {
+          if (!Objects.equals(destOrganization, sourceOrganization)) {
             differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.ORGANIZATION, sourceOrganization,
                                                        destOrganization));
           }
