@@ -27,7 +27,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import fll.Utilities;
-import fll.util.FLLInternalException;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
