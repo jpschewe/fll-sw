@@ -17,6 +17,35 @@ pipeline {
       }
     }
 
+    stage('Build Checker') {
+        steps {
+            // setup local checker repository
+            dir("checker") {
+                checkout changelog: false, 
+                    poll: false, 
+                    scm: [$class: 'GitSCM', 
+                        branches: [[name: 'refs/heads/master']], 
+                        doGenerateSubmoduleConfigurations: false, 
+                        extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'checker-framework']], 
+                        submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/typetools/checker-framework.git']]]
+            
+                // my copy of the annotated jdk
+                checkout changelog: false, 
+                    poll: false, 
+                    scm: [$class: 'GitSCM', 
+                        branches: [[name: 'refs/heads/jps-dev']], 
+                        doGenerateSubmoduleConfigurations: false, 
+                        extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'jdk']], 
+                        submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/jpschewe/checker-typetools-jdk']]]
+                                                                       
+                dir("checker-framework") {
+                    callGradle("assemble")
+                } // dir checker-framework
+
+            } // dir checker
+        } // steps
+    } // stage
+
     stage('Duplicate Code Analysis') {
       steps { 
         fllSwGradle('cpdCheck')
