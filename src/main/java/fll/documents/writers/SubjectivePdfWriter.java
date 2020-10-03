@@ -560,9 +560,6 @@ public class SubjectivePdfWriter {
 
     try {
       final Document document = writer.createDocumentForSchedule(schedule, schedulerColumn, pointSize, commentHeight);
-      try (java.io.Writer w = Files.newBufferedWriter(Paths.get("test-color.fo"))) {
-        XMLUtils.writeXML(document, w);
-      }
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
       FOPUtils.renderPdf(fopFactory, document, stream);
     } catch (FOPException | TransformerException e) {
