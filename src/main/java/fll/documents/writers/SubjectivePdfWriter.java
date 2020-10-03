@@ -995,6 +995,7 @@ public class SubjectivePdfWriter {
   }
 
   private static final float LIGHTEN_PERCENTAGE = 5;
+
   private static final float DARKEN_PERCENTAGE = 15;
 
   private Element createRubricHeaderRow(final Document document,
@@ -1003,6 +1004,7 @@ public class SubjectivePdfWriter {
     tableBody.appendChild(headerRow);
     headerRow.setAttribute("font-size", "10pt");
 
+    int index = 1;
     Color columnColor = new HSLColor(sheetColor).adjustTone(LIGHTEN_PERCENTAGE);
     Element lastCell = null;
     boolean first = true;
@@ -1028,6 +1030,12 @@ public class SubjectivePdfWriter {
         descriptionBlock.appendChild(document.createTextNode(shortDescription));
       }
 
+      final Element numberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      blockContainer.appendChild(numberBlock);
+      numberBlock.appendChild(document.createTextNode(String.valueOf(index)));
+      numberBlock.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_CENTER);
+      numberBlock.setAttribute("font-weight", "bold");
+
       FOPUtils.addLeftBorder(cell, 1);
       FOPUtils.addTopBorder(cell, 1);
       if (first) {
@@ -1037,6 +1045,8 @@ public class SubjectivePdfWriter {
 
       lastCell = cell;
       columnColor = new HSLColor(columnColor).adjustShade(DARKEN_PERCENTAGE);
+      index = index
+          + 1;
     }
     if (null != lastCell) {
       lastCell.setAttribute(String.format("%s:border-before-end-radius", FOPUtils.XSL_FOX_PREFIX), CORNER_RADIUS);
