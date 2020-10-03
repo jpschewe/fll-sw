@@ -58,12 +58,6 @@ public class SubjectivePdfWriter {
 
   private final String tournamentName;
 
-  private static final Color ROW_BLUE = new Color(0xB4, 0xCD, 0xED);
-
-  private static final Color ROW_YELLOW = new Color(0xFF, 0xFF, 0xC8);
-
-  private static final Color ROW_RED = new Color(0xF7, 0x98, 0x85);
-
   private final Color sheetColor;
 
   private final SubjectiveScoreCategory scoreCategory;
@@ -169,15 +163,15 @@ public class SubjectivePdfWriter {
     // to blue.
     switch (scoreCategory.getName()) {
     case SubjectiveConstants.CORE_VALUES_NAME:
-      sheetColor = ROW_RED;
+      sheetColor = new Color(0xf9, 0xd0, 0xc9);
       break;
     case SubjectiveConstants.PROJECT_NAME:
-      sheetColor = ROW_YELLOW;
+      sheetColor = new Color(0xd2, 0xda, 0xef);
       break;
     case SubjectiveConstants.ROBOT_DESIGN_NAME:
     case SubjectiveConstants.PROGRAMMING_NAME:
     default:
-      sheetColor = ROW_BLUE;
+      sheetColor = new Color(0xd6, 0xea, 0xd7);
       break;
     }
 
