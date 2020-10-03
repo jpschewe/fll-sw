@@ -7,6 +7,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.time.LocalTime;
 import java.util.Base64;
@@ -39,6 +41,7 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
 import fll.util.FOPUtils.Margins;
+import fll.util.HSLColor;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.Goal;
@@ -557,6 +560,9 @@ public class SubjectivePdfWriter {
 
     try {
       final Document document = writer.createDocumentForSchedule(schedule, schedulerColumn, pointSize, commentHeight);
+      try (java.io.Writer w = Files.newBufferedWriter(Paths.get("test-color.fo"))) {
+        XMLUtils.writeXML(document, w);
+      }
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
       FOPUtils.renderPdf(fopFactory, document, stream);
     } catch (FOPException | TransformerException e) {
@@ -988,19 +994,27 @@ public class SubjectivePdfWriter {
     return rangeCell;
   }
 
+  private static final float LIGHTEN_PERCENTAGE = 5;
+  private static final float DARKEN_PERCENTAGE = 15;
+
   private Element createRubricHeaderRow(final Document document,
                                         final Element tableBody) {
     final Element headerRow = FOPUtils.createTableRow(document);
     tableBody.appendChild(headerRow);
     headerRow.setAttribute("font-size", "10pt");
 
+    Color columnColor = new HSLColor(sheetColor).adjustTone(LIGHTEN_PERCENTAGE);
     Element lastCell = null;
     boolean first = true;
     for (final RubricMetaData rubricMetaData : masterRubricRangeMetaData) {
+      final String columnColorStr = String.format("#%02x%02x%02x", columnColor.getRed(), columnColor.getGreen(),
+                                                  columnColor.getBlue());
+
       final Element cell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
       headerRow.appendChild(cell);
       final Element blockContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
       cell.appendChild(blockContainer);
+      cell.setAttribute("background-color", columnColorStr);
 
       final Element titleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
       blockContainer.appendChild(titleBlock);
@@ -1020,7 +1034,9 @@ public class SubjectivePdfWriter {
         cell.setAttribute(String.format("%s:border-before-start-radius", FOPUtils.XSL_FOX_PREFIX), CORNER_RADIUS);
         first = false;
       }
+
       lastCell = cell;
+      columnColor = new HSLColor(columnColor).adjustShade(DARKEN_PERCENTAGE);
     }
     if (null != lastCell) {
       lastCell.setAttribute(String.format("%s:border-before-end-radius", FOPUtils.XSL_FOX_PREFIX), CORNER_RADIUS);
