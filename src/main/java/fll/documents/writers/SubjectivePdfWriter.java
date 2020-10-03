@@ -467,9 +467,6 @@ public class SubjectivePdfWriter {
 
       try {
         final Document document = writer.createDocumentForSchedule(schedule, null, pointSize, commentHeight);
-        try (java.io.Writer w = java.nio.file.Files.newBufferedWriter(java.nio.file.Paths.get("subjective.fo"))) {
-          net.mtu.eggplant.xml.XMLUtils.writeXML(document, w);
-        }
 
         final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
