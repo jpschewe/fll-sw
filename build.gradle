@@ -208,7 +208,7 @@ dependencies {
     exclude(group: "xml-apis", module: "xml-apis")
   }
   
-  implementation(group: "org.checkerframework", name: "checker-qual", version: "3.6.0")
+  implementation(group: "org.checkerframework", name: "checker-qual", version: "3.7.0")
     
   implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.20")
   
@@ -764,3 +764,13 @@ checkerFramework {
     ]
 }
 
+def checker_dir = file("./checker/checker-framework")
+if (checker_dir.exists()) {
+    println("Using development version of checker in: " + checker_dir)
+    
+    dependencies {
+        compileOnly files(file(checker_dir.toPath().resolve("checker/dist/checker-qual.jar")))
+        testCompileOnly files(file(checker_dir.toPath().resolve("checker/dist/checker-qual.jar")))
+        checkerFramework files(file(checker_dir.toPath().resolve("checker/dist/checker.jar")))
+    }
+}
