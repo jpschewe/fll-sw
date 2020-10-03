@@ -156,6 +156,10 @@ public class Launcher extends JFrame {
     }
   }
 
+  /**
+   * 
+   * @param args see "--help" for arguemnts
+   */
   public static void main(final String[] args) {
     final Options options = buildOptions();
     // parse options
