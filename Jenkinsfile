@@ -48,29 +48,29 @@ pipeline {
 
     stage('Duplicate Code Analysis') {
       steps { 
-        fllSwGradle('cpdCheck')
+        callGradle('cpdCheck')
         recordIssues tool: cpd(pattern: 'build/reports/cpd/cpdCheck.xml')        
       }     
     }
 
     stage('Test compilation of JSPs') {
       steps { 
-        fllSwGradle('jspToJava')
+        callGradle('jspToJava')
       }     
     }
 
     stage('Count lines of code') {
       steps { 
-        fllSwGradle('sloccount')
+        callGradle('sloccount')
         sloccountPublish pattern: 'build/reports/sloccount/cloc.xml'
       }
     }
 
     stage('Checkstyle analysis') {
       steps { 
-        fllSwGradle('checkstyleMain')
-        fllSwGradle('checkstyleTest')
-        fllSwGradle('checkstyleIntegrationTest')
+        callGradle('checkstyleMain')
+        callGradle('checkstyleTest')
+        callGradle('checkstyleIntegrationTest')
         recordIssues tool: checkStyle(pattern: 'build/reports/checkstyle/*.xml')
       }
     }
@@ -79,7 +79,7 @@ pipeline {
       steps {
         timeout(time: 3, unit: 'HOURS') {      
           // runs all of the test tasks
-          fllSwGradle('cobertura')
+          callGradle('cobertura')
           junit testResults: "build/test-results/*est/TEST-*.xml", keepLongStdio: true
           step $class: 'CoberturaPublisher', coberturaReportFile: 'build/reports/cobertura/coverage.xml'
         }                
@@ -88,9 +88,9 @@ pipeline {
 
     stage('SpotBugs analysis') {
       steps { 
-        fllSwGradle('spotbugsMain')
-        fllSwGradle('spotbugsTest')
-        fllSwGradle('spotbugsIntegrationTest')
+        callGradle('spotbugsMain')
+        callGradle('spotbugsTest')
+        callGradle('spotbugsIntegrationTest')
         recordIssues tool: spotBugs(pattern: 'build/reports/spotbugs/*.xml', useRankAsPriority: true), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
       }
     }
@@ -100,7 +100,7 @@ pipeline {
         throttle(['fll-sw']) { 
           timestamps {
             timeout(time: 3, unit: 'HOURS') {
-              fllSwGradle('distZip')
+              callGradle('distZip')
               stash name: 'build_data', includes: 'build/**', excludes: "build/tmp/**"
             }
           } // timestamps
@@ -114,7 +114,7 @@ pipeline {
           timestamps {
             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
               timeout(time: 3, unit: 'HOURS') {
-                fllSwGradle('windowsDistZip')                                        
+                callGradle('windowsDistZip')                                        
               }
             }
             stash name: 'windows_distribution', includes: 'build/distributions/*'
@@ -131,7 +131,7 @@ pipeline {
             unstash name: 'build_data'
             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
               timeout(time: 3, unit: 'HOURS') {
-                fllSwGradle('linuxDistTar')
+                callGradle('linuxDistTar')
               }
             }
             stash name: 'linux_distribution', includes: 'build/distributions/*'
@@ -147,7 +147,7 @@ pipeline {
             unstash name: 'build_data'
             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
               timeout(time: 3, unit: 'HOURS') {
-                fllSwGradle('macDistTar')
+                callGradle('macDistTar')
               }
             }
             stash name: 'mac_distribution', includes: 'build/distributions/*'
@@ -215,7 +215,7 @@ Find more details at: ${JENKINS_URL}
 
 } // pipeline
 
-def fllSwGradle(task) {
+def callGradle(task) {
   def args='--no-daemon -Dtest.ignoreFailures=true'
 
   if (isUnix()) {
