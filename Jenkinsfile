@@ -18,6 +18,7 @@ pipeline {
     }
 
     stage('Build Checker') {
+        agent { label "fll-sw_linux" }   
         steps {
             // setup local checker repository
             dir("checker") {
@@ -43,9 +44,16 @@ pipeline {
                 } // dir checker-framework
 
             } // dir checker
+            stash name: 'checker_build_data', includes: 'checker/checker-framework/checker/dist/**'           
         } // steps
     } // stage
-
+    
+    stage('Copy checker build to Windows') {
+        steps {
+            unstash name: 'checker_build_data'                      
+        }
+    }
+    
     stage('Duplicate Code Analysis') {
       steps { 
         callGradle('cpdCheck')
