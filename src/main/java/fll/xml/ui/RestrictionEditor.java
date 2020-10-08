@@ -57,6 +57,14 @@ public class RestrictionEditor extends PolynomialEditor {
     lowerBoundBox.add(new JLabel(" <= "));
     lowerBoundBox.add(Box.createHorizontalGlue());
 
+    lowerBound.addPropertyChangeListener("value", e -> {
+      final Number value = (Number) lowerBound.getValue();
+      if (null != value) {
+        final double newValue = value.doubleValue();
+        this.restriction.setLowerBound(newValue);
+      }
+    });
+
     final Box upperBoundBox = Box.createHorizontalBox();
     this.add(upperBoundBox);
     upperBoundBox.add(new JLabel(" <= "));
@@ -64,6 +72,14 @@ public class RestrictionEditor extends PolynomialEditor {
     upperBound.setValue(restriction.getUpperBound());
     upperBoundBox.add(upperBound);
     upperBoundBox.add(Box.createHorizontalGlue());
+
+    upperBound.addPropertyChangeListener("value", e -> {
+      final Number value = (Number) upperBound.getValue();
+      if (null != value) {
+        final double newValue = value.doubleValue();
+        this.restriction.setUpperBound(newValue);
+      }
+    });
 
     messageEditor = FormatterUtils.createDatabaseNameField();
     messageEditor.setValue(restriction.getMessage());
