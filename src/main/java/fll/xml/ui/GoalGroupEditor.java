@@ -202,7 +202,9 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
   /**
    * Force any pending edits to complete.
    */
+  @Override
   public void commitChanges() {
+    super.commitChanges();
     goalEditors.forEach(e -> e.commitChanges());
   }
 
