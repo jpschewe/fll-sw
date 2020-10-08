@@ -385,6 +385,9 @@
         <xsd:complexType>
 
             <xsd:sequence>
+                <xsd:element name="description"
+                    minOccurs="0" maxOccurs="1" type="xsd:string" />
+
                 <xsd:sequence maxOccurs="unbounded">
 
                     <xsd:sequence minOccurs="0"
@@ -396,9 +399,6 @@
                     </xsd:sequence>
                 </xsd:sequence>
             </xsd:sequence>
-
-            <xsd:attribute name="description"
-                type="xsd:string" use="optional" />
 
             <xsd:attribute name="title" type="xsd:string"
                 use="required" />
