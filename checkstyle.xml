@@ -23,6 +23,8 @@
     </module>
     <module name="JavadocVariable">
       <property name="scope" value="protected"/>
+      <property name="tokens" value="VARIABLE_DEF"/>
+      <property name="id" value="checkstyle:javadocvariable"/>
     </module>
     <module name="JavadocStyle">
       <property name="scope" value="protected"/>
