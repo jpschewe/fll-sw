@@ -28,6 +28,9 @@ import fll.web.DisplayWebSocket;
 import fll.web.SessionAttributes;
 import fll.web.playoff.H2HUpdateWebSocket;
 
+/**
+ * Handle changes to the remote control parameters.
+ */
 @WebServlet("/admin/RemoteControlPost")
 public class RemoteControlPost extends BaseFLLServlet {
 

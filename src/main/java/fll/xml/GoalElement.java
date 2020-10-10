@@ -97,6 +97,11 @@ public abstract class GoalElement implements Serializable, Evaluatable {
     firePropertyChange("description", old, v);
   }
 
+  /**
+   * @param property the property that changed
+   * @param oldValue the old value
+   * @param newValue the new value
+   */
   protected final void firePropertyChange(final String property,
                                           final @Nullable Object oldValue,
                                           final @Nullable Object newValue) {

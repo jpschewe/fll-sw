@@ -55,12 +55,20 @@ public class BracketData extends BracketInfo {
    * Data type that has a dbLine.
    */
   public abstract static class DbBracketDataType extends BracketDataType {
+    /**
+     * 
+     * @param dbLine {@link #getDBLine()}
+     */
     public DbBracketDataType(@JsonProperty("dbLine") final int dbLine) {
       this.dbLine = dbLine;
     }
 
     private final int dbLine;
 
+    /**
+     * 
+     * @return line in the database
+     */
     public int getDBLine() {
       return dbLine;
     }

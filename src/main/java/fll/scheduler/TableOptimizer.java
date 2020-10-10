@@ -445,7 +445,7 @@ public class TableOptimizer {
   }
 
   /**
-   * @param args
+   * @param args ignored
    */
   public static void main(final String[] args) {
     File schedfile = null;

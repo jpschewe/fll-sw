@@ -25,6 +25,10 @@ public final class Welcome {
 
   // private static final int MAX_NUM_LOGOS_PER_COLUMN = 6;
 
+  /**
+   * @param application used to read application variables
+   * @param out where to write the logo HTML code
+   */
   public static void outputLogos(final ServletContext application,
                                  final JspWriter out) {
     // All logos shall be located under sponsor_logos in the fll web folder.

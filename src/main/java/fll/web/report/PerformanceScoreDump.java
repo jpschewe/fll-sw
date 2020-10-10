@@ -20,8 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.apache.commons.io.IOUtils;
-
 import com.opencsv.CSVWriter;
 
 import fll.Utilities;
@@ -38,16 +36,14 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 @WebServlet("/report/PerformanceScoreDump")
 public class PerformanceScoreDump extends BaseFLLServlet {
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
-    CSVWriter csv = null;
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
       final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
@@ -58,16 +54,14 @@ public class PerformanceScoreDump extends BaseFLLServlet {
       response.setContentType("text/csv");
       response.setHeader("Content-Disposition", "filename=performance_scores.csv");
 
-      csv = new CSVWriter(response.getWriter());
+      try (CSVWriter csv = new CSVWriter(response.getWriter())) {
 
-      writeHeader(csv);
-      writeData(connection, tournamentID, performanceScoreType, csv);
+        writeHeader(csv);
+        writeData(connection, tournamentID, performanceScoreType, csv);
+      }
 
     } catch (final SQLException e) {
       throw new RuntimeException(e);
-    } finally {
-      IOUtils.closeQuietly(csv);
-      SQLFunctions.close(connection);
     }
   }
 

@@ -73,6 +73,7 @@ public class CSVCellReader extends CellFileReader {
     }
   }
 
+  @Override
   public void close() throws IOException {
     delegate.close();
   }

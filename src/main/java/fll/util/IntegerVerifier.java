@@ -22,6 +22,10 @@ public class IntegerVerifier extends InputVerifier {
 
   private final int maxValue;
 
+  /**
+   * @param minValue minimum accepted value
+   * @param maxValue maximum accepted value
+   */
   public IntegerVerifier(final int minValue,
                          final int maxValue) {
     this.minValue = minValue;

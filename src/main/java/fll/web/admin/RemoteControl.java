@@ -31,6 +31,10 @@ public final class RemoteControl {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  /**
+   * @param application read and write application variables
+   * @param pageContext write page variables
+   */
   public static void populateContext(final ServletContext application,
                                      final PageContext pageContext) {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);

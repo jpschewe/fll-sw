@@ -25,6 +25,10 @@ public final class SelectTournament {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  /**
+   * @param session session variables
+   * @param page page variables
+   */
   public static void populateContext(final HttpSession session,
                                      final PageContext page) {
 

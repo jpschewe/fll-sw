@@ -28,7 +28,6 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.CookieUtils;
 import fll.web.SessionAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Java code to handle changing of passwords.
@@ -36,14 +35,17 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 @WebServlet("/admin/ChangePassword")
 public class ChangePassword extends BaseFLLServlet {
 
+  /**
+   * @param request used to read parameters
+   * @param application get application variables
+   * @param pageContext set page variables
+   */
   public static void populateContext(final HttpServletRequest request,
                                      final ServletContext application,
                                      final PageContext pageContext) {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
       final String user = Queries.checkValidLogin(connection, loginKeys);
@@ -51,8 +53,6 @@ public class ChangePassword extends BaseFLLServlet {
 
     } catch (final SQLException e) {
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }
@@ -64,9 +64,7 @@ public class ChangePassword extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
       final String user = Queries.checkValidLogin(connection, loginKeys);
@@ -101,8 +99,6 @@ public class ChangePassword extends BaseFLLServlet {
 
     } catch (final SQLException e) {
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }

@@ -29,6 +29,8 @@ import fll.web.DisplayInfo;
  */
 @WebServlet("/ajax/DisplayQuery")
 public class DisplayQueryServlet extends BaseFLLServlet {
+  
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,

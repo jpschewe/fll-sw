@@ -5,7 +5,6 @@
  */
 package fll.web.admin;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
@@ -42,10 +40,14 @@ public final class GatherTeamData {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  /**
+   * @param request read parameters
+   * @param application read application variables
+   * @param page set page variables
+   */
   public static void populateContext(final HttpServletRequest request,
                                      final ServletContext application,
-                                     final PageContext page)
-      throws IOException, ServletException {
+                                     final PageContext page) {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Top of GatherTeamData.populateContext");
     }

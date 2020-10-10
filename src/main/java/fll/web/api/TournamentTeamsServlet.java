@@ -21,18 +21,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
-
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
-
 import fll.web.ApplicationAttributes;
 
+/**
+ * Access the current tournament teams.
+ */
 @WebServlet("/api/TournamentTeams/*")
 public class TournamentTeamsServlet extends HttpServlet {
 
@@ -40,13 +38,12 @@ public class TournamentTeamsServlet extends HttpServlet {
 
   @Override
   protected final void doGet(final HttpServletRequest request,
-                             final HttpServletResponse response) throws IOException, ServletException {
+                             final HttpServletResponse response)
+      throws IOException, ServletException {
     final ServletContext application = getServletContext();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final Map<Integer, TournamentTeam> teamMap = Queries.getTournamentTeams(connection);
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
@@ -82,8 +79,6 @@ public class TournamentTeamsServlet extends HttpServlet {
       jsonMapper.writeValue(writer, teams);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }

@@ -30,11 +30,15 @@ import fll.web.UploadProcessor;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 
+/**
+ * Replace the challenge description.
+ */
 @WebServlet("/developer/ReplaceChallengeDescriptor")
 public class ReplaceChallengeDescriptor extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,

@@ -347,6 +347,9 @@ public class TournamentSchedule implements Serializable {
    * @param sheetName the name of the worksheet the data is on
    * @param subjectiveHeaders the headers for the subjective columns
    * @throws ScheduleParseException if there is an error parsing the schedule
+   * @throws IOException if there is an error reading the stream
+   * @throws InvalidFormatException if there is an error parsing the stream
+   * @throws ParseException if there is an error parsing the data
    */
   public TournamentSchedule(final String name,
                             final InputStream stream,
@@ -364,6 +367,7 @@ public class TournamentSchedule implements Serializable {
    * @param subjectiveHeaders the headers for the subjective columns
    * @throws ScheduleParseException if there is an error parsing the schedule
    * @throws ParseException if there is an error parsing the file
+   * @throws IOExceptionif there is an error reading the file
    */
   public TournamentSchedule(final String name,
                             final File csvFile,
@@ -540,7 +544,7 @@ public class TournamentSchedule implements Serializable {
    * @param reader where to read the columns from
    * @param subjectiveHeaders the known subjective headers
    * @return the column information
-   * @throws IOException
+   * @throws IOException if there is an error reading the data
    * @throws RuntimeException if a header row cannot be found
    */
   public static ColumnInformation findColumns(final CellFileReader reader,
@@ -1873,7 +1877,7 @@ public class TournamentSchedule implements Serializable {
    * Write out the current schedule to a CSV file.
    *
    * @param outputFile where to write
-   * @throws IOException
+   * @throws IOException if there is an error writing to the file
    */
   public void writeToCSV(final File outputFile) throws IOException {
     try (Writer writer = new OutputStreamWriter(new FileOutputStream(outputFile), Utilities.DEFAULT_CHARSET)) {

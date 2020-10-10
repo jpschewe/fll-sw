@@ -64,6 +64,7 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
 
   private static final String VALUE_FONT_FAMILY = "Helvetica";
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,

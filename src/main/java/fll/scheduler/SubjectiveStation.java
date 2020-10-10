@@ -15,6 +15,11 @@ import java.time.Duration;
  * particular point in time.
  */
 public final class SubjectiveStation implements Serializable {
+
+  /**
+   * @param name {@link #getName()}
+   * @param durationInMinutes {@link #getDurationMinutes()}
+   */
   public SubjectiveStation(final String name,
                            final int durationInMinutes) {
     this.name = name;
@@ -46,6 +51,9 @@ public final class SubjectiveStation implements Serializable {
     return durationMinutes;
   }
 
+  /**
+   * @return {@link #getDurationMinutes()} as a {@link Duration} object
+   */
   public Duration getDuration() {
     return Duration.ofMinutes(durationMinutes);
   }

@@ -15,10 +15,6 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-
-
-
-
 /**
  * Notify the select team page when it should reload because there are more
  * unverified runs.
@@ -32,6 +28,9 @@ public class UnverifiedRunsWebSocket {
 
   private static final Object SESSIONS_LOCK = new Object();
 
+  /**
+   * @param session the newly opened session
+   */
   @OnOpen
   public void onOpen(final Session session) {
     synchronized (SESSIONS_LOCK) {
@@ -53,7 +52,8 @@ public class UnverifiedRunsWebSocket {
             session.getBasicRemote().sendText(messageText);
           } catch (final IOException ioe) {
             LOGGER.error("Got error sending message to session ("
-                + session.getId() + "), dropping session", ioe);
+                + session.getId()
+                + "), dropping session", ioe);
             toRemove.add(session);
           }
         } else {
@@ -68,6 +68,12 @@ public class UnverifiedRunsWebSocket {
     }
   }
 
+  /**
+   * Error handler.
+   * 
+   * @param session the session that had the error
+   * @param t the exception
+   */
   @OnError
   public void error(final Session session,
                     final Throwable t) {

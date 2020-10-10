@@ -13,6 +13,11 @@ import org.w3c.dom.Element;
  */
 public class ComplexPolynomial extends BasicPolynomial {
 
+  /**
+   * @param ele element to parse
+   * @param goalScope where to find goals
+   * @param variableScope where to find variables
+   */
   public ComplexPolynomial(final Element ele,
                            final GoalScope goalScope,
                            final VariableScope variableScope) {

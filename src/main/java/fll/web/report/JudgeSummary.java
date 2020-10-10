@@ -66,6 +66,13 @@ public final class JudgeSummary implements Serializable, Comparable<JudgeSummary
     return mNumActual;
   }
 
+  /**
+   * @param judge {@link #getJudge()}
+   * @param category {@link #getCategory()}
+   * @param group {@link #getGroup()}
+   * @param numExpected {@link #getNumExpected()}
+   * @param numActual {@link #getNumActual()}
+   */
   public JudgeSummary(final String judge,
                       @Nonnull final String category,
                       @Nonnull final String group,

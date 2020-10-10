@@ -26,16 +26,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
-
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 
@@ -58,41 +55,33 @@ public class QueryHandler extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final List<String> columnNames = new LinkedList<String>();
     final List<Map<String, String>> data = new LinkedList<Map<String, String>>();
     String error = null;
 
     DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Statement stmt = null;
-    ResultSet rs = null;
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection(); Statement stmt = connection.createStatement()) {
       final String query = request.getParameter(QUERY_PARAMETER);
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery(query);
+      try (ResultSet rs = stmt.executeQuery(query)) {
 
-      ResultSetMetaData meta = rs.getMetaData();
-      for (int columnNum = 1; columnNum <= meta.getColumnCount(); ++columnNum) {
-        columnNames.add(meta.getColumnName(columnNum).toLowerCase());
-      }
-      while (rs.next()) {
-        final Map<String, String> row = new HashMap<String, String>();
-        for (final String columnName : columnNames) {
-          final String value = rs.getString(columnName);
-          row.put(columnName, value);
+        ResultSetMetaData meta = rs.getMetaData();
+        for (int columnNum = 1; columnNum <= meta.getColumnCount(); ++columnNum) {
+          columnNames.add(meta.getColumnName(columnNum).toLowerCase());
         }
-        data.add(row);
-      }
-
+        while (rs.next()) {
+          final Map<String, String> row = new HashMap<String, String>();
+          for (final String columnName : columnNames) {
+            final String value = rs.getString(columnName);
+            row.put(columnName, value);
+          }
+          data.add(row);
+        }
+      } // ResultSet
     } catch (final SQLException e) {
       error = e.getMessage();
       LOGGER.error("Exception doing developer query", e);
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(connection);
     }
 
     response.setContentType("application/json");
@@ -109,31 +98,42 @@ public class QueryHandler extends BaseFLLServlet {
    * Object that comes back out of the servlet {@link QueryHandler}.
    */
   public static class ResultData {
+    /***
+     * @param columnNames {@link #getColumnNames()}
+     * @param data {@link #getData()}
+     * @param error {@link #getError()}
+     */
     public ResultData(@JsonProperty("columnNames") final List<String> columnNames,
                       @JsonProperty("data") final List<Map<String, String>> data,
-                      @JsonProperty("error") final String error) {
+                      @JsonProperty("error") final @Nullable String error) {
       this.columnNames.addAll(columnNames);
       this.data.addAll(data);
       this.error = error;
     }
 
-    /**
-     * If there is an error, this will be non-null.
-     */
     private final String error;
 
-    public String getError() {
+    /**
+     * @return If there is an error, this will be non-null.
+     */
+    public @Nullable String getError() {
       return error;
     }
 
     private final List<String> columnNames = new LinkedList<String>();
 
+    /**
+     * @return the column names
+     */
     public List<String> getColumnNames() {
       return columnNames;
     }
 
     private final List<Map<String, String>> data = new LinkedList<Map<String, String>>();
 
+    /**
+     * @return the parsed data list of pairs of column and value
+     */
     public List<Map<String, String>> getData() {
       return data;
     }

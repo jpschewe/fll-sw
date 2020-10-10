@@ -308,6 +308,9 @@ public class SolverParams extends SchedParams {
     return Collections.unmodifiableList(performanceEarliestStarts);
   }
 
+  /**
+   * @param v {@link #getPerformanceRoundEarliestStartTimes()}
+   */
   public void setPerformanceRoundEarliestStartTimes(final List<LocalTime> v) {
     performanceEarliestStarts.clear();
     performanceEarliestStarts.addAll(v);
@@ -423,8 +426,8 @@ public class SolverParams extends SchedParams {
 
   /**
    * @return Maximum number of hours the tournament should run. This
-   *          is used to limit the search space when generating a schedule.
-   *          Defaults to 8.
+   *         is used to limit the search space when generating a schedule.
+   *         Defaults to 8.
    */
   public final int getTMaxHours() {
     return this.tmaxHours;
@@ -465,6 +468,9 @@ public class SolverParams extends SchedParams {
     return Collections.unmodifiableList(this.subjectiveBreaks);
   }
 
+  /**
+   * @param breaks {@link #getSubjectiveBreaks()}
+   */
   public void setSubjectiveBreaks(final List<ScheduledBreak> breaks) {
     subjectiveBreaks.clear();
     subjectiveBreaks.addAll(breaks);
@@ -479,6 +485,9 @@ public class SolverParams extends SchedParams {
     return Collections.unmodifiableList(this.performanceBreaks);
   }
 
+  /**
+   * @param breaks {@link #getPerformanceBreaks()}
+   */
   public void setPerformanceBreaks(final List<ScheduledBreak> breaks) {
     performanceBreaks.clear();
     performanceBreaks.addAll(breaks);

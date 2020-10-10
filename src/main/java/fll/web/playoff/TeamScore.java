@@ -21,7 +21,7 @@ public abstract class TeamScore {
   /**
    * Create a non-performance TeamScore for the specified team.
    *
-   * @param teamNumber
+   * @param teamNumber {@link #getTeamNumber()}
    */
   public TeamScore(final int teamNumber) {
     this(teamNumber, NON_PERFORMANCE_RUN_NUMBER);

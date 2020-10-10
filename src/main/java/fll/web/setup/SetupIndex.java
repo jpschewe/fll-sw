@@ -104,6 +104,10 @@ public final class SetupIndex {
       return descriptions;
     }
 
+    /**
+     * @param url {@link #getURL()}
+     * @param description {@link #getDescription()}
+     */
     public DescriptionInfo(final URL url,
                            final ChallengeDescription description) {
       mUrl = url;
@@ -112,21 +116,33 @@ public final class SetupIndex {
 
     private final URL mUrl;
 
+    /**
+     * @return where the challenge description was found
+     */
     public URL getURL() {
       return mUrl;
     }
 
     private final ChallengeDescription mDescription;
 
+    /**
+     * @return the challenge description
+     */
     public ChallengeDescription getDescription() {
       return mDescription;
     }
 
+    /**
+     * @return {@link ChallengeDescription#getTitle()}
+     */
     @Nonnull
     public String getTitle() {
       return mDescription.getTitle();
     }
 
+    /**
+     * @return {@link ChallengeDescription#getRevision()}
+     */
     @Nonnull
     public String getRevision() {
       return mDescription.getRevision();

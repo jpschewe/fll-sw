@@ -26,14 +26,12 @@ import fll.db.GlobalParameters;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.XMLUtils;
 
+/**
+ * Display the challenge description.
+ */
 @WebServlet("/challenge.xml")
 public class DisplayChallengeDescriptor extends BaseFLLServlet {
 
-  /**
-   * @see fll.web.BaseFLLServlet#processRequest(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse, javax.servlet.ServletContext,
-   *      javax.servlet.http.HttpSession)
-   */
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

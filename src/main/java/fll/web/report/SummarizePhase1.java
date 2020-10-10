@@ -6,7 +6,6 @@
 
 package fll.web.report;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,7 +21,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
@@ -60,12 +58,17 @@ public final class SummarizePhase1 {
    */
   public static final String MISSING_CATEGORIES = "missingCategories";
 
+  /**
+   * @param request http request to access parameters and headers
+   * @param application application variables
+   * @param session session variables
+   * @param pageContext page variables
+   */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate table name from category")
   public static void populateContext(final HttpServletRequest request,
                                      final ServletContext application,
                                      final HttpSession session,
-                                     final PageContext pageContext)
-      throws IOException, ServletException {
+                                     final PageContext pageContext) {
     // clear the redirect if sent here directly from index.jsp
     final String referrer = request.getHeader("referer");
     if (null == referrer

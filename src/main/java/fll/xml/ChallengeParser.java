@@ -728,21 +728,6 @@ public final class ChallengeParser {
 
   }
 
-  public static boolean isValidCategoryName(final Document challengeDocument,
-                                            final String name) {
-    return ChallengeParser.getSubjectiveCategoryNames(challengeDocument).contains(name);
-  }
-
-  public static List<String> getSubjectiveCategoryNames(final Document challengeDocument) {
-    final List<String> subjectiveCategories = new LinkedList<>();
-    for (final Element categoryElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement()
-                                                                                               .getElementsByTagName("subjectiveCategory"))) {
-      final String categoryName = categoryElement.getAttribute("name");
-      subjectiveCategories.add(categoryName);
-    }
-    return subjectiveCategories;
-  }
-
   /**
    * Get the score type for a particular element.
    *

@@ -77,7 +77,7 @@ public final class UploadTeamTournamentAssignments extends BaseFLLServlet {
    * @param session used to store the headers, attribute is "fileHeaders" and is
    *          of type String[]
    * @throws IOException if an error occurs reading from file
-   * @throws InvalidFormatException
+   * @throws InvalidFormatException if there is an error parsing the file
    */
   public static void putHeadersInSession(final File file,
                                          final String sheetName,

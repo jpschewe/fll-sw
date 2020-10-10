@@ -81,10 +81,20 @@ public abstract class AbstractConditionStatement implements Serializable {
    */
   public abstract boolean isTrue(TeamScore teamScore);
 
+  /**
+   * @param doc used to create elements
+   * @return an XML element representing {@link #getComparison()}
+   */
   protected final Element getComparisonElement(final Document doc) {
     return doc.createElement(mComparison.getTagName());
   }
 
+  /**
+   * Convert this object to XML.
+   * 
+   * @param doc used to create elements
+   * @return an XML element representing this object
+   */
   public abstract Element toXml(Document doc);
 
 }

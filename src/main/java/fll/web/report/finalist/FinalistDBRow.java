@@ -20,6 +20,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public final class FinalistDBRow implements Serializable {
 
+  /**
+   * @param categoryName {@link #getCategoryName()}
+   * @param hour {@link #getHour()}
+   * @param minute {@Link #getMinute()}
+   * @param teamNumber {@link #getTeamNumber()}
+   */
   public FinalistDBRow(@JsonProperty("categoryName") final String categoryName,
                        @JsonProperty("hour") final int hour,
                        @JsonProperty("minute") final int minute,
@@ -32,22 +38,36 @@ public final class FinalistDBRow implements Serializable {
 
   private final String categoryName;
 
+  /**
+   * @return name of the category being judged in
+   */
   public String getCategoryName() {
     return categoryName;
   }
 
   private final int hour;
 
+  /**
+   * @return the hour of the finalist session
+   */
   public int getHour() {
     return hour;
   }
 
   private final int minute;
 
+  /**
+   * @return the minute of the finalist session
+   */
   public int getMinute() {
     return minute;
   }
 
+  /**
+   * @return the time as a {@link Date} object
+   * @see #getHour()
+   * @see #getMinute()
+   */
   @JsonIgnore
   public Date getTime() {
     final Calendar cal = Calendar.getInstance();
@@ -61,6 +81,9 @@ public final class FinalistDBRow implements Serializable {
 
   private final int teamNumber;
 
+  /**
+   * @return the team number
+   */
   public int getTeamNumber() {
     return teamNumber;
   }

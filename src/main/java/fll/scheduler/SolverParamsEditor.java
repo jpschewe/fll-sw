@@ -55,6 +55,9 @@ public class SolverParamsEditor extends JPanel {
 
   private final ScheduledBreakListEditor performanceBreaks;
 
+  /**
+   * Construct the editor.
+   */
   public SolverParamsEditor() {
     super(new GridBagLayout());
 
@@ -161,6 +164,9 @@ public class SolverParamsEditor extends JPanel {
 
   private SolverParams params;
 
+  /**
+   * @param params {@link #getParams()}
+   */
   public void setParams(final SolverParams params) {
     this.params = params;
 

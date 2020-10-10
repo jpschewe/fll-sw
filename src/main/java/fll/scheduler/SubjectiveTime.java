@@ -27,9 +27,10 @@ public final class SubjectiveTime implements Serializable {
   private final String name;
 
   /**
-   * Name of what is being judged.
    * This is the column name, not necessarily the
    * category name.
+   * 
+   * @return Name of what is being judged.
    */
   public String getName() {
     return name;
@@ -38,7 +39,7 @@ public final class SubjectiveTime implements Serializable {
   private final LocalTime time;
 
   /**
-   * Time of the judging session.
+   * @return Time of the judging session.
    */
   public LocalTime getTime() {
     return time;
