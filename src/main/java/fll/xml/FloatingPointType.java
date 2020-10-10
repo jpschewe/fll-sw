@@ -6,6 +6,9 @@
 
 package fll.xml;
 
+/**
+ * How to handle floating point values.
+ */
 public enum FloatingPointType {
 
   DECIMAL, ROUND, TRUNCATE;

@@ -6,7 +6,6 @@
 
 package fll;
 
-import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -20,6 +19,13 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 @SuppressFBWarnings(value = { "EQ_DOESNT_OVERRIDE_EQUALS" }, justification = "Equality doesn't change in this subclass of Team")
 public class TournamentTeam extends Team {
 
+  /**
+   * @param teamNumber {@link #getTeamNumber()}
+   * @param org {@link #getOrganization()}
+   * @param name {@link #getTeamName()}
+   * @param awardGroup {@link #getAwardGroup()}
+   * @param judgingGroup {@link #getJudgingGroup()}
+   */
   public TournamentTeam(@JsonProperty("teamNumber") final int teamNumber,
                         @JsonProperty("organization") final String org,
                         @JsonProperty("teamName") final String name,
@@ -54,12 +60,9 @@ public class TournamentTeam extends Team {
    * 
    * @param teams list that is modified
    * @param divisionStr the division to keep
-   * @throws RuntimeException
-   * @throws SQLException
    */
   public static void filterTeamsToEventDivision(final List<TournamentTeam> teams,
-                                                final String divisionStr)
-      throws SQLException, RuntimeException {
+                                                final String divisionStr) {
     final Iterator<TournamentTeam> iter = teams.iterator();
     while (iter.hasNext()) {
       final TournamentTeam t = iter.next();

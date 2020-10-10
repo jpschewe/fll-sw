@@ -272,18 +272,27 @@ public class TournamentSchedule implements Serializable {
 
   private final HashSet<String> tableColors = new HashSet<>();
 
+  /**
+   * @return colors of the tables (unmodifiable)
+   */
   public Set<String> getTableColors() {
     return Collections.unmodifiableSet(tableColors);
   }
 
   private final HashSet<String> awardGroups = new HashSet<>();
 
+  /**
+   * @return award groups (unmodifiable)
+   */
   public Set<String> getAwardGroups() {
     return Collections.unmodifiableSet(awardGroups);
   }
 
   private final HashSet<String> judgingGroups = new HashSet<>();
 
+  /**
+   * @return judging groups (unmodifiable)
+   */
   public Set<String> getJudgingGroups() {
     return Collections.unmodifiableSet(judgingGroups);
   }
@@ -292,11 +301,11 @@ public class TournamentSchedule implements Serializable {
 
   private final HashSet<String> subjectiveStations = new HashSet<>();
 
-  /**
-   * Name of this tournament.
-   */
   private final String name;
 
+  /**
+   * @return Name of this tournament
+   */
   public String getName() {
     return name;
   }
@@ -353,8 +362,8 @@ public class TournamentSchedule implements Serializable {
    * @param name see {@link #getName()}
    * @param csvFile where to read the schedule from
    * @param subjectiveHeaders the headers for the subjective columns
-   * @throws ScheduleParseException
-   * @throws ParseException
+   * @throws ScheduleParseException if there is an error parsing the schedule
+   * @throws ParseException if there is an error parsing the file
    */
   public TournamentSchedule(final String name,
                             final File csvFile,
@@ -366,9 +375,9 @@ public class TournamentSchedule implements Serializable {
   /**
    * Common construction.
    *
-   * @throws IOException
-   * @throws ScheduleParseException
-   * @throws ParseException
+   * @throws IOException if there is an error reading the file
+   * @throws ScheduleParseException if there is an error parsing the schedule
+   * @throws ParseException if there is an error parsing the file
    */
   private TournamentSchedule(final String name,
                              final CellFileReader reader,
@@ -387,9 +396,9 @@ public class TournamentSchedule implements Serializable {
   /**
    * Load a tournament from the database.
    *
-   * @param connection
-   * @param tournamentID
-   * @throws SQLException
+   * @param connection database connection
+   * @param tournamentID the tournament to load
+   * @throws SQLException on a database error
    */
   public TournamentSchedule(final Connection connection,
                             final int tournamentID)
@@ -1377,7 +1386,7 @@ public class TournamentSchedule implements Serializable {
    * @param connection database connection
    * @param tournamentID ID of the tournament to look for
    * @return if a schedule exists in the database for the specified tournament
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
   public static boolean scheduleExistsInDatabase(final Connection connection,
                                                  final int tournamentID)
@@ -1401,6 +1410,7 @@ public class TournamentSchedule implements Serializable {
    *
    * @param connection where to store the schedule
    * @param tournamentID the ID of the tournament
+   * @throws SQLException on a database error
    */
   public void storeSchedule(final Connection connection,
                             final int tournamentID)
@@ -1531,6 +1541,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Keep track of column information from a spreadsheet.
+   * A -1 value for a column means that it was not found.
    */
   public static final class ColumnInformation {
 
@@ -1546,72 +1557,125 @@ public class TournamentSchedule implements Serializable {
 
     private final int teamNumColumn;
 
+    /**
+     * @return column that contains the team number
+     */
     public int getTeamNumColumn() {
       return teamNumColumn;
     }
 
     private final int organizationColumn;
 
+    /**
+     * @return column that contains the organization
+     */
     public int getOrganizationColumn() {
       return organizationColumn;
     }
 
     private final int teamNameColumn;
 
+    /**
+     * @return column that contains the team name
+     */
     public int getTeamNameColumn() {
       return teamNameColumn;
     }
 
     private final int divisionColumn;
 
+    /**
+     * @return column for division (award group)
+     */
     public int getDivisionColumn() {
       return divisionColumn;
     }
 
     private final Map<Integer, String> subjectiveColumns;
 
+    /**
+     * @return key is column index, value is the subjective judging station
+     */
     public Map<Integer, String> getSubjectiveColumnInfo() {
       return subjectiveColumns;
     }
 
     private final int judgeGroupColumn;
 
+    /**
+     * @return column for judge
+     */
     public int getJudgeGroupColumn() {
       return judgeGroupColumn;
     }
 
     private final int[] perfColumn;
 
+    /**
+     * @return number of performance rounds
+     */
     public int getNumPerfs() {
       return perfColumn.length;
     }
 
+    /**
+     * @param round the performance round to get the column for
+     * @return the column for the performance round time
+     */
     public int getPerfColumn(final int round) {
       return perfColumn[round];
     }
 
     private final int[] perfTableColumn;
 
+    /**
+     * @param round the performance round to get the column for
+     * @return the column for the performance round table
+     */
     public int getPerfTableColumn(final int round) {
       return perfTableColumn[round];
     }
 
     private final int[] practiceColumn;
 
+    /**
+     * @return number of practice rounds
+     */
     public int getNumPracticePerfs() {
       return practiceColumn.length;
     }
 
+    /**
+     * @param round the practice round to get the column for
+     * @return the column for the practice round time
+     */
     public int getPracticePerfColumn(final int round) {
       return practiceColumn[round];
     }
 
     private final int[] practiceTableColumn;
 
+    /**
+     * @param round the practice round to get the column for
+     * @return the column for the practice round table
+     */
     public int getPracticePerfTableColumn(final int round) {
       return practiceTableColumn[round];
     }
 
+    /**
+     * @param headerLine {@link #getHeaderLine()}
+     * @param teamNumColumn {@link #getTeamNumColumn()}
+     * @param organizationColumn {@link #getOrganizationColumn()}
+     * @param teamNameColumn {@link #getTeamNameColumn()}
+     * @param divisionColumn {@link #getDivisionColumn()}
+     * @param subjectiveColumns {@link #getSubjectiveColumnInfo()}
+     * @param judgeGroupColumn {@link #getJudgeGroupColumn()}
+     * @param perfColumn {@link #getPerfColumn(int)}
+     * @param perfTableColumn {@link #getPerfTableColumn(int)}
+     * @param practiceColumn {@link #getPracticePerfColumn(int)}
+     * @param practiceTableColumn {@link #getPracticePerfTableColumn(int)}
+     */
     public ColumnInformation(final String[] headerLine,
                              final int teamNumColumn,
                              final int organizationColumn,
@@ -1739,8 +1803,8 @@ public class TournamentSchedule implements Serializable {
   /**
    * Write out to the specified writer.
    *
-   * @param outputWriter
-   * @throws IOException
+   * @param outputWriter where to write
+   * @throws IOException on an error writing
    */
   public void writeToCSV(final Writer outputWriter) throws IOException {
     try (CSVWriter csv = new CSVWriter(outputWriter)) {
@@ -1817,7 +1881,13 @@ public class TournamentSchedule implements Serializable {
     }
   }
 
+  /**
+   * Thrown for a missing column.
+   */
   public static class MissingColumnException extends FLLRuntimeException {
+    /**
+     * @param message {@link #getMessage()}
+     */
     public MissingColumnException(final String message) {
       super(message);
     }

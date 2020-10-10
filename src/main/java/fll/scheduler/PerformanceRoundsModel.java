@@ -19,7 +19,7 @@ import javax.swing.table.AbstractTableModel;
 /*package*/ class PerformanceRoundsModel extends AbstractTableModel {
   private final ArrayList<LocalTime> times = new ArrayList<>();
 
-  public PerformanceRoundsModel() {
+  PerformanceRoundsModel() {
   }
 
   @Override

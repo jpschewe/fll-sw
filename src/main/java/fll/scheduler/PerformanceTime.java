@@ -45,6 +45,9 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
 
   private final String table;
 
+  /**
+   * @return the table for the performance
+   */
   public String getTable() {
     return table;
   }
@@ -52,7 +55,7 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
   private final int side;
 
   /**
-   * One based side number.
+   * @return One based side number.
    */
   public int getSide() {
     return side;
@@ -60,13 +63,16 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
 
   private final LocalTime time;
 
+  /**
+   * @return the time of the performance
+   */
   public LocalTime getTime() {
     return this.time;
   }
 
   @Override
   public int hashCode() {
-    return null == time ? 13 : time.hashCode();
+    return time.hashCode();
   }
 
   @Override

@@ -36,7 +36,7 @@ class VariableRefEditor extends JPanel {
   /**
    * @param ref the object to edit
    */
-  public VariableRefEditor(@Nonnull final VariableRef ref) {
+  VariableRefEditor(@Nonnull final VariableRef ref) {
     this.variableRef = ref;
 
     setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));

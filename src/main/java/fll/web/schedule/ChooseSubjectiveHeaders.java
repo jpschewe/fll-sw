@@ -13,10 +13,15 @@ import fll.scheduler.SchedParams;
 /**
  * Support for chooseSubjectiveHeaders.jsp.
  */
-public class ChooseSubjectiveHeaders {
+public final class ChooseSubjectiveHeaders {
+
+  private ChooseSubjectiveHeaders() {
+  }
 
   /**
    * Setup page variables used by the JSP.
+   * 
+   * @param pageContext set page variables
    */
   public static void populateContext(final PageContext pageContext) {
     pageContext.setAttribute("default_duration", SchedParams.DEFAULT_SUBJECTIVE_MINUTES);

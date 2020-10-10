@@ -28,7 +28,7 @@ import javax.swing.JTextField;
    * @param min the minimum allowed value (inclusive)
    * @param max the maximum allowed value (inclusive)
    */
-  public IntegerCellEditor(final int min,
+  IntegerCellEditor(final int min,
                            final int max) {
     super(new JTextField());
     minValue = min;

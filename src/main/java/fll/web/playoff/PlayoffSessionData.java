@@ -28,6 +28,10 @@ import fll.xml.BracketSortType;
  */
 public final class PlayoffSessionData implements Serializable {
 
+  /**
+   * @param connection database connection
+   * @throws SQLException on a database error
+   */
   public PlayoffSessionData(final Connection connection) throws SQLException {
     final int currentTournamentID = Queries.getCurrentTournament(connection);
     mCurrentTournament = Tournament.findTournamentByID(connection, currentTournamentID);
@@ -53,36 +57,57 @@ public final class PlayoffSessionData implements Serializable {
 
   private boolean mEnableThird = false;
 
+  /**
+   * @return if the third place bracket is enabled
+   */
   public boolean getEnableThird() {
     return mEnableThird;
   }
 
+  /**
+   * @param v {@link #getEnableThird()}
+   */
   public void setEnableThird(boolean v) {
     mEnableThird = v;
   }
 
   private BracketSortType mSort;
 
+  /**
+   * @return how to sort the initial brackets
+   */
   public BracketSortType getSort() {
     return mSort;
   }
 
+  /**
+   * @param sort {@link #getSort()}
+   */
   public void setSort(final BracketSortType sort) {
     mSort = sort;
   }
 
   private final Map<Integer, TournamentTeam> mTournamentTeams;
 
+  /**
+   * @return key is team number, value is team
+   */
   public Map<Integer, TournamentTeam> getTournamentTeams() {
     return mTournamentTeams;
   }
 
+  /**
+   * @return the tournament teams
+   */
   public Collection<TournamentTeam> getTournamentTeamsValues() {
     return mTournamentTeams.values();
   }
 
   private final Tournament mCurrentTournament;
 
+  /**
+   * @return the current tournament
+   */
   public Tournament getCurrentTournament() {
     return mCurrentTournament;
   }
@@ -90,7 +115,7 @@ public final class PlayoffSessionData implements Serializable {
   private final List<String> mExistingBrackets;
 
   /**
-   * All existing playoff brackets.
+   * @return All existing playoff brackets.
    */
   public List<String> getExistingBrackets() {
     return mExistingBrackets;
@@ -125,26 +150,41 @@ public final class PlayoffSessionData implements Serializable {
 
   private final int mNumPlayoffRounds;
 
+  /**
+   * @return how many playoff rounds
+   */
   public int getNumPlayoffRounds() {
     return mNumPlayoffRounds;
   }
 
   private String mBracket;
 
+  /**
+   * @param v {@link #getBracket()}
+   */
   public void setBracket(final String v) {
     mBracket = v;
   }
 
+  /**
+   * @return the bracket name
+   */
   public @Nullable String getBracket() {
     return mBracket;
   }
 
   private List<Team> mTeamsNeedingSeedingRuns;
 
+  /**
+   * @return teams that needing to complete seeding rounds
+   */
   public List<Team> getTeamsNeedingSeedingRuns() {
     return mTeamsNeedingSeedingRuns;
   }
 
+  /**
+   * @param v {@link #getTeamsNeedingSeedingRuns()}
+   */
   public void setTeamsNeedingSeedingRounds(final List<Team> v) {
     mTeamsNeedingSeedingRuns = v;
   }

@@ -19,14 +19,13 @@ import javax.servlet.http.HttpSession;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.web.BaseFLLServlet;
 import fll.web.DisplayInfo;
 
 /**
  * Send big screen display data via JavaScript, to avoid network-timeout induced
- * freezes
+ * freezes.
  */
 @WebServlet("/ajax/DisplayQuery")
 public class DisplayQueryServlet extends BaseFLLServlet {
@@ -75,7 +74,8 @@ public class DisplayQueryServlet extends BaseFLLServlet {
           + "/report/finalist/FinalistTeams.jsp?finalistTeamsScroll=true";
     } else if (displayInfo.isSpecial()) {
       return contextPath
-          + "/custom/" + displayInfo.getSpecialUrl();
+          + "/custom/"
+          + displayInfo.getSpecialUrl();
     } else {
       return contextPath
           + "/welcome.jsp";
@@ -86,13 +86,18 @@ public class DisplayQueryServlet extends BaseFLLServlet {
    * Response to the query servlet.
    */
   public static class DisplayResponse {
-    @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
-    public final String displayURL;
+    private final String displayURL;
 
+    /**
+     * @return {@link #displayURL}
+     */
     public String getDisplayURL() {
       return this.displayURL;
     }
 
+    /**
+     * @param displayURL {@link #displayURL}
+     */
     public DisplayResponse(@JsonProperty("displayURL") final String displayURL) {
       this.displayURL = displayURL;
     }

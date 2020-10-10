@@ -47,7 +47,7 @@ public class DisplaySystemHandler extends Thread {
   private final MhubMessageHandler messageHandler;
 
   /**
-   * Construct the display handler, but doesn't start it
+   * Construct the display handler, but doesn't start it.
    * 
    * @param messageHandler used to send messages
    * @param application used to get the database connection and current display

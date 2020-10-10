@@ -13,8 +13,14 @@ import fll.Version;
 /**
  * Data needed for developer/index.jsp.
  */
-public class DeveloperIndex {
-  
+public final class DeveloperIndex {
+
+  private DeveloperIndex() {
+  }
+
+  /**
+   * @param pageContext used to set variables
+   */
   public static void populateContext(final PageContext pageContext) {
     pageContext.setAttribute("versionInfo", Version.getAllVersionInformation());
   }

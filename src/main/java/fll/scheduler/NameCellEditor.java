@@ -15,7 +15,7 @@ import javax.swing.JTextField;
  */
 /* package */ final class NameCellEditor extends DefaultCellEditor {
 
-  public NameCellEditor() {
+  NameCellEditor() {
     super(new JTextField());
   }
 

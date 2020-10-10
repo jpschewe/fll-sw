@@ -18,9 +18,12 @@ import fll.Utilities;
 /**
  * Helpers for welcome.jsp.
  */
-public class Welcome {
+public final class Welcome {
 
-  public static final int MAX_NUM_LOGOS_PER_COLUMN = 6;
+  private Welcome() {
+  }
+
+  // private static final int MAX_NUM_LOGOS_PER_COLUMN = 6;
 
   public static void outputLogos(final ServletContext application,
                                  final JspWriter out) {
@@ -29,11 +32,11 @@ public class Welcome {
 
     final List<String> logoFiles = Utilities.getGraphicFiles(new File(imagePath));
 
-//    final int numColumns = (int) Math.ceil((double) logoFiles.size()
-//        / (double) MAX_NUM_LOGOS_PER_COLUMN);
+    // final int numColumns = (int) Math.ceil((double) logoFiles.size()
+    // / (double) MAX_NUM_LOGOS_PER_COLUMN);
 
     final int numColumns = 3;
-    
+
     final Formatter formatter = new Formatter(out);
 
     if (!logoFiles.isEmpty()) {
@@ -52,13 +55,14 @@ public class Welcome {
         formatter.format("<td align='center'><img src='%s' /></td>%n", file);
 
         if (index
-            % numColumns == numColumns - 1) {
+            % numColumns == numColumns
+                - 1) {
           // odd
           formatter.format("</tr>%n");
           formatter.format("<tr><td colspan='%d'>&nbsp;</td></tr>%n", numColumns);
         }
       } // foreach file
-      
+
       final int remainder = logoFiles.size()
           % numColumns;
       for (int i = remainder; i > 0; --i) {
@@ -67,11 +71,11 @@ public class Welcome {
       if (remainder != 0) {
         formatter.format("</tr>%n");
       }
-      
+
       formatter.format("</table>%n");
       formatter.format("</td>");
     } // if logo files
-    
+
   }
-  
+
 }

@@ -23,13 +23,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-
-
 import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
-
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -38,21 +35,23 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  * Gather information for editing or adding a team and put it in the page
  * context.
  */
-public class GatherTeamData {
+public final class GatherTeamData {
+
+  private GatherTeamData() {
+  }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   public static void populateContext(final HttpServletRequest request,
                                      final ServletContext application,
-                                     final PageContext page) throws IOException, ServletException {
+                                     final PageContext page)
+      throws IOException, ServletException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Top of GatherTeamData.populateContext");
     }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       // store map of tournaments in session
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
@@ -63,8 +62,7 @@ public class GatherTeamData {
       final Map<Integer, Boolean> playoffsInitialized = new HashMap<>();
       for (final Tournament tournament : tournaments) {
 
-        final Collection<String> allEventDivisions = Queries.getAwardGroups(connection,
-                                                                               tournament.getTournamentID());
+        final Collection<String> allEventDivisions = Queries.getAwardGroups(connection, tournament.getTournamentID());
         if (allEventDivisions.isEmpty()) {
           // special case for empty, always allow 1
           allEventDivisions.add("1");
@@ -158,8 +156,6 @@ public class GatherTeamData {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
     if (LOGGER.isTraceEnabled()) {

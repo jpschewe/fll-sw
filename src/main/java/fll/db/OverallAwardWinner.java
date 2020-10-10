@@ -26,6 +26,7 @@ public class OverallAwardWinner implements Serializable {
    */
   public static final class OverallAwardWinnerCollectionTypeInformation
       extends TypeReference<Collection<OverallAwardWinner>> {
+    /** Single instance. */
     public static final OverallAwardWinnerCollectionTypeInformation INSTANCE = new OverallAwardWinnerCollectionTypeInformation();
   }
 

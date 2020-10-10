@@ -34,7 +34,7 @@ import javax.swing.JTable;
 
   private final JTable table;
 
-  public ScheduledBreakListEditor(final String title) {
+  ScheduledBreakListEditor(final String title) {
     super();
     setLayout(new BorderLayout());
 

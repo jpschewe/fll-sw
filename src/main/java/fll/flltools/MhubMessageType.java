@@ -10,14 +10,15 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Types of messages based on
- * https://github.com/poelstra/mhub/blob/master/src/protocol.ts
+ * https://github.com/poelstra/mhub/blob/master/src/protocol.ts.
  */
 public enum MhubMessageType {
+
   SUBSCRIBE_COMMAND("subscribe"), PUBLISH_COMMAND("publish"), PING_COMMAND("ping"), LOGIN_COMMAND(
       "login"), MESSAGE_RESPONSE("message"), SUB_ACK_RESPONSE("suback"), PUB_ACK_RESPONSE(
           "puback"), PING_ACK_RESPONSE("pingack"), LOGIN_ACK_RESPONSE("loginack"), ERROR_RESPONSE("error");
 
-  private MhubMessageType(final String type) {
+  MhubMessageType(final String type) {
     this.type = type;
   }
 

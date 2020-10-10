@@ -62,7 +62,7 @@ public class GreedySolver {
   private final SolverParams solverParameters;
 
   /**
-   * The parameters used by this instance of the solvers.
+   * @return the parameters used by this instance of the solvers.
    */
   public final SolverParams getParameters() {
     return solverParameters;
@@ -154,7 +154,11 @@ public class GreedySolver {
     formatter.printHelp("GreedySolver", options);
   }
 
-  public static void main(final String[] args) throws InterruptedException {
+  /**
+   * @param args see --help for options
+   * @throws InterruptedException
+   */
+  public static void main(final String[] args) {
     final Options options = buildOptions();
 
     // parse options
@@ -207,8 +211,9 @@ public class GreedySolver {
 
   /**
    * @param datafile the datafile for the schedule to solve
-   * @throws ParseException
-   * @throws InvalidParametersException
+   * @param optimize if true, find an optimal solution
+   * @throws ParseException if there is an error parsing the data file
+   * @throws InvalidParametersException if the parameters are not valid
    */
   public GreedySolver(final File datafile,
                       final boolean optimize)
@@ -220,7 +225,7 @@ public class GreedySolver {
     }
 
     final Properties properties = new Properties();
-    try (final Reader reader = new InputStreamReader(new FileInputStream(datafile), Utilities.DEFAULT_CHARSET)) {
+    try (Reader reader = new InputStreamReader(new FileInputStream(datafile), Utilities.DEFAULT_CHARSET)) {
       properties.load(reader);
     }
     if (LOGGER.isDebugEnabled()) {
@@ -337,7 +342,7 @@ public class GreedySolver {
     fewestAssignments = new FewestAssignments(this);
 
     // sort list of teams to make sure that the scheduler is deterministic
-    Collections.sort(teams, lowestTeamIndex);
+    Collections.sort(teams, LOWEST_TEAM_INDEX);
   }
 
   private boolean assignSubjective(final int group,
@@ -437,15 +442,17 @@ public class GreedySolver {
 
   /**
    * Get the duration for the given subjective station in time increments.
+   * 
+   * @param station the index of the subjective station
+   * @return the number of time increments for judging at this subjective station
    */
   public int getSubjectiveDuration(final int station) {
     return this.solverParameters.getSubjectiveMinutes(station);
   }
 
   /**
-   * Generated name for a subjective station.
-   *
    * @param station index used to generate the name
+   * @return Generated name for a subjective station
    */
   public static String getSubjectiveColumnName(final int station) {
     return String.format("%s%d", SUBJECTIVE_COLUMN_PREFIX, station
@@ -1434,6 +1441,9 @@ public class GreedySolver {
     return true;
   }
 
+  /**
+   * @return the number of subjective judging stations
+   */
   public int getNumSubjectiveStations() {
     return this.solverParameters.getNumSubjectiveStations();
   }
@@ -1460,8 +1470,8 @@ public class GreedySolver {
   private void outputSchedule(final File schedule) throws IOException {
     final List<SubjectiveStation> subjectiveStations = solverParameters.getSubjectiveStations();
 
-    try (final CSVWriter csv = new CSVWriter(new OutputStreamWriter(new FileOutputStream(schedule),
-                                                                    Utilities.DEFAULT_CHARSET))) {
+    try (CSVWriter csv = new CSVWriter(new OutputStreamWriter(new FileOutputStream(schedule),
+                                                              Utilities.DEFAULT_CHARSET))) {
       final List<String> line = new ArrayList<>();
       line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
       line.add(TournamentSchedule.TEAM_NAME_HEADER);
@@ -1622,8 +1632,8 @@ public class GreedySolver {
     return checkBreak(begin, end, solverParameters.getPerformanceBreaks());
   }
 
-  private static final Comparator<SchedTeam> lowestTeamIndex = (one,
-                                                                two) -> {
+  private static final Comparator<SchedTeam> LOWEST_TEAM_INDEX = (one,
+                                                                  two) -> {
     if (one.equals(two)) {
       return 0;
     } else if (one.getGroup() < two.getGroup()) {
@@ -1644,7 +1654,7 @@ public class GreedySolver {
 
     private final GreedySolver solver;
 
-    public FewestAssignments(final GreedySolver solver) {
+    FewestAssignments(final GreedySolver solver) {
       this.solver = solver;
     }
 

@@ -6,6 +6,7 @@
 
 package fll.util;
 
+import java.awt.Color;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.regex.Matcher;
@@ -19,9 +20,15 @@ import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 
 /**
- * Some utilties for working with {@link JFormattedTextField}
+ * Some utilties for working with {@link JFormattedTextField}.
  */
 public final class FormatterUtils {
+
+  static final Color INVALID_COLOR = Color.red;
+  static final Color VALID_COLOR = Color.black;
+
+  private FormatterUtils() {
+  }
 
   /**
    * Create a {@link JFormattedTextField} for editing integers.
@@ -50,7 +57,7 @@ public final class FormatterUtils {
   /**
    * No limits on the range.
    * 
-   * @see #createDoubleField(double, double)
+   * @return {@link #createDoubleField(double, double)}
    */
   public static JFormattedTextField createDoubleField() {
     return createDoubleField(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
@@ -146,7 +153,7 @@ public final class FormatterUtils {
      * pattern specifies the regular expression that will be used
      * to determine if a value is legal.
      */
-    public RegexFormatter(@Nonnull final String pattern) throws PatternSyntaxException {
+    RegexFormatter(@Nonnull final String pattern) throws PatternSyntaxException {
       this.pattern = Pattern.compile(pattern);
     }
 

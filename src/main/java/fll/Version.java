@@ -65,7 +65,7 @@ public final class Version {
   }
 
   /**
-   * @param args
+   * @param args ignored
    */
   public static void main(final String[] args) {
     LOG.info("Version is: "

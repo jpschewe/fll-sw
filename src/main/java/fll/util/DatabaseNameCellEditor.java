@@ -18,6 +18,9 @@ import javax.swing.JTextField;
  */
 public final class DatabaseNameCellEditor extends DefaultCellEditor {
 
+  /**
+   * Regular expression for valid database names.
+   */
   public static final String DATABASE_NAME_REGEXP = "[a-zA-Z]\\w*";
 
   private final Pattern pattern = Pattern.compile(DATABASE_NAME_REGEXP);

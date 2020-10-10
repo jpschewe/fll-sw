@@ -31,7 +31,7 @@ class EnumeratedValuesModel extends AbstractTableModel {
   /**
    * @param goal the goal to modify
    */
-  public EnumeratedValuesModel(@Nonnull final Goal goal) {
+  EnumeratedValuesModel(@Nonnull final Goal goal) {
     this.goal = goal;
     data.addAll(goal.getSortedValues());
 

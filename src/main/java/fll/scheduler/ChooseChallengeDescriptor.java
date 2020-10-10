@@ -174,7 +174,7 @@ public class ChooseChallengeDescriptor extends JDialog {
   }
 
   private static final class DescriptionInfoRenderer implements ListCellRenderer<DescriptionInfo> {
-    public DescriptionInfoRenderer() {
+    DescriptionInfoRenderer() {
       mDelegate = new BasicComboBoxRenderer();
     }
 

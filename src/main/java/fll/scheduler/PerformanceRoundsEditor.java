@@ -26,7 +26,7 @@ import javax.swing.JTable;
 
   private final JTable table;
 
-  public PerformanceRoundsEditor() {
+  PerformanceRoundsEditor() {
     super();
     setLayout(new BorderLayout());
 

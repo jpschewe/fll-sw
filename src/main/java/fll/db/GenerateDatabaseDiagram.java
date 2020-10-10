@@ -35,7 +35,7 @@ public final class GenerateDatabaseDiagram {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
-   * @param args
+   * @param args output directory
    */
   public static void main(final String[] args) {
     if (args.length != 1) {

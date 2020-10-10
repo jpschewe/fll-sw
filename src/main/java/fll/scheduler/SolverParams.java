@@ -17,11 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-
-
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
-
 
 /**
  * Parameters for {@link GreedySolver}.
@@ -30,37 +27,37 @@ public class SolverParams extends SchedParams {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  public static final String START_TIME_KEY = "start_time";
+  private static final String START_TIME_KEY = "start_time";
 
-  public static final String ALTERNATE_TABLES_KEY = "alternate_tables";
+  private static final String ALTERNATE_TABLES_KEY = "alternate_tables";
 
-  public static final String SUBJECTIVE_FIRST_KEY = "subjective_first";
+  private static final String SUBJECTIVE_FIRST_KEY = "subjective_first";
 
-  public static final String PERF_ATTEMPT_OFFSET_MINUTES_KEY = "perf_attempt_offset_minutes";
+  private static final String PERF_ATTEMPT_OFFSET_MINUTES_KEY = "perf_attempt_offset_minutes";
 
-  public static final String SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY = "subjective_attempt_offset_minutes";
+  private static final String SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY = "subjective_attempt_offset_minutes";
 
   @Deprecated
   private static final String NROUNDS_KEY = "NRounds";
 
-  public static final String NTABLES_KEY = "NTables";
+  private static final String NTABLES_KEY = "NTables";
 
-  public static final String TMAX_HOURS_KEY = "TMax_hours";
+  private static final String TMAX_HOURS_KEY = "TMax_hours";
 
-  public static final String TMAX_MINUTES_KEY = "TMax_minutes";
+  private static final String TMAX_MINUTES_KEY = "TMax_minutes";
 
-  public static final String GROUP_COUNTS_KEY = "group_counts";
+  private static final String GROUP_COUNTS_KEY = "group_counts";
 
-  public static final String GROUP_NAMES_KEY = "group_names";
+  private static final String GROUP_NAMES_KEY = "group_names";
 
-  public static final String PERF_EARLIEST_START_KEY = "perf_earliest_start";
+  private static final String PERF_EARLIEST_START_KEY = "perf_earliest_start";
 
   /**
    * Format for the number of breaks property. Expected to be
    * used with String.format() and one argument that is the
    * type of break "subjective" or "performance".
    */
-  private static final String numBreaksFormat = "num_%s_breaks";
+  private static final String NUM_BREAKS_FORMAT = "num_%s_breaks";
 
   /**
    * Format for the start of break property. Expected to be
@@ -68,7 +65,7 @@ public class SolverParams extends SchedParams {
    * type of break "subjective" or "performance" and then the index of the
    * break (starting at 0).
    */
-  private static final String startFormat = "%s_break_%d_start";
+  private static final String START_FORMAT = "%s_break_%d_start";
 
   /**
    * Format for the duration of break property. Expected to be
@@ -76,7 +73,7 @@ public class SolverParams extends SchedParams {
    * type of break "subjective" or "performance" and then the index of the
    * break (starting at 0).
    */
-  private static final String durationFormat = "%s_break_%d_duration";
+  private static final String DURATION_FORMAT = "%s_break_%d_duration";
 
   /**
    * Create the object with all default values.
@@ -229,15 +226,16 @@ public class SolverParams extends SchedParams {
   private LocalTime startTime = LocalTime.of(8, 0);
 
   /**
-   * The start time of the tournament. Nothing is scheduled before this time.
-   * Defaults to 8:00.
+   * @return The start time of the tournament. Nothing is scheduled before this
+   *         time.
+   *         Defaults to 8:00.
    */
   public final LocalTime getStartTime() {
     return startTime;
   }
 
   /**
-   * @see #getStartTime()
+   * @param v {@link #getStartTime()}
    */
   public final void setStartTime(final LocalTime v) {
     this.startTime = v;
@@ -265,8 +263,8 @@ public class SolverParams extends SchedParams {
   }
 
   /**
-   * Number of groups of teams.
-   * Defaults to 0.
+   * @return Number of groups of teams.
+   *         Defaults to 0.
    */
   public final int getNumGroups() {
     return judgingGroups.size();
@@ -284,7 +282,7 @@ public class SolverParams extends SchedParams {
   }
 
   /**
-   * @see #getAlternateTables()
+   * @param v {@link #getAlternateTables()}
    */
   public final void setAlternateTables(final boolean v) {
     this.alternate = v;
@@ -293,8 +291,8 @@ public class SolverParams extends SchedParams {
   private final List<LocalTime> performanceEarliestStarts = new LinkedList<>();
 
   /**
-   * The number of performance rounds.
-   * Defaults to 3.
+   * @return The number of performance rounds.
+   *         Defaults to 3.
    */
   public final int getNumPerformanceRounds() {
     return performanceEarliestStarts.size();
@@ -318,15 +316,15 @@ public class SolverParams extends SchedParams {
   private boolean subjectiveFirst = true;
 
   /**
-   * If true, schedule the subjective stations before the performance.
-   * Defaults to true.
+   * @return If true, schedule the subjective stations before the performance.
+   *         Defaults to true.
    */
   public final boolean getSubjectiveFirst() {
     return this.subjectiveFirst;
   }
 
   /**
-   * @see #getSubjectiveFirst()
+   * @param v {@link #getSubjectiveFirst()}
    */
   public final void setSubjectiveFirst(final boolean v) {
     this.subjectiveFirst = v;
@@ -350,7 +348,7 @@ public class SolverParams extends SchedParams {
   }
 
   /**
-   * @see #getPerformanceAttemptOffsetMinutes()
+   * @param v {@link #getPerformanceAttemptOffsetMinutes()}
    */
   public final void setPerformanceAttemptOffsetMinutes(final List<Integer> v) {
     this.perfAttemptOffsetMinutes.clear();
@@ -360,16 +358,16 @@ public class SolverParams extends SchedParams {
   private int subjectiveAttemptOffsetMinutes = 5;
 
   /**
-   * If a subjective round cannot be scheduled at a time, how many
-   * minutes later should the next time to try be.
-   * Defaults to 5.
+   * @return If a subjective round cannot be scheduled at a time, how many
+   *         minutes later should the next time to try be.
+   *         Defaults to 5.
    */
   public final int getSubjectiveAttemptOffsetMinutes() {
     return this.subjectiveAttemptOffsetMinutes;
   }
 
   /**
-   * @see #getSubjectiveAttemptOffsetMinutes()
+   * @param v {@link #getSubjectiveAttemptOffsetMinutes()}
    */
   public final void setSubjectiveAttemptOffsetMinutes(final int v) {
     this.subjectiveAttemptOffsetMinutes = v;
@@ -378,24 +376,23 @@ public class SolverParams extends SchedParams {
   private int numTables = 1;
 
   /**
-   * The number of performance tables.
-   * Defaults to 1.
+   * @return The number of performance tables.
+   *         Defaults to 1.
    */
   public final int getNumTables() {
     return this.numTables;
   }
 
   /**
-   * @see #getNumTables()
+   * @param v {@link #getNumTables()}
    */
   public final void setNumTables(final int v) {
     this.numTables = v;
   }
 
   /**
-   * Maximum duration the tournament should run. This
-   * is used to limit the search space when generating a schedule.
-   * 
+   * @return Maximum duration the tournament should run. This
+   *         is used to limit the search space when generating a schedule.
    * @see #getTMaxHours()
    * @see #getTMaxMinutes()
    */
@@ -425,16 +422,16 @@ public class SolverParams extends SchedParams {
   private int tmaxHours = 8;
 
   /**
-   * Maximum number of hours the tournament should run. This
-   * is used to limit the search space when generating a schedule.
-   * Defaults to 8.
+   * @return Maximum number of hours the tournament should run. This
+   *          is used to limit the search space when generating a schedule.
+   *          Defaults to 8.
    */
   public final int getTMaxHours() {
     return this.tmaxHours;
   }
 
   /**
-   * @see #getTMaxHours()
+   * @param v {@link #getTMaxHours()}
    */
   public final void setTMaxHours(final int v) {
     this.tmaxHours = v;
@@ -444,16 +441,16 @@ public class SolverParams extends SchedParams {
   private int tmaxMinutes = 0;
 
   /**
-   * This property is combined with {@link #getTMaxHours()} to create
-   * the limit on how long the tournament can be.
-   * Defaults to 0.
+   * @return This property is combined with {@link #getTMaxHours()} to create
+   *         the limit on how long the tournament can be.
+   *         Defaults to 0.
    */
   public final int getTMaxMinutes() {
     return this.tmaxMinutes;
   }
 
   /**
-   * @see #getTMaxMinutes()
+   * @param v {@link #getTMaxMinutes()}
    */
   public final void setTMaxMinutes(final int v) {
     this.tmaxMinutes = v;
@@ -505,10 +502,10 @@ public class SolverParams extends SchedParams {
       throws ParseException {
     final List<ScheduledBreak> breaks = new LinkedList<ScheduledBreak>();
 
-    final int numBreaks = Integer.parseInt(properties.getProperty(String.format(numBreaksFormat, breakType), "0"));
+    final int numBreaks = Integer.parseInt(properties.getProperty(String.format(NUM_BREAKS_FORMAT, breakType), "0"));
     for (int i = 0; i < numBreaks; ++i) {
-      final String startStr = properties.getProperty(String.format(startFormat, breakType, i), null);
-      final String durationStr = properties.getProperty(String.format(durationFormat, breakType, i), null);
+      final String startStr = properties.getProperty(String.format(START_FORMAT, breakType, i), null);
+      final String durationStr = properties.getProperty(String.format(DURATION_FORMAT, breakType, i), null);
       if (null == startStr
           || null == durationStr) {
         throw new FLLRuntimeException(String.format("Missing start or duration for %s break %d", breakType, i));
@@ -534,15 +531,15 @@ public class SolverParams extends SchedParams {
                           final String breakType,
                           final List<ScheduledBreak> breaks) {
     final int numBreaks = breaks.size();
-    properties.setProperty(String.format(numBreaksFormat, breakType), Integer.toString(numBreaks));
+    properties.setProperty(String.format(NUM_BREAKS_FORMAT, breakType), Integer.toString(numBreaks));
 
     for (int i = 0; i < numBreaks; ++i) {
       final ScheduledBreak sbreak = breaks.get(i);
-      final String startStr = String.format(startFormat, breakType, i);
+      final String startStr = String.format(START_FORMAT, breakType, i);
       final String formattedStart = TournamentSchedule.formatTime(sbreak.getStart());
       properties.setProperty(startStr, formattedStart);
 
-      final String durationStr = String.format(durationFormat, breakType, i);
+      final String durationStr = String.format(DURATION_FORMAT, breakType, i);
       properties.setProperty(durationStr, Long.toString(sbreak.getDuration().toMinutes()));
     }
 
@@ -559,14 +556,16 @@ public class SolverParams extends SchedParams {
       if ((performanceDurationMinutes
           & 1) == 1) {
         errors.add("Number of timeslots for performance duration minutes ("
-            + performanceDurationMinutes + ") is not even and must be to alternate tables.");
+            + performanceDurationMinutes
+            + ") is not even and must be to alternate tables.");
       }
 
       // make sure num tables is even
       if ((getNumTables()
           & 1) == 1) {
         errors.add("Number of tables ("
-            + getNumTables() + ") is not even and must be to alternate tables.");
+            + getNumTables()
+            + ") is not even and must be to alternate tables.");
       }
 
     }

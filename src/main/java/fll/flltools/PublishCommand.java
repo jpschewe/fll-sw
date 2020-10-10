@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Base class for all publish messages
+ * Base class for all publish messages.
  */
 public abstract class PublishCommand extends BaseMessage implements SequenceNumberCommand {
 

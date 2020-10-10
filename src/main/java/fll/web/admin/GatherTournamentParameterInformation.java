@@ -23,8 +23,16 @@ import fll.web.playoff.Playoff;
 /**
  * Gather parameter information for edit_tournament_parameters.jsp.
  */
-public class GatherTournamentParameterInformation {
+public final class GatherTournamentParameterInformation {
 
+  private GatherTournamentParameterInformation() {
+  }
+
+  /**
+   * @param application get application variables
+   * @param pageContext set variables for the page
+   * @throws SQLException on a database error
+   */
   public static void populateContext(final ServletContext application,
                                      final PageContext pageContext)
       throws SQLException {

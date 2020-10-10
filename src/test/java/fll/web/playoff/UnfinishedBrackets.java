@@ -25,7 +25,7 @@ public final class UnfinishedBrackets extends UnfinishedBaseTest {
    * @return brack names for {@link #test(String)}
    */
   public static String[] names() {
-    return UnfinishedBaseTest.unfinishedBracketNames;
+    return UnfinishedBaseTest.UNFINISHED_BRACKET_NAMES;
   }
 
   /**
@@ -37,7 +37,8 @@ public final class UnfinishedBrackets extends UnfinishedBaseTest {
   @ParameterizedTest
   @MethodSource("names")
   public void test(final String bracketName) throws SQLException {
-    final boolean result = Playoff.isPlayoffBracketUnfinished(connection, tournament.getTournamentID(), bracketName);
+    final boolean result = Playoff.isPlayoffBracketUnfinished(getConnection(), getTournament().getTournamentID(),
+                                                              bracketName);
     assertThat(result, is(true));
   }
 }

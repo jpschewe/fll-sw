@@ -57,7 +57,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.ImportDB;
 import fll.util.FLLRuntimeException;
 import fll.xml.ScoreType;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Some handy utilities.
@@ -127,6 +126,10 @@ public final class Utilities {
     return INTEGER_NUMBER_FORMAT_INSTANCE.get();
   }
 
+  /**
+   * @param type the score type
+   * @return the format object for the specified score type
+   */
   public static NumberFormat getFormatForScoreType(final ScoreType type) {
     return type == ScoreType.FLOAT ? getFloatingPointNumberFormat() : getIntegerNumberFormat();
   }
@@ -167,8 +170,6 @@ public final class Utilities {
                                  final Map<String, String> types,
                                  final Reader reader)
       throws IOException, SQLException {
-    Statement stmt = null;
-    PreparedStatement prep = null;
     try {
       final CSVReader csvreader = new CSVReader(reader);
 
@@ -188,54 +189,53 @@ public final class Utilities {
       if (null == line) {
         throw new RuntimeException("Cannot find the header line");
       }
-      stmt = connection.createStatement();
+
       final String[] columnTypes = new String[line.length];
-      for (int columnIndex = 0; columnIndex < line.length; ++columnIndex) {
-        final String columnName = line[columnIndex].toLowerCase();
-        if (columnIndex > 0) {
-          createTable.append(", ");
-          insertPrepSQL.append(", ");
-          valuesSQL.append(", ");
+      try (Statement stmt = connection.createStatement()) {
+        for (int columnIndex = 0; columnIndex < line.length; ++columnIndex) {
+          final String columnName = line[columnIndex].toLowerCase();
+          if (columnIndex > 0) {
+            createTable.append(", ");
+            insertPrepSQL.append(", ");
+            valuesSQL.append(", ");
+          }
+          String type = types.get(columnName);
+          if (null == type) {
+            type = "longvarchar";
+          }
+          // handle old dumps with no size
+          if (type.equalsIgnoreCase("varchar")) {
+            type = "varchar(255)";
+          }
+          // handle old dumps with no size
+          if (type.equalsIgnoreCase("char")) {
+            type = "char(255)";
+          }
+          columnTypes[columnIndex] = type;
+          createTable.append(columnName);
+          createTable.append(" "
+              + type);
+          insertPrepSQL.append(columnName);
+          valuesSQL.append("?");
         }
-        String type = types.get(columnName);
-        if (null == type) {
-          type = "longvarchar";
-        }
-        // handle old dumps with no size
-        if (type.equalsIgnoreCase("varchar")) {
-          type = "varchar(255)";
-        }
-        // handle old dumps with no size
-        if (type.equalsIgnoreCase("char")) {
-          type = "char(255)";
-        }
-        columnTypes[columnIndex] = type;
-        createTable.append(columnName);
-        createTable.append(" "
-            + type);
-        insertPrepSQL.append(columnName);
-        valuesSQL.append("?");
-      }
-      createTable.append(")");
-      insertPrepSQL.append(")");
-      valuesSQL.append(")");
-      stmt.executeUpdate(createTable.toString());
-      SQLFunctions.close(stmt);
+        createTable.append(")");
+        insertPrepSQL.append(")");
+        valuesSQL.append(")");
+        stmt.executeUpdate(createTable.toString());
+      } // statement
 
       // load each line into a row in the table
-      prep = connection.prepareStatement(insertPrepSQL.append(valuesSQL).toString());
-      while (null != (line = csvreader.readNext())) {
-        for (int columnIndex = 0; columnIndex < line.length; ++columnIndex) {
-          coerceData(line[columnIndex], columnTypes[columnIndex], prep, columnIndex
-              + 1);
+      try (PreparedStatement prep = connection.prepareStatement(insertPrepSQL.append(valuesSQL).toString())) {
+        while (null != (line = csvreader.readNext())) {
+          for (int columnIndex = 0; columnIndex < line.length; ++columnIndex) {
+            coerceData(line[columnIndex], columnTypes[columnIndex], prep, columnIndex
+                + 1);
+          }
+          prep.executeUpdate();
         }
-        prep.executeUpdate();
-      }
+      } // prepared statement
     } catch (final CsvValidationException e) {
       throw new IOException("Error reading line of file", e);
-    } finally {
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(prep);
     }
   }
 
@@ -357,21 +357,18 @@ public final class Utilities {
    *
    * @param connection the connection to check
    * @return true if the database is initialized
+   * @throws SQLException on a database error
    */
   public static boolean testDatabaseInitialized(final Connection connection) throws SQLException {
-    ResultSet rs = null;
-    try {
-      // get list of tables that already exist
-      final DatabaseMetaData metadata = connection.getMetaData();
-      rs = metadata.getTables(null, null, "%", null);
+    // get list of tables that already exist
+    final DatabaseMetaData metadata = connection.getMetaData();
+    try (ResultSet rs = metadata.getTables(null, null, "%", null)) {
       while (rs.next()) {
         if ("tournament_parameters".toLowerCase().equals(rs.getString(3).toLowerCase())) {
           return true;
         }
       }
       return false;
-    } finally {
-      SQLFunctions.close(rs);
     }
   }
 

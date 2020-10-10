@@ -28,12 +28,19 @@ public class ProgressDialog extends JDialog implements CheckCanceled {
 
   private final Object mLock = new Object();
 
+  /**
+   * @param owner {@link JDialog#getOwner()}
+   */
   public ProgressDialog(final Dialog owner) {
     super(owner, true);
 
     initComponents();
   }
 
+  /**
+   * @param owner {@link JDialog#getOwner()}
+   * @param title {@link JDialog#getTitle()}
+   */
   public ProgressDialog(final Dialog owner,
                         final String title) {
     super(owner, title, true);
@@ -41,12 +48,19 @@ public class ProgressDialog extends JDialog implements CheckCanceled {
     initComponents();
   }
 
+  /**
+   * @param owner {@link JDialog#getOwner()}
+   */
   public ProgressDialog(final Frame owner) {
     super(owner, true);
 
     initComponents();
   }
 
+  /**
+   * @param owner {@link JDialog#getOwner()}
+   * @param title {@link JDialog#getTitle()}
+   */
   public ProgressDialog(final Frame owner,
                         final String title) {
     super(owner, title, true);
@@ -54,12 +68,19 @@ public class ProgressDialog extends JDialog implements CheckCanceled {
     initComponents();
   }
 
+  /**
+   * @param owner {@link JDialog#getOwner()}
+   */
   public ProgressDialog(final Window owner) {
     super(owner, Dialog.ModalityType.APPLICATION_MODAL);
 
     initComponents();
   }
 
+  /**
+   * @param owner {@link JDialog#getOwner()}
+   * @param title {@link JDialog#getTitle()}
+   */
   public ProgressDialog(final Window owner,
                         final String title) {
     super(owner, title, Dialog.ModalityType.APPLICATION_MODAL);
@@ -93,7 +114,7 @@ public class ProgressDialog extends JDialog implements CheckCanceled {
   }
 
   /**
-   * The text displayed above the progress bar.
+   * @param note The text displayed above the progress bar.
    */
   public void setNote(final String note) {
     mNote.setText(note);
@@ -103,7 +124,7 @@ public class ProgressDialog extends JDialog implements CheckCanceled {
   private boolean mCanceled;
 
   /**
-   * Check if the cancel button has been pressed.
+   * @return Check if the cancel button has been pressed.
    */
   public boolean isCanceled() {
     synchronized (mLock) {
@@ -119,8 +140,6 @@ public class ProgressDialog extends JDialog implements CheckCanceled {
 
   /**
    * Overridden to reset the canceled flag.
-   * 
-   * @see java.awt.Dialog#setVisible(boolean)
    */
   @Override
   public void setVisible(final boolean value) {

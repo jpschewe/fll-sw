@@ -33,10 +33,9 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * Verify the judges information
+ * Verify the judges information.
  */
 @WebServlet("/admin/VerifyJudges")
 public class VerifyJudges extends BaseFLLServlet {
@@ -54,10 +53,8 @@ public class VerifyJudges extends BaseFLLServlet {
       LOGGER.trace("Top of VerifyJudges.processRequest");
     }
 
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
       final int tournament = Queries.getCurrentTournament(connection);
 
@@ -154,8 +151,6 @@ public class VerifyJudges extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }
