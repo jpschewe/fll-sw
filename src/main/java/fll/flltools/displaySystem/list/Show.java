@@ -14,6 +14,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * A message to tell the list module to display.
  */
 public class Show extends BaseListMessage {
+  /**
+   * @param node {@link #getNode()}
+   */
   public Show(@Nonnull final String node) {
     super(node, "show");
   }

@@ -13,7 +13,6 @@ import java.sql.SQLException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.FLLInternalException;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Constants for the tournament parameters in the database.
@@ -373,6 +372,7 @@ public final class TournamentParameters {
    * @param tournament the tournament ID
    * @param connection the connection
    * @param newSeedingRounds the new value of seeding rounds
+   * @throws SQLException on a database error
    */
   public static void setNumSeedingRounds(final Connection connection,
                                          final int tournament,
@@ -397,7 +397,7 @@ public final class TournamentParameters {
    * Set the default value for the number of seeding rounds.
    * 
    * @param connection database connection
-   * @param newSeedingRounds
+   * @param newSeedingRounds the new value
    * @throws SQLException on a database error
    */
   public static void setDefaultNumSeedingRounds(final Connection connection,
@@ -418,15 +418,12 @@ public final class TournamentParameters {
   public static boolean defaultParameterExists(final Connection connection,
                                                final String paramName)
       throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = TournamentParameters.getTournamentParameterStmt(connection, GenerateDB.INTERNAL_TOURNAMENT_ID, paramName);
-      rs = prep.executeQuery();
+    try (
+        PreparedStatement prep = TournamentParameters.getTournamentParameterStmt(connection,
+                                                                                 GenerateDB.INTERNAL_TOURNAMENT_ID,
+                                                                                 paramName);
+        ResultSet rs = prep.executeQuery()) {
       return rs.next();
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
   }
 
@@ -475,6 +472,7 @@ public final class TournamentParameters {
    * @param connection database connection
    * @param tournament the tournament ID
    * @see #getPerformanceAdvancementPercentage(Connection, int)
+   * @throws SQLException on a database error
    */
   public static void unsetPerformanceAdvancementPercentage(final Connection connection,
                                                            final int tournament)

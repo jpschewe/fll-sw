@@ -17,6 +17,10 @@ import fll.flltools.PublishCommand;
  */
 public abstract class BaseListMessage extends PublishCommand {
 
+  /**
+   * @param node {@link #getNode()}
+   * @param action what list action to execute
+   */
   public BaseListMessage(@Nonnull final String node,
                          @Nonnull final String action) {
     super("list:"

@@ -36,6 +36,7 @@ import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.playoff.BracketUpdate;
 import fll.web.playoff.DatabaseTeamScore;
@@ -776,6 +777,7 @@ public final class Queries {
    * @param connection database connection
    * @param teamNumber team to delete the score for
    * @param runNumber run number to delete
+   * @throws SQLException on a database error
    */
   @SuppressFBWarnings(value = "OBL_UNSATISFIED_OBLIGATION", justification = "Bug in findbugs - ticket:2924739")
   public static void deletePerformanceScore(final Connection connection,
@@ -987,7 +989,7 @@ public final class Queries {
    * @param lastPlayoffRound the last playoff round to include
    * @param currentTournament the tournament to work with
    * @return the updates to send to the display
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
   public static Collection<BracketUpdate> getH2HBracketData(final Connection connection,
                                                             final int currentTournament,
@@ -1069,7 +1071,7 @@ public final class Queries {
    */
   public static @Nullable String getEventDivision(final Connection connection,
                                                   final int teamNumber)
-      throws SQLException, RuntimeException {
+      throws SQLException {
     return getEventDivision(connection, teamNumber, getCurrentTournament(connection));
   }
 
@@ -1702,6 +1704,7 @@ public final class Queries {
    * @return null on success, the name of the other team with the same team
    *         number on an error
    * @throws FLLRuntimeException if the team number is an internal team number
+   * @throws SQLException on a database error
    */
   public static @Nullable String addTeam(final Connection connection,
                                          final int number,
@@ -1976,6 +1979,7 @@ public final class Queries {
    * @param tournamentID tournament ID
    * @return true if any playoff bracket is initialized in the tournament
    * @throws SQLException if the database connection fails
+   * @throws RuntimeException if there is no playoff data for this tournament
    */
   public static boolean isPlayoffDataInitialized(final Connection connection,
                                                  final int tournamentID)
@@ -2061,7 +2065,7 @@ public final class Queries {
    * @param index the division index
    * @return color in a format suitable for use in an HTML document
    */
-  public static String getColorForIndex(final int index) throws SQLException {
+  public static String getColorForIndex(final int index) {
     final int idx = index
         % 4;
     switch (idx) {
@@ -2074,7 +2078,7 @@ public final class Queries {
     case 3:
       return "#FF00FF";
     default:
-      throw new RuntimeException("Internal error, cannot choose color");
+      throw new FLLInternalException("Internal error, cannot choose color");
     }
   }
 
@@ -2093,7 +2097,7 @@ public final class Queries {
                               final int tournament,
                               final int teamNumber,
                               final int runNumber)
-      throws SQLException, IllegalArgumentException {
+      throws SQLException {
     try (PreparedStatement prep = getScoreStatsPrep(connection)) {
       prep.setInt(1, tournament);
       prep.setInt(2, teamNumber);
@@ -2124,7 +2128,7 @@ public final class Queries {
                                  final int tournament,
                                  final int teamNumber,
                                  final int runNumber)
-      throws SQLException, IllegalArgumentException {
+      throws SQLException {
     try (PreparedStatement prep = getScoreStatsPrep(connection)) {
       prep.setInt(1, tournament);
       prep.setInt(2, teamNumber);
@@ -2171,7 +2175,7 @@ public final class Queries {
    *
    * @param connection
    * @return 1 is tournament, 2 is teamNumber, 3 is runNumber
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
   @SuppressFBWarnings(value = { "NP_LOAD_OF_KNOWN_NULL_VALUE" }, justification = "Findbugs bug 3477957")
   private static PreparedStatement getScoreStatsPrep(final Connection connection) throws SQLException {
@@ -2353,6 +2357,7 @@ public final class Queries {
    * @param round the playoff round number
    * @param line the line number in the head to head bracket
    * @return the table assignment
+   * @throws SQLException on a database error
    */
   public static @Nullable String getAssignedTable(final Connection connection,
                                                   final int tournament,

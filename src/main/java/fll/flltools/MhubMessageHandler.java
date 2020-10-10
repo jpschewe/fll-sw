@@ -282,6 +282,10 @@ public class MhubMessageHandler extends Thread {
     }
   }
 
+  /**
+   * @param session the session that had an error
+   * @param t the exception
+   */
   @OnError
   public void error(final Session session,
                     final Throwable t) {
@@ -307,8 +311,12 @@ public class MhubMessageHandler extends Thread {
     sessionList.remove(session);
   }
 
+  /**
+   * @param session the session that was opened
+   * @throws IOException if there was an error working with the session
+   */
   @OnOpen
-  public void onOpen(Session session) throws IOException {
+  public void onOpen(final Session session) throws IOException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Websocket opened: "
           + session.getId());
@@ -323,6 +331,10 @@ public class MhubMessageHandler extends Thread {
     }
   }
 
+  /**
+   * @param session the session that was closed
+   * @throws IOException if there was an error working with the session
+   */
   @OnClose
   public void onClose(final Session session) {
     if (LOGGER.isTraceEnabled()) {
@@ -411,6 +423,10 @@ public class MhubMessageHandler extends Thread {
     }
   }
 
+  /**
+   * @param session the session
+   * @param msg the message that was received
+   */
   @OnMessage
   public void receiveTextMessage(@SuppressWarnings("unused") final Session session,
                                  final String msg) {

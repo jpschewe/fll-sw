@@ -109,6 +109,9 @@ public class ButtonColumn extends AbstractCellEditor
     editButton.setBorder(focusBorder);
   }
 
+  /**
+   * @return {@link #setMnemonic(int)}
+   */
   public int getMnemonic() {
     return mnemonic;
   }
@@ -150,9 +153,7 @@ public class ButtonColumn extends AbstractCellEditor
     return editorValue;
   }
 
-  //
-  // Implement TableCellRenderer interface
-  //
+  @Override
   public Component getTableCellRendererComponent(final JTable table,
                                                  final Object value,
                                                  final boolean isSelected,
@@ -191,9 +192,10 @@ public class ButtonColumn extends AbstractCellEditor
   //
   // Implement ActionListener interface
   //
-  /*
+  /**
    * The button has been pressed. Stop editing and invoke the custom Action
    */
+  @Override
   public void actionPerformed(final ActionEvent e) {
     final int row = table.convertRowIndexToModel(table.getEditingRow());
     fireEditingStopped();
@@ -207,17 +209,19 @@ public class ButtonColumn extends AbstractCellEditor
   //
   // Implement MouseListener interface
   //
-  /*
+  /**
    * When the mouse is pressed the editor is invoked. If you then then drag
    * the mouse to another cell before releasing it, the editor is still
    * active. Make sure editing is stopped when the mouse is released.
    */
+  @Override
   public void mousePressed(MouseEvent e) {
     if (table.isEditing()
         && table.getCellEditor() == this)
       isButtonColumnEditor = true;
   }
 
+  @Override
   public void mouseReleased(MouseEvent e) {
     if (isButtonColumnEditor
         && table.isEditing())
@@ -226,12 +230,15 @@ public class ButtonColumn extends AbstractCellEditor
     isButtonColumnEditor = false;
   }
 
+  @Override
   public void mouseClicked(MouseEvent e) {
   }
 
+  @Override
   public void mouseEntered(MouseEvent e) {
   }
 
+  @Override
   public void mouseExited(MouseEvent e) {
   }
 }

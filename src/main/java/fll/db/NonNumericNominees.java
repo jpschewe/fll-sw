@@ -187,6 +187,7 @@ public class NonNumericNominees {
    * @param judge the judge
    * @param teamNumber the team number
    * @return the titles of the non-numeric categories
+   * @throws SQLException on a database error
    */
   public static Set<String> getNomineesByJudgeForTeam(final Connection connection,
                                                       final Tournament tournament,

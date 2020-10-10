@@ -17,6 +17,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class SetArray extends BaseListMessage {
 
+  /**
+   * Constructor.
+   */
   public SetArray() {
     super("default", "setArray");
   }
@@ -53,6 +56,10 @@ public class SetArray extends BaseListMessage {
    * @see SetArray#getData()
    */
   public static final class Payload {
+    /**
+     * @param header {@link #getHeader()}
+     * @param data {@link #getData()}
+     */
     public Payload(final String header,
                    final List<List<String>> data) {
       this.header = header;
