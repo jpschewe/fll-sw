@@ -13,26 +13,29 @@ import fll.util.FLLRuntimeException;
  */
 public class ChallengeXMLException extends FLLRuntimeException {
 
+  /**
+   * Base constructor.
+   */
   public ChallengeXMLException() {
   }
 
   /**
-   * @param message passed to the parent class
+   * @param message {@link #getMessage()}
    */
   public ChallengeXMLException(final String message) {
     super(message);
   }
 
   /**
-   * @param cause passed to the parent class
+   * @param cause {@link #getCause()}
    */
   public ChallengeXMLException(final Throwable cause) {
     super(cause);
   }
 
   /**
-   * @param message passed to the parent class
-   * @param cause passed to the parent class
+   * @param message {@link #getMessage()}
+   * @param cause {@link #getCause()}
    */
   public ChallengeXMLException(final String message,
                                final Throwable cause) {

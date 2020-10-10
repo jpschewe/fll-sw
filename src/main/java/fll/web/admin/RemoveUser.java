@@ -25,7 +25,6 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.CookieUtils;
 import fll.web.SessionAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Java code to handle removing of users.
@@ -33,14 +32,17 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 @WebServlet("/admin/RemoveUser")
 public class RemoveUser extends BaseFLLServlet {
 
+  /**
+   * @param request read the parameters
+   * @param application get application variables
+   * @param pageContext write page variables
+   */
   public static void populateContext(final HttpServletRequest request,
                                      final ServletContext application,
                                      final PageContext pageContext) {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
       final String user = Queries.checkValidLogin(connection, loginKeys);
@@ -51,8 +53,6 @@ public class RemoveUser extends BaseFLLServlet {
 
     } catch (final SQLException e) {
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }
@@ -64,9 +64,7 @@ public class RemoveUser extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final String userToRemove = request.getParameter("remove_user");
       if (null != userToRemove
@@ -82,8 +80,6 @@ public class RemoveUser extends BaseFLLServlet {
 
     } catch (final SQLException e) {
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }

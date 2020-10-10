@@ -145,6 +145,7 @@ public class ScoresheetGenerator {
    * @param connection where to find database information
    * @param tournament the tournament ID
    * @param description description of the challenge
+   * @throws SQLException on a database error
    */
   public ScoresheetGenerator(final HttpServletRequest request,
                              final Connection connection,

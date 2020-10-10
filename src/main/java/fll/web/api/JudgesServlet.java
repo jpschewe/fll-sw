@@ -147,7 +147,15 @@ public class JudgesServlet extends HttpServlet {
 
   }
 
+  /**
+   * The result of an upload.
+   */
   public static final class UploadResult {
+    /**
+     * @param success {@link #getSuccess()}
+     * @param message {@link #getMessage()}
+     * @param numNewJudges {@link #getNumNewJudges()}
+     */
     public UploadResult(final boolean success,
                         final String message,
                         final int numNewJudges) {
@@ -158,18 +166,27 @@ public class JudgesServlet extends HttpServlet {
 
     private final boolean mSuccess;
 
+    /**
+     * @return if the upload was successful
+     */
     public boolean getSuccess() {
       return mSuccess;
     }
 
     private final String mMessage;
 
+    /**
+     * @return message for the user
+     */
     public String getMessage() {
       return mMessage;
     }
 
     private final int mNumNewJudges;
 
+    /**
+     * @return number of new judges
+     */
     public int getNumNewJudges() {
       return mNumNewJudges;
     }

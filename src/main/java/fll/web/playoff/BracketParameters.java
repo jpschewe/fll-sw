@@ -79,6 +79,7 @@ public class BracketParameters extends BaseFLLServlet {
     }
   }
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,

@@ -20,6 +20,9 @@ public class GuiExceptionHandler implements UncaughtExceptionHandler {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  /**
+   * Base constructor.
+   */
   public GuiExceptionHandler() {
   }
 

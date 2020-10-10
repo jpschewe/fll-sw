@@ -35,6 +35,11 @@ public class ConditionStatement extends AbstractConditionStatement {
    */
   public static final String RIGHT_TAG_NAME = "right";
 
+  /**
+   * @param ele the element to parse
+   * @param goalScope where to find goals
+   * @param variableScope where to find variables
+   */
   public ConditionStatement(final Element ele,
                             final GoalScope goalScope,
                             final VariableScope variableScope) {
@@ -58,16 +63,23 @@ public class ConditionStatement extends AbstractConditionStatement {
 
   private final ComplexPolynomial mLeft;
 
+  /**
+   * @return the left side of the condition
+   */
   public ComplexPolynomial getLeft() {
     return mLeft;
   }
 
   private final ComplexPolynomial mRight;
 
+  /**
+   * @return the right side of the condition
+   */
   public ComplexPolynomial getRight() {
     return mRight;
   }
 
+  @Override
   public boolean isTrue(TeamScore teamScore) {
     final double left = getLeft().evaluate(teamScore);
     final double right = getRight().evaluate(teamScore);

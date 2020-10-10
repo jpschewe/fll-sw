@@ -19,6 +19,9 @@ public class SubjectiveStationModel extends AbstractTableModel {
 
   private final List<SubjectiveStation> stations = new ArrayList<>();
 
+  /**
+   * Constructor.
+   */
   public SubjectiveStationModel() {
   }
 
@@ -111,7 +114,7 @@ public class SubjectiveStationModel extends AbstractTableModel {
   }
 
   /**
-   * Specify the stations for the model.
+   * @param stations Specify the stations for the model.
    */
   public void setData(final List<SubjectiveStation> stations) {
     this.stations.clear();
@@ -140,11 +143,11 @@ public class SubjectiveStationModel extends AbstractTableModel {
         - 1, stations.size()
             - 1);
   }
-  
+
   /**
    * Delete the specified row.
    * 
-   * @param row
+   * @param row row index to delete
    */
   public void deleteRow(final int row) {
     stations.remove(row);

@@ -155,6 +155,9 @@ public final class ImportDbSessionInfo {
     return redirectURL;
   }
 
+  /**
+   * @param v {@link #getRedirectURL()}
+   */
   public void setRedirectURL(final String v) {
     redirectURL = v;
   }

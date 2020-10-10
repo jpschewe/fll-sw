@@ -112,6 +112,9 @@ public final class TeamScheduleInfo implements Serializable {
     return allPerformances().filter(pt -> pt.getTime().equals(time)).findFirst().orElse(null);
   }
 
+  /**
+   * @param teamNumber {@link #getTeamNumber()}
+   */
   public TeamScheduleInfo(final int teamNumber) {
     this.teamNumber = teamNumber;
   }
@@ -220,14 +223,23 @@ public final class TeamScheduleInfo implements Serializable {
 
   private final HashMap<String, SubjectiveTime> subjectiveTimes = new HashMap<>();
 
+  /**
+   * @return unmodifiable collection of subjective times
+   */
   public Collection<SubjectiveTime> getSubjectiveTimes() {
     return Collections.unmodifiableCollection(subjectiveTimes.values());
   }
 
+  /**
+   * @param s the time to add
+   */
   public void addSubjectiveTime(final SubjectiveTime s) {
     subjectiveTimes.put(s.getName(), s);
   }
 
+  /**
+   * @param s the time to remove
+   */
   public void removeSubjectiveTime(final SubjectiveTime s) {
     subjectiveTimes.remove(s.getName());
   }
@@ -238,10 +250,13 @@ public final class TeamScheduleInfo implements Serializable {
    * @param name name of a judging station
    * @return null if no time with that name found
    */
-  public SubjectiveTime getSubjectiveTimeByName(final String name) {
+  public @Nullable SubjectiveTime getSubjectiveTimeByName(final String name) {
     return subjectiveTimes.get(name);
   }
 
+  /**
+   * @return unmodifiable set of the subjective stations
+   */
   public Set<String> getKnownSubjectiveStations() {
     return Collections.unmodifiableSet(subjectiveTimes.keySet());
   }

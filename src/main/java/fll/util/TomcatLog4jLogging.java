@@ -10,7 +10,6 @@ import org.apache.juli.logging.Log;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
 /**
  * Send Tomcat log data to log4j.
  */
@@ -18,12 +17,16 @@ public class TomcatLog4jLogging implements Log {
 
   private final Logger logger;
 
-  // this constructor is important, otherwise the ServiceLoader cannot start
+  /** This constructor is important, otherwise the ServiceLoader cannot start. */
   public TomcatLog4jLogging() {
     logger = LogManager.getLogger(TomcatLog4jLogging.class);
   }
 
-  // this constructor is needed by the LogFactory implementation
+  /**
+   * This constructor is needed by the LogFactory implementation.
+   * 
+   * @param name the name of the logger
+   */
   public TomcatLog4jLogging(final String name) {
     logger = LogManager.getLogger(name);
   }

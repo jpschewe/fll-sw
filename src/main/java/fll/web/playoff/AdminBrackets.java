@@ -35,6 +35,11 @@ public final class AdminBrackets {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  /**
+   * @param request request parameters
+   * @param application application variables
+   * @param pageContext page variables
+   */
   public static void populateContext(final HttpServletRequest request,
                                      final ServletContext application,
                                      final PageContext pageContext) {

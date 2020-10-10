@@ -26,6 +26,7 @@ import fll.web.WebUtils;
 @WebServlet("/subjective/Auth")
 public class AuthServlet extends BaseFLLServlet {
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,

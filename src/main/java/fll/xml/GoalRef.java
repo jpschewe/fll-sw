@@ -31,6 +31,10 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
 
   private static final String GOAL_ATTRIBUTE = "goal";
 
+  /**
+   * @param ele the element to parse
+   * @param scope {@link #getGoalScope()}
+   */
   public GoalRef(@NonNull final Element ele,
                  @NonNull final @UnderInitialization GoalScope scope) {
     mScoreType = GoalScoreType.fromString(ele.getAttribute(SCORE_TYPE_ATTRIBUTE));
@@ -125,6 +129,10 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
     return value;
   }
 
+  /**
+   * @param doc used to creates elements
+   * @return XML representation of this object
+   */
   public Element toXml(final Document doc) {
     final Element ele = doc.createElement(TAG_NAME);
     ele.setAttribute(SCORE_TYPE_ATTRIBUTE, mScoreType.toXmlString());

@@ -112,6 +112,10 @@ public class H2HUpdateWebSocket {
     }
   }
 
+  /**
+   * @param session the session
+   * @param msg the message received
+   */
   @OnMessage
   public void receiveTextMessage(final Session session,
                                  final String msg) {
@@ -302,6 +306,10 @@ public class H2HUpdateWebSocket {
 
   }
 
+  /**
+   * @param session session that has an error
+   * @param t the exception
+   */
   @OnError
   public void error(@SuppressWarnings("unused") final Session session,
                     final Throwable t) {
@@ -351,7 +359,7 @@ public class H2HUpdateWebSocket {
    * @param team the team
    * @param performanceRunNumber the run number
    * @param dbLine the line in the playoff table to find the bracket entry at
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
   public static void updateBracket(final Connection connection,
                                    final ScoreType performanceScoreType,

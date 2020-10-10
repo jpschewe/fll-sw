@@ -242,6 +242,7 @@ public class HSLColor {
     return hsl[1];
   }
 
+  @Override
   public String toString() {
     String toString = "HSLColor[h="
         + hsl[0]

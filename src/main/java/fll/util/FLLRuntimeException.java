@@ -12,31 +12,32 @@ package fll.util;
 public class FLLRuntimeException extends RuntimeException {
 
   /**
-   * 
+   * Base constructor.
    */
   public FLLRuntimeException() {
     super();
   }
 
   /**
-   * @param message
+   * @param message {@link #getMessage()}
    */
   public FLLRuntimeException(final String message) {
     super(message);
   }
 
   /**
-   * @param cause
+   * @param cause {@link #getCause()}
    */
   public FLLRuntimeException(final Throwable cause) {
     super(cause);
   }
 
   /**
-   * @param message
-   * @param cause
+   * @param message {@link #getMessage()}
+   * @param cause {@link #getCause()}
    */
-  public FLLRuntimeException(final String message, final Throwable cause) {
+  public FLLRuntimeException(final String message,
+                             final Throwable cause) {
     super(message, cause);
   }
 

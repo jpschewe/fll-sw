@@ -27,6 +27,10 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
    */
   public static final String TAG_NAME = "computedGoal";
 
+  /**
+   * @param ele the element to parse
+   * @param goalScope {@link #getGoalScope()}
+   */
   public ComputedGoal(final Element ele,
                       final @UnderInitialization GoalScope goalScope) {
     super(ele);

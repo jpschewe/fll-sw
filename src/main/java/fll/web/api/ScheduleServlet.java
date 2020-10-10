@@ -25,20 +25,21 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
+/**
+ * APi access to the tournament schedule.
+ */
 @WebServlet("/api/Schedule/*")
 public class ScheduleServlet extends HttpServlet {
 
   @Override
   protected final void doGet(final HttpServletRequest request,
-                             final HttpServletResponse response) throws IOException, ServletException {
+                             final HttpServletResponse response)
+      throws IOException, ServletException {
     final ServletContext application = getServletContext();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
@@ -57,8 +58,6 @@ public class ScheduleServlet extends HttpServlet {
 
     } catch (final SQLException e) {
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }

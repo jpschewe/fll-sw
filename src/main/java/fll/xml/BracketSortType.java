@@ -17,6 +17,9 @@ public enum BracketSortType {
 
   private final String mDescription;
 
+  /**
+   * @return the description of the sort type
+   */
   public String getDescription() {
     return mDescription;
   }

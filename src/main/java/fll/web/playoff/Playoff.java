@@ -686,7 +686,7 @@ public final class Playoff {
   /**
    * Maximum playoff round, this is the final winner.
    *
-   * @param connection
+   * @param connection database connection
    * @param tournament the tournament
    * @param playoffDivision the bracket name
    * @return max playoff round, -1 if there are no playoff rounds for this

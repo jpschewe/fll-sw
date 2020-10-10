@@ -187,12 +187,18 @@ public class FinalistSchedule implements Serializable {
 
   private final int mTournament;
 
+  /**
+   * @return tournament that the schedule is for
+   */
   public int getTournament() {
     return mTournament;
   }
 
   private final String mDivision;
 
+  /**
+   * @return the award group the schedule is for
+   */
   public String getDivision() {
     return mDivision;
   }

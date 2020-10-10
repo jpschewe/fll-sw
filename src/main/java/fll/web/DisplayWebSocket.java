@@ -35,6 +35,9 @@ public class DisplayWebSocket {
 
   private static final Object SESSIONS_LOCK = new Object();
 
+  /**
+   * @param session the session for the newly opened websocket
+   */
   @OnOpen
   public void onOpen(final Session session) {
     final HttpSession httpSession = (HttpSession) session.getUserProperties()
@@ -105,6 +108,10 @@ public class DisplayWebSocket {
     }
   }
 
+  /**
+   * @param session the session that threw an error
+   * @param t the exception
+   */
   @OnError
   public void error(final Session session,
                     final Throwable t) {

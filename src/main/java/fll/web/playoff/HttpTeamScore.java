@@ -14,6 +14,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public final class HttpTeamScore extends TeamScore {
 
+  /**
+   * @param teamNumber {@link #getTeamNumber()}
+   * @param runNumber {@link #getRunNumber()}
+   * @param request used to read the goal scores
+   */
   public HttpTeamScore(final int teamNumber,
                        final int runNumber,
                        final HttpServletRequest request) {

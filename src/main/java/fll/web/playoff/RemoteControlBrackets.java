@@ -39,6 +39,11 @@ public final class RemoteControlBrackets {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  /**
+   * @param application application variables
+   * @param session session variables
+   * @param pageContext page variables
+   */
   public static void populateContext(final ServletContext application,
                                      final HttpSession session,
                                      final PageContext pageContext) {

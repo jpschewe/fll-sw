@@ -155,10 +155,16 @@ public class ChallengeDescription implements Serializable {
 
   private WinnerType mWinner;
 
+  /**
+   * @return how the winner is defined
+   */
   public WinnerType getWinner() {
     return mWinner;
   }
 
+  /**
+   * @param v {@link #getWinner()}
+   */
   public void setWinner(final WinnerType v) {
     mWinner = v;
   }
@@ -209,6 +215,8 @@ public class ChallengeDescription implements Serializable {
    *
    * @param v the category to add
    * @param index the index to add the category at
+   * @throws IndexOutOfBoundsException if {@code index} is outside the range of
+   *           subjective categories
    */
   public void addSubjectiveCategory(final int index,
                                     final SubjectiveScoreCategory v)
@@ -232,6 +240,8 @@ public class ChallengeDescription implements Serializable {
    *
    * @param index the index to remove the element from
    * @return the category that was removed
+   * @throws IndexOutOfBoundsException if {@code index} is outside the range of
+   *           subjective categories
    */
   public SubjectiveScoreCategory removeSubjectiveCategory(final int index) throws IndexOutOfBoundsException {
     return mSubjectiveCategories.remove(index);
@@ -281,6 +291,8 @@ public class ChallengeDescription implements Serializable {
    *
    * @param v the category to add
    * @param index the index to add the category at
+   * @throws IndexOutOfBoundsException if {@code index} is outside the range of
+   *           non-numeric categories
    */
   public void addNonNumericCategory(final int index,
                                     final NonNumericCategory v)
@@ -304,6 +316,8 @@ public class ChallengeDescription implements Serializable {
    *
    * @param index the index to remove the element from
    * @return the category that was removed
+   * @throws IndexOutOfBoundsException if {@code index} is outside the range of
+   *           non-numeric categories
    */
   public NonNumericCategory removeNonNumericCategory(final int index) throws IndexOutOfBoundsException {
     return nonNumericCategories.remove(index);

@@ -31,6 +31,10 @@ public final class FinalistTeams {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  /**
+   * @param application application variables
+   * @param pageContext page variables
+   */
   public static void populateContext(final ServletContext application,
                                      final PageContext pageContext) {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);

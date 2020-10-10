@@ -11,7 +11,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.List;
@@ -58,7 +57,6 @@ import fll.xml.SwitchStatement;
 import fll.xml.Term;
 import fll.xml.Variable;
 import fll.xml.VariableRef;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Java code used in scoreEntry.jsp.
@@ -95,7 +93,6 @@ public final class ScoreEntry {
    * @param application application context
    * @param session session context
    * @throws IOException if there is an error writing to the output stream
-   * @throws ParseException if there is an error parsing values from the contexts
    * @throws SQLException if there is a problem talking to the database
    * @param pageContext used to get the edit flag
    */
@@ -103,7 +100,7 @@ public final class ScoreEntry {
                                   final ServletContext application,
                                   final HttpSession session,
                                   final PageContext pageContext)
-      throws IOException, ParseException, SQLException {
+      throws IOException, SQLException {
     final boolean editFlag = (Boolean) pageContext.getAttribute("EditFlag");
     if (editFlag) {
       generateInitForScoreEdit(writer, application, session);
@@ -170,12 +167,12 @@ public final class ScoreEntry {
    * @param writer where to write the text
    * @param application application context
    * @param pageContext used to get the edit flag state
-   * @throws ParseException
+   * @throws IOException if there is an error writing to {@code writer}
    */
   public static void generateIncrementMethods(final Writer writer,
                                               final ServletContext application,
                                               final PageContext pageContext)
-      throws IOException, ParseException {
+      throws IOException {
     final boolean editFlag = (Boolean) pageContext.getAttribute("EditFlag");
 
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
@@ -268,10 +265,11 @@ public final class ScoreEntry {
    * 
    * @param writer where to write the HTML
    * @param application used to get the challenge descrption
+   * @throws IOException if there is an error writing to {@code writer}
    */
   public static void generateRefreshBody(final Writer writer,
                                          final ServletContext application)
-      throws ParseException, IOException {
+      throws IOException {
     if (LOG.isTraceEnabled()) {
       LOG.trace("Entering generateRefreshBody");
     }
@@ -384,11 +382,10 @@ public final class ScoreEntry {
    * @param writer where to write
    * @param application used to get the challenge description
    * @throws IOException on an error writing to {@code writer}
-   * @throws ParseException on an error processing the goal elements
    */
   public static void generateCheckRestrictionsBody(final Writer writer,
                                                    final ServletContext application)
-      throws IOException, ParseException {
+      throws IOException {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final Formatter formatter = new Formatter(writer);
 
@@ -422,10 +419,11 @@ public final class ScoreEntry {
    * 
    * @param writer where to write the HTML
    * @param application used to get the challenge description
+   * @throws IOException if there is an error writing to {@code writer}
    */
   public static void generateInitForNewScore(final JspWriter writer,
                                              final ServletContext application)
-      throws IOException, ParseException {
+      throws IOException {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final PerformanceScoreCategory performanceElement = description.getPerformance();
 
@@ -479,6 +477,7 @@ public final class ScoreEntry {
    * the score has been double-checked or not.
    * 
    * @param writer where to write the HTML
+   * @throws IOException if there is an error writing to {@code writer}
    */
   public static void generateVerificationInput(final JspWriter writer) throws IOException {
     writer.println("<!-- Score Verification -->");
@@ -496,6 +495,7 @@ public final class ScoreEntry {
    * 
    * @param writer where to write the HTML
    * @param application used to get the challenge description
+   * @throws IOException if there is an error writing to {@code writer}
    */
   public static void generateScoreEntry(final JspWriter writer,
                                         final ServletContext application)
@@ -545,64 +545,52 @@ public final class ScoreEntry {
     final String name = goal.getName();
     final String title = goal.getTitle();
 
-    try {
+    writer.println("<!-- "
+        + name
+        + " -->");
+    writer.println("<tr>");
+    writer.println("  <td class='goal-title'>");
+    writer.println("    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+        + title
+        + ":");
+    writer.println("  </td>");
 
-      writer.println("<!-- "
-          + name
-          + " -->");
-      writer.println("<tr>");
-      writer.println("  <td class='goal-title'>");
-      writer.println("    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-          + title
-          + ":");
-      writer.println("  </td>");
-
-      if (goal.isComputed()) {
-        writer.println("  <td colspan='2' align='center'><b>Computed Goal</b></td>");
+    if (goal.isComputed()) {
+      writer.println("  <td colspan='2' align='center'><b>Computed Goal</b></td>");
+    } else {
+      if (goal.isEnumerated()) {
+        // enumerated
+        writer.println("  <td>");
+        generateEnumeratedGoalButtons(goal, name, writer);
+        writer.println("  </td>");
       } else {
-        if (goal.isEnumerated()) {
-          // enumerated
-          writer.println("  <td>");
-          generateEnumeratedGoalButtons(goal, name, writer);
-          writer.println("  </td>");
-        } else {
-          writer.println("  <td>");
-          generateSimpleGoalButtons(goal, name, writer);
-          writer.println("  </td>");
-        } // end simple goal
-      } // goal
+        writer.println("  <td>");
+        generateSimpleGoalButtons(goal, name, writer);
+        writer.println("  </td>");
+      } // end simple goal
+    } // goal
 
-      // computed score
-      writer.println("  <td align='right'>");
-      writer.println("    <input type='text' name='score_"
-          + name
-          + "' size='3' align='right' readonly tabindex='-1'>");
-      writer.println("  </td>");
+    // computed score
+    writer.println("  <td align='right'>");
+    writer.println("    <input type='text' name='score_"
+        + name
+        + "' size='3' align='right' readonly tabindex='-1'>");
+    writer.println("  </td>");
 
-      writer.println("</tr>");
-      writer.println("<!-- end "
-          + name
-          + " -->");
-      writer.newLine();
-    } catch (final ParseException pe) {
-      throw new RuntimeException("FATAL: min/max not parsable for goal: "
-          + name);
-    }
+    writer.println("</tr>");
+    writer.println("<!-- end "
+        + name
+        + " -->");
+    writer.newLine();
   }
 
   /**
    * Generate a the buttons for a simple goal.
-   *
-   * @param goalEle
-   * @param name
-   * @param writer
-   * @throws IOException
-   * @throws ParseException
    */
   private static void generateSimpleGoalButtons(final AbstractGoal goalEle,
                                                 final String name,
                                                 final JspWriter writer)
-      throws IOException, ParseException {
+      throws IOException {
     // start inc/dec buttons
     writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='150'>");
     writer.println("      <tr align='center'>");
@@ -687,6 +675,13 @@ public final class ScoreEntry {
     writer.println("        </td>");
   }
 
+  /**
+   * Get the id of an increment or decrement button in the generated page.
+   * 
+   * @param name goal name
+   * @param increment the amount of the increment
+   * @return the id for the button
+   */
   public static String getIncDecButtonID(final String name,
                                          final int increment) {
     final String incdec = (increment < 0 ? "dec" : "inc");
@@ -740,6 +735,8 @@ public final class ScoreEntry {
    * @param writer where to write the HTML
    * @param application used to get the challenge description
    * @param session used to get information about the current score entry
+   * @throws SQLException on a database error
+   * @throws IOException if there is a problem writing to {@code writer}
    */
   public static void generateInitForScoreEdit(final JspWriter writer,
                                               final ServletContext application,
@@ -751,83 +748,76 @@ public final class ScoreEntry {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection();
+        PreparedStatement prep = connection.prepareStatement("SELECT * from Performance"
+            + " WHERE TeamNumber = ?" //
+            + " AND RunNumber = ?"//
+            + " AND Tournament = ?")) {
       final int tournament = Queries.getCurrentTournament(connection);
 
-      prep = connection.prepareStatement("SELECT * from Performance"
-          + " WHERE TeamNumber = ?" //
-          + " AND RunNumber = ?"//
-          + " AND Tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setInt(2, runNumber);
       prep.setInt(3, tournament);
 
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        final PerformanceScoreCategory performanceElement = description.getPerformance();
-        for (final AbstractGoal element : performanceElement.getAllGoals()) {
-          if (!element.isComputed()) {
-            final Goal goal = (Goal) element;
-            final String name = goal.getName();
-            final String rawVarName = getVarNameForRawScore(name);
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          final PerformanceScoreCategory performanceElement = description.getPerformance();
+          for (final AbstractGoal element : performanceElement.getAllGoals()) {
+            if (!element.isComputed()) {
+              final Goal goal = (Goal) element;
+              final String name = goal.getName();
+              final String rawVarName = getVarNameForRawScore(name);
 
-            if (goal.isEnumerated()) {
-              // enumerated
-              final String storedValue = rs.getString(name);
-              boolean found = false;
-              for (final EnumeratedValue valueElement : goal.getSortedValues()) {
-                final String value = valueElement.getValue();
-                if (value.equals(storedValue)) {
-                  writer.println("  "
-                      + rawVarName
-                      + " = \""
-                      + value
-                      + "\";");
-                  found = true;
+              if (goal.isEnumerated()) {
+                // enumerated
+                final String storedValue = rs.getString(name);
+                boolean found = false;
+                for (final EnumeratedValue valueElement : goal.getSortedValues()) {
+                  final String value = valueElement.getValue();
+                  if (value.equals(storedValue)) {
+                    writer.println("  "
+                        + rawVarName
+                        + " = \""
+                        + value
+                        + "\";");
+                    found = true;
+                  }
                 }
+                if (!found) {
+                  throw new RuntimeException("Found enumerated value in the database that's not in the XML document, goal: "
+                      + name
+                      + " value: "
+                      + storedValue);
+                }
+              } else {
+                // just use the value that is stored in the database
+                writer.println("  "
+                    + rawVarName
+                    + " = "
+                    + rs.getString(name)
+                    + ";");
               }
-              if (!found) {
-                throw new RuntimeException("Found enumerated value in the database that's not in the XML document, goal: "
-                    + name
-                    + " value: "
-                    + storedValue);
-              }
-            } else {
-              // just use the value that is stored in the database
-              writer.println("  "
-                  + rawVarName
-                  + " = "
-                  + rs.getString(name)
-                  + ";");
-            }
-          } // !computed
-        } // foreach goal
-        // Always init the special double-check column
-        writer.println("  Verified = "
-            + rs.getBoolean("Verified")
-            + ";");
-      } else {
-        throw new RuntimeException("Cannot find TeamNumber and RunNumber in Performance table"
-            + " TeamNumber: "
-            + teamNumber
-            + " RunNumber: "
-            + runNumber);
+            } // !computed
+          } // foreach goal
+          // Always init the special double-check column
+          writer.println("  Verified = "
+              + rs.getBoolean("Verified")
+              + ";");
+        } else {
+          throw new RuntimeException("Cannot find TeamNumber and RunNumber in Performance table"
+              + " TeamNumber: "
+              + teamNumber
+              + " RunNumber: "
+              + runNumber);
+        }
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-      SQLFunctions.close(connection);
     }
   }
 
   private static void generateEnumeratedGoalButtons(final AbstractGoal goal,
                                                     final String goalName,
                                                     final JspWriter writer)
-      throws IOException, ParseException {
+      throws IOException {
     writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='100%'>");
 
     for (final EnumeratedValue valueEle : goal.getSortedValues()) {
@@ -947,8 +937,7 @@ public final class ScoreEntry {
   }
 
   private static void generateComputedGoalFunction(final Formatter formatter,
-                                                   final ComputedGoal compGoal)
-      throws ParseException {
+                                                   final ComputedGoal compGoal) {
     final String goalName = compGoal.getName();
 
     formatter.format("function %s() {%n", getComputedMethodName(goalName));
@@ -977,8 +966,7 @@ public final class ScoreEntry {
   private static void generateSwitch(final Formatter formatter,
                                      final SwitchStatement ele,
                                      final String goalName,
-                                     final int indent)
-      throws ParseException {
+                                     final int indent) {
     // keep track if there are any case statements
     boolean first = true;
     final boolean hasCase = !ele.getCases().isEmpty();
@@ -1027,9 +1015,8 @@ public final class ScoreEntry {
    *
    * @param poly the polynomial
    * @return the string that represents the polynomial
-   * @throws ParseException
    */
-  private static String polyToString(final BasicPolynomial poly) throws ParseException {
+  private static String polyToString(final BasicPolynomial poly) {
     final Formatter formatter = new Formatter();
 
     boolean first = true;
@@ -1127,12 +1114,10 @@ public final class ScoreEntry {
    * @param formatter where to write
    * @param ifPrefix what goes before "if", either spaces or "else"
    * @param ele condition statement
-   * @throws ParseException if there is an error parsing the polynomials
    */
   private static void generateCondition(final Formatter formatter,
                                         final String ifPrefix,
-                                        final AbstractConditionStatement ele)
-      throws ParseException {
+                                        final AbstractConditionStatement ele) {
     formatter.format("%sif(", ifPrefix);
 
     if (ele instanceof ConditionStatement) {

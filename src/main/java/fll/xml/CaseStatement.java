@@ -15,6 +15,9 @@ import fll.util.FLLInternalException;
 import fll.web.playoff.TeamScore;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
+/**
+ * Represents a case statement in a {@link ComputedGoal}.
+ */
 public class CaseStatement implements Evaluatable, Serializable {
 
   /**

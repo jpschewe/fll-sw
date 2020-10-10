@@ -22,12 +22,16 @@ import fll.Utilities;
 import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
 
+/**
+ * Allow one to access the challenge description through the REST API.
+ */
 @WebServlet("/api/ChallengeDescription")
 public class ChallengeDescriptionServlet extends HttpServlet {
 
   @Override
   protected final void doGet(final HttpServletRequest request,
-                             final HttpServletResponse response) throws IOException, ServletException {
+                             final HttpServletResponse response)
+      throws IOException, ServletException {
     final ServletContext application = getServletContext();
 
     response.reset();

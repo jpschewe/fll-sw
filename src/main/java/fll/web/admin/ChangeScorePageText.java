@@ -23,15 +23,17 @@ import fll.web.BaseFLLServlet;
 @WebServlet("/admin/ChangeScorePageText")
 public class ChangeScorePageText extends BaseFLLServlet {
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
-      final String newText = request.getParameter("ScorePageText");
-      if (null != newText
-          && !"".equals(newText)) {
-        application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, newText);
-      }
+                                final HttpSession session)
+      throws IOException, ServletException {
+    final String newText = request.getParameter("ScorePageText");
+    if (null != newText
+        && !"".equals(newText)) {
+      application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, newText);
+    }
 
     response.sendRedirect(response.encodeRedirectURL("index.jsp"));
 

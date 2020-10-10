@@ -46,6 +46,11 @@ public final class AllTeams {
 
   private static final int TEAMS_BETWEEN_LOGOS = 2;
 
+  /**
+   * @param application application variables
+   * @param session session variables
+   * @param pageContext page variables
+   */
   public static void populateContext(final ServletContext application,
                                      final HttpSession session,
                                      final PageContext pageContext) {
@@ -160,7 +165,17 @@ public final class AllTeams {
     return logoFiles;
   }
 
+  /**
+   * A performance score that can be displayed.
+   */
   public static final class ComputedPerformanceScore {
+    /**
+     * @param floatingPointScores if true then display scores as floating point
+     *          values
+     * @param runNumber {@link #getRunNumber()}
+     * @param isNoShow if this is a no show
+     * @param score the score to display, not used if {@code isNoShow} is true
+     */
     public ComputedPerformanceScore(final boolean floatingPointScores,
                                     final int runNumber,
                                     final boolean isNoShow,
@@ -179,12 +194,18 @@ public final class AllTeams {
 
     private final int mRunNumber;
 
+    /**
+     * @return the run number for the score
+     */
     public int getRunNumber() {
       return mRunNumber;
     }
 
     private final String mScoreString;
 
+    /**
+     * @return the score to display
+     */
     public String getScoreString() {
       return mScoreString;
     }
