@@ -32,6 +32,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +40,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
-
-import javax.swing.table.TableModel;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -59,6 +58,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.xml.sax.SAXException;
 
 import com.diffplug.common.base.Errors;
+import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
@@ -72,6 +72,7 @@ import com.opencsv.CSVWriter;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
+import fll.SubjectiveScore;
 import fll.TestUtils;
 import fll.Tournament;
 import fll.TournamentTeam;
@@ -82,7 +83,6 @@ import fll.db.ImportDB;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
-import fll.subjective.SubjectiveFrame;
 import fll.web.developer.QueryHandler;
 import fll.web.scoreEntry.ScoreEntry;
 import fll.xml.AbstractGoal;
@@ -797,7 +797,7 @@ public class FullTournamentTest {
 
     try {
       EventQueue.invokeAndWait(Errors.rethrow().wrap(() -> {
-        enterSubjectiveScores(testDataConn, description, sourceTournament, subjectiveZip);
+        enterSubjectiveScores(testDataConn, description, sourceTournament);
 
       }));
     } catch (final InvocationTargetException e) {
@@ -821,27 +821,16 @@ public class FullTournamentTest {
   @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "Need to specify category for table name")
   public void enterSubjectiveScores(final Connection testDataConn,
                                     final ChallengeDescription description,
-                                    final Tournament sourceTournament,
-                                    final Path subjectiveZip)
-      throws IOException, SQLException, ParseException {
-    final SubjectiveFrame subjective = new SubjectiveFrame();
-    subjective.load(subjectiveZip.toFile());
+                                    final Tournament sourceTournament)
+      throws IOException, SQLException, ParseException, SAXException {
+    // category->judge->teamNumber->score
+    final Map<String, Map<String, Map<Integer, SubjectiveScore>>> allScores = new HashMap<>();
 
-    // insert scores into zip
     for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
       final String category = subjectiveElement.getName();
-      final String title = subjectiveElement.getTitle();
 
-      // find appropriate table model
-      final TableModel tableModel = subjective.getTableModelForTitle(title);
-      assertNotNull(tableModel);
-
-      final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
-      assertTrue(teamNumberColumn >= 0, "Can't find TeamNumber column in subjective table model");
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Found team number column at "
-            + teamNumberColumn);
-      }
+      // judge -> teamNumber -> score
+      final Map<String, Map<Integer, SubjectiveScore>> categoryScores = new HashMap<>();
 
       try (PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM "
           + category
@@ -850,65 +839,31 @@ public class FullTournamentTest {
 
         try (ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
-            final int teamNumber = rs.getInt("TeamNumber");
+            final SubjectiveScore score = SubjectiveScore.fromResultSet(testDataConn, subjectiveElement,
+                                                                        sourceTournament, rs);
 
-            // find row number in table
-            int rowIndex = -1;
-            for (int rowIdx = 0; rowIdx < tableModel.getRowCount(); ++rowIdx) {
-              final Object teamNumberRaw = tableModel.getValueAt(rowIdx, teamNumberColumn);
-              assertNotNull(teamNumberRaw);
-              final int value = Utilities.getIntegerNumberFormat().parse(teamNumberRaw.toString()).intValue();
+            final Map<Integer, SubjectiveScore> judgeScores = categoryScores.computeIfAbsent(score.getJudge(),
+                                                                                             k -> new HashMap<>());
+            judgeScores.put(score.getTeamNumber(), score);
 
-              if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Checking if "
-                    + teamNumber
-                    + " equals "
-                    + value
-                    + " raw: "
-                    + teamNumberRaw
-                    + "? "
-                    + (value == teamNumber)
-                    + " rowIdx: "
-                    + rowIdx
-                    + " numRows: "
-                    + tableModel.getRowCount());
-              }
+          } // foreach result
 
-              if (value == teamNumber) {
-                rowIndex = rowIdx;
-                break;
-              }
-            }
-            assertTrue(rowIndex >= 0, "Can't find team "
-                + teamNumber
-                + " in subjective table model");
-
-            if (rs.getBoolean("NoShow")) {
-              // find column for no show
-              final int columnIndex = findColumnByName(tableModel, "No Show");
-              assertTrue(columnIndex >= 0, "Can't find No Show column in subjective table model");
-              tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);
-            } else {
-              for (final AbstractGoal goalElement : subjectiveElement.getAllGoals()) {
-                if (!goalElement.isComputed()) {
-                  final String goalName = goalElement.getName();
-                  final String goalTitle = goalElement.getTitle();
-
-                  // find column index for goal and call set
-                  final int columnIndex = findColumnByName(tableModel, goalTitle);
-                  assertTrue(columnIndex >= 0, "Can't find "
-                      + goalTitle
-                      + " column in subjective table model");
-                  final int value = rs.getInt(goalName);
-                  tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
-                }
-              }
-            } // not NoShow
-          } // foreach score
-        } // try ResultSet
-      } // try PreparedStatement
+          allScores.put(category, categoryScores);
+        } // allocate result set
+      } // allocate prep
     } // foreach category
-    subjective.save();
+
+    // send data as HTTP post
+    // "/api/SubjectiveScores"
+    final WebClient conversation = WebTestUtils.getConversation();
+
+    final URL url = new URL(TestUtils.URL_ROOT
+        + "api/SubjectiveScores");
+    final WebRequest request = new WebRequest(url, HttpMethod.POST);
+    request.setAdditionalHeader("Accept", "*/*");
+    request.setRequestBody("REQUESTBODY");
+    WebTestUtils.loadPage(conversation, request);
+
   }
 
   /**
@@ -1172,21 +1127,6 @@ public class FullTournamentTest {
 
     IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
         + "welcome.jsp");
-  }
-
-  /**
-   * Find a column index in a table model by name.
-   *
-   * @return -1 if not found
-   */
-  private static int findColumnByName(final TableModel tableModel,
-                                      final String name) {
-    for (int i = 0; i < tableModel.getColumnCount(); ++i) {
-      if (name.equals(tableModel.getColumnName(i))) {
-        return i;
-      }
-    }
-    return -1;
   }
 
   /**
