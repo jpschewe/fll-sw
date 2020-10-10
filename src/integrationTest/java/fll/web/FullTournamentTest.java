@@ -55,6 +55,7 @@ import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.xml.sax.SAXException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -803,14 +804,16 @@ public class FullTournamentTest {
     } // foreach category
 
     // send data as HTTP post
-    // "/api/SubjectiveScores"
     final WebClient conversation = WebTestUtils.getConversation();
-
     final URL url = new URL(TestUtils.URL_ROOT
         + "api/SubjectiveScores");
     final WebRequest request = new WebRequest(url, HttpMethod.POST);
     request.setAdditionalHeader("Accept", "*/*");
-    request.setRequestBody("REQUESTBODY");
+    request.setAdditionalHeader("Content-Type", "application/json");
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
+    final String json = jsonMapper.writeValueAsString(allScores);
+    request.setRequestBody(json);
+
     WebTestUtils.loadPage(conversation, request);
 
   }
