@@ -78,7 +78,9 @@ public final class WebTestUtils {
     if (error) {
       final String responseMessage = response.getStatusMessage();
       final String text = getPageSource(page);
-      final Path output = Files.createTempFile(Paths.get("screenshots"), "server-error", ".html");
+
+      final Path screenshots = IntegrationTestUtils.ensureScreenshotDirectoryExists();
+      final Path output = Files.createTempFile(screenshots, "server-error", ".html");
       try (Writer writer = Files.newBufferedWriter(output, Utilities.DEFAULT_CHARSET)) {
         writer.write(text);
       }
@@ -101,7 +103,7 @@ public final class WebTestUtils {
     if (page instanceof HtmlPage) {
       return ((HtmlPage) page).asXml();
     } else if (page instanceof SgmlPage) {
-        return ((SgmlPage) page).asXml();
+      return ((SgmlPage) page).asXml();
     } else if (page instanceof TextPage) {
       return ((TextPage) page).getContent();
     } else if (page instanceof UnexpectedPage) {
@@ -161,8 +163,10 @@ public final class WebTestUtils {
     final Page response = loadPage(conversation, request);
     final String contentType = response.getWebResponse().getContentType();
     if (!"application/json".equals(contentType)) {
+      final Path screenshots = IntegrationTestUtils.ensureScreenshotDirectoryExists();
+
       final String text = getPageSource(response);
-      final Path output = Files.createTempFile(Paths.get("screenshots"), "json-error", ".html");
+      final Path output = Files.createTempFile(screenshots, "json-error", ".html");
       try (Writer writer = Files.newBufferedWriter(output, Utilities.DEFAULT_CHARSET)) {
         writer.write(text);
       }

@@ -400,6 +400,20 @@ public final class IntegrationTestUtils {
   }
 
   /**
+   * Make sure that the directory used to store screen shots exists.
+   * 
+   * @return the directory to store screen shots in
+   * @throws IOException if there is an error creating the directory
+   */
+  public static Path ensureScreenshotDirectoryExists() throws IOException {
+    final Path screenshotsDir = Paths.get("screenshots");
+    if (!Files.exists(screenshotsDir)) {
+      Files.createDirectories(screenshotsDir);
+    }
+    return screenshotsDir;
+  }
+
+  /**
    * Store screenshot and other information for debugging the error.
    *
    * @param filePrefix prefix for the files that are created
@@ -409,10 +423,7 @@ public final class IntegrationTestUtils {
   public static void storeScreenshot(final String filePrefix,
                                      final WebDriver driver)
       throws IOException {
-    final Path screenshotsDir = Paths.get("screenshots");
-    if (!Files.exists(screenshotsDir)) {
-      Files.createDirectories(screenshotsDir);
-    }
+    final Path screenshotsDir = ensureScreenshotDirectoryExists();
 
     final Path tempDir = Files.createTempDirectory(screenshotsDir, filePrefix);
 
