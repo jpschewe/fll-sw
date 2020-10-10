@@ -30,7 +30,6 @@ import fll.db.TournamentParameters;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Create a new playoff division.
@@ -43,14 +42,13 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
   /**
    * Populate the context for create_playoff_division.jsp.
    *
-   * @param application
+   * @param application read application variables
+   * @param pageContext set page variables
    */
   public static void populateContext(final ServletContext application,
                                      final PageContext pageContext) {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
@@ -66,8 +64,6 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
     } catch (final SQLException sqle) {
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
@@ -81,9 +77,7 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
 
     String redirect = "index.jsp";
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
                                                                             PlayoffSessionData.class);
@@ -190,8 +184,6 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
           + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
     SessionAttributes.appendToMessage(session, message.toString());

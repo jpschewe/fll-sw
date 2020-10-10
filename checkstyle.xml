@@ -51,7 +51,9 @@
     <module name="IllegalInstantiation"/>
     <module name="InnerAssignment"/>
     <module name="MissingSwitchDefault"/>
-    <module name="SimplifyBooleanExpression"/>
+    <module name="SimplifyBooleanExpression">
+      <property name="id" value="checkstyle:simplifybooleanexpression"/>   
+    </module>
     <module name="SimplifyBooleanReturn"/>
     <module name="FinalClass"/>
     <module name="HideUtilityClassConstructor"/>
@@ -74,6 +76,6 @@
     <property name="fileNamePattern" value="src/main/web/extlib"/>
   </module>
   <module name="BeforeExecutionExclusionFileFilter">
-    <property name="fileNamePattern" value=".+\.(?:png|gif|jpg|jpeg|svg|zip|flldb|xls)$"/>
+    <property name="fileNamePattern" value=".+\.(?:png|gif|jpg|jpeg|svg|zip|flldb|xls|ico)$"/>
   </module>
 </module>

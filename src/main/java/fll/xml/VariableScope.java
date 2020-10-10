@@ -23,13 +23,12 @@ public interface VariableScope {
    * @throws ScopeException if the variable cannot be found
    */
   @Nonnull
-  public Variable getVariable(final String name) throws ScopeException;
+  Variable getVariable(String name) throws ScopeException;
 
   /**
-   * 
    * @return all variables currently known to the scope
    */
   @Nonnull
-  public Collection<Variable> getAllVariables();
+  Collection<Variable> getAllVariables();
 
 }

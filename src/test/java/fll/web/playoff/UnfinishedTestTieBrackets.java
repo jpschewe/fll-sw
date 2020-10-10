@@ -29,8 +29,8 @@ public final class UnfinishedTestTieBrackets extends UnfinishedBaseTest {
    * @return bracket names for {@link #test(String)}
    */
   public static String[] names() {
-    return new String[] { UnfinishedBaseTest.tie1st3rdBracketName, UnfinishedBaseTest.tie3rdBracketName,
-                          UnfinishedBaseTest.tieBracketName, UnfinishedBaseTest.tieMiddleBracketName };
+    return new String[] { UnfinishedBaseTest.TIE_1ST_3RD_BRACKET_NAME, UnfinishedBaseTest.TIE_3RD_BRACKET_NAME,
+                          UnfinishedBaseTest.TIE_BRACKET_NAME, UnfinishedBaseTest.TIE_MIDDLE_BRACKET_NAME };
   }
 
   /**
@@ -43,11 +43,11 @@ public final class UnfinishedTestTieBrackets extends UnfinishedBaseTest {
   @ParameterizedTest
   @MethodSource("names")
   public void test(final String bracketName) throws SQLException, ParseException {
-    final ChallengeDescription challenge = GlobalParameters.getChallengeDescription(connection);
+    final ChallengeDescription challenge = GlobalParameters.getChallengeDescription(getConnection());
     assertThat(challenge, notNullValue());
 
     // should get false for all ties
-    final boolean result = Playoff.finishBracket(connection, challenge, tournament, bracketName);
+    final boolean result = Playoff.finishBracket(getConnection(), challenge, getTournament(), bracketName);
     assertThat(result, is(false));
   }
 }

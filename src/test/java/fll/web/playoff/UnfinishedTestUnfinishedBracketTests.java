@@ -37,11 +37,12 @@ public final class UnfinishedTestUnfinishedBracketTests extends UnfinishedBaseTe
    */
   @Test
   public void testTeamInUnfinished() throws SQLException {
-    final Team team = Team.getTeamFromDatabase(connection, UnfinishedBaseTest.unfinishedTeamNumber);
+    final Team team = Team.getTeamFromDatabase(getConnection(), UnfinishedBaseTest.UNFINISHED_TEAM_NUMBER);
     assertThat(team, notNullValue());
 
     final List<Integer> teamNumbers = Collections.singletonList(team.getTeamNumber());
-    final String errors = Playoff.involvedInUnfinishedPlayoff(connection, tournament.getTournamentID(), teamNumbers);
+    final String errors = Playoff.involvedInUnfinishedPlayoff(getConnection(), getTournament().getTournamentID(),
+                                                              teamNumbers);
     assertThat(errors, notNullValue());
   }
 
@@ -53,11 +54,12 @@ public final class UnfinishedTestUnfinishedBracketTests extends UnfinishedBaseTe
    */
   @Test
   public void testUnfinishedByName() throws SQLException {
-    final List<String> actual = Playoff.getUnfinishedPlayoffBrackets(connection, tournament.getTournamentID());
+    final List<String> actual = Playoff.getUnfinishedPlayoffBrackets(getConnection(),
+                                                                     getTournament().getTournamentID());
 
-    assertThat(actual, hasSize(UnfinishedBaseTest.unfinishedBracketNames.length));
+    assertThat(actual, hasSize(UnfinishedBaseTest.UNFINISHED_BRACKET_NAMES.length));
 
-    for (final String bracketName : UnfinishedBaseTest.unfinishedBracketNames) {
+    for (final String bracketName : UnfinishedBaseTest.UNFINISHED_BRACKET_NAMES) {
       assertThat(bracketName, actual, hasItem(bracketName));
     }
   }
@@ -72,7 +74,7 @@ public final class UnfinishedTestUnfinishedBracketTests extends UnfinishedBaseTe
    */
   @Test
   public void testDummyScore() throws SQLException, RuntimeException {
-    final ChallengeDescription challenge = GlobalParameters.getChallengeDescription(connection);
+    final ChallengeDescription challenge = GlobalParameters.getChallengeDescription(getConnection());
     assertThat(challenge, notNullValue());
 
     final Map<String, Double> simpleGoals = new HashMap<>();
@@ -80,7 +82,7 @@ public final class UnfinishedTestUnfinishedBracketTests extends UnfinishedBaseTe
 
     Playoff.populateInitialScoreMaps(challenge, simpleGoals, enumGoals);
 
-    final TeamScore teamScore = new DummyTeamScore(UnfinishedBaseTest.unfinishedTeamNumber, 1, simpleGoals, enumGoals);
+    final TeamScore teamScore = new DummyTeamScore(UnfinishedBaseTest.UNFINISHED_TEAM_NUMBER, 1, simpleGoals, enumGoals);
 
     challenge.getPerformance().evaluate(teamScore);
   }

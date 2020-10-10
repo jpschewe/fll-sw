@@ -60,7 +60,6 @@ import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Import scores from a tournament database
@@ -93,49 +92,40 @@ public final class ImportDB {
   public static ImportDB.ImportResult loadFromDumpIntoNewDB(final ZipInputStream zipfile,
                                                             final Connection destConnection)
       throws IOException, SQLException {
-    PreparedStatement destPrep = null;
-    Connection sourceConnection = null;
-    Statement memStmt = null;
-    ResultSet memRS = null;
-    try {
-      final String databaseName = "dbimport"
-          + String.valueOf(ImportDBDump.getNextDBCount());
-      final DataSource memSource = Utilities.createMemoryDataSource(databaseName);
-      sourceConnection = memSource.getConnection();
+    final String databaseName = "dbimport"
+        + String.valueOf(ImportDBDump.getNextDBCount());
+    final DataSource memSource = Utilities.createMemoryDataSource(databaseName);
+    try (Connection sourceConnection = memSource.getConnection();
+        Statement memStmt = sourceConnection.createStatement()) {
 
       final ImportDB.ImportResult importResult = loadDatabaseDump(zipfile, sourceConnection);
       final ChallengeDescription challengeDescription = importResult.getChallengeDescription();
       GenerateDB.generateDB(challengeDescription, destConnection);
 
-      memStmt = sourceConnection.createStatement();
-
       // load the teams table into the destination database
-      memRS = memStmt.executeQuery("SELECT TeamNumber, TeamName, Organization FROM Teams");
-      destPrep = destConnection.prepareStatement("INSERT INTO Teams (TeamNumber, TeamName, Organization) VALUES (?, ?, ?)");
-      while (memRS.next()) {
-        final int num = memRS.getInt(1);
-        final String name = memRS.getString(2);
-        final String org = memRS.getString(3);
-        if (!Team.isInternalTeamNumber(num)) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Inserting into teams: "
-                + num
-                + ", "
-                + name
-                + ", "
-                + org);
+      try (ResultSet memRS = memStmt.executeQuery("SELECT TeamNumber, TeamName, Organization FROM Teams");
+          PreparedStatement destPrep = destConnection.prepareStatement("INSERT INTO Teams (TeamNumber, TeamName, Organization) VALUES (?, ?, ?)")) {
+        while (memRS.next()) {
+          final int num = memRS.getInt(1);
+          final String name = memRS.getString(2);
+          final String org = memRS.getString(3);
+          if (!Team.isInternalTeamNumber(num)) {
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("Inserting into teams: "
+                  + num
+                  + ", "
+                  + name
+                  + ", "
+                  + org);
+            }
+            destPrep.setInt(1, num);
+            destPrep.setString(2, name == null
+                || "".equals(name) ? GenerateDB.DEFAULT_TEAM_NAME : name);
+            destPrep.setString(3, org);
+            destPrep.executeUpdate();
           }
-          destPrep.setInt(1, num);
-          destPrep.setString(2, name == null
-              || "".equals(name) ? GenerateDB.DEFAULT_TEAM_NAME : name);
-          destPrep.setString(3, org);
-          destPrep.executeUpdate();
         }
       }
-      SQLFunctions.close(memRS);
-      memRS = null;
-      SQLFunctions.close(destPrep);
-      destPrep = null;
 
       // load all of the tournaments
       // don't worry about bringing the times over, this way they will all be
@@ -163,12 +153,6 @@ public final class ImportDB {
       memStmt.executeUpdate("SHUTDOWN");
 
       return importResult;
-    } finally {
-      SQLFunctions.close(memRS);
-      SQLFunctions.close(memStmt);
-      SQLFunctions.close(sourceConnection);
-
-      SQLFunctions.close(destPrep);
     }
   }
 
@@ -581,9 +565,7 @@ public final class ImportDB {
 
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Table names come from category names")
   private static void upgrade10To11(final Connection connection) throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
 
       final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
       for (final SubjectiveScoreCategory categoryElement : description.getSubjectiveCategories()) {
@@ -595,9 +577,6 @@ public final class ImportDB {
       }
 
       setDBVersion(connection, 11);
-    } finally {
-      SQLFunctions.close(stmt);
-      stmt = null;
     }
   }
 
@@ -640,9 +619,7 @@ public final class ImportDB {
       LOGGER.trace("Upgrading database from 13 to 14");
     }
 
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
 
       // need to check for columns as version 0 databases will automatically get
       // these columns created
@@ -657,8 +634,6 @@ public final class ImportDB {
       }
 
       setDBVersion(connection, 14);
-    } finally {
-      SQLFunctions.close(stmt);
     }
   }
 
@@ -672,42 +647,35 @@ public final class ImportDB {
 
     GenerateDB.createPlayoffBracketTeams(connection);
 
-    PreparedStatement prep = null;
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("INSERT INTO playoff_bracket_teams (tournament_id, bracket_name, team_number) VALUES(?, ?, ?)");
+    try (
+        PreparedStatement prep = connection.prepareStatement("INSERT INTO playoff_bracket_teams (tournament_id, bracket_name, team_number) VALUES(?, ?, ?)");
+        Statement stmt = connection.createStatement()) {
 
-      stmt = connection.createStatement();
+      try (ResultSet rs = stmt.executeQuery("SELECT DISTINCT tournament, event_division, team FROM PlayoffData")) {
+        while (rs.next()) {
+          final int tournament = rs.getInt(1);
+          final String bracketName = rs.getString(2);
+          final int team = rs.getInt(3);
+          if (!Team.isInternalTeamNumber(team)) {
 
-      rs = stmt.executeQuery("SELECT DISTINCT tournament, event_division, team FROM PlayoffData");
-      while (rs.next()) {
-        final int tournament = rs.getInt(1);
-        final String bracketName = rs.getString(2);
-        final int team = rs.getInt(3);
-        if (!Team.isInternalTeamNumber(team)) {
+            if (LOGGER.isTraceEnabled()) {
+              LOGGER.trace("Adding to playoff_bracket_names tournament: "
+                  + tournament
+                  + " bracketName: "
+                  + bracketName
+                  + " team: "
+                  + team);
+            }
 
-          if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Adding to playoff_bracket_names tournament: "
-                + tournament
-                + " bracketName: "
-                + bracketName
-                + " team: "
-                + team);
+            prep.setInt(1, tournament);
+            prep.setString(2, bracketName);
+            prep.setInt(3, team);
+            prep.executeUpdate();
           }
-
-          prep.setInt(1, tournament);
-          prep.setString(2, bracketName);
-          prep.setInt(3, team);
-          prep.executeUpdate();
         }
-      }
+      } // result set
 
       setDBVersion(connection, 15);
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(prep);
     }
   }
 
@@ -868,21 +836,18 @@ public final class ImportDB {
                                                final String table,
                                                final String column)
       throws SQLException {
-    ResultSet metaData = null;
-    try {
-      final DatabaseMetaData md = connection.getMetaData();
+    final DatabaseMetaData md = connection.getMetaData();
 
-      metaData = md.getColumns(null, null, table.toUpperCase(), "%");
+    try (ResultSet metaData = md.getColumns(null, null, table.toUpperCase(), "%")) {
       while (metaData.next()) {
         final String needle = metaData.getString("COLUMN_NAME");
         if (column.equalsIgnoreCase(needle)) {
           return true;
         }
       }
-      SQLFunctions.close(metaData);
-      metaData = null;
+    }
 
-      metaData = md.getColumns(null, null, table.toLowerCase(), "%");
+    try (ResultSet metaData = md.getColumns(null, null, table.toLowerCase(), "%")) {
       while (metaData.next()) {
         final String needle = metaData.getString("COLUMN_NAME");
         if (column.equalsIgnoreCase(needle)) {
@@ -890,8 +855,6 @@ public final class ImportDB {
         }
       }
       return false;
-    } finally {
-      SQLFunctions.close(metaData);
     }
   }
 
@@ -915,14 +878,7 @@ public final class ImportDB {
       challengeSubjectiveCategories.add(cat.getTitle());
     }
 
-    PreparedStatement getTournaments = null;
-    ResultSet tournaments = null;
-    PreparedStatement insert = null;
-    PreparedStatement getFinalistSchedule = null;
-    ResultSet scheduleRows = null;
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
 
       // need to check if the column exists as some version 12 databases got
       // created with the column
@@ -932,46 +888,36 @@ public final class ImportDB {
 
       GenerateDB.createNonNumericNomineesTables(connection, false);
 
-      insert = connection.prepareStatement("INSERT INTO non_numeric_nominees " //
+      try (PreparedStatement insert = connection.prepareStatement("INSERT INTO non_numeric_nominees " //
           + " (tournament, category, team_number)" //
           + " VALUES (?, ?, ?)");
+          PreparedStatement getTournaments = connection.prepareStatement("SELECT tournament_id from Tournaments");
+          PreparedStatement getFinalistSchedule = connection.prepareStatement("SELECT DISTINCT category, team_number " //
+              + " FROM finalist_schedule" //
+              + " WHERE tournament = ?")) {
 
-      getTournaments = connection.prepareStatement("SELECT tournament_id from Tournaments");
+        try (ResultSet tournaments = getTournaments.executeQuery()) {
+          while (tournaments.next()) {
+            final int tournament = tournaments.getInt(1);
+            insert.setInt(1, tournament);
+            getFinalistSchedule.setInt(1, tournament);
 
-      getFinalistSchedule = connection.prepareStatement("SELECT DISTINCT category, team_number " //
-          + " FROM finalist_schedule" //
-          + " WHERE tournament = ?");
+            try (ResultSet scheduleRows = getFinalistSchedule.executeQuery()) {
+              while (scheduleRows.next()) {
+                final String categoryTitle = scheduleRows.getString(1);
+                final int team = scheduleRows.getInt(2);
 
-      tournaments = getTournaments.executeQuery();
-      while (tournaments.next()) {
-        final int tournament = tournaments.getInt(1);
-        insert.setInt(1, tournament);
-        getFinalistSchedule.setInt(1, tournament);
-
-        scheduleRows = getFinalistSchedule.executeQuery();
-        while (scheduleRows.next()) {
-          final String categoryTitle = scheduleRows.getString(1);
-          final int team = scheduleRows.getInt(2);
-
-          if (!challengeSubjectiveCategories.contains(categoryTitle)) {
-            insert.setString(2, categoryTitle);
-            insert.setInt(3, team);
-            insert.executeUpdate();
+                if (!challengeSubjectiveCategories.contains(categoryTitle)) {
+                  insert.setString(2, categoryTitle);
+                  insert.setInt(3, team);
+                  insert.executeUpdate();
+                }
+              }
+            } // schedule rows
           }
-        }
-
-        SQLFunctions.close(scheduleRows);
-        scheduleRows = null;
-      }
-
+        } // tournament results
+      } // prepared statements
       setDBVersion(connection, 13);
-    } finally {
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(tournaments);
-      SQLFunctions.close(getTournaments);
-      SQLFunctions.close(insert);
-      SQLFunctions.close(scheduleRows);
-      SQLFunctions.close(getFinalistSchedule);
     }
 
   }
@@ -989,35 +935,28 @@ public final class ImportDB {
       LOGGER.trace("Upgrading database from 11 to 12");
     }
 
-    PreparedStatement getTournaments = null;
-    ResultSet tournaments = null;
-    PreparedStatement insert = null;
-    PreparedStatement getSubjectiveStations = null;
-    ResultSet stations = null;
-    try {
+    GenerateDB.createSubjectiveCategoryScheduleColumnMappingTables(connection);
+    try (PreparedStatement insert = connection.prepareStatement("INSERT INTO category_schedule_column " //
+        + " (tournament, category, schedule_column)" //
+        + " VALUES (?, ?, ?)");
 
-      GenerateDB.createSubjectiveCategoryScheduleColumnMappingTables(connection);
-
-      insert = connection.prepareStatement("INSERT INTO category_schedule_column " //
-          + " (tournament, category, schedule_column)" //
-          + " VALUES (?, ?, ?)");
-
-      getTournaments = connection.prepareStatement("SELECT tournament_id from Tournaments");
-      tournaments = getTournaments.executeQuery();
+        PreparedStatement getTournaments = connection.prepareStatement("SELECT tournament_id from Tournaments");
+        ResultSet tournaments = getTournaments.executeQuery();
+        PreparedStatement getSubjectiveStations = connection.prepareStatement("SELECT DISTINCT name from sched_subjective WHERE tournament = ?");) {
       while (tournaments.next()) {
         final int tournament = tournaments.getInt(1);
 
         insert.setInt(1, tournament);
 
         // get schedule columns
-        getSubjectiveStations = connection.prepareStatement("SELECT DISTINCT name from sched_subjective WHERE tournament = ?");
         getSubjectiveStations.setInt(1, tournament);
         final Collection<String> scheduleColumns = new LinkedList<>();
-        stations = getSubjectiveStations.executeQuery();
-        while (stations.next()) {
-          final String name = stations.getString(1);
-          scheduleColumns.add(name);
-        }
+        try (ResultSet stations = getSubjectiveStations.executeQuery()) {
+          while (stations.next()) {
+            final String name = stations.getString(1);
+            scheduleColumns.add(name);
+          }
+        } // stations
 
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace(String.format("Tournament %d has %s schedule columns", tournament, scheduleColumns.toString()));
@@ -1041,21 +980,11 @@ public final class ImportDB {
       } // foreach tournament
 
       setDBVersion(connection, 12);
-    } finally {
-      SQLFunctions.close(stations);
-      SQLFunctions.close(getSubjectiveStations);
-      SQLFunctions.close(insert);
-      SQLFunctions.close(tournaments);
-      SQLFunctions.close(getTournaments);
     }
   }
 
   private static void upgrade2To6(final Connection connection) throws SQLException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    PreparedStatement prep = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
       stmt.executeUpdate("DROP TABLE IF EXISTS sched_subjective CASCADE");
 
       final StringBuilder sql = new StringBuilder();
@@ -1072,35 +1001,29 @@ public final class ImportDB {
       final boolean foundPresentationColumn = checkForColumnInTable(connection, "schedule", "presentation");
 
       if (foundPresentationColumn) {
-        prep = connection.prepareStatement("INSERT INTO sched_subjective" //
+        try (PreparedStatement prep = connection.prepareStatement("INSERT INTO sched_subjective" //
             + " (tournament, team_number, name, subj_time)" //
             + " VALUES(?, ?, ?, ?)");
-        rs = stmt.executeQuery("SELECT tournament, team_number, presentation, technical FROM schedule");
-        while (rs.next()) {
-          final int tournament = rs.getInt(1);
-          final int team = rs.getInt(2);
-          final Time presentation = rs.getTime(3);
-          final Time technical = rs.getTime(4);
-          prep.setInt(1, tournament);
-          prep.setInt(2, team);
-          prep.setString(3, "Technical");
-          prep.setTime(4, technical);
-          prep.executeUpdate();
+            ResultSet rs = stmt.executeQuery("SELECT tournament, team_number, presentation, technical FROM schedule")) {
+          while (rs.next()) {
+            final int tournament = rs.getInt(1);
+            final int team = rs.getInt(2);
+            final Time presentation = rs.getTime(3);
+            final Time technical = rs.getTime(4);
+            prep.setInt(1, tournament);
+            prep.setInt(2, team);
+            prep.setString(3, "Technical");
+            prep.setTime(4, technical);
+            prep.executeUpdate();
 
-          prep.setString(3, "Research");
-          prep.setTime(4, presentation);
-          prep.executeUpdate();
-        }
+            prep.setString(3, "Research");
+            prep.setTime(4, presentation);
+            prep.executeUpdate();
+          }
+        } // prepared statement and result set
       }
 
       setDBVersion(connection, 6);
-    } finally {
-      SQLFunctions.close(rs);
-      rs = null;
-      SQLFunctions.close(stmt);
-      stmt = null;
-      SQLFunctions.close(prep);
-      prep = null;
     }
   }
 
@@ -1134,21 +1057,14 @@ public final class ImportDB {
   /**
    * Add judging_station to TournamentTeams. Rename event_division to station in
    * Judges
-   *
-   * @param connection
-   * @throws SQLException
    */
   private static void upgrade6To7(final Connection connection) throws SQLException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    PreparedStatement prep = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement();
 
-      prep = connection.prepareStatement("UPDATE TournamentTeams SET event_division = ? WHERE TeamNumber = ? AND Tournament = ?");
+        PreparedStatement prep = connection.prepareStatement("UPDATE TournamentTeams SET event_division = ? WHERE TeamNumber = ? AND Tournament = ?");
 
-      // set event_division to the default
-      rs = stmt.executeQuery("SELECT TeamNumber, Tournament FROM TournamentTeams WHERE event_division is NULL");
+        // set event_division to the default
+        ResultSet rs = stmt.executeQuery("SELECT TeamNumber, Tournament FROM TournamentTeams WHERE event_division is NULL")) {
       while (rs.next()) {
         final int teamNumber = rs.getInt(1);
         final int tournament = rs.getInt(2);
@@ -1156,6 +1072,7 @@ public final class ImportDB {
         prep.setInt(2, teamNumber);
         prep.setInt(3, tournament);
         prep.setString(1, division);
+        prep.executeUpdate();
       }
 
       // add score_group column
@@ -1168,13 +1085,6 @@ public final class ImportDB {
       stmt.executeUpdate("ALTER TABLE Judges ALTER COLUMN event_division RENAME TO station");
 
       setDBVersion(connection, 7);
-    } finally {
-      SQLFunctions.close(rs);
-      rs = null;
-      SQLFunctions.close(stmt);
-      stmt = null;
-      SQLFunctions.close(prep);
-      prep = null;
     }
   }
 
@@ -1290,6 +1200,7 @@ public final class ImportDB {
    *          be imported
    * @param importSubjective if the subjective data should be imported
    * @param importFinalist if the finalist schedule should be imported
+   * @throws SQLException on a database error
    */
   public static void importDatabase(final Connection sourceConnection,
                                     final Connection destinationConnection,
@@ -1413,110 +1324,92 @@ public final class ImportDB {
       LOGGER.debug("Importing Schedule");
     }
 
-    PreparedStatement destPrep = null;
-    PreparedStatement sourcePrep = null;
-    ResultSet sourceRS = null;
-    try {
-      destPrep = destinationConnection.prepareStatement("DELETE FROM sched_perf_rounds WHERE Tournament = ?");
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM sched_perf_rounds WHERE Tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
-      destPrep = null;
-      destPrep = destinationConnection.prepareStatement("DELETE FROM sched_subjective WHERE Tournament = ?");
+    }
+
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM sched_subjective WHERE Tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
-      destPrep = destinationConnection.prepareStatement("DELETE FROM schedule WHERE Tournament = ?");
+    }
+
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM schedule WHERE Tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
-      destPrep = null;
+    }
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT team_number, judging_station" //
-          + " FROM schedule WHERE tournament=?");
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number, judging_station" //
+        + " FROM schedule WHERE tournament=?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO schedule" //
+            + " (tournament, team_number, judging_station)" //
+            + " VALUES (?, ?, ?)")) {
+
       sourcePrep.setInt(1, sourceTournamentID);
-      destPrep = destinationConnection.prepareStatement("INSERT INTO schedule" //
-          + " (tournament, team_number, judging_station)" //
-          + " VALUES (?, ?, ?)");
-      destPrep.setInt(1, destTournamentID);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        for (int i = 1; i <= 2; i++) {
-          Object sourceObj = sourceRS.getObject(i);
-          if ("".equals(sourceObj)) {
-            sourceObj = null;
-          }
-          destPrep.setObject(i
-              + 1, sourceObj);
-        }
-        destPrep.executeUpdate();
-      }
-      SQLFunctions.close(sourceRS);
-      sourceRS = null;
-      SQLFunctions.close(sourcePrep);
-      sourcePrep = null;
-      SQLFunctions.close(destPrep);
-      destPrep = null;
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT team_number, practice, perf_time, table_color, table_side" //
-          + " FROM sched_perf_rounds WHERE tournament=?");
+      destPrep.setInt(1, destTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          for (int i = 1; i <= 2; i++) {
+            Object sourceObj = sourceRS.getObject(i);
+            if ("".equals(sourceObj)) {
+              sourceObj = null;
+            }
+            destPrep.setObject(i
+                + 1, sourceObj);
+          }
+          destPrep.executeUpdate();
+        }
+      }
+    }
+
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number, practice, perf_time, table_color, table_side" //
+            + " FROM sched_perf_rounds WHERE tournament=?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO sched_perf_rounds" //
+            + " (tournament, team_number, practice, perf_time, table_color, table_side)" //
+            + " VALUES (?, ?, ?, ?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
-      destPrep = destinationConnection.prepareStatement("INSERT INTO sched_perf_rounds" //
-          + " (tournament, team_number, practice, perf_time, table_color, table_side)" //
-          + " VALUES (?, ?, ?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        for (int i = 1; i <= 5; i++) {
-          Object sourceObj = sourceRS.getObject(i);
-          if ("".equals(sourceObj)) {
-            sourceObj = null;
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          for (int i = 1; i <= 5; i++) {
+            Object sourceObj = sourceRS.getObject(i);
+            if ("".equals(sourceObj)) {
+              sourceObj = null;
+            }
+            destPrep.setObject(i
+                + 1, sourceObj);
           }
-          destPrep.setObject(i
-              + 1, sourceObj);
+          destPrep.executeUpdate();
         }
-        destPrep.executeUpdate();
       }
-      SQLFunctions.close(sourceRS);
-      sourceRS = null;
-      SQLFunctions.close(sourcePrep);
-      sourcePrep = null;
-      SQLFunctions.close(destPrep);
-      destPrep = null;
+    }
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT team_number, name, subj_time" //
-          + " FROM sched_subjective WHERE tournament=?");
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number, name, subj_time" //
+        + " FROM sched_subjective WHERE tournament=?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO sched_subjective" //
+            + " (tournament, team_number, name, subj_time)" //
+            + " VALUES (?, ?, ?, ?)")) {
+
       sourcePrep.setInt(1, sourceTournamentID);
-      destPrep = destinationConnection.prepareStatement("INSERT INTO sched_subjective" //
-          + " (tournament, team_number, name, subj_time)" //
-          + " VALUES (?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        for (int i = 1; i <= 3; i++) {
-          Object sourceObj = sourceRS.getObject(i);
-          if ("".equals(sourceObj)) {
-            sourceObj = null;
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          for (int i = 1; i <= 3; i++) {
+            Object sourceObj = sourceRS.getObject(i);
+            if ("".equals(sourceObj)) {
+              sourceObj = null;
+            }
+            destPrep.setObject(i
+                + 1, sourceObj);
           }
-          destPrep.setObject(i
-              + 1, sourceObj);
+          destPrep.executeUpdate();
         }
-        destPrep.executeUpdate();
       }
-      SQLFunctions.close(sourceRS);
-      sourceRS = null;
-      SQLFunctions.close(sourcePrep);
-      sourcePrep = null;
-      SQLFunctions.close(destPrep);
-      destPrep = null;
-
-    } finally {
-      SQLFunctions.close(sourceRS);
-      sourceRS = null;
-      SQLFunctions.close(sourcePrep);
-      sourcePrep = null;
-      SQLFunctions.close(destPrep);
-      destPrep = null;
     }
   }
 
@@ -1525,40 +1418,34 @@ public final class ImportDB {
                                                     final int sourceTournamentID,
                                                     final int destTournamentID)
       throws SQLException {
-    PreparedStatement destPrep = null;
-    PreparedStatement sourcePrep = null;
-    ResultSet sourceRS = null;
-    try {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Importing table_division");
-      }
-      destPrep = destinationConnection.prepareStatement("DELETE FROM category_schedule_column WHERE tournament = ?");
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Importing table_division");
+    }
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM category_schedule_column WHERE tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
+    }
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT category, schedule_column"
-          + " FROM category_schedule_column WHERE tournament = ?");
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT category, schedule_column"
+        + " FROM category_schedule_column WHERE tournament = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO category_schedule_column (tournament, category, schedule_column) "
+            + "VALUES (?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
-      destPrep = destinationConnection.prepareStatement("INSERT INTO category_schedule_column (tournament, category, schedule_column) "
-          + "VALUES (?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        for (int i = 1; i <= 2; i++) {
-          Object sourceObj = sourceRS.getObject(i);
-          if ("".equals(sourceObj)) {
-            sourceObj = null;
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          for (int i = 1; i <= 2; i++) {
+            Object sourceObj = sourceRS.getObject(i);
+            if ("".equals(sourceObj)) {
+              sourceObj = null;
+            }
+            destPrep.setObject(i
+                + 1, sourceObj);
           }
-          destPrep.setObject(i
-              + 1, sourceObj);
+          destPrep.executeUpdate();
         }
-        destPrep.executeUpdate();
       }
-    } finally {
-      SQLFunctions.close(sourceRS);
-      SQLFunctions.close(sourcePrep);
-      SQLFunctions.close(destPrep);
     }
   }
 
@@ -1571,37 +1458,32 @@ public final class ImportDB {
       LOGGER.debug("Importing PlayoffData");
     }
 
-    PreparedStatement destPrep = null;
-    PreparedStatement sourcePrep = null;
-    ResultSet sourceRS = null;
-    try {
-      destPrep = destinationConnection.prepareStatement("DELETE FROM PlayoffData WHERE Tournament = ?");
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM PlayoffData WHERE Tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
+    }
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT event_division, PlayoffRound, LineNumber, Team, AssignedTable, Printed, run_number "
-          + "FROM PlayoffData WHERE Tournament=?");
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT event_division, PlayoffRound, LineNumber, Team, AssignedTable, Printed, run_number "
+            + "FROM PlayoffData WHERE Tournament=?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO PlayoffData (Tournament, event_division, PlayoffRound,"
+            + "LineNumber, Team, AssignedTable, Printed, run_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
-      destPrep = destinationConnection.prepareStatement("INSERT INTO PlayoffData (Tournament, event_division, PlayoffRound,"
-          + "LineNumber, Team, AssignedTable, Printed, run_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        for (int i = 1; i <= 7; i++) {
-          Object sourceObj = sourceRS.getObject(i);
-          if ("".equals(sourceObj)) {
-            sourceObj = null;
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          for (int i = 1; i <= 7; i++) {
+            Object sourceObj = sourceRS.getObject(i);
+            if ("".equals(sourceObj)) {
+              sourceObj = null;
+            }
+            destPrep.setObject(i
+                + 1, sourceObj);
           }
-          destPrep.setObject(i
-              + 1, sourceObj);
+          destPrep.executeUpdate();
         }
-        destPrep.executeUpdate();
       }
-    } finally {
-      SQLFunctions.close(sourceRS);
-      SQLFunctions.close(sourcePrep);
-      SQLFunctions.close(destPrep);
     }
   }
 
@@ -1614,33 +1496,27 @@ public final class ImportDB {
       LOGGER.debug("Importing PlayoffTeams");
     }
 
-    PreparedStatement destPrep = null;
-    PreparedStatement sourcePrep = null;
-    ResultSet sourceRS = null;
-    try {
-      destPrep = destinationConnection.prepareStatement("DELETE FROM playoff_bracket_teams WHERE tournament_id = ?");
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM playoff_bracket_teams WHERE tournament_id = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
+    }
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT bracket_name, team_number "
-          + "FROM playoff_bracket_teams WHERE tournament_id=?");
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT bracket_name, team_number "
+        + "FROM playoff_bracket_teams WHERE tournament_id=?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO playoff_bracket_teams (tournament_id, bracket_name, team_number)"
+            + "VALUES (?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
-      destPrep = destinationConnection.prepareStatement("INSERT INTO playoff_bracket_teams (tournament_id, bracket_name, team_number)"
-          + "VALUES (?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        final String bracketName = sourceRS.getString(1);
-        final int team = sourceRS.getInt(2);
-        destPrep.setString(2, bracketName);
-        destPrep.setInt(3, team);
-        destPrep.executeUpdate();
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          final String bracketName = sourceRS.getString(1);
+          final int team = sourceRS.getInt(2);
+          destPrep.setString(2, bracketName);
+          destPrep.setInt(3, team);
+          destPrep.executeUpdate();
+        }
       }
-    } finally {
-      SQLFunctions.close(sourceRS);
-      SQLFunctions.close(sourcePrep);
-      SQLFunctions.close(destPrep);
     }
   }
 
@@ -1718,59 +1594,54 @@ public final class ImportDB {
                                        final int destTournamentID,
                                        final ChallengeDescription description)
       throws SQLException {
-    PreparedStatement destPrep = null;
-    try {
-      // loop over each subjective category
-      for (final SubjectiveScoreCategory categoryElement : description.getSubjectiveCategories()) {
-        final String tableName = categoryElement.getName();
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Importing "
-              + tableName);
-        }
+    // loop over each subjective category
+    for (final SubjectiveScoreCategory categoryElement : description.getSubjectiveCategories()) {
+      final String tableName = categoryElement.getName();
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Importing "
+            + tableName);
+      }
 
-        destPrep = destinationConnection.prepareStatement("DELETE FROM "
-            + tableName
-            + " WHERE Tournament = ?");
+      try (PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM "
+          + tableName
+          + " WHERE Tournament = ?")) {
         destPrep.setInt(1, destTournamentID);
         destPrep.executeUpdate();
-        SQLFunctions.close(destPrep);
-
-        final StringBuilder columns = new StringBuilder();
-        int numColumns = 0;
-        columns.append(" Tournament,");
-        ++numColumns;
-        columns.append(" TeamNumber,");
-        ++numColumns;
-        columns.append(" NoShow,");
-        ++numColumns;
-        final List<AbstractGoal> goals = categoryElement.getAllGoals();
-        for (final AbstractGoal element : goals) {
-          if (!element.isComputed()) {
-            columns.append(" "
-                + element.getName()
-                + ",");
-            ++numColumns;
-
-            columns.append(" "
-                + GenerateDB.getGoalCommentColumnName(element)
-                + ",");
-            ++numColumns;
-          }
-        }
-        columns.append(" note,");
-        ++numColumns;
-        columns.append(" Judge,");
-        ++numColumns;
-        columns.append(" comment_great_job,");
-        ++numColumns;
-        columns.append(" comment_think_about");
-        ++numColumns;
-
-        importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,
-                     sourceTournamentID);
       }
-    } finally {
-      SQLFunctions.close(destPrep);
+
+      final StringBuilder columns = new StringBuilder();
+      int numColumns = 0;
+      columns.append(" Tournament,");
+      ++numColumns;
+      columns.append(" TeamNumber,");
+      ++numColumns;
+      columns.append(" NoShow,");
+      ++numColumns;
+      final List<AbstractGoal> goals = categoryElement.getAllGoals();
+      for (final AbstractGoal element : goals) {
+        if (!element.isComputed()) {
+          columns.append(" "
+              + element.getName()
+              + ",");
+          ++numColumns;
+
+          columns.append(" "
+              + GenerateDB.getGoalCommentColumnName(element)
+              + ",");
+          ++numColumns;
+        }
+      }
+      columns.append(" note,");
+      ++numColumns;
+      columns.append(" Judge,");
+      ++numColumns;
+      columns.append(" comment_great_job,");
+      ++numColumns;
+      columns.append(" comment_think_about");
+      ++numColumns;
+
+      importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,
+                   sourceTournamentID);
     }
   }
 
@@ -1797,50 +1668,44 @@ public final class ImportDB {
                                    final Connection sourceConnection,
                                    final int sourceTournamentID)
       throws SQLException {
-    PreparedStatement destPrep = null;
-    PreparedStatement sourcePrep = null;
-    ResultSet sourceRS = null;
-    try {
-      final StringBuffer sql = new StringBuffer();
-      sql.append("INSERT INTO ");
-      sql.append(tableName);
-      sql.append(" (");
-      sql.append(columns.toString());
-      sql.append(") VALUES (");
-      for (int i = 0; i < numColumns; i++) {
-        if (i > 0) {
-          sql.append(", ");
-        }
-        sql.append("?");
+    final StringBuffer sql = new StringBuffer();
+    sql.append("INSERT INTO ");
+    sql.append(tableName);
+    sql.append(" (");
+    sql.append(columns.toString());
+    sql.append(") VALUES (");
+    for (int i = 0; i < numColumns; i++) {
+      if (i > 0) {
+        sql.append(", ");
       }
-      sql.append(")");
-      destPrep = destinationConnection.prepareStatement(sql.toString());
-      destPrep.setInt(1, destTournamentID);
+      sql.append("?");
+    }
+    sql.append(")");
+    try (PreparedStatement destPrep = destinationConnection.prepareStatement(sql.toString());
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT "
-          + columns.toString()
-          + " FROM "
-          + tableName
-          + " WHERE Tournament = ?");
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT "
+            + columns.toString()
+            + " FROM "
+            + tableName
+            + " WHERE Tournament = ?")) {
+
+      destPrep.setInt(1, destTournamentID);
       sourcePrep.setInt(1, sourceTournamentID);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        // skip tournament column
-        for (int i = 1; i < numColumns; i++) {
-          Object sourceObj = sourceRS.getObject(i
-              + 1);
-          if ("".equals(sourceObj)) {
-            sourceObj = null;
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          // skip tournament column
+          for (int i = 1; i < numColumns; i++) {
+            Object sourceObj = sourceRS.getObject(i
+                + 1);
+            if ("".equals(sourceObj)) {
+              sourceObj = null;
+            }
+            destPrep.setObject(i
+                + 1, sourceObj);
           }
-          destPrep.setObject(i
-              + 1, sourceObj);
+          destPrep.executeUpdate();
         }
-        destPrep.executeUpdate();
       }
-    } finally {
-      SQLFunctions.close(sourceRS);
-      SQLFunctions.close(sourcePrep);
-      SQLFunctions.close(destPrep);
     }
 
   }
@@ -1852,47 +1717,41 @@ public final class ImportDB {
                                         final int destTournamentID,
                                         final ChallengeDescription description)
       throws SQLException {
-    PreparedStatement destPrep = null;
-    try {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Importing performance scores");
-      }
-      final PerformanceScoreCategory performanceElement = description.getPerformance();
-      final String tableName = "Performance";
-      destPrep = destinationConnection.prepareStatement("DELETE FROM "
-          + tableName
-          + " WHERE Tournament = ?");
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Importing performance scores");
+    }
+    final PerformanceScoreCategory performanceElement = description.getPerformance();
+    final String tableName = "Performance";
+    try (PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM "
+        + tableName
+        + " WHERE Tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
-      destPrep = null;
-
-      final StringBuilder columns = new StringBuilder();
-      columns.append(" Tournament,");
-      columns.append(" TeamNumber,");
-      columns.append(" RunNumber,");
-      // Note: If TimeStamp is no longer the 3rd element, then the hack below
-      // needs to be modified
-      columns.append(" TimeStamp,");
-      final List<AbstractGoal> goals = performanceElement.getAllGoals();
-      int numColumns = 7;
-      for (final AbstractGoal element : goals) {
-        if (!element.isComputed()) {
-          columns.append(" "
-              + element.getName()
-              + ",");
-          ++numColumns;
-        }
-      }
-      columns.append(" NoShow,");
-      columns.append(" Bye,");
-      columns.append(" Verified");
-
-      importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,
-                   sourceTournamentID);
-    } finally {
-      SQLFunctions.close(destPrep);
     }
+
+    final StringBuilder columns = new StringBuilder();
+    columns.append(" Tournament,");
+    columns.append(" TeamNumber,");
+    columns.append(" RunNumber,");
+    // Note: If TimeStamp is no longer the 3rd element, then the hack below
+    // needs to be modified
+    columns.append(" TimeStamp,");
+    final List<AbstractGoal> goals = performanceElement.getAllGoals();
+    int numColumns = 7;
+    for (final AbstractGoal element : goals) {
+      if (!element.isComputed()) {
+        columns.append(" "
+            + element.getName()
+            + ",");
+        ++numColumns;
+      }
+    }
+    columns.append(" NoShow,");
+    columns.append(" Bye,");
+    columns.append(" Verified");
+
+    importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,
+                 sourceTournamentID);
   }
 
   /**
@@ -1905,39 +1764,35 @@ public final class ImportDB {
                                             final int sourceTournamentID,
                                             final int destTournamentID)
       throws SQLException {
-    PreparedStatement destPrep = null;
-    PreparedStatement sourcePrep = null;
-    ResultSet sourceRS = null;
-    try {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Importing TournamentTeams");
-      }
-      destPrep = destinationConnection.prepareStatement("DELETE FROM TournamentTeams WHERE Tournament = ?");
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Importing TournamentTeams");
+    }
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM TournamentTeams WHERE Tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
-      sourcePrep = sourceConnection.prepareStatement("SELECT TeamNumber, event_division, judging_station FROM TournamentTeams WHERE Tournament = ?");
+    }
+
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT TeamNumber, event_division, judging_station FROM TournamentTeams WHERE Tournament = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station) VALUES (?, ?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
-      destPrep = destinationConnection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station) VALUES (?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        final int teamNumber = sourceRS.getInt(1);
-        if (!Team.isInternalTeamNumber(teamNumber)) {
-          final String eventDivision = sourceRS.getString(2);
-          final String judgingStation = sourceRS.getString(3);
-          final String actualEventDivision = eventDivision == null ? GenerateDB.DEFAULT_TEAM_DIVISION : eventDivision;
-          final String actualJudgingStation = judgingStation == null ? actualEventDivision : judgingStation;
-          destPrep.setInt(2, teamNumber);
-          destPrep.setString(3, actualEventDivision);
-          destPrep.setString(4, actualJudgingStation);
-          destPrep.executeUpdate();
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          final int teamNumber = sourceRS.getInt(1);
+          if (!Team.isInternalTeamNumber(teamNumber)) {
+            final String eventDivision = sourceRS.getString(2);
+            final String judgingStation = sourceRS.getString(3);
+            final String actualEventDivision = eventDivision == null ? GenerateDB.DEFAULT_TEAM_DIVISION : eventDivision;
+            final String actualJudgingStation = judgingStation == null ? actualEventDivision : judgingStation;
+            destPrep.setInt(2, teamNumber);
+            destPrep.setString(3, actualEventDivision);
+            destPrep.setString(4, actualJudgingStation);
+            destPrep.executeUpdate();
+          }
         }
       }
-    } finally {
-      SQLFunctions.close(sourceRS);
-      SQLFunctions.close(sourcePrep);
-      SQLFunctions.close(destPrep);
     }
   }
 
@@ -1963,35 +1818,31 @@ public final class ImportDB {
                                    final int sourceTournamentID,
                                    final int destTournamentID)
       throws SQLException {
-    PreparedStatement destPrep = null;
-    PreparedStatement sourcePrep = null;
-    ResultSet sourceRS = null;
-    try {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Importing Judges");
-      }
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Importing Judges");
+    }
 
-      destPrep = destinationConnection.prepareStatement("DELETE FROM Judges WHERE Tournament = ?");
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM Judges WHERE Tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
+    }
 
-      destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES (?, ?, ?, ?)");
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES (?, ?, ?, ?)");
+
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?")) {
+
       destPrep.setInt(4, destTournamentID);
-
-      sourcePrep = sourceConnection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        destPrep.setString(1, sourceRS.getString(1));
-        destPrep.setString(2, sourceRS.getString(2));
-        destPrep.setString(3, sourceRS.getString(3));
-        destPrep.executeUpdate();
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(1, sourceRS.getString(1));
+          destPrep.setString(2, sourceRS.getString(2));
+          destPrep.setString(3, sourceRS.getString(3));
+          destPrep.executeUpdate();
+        }
       }
-    } finally {
-      SQLFunctions.close(sourceRS);
-      SQLFunctions.close(sourcePrep);
-      SQLFunctions.close(destPrep);
     }
   }
 
@@ -2000,38 +1851,33 @@ public final class ImportDB {
                                                final int sourceTournamentID,
                                                final int destTournamentID)
       throws SQLException {
-    PreparedStatement destPrep = null;
-    PreparedStatement sourcePrep = null;
-    ResultSet sourceRS = null;
-    try {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Importing subjective nominees");
-      }
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Importing subjective nominees");
+    }
 
-      // do drops first
-      destPrep = destinationConnection.prepareStatement("DELETE FROM non_numeric_nominees WHERE tournament = ?");
+    // do drops first
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM non_numeric_nominees WHERE tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
+    }
 
-      // insert
-      destPrep = destinationConnection.prepareStatement("INSERT INTO non_numeric_nominees (tournament, category, team_number, judge) VALUES(?, ?, ?, ?)");
+    // insert
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO non_numeric_nominees (tournament, category, team_number, judge) VALUES(?, ?, ?, ?)");
+
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT category, team_number, judge FROM non_numeric_nominees WHERE tournament = ?")) {
+
       destPrep.setInt(1, destTournamentID);
-
-      sourcePrep = sourceConnection.prepareStatement("SELECT category, team_number, judge FROM non_numeric_nominees WHERE tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        destPrep.setString(2, sourceRS.getString(1));
-        destPrep.setInt(3, sourceRS.getInt(2));
-        destPrep.setString(4, sourceRS.getString(3));
-        destPrep.executeUpdate();
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString(1));
+          destPrep.setInt(3, sourceRS.getInt(2));
+          destPrep.setString(4, sourceRS.getString(3));
+          destPrep.executeUpdate();
+        }
       }
-
-    } finally {
-      SQLFunctions.close(sourceRS);
-      SQLFunctions.close(sourcePrep);
-      SQLFunctions.close(destPrep);
     }
   }
 
@@ -2040,60 +1886,57 @@ public final class ImportDB {
                                              final int sourceTournamentID,
                                              final int destTournamentID)
       throws SQLException {
-    PreparedStatement destPrep = null;
-    PreparedStatement sourcePrep = null;
-    ResultSet sourceRS = null;
-    try {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Importing finalist schedule");
-      }
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Importing finalist schedule");
+    }
 
-      // do drops first
-      destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ?");
+    // do drops first
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ?")) {
+      destPrep.setInt(1, destTournamentID);
+    }
+
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_categories WHERE tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
+    }
 
-      SQLFunctions.close(destPrep);
-      destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_categories WHERE tournament = ?");
+    // insert categories next
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_categories (tournament, category, division, room) VALUES(?, ?, ?, ?)");
+
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT category, division, room FROM finalist_categories WHERE tournament = ?")) {
+
       destPrep.setInt(1, destTournamentID);
-      destPrep.executeUpdate();
-
-      SQLFunctions.close(destPrep);
-      // insert categories next
-      destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_categories (tournament, category, division, room) VALUES(?, ?, ?, ?)");
-      destPrep.setInt(1, destTournamentID);
-
-      sourcePrep = sourceConnection.prepareStatement("SELECT category, division, room FROM finalist_categories WHERE tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        destPrep.setString(2, sourceRS.getString(1));
-        destPrep.setString(3, sourceRS.getString(2));
-        destPrep.setString(4, sourceRS.getString(3));
-        destPrep.executeUpdate();
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString(1));
+          destPrep.setString(3, sourceRS.getString(2));
+          destPrep.setString(4, sourceRS.getString(3));
+          destPrep.executeUpdate();
+        }
       }
+    }
 
-      SQLFunctions.close(destPrep);
-      // insert schedule values last
-      destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_schedule (tournament, category, judge_time, team_number, division) VALUES(?, ?, ?, ?, ?)");
+    // insert schedule values last
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_schedule (tournament, category, judge_time, team_number, division) VALUES(?, ?, ?, ?, ?)");
+
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT category, judge_time, team_number, division FROM finalist_schedule WHERE tournament = ?")) {
+
       destPrep.setInt(1, destTournamentID);
-
-      SQLFunctions.close(sourceRS);
-      SQLFunctions.close(sourcePrep);
-      sourcePrep = sourceConnection.prepareStatement("SELECT category, judge_time, team_number, division FROM finalist_schedule WHERE tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        destPrep.setString(2, sourceRS.getString(1));
-        destPrep.setTime(3, sourceRS.getTime(2));
-        destPrep.setInt(4, sourceRS.getInt(3));
-        destPrep.setString(5, sourceRS.getString(4));
-        destPrep.executeUpdate();
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString(1));
+          destPrep.setTime(3, sourceRS.getTime(2));
+          destPrep.setInt(4, sourceRS.getInt(3));
+          destPrep.setString(5, sourceRS.getString(4));
+          destPrep.executeUpdate();
+        }
       }
-    } finally {
-      SQLFunctions.close(sourceRS);
-      SQLFunctions.close(sourcePrep);
-      SQLFunctions.close(destPrep);
     }
   }
 
@@ -2104,6 +1947,7 @@ public final class ImportDB {
    * @param destConnection the database to insert the data into
    * @param tournament the name of the tournament to import
    * @return true if there are differences
+   * @throws SQLException on a database error
    */
   public static boolean checkForDifferences(final Connection sourceConnection,
                                             final Connection destConnection,
@@ -2154,7 +1998,7 @@ public final class ImportDB {
    * @param destConnection destination connection
    * @param tournament the tournament to check
    * @return the differences, empty list if no differences
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
   public static List<TeamPropertyDifference> checkTeamInfo(final Connection sourceConnection,
                                                            final Connection destConnection,
@@ -2162,49 +2006,40 @@ public final class ImportDB {
       throws SQLException {
     final List<TeamPropertyDifference> differences = new LinkedList<>();
 
-    PreparedStatement sourcePrep = null;
-    PreparedStatement destPrep = null;
-    ResultSet sourceRS = null;
-    ResultSet destRS = null;
-    try {
-      destPrep = destConnection.prepareStatement("SELECT Teams.TeamName, Teams.Organization"
-          + " FROM Teams"
-          + " WHERE Teams.TeamNumber = ?");
+    try (PreparedStatement destPrep = destConnection.prepareStatement("SELECT Teams.TeamName, Teams.Organization"
+        + " FROM Teams"
+        + " WHERE Teams.TeamNumber = ?");
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Organization"
-          + " FROM Teams, TournamentTeams, Tournaments" //
-          + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber" //
-          + " AND TournamentTeams.Tournament = Tournaments.tournament_id" //
-          + " AND Tournaments.Name = ?");
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Organization"
+            + " FROM Teams, TournamentTeams, Tournaments" //
+            + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber" //
+            + " AND TournamentTeams.Tournament = Tournaments.tournament_id" //
+            + " AND Tournaments.Name = ?")) {
 
       sourcePrep.setString(1, tournament);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        final int teamNumber = sourceRS.getInt(1);
-        final String sourceName = sourceRS.getString(2);
-        final String sourceOrganization = sourceRS.getString(3);
-        destPrep.setInt(1, teamNumber);
-        destRS = destPrep.executeQuery();
-        if (destRS.next()) {
-          final String destName = destRS.getString(1);
-          if (!Objects.equals(destName, sourceName)) {
-            differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.NAME, sourceName, destName));
-          }
-          final String destOrganization = destRS.getString(2);
-          if (!Objects.equals(destOrganization, sourceOrganization)) {
-            differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.ORGANIZATION, sourceOrganization,
-                                                       destOrganization));
-          }
-        }
-        // else handled by findMissingTeams
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          final int teamNumber = sourceRS.getInt(1);
+          final String sourceName = sourceRS.getString(2);
+          final String sourceOrganization = sourceRS.getString(3);
+          destPrep.setInt(1, teamNumber);
 
-        SQLFunctions.close(destRS);
-      }
-    } finally {
-      SQLFunctions.close(destRS);
-      SQLFunctions.close(sourceRS);
-      SQLFunctions.close(destPrep);
-      SQLFunctions.close(sourcePrep);
+          try (ResultSet destRS = destPrep.executeQuery()) {
+            if (destRS.next()) {
+              final String destName = destRS.getString(1);
+              if (!Objects.equals(destName, sourceName)) {
+                differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.NAME, sourceName, destName));
+              }
+              final String destOrganization = destRS.getString(2);
+              if (!Objects.equals(destOrganization, sourceOrganization)) {
+                differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.ORGANIZATION, sourceOrganization,
+                                                           destOrganization));
+              }
+            }
+            // else handled by findMissingTeams
+          } // dest result set
+        }
+      } // source result set
     }
     return differences;
   }
@@ -2371,7 +2206,7 @@ public final class ImportDB {
    * @param tournament the tournament to check
    * @return the teams in the source database and not in the destination
    *         database
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
   public static List<Team> findMissingTeams(final Connection sourceConnection,
                                             final Connection destConnection,

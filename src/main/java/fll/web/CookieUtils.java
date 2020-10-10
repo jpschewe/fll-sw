@@ -27,7 +27,7 @@ public final class CookieUtils {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  public static final String LOGIN_KEY = "fll-login";
+  private static final String LOGIN_KEY = "fll-login";
 
   private CookieUtils() {
   }
@@ -128,7 +128,7 @@ public final class CookieUtils {
   }
 
   /**
-   * Find the login key(s)
+   * Find the login key(s).
    *
    * @param request where to find the cookies
    * @return the string stored in the cookie or null if not found

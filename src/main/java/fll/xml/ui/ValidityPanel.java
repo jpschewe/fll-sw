@@ -29,7 +29,7 @@ final class ValidityPanel extends JPanel {
   /**
    * Default constructor sets state to unknown.
    */
-  public ValidityPanel() {
+  ValidityPanel() {
     setMinimumSize(new Dimension(MIN_WIDTH, MIN_HEIGHT));
     setUnknown();
   }

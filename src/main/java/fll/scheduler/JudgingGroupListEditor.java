@@ -33,7 +33,7 @@ import javax.swing.JTable;
 
   private final JTable table;
 
-  public JudgingGroupListEditor() {
+  JudgingGroupListEditor() {
     super();
     setLayout(new BorderLayout());
 

@@ -18,22 +18,18 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 
-
-
-
-
 /**
  * Edit a list of {@link SubjectiveStation} objects.
  */
 /* package */ class SubjectiveStationListEditor extends JComponent {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-  
+
   private final SubjectiveStationModel tableModel;
 
   private final JTable table;
 
-  public SubjectiveStationListEditor() {
+  SubjectiveStationListEditor() {
     super();
     setLayout(new BorderLayout());
 

@@ -60,7 +60,7 @@ public class DoLogin extends BaseFLLServlet {
       throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
-    try (final Connection connection = datasource.getConnection()) {
+    try (Connection connection = datasource.getConnection()) {
 
       // check for authentication table
       if (Queries.isAuthenticationEmpty(connection)) {

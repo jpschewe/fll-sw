@@ -15,6 +15,6 @@ public interface CheckCanceled {
   /**
    * @return true if the task should be canceled
    */
-  public boolean isCanceled();
+  boolean isCanceled();
 
 }

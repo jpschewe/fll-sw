@@ -28,6 +28,7 @@ public final class JudgeInformation implements Serializable {
   /**
    * Identifiers for judges must be unique within a
    * category, station combination.
+   * 
    * @return The identifier of the judge
    */
   public String getId() {
@@ -55,6 +56,11 @@ public final class JudgeInformation implements Serializable {
     return group;
   }
 
+  /**
+   * @param id {@link #getId()}
+   * @param category {@link #getCategory()}
+   * @param group {@link #getGroup()}
+   */
   @JsonCreator
   public JudgeInformation(@JsonProperty("id") final String id,
                           @JsonProperty("category") final String category,
@@ -78,7 +84,8 @@ public final class JudgeInformation implements Serializable {
     } else if (o.getClass().equals(JudgeInformation.class)) {
       final JudgeInformation other = (JudgeInformation) o;
       return getId().equals(other.getId())
-          && getCategory().equals(other.getCategory()) && getGroup().equals(other.getGroup());
+          && getCategory().equals(other.getCategory())
+          && getGroup().equals(other.getGroup());
     } else {
       return false;
     }
@@ -93,7 +100,8 @@ public final class JudgeInformation implements Serializable {
    * @throws SQLException when there is an error talking to the database
    */
   public static Collection<JudgeInformation> getJudges(final Connection connection,
-                                                       final int tournament) throws SQLException {
+                                                       final int tournament)
+      throws SQLException {
     Collection<JudgeInformation> judges = new LinkedList<JudgeInformation>();
 
     ResultSet rs = null;

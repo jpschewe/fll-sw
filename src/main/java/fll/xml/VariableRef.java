@@ -15,11 +15,17 @@ import org.w3c.dom.Element;
 
 import fll.web.playoff.TeamScore;
 
+/**
+ * Represents a variable reference.
+ */
 public class VariableRef implements Evaluatable, Serializable {
 
+  /**
+   * XML tag for this class.
+   */
   public static final String TAG_NAME = "variableRef";
 
-  public static final String VARIABLE_ATTRIBUTE = "variable";
+  private static final String VARIABLE_ATTRIBUTE = "variable";
 
   /**
    * Create a new variable reference.
@@ -84,6 +90,10 @@ public class VariableRef implements Evaluatable, Serializable {
     return getVariable().evaluate(teamScore);
   }
 
+  /**
+   * @param doc used to create elements
+   * @return element representing this variable reference
+   */
   public Element toXml(final Document doc) {
     final Element ele = doc.createElement(TAG_NAME);
     ele.setAttribute(VARIABLE_ATTRIBUTE, mVariableName);

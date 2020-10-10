@@ -22,8 +22,6 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 
@@ -57,7 +55,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
   private final DeleteEventListener deleteListener;
 
-  public TiebreakerEditor(@Nonnull final PerformanceScoreCategory performance) {
+  TiebreakerEditor(@Nonnull final PerformanceScoreCategory performance) {
     super(new BorderLayout());
     this.performance = performance;
 

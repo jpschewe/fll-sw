@@ -122,6 +122,7 @@ public class FooterFilter implements Filter {
     }
   }
 
+  // CHECKSTYLE:OFF don't want conditional logic simplified
   /**
    * @param url the url to check
    * @return true for all urls that should have no footer
@@ -148,6 +149,7 @@ public class FooterFilter implements Filter {
       return false;
     }
   }
+  // CHECKSTYLE:ON
 
   /**
    * Writer the footer to the char array writer.

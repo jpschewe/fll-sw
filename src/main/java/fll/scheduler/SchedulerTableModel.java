@@ -38,7 +38,7 @@ import org.apache.commons.lang3.tuple.Pair;
     }
   };
 
-  public SchedulerTableModel(final TournamentSchedule schedule) {
+  SchedulerTableModel(final TournamentSchedule schedule) {
     this.schedule = schedule;
     this.scheduleData = new ArrayList<>(schedule.getSchedule());
     this.subjectiveColumns = new ArrayList<>(schedule.getSubjectiveStations());

@@ -34,8 +34,10 @@ public class SlideshowTest {
   /**
    * Test setting slideshow interval and make sure it doesn't error.
    *
-   * @throws IOException
-   * @throws InterruptedException
+   * @param selenium browser driver
+   * @param seleniumWait used to wait for web elements
+   * @throws IOException test error
+   * @throws InterruptedException test error
    */
   @Test
   public void testSlideshowInterval(final WebDriver selenium,

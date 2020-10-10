@@ -34,6 +34,9 @@ import fll.xml.SubjectiveScoreCategory;
  */
 public class SubjectiveScore {
 
+  /**
+   * Constructor that sets all default values.
+   */
   public SubjectiveScore() {
     noShow = false;
     modified = false;

@@ -104,7 +104,7 @@ public class ByteResponseWrapper extends HttpServletResponseWrapper {
   private static class WrapperServletOutputStream extends ServletOutputStream {
     private final OutputStream os;
 
-    public WrapperServletOutputStream(final OutputStream os) {
+    WrapperServletOutputStream(final OutputStream os) {
       this.os = os;
     }
 

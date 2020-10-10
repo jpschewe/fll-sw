@@ -6,6 +6,9 @@
 
 package fll.xml;
 
+/**
+ * Used to specify which value to use from a goal.
+ */
 public enum GoalScoreType {
 
   RAW, COMPUTED;

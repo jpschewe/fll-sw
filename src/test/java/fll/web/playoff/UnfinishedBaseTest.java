@@ -34,45 +34,53 @@ public abstract class UnfinishedBaseTest {
 
   private String database;
 
-  protected Connection connection;
+  private Connection connection;
 
-  protected Tournament tournament;
+  protected Connection getConnection() {
+    return connection;
+  }
+
+  private Tournament tournament;
+
+  protected Tournament getTournament() {
+    return tournament;
+  }
 
   /** bracket that has multiple missing entries */
   // 19689, 20806, 21169, 21940
-  /* package */ static final String unfinishedLarge = "unfinished-large";
+  /* package */ static final String UNFINISHED_LARGE = "unfinished-large";
 
   // 14446, 16627, 17521, 18420
-  /* package */ static final String tie1st3rdBracketName = "tie-1st-3rd";
+  /* package */ static final String TIE_1ST_3RD_BRACKET_NAME = "tie-1st-3rd";
 
   // 11221, 11228, 11229, 12911
-  /* package */ static final String unfinished1st3rdBracketName = "unfinished-1st-3rd";
+  /* package */ static final String UNFINISHED_1ST_3RD_BRACKET_NAME = "unfinished-1st-3rd";
 
   // 10484, 10486, 10719, 10721
-  /* package */ static final String tieMiddleBracketName = "tie-middle";
+  /* package */ static final String TIE_MIDDLE_BRACKET_NAME = "tie-middle";
 
   // 7393, 7684, 8330, 9975
-  /* package */ static final String tie3rdBracketName = "tie-3rd";
+  /* package */ static final String TIE_3RD_BRACKET_NAME = "tie-3rd";
 
   // 4916, 4918, 5280, 7391
-  /* package */ static final String tieBracketName = "tie";
+  /* package */ static final String TIE_BRACKET_NAME = "tie";
 
   // 1154, 3135, 3698, 3811
-  /* package */ static final String unfinished3rdBracketName = "unfinished-3rd";
+  /* package */ static final String UNFINISHED_3RD_BRACKET_NAME = "unfinished-3rd";
 
   // 352, 405, 407, 408
-  /* package */ static final String unfinishedBracketName = "unfinished";
+  /* package */ static final String UNFINISHED_BRACKET_NAME = "unfinished";
 
-  /* package */ static final String[] finishedBracketNames = { "Lakes", "Woods" };
+  /* package */ static final String[] FINISHED_BRACKET_NAMES = { "Lakes", "Woods" };
 
-  /* package */ static final int unfinishedTeamNumber = 352;
+  /* package */ static final int UNFINISHED_TEAM_NUMBER = 352;
 
-  /* package */ static final String tournamentName = "12/13/15 - Rochester";
+  /* package */ static final String TOURNAMENT_NAME = "12/13/15 - Rochester";
 
-  /* package */ static final String[] unfinishedBracketNames = { tie1st3rdBracketName, tie3rdBracketName,
-                                                                 tieBracketName, tieMiddleBracketName,
-                                                                 unfinishedBracketName, unfinished3rdBracketName,
-                                                                 unfinished1st3rdBracketName, unfinishedLarge };
+  /* package */ static final String[] UNFINISHED_BRACKET_NAMES = { TIE_1ST_3RD_BRACKET_NAME, TIE_3RD_BRACKET_NAME,
+                                                                   TIE_BRACKET_NAME, TIE_MIDDLE_BRACKET_NAME,
+                                                                   UNFINISHED_BRACKET_NAME, UNFINISHED_3RD_BRACKET_NAME,
+                                                                   UNFINISHED_1ST_3RD_BRACKET_NAME, UNFINISHED_LARGE };
 
   @BeforeEach
   public void setUp() throws IOException, SQLException {
@@ -87,7 +95,7 @@ public abstract class UnfinishedBaseTest {
                                                                               connection);
     TestUtils.deleteImportData(importResult);
 
-    tournament = Tournament.findTournamentByName(connection, UnfinishedBaseTest.tournamentName);
+    tournament = Tournament.findTournamentByName(connection, UnfinishedBaseTest.TOURNAMENT_NAME);
     assertThat(tournament, notNullValue());
   }
 

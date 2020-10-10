@@ -20,9 +20,12 @@ import org.w3c.dom.Element;
  */
 public class Variable extends BasicPolynomial {
 
+  /**
+   * XML tag for this class.
+   */
   public static final String TAG_NAME = "variable";
 
-  public static final String NAME_ATTRIBUTE = "name";
+  private static final String NAME_ATTRIBUTE = "name";
 
   private final PropertyChangeSupport propChangeSupport;
 
@@ -34,6 +37,9 @@ public class Variable extends BasicPolynomial {
     propChangeSupport = new PropertyChangeSupport(this);
   }
 
+  /**
+   * @param name {@link #getName()}
+   */
   public Variable(final String name) {
     super();
 
@@ -61,6 +67,10 @@ public class Variable extends BasicPolynomial {
     this.propChangeSupport.firePropertyChange("name", old, v);
   }
 
+  /**
+   * @param doc used to create elements
+   * @return XML representation of this class
+   */
   public Element toXml(final Document doc) {
     final Element ele = doc.createElement(TAG_NAME);
     populateXml(doc, ele);

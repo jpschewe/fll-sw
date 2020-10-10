@@ -23,10 +23,15 @@ import fll.web.playoff.BracketData.TopRightCornerStyle;
 /**
  * Helpers for scoregenbrackets.jsp.
  */
-public class ScoregenBrackets {
+public final class ScoregenBrackets {
+
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  private ScoregenBrackets() {
+  }
+
   /**
+   * @param request used to get query parameters
    * @param application application context
    * @param pageContext page context, information is put in here
    */
@@ -35,7 +40,7 @@ public class ScoregenBrackets {
                                      final PageContext pageContext) {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    try (final Connection connection = datasource.getConnection()) {
+    try (Connection connection = datasource.getConnection()) {
 
       String division = request.getParameter("division");
       if (null == division) {

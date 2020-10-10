@@ -31,8 +31,8 @@ public final class UnfinishedTestFinish extends UnfinishedBaseTest {
    * @return bracket names for {@link #test(String)}
    */
   public static String[] names() {
-    return new String[] { UnfinishedBaseTest.unfinished3rdBracketName, UnfinishedBaseTest.unfinished1st3rdBracketName,
-                          UnfinishedBaseTest.unfinishedBracketName, UnfinishedBaseTest.unfinishedLarge };
+    return new String[] { UnfinishedBaseTest.UNFINISHED_3RD_BRACKET_NAME, UnfinishedBaseTest.UNFINISHED_1ST_3RD_BRACKET_NAME,
+                          UnfinishedBaseTest.UNFINISHED_BRACKET_NAME, UnfinishedBaseTest.UNFINISHED_LARGE };
   }
 
   /**
@@ -45,15 +45,17 @@ public final class UnfinishedTestFinish extends UnfinishedBaseTest {
   @ParameterizedTest
   @MethodSource("names")
   public void test(final String bracketName) throws SQLException, ParseException {
-    final ChallengeDescription challenge = GlobalParameters.getChallengeDescription(connection);
+    final ChallengeDescription challenge = GlobalParameters.getChallengeDescription(getConnection());
     assertThat(challenge, notNullValue());
 
-    final boolean before = Playoff.isPlayoffBracketUnfinished(connection, tournament.getTournamentID(), bracketName);
+    final boolean before = Playoff.isPlayoffBracketUnfinished(getConnection(), getTournament().getTournamentID(),
+                                                              bracketName);
     assertThat(before, is(true));
 
-    Playoff.finishBracket(connection, challenge, tournament, bracketName);
+    Playoff.finishBracket(getConnection(), challenge, getTournament(), bracketName);
 
-    final boolean after = Playoff.isPlayoffBracketUnfinished(connection, tournament.getTournamentID(), bracketName);
+    final boolean after = Playoff.isPlayoffBracketUnfinished(getConnection(), getTournament().getTournamentID(),
+                                                             bracketName);
     assertThat(after, is(false));
   }
 }

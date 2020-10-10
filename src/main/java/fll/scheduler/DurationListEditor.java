@@ -32,7 +32,7 @@ import javax.swing.JTable;
 
   private final JTable table;
 
-  public DurationListEditor() {
+  DurationListEditor() {
     super();
     setLayout(new BorderLayout());
 

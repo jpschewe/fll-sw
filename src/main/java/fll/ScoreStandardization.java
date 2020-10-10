@@ -30,6 +30,9 @@ public final class ScoreStandardization {
    * Thrown when there are not enough scores for a judging group.
    */
   public static class TooFewScoresException extends FLLRuntimeException {
+    /**
+     * @param message {@link #getMessage()}
+     */
     public TooFewScoresException(final String message) {
       super(message);
     }
@@ -147,6 +150,7 @@ public final class ScoreStandardization {
    * @param tournament which tournament to summarize scores for
    * @throws TooFewScoresException if there aren't enough scores in a judging
    *           group
+   * @throws SQLException a database error
    */
   public static void summarizeScores(final Connection connection,
                                      final int tournament)

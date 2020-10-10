@@ -72,6 +72,8 @@ public final class UploadTeamTournamentAssignments extends BaseFLLServlet {
    * Get the headers from the file.
    *
    * @param file the file that the data is in
+   * @param sheetName the sheet in an Excel file to read, null if reading a CSV
+   *          file
    * @param session used to store the headers, attribute is "fileHeaders" and is
    *          of type String[]
    * @throws IOException if an error occurs reading from file

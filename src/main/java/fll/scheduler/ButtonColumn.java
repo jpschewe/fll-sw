@@ -91,7 +91,7 @@ public class ButtonColumn extends AbstractCellEditor
   }
 
   /**
-   * Get foreground color of the button when the cell has focus
+   * Get foreground color of the button when the cell has focus.
    *
    * @return the foreground color
    */
@@ -100,7 +100,7 @@ public class ButtonColumn extends AbstractCellEditor
   }
 
   /**
-   * The foreground color of the button when the cell has focus
+   * The foreground color of the button when the cell has focus.
    *
    * @param focusBorder the foreground color
    */
@@ -114,7 +114,7 @@ public class ButtonColumn extends AbstractCellEditor
   }
 
   /**
-   * The mnemonic to activate the button when the cell has focus
+   * The mnemonic to activate the button when the cell has focus.
    *
    * @param mnemonic the mnemonic
    */

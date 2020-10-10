@@ -6,12 +6,14 @@
 package fll.xml;
 
 /**
- * @author jpschewe
+ * Types of scores.
  */
 public enum ScoreType {
   INTEGER, FLOAT;
 
-
+  /**
+   * @return XML representation
+   */
   public String toXmlString() {
     // case for XML and enum value are the same
     return toString();

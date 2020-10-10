@@ -19,8 +19,6 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 
-
-
 import fll.scheduler.ButtonColumn;
 import fll.util.DatabaseNameCellEditor;
 
@@ -40,7 +38,7 @@ class EnumeratedValuesEditor extends JPanel {
   /**
    * @param goal the goal to modify
    */
-  public EnumeratedValuesEditor(@Nonnull final Goal goal) {
+  EnumeratedValuesEditor(@Nonnull final Goal goal) {
     super(new BorderLayout());
 
     this.tableModel = new EnumeratedValuesModel(goal);

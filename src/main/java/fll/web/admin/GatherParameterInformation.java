@@ -21,21 +21,26 @@ import fll.db.GlobalParameters;
 import fll.db.TournamentParameters;
 import fll.flltools.MhubParameters;
 import fll.web.ApplicationAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Gather parameter information for edit_all_parameters.jsp.
  */
-public class GatherParameterInformation {
+public final class GatherParameterInformation {
 
+  private GatherParameterInformation() {
+  }
+
+  /**
+   * @param application get application variables
+   * @param pageContext set variables for the page
+   * @throws SQLException on a database error
+   */
   public static void populateContext(final ServletContext application,
                                      final PageContext pageContext)
       throws SQLException {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
       pageContext.setAttribute("tournaments", tournaments);
@@ -81,9 +86,6 @@ public class GatherParameterInformation {
       pageContext.setAttribute("gMhubHostname", MhubParameters.getHostname(connection));
       pageContext.setAttribute("gMhubPort", MhubParameters.getPort(connection));
       pageContext.setAttribute("gMhubDisplayNode", MhubParameters.getDisplayNode(connection));
-
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 }

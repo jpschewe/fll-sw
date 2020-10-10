@@ -35,7 +35,7 @@ import java.util.Arrays;
    * @param numWarnings the number of soft constraint violations out of
    *          ScheduleChecker
    */
-  public ObjectiveValue(final int solutionNumber,
+  ObjectiveValue(final int solutionNumber,
                         final int latestPerformanceTime,
                         final int[] numTeams,
                         final int[] latestSubjectiveTime,

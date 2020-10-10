@@ -42,14 +42,14 @@ import fll.util.FLLInternalException;
    * 
    * @param nullAllowed if true allow null times
    */
-  public ScheduleTimeField() {
+  ScheduleTimeField() {
     this(LocalTime.now());
   }
 
   /**
    * @param value the initial value for the widget
    */
-  public ScheduleTimeField(final LocalTime value) {
+  ScheduleTimeField(final LocalTime value) {
     try {
       final MaskFormatter mf = new MaskFormatter(MASKFORMAT);
       mf.setPlaceholderCharacter('_');
@@ -134,7 +134,7 @@ import fll.util.FLLInternalException;
 
     private final boolean nullAllowed;
 
-    public TimeVerifier(final boolean pNullAllowed) {
+    TimeVerifier(final boolean pNullAllowed) {
       this.nullAllowed = pNullAllowed;
     }
 

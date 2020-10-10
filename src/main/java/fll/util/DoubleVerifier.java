@@ -6,13 +6,9 @@
 
 package fll.util;
 
-import java.awt.Color;
-
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
-
-
 
 /**
  * Ensure that the value is a valid double between the minimum value and the
@@ -22,14 +18,14 @@ public class DoubleVerifier extends InputVerifier {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  public static final Color INVALID_COLOR = Color.red;
-
-  public static final Color VALID_COLOR = Color.black;
-
   private final double minValue;
 
   private final double maxValue;
 
+  /**
+   * @param minValue the minimum valid value
+   * @param maxValue the maximum vaid value
+   */
   public DoubleVerifier(final double minValue,
                         final double maxValue) {
     this.minValue = minValue;
@@ -46,21 +42,21 @@ public class DoubleVerifier extends InputVerifier {
 
         if (minValue <= value
             && value <= maxValue) {
-          input.setForeground(VALID_COLOR);
+          input.setForeground(FormatterUtils.VALID_COLOR);
           return true;
         } else {
-          input.setForeground(INVALID_COLOR);
+          input.setForeground(FormatterUtils.INVALID_COLOR);
           return false;
         }
       } catch (final NumberFormatException e) {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Unable to parse integer", e);
         }
-        input.setForeground(INVALID_COLOR);
+        input.setForeground(FormatterUtils.INVALID_COLOR);
         return false;
       }
     } else {
-      input.setForeground(INVALID_COLOR);
+      input.setForeground(FormatterUtils.INVALID_COLOR);
       return false;
     }
   }

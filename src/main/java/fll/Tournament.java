@@ -54,6 +54,9 @@ public final class Tournament implements Serializable {
 
   private final int tournamentID;
 
+  /**
+   * @return database ID for the tournament
+   */
   public int getTournamentID() {
     return tournamentID;
   }
@@ -235,6 +238,7 @@ public final class Tournament implements Serializable {
    * @param connection database connection
    * @param id tournament id
    * @return if a tournament with the specified {@code id} exists
+   * @throws SQLException on a database error
    */
   public static boolean doesTournamentExist(final Connection connection,
                                             final int id)
@@ -252,6 +256,7 @@ public final class Tournament implements Serializable {
    * @param connection database connection
    * @param name tournament name
    * @return if a tournament with the specified {@code name} exists
+   * @throws SQLException on a database error
    */
   public static boolean doesTournamentExist(final Connection connection,
                                             final String name)
@@ -296,6 +301,7 @@ public final class Tournament implements Serializable {
     }
   }
 
+  @Override
   public boolean equals(final Object o) {
     if (o instanceof Tournament) {
       final Tournament other = (Tournament) o;
@@ -305,6 +311,7 @@ public final class Tournament implements Serializable {
     }
   }
 
+  @Override
   public int hashCode() {
     return getTournamentID();
   }
@@ -459,12 +466,12 @@ public final class Tournament implements Serializable {
   /**
    * Check if this tournament contains scores.
    * 
-   * @param connection
+   * @param connection the database connection
    * @param description the challenge description to get the subjective
    *          categories
    * @return true if there are any performance or subjective scores in this
    *         tournament
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
   public boolean containsScores(final Connection connection,
                                 final ChallengeDescription description)
@@ -538,7 +545,7 @@ public final class Tournament implements Serializable {
    * Delete a tournament.
    * This will delete a tournament if there are no scores associated with it.
    * 
-   * @param connection
+   * @param connection database connection
    * @param tournamentID tournament to delete
    * @throws SQLException If there is a database error such as scores existing.
    */

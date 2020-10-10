@@ -15,14 +15,20 @@ import org.w3c.dom.Element;
 
 import fll.Utilities;
 
+/**
+ * An enumerated value inside a goal.
+ */
 public class EnumeratedValue implements Serializable {
 
-  public static final String TITLE_ATTRIBUTE = "title";
+  private static final String TITLE_ATTRIBUTE = "title";
 
-  public static final String SCORE_ATTRIBUTE = "score";
+  private static final String SCORE_ATTRIBUTE = "score";
 
-  public static final String VALUE_ATTRIBUTE = "value";
+  private static final String VALUE_ATTRIBUTE = "value";
 
+  /**
+   * Name of XML tag for values.
+   */
   public static final String TAG_NAME = "value";
 
   /**
@@ -95,6 +101,10 @@ public class EnumeratedValue implements Serializable {
     mValue = v;
   }
 
+  /**
+   * @param document used to create elements
+   * @return the XML element that represents this enumerated value
+   */
   public Element toXml(final Document document) {
     final Element ele = document.createElement(TAG_NAME);
     ele.setAttribute(SCORE_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mScore));

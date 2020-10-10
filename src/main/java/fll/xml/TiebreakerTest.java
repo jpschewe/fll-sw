@@ -15,8 +15,15 @@ import org.w3c.dom.Element;
  */
 public class TiebreakerTest extends BasicPolynomial {
 
+  /**
+   * XML tag name for this class.
+   */
   public static final String TAG_NAME = "test";
 
+  /**
+   * @param ele the XML element to parse
+   * @param goalScope where to find goals
+   */
   public TiebreakerTest(final Element ele,
                         final @UnderInitialization GoalScope goalScope) {
     super(ele, goalScope);
@@ -33,14 +40,24 @@ public class TiebreakerTest extends BasicPolynomial {
 
   private WinnerType mWinner;
 
+  /**
+   * @return how the winner of the tie breaker is determined
+   */
   public WinnerType getWinner() {
     return mWinner;
   }
 
+  /**
+   * @param v {@link #getWinner()}
+   */
   public void setWinner(final WinnerType v) {
     mWinner = v;
   }
 
+  /**
+   * @param doc used to create elements
+   * @return XML representation of this class
+   */
   public Element toXml(final Document doc) {
     final Element ele = doc.createElement(TAG_NAME);
     populateXml(doc, ele);

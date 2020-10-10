@@ -11,15 +11,21 @@ import org.w3c.dom.Element;
 
 import fll.Utilities;
 
+/**
+ * Representation of a restriction in the challenge.
+ */
 public class Restriction extends BasicPolynomial {
 
+  /**
+   * XML tag name for this class.
+   */
   public static final String TAG_NAME = "restriction";
 
-  public static final String LOWER_BOUND_ATTRIBUTE = "lowerBound";
+  private static final String LOWER_BOUND_ATTRIBUTE = "lowerBound";
 
-  public static final String UPPER_BOUND_ATTRIBUTE = "upperBound";
+  private static final String UPPER_BOUND_ATTRIBUTE = "upperBound";
 
-  public static final String MESSAGE_ATTRIBUTE = "message";
+  private static final String MESSAGE_ATTRIBUTE = "message";
 
   public Restriction(final Element ele,
                      final GoalScope goalScope) {
@@ -43,34 +49,56 @@ public class Restriction extends BasicPolynomial {
 
   private double mLowerBound;
 
+  /**
+   * @return lower bound
+   */
   public double getLowerBound() {
     return mLowerBound;
   }
 
+  /**
+   * @param v {@link #getLowerBound()}
+   */
   public void setLowerBound(final double v) {
     mLowerBound = v;
   }
 
   private double mUpperBound;
 
+  /**
+   * @return upper bound
+   */
   public double getUpperBound() {
     return mUpperBound;
   }
 
+  /**
+   * @param v {@link #getUpperBound()}
+   */
   public void setUpperBound(final double v) {
     mUpperBound = v;
   }
 
   private String mMessage;
 
+  /**
+   * @return message to display when restriction is violated
+   */
   public String getMessage() {
     return mMessage;
   }
 
+  /**
+   * @param v {@link #getMessage()}
+   */
   public void setMessage(final String v) {
     mMessage = v;
   }
 
+  /**
+   * @param doc used to create elements
+   * @return XML element representing this restriction
+   */
   public Element toXml(final Document doc) {
     final Element ele = doc.createElement(TAG_NAME);
 

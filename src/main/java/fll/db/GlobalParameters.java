@@ -16,6 +16,7 @@ import javax.annotation.Nonnull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -187,15 +188,17 @@ public final class GlobalParameters {
    * @return the description
    * @throws FLLRuntimeException if the description cannot be found
    * @throws SQLException on a database error
+   * @throws FLLInternalException if the challenge document is not in the
+   *           database
    */
   public static ChallengeDescription getChallengeDescription(final Connection connection)
-      throws SQLException, RuntimeException {
+      throws SQLException, FLLInternalException {
     try (PreparedStatement prep = getGlobalParameterStmt(connection, CHALLENGE_DOCUMENT)) {
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
           return ChallengeParser.parse(new InputStreamReader(rs.getAsciiStream(1), Utilities.DEFAULT_CHARSET));
         } else {
-          throw new FLLRuntimeException("Could not find challenge document in database");
+          throw new FLLInternalException("Could not find challenge document in database");
         }
       }
     }

@@ -16,10 +16,18 @@ public class TeamPropertyDifference implements Serializable {
    * Team string properties that can differ.
    */
   public enum TeamProperty {
-    NAME, ORGANIZATION
+    /**
+     * The name is different.
+     */
+    NAME,
+    /** The organization is different. */
+    ORGANIZATION
   };
 
-  public TeamPropertyDifference(final int teamNumber, final TeamProperty property, final String sourceValue, final String destValue) {
+  public TeamPropertyDifference(final int teamNumber,
+                                final TeamProperty property,
+                                final String sourceValue,
+                                final String destValue) {
     this.teamNumber = teamNumber;
     this.property = property;
     this.sourceValue = sourceValue;

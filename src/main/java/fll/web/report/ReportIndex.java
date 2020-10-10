@@ -17,22 +17,23 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-
-
 import fll.db.Queries;
-
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.report.finalist.FinalistSchedule;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Populate the page context for the report index page.
  */
-public class ReportIndex {
+public final class ReportIndex {
+
+  private ReportIndex() {
+  }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
+   * @param session session variables
    * @param application application context
    * @param pageContext page context, information is put in here
    */
@@ -43,25 +44,25 @@ public class ReportIndex {
     // clear out some variables
     session.removeAttribute(PromptSummarizeScores.SUMMARY_REDIRECT_KEY);
 
-    Connection connection = null;
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
       final int tournament = Queries.getCurrentTournament(connection);
 
-      prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?");
-      prep.setInt(1, Queries.getCurrentTournament(connection));
-      rs = prep.executeQuery();
-      final int maxRunNumber;
-      if (rs.next()) {
-        maxRunNumber = rs.getInt(1);
-      } else {
-        maxRunNumber = 1;
-      }
-      pageContext.setAttribute("maxRunNumber", maxRunNumber);
+      try (
+          PreparedStatement prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?")) {
+        prep.setInt(1, Queries.getCurrentTournament(connection));
+
+        try (ResultSet rs = prep.executeQuery()) {
+          final int maxRunNumber;
+          if (rs.next()) {
+            maxRunNumber = rs.getInt(1);
+          } else {
+            maxRunNumber = 1;
+          }
+          pageContext.setAttribute("maxRunNumber", maxRunNumber);
+        } // result set
+      } // prepared statement
 
       pageContext.setAttribute("tournamentTeams", Queries.getTournamentTeams(connection).values());
 
@@ -70,11 +71,7 @@ public class ReportIndex {
 
     } catch (final SQLException e) {
       LOGGER.error(e, e);
-      throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-      SQLFunctions.close(connection);
+      throw new FLLRuntimeException(e);
     }
   }
 

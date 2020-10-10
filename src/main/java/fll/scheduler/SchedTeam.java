@@ -10,7 +10,7 @@ package fll.scheduler;
  * Used by {@link GreedyScheduler} to track team information.
  */
 /* packet */final class SchedTeam {
-  public SchedTeam(final int index,
+  SchedTeam(final int index,
                    final int group) {
     this.index = index;
     this.group = group;

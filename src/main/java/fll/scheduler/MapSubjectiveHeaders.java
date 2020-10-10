@@ -54,7 +54,7 @@ import fll.xml.SubjectiveScoreCategory;
     return canceled;
   }
 
-  public MapSubjectiveHeaders(final Frame owner,
+  MapSubjectiveHeaders(final Frame owner,
                               final ChallengeDescription description,
                               final TournamentSchedule schedule) {
     super(owner, true);
@@ -64,7 +64,7 @@ import fll.xml.SubjectiveScoreCategory;
     initComponents();
   }
 
-  public MapSubjectiveHeaders(final Dialog owner,
+  MapSubjectiveHeaders(final Dialog owner,
                               final ChallengeDescription description,
                               final TournamentSchedule schedule) {
     super(owner, true);

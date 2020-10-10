@@ -19,28 +19,47 @@ import net.sf.log4jdbc.ConnectionSpy;
 
 /**
  * Based upon code from the bug report
- * http://code.google.com/p/log4jdbc/issues/detail?id=6
+ * http://code.google.com/p/log4jdbc/issues/detail?id=6.
  */
 public class DataSourceSpy implements DataSource, Serializable {
   private DataSource realDataSource;
 
   private boolean enabled = Boolean.parseBoolean(System.getProperty("log4jdbc.enabled", "true"));
 
+  /**
+   * Base constructor, invalid object since there is no datasource to delegate to.
+   */
   public DataSourceSpy() {
+    realDataSource = null;
   }
 
+  /**
+   * @param realDataSource the datasource to delegate to
+   */
   public DataSourceSpy(final DataSource realDataSource) {
     this.realDataSource = realDataSource;
   }
 
+  /**
+   * @param realDataSource the datasource to delegate to
+   */
   public void setRealDataSource(final DataSource realDataSource) {
     this.realDataSource = realDataSource;
   }
 
+  /**
+   * This can be set by the system property "log4jdbc.enabled". It defaults to
+   * enabled.
+   * 
+   * @return if spying is enabled
+   */
   public boolean isEnabled() {
     return enabled;
   }
 
+  /**
+   * @param enabled {@link #isEnabled()}
+   */
   public void setEnabled(final boolean enabled) {
     this.enabled = enabled;
   }
@@ -56,7 +75,8 @@ public class DataSourceSpy implements DataSource, Serializable {
 
   @Override
   public Connection getConnection(final String username,
-                                  final String password) throws SQLException {
+                                  final String password)
+      throws SQLException {
     if (enabled) {
       return new ConnectionSpy(realDataSource.getConnection(username, password));
     } else {
@@ -93,7 +113,7 @@ public class DataSourceSpy implements DataSource, Serializable {
   public <T> T unwrap(final Class<T> iface) throws SQLException {
     return realDataSource.unwrap(iface);
   }
-  
+
   @Override
   public Logger getParentLogger() throws SQLFeatureNotSupportedException {
     return realDataSource.getParentLogger();

@@ -29,17 +29,17 @@ public abstract class AbstractConditionStatement implements Serializable {
    * @param ele the element to parse
    */
   public AbstractConditionStatement(@Nonnull final Element ele) {
-    if (new NodelistElementCollectionAdapter(ele.getElementsByTagName(InequalityComparison.LESS_THAN_TAG_NAME)).hasNext()) {
+    if (new NodelistElementCollectionAdapter(ele.getElementsByTagName(InequalityComparison.LESS_THAN.getTagName())).hasNext()) {
       mComparison = InequalityComparison.LESS_THAN;
-    } else if (new NodelistElementCollectionAdapter(ele.getElementsByTagName(InequalityComparison.LESS_THAN_OR_EQUAL_TAG_NAME)).hasNext()) {
+    } else if (new NodelistElementCollectionAdapter(ele.getElementsByTagName(InequalityComparison.LESS_THAN_OR_EQUAL.getTagName())).hasNext()) {
       mComparison = InequalityComparison.LESS_THAN_OR_EQUAL;
-    } else if (new NodelistElementCollectionAdapter(ele.getElementsByTagName(InequalityComparison.GREATER_THAN_TAG_NAME)).hasNext()) {
+    } else if (new NodelistElementCollectionAdapter(ele.getElementsByTagName(InequalityComparison.GREATER_THAN.getTagName())).hasNext()) {
       mComparison = InequalityComparison.GREATER_THAN;
-    } else if (new NodelistElementCollectionAdapter(ele.getElementsByTagName(InequalityComparison.GREATER_THAN_OR_EQUAL_TAG_NAME)).hasNext()) {
+    } else if (new NodelistElementCollectionAdapter(ele.getElementsByTagName(InequalityComparison.GREATER_THAN_OR_EQUAL.getTagName())).hasNext()) {
       mComparison = InequalityComparison.GREATER_THAN_OR_EQUAL;
-    } else if (new NodelistElementCollectionAdapter(ele.getElementsByTagName(InequalityComparison.EQUAL_TO_TAG_NAME)).hasNext()) {
+    } else if (new NodelistElementCollectionAdapter(ele.getElementsByTagName(InequalityComparison.EQUAL_TO.getTagName())).hasNext()) {
       mComparison = InequalityComparison.EQUAL_TO;
-    } else if (new NodelistElementCollectionAdapter(ele.getElementsByTagName(InequalityComparison.NOT_EQUAL_TO_TAG_NAME)).hasNext()) {
+    } else if (new NodelistElementCollectionAdapter(ele.getElementsByTagName(InequalityComparison.NOT_EQUAL_TO.getTagName())).hasNext()) {
       mComparison = InequalityComparison.NOT_EQUAL_TO;
     } else {
       throw new FLLInternalException("Unknown comparison");
@@ -82,22 +82,7 @@ public abstract class AbstractConditionStatement implements Serializable {
   public abstract boolean isTrue(TeamScore teamScore);
 
   protected final Element getComparisonElement(final Document doc) {
-    switch (mComparison) {
-    case LESS_THAN:
-      return doc.createElement(InequalityComparison.LESS_THAN_TAG_NAME);
-    case LESS_THAN_OR_EQUAL:
-      return doc.createElement(InequalityComparison.LESS_THAN_OR_EQUAL_TAG_NAME);
-    case GREATER_THAN:
-      return doc.createElement(InequalityComparison.GREATER_THAN_TAG_NAME);
-    case GREATER_THAN_OR_EQUAL:
-      return doc.createElement(InequalityComparison.GREATER_THAN_OR_EQUAL_TAG_NAME);
-    case EQUAL_TO:
-      return doc.createElement(InequalityComparison.EQUAL_TO_TAG_NAME);
-    case NOT_EQUAL_TO:
-      return doc.createElement(InequalityComparison.NOT_EQUAL_TO_TAG_NAME);
-    default:
-      throw new FLLInternalException("Unknown comparison");
-    }
+    return doc.createElement(mComparison.getTagName());
   }
 
   public abstract Element toXml(Document doc);
