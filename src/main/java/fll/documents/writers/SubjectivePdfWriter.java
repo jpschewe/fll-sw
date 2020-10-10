@@ -50,6 +50,9 @@ import fll.xml.RubricRange;
 import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.xml.XMLUtils;
 
+/**
+ * Write subjective sheets as PDFs.
+ */
 public class SubjectivePdfWriter {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 

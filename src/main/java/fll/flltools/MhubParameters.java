@@ -56,6 +56,7 @@ public final class MhubParameters {
   /**
    * @return the hostname to talk to mhub at, or null to not talk to mhub
    * @param connection the connection to the database
+   * @throws on a database error
    */
   public static @Nullable String getHostname(final Connection connection) throws SQLException {
     if (GlobalParameters.globalParameterExists(connection, HOST_KEY)) {
@@ -90,7 +91,7 @@ public final class MhubParameters {
   /**
    * @param connection the connection to the database
    * @return the port number that mhub is listening on
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
   public static int getPort(final Connection connection) throws SQLException {
     if (GlobalParameters.globalParameterExists(connection, PORT_KEY)) {

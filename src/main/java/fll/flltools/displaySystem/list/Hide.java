@@ -14,6 +14,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * A message to tell the list module to hide.
  */
 public class Hide extends BaseListMessage {
+  /**
+   * @param node {@link #getNode()}
+   */
   public Hide(@Nonnull final String node) {
     super(node, "hide");
   }

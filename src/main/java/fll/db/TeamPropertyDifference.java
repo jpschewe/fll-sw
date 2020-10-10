@@ -24,6 +24,12 @@ public class TeamPropertyDifference implements Serializable {
     ORGANIZATION
   };
 
+  /**
+   * @param teamNumber {@link #getTeamNumber()}
+   * @param property {@link #getProperty()}
+   * @param sourceValue {@link #getSourceValue()}
+   * @param destValue {@link #getDestValue()}
+   */
   public TeamPropertyDifference(final int teamNumber,
                                 final TeamProperty property,
                                 final String sourceValue,
@@ -36,24 +42,36 @@ public class TeamPropertyDifference implements Serializable {
 
   private final int teamNumber;
 
+  /**
+   * @return team that the difference applies to
+   */
   public int getTeamNumber() {
     return teamNumber;
   }
 
   private final String sourceValue;
 
+  /**
+   * @return value in the source database
+   */
   public String getSourceValue() {
     return sourceValue;
   }
 
   private final String destValue;
 
+  /**
+   * @return value in the destination database
+   */
   public String getDestValue() {
     return destValue;
   }
 
   private final TeamProperty property;
 
+  /**
+   * @return what property is different
+   */
   public TeamProperty getProperty() {
     return property;
   }
