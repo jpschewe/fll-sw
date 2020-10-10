@@ -1,3 +1,6 @@
+Release 15.0.0
+==============
+
 * #817 - Move database import to the top index
 * #850 - Add support for delaying the display of performance scores
 * #821 - Reformat the finalist team schedule to be similar to the grid used for scheduling
