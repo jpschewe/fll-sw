@@ -791,6 +791,8 @@ public class FullTournamentTest {
           while (rs.next()) {
             final SubjectiveScore score = SubjectiveScore.fromResultSet(testDataConn, subjectiveElement,
                                                                         sourceTournament, rs);
+            // only modified scores are stored to the database
+            score.setModified(true);
 
             final Map<Integer, SubjectiveScore> judgeScores = categoryScores.computeIfAbsent(score.getJudge(),
                                                                                              k -> new HashMap<>());
