@@ -31,6 +31,11 @@ public class NonNumericCategory implements Serializable {
 
   private final PropertyChangeSupport propChangeSupport = new PropertyChangeSupport(this);
 
+  /**
+   * @param property the property that changed
+   * @param oldValue the old value
+   * @param newValue the new value
+   */
   protected final void firePropertyChange(final String property,
                                           final @Nullable Object oldValue,
                                           final @Nullable Object newValue) {

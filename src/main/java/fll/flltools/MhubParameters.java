@@ -56,7 +56,7 @@ public final class MhubParameters {
   /**
    * @return the hostname to talk to mhub at, or null to not talk to mhub
    * @param connection the connection to the database
-   * @throws on a database error
+   * @throws SQLException on a database error
    */
   public static @Nullable String getHostname(final Connection connection) throws SQLException {
     if (GlobalParameters.globalParameterExists(connection, HOST_KEY)) {

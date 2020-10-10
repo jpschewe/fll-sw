@@ -679,8 +679,7 @@ public final class Utilities {
    */
   public static boolean readBooleanProperty(final Properties properties,
                                             final String property,
-                                            final boolean defaultValue)
-      throws NullPointerException {
+                                            final boolean defaultValue) {
     final String value = properties.getProperty(property);
     if (null == value) {
       return defaultValue;

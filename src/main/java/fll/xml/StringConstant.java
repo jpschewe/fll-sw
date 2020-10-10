@@ -13,18 +13,24 @@ import fll.web.playoff.TeamScore;
  */
 public class StringConstant implements StringValue {
 
+  /**
+   * @param value {@link #getValue()}
+   */
   public StringConstant(final String value) {
     this.value = value;
   }
 
   private String value;
 
+  /**
+   * @param v {@link #getValue()}
+   */
   public void setValue(final String v) {
     value = v;
   }
 
   /**
-   * @return see {@link #getValue()}
+   * @return the value of the constant
    */
   public String getValue() {
     return value;

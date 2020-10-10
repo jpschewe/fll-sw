@@ -20,6 +20,9 @@ import org.w3c.dom.Element;
 import fll.web.playoff.TeamScore;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
+/**
+ * Represents a computed goal in the challenge.
+ */
 public class ComputedGoal extends AbstractGoal implements VariableScope {
 
   /**

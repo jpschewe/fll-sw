@@ -27,6 +27,11 @@ public class Restriction extends BasicPolynomial {
 
   private static final String MESSAGE_ATTRIBUTE = "message";
 
+  /**
+   * 
+   * @param ele the element to parse
+   * @param goalScope where to find goals
+   */
   public Restriction(final Element ele,
                      final GoalScope goalScope) {
     super(ele, goalScope);

@@ -115,6 +115,7 @@ public final class ScoreEntry {
    * 
    * @param writer where to write the HTML
    * @param application used to get the challenge description
+   * @throws IOException if there is an error writing to {@code writer}
    */
   public static void generateIsConsistent(final JspWriter writer,
                                           final ServletContext application)

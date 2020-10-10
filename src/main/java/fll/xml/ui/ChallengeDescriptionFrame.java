@@ -69,8 +69,9 @@ public class ChallengeDescriptionFrame extends JFrame {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
-   * @param args
-   * @throws IOException
+   * @param args ignored
+   * @throws IOException if there is an error reading the default challenge
+   *           description file
    */
   public static void main(final String[] args) throws IOException {
     Thread.setDefaultUncaughtExceptionHandler(new GuiExceptionHandler());
@@ -139,6 +140,9 @@ public class ChallengeDescriptionFrame extends JFrame {
 
   private static final int DEFAULT_HEIGHT = 600;
 
+  /**
+   * Construct the UI.
+   */
   public ChallengeDescriptionFrame() {
     super("Challenge Description Editor");
 

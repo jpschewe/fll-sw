@@ -38,6 +38,9 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
   private static final String MINIMUM_SCORE_ATTRIBUTE = "minimumScore";
 
+  /**
+   * @param ele the element to parse
+   */
   public PerformanceScoreCategory(final Element ele) {
     super(ele);
 
@@ -137,6 +140,8 @@ public class PerformanceScoreCategory extends ScoreCategory {
    *
    * @param index the index to add the test at
    * @param v the test to add
+   * @throws IndexOutOfBoundsException if {@code index} is outside the range of
+   *           tiebreakers
    */
   public void addTiebreakerTest(final int index,
                                 final TiebreakerTest v)
@@ -176,10 +181,16 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
   private double mMinimumScore;
 
+  /**
+   * @return the minimum score to store
+   */
   public double getMinimumScore() {
     return mMinimumScore;
   }
 
+  /**
+   * @param v {@link #getMinimumScore()}
+   */
   public void setMinimumScore(final double v) {
     mMinimumScore = v;
   }
@@ -195,6 +206,10 @@ public class PerformanceScoreCategory extends ScoreCategory {
     }
   }
 
+  /**
+   * @param doc used to create elements
+   * @return XML representation of this object
+   */
   public Element toXml(final Document doc) {
     final Element ele = doc.createElement(TAG_NAME);
 

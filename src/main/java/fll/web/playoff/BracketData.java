@@ -56,7 +56,6 @@ public class BracketData extends BracketInfo {
    */
   public abstract static class DbBracketDataType extends BracketDataType {
     /**
-     * 
      * @param dbLine {@link #getDBLine()}
      */
     public DbBracketDataType(@JsonProperty("dbLine") final int dbLine) {
@@ -66,7 +65,6 @@ public class BracketData extends BracketInfo {
     private final int dbLine;
 
     /**
-     * 
      * @return line in the database
      */
     public int getDBLine() {
@@ -80,6 +78,12 @@ public class BracketData extends BracketInfo {
    */
   public static class TeamBracketCell extends DbBracketDataType {
 
+    /**
+     * @param team {@link #getTeam()}
+     * @param table {@link #getTable()}
+     * @param dbLine {@link #getDBLine()}
+     * @param printed {@link #getPrinted()}
+     */
     public TeamBracketCell(@JsonProperty("team") final Team team,
                            @JsonProperty("table") final String table,
                            @JsonProperty("dbline") final int dbLine,
@@ -92,18 +96,27 @@ public class BracketData extends BracketInfo {
 
     private final Team team;
 
+    /**
+     * @return the team
+     */
     public Team getTeam() {
       return team;
     }
 
     private final String table;
 
+    /**
+     * @return the table that the performance is on
+     */
     public @Nullable String getTable() {
       return table;
     }
 
     private final boolean printed;
 
+    /**
+     * @return has the score sheet been printed
+     */
     public boolean getPrinted() {
       return printed;
     }
@@ -113,12 +126,18 @@ public class BracketData extends BracketInfo {
    * Cell for bracket labels.
    */
   public static class BracketLabelCell extends BracketDataType {
+    /**
+     * @param lbl {@link #getLabel()}
+     */
     public BracketLabelCell(final String lbl) {
       this.label = lbl;
     }
 
     private final String label;
 
+    /**
+     * @return bracket label
+     */
     public String getLabel() {
       return label;
     }
@@ -130,6 +149,12 @@ public class BracketData extends BracketInfo {
    * to store a color associated with the given table.
    */
   public static class BigScreenTableAssignmentCell extends DbBracketDataType {
+    /**
+     * @param round {@link #getRound()}
+     * @param row {@link #getRow()}
+     * @param table {@link #getTable()}
+     * @param dbLine {@link #getDBLine()}
+     */
     public BigScreenTableAssignmentCell(final int round,
                                         final int row,
                                         final String table,
@@ -142,18 +167,27 @@ public class BracketData extends BracketInfo {
 
     private final int round;
 
+    /**
+     * @return the playoff round
+     */
     public int getRound() {
       return round;
     }
 
     private final int row;
 
+    /**
+     * @return the display row
+     */
     public int getRow() {
       return row;
     }
 
     private final String table;
 
+    /**
+     * @return the table for the cell
+     */
     public String getTable() {
       return table;
     }
@@ -163,22 +197,28 @@ public class BracketData extends BracketInfo {
    * Cell that doesn't exist because it is part of a spanned cell.
    */
   public static class SpannedOverBracketCell extends BracketDataType {
+    /**
+     * Comment is set to null.
+     */
     public SpannedOverBracketCell() {
       this.comment = null;
     }
 
+    /**
+     * @param comment {@link #getComment()}
+     */
     public SpannedOverBracketCell(final String comment) {
       this.comment = comment;
     }
 
-    private final String comment;
+    private final @Nullable String comment;
 
     /**
      * Gets the comment string, if any.
      * 
      * @return The comment string to use, or null if no string was set.
      */
-    public String getComment() {
+    public @Nullable String getComment() {
       return comment;
     }
   }
@@ -188,6 +228,18 @@ public class BracketData extends BracketInfo {
    * checkbox and info.
    */
   public static class ScoreSheetFormBracketCell extends BracketDataType {
+
+    /**
+     * @param allTables {@link #getAllTables()}
+     * @param label {@link #getLabel()}
+     * @param matchNum {@link #getMatchNum()}
+     * @param printed {@link #getPrinted()}
+     * @param tableA {@link #getTableA()}
+     * @param tableB {@Link #getTableB()}
+     * @param teamA {@link #getTeamA()}
+     * @param teamB {@link #getTeamB()}
+     * @param rowsSpanned {@link #getRowsSpanned()}
+     */
     public ScoreSheetFormBracketCell(final List<TableInformation> allTables,
                                      final String label,
                                      final int matchNum,
@@ -209,91 +261,87 @@ public class BracketData extends BracketInfo {
       this.rowsSpanned = rowsSpanned;
     }
 
-    private int rowsSpanned;
+    private final int rowsSpanned;
 
-    private String label;
+    private final String label;
 
-    private String tableA;
+    private final String tableA;
 
-    private String tableB;
+    private final String tableB;
 
-    private boolean printed;
+    private final boolean printed;
 
     private final List<TableInformation> allTables = new LinkedList<>();
 
-    private int matchNum;
+    private final int matchNum;
 
-    private Team teamA;
+    private final Team teamA;
 
-    private Team teamB;
+    private final Team teamB;
 
+    /**
+     * @return all possible tables
+     */
     public List<TableInformation> getAllTables() {
       return allTables;
     }
 
+    /**
+     * @return bracket label
+     */
     public String getLabel() {
       return label;
     }
 
-    public void setLabel(final String label) {
-      this.label = label;
-    }
-
+    /**
+     * @return match number
+     */
     public int getMatchNum() {
       return matchNum;
     }
 
-    public void setMatchNum(final int matchNum) {
-      this.matchNum = matchNum;
-    }
-
+    /**
+     * @return has this score sheet been printed
+     */
     public boolean getPrinted() {
       return printed;
     }
 
-    public void setPrinted(final boolean printed) {
-      this.printed = printed;
-    }
-
+    /**
+     * @return the first team
+     */
     public Team getTeamA() {
       return teamA;
     }
 
-    public void setTeamA(final Team teamA) {
-      this.teamA = teamA;
-    }
-
+    /**
+     * @return the second team
+     */
     public Team getTeamB() {
       return teamB;
     }
 
-    public void setTeamB(final Team teamB) {
-      this.teamB = teamB;
-    }
-
+    /**
+     * @return the table for the first team
+     */
     public String getTableA() {
       return tableA;
     }
 
-    public void setTableA(final String tableA) {
-      this.tableA = tableA;
-    }
-
+    /**
+     * @return the table for the second team
+     */
     public String getTableB() {
       return tableB;
     }
 
-    public void setTableB(final String tableB) {
-      this.tableB = tableB;
-    }
-
+    /**
+     * @return how many rows are spanned by this cell
+     */
     public int getRowsSpanned() {
       return rowsSpanned;
     }
 
-    public void setRowsSpanned(final int rowsSpanned) {
-      this.rowsSpanned = rowsSpanned;
-    }
   }
 
   /**
@@ -308,21 +356,11 @@ public class BracketData extends BracketInfo {
     /**
      * Draw to the top of the cell.
      */
-    MEET_TOP_OF_CELL(0),
+    MEET_TOP_OF_CELL,
     /**
      * Draw to the bottom of the cell.
      */
-    MEET_BOTTOM_OF_CELL(1);
-
-    private int moduloMinimum;
-
-    TopRightCornerStyle(final int moduloMin) {
-      this.moduloMinimum = moduloMin;
-    }
-
-    public int getModuloMinimum() {
-      return moduloMinimum;
-    }
+    MEET_BOTTOM_OF_CELL;
   }
 
   // Map of round number to map of row number (of the conceptual HTML table -
@@ -344,6 +382,9 @@ public class BracketData extends BracketInfo {
 
   private final int finalsRound;
 
+  /**
+   * @return the round number that is the finals
+   */
   public int getFinalsRound() {
     return finalsRound;
   }

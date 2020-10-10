@@ -47,6 +47,10 @@ public class VariableListEditor extends JPanel {
 
   private final GoalScope goalScope;
 
+  /**
+   * @param goal the goal to edit variables for
+   * @param goalScope where to find goals
+   */
   public VariableListEditor(@Nonnull final ComputedGoal goal,
                             @Nonnull final GoalScope goalScope) {
     super(new BorderLayout());

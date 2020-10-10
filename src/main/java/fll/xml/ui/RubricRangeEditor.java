@@ -163,6 +163,9 @@ public final class RubricRangeEditor extends JPanel implements Validatable {
 
   }
 
+  /**
+   * Commit changes to all editors.
+   */
   public void commitChanges() {
     try {
       mTitle.commitEdit();

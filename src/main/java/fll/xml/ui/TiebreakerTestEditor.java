@@ -28,6 +28,11 @@ public class TiebreakerTestEditor extends PolynomialEditor {
     return test;
   }
 
+  /**
+   * 
+   * @param test the object to edit
+   * @param goalScope where to find goals
+   */
   public TiebreakerTestEditor(@Nonnull final TiebreakerTest test,
                               @Nonnull final GoalScope goalScope) {
     super(test, goalScope, null);
