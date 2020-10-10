@@ -1,3 +1,4 @@
+* #855 - Remove Subjective Java Application in favor of the web application
 * #817 - Move database import to the top index
 * #850 - Add support for delaying the display of performance scores
 * #821 - Reformat the finalist team schedule to be similar to the grid used for scheduling
