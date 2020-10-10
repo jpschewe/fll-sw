@@ -103,6 +103,9 @@ import net.mtu.eggplant.util.BasicFileFilter;
  */
 public class SchedulerUI extends JFrame {
 
+  /**
+   * @param args ignored
+   */
   public static void main(final String[] args) {
     GuiExceptionHandler.registerExceptionHandler();
 
@@ -160,6 +163,9 @@ public class SchedulerUI extends JFrame {
 
   private static final String BASE_TITLE = "FLL Scheduler";
 
+  /**
+   * Build the UI.
+   */
   public SchedulerUI() {
     super(BASE_TITLE);
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -1109,6 +1115,9 @@ public class SchedulerUI extends JFrame {
 
   private SchedParams mSchedParams;
 
+  /**
+   * @return the current schedule parameters
+   */
   public SchedParams getSchedParams() {
     return mSchedParams;
   }
@@ -1348,13 +1357,19 @@ public class SchedulerUI extends JFrame {
   // this
   private File mScheduleFile = new File("dummy.csv");
 
+  /**
+   * @return the currently loaded file
+   */
   protected File getScheduleFile() {
     return mScheduleFile;
   }
 
   private @Nullable String mScheduleSheetName;
 
-  protected String getCurrentSheetName() {
+  /**
+   * @return the name of the current sheet
+   */
+  protected @Nullable String getCurrentSheetName() {
     return mScheduleSheetName;
   }
 

@@ -7,23 +7,37 @@
 package fll.scheduler;
 
 /**
- * Thrown when there is an error parsing the schedule. 
+ * Thrown when there is an error parsing the schedule.
  */
 public class ScheduleParseException extends Exception {
 
+  /**
+   * Base constructor.
+   */
   public ScheduleParseException() {
     super();
   }
 
+  /**
+   * @param message {@link #getMessage()}
+   */
   public ScheduleParseException(final String message) {
     super(message);
   }
 
+  /**
+   * @param cause {@link #getCause()}
+   */
   public ScheduleParseException(final Throwable cause) {
     super(cause);
   }
 
-  public ScheduleParseException(final String message, final Throwable cause) {
+  /**
+   * @param message {@link #getMessage()}
+   * @param cause {@link #getCause()}
+   */
+  public ScheduleParseException(final String message,
+                                final Throwable cause) {
     super(message, cause);
   }
 
