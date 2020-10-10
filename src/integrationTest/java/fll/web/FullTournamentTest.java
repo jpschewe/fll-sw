@@ -15,11 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.awt.EventQueue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -57,7 +55,6 @@ import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.xml.sax.SAXException;
 
-import com.diffplug.common.base.Errors;
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -342,9 +339,8 @@ public class FullTournamentTest {
       LOGGER.info("Checking displays");
       checkDisplays(selenium, seleniumWait);
 
-      LOGGER.info("Checking the subjective scores");
-      enterSubjectiveScores(selenium, seleniumWait, testDataConn, challengeDescription, sourceTournament,
-                            outputDirectory);
+      LOGGER.info("Entering the subjective scores");
+      enterSubjectiveScores(testDataConn, challengeDescription, sourceTournament);
 
       LOGGER.info("Writing final datbaase");
       IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
@@ -771,57 +767,10 @@ public class FullTournamentTest {
 
   }
 
-  /**
-   * Simulate entering subjective scores by pulling them out of testDataConn.
-   *
-   * @param seleniumWait wait for elements
-   * @param testDataConn Where to get the test data from
-   * @param challengeDocument the challenge descriptor
-   * @throws SQLException test error
-   * @throws SAXException test error
-   * @throws InterruptedException if there is an error invoking on the event queue
-   */
-  private void enterSubjectiveScores(final WebDriver selenium,
-                                     final WebDriverWait seleniumWait,
-                                     final Connection testDataConn,
-                                     final ChallengeDescription description,
-                                     final Tournament sourceTournament,
-                                     final Path outputDirectory)
-      throws SQLException, IOException, MalformedURLException, ParseException, SAXException, InterruptedException {
-
-    final Path subjectiveZip = outputDirectory.resolve(sanitizeFilename(sourceTournament.getName())
-        + "_subjective-data.fll");
-
-    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-        + "admin/subjective-data.fll"), "application/zip", subjectiveZip);
-
-    try {
-      EventQueue.invokeAndWait(Errors.rethrow().wrap(() -> {
-        enterSubjectiveScores(testDataConn, description, sourceTournament);
-
-      }));
-    } catch (final InvocationTargetException e) {
-      LOGGER.error("Error entering subjective scores", e);
-      fail("Got error entering subjective scores");
-    }
-
-    // upload scores
-    IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
-        + "admin/index.jsp");
-    final WebElement fileInput = selenium.findElement(By.name("subjectiveFile"));
-    fileInput.sendKeys(subjectiveZip.toAbsolutePath().toString());
-
-    selenium.findElement(By.id("uploadSubjectiveFile")).click();
-
-    assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
-    assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
-
-  }
-
   @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "Need to specify category for table name")
-  public void enterSubjectiveScores(final Connection testDataConn,
-                                    final ChallengeDescription description,
-                                    final Tournament sourceTournament)
+  private void enterSubjectiveScores(final Connection testDataConn,
+                                     final ChallengeDescription description,
+                                     final Tournament sourceTournament)
       throws IOException, SQLException, ParseException, SAXException {
     // category->judge->teamNumber->score
     final Map<String, Map<String, Map<Integer, SubjectiveScore>>> allScores = new HashMap<>();
