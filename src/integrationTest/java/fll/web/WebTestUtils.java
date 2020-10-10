@@ -19,8 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 
-import org.xml.sax.SAXException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.SgmlPage;
@@ -48,9 +46,17 @@ public final class WebTestUtils {
     // no instances
   }
 
+  /**
+   * Load a page using HTML unit.
+   * 
+   * @param conversation the current conversation
+   * @param request the request
+   * @return the response
+   * @throws IOException if there is an error talking to the server
+   */
   public static Page loadPage(final WebClient conversation,
                               final com.gargoylesoftware.htmlunit.WebRequest request)
-      throws IOException, SAXException {
+      throws IOException {
     final boolean exceptionOnError = conversation.getOptions().isThrowExceptionOnFailingStatusCode();
     conversation.getOptions().setThrowExceptionOnFailingStatusCode(false);
     try {
@@ -98,6 +104,9 @@ public final class WebTestUtils {
 
   /**
    * Get source of any page type.
+   * 
+   * @param page the page
+   * @return the source as a string
    */
   public static String getPageSource(final Page page) {
     if (page instanceof HtmlPage) {
@@ -114,7 +123,13 @@ public final class WebTestUtils {
     }
   }
 
-  public static WebClient getConversation() throws IOException, SAXException {
+  /**
+   * Get a conversation with the web server that is already logged in.
+   * 
+   * @return the client to use for loading further pages
+   * @throws IOException if there is an error talking to the server
+   */
+  public static WebClient getConversation() throws IOException {
     final WebClient conversation = new WebClient();
 
     // always login first
@@ -151,8 +166,11 @@ public final class WebTestUtils {
 
   /**
    * Submit a query to developer/QueryHandler, parse the JSON and return it.
+   * 
+   * @param query the SQL query to execute using the developer tools
+   * @return the parsed SQL result
    */
-  public static QueryHandler.ResultData executeServerQuery(final String query) throws IOException, SAXException {
+  public static QueryHandler.ResultData executeServerQuery(final String query) throws IOException {
     final WebClient conversation = getConversation();
 
     final URL url = new URL(TestUtils.URL_ROOT
