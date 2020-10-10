@@ -34,6 +34,9 @@ public class RestrictionListEditor extends JPanel implements Validatable {
 
   private final List<RestrictionEditor> editors = new LinkedList<>();
 
+  /**
+   * @param performance where to get the restrictions to edit
+   */
   public RestrictionListEditor(@Nonnull final PerformanceScoreCategory performance) {
     super(new BorderLayout());
     this.performance = performance;
@@ -87,6 +90,9 @@ public class RestrictionListEditor extends JPanel implements Validatable {
     GuiUtils.addToContainer(editorContainer, panel);
   }
 
+  /**
+   * Commit any changes to the restrictions.
+   */
   public void commitChanges() {
     final List<Restriction> newRestrictions = new LinkedList<>();
 

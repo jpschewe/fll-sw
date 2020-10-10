@@ -151,6 +151,11 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
     mSubjectiveCategory.setScoreSheetInstructions(mScoreSheetInstructions.getText());
   }
 
+  /**
+   * 
+   * @param oldTitle the old title
+   * @param newTitle the new title
+   */
   protected void fireTitleChange(final String oldTitle,
                                  final String newTitle) {
     firePropertyChange("title", oldTitle, newTitle);

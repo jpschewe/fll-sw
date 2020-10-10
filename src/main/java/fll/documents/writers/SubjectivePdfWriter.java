@@ -33,6 +33,7 @@ import org.w3c.dom.Element;
 
 import fll.SubjectiveScore;
 import fll.Utilities;
+import fll.scheduler.SubjectiveTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
@@ -699,7 +700,12 @@ public class SubjectivePdfWriter {
       if (null == scheduleColumn) {
         scheduledTime = null;
       } else {
-        scheduledTime = teamInfo.getSubjectiveTimeByName(scheduleColumn).getTime();
+        final SubjectiveTime stime = teamInfo.getSubjectiveTimeByName(scheduleColumn);
+        if (null == stime) {
+          scheduledTime = null;
+        } else {
+          scheduledTime = stime.getTime();
+        }
       }
 
       final Element sheet = createSheet(document, teamNumber, teamName, awardGroup, scheduledTime, pointSize,

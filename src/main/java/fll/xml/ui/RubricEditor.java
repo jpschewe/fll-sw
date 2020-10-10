@@ -32,6 +32,10 @@ public final class RubricEditor extends JPanel implements Validatable {
 
   private final List<RubricRangeEditor> rangeEditors = new LinkedList<>();
 
+  /**
+   * 
+   * @param goal the goal to edit the rubric for
+   */
   public RubricEditor(final Goal goal) {
     super(new BorderLayout());
     this.goal = goal;
@@ -83,6 +87,9 @@ public final class RubricEditor extends JPanel implements Validatable {
     GuiUtils.addToContainer(rangeList, panel);
   }
 
+  /**
+   * Commit any changes to the rubric.
+   */
   public void commitChanges() {
     final List<RubricRange> newRubric = new LinkedList<>();
 

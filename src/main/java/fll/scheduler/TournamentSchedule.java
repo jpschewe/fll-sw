@@ -367,7 +367,7 @@ public class TournamentSchedule implements Serializable {
    * @param subjectiveHeaders the headers for the subjective columns
    * @throws ScheduleParseException if there is an error parsing the schedule
    * @throws ParseException if there is an error parsing the file
-   * @throws IOExceptionif there is an error reading the file
+   * @throws IOException if there is an error reading the file
    */
   public TournamentSchedule(final String name,
                             final File csvFile,

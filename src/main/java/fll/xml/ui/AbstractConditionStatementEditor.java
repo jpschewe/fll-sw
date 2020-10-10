@@ -48,6 +48,12 @@ public class AbstractConditionStatementEditor extends JPanel implements Validata
     return stmt;
   }
 
+  /**
+   * 
+   * @param stmt {@link #getStatement()}
+   * @param goalScope where to find goals
+   * @param variableScope where to find variables
+   */
   public AbstractConditionStatementEditor(final AbstractConditionStatement stmt,
                                           final GoalScope goalScope,
                                           final VariableScope variableScope) {

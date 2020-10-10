@@ -13,17 +13,30 @@ import fll.util.FLLRuntimeException;
  */
 public class VariableRefNotAllowedException extends FLLRuntimeException {
 
+  /**
+   * Base constructor.
+   */
   public VariableRefNotAllowedException() {
   }
 
+  /**
+   * @param message {@link #getMessage()}
+   */
   public VariableRefNotAllowedException(final String message) {
     super(message);
   }
 
+  /**
+   * @param cause {@link #getCause()}
+   */
   public VariableRefNotAllowedException(final Throwable cause) {
     super(cause);
   }
 
+  /**
+   * @param message {@link #getMessage()}
+   * @param cause {@link #getCause()}
+   */
   public VariableRefNotAllowedException(final String message,
                                         final Throwable cause) {
     super(message, cause);

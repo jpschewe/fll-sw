@@ -33,6 +33,10 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
    */
   public static final String WEIGHT_ATTRIBUTE = "weight";
 
+  /**
+   * 
+   * @param ele the element to parse
+   */
   protected ScoreCategory(final Element ele) {
     mWeight = Double.valueOf(ele.getAttribute(WEIGHT_ATTRIBUTE));
 
@@ -135,10 +139,16 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
 
   private double mWeight;
 
+  /**
+   * @return the weight for this category in the overall score
+   */
   public double getWeight() {
     return mWeight;
   }
 
+  /**
+   * @param v {@link #getWeight()}
+   */
   public void setWeight(final double v) {
     mWeight = v;
   }
@@ -234,8 +244,12 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
     return ScoreType.INTEGER;
   }
 
-  public void populateXml(final Document doc,
-                          final Element ele) {
+  /**
+   * @param doc used to create elements
+   * @param ele the element to add information from this class to
+   */
+  protected void populateXml(final Document doc,
+                             final Element ele) {
     ele.setAttribute(WEIGHT_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mWeight));
 
     for (final GoalElement ge : goalElements) {

@@ -284,6 +284,9 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
   private final String mName;
 
+  /**
+   * @return display name
+   */
   public String getName() {
     return mName;
   }
@@ -357,6 +360,10 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     return mRemotePage;
   }
 
+  /**
+   * 
+   * @param v {@link #getRemotePage()}
+   */
   public void setRemotePage(final String v) {
     mRemotePage = v;
   }

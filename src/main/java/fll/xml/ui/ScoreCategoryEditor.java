@@ -76,6 +76,10 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
 
   private final ValidityPanel categoryValid;
 
+  /**
+   * 
+   * @param scoreCategory the object to edit
+   */
   public ScoreCategoryEditor(final ScoreCategory scoreCategory) {
     mCategory = scoreCategory;
     setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));

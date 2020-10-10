@@ -43,6 +43,11 @@ public class RestrictionEditor extends PolynomialEditor {
     return restriction;
   }
 
+  /**
+   * 
+   * @param restriction the object to edit
+   * @param goalScope where to get goals
+   */
   public RestrictionEditor(@Nonnull final Restriction restriction,
                            @Nonnull final GoalScope goalScope) {
     super(restriction, goalScope, null);

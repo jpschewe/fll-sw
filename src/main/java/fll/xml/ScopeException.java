@@ -13,6 +13,10 @@ import fll.util.FLLRuntimeException;
  */
 public class ScopeException extends FLLRuntimeException {
 
+  /**
+   * 
+   * @param message {@link #getMessage()}
+   */
   public ScopeException(final String message) {
     super(message);
   }

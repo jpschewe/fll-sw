@@ -19,6 +19,10 @@ public class PerformanceEditor extends ScoreCategoryEditor {
 
   private final RestrictionListEditor restrictions;
 
+  /**
+   * 
+   * @param category the category to edit
+   */
   public PerformanceEditor(final PerformanceScoreCategory category) {
     super(category);
 

@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -46,13 +45,14 @@ public final class Tables {
    * @param request the HTTP request with parameters
    * @param response the going back to the user
    * @throws SQLException on a database error
+   * @throws IOException if there is an error writing to {@code out}
    */
   public static void generatePage(final JspWriter out,
                                   final ServletContext application,
                                   final HttpSession session,
                                   final HttpServletRequest request,
                                   final HttpServletResponse response)
-      throws SQLException, IOException, ParseException {
+      throws SQLException, IOException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {

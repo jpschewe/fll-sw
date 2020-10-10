@@ -29,6 +29,10 @@ public class Variable extends BasicPolynomial {
 
   private final PropertyChangeSupport propChangeSupport;
 
+  /**
+   * @param ele the element to parse
+   * @param goalScope where to find goals
+   */
   public Variable(final Element ele,
                   final @UnderInitialization GoalScope goalScope) {
     super(ele, goalScope);

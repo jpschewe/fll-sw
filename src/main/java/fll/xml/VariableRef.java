@@ -38,6 +38,10 @@ public class VariableRef implements Evaluatable, Serializable {
     this(ele.getAttribute(VARIABLE_ATTRIBUTE), scope);
   }
 
+  /**
+   * @param variableName {@link #getVariableName()}
+   * @param scope {@link #getVariableScope()}
+   */
   public VariableRef(@Nonnull final String variableName,
                      @Nonnull final VariableScope scope) {
     mVariableName = variableName;
