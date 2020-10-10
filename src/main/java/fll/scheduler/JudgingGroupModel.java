@@ -22,9 +22,6 @@ public class JudgingGroupModel extends AbstractTableModel {
 
   private final List<Integer> counts = new ArrayList<>();
 
-  public JudgingGroupModel() {
-  }
-
   @Override
   public int getRowCount() {
     return judges.size();
@@ -142,7 +139,8 @@ public class JudgingGroupModel extends AbstractTableModel {
   }
 
   /**
-   * Add a new row to the table. The name will be auto generated. The count will be 1.
+   * Add a new row to the table. The name will be auto generated. The count will
+   * be 1.
    */
   public void addNewRow() {
     judges.add(String.format("group-%d", judges.size()));
@@ -155,7 +153,7 @@ public class JudgingGroupModel extends AbstractTableModel {
   /**
    * Delete the specified row.
    * 
-   * @param row
+   * @param row the row index to delete
    */
   public void deleteRow(final int row) {
     judges.remove(row);

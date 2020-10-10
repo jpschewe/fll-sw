@@ -13,18 +13,31 @@ import fll.util.FLLRuntimeException;
  */
 public class InconsistentSchedParams extends FLLRuntimeException {
 
+  /**
+   * Base constructor.
+   */
   public InconsistentSchedParams() {
     super();
   }
 
+  /**
+   * @param message {@link #getMessage()}
+   */
   public InconsistentSchedParams(final String message) {
     super(message);
   }
 
+  /**
+   * @param cause {@link #getCause()}
+   */
   public InconsistentSchedParams(final Throwable cause) {
     super(cause);
   }
 
+  /**
+   * @param message {@link #getMessage()}
+   * @param cause {@link #getCause()}
+   */
   public InconsistentSchedParams(final String message,
                                  final Throwable cause) {
     super(message, cause);

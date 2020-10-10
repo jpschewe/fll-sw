@@ -19,9 +19,6 @@ public class DurationModel extends AbstractTableModel {
 
   private final List<Integer> durations = new ArrayList<>();
 
-  public DurationModel() {
-  }
-
   @Override
   public int getRowCount() {
     return durations.size();

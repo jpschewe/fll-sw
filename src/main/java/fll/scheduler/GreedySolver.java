@@ -214,6 +214,7 @@ public class GreedySolver {
    * @param optimize if true, find an optimal solution
    * @throws ParseException if there is an error parsing the data file
    * @throws InvalidParametersException if the parameters are not valid
+   * @throws IOException if there is an error reading the file
    */
   public GreedySolver(final File datafile,
                       final boolean optimize)

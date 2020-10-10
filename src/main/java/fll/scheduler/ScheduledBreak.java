@@ -16,8 +16,8 @@ import java.time.LocalTime;
 public final class ScheduledBreak implements Serializable {
 
   /**
-   * @param start start of break
-   * @param duration how long the break is
+   * @param start {@link #getStart()}
+   * @param duration {@link #getDuration()}
    */
   public ScheduledBreak(final LocalTime start,
                         final Duration duration) {
@@ -27,16 +27,25 @@ public final class ScheduledBreak implements Serializable {
 
   private LocalTime start;
 
+  /**
+   * @return start time of the break
+   */
   public LocalTime getStart() {
     return this.start;
   }
 
   private Duration duration;
 
+  /**
+   * @return duration of the break
+   */
   public Duration getDuration() {
     return this.duration;
   }
 
+  /**
+   * @return end time of the break
+   */
   public LocalTime getEnd() {
     return this.start.plus(this.duration);
   }

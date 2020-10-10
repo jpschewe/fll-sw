@@ -21,6 +21,9 @@ public class ScheduledBreakModel extends AbstractTableModel {
 
   private final ArrayList<ScheduledBreak> breaks = new ArrayList<>();
 
+  /**
+   * Base constructor.
+   */
   public ScheduledBreakModel() {
   }
 
@@ -150,7 +153,7 @@ public class ScheduledBreakModel extends AbstractTableModel {
   /**
    * Delete the specified row.
    * 
-   * @param row
+   * @param row the row index to delete
    */
   public void deleteRow(final int row) {
     breaks.remove(row);
