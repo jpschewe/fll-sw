@@ -23,7 +23,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.xml.sax.SAXException;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
@@ -51,6 +50,11 @@ public class TestAJAXBrackets {
 
   private WebDriverWait scoresheetWait;
 
+  /**
+   * Setup the windows that will be used.
+   * 
+   * @throws Exception on an error
+   */
   @BeforeEach
   public void setUp() throws Exception {
     bracketsWindow = IntegrationTestUtils.createWebDriver();
@@ -63,6 +67,9 @@ public class TestAJAXBrackets {
     scoresheetWait = IntegrationTestUtils.createWebDriverWait(scoresheetWindow);
   }
 
+  /**
+   * Clean up.
+   */
   @AfterEach
   public void tearDown() {
     if (null != bracketsWindow) {
@@ -76,10 +83,18 @@ public class TestAJAXBrackets {
     }
   }
 
+  /**
+   * Full test of AJAX brackets.
+   * 
+   * @param selenium browser driver
+   * @param seleniumWait wait for elements
+   * @throws IOException if there is an error talking to the server
+   * @throws InterruptedException if there is an error waiting for an element
+   */
   @Test
   public void testAJAXBracketsInFull(final WebDriver selenium,
                                      final WebDriverWait seleniumWait)
-      throws IOException, SAXException, InterruptedException {
+      throws IOException, InterruptedException {
     try {
       // Setup our playoffs
       final InputStream challenge = TestAJAXBrackets.class.getResourceAsStream("data/very-simple.xml");
