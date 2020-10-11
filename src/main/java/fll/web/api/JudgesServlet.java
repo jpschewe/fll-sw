@@ -33,10 +33,9 @@ import fll.JudgeInformation;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * Sccess judges information.
+ * API access to judges.
  * GET: {judges}
  * POST: expects the data from GET and returns UploadResult
  */
@@ -52,9 +51,7 @@ public class JudgesServlet extends HttpServlet {
     final ServletContext application = getServletContext();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
@@ -68,8 +65,6 @@ public class JudgesServlet extends HttpServlet {
       jsonMapper.writeValue(writer, judges);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }
@@ -87,11 +82,9 @@ public class JudgesServlet extends HttpServlet {
     final ServletContext application = getServletContext();
 
     int numNewJudges = 0;
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    PreparedStatement insertJudge = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final int currentTournament = Queries.getCurrentTournament(connection);
 
@@ -109,40 +102,39 @@ public class JudgesServlet extends HttpServlet {
 
       final Collection<JudgeInformation> currentJudges = JudgeInformation.getJudges(connection, currentTournament);
 
-      insertJudge = connection.prepareStatement("INSERT INTO Judges (id, category, Tournament, station) VALUES (?, ?, ?, ?)");
-      insertJudge.setInt(3, currentTournament);
+      try (
+          PreparedStatement insertJudge = connection.prepareStatement("INSERT INTO Judges (id, category, Tournament, station) VALUES (?, ?, ?, ?)")) {
+        insertJudge.setInt(3, currentTournament);
 
-      for (final JudgeInformation judge : judges) {
-        if (null != judge) {
-          JudgeInformation found = null;
-          for (final JudgeInformation cjudge : currentJudges) {
-            if (Objects.equals(cjudge, judge)) {
-              found = cjudge;
+        for (final JudgeInformation judge : judges) {
+          if (null != judge) {
+            JudgeInformation found = null;
+            for (final JudgeInformation cjudge : currentJudges) {
+              if (Objects.equals(cjudge, judge)) {
+                found = cjudge;
+              }
+
+              if (null == found) {
+                insertJudge.setString(1, judge.getId());
+                insertJudge.setString(2, judge.getCategory());
+                insertJudge.setString(4, judge.getGroup());
+                insertJudge.executeUpdate();
+                ++numNewJudges;
+              }
             }
-          }
+          } // non-null judge
+        } // foreach judge sent
 
-          if (null == found) {
-            insertJudge.setString(1, judge.getId());
-            insertJudge.setString(2, judge.getCategory());
-            insertJudge.setString(4, judge.getGroup());
-            insertJudge.executeUpdate();
-            ++numNewJudges;
-          }
-        } // non-null judge
-      } // foreach judge sent
-
-      final UploadResult result = new UploadResult(true, "Successfully uploaded judges", numNewJudges);
-      response.reset();
-      jsonMapper.writeValue(writer, result);
+        final UploadResult result = new UploadResult(true, "Successfully uploaded judges", numNewJudges);
+        response.reset();
+        jsonMapper.writeValue(writer, result);
+      } // prepared statement
 
     } catch (final SQLException e) {
       LOGGER.error("Error uploading judges", e);
 
       final UploadResult result = new UploadResult(false, e.getMessage(), numNewJudges);
       jsonMapper.writeValue(writer, result);
-    } finally {
-      SQLFunctions.close(insertJudge);
-      SQLFunctions.close(connection);
     }
 
   }

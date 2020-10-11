@@ -16,7 +16,6 @@ import java.io.Writer;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,9 +46,11 @@ public final class WebTestUtils {
   }
 
   /**
-   * @param conversation the connection to the server
-   * @param request the request to send to the server
-   * @return the loaded page
+   * Load a page using HTML unit.
+   * 
+   * @param conversation the current conversation
+   * @param request the request
+   * @return the response
    * @throws IOException if there is an error talking to the server
    */
   public static Page loadPage(final WebClient conversation,
@@ -82,7 +83,9 @@ public final class WebTestUtils {
     if (error) {
       final String responseMessage = response.getStatusMessage();
       final String text = getPageSource(page);
-      final Path output = Files.createTempFile(Paths.get("screenshots"), "server-error", ".html");
+
+      final Path screenshots = IntegrationTestUtils.ensureScreenshotDirectoryExists();
+      final Path output = Files.createTempFile(screenshots, "server-error", ".html");
       try (Writer writer = Files.newBufferedWriter(output, Utilities.DEFAULT_CHARSET)) {
         writer.write(text);
       }
@@ -102,7 +105,7 @@ public final class WebTestUtils {
    * Get source of any page type.
    * 
    * @param page the page to get the source of
-   * @return the page source
+   * @return the source as a string
    */
   public static String getPageSource(final Page page) {
     if (page instanceof HtmlPage) {
@@ -120,6 +123,8 @@ public final class WebTestUtils {
   }
 
   /**
+   * Get a conversation with the web server that is already logged in.
+   * 
    * @return a connection to the server for loading pages that is authenticated
    * @throws IOException if there is an error talking to the server
    */
@@ -176,8 +181,10 @@ public final class WebTestUtils {
     final Page response = loadPage(conversation, request);
     final String contentType = response.getWebResponse().getContentType();
     if (!"application/json".equals(contentType)) {
+      final Path screenshots = IntegrationTestUtils.ensureScreenshotDirectoryExists();
+
       final String text = getPageSource(response);
-      final Path output = Files.createTempFile(Paths.get("screenshots"), "json-error", ".html");
+      final Path output = Files.createTempFile(screenshots, "json-error", ".html");
       try (Writer writer = Files.newBufferedWriter(output, Utilities.DEFAULT_CHARSET)) {
         writer.write(text);
       }

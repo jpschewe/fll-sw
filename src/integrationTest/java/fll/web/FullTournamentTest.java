@@ -15,11 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.awt.EventQueue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -30,8 +28,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +37,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
-
-import javax.swing.table.TableModel;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -57,7 +53,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.diffplug.common.base.Errors;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
@@ -71,6 +68,7 @@ import com.opencsv.CSVWriter;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
+import fll.SubjectiveScore;
 import fll.TestUtils;
 import fll.Tournament;
 import fll.TournamentTeam;
@@ -81,7 +79,6 @@ import fll.db.ImportDB;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
-import fll.subjective.SubjectiveFrame;
 import fll.web.developer.QueryHandler;
 import fll.web.scoreEntry.ScoreEntry;
 import fll.xml.AbstractGoal;
@@ -340,9 +337,8 @@ public class FullTournamentTest {
       LOGGER.info("Checking displays");
       checkDisplays(selenium, seleniumWait);
 
-      LOGGER.info("Checking the subjective scores");
-      enterSubjectiveScores(selenium, seleniumWait, testDataConn, challengeDescription, sourceTournament,
-                            outputDirectory);
+      LOGGER.info("Entering the subjective scores");
+      enterSubjectiveScores(testDataConn, challengeDescription, sourceTournament);
 
       LOGGER.info("Writing final datbaase");
       IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
@@ -764,76 +760,20 @@ public class FullTournamentTest {
 
   }
 
-  /**
-   * Simulate entering subjective scores by pulling them out of testDataConn.
-   *
-   * @param seleniumWait wait for elements
-   * @param testDataConn Where to get the test data from
-   * @param challengeDocument the challenge descriptor
-   * @throws SQLException test error
-   * @throws InterruptedException if there is an error invoking on the event queue
-   */
-  private void enterSubjectiveScores(final WebDriver selenium,
-                                     final WebDriverWait seleniumWait,
-                                     final Connection testDataConn,
-                                     final ChallengeDescription description,
-                                     final Tournament sourceTournament,
-                                     final Path outputDirectory)
-      throws SQLException, IOException, MalformedURLException, InterruptedException {
-
-    final Path subjectiveZip = outputDirectory.resolve(sanitizeFilename(sourceTournament.getName())
-        + "_subjective-data.fll");
-
-    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-        + "admin/subjective-data.fll"), "application/zip", subjectiveZip);
-
-    try {
-      EventQueue.invokeAndWait(Errors.rethrow().wrap(() -> {
-        enterSubjectiveScores(testDataConn, description, sourceTournament, subjectiveZip);
-
-      }));
-    } catch (final InvocationTargetException e) {
-      LOGGER.error("Error entering subjective scores", e);
-      fail("Got error entering subjective scores");
-    }
-
-    // upload scores
-    IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
-        + "admin/index.jsp");
-    final WebElement fileInput = selenium.findElement(By.name("subjectiveFile"));
-    fileInput.sendKeys(subjectiveZip.toAbsolutePath().toString());
-
-    selenium.findElement(By.id("uploadSubjectiveFile")).click();
-
-    assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
-    assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
-
-  }
 
   @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "Need to specify category for table name")
   private void enterSubjectiveScores(final Connection testDataConn,
                                      final ChallengeDescription description,
-                                     final Tournament sourceTournament,
-                                     final Path subjectiveZip)
+                                     final Tournament sourceTournament)
       throws IOException, SQLException {
-    final SubjectiveFrame subjective = new SubjectiveFrame();
-    subjective.load(subjectiveZip.toFile());
+    // category->judge->teamNumber->score
+    final Map<String, Map<String, Map<Integer, SubjectiveScore>>> allScores = new HashMap<>();
 
-    // insert scores into zip
     for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
       final String category = subjectiveElement.getName();
-      final String title = subjectiveElement.getTitle();
 
-      // find appropriate table model
-      final TableModel tableModel = subjective.getTableModelForTitle(title);
-      assertNotNull(tableModel);
-
-      final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
-      assertTrue(teamNumberColumn >= 0, "Can't find TeamNumber column in subjective table model");
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Found team number column at "
-            + teamNumberColumn);
-      }
+      // judge -> teamNumber -> score
+      final Map<String, Map<Integer, SubjectiveScore>> categoryScores = new HashMap<>();
 
       try (PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM "
           + category
@@ -842,67 +782,36 @@ public class FullTournamentTest {
 
         try (ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
-            final int teamNumber = rs.getInt("TeamNumber");
 
-            // find row number in table
-            int rowIndex = -1;
-            for (int rowIdx = 0; rowIdx < tableModel.getRowCount(); ++rowIdx) {
-              final Object teamNumberRaw = tableModel.getValueAt(rowIdx, teamNumberColumn);
-              assertNotNull(teamNumberRaw);
-              final int value = Utilities.getIntegerNumberFormat().parse(teamNumberRaw.toString()).intValue();
+            final SubjectiveScore score = SubjectiveScore.fromResultSet(testDataConn, subjectiveElement,
+                                                                        sourceTournament, rs);
+            // only modified scores are stored to the database
+            score.setModified(true);
 
-              if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Checking if "
-                    + teamNumber
-                    + " equals "
-                    + value
-                    + " raw: "
-                    + teamNumberRaw
-                    + "? "
-                    + (value == teamNumber)
-                    + " rowIdx: "
-                    + rowIdx
-                    + " numRows: "
-                    + tableModel.getRowCount());
-              }
+            final Map<Integer, SubjectiveScore> judgeScores = categoryScores.computeIfAbsent(score.getJudge(),
+                                                                                             k -> new HashMap<>());
+            judgeScores.put(score.getTeamNumber(), score);
 
-              if (value == teamNumber) {
-                rowIndex = rowIdx;
-                break;
-              }
-            }
-            assertTrue(rowIndex >= 0, "Can't find team "
-                + teamNumber
-                + " in subjective table model");
+          } // foreach result
 
-            if (rs.getBoolean("NoShow")) {
-              // find column for no show
-              final int columnIndex = findColumnByName(tableModel, "No Show");
-              assertTrue(columnIndex >= 0, "Can't find No Show column in subjective table model");
-              tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);
-            } else {
-              for (final AbstractGoal goalElement : subjectiveElement.getAllGoals()) {
-                if (!goalElement.isComputed()) {
-                  final String goalName = goalElement.getName();
-                  final String goalTitle = goalElement.getTitle();
-
-                  // find column index for goal and call set
-                  final int columnIndex = findColumnByName(tableModel, goalTitle);
-                  assertTrue(columnIndex >= 0, "Can't find "
-                      + goalTitle
-                      + " column in subjective table model");
-                  final int value = rs.getInt(goalName);
-                  tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
-                }
-              }
-            } // not NoShow
-          } // foreach score
-        } catch (final ParseException pe) {
-          throw new RuntimeException(pe);
-        }
-      } // try PreparedStatement
+          allScores.put(category, categoryScores);
+        } // allocate result set
+      } // allocate prep
     } // foreach category
-    subjective.save();
+
+    // send data as HTTP post
+    final WebClient conversation = WebTestUtils.getConversation();
+    final URL url = new URL(TestUtils.URL_ROOT
+        + "api/SubjectiveScores");
+    final WebRequest request = new WebRequest(url, HttpMethod.POST);
+    request.setAdditionalHeader("Accept", "*/*");
+    request.setAdditionalHeader("Content-Type", "application/json");
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
+    final String json = jsonMapper.writeValueAsString(allScores);
+    request.setRequestBody(json);
+
+    WebTestUtils.loadPage(conversation, request);
+
   }
 
   /**
@@ -1166,21 +1075,6 @@ public class FullTournamentTest {
 
     IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
         + "welcome.jsp");
-  }
-
-  /**
-   * Find a column index in a table model by name.
-   *
-   * @return -1 if not found
-   */
-  private static int findColumnByName(final TableModel tableModel,
-                                      final String name) {
-    for (int i = 0; i < tableModel.getColumnCount(); ++i) {
-      if (name.equals(tableModel.getColumnName(i))) {
-        return i;
-      }
-    }
-    return -1;
   }
 
   /**
