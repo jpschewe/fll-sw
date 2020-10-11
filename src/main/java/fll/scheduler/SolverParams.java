@@ -91,7 +91,7 @@ public class SolverParams extends SchedParams {
   /**
    * Populate the parameters from the properties object.
    * 
-   * @param properties
+   * @param properties the properties to load
    * @throws ParseException if there is a problem parsing the properties
    */
   @Override

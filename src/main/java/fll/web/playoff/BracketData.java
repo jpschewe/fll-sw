@@ -235,7 +235,7 @@ public class BracketData extends BracketInfo {
      * @param matchNum {@link #getMatchNum()}
      * @param printed {@link #getPrinted()}
      * @param tableA {@link #getTableA()}
-     * @param tableB {@Link #getTableB()}
+     * @param tableB {@link #getTableB()}
      * @param teamA {@link #getTeamA()}
      * @param teamB {@link #getTeamB()}
      * @param rowsSpanned {@link #getRowsSpanned()}
