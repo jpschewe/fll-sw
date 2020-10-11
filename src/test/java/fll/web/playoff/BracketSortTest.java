@@ -44,11 +44,11 @@ public class BracketSortTest {
   /**
    * Test sorting alphabetically by team name.
    * 
-   * @throws ClassNotFoundException
-   * @throws IllegalAccessException
-   * @throws InstantiationException
-   * @throws SQLException
-   * @throws UnsupportedEncodingException
+   * @throws ClassNotFoundException test error
+   * @throws IllegalAccessException test error
+   * @throws InstantiationException test error
+   * @throws SQLException test error
+   * @throws UnsupportedEncodingException test error
    */
   @Test
   public void testAlphaTeam() throws InstantiationException, IllegalAccessException, ClassNotFoundException,

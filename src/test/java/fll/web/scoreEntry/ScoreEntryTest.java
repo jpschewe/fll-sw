@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
-import java.text.ParseException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,9 +63,11 @@ public class ScoreEntryTest {
    * Load all-elements.xml (from {@link ChallengeParserTest}) and make sure
    * there are no errors.
    * </p>
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testGenerateCheckRestrictionsBody() throws IOException, ParseException {
+  public void testGenerateCheckRestrictionsBody() throws IOException {
     final StringWriter writer = new StringWriter();
 
     ScoreEntry.generateCheckRestrictionsBody(writer, new TestServletContext());

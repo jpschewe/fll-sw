@@ -38,6 +38,9 @@ public class UtilitiesTest {
 
   /**
    * Test loading a csv file.
+   * 
+   * @throws SQLException test error
+   * @throws IOException test error
    */
   @SuppressFBWarnings(value = "DMI_EMPTY_DB_PASSWORD", justification = "Empty password for in-memory database in test is ok")
   @Test

@@ -13,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -55,9 +54,11 @@ public class ScoreTest {
   /**
    * Test computed goals. Loads data/test-computed-goal.xml and uses a dummy
    * team score object.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testComputedGoals() throws ParseException, IOException {
+  public void testComputedGoals() throws IOException {
     try (InputStream stream = ScoreTest.class.getResourceAsStream("data/test-computed-goal.xml")) {
       final PerformanceScoreCategory performanceElement = loadDocumentAndGetPerformanceElemnt(stream);
 
@@ -101,9 +102,11 @@ public class ScoreTest {
   /**
    * Test computed goals. Loads data/test-variables.xml and uses a dummy team
    * score object.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testVariables() throws ParseException, IOException {
+  public void testVariables() throws IOException {
     try (InputStream stream = ScoreTest.class.getResourceAsStream("data/test-variables.xml")) {
       final PerformanceScoreCategory performanceElement = loadDocumentAndGetPerformanceElemnt(stream);
 

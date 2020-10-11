@@ -35,6 +35,9 @@ public class ImportDBTest {
 
   /**
    * Test the 2012 plymouth database. Got an error about data truncation.
+   * 
+   * @throws SQLException test error
+   * @throws IOException test error
    */
   @Test
   public void testTruncation() throws IOException, SQLException {
@@ -60,8 +63,8 @@ public class ImportDBTest {
   /**
    * Make sure that no show scores in the subjective data import properly.
    * 
-   * @throws IOException
-   * @throws SQLException
+   * @throws SQLException test error
+   * @throws IOException test error
    */
   @Test
   public void testImportSubjectiveNoShow() throws IOException, SQLException {
@@ -98,6 +101,9 @@ public class ImportDBTest {
    * and make sure no exceptions are thrown. Also do a dump and load of the
    * database again to ensure there are no issues with the load of a newly
    * dumped database.
+   * 
+   * @throws SQLException test error
+   * @throws IOException test error
    */
   @Test
   public void testLoadFromDumpIntoNewDB() throws IOException, SQLException {

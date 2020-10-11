@@ -36,12 +36,18 @@ public abstract class UnfinishedBaseTest {
 
   private Connection connection;
 
+  /**
+   * @return the database connection for testing
+   */
   protected Connection getConnection() {
     return connection;
   }
 
   private Tournament tournament;
 
+  /**
+   * @return the tournament used for the test
+   */
   protected Tournament getTournament() {
     return tournament;
   }
@@ -82,6 +88,12 @@ public abstract class UnfinishedBaseTest {
                                                                    UNFINISHED_BRACKET_NAME, UNFINISHED_3RD_BRACKET_NAME,
                                                                    UNFINISHED_1ST_3RD_BRACKET_NAME, UNFINISHED_LARGE };
 
+  /**
+   * Setup tests.
+   * 
+   * @throws IOException test error
+   * @throws SQLException test error
+   */
   @BeforeEach
   public void setUp() throws IOException, SQLException {
     tempFile = File.createTempFile("flltest", null);
@@ -99,6 +111,9 @@ public abstract class UnfinishedBaseTest {
     assertThat(tournament, notNullValue());
   }
 
+  /**
+   * Clean up after tests.
+   */
   @AfterEach
   public void tearDown() {
     SQLFunctions.close(connection);
