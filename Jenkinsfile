@@ -190,9 +190,9 @@ pipeline {
                 
                 recordIssues tool: taskScanner(includePattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', excludePattern: 'checkstyle*.xml', highTags: 'FIXME,HACK', normalTags: 'TODO')
                 
-                recordIssues tool: java()  
+                recordIssues tool: java(), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]  
 
-                recordIssues tool: javaDoc()                                            
+                recordIssues tool: javaDoc(), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]                                            
             }            
         }
     }
