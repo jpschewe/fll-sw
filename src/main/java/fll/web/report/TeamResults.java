@@ -38,6 +38,7 @@ import fll.TournamentTeam;
 import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
 import fll.documents.writers.SubjectivePdfWriter;
+import fll.scheduler.SubjectiveTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
@@ -131,7 +132,12 @@ public class TeamResults extends BaseFLLServlet {
       if (null == scheduleColumn) {
         scheduledTime = null;
       } else {
-        scheduledTime = schedInfo.getSubjectiveTimeByName(scheduleColumn).getTime();
+        final SubjectiveTime stime = schedInfo.getSubjectiveTimeByName(scheduleColumn);
+        if (null == stime) {
+          scheduledTime = null;
+        } else {
+          scheduledTime = stime.getTime();
+        }
       }
 
       SubjectivePdfWriter.createDocumentForScores(zipOut, description, tournament.getName(), category, scores,

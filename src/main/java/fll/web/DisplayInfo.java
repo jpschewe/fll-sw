@@ -603,7 +603,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
      * @param parent the display info to delegate to for values
      * @param index {@link #getIndex()}
      * @param bracket {@link #getBracket()}
-     * @param firstRound {@Link #getFirstRound()}
+     * @param firstRound {@link #getFirstRound()}
      */
     public H2HBracketDisplay(final DisplayInfo parent,
                              final int index,
