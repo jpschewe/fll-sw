@@ -56,6 +56,10 @@ public class TournamentScheduleTest {
 
   private static final String TECHNICAL_HEADER = "Technical";
 
+  /**
+   * @throws SQLException test error
+   * @throws UnsupportedEncodingException test error
+   */
   @Test
   public void testForNoSchedule() throws SQLException, UnsupportedEncodingException {
     Utilities.loadDBDriver();
@@ -80,6 +84,13 @@ public class TournamentScheduleTest {
     }
   }
 
+  /**
+   * @throws SQLException test error
+   * @throws IOException test error
+   * @throws InvalidFormatException test error
+   * @throws ParseException test error
+   * @throws ScheduleParseException test error
+   */
   @Test
   public void testStoreSchedule()
       throws SQLException, IOException, InvalidFormatException, ParseException, ScheduleParseException {
@@ -167,10 +178,10 @@ public class TournamentScheduleTest {
    * and a 24 hour formatted schedule and that they come
    * out the same.
    *
-   * @throws IOException
-   * @throws InvalidFormatException
-   * @throws ScheduleParseException
-   * @throws ParseException
+   * @throws IOException test error
+   * @throws InvalidFormatException test error
+   * @throws ScheduleParseException test error
+   * @throws ParseException test error
    */
   @Test
   public void testScheduleTimeFormat()
@@ -250,10 +261,10 @@ public class TournamentScheduleTest {
    * root of the repository.
    * All schedule files that end in '.xls' will be loaded.
    *
-   * @throws ScheduleParseException
-   * @throws ParseException
-   * @throws IOException
-   * @throws InvalidFormatException
+   * @throws ScheduleParseException test error
+   * @throws ParseException test error
+   * @throws IOException test error
+   * @throws InvalidFormatException test error
    */
   @Test
   public void testLoadAllSchedules()

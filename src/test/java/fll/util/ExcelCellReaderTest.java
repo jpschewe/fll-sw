@@ -26,6 +26,11 @@ import fll.Utilities;
 @ExtendWith(TestUtils.InitializeLogging.class)
 public class ExcelCellReaderTest {
 
+  /**
+   * @throws InvalidFormatException test error
+   * @throws IOException test error
+   * @throws ParseException test error
+   */
   @Test
   public void testEmptyCells() throws InvalidFormatException, IOException, ParseException {
     final InputStream stream = ExcelCellReaderTest.class.getResourceAsStream("data/excel-test.xls");
@@ -49,6 +54,11 @@ public class ExcelCellReaderTest {
     assertTrue(found, "Can't find line 19");
   }
 
+  /**
+   * @throws InvalidFormatException test error
+   * @throws IOException test error
+   * @throws ParseException test error
+   */
   @Test
   public void testEmptyFirstCell() throws InvalidFormatException, IOException, ParseException {
     final InputStream stream = ExcelCellReaderTest.class.getResourceAsStream("data/excel-test.xls");
@@ -75,8 +85,8 @@ public class ExcelCellReaderTest {
   /**
    * Make sure that integers read in are kept as integers.
    * 
-   * @throws IOException
-   * @throws InvalidFormatException
+   * @throws IOException test error
+   * @throws InvalidFormatException test error
    */
   @Test
   public void testIntegers() throws InvalidFormatException, IOException {
