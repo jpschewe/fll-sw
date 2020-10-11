@@ -333,7 +333,6 @@ public class MhubMessageHandler extends Thread {
 
   /**
    * @param session the session that was closed
-   * @throws IOException if there was an error working with the session
    */
   @OnClose
   public void onClose(final Session session) {

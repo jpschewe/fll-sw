@@ -156,7 +156,6 @@ public class GreedySolver {
 
   /**
    * @param args see --help for options
-   * @throws InterruptedException
    */
   public static void main(final String[] args) {
     final Options options = buildOptions();
