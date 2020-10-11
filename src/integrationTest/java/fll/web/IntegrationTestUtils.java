@@ -187,7 +187,7 @@ public final class IntegrationTestUtils {
    * @param driver the test controller
    * @param driverWait wait for elements
    * @param challengeDocument the challenge descriptor
-   * @throws IOException
+   * @throws IOException if there is an error talking to the server
    */
   public static void initializeDatabase(final WebDriver driver,
                                         final WebDriverWait driverWait,
@@ -212,7 +212,7 @@ public final class IntegrationTestUtils {
    * @param driver the test controller
    * @param driverWait wait for elements
    * @param challengeStream the challenge descriptor
-   * @throws IOException
+   * @throws IOException if there is an error talking to the server
    */
   public static void initializeDatabase(final WebDriver driver,
                                         final WebDriverWait driverWait,
@@ -290,7 +290,7 @@ public final class IntegrationTestUtils {
    * @param seleniumWait wait for elements
    * @param inputStream input stream that has database to load in it, this input
    *          stream is closed by this method upon successful completion
-   * @throws IOException
+   * @throws IOException if there is an error talking to the server
    */
   public static void initializeDatabaseFromDump(final WebDriver selenium,
                                                 final WebDriverWait seleniumWait,
@@ -450,7 +450,7 @@ public final class IntegrationTestUtils {
    *
    * @param inputStream the data to store in the temporary file
    * @return the temporary file, you need to delete it
-   * @throws IOException
+   * @throws IOException if there is an error talking to the server
    */
   public static File storeInputStreamToFile(final InputStream inputStream) throws IOException {
     final File tempFile = File.createTempFile("fll", null);
@@ -513,6 +513,7 @@ public final class IntegrationTestUtils {
    *
    * @param tournamentName name of tournament
    * @return the tournament or null if not found
+   * @throws IOException if there is an error talking to the server
    */
   public static Tournament getTournamentByName(final String tournamentName) throws IOException {
     final String json = readJSON(TestUtils.URL_ROOT
@@ -549,6 +550,7 @@ public final class IntegrationTestUtils {
    * @param organization organization
    * @param division award group
    * @param tournamentName tournament
+   * @throws IOException if there is an error talking to the server
    */
   public static void addTeam(final WebDriver selenium,
                              final WebDriverWait seleniumWait,
@@ -595,7 +597,7 @@ public final class IntegrationTestUtils {
    * @param selenium the browser driver
    * @param tournamentName the name of the tournament to make the current
    *          tournament
-   * @throws IOException
+   * @throws IOException if there is an error talking to the server
    */
   public static void setTournament(final WebDriver selenium,
                                    final WebDriverWait seleniumWait,
@@ -640,6 +642,9 @@ public final class IntegrationTestUtils {
     return createWebDriver(WebDriverType.FIREFOX);
   }
 
+  /**
+   * Types of web browser to create drivers for.
+   */
   public enum WebDriverType {
     /** firefox web browser. */
     FIREFOX,
@@ -827,6 +832,8 @@ public final class IntegrationTestUtils {
    * @param destination where to save the file. If null don't save the file.
    *          Any existing file will be
    *          overwritten.
+   * @throws ClientProtocolException if there is an error talking to the server
+   * @throws IOException if there is an error talking to the server
    */
   public static void downloadFile(final URL urlToLoad,
                                   final String expectedContentType,

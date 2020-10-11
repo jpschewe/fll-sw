@@ -19,8 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 
-import org.xml.sax.SAXException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.SgmlPage;
@@ -48,9 +46,15 @@ public final class WebTestUtils {
     // no instances
   }
 
+  /**
+   * @param conversation the connection to the server
+   * @param request the request to send to the server
+   * @return the loaded page
+   * @throws IOException if there is an error talking to the server
+   */
   public static Page loadPage(final WebClient conversation,
                               final com.gargoylesoftware.htmlunit.WebRequest request)
-      throws IOException, SAXException {
+      throws IOException {
     final boolean exceptionOnError = conversation.getOptions().isThrowExceptionOnFailingStatusCode();
     conversation.getOptions().setThrowExceptionOnFailingStatusCode(false);
     try {
@@ -96,12 +100,15 @@ public final class WebTestUtils {
 
   /**
    * Get source of any page type.
+   * 
+   * @param page the page to get the source of
+   * @return the page source
    */
   public static String getPageSource(final Page page) {
     if (page instanceof HtmlPage) {
       return ((HtmlPage) page).asXml();
     } else if (page instanceof SgmlPage) {
-        return ((SgmlPage) page).asXml();
+      return ((SgmlPage) page).asXml();
     } else if (page instanceof TextPage) {
       return ((TextPage) page).getContent();
     } else if (page instanceof UnexpectedPage) {
@@ -112,7 +119,11 @@ public final class WebTestUtils {
     }
   }
 
-  public static WebClient getConversation() throws IOException, SAXException {
+  /**
+   * @return a connection to the server for loading pages that is authenticated
+   * @throws IOException if there is an error talking to the server
+   */
+  public static WebClient getConversation() throws IOException {
     final WebClient conversation = new WebClient();
 
     // always login first
@@ -149,8 +160,12 @@ public final class WebTestUtils {
 
   /**
    * Submit a query to developer/QueryHandler, parse the JSON and return it.
+   * 
+   * @param query the SQL query
+   * @return the parsed result of the SQL query
+   * @throws IOException if there is an error talking to the server
    */
-  public static QueryHandler.ResultData executeServerQuery(final String query) throws IOException, SAXException {
+  public static QueryHandler.ResultData executeServerQuery(final String query) throws IOException {
     final WebClient conversation = getConversation();
 
     final URL url = new URL(TestUtils.URL_ROOT

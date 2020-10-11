@@ -15,6 +15,11 @@ public final class ElementBy {
   private ElementBy() {
   }
 
+  /**
+   * 
+   * @param text the text to look for
+   * @return a search for partial text
+   */
   public static By partialText(final String text) {
     return By.xpath("//*[contains(normalize-space(.),'"
         + text + "')]");

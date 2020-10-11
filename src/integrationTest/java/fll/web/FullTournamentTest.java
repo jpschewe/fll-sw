@@ -56,7 +56,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.xml.sax.SAXException;
 
 import com.diffplug.common.base.Errors;
 import com.gargoylesoftware.htmlunit.Page;
@@ -102,11 +101,17 @@ public class FullTournamentTest {
 
   private static NoExitSecurityManagerInstaller noExitSecurityManagerInstaller;
 
+  /**
+   * Tear down code for test.
+   */
   @AfterAll
   public static void tearDownOnce() {
     noExitSecurityManagerInstaller.uninstall();
   }
 
+  /**
+   * Setup code for test.
+   */
   @BeforeAll
   public static void setUpOnce() {
     FailOnThreadViolationRepaintManager.install();
@@ -137,16 +142,14 @@ public class FullTournamentTest {
    * @throws ClassNotFoundException test error
    * @throws InstantiationException test error
    * @throws IllegalAccessException test error
-   * @throws ParseException test error
    * @throws SQLException test error
    * @throws InterruptedException test error
-   * @throws SAXException test error
    */
   @Test
   public void testFullTournament(final WebDriver selenium,
                                  final WebDriverWait seleniumWait)
-      throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, ParseException,
-      SQLException, InterruptedException, SAXException {
+      throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException,
+      InterruptedException {
     try {
       try (Connection testDataConn = DriverManager.getConnection("jdbc:hsqldb:mem:full-tournament-test")) {
         assertNotNull(testDataConn, "Error connecting to test data database");
@@ -183,9 +186,6 @@ public class FullTournamentTest {
     } catch (final IOException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
-    } catch (final ParseException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
     } catch (final SQLException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
@@ -203,18 +203,16 @@ public class FullTournamentTest {
    * @param testDataConn connection to the source data
    * @param testTournamentName name of the tournament to create
    * @param outputDirectory where to save files, must not be null and must exist
-   * @throws IOException
-   * @throws SQLException
-   * @throws ParseException
-   * @throws InterruptedException
-   * @throws SAXException
+   * @throws IOException if there is an error talking to the browser
+   * @throws SQLException on a database error
+   * @throws InterruptedException if an element cannot be found in time
    */
   public void replayTournament(final WebDriver selenium,
                                final WebDriverWait seleniumWait,
                                final Connection testDataConn,
                                final String testTournamentName,
                                final Path outputDirectory)
-      throws IOException, SQLException, ParseException, InterruptedException, SAXException {
+      throws IOException, SQLException, InterruptedException {
     final String safeTestTournamentName = sanitizeFilename(testTournamentName);
 
     final ChallengeDescription challengeDescription = GlobalParameters.getChallengeDescription(testDataConn);
@@ -646,7 +644,7 @@ public class FullTournamentTest {
     assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
   }
 
-  private void checkReports() throws IOException, SAXException {
+  private void checkReports() throws IOException {
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
         + "report/FinalComputedScores"), "application/pdf", null);
 
@@ -657,7 +655,7 @@ public class FullTournamentTest {
         + "report/PlayoffReport"), "application/pdf", null);
   }
 
-  private void checkRankAndScores(final String testTournamentName) throws IOException, SAXException {
+  private void checkRankAndScores(final String testTournamentName) throws IOException {
     // check ranking and scores
     final double scoreFP = 1E-1; // just check to one decimal place
 
@@ -719,13 +717,8 @@ public class FullTournamentTest {
   /**
    * Visit the printable brackets for the division specified and print the
    * brackets.
-   *
-   * @throws IOException
-   * @throws MalformedURLException
-   * @throws SAXException
    */
-  private static void printPlayoffScoresheets(final String division)
-      throws MalformedURLException, IOException, SAXException {
+  private static void printPlayoffScoresheets(final String division) throws MalformedURLException, IOException {
     final WebClient conversation = WebTestUtils.getConversation();
 
     final Page indexResponse = WebTestUtils.loadPage(conversation, new WebRequest(new URL(TestUtils.URL_ROOT
@@ -778,7 +771,6 @@ public class FullTournamentTest {
    * @param testDataConn Where to get the test data from
    * @param challengeDocument the challenge descriptor
    * @throws SQLException test error
-   * @throws SAXException test error
    * @throws InterruptedException if there is an error invoking on the event queue
    */
   private void enterSubjectiveScores(final WebDriver selenium,
@@ -787,7 +779,7 @@ public class FullTournamentTest {
                                      final ChallengeDescription description,
                                      final Tournament sourceTournament,
                                      final Path outputDirectory)
-      throws SQLException, IOException, MalformedURLException, ParseException, SAXException, InterruptedException {
+      throws SQLException, IOException, MalformedURLException, InterruptedException {
 
     final Path subjectiveZip = outputDirectory.resolve(sanitizeFilename(sourceTournament.getName())
         + "_subjective-data.fll");
@@ -819,11 +811,11 @@ public class FullTournamentTest {
   }
 
   @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "Need to specify category for table name")
-  public void enterSubjectiveScores(final Connection testDataConn,
-                                    final ChallengeDescription description,
-                                    final Tournament sourceTournament,
-                                    final Path subjectiveZip)
-      throws IOException, SQLException, ParseException {
+  private void enterSubjectiveScores(final Connection testDataConn,
+                                     final ChallengeDescription description,
+                                     final Tournament sourceTournament,
+                                     final Path subjectiveZip)
+      throws IOException, SQLException {
     final SubjectiveFrame subjective = new SubjectiveFrame();
     subjective.load(subjectiveZip.toFile());
 
@@ -905,7 +897,9 @@ public class FullTournamentTest {
               }
             } // not NoShow
           } // foreach score
-        } // try ResultSet
+        } catch (final ParseException pe) {
+          throw new RuntimeException(pe);
+        }
       } // try PreparedStatement
     } // foreach category
     subjective.save();
@@ -922,7 +916,7 @@ public class FullTournamentTest {
                                      final Tournament sourceTournament,
                                      final int runNumber,
                                      final int teamNumber)
-      throws SQLException, IOException, MalformedURLException, ParseException {
+      throws IOException, MalformedURLException, SQLException {
 
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Setting score for "
@@ -1051,7 +1045,7 @@ public class FullTournamentTest {
                                       final Tournament sourceTournament,
                                       final int runNumber,
                                       final int teamNumber)
-      throws SQLException, IOException, MalformedURLException, ParseException {
+      throws SQLException, IOException, MalformedURLException {
     final String selectTeamPage = TestUtils.URL_ROOT
         + "scoreEntry/select_team.jsp";
 
