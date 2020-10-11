@@ -242,9 +242,12 @@ public final class ScheduleWriter {
                           STANDARD_BORDER_WIDTH);
 
       for (final String subjectiveStation : subjectiveStations) {
-        final Element cell = FOPUtils.createTableCell(document, null,
-                                                      TournamentSchedule.formatTime(si.getSubjectiveTimeByName(subjectiveStation)
-                                                                                      .getTime()));
+        final SubjectiveTime stime = si.getSubjectiveTimeByName(subjectiveStation);
+        if (null == stime) {
+          throw new RuntimeException("Cannot find time for "
+              + subjectiveStation);
+        }
+        final Element cell = FOPUtils.createTableCell(document, null, TournamentSchedule.formatTime(stime.getTime()));
         row.appendChild(cell);
         FOPUtils.addBorders(cell, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
                             STANDARD_BORDER_WIDTH);
@@ -605,7 +608,12 @@ public final class ScheduleWriter {
 
       final Element value = FOPUtils.createXslFoElement(document, "inline");
       block.appendChild(value);
-      final LocalTime start = si.getSubjectiveTimeByName(subjectiveStation).getTime();
+      final SubjectiveTime stime = si.getSubjectiveTimeByName(subjectiveStation);
+      if (null == stime) {
+        throw new RuntimeException("Cannot find time for "
+            + subjectiveStation);
+      }
+      final LocalTime start = stime.getTime();
       final LocalTime end = start.plus(params.getStationByName(subjectiveStation).getDuration());
       value.appendChild(document.createTextNode(String.format("%s - %s", TournamentSchedule.formatTime(start),
                                                               TournamentSchedule.formatTime(end))));
@@ -756,7 +764,12 @@ public final class ScheduleWriter {
       final Element row = FOPUtils.createTableRow(document);
       tableBody.appendChild(row);
 
-      final LocalTime time = si.getSubjectiveTimeByName(subjectiveStation).getTime();
+      final SubjectiveTime stime = si.getSubjectiveTimeByName(subjectiveStation);
+      if (null == stime) {
+        throw new RuntimeException("Cannot find time for "
+            + subjectiveStation);
+      }
+      final LocalTime time = stime.getTime();
 
       final double topBorderWidth;
       if (Objects.equals(time, prevTime)) {
@@ -1100,7 +1113,7 @@ public final class ScheduleWriter {
       final Element row = FOPUtils.createTableRow(document);
       tableBody.appendChild(row);
 
-      final LocalTime time = si.getSubjectiveTimeByName(subjectiveStation).getTime();
+      final SubjectiveTime stime = si.getSubjectiveTimeByName(subjectiveStation);
       final String awardGroup = si.getAwardGroup();
       final double topBorderWidth;
       if (Objects.equals(awardGroup, prevAwardGroup)) {
@@ -1139,7 +1152,8 @@ public final class ScheduleWriter {
       FOPUtils.addRightBorder(cell, STANDARD_BORDER_WIDTH);
       FOPUtils.addTopBorder(cell, topBorderWidth);
 
-      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, TournamentSchedule.formatTime(time));
+      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                      null == stime ? "" : TournamentSchedule.formatTime(stime.getTime()));
       row.appendChild(cell);
       FOPUtils.addBottomBorder(cell, STANDARD_BORDER_WIDTH);
       FOPUtils.addLeftBorder(cell, STANDARD_BORDER_WIDTH);

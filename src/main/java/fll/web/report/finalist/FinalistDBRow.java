@@ -23,7 +23,7 @@ public final class FinalistDBRow implements Serializable {
   /**
    * @param categoryName {@link #getCategoryName()}
    * @param hour {@link #getHour()}
-   * @param minute {@Link #getMinute()}
+   * @param minute {@link #getMinute()}
    * @param teamNumber {@link #getTeamNumber()}
    */
   public FinalistDBRow(@JsonProperty("categoryName") final String categoryName,

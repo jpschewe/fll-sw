@@ -1847,8 +1847,11 @@ public class TournamentSchedule implements Serializable {
         line.add(si.getOrganization());
         line.add(si.getJudgingGroup());
         for (final String category : categories) {
-          final LocalTime d = si.getSubjectiveTimeByName(category).getTime();
-          line.add(TournamentSchedule.formatTime(d));
+          final SubjectiveTime stime = si.getSubjectiveTimeByName(category);
+          if (null != stime) {
+            final LocalTime d = stime.getTime();
+            line.add(TournamentSchedule.formatTime(d));
+          }
         }
 
         si.enumeratePracticePerformances().forEachOrdered(pair -> {
