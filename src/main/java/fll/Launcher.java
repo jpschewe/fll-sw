@@ -51,7 +51,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.scheduler.SchedulerUI;
-import fll.subjective.SubjectiveFrame;
 import fll.tomcat.TomcatLauncher;
 import fll.util.ConsoleExceptionHandler;
 import fll.util.GuiExceptionHandler;
@@ -356,12 +355,6 @@ public class Launcher extends JFrame {
     });
     buttonBox.add(custom);
 
-    final JButton subjectiveButton = new JButton("Subjective Application");
-    subjectiveButton.addActionListener(ae -> {
-      launchSubjective();
-    });
-    buttonBox.add(subjectiveButton);
-
     final JButton schedulerButton = new JButton("Scheduler");
     schedulerButton.addActionListener(ae -> {
       launchScheduler();
@@ -470,41 +463,6 @@ public class Launcher extends JFrame {
 
         scheduler.setLocationRelativeTo(null);
         scheduler.setVisible(true);
-      } catch (final Exception e) {
-        LOGGER.fatal("Unexpected error", e);
-        JOptionPane.showMessageDialog(null, "Unexpected error: "
-            + e.getMessage(), "Error Launching Scheduler", JOptionPane.ERROR_MESSAGE);
-      }
-    }
-  }
-
-  private SubjectiveFrame subjective = null;
-
-  private void launchSubjective() {
-    if (null != subjective) {
-      subjective.setVisible(true);
-    } else {
-      try {
-        subjective = new SubjectiveFrame();
-        setApplicationIcon(subjective);
-
-        subjective.addWindowListener(new WindowAdapter() {
-          @Override
-          public void windowClosed(final WindowEvent e) {
-            subjective = null;
-          }
-        });
-        // should be able to watch for window closing, but hidden works
-        subjective.addComponentListener(new ComponentAdapter() {
-          @Override
-          public void componentHidden(final ComponentEvent e) {
-            subjective = null;
-          }
-        });
-
-        subjective.setLocationRelativeTo(null);
-        subjective.setVisible(true);
-        subjective.promptForFile();
       } catch (final Exception e) {
         LOGGER.fatal("Unexpected error", e);
         JOptionPane.showMessageDialog(null, "Unexpected error: "

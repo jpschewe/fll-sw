@@ -41,13 +41,13 @@ import fll.db.GenerateDB;
 import fll.db.NonNumericNominees;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
-import fll.web.admin.UploadSubjectiveData;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
+import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
 
 /**
- * Access to subjective scores.
+ * API access to subjective scores.
  * GET: {category, {judge, {teamNumber, SubjectiveScore}}}
  * POST: expects the data from GET and returns UploadResult
  */
@@ -287,8 +287,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
       } // foreach category
 
-      UploadSubjectiveData.removeNullSubjectiveRows(connection, currentTournament.getTournamentID(),
-                                                    challengeDescription);
+      removeNullSubjectiveRows(connection, currentTournament.getTournamentID(), challengeDescription);
 
       final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament.getTournamentID());
       tournament.recordSubjectiveModified(connection);
@@ -308,7 +307,60 @@ public class SubjectiveScoresServlet extends HttpServlet {
       final PrintWriter writer = response.getWriter();
       jsonMapper.writeValue(writer, result);
     }
+  }
 
+  /**
+   * Remove subjective score rows from database that are empty. These
+   * are rows that have null for all scores and is not a no show.
+   *
+   * @param connection database connection
+   * @param tournamentId which tournament to work on
+   * @param challengeDescription the challenge description
+   */
+  private static void removeNullSubjectiveRows(final Connection connection,
+                                               final int tournamentId,
+                                               final ChallengeDescription challengeDescription)
+      throws SQLException {
+    for (final SubjectiveScoreCategory cat : challengeDescription.getSubjectiveCategories()) {
+      removeNullRows(tournamentId, connection, cat.getName(), cat);
+    }
+  }
+
+  /**
+   * Remove rows from the specified subjective category that are empty. These
+   * are rows that have null for all scores and is not a no show.
+   *
+   * @param currentTournament
+   * @param connection
+   * @param categoryName
+   * @param categoryElement
+   * @throws SQLException
+   */
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")
+  private static void removeNullRows(final int currentTournament,
+                                     final Connection connection,
+                                     final String categoryName,
+                                     final ScoreCategory categoryElement)
+      throws SQLException {
+    final List<AbstractGoal> goalDescriptions = categoryElement.getAllGoals();
+
+    final StringBuffer sql = new StringBuffer();
+    sql.append("DELETE FROM "
+        + categoryName
+        + " WHERE NoShow <> ? ");
+    for (final AbstractGoal goalDescription : goalDescriptions) {
+      sql.append(" AND "
+          + goalDescription.getName()
+          + " IS NULL ");
+    }
+
+    sql.append(" AND Tournament = ?");
+
+    try (PreparedStatement prep = connection.prepareStatement(sql.toString())) {
+      prep.setBoolean(1, true);
+      prep.setInt(2, currentTournament);
+      prep.executeUpdate();
+    }
   }
 
   /**

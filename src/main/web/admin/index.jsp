@@ -25,15 +25,6 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
   function hide(id) {
     document.getElementById(id).style.display = "none";
   }
-
-  function confirm_subjective() {
-    var overwrite = document.getElementById('subjective_overwrite_all').checked;
-    if (overwrite) {
-      return confirm("Are you sure you want to overwrite all subjective scores?")
-    } else {
-      return true;
-    }
-  }
 </script>
 </head>
 
@@ -339,54 +330,6 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                 <li>
                     <a href='<c:url value="/subjective/index.html"/>'
                         target="_new">Subjective Web application</a>
-                </li>
-
-
-                <li>
-                    <a href="subjective-data.fll">Download the data
-                        file for subjective score entry.</a> Should be
-                    downloaded after each subjective score upload to
-                    lessen chance of data loss due to overwrite.
-                </li>
-
-                <li>
-                    <form name='uploadSubjective'
-                        ACTION='<c:url value="UploadSubjectiveData"/>'
-                        METHOD="POST" ENCTYPE="multipart/form-data">
-                        Upload the data file for subjective scores.
-
-                        <!-- file to upload -->
-                        <input type="file" size="32"
-                            name="subjectiveFile" />
-
-                        <!-- overwrite all scores -->
-                        <input type='checkbox' name='overwrite_all'
-                            value='true' id='subjective_overwrite_all' />
-                        <label for='subjective_overwrite_all'>Overwrite
-                            All Subjective Scores</label>
-                        <a
-                            href='javascript:display("subjective_overwrite_help")'>[help]</a>
-                        <div id='subjective_overwrite_help' class='help'
-                            style='display: none'>
-                            The normal upload only saves scores that
-                            have been modified by the subjective
-                            application. Checking this box saves
-                            <b>all</b>
-                            scores in the data file to the database,
-                            overwriting any scores that are in the
-                            database. This option is useful when
-                            restoring the subjective scores after
-                            initializing the database from another
-                            server. <a
-                                href='javascript:hide("subjective_overwrite_help")'>[hide]</a>
-                        </div>
-
-                        <!-- subjective file upload button -->
-                        <input id='uploadSubjectiveFile' type="submit"
-                            value="Upload"
-                            onclick='return confirm_subjective()' />
-
-                    </form>
                 </li>
 
                 <li>
