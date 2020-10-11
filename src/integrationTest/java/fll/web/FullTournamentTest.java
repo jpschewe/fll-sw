@@ -40,10 +40,6 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
-import org.fest.swing.security.NoExitSecurityManagerInstaller;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
@@ -95,27 +91,6 @@ import fll.xml.SubjectiveScoreCategory;
 public class FullTournamentTest {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
-  private static NoExitSecurityManagerInstaller noExitSecurityManagerInstaller;
-
-  /**
-   * Tear down code for test.
-   */
-  @AfterAll
-  public static void tearDownOnce() {
-    noExitSecurityManagerInstaller.uninstall();
-  }
-
-  /**
-   * Setup code for test.
-   */
-  @BeforeAll
-  public static void setUpOnce() {
-    FailOnThreadViolationRepaintManager.install();
-    noExitSecurityManagerInstaller = NoExitSecurityManagerInstaller.installNoExitSecurityManager(status -> assertEquals(0,
-                                                                                                                        status,
-                                                                                                                        "Bad exit status"));
-  }
 
   /**
    * Load the test data into the specified database.
@@ -759,7 +734,6 @@ public class FullTournamentTest {
     assertEquals("application/pdf", printResponse.getWebResponse().getContentType());
 
   }
-
 
   @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "Need to specify category for table name")
   private void enterSubjectiveScores(final Connection testDataConn,
