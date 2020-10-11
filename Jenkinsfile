@@ -79,7 +79,7 @@ pipeline {
         callGradle('checkstyleMain')
         callGradle('checkstyleTest')
         callGradle('checkstyleIntegrationTest')
-        recordIssues tool: checkStyle(pattern: 'build/reports/checkstyle/*.xml')
+        recordIssues tool: checkStyle(pattern: 'build/reports/checkstyle/*.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
       }
     }
 
