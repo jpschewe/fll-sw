@@ -399,7 +399,16 @@ public class SubjectiveScoresServlet extends HttpServlet {
     return insertPrep;
   }
 
+  /**
+   * Result to send back after an upload.
+   */
   public static final class UploadResult {
+
+    /**
+     * @param success {@link #getSuccess()}
+     * @param message {@link #getMessage()}
+     * @param numModified {@link #getNumModified()}
+     */
     public UploadResult(final boolean success,
                         final String message,
                         final int numModified) {
@@ -410,18 +419,27 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
     private final boolean mSuccess;
 
+    /**
+     * @return if the upload was successful
+     */
     public boolean getSuccess() {
       return mSuccess;
     }
 
     private final String mMessage;
 
+    /**
+     * @return message for the user
+     */
     public String getMessage() {
       return mMessage;
     }
 
     private final int mNumModified;
 
+    /**
+     * @return number of modified scores
+     */
     public int getNumModified() {
       return mNumModified;
     }

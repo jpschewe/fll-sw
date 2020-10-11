@@ -212,7 +212,7 @@ public final class Tables {
    * @param connection the database connection
    * @param tournamentId the tournament id
    * @param tables the new tables, each pair is side 1 and side 2 of the table
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
   public static void replaceTablesForTournament(final Connection connection,
                                                 final int tournamentId,
