@@ -172,6 +172,10 @@ subjectiveCategory:before {
     font-weight: bold;
 }
 
+nominates:before {
+    content: "Judge can nominate teams for " attr(nonNumericCategoryTitle)
+}
+
 term:before {
     content: attr(floatingPointType) "(";
 }
@@ -218,4 +222,10 @@ variable * {
 
 variable:before {
     content: attr(name) " = ";
+}
+
+nonNumericCategory:before {
+    content: attr(title) " - winner per award group: " attr(perAwardGroup);
+    font-size: 120%;
+    font-weight: bold;
 }
