@@ -180,7 +180,7 @@ term:before {
     content: attr(floatingPointType) "(";
 }
 
-term:not (:last-child ):after {
+term:not(:last-child ):after {
     content: ") + ";
 }
 
@@ -196,7 +196,7 @@ goalRef:before {
     content: attr(scoreType) "(" attr(goal) ")";
 }
 
-goalRef:not (:last-child ):after {
+goalRef:not(:last-child ):after {
     content: " x ";
 }
 
@@ -204,7 +204,7 @@ constant:before {
     content: attr(value);
 }
 
-constant:not (:last-child ):after {
+constant:not(:last-child ):after {
     content: " x ";
 }
 
@@ -212,7 +212,7 @@ variableRef:before {
     content: attr(variable);
 }
 
-variableRef:not (:last-child ):after {
+variableRef:not(:last-child ):after {
     content: " x ";
 }
 
