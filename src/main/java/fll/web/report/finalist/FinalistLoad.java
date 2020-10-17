@@ -232,6 +232,10 @@ public final class FinalistLoad {
           output.format("  %s = $.finalist.addCategory(%s, false, false);%n", categoryVar, quotedCatTitle);
           output.format("}%n");
         }
+        
+        // clear judges and teams from category as we want to use whatever is coming from the database
+        output.format("$.finalist.clearCategoryTeams(%s);%n", categoryVar);
+        output.format("$.finalist.clearCategoryNominatingJudges(%s);%n", categoryVar);
 
         for (final Nominee nominee : NonNumericNominees.getNominees(connection, tournament, category)) {
           output.format("$.finalist.addTeamToCategory(%s, %d);%n", categoryVar, nominee.getTeamNumber());

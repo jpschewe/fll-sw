@@ -229,7 +229,7 @@
     this.name = name;
     this.numeric = numeric;
     this.catId = category_id;
-    this.teams = []; // all teams reguardless of division
+    this.teams = []; // all teams regardless of division
     this.room = {}; // division -> room
     this.scheduled = false;
     this.overall = overall;
@@ -1346,7 +1346,17 @@
       category.judges[teamNumber] = judges;
       _save();
     },
-
+        
+    clearCategoryTeams : function(category) {
+      category.teams = [];
+      _save();
+    },
+    
+    clearCategoryNominatingJudges : function(category) {
+      category.judges = {};
+      _save();
+    },
+    
     /**
      * Convert the non-numeric nominee information into a list of
      * NonNumericNominees objects. This is to prepare to send the data to the
