@@ -43,7 +43,7 @@ fll.web.admin.StoreDelayedPerformance.populateContext(application, pageContext);
     bracket display.</p>
 
 <form action="<c:url value='/admin/StoreDelayedPerformance' />"
-    method="POST" name="delayed_performance">
+    method="POST" name="delayed_performance" id="delayed_performance">
 
     <table border="1" id="delayedPerformanceTable">
         <tr>
