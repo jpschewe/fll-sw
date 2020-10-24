@@ -28,10 +28,6 @@ GatherTournamentParameterInformation.populateContext(application, pageContext);
 
   $(document).ready(function() {
     $("#edit_tournament_parameters").validate();
-
-    $("#submit").click(function() {
-      return validateForm();
-    });
   });
 </script>
 

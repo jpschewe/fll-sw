@@ -43,10 +43,6 @@ GatherParameterInformation.populateContext(application, pageContext);
 
   $(document).ready(function() {
     $("#edit_global_parameters").validate();
-
-    $("#submit").click(function() {
-      return validateForm();
-    });
   });
 </script>
 
@@ -69,7 +65,7 @@ GatherParameterInformation.populateContext(application, pageContext);
         <p>This page is for advanced users only. Be careful changing
             parameters here.</p>
 
-        <form name='edit_global_parameters'
+        <form name='edit_global_parameters' id='edit_global_parameters'
             action='StoreGlobalParameters' method='POST'>
 
             <table>
