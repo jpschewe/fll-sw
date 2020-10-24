@@ -13,7 +13,7 @@ fll.web.admin.StoreDelayedPerformance.populateContext(application, pageContext);
     src="<c:url value='/extlib/timepicker/jquery.timepicker.js'/>"></script>
 
 <script type="text/javascript"
-    src="<c:url value='/extlib/jquery.validate.min.js'/>"></script>
+    src="<c:url value='/extlib/jquery-validation/dist/jquery.validate.min.js'/>"></script>
 
 <script type="text/javascript" src="delayed_performance.js"></script>
 

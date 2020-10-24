@@ -1,3 +1,6 @@
 [submodule "src/main/web/extlib/timepicker"]
 	path = src/main/web/extlib/timepicker
 	url = https://github.com/jonthornton/jquery-timepicker.git
+[submodule "src/main/web/extlib/jquery-validation"]
+	path = src/main/web/extlib/jquery-validation
+	url = https://github.com/jquery-validation/jquery-validation.git
