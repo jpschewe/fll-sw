@@ -4,6 +4,8 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+"use strict";
+
 String.repeat = function(chr, count) {
 	var str = "";
 	for (var x = 0; x < count; x++) {
