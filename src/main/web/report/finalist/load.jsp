@@ -7,10 +7,12 @@
 <head>
 <title>Finalist Schedule Load</title>
 
-<script type='text/javascript' src='../../extlib/jquery-1.11.1.min.js'></script>
 <script type='text/javascript'
-    src='../../extlib/jquery.json-2.5-pre.min.js'></script>
-<script type='text/javascript' src='../../extlib/jstorage-0.4.11.min.js'></script>
+    src=<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+<script type='text/javascript'
+    src="<c:url value='/extlib/jquery.json-2.5-pre.min.js'/>"></script>
+<script type='text/javascript'
+    src="<c:url value='/extlib/jstorage-0.4.12/jstorage.min.js' />"></script>
 <script type='text/javascript' src='finalist.js'></script>
 <script type='text/javascript'>
   var _loadingTournament =
