@@ -30,7 +30,7 @@ GatherParameterInformation.populateContext(application, pageContext);
 <script type="text/javascript"
     src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 <script type="text/javascript"
-    src="<c:url value='/extlib/jquery.validate.min.js'/>"></script>
+    src="<c:url value='/extlib/jquery-validation/dist/jquery.validate.min.js'/>"></script>
 
 <!-- functions to displaying and hiding help -->
 <script type="text/javascript">
