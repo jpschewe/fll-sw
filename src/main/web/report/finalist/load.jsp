@@ -10,7 +10,7 @@
 <script type='text/javascript'
     src=<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 <script type='text/javascript'
-    src="<c:url value='/extlib/jquery.json-2.5-pre.min.js'/>"></script>
+    src="<c:url value='/extlib/jquery-json-2.6.0/dist/jquery.json.min.js' />"></script>
 <script type='text/javascript'
     src="<c:url value='/extlib/jstorage-0.4.12/jstorage.min.js' />"></script>
 <script type='text/javascript' src='finalist.js'></script>

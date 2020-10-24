@@ -1,0 +1,42 @@
+{
+  "name": "jquery-json",
+  "description": "jQuery plugin for serialising to and parsing from JSON.",
+  "version": "2.6.0",
+  "keywords": [
+    "jquery-plugin"
+  ],
+  "homepage": "https://github.com/Krinkle/jquery-json",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Krinkle/jquery-json.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Krinkle/jquery-json/issues"
+  },
+  "author": "Brantley Harris <deadwisdom@gmail.com> (https://github.com/DeadWisdom)",
+  "contributors": [
+    "Timo Tijhof <krinklemail@gmail.com> (https://github.com/Krinkle)"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "test": "grunt test",
+    "build": "npm install && grunt build"
+  },
+  "files": [
+    "src",
+    "dist",
+    "LICENSE.txt",
+    "README.md"
+  ],
+  "main": "./src/jquery.json.js",
+  "devDependencies": {
+    "grunt": "1.0.1",
+    "grunt-contrib-connect": "1.0.2",
+    "grunt-contrib-jshint": "1.0.0",
+    "grunt-contrib-qunit": "1.2.0",
+    "grunt-contrib-uglify": "2.0.0",
+    "grunt-jscs": "3.0.1",
+    "jquery": "1.11.2",
+    "qunitjs": "2.0.1"
+  }
+}
