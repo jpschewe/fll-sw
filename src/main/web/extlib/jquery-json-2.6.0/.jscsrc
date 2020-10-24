@@ -1,0 +1,16 @@
+{
+	"preset": "crockford",
+
+	"disallowKeywords": [ "with" ],
+	"disallowMultipleLineBreaks": true,
+	"disallowQuotedKeysInObjects": true,
+	"disallowSpaceAfterObjectKeys": true,
+	"disallowYodaConditions": true,
+	"requireBlocksOnNewline": 1,
+	"requireCamelCaseOrUpperCaseIdentifiers": true,
+	"requireVarDeclFirst": null,
+	"requireMultipleVarDecl": true,
+	"validateIndentation": "\t",
+	"validateLineBreaks": "LF",
+	"validateQuoteMarks": "'"
+}
