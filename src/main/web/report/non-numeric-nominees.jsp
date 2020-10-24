@@ -13,7 +13,7 @@
 <script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
 <script type='text/javascript'
     src='../extlib/jquery.json-2.5-pre.min.js'></script>
-<script type='text/javascript' src='../extlib/jstorage-0.4.11.min.js'></script>
+<script type='text/javascript' src='../extlib/jstorage-0.4.12/jstorage.min.js'></script>
 <script type='text/javascript' src='../js/fll-objects.js'></script>
 <script type='text/javascript' src='finalist/finalist.js'></script>
 <script type='text/javascript' src='finalist/non-numeric.js'></script>
