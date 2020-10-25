@@ -12,7 +12,7 @@
 <script type='text/javascript'
     src="<c:url value='/extlib/jquery-json/dist/jquery.json.min.js' />"></script>
 <script type='text/javascript'
-    src="<c:url value='/extlib/jstorage-0.4.12/jstorage.min.js' />"></script>
+    src="<c:url value='/extlib/jStorage/jstorage.min.js' />"></script>
 <script type='text/javascript' src='finalist.js'></script>
 <script type='text/javascript'>
   var _loadingTournament =
