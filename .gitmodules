@@ -4,3 +4,6 @@
 [submodule "src/main/web/extlib/jquery-validation"]
 	path = src/main/web/extlib/jquery-validation
 	url = https://github.com/jquery-validation/jquery-validation.git
+[submodule "src/main/web/extlib/jquery-json"]
+	path = src/main/web/extlib/jquery-json
+	url = https://github.com/Krinkle/jquery-json.git
