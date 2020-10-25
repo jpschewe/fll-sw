@@ -16,7 +16,7 @@
   src='extlib/jquery-1.11.1.min.js'></script>
 <script
   type='text/javascript'
-  src='extlib/jquery.mobile-1.4.5.min.js'></script>
+  src='extlib/jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js'></script>
  
 </head>
 <body>

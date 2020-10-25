@@ -128,7 +128,7 @@
         </li>
 
         <li>
-            <a href="http://www.jstorage.info/">jStorage</a> - <a
+            <a href="https://github.com/andris9/jStorage">jStorage</a> - <a
                 href="jstorage.license.txt">License</a>
         </li>
 
