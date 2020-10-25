@@ -25,7 +25,7 @@ TABLE.B {
 <script type='text/javascript'
     src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 <script type="text/javascript"
-    src="<c:url value='/extlib/jquery.scrollTo-2.1.2.min.js'/>"></script>
+    src="<c:url value='/extlib/jquery.scrollTo/jquery.scrollTo.min.js'/>"></script>
 
 
 
