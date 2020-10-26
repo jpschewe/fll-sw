@@ -9,10 +9,10 @@
     src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 
 <script type='text/javascript'
-    src="<c:url value='/extlib/jquery.json-2.5-pre.min.js'/>"></script>
+    src="<c:url value='/extlib/jquery-json/dist/jquery.json.min.js'/>"></script>
 
 <script type='text/javascript'
-    src="<c:url value='/extlib/jstorage-0.4.11.min.js'/>"></script>
+    src="<c:url value='/extlib/jStorage/jstorage.min.js'/>"></script>
 
 <script type='text/javascript' src="<c:url value='/js/fll-objects.js'/>"></script>
 <script type='text/javascript'

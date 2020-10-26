@@ -9,26 +9,24 @@
 function addRow() {
   var numRows = parseInt($('#numRows').val());
 
-  var newTournamentId = $('#newTournamentId').val();
-
   var trElement = $("<tr></tr>");
 
   var td1Element = $("<td></td>");
   var runNumberElement = $("<input type=\"text\" name=\"runNumber" + numRows
-      + "\" id=\"runNumber" + numRows + "\" size=\"8\" />");
+      + "\" id=\"runNumber" + numRows + "\" class=\"required digits\" size=\"8\" />");
   td1Element.append(runNumberElement);
   trElement.append(td1Element);
 
   var td2Element = $("<td></td>");
   var dateElement = $("<input type=\"text\" name=\"date" + numRows
-      + "\" size=\"8\" id=\"date" + numRows + "\" />");
+      + "\" size=\"8\" class=\"required\" id=\"date" + numRows + "\" />");
   dateElement.datepicker();
   td2Element.append(dateElement);
   trElement.append(td2Element);
 
   var td3Element = $("<td></td>");
   var timeElement = $("<input type=\"text\" name=\"time" + numRows
-      + "\" id=\"time" + numRows + "\" size=\"8\" />");
+      + "\" class=\"required\" id=\"time" + numRows + "\" size=\"8\" />");
   timeElement.timepicker();
   td3Element.append(timeElement);
   trElement.append(td3Element);
@@ -36,6 +34,7 @@ function addRow() {
   $('#delayedPerformanceTable tbody').append(trElement);
 
   $('#numRows').val(numRows + 1);
+  
 }
 
 function validateData() {
@@ -75,5 +74,7 @@ $(document).ready(function() {
   });
 
   setupDatepickers();
+  
+  $("#delayed_performance").validate();
 
 }); // end ready function

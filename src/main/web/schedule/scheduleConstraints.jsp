@@ -9,7 +9,7 @@
 <script type="text/javascript"
     src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 <script type="text/javascript"
-    src="<c:url value='/extlib/jquery.validate.min.js'/>"></script>
+    src="<c:url value='/extlib/jquery-validation/dist/jquery.validate.min.js'/>"></script>
 
 <script type="text/javascript">
   $(document).ready(function() {

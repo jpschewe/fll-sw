@@ -13,7 +13,7 @@ fll.web.admin.StoreDelayedPerformance.populateContext(application, pageContext);
     src="<c:url value='/extlib/timepicker/jquery.timepicker.js'/>"></script>
 
 <script type="text/javascript"
-    src="<c:url value='/extlib/jquery.validate.min.js'/>"></script>
+    src="<c:url value='/extlib/jquery-validation/dist/jquery.validate.min.js'/>"></script>
 
 <script type="text/javascript" src="delayed_performance.js"></script>
 
@@ -43,7 +43,7 @@ fll.web.admin.StoreDelayedPerformance.populateContext(application, pageContext);
     bracket display.</p>
 
 <form action="<c:url value='/admin/StoreDelayedPerformance' />"
-    method="POST" name="delayed_performance">
+    method="POST" name="delayed_performance" id="delayed_performance">
 
     <table border="1" id="delayedPerformanceTable">
         <tr>
