@@ -44,7 +44,6 @@ public class RestrictionEditor extends PolynomialEditor {
   }
 
   /**
-   * 
    * @param restriction the object to edit
    * @param goalScope where to get goals
    */
@@ -86,10 +85,14 @@ public class RestrictionEditor extends PolynomialEditor {
       }
     });
 
-    messageEditor = FormatterUtils.createDatabaseNameField();
+    messageEditor = FormatterUtils.createStringField();
     messageEditor.setValue(restriction.getMessage());
     messageEditor.setToolTipText("Message to display when the restriction is violated");
     this.add(messageEditor);
+
+    messageEditor.addPropertyChangeListener("value", e -> {
+      this.restriction.setMessage(messageEditor.getText());
+    });
   }
 
   /**
