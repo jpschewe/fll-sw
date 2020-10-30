@@ -1,3 +1,10 @@
+Release 15.1.0
+==============
+* #857 - Clear non-numeric nominees before load
+* #856 - Support non-numeric categories when displaying the challenge description
+* #860 - Upgrade javascript libraries
+* Fix storing of restriction message in the Challenge Editor
+
 Release 15.0.0
 ==============
 * #855 - Remove Subjective Java Application in favor of the web application
