@@ -224,7 +224,8 @@ Find more details at: ${JENKINS_URL}
 } // pipeline
 
 def callGradle(task) {
-  def args='--no-daemon -Dtest.ignoreFailures=true'
+  //def args='--no-daemon -Dtest.ignoreFailures=true'
+  def args='-Dtest.ignoreFailures=true'
 
   if (isUnix()) {
     sh script: "./gradlew ${args} ${task}"
