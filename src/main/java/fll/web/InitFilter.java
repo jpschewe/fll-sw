@@ -148,6 +148,8 @@ public class InitFilter implements Filter {
           + "/api/CheckAuth")) {
         // checking the authentication doesn't require security
         return false;
+      } else if (path.startsWith("/robots.txt")) {
+        return false;
       } else {
         LOGGER.debug("Returning true from needsSecurity");
         return true;
@@ -182,6 +184,9 @@ public class InitFilter implements Filter {
         return false;
       } else if (path.startsWith(contextPath
           + "/setup")) {
+        return false;
+      } else if (path.startsWith(contextPath
+          + "/robots.txt")) {
         return false;
       }
     }
