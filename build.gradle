@@ -27,18 +27,18 @@ plugins {
     id "org.unbroken-dome.test-sets" version "3.0.1"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
-    id "com.github.spotbugs" version "4.5.0"
+    id "com.github.spotbugs" version "4.5.1"
     id "org.myire.munge" version "1.0" // transformer for spotbugs XML
     id "de.aaschmid.cpd" version "3.1"
-    id "edu.sc.seis.launch4j" version "2.4.6"
+    id "edu.sc.seis.launch4j" version "2.4.8"
     id "net.saliman.cobertura" version "4.0.0"
-    id "com.gorylenko.gradle-git-properties" version "2.2.2"
-    id "com.github.ben-manes.versions" version "0.29.0" // adds dependencyUpdates task
+    id "com.gorylenko.gradle-git-properties" version "2.2.4"
+    id "com.github.ben-manes.versions" version "0.33.0" // adds dependencyUpdates task
     id "de.undercouch.download" version "4.1.1" // file download
     id "checkstyle"
         
     // Checker Framework pluggable type-checking
-    id "org.checkerframework" version "0.5.10"
+    id "org.checkerframework" version "0.5.11"
 }
 
 // needs to use old plugin mechanism otherwise I can't set nextVersion and snapshotSuffix
@@ -76,7 +76,7 @@ eclipse {
 }
 
 dependencies {
-  jspc("org.apache.ant:ant:1.10.8")
+  jspc("org.apache.ant:ant:1.10.9")
 }
 
 testSets {
@@ -103,13 +103,13 @@ repositories {
 }
 
 ext {
-    jackson_version = "2.11.1"
+    jackson_version = "2.11.3"
     slf4j_version = "1.7.30"
-    tomcat_version = "9.0.37"
+    tomcat_version = "9.0.39"
     poi_version = "4.1.2"
-    junit_version = "5.6.2"
+    junit_version = "5.7.0"
     log4j_version = "2.13.3"
-    spotbugs_version = "4.1.3"
+    spotbugs_version = "4.1.4"
 
     web_build_dir = new File(project.buildDir, "web")
     documentation_build_dir = new File(project.buildDir, "gen-documentation")    
@@ -177,7 +177,7 @@ dependencies {
 
   implementation(group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0")
             
-  implementation(group: "dnsjava", name: "dnsjava", version: "3.2.2")
+  implementation(group: "dnsjava", name: "dnsjava", version: "3.3.1")
     
   implementation(group: "commons-fileupload", name: "commons-fileupload", version: "1.4")
     
@@ -191,11 +191,11 @@ dependencies {
     
   implementation(group: "net.java.linoleum", name: "jlfgr", version: "1_0")
         
-  implementation(group: "com.opencsv", name: "opencsv", version: "5.2")
+  implementation(group: "com.opencsv", name: "opencsv", version: "5.3")
     
   implementation(group: "net.mtu.eggplant", name: "JonsInfra", version: "3.0.0"   )
     
-  implementation(group: "com.google.guava", name: "guava", version: "29.0-jre")
+  implementation(group: "com.google.guava", name: "guava", version: "30.0-jre")
     
   implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.5") {
     // only needed for BMP and TIFF formats
@@ -210,7 +210,7 @@ dependencies {
   
   implementation(group: "org.checkerframework", name: "checker-qual", version: "3.7.0")
     
-  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.20")
+  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.21")
   
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-api", version: project.junit_version)
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-params", version: project.junit_version)
@@ -222,13 +222,13 @@ dependencies {
   integrationTestImplementation(sourceSets.test.output)
         
   integrationTestImplementation(group: "org.easytesting", name: "fest-swing", version: "1.2.1")
-  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.42.0") {
+  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.44.0") {
       
     // xml APIs are part of the JDK
     exclude(group: "xml-apis", module: "xml-apis")
   }
   integrationTestImplementation(group: "org.seleniumhq.selenium", name: "selenium-server", version: "3.141.59")
-  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "4.1.0")
+  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "4.2.2")
   
   // make selenium log to log4j
   integrationTestImplementation(group: "org.apache.logging.log4j", name: "log4j-jul", version: project.log4j_version)
