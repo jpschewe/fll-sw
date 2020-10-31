@@ -9,11 +9,11 @@ import org.apache.tools.ant.filters.FixCrLfFilter;
 buildscript {
     repositories {
         jcenter()
+        gradlePluginPortal()
     }
     dependencies {
       classpath(group: "com.cinnober.gradle", name: "semver-git", version: "3.0.0")
         classpath("org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:3.0.1")
-        classpath("org.kordamp:markdown-gradle-plugin:1.2.0")
     }
     configurations.classpath {
       exclude(group: "com.google.guava", module: "guava")
@@ -26,7 +26,7 @@ plugins {
     id "com.dorongold.task-tree" version "1.5"
     id "org.unbroken-dome.test-sets" version "3.0.1"
     id "eclipse"
-    id "org.kordamp.markdown.convert" version "1.2.0"       
+    id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
     id "com.github.spotbugs" version "4.5.0"
     id "org.myire.munge" version "1.0" // transformer for spotbugs XML
     id "de.aaschmid.cpd" version "3.1"
