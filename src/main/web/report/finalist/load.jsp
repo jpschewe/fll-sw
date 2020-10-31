@@ -33,7 +33,8 @@
   var championship = $.finalist
         .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
     if (null == championship) {
-      championship = $.finalist.addCategory($.finalist.CHAMPIONSHIP_NAME, true, false);
+      championship = $.finalist.addCategory($.finalist.CHAMPIONSHIP_NAME, true,
+          false);
     }
     $.finalist.setCategoryScheduled(championship, true);
 <%FinalistLoad.outputCategoryScores(out, application);%>
@@ -90,10 +91,19 @@
     </p>
 
     <div id='choose_clear'>
-        You already have data loaded for this tournament. Would you like
-        to clear the existing data and load from scratch?
-        <button id='clear'>Yes, clear the data</button>
-        <button id='keep'>No, just refresh the data</button>
+        You already have finalist data for this tournament stored in
+        your browser. Would you like to clear the existing existing data
+        and load from the database?
+        <div>
+            <button id='clear'>Yes, load from the database</button>
+            This is the most common choice.
+        </div>
+
+        <div>
+            <button id='keep'>No, just refresh the data</button>
+            Choose this if you have made changes to finalists and have
+            not saved this information to the database.
+        </div>
     </div>
 
 
