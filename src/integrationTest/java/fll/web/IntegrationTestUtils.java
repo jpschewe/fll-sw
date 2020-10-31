@@ -906,12 +906,15 @@ public final class IntegrationTestUtils {
     public void beforeTestExecution(final ExtensionContext context) throws Exception {
       final TomcatLauncher launcher = new TomcatLauncher(Launcher.DEFAULT_WEB_PORT);
       try {
+        LOGGER.info("Starting tomcat");
         launcher.start();
       } catch (final LifecycleException e) {
+        LOGGER.error("Error starting tomcat", e);
         throw new RuntimeException(e);
       }
       getStore(context).put(TOMCAT_LAUNCHER_KEY, launcher);
 
+      LOGGER.info("Starting selenium");
       final WebDriver selenium = createWebDriver();
       getStore(context).put(WEBDRIVER_KEY, selenium);
 
@@ -924,15 +927,22 @@ public final class IntegrationTestUtils {
       final TomcatLauncher launcher = getStore(context).remove(TOMCAT_LAUNCHER_KEY, TomcatLauncher.class);
       try {
         if (null != launcher) {
+          LOGGER.info("Stopping tomcat");
           launcher.stop();
+        } else {
+          LOGGER.warn("Tomcat doesn't exist");
         }
       } catch (final LifecycleException e) {
+        LOGGER.error("Error shutting down tomcat", e);
         throw new RuntimeException(e);
       }
 
       final WebDriver selenium = getStore(context).remove(WEBDRIVER_KEY, WebDriver.class);
       if (null != selenium) {
+        LOGGER.info("Shutting down selenium");
         selenium.quit();
+      } else {
+        LOGGER.warn("Selenium doesn't exist");
       }
     }
 
