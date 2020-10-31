@@ -107,7 +107,7 @@ pipeline {
       steps {
         throttle(['fll-sw']) { 
           timestamps {
-            timeout(time: 3, unit: 'HOURS') {
+            timeout(time: 1, unit: 'HOURS') {
               callGradle('distZip')
               stash name: 'build_data', includes: 'build/**', excludes: "build/tmp/**"
             }
@@ -121,7 +121,7 @@ pipeline {
         throttle(['fll-sw']) { 
           timestamps {
             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
-              timeout(time: 3, unit: 'HOURS') {
+              timeout(time: 1, unit: 'HOURS') {
                 callGradle('windowsDistZip')                                        
               }
             }
@@ -138,7 +138,7 @@ pipeline {
           timestamps {
             unstash name: 'build_data'
             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
-              timeout(time: 3, unit: 'HOURS') {
+              timeout(time: 1, unit: 'HOURS') {
                 callGradle('linuxDistTar')
               }
             }
@@ -154,7 +154,7 @@ pipeline {
           timestamps {
             unstash name: 'build_data'
             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
-              timeout(time: 3, unit: 'HOURS') {
+              timeout(time: 1, unit: 'HOURS') {
                 callGradle('macDistTar')
               }
             }
