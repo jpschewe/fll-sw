@@ -596,9 +596,14 @@ public final class ScheduleWriter {
     division.appendChild(divisionValue);
     divisionValue.appendChild(document.createTextNode(si.getAwardGroup()));
 
+    container.appendChild(FOPUtils.createBlankLine(document));
+
+    // build all of the elements to display and then add them to the document in
+    // time order
+    final SortedMap<LocalTime, Element> scheduleElements = new TreeMap<>();
+
     for (final String subjectiveStation : schedule.getSubjectiveStations()) {
       final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-      container.appendChild(block);
 
       final Element header = FOPUtils.createXslFoElement(document, "inline");
       block.appendChild(header);
@@ -617,18 +622,18 @@ public final class ScheduleWriter {
       final LocalTime end = start.plus(params.getStationByName(subjectiveStation).getDuration());
       value.appendChild(document.createTextNode(String.format("%s - %s", TournamentSchedule.formatTime(start),
                                                               TournamentSchedule.formatTime(end))));
+
+      scheduleElements.put(start, block);
     }
 
     for (final PerformanceTime performance : si.getAllPerformances()) {
       final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-      container.appendChild(block);
 
       final String roundName = si.getRoundName(performance);
       final Element header = FOPUtils.createXslFoElement(document, "inline");
       block.appendChild(header);
       header.setAttribute("font-weight", "bold");
-      header.appendChild(document.createTextNode(roundName
-          + ": "));
+      header.appendChild(document.createTextNode(String.format("Performance %s: ", roundName)));
 
       final Element value = FOPUtils.createXslFoElement(document, "inline");
       block.appendChild(value);
@@ -637,7 +642,12 @@ public final class ScheduleWriter {
       value.appendChild(document.createTextNode(String.format("%s - %s %s %d", TournamentSchedule.formatTime(start),
                                                               TournamentSchedule.formatTime(end),
                                                               performance.getTable(), performance.getSide())));
+
+      scheduleElements.put(start, block);
     }
+
+    // add the elements in time order
+    scheduleElements.values().forEach(container::appendChild);
 
     container.appendChild(FOPUtils.createBlankLine(document));
 
