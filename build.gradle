@@ -12,7 +12,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-    // needs to use old plugin mechanism otherwise I can't set the extra properties   
+      // needs to use old plugin mechanism otherwise I can't set the extra properties   
       classpath(group: "com.cinnober.gradle", name: "semver-git", version: "3.0.0")
     }
     configurations.classpath {
@@ -41,7 +41,7 @@ plugins {
     id "org.checkerframework" version "0.5.10"
 }
 
-// needs to use old plugin mechanism otherwise I can't set the extra properties
+// needs to use old plugin mechanism otherwise I can't set nextVersion and snapshotSuffix
 ext.nextVersion = "patch"
 ext.snapshotSuffix = "beta.<count>+g<sha><dirty>"
 // optionally: ext.dirtyMarker = "-dirty" (default) replaces <dirty> in snapshotSuffix
