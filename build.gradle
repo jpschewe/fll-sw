@@ -31,7 +31,6 @@ plugins {
     id "org.myire.munge" version "1.0" // transformer for spotbugs XML
     id "de.aaschmid.cpd" version "3.1"
     id "edu.sc.seis.launch4j" version "2.4.8"
-    id "net.saliman.cobertura" version "4.0.0"
     id "com.gorylenko.gradle-git-properties" version "2.2.4"
     id "com.github.ben-manes.versions" version "0.33.0" // adds dependencyUpdates task
     id "de.undercouch.download" version "4.1.1" // file download
@@ -39,6 +38,9 @@ plugins {
         
     // Checker Framework pluggable type-checking
     id "org.checkerframework" version "0.5.11"
+    
+    // code coverage
+    id "jacoco"
 }
 
 // needs to use old plugin mechanism otherwise I can't set nextVersion and snapshotSuffix
@@ -299,11 +301,11 @@ def baseDistribution = copySpec {
     from("$buildDir/reports/spotbugs/") {
         into "web/documentation/reports/spotbugs"
     }
-    from("$buildDir/reports/cobertura/") {
-        into "web/documentation/reports/coverage"
-    }
     from("$buildDir/reports/checkstyle/") {
         into "web/documentation/reports/checkstyle"
+    }
+    from("$buildDir/reports/jacoco/test/html") {
+        into "web/documentation/reports/coverage"
     }
 }
 // make sure that the launch script has Unix line endings
@@ -553,11 +555,6 @@ tasks.register("writeLaunchJar", Jar) {
 }
 distributionDependencies.dependsOn(writeLaunchJar)
 
-cobertura {
-    coverageFormats = [ "html", "xml" ]
-}
-
-
 dependencyUpdates.resolutionStrategy {
     componentSelection { rules ->
         rules.all { ComponentSelection selection ->
@@ -771,5 +768,16 @@ if (checker_dir.exists()) {
         compileOnly files(file(checker_dir.toPath().resolve("checker/dist/checker-qual.jar")))
         testCompileOnly files(file(checker_dir.toPath().resolve("checker/dist/checker-qual.jar")))
         checkerFramework files(file(checker_dir.toPath().resolve("checker/dist/checker.jar")))
+    }
+}
+
+
+
+jacocoTestReport {
+    // make sure to get both test and integrationt test
+    executionData tasks.withType(Test)
+
+    reports {
+        xml.enabled true
     }
 }

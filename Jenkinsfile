@@ -87,9 +87,11 @@ pipeline {
       steps {
         timeout(time: 3, unit: 'HOURS') {      
           // runs all of the test tasks
-          callGradle('cobertura')
+          callGradle('test')
+          callGradle('integrationTest')
+          callGradle('jacocoTestReport')
           junit testResults: "build/test-results/*est/TEST-*.xml", keepLongStdio: true
-          step $class: 'CoberturaPublisher', coberturaReportFile: 'build/reports/cobertura/coverage.xml'
+          jacoco classPattern: 'build/classes/*/*', execPattern: 'build/jacoco/*.exec', sourcePattern: 'src/main/java,src/test/java,src/integrationTest/java'
         }                
       }
     }
