@@ -15,6 +15,8 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
+import org.checkerframework.checker.lock.qual.GuardedBy;
+
 /**
  * Notify the select team page when it should reload because there are more
  * unverified runs.
@@ -24,6 +26,7 @@ public class UnverifiedRunsWebSocket {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  @GuardedBy("SESSIONS_LOCK")
   private static final Set<Session> ALL_SESSIONS = new HashSet<>();
 
   private static final Object SESSIONS_LOCK = new Object();
