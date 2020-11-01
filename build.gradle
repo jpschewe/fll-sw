@@ -774,6 +774,9 @@ if (checker_dir.exists()) {
 
 
 jacocoTestReport {
+    // make sure to get both test and integrationt test
+    executionData tasks.withType(Test)
+
     reports {
         xml.enabled true
     }
