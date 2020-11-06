@@ -27,7 +27,8 @@ import fll.xml.NonNumericCategory;
                                                 final int index,
                                                 final boolean isSelected,
                                                 final boolean cellHasFocus) {
-    return delegate.getListCellRendererComponent(list, value.getTitle(), index, isSelected, cellHasFocus);
+    return delegate.getListCellRendererComponent(list, null == value ? "" : value.getTitle(), index, isSelected,
+                                                 cellHasFocus);
   }
 
 }

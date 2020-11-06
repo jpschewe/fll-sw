@@ -152,7 +152,6 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
   }
 
   /**
-   * 
    * @param oldTitle the old title
    * @param newTitle the new title
    */
@@ -186,6 +185,11 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
 
   private void addNewNominates() {
     final Collection<NonNumericCategory> categories = description.getNonNumericCategories();
+    if (categories.isEmpty()) {
+      JOptionPane.showMessageDialog(this, "You need to define some non-numeric categories first", "Error",
+                                    JOptionPane.ERROR_MESSAGE);
+      return;
+    }
     final ChooseOptionDialog<NonNumericCategory> dialog = new ChooseOptionDialog<>(JOptionPane.getRootFrame(),
                                                                                    new LinkedList<>(categories),
                                                                                    new NonNumericCategoryCellRenderer());
