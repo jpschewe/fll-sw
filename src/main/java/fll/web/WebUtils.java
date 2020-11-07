@@ -37,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fll.db.Queries;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Some utilities for dealing with the web.
@@ -268,6 +267,14 @@ public final class WebUtils {
   }
 
   /**
+   * Check for headers that indicate that this request has been proxied and
+   * therefore should not be considered local.
+   */
+  private static boolean isProxied(final HttpServletRequest request) {
+    return null != request.getHeader("X-Forwarded-For");
+  }
+
+  /**
    * Check if the web request is authenticated.
    * If the connection is from localhost it's
    * allowed.
@@ -289,25 +296,26 @@ public final class WebUtils {
       requestAddressStr = requestAddressStr.substring(0, zoneIndex);
     }
 
-    try {
-      final InetAddress requestAddress = InetAddress.getByName(requestAddressStr);
-      if (requestAddress.isLoopbackAddress()) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Returning true from checkAuthenticated for connection from local ip: "
-              + requestAddressStr);
+    if (!isProxied(request)) {
+      // proxied connections cannot be considered localhost
+      try {
+        final InetAddress requestAddress = InetAddress.getByName(requestAddressStr);
+        if (requestAddress.isLoopbackAddress()) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Returning true from checkAuthenticated for connection from local ip: "
+                + requestAddressStr);
+          }
+          return true;
         }
-        return true;
-      }
-    } catch (final UnknownHostException e) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Error converting request address string to address: "
-            + requestAddressStr, e);
+      } catch (final UnknownHostException e) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Error converting request address string to address: "
+              + requestAddressStr, e);
+        }
       }
     }
 
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       if (Queries.isAuthenticationEmpty(connection)) {
         LOGGER.debug("Returning true from checkAuthenticated for empty auth");
@@ -328,8 +336,6 @@ public final class WebUtils {
       }
     } catch (final SQLException e) {
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
