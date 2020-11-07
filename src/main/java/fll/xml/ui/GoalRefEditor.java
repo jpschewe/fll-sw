@@ -71,6 +71,7 @@ import fll.xml.GoalScoreType;
       final GoalScoreType selected = scoreType.getItemAt(scoreType.getSelectedIndex());
       goalRef.setScoreType(selected);
     });
+    scoreType.setSelectedItem(goalRef.getScoreType());
   }
 
   private final NameChangeListener nameListener = new NameChangeListener();
