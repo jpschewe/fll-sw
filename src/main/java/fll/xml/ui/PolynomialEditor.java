@@ -86,9 +86,14 @@ import fll.xml.VariableScope;
 
     // floating point type
     floatingPointType = new JComboBox<>(FloatingPointType.values());
-    floatingPointType.setSelectedItem(FloatingPointType.TRUNCATE);
     this.add(floatingPointType);
     floatingPointType.setToolTipText("How to handle floating point values");
+    floatingPointType.setSelectedItem(poly.getFloatingPoint());
+    floatingPointType.addActionListener(e -> {
+      final FloatingPointType v = floatingPointType.getItemAt(floatingPointType.getSelectedIndex());
+      poly.setFloatingPoint(v);
+    });
+
   }
 
   private void addNewTerm() {
