@@ -131,7 +131,8 @@ public class RestrictionEditor extends PolynomialEditor {
     if (!Double.isFinite(restriction.getUpperBound())) {
       messages.add("Upper bound must be a finite number");
     }
-    if(restriction.getMessage().isBlank()) {
+    if (null == restriction.getMessage()
+        || restriction.getMessage().isBlank()) {
       messages.add("Message must have some text");
     }
 
