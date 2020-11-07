@@ -1,3 +1,5 @@
+* Various fixes to the challenge description editor
+
 Release 15.1.0
 ==============
 * #857 - Clear non-numeric nominees before load
