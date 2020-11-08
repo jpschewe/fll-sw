@@ -1,3 +1,4 @@
+* #871 - Fix bug where judges were not saved from the subjective application
 * Various fixes to the challenge description editor
 
 Release 15.1.0

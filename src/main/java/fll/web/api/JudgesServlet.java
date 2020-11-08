@@ -101,6 +101,7 @@ public class JudgesServlet extends HttpServlet {
       final Collection<JudgeInformation> judges = jsonMapper.readValue(reader, JudgesTypeInformation.INSTANCE);
 
       final Collection<JudgeInformation> currentJudges = JudgeInformation.getJudges(connection, currentTournament);
+      LOGGER.trace("Current judges: {}", currentJudges);
 
       try (
           PreparedStatement insertJudge = connection.prepareStatement("INSERT INTO Judges (id, category, Tournament, station) VALUES (?, ?, ?, ?)")) {
@@ -112,16 +113,19 @@ public class JudgesServlet extends HttpServlet {
             for (final JudgeInformation cjudge : currentJudges) {
               if (Objects.equals(cjudge, judge)) {
                 found = cjudge;
-              }
-
-              if (null == found) {
-                insertJudge.setString(1, judge.getId());
-                insertJudge.setString(2, judge.getCategory());
-                insertJudge.setString(4, judge.getGroup());
-                insertJudge.executeUpdate();
-                ++numNewJudges;
+                break;
               }
             }
+
+            if (null == found) {
+              LOGGER.trace("Adding judge: {}", judge.getId());
+
+              insertJudge.setString(1, judge.getId());
+              insertJudge.setString(2, judge.getCategory());
+              insertJudge.setString(4, judge.getGroup());
+              insertJudge.executeUpdate();
+              ++numNewJudges;
+            } // add judge
           } // non-null judge
         } // foreach judge sent
 
