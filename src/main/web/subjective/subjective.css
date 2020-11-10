@@ -80,3 +80,11 @@ span.sliderTickMark {
     width: 15px;
     border: solid 2px black;
 }
+
+.split_30_70 .ui-block-a {
+    width: 30%;
+}
+
+.split_30_70 .ui-block-b {
+    width: 70%;
+}

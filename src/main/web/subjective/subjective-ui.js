@@ -832,14 +832,19 @@ $(document)
           // add the non-numeric categories that teams can be nominated for
           $("#enter-score_nominates").empty();
           $("#enter-score_nominates").hide();
-          var hideNominates = true;
           $.each($.subjective.getCurrentCategory().nominates, function(index,
               nominate) {
             $("#enter-score_nominates").show();
 
+            var grid = $("<div class=\"ui-grid-a split_30_70\"></div>");
+            $("#enter-score_nominates").append(grid);
+
+            var blockA = $("<div class=\"ui-block-a\">");
+            grid.append(blockA);
+            
             var label = $("<label>" + nominate.nonNumericCategoryTitle
                 + "</label>");
-            $("#enter-score_nominates").append(label);
+            blockA.append(label);
             var checkbox = $("<input type='checkbox' id='enter-score_nominate_"
                 + index + "' />");
             if (null != score
@@ -848,6 +853,12 @@ $(document)
               checkbox.prop("checked", true);
             }
             label.append(checkbox);
+
+            var blockB = $("<div class=\"ui-block-b\">");
+            grid.append(blockB);
+            //FIXME need to lookup category
+            blockB.text("Some text");
+            
           });
 
           // read the intial value
