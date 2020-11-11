@@ -18,7 +18,8 @@
 
     // //////////////////////// PRIVATE INTERFACE ////////////////////////
 
-    var _subjectiveCategories;
+    var _subjectiveCategories; // category.name -> category
+    var _nonNumericCategories; // category.title -> category
     var _tournament;
     var _teams;
     var _schedule;
@@ -34,6 +35,7 @@
 
     function _init_variables() {
         _subjectiveCategories = {};
+        _nonNumericCategories = {};
         _tournament = null;
         _teams = {};
         _schedule = null;
@@ -54,6 +56,11 @@
         var value = $.jStorage.get(STORAGE_PREFIX + "_subjectiveCategories");
         if (null != value) {
             _subjectiveCategories = value;
+        }
+
+        var value = $.jStorage.get(STORAGE_PREFIX + "_nonNumericCategories");
+        if (null != value) {
+            _nonNumericCategories = value;
         }
 
         value = $.jStorage.get(STORAGE_PREFIX + "_tournament");
@@ -120,6 +127,8 @@
     function _save() {
         $.jStorage.set(STORAGE_PREFIX + "_subjectiveCategories",
             _subjectiveCategories);
+        $.jStorage.set(STORAGE_PREFIX + "_subjectiveCategories",
+            _nonNumericCategories);
         $.jStorage.set(STORAGE_PREFIX + "_tournament", _tournament);
         $.jStorage.set(STORAGE_PREFIX + "_teams", _teams);
         $.jStorage.set(STORAGE_PREFIX + "_schedule", _schedule);
@@ -216,6 +225,18 @@
             });
     }
 
+    function loadNonNumericCategories() {
+        _nonNumericCategories = {};
+
+        return $.getJSON("/api/ChallengeDescription/NonNumericCategories", function(
+            categories) {
+            $.each(categories, function(i, category) {
+                _nonNumericCategories[category.title] = category;
+            });
+        });
+    }
+
+
     function _loadCategoryColumnMapping() {
         _categoryColumnMapping = {};
         return $.getJSON("../api/CategoryScheduleMapping", function(data) {
@@ -268,6 +289,12 @@
             });
             waitList.push(subjectiveCategoriesPromise);
 
+            var nonNumericCategoriesPromise = loadNonNumericCategories();
+            nonNumericCategoriesPromise.fail(function() {
+                failCallback("NonNumeric Categories");
+            });
+            waitList.push(nonNumericCategoriesPromise);
+
             var tournamentPromise = _loadTournament();
             tournamentPromise.fail(function() {
                 failCallback("Tournament");
@@ -319,6 +346,14 @@
                 retval.push(val);
             });
             return retval;
+        },
+
+        /**
+         * @param title the title of the category to find
+         * @return category with the specified title
+         */
+        getNonNumericCategory: function(title) {
+            return _nonNumericCategories[title];
         },
 
         /**

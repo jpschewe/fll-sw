@@ -856,9 +856,11 @@ $(document)
 
                 var blockB = $("<div class=\"ui-block-b\">");
                 grid.append(blockB);
-                //FIXME need to lookup category
-                blockB.text("Some text");
 
+                var nonNumericCategory = $.subjective.getNonNumericCategory(nominate.nonNumericCategoryTitle);
+                if (nonNumericCategory) {
+                    blockB.text(nonNumericCategory.description);
+                }
             });
 
             // read the intial value
