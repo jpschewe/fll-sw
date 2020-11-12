@@ -137,6 +137,8 @@ public final class ImportDB {
         }
       }
 
+      importAuthentication(sourceConnection, destConnection);
+
       // for each tournament listed in the dump file, import it
       for (final Tournament sourceTournament : Tournament.getTournaments(sourceConnection)) {
         final String tournament = sourceTournament.getName();
@@ -153,6 +155,22 @@ public final class ImportDB {
       memStmt.executeUpdate("SHUTDOWN");
 
       return importResult;
+    }
+  }
+
+  private static void importAuthentication(final Connection sourceConnection,
+                                           final Connection destConnection)
+      throws SQLException {
+    try (Statement source = sourceConnection.createStatement();
+        ResultSet sourceData = source.executeQuery("SELECT fll_user, fll_pass FROM fll_authentication");
+        PreparedStatement dest = destConnection.prepareStatement("INSERT INTO fll_authentication (fll_user, fll_pass) VALUES(?, ?)")) {
+      while (sourceData.next()) {
+        final String user = sourceData.getString("fll_user");
+        final String pass = sourceData.getString("fll_pass");
+        dest.setString(1, user);
+        dest.setString(2, pass);
+        dest.executeUpdate();
+      }
     }
   }
 
