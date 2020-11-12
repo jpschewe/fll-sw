@@ -8,8 +8,10 @@ package fll.web;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
@@ -17,8 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
+import com.diffplug.common.base.Errors;
+
 import fll.db.Queries;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Some cookie utilities for FLL.
@@ -55,14 +58,10 @@ public final class CookieUtils {
           + domain);
     }
 
-    final Collection<Cookie> loginCookies = CookieUtils.findLoginCookie(request);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
-
-      for (final Cookie loginCookie : loginCookies) {
+      CookieUtils.findLoginCookies(request).forEach(Errors.rethrow().wrap(loginCookie -> {
         final Cookie delCookie = new Cookie(loginCookie.getName(), "");
         delCookie.setMaxAge(0);
         delCookie.setDomain(domain);
@@ -74,12 +73,10 @@ public final class CookieUtils {
           LOGGER.debug("Removed cookie from DB: "
               + loginCookie.getValue());
         }
-      }
+      }));
 
     } catch (final SQLException e) {
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }
@@ -105,26 +102,15 @@ public final class CookieUtils {
    * Find all login cookies.
    *
    * @param request where to find the cookies
-   * @return the cookie or null if not found
+   * @return the login cookies
    */
-  public static Collection<Cookie> findLoginCookie(final HttpServletRequest request) {
-    final Collection<Cookie> found = new LinkedList<>();
-
+  private static Stream<Cookie> findLoginCookies(final HttpServletRequest request) {
     final Cookie[] cookies = request.getCookies();
     if (null == cookies) {
-      return found;
+      return Stream.of();
+    } else {
+      return Arrays.stream(cookies).filter(c -> LOGIN_KEY.equals(c.getName()));
     }
-
-    for (final Cookie cookie : cookies) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Checking cookie: "
-            + cookie.getName());
-      }
-      if (LOGIN_KEY.equals(cookie.getName())) {
-        found.add(cookie);
-      }
-    }
-    return found;
   }
 
   /**
@@ -134,12 +120,6 @@ public final class CookieUtils {
    * @return the string stored in the cookie or null if not found
    */
   public static Collection<String> findLoginKey(final HttpServletRequest request) {
-    final Collection<String> retval = new LinkedList<>();
-    for (final Cookie cookie : findLoginCookie(request)) {
-      if (null != cookie) {
-        retval.add(cookie.getValue());
-      }
-    }
-    return retval;
+    return findLoginCookies(request).map(Cookie::getValue).collect(Collectors.toUnmodifiableList());
   }
 }
