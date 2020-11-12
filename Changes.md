@@ -1,3 +1,4 @@
+* #872 - Display non-numeric award description in subjective app
 * #871 - Fix bug where judges were not saved from the subjective application
 * Various fixes to the challenge description editor
 
