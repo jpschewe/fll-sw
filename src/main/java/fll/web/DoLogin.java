@@ -21,7 +21,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import fll.db.Queries;
+import fll.db.Authentication;
 
 /**
  * Handle login credentials and if incorrect redirect back to login page.
@@ -63,7 +63,7 @@ public class DoLogin extends BaseFLLServlet {
     try (Connection connection = datasource.getConnection()) {
 
       // check for authentication table
-      if (Queries.isAuthenticationEmpty(connection)) {
+      if (Authentication.isAuthenticationEmpty(connection)) {
         LOGGER.warn("No authentication information in the database");
         SessionAttributes.appendToMessage(session,
                                           "<p class='error'>No authentication information in the database - see administrator</p>");
@@ -87,7 +87,7 @@ public class DoLogin extends BaseFLLServlet {
 
       // compare login information
       LOGGER.trace("Checking user: {} hashedPass: {}", user, hashedPass);
-      final Map<String, String> authInfo = Queries.getAuthInfo(connection);
+      final Map<String, String> authInfo = Authentication.getAuthInfo(connection);
       for (final Map.Entry<String, String> entry : authInfo.entrySet()) {
         if (user.equals(entry.getKey())
             && hashedPass.equals(entry.getValue())) {
@@ -95,7 +95,7 @@ public class DoLogin extends BaseFLLServlet {
           CookieUtils.clearLoginCookies(application, request, response);
 
           final String magicKey = String.valueOf(System.currentTimeMillis());
-          Queries.addValidLogin(connection, user, magicKey);
+          Authentication.addValidLogin(connection, user, magicKey);
           CookieUtils.setLoginCookie(response, magicKey);
 
           String redirect = SessionAttributes.getRedirectURL(session);

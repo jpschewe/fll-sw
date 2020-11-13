@@ -33,7 +33,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 25;
+  public static final int DATABASE_VERSION = 26;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -107,6 +107,7 @@ public final class GenerateDB {
       // authentication tables
       createAuthentication(connection);
       createValidLogin(connection);
+      createAuthenticationRoles(connection, true);
 
       // Table structure for table 'Tournaments'
       tournaments(connection);
@@ -455,6 +456,33 @@ public final class GenerateDB {
           + " ,fll_pass char(32)"//
           + " ,CONSTRAINT fll_authentication_pk PRIMARY KEY (fll_user)" //
           + ")");
+    }
+  }
+
+  /**
+   * Create the 'auth_roles" table. Drops the table if it exists.
+   * 
+   * @param connection database connection
+   * @param createConstraints if true create the constraints
+   * @throws SQLException on a database error
+   */
+  public static void createAuthenticationRoles(final Connection connection,
+                                               final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("DROP TABLE IF EXISTS auth_roles CASCADE");
+
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE auth_roles (");
+      sql.append("  fll_user VARCHAR(64) NOT NULL");
+      sql.append(" ,fll_role VARCHAR(64) NOT NULL");
+      if (createConstraints) {
+        sql.append(" ,CONSTRAINT auth_roles_pk PRIMARY KEY (fll_user, fll_role)");
+        sql.append(" ,CONSTRAINT auth_roles_fk1 FOREIGN KEY(fll_user) REFERENCES fll_authentication(fll_user)");
+      }
+      sql.append(")");
+      stmt.executeUpdate(sql.toString());
+
     }
   }
 

@@ -20,7 +20,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import fll.db.Queries;
+import fll.db.Authentication;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.CookieUtils;
@@ -45,10 +45,10 @@ public class RemoveUser extends BaseFLLServlet {
     try (Connection connection = datasource.getConnection()) {
 
       final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
-      final String user = Queries.checkValidLogin(connection, loginKeys);
+      final String user = Authentication.checkValidLogin(connection, loginKeys);
       pageContext.setAttribute("fll_user", user);
 
-      final Collection<String> users = Queries.getUsers(connection);
+      final Collection<String> users = Authentication.getUsers(connection);
       pageContext.setAttribute("all_users", users);
 
     } catch (final SQLException e) {
@@ -69,7 +69,7 @@ public class RemoveUser extends BaseFLLServlet {
       final String userToRemove = request.getParameter("remove_user");
       if (null != userToRemove
           && !userToRemove.isEmpty()) {
-        Queries.removeUser(connection, userToRemove);
+        Authentication.removeUser(connection, userToRemove);
 
         SessionAttributes.appendToMessage(session, "<p id='success'>Removed user '"
             + userToRemove);

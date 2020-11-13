@@ -36,7 +36,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fll.db.Queries;
+import fll.db.Authentication;
 
 /**
  * Some utilities for dealing with the web.
@@ -317,13 +317,13 @@ public final class WebUtils {
 
     try (Connection connection = datasource.getConnection()) {
 
-      if (Queries.isAuthenticationEmpty(connection)) {
+      if (Authentication.isAuthenticationEmpty(connection)) {
         LOGGER.debug("Returning true from checkAuthenticated for empty auth");
         return true;
       }
 
       final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
-      final String user = Queries.checkValidLogin(connection, loginKeys);
+      final String user = Authentication.checkValidLogin(connection, loginKeys);
       if (null != user) {
         LOGGER.debug("Returning true from checkSecurity for valid login: "
             + loginKeys

@@ -23,7 +23,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import fll.db.Queries;
+import fll.db.Authentication;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.CookieUtils;
@@ -48,7 +48,7 @@ public class ChangePassword extends BaseFLLServlet {
     try (Connection connection = datasource.getConnection()) {
 
       final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
-      final String user = Queries.checkValidLogin(connection, loginKeys);
+      final String user = Authentication.checkValidLogin(connection, loginKeys);
       pageContext.setAttribute("fll_user", user);
 
     } catch (final SQLException e) {
@@ -67,9 +67,9 @@ public class ChangePassword extends BaseFLLServlet {
     try (Connection connection = datasource.getConnection()) {
 
       final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
-      final String user = Queries.checkValidLogin(connection, loginKeys);
+      final String user = Authentication.checkValidLogin(connection, loginKeys);
 
-      final String passwordHash = Queries.getHashedPassword(connection, user);
+      final String passwordHash = Authentication.getHashedPassword(connection, user);
       final String oldPassword = request.getParameter("old_password");
       final String hashedOldPass = DigestUtils.md5Hex(oldPassword);
       if (!Objects.equals(passwordHash, hashedOldPass)) {
@@ -89,8 +89,8 @@ public class ChangePassword extends BaseFLLServlet {
       final String newPasswordHash = DigestUtils.md5Hex(newPassword);
 
       // invalidate all login keys now that the password has changed
-      Queries.changePassword(connection, user, newPasswordHash);
-      Queries.removeValidLoginByUser(connection, user);
+      Authentication.changePassword(connection, user, newPasswordHash);
+      Authentication.removeValidLoginByUser(connection, user);
 
       SessionAttributes.appendToMessage(session, "<p id='success'>Password changed for '"
           + user

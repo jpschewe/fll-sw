@@ -21,7 +21,7 @@ import javax.sql.DataSource;
 
 import com.diffplug.common.base.Errors;
 
-import fll.db.Queries;
+import fll.db.Authentication;
 
 /**
  * Some cookie utilities for FLL.
@@ -67,7 +67,7 @@ public final class CookieUtils {
         delCookie.setDomain(domain);
         response.addCookie(delCookie);
 
-        Queries.removeValidLoginByKey(connection, loginCookie.getValue());
+        Authentication.removeValidLoginByKey(connection, loginCookie.getValue());
 
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Removed cookie from DB: "

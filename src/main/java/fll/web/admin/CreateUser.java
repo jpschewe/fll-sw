@@ -23,7 +23,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import fll.db.Queries;
+import fll.db.Authentication;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.CookieUtils;
@@ -102,7 +102,7 @@ public class CreateUser extends BaseFLLServlet {
 
       // do a login if not already logged in
       final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
-      final String authenticatedUser = Queries.checkValidLogin(connection, loginKeys);
+      final String authenticatedUser = Authentication.checkValidLogin(connection, loginKeys);
       if (null == authenticatedUser) {
         LOGGER.debug("Doing login");
         request.getRequestDispatcher("/DoLogin").forward(request, response);

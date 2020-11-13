@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -54,12 +55,14 @@ import fll.Utilities;
 import fll.db.TeamPropertyDifference.TeamProperty;
 import fll.util.FLLRuntimeException;
 import fll.web.GatherBugReport;
+import fll.web.UserRole;
 import fll.web.developer.importdb.ImportDBDump;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Import scores from a tournament database
@@ -169,6 +172,18 @@ public final class ImportDB {
         final String pass = sourceData.getString("fll_pass");
         dest.setString(1, user);
         dest.setString(2, pass);
+        dest.executeUpdate();
+      }
+    }
+
+    try (Statement source = sourceConnection.createStatement();
+        ResultSet sourceData = source.executeQuery("SELECT fll_user, fll_role FROM auth_roles");
+        PreparedStatement dest = destConnection.prepareStatement("INSERT INTO auth_roles (fll_user, fll_role) VALUES(?, ?)")) {
+      while (sourceData.next()) {
+        final String user = sourceData.getString("fll_user");
+        final String role = sourceData.getString("fll_role");
+        dest.setString(1, user);
+        dest.setString(2, role);
         dest.executeUpdate();
       }
     }
@@ -554,6 +569,11 @@ public final class ImportDB {
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 26) {
+      upgrade25To26(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
           + dbVersion);
@@ -838,6 +858,29 @@ public final class ImportDB {
     GenerateDB.createDelayedPerformanceTable(connection, false);
 
     setDBVersion(connection, 25);
+  }
+
+  private static void upgrade25To26(final Connection connection) throws SQLException {
+    LOGGER.trace("Upgrading database from 25 to 26");
+
+    final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
+    if (!tables.contains("fll_authentication")) {
+      GenerateDB.createAuthentication(connection);
+    }
+
+    if (!tables.contains("valid_login")) {
+      GenerateDB.createValidLogin(connection);
+    }
+
+    GenerateDB.createAuthenticationRoles(connection, false);
+
+    // all existing users have admin privileges
+    for (final String user : Authentication.getUsers(connection)) {
+      LOGGER.debug("Adding admin role to {}", user);
+      Authentication.setRoles(connection, user, Collections.singleton(UserRole.ADMIN));
+    }
+
+    setDBVersion(connection, 26);
   }
 
   /**
