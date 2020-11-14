@@ -20,7 +20,7 @@ fll.web.admin.CreateUser.populateContext(request, pageContext);
   $(document).ready(function() {
 
     jQuery.validator.addMethod("alphanumeric", function(value, element) {
-      return this.optional(element) || /^[\w]+$/i.test(value);
+      return this.optional(element) || /^\w+$/i.test(value);
     }, "Letters, numbers, and underscores only please");
 
     $("#create_user").validate({
