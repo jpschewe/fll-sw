@@ -1,0 +1,2432 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+
+  
+  
+    <title>Score Entry</title>
+  
+
+
+<link rel="stylesheet" type="text/css" href="Score%20Entry_files/fll-sw.css">
+
+<link rel="stylesheet" type="text/css" href="Score%20Entry_files/scoreEntry.css">
+
+<!-- a couple of things come from the JSP, so need to be inline -->
+<style type="text/css">
+table#top_info {
+    background-color: #e0e0e0;
+
+}
+body {
+    background-color: transparent;
+}
+</style>
+
+<script type="text/javascript" src="Score%20Entry_files/jquery-1.js"></script>
+
+<link rel="stylesheet" type="text/css" href="Score%20Entry_files/jquery-ui.css">
+
+<script type="text/javascript" src="Score%20Entry_files/jquery-ui.js"></script>
+
+<script type="text/javascript" src="Score%20Entry_files/scoreEntry.js"></script>
+
+<script type="text/javascript">
+var EditFlag = false;
+
+
+    
+
+function init() {
+  // disable text selection
+  document.onselectstart=new Function ("return false")
+
+    m00_small_inspection_area_raw = 0.0;
+  m07_robot_dance_raw = 0.0;
+  m06_pull_up_bar_pass_under_raw = 0.0;
+  m06_pull_up_holds_robot_end_raw = 0.0;
+  m01_innovation_project_raw = 0.0;
+  m14_health_units_touching_logo_gray_raw = 0.0;
+  m14_health_units_looped_over_pullup_bar_raw = 0.0;
+  m04_bench_flat_raw = 0.0;
+  m04_bench_cubes_hopscotch_raw = 0.0;
+  m04_bench_backrest_removed_raw = 0.0;
+  m05_basketball_cube_crate_raw = 0.0;
+  m05_basketball_height_raw = "no";
+  m03_slide_figures_off_raw = "No";
+  m03_slide_figure_home_raw = 0.0;
+  m03_slide_figure_heavy_tire_raw = 0.0;
+  m02_step_counter_raw = "None";
+  m09_tire_light_blue_white_center_up_raw = 0.0;
+  m09_tire_flip_black_tire_white_center_up_raw = 0.0;
+  m09_tire_flip_white_center_in_large_target_raw = 0.0;
+  m11_treadmill_raw = "no";
+  goal_22_raw = "no";
+  m13_weight_machinge_raw = "no";
+  m10_cell_phone_raw = 0.0;
+  m08_boccia_color_match_raw = 0.0;
+  m08_cubes_in_frame_target_raw = 0.0;
+  m08_boccia_yellow_cube_raw = 0.0;
+  m15_precision_tokens_raw = "zero";
+  Verified = 0;
+
+
+  refresh();
+  
+  /* Saves total score for smarter notification popups */
+  savedTotalScore = document.scoreEntry.totalScore.value;
+}
+
+function refresh() { 
+  var score = 0;
+
+  // m00_small_inspection_area
+if(m00_small_inspection_area_raw == 0) {
+  document.scoreEntry.m00_small_inspection_area[0].checked = true
+  document.scoreEntry.m00_small_inspection_area_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m00_small_inspection_area[1].checked = true
+  document.scoreEntry.m00_small_inspection_area_radioValue.value = 'YES'
+}
+m00_small_inspection_area_computed = m00_small_inspection_area_raw * 25.0;
+score += m00_small_inspection_area_computed;
+document.scoreEntry.score_m00_small_inspection_area.value = m00_small_inspection_area_computed;
+
+// m07_robot_dance
+if(m07_robot_dance_raw == 0) {
+  document.scoreEntry.m07_robot_dance[0].checked = true
+  document.scoreEntry.m07_robot_dance_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m07_robot_dance[1].checked = true
+  document.scoreEntry.m07_robot_dance_radioValue.value = 'YES'
+}
+m07_robot_dance_computed = m07_robot_dance_raw * 20.0;
+score += m07_robot_dance_computed;
+document.scoreEntry.score_m07_robot_dance.value = m07_robot_dance_computed;
+
+// m06_pull_up_bar_pass_under
+if(m06_pull_up_bar_pass_under_raw == 0) {
+  document.scoreEntry.m06_pull_up_bar_pass_under[0].checked = true
+  document.scoreEntry.m06_pull_up_bar_pass_under_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m06_pull_up_bar_pass_under[1].checked = true
+  document.scoreEntry.m06_pull_up_bar_pass_under_radioValue.value = 'YES'
+}
+m06_pull_up_bar_pass_under_computed = m06_pull_up_bar_pass_under_raw * 15.0;
+score += m06_pull_up_bar_pass_under_computed;
+document.scoreEntry.score_m06_pull_up_bar_pass_under.value = m06_pull_up_bar_pass_under_computed;
+
+// m06_pull_up_holds_robot_end
+if(m06_pull_up_holds_robot_end_raw == 0) {
+  document.scoreEntry.m06_pull_up_holds_robot_end[0].checked = true
+  document.scoreEntry.m06_pull_up_holds_robot_end_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m06_pull_up_holds_robot_end[1].checked = true
+  document.scoreEntry.m06_pull_up_holds_robot_end_radioValue.value = 'YES'
+}
+m06_pull_up_holds_robot_end_computed = m06_pull_up_holds_robot_end_raw * 30.0;
+score += m06_pull_up_holds_robot_end_computed;
+document.scoreEntry.score_m06_pull_up_holds_robot_end.value = m06_pull_up_holds_robot_end_computed;
+
+// m01_innovation_project
+if(m01_innovation_project_raw == 0) {
+  document.scoreEntry.m01_innovation_project[0].checked = true
+  document.scoreEntry.m01_innovation_project_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m01_innovation_project[1].checked = true
+  document.scoreEntry.m01_innovation_project_radioValue.value = 'YES'
+}
+m01_innovation_project_computed = m01_innovation_project_raw * 20.0;
+score += m01_innovation_project_computed;
+document.scoreEntry.score_m01_innovation_project.value = m01_innovation_project_computed;
+
+// m14_health_units_touching_logo_gray
+document.scoreEntry.m14_health_units_touching_logo_gray.value = m14_health_units_touching_logo_gray_raw;
+m14_health_units_touching_logo_gray_computed = m14_health_units_touching_logo_gray_raw * 5.0;
+score += m14_health_units_touching_logo_gray_computed;
+document.scoreEntry.score_m14_health_units_touching_logo_gray.value = m14_health_units_touching_logo_gray_computed;
+
+// m14_health_units_looped_over_pullup_bar
+document.scoreEntry.m14_health_units_looped_over_pullup_bar.value = m14_health_units_looped_over_pullup_bar_raw;
+m14_health_units_looped_over_pullup_bar_computed = m14_health_units_looped_over_pullup_bar_raw * 10.0;
+score += m14_health_units_looped_over_pullup_bar_computed;
+document.scoreEntry.score_m14_health_units_looped_over_pullup_bar.value = m14_health_units_looped_over_pullup_bar_computed;
+
+// m04_bench_flat
+if(m04_bench_flat_raw == 0) {
+  document.scoreEntry.m04_bench_flat[0].checked = true
+  document.scoreEntry.m04_bench_flat_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m04_bench_flat[1].checked = true
+  document.scoreEntry.m04_bench_flat_radioValue.value = 'YES'
+}
+m04_bench_flat_computed = m04_bench_flat_raw * 10.0;
+score += m04_bench_flat_computed;
+document.scoreEntry.score_m04_bench_flat.value = m04_bench_flat_computed;
+
+// m04_bench_cubes_hopscotch
+document.scoreEntry.m04_bench_cubes_hopscotch.value = m04_bench_cubes_hopscotch_raw;
+m04_bench_cubes_hopscotch_computed = m04_bench_cubes_hopscotch_raw * 10.0;
+score += m04_bench_cubes_hopscotch_computed;
+document.scoreEntry.score_m04_bench_cubes_hopscotch.value = m04_bench_cubes_hopscotch_computed;
+
+// m04_bench_backrest_removed
+if(m04_bench_backrest_removed_raw == 0) {
+  document.scoreEntry.m04_bench_backrest_removed[0].checked = true
+  document.scoreEntry.m04_bench_backrest_removed_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m04_bench_backrest_removed[1].checked = true
+  document.scoreEntry.m04_bench_backrest_removed_radioValue.value = 'YES'
+}
+m04_bench_backrest_removed_computed = m04_bench_backrest_removed_raw * 15.0;
+score += m04_bench_backrest_removed_computed;
+document.scoreEntry.score_m04_bench_backrest_removed.value = m04_bench_backrest_removed_computed;
+
+// m05_basketball_cube_crate
+if(m05_basketball_cube_crate_raw == 0) {
+  document.scoreEntry.m05_basketball_cube_crate[0].checked = true
+  document.scoreEntry.m05_basketball_cube_crate_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m05_basketball_cube_crate[1].checked = true
+  document.scoreEntry.m05_basketball_cube_crate_radioValue.value = 'YES'
+}
+m05_basketball_cube_crate_computed = m05_basketball_cube_crate_raw * 15.0;
+score += m05_basketball_cube_crate_computed;
+document.scoreEntry.score_m05_basketball_cube_crate.value = m05_basketball_cube_crate_computed;
+
+// m05_basketball_height
+if(m05_basketball_height_raw == "no") {
+  document.scoreEntry.m05_basketball_height[0].checked = true;
+  m05_basketball_height_computed = 0.000000 * 1.0;
+  document.scoreEntry.m05_basketball_height_radioValue.value = 'NO'
+} else if(m05_basketball_height_raw == "middle_stopper") {
+  document.scoreEntry.m05_basketball_height[1].checked = true;
+  m05_basketball_height_computed = 15.000000 * 1.0;
+  document.scoreEntry.m05_basketball_height_radioValue.value = 'MIDDLE_STOPPER'
+} else if(m05_basketball_height_raw == "top_stopper") {
+  document.scoreEntry.m05_basketball_height[2].checked = true;
+  m05_basketball_height_computed = 25.000000 * 1.0;
+  document.scoreEntry.m05_basketball_height_radioValue.value = 'TOP_STOPPER'
+}
+score += m05_basketball_height_computed;
+document.scoreEntry.score_m05_basketball_height.value = m05_basketball_height_computed;
+
+// m03_slide_figures_off
+if(m03_slide_figures_off_raw == "No") {
+  document.scoreEntry.m03_slide_figures_off[0].checked = true;
+  m03_slide_figures_off_computed = 0.000000 * 1.0;
+  document.scoreEntry.m03_slide_figures_off_radioValue.value = 'NO'
+} else if(m03_slide_figures_off_raw == "one_figure") {
+  document.scoreEntry.m03_slide_figures_off[1].checked = true;
+  m03_slide_figures_off_computed = 5.000000 * 1.0;
+  document.scoreEntry.m03_slide_figures_off_radioValue.value = 'ONE_FIGURE'
+} else if(m03_slide_figures_off_raw == "both_figures") {
+  document.scoreEntry.m03_slide_figures_off[2].checked = true;
+  m03_slide_figures_off_computed = 20.000000 * 1.0;
+  document.scoreEntry.m03_slide_figures_off_radioValue.value = 'BOTH_FIGURES'
+}
+score += m03_slide_figures_off_computed;
+document.scoreEntry.score_m03_slide_figures_off.value = m03_slide_figures_off_computed;
+
+// m03_slide_figure_home
+if(m03_slide_figure_home_raw == 0) {
+  document.scoreEntry.m03_slide_figure_home[0].checked = true
+  document.scoreEntry.m03_slide_figure_home_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m03_slide_figure_home[1].checked = true
+  document.scoreEntry.m03_slide_figure_home_radioValue.value = 'YES'
+}
+m03_slide_figure_home_computed = m03_slide_figure_home_raw * 10.0;
+score += m03_slide_figure_home_computed;
+document.scoreEntry.score_m03_slide_figure_home.value = m03_slide_figure_home_computed;
+
+// m03_slide_figure_heavy_tire
+if(m03_slide_figure_heavy_tire_raw == 0) {
+  document.scoreEntry.m03_slide_figure_heavy_tire[0].checked = true
+  document.scoreEntry.m03_slide_figure_heavy_tire_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m03_slide_figure_heavy_tire[1].checked = true
+  document.scoreEntry.m03_slide_figure_heavy_tire_radioValue.value = 'YES'
+}
+m03_slide_figure_heavy_tire_computed = m03_slide_figure_heavy_tire_raw * 20.0;
+score += m03_slide_figure_heavy_tire_computed;
+document.scoreEntry.score_m03_slide_figure_heavy_tire.value = m03_slide_figure_heavy_tire_computed;
+
+// m02_step_counter
+if(m02_step_counter_raw == "None") {
+  document.scoreEntry.m02_step_counter[0].checked = true;
+  m02_step_counter_computed = 0.000000 * 1.0;
+  document.scoreEntry.m02_step_counter_radioValue.value = 'NONE'
+} else if(m02_step_counter_raw == "magenta") {
+  document.scoreEntry.m02_step_counter[1].checked = true;
+  m02_step_counter_computed = 10.000000 * 1.0;
+  document.scoreEntry.m02_step_counter_radioValue.value = 'MAGENTA'
+} else if(m02_step_counter_raw == "yellow") {
+  document.scoreEntry.m02_step_counter[2].checked = true;
+  m02_step_counter_computed = 15.000000 * 1.0;
+  document.scoreEntry.m02_step_counter_radioValue.value = 'YELLOW'
+} else if(m02_step_counter_raw == "blue") {
+  document.scoreEntry.m02_step_counter[3].checked = true;
+  m02_step_counter_computed = 20.000000 * 1.0;
+  document.scoreEntry.m02_step_counter_radioValue.value = 'BLUE'
+}
+score += m02_step_counter_computed;
+document.scoreEntry.score_m02_step_counter.value = m02_step_counter_computed;
+
+// m09_tire_light_blue_white_center_up
+if(m09_tire_light_blue_white_center_up_raw == 0) {
+  document.scoreEntry.m09_tire_light_blue_white_center_up[0].checked = true
+  document.scoreEntry.m09_tire_light_blue_white_center_up_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m09_tire_light_blue_white_center_up[1].checked = true
+  document.scoreEntry.m09_tire_light_blue_white_center_up_radioValue.value = 'YES'
+}
+m09_tire_light_blue_white_center_up_computed = m09_tire_light_blue_white_center_up_raw * 10.0;
+score += m09_tire_light_blue_white_center_up_computed;
+document.scoreEntry.score_m09_tire_light_blue_white_center_up.value = m09_tire_light_blue_white_center_up_computed;
+
+// m09_tire_flip_black_tire_white_center_up
+if(m09_tire_flip_black_tire_white_center_up_raw == 0) {
+  document.scoreEntry.m09_tire_flip_black_tire_white_center_up[0].checked = true
+  document.scoreEntry.m09_tire_flip_black_tire_white_center_up_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m09_tire_flip_black_tire_white_center_up[1].checked = true
+  document.scoreEntry.m09_tire_flip_black_tire_white_center_up_radioValue.value = 'YES'
+}
+m09_tire_flip_black_tire_white_center_up_computed = m09_tire_flip_black_tire_white_center_up_raw * 15.0;
+score += m09_tire_flip_black_tire_white_center_up_computed;
+document.scoreEntry.score_m09_tire_flip_black_tire_white_center_up.value = m09_tire_flip_black_tire_white_center_up_computed;
+
+// m09_tire_flip_white_center_in_large_target
+document.scoreEntry.m09_tire_flip_white_center_in_large_target.value = m09_tire_flip_white_center_in_large_target_raw;
+m09_tire_flip_white_center_in_large_target_computed = m09_tire_flip_white_center_in_large_target_raw * 5.0;
+score += m09_tire_flip_white_center_in_large_target_computed;
+document.scoreEntry.score_m09_tire_flip_white_center_in_large_target.value = m09_tire_flip_white_center_in_large_target_computed;
+
+// m11_treadmill
+if(m11_treadmill_raw == "no") {
+  document.scoreEntry.m11_treadmill[0].checked = true;
+  m11_treadmill_computed = 0.000000 * 1.0;
+  document.scoreEntry.m11_treadmill_radioValue.value = 'NO'
+} else if(m11_treadmill_raw == "gray") {
+  document.scoreEntry.m11_treadmill[1].checked = true;
+  m11_treadmill_computed = 5.000000 * 1.0;
+  document.scoreEntry.m11_treadmill_radioValue.value = 'GRAY'
+} else if(m11_treadmill_raw == "red") {
+  document.scoreEntry.m11_treadmill[2].checked = true;
+  m11_treadmill_computed = 10.000000 * 1.0;
+  document.scoreEntry.m11_treadmill_radioValue.value = 'RED'
+} else if(m11_treadmill_raw == "orange") {
+  document.scoreEntry.m11_treadmill[3].checked = true;
+  m11_treadmill_computed = 15.000000 * 1.0;
+  document.scoreEntry.m11_treadmill_radioValue.value = 'ORANGE'
+} else if(m11_treadmill_raw == "yellow") {
+  document.scoreEntry.m11_treadmill[4].checked = true;
+  m11_treadmill_computed = 20.000000 * 1.0;
+  document.scoreEntry.m11_treadmill_radioValue.value = 'YELLOW'
+} else if(m11_treadmill_raw == "light_green") {
+  document.scoreEntry.m11_treadmill[5].checked = true;
+  m11_treadmill_computed = 25.000000 * 1.0;
+  document.scoreEntry.m11_treadmill_radioValue.value = 'LIGHT_GREEN'
+} else if(m11_treadmill_raw == "dark_green") {
+  document.scoreEntry.m11_treadmill[6].checked = true;
+  m11_treadmill_computed = 30.000000 * 1.0;
+  document.scoreEntry.m11_treadmill_radioValue.value = 'DARK_GREEN'
+}
+score += m11_treadmill_computed;
+document.scoreEntry.score_m11_treadmill.value = m11_treadmill_computed;
+
+// goal_22
+if(goal_22_raw == "no") {
+  document.scoreEntry.goal_22[0].checked = true;
+  goal_22_computed = 0.000000 * 1.0;
+  document.scoreEntry.goal_22_radioValue.value = 'NO'
+} else if(goal_22_raw == "outside_large_circle") {
+  document.scoreEntry.goal_22[1].checked = true;
+  goal_22_computed = 15.000000 * 1.0;
+  document.scoreEntry.goal_22_radioValue.value = 'OUTSIDE_LARGE_CIRCLE'
+} else if(goal_22_raw == "inside_small_circle") {
+  document.scoreEntry.goal_22[2].checked = true;
+  goal_22_computed = 30.000000 * 1.0;
+  document.scoreEntry.goal_22_radioValue.value = 'INSIDE_SMALL_CIRCLE'
+}
+score += goal_22_computed;
+document.scoreEntry.score_goal_22.value = goal_22_computed;
+
+// m13_weight_machinge
+if(m13_weight_machinge_raw == "no") {
+  document.scoreEntry.m13_weight_machinge[0].checked = true;
+  m13_weight_machinge_computed = 0.000000 * 1.0;
+  document.scoreEntry.m13_weight_machinge_radioValue.value = 'NO'
+} else if(m13_weight_machinge_raw == "blue") {
+  document.scoreEntry.m13_weight_machinge[1].checked = true;
+  m13_weight_machinge_computed = 10.000000 * 1.0;
+  document.scoreEntry.m13_weight_machinge_radioValue.value = 'BLUE'
+} else if(m13_weight_machinge_raw == "magenta") {
+  document.scoreEntry.m13_weight_machinge[2].checked = true;
+  m13_weight_machinge_computed = 15.000000 * 1.0;
+  document.scoreEntry.m13_weight_machinge_radioValue.value = 'MAGENTA'
+} else if(m13_weight_machinge_raw == "yellow") {
+  document.scoreEntry.m13_weight_machinge[3].checked = true;
+  m13_weight_machinge_computed = 20.000000 * 1.0;
+  document.scoreEntry.m13_weight_machinge_radioValue.value = 'YELLOW'
+}
+score += m13_weight_machinge_computed;
+document.scoreEntry.score_m13_weight_machinge.value = m13_weight_machinge_computed;
+
+// m10_cell_phone
+if(m10_cell_phone_raw == 0) {
+  document.scoreEntry.m10_cell_phone[0].checked = true
+  document.scoreEntry.m10_cell_phone_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m10_cell_phone[1].checked = true
+  document.scoreEntry.m10_cell_phone_radioValue.value = 'YES'
+}
+m10_cell_phone_computed = m10_cell_phone_raw * 15.0;
+score += m10_cell_phone_computed;
+document.scoreEntry.score_m10_cell_phone.value = m10_cell_phone_computed;
+
+// m08_boccia_color_match
+if(m08_boccia_color_match_raw == 0) {
+  document.scoreEntry.m08_boccia_color_match[0].checked = true
+  document.scoreEntry.m08_boccia_color_match_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m08_boccia_color_match[1].checked = true
+  document.scoreEntry.m08_boccia_color_match_radioValue.value = 'YES'
+}
+m08_boccia_color_match_computed = m08_boccia_color_match_raw * 25.0;
+score += m08_boccia_color_match_computed;
+document.scoreEntry.score_m08_boccia_color_match.value = m08_boccia_color_match_computed;
+
+// m08_cubes_in_frame_target
+document.scoreEntry.m08_cubes_in_frame_target.value = m08_cubes_in_frame_target_raw;
+m08_cubes_in_frame_target_computed = m08_cubes_in_frame_target_raw * 5.0;
+score += m08_cubes_in_frame_target_computed;
+document.scoreEntry.score_m08_cubes_in_frame_target.value = m08_cubes_in_frame_target_computed;
+
+// m08_boccia_yellow_cube
+if(m08_boccia_yellow_cube_raw == 0) {
+  document.scoreEntry.m08_boccia_yellow_cube[0].checked = true
+  document.scoreEntry.m08_boccia_yellow_cube_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m08_boccia_yellow_cube[1].checked = true
+  document.scoreEntry.m08_boccia_yellow_cube_radioValue.value = 'YES'
+}
+m08_boccia_yellow_cube_computed = m08_boccia_yellow_cube_raw * 10.0;
+score += m08_boccia_yellow_cube_computed;
+document.scoreEntry.score_m08_boccia_yellow_cube.value = m08_boccia_yellow_cube_computed;
+
+// m15_precision_tokens
+if(m15_precision_tokens_raw == "zero") {
+  document.scoreEntry.m15_precision_tokens[0].checked = true;
+  m15_precision_tokens_computed = 0.000000 * 1.0;
+  document.scoreEntry.m15_precision_tokens_radioValue.value = 'ZERO'
+} else if(m15_precision_tokens_raw == "one") {
+  document.scoreEntry.m15_precision_tokens[1].checked = true;
+  m15_precision_tokens_computed = 5.000000 * 1.0;
+  document.scoreEntry.m15_precision_tokens_radioValue.value = 'ONE'
+} else if(m15_precision_tokens_raw == "two") {
+  document.scoreEntry.m15_precision_tokens[2].checked = true;
+  m15_precision_tokens_computed = 10.000000 * 1.0;
+  document.scoreEntry.m15_precision_tokens_radioValue.value = 'TWO'
+} else if(m15_precision_tokens_raw == "three") {
+  document.scoreEntry.m15_precision_tokens[3].checked = true;
+  m15_precision_tokens_computed = 20.000000 * 1.0;
+  document.scoreEntry.m15_precision_tokens_radioValue.value = 'THREE'
+} else if(m15_precision_tokens_raw == "four") {
+  document.scoreEntry.m15_precision_tokens[4].checked = true;
+  m15_precision_tokens_computed = 30.000000 * 1.0;
+  document.scoreEntry.m15_precision_tokens_radioValue.value = 'FOUR'
+} else if(m15_precision_tokens_raw == "five") {
+  document.scoreEntry.m15_precision_tokens[5].checked = true;
+  m15_precision_tokens_computed = 45.000000 * 1.0;
+  document.scoreEntry.m15_precision_tokens_radioValue.value = 'FIVE'
+} else if(m15_precision_tokens_raw == "six") {
+  document.scoreEntry.m15_precision_tokens[6].checked = true;
+  m15_precision_tokens_computed = 60.000000 * 1.0;
+  document.scoreEntry.m15_precision_tokens_radioValue.value = 'SIX'
+}
+score += m15_precision_tokens_computed;
+document.scoreEntry.score_m15_precision_tokens.value = m15_precision_tokens_computed;
+
+if(Verified == 0) {
+  document.scoreEntry.Verified[0].checked = true
+} else {
+  document.scoreEntry.Verified[1].checked = true
+}
+
+
+  //check for minimum total score
+  if(score < 0.0) {
+    score = 0.0;
+  }
+
+  document.scoreEntry.totalScore.value = score;
+
+  check_restrictions();
+}
+
+function check_restrictions() {
+  var error_found = false;
+  $("#score-errors").empty();
+  
+  var restriction_0_value = parseInt(1.000000* m03_slide_figures_off_computed + -5.000000* m03_slide_figure_home_raw);
+  if(restriction_0_value > 20.000000 || restriction_0_value < 0.000000) {
+    $('#score-errors').append('<div>Cannot score Figure In Home if no figure off slide</div>');
+    error_found = true;
+  }
+  var restriction_1_value = parseInt(1.000000* m03_slide_figures_off_computed + -5.000000* m03_slide_figure_heavy_tire_raw);
+  if(restriction_1_value > 20.000000 || restriction_1_value < 0.000000) {
+    $('#score-errors').append('<div>Cannot score Figure on Tire if no figure off slide</div>');
+    error_found = true;
+  }
+  var restriction_2_value = parseInt(4.000000* m04_bench_flat_raw + -1.000000* m04_bench_cubes_hopscotch_raw);
+  if(restriction_2_value > 4.000000 || restriction_2_value < 0.000000) {
+    $('#score-errors').append('<div>Cannot score Cubes in Hopscotch unless Bench is Down Flat</div>');
+    error_found = true;
+  }
+  var restriction_3_value = parseInt(1.000000* m07_robot_dance_raw + 1.000000* m06_pull_up_holds_robot_end_raw);
+  if(restriction_3_value > 1.000000 || restriction_3_value < 0.000000) {
+    $('#score-errors').append('<div>Cannot Score Both Robot Dance at end of match and Robot is Hanging on Pull Up bar at end of Match</div>');
+    error_found = true;
+  }
+  var restriction_4_value = parseInt(1.000000* m14_health_units_touching_logo_gray_raw + 1.000000* m14_health_units_looped_over_pullup_bar_raw);
+  if(restriction_4_value > 8.000000 || restriction_4_value < 0.000000) {
+    $('#score-errors').append('<div>There are only 8 health units</div>');
+    error_found = true;
+  }
+  var restriction_5_value = parseInt(1.000000* m03_slide_figures_off_computed + -10.000000* m03_slide_figure_heavy_tire_raw + -10.000000* m03_slide_figure_home_raw);
+  if(restriction_5_value > 20.000000 || restriction_5_value < -5.000000) {
+    $('#score-errors').append('<div>Cannot score both figure in home and on Tire if 2 Figures not off slide</div>');
+    error_found = true;
+  }
+
+
+  if(error_found) {
+    $("#submit_score").attr('disabled', true);
+    $("#score-errors").show();
+  } else {
+    $("#submit_score").attr('disabled', false);
+    $("#score-errors").hide();
+  }
+}
+
+function isConsistent() {
+  //m00_small_inspection_area
+  if(m00_small_inspection_area_raw < 0.0 || m00_small_inspection_area_raw > 1.0) {
+    return false;
+  }
+
+  //m07_robot_dance
+  if(m07_robot_dance_raw < 0.0 || m07_robot_dance_raw > 1.0) {
+    return false;
+  }
+
+  //m06_pull_up_bar_pass_under
+  if(m06_pull_up_bar_pass_under_raw < 0.0 || m06_pull_up_bar_pass_under_raw > 1.0) {
+    return false;
+  }
+
+  //m06_pull_up_holds_robot_end
+  if(m06_pull_up_holds_robot_end_raw < 0.0 || m06_pull_up_holds_robot_end_raw > 1.0) {
+    return false;
+  }
+
+  //m01_innovation_project
+  if(m01_innovation_project_raw < 0.0 || m01_innovation_project_raw > 1.0) {
+    return false;
+  }
+
+  //m14_health_units_touching_logo_gray
+  if(m14_health_units_touching_logo_gray_raw < 0.0 || m14_health_units_touching_logo_gray_raw > 8.0) {
+    return false;
+  }
+
+  //m14_health_units_looped_over_pullup_bar
+  if(m14_health_units_looped_over_pullup_bar_raw < 0.0 || m14_health_units_looped_over_pullup_bar_raw > 4.0) {
+    return false;
+  }
+
+  //m04_bench_flat
+  if(m04_bench_flat_raw < 0.0 || m04_bench_flat_raw > 1.0) {
+    return false;
+  }
+
+  //m04_bench_cubes_hopscotch
+  if(m04_bench_cubes_hopscotch_raw < 0.0 || m04_bench_cubes_hopscotch_raw > 4.0) {
+    return false;
+  }
+
+  //m04_bench_backrest_removed
+  if(m04_bench_backrest_removed_raw < 0.0 || m04_bench_backrest_removed_raw > 1.0) {
+    return false;
+  }
+
+  //m05_basketball_cube_crate
+  if(m05_basketball_cube_crate_raw < 0.0 || m05_basketball_cube_crate_raw > 1.0) {
+    return false;
+  }
+
+  //m05_basketball_height
+  // nothing to check
+
+  //m03_slide_figures_off
+  // nothing to check
+
+  //m03_slide_figure_home
+  if(m03_slide_figure_home_raw < 0.0 || m03_slide_figure_home_raw > 1.0) {
+    return false;
+  }
+
+  //m03_slide_figure_heavy_tire
+  if(m03_slide_figure_heavy_tire_raw < 0.0 || m03_slide_figure_heavy_tire_raw > 1.0) {
+    return false;
+  }
+
+  //m02_step_counter
+  // nothing to check
+
+  //m09_tire_light_blue_white_center_up
+  if(m09_tire_light_blue_white_center_up_raw < 0.0 || m09_tire_light_blue_white_center_up_raw > 1.0) {
+    return false;
+  }
+
+  //m09_tire_flip_black_tire_white_center_up
+  if(m09_tire_flip_black_tire_white_center_up_raw < 0.0 || m09_tire_flip_black_tire_white_center_up_raw > 1.0) {
+    return false;
+  }
+
+  //m09_tire_flip_white_center_in_large_target
+  if(m09_tire_flip_white_center_in_large_target_raw < 0.0 || m09_tire_flip_white_center_in_large_target_raw > 2.0) {
+    return false;
+  }
+
+  //m11_treadmill
+  // nothing to check
+
+  //goal_22
+  // nothing to check
+
+  //m13_weight_machinge
+  // nothing to check
+
+  //m10_cell_phone
+  if(m10_cell_phone_raw < 0.0 || m10_cell_phone_raw > 1.0) {
+    return false;
+  }
+
+  //m08_boccia_color_match
+  if(m08_boccia_color_match_raw < 0.0 || m08_boccia_color_match_raw > 1.0) {
+    return false;
+  }
+
+  //m08_cubes_in_frame_target
+  if(m08_cubes_in_frame_target_raw < 0.0 || m08_cubes_in_frame_target_raw > 17.0) {
+    return false;
+  }
+
+  //m08_boccia_yellow_cube
+  if(m08_boccia_yellow_cube_raw < 0.0 || m08_boccia_yellow_cube_raw > 1.0) {
+    return false;
+  }
+
+  //m15_precision_tokens
+  // nothing to check
+
+  return true;
+}
+
+
+
+// m00_small_inspection_area
+var m00_small_inspection_area_raw;
+var m00_small_inspection_area_computed;
+function set_m00_small_inspection_area(newValue) {
+  var temp = m00_small_inspection_area_raw;
+  m00_small_inspection_area_raw = newValue;
+  if(!isConsistent()) {
+    m00_small_inspection_area_raw = temp;
+  }
+  refresh();
+}
+function check_m00_small_inspection_area() {
+  var str = document.scoreEntry.m00_small_inspection_area.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m00_small_inspection_area(num);
+  }
+  refresh();
+}
+
+
+// m07_robot_dance
+var m07_robot_dance_raw;
+var m07_robot_dance_computed;
+function set_m07_robot_dance(newValue) {
+  var temp = m07_robot_dance_raw;
+  m07_robot_dance_raw = newValue;
+  if(!isConsistent()) {
+    m07_robot_dance_raw = temp;
+  }
+  refresh();
+}
+function check_m07_robot_dance() {
+  var str = document.scoreEntry.m07_robot_dance.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m07_robot_dance(num);
+  }
+  refresh();
+}
+
+
+// m06_pull_up_bar_pass_under
+var m06_pull_up_bar_pass_under_raw;
+var m06_pull_up_bar_pass_under_computed;
+function set_m06_pull_up_bar_pass_under(newValue) {
+  var temp = m06_pull_up_bar_pass_under_raw;
+  m06_pull_up_bar_pass_under_raw = newValue;
+  if(!isConsistent()) {
+    m06_pull_up_bar_pass_under_raw = temp;
+  }
+  refresh();
+}
+function check_m06_pull_up_bar_pass_under() {
+  var str = document.scoreEntry.m06_pull_up_bar_pass_under.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m06_pull_up_bar_pass_under(num);
+  }
+  refresh();
+}
+
+
+// m06_pull_up_holds_robot_end
+var m06_pull_up_holds_robot_end_raw;
+var m06_pull_up_holds_robot_end_computed;
+function set_m06_pull_up_holds_robot_end(newValue) {
+  var temp = m06_pull_up_holds_robot_end_raw;
+  m06_pull_up_holds_robot_end_raw = newValue;
+  if(!isConsistent()) {
+    m06_pull_up_holds_robot_end_raw = temp;
+  }
+  refresh();
+}
+function check_m06_pull_up_holds_robot_end() {
+  var str = document.scoreEntry.m06_pull_up_holds_robot_end.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m06_pull_up_holds_robot_end(num);
+  }
+  refresh();
+}
+
+
+// m01_innovation_project
+var m01_innovation_project_raw;
+var m01_innovation_project_computed;
+function set_m01_innovation_project(newValue) {
+  var temp = m01_innovation_project_raw;
+  m01_innovation_project_raw = newValue;
+  if(!isConsistent()) {
+    m01_innovation_project_raw = temp;
+  }
+  refresh();
+}
+function check_m01_innovation_project() {
+  var str = document.scoreEntry.m01_innovation_project.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m01_innovation_project(num);
+  }
+  refresh();
+}
+
+
+// m14_health_units_touching_logo_gray
+var m14_health_units_touching_logo_gray_raw;
+var m14_health_units_touching_logo_gray_computed;
+function set_m14_health_units_touching_logo_gray(newValue) {
+  var temp = m14_health_units_touching_logo_gray_raw;
+  m14_health_units_touching_logo_gray_raw = newValue;
+  if(!isConsistent()) {
+    m14_health_units_touching_logo_gray_raw = temp;
+  }
+  refresh();
+}
+function check_m14_health_units_touching_logo_gray() {
+  var str = document.scoreEntry.m14_health_units_touching_logo_gray.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m14_health_units_touching_logo_gray(num);
+  }
+  refresh();
+}
+function increment_m14_health_units_touching_logo_gray(increment) {
+  var temp = m14_health_units_touching_logo_gray_raw
+  m14_health_units_touching_logo_gray_raw += increment;
+  if(m14_health_units_touching_logo_gray_raw > 8.0) {
+    m14_health_units_touching_logo_gray_raw = 8.0;
+   }
+  if(m14_health_units_touching_logo_gray_raw < 0.0) {
+    m14_health_units_touching_logo_gray_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m14_health_units_touching_logo_gray_raw = temp;
+  }
+  refresh();
+}
+
+
+// m14_health_units_looped_over_pullup_bar
+var m14_health_units_looped_over_pullup_bar_raw;
+var m14_health_units_looped_over_pullup_bar_computed;
+function set_m14_health_units_looped_over_pullup_bar(newValue) {
+  var temp = m14_health_units_looped_over_pullup_bar_raw;
+  m14_health_units_looped_over_pullup_bar_raw = newValue;
+  if(!isConsistent()) {
+    m14_health_units_looped_over_pullup_bar_raw = temp;
+  }
+  refresh();
+}
+function check_m14_health_units_looped_over_pullup_bar() {
+  var str = document.scoreEntry.m14_health_units_looped_over_pullup_bar.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m14_health_units_looped_over_pullup_bar(num);
+  }
+  refresh();
+}
+function increment_m14_health_units_looped_over_pullup_bar(increment) {
+  var temp = m14_health_units_looped_over_pullup_bar_raw
+  m14_health_units_looped_over_pullup_bar_raw += increment;
+  if(m14_health_units_looped_over_pullup_bar_raw > 4.0) {
+    m14_health_units_looped_over_pullup_bar_raw = 4.0;
+   }
+  if(m14_health_units_looped_over_pullup_bar_raw < 0.0) {
+    m14_health_units_looped_over_pullup_bar_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m14_health_units_looped_over_pullup_bar_raw = temp;
+  }
+  refresh();
+}
+
+
+// m04_bench_flat
+var m04_bench_flat_raw;
+var m04_bench_flat_computed;
+function set_m04_bench_flat(newValue) {
+  var temp = m04_bench_flat_raw;
+  m04_bench_flat_raw = newValue;
+  if(!isConsistent()) {
+    m04_bench_flat_raw = temp;
+  }
+  refresh();
+}
+function check_m04_bench_flat() {
+  var str = document.scoreEntry.m04_bench_flat.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m04_bench_flat(num);
+  }
+  refresh();
+}
+
+
+// m04_bench_cubes_hopscotch
+var m04_bench_cubes_hopscotch_raw;
+var m04_bench_cubes_hopscotch_computed;
+function set_m04_bench_cubes_hopscotch(newValue) {
+  var temp = m04_bench_cubes_hopscotch_raw;
+  m04_bench_cubes_hopscotch_raw = newValue;
+  if(!isConsistent()) {
+    m04_bench_cubes_hopscotch_raw = temp;
+  }
+  refresh();
+}
+function check_m04_bench_cubes_hopscotch() {
+  var str = document.scoreEntry.m04_bench_cubes_hopscotch.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m04_bench_cubes_hopscotch(num);
+  }
+  refresh();
+}
+function increment_m04_bench_cubes_hopscotch(increment) {
+  var temp = m04_bench_cubes_hopscotch_raw
+  m04_bench_cubes_hopscotch_raw += increment;
+  if(m04_bench_cubes_hopscotch_raw > 4.0) {
+    m04_bench_cubes_hopscotch_raw = 4.0;
+   }
+  if(m04_bench_cubes_hopscotch_raw < 0.0) {
+    m04_bench_cubes_hopscotch_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m04_bench_cubes_hopscotch_raw = temp;
+  }
+  refresh();
+}
+
+
+// m04_bench_backrest_removed
+var m04_bench_backrest_removed_raw;
+var m04_bench_backrest_removed_computed;
+function set_m04_bench_backrest_removed(newValue) {
+  var temp = m04_bench_backrest_removed_raw;
+  m04_bench_backrest_removed_raw = newValue;
+  if(!isConsistent()) {
+    m04_bench_backrest_removed_raw = temp;
+  }
+  refresh();
+}
+function check_m04_bench_backrest_removed() {
+  var str = document.scoreEntry.m04_bench_backrest_removed.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m04_bench_backrest_removed(num);
+  }
+  refresh();
+}
+
+
+// m05_basketball_cube_crate
+var m05_basketball_cube_crate_raw;
+var m05_basketball_cube_crate_computed;
+function set_m05_basketball_cube_crate(newValue) {
+  var temp = m05_basketball_cube_crate_raw;
+  m05_basketball_cube_crate_raw = newValue;
+  if(!isConsistent()) {
+    m05_basketball_cube_crate_raw = temp;
+  }
+  refresh();
+}
+function check_m05_basketball_cube_crate() {
+  var str = document.scoreEntry.m05_basketball_cube_crate.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m05_basketball_cube_crate(num);
+  }
+  refresh();
+}
+
+
+// m05_basketball_height
+var m05_basketball_height_raw;
+var m05_basketball_height_computed;
+function set_m05_basketball_height(newValue) {
+  var temp = m05_basketball_height_raw;
+  m05_basketball_height_raw = newValue;
+  if(!isConsistent()) {
+    m05_basketball_height_raw = temp;
+  }
+  refresh();
+}
+function check_m05_basketball_height() {
+  var str = document.scoreEntry.m05_basketball_height.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m05_basketball_height(num);
+  }
+  refresh();
+}
+
+
+// m03_slide_figures_off
+var m03_slide_figures_off_raw;
+var m03_slide_figures_off_computed;
+function set_m03_slide_figures_off(newValue) {
+  var temp = m03_slide_figures_off_raw;
+  m03_slide_figures_off_raw = newValue;
+  if(!isConsistent()) {
+    m03_slide_figures_off_raw = temp;
+  }
+  refresh();
+}
+function check_m03_slide_figures_off() {
+  var str = document.scoreEntry.m03_slide_figures_off.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m03_slide_figures_off(num);
+  }
+  refresh();
+}
+
+
+// m03_slide_figure_home
+var m03_slide_figure_home_raw;
+var m03_slide_figure_home_computed;
+function set_m03_slide_figure_home(newValue) {
+  var temp = m03_slide_figure_home_raw;
+  m03_slide_figure_home_raw = newValue;
+  if(!isConsistent()) {
+    m03_slide_figure_home_raw = temp;
+  }
+  refresh();
+}
+function check_m03_slide_figure_home() {
+  var str = document.scoreEntry.m03_slide_figure_home.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m03_slide_figure_home(num);
+  }
+  refresh();
+}
+
+
+// m03_slide_figure_heavy_tire
+var m03_slide_figure_heavy_tire_raw;
+var m03_slide_figure_heavy_tire_computed;
+function set_m03_slide_figure_heavy_tire(newValue) {
+  var temp = m03_slide_figure_heavy_tire_raw;
+  m03_slide_figure_heavy_tire_raw = newValue;
+  if(!isConsistent()) {
+    m03_slide_figure_heavy_tire_raw = temp;
+  }
+  refresh();
+}
+function check_m03_slide_figure_heavy_tire() {
+  var str = document.scoreEntry.m03_slide_figure_heavy_tire.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m03_slide_figure_heavy_tire(num);
+  }
+  refresh();
+}
+
+
+// m02_step_counter
+var m02_step_counter_raw;
+var m02_step_counter_computed;
+function set_m02_step_counter(newValue) {
+  var temp = m02_step_counter_raw;
+  m02_step_counter_raw = newValue;
+  if(!isConsistent()) {
+    m02_step_counter_raw = temp;
+  }
+  refresh();
+}
+function check_m02_step_counter() {
+  var str = document.scoreEntry.m02_step_counter.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m02_step_counter(num);
+  }
+  refresh();
+}
+
+
+// m09_tire_light_blue_white_center_up
+var m09_tire_light_blue_white_center_up_raw;
+var m09_tire_light_blue_white_center_up_computed;
+function set_m09_tire_light_blue_white_center_up(newValue) {
+  var temp = m09_tire_light_blue_white_center_up_raw;
+  m09_tire_light_blue_white_center_up_raw = newValue;
+  if(!isConsistent()) {
+    m09_tire_light_blue_white_center_up_raw = temp;
+  }
+  refresh();
+}
+function check_m09_tire_light_blue_white_center_up() {
+  var str = document.scoreEntry.m09_tire_light_blue_white_center_up.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m09_tire_light_blue_white_center_up(num);
+  }
+  refresh();
+}
+
+
+// m09_tire_flip_black_tire_white_center_up
+var m09_tire_flip_black_tire_white_center_up_raw;
+var m09_tire_flip_black_tire_white_center_up_computed;
+function set_m09_tire_flip_black_tire_white_center_up(newValue) {
+  var temp = m09_tire_flip_black_tire_white_center_up_raw;
+  m09_tire_flip_black_tire_white_center_up_raw = newValue;
+  if(!isConsistent()) {
+    m09_tire_flip_black_tire_white_center_up_raw = temp;
+  }
+  refresh();
+}
+function check_m09_tire_flip_black_tire_white_center_up() {
+  var str = document.scoreEntry.m09_tire_flip_black_tire_white_center_up.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m09_tire_flip_black_tire_white_center_up(num);
+  }
+  refresh();
+}
+
+
+// m09_tire_flip_white_center_in_large_target
+var m09_tire_flip_white_center_in_large_target_raw;
+var m09_tire_flip_white_center_in_large_target_computed;
+function set_m09_tire_flip_white_center_in_large_target(newValue) {
+  var temp = m09_tire_flip_white_center_in_large_target_raw;
+  m09_tire_flip_white_center_in_large_target_raw = newValue;
+  if(!isConsistent()) {
+    m09_tire_flip_white_center_in_large_target_raw = temp;
+  }
+  refresh();
+}
+function check_m09_tire_flip_white_center_in_large_target() {
+  var str = document.scoreEntry.m09_tire_flip_white_center_in_large_target.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m09_tire_flip_white_center_in_large_target(num);
+  }
+  refresh();
+}
+function increment_m09_tire_flip_white_center_in_large_target(increment) {
+  var temp = m09_tire_flip_white_center_in_large_target_raw
+  m09_tire_flip_white_center_in_large_target_raw += increment;
+  if(m09_tire_flip_white_center_in_large_target_raw > 2.0) {
+    m09_tire_flip_white_center_in_large_target_raw = 2.0;
+   }
+  if(m09_tire_flip_white_center_in_large_target_raw < 0.0) {
+    m09_tire_flip_white_center_in_large_target_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m09_tire_flip_white_center_in_large_target_raw = temp;
+  }
+  refresh();
+}
+
+
+// m11_treadmill
+var m11_treadmill_raw;
+var m11_treadmill_computed;
+function set_m11_treadmill(newValue) {
+  var temp = m11_treadmill_raw;
+  m11_treadmill_raw = newValue;
+  if(!isConsistent()) {
+    m11_treadmill_raw = temp;
+  }
+  refresh();
+}
+function check_m11_treadmill() {
+  var str = document.scoreEntry.m11_treadmill.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m11_treadmill(num);
+  }
+  refresh();
+}
+
+
+// goal_22
+var goal_22_raw;
+var goal_22_computed;
+function set_goal_22(newValue) {
+  var temp = goal_22_raw;
+  goal_22_raw = newValue;
+  if(!isConsistent()) {
+    goal_22_raw = temp;
+  }
+  refresh();
+}
+function check_goal_22() {
+  var str = document.scoreEntry.goal_22.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_goal_22(num);
+  }
+  refresh();
+}
+
+
+// m13_weight_machinge
+var m13_weight_machinge_raw;
+var m13_weight_machinge_computed;
+function set_m13_weight_machinge(newValue) {
+  var temp = m13_weight_machinge_raw;
+  m13_weight_machinge_raw = newValue;
+  if(!isConsistent()) {
+    m13_weight_machinge_raw = temp;
+  }
+  refresh();
+}
+function check_m13_weight_machinge() {
+  var str = document.scoreEntry.m13_weight_machinge.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m13_weight_machinge(num);
+  }
+  refresh();
+}
+
+
+// m10_cell_phone
+var m10_cell_phone_raw;
+var m10_cell_phone_computed;
+function set_m10_cell_phone(newValue) {
+  var temp = m10_cell_phone_raw;
+  m10_cell_phone_raw = newValue;
+  if(!isConsistent()) {
+    m10_cell_phone_raw = temp;
+  }
+  refresh();
+}
+function check_m10_cell_phone() {
+  var str = document.scoreEntry.m10_cell_phone.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m10_cell_phone(num);
+  }
+  refresh();
+}
+
+
+// m08_boccia_color_match
+var m08_boccia_color_match_raw;
+var m08_boccia_color_match_computed;
+function set_m08_boccia_color_match(newValue) {
+  var temp = m08_boccia_color_match_raw;
+  m08_boccia_color_match_raw = newValue;
+  if(!isConsistent()) {
+    m08_boccia_color_match_raw = temp;
+  }
+  refresh();
+}
+function check_m08_boccia_color_match() {
+  var str = document.scoreEntry.m08_boccia_color_match.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m08_boccia_color_match(num);
+  }
+  refresh();
+}
+
+
+// m08_cubes_in_frame_target
+var m08_cubes_in_frame_target_raw;
+var m08_cubes_in_frame_target_computed;
+function set_m08_cubes_in_frame_target(newValue) {
+  var temp = m08_cubes_in_frame_target_raw;
+  m08_cubes_in_frame_target_raw = newValue;
+  if(!isConsistent()) {
+    m08_cubes_in_frame_target_raw = temp;
+  }
+  refresh();
+}
+function check_m08_cubes_in_frame_target() {
+  var str = document.scoreEntry.m08_cubes_in_frame_target.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m08_cubes_in_frame_target(num);
+  }
+  refresh();
+}
+function increment_m08_cubes_in_frame_target(increment) {
+  var temp = m08_cubes_in_frame_target_raw
+  m08_cubes_in_frame_target_raw += increment;
+  if(m08_cubes_in_frame_target_raw > 17.0) {
+    m08_cubes_in_frame_target_raw = 17.0;
+   }
+  if(m08_cubes_in_frame_target_raw < 0.0) {
+    m08_cubes_in_frame_target_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m08_cubes_in_frame_target_raw = temp;
+  }
+  refresh();
+}
+
+
+// m08_boccia_yellow_cube
+var m08_boccia_yellow_cube_raw;
+var m08_boccia_yellow_cube_computed;
+function set_m08_boccia_yellow_cube(newValue) {
+  var temp = m08_boccia_yellow_cube_raw;
+  m08_boccia_yellow_cube_raw = newValue;
+  if(!isConsistent()) {
+    m08_boccia_yellow_cube_raw = temp;
+  }
+  refresh();
+}
+function check_m08_boccia_yellow_cube() {
+  var str = document.scoreEntry.m08_boccia_yellow_cube.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m08_boccia_yellow_cube(num);
+  }
+  refresh();
+}
+
+
+// m15_precision_tokens
+var m15_precision_tokens_raw;
+var m15_precision_tokens_computed;
+function set_m15_precision_tokens(newValue) {
+  var temp = m15_precision_tokens_raw;
+  m15_precision_tokens_raw = newValue;
+  if(!isConsistent()) {
+    m15_precision_tokens_raw = temp;
+  }
+  refresh();
+}
+function check_m15_precision_tokens() {
+  var str = document.scoreEntry.m15_precision_tokens.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m15_precision_tokens(num);
+  }
+  refresh();
+}
+
+
+// Verified 
+var Verified;
+function set_Verified(newValue) {
+  Verified = newValue;
+  if (newValue == 1) {    $('#verification-warning').show();  } else if (newValue == 0) {    $('#verification-warning').hide();  }  refresh();
+}
+
+
+
+ <!-- end check for bye -->
+
+</script>
+
+</head>
+
+<body>
+
+  <div id="floating-messages">
+    <div id="score-errors" style="display: none;"></div>
+    <div id="verification-warning" style="display: none;">Are you sure this score has
+      been Verified? Normally scores are not verified on the initial
+      entry.</div>
+  </div>
+
+  <form action="SubmitScoreEntry" method="POST" name="scoreEntry" id="scoreEntry">
+    <input type="hidden" id="NoShow" name="NoShow" value="false">
+    <input type="hidden" id="delete" name="delete" value="false">
+
+      <input type="hidden" name="EditFlag" id="EditFlag" value="false" readonly="readonly">
+    
+    <input type="hidden" name="RunNumber" value="1" readonly="readonly"> <input type="hidden" name="TeamNumber" value="1234" readonly="readonly">
+
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
+      <!-- info bar -->
+      <tbody><tr>
+        <td valign="middle" align="center">
+          <!-- top info bar (team name etc) -->
+          <table id="top_info" width="100%" cellspacing="0" cellpadding="0" border="1">
+            <tbody><tr valign="middle" align="center">
+              <td>
+
+                <table width="90%" cellspacing="0" cellpadding="5" border="0">
+                  <!--  inner box on title -->
+                  <tbody><tr>
+                    <td valign="middle" align="center">
+                        
+                        
+                          <font size="4" face="Arial">Score Entry</font>
+                        
+                      </td>
+                  </tr>
+                  <tr align="center">
+                    <td><font size="4" face="Arial" color="#0000ff">#1234&nbsp;Afton Rules&nbsp;Jeannie Team&nbsp;--&nbsp;Run&nbsp;Number&nbsp;1</font>
+                    </td>
+                  </tr>
+                </tbody></table> <!--  end inner box on title -->
+
+              </td>
+            </tr>
+            <!-- team info -->
+
+            
+
+          </tbody></table> <!--  end info bar -->
+
+        </td>
+      </tr>
+
+
+      <!-- score entry -->
+      <tr>
+        <td valign="middle" align="center">
+
+          <table class="score-entry" bordercolor="#808080" border="1">
+            <colgroup>
+              <!--  goal -->
+              <col width="50%">
+              <!-- buttons -->
+              <col width="30%">
+              <!-- count -->
+              <col width="10%">
+              <!--  score -->
+              <col width="10%">
+            </colgroup>
+            <tbody><tr>
+              <td colspan="2"><font size="4"><u>Goal</u></font></td>
+              <td align="right"><font size="4"><u>Count</u></font>
+              </td>
+              <td align="right"><font size="4"><u>Score</u></font>
+              </td>
+            </tr>
+
+            
+              
+              
+                
+                <!-- m00_small_inspection_area -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M00 - ALL Equipment Fits in Small Inspection Area:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m00_small_inspection_area_no" name="m00_small_inspection_area" value="0" onclick="set_m00_small_inspection_area(0)" checked="checked">
+          <label for="m00_small_inspection_area_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m00_small_inspection_area_yes" name="m00_small_inspection_area" value="1" onclick="set_m00_small_inspection_area(1)">
+          <label for="m00_small_inspection_area_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m00_small_inspection_area_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m00_small_inspection_area" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m00_small_inspection_area -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M07</b></td>
+<td colspan="2" class="center truncate"><b>M07</b></td>
+</tr>
+<!-- m07_robot_dance -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M07 - Robot Dance - Robot Dancing on Dance Floor at End of Match:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m07_robot_dance_no" name="m07_robot_dance" value="0" onclick="set_m07_robot_dance(0)" checked="checked">
+          <label for="m07_robot_dance_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m07_robot_dance_yes" name="m07_robot_dance" value="1" onclick="set_m07_robot_dance(1)">
+          <label for="m07_robot_dance_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m07_robot_dance_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m07_robot_dance" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m07_robot_dance -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M06</b></td>
+<td colspan="2" class="center truncate"><b>M06</b></td>
+</tr>
+<!-- m06_pull_up_bar_pass_under -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M06 - Pull-Up Bar - Pass Completely Under Bar:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m06_pull_up_bar_pass_under_no" name="m06_pull_up_bar_pass_under" value="0" onclick="set_m06_pull_up_bar_pass_under(0)" checked="checked">
+          <label for="m06_pull_up_bar_pass_under_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m06_pull_up_bar_pass_under_yes" name="m06_pull_up_bar_pass_under" value="1" onclick="set_m06_pull_up_bar_pass_under(1)">
+          <label for="m06_pull_up_bar_pass_under_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m06_pull_up_bar_pass_under_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m06_pull_up_bar_pass_under" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m06_pull_up_bar_pass_under -->
+
+<!-- m06_pull_up_holds_robot_end -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M06 - Pull-Up Bar - Holds 100% Robot Weight at End:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m06_pull_up_holds_robot_end_no" name="m06_pull_up_holds_robot_end" value="0" onclick="set_m06_pull_up_holds_robot_end(0)" checked="checked">
+          <label for="m06_pull_up_holds_robot_end_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m06_pull_up_holds_robot_end_yes" name="m06_pull_up_holds_robot_end" value="1" onclick="set_m06_pull_up_holds_robot_end(1)">
+          <label for="m06_pull_up_holds_robot_end_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m06_pull_up_holds_robot_end_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m06_pull_up_holds_robot_end" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m06_pull_up_holds_robot_end -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M01</b></td>
+<td colspan="2" class="center truncate"><b>M01</b></td>
+</tr>
+<!-- m01_innovation_project -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M01 - Innovation Project - Touching RePLAY Logo or Gray Bench Area:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m01_innovation_project_no" name="m01_innovation_project" value="0" onclick="set_m01_innovation_project(0)" checked="checked">
+          <label for="m01_innovation_project_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m01_innovation_project_yes" name="m01_innovation_project" value="1" onclick="set_m01_innovation_project(1)">
+          <label for="m01_innovation_project_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m01_innovation_project_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m01_innovation_project" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m01_innovation_project -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M14</b></td>
+<td colspan="2" class="center truncate"><b>M14</b></td>
+</tr>
+<!-- m14_health_units_touching_logo_gray -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M14 - Health Units - Touching RePLAY Logo or Gray Bench Area:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input id="dec_m14_health_units_touching_logo_gray_8" type="button" value="-8" onclick="increment_m14_health_units_touching_logo_gray(-8)">
+        </td>
+        <td>
+          <input id="dec_m14_health_units_touching_logo_gray_3" type="button" value="-3" onclick="increment_m14_health_units_touching_logo_gray(-3)">
+        </td>
+        <td>
+          <input id="dec_m14_health_units_touching_logo_gray_1" type="button" value="-1" onclick="increment_m14_health_units_touching_logo_gray(-1)">
+        </td>
+        <td>
+          <input id="inc_m14_health_units_touching_logo_gray_1" type="button" value="+1" onclick="increment_m14_health_units_touching_logo_gray(1)">
+        </td>
+        <td>
+          <input id="inc_m14_health_units_touching_logo_gray_3" type="button" value="+3" onclick="increment_m14_health_units_touching_logo_gray(3)">
+        </td>
+        <td>
+          <input id="inc_m14_health_units_touching_logo_gray_8" type="button" value="+8" onclick="increment_m14_health_units_touching_logo_gray(8)">
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m14_health_units_touching_logo_gray" size="3" onchange="check_m14_health_units_touching_logo_gray()" value="0" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m14_health_units_touching_logo_gray" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m14_health_units_touching_logo_gray -->
+
+<!-- m14_health_units_looped_over_pullup_bar -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M14 - Health Units - Looped over Pull-Up bar Posts Touching NO Equipment:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input id="dec_m14_health_units_looped_over_pullup_bar_4" type="button" value="-4" onclick="increment_m14_health_units_looped_over_pullup_bar(-4)">
+        </td>
+        <td>
+          <input id="dec_m14_health_units_looped_over_pullup_bar_1" type="button" value="-1" onclick="increment_m14_health_units_looped_over_pullup_bar(-1)">
+        </td>
+        <td>
+          <input id="inc_m14_health_units_looped_over_pullup_bar_1" type="button" value="+1" onclick="increment_m14_health_units_looped_over_pullup_bar(1)">
+        </td>
+        <td>
+          <input id="inc_m14_health_units_looped_over_pullup_bar_4" type="button" value="+4" onclick="increment_m14_health_units_looped_over_pullup_bar(4)">
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m14_health_units_looped_over_pullup_bar" size="3" onchange="check_m14_health_units_looped_over_pullup_bar()" value="0" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m14_health_units_looped_over_pullup_bar" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m14_health_units_looped_over_pullup_bar -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M04</b></td>
+<td colspan="2" class="center truncate"><b>M04</b></td>
+</tr>
+<!-- m04_bench_flat -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M04 - Bench - Flat Down:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m04_bench_flat_no" name="m04_bench_flat" value="0" onclick="set_m04_bench_flat(0)" checked="checked">
+          <label for="m04_bench_flat_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m04_bench_flat_yes" name="m04_bench_flat" value="1" onclick="set_m04_bench_flat(1)">
+          <label for="m04_bench_flat_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m04_bench_flat_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m04_bench_flat" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m04_bench_flat -->
+
+<!-- m04_bench_cubes_hopscotch -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M04 - Bench - Flat Down - # Spaces w/Cube in Hopscotch:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input id="dec_m04_bench_cubes_hopscotch_4" type="button" value="-4" onclick="increment_m04_bench_cubes_hopscotch(-4)">
+        </td>
+        <td>
+          <input id="dec_m04_bench_cubes_hopscotch_1" type="button" value="-1" onclick="increment_m04_bench_cubes_hopscotch(-1)">
+        </td>
+        <td>
+          <input id="inc_m04_bench_cubes_hopscotch_1" type="button" value="+1" onclick="increment_m04_bench_cubes_hopscotch(1)">
+        </td>
+        <td>
+          <input id="inc_m04_bench_cubes_hopscotch_4" type="button" value="+4" onclick="increment_m04_bench_cubes_hopscotch(4)">
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m04_bench_cubes_hopscotch" size="3" onchange="check_m04_bench_cubes_hopscotch()" value="0" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m04_bench_cubes_hopscotch" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m04_bench_cubes_hopscotch -->
+
+<!-- m04_bench_backrest_removed -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M04 - Bench - Backrest Completely Removed:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m04_bench_backrest_removed_no" name="m04_bench_backrest_removed" value="0" onclick="set_m04_bench_backrest_removed(0)" checked="checked">
+          <label for="m04_bench_backrest_removed_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m04_bench_backrest_removed_yes" name="m04_bench_backrest_removed" value="1" onclick="set_m04_bench_backrest_removed(1)">
+          <label for="m04_bench_backrest_removed_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m04_bench_backrest_removed_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m04_bench_backrest_removed" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m04_bench_backrest_removed -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M05</b></td>
+<td colspan="2" class="center truncate"><b>M05</b></td>
+</tr>
+<!-- m05_basketball_cube_crate -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M05 - Basketball - Cube in Crate:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m05_basketball_cube_crate_no" name="m05_basketball_cube_crate" value="0" onclick="set_m05_basketball_cube_crate(0)" checked="checked">
+          <label for="m05_basketball_cube_crate_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m05_basketball_cube_crate_yes" name="m05_basketball_cube_crate" value="1" onclick="set_m05_basketball_cube_crate(1)">
+          <label for="m05_basketball_cube_crate_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m05_basketball_cube_crate_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m05_basketball_cube_crate" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m05_basketball_cube_crate -->
+
+<!-- m05_basketball_height -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M05 - Basketball Height:
+  </td>
+  <td>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr>
+        <td class="right">
+          <input type="radio" name="m05_basketball_height" value="no" id="m05_basketball_height_no" '="" onclick='set_m05_basketball_height("no")' checked="checked">
+        </td>
+        <td><label for="m05_basketball_height_no">
+          No
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m05_basketball_height" value="middle_stopper" id="m05_basketball_height_middle_stopper" '="" onclick='set_m05_basketball_height("middle_stopper")'>
+        </td>
+        <td><label for="m05_basketball_height_middle_stopper">
+          Middle Stopper
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m05_basketball_height" value="top_stopper" id="m05_basketball_height_top_stopper" '="" onclick='set_m05_basketball_height("top_stopper")'>
+        </td>
+        <td><label for="m05_basketball_height_top_stopper">
+          Top Stopper
+        </label></td>
+      </tr>
+        </tbody></table>
+  </td><td align="right">
+    <input type="text" name="m05_basketball_height_radioValue" size="10" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m05_basketball_height" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m05_basketball_height -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M03</b></td>
+<td colspan="2" class="center truncate"><b>M03</b></td>
+</tr>
+<!-- m03_slide_figures_off -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M03 - Slide - Slide Figures Off Slide:
+  </td>
+  <td>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr>
+        <td class="right">
+          <input type="radio" name="m03_slide_figures_off" value="No" id="m03_slide_figures_off_No" '="" onclick='set_m03_slide_figures_off("No")' checked="checked">
+        </td>
+        <td><label for="m03_slide_figures_off_No">
+          No
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m03_slide_figures_off" value="one_figure" id="m03_slide_figures_off_one_figure" '="" onclick='set_m03_slide_figures_off("one_figure")'>
+        </td>
+        <td><label for="m03_slide_figures_off_one_figure">
+          One Slide Figure
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m03_slide_figures_off" value="both_figures" id="m03_slide_figures_off_both_figures" '="" onclick='set_m03_slide_figures_off("both_figures")'>
+        </td>
+        <td><label for="m03_slide_figures_off_both_figures">
+          Both Slide Figures
+        </label></td>
+      </tr>
+        </tbody></table>
+  </td><td align="right">
+    <input type="text" name="m03_slide_figures_off_radioValue" size="10" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m03_slide_figures_off" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m03_slide_figures_off -->
+
+<!-- m03_slide_figure_home -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M03 - Slide Figure Completely in Home:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m03_slide_figure_home_no" name="m03_slide_figure_home" value="0" onclick="set_m03_slide_figure_home(0)" checked="checked">
+          <label for="m03_slide_figure_home_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m03_slide_figure_home_yes" name="m03_slide_figure_home" value="1" onclick="set_m03_slide_figure_home(1)">
+          <label for="m03_slide_figure_home_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m03_slide_figure_home_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m03_slide_figure_home" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m03_slide_figure_home -->
+
+<!-- m03_slide_figure_heavy_tire -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M03 - Slide Figure Completely on Heavy Black Tire:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m03_slide_figure_heavy_tire_no" name="m03_slide_figure_heavy_tire" value="0" onclick="set_m03_slide_figure_heavy_tire(0)" checked="checked">
+          <label for="m03_slide_figure_heavy_tire_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m03_slide_figure_heavy_tire_yes" name="m03_slide_figure_heavy_tire" value="1" onclick="set_m03_slide_figure_heavy_tire(1)">
+          <label for="m03_slide_figure_heavy_tire_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m03_slide_figure_heavy_tire_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m03_slide_figure_heavy_tire" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m03_slide_figure_heavy_tire -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M02</b></td>
+<td colspan="2" class="center truncate"><b>M02</b></td>
+</tr>
+<!-- m02_step_counter -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M02 - Step Counter:
+  </td>
+  <td>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr>
+        <td class="right">
+          <input type="radio" name="m02_step_counter" value="None" id="m02_step_counter_None" '="" onclick='set_m02_step_counter("None")' checked="checked">
+        </td>
+        <td><label for="m02_step_counter_None">
+          No
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m02_step_counter" value="magenta" id="m02_step_counter_magenta" '="" onclick='set_m02_step_counter("magenta")'>
+        </td>
+        <td><label for="m02_step_counter_magenta">
+          Magenta
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m02_step_counter" value="yellow" id="m02_step_counter_yellow" '="" onclick='set_m02_step_counter("yellow")'>
+        </td>
+        <td><label for="m02_step_counter_yellow">
+          Yellow
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m02_step_counter" value="blue" id="m02_step_counter_blue" '="" onclick='set_m02_step_counter("blue")'>
+        </td>
+        <td><label for="m02_step_counter_blue">
+          Blue
+        </label></td>
+      </tr>
+        </tbody></table>
+  </td><td align="right">
+    <input type="text" name="m02_step_counter_radioValue" size="10" readonly="readonly" tabindex="-1" value="NONE" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m02_step_counter" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m02_step_counter -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M09</b></td>
+<td colspan="2" class="center truncate"><b>M09</b></td>
+</tr>
+<!-- m09_tire_light_blue_white_center_up -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M09 - Tire Flip - Light Blue Tire White Center UP:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m09_tire_light_blue_white_center_up_no" name="m09_tire_light_blue_white_center_up" value="0" onclick="set_m09_tire_light_blue_white_center_up(0)" checked="checked">
+          <label for="m09_tire_light_blue_white_center_up_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m09_tire_light_blue_white_center_up_yes" name="m09_tire_light_blue_white_center_up" value="1" onclick="set_m09_tire_light_blue_white_center_up(1)">
+          <label for="m09_tire_light_blue_white_center_up_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m09_tire_light_blue_white_center_up_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m09_tire_light_blue_white_center_up" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m09_tire_light_blue_white_center_up -->
+
+<!-- m09_tire_flip_black_tire_white_center_up -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M09 - Tire Flip - Heavy Black Tire White Center UP:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m09_tire_flip_black_tire_white_center_up_no" name="m09_tire_flip_black_tire_white_center_up" value="0" onclick="set_m09_tire_flip_black_tire_white_center_up(0)" checked="checked">
+          <label for="m09_tire_flip_black_tire_white_center_up_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m09_tire_flip_black_tire_white_center_up_yes" name="m09_tire_flip_black_tire_white_center_up" value="1" onclick="set_m09_tire_flip_black_tire_white_center_up(1)">
+          <label for="m09_tire_flip_black_tire_white_center_up_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m09_tire_flip_black_tire_white_center_up_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m09_tire_flip_black_tire_white_center_up" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m09_tire_flip_black_tire_white_center_up -->
+
+<!-- m09_tire_flip_white_center_in_large_target -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M09 - Tire Flip - White Center Up Tires Completely in Large Target Circle:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input id="dec_m09_tire_flip_white_center_in_large_target_2" type="button" value="-2" onclick="increment_m09_tire_flip_white_center_in_large_target(-2)">
+        </td>
+        <td>
+          <input id="dec_m09_tire_flip_white_center_in_large_target_1" type="button" value="-1" onclick="increment_m09_tire_flip_white_center_in_large_target(-1)">
+        </td>
+        <td>
+          <input id="inc_m09_tire_flip_white_center_in_large_target_1" type="button" value="+1" onclick="increment_m09_tire_flip_white_center_in_large_target(1)">
+        </td>
+        <td>
+          <input id="inc_m09_tire_flip_white_center_in_large_target_2" type="button" value="+2" onclick="increment_m09_tire_flip_white_center_in_large_target(2)">
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m09_tire_flip_white_center_in_large_target" size="3" onchange="check_m09_tire_flip_white_center_in_large_target()" value="0" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m09_tire_flip_white_center_in_large_target" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m09_tire_flip_white_center_in_large_target -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M11</b></td>
+<td colspan="2" class="center truncate"><b>M11</b></td>
+</tr>
+<!-- m11_treadmill -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M11 - Treadmill:
+  </td>
+  <td>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr>
+        <td class="right">
+          <input type="radio" name="m11_treadmill" value="no" id="m11_treadmill_no" '="" onclick='set_m11_treadmill("no")' checked="checked">
+        </td>
+        <td><label for="m11_treadmill_no">
+          No
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m11_treadmill" value="gray" id="m11_treadmill_gray" '="" onclick='set_m11_treadmill("gray")'>
+        </td>
+        <td><label for="m11_treadmill_gray">
+          Gray
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m11_treadmill" value="red" id="m11_treadmill_red" '="" onclick='set_m11_treadmill("red")'>
+        </td>
+        <td><label for="m11_treadmill_red">
+          Red
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m11_treadmill" value="orange" id="m11_treadmill_orange" '="" onclick='set_m11_treadmill("orange")'>
+        </td>
+        <td><label for="m11_treadmill_orange">
+          Orange
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m11_treadmill" value="yellow" id="m11_treadmill_yellow" '="" onclick='set_m11_treadmill("yellow")'>
+        </td>
+        <td><label for="m11_treadmill_yellow">
+          Yellow
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m11_treadmill" value="light_green" id="m11_treadmill_light_green" '="" onclick='set_m11_treadmill("light_green")'>
+        </td>
+        <td><label for="m11_treadmill_light_green">
+          Light Green
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m11_treadmill" value="dark_green" id="m11_treadmill_dark_green" '="" onclick='set_m11_treadmill("dark_green")'>
+        </td>
+        <td><label for="m11_treadmill_dark_green">
+          Dark Green
+        </label></td>
+      </tr>
+        </tbody></table>
+  </td><td align="right">
+    <input type="text" name="m11_treadmill_radioValue" size="10" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m11_treadmill" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m11_treadmill -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M12</b></td>
+<td colspan="2" class="center truncate"><b>M12</b></td>
+</tr>
+<!-- goal_22 -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M12 - Row Machine - :
+  </td>
+  <td>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr>
+        <td class="right">
+          <input type="radio" name="goal_22" value="no" id="goal_22_no" '="" onclick='set_goal_22("no")' checked="checked">
+        </td>
+        <td><label for="goal_22_no">
+          No
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="goal_22" value="outside_large_circle" id="goal_22_outside_large_circle" '="" onclick='set_goal_22("outside_large_circle")'>
+        </td>
+        <td><label for="goal_22_outside_large_circle">
+          Competely Outside Large Circle
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="goal_22" value="inside_small_circle" id="goal_22_inside_small_circle" '="" onclick='set_goal_22("inside_small_circle")'>
+        </td>
+        <td><label for="goal_22_inside_small_circle">
+          Completely Inside Small Circle
+        </label></td>
+      </tr>
+        </tbody></table>
+  </td><td align="right">
+    <input type="text" name="goal_22_radioValue" size="10" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_goal_22" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end goal_22 -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M13</b></td>
+<td colspan="2" class="center truncate"><b>M13</b></td>
+</tr>
+<!-- m13_weight_machinge -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M13 - Weight Machine:
+  </td>
+  <td>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr>
+        <td class="right">
+          <input type="radio" name="m13_weight_machinge" value="no" id="m13_weight_machinge_no" '="" onclick='set_m13_weight_machinge("no")' checked="checked">
+        </td>
+        <td><label for="m13_weight_machinge_no">
+          No
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m13_weight_machinge" value="blue" id="m13_weight_machinge_blue" '="" onclick='set_m13_weight_machinge("blue")'>
+        </td>
+        <td><label for="m13_weight_machinge_blue">
+          Blue
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m13_weight_machinge" value="magenta" id="m13_weight_machinge_magenta" '="" onclick='set_m13_weight_machinge("magenta")'>
+        </td>
+        <td><label for="m13_weight_machinge_magenta">
+          Magenta
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m13_weight_machinge" value="yellow" id="m13_weight_machinge_yellow" '="" onclick='set_m13_weight_machinge("yellow")'>
+        </td>
+        <td><label for="m13_weight_machinge_yellow">
+          Yellow
+        </label></td>
+      </tr>
+        </tbody></table>
+  </td><td align="right">
+    <input type="text" name="m13_weight_machinge_radioValue" size="10" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m13_weight_machinge" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m13_weight_machinge -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M10</b></td>
+<td colspan="2" class="center truncate"><b>M10</b></td>
+</tr>
+<!-- m10_cell_phone -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M10 - Cell Phone - White Side Up Resting on Only the Mat:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m10_cell_phone_no" name="m10_cell_phone" value="0" onclick="set_m10_cell_phone(0)" checked="checked">
+          <label for="m10_cell_phone_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m10_cell_phone_yes" name="m10_cell_phone" value="1" onclick="set_m10_cell_phone(1)">
+          <label for="m10_cell_phone_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m10_cell_phone_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m10_cell_phone" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m10_cell_phone -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M08</b></td>
+<td colspan="2" class="center truncate"><b>M08</b></td>
+</tr>
+<!-- m08_boccia_color_match -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M08 - Boccia - Color Matching:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m08_boccia_color_match_no" name="m08_boccia_color_match" value="0" onclick="set_m08_boccia_color_match(0)" checked="checked">
+          <label for="m08_boccia_color_match_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m08_boccia_color_match_yes" name="m08_boccia_color_match" value="1" onclick="set_m08_boccia_color_match(1)">
+          <label for="m08_boccia_color_match_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m08_boccia_color_match_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m08_boccia_color_match" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m08_boccia_color_match -->
+
+<!-- m08_cubes_in_frame_target -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M08 - Boccia - # Cubes Completely in Frame or Target :
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input id="dec_m08_cubes_in_frame_target_17" type="button" value="-17" onclick="increment_m08_cubes_in_frame_target(-17)">
+        </td>
+        <td>
+          <input id="dec_m08_cubes_in_frame_target_5" type="button" value="-5" onclick="increment_m08_cubes_in_frame_target(-5)">
+        </td>
+        <td>
+          <input id="dec_m08_cubes_in_frame_target_1" type="button" value="-1" onclick="increment_m08_cubes_in_frame_target(-1)">
+        </td>
+        <td>
+          <input id="inc_m08_cubes_in_frame_target_1" type="button" value="+1" onclick="increment_m08_cubes_in_frame_target(1)">
+        </td>
+        <td>
+          <input id="inc_m08_cubes_in_frame_target_5" type="button" value="+5" onclick="increment_m08_cubes_in_frame_target(5)">
+        </td>
+        <td>
+          <input id="inc_m08_cubes_in_frame_target_17" type="button" value="+17" onclick="increment_m08_cubes_in_frame_target(17)">
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m08_cubes_in_frame_target" size="3" onchange="check_m08_cubes_in_frame_target()" value="0" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m08_cubes_in_frame_target" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m08_cubes_in_frame_target -->
+
+<!-- m08_boccia_yellow_cube -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M08 - Boccia - Yellow Cube Completely In Target:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m08_boccia_yellow_cube_no" name="m08_boccia_yellow_cube" value="0" onclick="set_m08_boccia_yellow_cube(0)" checked="checked">
+          <label for="m08_boccia_yellow_cube_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m08_boccia_yellow_cube_yes" name="m08_boccia_yellow_cube" value="1" onclick="set_m08_boccia_yellow_cube(1)">
+          <label for="m08_boccia_yellow_cube_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m08_boccia_yellow_cube_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m08_boccia_yellow_cube" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m08_boccia_yellow_cube -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M15</b></td>
+<td colspan="2" class="center truncate"><b>M15</b></td>
+</tr>
+<!-- m15_precision_tokens -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M15 - Precision Tokens Remaining on Field:
+  </td>
+  <td>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr>
+        <td class="right">
+          <input type="radio" name="m15_precision_tokens" value="zero" id="m15_precision_tokens_zero" '="" onclick='set_m15_precision_tokens("zero")' checked="checked">
+        </td>
+        <td><label for="m15_precision_tokens_zero">
+          0
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m15_precision_tokens" value="one" id="m15_precision_tokens_one" '="" onclick='set_m15_precision_tokens("one")'>
+        </td>
+        <td><label for="m15_precision_tokens_one">
+          1
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m15_precision_tokens" value="two" id="m15_precision_tokens_two" '="" onclick='set_m15_precision_tokens("two")'>
+        </td>
+        <td><label for="m15_precision_tokens_two">
+          2
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m15_precision_tokens" value="three" id="m15_precision_tokens_three" '="" onclick='set_m15_precision_tokens("three")'>
+        </td>
+        <td><label for="m15_precision_tokens_three">
+          3
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m15_precision_tokens" value="four" id="m15_precision_tokens_four" '="" onclick='set_m15_precision_tokens("four")'>
+        </td>
+        <td><label for="m15_precision_tokens_four">
+          4
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m15_precision_tokens" value="five" id="m15_precision_tokens_five" '="" onclick='set_m15_precision_tokens("five")'>
+        </td>
+        <td><label for="m15_precision_tokens_five">
+          5
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m15_precision_tokens" value="six" id="m15_precision_tokens_six" '="" onclick='set_m15_precision_tokens("six")'>
+        </td>
+        <td><label for="m15_precision_tokens_six">
+          6
+        </label></td>
+      </tr>
+        </tbody></table>
+  </td><td align="right">
+    <input type="text" name="m15_precision_tokens_radioValue" size="10" readonly="readonly" tabindex="-1" value="ZERO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m15_precision_tokens" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m15_precision_tokens -->
+
+
+
+                <!-- Total Score -->
+                <tr>
+                  <td colspan="3"><font size="4"><u>Total
+                        Score:</u></font></td>
+                  <td align="right"><input type="text" name="totalScore" size="3" readonly="readonly" tabindex="-1" value="0"></td>
+                </tr>
+                <!-- Score Verification -->
+    <tr>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size="4" color="red">Score entry verified:</font></td>
+      <td><table width="150" cellspacing="0" cellpadding="0" border="0"><tbody><tr align="center">
+        <td>
+          <input type="radio" id="Verified_no" name="Verified" value="0" onclick="set_Verified(0)" checked="checked">
+          <label for="Verified_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="Verified_yes" name="Verified" value="1" onclick="set_Verified(1)">
+          <label for="Verified_yes">Yes</label>
+        </td>
+      </tr></tbody></table></td>
+      <td colspan="2">&nbsp;</td>
+    </tr>
+
+              
+            
+            <!-- end check for bye -->
+
+          </tbody></table> <!-- end score entry table  -->
+
+        </td>
+      </tr>
+    </tbody></table>
+    <!-- end table to center everything -->
+  </form>
+  <!-- end score entry form -->
+
+    
+<hr><table>  <tbody><tr>    <td><a href="http://localhost:9080/admin/performance-area.jsp" target="_top">Scoring Coordinator</a></td>    <td><a href="http://localhost:9080/judges-room.jsp" target="_top">Judges Room</a></td>    <td><a href="http://localhost:9080/index.jsp" target="_top">Main Index</a></td>    <td><a href="http://localhost:9080/admin/index.jsp" target="_top">Admin Index</a></td>  </tr>  <tr><td colspan="4">Software version: 15.1.4-beta.29+gbe61db3-dirty</td></tr></tbody></table>
+<div style="display: none; position: absolute;" tabindex="-1" role="dialog" class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-dialog-buttons ui-draggable ui-resizable" aria-describedby="yesno-dialog" aria-labelledby="ui-id-1"><div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix ui-draggable-handle"><span id="ui-id-1" class="ui-dialog-title">&nbsp;</span><button type="button" class="ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close" title="Close"><span class="ui-button-icon ui-icon ui-icon-closethick"></span><span class="ui-button-icon-space"> </span>Close</button></div><div id="yesno-dialog" class="ui-dialog-content ui-widget-content">
+        <p id="yesno-dialog_text"></p>
+    </div><div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix"><div class="ui-dialog-buttonset"><button type="button" id="yesno-dialog_yes" class="ui-button ui-corner-all ui-widget">Yes</button><button type="button" id="yesno-dialog_no" class="ui-button ui-corner-all ui-widget">No</button></div></div><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-e" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-s" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-sw" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-ne" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90;"></div></div></body></html>
