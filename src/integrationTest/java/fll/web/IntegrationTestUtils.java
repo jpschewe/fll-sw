@@ -95,7 +95,7 @@ public final class IntegrationTestUtils {
   /**
    * Username used for integration tests.
    */
-  public static final String TEST_USERNAME = "fll";
+  public static final String TEST_USERNAME = "fll_test";
 
   /**
    * Password used for integration tests.
@@ -358,6 +358,15 @@ public final class IntegrationTestUtils {
 
   private static void createUser(final WebDriver selenium,
                                  final WebDriverWait seleniumWait) {
+
+    seleniumWait.until(ExpectedConditions.or(ExpectedConditions.urlContains("createUsername.jsp"),
+                                             ExpectedConditions.presenceOfElementLocated(By.name("submit_create_admin"))));
+
+    if (isElementPresent(selenium, By.name("submit_create_admin"))) {
+      // create new admin user
+      selenium.findElement(By.name("submit_create_admin")).click();
+    }
+
     seleniumWait.until(ExpectedConditions.urlContains("createUsername.jsp"));
 
     final WebElement userElement = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.name("user")));

@@ -139,7 +139,8 @@ public class CreateUser extends BaseFLLServlet {
         request.getRequestDispatcher("/DoLogin").forward(request, response);
       } else {
         LOGGER.debug("Redirecting to index");
-        response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+        response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+            + "/index.jsp"));
       }
 
     } catch (final SQLException e) {

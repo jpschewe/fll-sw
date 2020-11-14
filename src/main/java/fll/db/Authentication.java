@@ -105,6 +105,29 @@ public final class Authentication {
   }
 
   /**
+   * Get the list of current users that have the {@link UserRole#ADMIN} role.
+   * 
+   * @param connection the database connection
+   * @return the usernames
+   * @throws SQLException on a database error
+   */
+  public static Collection<String> getAdminUsers(final Connection connection) throws SQLException {
+    final Collection<String> users = new LinkedList<>();
+    try (PreparedStatement prep = connection.prepareStatement("SELECT fll_user FROM fll_authentication, auth_roles" //
+        + " WHERE fll_authentication.fll_user = auth_roles.fll_user" //
+        + " AND auth_roles.fll_role = ?")) {
+      prep.setString(1, UserRole.ADMIN.name());
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final String user = rs.getString("fll_user");
+          users.add(user);
+        }
+      }
+    }
+    return users;
+  }
+
+  /**
    * Remove a user.
    * 
    * @param connection the database connection
