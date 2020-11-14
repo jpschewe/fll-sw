@@ -19,8 +19,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.util.FLLRuntimeException;
 import fll.web.UserRole;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -326,4 +328,43 @@ public final class Authentication {
     return null;
   }
 
+  /**
+   * Add a user to the database.
+   * 
+   * @param connection database connection
+   * @param user the user to add
+   * @param pass the password for the user
+   * @throws SQLException on a database error
+   * @throws DuplicateUserException if the user already exists
+   */
+  public static void addUser(final Connection connection,
+                             final String user,
+                             final String pass)
+      throws SQLException {
+    final Collection<String> existingUsers = Authentication.getUsers(connection);
+    if (existingUsers.contains(user)) {
+      throw new DuplicateUserException(String.format("The user '%s' already exists", user));
+    }
+
+    final String hashedPass = DigestUtils.md5Hex(pass);
+    try (
+        PreparedStatement addUser = connection.prepareStatement("INSERT INTO fll_authentication (fll_user, fll_pass) VALUES(?, ?)")) {
+      addUser.setString(1, user);
+      addUser.setString(2, hashedPass);
+      addUser.executeUpdate();
+    }
+
+  }
+
+  /**
+   * Thrown when a duplicate username is found.
+   */
+  public static final class DuplicateUserException extends FLLRuntimeException {
+    /**
+     * @param message {@link #getMessage()}
+     */
+    public DuplicateUserException(final String message) {
+      super(message);
+    }
+  }
 }

@@ -20,18 +20,26 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.Console;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
+import javax.sql.DataSource;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -50,10 +58,13 @@ import org.apache.commons.cli.Options;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.db.Authentication;
 import fll.scheduler.SchedulerUI;
 import fll.tomcat.TomcatLauncher;
 import fll.util.ConsoleExceptionHandler;
+import fll.util.FLLRuntimeException;
 import fll.util.GuiExceptionHandler;
+import fll.web.UserRole;
 import fll.xml.ui.ChallengeDescriptionFrame;
 import it.sauronsoftware.junique.AlreadyLockedException;
 import it.sauronsoftware.junique.JUnique;
@@ -120,12 +131,15 @@ public class Launcher extends JFrame {
 
   private static final String OPT_HEADLESS = "headless";
 
+  private static final String OPT_CREATE_ADMIN = "create-admin";
+
   private static Options buildOptions() {
     final Options options = new Options();
     options.addOption(null, OPT_START_WEB, false, "Immediately start the webserver");
     options.addOption(null, OPT_PORT, true, "The port to use for the web server. Deafult is "
         + DEFAULT_WEB_PORT);
     options.addOption(null, OPT_HEADLESS, false, "Run without the GUI and immediately start the webserver");
+    options.addOption(null, OPT_CREATE_ADMIN, false, "Create an admin user");
 
     options.addOption("h", OPT_HELP, false, "help");
 
@@ -156,7 +170,6 @@ public class Launcher extends JFrame {
   }
 
   /**
-   * 
    * @param args see "--help" for arguemnts
    */
   public static void main(final String[] args) {
@@ -184,6 +197,10 @@ public class Launcher extends JFrame {
         startWeb = true;
         headless = true;
       }
+      if (cmd.hasOption(OPT_CREATE_ADMIN)) {
+        createAdminUserCli();
+      }
+
       if (cmd.hasOption(OPT_HELP)) {
         usage(options);
         System.exit(0);
@@ -219,6 +236,79 @@ public class Launcher extends JFrame {
         System.exit(1);
       }
     }
+  }
+
+  /**
+   * Create an admin user from the command line.
+   */
+  private static void createAdminUserCli() {
+    final DataSource datasource = createDatasource();
+    try (Connection connection = datasource.getConnection()) {
+      if (!Utilities.testDatabaseInitialized(connection)) {
+        LOGGER.warn("Database is not initialized, cannot create admin user now. A user will be created when the database is initialized");
+        return;
+      }
+
+      final Console console = System.console();
+      if (null == console) {
+        throw new IllegalStateException("No console is connected");
+      }
+
+      final Pattern usernamePattern = Pattern.compile("^\\w+$");
+      boolean done = false;
+      while (!done) {
+        final String user = console.readLine("Username: ");
+        final char[] pass = console.readPassword("Password: ");
+        final char[] passCheck = console.readPassword("Repeat password: ");
+
+        done = true;
+        if (!usernamePattern.matcher(user).matches()) {
+          console.writer().format("Username can only contain letters, numbers and underscore%n");
+          done = false;
+        }
+        if (null == pass) {
+          console.writer().format("Password not read, try again%n");
+          done = false;
+        }
+        if (!Arrays.equals(pass, passCheck)) {
+          console.writer().format("Passwords do not match%n");
+          done = false;
+        }
+
+        if (done) {
+          // create the user
+          final Collection<String> existingUsers = Authentication.getUsers(connection);
+          if (existingUsers.contains(user)) {
+            console.writer().format("The username '%s' already exists in the database%n", user);
+            done = false;
+          } else {
+            Authentication.addUser(connection, user, String.valueOf(pass));
+            Authentication.setRoles(connection, user, Collections.singleton(UserRole.ADMIN));
+          }
+        } // create user
+
+      } // while not done
+
+    } catch (final SQLException e) {
+      LOGGER.error("Error talking to the database", e);
+      throw new FLLRuntimeException("Error talking to the database", e);
+    }
+
+  }
+
+  private static DataSource createDatasource() {
+    final Path classesPath = TomcatLauncher.getClassesPath();
+    LOGGER.debug("Classes path {}", classesPath);
+
+    final Path webappRoot = TomcatLauncher.findWebappRoot(classesPath);
+    if (null == webappRoot) {
+      throw new FLLRuntimeException("Cannot find location of the database");
+    }
+    LOGGER.debug("Web app root: {}", webappRoot);
+
+    final String database = webappRoot.resolve("WEB-INF/flldb").toString();
+    final DataSource datasource = Utilities.createFileDataSource(database);
+    return datasource;
   }
 
   private final JLabel mServerStatus;

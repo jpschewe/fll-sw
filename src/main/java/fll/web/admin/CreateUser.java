@@ -8,8 +8,6 @@ package fll.web.admin;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,8 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
-
-import org.apache.commons.codec.digest.DigestUtils;
 
 import fll.db.Authentication;
 import fll.web.ApplicationAttributes;
@@ -96,28 +92,17 @@ public class CreateUser extends BaseFLLServlet {
         return;
       }
 
-      try (
-          PreparedStatement checkUser = connection.prepareStatement("SELECT fll_user FROM fll_authentication WHERE fll_user = ?")) {
-        checkUser.setString(1, user);
-        try (ResultSet rs = checkUser.executeQuery()) {
-          if (rs.next()) {
-            LOGGER.debug("User already exists");
-            SessionAttributes.appendToMessage(session, "<p class='error'>Username '"
-                + user
-                + "' already exists.</p>");
-            response.sendRedirect(response.encodeRedirectURL("createUsername.jsp"));
-            return;
-          }
-        }
+      final Collection<String> existingUsers = Authentication.getUsers(connection);
+      if (existingUsers.contains(user)) {
+        LOGGER.debug("User already exists");
+        SessionAttributes.appendToMessage(session, "<p class='error'>Username '"
+            + user
+            + "' already exists.</p>");
+        response.sendRedirect(response.encodeRedirectURL("createUsername.jsp"));
+        return;
       }
 
-      final String hashedPass = DigestUtils.md5Hex(pass);
-      try (
-          PreparedStatement addUser = connection.prepareStatement("INSERT INTO fll_authentication (fll_user, fll_pass) VALUES(?, ?)")) {
-        addUser.setString(1, user);
-        addUser.setString(2, hashedPass);
-        addUser.executeUpdate();
-      }
+      Authentication.addUser(connection, user, pass);
 
       final Set<UserRole> selectedRoles = Arrays.stream(UserRole.values()) //
                                                 .filter(r -> null != request.getParameter(String.format("role_%s",
