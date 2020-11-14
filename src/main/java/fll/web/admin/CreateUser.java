@@ -11,7 +11,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -19,6 +23,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -28,6 +33,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.CookieUtils;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 
 /**
  * Create a user if.
@@ -36,6 +42,25 @@ import fll.web.SessionAttributes;
 public class CreateUser extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
+  /**
+   * Set some variables for createUsername.jsp to use.
+   * 
+   * @param request used to get parameters
+   * @param pageContext where to store page variables
+   */
+  public static void populateContext(final HttpServletRequest request,
+                                     final PageContext pageContext) {
+    pageContext.setAttribute("possibleRoles", UserRole.values());
+
+    final Set<UserRole> selectedRoles = new HashSet<>();
+    for (final UserRole role : UserRole.values()) {
+      if (null != request.getParameter(role.name())) {
+        selectedRoles.add(role);
+      }
+    }
+    pageContext.setAttribute("selectedRoles", selectedRoles);
+  }
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -93,6 +118,12 @@ public class CreateUser extends BaseFLLServlet {
         addUser.setString(2, hashedPass);
         addUser.executeUpdate();
       }
+
+      final Set<UserRole> selectedRoles = Arrays.stream(UserRole.values()) //
+                                                .filter(r -> null != request.getParameter(String.format("role_%s",
+                                                                                                        r.name()))) //
+                                                .collect(Collectors.toSet());
+      Authentication.setRoles(connection, user, selectedRoles);
 
       LOGGER.debug("Created user");
       SessionAttributes.appendToMessage(session,

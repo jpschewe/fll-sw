@@ -10,15 +10,20 @@ package fll.web;
  * Roles that a user can be in.
  */
 public enum UserRole {
+  PUBLIC("This role has no special permissions"), REF("This role can enter performance scores"), JUDGE(
+      "This role can enter subjective scores"), ADMIN("This role can do anything");
+
+  UserRole(final String description) {
+    this.description = description;
+  }
+
+  private final String description;
+
   /**
-   * This role has no special permissions.
+   * @return description of the role
    */
-  PUBLIC,
-  /** This role can enter performance scores. */
-  REF,
-  /** This role can enter subjective scores. */
-  JUDGE,
-  /** This role can do anything. */
-  ADMIN;
+  public String getDescription() {
+    return description;
+  }
 
 }
