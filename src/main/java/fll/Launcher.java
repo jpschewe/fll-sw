@@ -12,6 +12,8 @@ import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.FlowLayout;
 import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ComponentAdapter;
@@ -40,11 +42,15 @@ import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.sql.DataSource;
+import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
@@ -63,8 +69,10 @@ import fll.scheduler.SchedulerUI;
 import fll.tomcat.TomcatLauncher;
 import fll.util.ConsoleExceptionHandler;
 import fll.util.FLLRuntimeException;
+import fll.util.FormatterUtils;
 import fll.util.GuiExceptionHandler;
 import fll.web.UserRole;
+import fll.xml.ui.ChallengeDescriptionEditor;
 import fll.xml.ui.ChallengeDescriptionFrame;
 import it.sauronsoftware.junique.AlreadyLockedException;
 import it.sauronsoftware.junique.JUnique;
@@ -238,6 +246,8 @@ public class Launcher extends JFrame {
     }
   }
 
+  private static final Pattern USERNAME_PATTERN = Pattern.compile("^\\w+$");
+
   /**
    * Create an admin user from the command line.
    */
@@ -254,7 +264,6 @@ public class Launcher extends JFrame {
         throw new IllegalStateException("No console is connected");
       }
 
-      final Pattern usernamePattern = Pattern.compile("^\\w+$");
       boolean done = false;
       while (!done) {
         final String user = console.readLine("Username: ");
@@ -262,7 +271,7 @@ public class Launcher extends JFrame {
         final char[] passCheck = console.readPassword("Repeat password: ");
 
         done = true;
-        if (!usernamePattern.matcher(user).matches()) {
+        if (!USERNAME_PATTERN.matcher(user).matches()) {
           console.writer().format("Username can only contain letters, numbers and underscore%n");
           done = false;
         }
@@ -294,6 +303,167 @@ public class Launcher extends JFrame {
       throw new FLLRuntimeException("Error talking to the database", e);
     }
 
+  }
+
+  private static final class AdminUserPrompt extends JDialog {
+    AdminUserPrompt(final JFrame parent) {
+      super(parent, "Create Admin User", true);
+      setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+      final Container cpane = getContentPane();
+      cpane.setLayout(new GridBagLayout());
+
+      GridBagConstraints gbc;
+
+      gbc = new GridBagConstraints();
+      gbc.weightx = 0;
+      gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+      cpane.add(new JLabel("Username: "), gbc);
+
+      final JFormattedTextField userEditor = FormatterUtils.createFieldForPattern(USERNAME_PATTERN);
+      gbc = new GridBagConstraints();
+      gbc.weightx = 1;
+      gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+      gbc.gridwidth = GridBagConstraints.REMAINDER;
+      gbc.fill = GridBagConstraints.HORIZONTAL;
+      cpane.add(userEditor, gbc);
+      userEditor.setColumns(ChallengeDescriptionEditor.SHORT_TEXT_WIDTH);
+
+      gbc = new GridBagConstraints();
+      gbc.weightx = 0;
+      gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+      cpane.add(new JLabel("Password: "), gbc);
+
+      final JPasswordField passwordEditor = new JPasswordField();
+      gbc = new GridBagConstraints();
+      gbc.weightx = 1;
+      gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+      gbc.gridwidth = GridBagConstraints.REMAINDER;
+      gbc.fill = GridBagConstraints.HORIZONTAL;
+      cpane.add(passwordEditor, gbc);
+
+      gbc = new GridBagConstraints();
+      gbc.weightx = 0;
+      gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+      cpane.add(new JLabel("Repeat Password: "), gbc);
+
+      final JPasswordField password2Editor = new JPasswordField();
+      gbc = new GridBagConstraints();
+      gbc.weightx = 1;
+      gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+      gbc.gridwidth = GridBagConstraints.REMAINDER;
+      gbc.fill = GridBagConstraints.HORIZONTAL;
+      cpane.add(password2Editor, gbc);
+
+      final Box buttonBox = Box.createHorizontalBox();
+      gbc = new GridBagConstraints();
+      gbc.weightx = 1;
+      gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+      gbc.gridwidth = GridBagConstraints.REMAINDER;
+      gbc.fill = GridBagConstraints.HORIZONTAL;
+      cpane.add(buttonBox, gbc);
+
+      final JButton ok = new JButton("OK");
+      buttonBox.add(ok);
+      getRootPane().setDefaultButton(ok);
+      ok.addActionListener(ae -> {
+        final String username = userEditor.getText();
+        if (username.isBlank()) {
+          JOptionPane.showMessageDialog(this, "Username cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+          return;
+        }
+
+        final char[] pass = passwordEditor.getPassword();
+        final char[] passCheck = password2Editor.getPassword();
+        if (!Arrays.equals(pass, passCheck)) {
+          JOptionPane.showMessageDialog(this, "Passwords do not match", "Error", JOptionPane.ERROR_MESSAGE);
+          return;
+        }
+
+        this.user = username;
+        this.password = String.valueOf(pass);
+        this.canceled = false;
+        setVisible(false);
+      });
+
+      final JButton cancel = new JButton("Cancel");
+      buttonBox.add(cancel);
+      cancel.addActionListener(ae -> {
+        canceled = true;
+        setVisible(false);
+      });
+
+      pack();
+    }
+
+    private boolean canceled = false;
+
+    /**
+     * @return was the dialog canceled?
+     */
+    public boolean isCanceled() {
+      return canceled;
+    }
+
+    private String user;
+
+    /**
+     * @return the specified user
+     */
+    public String getUser() {
+      return user;
+    }
+
+    private String password;
+
+    /**
+     * @return the specified password
+     */
+    public String getPassword() {
+      return password;
+    }
+
+  }
+
+  /**
+   * Create an admin user from the GUI.
+   */
+  private void createAdminUserGui() {
+    final DataSource datasource = createDatasource();
+    try (Connection connection = datasource.getConnection()) {
+      if (!Utilities.testDatabaseInitialized(connection)) {
+        JOptionPane.showMessageDialog(this,
+                                      "Database is not initialized, cannot create admin user now. A user will be created when the database is initialized",
+                                      "Database Not Initialized", JOptionPane.WARNING_MESSAGE);
+        return;
+      }
+
+      final AdminUserPrompt dialog = new AdminUserPrompt(this);
+      dialog.setLocationRelativeTo(this);
+      dialog.setVisible(true);
+      if (dialog.isCanceled()) {
+        return;
+      }
+
+      final String user = dialog.getUser();
+      final String pass = dialog.getPassword();
+
+      // create the user
+      final Collection<String> existingUsers = Authentication.getUsers(connection);
+      if (existingUsers.contains(user)) {
+        final String message = String.format("The username '%s' already exists in the database", user);
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+      } else {
+        Authentication.addUser(connection, user, String.valueOf(pass));
+        Authentication.setRoles(connection, user, Collections.singleton(UserRole.ADMIN));
+        JOptionPane.showMessageDialog(this, "User successfully created", "Success", JOptionPane.INFORMATION_MESSAGE);
+      }
+
+    } catch (final SQLException e) {
+      final String message = String.format("Error talking to the database: %s", e.getMessage());
+      JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+      LOGGER.error("Error talking to the database", e);
+    }
   }
 
   private static DataSource createDatasource() {
@@ -457,6 +627,12 @@ public class Launcher extends JFrame {
     });
     buttonBox.add(challengeEditorButton);
 
+    final JButton createAdminUser = new JButton("Create Admin User");
+    createAdminUser.addActionListener(ae -> {
+      createAdminUserGui();
+    });
+    buttonBox.add(createAdminUser);
+
     final JButton exit = new JButton("Exit");
     exit.addActionListener(ae -> {
       maybeExit();
@@ -551,7 +727,7 @@ public class Launcher extends JFrame {
           }
         });
 
-        scheduler.setLocationRelativeTo(null);
+        scheduler.setLocationRelativeTo(this);
         scheduler.setVisible(true);
       } catch (final Exception e) {
         LOGGER.fatal("Unexpected error", e);
@@ -584,7 +760,7 @@ public class Launcher extends JFrame {
           }
         });
 
-        challengeEditor.setLocationRelativeTo(null);
+        challengeEditor.setLocationRelativeTo(this);
         challengeEditor.setVisible(true);
       } catch (final Exception e) {
         LOGGER.fatal("Unexpected error", e);

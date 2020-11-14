@@ -8,12 +8,8 @@ package fll.util;
 
 import java.awt.Color;
 import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFormattedTextField;
 import javax.swing.text.DefaultFormatter;
 import javax.swing.text.DefaultFormatterFactory;
@@ -25,6 +21,7 @@ import javax.swing.text.NumberFormatter;
 public final class FormatterUtils {
 
   static final Color INVALID_COLOR = Color.red;
+
   static final Color VALID_COLOR = Color.black;
 
   private FormatterUtils() {
@@ -124,12 +121,21 @@ public final class FormatterUtils {
   /**
    * Create a {@link JFormattedTextField} for editing database names.
    * The default value is the empty string.
-   * The XML pattern is "\p{L}[\p{L}\p{Nd}_]*".
    * 
    * @return text field for editing database names
    */
   public static JFormattedTextField createDatabaseNameField() {
-    final RegexFormatter format = new RegexFormatter(DatabaseNameCellEditor.DATABASE_NAME_REGEXP);
+    return createFieldForPattern(DatabaseNameCellEditor.DATABASE_NAME_PATTERN);
+  }
+
+  /**
+   * Create a field that is formatted with {@link RegexFormatter}.
+   * 
+   * @param pattern {@link RegexFormatter#getPattern()}
+   * @return text field for editing strings matching the specified {@code pattern}
+   */
+  public static JFormattedTextField createFieldForPattern(final Pattern pattern) {
+    final RegexFormatter format = new RegexFormatter(pattern);
     format.setOverwriteMode(false);
     format.setValueClass(String.class);
 
@@ -138,56 +144,4 @@ public final class FormatterUtils {
     return field;
   }
 
-  /**
-   * Allows one to use regular expressions to specify the format of a
-   * {@link JFormattedTextField}.
-   * Based on code from http://www.oracle.com/technetwork/java/reftf-138955.html
-   * and
-   * http://www.java2s.com/Tutorial/Java/0240__Swing/RegexFormatterwithaJFormattedTextField.htm.
-   */
-  private static class RegexFormatter extends DefaultFormatter {
-    private final Pattern pattern;
-
-    /**
-     * Creates a regular expression based AbstractFormatter.
-     * pattern specifies the regular expression that will be used
-     * to determine if a value is legal.
-     */
-    RegexFormatter(@Nonnull final String pattern) throws PatternSyntaxException {
-      this.pattern = Pattern.compile(pattern);
-    }
-
-    /**
-     * Returns the Pattern used to determine if a value is legal.
-     */
-    public Pattern getPattern() {
-      return pattern;
-    }
-
-    /**
-     * Parses text returning an arbitrary Object. Some formatters
-     * may return null.
-     * If a Pattern has been specified and the text completely
-     * matches the regular expression this will invoke setMatcher.
-     * 
-     * @throws ParseException
-     *           if there is an error in the conversion
-     * @param text
-     *          String to convert
-     * @return Object representation of text
-     */
-    public Object stringToValue(String text) throws ParseException {
-      final Pattern pattern = getPattern();
-
-      if (pattern != null) {
-        final Matcher matcher = pattern.matcher(text);
-
-        if (matcher.matches()) {
-          return super.stringToValue(text);
-        }
-        throw new ParseException("Pattern did not match", 0);
-      }
-      return text;
-    }
-  } // RegEx formatter
 }
