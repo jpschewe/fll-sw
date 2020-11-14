@@ -19,7 +19,6 @@
 
     <Loggers>
         <!-- stuff for debugging -->
-        <Logger name="fll.db.ImportDB" level="DEBUG" />
 
         <!-- for debugging the database, set levels to something lower than 
             fatal to actually see log output -->
