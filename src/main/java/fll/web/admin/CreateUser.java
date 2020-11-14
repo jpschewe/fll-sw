@@ -36,7 +36,7 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 
 /**
- * Create a user if.
+ * Create a user.
  */
 @WebServlet("/admin/CreateUser")
 public class CreateUser extends BaseFLLServlet {
