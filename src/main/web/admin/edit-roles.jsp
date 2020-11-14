@@ -29,7 +29,8 @@ fll.web.admin.EditRoles.populateContext(request, application, pageContext);
         </dl>
     </div>
 
-    <form method="POST" action="EditRoles" name="edit_roles">
+    <form method="POST" action="EditRoles" name="edit_roles"
+        id="edit_roles">
         <table>
             <tr>
                 <th></th>
@@ -43,7 +44,7 @@ fll.web.admin.EditRoles.populateContext(request, application, pageContext);
                     <c:set var="selectedRoles"
                         value="${userRoles[user]}" />
 
-                    <td>${user }</td>
+                    <td>${user}</td>
 
                     <c:forEach items="${possibleRoles}" var="role">
                         <c:if test="${selectedRoles.contains(role) }">
