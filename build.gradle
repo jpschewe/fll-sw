@@ -411,6 +411,8 @@ tasks.register("jspToClasses", JavaCompile) {
     classpath = configurations.jspc + sourceSets.main.runtimeClasspath
 }
 check.dependsOn(jspToClasses)
+run.dependsOn(jspToClasses)
+assemble.dependsOn(jspToClasses)
 
 
 cpdCheck {
