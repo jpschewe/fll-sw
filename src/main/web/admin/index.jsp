@@ -407,8 +407,14 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
         </li>
         <li>
             <a href="createUsername.jsp">Create User</a>
+        </li>
+
+        <li>
+            <a href="edit-roles.jsp">Edit user roles</a>
+        </li>
         <li>
             <a href="removeUser.jsp">Remove User</a>
+        </li>
     </ul>
 
     <h2>Advanced</h2>
