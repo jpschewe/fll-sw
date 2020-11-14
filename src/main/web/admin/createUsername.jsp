@@ -9,6 +9,41 @@ fll.web.admin.CreateUser.populateContext(request, pageContext);
 <title>Create User</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
+
+<script type="text/javascript"
+    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+
+<script type="text/javascript"
+    src="<c:url value='/extlib/jquery-validation/dist/jquery.validate.min.js'/>"></script>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+
+    jQuery.validator.addMethod("alphanumeric", function(value, element) {
+      return this.optional(element) || /^[\w]+$/i.test(value);
+    }, "Letters, numbers, and underscores only please");
+
+    $("#create_user").validate({
+      rules : {
+        pass : "required",
+        pass_check : {
+          equalTo : "#pass"
+        },
+        user : {
+          required : true,
+          alphanumeric : true
+        }
+      },
+      messages : {
+        pass_check : {
+          equalTo : "The password entries must match"
+        }
+      }
+
+    });
+  });
+</script>
+
 </head>
 
 <body>
@@ -17,18 +52,21 @@ fll.web.admin.CreateUser.populateContext(request, pageContext);
     <%-- clear out the message, so that we don't see it again --%>
     <c:remove var="message" />
 
-    <form method="POST" action="CreateUser" name="create_user">
+    <form method="POST" action="CreateUser" name="create_user"
+        id="create_user">
         <div>
             Username :
-            <input type="text" size="15" maxlength="64" name="user">
+            <input type="text" size="15" maxlength="64" name="user"
+                id="user">
         </div>
         <div>
             Password :
-            <input type="password" size="15" name="pass">
+            <input type="password" size="15" name="pass" id="pass">
         </div>
         <div>
             Repeat Password :
-            <input type="password" size="15" name="pass_check">
+            <input type="password" size="15" name="pass_check"
+                id="pass_check">
         </div>
 
         <div>Roles:</div>
