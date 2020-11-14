@@ -17,9 +17,11 @@
     </module>
     <module name="JavadocMethod">
       <property name="scope" value="protected"/>
+      <property name="id" value="checkstyle:javadocmethod"/>
     </module>
     <module name="JavadocType">
       <property name="scope" value="protected"/>
+      <property name="id" value="checkstyle:javadoctype"/>
     </module>
     <module name="JavadocVariable">
       <property name="scope" value="protected"/>
@@ -28,6 +30,7 @@
     </module>
     <module name="JavadocStyle">
       <property name="scope" value="protected"/>
+      <property name="id" value="checkstyle:javadocstyle"/>
     </module>
     <module name="ConstantName"/>
     <module name="LocalFinalVariableName"/>
