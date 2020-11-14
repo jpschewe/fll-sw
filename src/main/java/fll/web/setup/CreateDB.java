@@ -71,7 +71,7 @@ public class CreateDB extends BaseFLLServlet {
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
 
           message.append("<p id='success'><i>Successfully initialized database</i></p>");
-          redirect = "/admin/createUsername.jsp";
+          redirect = "/admin/createUsername.jsp?ADMIN";
 
         } catch (final MalformedURLException e) {
           throw new FLLInternalException("Could not parse URL from choosen description: "
@@ -94,7 +94,7 @@ public class CreateDB extends BaseFLLServlet {
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
 
           message.append("<p id='success'><i>Successfully initialized database</i></p>");
-          redirect = "/admin/createUsername.jsp";
+          redirect = "/admin/createUsername.jsp?ADMIN";
         }
       } else if (null != request.getAttribute("createdb")) {
         // import a database from a dump
@@ -120,7 +120,7 @@ public class CreateDB extends BaseFLLServlet {
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
 
           message.append("<p id='success'><i>Successfully initialized database from dump</i></p>");
-          redirect = "/admin/createUsername.jsp";
+          redirect = "/admin/createUsername.jsp?ADMIN";
         }
 
       } else {
