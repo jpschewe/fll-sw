@@ -137,10 +137,6 @@ public class InitFilter implements Filter {
         // allow the list of finalist teams to be public
         permissionDenied = false;
       } else if (path.startsWith(contextPath
-          + "/api/CheckAuth")) {
-        // checking the authentication doesn't require security
-        permissionDenied = false;
-      } else if (path.startsWith(contextPath
           + "/admin/changePassword.jsp")) {
         // handled by the page
         permissionDenied = false;
@@ -154,6 +150,10 @@ public class InitFilter implements Filter {
       if (!auth.isRef()) {
         permissionDenied = true;
       }
+    } else if (path.startsWith(contextPath
+        + "/subjective/CheckAuth")) {
+      // checking the authentication doesn't require security
+      permissionDenied = false;
     } else if (path.startsWith(contextPath
         + "/subjective")) {
       if (!auth.isJudge()) {

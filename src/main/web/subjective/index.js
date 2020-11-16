@@ -107,7 +107,7 @@ function checkServerStatus() {
 function serverLoadPage() {
   $("#index-page_choose_clear").hide();
 
-  $.getJSON("../api/CheckAuth", function(data) {
+  $.getJSON("CheckAuth", function(data) {
     $.subjective.log("data: " + $.toJSON(data));
 
     if (data.authenticated) {

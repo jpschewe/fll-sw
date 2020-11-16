@@ -3,7 +3,7 @@
  * HighTechKids is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.web.api;
+package fll.subjective;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -26,7 +26,7 @@ import fll.web.SessionAttributes;
  * Check if the user is logged in as a judge. This is used by the subjective application.
  * GET: AuthResult
  */
-@WebServlet("/api/CheckAuth")
+@WebServlet("/subjective/CheckAuth")
 public class CheckAuthServlet extends BaseFLLServlet {
 
   @Override

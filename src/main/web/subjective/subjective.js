@@ -811,7 +811,7 @@
 
             $
                 .getJSON(
-                    "../api/CheckAuth",
+                    "CheckAuth",
                     function(data) {
                         if (data.authenticated) {
                             $.subjective
