@@ -106,7 +106,6 @@ public final class GenerateDB {
 
       // authentication tables
       createAuthentication(connection);
-      createValidLogin(connection);
       createAuthenticationRoles(connection, true);
 
       // Table structure for table 'Tournaments'
@@ -483,24 +482,6 @@ public final class GenerateDB {
       sql.append(")");
       stmt.executeUpdate(sql.toString());
 
-    }
-  }
-
-  /**
-   * Create the 'valid_login' table. Drops the table if it exists.
-   * 
-   * @param connection database connection
-   * @throws SQLException on a database error
-   */
-  public static void createValidLogin(final Connection connection) throws SQLException {
-    try (Statement stmt = connection.createStatement()) {
-
-      stmt.executeUpdate("DROP TABLE IF EXISTS valid_login CASCADE");
-      stmt.executeUpdate("CREATE TABLE valid_login ("
-          + "  fll_user varchar(64) NOT NULL" //
-          + " ,magic_key varchar(64) NOT NULL" //
-          + " ,CONSTRAINT valid_login_pk PRIMARY KEY (fll_user, magic_key)" //
-          + ")");
     }
   }
 

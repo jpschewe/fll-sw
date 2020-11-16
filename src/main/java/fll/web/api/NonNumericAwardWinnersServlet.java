@@ -22,6 +22,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,6 +34,8 @@ import fll.db.Queries;
 import fll.db.AwardWinners;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
+import fll.web.SessionAttributes;
 
 /**
  * Get and set non-numeric award winners that are per award group.
@@ -48,6 +51,13 @@ public class NonNumericAwardWinnersServlet extends HttpServlet {
   protected final void doGet(final HttpServletRequest request,
                              final HttpServletResponse response)
       throws IOException, ServletException {
+    final HttpSession session = request.getSession();
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+    if (!auth.isJudge()) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+      return;
+    }
+
     final ServletContext application = getServletContext();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -72,6 +82,13 @@ public class NonNumericAwardWinnersServlet extends HttpServlet {
   protected final void doPost(final HttpServletRequest request,
                               final HttpServletResponse response)
       throws IOException, ServletException {
+    final HttpSession session = request.getSession();
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+    if (!auth.isJudge()) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+      return;
+    }
+
     final ObjectMapper jsonMapper = Utilities.createJsonMapper();
     response.reset();
     response.setContentType("application/json");

@@ -21,9 +21,9 @@ import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import fll.db.Authentication;
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.CookieUtils;
 import fll.web.SessionAttributes;
 
 /**
@@ -33,20 +33,14 @@ import fll.web.SessionAttributes;
 public class RemoveUser extends BaseFLLServlet {
 
   /**
-   * @param request read the parameters
    * @param application get application variables
    * @param pageContext write page variables
    */
-  public static void populateContext(final HttpServletRequest request,
-                                     final ServletContext application,
+  public static void populateContext(final ServletContext application,
                                      final PageContext pageContext) {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-
-      final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
-      final String user = Authentication.checkValidLogin(connection, loginKeys);
-      pageContext.setAttribute("fll_user", user);
 
       final Collection<String> users = Authentication.getUsers(connection);
       pageContext.setAttribute("all_users", users);
@@ -70,16 +64,16 @@ public class RemoveUser extends BaseFLLServlet {
       if (null != userToRemove
           && !userToRemove.isEmpty()) {
         Authentication.removeUser(connection, userToRemove);
+        Authentication.markLoggedOut(application, userToRemove);
 
         SessionAttributes.appendToMessage(session, "<p id='success'>Removed user '"
             + userToRemove);
-
       }
 
       response.sendRedirect(response.encodeRedirectURL("removeUser.jsp"));
 
     } catch (final SQLException e) {
-      throw new RuntimeException(e);
+      throw new FLLRuntimeException(e);
     }
 
   }

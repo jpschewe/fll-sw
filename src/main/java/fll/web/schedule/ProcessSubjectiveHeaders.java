@@ -63,8 +63,6 @@ public class ProcessSubjectiveHeaders extends BaseFLLServlet {
           final String durationStr = request.getParameter(cat.getName()
               + ":duration");
 
-          // TODO issue:129 validate that duration is not empty and a number
-
           final int duration = Integer.parseInt(durationStr);
           subjectiveStations.add(new SubjectiveStation(header, duration));
 

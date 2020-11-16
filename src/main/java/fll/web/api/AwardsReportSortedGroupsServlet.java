@@ -25,6 +25,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -34,6 +35,8 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
+import fll.web.SessionAttributes;
 
 /**
  * Collection of names of the groups used in the awards report in sorted order.
@@ -79,6 +82,12 @@ public class AwardsReportSortedGroupsServlet extends HttpServlet {
   protected final void doPost(final HttpServletRequest request,
                               final HttpServletResponse response)
       throws IOException, ServletException {
+    final HttpSession session = request.getSession();
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+    if (!auth.isAdmin()) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+      return;
+    }
 
     final ObjectMapper jsonMapper = Utilities.createJsonMapper();
     response.reset();

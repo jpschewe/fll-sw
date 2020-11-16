@@ -7,6 +7,7 @@
 package fll.web;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Set;
 
@@ -49,6 +50,7 @@ public final class AuthenticationContext implements Serializable {
     this.loggedIn = loggedIn;
     this.username = username;
     this.roles = roles;
+    this.created = LocalDateTime.now();
   }
 
   private final boolean inSetup;
@@ -89,4 +91,41 @@ public final class AuthenticationContext implements Serializable {
     return roles;
   }
 
+  /**
+   * @return is this user an admin
+   */
+  public boolean isAdmin() {
+    return roles.contains(UserRole.ADMIN);
+  }
+
+  /**
+   * @return is this user a judge or admin
+   */
+  public boolean isJudge() {
+    return roles.contains(UserRole.ADMIN)
+        || roles.contains(UserRole.JUDGE);
+  }
+
+  /**
+   * @return is this user a ref or admin
+   */
+  public boolean isRef() {
+    return roles.contains(UserRole.ADMIN)
+        || roles.contains(UserRole.REF);
+  }
+
+  private final LocalDateTime created;
+
+  /**
+   * @return when this object was created
+   */
+  public LocalDateTime getCreated() {
+    return created;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("%s [loggedIn: %b inSetup: %b username: %s roles: %s", getClass().getSimpleName(),
+                         this.loggedIn, this.inSetup, this.username, this.roles);
+  }
 }

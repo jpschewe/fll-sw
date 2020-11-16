@@ -868,10 +868,6 @@ public final class ImportDB {
       GenerateDB.createAuthentication(connection);
     }
 
-    if (!tables.contains("valid_login")) {
-      GenerateDB.createValidLogin(connection);
-    }
-
     GenerateDB.createAuthenticationRoles(connection, false);
 
     // all existing users have admin privileges

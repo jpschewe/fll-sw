@@ -19,6 +19,7 @@
 
     <Loggers>
         <!-- stuff for debugging -->
+        <Logger name="fll.web.PermissionDenied" level="DEBUG" />
 
         <!-- for debugging the database, set levels to something lower than 
             fatal to actually see log output -->

@@ -29,7 +29,6 @@ import fll.db.Authentication;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.CookieUtils;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 
@@ -42,21 +41,15 @@ public class EditRoles extends BaseFLLServlet {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
-   * @param request used to get login cookies
    * @param application application variables
    * @param pageContext setup variables for the page
    */
-  public static void populateContext(final HttpServletRequest request,
-                                     final ServletContext application,
+  public static void populateContext(final ServletContext application,
                                      final PageContext pageContext) {
     pageContext.setAttribute("possibleRoles", UserRole.values());
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-
-      final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
-      final String loggedInUser = Authentication.checkValidLogin(connection, loginKeys);
-      pageContext.setAttribute("loggedInUser", loggedInUser);
 
       final Collection<String> users = Authentication.getUsers(connection);
       pageContext.setAttribute("users", users);
@@ -89,8 +82,13 @@ public class EditRoles extends BaseFLLServlet {
                                                                                                      role.name()))) //
                                           .collect(Collectors.toSet());
 
-        LOGGER.debug("Setting roles for '{}' to {}", user, roles);
-        Authentication.setRoles(connection, user, roles);
+        final Set<UserRole> currentRoles = Authentication.getRoles(connection, user);
+        if (!roles.equals(currentRoles)) {
+          LOGGER.debug("Setting roles for '{}' to {}", user, roles);
+          Authentication.setRoles(connection, user, roles);
+
+          Authentication.markRefreshNeeded(application, user);
+        }
       }
 
       SessionAttributes.appendToMessage(session,

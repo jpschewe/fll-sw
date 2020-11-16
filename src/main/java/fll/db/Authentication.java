@@ -11,18 +11,20 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
+
+import javax.servlet.ServletContext;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.FLLRuntimeException;
+import fll.web.ApplicationAttributes;
 import fll.web.UserRole;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -144,11 +146,6 @@ public final class Authentication {
       removeRoles.executeUpdate();
     }
 
-    try (PreparedStatement removeKeys = connection.prepareStatement("DELETE FROM valid_login where fll_user = ?")) {
-      removeKeys.setString(1, user);
-      removeKeys.executeUpdate();
-    }
-
     try (
         PreparedStatement removeUser = connection.prepareStatement("DELETE FROM fll_authentication where fll_user = ?")) {
       removeUser.setString(1, user);
@@ -157,51 +154,20 @@ public final class Authentication {
   }
 
   /**
-   * Remove a valid login by user.
-   * 
-   * @param connection database connection
-   * @param user the user to remove valid login information for
-   * @throws SQLException on a database error
-   */
-  public static void removeValidLoginByUser(final Connection connection,
-                                            final String user)
-      throws SQLException {
-    try (PreparedStatement prep = connection.prepareStatement("DELETE FROM valid_login WHERE fll_user = ?")) {
-      prep.setString(1, user);
-      prep.executeUpdate();
-    }
-  }
-
-  /**
    * @param connection database connection
    * @param user the user to change the password for
-   * @param passwordHash the new hashed password
+   * @param password the new password
    * @throws SQLException on a database error
    */
   public static void changePassword(final Connection connection,
                                     final String user,
-                                    final String passwordHash)
+                                    final String password)
       throws SQLException {
+    final String passwordHash = computePasswordHash(password);
     try (
         PreparedStatement prep = connection.prepareStatement("UPDATE fll_authentication SET fll_pass = ? WHERE fll_user = ?")) {
       prep.setString(1, passwordHash);
       prep.setString(2, user);
-      prep.executeUpdate();
-    }
-  }
-
-  /**
-   * Remove a valid login by magic key.
-   * 
-   * @param connection database connection
-   * @param magicKey the valid login key
-   * @throws SQLException on a database error
-   */
-  public static void removeValidLoginByKey(final Connection connection,
-                                           final String magicKey)
-      throws SQLException {
-    try (PreparedStatement prep = connection.prepareStatement("DELETE FROM valid_login WHERE magic_key = ?")) {
-      prep.setString(1, magicKey);
       prep.executeUpdate();
     }
   }
@@ -238,11 +204,6 @@ public final class Authentication {
   public static @Nullable String getHashedPassword(final Connection connection,
                                                    final String user)
       throws SQLException {
-    final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
-    if (!tables.contains("valid_login")) {
-      GenerateDB.createValidLogin(connection);
-    }
-
     try (
         PreparedStatement prep = connection.prepareStatement("SELECT fll_pass FROM fll_authentication WHERE fll_user = ?")) {
       prep.setString(1, user);
@@ -250,78 +211,6 @@ public final class Authentication {
         if (rs.next()) {
           final String pass = rs.getString(1);
           return pass;
-        }
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Get the authentication information.
-   *
-   * @param connection database connection
-   * @return key is user, value is hashed pass
-   * @throws SQLException on a database error
-   */
-  public static Map<String, String> getAuthInfo(final Connection connection) throws SQLException {
-    final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
-    if (!tables.contains("valid_login")) {
-      GenerateDB.createValidLogin(connection);
-    }
-
-    final Map<String, String> retval = new HashMap<>();
-    try (Statement stmt = connection.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT fll_user, fll_pass FROM fll_authentication")) {
-      while (rs.next()) {
-        final String user = rs.getString(1);
-        final String pass = rs.getString(2);
-        retval.put(user, pass);
-      }
-    }
-    return retval;
-  }
-
-  /**
-   * Add a valid login to the database.
-   *
-   * @param connection database connection
-   * @param magicKey used in cookies to store the valid login
-   * @param user the user that has logged in
-   * @throws SQLException on a database error
-   */
-  public static void addValidLogin(final Connection connection,
-                                   final String user,
-                                   final String magicKey)
-      throws SQLException {
-    try (
-        PreparedStatement prep = connection.prepareStatement("INSERT INTO valid_login (fll_user, magic_key) VALUES(?, ?)")) {
-      prep.setString(1, user);
-      prep.setString(2, magicKey);
-      prep.executeUpdate();
-    }
-  }
-
-  /**
-   * Check if any of the specified login keys matches one that was stored.
-   *
-   * @param connection database connection
-   * @param keys the keys to check
-   * @return the username that the key matches, null otherwise
-   * @throws SQLException on a database error
-   */
-  public static @Nullable String checkValidLogin(final Connection connection,
-                                                 final Collection<String> keys)
-      throws SQLException {
-    // not doing the comparison with SQL to avoid SQL injection attack
-    try (Statement stmt = connection.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT fll_user, magic_key FROM valid_login")) {
-      while (rs.next()) {
-        final String user = rs.getString(1);
-        final String compare = rs.getString(2);
-        for (final String magicKey : keys) {
-          if (Objects.equals(magicKey, compare)) {
-            return user;
-          }
         }
       }
     }
@@ -346,14 +235,40 @@ public final class Authentication {
       throw new DuplicateUserException(String.format("The user '%s' already exists", user));
     }
 
-    final String hashedPass = DigestUtils.md5Hex(pass);
+    final String hashedPass = computePasswordHash(pass);
     try (
         PreparedStatement addUser = connection.prepareStatement("INSERT INTO fll_authentication (fll_user, fll_pass) VALUES(?, ?)")) {
       addUser.setString(1, user);
       addUser.setString(2, hashedPass);
       addUser.executeUpdate();
     }
+  }
 
+  private static String computePasswordHash(final String password) {
+    final String hashedPass = DigestUtils.md5Hex(password);
+    return hashedPass;
+  }
+
+  /**
+   * Check if the specified {@code password} is valid for {@code user}.
+   * 
+   * @param connection database connection
+   * @param user the user to check
+   * @param password the password to check
+   * @return if the username and password is valid
+   * @throws SQLException on a database error
+   */
+  public static boolean checkValidPassword(final Connection connection,
+                                           final String user,
+                                           final String password)
+      throws SQLException {
+    final String hashStored = getHashedPassword(connection, user);
+    if (null == hashStored) {
+      return false;
+    } else {
+      final String hash = computePasswordHash(password);
+      return hashStored.equals(hash);
+    }
   }
 
   /**
@@ -367,4 +282,31 @@ public final class Authentication {
       super(message);
     }
   }
+
+  /**
+   * Specify that {@code username} needs to be refreshed from the database.
+   * 
+   * @param application application variable store
+   * @param username the username to mark as needing a refresh
+   */
+  public static void markRefreshNeeded(final ServletContext application,
+                                       final String username) {
+    final Map<String, LocalDateTime> authRefresh = ApplicationAttributes.getAuthRefresh(application);
+    authRefresh.put(username, LocalDateTime.now());
+    application.setAttribute(ApplicationAttributes.AUTH_REFRESH, authRefresh);
+  }
+
+  /**
+   * Specify that {@code username} needs to login again.
+   * 
+   * @param application application variable store
+   * @param username the username to mark as needing a login
+   */
+  public static void markLoggedOut(final ServletContext application,
+                                   final String username) {
+    final Map<String, LocalDateTime> authLoggedOut = ApplicationAttributes.getAuthLoggedOut(application);
+    authLoggedOut.put(username, LocalDateTime.now());
+    application.setAttribute(ApplicationAttributes.AUTH_LOGGED_OUT, authLoggedOut);
+  }
+
 }

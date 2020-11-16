@@ -26,8 +26,8 @@ import javax.sql.DataSource;
 
 import fll.db.Authentication;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
-import fll.web.CookieUtils;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 
@@ -117,16 +117,15 @@ public class CreateUser extends BaseFLLServlet {
                                             + "'</p>");
 
       // do a login if not already logged in
-      final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
-      final String authenticatedUser = Authentication.checkValidLogin(connection, loginKeys);
-      if (null == authenticatedUser) {
-        LOGGER.debug("Doing login");
-        request.getRequestDispatcher("/DoLogin").forward(request, response);
-      } else {
-        LOGGER.debug("Redirecting to index");
-        response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-            + "/index.jsp"));
+      final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+      if (!auth.getLoggedIn()) {
+        final AuthenticationContext newAuth = AuthenticationContext.loggedIn(user, selectedRoles);
+        session.setAttribute(SessionAttributes.AUTHENTICATION, newAuth);
       }
+
+      LOGGER.debug("Redirecting to index");
+      response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+          + "/index.jsp"));
 
     } catch (final SQLException e) {
       throw new RuntimeException(e);

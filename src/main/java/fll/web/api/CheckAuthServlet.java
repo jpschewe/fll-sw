@@ -11,29 +11,32 @@ import java.io.PrintWriter;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
-import fll.web.WebUtils;
+import fll.web.AuthenticationContext;
+import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
 
 /**
- * Check if the user is logged in.
+ * Check if the user is logged in as a judge. This is used by the subjective application.
  * GET: AuthResult
  */
 @WebServlet("/api/CheckAuth")
-public class CheckAuthServlet extends HttpServlet {
+public class CheckAuthServlet extends BaseFLLServlet {
 
   @Override
-  protected final void doGet(final HttpServletRequest request,
-                             final HttpServletResponse response)
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session)
       throws IOException, ServletException {
-    final ServletContext application = getServletContext();
-
-    final boolean authenticated = WebUtils.checkAuthenticated(request, application);
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+    final boolean authenticated = auth.isJudge();
     final AuthResult result = new AuthResult(authenticated);
 
     final ObjectMapper jsonMapper = Utilities.createJsonMapper();
@@ -43,7 +46,6 @@ public class CheckAuthServlet extends HttpServlet {
     final PrintWriter writer = response.getWriter();
 
     jsonMapper.writeValue(writer, result);
-
   }
 
   /**

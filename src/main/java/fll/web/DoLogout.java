@@ -25,11 +25,12 @@ public class DoLogout extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
-    CookieUtils.clearLoginCookies(application, request, response);
+                                final HttpSession session)
+      throws IOException, ServletException {
+    final AuthenticationContext newAuth = AuthenticationContext.notLoggedIn();
+    session.setAttribute(SessionAttributes.AUTHENTICATION, newAuth);
 
     response.sendRedirect(response.encodeRedirectURL(request.getContextPath()));
-
   }
 
 }

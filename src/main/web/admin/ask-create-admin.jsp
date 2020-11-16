@@ -35,7 +35,7 @@ fll.web.admin.AskCreateAdmin.populateContext(application, pageContext);
             value="Create Admin User" type="submit" />
     </form>
 
-    <form method="GET" action="<c:url value='/'/>"
+    <form method="GET" action="<c:url value='/login.jsp'/>"
         name="no_create_admin" id="no_create_admin">
         <input name="submit_no_create_admin" id="submit_no_create_admin"
             value="Do not create an admin user" type="submit" />
