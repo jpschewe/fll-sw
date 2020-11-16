@@ -1011,7 +1011,10 @@ public final class IntegrationTestUtils {
           final Path fname = path.getFileName();
           if (null != fname
               && fname.startsWith("flldb.")) {
+            LOGGER.debug("Deleting datbase file: {}", path);
             Files.delete(path);
+          } else {
+            LOGGER.debug("Not deleting WEB-INF file: {}", path);
           }
         }
       }
