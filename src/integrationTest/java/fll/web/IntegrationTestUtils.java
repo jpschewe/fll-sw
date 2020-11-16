@@ -25,6 +25,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -79,6 +80,7 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.tomcat.TomcatLauncher;
 import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 import fll.web.api.TournamentsServlet;
 import fll.xml.BracketSortType;
 import io.github.bonigarcia.wdm.WebDriverManager;
@@ -297,6 +299,7 @@ public final class IntegrationTestUtils {
                                                 final InputStream inputStream)
       throws IOException {
     assertNotNull(inputStream);
+
     final File dumpFile = IntegrationTestUtils.storeInputStreamToFile(inputStream);
     try {
       selenium.get(TestUtils.URL_ROOT
@@ -913,6 +916,9 @@ public final class IntegrationTestUtils {
 
     @Override
     public void beforeTestExecution(final ExtensionContext context) throws Exception {
+      // remove the database first to ensure that we are always at the same starting state
+      removeDatabase();
+      
       final TomcatLauncher launcher = new TomcatLauncher(Launcher.DEFAULT_WEB_PORT);
       try {
         LOGGER.info("Starting tomcat");
@@ -988,6 +994,26 @@ public final class IntegrationTestUtils {
             + type.getName());
       }
     }
+
+    private static void removeDatabase() throws IOException {
+      final Path classesPath = TomcatLauncher.getClassesPath();
+      LOGGER.debug("Classes path {}", classesPath);
+
+      final Path webappRoot = TomcatLauncher.findWebappRoot(classesPath);
+      if (null == webappRoot) {
+        throw new FLLRuntimeException("Cannot find location of the database");
+      }
+      LOGGER.debug("Web app root: {}", webappRoot);
+      final Path webInfDir = webappRoot.resolve("WEB-INF");
+      try (DirectoryStream<Path> stream = Files.newDirectoryStream(webInfDir)) {
+        for (final Path path : stream) {
+          if (path.getFileName().startsWith("flldb.")) {
+            Files.delete(path);
+          }
+        }
+      }
+    }
+
   }
 
   /**
@@ -1078,4 +1104,5 @@ public final class IntegrationTestUtils {
   public static WebDriverWait createWebDriverWait(final WebDriver selenium) {
     return new WebDriverWait(selenium, WAIT_FOR_ELEMENT.getSeconds(), WAIT_FOR_ELEMENT_POLL_INTERVAL.toMillis());
   }
+
 }
