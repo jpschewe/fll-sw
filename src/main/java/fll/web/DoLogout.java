@@ -30,7 +30,8 @@ public class DoLogout extends BaseFLLServlet {
     final AuthenticationContext newAuth = AuthenticationContext.notLoggedIn();
     session.setAttribute(SessionAttributes.AUTHENTICATION, newAuth);
 
-    response.sendRedirect(response.encodeRedirectURL(request.getContextPath()));
+    // send back to top level index on logout
+    response.sendRedirect(response.encodeRedirectURL("/"));
   }
 
 }
