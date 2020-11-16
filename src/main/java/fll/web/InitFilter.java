@@ -145,22 +145,26 @@ public class InitFilter implements Filter {
           permissionDenied = true;
         }
       }
-    } else if (path.startsWith(contextPath
-        + "/scoreEntry/")) {
+    } else if (null != path
+        && path.startsWith(contextPath
+            + "/scoreEntry/")) {
       if (!auth.isRef()) {
         permissionDenied = true;
       }
-    } else if (path.startsWith(contextPath
-        + "/subjective/CheckAuth")) {
+    } else if (null != path
+        && path.startsWith(contextPath
+            + "/subjective/CheckAuth")) {
       // checking the authentication doesn't require security
       permissionDenied = false;
-    } else if (path.startsWith(contextPath
-        + "/subjective")) {
+    } else if (null != path
+        && path.startsWith(contextPath
+            + "/subjective")) {
       if (!auth.isJudge()) {
         permissionDenied = true;
       }
-    } else if (path.startsWith(contextPath
-        + "/playoff/scoregenbrackets.jsp") //
+    } else if (null != path
+        && path.startsWith(contextPath
+            + "/playoff/scoregenbrackets.jsp") //
         || path.startsWith(contextPath
             + "/playoff/adminbrackets.jsp") //
     ) {
