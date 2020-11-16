@@ -29,17 +29,6 @@ public class RegexFormatter extends DefaultFormatter {
    * Creates a regular expression based AbstractFormatter.
    * {@code pattern} specifies the regular expression that will be used
    * to determine if a value is legal.
-   *
-   * @param pattern {@link #getPattern()}
-   */
-  public RegexFormatter(@Nonnull final String pattern) throws PatternSyntaxException {
-    this(Pattern.compile(pattern));
-  }
-
-  /**
-   * Creates a regular expression based AbstractFormatter.
-   * {@code pattern} specifies the regular expression that will be used
-   * to determine if a value is legal.
    * 
    * @param pattern {@link #getPattern()}
    */

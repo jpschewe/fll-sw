@@ -20,6 +20,13 @@ public final class PermissionDenied {
   private PermissionDenied() {
   }
 
+  /**
+   * Populate the redirect url in the session if this page was visited due to a
+   * forward.
+   * 
+   * @param session session variables
+   * @param request browser request
+   */
   public static void populateContext(final HttpSession session,
                                      final HttpServletRequest request) {
     final Object origUri = request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
