@@ -163,10 +163,10 @@ public class InitFilter implements Filter {
         permissionDenied = true;
       }
     } else if (null != path
-        && path.startsWith(contextPath
+        && (path.startsWith(contextPath
             + "/playoff/scoregenbrackets.jsp") //
-        || path.startsWith(contextPath
-            + "/playoff/adminbrackets.jsp") //
+            || path.startsWith(contextPath
+                + "/playoff/adminbrackets.jsp")) //
     ) {
       if (!auth.isRef()) {
         permissionDenied = true;

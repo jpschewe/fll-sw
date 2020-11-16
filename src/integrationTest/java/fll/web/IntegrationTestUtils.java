@@ -916,9 +916,10 @@ public final class IntegrationTestUtils {
 
     @Override
     public void beforeTestExecution(final ExtensionContext context) throws Exception {
-      // remove the database first to ensure that we are always at the same starting state
+      // remove the database first to ensure that we are always at the same starting
+      // state
       removeDatabase();
-      
+
       final TomcatLauncher launcher = new TomcatLauncher(Launcher.DEFAULT_WEB_PORT);
       try {
         LOGGER.info("Starting tomcat");
@@ -1007,7 +1008,9 @@ public final class IntegrationTestUtils {
       final Path webInfDir = webappRoot.resolve("WEB-INF");
       try (DirectoryStream<Path> stream = Files.newDirectoryStream(webInfDir)) {
         for (final Path path : stream) {
-          if (path.getFileName().startsWith("flldb.")) {
+          final Path fname = path.getFileName();
+          if (null != fname
+              && fname.startsWith("flldb.")) {
             Files.delete(path);
           }
         }
