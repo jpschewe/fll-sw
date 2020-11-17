@@ -144,6 +144,10 @@ public class InitFilter implements Filter {
           + "/admin/changePassword.jsp")) {
         // handled by the page
         permissionDenied = false;
+      } else if (path.startsWith(contextPath
+          + "/admin/createUsername.jsp")) {
+        // handled by the page
+        permissionDenied = false;
       } else {
         if (!auth.isAdmin()) {
           permissionDenied = true;
