@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
@@ -988,11 +989,13 @@ public class SubjectivePdfWriter {
 
     if (null != goalComment) {
       // add judges comments
-      final Element commentBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-      block.appendChild(commentBlock);
-      commentBlock.setAttribute("font-style", "italic");
-      commentBlock.setAttribute("font-weight", "bold");
-      commentBlock.appendChild(document.createTextNode(goalComment));
+      Arrays.stream(goalComment.split("\\r?\\n")).forEach(comment -> {
+        final Element commentBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        block.appendChild(commentBlock);
+        commentBlock.setAttribute("font-style", "italic");
+        commentBlock.setAttribute("font-weight", "bold");
+        commentBlock.appendChild(document.createTextNode(comment));
+      });
     }
 
     return rangeCell;
@@ -1117,23 +1120,44 @@ public class SubjectivePdfWriter {
       commentGreatJob = String.valueOf(Utilities.NON_BREAKING_SPACE);
       commentThinkAbout = String.valueOf(Utilities.NON_BREAKING_SPACE);
     } else {
-      commentGreatJob = score.getCommentGreatJob();
-      commentThinkAbout = score.getCommentThinkAbout();
+      final String greatJobRaw = score.getCommentGreatJob();
+      if (null == greatJobRaw) {
+        commentGreatJob = String.valueOf(Utilities.NON_BREAKING_SPACE);
+      } else {
+        commentGreatJob = greatJobRaw;
+      }
+
+      final String thinkAboutRaw = score.getCommentThinkAbout();
+      if (null == thinkAboutRaw) {
+        commentThinkAbout = String.valueOf(Utilities.NON_BREAKING_SPACE);
+      } else {
+        commentThinkAbout = thinkAboutRaw;
+      }
 
       rowElement.setAttribute("font-style", "italic");
       rowElement.setAttribute("font-weight", "bold");
     }
 
-    final Element left = FOPUtils.createTableCell(document, null, commentGreatJob == null ? "" : commentGreatJob);
+    final Element left = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
     rowElement.appendChild(left);
     FOPUtils.addRightBorder(left, 1);
     left.setAttribute("padding-right", RUBRIC_TABLE_PADDING);
     left.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
+    Arrays.stream(commentGreatJob.split("\\r?\\n")).forEach(comment -> {
+      final Element commentBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      left.appendChild(commentBlock);
+      commentBlock.appendChild(document.createTextNode(comment));
+    });
 
-    final Element right = FOPUtils.createTableCell(document, null, commentThinkAbout == null ? "" : commentThinkAbout);
+    final Element right = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
     rowElement.appendChild(right);
     right.setAttribute("padding-right", RUBRIC_TABLE_PADDING);
     right.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
+    Arrays.stream(commentThinkAbout.split("\\r?\\n")).forEach(comment -> {
+      final Element commentBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      right.appendChild(commentBlock);
+      commentBlock.appendChild(document.createTextNode(comment));
+    });
 
     if (null == score) {
       // use back if needed

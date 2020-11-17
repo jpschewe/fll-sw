@@ -1,3 +1,4 @@
+* #869 - Keep carriage returns in subjective comments when creating PDF for teams
 * #874 - Add challenge revision to the bottom of the score entry page
 * #872 - Display non-numeric award description in subjective app
 * #871 - Fix bug where judges were not saved from the subjective application
