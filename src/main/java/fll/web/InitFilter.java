@@ -75,6 +75,10 @@ public class InitFilter implements Filter {
           LOGGER.debug("Returning after initialize did redirect");
           return;
         }
+      } else if (null != path
+          && path.startsWith(httpRequest.getContextPath()
+              + "/setup")) {
+        possiblyInstallSetupAuthentication(application, session);
       }
 
       final boolean permissionDenied = checkSecurity(session, httpRequest, httpResponse);
@@ -226,6 +230,25 @@ public class InitFilter implements Filter {
 
   private static final Object INIT_LOCK = new Object();
 
+  private static void possiblyInstallSetupAuthentication(final ServletContext application,
+                                                         final HttpSession session) {
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
+
+      // check if the database is initialized
+      final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
+      if (!dbinitialized) {
+        // setup special authentication for setup
+        LOGGER.debug("No database, setting inSetup authentication");
+        AuthenticationContext auth = AuthenticationContext.inSetup();
+        session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
+      }
+    } catch (final SQLException e) {
+      throw new RuntimeException(e);
+    }
+
+  }
+
   /**
    * @return true if everything is OK, false if a redirect happened
    */
@@ -254,9 +277,7 @@ public class InitFilter implements Filter {
           response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
               + "/setup/index.jsp"));
 
-          // setup special authentication for setup
-          AuthenticationContext auth = AuthenticationContext.inSetup();
-          session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
+          possiblyInstallSetupAuthentication(application, session);
 
           return false;
         }
