@@ -1,4 +1,8 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
+<c:if test="${not authentication.admin and not authentication.inSetup}">
+    <jsp:forward page="/permission-denied.jsp"></jsp:forward>
+</c:if>
+
 <%
 fll.web.admin.AskCreateAdmin.populateContext(application, pageContext);
 %>
