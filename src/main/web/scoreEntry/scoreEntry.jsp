@@ -346,6 +346,8 @@ function check_restrictions() {
     <div id="yesno-dialog">
         <p id='yesno-dialog_text'></p>
     </div>
+    
+    <div>Challenge revision: ${challengeDescription.revision}</div>
 
 </body>
 </html>
