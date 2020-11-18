@@ -84,10 +84,7 @@ dependencies {
 testSets {
     integrationTest
 }
-integrationTest {
-    // have selenium log through log4j
-    systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
-}
+
 // don't depend on check so that users can skip these on a basic check. check.dependsOn integrationTest
 integrationTest.mustRunAfter test
 
@@ -95,10 +92,15 @@ test {
     useJUnitPlatform()
     ignoreFailures = Boolean.getBoolean("test.ignoreFailures") 
 }
+
 integrationTest {
     useJUnitPlatform()
     ignoreFailures = Boolean.getBoolean("test.ignoreFailures") 
+    // have selenium log through log4j
+    systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
+    forkEvery = 1
 }
+
 repositories {
     //mavenLocal()
     jcenter()
