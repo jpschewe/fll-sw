@@ -1010,11 +1010,11 @@ public final class IntegrationTestUtils {
         for (final Path path : stream) {
           final Path fname = path.getFileName();
           if (null != fname
-              && fname.startsWith("flldb.")) {
-            LOGGER.debug("Deleting datbase file: {}", path);
+              && fname.toString().startsWith("flldb.")) {
+            LOGGER.debug("Deleting datbase file: {}", fname);
             Files.delete(path);
           } else {
-            LOGGER.debug("Not deleting WEB-INF file: {}", path);
+            LOGGER.debug("Not deleting WEB-INF file: {} path: {}", fname, path);
           }
         }
       }
