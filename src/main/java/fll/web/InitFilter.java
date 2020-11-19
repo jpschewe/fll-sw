@@ -240,8 +240,6 @@ public class InitFilter implements Filter {
     // nothing
   }
 
-  private static final Object INIT_LOCK = new Object();
-
   private static void possiblyInstallSetupAuthentication(final ServletContext application,
                                                          final HttpSession session) {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -271,63 +269,63 @@ public class InitFilter implements Filter {
       throws IOException, RuntimeException {
     LOGGER.trace("Top of initialize");
 
-    synchronized (INIT_LOCK) {
+    // make sure that we compute the host names as soon as possible
+    // TODO: this will update the hostnames on every page load. Issue #875.
+    WebUtils.updateHostNamesInBackground(application);
 
-      // make sure that we compute the host names as soon as possible
-      // TODO: this will update the hostnames on every page load. Issue #875.
-      WebUtils.updateHostNamesInBackground(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      try (Connection connection = datasource.getConnection()) {
+      // check if the database is initialized
+      final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
+      if (!dbinitialized) {
+        LOGGER.warn("Database not initialized, redirecting to setup");
+        SessionAttributes.appendToMessage(session,
+                                          "<p class='error'>The database is not yet initialized. Please create the database.</p>");
+        response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+            + "/setup/index.jsp"));
 
-        // check if the database is initialized
-        final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
-        if (!dbinitialized) {
-          LOGGER.warn("Database not initialized, redirecting to setup");
-          SessionAttributes.appendToMessage(session,
-                                            "<p class='error'>The database is not yet initialized. Please create the database.</p>");
+        // setup special authentication for setup
+        AuthenticationContext auth = AuthenticationContext.inSetup();
+        session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
+
+        return false;
+      }
+
+      if (null == ApplicationAttributes.getAttribute(application, ApplicationAttributes.CHALLENGE_DESCRIPTION,
+                                                     ChallengeDescription.class)) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Loading challenge descriptor");
+        }
+        try {
+          // load the challenge descriptor
+          final ChallengeDescription challengeDescription = GlobalParameters.getChallengeDescription(connection);
+
+          application.setAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION, challengeDescription);
+        } catch (final FLLRuntimeException e) {
+          LOGGER.error("Error getting challenge document", e);
+          SessionAttributes.appendToMessage(session, "<p class='error'>"
+              + e.getMessage()
+              + " Please create the database.</p>");
+
           response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
               + "/setup/index.jsp"));
 
-          possiblyInstallSetupAuthentication(application, session);
+          // setup special authentication for setup
+          AuthenticationContext auth = AuthenticationContext.inSetup();
+          session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
 
           return false;
         }
-
-        // load the challenge descriptor
-        if (null == ApplicationAttributes.getAttribute(application, ApplicationAttributes.CHALLENGE_DESCRIPTION,
-                                                       ChallengeDescription.class)) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Loading challenge descriptor");
-          }
-          try {
-            final ChallengeDescription challengeDescription = GlobalParameters.getChallengeDescription(connection);
-
-            application.setAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION, challengeDescription);
-          } catch (final FLLRuntimeException e) {
-            LOGGER.error("Error getting challenge document", e);
-            SessionAttributes.appendToMessage(session, "<p class='error'>"
-                + e.getMessage()
-                + " Please create the database.</p>");
-            response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-                + "/setup/index.jsp"));
-
-            // setup special authentication for setup
-            AuthenticationContext auth = AuthenticationContext.inSetup();
-            session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
-
-            return false;
-          }
-        }
-
-      } catch (final SQLException e) {
-        throw new RuntimeException(e);
       }
 
-      LOGGER.trace("Bottom of initialize returning true");
-      return true;
+    } catch (final SQLException e) {
+      throw new RuntimeException(e);
+    }
 
-    } // lock
+    LOGGER.trace("Bottom of initialize returning true");
+    return true;
+
   }
 
   /**
