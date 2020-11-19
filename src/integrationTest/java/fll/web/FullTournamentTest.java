@@ -583,11 +583,7 @@ public class FullTournamentTest {
     selenium.findElement(By.id("teams_file")).sendKeys(teamsFile.toAbsolutePath().toString());
 
     selenium.findElement(By.id("upload_teams")).click();
-
-    IntegrationTestUtils.assertNoException(selenium);
-
-    // skip past the filter page
-    selenium.findElement(By.id("next")).click();
+    seleniumWait.until(ExpectedConditions.urlContains("teamColumnSelection"));
     IntegrationTestUtils.assertNoException(selenium);
 
     // team column selection
@@ -598,6 +594,7 @@ public class FullTournamentTest {
     new Select(selenium.findElement(By.name("event_division"))).selectByValue("award_group");
     new Select(selenium.findElement(By.name("judging_station"))).selectByValue("judging_group");
     selenium.findElement(By.id("next")).click();
+
     IntegrationTestUtils.assertNoException(selenium);
     assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
 
