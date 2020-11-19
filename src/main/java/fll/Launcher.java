@@ -674,13 +674,14 @@ public class Launcher extends JFrame {
    */
   private void checkWebserver() {
     boolean newServerOnline = false;
+    LOGGER.trace("Checking if the server is online");
     try (Socket s = new Socket("localhost", port)) {
       newServerOnline = true;
     } catch (final IOException ex) {
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Error checking web server, probably down", ex);
-      }
+      LOGGER.trace("Error checking web server, probably down", ex);
     }
+    LOGGER.trace("Finished checking if the server is online");
+
     if (newServerOnline != mServerOnline) {
       // change detected
       mServerOnline = newServerOnline;
