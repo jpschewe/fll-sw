@@ -128,6 +128,21 @@ public final class WebUtils {
   }
 
   /**
+   * Call {@link #updateHostNamesInBackground(ServletContext)} if the hostnames
+   * have expired or have not been set.
+   * 
+   * @param application application variable store
+   */
+  public static void scheduleHostnameUpdateIfNeeded(final ServletContext application) {
+    final LocalTime expiration = ApplicationAttributes.getAttribute(application, HOSTNAMES_EXPIRATION_KEY,
+                                                                    LocalTime.class);
+    if (null == expiration
+        || LocalTime.now().isAfter(expiration)) {
+      updateHostNamesInBackground(application);
+    }
+  }
+
+  /**
    * Get all URLs that this host can be access via. The scheme of the URLs is
    * determined by the scheme of the request.
    *
@@ -138,12 +153,7 @@ public final class WebUtils {
    */
   public static Collection<String> getAllUrls(final HttpServletRequest request,
                                               final ServletContext application) {
-    final LocalTime expiration = ApplicationAttributes.getAttribute(application, HOSTNAMES_EXPIRATION_KEY,
-                                                                    LocalTime.class);
-    if (null == expiration
-        || LocalTime.now().isAfter(expiration)) {
-      updateHostNamesInBackground(application);
-    }
+    scheduleHostnameUpdateIfNeeded(application);
 
     @SuppressWarnings("unchecked") // can't store generics in ServletContext
     final Collection<String> hostNames = ApplicationAttributes.getAttribute(application, HOSTNAMES_KEY,

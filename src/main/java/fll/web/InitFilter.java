@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import org.eclipse.jdt.internal.compiler.ast.Annotation.AnnotationTargetAllowed;
+
 import fll.Utilities;
 import fll.db.Authentication;
 import fll.db.GlobalParameters;
@@ -269,9 +271,8 @@ public class InitFilter implements Filter {
       throws IOException, RuntimeException {
     LOGGER.trace("Top of initialize");
 
-    // make sure that we compute the host names as soon as possible
-    // TODO: this will update the hostnames on every page load. Issue #875.
-    WebUtils.updateHostNamesInBackground(application);
+    // make sure hostname updates happen right away
+    WebUtils.scheduleHostnameUpdateIfNeeded(application);
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
