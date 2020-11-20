@@ -813,7 +813,7 @@ public final class IntegrationTestUtils {
 
     selenium.findElement(By.id("submit_data")).click();
 
-    selenium.findElement(By.id("success"));
+    seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
   }
 
   /**
