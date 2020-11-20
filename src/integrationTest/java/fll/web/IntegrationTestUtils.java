@@ -253,7 +253,7 @@ public final class IntegrationTestUtils {
 
     if (isElementPresent(driver, By.name("submit_login"))) {
       LOGGER.trace("Login required");
-      login(driver, driverWait);
+      login(driver);
 
       LOGGER.trace("Visiting setup after login");
       driver.get(TestUtils.URL_ROOT
@@ -282,7 +282,7 @@ public final class IntegrationTestUtils {
     createUser(driver, driverWait);
 
     LOGGER.trace("Finished with create user, calling login");
-    login(driver, driverWait);
+    login(driver);
   }
 
   /**
@@ -310,7 +310,7 @@ public final class IntegrationTestUtils {
                                                ExpectedConditions.urlContains("/setup")));
 
       if (isElementPresent(selenium, By.name("submit_login"))) {
-        login(selenium, seleniumWait);
+        login(selenium);
 
         selenium.get(TestUtils.URL_ROOT
             + "setup/");
@@ -336,13 +336,13 @@ public final class IntegrationTestUtils {
 
       createUser(selenium, seleniumWait);
 
-      login(selenium, seleniumWait);
+      login(selenium);
     } finally {
       if (!dumpFile.delete()) {
         dumpFile.deleteOnExit();
       }
     }
-    login(selenium, seleniumWait);
+    login(selenium);
   }
 
   /**
@@ -460,6 +460,7 @@ public final class IntegrationTestUtils {
         + htmlFile.toAbsolutePath().toString());
 
     // get the database
+    login(driver);
     final Path dbOutput = tempDir.resolve("database.flldb");
     LOGGER.info("Downloading database to "
         + dbOutput.toAbsolutePath());
@@ -492,10 +493,8 @@ public final class IntegrationTestUtils {
    * Login to software.
    *
    * @param driver browser driver
-   * @param seleniumWait wait for elements
    */
-  public static void login(final WebDriver driver,
-                           final WebDriverWait seleniumWait) {
+  public static void login(final WebDriver driver) {
     driver.get(TestUtils.URL_ROOT
         + "login.jsp");
 
@@ -507,8 +506,6 @@ public final class IntegrationTestUtils {
 
     final WebElement submitElement = driver.findElement(By.name("submit_login"));
     submitElement.click();
-
-    seleniumWait.until(ExpectedConditions.not(ExpectedConditions.urlContains("login.jsp")));
   }
 
   private static String readAll(final Reader rd) throws IOException {
