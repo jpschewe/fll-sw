@@ -119,10 +119,7 @@ public class InitFilter implements Filter {
 
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    LOGGER.debug("Checking contextPath: "
-        + contextPath
-        + " path: "
-        + path);
+    LOGGER.debug("Checking contextPath: {} path: '{}'", contextPath, path);
     boolean permissionDenied = false;
     if (null != path
         && (path.startsWith(contextPath
@@ -222,7 +219,8 @@ public class InitFilter implements Filter {
           || path.endsWith(".jpg") //
           || path.endsWith(".gif") //
           || path.endsWith(".png") //
-          || path.endsWith(".html")) {
+          || path.endsWith(".html") //
+          || path.endsWith(".ico")) {
         return false;
       } else if (path.startsWith(contextPath
           + "/setup")) {
