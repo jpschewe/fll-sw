@@ -98,6 +98,9 @@ integrationTest {
     ignoreFailures = Boolean.getBoolean("test.ignoreFailures") 
     // have selenium log through log4j
     systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
+    
+    // debug log4j configuration
+    //systemProperty("log4j2.debug", "true")
     forkEvery = 1
 }
 
