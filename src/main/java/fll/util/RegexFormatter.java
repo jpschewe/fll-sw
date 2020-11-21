@@ -9,7 +9,6 @@ package fll.util;
 import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import javax.annotation.Nonnull;
 import javax.swing.JFormattedTextField;

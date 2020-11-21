@@ -25,8 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.eclipse.jdt.internal.compiler.ast.Annotation.AnnotationTargetAllowed;
-
 import fll.Utilities;
 import fll.db.Authentication;
 import fll.db.GlobalParameters;
