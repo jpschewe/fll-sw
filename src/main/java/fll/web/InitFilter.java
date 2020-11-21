@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.db.Authentication;
 import fll.db.GlobalParameters;
@@ -260,6 +261,7 @@ public class InitFilter implements Filter {
   /**
    * @return true if everything is OK, false if a redirect happened
    */
+  @SuppressFBWarnings(value = "RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE", justification = "Spotbugs false positive checking of null for connection")
   private static boolean initialize(final HttpServletRequest request,
                                     final HttpServletResponse response,
                                     final HttpSession session,
