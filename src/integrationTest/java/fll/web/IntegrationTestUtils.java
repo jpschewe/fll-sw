@@ -937,25 +937,25 @@ public final class IntegrationTestUtils {
 
     @Override
     public void afterTestExecution(final ExtensionContext context) throws Exception {
+      final WebDriver selenium = getStore(context).remove(WEBDRIVER_KEY, WebDriver.class);
+      if (null != selenium) {
+        LOGGER.info("Shutting down selenium");
+        selenium.quit();
+      } else {
+        LOGGER.error("Selenium doesn't exist, cannot be shutdown");
+      }
+
       final TomcatLauncher launcher = getStore(context).remove(TOMCAT_LAUNCHER_KEY, TomcatLauncher.class);
       try {
         if (null != launcher) {
           LOGGER.info("Stopping tomcat");
           launcher.stop();
         } else {
-          LOGGER.warn("Tomcat doesn't exist");
+          LOGGER.error("Tomcat doesn't exist, cannot be shutdown");
         }
       } catch (final LifecycleException e) {
         LOGGER.error("Error shutting down tomcat", e);
         throw new RuntimeException(e);
-      }
-
-      final WebDriver selenium = getStore(context).remove(WEBDRIVER_KEY, WebDriver.class);
-      if (null != selenium) {
-        LOGGER.info("Shutting down selenium");
-        selenium.quit();
-      } else {
-        LOGGER.warn("Selenium doesn't exist");
       }
     }
 
@@ -974,14 +974,14 @@ public final class IntegrationTestUtils {
         throws ParameterResolutionException {
       final Class<?> type = parameterContext.getParameter().getType();
       if (WebDriver.class.isAssignableFrom(type)) {
-        final WebDriver selenium = getStore(extensionContext).remove(WEBDRIVER_KEY, WebDriver.class);
+        final WebDriver selenium = getStore(extensionContext).get(WEBDRIVER_KEY, WebDriver.class);
         if (null != selenium) {
           return selenium;
         } else {
           throw new ParameterResolutionException("The webdriver has not been created. This is an internal error");
         }
       } else if (WebDriverWait.class.isAssignableFrom(type)) {
-        final WebDriverWait wait = getStore(extensionContext).remove(WAIT_KEY, WebDriverWait.class);
+        final WebDriverWait wait = getStore(extensionContext).get(WAIT_KEY, WebDriverWait.class);
         if (null != wait) {
           return wait;
         } else {
