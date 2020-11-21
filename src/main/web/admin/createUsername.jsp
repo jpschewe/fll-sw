@@ -32,7 +32,7 @@ fll.web.admin.CreateUser.populateContext(request, pageContext);
       rules : {
         pass : "required",
         pass_check : {
-          required : true
+          required : true,
           equalTo : "#pass"
         },
         user : {
