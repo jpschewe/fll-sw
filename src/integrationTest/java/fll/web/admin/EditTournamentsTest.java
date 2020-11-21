@@ -30,6 +30,8 @@ import fll.web.IntegrationTestUtils;
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class EditTournamentsTest {
 
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
   /**
    * @param selenium web browser driver
    * @param seleniumWait browser wait object
@@ -42,15 +44,20 @@ public class EditTournamentsTest {
       throws IOException, InterruptedException {
     try {
       final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
+      LOGGER.trace("Initializating database");
       IntegrationTestUtils.initializeDatabase(selenium, seleniumWait, challengeStream);
 
-      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.linkText("Admin Index"))).click();
+      selenium.get(TestUtils.URL_ROOT
+          + "admin/index.jsp");
 
+      LOGGER.trace("Waiting for add-edit-tournaments to be clickable, then clicking");
       seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("add-edit-tournaments"))).click();
 
+      LOGGER.trace("Waiting for addRow to be clickable, then clicking");
       seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("addRow"))).click();
 
       // get num rows
+      LOGGER.trace("Waiting for numRows");
       final WebElement numRowsEle = seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.name("numRows")));
       final String numRowsStr = numRowsEle.getAttribute("value");
       assertNotNull(numRowsStr);
@@ -61,12 +68,17 @@ public class EditTournamentsTest {
           - 1;
       final String lastRowName = "name"
           + lastRowIdx;
+      LOGGER.trace("Looking for {}", lastRowName);
       final WebElement lastRow = selenium.findElement(By.name(lastRowName));
 
+      LOGGER.trace("Entering tournament name");
       lastRow.sendKeys("test tournament");
+      LOGGER.trace("Clicking on commit");
       selenium.findElement(By.name("commit")).click();
 
+      LOGGER.trace("Waiting for success");
       seleniumWait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.id("success")));
+      LOGGER.trace("Finished");
     } catch (final RuntimeException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
