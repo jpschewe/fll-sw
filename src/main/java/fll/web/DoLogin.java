@@ -71,6 +71,7 @@ public class DoLogin extends BaseFLLServlet {
       }
 
       // compute hash
+      LOGGER.trace("Form parameters: {}", request.getParameterMap());
       final String user = request.getParameter("user");
       final String pass = request.getParameter("pass");
       if (null == user

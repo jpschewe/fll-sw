@@ -6,10 +6,13 @@
 
 package fll.web;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,10 +24,19 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
+import java.net.CookieManager;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,20 +44,17 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
 import org.apache.catalina.LifecycleException;
-import org.apache.http.Header;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.protocol.BasicHttpContext;
 import org.fest.swing.image.ScreenshotTaker;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
@@ -459,14 +468,18 @@ public final class IntegrationTestUtils {
     LOGGER.info("HTML saved to "
         + htmlFile.toAbsolutePath().toString());
 
-    // get the database
-    login(driver);
-    final Path dbOutput = tempDir.resolve("database.flldb");
-    LOGGER.info("Downloading database to "
-        + dbOutput.toAbsolutePath());
-    downloadFile(new URL(TestUtils.URL_ROOT
-        + "admin/database.flldb"), null, dbOutput);
-
+    try {
+      // get the database
+      final Path dbOutput = tempDir.resolve("database.flldb");
+      LOGGER.info("Downloading database to "
+          + dbOutput.toAbsolutePath());
+      downloadFile(new URI(TestUtils.URL_ROOT
+          + "admin/database.flldb"), null, dbOutput);
+    } catch (final URISyntaxException e) {
+      LOGGER.error("Error creating address to download database for screen shot", e);
+    } catch (final InterruptedException e) {
+      LOGGER.error("Interrupted downloading database for screen shot", e);
+    }
   }
 
   /**
@@ -843,6 +856,47 @@ public final class IntegrationTestUtils {
   }
 
   /**
+   * HTTP codes with this value and greater are errors.
+   */
+  private static final int HTTP_ERROR_BASE = 400;
+
+  /**
+   * Login to the software. This depends on {@code client} having a cookie handler
+   * to track the session cookie.
+   * This is used to login without selenium.
+   * 
+   * @param client the client to make the request with
+   * @throws InterruptedException if the client is interrupted posting to the
+   *           login page
+   * @throws IOException if there is an error posting to the login page
+   */
+  private static void login(final HttpClient client) throws IOException, InterruptedException {
+    final Map<String, String> loginData = new HashMap<>();
+    loginData.put("user", TEST_USERNAME);
+    loginData.put("pass", TEST_PASSWORD);
+
+    final String formData = loginData.entrySet().stream().map(entry -> entry.getKey()
+        + "="
+        + URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8)).collect(Collectors.joining("&"));
+
+    try {
+      final HttpRequest loginRequest = HttpRequest.newBuilder()//
+                                                  .uri(new URI(TestUtils.URL_ROOT
+                                                      + "DoLogin")) //
+                                                  .header("Content-Type", "application/x-www-form-urlencoded")
+                                                  .POST(BodyPublishers.ofString(formData, StandardCharsets.UTF_8))
+                                                  .build();
+      final HttpResponse<String> loginResponse = client.send(loginRequest, BodyHandlers.ofString());
+      assertThat("Error logging in", loginResponse.statusCode(), lessThan(HTTP_ERROR_BASE));
+    } catch (final URISyntaxException e) {
+      LOGGER.error("Error creating login address", e);
+      fail("Internal error, login address does not convert to a URI: "
+          + e.getMessage());
+    }
+
+  }
+
+  /**
    * Download the specified file and check the content type.
    * If the content type doesn't match an assertion violation will be thrown.
    *
@@ -854,46 +908,38 @@ public final class IntegrationTestUtils {
    *          overwritten.
    * @throws ClientProtocolException if there is an error talking to the server
    * @throws IOException if there is an error talking to the server
+   * @throws InterruptedException if the request is interrupted
    */
-  public static void downloadFile(final URL urlToLoad,
+  public static void downloadFile(final URI urlToLoad,
                                   final String expectedContentType,
                                   final Path destination)
-      throws ClientProtocolException, IOException {
+      throws ClientProtocolException, IOException, InterruptedException {
 
-    try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-      final BasicHttpContext localContext = new BasicHttpContext();
+    final HttpClient client = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
 
-      // if (this.mimicWebDriverCookieState) {
-      // localContext.setAttribute(ClientContext.COOKIE_STORE,
-      // mimicCookieState(selenium.manage().getCookies()));
-      // }
-      final HttpRequestBase requestMethod = new HttpGet();
-      requestMethod.setURI(urlToLoad.toURI());
-      // HttpParams httpRequestParameters = requestMethod.getParams();
-      // httpRequestParameters.setParameter(ClientPNames.HANDLE_REDIRECTS,
-      // this.followRedirects);
-      // requestMethod.setParams(httpRequestParameters);
+    login(client);
 
-      try (CloseableHttpResponse response = client.execute(requestMethod, localContext)) {
+    final HttpRequest downloadRequest = HttpRequest.newBuilder().uri(urlToLoad).build();
 
-        if (null != expectedContentType) {
-          final Header contentTypeHeader = response.getFirstHeader("Content-type");
-          assertNotNull(contentTypeHeader, "Null content type header: "
-              + urlToLoad.toString());
-          final String contentType = contentTypeHeader.getValue().split(";")[0].trim();
-          assertEquals(expectedContentType, contentType, "Unexpected content type from: "
-              + urlToLoad.toString());
-        }
+    final HttpResponse<InputStream> downloadResponse = client.send(downloadRequest, BodyHandlers.ofInputStream());
+    assertThat("Error downloading content from "
+        + urlToLoad, downloadResponse.statusCode(), lessThan(HTTP_ERROR_BASE));
 
-        if (null != destination) {
-          try (InputStream stream = response.getEntity().getContent()) {
-            Files.copy(stream, destination, StandardCopyOption.REPLACE_EXISTING);
-          } // try create stream
-        } // non-null destination
-      }
-    } catch (final URISyntaxException e) {
-      throw new FLLInternalException("Got exception turning URL into URI, this shouldn't happen", e);
+    if (null != expectedContentType) {
+      final Optional<String> contentTypeHeader = downloadResponse.headers().firstValue("Content-type");
+      assertTrue(contentTypeHeader.isPresent(), "Null content type header: "
+          + urlToLoad.toString());
+
+      final String contentType = contentTypeHeader.get().split(";")[0].trim();
+      assertEquals(expectedContentType, contentType, "Unexpected content type from: "
+          + urlToLoad.toString());
     }
+
+    if (null != destination) {
+      try (InputStream stream = downloadResponse.body()) {
+        Files.copy(stream, destination, StandardCopyOption.REPLACE_EXISTING);
+      } // try create stream
+    } // non-null destination
   }
 
   /**
