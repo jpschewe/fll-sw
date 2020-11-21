@@ -429,7 +429,12 @@ tasks.register("sloccount", Exec) {
     group = "Documentation"
     description = "Count number of lines of code"
 
-    commandLine("cloc", "--by-file", "--xml", "--out", "$buildDir/reports/sloccount/cloc.xml", "src")
+    commandLine("cloc", 
+    "--by-file",
+    "--exclude-dir", "extlib", 
+    "--xml", 
+    "--out", "$buildDir/reports/sloccount/cloc.xml", 
+    "src")
 }
 
 tasks.register("renderWorkflows") {
