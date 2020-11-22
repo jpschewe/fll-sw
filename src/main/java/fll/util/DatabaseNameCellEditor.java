@@ -18,12 +18,13 @@ import javax.swing.JTextField;
  */
 public final class DatabaseNameCellEditor extends DefaultCellEditor {
 
+  private static final String DATABASE_NAME_REGEXP = "[a-zA-Z]\\w*";
+
   /**
    * Regular expression for valid database names.
+   * The XML pattern is "\p{L}[\p{L}\p{Nd}_]*".
    */
-  public static final String DATABASE_NAME_REGEXP = "[a-zA-Z]\\w*";
-
-  private final Pattern pattern = Pattern.compile(DATABASE_NAME_REGEXP);
+  public static final Pattern DATABASE_NAME_PATTERN = Pattern.compile(DATABASE_NAME_REGEXP);
 
   /**
    * Create a cell editor for database name.
@@ -47,7 +48,7 @@ public final class DatabaseNameCellEditor extends DefaultCellEditor {
   public boolean stopCellEditing() {
     final String str = getComponent().getText();
     boolean stop;
-    if (pattern.matcher(str).matches()) {
+    if (DATABASE_NAME_PATTERN.matcher(str).matches()) {
       stop = true;
     } else {
       stop = false;

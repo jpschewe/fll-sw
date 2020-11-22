@@ -27,7 +27,7 @@ plugins {
     id "org.unbroken-dome.test-sets" version "3.0.1"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
-    id "com.github.spotbugs" version "4.5.1"
+    id "com.github.spotbugs" version "4.6.0"
     id "org.myire.munge" version "1.0" // transformer for spotbugs XML
     id "de.aaschmid.cpd" version "3.1"
     id "edu.sc.seis.launch4j" version "2.4.8"
@@ -84,10 +84,7 @@ dependencies {
 testSets {
     integrationTest
 }
-integrationTest {
-    // have selenium log through log4j
-    systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
-}
+
 // don't depend on check so that users can skip these on a basic check. check.dependsOn integrationTest
 integrationTest.mustRunAfter test
 
@@ -95,10 +92,18 @@ test {
     useJUnitPlatform()
     ignoreFailures = Boolean.getBoolean("test.ignoreFailures") 
 }
+
 integrationTest {
     useJUnitPlatform()
     ignoreFailures = Boolean.getBoolean("test.ignoreFailures") 
+    // have selenium log through log4j
+    systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
+    
+    // debug log4j configuration
+    //systemProperty("log4j2.debug", "true")
+    forkEvery = 1
 }
+
 repositories {
     //mavenLocal()
     jcenter()
@@ -411,6 +416,8 @@ tasks.register("jspToClasses", JavaCompile) {
     classpath = configurations.jspc + sourceSets.main.runtimeClasspath
 }
 check.dependsOn(jspToClasses)
+run.dependsOn(jspToClasses)
+assemble.dependsOn(jspToClasses)
 
 
 cpdCheck {
@@ -422,7 +429,12 @@ tasks.register("sloccount", Exec) {
     group = "Documentation"
     description = "Count number of lines of code"
 
-    commandLine("cloc", "--by-file", "--xml", "--out", "$buildDir/reports/sloccount/cloc.xml", "src")
+    commandLine("cloc", 
+    "--by-file",
+    "--exclude-dir", "extlib", 
+    "--xml", 
+    "--out", "$buildDir/reports/sloccount/cloc.xml", 
+    "src")
 }
 
 tasks.register("renderWorkflows") {

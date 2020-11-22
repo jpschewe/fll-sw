@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -116,12 +118,13 @@ public class FullTournamentTest {
    * @throws IllegalAccessException test error
    * @throws SQLException test error
    * @throws InterruptedException test error
+   * @throws URISyntaxException test error
    */
   @Test
   public void testFullTournament(final WebDriver selenium,
                                  final WebDriverWait seleniumWait)
       throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException,
-      InterruptedException {
+      InterruptedException, URISyntaxException {
     try {
       try (Connection testDataConn = DriverManager.getConnection("jdbc:hsqldb:mem:full-tournament-test")) {
         assertNotNull(testDataConn, "Error connecting to test data database");
@@ -178,13 +181,14 @@ public class FullTournamentTest {
    * @throws IOException if there is an error talking to the browser
    * @throws SQLException on a database error
    * @throws InterruptedException if an element cannot be found in time
+   * @throws URISyntaxException test error
    */
   public void replayTournament(final WebDriver selenium,
                                final WebDriverWait seleniumWait,
                                final Connection testDataConn,
                                final String testTournamentName,
                                final Path outputDirectory)
-      throws IOException, SQLException, InterruptedException {
+      throws IOException, SQLException, InterruptedException, URISyntaxException {
     final String safeTestTournamentName = sanitizeFilename(testTournamentName);
 
     final ChallengeDescription challengeDescription = GlobalParameters.getChallengeDescription(testDataConn);
@@ -209,7 +213,7 @@ public class FullTournamentTest {
     LOGGER.info("Loading teams");
     loadTeams(selenium, seleniumWait, testDataConn, sourceTournament, outputDirectory);
 
-    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+    IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
         + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
                                                                               safeTestTournamentName
                                                                                   + "_01-teams-loaded.flldb"));
@@ -222,7 +226,7 @@ public class FullTournamentTest {
 
     LOGGER.info("Loading the schedule");
     uploadSchedule(selenium, seleniumWait, testDataConn, sourceTournament, outputDirectory);
-    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+    IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
         + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
                                                                               safeTestTournamentName
                                                                                   + "_02-schedule-loaded.flldb"));
@@ -230,7 +234,7 @@ public class FullTournamentTest {
     LOGGER.info("Assigning judges");
     assignJudges(selenium, seleniumWait, testDataConn, sourceTournament);
 
-    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+    IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
         + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
                                                                               safeTestTournamentName
                                                                                   + "_03-judges-assigned.flldb"));
@@ -238,7 +242,7 @@ public class FullTournamentTest {
     LOGGER.info("Assigning table labels");
     assignTableLabels(selenium, seleniumWait);
 
-    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+    IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
         + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
                                                                               safeTestTournamentName
                                                                                   + "_04-table-labels-assigned.flldb"));
@@ -270,7 +274,7 @@ public class FullTournamentTest {
 
         if (runNumber > numSeedingRounds) {
           if (!initializedPlayoff) {
-            IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+            IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
                 + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
                                                                                       safeTestTournamentName
                                                                                           + "_05-seeding-rounds-completed.flldb"));
@@ -316,7 +320,7 @@ public class FullTournamentTest {
       enterSubjectiveScores(testDataConn, challengeDescription, sourceTournament);
 
       LOGGER.info("Writing final datbaase");
-      IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+      IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
           + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
                                                                                 safeTestTournamentName
                                                                                     + "_99-final.flldb"));
@@ -583,11 +587,7 @@ public class FullTournamentTest {
     selenium.findElement(By.id("teams_file")).sendKeys(teamsFile.toAbsolutePath().toString());
 
     selenium.findElement(By.id("upload_teams")).click();
-
-    IntegrationTestUtils.assertNoException(selenium);
-
-    // skip past the filter page
-    selenium.findElement(By.id("next")).click();
+    seleniumWait.until(ExpectedConditions.urlContains("teamColumnSelection"));
     IntegrationTestUtils.assertNoException(selenium);
 
     // team column selection
@@ -598,6 +598,7 @@ public class FullTournamentTest {
     new Select(selenium.findElement(By.name("event_division"))).selectByValue("award_group");
     new Select(selenium.findElement(By.name("judging_station"))).selectByValue("judging_group");
     selenium.findElement(By.id("next")).click();
+
     IntegrationTestUtils.assertNoException(selenium);
     assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
 
@@ -615,14 +616,14 @@ public class FullTournamentTest {
     assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
   }
 
-  private void checkReports() throws IOException {
-    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+  private void checkReports() throws IOException, InterruptedException, URISyntaxException {
+    IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
         + "report/FinalComputedScores"), "application/pdf", null);
 
-    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+    IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
         + "report/CategoryScoresByScoreGroup"), "application/pdf", null);
 
-    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+    IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
         + "report/PlayoffReport"), "application/pdf", null);
   }
 

@@ -1,28 +1,100 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<c:if test="${not authentication.admin and not authentication.inSetup}">
+    <jsp:forward page="/permission-denied.jsp"></jsp:forward>
+</c:if>
+
+<%
+fll.web.admin.CreateUser.populateContext(request, pageContext);
+%>
+
 <html>
 
 <head>
-<title>Administration</title>
+<title>Create User</title>
 <link rel="stylesheet" type="text/css"
- href="<c:url value='/style/fll-sw.css'/>" />
+    href="<c:url value='/style/fll-sw.css'/>" />
+
+<script type="text/javascript"
+    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+
+<script type="text/javascript"
+    src="<c:url value='/extlib/jquery-validation/dist/jquery.validate.min.js'/>"></script>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+
+    jQuery.validator.addMethod("alphanumeric", function(value, element) {
+      return this.optional(element) || /^\w+$/i.test(value);
+    }, "Letters, numbers, and underscores only please");
+
+    $("#create_user").validate({
+      rules : {
+        pass : "required",
+        pass_check : {
+          required : true,
+          equalTo : "#pass"
+        },
+        user : {
+          required : true,
+          alphanumeric : true
+        }
+      },
+      messages : {
+        pass_check : {
+          equalTo : "The password entries must match"
+        }
+      }
+
+    });
+  });
+</script>
+
 </head>
 
 <body>
 
- <div class='status-message'>${message}</div>
- <%-- clear out the message, so that we don't see it again --%>
- <c:remove var="message" />
+    <div class='status-message'>${message}</div>
+    <%-- clear out the message, so that we don't see it again --%>
+    <c:remove var="message" />
 
-<p>Specify a username and password that is used to be able to edit information in the database.</p>
+    <form method="POST" action="CreateUser" name="create_user"
+        id="create_user">
+        <div>
+            Username :
+            <input type="text" size="15" maxlength="64" name="user"
+                id="user">
+        </div>
+        <div>
+            Password :
+            <input type="password" size="15" name="pass" id="pass">
+        </div>
+        <div>
+            Repeat Password :
+            <input type="password" size="15" name="pass_check"
+                id="pass_check">
+        </div>
 
- <form method="POST" action="CreateUser" name="create_user">
-  Username : <input type="text" size="15" maxlength="64" name="user"><br />
-  Password : <input type="password" size="15" name="pass"><br />
-  Repeat Password : <input type="password" size="15" name="pass_check"><br />
+        <div>Roles:</div>
+        <c:forEach items="${possibleRoles}" var="role">
+            <div>
+                <label>
+                    <c:if test="${selectedRoles.contains(role) }">
+                        <c:set var="checked" value="checked" />
+                    </c:if>
 
-  <input name="submit_create_user" value="Create User" type="submit" />
- </form>
+                    <input type='checkbox' name='role_${role}'
+                        value='true' id='role_${role}' ${checked} />${role}
+                    - ${role.description}
+
+                    <c:remove var="checked" />
+                </label>
+            </div>
+        </c:forEach>
+
+        <input name="submit_create_user" value="Create User"
+            type="submit" />
+    </form>
 
 
 </body>

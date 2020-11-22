@@ -9,7 +9,7 @@ package fll.web;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -19,9 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
-import fll.db.Queries;
+import fll.db.Authentication;
+import fll.util.FLLRuntimeException;
 
 /**
  * Handle login credentials and if incorrect redirect back to login page.
@@ -63,7 +62,7 @@ public class DoLogin extends BaseFLLServlet {
     try (Connection connection = datasource.getConnection()) {
 
       // check for authentication table
-      if (Queries.isAuthenticationEmpty(connection)) {
+      if (Authentication.isAuthenticationEmpty(connection)) {
         LOGGER.warn("No authentication information in the database");
         SessionAttributes.appendToMessage(session,
                                           "<p class='error'>No authentication information in the database - see administrator</p>");
@@ -72,6 +71,7 @@ public class DoLogin extends BaseFLLServlet {
       }
 
       // compute hash
+      LOGGER.trace("Form parameters: {}", request.getParameterMap());
       final String user = request.getParameter("user");
       final String pass = request.getParameter("pass");
       if (null == user
@@ -83,39 +83,27 @@ public class DoLogin extends BaseFLLServlet {
         response.sendRedirect(response.encodeRedirectURL("/login.jsp"));
         return;
       }
-      final String hashedPass = DigestUtils.md5Hex(pass);
 
-      // compare login information
-      LOGGER.trace("Checking user: {} hashedPass: {}", user, hashedPass);
-      final Map<String, String> authInfo = Queries.getAuthInfo(connection);
-      for (final Map.Entry<String, String> entry : authInfo.entrySet()) {
-        if (user.equals(entry.getKey())
-            && hashedPass.equals(entry.getValue())) {
-          // clear out old login cookies first
-          CookieUtils.clearLoginCookies(application, request, response);
+      if (Authentication.checkValidPassword(connection, user, pass)) {
+        // store authentication information
+        final Set<UserRole> roles = Authentication.getRoles(connection, user);
+        final AuthenticationContext newAuth = AuthenticationContext.loggedIn(user, roles);
+        session.setAttribute(SessionAttributes.AUTHENTICATION, newAuth);
 
-          final String magicKey = String.valueOf(System.currentTimeMillis());
-          Queries.addValidLogin(connection, user, magicKey);
-          CookieUtils.setLoginCookie(response, magicKey);
-
-          String redirect = SessionAttributes.getRedirectURL(session);
-          if (null == redirect) {
-            redirect = "/index.jsp";
-          }
-          LOGGER.trace("Redirecting to {} with message '{}'", redirect, SessionAttributes.getMessage(session));
-          response.sendRedirect(response.encodeRedirectURL(redirect));
-          return;
-        } else {
-          LOGGER.trace("Didn't match user: {} pass: {}", entry.getKey(), entry.getValue());
+        String redirect = SessionAttributes.getRedirectURL(session);
+        if (null == redirect) {
+          redirect = "/index.jsp";
         }
+        LOGGER.trace("Redirecting to {} with message '{}'", redirect, SessionAttributes.getMessage(session));
+        response.sendRedirect(response.encodeRedirectURL(redirect));
+      } else {
+        LOGGER.warn("Incorrect login credentials user: {}", user);
+        SessionAttributes.appendToMessage(session, "<p class='error'>Incorrect login information provided</p>");
+        response.sendRedirect(response.encodeRedirectURL("/login.jsp"));
       }
 
-      LOGGER.warn("Incorrect login credentials user: {}", user);
-      SessionAttributes.appendToMessage(session, "<p class='error'>Incorrect login information provided</p>");
-      response.sendRedirect(response.encodeRedirectURL("/login.jsp"));
-      return;
     } catch (final SQLException e) {
-      throw new RuntimeException(e);
+      throw new FLLRuntimeException(e);
     }
   }
 

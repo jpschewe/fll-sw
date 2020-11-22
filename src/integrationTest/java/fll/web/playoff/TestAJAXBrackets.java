@@ -132,6 +132,11 @@ public class TestAJAXBrackets {
       selenium.findElement(By.name("submit_data")).click();
       seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
+      // login in other windows
+      IntegrationTestUtils.login(bracketsWindow);
+      IntegrationTestUtils.login(scoreEntryWindow);
+      IntegrationTestUtils.login(scoresheetWindow);
+
       // open brackets
       IntegrationTestUtils.loadPage(bracketsWindow, bracketsWait, TestUtils.URL_ROOT
           + "playoff/remoteControlBrackets.jsp?scroll=false", ExpectedConditions.urlContains("remoteControlBrackets"));

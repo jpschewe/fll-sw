@@ -5,6 +5,10 @@
  */
 package fll.web;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
@@ -125,6 +129,53 @@ public final class ApplicationAttributes {
    */
   public static DataSource getDataSource(final ServletContext application) {
     return getNonNullAttribute(application, ApplicationAttributes.DATASOURCE, DataSource.class);
+  }
+
+  /**
+   * Key for authentications that need refreshing.
+   */
+  public static final String AUTH_REFRESH = "authRefresh";
+
+  /**
+   * @param application application variable store
+   * @return authentications that need refreshing if created before the specified
+   *         time
+   */
+  public static Map<String, LocalDateTime> getAuthRefresh(final ServletContext application) {
+    @SuppressWarnings("unchecked") // can't get generics out of the application
+    final Map<String, LocalDateTime> authRefresh = (Map<String, LocalDateTime>) getAttribute(application, AUTH_REFRESH,
+                                                                                             Map.class);
+    if (null == authRefresh) {
+      final Map<String, LocalDateTime> newValue = new HashMap<>();
+      application.setAttribute(AUTH_REFRESH, newValue);
+      return newValue;
+    } else {
+      return authRefresh;
+    }
+  }
+
+  /**
+   * Key for authentications that need logging out.
+   */
+  public static final String AUTH_LOGGED_OUT = "authLoggedOut";
+
+  /**
+   * @param application application variable store
+   * @return authentications that need to be logged out if created before the
+   *         specified time
+   */
+  public static Map<String, LocalDateTime> getAuthLoggedOut(final ServletContext application) {
+    @SuppressWarnings("unchecked") // can't get generics out of the application
+    final Map<String, LocalDateTime> authLoggedOut = (Map<String, LocalDateTime>) getAttribute(application,
+                                                                                             AUTH_LOGGED_OUT,
+                                                                                             Map.class);
+    if (null == authLoggedOut) {
+      final Map<String, LocalDateTime> newValue = new HashMap<>();
+      application.setAttribute(AUTH_LOGGED_OUT, newValue);
+      return newValue;
+    } else {
+      return authLoggedOut;
+    }
   }
 
 }

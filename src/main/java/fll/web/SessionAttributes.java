@@ -129,4 +129,27 @@ public final class SessionAttributes {
     return retval;
   }
 
+  /**
+   * Stores the current login information. This is an instance of
+   * {@link AuthenticationContext}.
+   */
+  public static final String AUTHENTICATION = "authentication";
+
+  /**
+   * Get the authentication information. If there is no authentication information
+   * {@link AuthenticationContext#notLoggedIn()} is used.
+   * 
+   * @param session used to get the variable
+   * @return the authentication information
+   */
+  public static AuthenticationContext getAuthentication(final HttpSession session) {
+    final AuthenticationContext auth = getAttribute(session, AUTHENTICATION, AuthenticationContext.class);
+    if (null == auth) {
+      final AuthenticationContext newAuth = AuthenticationContext.notLoggedIn();
+      session.setAttribute(AUTHENTICATION, newAuth);
+      return newAuth;
+    } else {
+      return auth;
+    }
+  }
 }

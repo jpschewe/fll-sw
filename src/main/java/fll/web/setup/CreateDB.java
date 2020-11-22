@@ -26,11 +26,14 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 
 import fll.Utilities;
+import fll.db.Authentication;
 import fll.db.GenerateDB;
 import fll.db.ImportDB;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -51,6 +54,12 @@ public class CreateDB extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext currentAuth = SessionAttributes.getAuthentication(session);
+    if(!currentAuth.isAdmin() && !currentAuth.getInSetup()) {
+      request.getRequestDispatcher("/permission-denied.jsp").forward(request, response);
+      return;
+    }
+    
     String redirect;
     final StringBuilder message = new StringBuilder();
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -71,7 +80,16 @@ public class CreateDB extends BaseFLLServlet {
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
 
           message.append("<p id='success'><i>Successfully initialized database</i></p>");
-          redirect = "/admin/createUsername.jsp";
+          if (Authentication.getAdminUsers(connection).isEmpty()) {
+            redirect = "/admin/createUsername.jsp?ADMIN";
+          } else {
+            redirect = "/admin/ask-create-admin.jsp";
+          }
+          
+          // setup special authentication for setup 
+          AuthenticationContext auth = AuthenticationContext.inSetup();
+          session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
+
 
         } catch (final MalformedURLException e) {
           throw new FLLInternalException("Could not parse URL from choosen description: "
@@ -94,7 +112,15 @@ public class CreateDB extends BaseFLLServlet {
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
 
           message.append("<p id='success'><i>Successfully initialized database</i></p>");
-          redirect = "/admin/createUsername.jsp";
+          if (Authentication.getAdminUsers(connection).isEmpty()) {
+            redirect = "/admin/createUsername.jsp?ADMIN";
+          } else {
+            redirect = "/admin/ask-create-admin.jsp";
+          }
+          
+          // setup special authentication for setup 
+          AuthenticationContext auth = AuthenticationContext.inSetup();
+          session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
         }
       } else if (null != request.getAttribute("createdb")) {
         // import a database from a dump
@@ -120,7 +146,15 @@ public class CreateDB extends BaseFLLServlet {
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
 
           message.append("<p id='success'><i>Successfully initialized database from dump</i></p>");
-          redirect = "/admin/createUsername.jsp";
+          if (Authentication.getAdminUsers(connection).isEmpty()) {
+            redirect = "/admin/createUsername.jsp?ADMIN";
+          } else {
+            redirect = "/admin/ask-create-admin.jsp";
+          }
+          
+          // setup special authentication for setup 
+          AuthenticationContext auth = AuthenticationContext.inSetup();
+          session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
         }
 
       } else {
@@ -137,7 +171,7 @@ public class CreateDB extends BaseFLLServlet {
       LOG.error(fue, fue);
       redirect = "/setup";
     } catch (final IOException ioe) {
-      message.append("<p class='error'>Error reading database: "
+      message.append("<p class='error'>Error reading uploaded database: "
           + ioe.getMessage()
           + "</p>");
       LOG.error(ioe, ioe);

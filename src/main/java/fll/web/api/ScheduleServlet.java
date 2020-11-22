@@ -27,7 +27,7 @@ import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
 
 /**
- * APi access to the tournament schedule.
+ * API access to the tournament schedule.
  */
 @WebServlet("/api/Schedule/*")
 public class ScheduleServlet extends HttpServlet {

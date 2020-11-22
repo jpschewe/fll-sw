@@ -21,6 +21,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import fll.Version;
 
@@ -32,18 +33,11 @@ public class FooterFilter implements Filter {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  /**
-   * @see javax.servlet.Filter#destroy()
-   */
   @Override
   public void destroy() {
     // nothing
   }
 
-  /**
-   * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest,
-   *      javax.servlet.ServletResponse, javax.servlet.FilterChain)
-   */
   @Override
   public void doFilter(final ServletRequest request,
                        final ServletResponse response,
@@ -157,10 +151,14 @@ public class FooterFilter implements Filter {
   private static void addFooter(final CharArrayWriter caw,
                                 final HttpServletRequest request)
       throws IOException {
+    final HttpSession session = request.getSession();
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
     final String contextPath = request.getContextPath();
     final Formatter formatter = new Formatter(caw);
     formatter.format("<hr />");
-    formatter.format("<table>");
+    formatter.format("<table style='border-spacing: 5px'>");
+
     formatter.format("  <tr>");
     formatter.format("    <td><a href='%s/admin/performance-area.jsp' target='_top'>Scoring Coordinator</a></td>",
                      contextPath);
@@ -168,7 +166,22 @@ public class FooterFilter implements Filter {
     formatter.format("    <td><a href='%s/index.jsp' target='_top'>Main Index</a></td>", contextPath);
     formatter.format("    <td><a href='%s/admin/index.jsp' target='_top'>Admin Index</a></td>", contextPath);
     formatter.format("  </tr>");
-    formatter.format("  <tr><td colspan='4'>Software version: %s</td></tr>", Version.getVersion());
+
+    final int numColumns = 4;
+    final int halfNumColumns = numColumns
+        / 2;
+    final int lastHalfNumColumns = numColumns
+        - halfNumColumns;
+    if (auth.getLoggedIn()) {
+      formatter.format("  <tr><td colspan='%d'>Logged in as %s</td><td colspan='%d'><a href='%s/DoLogout'>Log Out</a></td></tr>",
+                       halfNumColumns, auth.getUsername(), lastHalfNumColumns, contextPath);
+    } else {
+      formatter.format("  <tr><td colspan='%d'>Not logged in</td><td colspan='%d'><a href='%s/login.jsp'>Log In</a></td></tr>",
+                       halfNumColumns, lastHalfNumColumns, contextPath);
+    }
+
+    formatter.format("  <tr><td colspan='%d'>Software version: %s</td></tr>", numColumns, Version.getVersion());
+
     formatter.format("</table>");
     formatter.format("%n</body></html>");
   }

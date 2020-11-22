@@ -12,8 +12,6 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.Collection;
@@ -30,13 +28,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import fll.db.Queries;
 
 /**
  * Some utilities for dealing with the web.
@@ -133,6 +128,21 @@ public final class WebUtils {
   }
 
   /**
+   * Call {@link #updateHostNamesInBackground(ServletContext)} if the hostnames
+   * have expired or have not been set.
+   * 
+   * @param application application variable store
+   */
+  public static void scheduleHostnameUpdateIfNeeded(final ServletContext application) {
+    final LocalTime expiration = ApplicationAttributes.getAttribute(application, HOSTNAMES_EXPIRATION_KEY,
+                                                                    LocalTime.class);
+    if (null == expiration
+        || LocalTime.now().isAfter(expiration)) {
+      updateHostNamesInBackground(application);
+    }
+  }
+
+  /**
    * Get all URLs that this host can be access via. The scheme of the URLs is
    * determined by the scheme of the request.
    *
@@ -143,12 +153,7 @@ public final class WebUtils {
    */
   public static Collection<String> getAllUrls(final HttpServletRequest request,
                                               final ServletContext application) {
-    final LocalTime expiration = ApplicationAttributes.getAttribute(application, HOSTNAMES_EXPIRATION_KEY,
-                                                                    LocalTime.class);
-    if (null == expiration
-        || LocalTime.now().isAfter(expiration)) {
-      updateHostNamesInBackground(application);
-    }
+    scheduleHostnameUpdateIfNeeded(application);
 
     @SuppressWarnings("unchecked") // can't store generics in ServletContext
     final Collection<String> hostNames = ApplicationAttributes.getAttribute(application, HOSTNAMES_KEY,
@@ -227,7 +232,7 @@ public final class WebUtils {
     for (final InetAddress address : getAllIPs()) {
       if (address instanceof Inet4Address) {
         // TODO skip IPv6 for now, need to figure out how to encode and get
-        // Tomcat to listen on IPv6
+        // Tomcat to listen on IPv6. Issue #233.
 
         if (!address.isLoopbackAddress()) {
           // don't tell the user about connecting to localhost
@@ -263,79 +268,6 @@ public final class WebUtils {
       return '"'
           + escapeMatcher.replaceAll("\\\\$0")
           + '"';
-    }
-  }
-
-  /**
-   * Check for headers that indicate that this request has been proxied and
-   * therefore should not be considered local.
-   */
-  private static boolean isProxied(final HttpServletRequest request) {
-    return null != request.getHeader("X-Forwarded-For");
-  }
-
-  /**
-   * Check if the web request is authenticated.
-   * If the connection is from localhost it's
-   * allowed.
-   *
-   * @param request the web request
-   * @param application the application context
-   * @return true if authenticated, false otherwise
-   */
-  public static boolean checkAuthenticated(final HttpServletRequest request,
-                                           final ServletContext application) {
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
-
-    // check request against all interfaces
-    String requestAddressStr = request.getRemoteAddr();
-
-    // remove zone from IPv6 addresses
-    final int zoneIndex = requestAddressStr.indexOf('%');
-    if (-1 != zoneIndex) {
-      requestAddressStr = requestAddressStr.substring(0, zoneIndex);
-    }
-
-    if (!isProxied(request)) {
-      // proxied connections cannot be considered localhost
-      try {
-        final InetAddress requestAddress = InetAddress.getByName(requestAddressStr);
-        if (requestAddress.isLoopbackAddress()) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Returning true from checkAuthenticated for connection from local ip: "
-                + requestAddressStr);
-          }
-          return true;
-        }
-      } catch (final UnknownHostException e) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Error converting request address string to address: "
-              + requestAddressStr, e);
-        }
-      }
-    }
-
-    try (Connection connection = datasource.getConnection()) {
-
-      if (Queries.isAuthenticationEmpty(connection)) {
-        LOGGER.debug("Returning true from checkAuthenticated for empty auth");
-        return true;
-      }
-
-      final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
-      final String user = Queries.checkValidLogin(connection, loginKeys);
-      if (null != user) {
-        LOGGER.debug("Returning true from checkSecurity for valid login: "
-            + loginKeys
-            + " user: "
-            + user);
-        return true;
-      } else {
-        LOGGER.debug("Returning false from checkAuthenticated");
-        return false;
-      }
-    } catch (final SQLException e) {
-      throw new RuntimeException(e);
     }
   }
 

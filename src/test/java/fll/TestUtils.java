@@ -68,16 +68,20 @@ public final class TestUtils {
    */
   public static class InitializeLogging implements BeforeTestExecutionCallback, AfterTestExecutionCallback {
 
+    private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
     // TODO consider creating a log file per test
     // https://stackoverflow.com/questions/52075223/log-file-per-junit-5-test-in-order-to-attach-it-to-the-allure-report
 
     @Override
     public void beforeTestExecution(final ExtensionContext context) throws Exception {
       ThreadContext.push(context.getDisplayName());
+      LOGGER.info("Starting {}", context.getDisplayName());
     }
 
     @Override
     public void afterTestExecution(final ExtensionContext context) throws Exception {
+      LOGGER.info("Finished {}", context.getDisplayName());
       ThreadContext.pop();
     }
   }
