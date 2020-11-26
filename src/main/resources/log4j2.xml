@@ -4,13 +4,13 @@
         <!-- limit CONSOLE to be info -->
         <Console name="CONSOLE" target="SYSTEM_OUT">
             <PatternLayout
-                pattern="%r [%t] %p %c %notEmpty{%x} %notEmpty{%X}- %m%n" />
+                pattern="%d [%t] %p %c %notEmpty{%x} %notEmpty{%X}- %m%n" />
         </Console>
 
         <RollingFile name="LOGFILE"
             filePattern="logs/fll-sw_%d{yyyy-MM-dd_HH-mm-ss}.%i.log">
             <PatternLayout
-                pattern="%r [%t] %p %c %notEmpty{%x} %notEmpty{%X}- %m%n" />
+                pattern="%d [%t] %p %c %notEmpty{%x} %notEmpty{%X}- %m%n" />
             <Policies>
                 <OnStartupTriggeringPolicy />
             </Policies>
