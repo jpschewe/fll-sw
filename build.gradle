@@ -37,7 +37,7 @@ plugins {
     id "checkstyle"
         
     // Checker Framework pluggable type-checking
-    id "org.checkerframework" version "0.5.11"
+    id "org.checkerframework" version "0.5.13"
     
     // code coverage
     id "jacoco"
@@ -215,7 +215,7 @@ dependencies {
     exclude(group: "xml-apis", module: "xml-apis")
   }
   
-  implementation(group: "org.checkerframework", name: "checker-qual", version: "3.7.0")
+  implementation(group: "org.checkerframework", name: "checker-qual", version: "3.8.0")
     
   implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.21")
   
