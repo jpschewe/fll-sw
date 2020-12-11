@@ -226,14 +226,23 @@ public class SchedulerUI extends JFrame {
     changeDuration = FormatterUtils.createIntegerField(0, 1000);
     changeDuration.setToolTipText("The number of minutes that a team has between any 2 activities");
     addRow(constraintsPanel, new JLabel("Change time duration:"), changeDuration);
+    changeDuration.addPropertyChangeListener("value", e -> {
+      checkSchedule();
+    });
 
     performanceChangeDuration = FormatterUtils.createIntegerField(0, 1000);
     performanceChangeDuration.setToolTipText("The number of minutes that a team has between any 2 performance runs");
     addRow(constraintsPanel, new JLabel("Performance change time duration:"), performanceChangeDuration);
+    performanceChangeDuration.addPropertyChangeListener("value", e -> {
+      checkSchedule();
+    });
 
     performanceDuration = FormatterUtils.createIntegerField(1, 1000);
     performanceDuration.setToolTipText("The amount of time that the team is expected to be at the table");
     addRow(constraintsPanel, new JLabel("Performance duration:"), performanceDuration);
+    performanceDuration.addPropertyChangeListener("value", e -> {
+      checkSchedule();
+    });
 
     addRow(constraintsPanel, new JLabel("Make sure to pass these values onto your computer person with the schedule!"));
 
@@ -1155,6 +1164,10 @@ public class SchedulerUI extends JFrame {
    * Verify the existing schedule and update the violations.
    */
   private void checkSchedule() {
+    if (null == mScheduleData) {
+      return;
+    }
+
     violationTable.clearSelection();
 
     // make sure sched params are updated based on the UI elements
@@ -1167,6 +1180,7 @@ public class SchedulerUI extends JFrame {
     final ScheduleChecker checker = new ScheduleChecker(params, getScheduleData());
     mViolationsModel = new ViolationTableModel(checker.verifySchedule());
     violationTable.setModel(mViolationsModel);
+    mScheduleTable.repaint();
   }
 
   private final JLabel mDescriptionFilename;
