@@ -1,3 +1,4 @@
+* #340 - Move setting of score page text to the remote control page
 * #870 - Add security roles (admin, judge, ref)
 * #869 - Keep carriage returns in subjective comments when creating PDF for teams
 * #874 - Add challenge revision to the bottom of the score entry page

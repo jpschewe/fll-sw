@@ -274,25 +274,6 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
 
     <h2>Tournament day</h2>
     <ol>
-        <li>
-            <form action='ChangeScorePageText' method='post'>
-                Scoring display text:
-                <input type='text' name='ScorePageText'
-                    value='<c:out value="${ScorePageText}"/>'>
-                <input type='submit' value='Change text'>
-                <a href='javascript:display("ScorePageTextHelp")'>[help]</a>
-                <div id='ScorePageTextHelp' class='help'
-                    style='display: none'>
-                    This text is displayed on the various big screen
-                    display pages. There is only 1 or 2 lines of space
-                    available, so keep it short. This can be used to
-                    notify participants and spectators of when the next
-                    break will be over. <a
-                        href='javascript:hide("ScorePageTextHelp")'>[hide]</a>
-                </div>
-            </form>
-        </li>
-
 
         <li>
             <c:if test="${judgesAssigned }">

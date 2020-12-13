@@ -409,6 +409,22 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
 
     </form>
 
+    <form action="<c:url value='/admin/ChangeScorePageText'/>"
+        method='post'>
+        <div>
+            Scoring display text:
+            <input type='text' name='ScorePageText'
+                value='<c:out value="${ScorePageText}"/>'>
+            <input type='submit' value='Change text'>
+        </div>
+        <div>This text is displayed on the various big screen
+            display pages. There is only 1 or 2 lines of space
+            available, so keep it short. This can be used to notify
+            participants and spectators of when the next break will be
+            over.</div>
+    </form>
+
+
     <h2>Troubleshooting</h2>
 
     <p>If you have a display that is stale. Look at the seen @ time

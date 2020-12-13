@@ -35,7 +35,12 @@ public class ChangeScorePageText extends BaseFLLServlet {
       application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, newText);
     }
 
-    response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+    final String referer = request.getHeader("referer");
+    if (null != referer) {
+      response.sendRedirect(response.encodeRedirectURL(referer));
+    } else {
+      response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+    }
 
   }
 }
