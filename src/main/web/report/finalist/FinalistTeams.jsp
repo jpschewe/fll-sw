@@ -4,38 +4,45 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-  fll.web.report.finalist.FinalistTeams.populateContext(application, pageContext);
+fll.web.report.finalist.FinalistTeams.populateContext(application, pageContext);
 %>
 
 <html>
 <head>
-<link
-  rel="stylesheet"
-  type="text/css"
-  href="<c:url value='/style/base.css'/>" />
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/style/base.css'/>" />
 
-<script
-  type='text/javascript'
-  src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-
-<link
-  rel='stylesheet'
-  type='text/css'
-  href='../../style/base.css' />
-<link
-  rel='stylesheet'
-  type='text/css'
-  href='../../scoreboard/score_style.css' />
+<link rel='stylesheet' type='text/css' href='../../style/base.css' />
+<link rel='stylesheet' type='text/css'
+    href='../../scoreboard/score_style.css' />
 
 
-<script
-  type='text/javascript'
-  src="<c:url value='/scripts/scroll.js'/>"></script>
+<script type='text/javascript'
+    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+<script type="text/javascript"
+    src="<c:url value='/extlib/jquery.scrollTo/jquery.scrollTo.min.js'/>"></script>
 
 <script type="text/javascript">
+  var scrollDuration = parseInt("${scrollDuration}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
+
+  function bottomReload() {
+    console.log("In bottomReload");
+    $.scrollTo($("#top"));
+    location.reload(true);
+  }
+
+  function scrollToBottom() {
+    $.scrollTo($("#bottom"), {
+      duration : scrollDuration,
+      easing : 'linear',
+      onAfter : bottomReload,
+    });
+  }
+
   $(document).ready(function() {
     <c:if test="${param.finalistTeamsScroll}">
-    startScrolling();
+    console.log("Starting scroll");
+    scrollToBottom();
     </c:if>
   });
 </script>
@@ -43,33 +50,38 @@
 </head>
 
 <body class='scoreboard'>
-  <div class='status-message'>${message}</div>
-  <%-- clear out the message, so that we don't see it again --%>
-  <c:remove var="message" />
+    <div id="top">
+        &nbsp;
+    </div>
 
-  <h1>Teams in finalist judging</h1>
+    <div class='status-message'>${message}</div>
+    <%-- clear out the message, so that we don't see it again --%>
+    <c:remove var="message" />
 
-  <p>Please send a coach to the information desk to pickup your
-    finalist schedule.</p>
+    <h1>Teams in finalist judging</h1>
 
-  <table border='1'>
-    <tr>
-      <th>Team #</th>
-      <th>Team Name</th>
-      <th>Organization</th>
-    </tr>
+    <p>Please send a coach to the information desk to pickup your
+        finalist schedule.</p>
 
-    <c:forEach
-      items="${teams }"
-      var="team">
-      <tr>
-        <td>${team.teamNumber}</td>
-        <td>${team.teamName}</td>
-        <td>${team.organization}</td>
-      </tr>
-    </c:forEach>
+    <table border='1'>
+        <tr>
+            <th>Team #</th>
+            <th>Team Name</th>
+            <th>Organization</th>
+        </tr>
 
-  </table>
+        <c:forEach items="${teams }" var="team">
+            <tr>
+                <td>${team.teamNumber}</td>
+                <td>${team.teamName}</td>
+                <td>${team.organization}</td>
+            </tr>
+        </c:forEach>
 
+    </table>
+
+    <div id="bottom">
+        &nbsp;
+    </div>
 </body>
 </html>

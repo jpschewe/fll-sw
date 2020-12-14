@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 
 import fll.Team;
 import fll.TournamentTeam;
+import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 
@@ -46,12 +47,14 @@ public final class FinalistTeams {
 
       final Map<Integer, TournamentTeam> allTeams = Queries.getTournamentTeams(connection, tournament);
 
+      int numRows = 0;
       for (final String division : FinalistSchedule.getAllDivisions(connection, tournament)) {
 
         final FinalistSchedule schedule = new FinalistSchedule(connection, tournament, division);
         for (final FinalistDBRow row : schedule.getSchedule()) {
           final TournamentTeam team = allTeams.get(row.getTeamNumber());
           if (null != team) {
+            ++numRows;
             teams.add(team);
           } else {
             LOGGER.warn("Cannot find team for number: "
@@ -63,6 +66,13 @@ public final class FinalistTeams {
       } // foreach division
 
       pageContext.setAttribute("teams", teams);
+
+      // used for scroll control
+      final int msPerRow = GlobalParameters.getHeadToHeadMsPerRow(connection);
+      final int scrollDuration = numRows
+          * msPerRow;
+
+      pageContext.setAttribute("scrollDuration", scrollDuration);
 
     } catch (final SQLException e) {
       LOGGER.error(e, e);
