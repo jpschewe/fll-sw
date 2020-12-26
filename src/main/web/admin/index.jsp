@@ -396,6 +396,9 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
         <li>
             <a href="removeUser.jsp">Remove User</a>
         </li>
+        <li>
+            <a href="unlockUserAccount.jsp">Unlock User account</a>
+        </li>
     </ul>
 
     <h2>Advanced</h2>

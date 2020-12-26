@@ -11,6 +11,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
@@ -309,4 +311,99 @@ public final class Authentication {
     application.setAttribute(ApplicationAttributes.AUTH_LOGGED_OUT, authLoggedOut);
   }
 
+  /**
+   * After {@link #ALLOWED_FAILURES} failures the amount of time to lock the
+   * account per failure.
+   */
+  private static final Duration WAIT_PER_FAILURE = Duration.ofMinutes(1);
+
+  /**
+   * How many failures in a row before the account is locked.
+   */
+  private static final int ALLOWED_FAILURES = 5;
+
+  /**
+   * Check if {@code username} is currently locked.
+   * 
+   * @param connection database connection
+   * @param username username to check
+   * @return true if {@code username} is locked
+   * @throws SQLException on a database error
+   */
+  public static boolean isAccountLocked(final Connection connection,
+                                        final String username)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT num_failures, last_failure FROM fll_authentication WHERE fll_user = ?")) {
+      prep.setString(1, username);
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          final Timestamp lastFailure = rs.getTimestamp("last_failure");
+          if (null == lastFailure) {
+            // no last failure timestamp, can't be locked out
+            return false;
+          } else {
+            final int numFailures = rs.getInt("num_failures");
+            if (numFailures >= ALLOWED_FAILURES) {
+              final LocalDateTime unlockTime = lastFailure.toLocalDateTime()
+                                                          .plus(WAIT_PER_FAILURE.multipliedBy(numFailures));
+              return unlockTime.isAfter(LocalDateTime.now());
+            } else {
+              // not enough failures
+              return false;
+            }
+          }
+        } else {
+          // non-existant users can't be locked out
+          return false;
+        }
+      }
+    }
+  }
+
+  /**
+   * @param connection database connection
+   * @param username user to record a successful login for
+   * @throws SQLException on a database error
+   */
+  public static void recordSuccessfulLogin(final Connection connection,
+                                           final String username)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("UPDATE fll_authentication " //
+        + " SET last_failure = NULL " //
+        + " ,num_failures = 0"
+        + " WHERE fll_user = ?")) {
+      prep.setString(1, username);
+      prep.executeUpdate();
+    }
+  }
+
+  /**
+   * @param connection database connection
+   * @param username user to record a failed login attempt for
+   * @throws SQLException on a database error
+   */
+  public static void recordFailedLogin(final Connection connection,
+                                       final String username)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("UPDATE fll_authentication " //
+        + " SET last_failure = CURRENT_TIMESTAMP" //
+        + " ,num_failures = num_failures + 1" //
+        + " WHERE fll_user = ?")) {
+      prep.setString(1, username);
+      prep.executeUpdate();
+    }
+  }
+
+  /**
+   * @param connection database connection
+   * @param username the account to unlock
+   * @throws SQLException on a database error
+   */
+  public static void unlockAccount(final Connection connection,
+                                   final String username)
+      throws SQLException {
+    // recording a successful login will unlock the account
+    recordSuccessfulLogin(connection, username);
+  }
 }

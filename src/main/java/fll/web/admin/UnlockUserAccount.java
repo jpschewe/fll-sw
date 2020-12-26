@@ -28,10 +28,10 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
 /**
- * Java code to handle removing of users.
+ * Java code to handle unlocking of accounts.
  */
-@WebServlet("/admin/RemoveUser")
-public class RemoveUser extends BaseFLLServlet {
+@WebServlet("/admin/UnlockUserAccount")
+public class UnlockUserAccount extends BaseFLLServlet {
 
   /**
    * @param application get application variables
@@ -39,6 +39,7 @@ public class RemoveUser extends BaseFLLServlet {
    */
   public static void populateContext(final ServletContext application,
                                      final PageContext pageContext) {
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
@@ -66,18 +67,16 @@ public class RemoveUser extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
-      final String userToRemove = request.getParameter("remove_user");
-      if (null != userToRemove
-          && !userToRemove.isEmpty()) {
-        Authentication.removeUser(connection, userToRemove);
-        Authentication.markLoggedOut(application, userToRemove);
+      final String userToUnlock = request.getParameter("unlock_user");
+      if (null != userToUnlock
+          && !userToUnlock.isEmpty()) {
+        Authentication.unlockAccount(connection, userToUnlock);
 
-        SessionAttributes.appendToMessage(session, "<p id='success'>Removed user '"
-            + userToRemove);
+        SessionAttributes.appendToMessage(session, "<p id='success'>Unlocked user '"
+            + userToUnlock);
       }
 
-      response.sendRedirect(response.encodeRedirectURL("removeUser.jsp"));
-
+      response.sendRedirect(response.encodeRedirectURL("unlockUserAccount.jsp"));
     } catch (final SQLException e) {
       throw new FLLRuntimeException(e);
     }

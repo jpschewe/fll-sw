@@ -7,7 +7,7 @@ fll.web.admin.RemoveUser.populateContext(application, pageContext);
 <html>
 
 <head>
-<title>Administration</title>
+<title>Remove User</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 </head>
@@ -19,7 +19,7 @@ fll.web.admin.RemoveUser.populateContext(application, pageContext);
     <c:remove var="message" />
 
     <c:choose>
-        <c:when test="${authentication.loggedIn}">
+        <c:when test="${authentication.admin}">
 
             <c:choose>
                 <c:when test="${all_users.size() == 1 }">
@@ -57,11 +57,9 @@ fll.web.admin.RemoveUser.populateContext(application, pageContext);
         </c:when>
         <c:otherwise>
             <p>
-                You must be logged in as a user to ensure that we don't
-                delete ALL users and then lock everyone out of the
-                system. You should visit the <a
-                    href="<c:url value='/login.jsp'/>">login page</a> to
-                log in.
+                You must be logged in as an admin user. You should visit
+                the <a href="<c:url value='/login.jsp'/>">login page</a>
+                to log in.
             </p>
         </c:otherwise>
     </c:choose>

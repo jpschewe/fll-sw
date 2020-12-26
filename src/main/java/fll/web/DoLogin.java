@@ -70,9 +70,19 @@ public class DoLogin extends BaseFLLServlet {
         return;
       }
 
-      // compute hash
       LOGGER.trace("Form parameters: {}", request.getParameterMap());
       final String user = request.getParameter("user");
+
+      // check for locked account
+      if (Authentication.isAccountLocked(connection, user)) {
+        LOGGER.warn("Account {} is locked", user);
+        SessionAttributes.appendToMessage(session,
+                                          "<p class='error'>Account is locked. Wait for it to unlock or contact an admin.</p>");
+        response.sendRedirect(response.encodeRedirectURL("/login.jsp"));
+        return;
+      }
+
+      // compute hash
       final String pass = request.getParameter("pass");
       if (null == user
           || user.isEmpty()
@@ -85,6 +95,8 @@ public class DoLogin extends BaseFLLServlet {
       }
 
       if (Authentication.checkValidPassword(connection, user, pass)) {
+        Authentication.recordSuccessfulLogin(connection, user);
+
         // store authentication information
         final Set<UserRole> roles = Authentication.getRoles(connection, user);
         final AuthenticationContext newAuth = AuthenticationContext.loggedIn(user, roles);
@@ -97,6 +109,8 @@ public class DoLogin extends BaseFLLServlet {
         LOGGER.trace("Redirecting to {} with message '{}'", redirect, SessionAttributes.getMessage(session));
         response.sendRedirect(response.encodeRedirectURL(redirect));
       } else {
+        Authentication.recordFailedLogin(connection, user);
+
         LOGGER.warn("Incorrect login credentials user: {}", user);
         SessionAttributes.appendToMessage(session, "<p class='error'>Incorrect login information provided</p>");
         response.sendRedirect(response.encodeRedirectURL("/login.jsp"));
