@@ -574,6 +574,11 @@ public final class ImportDB {
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 27) {
+      upgrade26To27(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
           + dbVersion);
@@ -877,6 +882,23 @@ public final class ImportDB {
     }
 
     setDBVersion(connection, 26);
+  }
+
+  private static void upgrade26To27(final Connection connection) throws SQLException {
+    LOGGER.trace("Upgrading database from 26to 27");
+
+    // add level and next_level to Tournaments
+    try (Statement stmt = connection.createStatement()) {
+      // need to check for columns as the upgrpade from 25 to 26 may do this
+      if (!checkForColumnInTable(connection, "fll_authentication", "num_failures")) {
+        stmt.executeUpdate("ALTER TABLE fll_authentication ADD COLUMN num_failures INTEGER DEFAULT 0 NOT NULL");
+      }
+      if (!checkForColumnInTable(connection, "fll_authentication", "last_failure")) {
+        stmt.executeUpdate("ALTER TABLE fll_authentication ADD COLUMN last_failure TIMESTAMP DEFAULT NULL");
+      }
+    }
+
+    setDBVersion(connection, 27);
   }
 
   /**
