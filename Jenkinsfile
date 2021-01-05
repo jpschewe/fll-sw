@@ -25,7 +25,7 @@ pipeline {
                 checkout changelog: false, 
                     poll: false, 
                     scm: [$class: 'GitSCM', 
-                        branches: [[name: 'refs/tags/checker-framework-3.8.0']], 
+                        branches: [[name: 'refs/tags/checker-framework-3.9.0']], 
                         doGenerateSubmoduleConfigurations: false, 
                         extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'checker-framework']], 
                         submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/typetools/checker-framework.git']]]
