@@ -215,7 +215,7 @@ dependencies {
     exclude(group: "xml-apis", module: "xml-apis")
   }
   
-  implementation(group: "org.checkerframework", name: "checker-qual", version: "3.8.0")
+  implementation(group: "org.checkerframework", name: "checker-qual", version: "3.9.0")
     
   implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.21")
   
