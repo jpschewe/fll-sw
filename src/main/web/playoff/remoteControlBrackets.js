@@ -204,7 +204,7 @@ function openSocket() {
 
   var url = window.location.pathname;
   var directory = url.substring(0, url.lastIndexOf('/'));
-  var webSocketAddress = "ws://" + window.location.host + directory
+  var webSocketAddress = getWebsocketProtocol() + "//" + window.location.host + directory
       + "/H2HUpdateWebSocket";
 
   var socket = new WebSocket(webSocketAddress);

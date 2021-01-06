@@ -17,6 +17,8 @@
   type="text/javascript"
   src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 
+<script type='text/javascript' src="<c:url value='/js/fll-functions.js' />"></script>
+
 <script type='text/javascript'>
   var width = screen.width - 10;
   var height = screen.height - 10;
@@ -105,7 +107,7 @@
 
     var url = window.location.pathname;
     var directory = url.substring(0, url.lastIndexOf('/'));
-    var webSocketAddress = "ws://" + window.location.host + directory
+    var webSocketAddress = getWebsocketProtocol() + "//" + window.location.host + directory
         + "/DisplayWebSocket";
 
     socket = new WebSocket(webSocketAddress);
