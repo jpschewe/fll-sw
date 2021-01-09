@@ -29,7 +29,23 @@ pipeline {
                         doGenerateSubmoduleConfigurations: false, 
                         extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'checker-framework']], 
                         submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/typetools/checker-framework.git']]]
-            
+
+                checkout changelog: false, 
+                    poll: false, 
+                    scm: [$class: 'GitSCM', 
+                        branches: [[name: 'refs/tags/3.9.16']], 
+                        doGenerateSubmoduleConfigurations: false, 
+                        extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'annotation-tools']], 
+                        submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/typetools/annotation-tools.git']]]
+
+                checkout changelog: false, 
+                    poll: false, 
+                    scm: [$class: 'GitSCM', 
+                        branches: [[name: 'a1a89d08b73971f1b0b999a779321b349b033780']], 
+                        doGenerateSubmoduleConfigurations: false, 
+                        extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'stubparser']], 
+                        submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/typetools/stubparser.git']]]
+
                 // my copy of the annotated jdk
                 checkout changelog: false, 
                     poll: false, 
