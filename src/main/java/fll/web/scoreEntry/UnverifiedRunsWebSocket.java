@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
@@ -41,6 +42,16 @@ public class UnverifiedRunsWebSocket {
     }
   }
 
+  /**
+   * @param session the session for the closed websocket
+   */
+  @OnClose
+  public void onClose(final Session session) {
+    synchronized(SESSIONS_LOCK) {
+      internalRemoveSession(session);
+    }
+  }
+  
   /**
    * Notify all clients that they should update.
    */
