@@ -13,6 +13,8 @@
    .dark_bg  {font-size:10pt; font-weight:bold; background-color:black; color:#e0e0e0; }
   </style>
 <script type="text/javascript" src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+<script type='text/javascript' src="<c:url value='/js/fll-functions.js' />"></script>
+
 <script type='text/javascript'>
 
 function editFlagBoxClicked() {
@@ -60,7 +62,7 @@ function openSocket() {
 
   var url = window.location.pathname;
   var directory = url.substring(0, url.lastIndexOf('/'));
-  var webSocketAddress = "ws://" + window.location.host + directory
+  var webSocketAddress = getWebsocketProtocol() + "//" + window.location.host + directory
       + "/UnverifiedRunsWebSocket";
 
   var socket = new WebSocket(webSocketAddress);

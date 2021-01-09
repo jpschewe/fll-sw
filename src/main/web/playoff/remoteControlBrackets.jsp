@@ -62,6 +62,7 @@ SPAN.TIE {
   var maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
 </script>
 
+<script type='text/javascript' src="<c:url value='/js/fll-functions.js' />"></script>
 <script type='text/javascript' src='h2hutils.js'></script>
 <script type='text/javascript' src='remoteControlBrackets.js'></script>
 

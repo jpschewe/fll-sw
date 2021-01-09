@@ -16,7 +16,8 @@ fll.web.playoff.AdminBrackets.populateContext(request, application, pageContext)
 </script>
 
 
-<script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
+<script type='text/javascript' src="<c:url value='/js/fll-functions.js' />"></script>
+<script type='text/javascript' src="<c:url value='/extlib/jquery-1.11.1.min.js' />"></script>
 <script type='text/javascript' src='h2hutils.js'></script>
 <script type='text/javascript' src='adminbrackets.js'></script>
 

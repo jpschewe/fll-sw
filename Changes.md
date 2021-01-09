@@ -1,3 +1,4 @@
+* #878 - Use "wss:" for websockets when the page was loaded via https 
 * #877 - Lock user accounts after too many failed password attempts
 * #452 - Use jquery.scrollTo for all automatic scrolling
 * #340 - Move setting of score page text to the remote control page

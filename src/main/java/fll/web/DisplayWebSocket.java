@@ -15,6 +15,7 @@ import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
+import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
@@ -53,6 +54,16 @@ public class DisplayWebSocket {
             + " display: "
             + displayName);
       }
+    }
+  }
+
+  /**
+   * @param session the session for the closed websocket
+   */
+  @OnClose
+  public void onClose(final Session session) {
+    synchronized (SESSIONS_LOCK) {
+      internalRemoveSession(session);
     }
   }
 

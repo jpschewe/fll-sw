@@ -1,4 +1,4 @@
-"use-script";
+; "use-script";
 
 /**
  * Log the console if it's available.
@@ -7,9 +7,9 @@
  *          the message to log
  */
 function _log(str) {
-  if (typeof (console) != 'undefined') {
-    console.log(str);
-  }
+    if (typeof (console) != 'undefined') {
+        console.log(str);
+    }
 }
 
 /**
@@ -21,9 +21,21 @@ function _log(str) {
  *          the object to remove
  */
 function removeFromArray(ar, obj) {
-  for (var i = 0; i < ar.length; i++) {
-    if (ar[i] === obj) {
-      ar.splice(i, 1);
+    for (var i = 0; i < ar.length; i++) {
+        if (ar[i] === obj) {
+            ar.splice(i, 1);
+        }
     }
-  }
+}
+
+/**
+ * Determine if using TLS or not. Returns "wss:" or "ws:".
+ */
+function getWebsocketProtocol() {
+    if ("https:" == document.location.protocol) {
+        return "wss:";
+    } else {
+        return "ws:";
+    }
+
 }

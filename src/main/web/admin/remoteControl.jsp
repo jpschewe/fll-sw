@@ -58,6 +58,10 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
         on the display screen. Note that it takes some time for the
         display to change, up to 2 minutes.</p>
 
+    <p>The last seen time for each display is only updated when the
+        form on this page is submitted. The timezone matches that of the
+        server.</p>
+
 
     <%-- NOTE: The values of the radio buttons need to match up with the strings in DisplayQueryServlet.pickURL() --%>
     <div class='status-message'>${message}</div>
