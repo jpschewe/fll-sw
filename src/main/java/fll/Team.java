@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Comparator;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -105,8 +107,8 @@ public class Team implements Serializable {
    *         database.
    * @throws SQLException on a database access error.
    */
-  public static Team getTeamFromDatabase(final Connection connection,
-                                         final int teamNumber)
+  public static @Nullable Team getTeamFromDatabase(final Connection connection,
+                                                   final int teamNumber)
       throws SQLException {
     // First, handle known non-database team numbers...
     if (teamNumber == NULL_TEAM_NUMBER) {
