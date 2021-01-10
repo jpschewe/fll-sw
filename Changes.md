@@ -1,3 +1,4 @@
+* #880 - Add non-numeric nominees report
 * #881 - Fix display of non-numeric categories on edit award winners page
 * #878 - Use "wss:" for websockets when the page was loaded via https 
 * #877 - Lock user accounts after too many failed password attempts
