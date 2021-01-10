@@ -486,7 +486,7 @@ function loadNonNumericCategories() {
   return $.getJSON("/api/ChallengeDescription/NonNumericCategories", function(
       categories) {
     $.each(categories, function(i, category) {
-      _nonNumericCategories[category.name] = category;
+      _nonNumericCategories[category.title] = category;
     });
   });
 }
