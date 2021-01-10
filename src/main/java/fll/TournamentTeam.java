@@ -13,8 +13,6 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -90,10 +88,11 @@ public class TournamentTeam extends Team {
    * @throws SQLException on a database access error.
    * @throws IllegalArgumentException if the team number is for {@link Team#NULL},
    *           {@link Team#TIE} or {@link Team#BYE}
+   * @throws IllegalArgumentException if the team cannot be found
    */
-  public static @Nullable TournamentTeam getTournamentTeamFromDatabase(final Connection connection,
-                                                                       final Tournament tournament,
-                                                                       final int teamNumber)
+  public static TournamentTeam getTournamentTeamFromDatabase(final Connection connection,
+                                                             final Tournament tournament,
+                                                             final int teamNumber)
       throws SQLException {
 
     // First, handle known non-database team numbers...
@@ -127,7 +126,9 @@ public class TournamentTeam extends Team {
           final TournamentTeam x = new TournamentTeam(teamNumber, org, name, awardGroup, judgingGroup);
           return x;
         } else {
-          return null;
+          throw new IllegalArgumentException("Team "
+              + teamNumber
+              + " is not in the database");
         }
       }
     }
