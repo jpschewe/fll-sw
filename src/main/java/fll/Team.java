@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import net.mtu.eggplant.util.StringUtils;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * The static state of a team. This does not include information about the team
@@ -105,6 +104,7 @@ public class Team implements Serializable {
    * @return The new Team object or null if the team was not found in the
    *         database.
    * @throws SQLException on a database access error.
+   * @throws IllegalArgumentException if the team cannot be found
    */
   public static Team getTeamFromDatabase(final Connection connection,
                                          final int teamNumber)
@@ -120,25 +120,22 @@ public class Team implements Serializable {
       return BYE;
     }
 
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = connection.prepareStatement("SELECT Organization, TeamName FROM Teams"
-          + " WHERE TeamNumber = ?");
+    try (PreparedStatement stmt = connection.prepareStatement("SELECT Organization, TeamName FROM Teams"
+        + " WHERE TeamNumber = ?")) {
       stmt.setInt(1, teamNumber);
-      rs = stmt.executeQuery();
-      if (rs.next()) {
-        final String org = rs.getString(1);
-        final String name = rs.getString(2);
+      try (ResultSet rs = stmt.executeQuery()) {
+        if (rs.next()) {
+          final String org = rs.getString(1);
+          final String name = rs.getString(2);
 
-        final Team x = new Team(teamNumber, org, name);
-        return x;
-      } else {
-        return null;
+          final Team x = new Team(teamNumber, org, name);
+          return x;
+        } else {
+          throw new IllegalArgumentException("Team "
+              + teamNumber
+              + " is not in the database");
+        }
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
     }
   }
 
