@@ -30,6 +30,10 @@
     if (tournament != _loadingTournament) {
       console.log("Clearing data for old tournament: " + tournament);
       $.finalist.clearAllData();
+      console.log("Finished clearing data");
+      // make sure everything properly initializes
+      console.log("Reloading page");
+      location.reload();
     }
 <%FinalistLoad.outputDivisions(out, application);%>
   
@@ -39,6 +43,8 @@
   
 <%FinalistLoad.outputNonNumericNominees(out, application);%>
   $.finalist.setTournament(_loadingTournament);
+  
+  console.log("Finished loading data");
   }
 
   function storeNominees() {
