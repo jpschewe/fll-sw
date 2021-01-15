@@ -1,3 +1,7 @@
+* Make sure non-numeric nominees reload properly when the local data needs to be cleared
+* #882 - Properly handle storing non-numeric nominees that don't have a judge associated
+* #885 - Don't error on too few scores in summarization, instead depend on the UI to alert the user to this situation
+
 Release 15.3.0
 ==============
 
