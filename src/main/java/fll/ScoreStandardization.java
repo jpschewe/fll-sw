@@ -14,7 +14,6 @@ import java.util.Map;
 
 import fll.db.GlobalParameters;
 import fll.db.Queries;
-import fll.util.FLLRuntimeException;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
@@ -26,25 +25,13 @@ public final class ScoreStandardization {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  /**
-   * Thrown when there are not enough scores for a judging group.
-   */
-  public static class TooFewScoresException extends FLLRuntimeException {
-    /**
-     * @param message {@link #getMessage()}
-     */
-    public TooFewScoresException(final String message) {
-      super(message);
-    }
-  }
-
   private ScoreStandardization() {
     // no instances
   }
 
   private static void summarizePerformanceScores(final Connection connection,
                                                  final int tournament)
-      throws SQLException, TooFewScoresException {
+      throws SQLException {
 
     final double mean = GlobalParameters.getStandardizedMean(connection);
     final double sigma = GlobalParameters.getStandardizedSigma(connection);
@@ -110,12 +97,11 @@ public final class ScoreStandardization {
               } // select team scores
             } // allocate statements
           } else {
-            throw new TooFewScoresException("Not enough scores for in category: Performance. Tournament: "
-                + tournament);
+            LOGGER.error("Not enough scores for in category: Performance. Tournament: {}", tournament);
           } // sgCount
         } else {
-          throw new TooFewScoresException("No performance scores for standardization. Tournament: "
-              + tournament);
+          LOGGER.error("No performances score for standardization. Tournament: {}", tournament);
+          return;
         } // params check
       } // select params
     } // allocate params stmt
@@ -148,13 +134,11 @@ public final class ScoreStandardization {
    * @param connection connection to the database with delete and insert
    *          privileges
    * @param tournament which tournament to summarize scores for
-   * @throws TooFewScoresException if there aren't enough scores in a judging
-   *           group
    * @throws SQLException a database error
    */
   public static void summarizeScores(final Connection connection,
                                      final int tournament)
-      throws SQLException, TooFewScoresException {
+      throws SQLException {
 
     // delete all final scores for the tournament
     try (PreparedStatement deletePrep = connection.prepareStatement("DELETE FROM final_scores WHERE tournament = ?")) {
@@ -238,12 +222,7 @@ public final class ScoreStandardization {
             updatePrep.setString(7, goalGroup);
             updatePrep.executeUpdate();
           } else { // if(sgCount == 1) {
-            throw new TooFewScoresException("Not enough scores for Judge: "
-                + judge
-                + " in category: "
-                + category
-                + " goal group: "
-                + goalGroup);
+            LOGGER.error("Not enough scores for Judge: {} in category: {} goal group: {}", judge, category, goalGroup);
           } // ignore 0 in a judging group
 
         } // foreach result

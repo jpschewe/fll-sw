@@ -32,7 +32,6 @@ import com.opencsv.CSVWriter;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.ScoreStandardization;
-import fll.ScoreStandardization.TooFewScoresException;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
@@ -274,12 +273,7 @@ public class TournamentAdvancement extends BaseFLLServlet {
 
     Queries.updateScoreTotals(description, connection, tournament.getTournamentID());
 
-    try {
-      ScoreStandardization.standardizeSubjectiveScores(connection, tournament.getTournamentID());
-    } catch (final TooFewScoresException e) {
-      LOGGER.warn("Too few scores for tournament {}, skipping output of teams", tournament.getDescription());
-      return false;
-    }
+    ScoreStandardization.standardizeSubjectiveScores(connection, tournament.getTournamentID());
 
     ScoreStandardization.summarizeScores(connection, tournament.getTournamentID());
 

@@ -28,7 +28,6 @@ import javax.sql.DataSource;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.ScoreStandardization;
-import fll.ScoreStandardization.TooFewScoresException;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -84,12 +83,7 @@ public final class SummarizePhase1 {
 
       Queries.updateScoreTotals(challengeDescription, connection, tournamentID);
 
-      try {
-        ScoreStandardization.standardizeSubjectiveScores(connection, tournamentID);
-      } catch (final TooFewScoresException e) {
-        pageContext.setAttribute("ERROR", e.getMessage());
-        return;
-      }
+      ScoreStandardization.standardizeSubjectiveScores(connection, tournamentID);
 
       ScoreStandardization.summarizeScores(connection, tournamentID);
 
