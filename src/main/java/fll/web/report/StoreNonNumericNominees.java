@@ -63,6 +63,9 @@ public class StoreNonNumericNominees extends BaseFLLServlet {
 
       // decode JSON
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
+      
+      LOGGER.debug("Storing nominees: {}", nomineesStr);
+      
 
       final Collection<NonNumericNominees> nominees = jsonMapper.readValue(nomineesStr,
                                                                            NonNumericNomineesTypeInformation.INSTANCE);
