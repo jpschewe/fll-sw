@@ -387,7 +387,7 @@ tasks.register("jspToJava", JavaExec) {
 
     classpath = configurations.jspc + sourceSets.main.runtimeClasspath
     main = "org.apache.jasper.JspC"
-    jvmArgs = ["-Dlog4j.configuration=$buildDir/log4j.jspc.properties"] //, "-Dlog4j.debug"] 
+    jvmArgs = ["-Dlog4j2.configurationFile=$buildDir/log4j.jspc.properties"] //, "-Dlog4j.debug"] 
 
     args "-webapp", jspSrc,
             "-d", jspJavaSrc,
