@@ -40,6 +40,9 @@ function NonNumericNominees(categoryName, nominees) {
 function Nominee(teamNumber, judges) {
   this.teamNumber = teamNumber;
   this.judges = judges;
+  if(typeof this.judges == 'undefined') {
+    this.judges = [null];
+}
 }
 
 /**
