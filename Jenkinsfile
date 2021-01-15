@@ -25,7 +25,7 @@ pipeline {
                 checkout changelog: false, 
                     poll: false, 
                     scm: [$class: 'GitSCM', 
-                        branches: [[name: 'refs/tags/checker-framework-3.9.0']], 
+                        branches: [[name: 'refs/tags/checker-framework-3.9.1']], 
                         doGenerateSubmoduleConfigurations: false, 
                         extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'checker-framework']], 
                         submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/typetools/checker-framework.git']]]
@@ -33,7 +33,7 @@ pipeline {
                 checkout changelog: false, 
                     poll: false, 
                     scm: [$class: 'GitSCM', 
-                        branches: [[name: 'refs/tags/3.9.16']], 
+                        branches: [[name: 'refs/tags/3.9.17']], 
                         doGenerateSubmoduleConfigurations: false, 
                         extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'annotation-tools']], 
                         submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/typetools/annotation-tools.git']]]
@@ -41,7 +41,7 @@ pipeline {
                 checkout changelog: false, 
                     poll: false, 
                     scm: [$class: 'GitSCM', 
-                        branches: [[name: 'a1a89d08b73971f1b0b999a779321b349b033780']], 
+                        branches: [[name: '25e3694']], 
                         doGenerateSubmoduleConfigurations: false, 
                         extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'stubparser']], 
                         submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/typetools/stubparser.git']]]
