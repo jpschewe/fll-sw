@@ -3,7 +3,8 @@
 <web-app metadata-complete="false" version="3.0">
 
     <session-config>
-        <session-timeout>30</session-timeout>
+        <!-- this controls how long a login can live without a page being loaded -->
+        <session-timeout>240</session-timeout>
     </session-config>
 
     <welcome-file-list>
