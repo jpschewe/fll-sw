@@ -191,6 +191,7 @@ public class InitFilter implements Filter {
     }
 
     if (permissionDenied) {
+      LOGGER.info("Permission denied accessing {} with auth: {}", path, auth);
       request.getRequestDispatcher("/permission-denied.jsp").forward(request, response);
       return true;
     } else {
@@ -248,7 +249,7 @@ public class InitFilter implements Filter {
       final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
       if (!dbinitialized) {
         // setup special authentication for setup
-        LOGGER.debug("No database, setting inSetup authentication");
+        LOGGER.info("No database, setting inSetup authentication");
         AuthenticationContext auth = AuthenticationContext.inSetup();
         session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
       }
@@ -285,6 +286,7 @@ public class InitFilter implements Filter {
             + "/setup/index.jsp"));
 
         // setup special authentication for setup
+        LOGGER.info("Setting in-setup authentication");
         AuthenticationContext auth = AuthenticationContext.inSetup();
         session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
 
@@ -311,6 +313,7 @@ public class InitFilter implements Filter {
               + "/setup/index.jsp"));
 
           // setup special authentication for setup
+          LOGGER.info("Setting in-setup authentication after error");
           AuthenticationContext auth = AuthenticationContext.inSetup();
           session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
 
@@ -343,8 +346,8 @@ public class InitFilter implements Filter {
     final LocalDateTime loggedOut = authLoggedOut.get(auth.getUsername());
     if (null != loggedOut
         && loggedOut.isAfter(auth.getCreated())) {
-      LOGGER.debug("User {} was logged out in another session. Logout time {} is after {}", auth.getUsername(),
-                   loggedOut, auth.getCreated());
+      LOGGER.info("User {} was logged out in another session. Logout time {} is after {}", auth.getUsername(),
+                  loggedOut, auth.getCreated());
       AuthenticationContext newAuth = AuthenticationContext.notLoggedIn();
       session.setAttribute(SessionAttributes.AUTHENTICATION, newAuth);
     }
@@ -353,8 +356,8 @@ public class InitFilter implements Filter {
     final LocalDateTime refresh = authRefresh.get(auth.getUsername());
     if (null != refresh
         && refresh.isAfter(auth.getCreated())) {
-      LOGGER.debug("User {} needs authentication refreshed. Refresh time {} is after {}", auth.getUsername(), refresh,
-                   auth.getCreated());
+      LOGGER.info("User {} needs authentication refreshed. Refresh time {} is after {}", auth.getUsername(), refresh,
+                  auth.getCreated());
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       try (Connection connection = datasource.getConnection()) {
         final Set<UserRole> roles = Authentication.getRoles(connection, auth.getUsername());

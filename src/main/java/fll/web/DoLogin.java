@@ -98,6 +98,7 @@ public class DoLogin extends BaseFLLServlet {
         Authentication.recordSuccessfulLogin(connection, user);
 
         // store authentication information
+        LOGGER.info("User {} logged in", user);
         final Set<UserRole> roles = Authentication.getRoles(connection, user);
         final AuthenticationContext newAuth = AuthenticationContext.loggedIn(user, roles);
         session.setAttribute(SessionAttributes.AUTHENTICATION, newAuth);

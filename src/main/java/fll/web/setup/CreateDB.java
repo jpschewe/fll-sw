@@ -46,7 +46,7 @@ import fll.xml.ChallengeParser;
 @WebServlet("/setup/CreateDB")
 public class CreateDB extends BaseFLLServlet {
 
-  private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -87,6 +87,7 @@ public class CreateDB extends BaseFLLServlet {
           }
           
           // setup special authentication for setup 
+          LOGGER.info("Installing in-setup auth");
           AuthenticationContext auth = AuthenticationContext.inSetup();
           session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
 
@@ -168,19 +169,19 @@ public class CreateDB extends BaseFLLServlet {
       message.append("<p class='error'>Error handling the file upload: "
           + fue.getMessage()
           + "</p>");
-      LOG.error(fue, fue);
+      LOGGER.error(fue, fue);
       redirect = "/setup";
     } catch (final IOException ioe) {
       message.append("<p class='error'>Error reading uploaded database: "
           + ioe.getMessage()
           + "</p>");
-      LOG.error(ioe, ioe);
+      LOGGER.error(ioe, ioe);
       redirect = "/setup";
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error loading data into the database: "
           + sqle.getMessage()
           + "</p>");
-      LOG.error(sqle, sqle);
+      LOGGER.error(sqle, sqle);
       redirect = "/setup";
     }
 

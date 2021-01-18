@@ -124,6 +124,7 @@ public class CreateUser extends BaseFLLServlet {
 
       // do a login if not already logged in
       if (!auth.getLoggedIn()) {
+        LOGGER.info("Logged in new user {}", user);
         final AuthenticationContext newAuth = AuthenticationContext.loggedIn(user, selectedRoles);
         session.setAttribute(SessionAttributes.AUTHENTICATION, newAuth);
       }
