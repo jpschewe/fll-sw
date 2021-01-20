@@ -1,5 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<% fll.web.DoLogin.storeParameters(request, session); %>
+
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -23,7 +25,7 @@
     <%-- clear out the message, so that we don't see it again --%>
     <c:remove var="message" />
 
-    <form method="POST" action="DoLogin" name="login" data-ajax="false">
+    <form method="POST" action="<c:url value='/DoLogin'/>" name="login" data-ajax="false">
         Username :
         <input type="text" size="15" maxlength="64" name="user"
             autocorrect="off" autocapitalize="off" autocomplete="off"

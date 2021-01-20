@@ -51,12 +51,24 @@ public class InitFilter implements Filter {
                        final ServletResponse response,
                        final FilterChain chain)
       throws IOException, ServletException {
+
+    final ServletRequest requestToPass;
     if (response instanceof HttpServletResponse
         && request instanceof HttpServletRequest) {
       final HttpServletResponse httpResponse = (HttpServletResponse) response;
-      final HttpServletRequest httpRequest = (HttpServletRequest) request;
-      final String path = httpRequest.getRequestURI();
-      final HttpSession session = httpRequest.getSession();
+      final HttpServletRequest req = (HttpServletRequest) request;
+      final String path = req.getRequestURI();
+      final HttpSession session = req.getSession();
+
+      LOGGER.trace("Redirect URL is {}", SessionAttributes.getRedirectURL(session));
+      LOGGER.trace("Request is for {}", req.getRequestURI());
+      LOGGER.trace("forward.request_uri: {}", req.getAttribute("javax.servlet.forward.request_uri"));
+      LOGGER.trace("forward.context_path: {}", req.getAttribute("javax.servlet.forward.context_path"));
+      LOGGER.trace("forward.servlet_path: {}", req.getAttribute("javax.servlet.forward.servlet_path"));
+      LOGGER.trace("forward.path_info: {}", req.getAttribute("javax.servlet.forward.path_info"));
+      LOGGER.trace("forward.query_string: {}", req.getAttribute("javax.servlet.forward.query_string"));
+
+      final HttpServletRequest httpRequest = FormParameterStorage.applyParameters(req, session);
 
       final ServletContext application = session.getServletContext();
 
@@ -93,12 +105,14 @@ public class InitFilter implements Filter {
       httpResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0
       httpResponse.setDateHeader("Expires", 0); // proxy server cache
 
+      requestToPass = httpRequest;
     } else {
       LOGGER.trace("Non-servlet request: {}", request);
+      requestToPass = request;
     }
 
-    LOGGER.trace("Bottom of doFilter");
-    chain.doFilter(request, response);
+    LOGGER.trace("Bottom of doFilter with request class: {}", requestToPass.getClass());
+    chain.doFilter(requestToPass, response);
   }
 
   /**
@@ -192,7 +206,7 @@ public class InitFilter implements Filter {
 
     if (permissionDenied) {
       LOGGER.info("Permission denied accessing {} with auth: {}", path, auth);
-      request.getRequestDispatcher("/permission-denied.jsp").forward(request, response);
+      request.getRequestDispatcher("/login.jsp").forward(request, response);
       return true;
     } else {
       return false;

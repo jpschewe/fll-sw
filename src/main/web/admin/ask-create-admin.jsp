@@ -1,6 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 <c:if test="${not authentication.admin and not authentication.inSetup}">
-    <jsp:forward page="/permission-denied.jsp"></jsp:forward>
+    <jsp:forward page="/login.jsp"></jsp:forward>
 </c:if>
 
 <%

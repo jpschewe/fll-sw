@@ -56,7 +56,7 @@ public class CreateDB extends BaseFLLServlet {
       throws IOException, ServletException {
     final AuthenticationContext currentAuth = SessionAttributes.getAuthentication(session);
     if(!currentAuth.isAdmin() && !currentAuth.getInSetup()) {
-      request.getRequestDispatcher("/permission-denied.jsp").forward(request, response);
+      request.getRequestDispatcher("/login.jsp").forward(request, response);
       return;
     }
     

@@ -1,3 +1,5 @@
+* #680 - pass form parameters through the login redirect
+
 Release 15.4.0
 ==============
 * Make sure non-numeric nominees reload properly when the local data needs to be cleared

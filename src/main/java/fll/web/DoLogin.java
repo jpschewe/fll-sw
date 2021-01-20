@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -29,6 +30,35 @@ import fll.util.FLLRuntimeException;
 public class DoLogin extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
+  /**
+   * Store the form parameters to be used by a redirect. Also track the URL to
+   * redirect back to.
+   * 
+   * @param request the request
+   * @param session the session to store the parameters in
+   */
+  public static void storeParameters(final HttpServletRequest request,
+                                     final HttpSession session) {
+    final Object origUriObj = request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
+    final String origUri;
+    if (null != origUriObj) {
+      origUri = origUriObj.toString();
+    } else {
+      origUri = null;
+    }
+
+    FormParameterStorage.storeParameters(request, session);
+
+    session.setAttribute(SessionAttributes.REDIRECT_URL, origUri);
+
+    LOGGER.debug("Request is for {}", request.getRequestURI());
+    LOGGER.debug("forward.request_uri: {}", request.getAttribute("javax.servlet.forward.request_uri"));
+    LOGGER.debug("forward.context_path: {}", request.getAttribute("javax.servlet.forward.context_path"));
+    LOGGER.debug("forward.servlet_path: {}", request.getAttribute("javax.servlet.forward.servlet_path"));
+    LOGGER.debug("forward.path_info: {}", request.getAttribute("javax.servlet.forward.path_info"));
+    LOGGER.debug("forward.query_string: {}", request.getAttribute("javax.servlet.forward.query_string"));
+  }
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -107,6 +137,9 @@ public class DoLogin extends BaseFLLServlet {
         if (null == redirect) {
           redirect = "/index.jsp";
         }
+        // clear the attribute since it's been used
+        session.removeAttribute(SessionAttributes.REDIRECT_URL);
+
         LOGGER.trace("Redirecting to {} with message '{}'", redirect, SessionAttributes.getMessage(session));
         response.sendRedirect(response.encodeRedirectURL(redirect));
       } else {
