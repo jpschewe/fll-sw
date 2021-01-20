@@ -152,4 +152,11 @@ public final class SessionAttributes {
       return auth;
     }
   }
+
+  /**
+   * The key in the session to get form parameters stored by login and should be
+   * passed to the next page.
+   */
+  public static final String STORED_PARAMETERS = "stored_parameters";
+
 }
