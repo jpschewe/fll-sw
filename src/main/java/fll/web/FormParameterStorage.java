@@ -22,7 +22,7 @@ import com.google.common.base.Objects;
  * Keep track of form parameters through a handle a redirect.
  * The form parameters are stored using
  * {@link #storeParameters(HttpServletRequest, HttpSession)} and applied using
- * {@link #applyParameters(HttpServeletRequest, HttpSession)}.
+ * {@link #applyParameters(HttpServletRequest, HttpSession)}.
  */
 public final class FormParameterStorage implements Serializable {
 
@@ -42,7 +42,7 @@ public final class FormParameterStorage implements Serializable {
 
   /**
    * Store any form parameters found in {@code request} for later application with
-   * {@link #applyParameters(HttpServeletRequest, HttpSession)}.
+   * {@link #applyParameters(HttpServletRequest, HttpSession)}.
    * 
    * @param request the request
    * @param session where the session variables are stored
