@@ -516,6 +516,11 @@ public class Launcher extends JFrame {
       }
     });
 
+    // ensure the webserver gets shutdown
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      stopWebserver();
+    }));
+
     setApplicationIcon(this);
 
     final Container cpane = getContentPane();
@@ -657,6 +662,10 @@ public class Launcher extends JFrame {
         return;
       }
     }
+
+    // make sure sessions are persisted
+    stopWebserver();
+
     // close
     this.dispose();
     System.exit(0);
