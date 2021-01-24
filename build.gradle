@@ -133,7 +133,7 @@ repositories {
 }
 
 ext {
-    jackson_version = "2.11.3"
+    jackson_version = "2.12.1"
     slf4j_version = "1.7.30"
     tomcat_version = "9.0.39"
     poi_version = "4.1.2"
