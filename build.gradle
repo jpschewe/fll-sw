@@ -91,6 +91,18 @@ integrationTest.mustRunAfter test
 test {
     useJUnitPlatform()
     ignoreFailures = Boolean.getBoolean("test.ignoreFailures") 
+    
+    jvmArgs = [
+    //"-Dlog4j2.debug=true",
+    
+    // Add the JAVA 9 specific start-up parameters required by Tomcat
+    "--add-opens=java.base/java.lang=ALL-UNNAMED",
+    "--add-opens=java.base/java.io=ALL-UNNAMED",
+    "--add-opens=java.base/java.util=ALL-UNNAMED",
+    "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED",
+    "--add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED"
+    ]
+    
 }
 
 integrationTest {
@@ -102,6 +114,17 @@ integrationTest {
     // debug log4j configuration
     //systemProperty("log4j2.debug", "true")
     forkEvery = 1
+    
+        jvmArgs = [
+    //"-Dlog4j2.debug=true",
+    
+    // Add the JAVA 9 specific start-up parameters required by Tomcat
+    "--add-opens=java.base/java.lang=ALL-UNNAMED",
+    "--add-opens=java.base/java.io=ALL-UNNAMED",
+    "--add-opens=java.base/java.util=ALL-UNNAMED",
+    "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED",
+    "--add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED"
+    ]    
 }
 
 repositories {
@@ -110,7 +133,7 @@ repositories {
 }
 
 ext {
-    jackson_version = "2.11.3"
+    jackson_version = "2.12.1"
     slf4j_version = "1.7.30"
     tomcat_version = "9.0.39"
     poi_version = "4.1.2"
@@ -337,6 +360,16 @@ tasks.register("run", JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
         
     main = project.mainClassName
+    
+    jvmArgs = [
+        // Add the JAVA 9 specific start-up parameters required by Tomcat
+        "--add-opens=java.base/java.lang=ALL-UNNAMED",
+        "--add-opens=java.base/java.io=ALL-UNNAMED",
+        "--add-opens=java.base/java.util=ALL-UNNAMED",
+        "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED",
+        "--add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED"
+    ]
+    
 }
 
 
@@ -509,7 +542,16 @@ createExe {
     
     // for debugging classpath information        
     //headerType = "console"
-    //jvmOptions = ["-Dlog4j2.debug=true"]
+    jvmOptions = [
+    //"-Dlog4j2.debug=true",
+    
+    // Add the JAVA 9 specific start-up parameters required by Tomcat
+    "--add-opens=java.base/java.lang=ALL-UNNAMED",
+    "--add-opens=java.base/java.io=ALL-UNNAMED",
+    "--add-opens=java.base/java.util=ALL-UNNAMED",
+    "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED",
+    "--add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED"
+    ]
 }
 distributionDependencies.dependsOn(createExe)
 
