@@ -1,11 +1,12 @@
+<%@page import="fll.web.UserRole"%>
+<%@page import="java.util.Set"%>
+<%@page import="fll.web.SessionAttributes"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
-<%@ page import="fll.web.UserRole"%>
 
-<c:if test="${not authentication.admin}">
-    <jsp:forward page="/login.jsp"></jsp:forward>
-</c:if>
 
 <%
+SessionAttributes.getAuthentication(session).requireRoles(request, response, session, Set.of(UserRole.ADMIN));
+
 fll.web.admin.EditRoles.populateContext(application, pageContext);
 %>
 

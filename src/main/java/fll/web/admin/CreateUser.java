@@ -66,7 +66,7 @@ public class CreateUser extends BaseFLLServlet {
       throws IOException, ServletException {
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
     if (!auth.isAdmin()
-        && !auth.getInSetup()) {
+        && !auth.isInSetup()) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }

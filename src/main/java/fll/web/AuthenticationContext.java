@@ -6,10 +6,16 @@
 
 package fll.web;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Set;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -60,7 +66,7 @@ public final class AuthenticationContext implements Serializable {
    * 
    * @return true if during setup
    */
-  public boolean getInSetup() {
+  public boolean isInSetup() {
     return inSetup;
   }
 
@@ -127,5 +133,37 @@ public final class AuthenticationContext implements Serializable {
   public String toString() {
     return String.format("%s [loggedIn: %b inSetup: %b username: %s roles: %s", getClass().getSimpleName(),
                          this.loggedIn, this.inSetup, this.username, this.roles);
+  }
+
+  public void requireRoles(final HttpServletRequest request,
+                           final HttpServletResponse response,
+                           final HttpSession session,
+                           final Set<UserRole> requiredRoles)
+      throws ServletException, IOException {
+    requireRoles(request, response, session, requiredRoles, false);
+  }
+
+  public void requireRoles(final HttpServletRequest request,
+                           final HttpServletResponse response,
+                           final HttpSession session,
+                           final Set<UserRole> requiredRoles,
+                           final boolean allowSetup)
+      throws ServletException, IOException {
+
+    if (allowSetup
+        && isInSetup()) {
+      return;
+    } else if (isAdmin()) {
+      return;
+    } else {
+      if (!roles.containsAll(requiredRoles)) {
+        SessionAttributes.appendToMessage(session,
+                                          "<p>You need to be logged in as a user with the following roles to view this page: "
+                                              + requiredRoles
+                                              + "</p>");
+        request.getRequestDispatcher("/login.jsp").forward(request, response);
+      }
+    }
+
   }
 }

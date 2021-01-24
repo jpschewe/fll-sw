@@ -55,11 +55,12 @@ public class CreateDB extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
     final AuthenticationContext currentAuth = SessionAttributes.getAuthentication(session);
-    if(!currentAuth.isAdmin() && !currentAuth.getInSetup()) {
+    if (!currentAuth.isAdmin()
+        && !currentAuth.isInSetup()) {
       request.getRequestDispatcher("/login.jsp").forward(request, response);
       return;
     }
-    
+
     String redirect;
     final StringBuilder message = new StringBuilder();
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -85,12 +86,11 @@ public class CreateDB extends BaseFLLServlet {
           } else {
             redirect = "/admin/ask-create-admin.jsp";
           }
-          
-          // setup special authentication for setup 
+
+          // setup special authentication for setup
           LOGGER.info("Installing in-setup auth");
           AuthenticationContext auth = AuthenticationContext.inSetup();
           session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
-
 
         } catch (final MalformedURLException e) {
           throw new FLLInternalException("Could not parse URL from choosen description: "
@@ -118,8 +118,8 @@ public class CreateDB extends BaseFLLServlet {
           } else {
             redirect = "/admin/ask-create-admin.jsp";
           }
-          
-          // setup special authentication for setup 
+
+          // setup special authentication for setup
           AuthenticationContext auth = AuthenticationContext.inSetup();
           session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
         }
@@ -152,8 +152,8 @@ public class CreateDB extends BaseFLLServlet {
           } else {
             redirect = "/admin/ask-create-admin.jsp";
           }
-          
-          // setup special authentication for setup 
+
+          // setup special authentication for setup
           AuthenticationContext auth = AuthenticationContext.inSetup();
           session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
         }
