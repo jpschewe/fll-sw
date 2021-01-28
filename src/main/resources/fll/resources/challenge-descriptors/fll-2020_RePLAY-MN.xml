@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><fll copyright="" revision="19" schemaVersion="3" title="2020 Minnesota FIRST LEGO League - RePLAY" winner="HIGH">
+<?xml version="1.0" encoding="UTF-8"?><fll copyright="" revision="21" schemaVersion="3" title="2020 Minnesota FIRST LEGO League - RePLAY" winner="HIGH">
   <Performance minimumScore="0.00" weight="1.00">
     <goal initialValue="0.00" max="1.00" min="0.00" multiplier="25.00" name="m00_small_inspection_area" required="false" scoreType="INTEGER" title="M00 - ALL Equipment Fits in Small Inspection Area"/>
     <goalGroup title="M07">
@@ -163,7 +163,7 @@
   <subjectiveCategory name="project" title="Innovation Project" weight="1.00">
     <scoreSheetInstructions>Teams should communicate to the judges their achievement in each of the criteria below. This rubric should be filled out during the Innovation Project presentation. Judges are required to tick one box on each separate line to indicate the level the team has achieved. If the team exceeds, please make a short comment in the Exceeds box.</scoreSheetInstructions>
     <goalGroup title=" Identify">
-      <description>- Team had a clearly defined problem that it was well researched.</description>
+      <description>- Team had a clearly defined problem that was well researched.</description>
       <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="identify_1" required="true" scoreType="INTEGER" title="Identify1">
         <description>Team had a clearly defined problem that was well researched.</description>
         <rubric>
@@ -338,7 +338,7 @@
           <range max="6" min="4" shortDescription="Solution and its potential impact on others partially clear" title="Developing">
             <description/>
           </range>
-          <range max="9" min="7" shortDescription="Solution and its potential impace on other fully clear" title="Accomplished">
+          <range max="9" min="7" shortDescription="Solution and its potential impact on other fully clear" title="Accomplished">
             <description/>
           </range>
           <range max="12" min="10" shortDescription="How has the team exceeded?" title="Exceeds">
@@ -621,7 +621,7 @@
       </goal>
     </goalGroup>
     <goalGroup title="Communicate">
-      <description>- Team repeatedly tested their robot and code to identify areas for improvement and incorporated the findings into their current solution.</description>
+      <description>Team's explanation of the robot design process was effective and showed how all team members have been involved.</description>
       <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="communicate_1" required="false" scoreType="INTEGER" title="Communicate1">
         <description>Team's explanation of the robot design process was effective and showed how all team members have been involved</description>
         <rubric>
@@ -640,7 +640,7 @@
         </rubric>
       </goal>
       <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="communicate_2" required="false" scoreType="INTEGER" title="Communicate2">
-        <description>eam's explanation of the robot design process was effective and showed how all team members have been involved</description>
+        <description>Team's explanation of the robot design process was effective and showed how all team members have been involved</description>
         <rubric>
           <range max="3" min="1" shortDescription="Clear evidence that some team members involved" title="Beginning">
             <description/>
@@ -809,7 +809,7 @@
       </goal>
     </goalGroup>
     <goalGroup title="Communicate">
-      <description>- Team’s explanation of the robot design process was effective and showed how all team members have been involved</description>
+      <description>Team's explanation of the robot design process was effective and showed how all team members have been involved</description>
       <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="communicate_1" required="false" scoreType="INTEGER" title="Communicate1">
         <description>Team's explanation of the robot design process was effective and showed how all team members have been involved</description>
         <rubric>
@@ -828,7 +828,7 @@
         </rubric>
       </goal>
       <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="communicate_2" required="false" scoreType="INTEGER" title="Communicate2">
-        <description>eam's explanation of the robot design process was effective and showed how all team members have been involved</description>
+        <description>Team's explanation of the robot design process was effective and showed how all team members have been involved</description>
         <rubric>
           <range max="3" min="1" shortDescription="Clear evidence that some team members involved" title="Beginning">
             <description/>
@@ -857,5 +857,8 @@
   </nonNumericCategory>
   <nonNumericCategory perAwardGroup="true" title="Engineering Excellence">
     <description>This award celebrates a team with an efficiently designed robot, an innovative project solution that effectively addresses the season challenge and great Core Values evident in all they do.</description>
+  </nonNumericCategory>
+  <nonNumericCategory perAwardGroup="false" title="Innovation Project Model">
+    <description>Referee Submitted Award for most Creative Innovation Project presented by team </description>
   </nonNumericCategory>
 </fll>
