@@ -165,6 +165,10 @@ public class InitFilter implements Filter {
         // handled by the page
         permissionDenied = false;
       } else if (path.startsWith(contextPath
+          + "/admin/edit-roles.jsp")) {
+        // handled by the page
+        permissionDenied = false;
+      } else if (path.startsWith(contextPath
           + "/admin/ask-create-admin.jsp")) {
         // handled by the page
         permissionDenied = false;

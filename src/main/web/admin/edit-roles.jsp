@@ -1,12 +1,8 @@
-<%@page import="fll.web.UserRole"%>
-<%@page import="java.util.Set"%>
-<%@page import="fll.web.SessionAttributes"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
 
 <%
-SessionAttributes.getAuthentication(session).requireRoles(request, response, session, Set.of(UserRole.ADMIN));
-
 fll.web.admin.EditRoles.populateContext(application, pageContext);
 %>
 
