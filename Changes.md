@@ -1,3 +1,5 @@
+Release 15.6.0
+==============
 * #888 - Handle null team organization when generating the final computed scores report
 
 Release 15.5.0
