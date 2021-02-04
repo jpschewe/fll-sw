@@ -1,3 +1,5 @@
+* #888 - Handle null team organization when generating the final computed scores report
+
 Release 15.5.0
 ==============
 * #680 - pass form parameters through the login redirect

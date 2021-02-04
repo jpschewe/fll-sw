@@ -583,7 +583,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
           // The first row of the team table...
           // First column is organization name
-          row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, organization));
+          row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                    null == organization ? "" : organization));
 
           row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, judgingGroup));
 
