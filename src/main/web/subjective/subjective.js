@@ -127,7 +127,7 @@
     function _save() {
         $.jStorage.set(STORAGE_PREFIX + "_subjectiveCategories",
             _subjectiveCategories);
-        $.jStorage.set(STORAGE_PREFIX + "_subjectiveCategories",
+        $.jStorage.set(STORAGE_PREFIX + "_nonNumericCategories",
             _nonNumericCategories);
         $.jStorage.set(STORAGE_PREFIX + "_tournament", _tournament);
         $.jStorage.set(STORAGE_PREFIX + "_teams", _teams);

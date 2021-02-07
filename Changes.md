@@ -1,3 +1,4 @@
+* #891 - Fix typo in where non-numeric categories are stored in the subjective application
 * #890 - Remove footer from login page
 
 Release 15.6.0
