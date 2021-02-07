@@ -139,6 +139,8 @@ public class FooterFilter implements Filter {
       return true;
     } else if (url.indexOf("slideshow.jsp") != -1) {
       return true;
+    } else if (url.indexOf("login.jsp") != -1) {
+      return true;
     } else {
       return false;
     }
