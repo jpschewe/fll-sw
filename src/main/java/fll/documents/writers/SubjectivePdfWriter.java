@@ -648,7 +648,12 @@ public class SubjectivePdfWriter {
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
       FOPUtils.renderPdf(fopFactory, document, stream);
     } catch (FOPException | TransformerException e) {
-      throw new FLLInternalException("Error creating the subjective schedule PDF", e);
+      throw new FLLInternalException("Error creating the subjective schedule PDF. Team: "
+          + teamNumber
+          + " teamName: "
+          + teamName
+          + " category: "
+          + category.getName(), e);
     }
   }
 
