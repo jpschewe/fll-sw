@@ -598,6 +598,19 @@ function addRubricToScoreEntry(table, goal, ranges) {
 
                     $("#enter-score-goal-comments").append(popup);
 
+                    $("#enter-score-" + goal.name + "-close")
+                        .click(function() {
+                            var comment = $("#enter-score-comment-" + goal.name + "-text").val();
+                            var openCommentButton = $("#enter-score-comment-"
+                                + goal.name
+                                + "-button");
+                            if (!isBlank(comment)) {
+                                openCommentButton.addClass("comment-entered");
+                            } else {
+                                openCommentButton.removeClass("comment-entered");
+                            }
+                        });
+
                 } else {
                     borderClass = "border-right";
                     commentButton = "";
@@ -777,6 +790,26 @@ function createGoalGroupRows(table, totalColumns, score, goalGroup) {
 
 }
 
+function updateGreatJobButtonBackground() {
+    var greatJobButton = $("#enter-score-comment-great-job-button");
+    var comment = $("#enter-score-comment-great-job-text").val();
+    if (!isBlank(comment)) {
+        greatJobButton.addClass("comment-entered");
+    } else {
+        greatJobButton.removeClass("comment-entered");
+    }
+}
+
+function updateThinkAboutButtonBackground() {
+    var button = $("#enter-score-comment-think-about-button");
+    var comment = $("#enter-score-comment-think-about-text").val();
+    if (!isBlank(comment)) {
+        button.addClass("comment-entered");
+    } else {
+        button.removeClass("comment-entered");
+    }
+}
+
 $(document)
     .on(
         "pagebeforeshow",
@@ -798,6 +831,8 @@ $(document)
                 $("#enter-score-comment-great-job-text").val("");
                 $("#enter-score-comment-think-about-text").val("");
             }
+            updateGreatJobButtonBackground();
+            updateThinkAboutButtonBackground();
 
             var table = $("#enter-score_score-table");
             table.empty();
@@ -874,8 +909,19 @@ $(document)
                 addEventsToSlider(goal);
 
                 if (null != score) {
+                    var openCommentButton = $("#enter-score-comment-"
+                        + goal.name
+                        + "-button");
+
+                    var comment = score.goalComments[goal.name];
+                    if (!isBlank(comment)) {
+                        openCommentButton.addClass("comment-entered");
+                    } else {
+                        openCommentButton.removeClass("comment-entered");
+                    }
+
                     $("#enter-score-comment-" + goal.name + "-text").val(
-                        score.goalComments[goal.name]);
+                        comment);
                 } else {
                     $("#enter-score-comment-" + goal.name + "-text").val("");
                 }
@@ -974,6 +1020,11 @@ $(document).on("pageinit", "#enter-score-page", function(event) {
     $("#enter-score_confirm-zero_no-show").click(function() {
         enterNoShow();
     });
+
+    $("#enter-score-comment-great-job-close").click(
+        updateGreatJobButtonBackground);
+    $("#enter-score-comment-think-about-close").click(
+        updateThinkAboutButtonBackground);
 
 });
 

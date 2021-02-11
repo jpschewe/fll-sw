@@ -1,3 +1,4 @@
+* #892 - Color comment buttons in the subjective application when comments have been entered
 * Make subjective judging app reload smarter. If there are no modified scores, just load from the server.
 * #891 - Fix typo in where non-numeric categories are stored in the subjective application
 * #890 - Remove footer from login page
