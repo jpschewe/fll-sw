@@ -592,8 +592,8 @@ function addRubricToScoreEntry(table, goal, ranges) {
 
                     var link = $(" <a href='#' data-rel='back' id='enter-score-"
                         + goal.name
-                        + "-save'"
-                        + " class='ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b'>Save</a>");
+                        + "-close'"
+                        + " class='ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b'>Close</a>");
                     popup.append(link);
 
                     $("#enter-score-goal-comments").append(popup);
