@@ -583,7 +583,6 @@
          */
         getSchedInfoForTeam: function(teamNumber) {
             if (null == _schedule) {
-                _log("No schedule");
                 return null;
             } else {
                 var schedInfo = null;
