@@ -37,5 +37,12 @@ function getWebsocketProtocol() {
     } else {
         return "ws:";
     }
-
 }
+
+/**
+ * Check if a string is empty, null or undefined.
+ */
+function isBlank(str) {
+    return (!str || /^\s*$/.test(str));
+}
+
