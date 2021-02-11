@@ -11,6 +11,8 @@ import java.awt.geom.Dimension2D;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,11 +39,14 @@ import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.xml.ChallengeDescription;
+import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Utilities for working with Apache FOP.
  */
 public final class FOPUtils {
+
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private FOPUtils() {
   }
@@ -662,20 +667,30 @@ public final class FOPUtils {
                                final Document xslfo,
                                final OutputStream out)
       throws IOException, FOPException, TransformerException {
-    final Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, out);
+    try {
+      final Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, out);
 
-    // Setup JAXP using identity transformer
-    final TransformerFactory factory = TransformerFactory.newInstance();
-    final Transformer transformer = factory.newTransformer(); // identity transformer
+      // Setup JAXP using identity transformer
+      final TransformerFactory factory = TransformerFactory.newInstance();
+      final Transformer transformer = factory.newTransformer(); // identity transformer
 
-    // Setup input and output for XSLT transformation
-    final Source src = new DOMSource(xslfo);
+      // Setup input and output for XSLT transformation
+      final Source src = new DOMSource(xslfo);
 
-    // Resulting SAX events (the generated FO) must be piped through to FOP
-    final Result res = new SAXResult(fop.getDefaultHandler());
+      // Resulting SAX events (the generated FO) must be piped through to FOP
+      final Result res = new SAXResult(fop.getDefaultHandler());
 
-    // Start XSLT transformation and FOP processing
-    transformer.transform(src, res);
+      // Start XSLT transformation and FOP processing
+      transformer.transform(src, res);
+    } catch (FOPException | TransformerException e) {
+      try (Writer w = new StringWriter()) {
+        XMLUtils.writeXML(xslfo, w);
+        LOGGER.error("Invalid document: {}", w);
+      } catch (final Exception e2) {
+        LOGGER.debug("Got error trying to log invalid XML document", e2);
+      }
+      throw e;
+    }
   }
 
   /**
