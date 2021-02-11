@@ -686,7 +686,7 @@ public final class FOPUtils {
       try (Writer w = new StringWriter()) {
         XMLUtils.writeXML(xslfo, w);
         LOGGER.error("Invalid document: {}", w);
-      } catch (final Exception e2) {
+      } catch (final RuntimeException e2) {
         LOGGER.debug("Got error trying to log invalid XML document", e2);
       }
       throw e;
