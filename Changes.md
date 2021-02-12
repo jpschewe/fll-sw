@@ -1,3 +1,5 @@
+Release 15.6.0
+==============
 * #897 - Fix handling of repeating question marks in comments
 * #892 - Color comment buttons in the subjective application when comments have been entered
 * Make subjective judging app reload smarter. If there are no modified scores, just load from the server.
