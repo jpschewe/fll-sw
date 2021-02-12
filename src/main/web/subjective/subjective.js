@@ -748,16 +748,23 @@
          * @return the promise from the AJAX function
          */
         uploadScores: function(doneCallback, failCallback) {
-            return $.post("../api/SubjectiveScores", $.toJSON(_allScores),
-                function(result) {
+            var dataToUpload = $.toJSON(_allScores);
+            return $.ajax({
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                url: "../api/SubjectiveScores",
+                data: dataToUpload,
+                success: function(result) {
                     if (result.success) {
                         doneCallback(result);
                     } else {
                         failCallback(result);
                     }
-                }, 'json').fail(function(result) {
-                    failCallback(result);
-                });
+                }
+            }).fail(function(result) {
+                failCallback(result);
+            });
         },
 
         /**
@@ -771,14 +778,22 @@
          * @return the promise from the AJAX function
          */
         uploadJudges: function(doneCallback, failCallback) {
-            return $.post("../api/Judges", $.toJSON(_judges), function(result) {
-                $.subjective.log("uploading judges success");
-                if (result.success) {
-                    doneCallback(result);
-                } else {
-                    failCallback(result);
+            var dataToUpload = $.toJSON(_judges);
+            return $.ajax({
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                url: "../api/Judges",
+                data: dataToUpload,
+                success: function(result) {
+                    $.subjective.log("uploading judges success");
+                    if (result.success) {
+                        doneCallback(result);
+                    } else {
+                        failCallback(result);
+                    }
                 }
-            }, 'json').fail(function(result) {
+            }).fail(function(result) {
                 failCallback(result);
             });
         },
