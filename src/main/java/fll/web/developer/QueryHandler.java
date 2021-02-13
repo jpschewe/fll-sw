@@ -61,7 +61,7 @@ public class QueryHandler extends BaseFLLServlet {
     final List<Map<String, String>> data = new LinkedList<Map<String, String>>();
     String error = null;
 
-    DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection(); Statement stmt = connection.createStatement()) {
       final String query = request.getParameter(QUERY_PARAMETER);
       try (ResultSet rs = stmt.executeQuery(query)) {
