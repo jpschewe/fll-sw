@@ -63,6 +63,8 @@ import net.mtu.eggplant.xml.XMLUtils;
 @WebServlet("/report/FinalComputedScores")
 public final class FinalComputedScores extends BaseFLLServlet {
 
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
   /**
    * If 2 scores are within this amount of each other they are
    * considered a tie.
@@ -572,6 +574,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           final double overallScore;
           final double ts = overallResult.getDouble(4);
           if (overallResult.wasNull()) {
+            LOGGER.warn("Team {} has no overall score", teamNumber);
             overallScore = Double.NaN;
           } else {
             overallScore = ts;
