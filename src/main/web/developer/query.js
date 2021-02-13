@@ -7,7 +7,8 @@
 "use-strict";
 
 $(document).ready(function() {
-    $("#execute_query").click(function() {
+    $("#query_form").submit(function(event) {
+        event.preventDefault(); //prevent default action 
         executeQuery();
     });
 }); // end ready function
@@ -25,15 +26,12 @@ function executeQuery() {
     $.ajax({
         type: "POST",
         url: 'QueryHandler',
-        dataType: "json",
-        contentType: "application/json",
-        data: {
-            query: queryString
-        },
+        data: $("#query_form").serialize(),
         success: function(data) {
             populateQueryResult(data);
         }
     });
+
 }
 
 function populateQueryResult(data) {

@@ -31,24 +31,27 @@
         <h1>Developer Database Commands</h1>
 
         <p>
-            <font color='red'><b>This page is intended for
-                    developers only. If you don't know what you're
-                    doing, LEAVE THIS PAGE!</b></font>
+            <font color='red'>
+                <b>This page is intended for developers only. If you
+                    don't know what you're doing, LEAVE THIS PAGE!</b>
+            </font>
         </p>
 
         <c:if test="${not empty param.message}">
             <p>
-                <i><c:out value="${param.message}" /></i>
+                <i>
+                    <c:out value="${param.message}" />
+                </i>
             </p>
         </c:if>
 
-        <p>
+        <form method='POST' action='QueryHandler' id='query_form'>
             Enter query
             <!--  must be on single line -->
             <textarea id='query' name='query' rows='5' cols='60'></textarea>
             <br />
             <button id='execute_query'>Execute Query</button>
-        </p>
+        </form>
         <table id='query_result'>
         </table>
 

@@ -64,6 +64,8 @@ public class QueryHandler extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection(); Statement stmt = connection.createStatement()) {
       final String query = request.getParameter(QUERY_PARAMETER);
+      LOGGER.debug("Executing query '{}'", query);
+
       try (ResultSet rs = stmt.executeQuery(query)) {
 
         ResultSetMetaData meta = rs.getMetaData();
