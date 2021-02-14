@@ -1,5 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
+<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+
 <%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
 <%@ page import="net.mtu.eggplant.util.StringUtils" %>
 

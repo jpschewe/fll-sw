@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -37,6 +38,7 @@ import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 
 /**
  * Collection of names of the groups used in the awards report in sorted order.
@@ -51,6 +53,12 @@ public class AwardsReportSortedGroupsServlet extends HttpServlet {
                              final HttpServletResponse response)
       throws IOException, ServletException {
     final ServletContext application = getServletContext();
+    final HttpSession session = request.getSession();
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {

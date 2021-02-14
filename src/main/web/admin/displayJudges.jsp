@@ -1,6 +1,8 @@
 <%@page import="fll.web.admin.GatherJudgeInformation"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+
 <html>
 <head>
 <title>Judge Assignments</title>

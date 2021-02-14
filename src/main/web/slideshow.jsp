@@ -9,6 +9,8 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
       
+<fll-sw:required-roles roles="PUBLIC" allowSetup="false" />
+      
 <%
 // All images shall be located under slideshow/ in the fll web folder.
 String imagePath = application.getRealPath("/slideshow");

@@ -1,5 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<fll-sw:required-roles roles="JUDGE,REF" allowSetup="false" />
+
 <%
 fll.web.report.TopScoreReport.populateContextPerJudgingStation(application, pageContext);
 %>

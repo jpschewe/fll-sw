@@ -2,6 +2,7 @@
 
 <%@ page import="fll.web.DisplayInfo"%>
 
+<fll-sw:required-roles roles="PUBLIC" allowSetup="false" />
 
 <html>
 <head>

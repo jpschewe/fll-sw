@@ -94,12 +94,6 @@ public class InitFilter implements Filter {
         possiblyInstallSetupAuthentication(application, session);
       }
 
-      final boolean permissionDenied = checkSecurity(session, httpRequest, httpResponse);
-      if (permissionDenied) {
-        LOGGER.debug("User does not have permission for the page, forwarded request");
-        return;
-      }
-
       // keep browser from caching any content
       httpResponse.setHeader("Cache-Control", "no-store"); // HTTP 1.1
       httpResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0
@@ -113,109 +107,6 @@ public class InitFilter implements Filter {
 
     LOGGER.trace("Bottom of doFilter with request class: {}", requestToPass.getClass());
     chain.doFilter(requestToPass, response);
-  }
-
-  /**
-   * Check if the user can access this page. Note that some pages check
-   * authentication themselves. Going forward I suspect that this is the direction
-   * that I will go for future code.
-   *
-   * @return true if the user is being sent to the permission denied page and the
-   *         caller should stop processing
-   * @throws IOException if there was an error with the forward
-   * @throws ServletException if there was an error with the forward
-   */
-  private boolean checkSecurity(final HttpSession session,
-                                final HttpServletRequest request,
-                                final HttpServletResponse response)
-      throws IOException, ServletException {
-    final String path = request.getRequestURI();
-    final String contextPath = request.getContextPath();
-
-    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
-
-    LOGGER.debug("Checking contextPath: {} path: '{}'", contextPath, path);
-    boolean permissionDenied = false;
-    if (null != path
-        && (path.startsWith(contextPath
-            + "/admin/") //
-            || path.startsWith(contextPath
-                + "/developer/") //
-            || path.startsWith(contextPath
-                + "/report/") //
-            || path.startsWith(contextPath
-                + "/schedule/") //
-            || path.startsWith(contextPath
-                + "/playoff/InitializeBrackets") //
-        )) {
-      if (path.startsWith(contextPath
-          + "/report/finalist/FinalistTeams")) {
-        // allow the list of finalist teams to be public
-        permissionDenied = false;
-      } else if (path.startsWith(contextPath
-          + "/admin/changePassword.jsp")) {
-        // handled by the page
-        permissionDenied = false;
-      } else if (path.startsWith(contextPath
-          + "/admin/createUsername.jsp")) {
-        // handled by the page
-        permissionDenied = false;
-      } else if (path.startsWith(contextPath
-          + "/admin/CreateUser")) {
-        // handled by the page
-        permissionDenied = false;
-      } else if (path.startsWith(contextPath
-          + "/admin/edit-roles.jsp")) {
-        // handled by the page
-        permissionDenied = false;
-      } else if (path.startsWith(contextPath
-          + "/admin/ask-create-admin.jsp")) {
-        // handled by the page
-        permissionDenied = false;
-      } else {
-        if (!auth.isAdmin()) {
-          permissionDenied = true;
-        }
-      }
-    } else if (null != path
-        && path.startsWith(contextPath
-            + "/scoreEntry/")) {
-      if (!auth.isRef()) {
-        permissionDenied = true;
-      }
-    } else if (null != path
-        && path.startsWith(contextPath
-            + "/subjective/CheckAuth")) {
-      // checking the authentication doesn't require security
-      permissionDenied = false;
-    } else if (null != path
-        && path.startsWith(contextPath
-            + "/subjective")) {
-      if (!auth.isJudge()) {
-        permissionDenied = true;
-      }
-    } else if (null != path
-        && (path.startsWith(contextPath
-            + "/playoff/scoregenbrackets.jsp") //
-            || path.startsWith(contextPath
-                + "/playoff/adminbrackets.jsp")) //
-    ) {
-      if (!auth.isRef()) {
-        permissionDenied = true;
-      }
-    } else {
-      // no authentication needed or handled by the page itself
-      permissionDenied = false;
-    }
-
-    if (permissionDenied) {
-      LOGGER.info("Permission denied accessing {} with auth: {}", path, auth);
-      request.getRequestDispatcher("/login.jsp").forward(request, response);
-      return true;
-    } else {
-      return false;
-    }
-
   }
 
   /**

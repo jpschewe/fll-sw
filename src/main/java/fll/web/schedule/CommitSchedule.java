@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -30,11 +31,12 @@ import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.web.admin.Tables;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Commit the schedule in {@link UploadScheduleData#getSchedule()} to the
@@ -52,14 +54,18 @@ public class CommitSchedule extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
     final UploadScheduleData uploadScheduleData = SessionAttributes.getNonNullAttribute(session, UploadScheduleData.KEY,
                                                                                         UploadScheduleData.class);
 
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
       final int tournamentID = Queries.getCurrentTournament(connection);
 
       final TournamentSchedule schedule = uploadScheduleData.getSchedule();
@@ -89,8 +95,6 @@ public class CommitSchedule extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new FLLRuntimeException("There was an error talking to the database", e);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 

@@ -9,6 +9,7 @@ package fll.web.admin;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletContext;
@@ -26,9 +27,11 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.ImportDB;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
+import fll.web.UserRole;
 import fll.web.developer.importdb.ImportDBDump;
 import fll.web.developer.importdb.ImportDbSessionInfo;
 
@@ -47,6 +50,11 @@ public class ProcessImportPerformance extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
 
     final StringBuilder message = new StringBuilder();
 

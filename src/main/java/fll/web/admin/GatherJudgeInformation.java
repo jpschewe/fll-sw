@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -28,8 +29,10 @@ import fll.JudgeInformation;
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -69,6 +72,12 @@ public class GatherJudgeInformation extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
+
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Top of GatherJudgeInformation.processRequest");
     }

@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -36,7 +37,10 @@ import fll.db.NonNumericNominees.Nominee;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -55,6 +59,11 @@ public class NonNumericNomineesReport extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);

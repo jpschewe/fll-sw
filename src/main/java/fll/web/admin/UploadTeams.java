@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,9 +41,11 @@ import fll.db.Queries;
 import fll.util.CellFileReader;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadSpreadsheet;
+import fll.web.UserRole;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -60,6 +63,11 @@ public final class UploadTeams extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
 
     final StringBuilder message = new StringBuilder();
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -67,9 +75,7 @@ public final class UploadTeams extends BaseFLLServlet {
     final String fileName = SessionAttributes.getNonNullAttribute(session, "spreadsheetFile", String.class);
 
     File file = null;
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
       file = new File(fileName);
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Wrote teams data to: "
@@ -92,7 +98,6 @@ public final class UploadTeams extends BaseFLLServlet {
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving team data into the database", e);
     } finally {
-      SQLFunctions.close(connection);
       if (null != file) {
         if (!file.delete()) {
           file.deleteOnExit();

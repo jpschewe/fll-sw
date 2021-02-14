@@ -8,6 +8,7 @@ package fll.web.developer.importdb;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -20,8 +21,10 @@ import javax.sql.DataSource;
 import fll.Tournament;
 
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 
 /**
  * Servlet to check if the tournament exists in the dest database.
@@ -39,6 +42,12 @@ public class CheckTournamentExists extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
+
     final StringBuilder message = new StringBuilder();
 
     final ImportDbSessionInfo sessionInfo = SessionAttributes.getNonNullAttribute(session,

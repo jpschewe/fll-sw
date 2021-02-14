@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
@@ -31,9 +32,11 @@ import fll.util.CellFileReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadSpreadsheet;
+import fll.web.UserRole;
 import fll.web.WebUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -51,6 +54,11 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
 
     final StringBuilder message = new StringBuilder();
     final String advanceFile = SessionAttributes.getNonNullAttribute(session,

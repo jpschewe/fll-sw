@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -22,10 +23,12 @@ import javax.servlet.http.HttpSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.DisplayInfo;
 import fll.web.DisplayWebSocket;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.web.playoff.H2HUpdateWebSocket;
 
 /**
@@ -42,6 +45,12 @@ public class RemoteControlPost extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
+
     final Collection<DisplayInfo> displays = DisplayInfo.getDisplayInformation(application);
 
     if (LOGGER.isTraceEnabled()) {

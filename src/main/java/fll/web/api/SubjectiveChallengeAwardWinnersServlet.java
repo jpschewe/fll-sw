@@ -15,6 +15,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -30,12 +31,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
 import fll.db.AwardWinner;
-import fll.db.Queries;
 import fll.db.AwardWinners;
+import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 
 /**
  * Get and set challenge subjective award winners.
@@ -53,8 +55,8 @@ public class SubjectiveChallengeAwardWinnersServlet extends HttpServlet {
       throws IOException, ServletException {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
-    if (!auth.isJudge()) {
-      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE), false)) {
       return;
     }
 
@@ -70,8 +72,7 @@ public class SubjectiveChallengeAwardWinnersServlet extends HttpServlet {
       final PrintWriter writer = response.getWriter();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
-      final Collection<AwardWinner> winners = AwardWinners.getChallengeAwardWinners(connection,
-                                                                                              currentTournament);
+      final Collection<AwardWinner> winners = AwardWinners.getChallengeAwardWinners(connection, currentTournament);
 
       jsonMapper.writeValue(writer, winners);
     } catch (final SQLException e) {
@@ -85,8 +86,8 @@ public class SubjectiveChallengeAwardWinnersServlet extends HttpServlet {
       throws IOException, ServletException {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
-    if (!auth.isJudge()) {
-      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE), false)) {
       return;
     }
 

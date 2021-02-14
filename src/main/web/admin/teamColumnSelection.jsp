@@ -7,6 +7,8 @@
 <%@ page import="javax.sql.DataSource"%>
 <%@ page import="java.sql.Connection"%>
 
+<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+
 <!-- query string <c:out value="${request.queryString}"/> -->
 
 <%

@@ -1,6 +1,8 @@
 <%@page import="fll.xml.BracketSortType"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+
 <%
     fll.web.playoff.BracketParameters.populateContext(application, session, pageContext);
 %>

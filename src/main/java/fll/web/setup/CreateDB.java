@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletContext;
@@ -35,6 +36,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
+import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 
@@ -54,10 +56,9 @@ public class CreateDB extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
-    final AuthenticationContext currentAuth = SessionAttributes.getAuthentication(session);
-    if (!currentAuth.isAdmin()
-        && !currentAuth.isInSetup()) {
-      request.getRequestDispatcher("/login.jsp").forward(request, response);
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), true)) {
       return;
     }
 
@@ -89,8 +90,7 @@ public class CreateDB extends BaseFLLServlet {
 
           // setup special authentication for setup
           LOGGER.info("Installing in-setup auth");
-          AuthenticationContext auth = AuthenticationContext.inSetup();
-          session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
+          session.setAttribute(SessionAttributes.AUTHENTICATION, AuthenticationContext.inSetup());
 
         } catch (final MalformedURLException e) {
           throw new FLLInternalException("Could not parse URL from choosen description: "
@@ -120,8 +120,7 @@ public class CreateDB extends BaseFLLServlet {
           }
 
           // setup special authentication for setup
-          AuthenticationContext auth = AuthenticationContext.inSetup();
-          session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
+          session.setAttribute(SessionAttributes.AUTHENTICATION, AuthenticationContext.inSetup());
         }
       } else if (null != request.getAttribute("createdb")) {
         // import a database from a dump
@@ -154,8 +153,7 @@ public class CreateDB extends BaseFLLServlet {
           }
 
           // setup special authentication for setup
-          AuthenticationContext auth = AuthenticationContext.inSetup();
-          session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
+          session.setAttribute(SessionAttributes.AUTHENTICATION, AuthenticationContext.inSetup());
         }
 
       } else {

@@ -6,6 +6,8 @@
 <%@ page import="fll.web.ApplicationAttributes"%>
 <%@ page import="javax.sql.DataSource" %>
 
+<fll-sw:required-roles roles="REF" allowSetup="false" />
+
 <%
 final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();

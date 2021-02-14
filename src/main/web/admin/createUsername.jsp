@@ -1,8 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<c:if test="${not authentication.admin and not authentication.inSetup}">
-    <jsp:forward page="/login.jsp"></jsp:forward>
-</c:if>
+<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
 
 <%
 fll.web.admin.CreateUser.populateContext(request, pageContext);
