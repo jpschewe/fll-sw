@@ -142,18 +142,18 @@ public final class AuthenticationContext implements Serializable {
    * Defaults {@code inSetup} to false.
    * 
    * @param request
-   *          {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
+   *          {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
    * @param response
-   *          {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
+   *          {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
    * @param session
-   *          {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
+   *          {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
    * @param requiredRoles
-   *          {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
-   * @return {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
+   *          {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
+   * @return {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
    * @throws ServletException
-   *           {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
+   *           {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
    * @throws IOException
-   *           {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
+   *           {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
    */
   public boolean requireRoles(final ServletRequest request,
                               final ServletResponse response,
