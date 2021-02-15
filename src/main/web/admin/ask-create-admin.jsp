@@ -1,6 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+<fll-sw:required-roles roles="ADMIN" allowSetup="true" />
 
 <%
 fll.web.admin.AskCreateAdmin.populateContext(application, pageContext);
