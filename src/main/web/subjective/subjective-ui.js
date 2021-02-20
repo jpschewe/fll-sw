@@ -483,7 +483,10 @@ function createNewScore() {
     score.judge = $.subjective.getCurrentJudge().id;
     score.teamNumber = $.subjective.getCurrentTeam().teamNumber;
     score.note = null;
-
+    score.goalComments = {};
+    score.commentThinkAbout = null;
+    score.commentGreatJob = null;
+    
     return score;
 }
 
@@ -913,7 +916,12 @@ $(document)
                         + goal.name
                         + "-button");
 
-                    var comment = score.goalComments[goal.name];
+                    var comment;
+                    if (score.goalComments) {
+                        comment = score.goalComments[goal.name];
+                    } else {
+                        comment = "";
+                    }
                     if (!isBlank(comment)) {
                         openCommentButton.addClass("comment-entered");
                     } else {
