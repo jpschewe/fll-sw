@@ -25,7 +25,7 @@ pipeline {
                 checkout changelog: false, 
                     poll: false, 
                     scm: [$class: 'GitSCM', 
-                        branches: [[name: 'refs/tags/checker-framework-3.9.1']], 
+                        branches: [[name: 'refs/tags/checker-framework-3.10.0']], 
                         doGenerateSubmoduleConfigurations: false, 
                         extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'checker-framework']], 
                         submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/typetools/checker-framework.git']]]
@@ -33,7 +33,7 @@ pipeline {
                 checkout changelog: false, 
                     poll: false, 
                     scm: [$class: 'GitSCM', 
-                        branches: [[name: 'refs/tags/3.9.17']], 
+                        branches: [[name: 'refs/tags/3.10.0']], 
                         doGenerateSubmoduleConfigurations: false, 
                         extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'annotation-tools']], 
                         submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/typetools/annotation-tools.git']]]
