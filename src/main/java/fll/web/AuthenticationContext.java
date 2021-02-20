@@ -25,6 +25,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public final class AuthenticationContext implements Serializable {
 
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
   /**
    * @return not logged in state
    */
@@ -187,8 +189,13 @@ public final class AuthenticationContext implements Serializable {
       return true;
     } else if (isAdmin()) {
       return true;
+    } else if (requiredRoles.contains(UserRole.PUBLIC)) {
+      return true;
     } else {
       if (!roles.containsAll(requiredRoles)) {
+        LOGGER.debug("Missing a required role {} does not contain one of {}, redirecting to login.jsp", roles,
+                     requiredRoles);
+
         SessionAttributes.appendToMessage(session,
                                           "<p>You need to be logged in as a user with the following roles to view this page: "
                                               + requiredRoles.stream().map(Object::toString)
