@@ -1,3 +1,6 @@
+* #899 - Make sure that all properties exist in the subjective judging application all of the time
+* Fix bug where the SQL query page doesn't work
+
 Release 15.6.0
 ==============
 * #897 - Fix handling of repeating question marks in comments
