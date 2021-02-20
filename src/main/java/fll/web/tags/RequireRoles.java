@@ -27,6 +27,8 @@ import fll.web.UserRole;
  */
 public class RequireRoles extends TagSupport {
 
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+  
   /**
    * Simple constructor.
    */
@@ -36,6 +38,8 @@ public class RequireRoles extends TagSupport {
 
   @Override
   public int doEndTag() throws JspException {
+    LOGGER.debug("Top of RequireRoles.doEndTag");
+    
     final HttpSession session = pageContext.getSession();
     final ServletRequest request = pageContext.getRequest();
     final ServletResponse response = pageContext.getResponse();
