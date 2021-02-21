@@ -20,7 +20,11 @@ pipeline {
     stage('Build Checker') {
         agent { label "fll-sw_linux" }   
         steps {
+                echo "Using stock checker framework"
+        
             // setup local checker repository
+            /*
+                           echo "Using custom checker framework"                 
             dir("checker") {
                 checkout changelog: false, 
                     poll: false, 
@@ -58,7 +62,7 @@ pipeline {
                 dir("checker-framework") {
                     callGradle("assemble")
                 } // dir checker-framework
-
+*/
             } // dir checker
             stash name: 'checker_build_data', includes: 'checker/checker-framework/checker/dist/**'           
         } // steps

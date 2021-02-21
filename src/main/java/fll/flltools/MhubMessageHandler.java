@@ -6,7 +6,7 @@
 
 package fll.flltools;
 
-import static org.checkerframework.checker.nullness.NullnessUtil.castNonNull;
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import java.io.IOException;
 import java.io.StringWriter;

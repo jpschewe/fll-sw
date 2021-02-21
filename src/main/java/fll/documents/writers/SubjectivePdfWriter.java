@@ -1,6 +1,6 @@
 package fll.documents.writers;
 
-import static org.checkerframework.checker.nullness.NullnessUtil.castNonNull;
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
