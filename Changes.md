@@ -1,3 +1,4 @@
+* #900 - Focus on the text field after opening the comment dialog in the subjective application
 * #899 - Make sure that all properties exist in the subjective judging application all of the time
 * Fix bug where the SQL query page doesn't work
 
