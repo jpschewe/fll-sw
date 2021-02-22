@@ -486,7 +486,7 @@ function createNewScore() {
     score.goalComments = {};
     score.commentThinkAbout = null;
     score.commentGreatJob = null;
-    
+
     return score;
 }
 
@@ -613,6 +613,12 @@ function addRubricToScoreEntry(table, goal, ranges) {
                                 openCommentButton.removeClass("comment-entered");
                             }
                         });
+
+                    $("#enter-score-comment-" + goal.name).popup({
+                        afteropen: function(event, ui) {
+                            $("#enter-score-comment-" + goal.name + "-text").focus();
+                        }
+                    });
 
                 } else {
                     borderClass = "border-right";
@@ -1033,6 +1039,24 @@ $(document).on("pageinit", "#enter-score-page", function(event) {
         updateGreatJobButtonBackground);
     $("#enter-score-comment-think-about-close").click(
         updateThinkAboutButtonBackground);
+
+    $("#enter-score-comment-great-job").popup({
+        afteropen: function(event, ui) {
+            $("#enter-score-comment-great-job-text").focus();
+        }
+    });
+
+    $("#enter-score-comment-think-about").popup({
+        afteropen: function(event, ui) {
+            $("#enter-score-comment-think-about-text").focus();
+        }
+    });
+
+    $("#enter-score-note").popup({
+        afteropen: function(event, ui) {
+            $("#enter-score-note-text").focus();
+        }
+    });
 
 });
 
