@@ -50,6 +50,7 @@ import org.hsqldb.jdbc.JDBCDataSource;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 
@@ -817,7 +818,7 @@ public final class Utilities {
    * @return a new instance
    */
   public static ObjectMapper createJsonMapper() {
-    return new ObjectMapper().registerModule(new Jdk8Module());
+    return new ObjectMapper().registerModule(new Jdk8Module()).registerModule(new JavaTimeModule());
   }
 
   /**
