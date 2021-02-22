@@ -1,8 +1,10 @@
+Release 15.8.0
+==============
 * #900 - Focus on the text field after opening the comment dialog in the subjective application
 * #899 - Make sure that all properties exist in the subjective judging application all of the time
 * Fix bug where the SQL query page doesn't work
 
-Release 15.6.0
+Release 15.7.0
 ==============
 * #897 - Fix handling of repeating question marks in comments
 * #892 - Color comment buttons in the subjective application when comments have been entered
