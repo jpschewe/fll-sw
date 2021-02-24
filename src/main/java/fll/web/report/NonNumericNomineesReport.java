@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -245,8 +246,9 @@ public class NonNumericNomineesReport extends BaseFLLServlet {
     subtitleBlock.appendChild(subtitleCenter);
     subtitleCenter.setAttribute("leader-pattern", "space");
 
-    if (null != tournament.getDate()) {
-      final String dateString = String.format("Date: %s", AwardsReport.DATE_FORMATTER.format(tournament.getDate()));
+    final LocalDate tournamentDate = tournament.getDate();
+    if (null != tournamentDate) {
+      final String dateString = String.format("Date: %s", AwardsReport.DATE_FORMATTER.format(tournamentDate));
 
       subtitleBlock.appendChild(document.createTextNode(dateString));
     }

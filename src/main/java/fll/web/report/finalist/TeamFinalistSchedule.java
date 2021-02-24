@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Collection;
@@ -146,10 +147,10 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
     row2.appendChild(title);
     FOPUtils.addBottomBorder(title, ScheduleWriter.THICK_BORDER_WIDTH);
 
-    if (null != tournament.getDate()) {
+    final LocalDate tournamentDate = tournament.getDate();
+    if (null != tournamentDate) {
       final Element date = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
-                                                    tournament.getDate()
-                                                              .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)));
+                                                    tournamentDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)));
       row2.appendChild(date);
       FOPUtils.addBottomBorder(date, ScheduleWriter.THICK_BORDER_WIDTH);
     }

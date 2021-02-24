@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
@@ -38,8 +39,8 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.AdvancingTeam;
 import fll.db.AwardWinner;
-import fll.db.OverallAwardWinner;
 import fll.db.AwardWinners;
+import fll.db.OverallAwardWinner;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
@@ -487,8 +488,9 @@ public class AwardsReport extends BaseFLLServlet {
     subtitleBlock.appendChild(subtitleCenter);
     subtitleCenter.setAttribute("leader-pattern", "space");
 
-    if (null != tournament.getDate()) {
-      final String dateString = String.format("Date: %s", DATE_FORMATTER.format(tournament.getDate()));
+    final LocalDate tournamentDate = tournament.getDate();
+    if (null != tournamentDate) {
+      final String dateString = String.format("Date: %s", DATE_FORMATTER.format(tournamentDate));
 
       subtitleBlock.appendChild(document.createTextNode(dateString));
     }
