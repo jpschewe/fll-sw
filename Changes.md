@@ -1,3 +1,4 @@
+* #903 - Fix importing of finalist schedule information when loading a database
 * #903 - properly handle a tournament without a date
 
 Release 15.8.0
