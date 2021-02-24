@@ -1,3 +1,5 @@
+* #903 - properly handle a tournament without a date
+
 Release 15.8.0
 ==============
 * #900 - Focus on the text field after opening the comment dialog in the subjective application

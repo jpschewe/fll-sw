@@ -146,11 +146,13 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
     row2.appendChild(title);
     FOPUtils.addBottomBorder(title, ScheduleWriter.THICK_BORDER_WIDTH);
 
-    final Element date = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
-                                                  tournament.getDate()
-                                                            .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)));
-    row2.appendChild(date);
-    FOPUtils.addBottomBorder(date, ScheduleWriter.THICK_BORDER_WIDTH);
+    if (null != tournament.getDate()) {
+      final Element date = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
+                                                    tournament.getDate()
+                                                              .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)));
+      row2.appendChild(date);
+      FOPUtils.addBottomBorder(date, ScheduleWriter.THICK_BORDER_WIDTH);
+    }
 
     return staticContent;
 
