@@ -1,3 +1,4 @@
+* #905 - Make tab to skip over read-only cells on non-numeric categories page
 * #904 - Add FLL-SW version information to bug reports
 * #902 - Fix loading of non-numeric award winners into the edit award winners page
 * #903 - Fix importing of finalist schedule information when loading a database
