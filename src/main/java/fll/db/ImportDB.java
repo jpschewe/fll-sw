@@ -1973,6 +1973,7 @@ public final class ImportDB {
     try (
         PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
     }
 
     try (
