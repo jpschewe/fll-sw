@@ -1,3 +1,4 @@
+* #904 - Add FLL-SW version information to bug reports
 * #902 - Fix loading of non-numeric award winners into the edit award winners page
 * #903 - Fix importing of finalist schedule information when loading a database
 * #903 - properly handle a tournament without a date
