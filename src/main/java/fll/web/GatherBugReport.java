@@ -83,7 +83,7 @@ public class GatherBugReport extends BaseFLLServlet {
         final String versionInfo = Version.getAllVersionInformation().entrySet().stream() //
                                           .map(e -> String.format("%s:%s", e.getKey(), e.getValue())) //
                                           .collect(Collectors.joining("\n"));
-        zipOut.write(versionInfo.toString().getBytes(Utilities.DEFAULT_CHARSET));
+        zipOut.write(versionInfo.getBytes(Utilities.DEFAULT_CHARSET));
 
         addDatabase(zipOut, connection, challengeDescription);
         addLogFiles(zipOut);
