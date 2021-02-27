@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -331,8 +332,9 @@ public class PlayoffReport extends BaseFLLServlet {
     subtitleBlock.appendChild(subtitleCenter);
     subtitleCenter.setAttribute("leader-pattern", "space");
 
-    if (null != tournament.getDate()) {
-      final String dateString = String.format("Date: %s", AwardsReport.DATE_FORMATTER.format(tournament.getDate()));
+    final LocalDate tournamentDate = tournament.getDate();
+    if (null != tournamentDate) {
+      final String dateString = String.format("Date: %s", AwardsReport.DATE_FORMATTER.format(tournamentDate));
 
       subtitleBlock.appendChild(document.createTextNode(dateString));
     }

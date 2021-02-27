@@ -84,7 +84,7 @@ public final class Tournament implements Serializable {
   /**
    * @return date of the tournament
    */
-  public LocalDate getDate() {
+  public @Nullable LocalDate getDate() {
     return date;
   }
 

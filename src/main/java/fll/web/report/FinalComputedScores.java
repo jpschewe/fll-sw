@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -974,8 +975,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
     challengeTitleCell.setAttribute("padding-left", sidePadding);
 
     final StringBuilder title = new StringBuilder();
-    if (null != tournament.getDate()) {
-      title.append(AwardsReport.DATE_FORMATTER.format(tournament.getDate())
+    final LocalDate tournamentDate = tournament.getDate();
+    if (null != tournamentDate) {
+      title.append(AwardsReport.DATE_FORMATTER.format(tournamentDate)
           + " - ");
     }
     title.append(tournament.getDescription());
