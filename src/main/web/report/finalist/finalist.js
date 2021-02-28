@@ -473,7 +473,8 @@
     },
 
     /**
-     * Integer or undefined or -1 (unset).
+     * @param division the playoff bracket name
+     * @return Integer or undefined or -1 (unset).
      */
     getPlayoffStartHour : function(division) {
       return _playoffStartHour[division];
@@ -484,7 +485,8 @@
     },
 
     /**
-     * Integer or undefined or -1 (unset).
+     * @param division the playoff bracket name
+     * @return Integer or undefined or -1 (unset).
      */
     getPlayoffStartMinute : function(division) {
       return _playoffStartMinute[division];
@@ -495,7 +497,8 @@
     },
 
     /**
-     * Time or undefined.
+     * @return Time or undefined.
+     * @param division the playoff bracket name
      */
     getPlayoffStartTime : function(division) {
       var hour = $.finalist.getPlayoffStartHour(division);
@@ -509,7 +512,8 @@
     },
 
     /**
-     * Integer or undefined or -1 (unset).
+     * @return Integer or undefined or -1 (unset).
+     * @param division the playoff bracket name
      */
     getPlayoffEndHour : function(division) {
       return _playoffEndHour[division];
@@ -520,7 +524,8 @@
     },
 
     /**
-     * Integer or undefined or -1 (unset).
+     * @param division the playoff bracket name
+     * @return Integer or undefined or -1 (unset).
      */
     getPlayoffEndMinute : function(division) {
       return _playoffEndMinute[division];
@@ -531,7 +536,8 @@
     },
 
     /**
-     * Time or undefined.
+     * @param division the playoff bracket name
+     * @return Time or undefined.
      */
     getPlayoffEndTime : function(division) {
       var hour = $.finalist.getPlayoffEndHour(division);
