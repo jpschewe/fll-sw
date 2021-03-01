@@ -42,9 +42,9 @@
         _divisions = [];
         _currentDivision = null;
         _numTeamsAutoSelected = 1;
-        _startHour = 2;
-        _startMinute = 0;
-        _duration = 20;
+        _startHour = {};
+        _startMinute = {};
+        _duration = {};
         _categoriesVisited = {};
         _currentCategory = null;
         _playoffDivisions = [];
@@ -283,19 +283,16 @@
      * 
      * Does NOT save.
      */
-    function _addMinutesToSchedules(minutes) {
+    function _addMinutesToSchedules(currentDivision, minutes) {
+        const currentSchedule = _schedules[currentDivision];
+        if (null != currentSchedule) {
+            $.each(currentSchedule, function(k, slot) {
 
-        $.each(_schedules, function(i, schedule) {
-            if (null != schedule) {
-                $.each(schedule, function(k, slot) {
+                slot.time = $.finalist.addMinutesToTime(slot.time, minutes);
+                slot.endTime = $.finalist.addMinutesToTime(slot.endTime, minutes);
 
-                    slot.time = $.finalist.addMinutesToTime(slot.time, minutes);
-                    slot.endTime = $.finalist.addMinutesToTime(slot.endTime, minutes);
-
-                }); // foreach timeslot
-            }
-        }); // foreach schedule
-
+            }); // foreach timeslot
+        }
     }
 
     /**
@@ -1086,8 +1083,8 @@
 
             // list of Timeslots in time order
             var schedule = [];
-            var nextTime = $.finalist.getStartTime();
-            var slotDuration = $.finalist.getDuration();
+            var nextTime = $.finalist.getStartTime(currentDivision);
+            var slotDuration = $.finalist.getDuration(currentDivision);
             $.finalist.log("Next timeslot starts at " + nextTime.hour + ":"
                 + nextTime.minute + " duration is " + slotDuration);
             $.each(sortedTeams, function(i, teamNum) {
@@ -1148,7 +1145,7 @@
          */
         addSlotToSchedule: function(schedule) {
             var lastSlot = schedule[schedule.length - 1];
-            var newSlot = new Timeslot(lastSlot.endTime, $.finalist.getDuration());
+            var newSlot = new Timeslot(lastSlot.endTime, $.finalist.getDuration($.finalist.getCurrentDivision()));
             schedule.push(newSlot);
 
             return newSlot;
@@ -1197,46 +1194,70 @@
             return false;
         },
 
-        setStartHour: function(hour) {
-            var diffHours = hour - _startHour;
+        setStartHour: function(currentDivision, hour) {
+            var diffHours = hour - $.finalist.getStartHour(currentDivision);
             var diffMinutes = diffHours * 60;
-            _addMinutesToSchedules(diffMinutes);
+            _addMinutesToSchedules(currentDivision, diffMinutes);
 
-            _startHour = hour;
+            _startHour[currentDivision] = hour;
             _save();
         },
 
-        getStartHour: function() {
-            return _startHour;
+        /**
+         * @return the value or 2 if not yet set
+         */
+        getStartHour: function(currentDivision) {
+            const prevValue = _startHour[currentDivision];
+            if (undefined == prevValue) {
+                return 2;
+            } else {
+                return prevValue;
+            }
         },
 
-        setStartMinute: function(minute) {
-            var diffMinutes = minute - _startMinute;
+        setStartMinute: function(currentDivision, minute) {
+            var diffMinutes = minute - $.finalist.getStartMinute(currentDivision);
             _addMinutesToSchedules(diffMinutes);
 
-            _startMinute = minute;
+            _startMinute[currentDivision] = minute;
             _save();
         },
 
-        getStartMinute: function() {
-            return _startMinute;
+        /**
+         * @return the value or 0 if not yet set
+         */
+        getStartMinute: function(currentDivision) {
+            const prevValue = _startMinute[currentDivision];
+            if (undefined == prevValue) {
+                return 0;
+            } else {
+                return prevValue;
+            }
         },
 
-        getStartTime: function() {
-            var time = new Time(_startHour, _startMinute);
+        getStartTime: function(currentDivision) {
+            var time = new Time($.finalist.getStartHour(currentDivision), $.finalist.getStartMinute(currentDivision));
             return time;
         },
 
-        setDuration: function(v) {
-            var diffMinutes = v - _duration;
+        setDuration: function(currentDivision, v) {
+            var diffMinutes = v - $.finalist.getDuration(currentDivision);
             _addMinutesToDurationOfSchedules(diffMinutes);
 
-            _duration = v;
+            _duration[currentDivision] = v;
             _save();
         },
 
-        getDuration: function() {
-            return _duration;
+        /**
+         * @return the value or 20 if not yet set
+         */
+        getDuration: function(currentDivision) {
+            const prevValue = _duration[currentDivision];
+            if (undefined == prevValue) {
+                return 20;
+            } else {
+                return prevValue;
+            }
         },
 
         setCurrentCategoryId: function(catId) {
