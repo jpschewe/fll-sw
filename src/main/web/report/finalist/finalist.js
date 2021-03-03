@@ -604,7 +604,9 @@
          * @return true/false
          */
         isTeamInDivision: function(team, division) {
-            if (-1 == $.inArray(division, team.divisions)) {
+            if (!team) {
+                return false;
+            } else if (-1 == $.inArray(division, team.divisions)) {
                 return false;
             } else {
                 return true;
