@@ -7,11 +7,9 @@
 package fll.web.report.finalist;
 
 import java.io.Serializable;
-import java.util.Calendar;
+import java.time.LocalTime;
 import java.util.Comparator;
-import java.util.Date;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -22,17 +20,14 @@ public final class FinalistDBRow implements Serializable {
 
   /**
    * @param categoryName {@link #getCategoryName()}
-   * @param hour {@link #getHour()}
-   * @param minute {@link #getMinute()}
+   * @param time {@link #getTime()}
    * @param teamNumber {@link #getTeamNumber()}
    */
   public FinalistDBRow(@JsonProperty("categoryName") final String categoryName,
-                       @JsonProperty("hour") final int hour,
-                       @JsonProperty("minute") final int minute,
+                       @JsonProperty("time") final LocalTime time,
                        @JsonProperty("teamNumber") final int teamNumber) {
     this.categoryName = categoryName;
-    this.hour = hour;
-    this.minute = minute;
+    this.time = time;
     this.teamNumber = teamNumber;
   }
 
@@ -45,38 +40,13 @@ public final class FinalistDBRow implements Serializable {
     return categoryName;
   }
 
-  private final int hour;
+  private final LocalTime time;
 
   /**
-   * @return the hour of the finalist session
+   * @return the time of the finalist session
    */
-  public int getHour() {
-    return hour;
-  }
-
-  private final int minute;
-
-  /**
-   * @return the minute of the finalist session
-   */
-  public int getMinute() {
-    return minute;
-  }
-
-  /**
-   * @return the time as a {@link Date} object
-   * @see #getHour()
-   * @see #getMinute()
-   */
-  @JsonIgnore
-  public Date getTime() {
-    final Calendar cal = Calendar.getInstance();
-    cal.set(Calendar.HOUR, getHour());
-    cal.set(Calendar.MINUTE, getMinute());
-    cal.set(Calendar.SECOND, 0);
-    cal.set(Calendar.MILLISECOND, 0);
-
-    return cal.getTime();
+  public LocalTime getTime() {
+    return time;
   }
 
   private final int teamNumber;

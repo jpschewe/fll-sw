@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.HashMap;
@@ -209,6 +210,11 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
     return document;
   }
 
+  /**
+   * Simple hour and minute time format.
+   */
+  public static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("hh:mm");
+
   private Element createMainTable(final Connection connection,
                                   final Document document,
                                   final FinalistSchedule schedule) {
@@ -265,13 +271,14 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
     mainTableBody.setAttribute("font-family", SCHEDULE_FONT_FAMILY);
     mainTableBody.setAttribute("font-size", SCHEDULE_FONT_SIZE);
 
-    final SortedMap<TimeSlot, Map<String, FinalistDBRow>> organized = organizeSchedule(schedule);
+    final SortedMap<LocalTime, Map<String, FinalistDBRow>> organized = organizeSchedule(schedule);
     organized.forEach((timeSlot,
                        timeData) -> {
       final Element tableRow = FOPUtils.createTableRow(document);
       mainTableBody.appendChild(tableRow);
 
-      final Element tCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, timeSlot.formattedString());
+      final Element tCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                     TIME_FORMAT.format(timeSlot));
       tableRow.appendChild(tCell);
       FOPUtils.addBorders(tCell, ScheduleWriter.STANDARD_BORDER_WIDTH);
       FOPUtils.addPadding(tCell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
@@ -332,11 +339,11 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
    * Organize the data so that all time slots are together with a map of
    * categories to data for the category at the time. The map is sorted by time.
    */
-  private SortedMap<TimeSlot, Map<String, FinalistDBRow>> organizeSchedule(final FinalistSchedule schedule) {
-    final SortedMap<TimeSlot, Map<String, FinalistDBRow>> organized = new TreeMap<>();
+  private SortedMap<LocalTime, Map<String, FinalistDBRow>> organizeSchedule(final FinalistSchedule schedule) {
+    final SortedMap<LocalTime, Map<String, FinalistDBRow>> organized = new TreeMap<>();
 
     schedule.getSchedule().forEach(row -> {
-      final TimeSlot rowTimeSlow = new TimeSlot(row.getHour(), row.getMinute());
+      final LocalTime rowTimeSlow = row.getTime();
       final Map<String, FinalistDBRow> timeData = organized.computeIfAbsent(rowTimeSlow, k -> new HashMap<>());
       timeData.put(row.getCategoryName(), row);
     });
@@ -344,53 +351,4 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
     return organized;
   }
 
-  private static final class TimeSlot implements Comparable<TimeSlot> {
-    TimeSlot(final int hour,
-             final int minute) {
-      this.hour = hour;
-      this.minute = minute;
-    }
-
-    private final int hour;
-
-    private final int minute;
-
-    @Override
-    public int hashCode() {
-      return hour
-          ^ minute;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-      if (null == o) {
-        return false;
-      } else if (this == o) {
-        return true;
-      } else if (this.getClass().equals(o.getClass())) {
-        final TimeSlot other = (TimeSlot) o;
-        return this.hour == other.hour
-            && this.minute == other.minute;
-      } else {
-        return false;
-      }
-    }
-
-    /**
-     * @return hour and minute formatted for printing
-     */
-    public String formattedString() {
-      return String.format("%02d:%02d", this.hour, this.minute);
-    }
-
-    @Override
-    public int compareTo(final TimeSlot o) {
-      final int hourComparison = Integer.compare(this.hour, o.hour);
-      if (0 == hourComparison) {
-        return Integer.compare(this.minute, o.minute);
-      } else {
-        return hourComparison;
-      }
-    }
-  }
 }

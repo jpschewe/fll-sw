@@ -12,10 +12,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
-import java.util.Calendar;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import fll.db.Queries;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -92,16 +90,10 @@ public class FinalistSchedule implements Serializable {
       schedule = getSchedule.executeQuery();
       while (schedule.next()) {
         final String name = schedule.getString(1);
-        final Time judgeTime = schedule.getTime(2);
+        final LocalTime judgeTime = schedule.getTime(2).toLocalTime();
         final int teamNumber = schedule.getInt(3);
 
-        final Date judgeDate = Queries.timeToDate(judgeTime);
-        final Calendar cal = Calendar.getInstance();
-        cal.setTime(judgeDate);
-        final int hour = cal.get(Calendar.HOUR);
-        final int minute = cal.get(Calendar.MINUTE);
-
-        final FinalistDBRow row = new FinalistDBRow(name, hour, minute, teamNumber);
+        final FinalistDBRow row = new FinalistDBRow(name, judgeTime, teamNumber);
         newSchedule.add(row);
       }
 
@@ -242,7 +234,7 @@ public class FinalistSchedule implements Serializable {
       insertSchedPrep.setString(2, getDivision());
       for (final FinalistDBRow row : mSchedule) {
         insertSchedPrep.setString(3, row.getCategoryName());
-        insertSchedPrep.setTime(4, Queries.dateToTime(row.getTime()));
+        insertSchedPrep.setTime(4, Time.valueOf(row.getTime()));
         insertSchedPrep.setInt(5, row.getTeamNumber());
         insertSchedPrep.executeUpdate();
       }

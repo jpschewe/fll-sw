@@ -201,13 +201,12 @@ function createTimeslotCell(slot, category) {
  */
 function updateScheduleToSend() {
 
-    var schedRows = [];
-    $.each(schedule, function(i, slot) {
-        $.each($.finalist.getAllScheduledCategories(), function(i, category) {
+    const schedRows = [];
+    $.each(schedule, function(_, slot) {
+        $.each($.finalist.getAllScheduledCategories(), function(_, category) {
             var teamNum = slot.categories[category.catId];
             if (teamNum != null) {
-                var dbrow = new FinalistDBRow(category.name, slot.time.hour,
-                    slot.time.minute, teamNum);
+                var dbrow = new FinalistDBRow(category.name, slot.time, teamNum);
                 schedRows.push(dbrow);
             }
         }); // foreach category

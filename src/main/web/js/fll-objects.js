@@ -9,11 +9,14 @@
 /**
  * Used for packaging up and sending to the server to put in the database. Needs
  * to match fll.web.report.finalist.FinalistDBRow.
+ 
+ * @param time JSJoda.LocalTime, time of the row
+ * @param categoryName the category of the row
+ * @param teamNumber the team in the row
  */
-function FinalistDBRow(categoryName, hour, minute, teamNumber) {
+function FinalistDBRow(categoryName, time, teamNumber) {
     this.categoryName = categoryName;
-    this.hour = hour;
-    this.minute = minute;
+    this.time = time;
     this.teamNumber = teamNumber;
 }
 

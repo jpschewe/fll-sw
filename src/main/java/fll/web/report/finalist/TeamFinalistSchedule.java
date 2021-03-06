@@ -290,7 +290,7 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
               room = "";
             }
 
-            cell = FOPUtils.createTableCell(document, null, String.format("%d:%02d", row.getHour(), row.getMinute()));
+            cell = FOPUtils.createTableCell(document, null, PdfFinalistSchedule.TIME_FORMAT.format(row.getTime()));
             tableRow.appendChild(cell);
             FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
                                 ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
