@@ -94,7 +94,7 @@ public class PromptSummarizeScores extends BaseFLLServlet {
           return false;
         } else {
           session.setAttribute(SUMMARY_REDIRECT_KEY, redirect);
-          WebUtils.sendRedirect(application, response, "promptSummarizeScores.jsp");
+          WebUtils.sendRedirect(application, response, "/report/promptSummarizeScores.jsp");
           return true;
         }
       } else {

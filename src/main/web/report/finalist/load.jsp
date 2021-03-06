@@ -2,6 +2,11 @@
 
 <%@ page import="fll.web.report.finalist.FinalistLoad"%>
 
+<%
+if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/finalist/load.jsp")) {
+    return;
+  }
+%>
 <!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
 <html>
 <head>
