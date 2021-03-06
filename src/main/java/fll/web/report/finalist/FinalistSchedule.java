@@ -58,7 +58,7 @@ public class FinalistSchedule implements Serializable {
    * Load a schedule from the database.
    *
    * @throws SQLException on a database error
-   * @param division the group that the schedule is for
+   * @param division the award group that the schedule is for
    * @param connection where to load from
    * @param tournament the tournament to load a schedule for
    */
