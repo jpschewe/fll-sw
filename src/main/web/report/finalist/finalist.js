@@ -7,33 +7,30 @@
 "use-strict";
 
 (function($) {
-    if (!$) {
+    if (typeof $ != 'function') {
         throw new Error("jQuery needs to be loaded!");
     }
-    if (!$.jStorage) {
-        throw new Error("jStorage needs to be loaded!");
+    if (typeof fllStorage != 'object') {
+        throw new Error("fllStorage needs to be loaded");
     }
 
-    var STORAGE_PREFIX = "fll.finalists";
+    const STORAGE_PREFIX = "fll.finalists";
 
     // //////////////////////// PRIVATE METHODS ////////////////////////
-    var _teams;
-    var _categories;
-    var _tournament;
-    var _divisions;
-    var _currentDivision;
-    var _numTeamsAutoSelected;
-    var _startHour;
-    var _startMinute;
-    var _duration; // minutes
-    var _categoriesVisited;
-    var _currentCategoryId; // category to display with numeric.html
-    var _playoffDivisions;
-    var _playoffStartHour;
-    var _playoffStartMinute;
-    var _playoffEndHour;
-    var _playoffEndMinute;
-    var _schedules;
+    let _teams;
+    let _categories;
+    let _tournament;
+    let _divisions;
+    let _currentDivision;
+    let _numTeamsAutoSelected;
+    let _startTimes;
+    let _duration; // minutes
+    let _categoriesVisited;
+    let _currentCategoryId; // category to display with numeric.html
+    let _playoffDivisions;
+    let _playoffStartTimes;
+    let _playoffEndTimes;
+    let _schedules;
 
     function _init_variables() {
         _teams = {};
@@ -42,16 +39,13 @@
         _divisions = [];
         _currentDivision = null;
         _numTeamsAutoSelected = 1;
-        _startHour = {};
-        _startMinute = {};
+        _startTimes = {};
         _duration = {};
         _categoriesVisited = {};
         _currentCategory = null;
         _playoffDivisions = [];
-        _playoffStartHour = {};
-        _playoffStartMinute = {};
-        _playoffEndHour = {};
-        _playoffEndMinute = {};
+        _playoffStartTimes = {};
+        _playoffEndTimes = {};
         _schedules = {};
     }
 
@@ -59,26 +53,22 @@
      * Save the current state to local storage.
      */
     function _save() {
-        $.jStorage.set(STORAGE_PREFIX + "_teams", _teams);
-        $.jStorage.set(STORAGE_PREFIX + "_categories", _categories);
-        $.jStorage.set(STORAGE_PREFIX + "_tournament", _tournament);
-        $.jStorage.set(STORAGE_PREFIX + "_divisions", _divisions);
-        $.jStorage.set(STORAGE_PREFIX + "_currentDivision", _currentDivision);
-        $.jStorage.set(STORAGE_PREFIX + "_numTeamsAutoSelected",
+        fllStorage.set(STORAGE_PREFIX, "_teams", _teams);
+        fllStorage.set(STORAGE_PREFIX, "_categories", _categories);
+        fllStorage.set(STORAGE_PREFIX, "_tournament", _tournament);
+        fllStorage.set(STORAGE_PREFIX, "_divisions", _divisions);
+        fllStorage.set(STORAGE_PREFIX, "_currentDivision", _currentDivision);
+        fllStorage.set(STORAGE_PREFIX, "_numTeamsAutoSelected",
             _numTeamsAutoSelected);
-        $.jStorage.set(STORAGE_PREFIX + "_startHour", _startHour);
-        $.jStorage.set(STORAGE_PREFIX + "_startMinute", _startMinute);
-        $.jStorage.set(STORAGE_PREFIX + "_duration", _duration);
-        $.jStorage.set(STORAGE_PREFIX + "_categoriesVisited", _categoriesVisited);
-        $.jStorage.set(STORAGE_PREFIX + "_currentCategoryId", _currentCategoryId);
-        $.jStorage.set(STORAGE_PREFIX + "_playoffDivisions", _playoffDivisions);
-        $.jStorage.set(STORAGE_PREFIX + "_playoffStartHour", _playoffStartHour);
-        $.jStorage.set(STORAGE_PREFIX + "_playoffStartMinute", _playoffStartMinute);
-        $.jStorage.set(STORAGE_PREFIX + "_playoffEndHour", _playoffEndHour);
-        $.jStorage.set(STORAGE_PREFIX + "_playoffEndMinute", _playoffEndMinute);
+        fllStorage.set(STORAGE_PREFIX, "_startTimes", _startTimes);
+        fllStorage.set(STORAGE_PREFIX, "_duration", _duration);
+        fllStorage.set(STORAGE_PREFIX, "_categoriesVisited", _categoriesVisited);
+        fllStorage.set(STORAGE_PREFIX, "_currentCategoryId", _currentCategoryId);
+        fllStorage.set(STORAGE_PREFIX, "_playoffDivisions", _playoffDivisions);
+        fllStorage.set(STORAGE_PREFIX, "_playoffStartTimes", _playoffStartTimes);
+        fllStorage.set(STORAGE_PREFIX, "_playoffEndTimes", _playoffEndTimes);
 
-        $.jStorage.set(STORAGE_PREFIX + "_schedules", _schedules);
-
+        fllStorage.set(STORAGE_PREFIX, "_schedules", _schedules);
     }
 
     /**
@@ -87,73 +77,61 @@
     function _load() {
         _init_variables();
 
-        var value = $.jStorage.get(STORAGE_PREFIX + "_teams");
+        let value = fllStorage.get(STORAGE_PREFIX, "_teams");
         if (null != value) {
             _teams = value;
         }
-        value = $.jStorage.get(STORAGE_PREFIX + "_categories");
+        value = fllStorage.get(STORAGE_PREFIX, "_categories");
         if (null != value) {
             _categories = value;
         }
-        value = $.jStorage.get(STORAGE_PREFIX + "_tournament");
+        value = fllStorage.get(STORAGE_PREFIX, "_tournament");
         if (null != value) {
             _tournament = value;
         }
-        value = $.jStorage.get(STORAGE_PREFIX + "_divisions");
+        value = fllStorage.get(STORAGE_PREFIX, "_divisions");
         if (null != value) {
             _divisions = value;
         }
-        value = $.jStorage.get(STORAGE_PREFIX + "_currentDivision");
+        value = fllStorage.get(STORAGE_PREFIX, "_currentDivision");
         if (null != value) {
             _currentDivision = value;
         }
-        value = $.jStorage.get(STORAGE_PREFIX + "_numTeamsAutoSelected");
+        value = fllStorage.get(STORAGE_PREFIX, "_numTeamsAutoSelected");
         if (null != value) {
             _numTeamsAutoSelected = value;
         }
-        value = $.jStorage.get(STORAGE_PREFIX + "_startHour");
+        value = fllStorage.get(STORAGE_PREFIX, "_startTimes");
         if (null != value) {
-            _startHour = value;
+            _startTimes = value;
         }
-        value = $.jStorage.get(STORAGE_PREFIX + "_startMinute");
-        if (null != value) {
-            _startMinute = value;
-        }
-        value = $.jStorage.get(STORAGE_PREFIX + "_duration");
+        value = fllStorage.get(STORAGE_PREFIX, "_duration");
         if (null != value) {
             _duration = value;
         }
-        value = $.jStorage.get(STORAGE_PREFIX + "_categoriesVisited");
+        value = fllStorage.get(STORAGE_PREFIX, "_categoriesVisited");
         if (null != value) {
             _categoriesVisited = value;
         }
-        value = $.jStorage.get(STORAGE_PREFIX + "_currentCategoryId");
+        value = fllStorage.get(STORAGE_PREFIX, "_currentCategoryId");
         if (null != value) {
             _currentCategoryId = value;
         }
-        value = $.jStorage.get(STORAGE_PREFIX + "_playoffDivisions");
+        value = fllStorage.get(STORAGE_PREFIX, "_playoffDivisions");
         if (null != value) {
             _playoffDivisions = value;
         }
 
-        value = $.jStorage.get(STORAGE_PREFIX + "_playoffStartHour");
+        value = fllStorage.get(STORAGE_PREFIX, "_playoffStartTimes");
         if (null != value) {
-            _playoffStartHour = value;
+            _playoffStartTimes = value;
         }
-        value = $.jStorage.get(STORAGE_PREFIX + "_playoffStartMinute");
+        value = fllStorage.get(STORAGE_PREFIX, "_playoffEndTimes");
         if (null != value) {
-            _playoffStartMinute = value;
-        }
-        value = $.jStorage.get(STORAGE_PREFIX + "_playoffEndHour");
-        if (null != value) {
-            _playoffEndHour = value;
-        }
-        value = $.jStorage.get(STORAGE_PREFIX + "_playoffEndMinute");
-        if (null != value) {
-            _playoffEndMinute = value;
+            _playoffEndTimes = value;
         }
 
-        value = $.jStorage.get(STORAGE_PREFIX + "_schedules");
+        value = fllStorage.get(STORAGE_PREFIX, "_schedules");
         if (null != value) {
             _schedules = value;
         }
@@ -164,11 +142,7 @@
      * Clear anything from local storage with a prefix of STORAGE_PREFIX.
      */
     function _clear_local_storage() {
-        $.each($.jStorage.index(), function(index, value) {
-            if (value.substring(0, STORAGE_PREFIX.length) == STORAGE_PREFIX) {
-                $.jStorage.deleteKey(value);
-            }
-        });
+        fllStorage.clearNamespace(STORAGE_PREFIX);
     }
 
     /**
@@ -176,7 +150,7 @@
      */
     function _check_duplicate_category(name) {
         var duplicate = false;
-        $.each(_categories, function(i, val) {
+        $.each(_categories, function(_, val) {
             if (val.name == name) {
                 duplicate = true;
             }
@@ -240,81 +214,56 @@
     }
 
     /**
-     * A time object.
-     */
-    function Time(hour, minute) {
-        this.hour = hour;
-        this.minute = minute;
-    }
-
-    /**
-     * Convert a time to a Date object
-     */
-    function timeToDate(time) {
-        var d = new Date();
-        d.setHours(time.hour);
-        d.setMinutes(time.minute);
-        return d;
-    }
-
-    /**
      * Schedule timeslot.
      * 
      * @param time
-     *          Time object for start of slot
+     *          JSJoda.LocalTime object for start of slot
      * @param duration
-     *          integer number of minutes for time slot
+     *          JSJoda.Duration object for time slot duration
      */
     function Timeslot(time, duration) {
         this.categories = {}; // categoryId -> teamNumber
         this.time = time;
-        this.endTime = $.finalist.addMinutesToTime(this.time, duration);
-    }
-
-    function _addMinutesToTime(time, minutes) {
-        var d = timeToDate(time);
-        d.setTime(d.getTime() + (minutes * 60 * 1000));
-        var t = new Time(d.getHours(), d.getMinutes());
-        return t;
+        this.endTime = time.plus(duration);
     }
 
     /**
-     * Add the specified number of minutes to all timeslots in existing schedules.
+     * Add the specified offset to all timeslots in the specified schedule.
      * 
      * Does NOT save.
+     *
+     * @param currentDivision the schedule to change (if it exists)
+     * @param offset the temporal offset to add to the schedule
      */
-    function _addMinutesToSchedules(currentDivision, minutes) {
+    function _addTimeToSchedule(currentDivision, offset) {
         const currentSchedule = _schedules[currentDivision];
         if (null != currentSchedule) {
             $.each(currentSchedule, function(k, slot) {
-
-                slot.time = $.finalist.addMinutesToTime(slot.time, minutes);
-                slot.endTime = $.finalist.addMinutesToTime(slot.endTime, minutes);
-
+                slot.time = slot.time.plus(offset);
+                slot.endTime = slot.endTime.plus(offset);
             }); // foreach timeslot
         }
     }
 
     /**
-     * Add the specified number of minutes to the duration of all timeslots in
+     * Add the specified offset to the duration of all timeslots in
      * existing schedules. This slides everything forward to prevent
      * 
      * Does NOT save.
      */
-    function _addMinutesToDurationOfSchedules(minutes) {
+    function _addToScheduleSlotDurations(offset) {
 
         $.each(_schedules, function(i, schedule) {
             if (null != schedule) {
-                var addToStart = 0;
-                var addToEnd = minutes;
+                var addToStart = JSJoda.Duration.ofMinutues(0);
+                var addToEnd = offset;
 
                 $.each(schedule, function(k, slot) {
-
-                    slot.time = $.finalist.addMinutesToTime(slot.time, addToStart);
-                    slot.endTime = $.finalist.addMinutesToTime(slot.endTime, addToEnd);
+                    slot.time = slot.time.plus(addToStart);
+                    slot.endTime = slot.endTime.plus(addToEnd);
 
                     addToStart = addToEnd;
-                    addToEnd = addToEnd + minutes;
+                    addToEnd = addToEnd.plus(offset);
                 }); // foreach timeslot
             }
         }); // foreach schedule
@@ -331,46 +280,11 @@
         },
 
         /**
-         * Compare 2 times.
-         * 
-         * @return -1 if a is less than b, 0 if they are equal, 1 if a is greater
-         *         than b
-         */
-        compareTimes: function(a, b) {
-            if (a.hour == b.hour) {
-                if (a.minute == b.minute) {
-                    return 0;
-                } else if (a.minute < b.minute) {
-                    return -1;
-                } else {
-                    return 1;
-                }
-            } else if (a.hour < b.hour) {
-                return -1
-            } else {
-                return 1;
-            }
-        },
-
-        /**
-         * Add a number of minutes to a time.
-         * 
-         * @param time
-         *          Time object
-         * @param minutes
-         *          integer minutes
-         * @return a new Time object
-         */
-        addMinutesToTime: function(time, minutes) {
-            return _addMinutesToTime(time, minutes);
-        },
-
-        /**
-         * Convert a time object to a string to be displayed.
+         * Convert a JSJoda.LocalTime object to a string to be displayed.
          */
         timeToDisplayString: function(time) {
-            return time.hour.toString().padL(2, "0") + ":"
-                + time.minute.toString().padL(2, "0");
+            const timeFormatter = JSJoda.DateTimeFormatter.ofPattern("HH:mm");
+            return time.format(timeFormatter);
         },
 
         /**
@@ -453,12 +367,10 @@
             if (-1 == $.inArray(division, _playoffDivisions)) {
                 _playoffDivisions.push(division);
 
-                $.finalist.setPlayoffStartHour(division, -1);
-                $.finalist.setPlayoffStartMinute(division, -1);
-                $.finalist.setPlayoffEndHour(division, -1);
-                $.finalist.setPlayoffEndMinute(division, -1);
+                $.finalist.setPlayoffStartTime(division, null);
+                $.finalist.setPlayoffEndTime(division, null);
+                _save();
             }
-            _save();
         },
 
         getPlayoffDivisions: function() {
@@ -471,80 +383,34 @@
 
         /**
          * @param division the playoff bracket name
-         * @return Integer or undefined or -1 (unset).
-         */
-        getPlayoffStartHour: function(division) {
-            return _playoffStartHour[division];
-        },
-        setPlayoffStartHour: function(division, hour) {
-            _playoffStartHour[division] = hour;
-            _save();
-        },
-
-        /**
-         * @param division the playoff bracket name
-         * @return Integer or undefined or -1 (unset).
-         */
-        getPlayoffStartMinute: function(division) {
-            return _playoffStartMinute[division];
-        },
-        setPlayoffStartMinute: function(division, minute) {
-            _playoffStartMinute[division] = minute;
-            _save();
-        },
-
-        /**
-         * @return Time or undefined.
-         * @param division the playoff bracket name
+         * @return JSJoda.LocalTime or null.
          */
         getPlayoffStartTime: function(division) {
-            var hour = $.finalist.getPlayoffStartHour(division);
-            var minute = $.finalist.getPlayoffStartMinute(division);
-            if (hour != undefined && hour >= 0 && minute != undefined && minute >= 0) {
-                var time = new Time(hour, minute);
-                return time;
-            } else {
-                return undefined;
-            }
+            return _playoffStartTimes[division];
         },
-
         /**
-         * @return Integer or undefined or -1 (unset).
-         * @param division the playoff bracket name
+         * @param division playoff bracket name
+         * @Param time JSJoda.LocalTime
          */
-        getPlayoffEndHour: function(division) {
-            return _playoffEndHour[division];
-        },
-        setPlayoffEndHour: function(division, hour) {
-            _playoffEndHour[division] = hour;
+        setPlayoffStartTime: function(division, time) {
+            _playoffStartTimes[division] = time;
             _save();
         },
 
         /**
+         * @return JSJoda.LocalTime or null
          * @param division the playoff bracket name
-         * @return Integer or undefined or -1 (unset).
-         */
-        getPlayoffEndMinute: function(division) {
-            return _playoffEndMinute[division];
-        },
-        setPlayoffEndMinute: function(division, minute) {
-            _playoffEndMinute[division] = minute;
-            _save();
-        },
-
-        /**
-         * @param division the playoff bracket name
-         * @return Time or undefined.
          */
         getPlayoffEndTime: function(division) {
-            var hour = $.finalist.getPlayoffEndHour(division);
-            var minute = $.finalist.getPlayoffEndMinute(division);
-            if (hour != undefined && hour >= 0 && minute != undefined && minute >= 0) {
-                var time = new Time(hour, minute);
-                return time;
-            } else {
-                return undefined;
-            }
+            return _playoffEndTimes[division];
+        },
+        /**
+         * @param division playoff bracket name
+         * @Param time JSJoda.LocalTime
+         */
+        setPlayoffEndTime: function(division, time) {
+            _playoffEndTimes[division] = time;
+            _save();
         },
 
         /**
@@ -1087,8 +953,7 @@
             var schedule = [];
             var nextTime = $.finalist.getStartTime(currentDivision);
             var slotDuration = $.finalist.getDuration(currentDivision);
-            $.finalist.log("Next timeslot starts at " + nextTime.hour + ":"
-                + nextTime.minute + " duration is " + slotDuration);
+            $.finalist.log("Next timeslot starts at " + nextTime + " duration is " + slotDuration);
             $.each(sortedTeams, function(i, teamNum) {
                 var team = $.finalist.lookupTeam(teamNum);
                 var teamCategories = finalistsCount[teamNum];
@@ -1111,7 +976,7 @@
                             var newSlot = new Timeslot(nextTime, slotDuration);
                             schedule.push(newSlot);
 
-                            nextTime = $.finalist.addMinutesToTime(nextTime, slotDuration);
+                            nextTime = nextTime.plus(slotDuration);
 
                             if (!$.finalist.hasPlayoffConflict(team, newSlot)) {
                                 scheduled = true;
@@ -1133,7 +998,7 @@
          */
         sortSchedule: function(schedule) {
             schedule.sort(function(slotA, slotB) {
-                return $.finalist.compareTimes(slotA.time, slotB.time);
+                return slotA.compareTo(slotB);
             });
         },
 
@@ -1165,8 +1030,6 @@
         hasPlayoffConflict: function(team, slot) {
             var conflict = false;
             $.each(team.playoffDivisions, function(i, playoffDivision) {
-                var start = $.finalist.getPlayoffStartTime(playoffDivision);
-                var end = $.finalist.getPlayoffEndTime(playoffDivision);
                 if ($.finalist.slotHasPlayoffConflict(playoffDivision, slot)) {
                     conflict = true;
                 }
@@ -1185,78 +1048,70 @@
          * @returns true or false
          */
         slotHasPlayoffConflict: function(playoffDivision, slot) {
-            var start = $.finalist.getPlayoffStartTime(playoffDivision);
-            var end = $.finalist.getPlayoffEndTime(playoffDivision);
+            const start = $.finalist.getPlayoffStartTime(playoffDivision);
+            const end = $.finalist.getPlayoffEndTime(playoffDivision);
             if (start != undefined && end != undefined) {
-                if ($.finalist.compareTimes(start, slot.endTime) < 0
-                    && $.finalist.compareTimes(slot.time, end) < 0) {
+                if (start.isBefore(slot.endTime)
+                    && slot.time.isBefore(end)) {
                     return true;
                 }
             }
             return false;
         },
 
-        setStartHour: function(currentDivision, hour) {
-            var diffHours = hour - $.finalist.getStartHour(currentDivision);
-            var diffMinutes = diffHours * 60;
-            _addMinutesToSchedules(currentDivision, diffMinutes);
-
-            _startHour[currentDivision] = hour;
-            _save();
-        },
-
         /**
-         * @return the value or 2 if not yet set
+         * The start time for the schedule.
+         *
+         * @param currentDivision the award group to get the schedule start time for
          */
-        getStartHour: function(currentDivision) {
-            const prevValue = _startHour[currentDivision];
-            if (undefined == prevValue) {
-                return 2;
-            } else {
-                return prevValue;
-            }
-        },
-
-        setStartMinute: function(currentDivision, minute) {
-            var diffMinutes = minute - $.finalist.getStartMinute(currentDivision);
-            _addMinutesToSchedules(diffMinutes);
-
-            _startMinute[currentDivision] = minute;
-            _save();
-        },
-
-        /**
-         * @return the value or 0 if not yet set
-         */
-        getStartMinute: function(currentDivision) {
-            const prevValue = _startMinute[currentDivision];
-            if (undefined == prevValue) {
-                return 0;
-            } else {
-                return prevValue;
-            }
-        },
-
         getStartTime: function(currentDivision) {
-            var time = new Time($.finalist.getStartHour(currentDivision), $.finalist.getStartMinute(currentDivision));
-            return time;
+            const prevValue = _startTimes[currentDivision];
+            if (undefined == prevValue) {
+                return JSJoda.LocalTime.of(14, 0);
+            } else {
+                return prevValue;
+            }
         },
 
+        /**
+         * Set a new start time for the schedule. This adjusts the schedule by the difference between the old and new times.
+         *
+         * @param currentDivision the award group to set the schedule start time for
+         * @param newStartTime the new start time for the schedule
+         */
+        setStartTime: function(currentDivision, newStartTime) {
+            const prevValue = $.finalist.getStartTime(currentDivision);
+            const diff = prevValue.until(newStartTime, JSJoda.ChronoUnit.MINUTES);
+            const durationDiff = JSJoda.Duration.ofMinutes(diff);
+            _addTimeToSchedule(currentDivision, durationDiff);
+
+            _startTimes[currentDivision] = newStartTime;
+            _save();
+        },
+
+
+        /**
+         * Set a slot duration for the schedule. This adjusts the schedule by the difference between the old and new slot durations.
+         *
+         * @param currentDivision the award group to set the schedule slot duration for
+         * @param v the new slot duration for the schedule
+         */
         setDuration: function(currentDivision, v) {
-            var diffMinutes = v - $.finalist.getDuration(currentDivision);
-            _addMinutesToDurationOfSchedules(diffMinutes);
+            const prevValue = $.finalist.getDuration(currentDivision);
+            const diff = v.minus(prevValue);
+            _addToScheduleSlotDurations(diff);
 
             _duration[currentDivision] = v;
             _save();
         },
 
         /**
-         * @return the value or 20 if not yet set
+         * @return the value or 20 minutes if not yet set
          */
         getDuration: function(currentDivision) {
             const prevValue = _duration[currentDivision];
             if (undefined == prevValue) {
-                return 20;
+                return JSJoda.Duration.ofMinutes(20);
             } else {
                 return prevValue;
             }

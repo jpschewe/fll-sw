@@ -1,3 +1,4 @@
+* #909 - Use time picker widget when choosing start and end times in the finalist scheduling workflow
 * #914 - Fix parsing of LocalTime in javascript by using the JSJoda time package
 * #905 - Make tab to skip over read-only cells on non-numeric categories page
 * #904 - Add FLL-SW version information to bug reports

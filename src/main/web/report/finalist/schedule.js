@@ -242,7 +242,7 @@ function moveTeam(team, category, newSlot) {
       }
     }); // foreach category
 
-    if ($.finalist.compareTimes(slot.time, newSlot.time) == 0) {
+    if (slot.time.equals(newSlot.time)) {
       destSlot = slot;
     }
 
@@ -256,7 +256,7 @@ function moveTeam(team, category, newSlot) {
     return;
   }
 
-  if ($.finalist.compareTimes(srcSlot.time, destSlot.time) == 0) {
+  if (srcSlot.time.equals(destSlot.time)) {
     // dropping on the same slot where the team already was
     return;
   }

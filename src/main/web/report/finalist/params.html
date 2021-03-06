@@ -6,16 +6,30 @@
 <script type='text/javascript' src='../../extlib/jquery-1.11.1.min.js'></script>
 <script type='text/javascript'
     src='../../extlib/jquery-json/dist/jquery.json.min.js'></script>
-<script type='text/javascript' src='../../extlib/jStorage/jstorage.min.js'></script>
+
+<script type='text/javascript'
+    src='../../extlib/timepicker/jquery.timepicker.js'></script>
+<link rel="stylesheet"
+    href='../../extlib/timepicker/jquery.timepicker.css' />
+
+<script type='text/javascript'
+    src='../../extlib/js-joda/packages/core/dist/js-joda.min.js'></script>
+
+<script type='text/javascript' src='../../js/fll-storage.js'></script>
+
 <script type='text/javascript' src='finalist.js'></script>
 <script type='text/javascript' src='params.js'></script>
+
 </head>
 
 <body>
     <div id='navbar'></div>
     <hr />
 
-    <h1>Finalist Schedule Parameters <button id="next">Next</button></h1>
+    <h1>
+        Finalist Schedule Parameters
+        <button id="next">Next</button>
+    </h1>
 
     <div id='cache-ready'>All data for finalist scheduling is now
         cached. You may now disconnect from the network and continue
@@ -27,15 +41,19 @@
     </p>
 
     <p>
+        <b>Tip:</b>
+        When selecting a time you can type the hour and you will jump to
+        that place in the drop down.
+    </p>
+
+    <p>
         Choose the start time for the finalist scheduling and the
         duration in minutes. Changing the start time or duration will
         modify any existing schedules. The duration must be at least 5
         minutes.
         <br />
-        Start time (hour and minute):
-        <input type="text" id="hour" size="2" maxlength="2" />
-        :
-        <input type="text" id="minute" size="2" maxlength="2" />
+        Start time:
+        <input type="text" id="startTime" size="8" />
         <br />
         Interval (minutes):
         <input type="text" id="duration" size="4" />
