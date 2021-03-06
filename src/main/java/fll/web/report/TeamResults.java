@@ -53,7 +53,6 @@ import fll.xml.SubjectiveScoreCategory;
  */
 @WebServlet("/report/TeamResults")
 public class TeamResults extends BaseFLLServlet {
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Override
   protected void processRequest(final HttpServletRequest request,
