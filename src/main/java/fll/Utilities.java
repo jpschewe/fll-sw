@@ -49,6 +49,7 @@ import org.hsqldb.jdbc.JDBCDataSource;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.opencsv.CSVReader;
@@ -818,7 +819,11 @@ public final class Utilities {
    * @return a new instance
    */
   public static ObjectMapper createJsonMapper() {
-    return new ObjectMapper().registerModule(new Jdk8Module()).registerModule(new JavaTimeModule());
+    return new ObjectMapper() //
+        .registerModule(new Jdk8Module()) //
+        .registerModule(new JavaTimeModule()) //
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) //
+        ;
   }
 
   /**

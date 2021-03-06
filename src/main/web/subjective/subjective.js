@@ -244,12 +244,13 @@
         });
     }
 
+    /**
+     * @param javaTime java time string from Jackson converting LocalTime to string without writing as timestamps
+     * @return javascript Date object
+     */
     function _javaLocalTimeToJsDate(javaTime) {
-        var jsDate = new Date(0);
-        jsDate.setHours(Number(javaTime.hour));
-        jsDate.setMinutes(Number(javaTime.minute));
-        jsDate.setSeconds(Number(javaTime.second));
-        return jsDate;
+        const jsLocalTime = JSJoda.LocalTime.parse(javaTime);
+        return jsLocalTime;
     }
 
     // //////////////////////// PUBLIC INTERFACE /////////////////////////
@@ -567,7 +568,7 @@
                     } else if (null == timeB) {
                         return 1;
                     } else {
-                        return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
+                        return timeA.compareTo(timeB);
                     }
                 }
             });
@@ -685,16 +686,16 @@
 
         /**
          * Get the scheduled time for the specified team for the current category.
-         * If there is no schedule, this returns the Date(0).
+         * If there is no schedule, this returns JSJoda.LocalTime.of().
          * 
          * @param teamNumber
          *          number of the team to find
-         * @return Date or null if there is no schedule information for the team
+         * @return LocalTime or null if there is no schedule information for the team
          */
         getScheduledTime: function(teamNumber) {
-            var cachedDate = _teamTimeCache[teamNumber];
+            const cachedDate = _teamTimeCache[teamNumber];
             if (null != cachedDate) {
-                return new Date(cachedDate);
+                return cachedDate;
             }
 
             var retval;
@@ -713,7 +714,7 @@
                 });
                 if (null == time) {
                     _log("No time found for " + teamNumber);
-                    retval = new Date(0);
+                    retval = JSJoda.LocalTime.of();
                 } else {
                     retval = _javaLocalTimeToJsDate(time);
                     _teamTimeCache[teamNumber] = retval;

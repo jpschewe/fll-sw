@@ -6,6 +6,7 @@
 
 "use-strict";
 
+
 function selectJudgingGroup(group) {
     $.subjective.setCurrentJudgingGroup(group);
     $.mobile.navigate("#choose-category-page");
@@ -352,13 +353,13 @@ function selectTeam(team) {
 
 function populateTeams() {
     $("#teams-list_teams").empty();
-    var teams = $.subjective.getCurrentTeams();
+    const timeFormatter = JSJoda.DateTimeFormatter.ofPattern("HH:mm");
+    const teams = $.subjective.getCurrentTeams();
     $.each(teams, function(i, team) {
         var time = $.subjective.getScheduledTime(team.teamNumber);
         var timeStr = null;
         if (null != time) {
-            timeStr = time.getHours().toString().padL(2, "0") + ":"
-                + time.getMinutes().toString().padL(2, "0");
+            timeStr = time.format(timeFormatter);
         }
 
         var scoreStr;
