@@ -33,7 +33,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 27;
+  public static final int DATABASE_VERSION = 28;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -323,6 +323,8 @@ public final class GenerateDB {
       createAwardGroupOrder(connection, true);
 
       createDelayedPerformanceTable(connection, true);
+
+      createFinalistParameterTables(connection, true);
 
       // --------------- create views ---------------
 
@@ -1091,6 +1093,47 @@ public final class GenerateDB {
       sql.append(")");
 
       stmt.executeUpdate(sql.toString());
+    }
+  }
+
+  /**
+   * Create the tables to store finalist parameter information.
+   *
+   * @param connection
+   */
+  /* package */ static void createFinalistParameterTables(final Connection connection,
+                                                          final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+
+      stmt.executeUpdate("DROP TABLE IF EXISTS playoff_schedules CASCADE");
+
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE playoff_schedules (");
+      sql.append("    tournament_id INTEGER NOT NULL");
+      sql.append("   ,bracket_name LONGVARCHAR NOT NULL");
+      sql.append("   ,start_time TIME NOT NULL");
+      sql.append("   ,end_time TIME NOT NULL");
+      if (createConstraints) {
+        sql.append("   ,CONSTRAINT playoff_schedules_pk PRIMARY KEY(tournament_id, bracket_name)");
+        sql.append("   ,CONSTRAINT playoff_schedules_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+      }
+      sql.append(")");
+      stmt.executeUpdate(sql.toString());
+
+      final StringBuilder sql2 = new StringBuilder();
+      sql2.append("CREATE TABLE finalist_parameters (");
+      sql2.append("    tournament_id INTEGER NOT NULL");
+      sql2.append("   ,award_group LONGVARCHAR NOT NULL");
+      sql2.append("   ,start_time TIME NOT NULL");
+      sql2.append("   ,slot_duration INTEGER NOT NULL");
+      if (createConstraints) {
+        sql2.append("   ,CONSTRAINT finalist_parameters_pk PRIMARY KEY(tournament_id, award_group)");
+        sql2.append("   ,CONSTRAINT finalist_parameters_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+      }
+      sql2.append(")");
+      stmt.executeUpdate(sql2.toString());
+
     }
   }
 

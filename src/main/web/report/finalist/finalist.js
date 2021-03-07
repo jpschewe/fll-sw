@@ -1269,6 +1269,33 @@
             }); // foreach category
 
             return allNonNumericNominees;
+        },
+
+        uploadPlayoffSchedules: function(successCallback, failCallback) {
+            const schedulesToUpload = {};
+            $.each(_playoffSchedules, function(bracketName, schedule) {
+                if (null != schedule.startTime && null != schedule.endTime) {
+                    schedulesToUpload[bracketName] = schedule;
+                }
+            });
+
+            const dataToUpload = JSON.stringify(schedulesToUpload);
+            return $.ajax({
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                url: "../../api/PlayoffSchedules",
+                data: dataToUpload,
+                success: function(result) {
+                    if (result.success) {
+                        successCallback(result);
+                    } else {
+                        failCallback(result);
+                    }
+                }
+            }).fail(function(result) {
+                failCallback(result);
+            });
         }
 
     };

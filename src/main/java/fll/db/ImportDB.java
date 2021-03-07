@@ -579,6 +579,11 @@ public final class ImportDB {
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 28) {
+      upgrade27To28(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
           + dbVersion);
@@ -899,6 +904,14 @@ public final class ImportDB {
     }
 
     setDBVersion(connection, 27);
+  }
+
+  private static void upgrade27To28(final Connection connection) throws SQLException {
+    LOGGER.trace("Upgrading database from 27 to 28");
+
+    GenerateDB.createFinalistParameterTables(connection, false);
+
+    setDBVersion(connection, 28);
   }
 
   /**
@@ -1969,7 +1982,7 @@ public final class ImportDB {
       LOGGER.debug("Importing finalist schedule");
     }
 
-    // do drops first
+    // do deletes first
     try (
         PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
@@ -1978,6 +1991,12 @@ public final class ImportDB {
 
     try (
         PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_categories WHERE tournament = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM playoff_schedules WHERE tournament_id = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
     }
@@ -2017,6 +2036,25 @@ public final class ImportDB {
           destPrep.executeUpdate();
         }
       }
+    }
+
+    // insert playoff schedules
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO playoff_schedules (tournament_id, bracket_name, start_time, end_time) VALUES(?, ?, ?, ?)");
+
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT bracket_name, start_time, end_time FROM playoff_schedules WHERE tournament_id = ?")) {
+
+      destPrep.setInt(1, destTournamentID);
+      sourcePrep.setInt(1, sourceTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString(1));
+          destPrep.setTime(3, sourceRS.getTime(2));
+          destPrep.setTime(4, sourceRS.getTime(3));
+          destPrep.executeUpdate();
+        }
+      }
+
     }
   }
 
