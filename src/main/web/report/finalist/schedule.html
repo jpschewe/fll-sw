@@ -9,6 +9,12 @@
 <script type='text/javascript'
     src='../../extlib/js-joda/packages/core/dist/js-joda.min.js'></script>
 
+<link rel="stylesheet" type="text/css"
+    href='../../extlib/jquery-ui-1.12.1/jquery-ui.min.css' />
+
+<script type="text/javascript"
+    src='../../extlib/jquery-ui-1.12.1/jquery-ui.min.js'></script>
+
 <script type='text/javascript' src='../../js/fll-functions.js'></script>
 <script type='text/javascript' src='../../js/fll-storage.js'></script>
 <script type='text/javascript' src='../../js/fll-objects.js'></script>
@@ -117,7 +123,11 @@ and mark draggable things as movable. */
         once the schedule is finished and you are connected to the
         network.
     </form>
-    <button id='upload''>Test</button>
+    <button id='upload'>Test</button>
+
+    <div id="wait-dialog">
+        <p id='wait-dialog_text'>Uploading data. Please wait...</p>
+    </div>
 
 </body>
 </html>

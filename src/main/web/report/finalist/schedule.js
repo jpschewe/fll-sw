@@ -221,8 +221,9 @@ const finalistScheduleModule = {};
         waitList.push($.finalist.uploadPlayoffSchedules(
             playoffSchedulesSuccess, playoffSchedulesFail));
 
+        $("#wait-dialog").dialog("open");
         $.when.apply($, waitList).done(function() {
-            _log("Upload success");
+            $("#wait-dialog").dialog("close");
         });
     }
 
@@ -509,6 +510,13 @@ const finalistScheduleModule = {};
                 function() {
                     uploadData();
                 });
+
+            $("#wait-dialog").dialog({
+                autoOpen: false,
+                modal: true,
+                dialogClass: "no-close",
+                closeOnEscape: false
+            });
 
             $.finalist.displayNavbar();
         });
