@@ -3,9 +3,10 @@
 <%@ page import="fll.web.report.finalist.FinalistLoad"%>
 
 <%
-if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/finalist/load.jsp")) {
-    return;
-  }
+	if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(response, application, session,
+		"/report/finalist/load.jsp")) {
+	return;
+}
 %>
 <!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
 <html>
@@ -20,6 +21,13 @@ if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(response, applica
 <script type='text/javascript'
     src='../../extlib/js-joda/packages/core/dist/js-joda.min.js'></script>
 
+<link rel="stylesheet" type="text/css"
+    href='../../extlib/jquery-ui-1.12.1/jquery-ui.min.css' />
+
+<script type="text/javascript"
+    src='../../extlib/jquery-ui-1.12.1/jquery-ui.min.js'></script>
+
+<script type='text/javascript' src='../../js/fll-functions.js'></script>
 <script type='text/javascript' src='../../js/fll-objects.js'></script>
 <script type='text/javascript' src='../../js/fll-storage.js'></script>
 
@@ -35,7 +43,9 @@ if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(response, applica
   }
 
   function loadData() {
-    console.log("Loading data");
+    $("#wait-dialog").dialog("open");
+
+    _log("Loading data");
 <%FinalistLoad.outputDivisions(out, application);%>
   
 <%FinalistLoad.outputTeamVariables(out, application);%>
@@ -54,6 +64,8 @@ if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(response, applica
   
 <%FinalistLoad.outputSchedules(out, application);%>
   $.finalist.setTournament(_loadingTournament);
+
+    $("#wait-dialog").dialog("close");
   }
 
   $(document).ready(function() {
@@ -70,12 +82,19 @@ if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(response, applica
       location.href = "params.html";
     });
 
+    $("#wait-dialog").dialog({
+      autoOpen : false,
+      modal : true,
+      dialogClass : "no-close",
+      closeOnEscape : false
+    });
+
     var allTeams = $.finalist.getAllTeams();
     var tournament = $.finalist.getTournament();
 
     if (null != allTeams && allTeams.length > 0) {
       if (tournament != _loadingTournament) {
-        console.log("Clearing data for old tournament: " + tournament);
+        _log("Clearing data for old tournament: " + tournament);
         clearData();
         loadData();
         $("#choose_clear").hide();
@@ -115,6 +134,10 @@ if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(response, applica
             Choose this if you have made changes to finalists and have
             not saved this information to the database.
         </div>
+    </div>
+
+    <div id="wait-dialog">
+        <p id='wait-dialog_text'>Loading data. Please wait...</p>
     </div>
 
 
