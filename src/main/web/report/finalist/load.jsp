@@ -20,6 +20,7 @@ if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(response, applica
 <script type='text/javascript'
     src='../../extlib/js-joda/packages/core/dist/js-joda.min.js'></script>
 
+<script type='text/javascript' src='../../js/fll-objects.js'></script>
 <script type='text/javascript' src='../../js/fll-storage.js'></script>
 
 <script type='text/javascript' src='finalist.js'></script>

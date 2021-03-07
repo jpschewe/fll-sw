@@ -27,44 +27,38 @@ const finalistParamsModule = {
 
     populateHeadToHeadTimes: function() {
         $("#head_head_times").empty();
-        
+
         const defaultTime = new Date();
 
         $
             .each(
-                $.finalist.getPlayoffDivisions(),
-                function(index, division) {
-                    const startTimeElement = $("<input type='text' id='start_time_"
-                        + index + "' size='8'/>");
-
+                $.finalist.getPlayoffSchedules(),
+                function(bracketName, playoffSchedule) {
+                    const startTimeElement = $("<input type='text' size='8'/>");
                     finalistParamsModule.initTimePicker(startTimeElement, defaultTime);
 
                     startTimeElement.on('changeTime', function() {
                         const newDate = startTimeElement.timepicker('getTime');
                         const newLocalTime = JSJoda.LocalTime.of(newDate.getHours(), newDate.getMinutes());
-                        $.finalist.setPlayoffStartTime(division, newLocalTime);
+                        $.finalist.setPlayoffStartTime(bracketName, newLocalTime);
                     });
 
-                    finalistParamsModule.setTimeField(startTimeElement, $.finalist
-                        .getPlayoffStartTime(division));
+                    finalistParamsModule.setTimeField(startTimeElement, playoffSchedule.startTime);
 
 
-                    const endTimeElement = $("<input type='text' id='end_hour_" + index
-                        + "' size='8' />");
-
+                    const endTimeElement = $("<input type='text' size='8' />");
                     finalistParamsModule.initTimePicker(endTimeElement, defaultTime);
 
                     endTimeElement.on('changeTime', function() {
                         const newDate = endTimeElement.timepicker('getTime');
                         const newLocalTime = JSJoda.LocalTime.of(newDate.getHours(), newDate.getMinutes());
-                        $.finalist.setPlayoffEndTime(division, newLocalTime);
+                        $.finalist.setPlayoffEndTime(bracketName, newLocalTime);
                     });
 
-                    finalistParamsModule.setTimeField(endTimeElement, $.finalist
-                        .getPlayoffEndTime(division));
+                    finalistParamsModule.setTimeField(endTimeElement, playoffSchedule.endTime);
 
                     const paragraph = $("<p></p>");
-                    paragraph.append("<b>Head to Head bracket " + division
+                    paragraph.append("<b>Head to Head bracket " + bracketName
                         + " times</b><br/>");
                     paragraph.append("Start: ");
                     paragraph.append(startTimeElement);

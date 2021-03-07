@@ -27,9 +27,7 @@
     let _duration; // minutes
     let _categoriesVisited;
     let _currentCategoryId; // category to display with numeric.html
-    let _playoffDivisions;
-    let _playoffStartTimes;
-    let _playoffEndTimes;
+    let _playoffSchedules;
     let _schedules;
 
     function _init_variables() {
@@ -43,9 +41,7 @@
         _duration = {};
         _categoriesVisited = {};
         _currentCategory = null;
-        _playoffDivisions = [];
-        _playoffStartTimes = {};
-        _playoffEndTimes = {};
+        _playoffSchedules = {};
         _schedules = {};
     }
 
@@ -64,9 +60,7 @@
         fllStorage.set(STORAGE_PREFIX, "_duration", _duration);
         fllStorage.set(STORAGE_PREFIX, "_categoriesVisited", _categoriesVisited);
         fllStorage.set(STORAGE_PREFIX, "_currentCategoryId", _currentCategoryId);
-        fllStorage.set(STORAGE_PREFIX, "_playoffDivisions", _playoffDivisions);
-        fllStorage.set(STORAGE_PREFIX, "_playoffStartTimes", _playoffStartTimes);
-        fllStorage.set(STORAGE_PREFIX, "_playoffEndTimes", _playoffEndTimes);
+        fllStorage.set(STORAGE_PREFIX, "_playoffSchedules", _playoffSchedules);
 
         fllStorage.set(STORAGE_PREFIX, "_schedules", _schedules);
     }
@@ -117,18 +111,9 @@
         if (null != value) {
             _currentCategoryId = value;
         }
-        value = fllStorage.get(STORAGE_PREFIX, "_playoffDivisions");
+        value = fllStorage.get(STORAGE_PREFIX, "_playoffSchedules");
         if (null != value) {
-            _playoffDivisions = value;
-        }
-
-        value = fllStorage.get(STORAGE_PREFIX, "_playoffStartTimes");
-        if (null != value) {
-            _playoffStartTimes = value;
-        }
-        value = fllStorage.get(STORAGE_PREFIX, "_playoffEndTimes");
-        if (null != value) {
-            _playoffEndTimes = value;
+            _playoffSchedules = value;
         }
 
         value = fllStorage.get(STORAGE_PREFIX, "_schedules");
@@ -172,6 +157,7 @@
         this.org = org;
         this.judgingGroup = judgingGroup;
         this.categoryScores = {};
+        // names of playoff brackets this team is competing in
         this.playoffDivisions = [];
         _teams[num] = this;
         _save();
@@ -360,25 +346,27 @@
         },
 
         /**
-         * Add a playoff division to the list of known divisions. If the division
+         * Add a playoff division to the list of known playoff schedules. If the division
          * already exists it is not added.
+         * 
+         * @param division the name of the playoff bracket
          */
         addPlayoffDivision: function(division) {
-            if (-1 == $.inArray(division, _playoffDivisions)) {
-                _playoffDivisions.push(division);
-
-                $.finalist.setPlayoffStartTime(division, null);
-                $.finalist.setPlayoffEndTime(division, null);
+            const existing = _playoffSchedules[division];
+            if (null == existing) {
+                const playoffSchedule = new PlayoffSchedule();
+                _playoffSchedules[division] = playoffSchedule;
                 _save();
             }
         },
 
-        getPlayoffDivisions: function() {
-            return _playoffDivisions;
-        },
-
-        getPlayoffDivisionByIndex: function(divIndex) {
-            return _playoffDivisions[divIndex];
+        /**
+         * The playoff schedules. Note that the times may be null. 
+         *
+         * @return key=bracket name, value=PlayoffSchedule
+         */
+        getPlayoffSchedules: function() {
+            return _playoffSchedules;
         },
 
         /**
@@ -386,14 +374,24 @@
          * @return JSJoda.LocalTime or null.
          */
         getPlayoffStartTime: function(division) {
-            return _playoffStartTimes[division];
+            const existing = _playoffSchedules[division];
+            if (null == existing) {
+                return null;
+            } else {
+                return existing.startTime;
+            }
         },
         /**
          * @param division playoff bracket name
          * @Param time JSJoda.LocalTime
          */
         setPlayoffStartTime: function(division, time) {
-            _playoffStartTimes[division] = time;
+            let existing = _playoffSchedules[division];
+            if (null == existing) {
+                existing = new PlayoffSchdule();
+            }
+            existing.startTime = time;
+            _playoffSchedules[division] = existing;
             _save();
         },
 
@@ -402,14 +400,24 @@
          * @param division the playoff bracket name
          */
         getPlayoffEndTime: function(division) {
-            return _playoffEndTimes[division];
+            const existing = _playoffSchedules[division];
+            if (null == existing) {
+                return null;
+            } else {
+                return existing.endTime;
+            }
         },
         /**
          * @param division playoff bracket name
          * @Param time JSJoda.LocalTime
          */
         setPlayoffEndTime: function(division, time) {
-            _playoffEndTimes[division] = time;
+            let existing = _playoffSchedules[division];
+            if (null == existing) {
+                existing = new PlayoffSchdule();
+            }
+            existing.endTime = time;
+            _playoffSchedules[division] = existing;
             _save();
         },
 
@@ -1029,8 +1037,9 @@
          */
         hasPlayoffConflict: function(team, slot) {
             var conflict = false;
-            $.each(team.playoffDivisions, function(i, playoffDivision) {
-                if ($.finalist.slotHasPlayoffConflict(playoffDivision, slot)) {
+            $.each(team.playoffDivisions, function(_, bracketName) {
+                const playoffSchedule = _playoffSchedules[bracketName];
+                if (null != playoffSchedule && $.finalist.slotHasPlayoffConflict(playoffSchedule, slot)) {
                     conflict = true;
                 }
             });
@@ -1041,16 +1050,16 @@
          * Check if there is a conflict between the specified time slot and the
          * playoff times for the specified playoff division.
          * 
-         * @param playoffDivision
-         *          one of the playoff divisions
+         * @param playoffSchedule
+         *          The playoff schedule
          * @param slot
          *          Timeslot object
          * @returns true or false
          */
-        slotHasPlayoffConflict: function(playoffDivision, slot) {
-            const start = $.finalist.getPlayoffStartTime(playoffDivision);
-            const end = $.finalist.getPlayoffEndTime(playoffDivision);
-            if (start != undefined && end != undefined) {
+        slotHasPlayoffConflict: function(playoffSchedule, slot) {
+            const start = playoffSchedule.startTime;
+            const end = playoffSchedule.endTime;
+            if (null != start && null != end) {
                 if (start.isBefore(slot.endTime)
                     && slot.time.isBefore(end)) {
                     return true;

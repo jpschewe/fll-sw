@@ -371,14 +371,14 @@ function addRowForSlot(slot) {
     var playoffCell = $("<div class='rTableCell'></div>");
     row.append(playoffCell);
     var first = true;
-    $.each($.finalist.getPlayoffDivisions(), function(index, playoffDivision) {
-        if ($.finalist.slotHasPlayoffConflict(playoffDivision, slot)) {
+    $.each($.finalist.getPlayoffSchedules(), function(bracketName, playoffSchedule) {
+        if ($.finalist.slotHasPlayoffConflict(playoffSchedule, slot)) {
             if (first) {
                 first = false;
             } else {
                 playoffCell.append(",");
             }
-            playoffCell.append(playoffDivision);
+            playoffCell.append(bracketName);
         }
     });
 

@@ -6,6 +6,15 @@
 
 "use-strict";
 
+
+/**
+ * Start and end times are initialized to null.
+ */
+function PlayoffSchedule() {
+    this.startTime = null;
+    this.endTime = null;
+}
+
 /**
  * Used for packaging up and sending to the server to put in the database. Needs
  * to match fll.web.report.finalist.FinalistDBRow.
