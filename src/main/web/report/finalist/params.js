@@ -83,8 +83,7 @@ const finalistParamsModule = {
     },
 
     setDurationDisplay: function(duration) {
-        const durationMinutes = duration.toMinutes();
-        $("#duration").val(durationMinutes);
+        $("#duration").val(duration);
     }
 
 } // end scope for page
@@ -140,8 +139,7 @@ $(document).ready(
                 alert("Duration must be at least 5 minutes");
                 finalistParamsModule.setDurationDisplay($.finalist.getDuration($.finalist.getCurrentDivision()));
             } else {
-                const duration = JSJoda.Duration.ofMinutes(minutes);
-                $.finalist.setDuration($.finalist.getCurrentDivision(), duration);
+                $.finalist.setDuration($.finalist.getCurrentDivision(), minutes);
             }
         });
 

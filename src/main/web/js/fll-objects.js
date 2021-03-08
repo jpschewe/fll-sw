@@ -16,6 +16,15 @@ function PlayoffSchedule() {
 }
 
 /**
+ * Start time initialized to 2:00pm.
+ * Duration initialized to 20 minutes.
+ */
+function FinalistScheduleParameters() {
+    this.startTime = JSJoda.LocalTime.of(14, 0);
+    this.intervalMinutes = 20;
+}
+
+/**
  * Used for packaging up and sending to the server to put in the database. Needs
  * to match fll.web.report.finalist.FinalistDBRow.
  

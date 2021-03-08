@@ -1121,6 +1121,8 @@ public final class GenerateDB {
       sql.append(")");
       stmt.executeUpdate(sql.toString());
 
+      stmt.executeUpdate("DROP TABLE IF EXISTS finalist_parameters CASCADE");
+
       final StringBuilder sql2 = new StringBuilder();
       sql2.append("CREATE TABLE finalist_parameters (");
       sql2.append("    tournament_id INTEGER NOT NULL");

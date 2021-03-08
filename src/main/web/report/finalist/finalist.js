@@ -23,8 +23,7 @@
     let _divisions;
     let _currentDivision;
     let _numTeamsAutoSelected;
-    let _startTimes;
-    let _duration; // minutes
+    let _scheduleParameters;
     let _categoriesVisited;
     let _currentCategoryId; // category to display with numeric.html
     let _playoffSchedules;
@@ -37,8 +36,7 @@
         _divisions = [];
         _currentDivision = null;
         _numTeamsAutoSelected = 1;
-        _startTimes = {};
-        _duration = {};
+        _scheduleParameters = {};
         _categoriesVisited = {};
         _currentCategoryId = null;
         _playoffSchedules = {};
@@ -56,8 +54,7 @@
         fllStorage.set(STORAGE_PREFIX, "_currentDivision", _currentDivision);
         fllStorage.set(STORAGE_PREFIX, "_numTeamsAutoSelected",
             _numTeamsAutoSelected);
-        fllStorage.set(STORAGE_PREFIX, "_startTimes", _startTimes);
-        fllStorage.set(STORAGE_PREFIX, "_duration", _duration);
+        fllStorage.set(STORAGE_PREFIX, "_scheduleParameters", _scheduleParameters);
         fllStorage.set(STORAGE_PREFIX, "_categoriesVisited", _categoriesVisited);
         fllStorage.set(STORAGE_PREFIX, "_currentCategoryId", _currentCategoryId);
         fllStorage.set(STORAGE_PREFIX, "_playoffSchedules", _playoffSchedules);
@@ -95,13 +92,9 @@
         if (null != value) {
             _numTeamsAutoSelected = value;
         }
-        value = fllStorage.get(STORAGE_PREFIX, "_startTimes");
+        value = fllStorage.get(STORAGE_PREFIX, "_scheduleParameters");
         if (null != value) {
-            _startTimes = value;
-        }
-        value = fllStorage.get(STORAGE_PREFIX, "_duration");
-        if (null != value) {
-            _duration = value;
+            _scheduleParameters = value;
         }
         value = fllStorage.get(STORAGE_PREFIX, "_categoriesVisited");
         if (null != value) {
@@ -204,12 +197,13 @@
      * 
      * @param time
      *          JSJoda.LocalTime object for start of slot
-     * @param duration
-     *          JSJoda.Duration object for time slot duration
+     * @param minutes
+     *          minutes for time slot duration
      */
-    function Timeslot(time, duration) {
+    function Timeslot(time, minutes) {
         this.categories = {}; // categoryId -> teamNumber
         this.time = time;
+        const duration = JSJoda.Duration.ofMinutes(minutes)
         this.endTime = time.plus(duration);
     }
 
@@ -236,12 +230,14 @@
      * existing schedules. This slides everything forward to prevent
      * 
      * Does NOT save.
+     *
+     * @param offset JSJoda.Duration
      */
     function _addToScheduleSlotDurations(offset) {
 
         $.each(_schedules, function(i, schedule) {
             if (null != schedule) {
-                var addToStart = JSJoda.Duration.ofMinutues(0);
+                var addToStart = JSJoda.Duration.ofMinutes(0);
                 var addToEnd = offset;
 
                 $.each(schedule, function(k, slot) {
@@ -265,6 +261,15 @@
         }
         if (null != playoffSchedule.endTime && !(playoffSchedule.endTime instanceof JSJoda.LocalTime)) {
             playoffSchedule.endTime = JSJoda.LocalTime.parse(playoffSchedule.endTime);
+        }
+    }
+
+    /**
+     * Make sure that the start is a JSJoda.LocalTime object.
+     */
+    function _fixScheduleParameters(params) {
+        if (null != params.startTime && !(params.startTime instanceof JSJoda.LocalTime)) {
+            params.startTime = JSJoda.LocalTime.parse(params.startTime);
         }
     }
 
@@ -970,9 +975,10 @@
             });
 
             // list of Timeslots in time order
-            var schedule = [];
-            var nextTime = $.finalist.getStartTime(currentDivision);
-            var slotDuration = $.finalist.getDuration(currentDivision);
+            const schedule = [];
+            let nextTime = $.finalist.getStartTime(currentDivision);
+            const slotMinutes = $.finalist.getDuration(currentDivision);
+            const slotDuration = JSJoda.Duration.ofMinutes(slotMinutes);
             $.finalist.log("Next timeslot starts at " + nextTime + " duration is " + slotDuration);
             $.each(sortedTeams, function(i, teamNum) {
                 var team = $.finalist.lookupTeam(teamNum);
@@ -993,7 +999,7 @@
                         }); // foreach timeslot
 
                         while (!scheduled) {
-                            var newSlot = new Timeslot(nextTime, slotDuration);
+                            var newSlot = new Timeslot(nextTime, slotMinutes);
                             schedule.push(newSlot);
 
                             nextTime = nextTime.plus(slotDuration);
@@ -1081,17 +1087,26 @@
         },
 
         /**
+         * The schedule parameters.
+         *
+         * @param currentDivision the award group to get the schedule start time for
+         */
+        getScheduleParameters: function(currentDivision) {
+            let prevValue = _scheduleParameters[currentDivision];
+            if (undefined == prevValue) {
+                prevValue = new FinalistScheduleParameters();
+                _scheduleParameters[currentDivision] = prevValue;
+            }
+            return prevValue;
+        },
+
+        /**
          * The start time for the schedule.
          *
          * @param currentDivision the award group to get the schedule start time for
          */
         getStartTime: function(currentDivision) {
-            const prevValue = _startTimes[currentDivision];
-            if (undefined == prevValue) {
-                return JSJoda.LocalTime.of(14, 0);
-            } else {
-                return prevValue;
-            }
+            return $.finalist.getScheduleParameters(currentDivision).startTime;
         },
 
         /**
@@ -1106,7 +1121,7 @@
             const durationDiff = JSJoda.Duration.ofMinutes(diff);
             _addTimeToSchedule(currentDivision, durationDiff);
 
-            _startTimes[currentDivision] = newStartTime;
+            $.finalist.getScheduleParameters(currentDivision).startTime = newStartTime;
             _save();
         },
 
@@ -1119,10 +1134,11 @@
          */
         setDuration: function(currentDivision, v) {
             const prevValue = $.finalist.getDuration(currentDivision);
-            const diff = v.minus(prevValue);
-            _addToScheduleSlotDurations(diff);
+            const diffMinutes = v - prevValue;
+            const diffDuration = JSJoda.Duration.ofMinutes(diffMinutes);
+            _addToScheduleSlotDurations(diffDuration);
 
-            _duration[currentDivision] = v;
+            $.finalist.getScheduleParameters(currentDivision).intervalMinutes = v;
             _save();
         },
 
@@ -1130,12 +1146,7 @@
          * @return the value or 20 minutes if not yet set
          */
         getDuration: function(currentDivision) {
-            const prevValue = _duration[currentDivision];
-            if (undefined == prevValue) {
-                return JSJoda.Duration.ofMinutes(20);
-            } else {
-                return prevValue;
-            }
+            return $.finalist.getScheduleParameters(currentDivision).intervalMinutes;
         },
 
         setCurrentCategoryId: function(catId) {
@@ -1332,6 +1343,54 @@
         },
 
         /**
+          * Load the finalist schedule parameters from the server.
+          * 
+          * @return promise to execute
+          */
+        loadFinalistScheduleParameters: function() {
+            return $.getJSON("../../api/FinalistScheduleParameters", function(data) {
+                $.each(data, function(awardGroup, parameters) {
+                    _fixScheduleParameters(parameters);
+                    _scheduleParameters[awardGroup] = parameters;
+                })
+            });
+        },
+
+        /**
+         * Upload the schedule parameters to the server.
+         * 
+         * @param successCallback called with the server result on success
+         * @param failCallback called with the server result on failure
+         * @return promise to execute
+         */
+        uploadScheduleParameters: function(successCallback, failCallback) {
+            const paramsToUpload = {};
+            $.each(_scheduleParameters, function(awardGroup, params) {
+                if (null != params.startTime) {
+                    paramsToUpload[awardGroup] = params;
+                }
+            });
+
+            const dataToUpload = JSON.stringify(paramsToUpload);
+            return $.ajax({
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                url: "../../api/FinalistScheduleParameters",
+                data: dataToUpload,
+                success: function(result) {
+                    if (result.success) {
+                        successCallback(result);
+                    } else {
+                        failCallback(result);
+                    }
+                }
+            }).fail(function(result) {
+                failCallback(result);
+            });
+        },
+
+        /**
          * Load all data from server.
          * 
          * @param doneCallback
@@ -1348,6 +1407,12 @@
                 failCallback("Playoff Schedules");
             })
             waitList.push(playoffSchedulesPromise);
+
+            const finalistParamsPromise = $.finalist.loadFinalistScheduleParameters();
+            finalistParamsPromise.fail(function() {
+                failCallback("Finalist Schedule Parameters");
+            })
+            waitList.push(finalistParamsPromise);
 
             $.when.apply($, waitList).done(function() {
                 _save();

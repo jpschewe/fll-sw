@@ -206,7 +206,6 @@ const finalistScheduleModule = {};
         const playoffSchedulesSuccess = function(result) {
             _log("Playoff schedules upload success")
         };
-
         const playoffSchedulesFail = function(result) {
             let message;
             if (null == result) {
@@ -217,9 +216,24 @@ const finalistScheduleModule = {};
 
             alert("Playoff schedules upload failure: " + message);
         }
-
         waitList.push($.finalist.uploadPlayoffSchedules(
             playoffSchedulesSuccess, playoffSchedulesFail));
+
+        const scheduleParamsSuccess = function(result) {
+            _log("Schdule parameters upload success")
+        };
+        const scheduleParamsFail = function(result) {
+            let message;
+            if (null == result) {
+                message = "Unknown server error";
+            } else {
+                message = result.message;
+            }
+
+            alert("Schedule parameters upload failure: " + message);
+        }
+        waitList.push($.finalist.uploadScheduleParameters(
+            scheduleParamsSuccess, scheduleParamsFail));
 
         $("#wait-dialog").dialog("open");
         $.when.apply($, waitList).done(function() {
