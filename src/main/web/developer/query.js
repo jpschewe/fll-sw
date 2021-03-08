@@ -4,7 +4,7 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-"use-strict";
+"use strict";
 
 $(document).ready(function() {
     $("#query_form").submit(function(event) {

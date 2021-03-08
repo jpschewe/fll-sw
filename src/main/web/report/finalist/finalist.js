@@ -4,7 +4,7 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-"use-strict";
+"use strict";
 
 (function($) {
     if (typeof $ != 'function') {
@@ -40,7 +40,7 @@
         _startTimes = {};
         _duration = {};
         _categoriesVisited = {};
-        _currentCategory = null;
+        _currentCategoryId = null;
         _playoffSchedules = {};
         _schedules = {};
     }
@@ -580,9 +580,9 @@
                 if (currentCategory.overall
                     || $.finalist.isTeamInDivision(team, currentDivision)) {
                     if (!checkedEnoughTeams) {
-                        var group = team.judgingGroup;
-                        prevScore = prevScores[group];
-                        curScore = $.finalist.getCategoryScore(team, currentCategory);
+                        const group = team.judgingGroup;
+                        const prevScore = prevScores[group];
+                        const curScore = $.finalist.getCategoryScore(team, currentCategory);
                         if (curScore != undefined && curScore > 0) {
                             if (prevScore == undefined) {
                                 $.finalist.addTeamToCategory(currentCategory, team.num);

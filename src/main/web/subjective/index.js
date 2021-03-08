@@ -4,14 +4,14 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-"use-strict";
+"use strict";
 
 function loadData() {
     $.mobile.loading("show");
 
     $.subjective.loadFromServer(
         function() {
-            subjectiveCategories = $.subjective.getSubjectiveCategories();
+            const subjectiveCategories = $.subjective.getSubjectiveCategories();
 
             $.mobile.loading("hide");
             $("#index-page_choose_clear").hide();
@@ -68,7 +68,7 @@ function checkTournament() {
     $.subjective.getServerTournament(function(serverTournament) {
         $.mobile.loading("hide");
 
-        var storedTournament = $.subjective.getTournament();
+        const storedTournament = $.subjective.getTournament();
         if (null == storedTournament) {
             reloadData();
         } else if (storedTournament.name != serverTournament.name

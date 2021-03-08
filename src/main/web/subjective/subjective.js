@@ -4,7 +4,7 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-"use-strict";
+"use strict";
 
 (function($) {
     if (!$) {
@@ -459,7 +459,7 @@
          * The judges that are judging at current station and current category.
          */
         getPossibleJudges: function() {
-            retval = [];
+            const retval = [];
             if (null == _judges) {
                 return retval;
             } else {
