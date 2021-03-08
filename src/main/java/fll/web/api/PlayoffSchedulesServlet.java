@@ -75,7 +75,7 @@ public class PlayoffSchedulesServlet extends HttpServlet {
 
       jsonMapper.writeValue(writer, playoffSchedules);
     } catch (final SQLException e) {
-      throw new RuntimeException(e);
+      throw new FLLRuntimeException(e);
     }
   }
 
