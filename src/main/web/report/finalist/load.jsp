@@ -33,14 +33,10 @@
 
 <script type='text/javascript' src='finalist.js'></script>
 
-<script type='text/javascript'>
-  var _loadingTournament =
-<%=FinalistLoad.currentTournament(application)%>
-  ;
+<script type='text/javascript' src='finalist_load.js'></script>
 
-  function clearData() {
-    $.finalist.clearAllData();
-  }
+<script type='text/javascript'>
+  var _loadingTournament = <%=FinalistLoad.currentTournament(application)%> ;
 
   function loadData() {
     $("#wait-dialog").dialog("open");
@@ -65,49 +61,8 @@
 <%FinalistLoad.outputSchedules(out, application);%>
   $.finalist.setTournament(_loadingTournament);
 
-    $("#wait-dialog").dialog("close");
+  finalistScheduleLoad.loadUsingApi();
   }
-
-  $(document).ready(function() {
-    $("#choose_clear").hide();
-    $("#clear").click(function() {
-      clearData();
-      loadData();
-      $("#choose_clear").hide();
-      location.href = "params.html";
-    });
-    $("#keep").click(function() {
-      loadData();
-      $("#choose_clear").hide();
-      location.href = "params.html";
-    });
-
-    $("#wait-dialog").dialog({
-      autoOpen : false,
-      modal : true,
-      dialogClass : "no-close",
-      closeOnEscape : false
-    });
-
-    var allTeams = $.finalist.getAllTeams();
-    var tournament = $.finalist.getTournament();
-
-    if (null != allTeams && allTeams.length > 0) {
-      if (tournament != _loadingTournament) {
-        _log("Clearing data for old tournament: " + tournament);
-        clearData();
-        loadData();
-        $("#choose_clear").hide();
-        location.href = "params.html";
-      } else {
-        $("#choose_clear").show();
-      }
-    } else {
-      loadData();
-      $("#choose_clear").hide();
-      location.href = "params.html";
-    }
-  });
 </script>
 
 </head>

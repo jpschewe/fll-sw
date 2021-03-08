@@ -256,6 +256,18 @@
 
     }
 
+    /**
+     * Make sure that the start and end times are JSJoda.LocalTime objects.
+     */
+    function _fixPlayoffSchedule(playoffSchedule) {
+        if (null != playoffSchedule.startTime && !(playoffSchedule.startTime instanceof JSJoda.LocalTime)) {
+            playoffSchedule.startTime = JSJoda.LocalTime.parse(playoffSchedule.startTime);
+        }
+        if (null != playoffSchedule.endTime && !(playoffSchedule.endTime instanceof JSJoda.LocalTime)) {
+            playoffSchedule.endTime = JSJoda.LocalTime.parse(playoffSchedule.endTime);
+        }
+    }
+
     // //////////////////////// PUBLIC INTERFACE /////////////////////////
     $.finalist = {
         CHAMPIONSHIP_NAME: "Championship",
@@ -1271,6 +1283,27 @@
             return allNonNumericNominees;
         },
 
+        /**
+         * Load the playoff schedules from the server.
+         * 
+         * @return promise to execute
+         */
+        loadPlayoffSchedules: function() {
+            return $.getJSON("../../api/PlayoffSchedules", function(data) {
+                $.each(data, function(bracketName, playoffSchedule) {
+                    _fixPlayoffSchedule(playoffSchedule);
+                    _playoffSchedules[bracketName] = playoffSchedule;
+                })
+            });
+        },
+
+        /**
+         * Upload the playoff schedules to the server.
+         * 
+         * @param successCallback called with the server result on success
+         * @param failCallback called with the server result on failure
+         * @return promise to execute
+         */
         uploadPlayoffSchedules: function(successCallback, failCallback) {
             const schedulesToUpload = {};
             $.each(_playoffSchedules, function(bracketName, schedule) {
@@ -1295,6 +1328,30 @@
                 }
             }).fail(function(result) {
                 failCallback(result);
+            });
+        },
+
+        /**
+         * Load all data from server.
+         * 
+         * @param doneCallback
+         *          called with no arguments on success
+         * @param failCallback
+         *          called with message on failure
+         */
+        loadFromServer: function(doneCallback, failCallback) {
+
+            const waitList = [];
+
+            const playoffSchedulesPromise = $.finalist.loadPlayoffSchedules();
+            playoffSchedulesPromise.fail(function() {
+                failCallback("Playoff Schedules");
+            })
+            waitList.push(playoffSchedulesPromise);
+
+            $.when.apply($, waitList).done(function() {
+                _save();
+                doneCallback();
             });
         }
 
