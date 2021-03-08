@@ -58,7 +58,7 @@ public class PlayoffSchedule implements Serializable {
   /**
    * @param connection database connection
    * @param tournament the tournament to load the playoff schedules for
-   * @return the playoff schedules for the the tournament
+   * @return the playoff schedules for the the tournament keyed by bracket name
    * @throws SQLException on a database error
    */
   public static Map<String, PlayoffSchedule> loadPlayoffSchedules(final Connection connection,
