@@ -1,3 +1,5 @@
+Release 15.9.0
+==============
 * #912 - Use the order of subjective categories in the challenge description for the awards report
 * #914 - Fix parsing of LocalTime in javascript by using the JSJoda time package
 * #905 - Make tab to skip over read-only cells on non-numeric categories page
