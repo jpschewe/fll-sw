@@ -7,14 +7,14 @@
 "use-strict";
 
 (function($) {
-    if (!$) {
+    if (typeof $ != 'function') {
         throw new Error("jQuery needs to be loaded!");
     }
-    if (!$.jStorage) {
-        throw new Error("jStorage needs to be loaded!");
+    if (typeof fllStorage != 'object') {
+        throw new Error("fllStorage needs to be loaded!");
     }
 
-    var STORAGE_PREFIX = "fll.subjective.";
+    const STORAGE_PREFIX = "fll.subjective.";
 
     // //////////////////////// PRIVATE INTERFACE ////////////////////////
 
@@ -53,95 +53,95 @@
     function _loadFromDisk() {
         _init_variables();
 
-        var value = $.jStorage.get(STORAGE_PREFIX + "_subjectiveCategories");
+        var value = fllStorage.get(STORAGE_PREFIX, "_subjectiveCategories");
         if (null != value) {
             _subjectiveCategories = value;
         }
 
-        var value = $.jStorage.get(STORAGE_PREFIX + "_nonNumericCategories");
+        var value = fllStorage.get(STORAGE_PREFIX, "_nonNumericCategories");
         if (null != value) {
             _nonNumericCategories = value;
         }
 
-        value = $.jStorage.get(STORAGE_PREFIX + "_tournament");
+        value = fllStorage.get(STORAGE_PREFIX, "_tournament");
         if (null != value) {
             _tournament = value;
         }
 
-        value = $.jStorage.get(STORAGE_PREFIX + "_teams");
+        value = fllStorage.get(STORAGE_PREFIX, "_teams");
         if (null != value) {
             _teams = value;
         }
 
-        value = $.jStorage.get(STORAGE_PREFIX + "_schedule");
+        value = fllStorage.get(STORAGE_PREFIX, "_schedule");
         if (null != value) {
             _schedule = value;
         }
 
-        value = $.jStorage.get(STORAGE_PREFIX + "_currentJudgingGroup");
+        value = fllStorage.get(STORAGE_PREFIX, "_currentJudgingGroup");
         if (null != value) {
             _currentJudgingGroup = value;
         }
 
-        value = $.jStorage.get(STORAGE_PREFIX + "_currentCategory");
+        value = fllStorage.get(STORAGE_PREFIX, "_currentCategory");
         if (null != value) {
             _currentCategory = value;
         }
 
-        value = $.jStorage.get(STORAGE_PREFIX + "_judges");
+        value = fllStorage.get(STORAGE_PREFIX, "_judges");
         if (null != value) {
             _judges = value;
         }
 
-        value = $.jStorage.get(STORAGE_PREFIX + "_currentJudge");
+        value = fllStorage.get(STORAGE_PREFIX, "_currentJudge");
         if (null != value) {
             _currentJudge = value;
         }
 
-        value = $.jStorage.get(STORAGE_PREFIX + "_allScores");
+        value = fllStorage.get(STORAGE_PREFIX, "_allScores");
         if (null != value) {
             _allScores = value;
         }
 
-        value = $.jStorage.get(STORAGE_PREFIX + "_teamTimeCache");
+        value = fllStorage.get(STORAGE_PREFIX, "_teamTimeCache");
         if (null != value) {
             _teamTimeCache = value;
         }
 
-        value = $.jStorage.get(STORAGE_PREFIX + "_currentTeam");
+        value = fllStorage.get(STORAGE_PREFIX, "_currentTeam");
         if (null != value) {
             _currentTeam = value;
         }
 
-        value = $.jStorage.get(STORAGE_PREFIX + "_scoreEntryBackPage");
+        value = fllStorage.get(STORAGE_PREFIX, "_scoreEntryBackPage");
         if (null != value) {
             _scoreEntryBackPage = value;
         }
 
-        value = $.jStorage.get(STORAGE_PREFIX + "_categoryColumnMapping");
+        value = fllStorage.get(STORAGE_PREFIX, "_categoryColumnMapping");
         if (null != value) {
             _categoryColumnMapping = value;
         }
     }
 
     function _save() {
-        $.jStorage.set(STORAGE_PREFIX + "_subjectiveCategories",
+        fllStorage.get(STORAGE_PREFIX, "_subjectiveCategories",
             _subjectiveCategories);
-        $.jStorage.set(STORAGE_PREFIX + "_nonNumericCategories",
+        fllStorage.get(STORAGE_PREFIX, "_nonNumericCategories",
             _nonNumericCategories);
-        $.jStorage.set(STORAGE_PREFIX + "_tournament", _tournament);
-        $.jStorage.set(STORAGE_PREFIX + "_teams", _teams);
-        $.jStorage.set(STORAGE_PREFIX + "_schedule", _schedule);
-        $.jStorage.set(STORAGE_PREFIX + "_currentJudgingGroup",
+        fllStorage.get(STORAGE_PREFIX, "_tournament", _tournament);
+        fllStorage.get(STORAGE_PREFIX, "_teams", _teams);
+        fllStorage.get(STORAGE_PREFIX, "_schedule", _schedule);
+        fllStorage.get(STORAGE_PREFIX, "_currentJudgingGroup",
             _currentJudgingGroup);
-        $.jStorage.set(STORAGE_PREFIX + "_currentCategory", _currentCategory);
-        $.jStorage.set(STORAGE_PREFIX + "_judges", _judges);
-        $.jStorage.set(STORAGE_PREFIX + "_currentJudge", _currentJudge);
-        $.jStorage.set(STORAGE_PREFIX + "_allScores", _allScores);
-        $.jStorage.set(STORAGE_PREFIX + "_teamTimeCache", _teamTimeCache);
-        $.jStorage.set(STORAGE_PREFIX + "_currentTeam", _currentTeam);
-        $.jStorage.set(STORAGE_PREFIX + "_scoreEntryBackPage", _scoreEntryBackPage);
-        $.jStorage.set(STORAGE_PREFIX + "_categoryColumnMapping",
+        fllStorage.get(STORAGE_PREFIX, "_currentCategory", _currentCategory);
+        fllStorage.get(STORAGE_PREFIX, "_judges", _judges);
+        fllStorage.get(STORAGE_PREFIX, "_currentJudge", _currentJudge);
+        fllStorage.get(STORAGE_PREFIX, "_allScores", _allScores);
+        fllStorage.get(STORAGE_PREFIX, "_teamTimeCache", _teamTimeCache);
+        fllStorage.get(STORAGE_PREFIX, "_currentTeam", _currentTeam);
+        fllStorage.get(STORAGE_PREFIX, "_scoreEntryBackPage", _scoreEntryBackPage);
+        fllStorage.get(STORAGE_PREFIX, "_categoryColumnMapping",
             _categoryColumnMapping);
 
     }
