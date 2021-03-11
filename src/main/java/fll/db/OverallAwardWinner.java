@@ -46,12 +46,7 @@ public class OverallAwardWinner implements Serializable {
   private final String name;
 
   /**
-   * For scored categories this is
-   * {@link fll.xml.SubjectiveScoreCategory#getName()} and
-   * needs to be converted to a displayed title through the challenge description.
-   * For the extra awards, this is the display name.
-   * 
-   * @return name of the category
+   * @return display name of the category
    */
   @Nonnull
   public final String getName() {
