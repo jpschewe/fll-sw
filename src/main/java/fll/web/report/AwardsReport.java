@@ -50,6 +50,7 @@ import fll.web.BaseFLLServlet;
 import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
+import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -145,8 +146,8 @@ public class AwardsReport extends BaseFLLServlet {
     addHeadToHead(connection, tournament, description, document, documentBody, sortedAwardGroups);
 
     addSubjectiveChallengeWinners(connection, description, document, documentBody, tournament, sortedAwardGroups);
-    addSubjectiveExtraWinners(connection, document, documentBody, tournament, sortedAwardGroups);
-    addSubjectiveOverallWinners(connection, document, documentBody, tournament);
+    addSubjectiveExtraWinners(connection, description, document, documentBody, tournament, sortedAwardGroups);
+    addSubjectiveOverallWinners(connection, description, document, documentBody, tournament);
 
     final List<AdvancingTeam> advancing = AdvancingTeam.loadAdvancingTeams(connection, tournament.getTournamentID());
     if (!advancing.isEmpty()) {
@@ -191,6 +192,7 @@ public class AwardsReport extends BaseFLLServlet {
   }
 
   private void addSubjectiveExtraWinners(final Connection connection,
+                                         final ChallengeDescription description,
                                          final Document document,
                                          final Element documentBody,
                                          final Tournament tournament,
@@ -198,7 +200,11 @@ public class AwardsReport extends BaseFLLServlet {
       throws SQLException {
     final List<AwardWinner> winners = AwardWinners.getExtraAwardWinners(connection, tournament.getTournamentID());
 
-    addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups, Collections.emptyList());
+    final List<String> categoryOrder = description.getNonNumericCategories().stream() //
+                                                  .map(NonNumericCategory::getTitle) //
+                                                  .collect(Collectors.toList());
+
+    addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups, categoryOrder);
   }
 
   private void addSubjectiveWinners(final Connection connection,
@@ -234,6 +240,7 @@ public class AwardsReport extends BaseFLLServlet {
   }
 
   private void addSubjectiveOverallWinners(final Connection connection,
+                                           ChallengeDescription description,
                                            final Document document,
                                            final Element documentBody,
                                            final Tournament tournament)
@@ -248,9 +255,18 @@ public class AwardsReport extends BaseFLLServlet {
       categoryWinners.add(winner);
     }
 
-    for (final Map.Entry<String, List<OverallAwardWinner>> entry : organizedWinners.entrySet()) {
-      final String categoryName = entry.getKey();
-      final List<OverallAwardWinner> categoryWinners = entry.getValue();
+    final List<String> categoryOrder = description.getNonNumericCategories().stream() //
+                                                  .map(NonNumericCategory::getTitle) //
+                                                  .collect(Collectors.toList());
+    final List<String> fullOrder = new LinkedList<String>(categoryOrder);
+    organizedWinners.keySet().forEach(c -> {
+      if (!fullOrder.contains(c)) {
+        fullOrder.add(c);
+      }
+    });
+    for (final String categoryName : fullOrder) {
+      final List<OverallAwardWinner> categoryWinners = organizedWinners.getOrDefault(categoryName,
+                                                                                     Collections.emptyList());
       if (!categoryWinners.isEmpty()) {
         final Element container = addSubjectiveOverallWinners(connection, document, categoryName, categoryWinners);
         documentBody.appendChild(container);
