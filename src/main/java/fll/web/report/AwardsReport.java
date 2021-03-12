@@ -431,10 +431,8 @@ public class AwardsReport extends BaseFLLServlet {
                               final ChallengeDescription description,
                               final List<String> sortedAwardGroups)
       throws SQLException {
-    documentBody.appendChild(FOPUtils.createHorizontalLine(document, 2));
 
     final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    documentBody.appendChild(categoryTitleBlock);
     categoryTitleBlock.setAttribute("font-weight", "bold");
 
     categoryTitleBlock.appendChild(document.createTextNode("Robot Performance Award - top score from regular match play"));
@@ -442,7 +440,6 @@ public class AwardsReport extends BaseFLLServlet {
     final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
 
     final Element table = FOPUtils.createBasicTable(document);
-    documentBody.appendChild(table);
 
     table.appendChild(FOPUtils.createTableColumn(document, AWARD_DESCRIPTION_WIDTH));
     table.appendChild(FOPUtils.createTableColumn(document, TEAM_NUMBER_WIDTH));
@@ -458,6 +455,7 @@ public class AwardsReport extends BaseFLLServlet {
     scores.entrySet().stream().map(Map.Entry::getKey).filter(e -> !localSortedAwardGroups.contains(e))
           .forEach(localSortedAwardGroups::add);
 
+    boolean haveScores = false;
     for (final String group : localSortedAwardGroups) {
       if (scores.containsKey(group)) {
         final List<Top10.ScoreEntry> scoreList = scores.get(group);
@@ -476,10 +474,17 @@ public class AwardsReport extends BaseFLLServlet {
           row.appendChild(FOPUtils.createTableCell(document, null, "With a score of:"));
 
           row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.get().getFormattedScore())));
+
+          haveScores = true;
         } // have a winner
       } // group has scores
     } // foreach group
 
+    if (haveScores) {
+      documentBody.appendChild(FOPUtils.createHorizontalLine(document, 2));
+      documentBody.appendChild(categoryTitleBlock);
+      documentBody.appendChild(table);
+    }
   }
 
   private Element createHeader(final Document document,

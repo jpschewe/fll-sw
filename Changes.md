@@ -1,3 +1,7 @@
+Release 15.9.1
+==============
+* #911, #918 - Allow the awards report to be output when there are no performance scores
+
 Release 15.9.0
 ==============
 * #912 - Use the order of subjective categories in the challenge description for the awards report
