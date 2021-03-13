@@ -105,8 +105,8 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
             + " rows");
       }
 
-      final FinalistSchedule schedule = new FinalistSchedule(tournament, division, categories, rows);
-      schedule.store(connection);
+      final FinalistSchedule schedule = new FinalistSchedule(categories, rows);
+      schedule.store(connection, tournament, division);
 
       final Collection<NonNumericNominees> nominees = jsonMapper.readValue(nomineesStr,
                                                                            StoreNonNumericNominees.NonNumericNomineesTypeInformation.INSTANCE);

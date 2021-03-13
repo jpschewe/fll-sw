@@ -220,7 +220,7 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
                                   final FinalistSchedule schedule) {
 
     // convert to list to ensure we have a stable iteration order
-    final List<String> categories = new LinkedList<>(schedule.getCategories());
+    final List<String> categories = new LinkedList<>(schedule.getCategoryNames());
     final Map<String, String> categoryToRoom = schedule.getRooms();
 
     final Element mainTable = FOPUtils.createBasicTable(document);

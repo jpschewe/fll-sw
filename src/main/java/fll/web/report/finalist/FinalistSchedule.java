@@ -22,7 +22,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import fll.Tournament;
 
 /**
  * The schedule for finalist judging.
@@ -31,23 +34,18 @@ public class FinalistSchedule implements Serializable {
 
   /**
    * Create a schedule.
-   *
-   * @param division the group that the schedule is for
-   * @param tournament the tournament that the schedule is associated with
+   * 
    * @param categories key is the category name, value is if the category is
    *          public
    * @param schedule the schedule entries
    */
-  public FinalistSchedule(final int tournament,
-                          final String division,
-                          final Collection<FinalistCategory> categories,
-                          final Collection<FinalistDBRow> schedule) {
-    this.mTournament = tournament;
-    this.mDivision = division;
+  public FinalistSchedule(@JsonProperty("categories") final Collection<FinalistCategory> categories,
+                          @JsonProperty("schedule") final Collection<FinalistDBRow> schedule) {
     this.mSchedule = Collections.unmodifiableCollection(new LinkedList<>(schedule));
+    this.categories = Collections.unmodifiableCollection(categories);
 
     for (final FinalistCategory row : categories) {
-      mCategories.add(row.getCategoryName());
+      mCategoryNames.add(row.getCategoryName());
       mRooms.put(row.getCategoryName(), row.getRoom());
     }
   }
@@ -56,66 +54,69 @@ public class FinalistSchedule implements Serializable {
    * Load a schedule from the database.
    *
    * @throws SQLException on a database error
-   * @param division the award group that the schedule is for
+   * @param awardGroup the award group that the schedule is for
    * @param connection where to load from
    * @param tournament the tournament to load a schedule for
    */
   public FinalistSchedule(final Connection connection,
                           final int tournament,
-                          final String division)
+                          final String awardGroup)
       throws SQLException {
     final Collection<FinalistDBRow> newSchedule = new LinkedList<>();
-    mTournament = tournament;
-    mDivision = division;
+    final Collection<FinalistCategory> newCategories = new LinkedList<>();
 
-    PreparedStatement getCategories = null;
-    ResultSet categories = null;
-    PreparedStatement getSchedule = null;
-    ResultSet schedule = null;
-    try {
-      getCategories = connection.prepareStatement("SELECT category, room FROM finalist_categories WHERE tournament = ? AND division = ?");
-      getCategories.setInt(1, mTournament);
-      getCategories.setString(2, mDivision);
-      categories = getCategories.executeQuery();
-      while (categories.next()) {
-        final String name = categories.getString(1);
-        final String room = categories.getString(2);
-        mCategories.add(name);
-        mRooms.put(name, room);
+    try (
+        PreparedStatement getCategories = connection.prepareStatement("SELECT category, room FROM finalist_categories WHERE tournament = ? AND division = ?")) {
+      getCategories.setInt(1, tournament);
+      getCategories.setString(2, awardGroup);
+      try (ResultSet categories = getCategories.executeQuery()) {
+        while (categories.next()) {
+          final String name = categories.getString(1);
+          final String room = categories.getString(2);
+          mCategoryNames.add(name);
+          mRooms.put(name, room);
+          newCategories.add(new FinalistCategory(name, room));
+        }
       }
 
-      getSchedule = connection.prepareStatement("SELECT category, judge_time, team_number FROM finalist_schedule WHERE tournament = ? AND division = ?");
-      getSchedule.setInt(1, mTournament);
-      getSchedule.setString(2, mDivision);
-      schedule = getSchedule.executeQuery();
-      while (schedule.next()) {
-        final String name = schedule.getString(1);
-        final LocalTime judgeTime = schedule.getTime(2).toLocalTime();
-        final int teamNumber = schedule.getInt(3);
+      try (
+          PreparedStatement getSchedule = connection.prepareStatement("SELECT category, judge_time, team_number FROM finalist_schedule WHERE tournament = ? AND division = ?")) {
+        getSchedule.setInt(1, tournament);
+        getSchedule.setString(2, awardGroup);
+        try (ResultSet schedule = getSchedule.executeQuery()) {
+          while (schedule.next()) {
+            final String name = schedule.getString(1);
+            final LocalTime judgeTime = schedule.getTime(2).toLocalTime();
+            final int teamNumber = schedule.getInt(3);
 
-        final FinalistDBRow row = new FinalistDBRow(name, judgeTime, teamNumber);
-        newSchedule.add(row);
+            final FinalistDBRow row = new FinalistDBRow(name, judgeTime, teamNumber);
+            newSchedule.add(row);
+          }
+        }
       }
 
-      mSchedule = Collections.unmodifiableCollection(newSchedule);
-
-    } finally {
-      SQLFunctions.close(categories);
-      SQLFunctions.close(getCategories);
-      SQLFunctions.close(schedule);
-      SQLFunctions.close(getSchedule);
+      this.mSchedule = Collections.unmodifiableCollection(newSchedule);
+      this.categories = Collections.unmodifiableCollection(newCategories);
     }
   }
 
-  private final Set<String> mCategories = new HashSet<>();
+  private final Collection<FinalistCategory> categories;
 
   /**
-   * Unmodifiable version of the categories.
-   *
-   * @return set of category names
+   * @return the finalist category information for the schedule
    */
-  public Set<String> getCategories() {
-    return Collections.unmodifiableSet(mCategories);
+  public Collection<FinalistCategory> getCategories() {
+    return categories;
+  }
+
+  private final Set<String> mCategoryNames = new HashSet<>();
+
+  /**
+   * @return set of category names (unmodifiable)
+   */
+  @JsonIgnore
+  public Set<String> getCategoryNames() {
+    return Collections.unmodifiableSet(mCategoryNames);
   }
 
   private final Map<String, String> mRooms = new HashMap<>();
@@ -125,6 +126,7 @@ public class FinalistSchedule implements Serializable {
    *
    * @return key=category name, value=room
    */
+  @JsonIgnore
   public Map<String, String> getRooms() {
     return Collections.unmodifiableMap(mRooms);
   }
@@ -177,74 +179,58 @@ public class FinalistSchedule implements Serializable {
     return result;
   }
 
-  private final int mTournament;
-
-  /**
-   * @return tournament that the schedule is for
-   */
-  public int getTournament() {
-    return mTournament;
-  }
-
-  private final String mDivision;
-
-  /**
-   * @return the award group the schedule is for
-   */
-  public String getDivision() {
-    return mDivision;
-  }
-
   /**
    * Store the schedule to the database. Remove any finalist schedule existing
    * for the tournament.
    *
    * @param connection database connection
+   * @param tournament the tournament that the schedule is for
+   * @param awardGroup award group that the schedule is for
    * @throws SQLException on a database error
    */
-  public void store(final Connection connection) throws SQLException {
+  public void store(final Connection connection,
+                    final int tournament,
+                    final String awardGroup)
+      throws SQLException {
 
-    PreparedStatement deleteCategoriesPrep = null;
-    PreparedStatement insertCategoriesPrep = null;
-    PreparedStatement deleteSchedPrep = null;
-    PreparedStatement insertSchedPrep = null;
-    try {
-      deleteSchedPrep = connection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ? AND division = ?");
-      deleteSchedPrep.setInt(1, getTournament());
-      deleteSchedPrep.setString(2, getDivision());
+    try (
+        PreparedStatement deleteSchedPrep = connection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ? AND division = ?")) {
+      deleteSchedPrep.setInt(1, tournament);
+      deleteSchedPrep.setString(2, awardGroup);
       deleteSchedPrep.executeUpdate();
+    }
 
-      deleteCategoriesPrep = connection.prepareStatement("DELETE FROM finalist_categories WHERE tournament = ? AND division = ?");
-      deleteCategoriesPrep.setInt(1, getTournament());
-      deleteCategoriesPrep.setString(2, getDivision());
+    try (
+        PreparedStatement deleteCategoriesPrep = connection.prepareStatement("DELETE FROM finalist_categories WHERE tournament = ? AND division = ?")) {
+      deleteCategoriesPrep.setInt(1, tournament);
+      deleteCategoriesPrep.setString(2, awardGroup);
       deleteCategoriesPrep.executeUpdate();
+    }
 
-      insertCategoriesPrep = connection.prepareStatement("INSERT INTO finalist_categories (tournament, division, category, room) VALUES(?, ?, ?, ?)");
-      insertCategoriesPrep.setInt(1, getTournament());
-      insertCategoriesPrep.setString(2, getDivision());
+    try (
+        PreparedStatement insertCategoriesPrep = connection.prepareStatement("INSERT INTO finalist_categories (tournament, division, category, room) VALUES(?, ?, ?, ?)")) {
+      insertCategoriesPrep.setInt(1, tournament);
+      insertCategoriesPrep.setString(2, awardGroup);
 
-      for (final String categoryName : mCategories) {
+      for (final String categoryName : mCategoryNames) {
         insertCategoriesPrep.setString(3, categoryName);
         insertCategoriesPrep.setString(4, mRooms.get(categoryName));
         insertCategoriesPrep.executeUpdate();
       }
+    }
 
-      insertSchedPrep = connection.prepareStatement("INSERT INTO finalist_schedule (tournament, division, category, judge_time, team_number) VALUES(?, ?, ?, ?, ?)");
-      insertSchedPrep.setInt(1, getTournament());
-      insertSchedPrep.setString(2, getDivision());
+    try (
+        PreparedStatement insertSchedPrep = connection.prepareStatement("INSERT INTO finalist_schedule (tournament, division, category, judge_time, team_number) VALUES(?, ?, ?, ?, ?)")) {
+      insertSchedPrep.setInt(1, tournament);
+      insertSchedPrep.setString(2, awardGroup);
       for (final FinalistDBRow row : mSchedule) {
         insertSchedPrep.setString(3, row.getCategoryName());
         insertSchedPrep.setTime(4, Time.valueOf(row.getTime()));
         insertSchedPrep.setInt(5, row.getTeamNumber());
         insertSchedPrep.executeUpdate();
       }
-
-    } finally {
-      SQLFunctions.close(deleteSchedPrep);
-      SQLFunctions.close(insertSchedPrep);
-      SQLFunctions.close(deleteCategoriesPrep);
-      SQLFunctions.close(insertCategoriesPrep);
     }
+
   }
 
   /**
@@ -259,22 +245,55 @@ public class FinalistSchedule implements Serializable {
   public static Collection<String> getAllDivisions(final Connection connection,
                                                    final int tournament)
       throws SQLException {
-    PreparedStatement getDivisions = null;
-    ResultSet divisions = null;
     final Collection<String> result = new LinkedList<>();
-    try {
-      getDivisions = connection.prepareStatement("SELECT DISTINCT division FROM finalist_categories WHERE tournament = ?");
+    try (
+        PreparedStatement getDivisions = connection.prepareStatement("SELECT DISTINCT division FROM finalist_categories WHERE tournament = ?")) {
       getDivisions.setInt(1, tournament);
-      divisions = getDivisions.executeQuery();
-      while (divisions.next()) {
-        result.add(divisions.getString(1));
+      try (ResultSet divisions = getDivisions.executeQuery()) {
+        while (divisions.next()) {
+          result.add(divisions.getString(1));
+        }
       }
-    } finally {
-      SQLFunctions.close(divisions);
-      SQLFunctions.close(getDivisions);
     }
 
     return result;
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournament the tournament the schedules belong to
+   * @param schedules map of award group to schedule
+   * @throws SQLException on a database error
+   */
+  public static void storeSchedules(final Connection connection,
+                                    final Tournament tournament,
+                                    final Map<String, FinalistSchedule> schedules)
+      throws SQLException {
+    for (Map.Entry<String, FinalistSchedule> entry : schedules.entrySet()) {
+      final String awardGroup = entry.getKey();
+      final FinalistSchedule schedule = entry.getValue();
+      schedule.store(connection, tournament.getTournamentID(), awardGroup);
+    }
+  }
+
+  /**
+   * Load all finalist schedules for a tournament.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament to load finalist schedules for
+   * @return the schedules, may be empty
+   * @throws SQLException on a database error
+   */
+  public static Map<String, FinalistSchedule> loadSchedules(final Connection connection,
+                                                            final Tournament tournament)
+      throws SQLException {
+    final Map<String, FinalistSchedule> schedules = new HashMap<>();
+    for (final String awardGroup : FinalistSchedule.getAllDivisions(connection, tournament.getTournamentID())) {
+      final FinalistSchedule schedule = new FinalistSchedule(connection, tournament.getTournamentID(), awardGroup);
+      schedules.put(awardGroup, schedule);
+    }
+
+    return schedules;
   }
 
 }

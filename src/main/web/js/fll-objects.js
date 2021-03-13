@@ -9,6 +9,8 @@
 
 /**
  * Start and end times are initialized to null.
+ *
+ * Matches fll.db.PlayoffSchedule.
  */
 function PlayoffSchedule() {
     this.startTime = null;
@@ -18,6 +20,8 @@ function PlayoffSchedule() {
 /**
  * Start time initialized to 2:00pm.
  * Duration initialized to 20 minutes.
+ *
+ * Matches fll.web.report.finalist.FinalistScheduleParameters.
  */
 function FinalistScheduleParameters() {
     this.startTime = JSJoda.LocalTime.of(14, 0);
@@ -45,6 +49,19 @@ function FinalistDBRow(categoryName, time, teamNumber) {
 function FinalistCategory(categoryName, room) {
     this.categoryName = categoryName;
     this.room = room;
+}
+
+/**
+ * Matches fll.web.report.finalist.FinalistSchedule.
+ *
+ * @param division award group the schedule is for
+ * @param categories list of FinalistCategory
+ * @param schedule list of FinalistDBRow
+ */
+function FinalistSchedule(divison, categories, schedule) {
+    this.division = division;
+    this.categories = categories;
+    this.schedule = schedule;
 }
 
 /**

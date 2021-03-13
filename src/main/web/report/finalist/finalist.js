@@ -218,7 +218,7 @@
     function _addTimeToSchedule(currentDivision, offset) {
         const currentSchedule = _schedules[currentDivision];
         if (null != currentSchedule) {
-            $.each(currentSchedule, function(k, slot) {
+            $.each(currentSchedule, function(_, slot) {
                 slot.time = slot.time.plus(offset);
                 slot.endTime = slot.endTime.plus(offset);
             }); // foreach timeslot
@@ -270,6 +270,15 @@
     function _fixScheduleParameters(params) {
         if (null != params.startTime && !(params.startTime instanceof JSJoda.LocalTime)) {
             params.startTime = JSJoda.LocalTime.parse(params.startTime);
+        }
+    }
+
+    /**
+     * Make sure that the time is a JSJoda.LocalTime object.
+     */
+    function _fixFinalistDBRow(row) {
+        if (null != row.time && !(row.time instanceof JSJoda.LocalTime)) {
+            row.time = JSJoda.LocalTime.parse(row.time);
         }
     }
 
@@ -780,20 +789,6 @@
             return category;
         },
 
-        setCategoryName: function(category, newName) {
-            if (category.name == newName) {
-                return true;
-            }
-
-            if (_check_duplicate_category(newName)) {
-                return false;
-            } else {
-                category.name = newName;
-                _save();
-                return true;
-            }
-        },
-
         addTeamToCategory: function(category, teamNum) {
             teamNum = parseInt(teamNum, 10);
             var index = category.teams.indexOf(teamNum);
@@ -899,7 +894,7 @@
          * @see scheduleFinalists
          */
         getSchedule: function(currentDivision) {
-            var schedule = _schedules[currentDivision];
+            let schedule = _schedules[currentDivision];
             if (null == schedule) {
                 schedule = $.finalist.scheduleFinalists(currentDivision);
                 _schedules[currentDivision] = schedule;
@@ -949,22 +944,24 @@
          * @return array of timeslots in order from earliest to latest
          */
         scheduleFinalists: function(currentDivision) {
-            var finalistsCount = $.finalist.getTeamToCategoryMap(currentDivision);
+            _log("Creating schedule for " + currentDivision);
+
+            let finalistsCount = $.finalist.getTeamToCategoryMap(currentDivision);
 
             // sort the map so that the team in the most categories is first,
             // this
             // should ensure the minimum amount of time to do the finalist
             // judging
-            var sortedTeams = [];
+            const sortedTeams = [];
             $.each(finalistsCount, function(teamNum, categories) {
                 sortedTeams.push(teamNum);
             });
             sortedTeams.sort(function(a, b) {
-                var aCategories = finalistsCount[a];
-                var bCategories = finalistsCount[b];
+                const aCategories = finalistsCount[a];
+                const bCategories = finalistsCount[b];
 
-                var aCount = aCategories.length;
-                var bCount = bCategories.length;
+                const aCount = aCategories.length;
+                const bCount = bCategories.length;
                 if (aCount == bCount) {
                     return 0;
                 } else if (aCount > bCount) {
@@ -981,14 +978,14 @@
             const slotDuration = JSJoda.Duration.ofMinutes(slotMinutes);
             $.finalist.log("Next timeslot starts at " + nextTime + " duration is " + slotDuration);
             $.each(sortedTeams, function(i, teamNum) {
-                var team = $.finalist.lookupTeam(teamNum);
-                var teamCategories = finalistsCount[teamNum];
+                const team = $.finalist.lookupTeam(teamNum);
+                const teamCategories = finalistsCount[teamNum];
                 $.each(teamCategories, function(j, category) {
 
                     if ($.finalist.isCategoryScheduled(category)) {
 
-                        var scheduled = false;
-                        $.each(schedule, function(k, slot) {
+                        let scheduled = false;
+                        $.each(schedule, function(_, slot) {
                             if (!scheduled
                                 && !$.finalist.isTimeslotBusy(slot, category.catId)
                                 && !$.finalist.isTeamInTimeslot(slot, teamNum)
@@ -999,7 +996,7 @@
                         }); // foreach timeslot
 
                         while (!scheduled) {
-                            var newSlot = new Timeslot(nextTime, slotMinutes);
+                            const newSlot = new Timeslot(nextTime, slotMinutes);
                             schedule.push(newSlot);
 
                             nextTime = nextTime.plus(slotDuration);
@@ -1391,6 +1388,64 @@
         },
 
         /**
+         * Load the finalist schedules from the server.
+         * 
+         * @return promise to execute
+         */
+        loadFinalistSchedules: function() {
+            return $.getJSON("../../api/FinalistSchedule", function(data) {
+                $.each(data, function(awardGroup, schedule) {
+                    $.each(schedule.schedule, function(_, scheduleRow) {
+                        _fixFinalistDBRow(scheduleRow);
+
+                        const category = $.finalist.getCategoryByName(scheduleRow.categoryName);
+                        $.finalist.addTeamToCategory(category, scheduleRow.teamNumber);
+                    });
+
+                    $.each(schedule.categories, function(_, finalistCategory) {
+                        const category = $.finalist.getCategoryByName(finalistCategory.categoryName);
+                        $.finalist.setRoom(category, awardGroup, finalistCategory.room);
+
+                        // if the category is in a schedule, then it's scheduled'
+                        $.finalist.setCategoryScheduled(category, true);
+                    });
+                    // _schedules is the array of FinalistDBRow objects
+                    _schedules[awardGroup] = schedule.schedule;
+
+
+                })
+            });
+        },
+        
+        /**
+         * Upload the schedules to the server.
+         * 
+         * @param successCallback called with the server result on success
+         * @param failCallback called with the server result on failure
+         * @return promise to execute
+         */
+        uploadSchedules: function(successCallback, failCallback) {
+            const dataToUpload = JSON.stringify(_schedules);
+            return $.ajax({
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                url: "../../api/FinalistSchedule",
+                data: dataToUpload,
+                success: function(result) {
+                    if (result.success) {
+                        successCallback(result);
+                    } else {
+                        failCallback(result);
+                    }
+                }
+            }).fail(function(result) {
+                failCallback(result);
+            });
+        },
+
+
+        /**
          * Load all data from server.
          * 
          * @param doneCallback
@@ -1413,6 +1468,12 @@
                 failCallback("Finalist Schedule Parameters");
             })
             waitList.push(finalistParamsPromise);
+
+            const finalistSchedulesPromise = $.finalist.loadFinalistSchedules();
+            finalistSchedulesPromise.fail(function() {
+                failCallback("Finalist Schedules");
+            })
+            waitList.push(finalistSchedulesPromise);
 
             $.when.apply($, waitList).done(function() {
                 _save();

@@ -235,6 +235,22 @@ const finalistScheduleModule = {};
         waitList.push($.finalist.uploadScheduleParameters(
             scheduleParamsSuccess, scheduleParamsFail));
 
+        const schedulesSuccess = function(result) {
+            _log("Schdules upload success")
+        };
+        const schedulesFail = function(result) {
+            let message;
+            if (null == result) {
+                message = "Unknown server error";
+            } else {
+                message = result.message;
+            }
+
+            alert("Schedules upload failure: " + message);
+        }
+        waitList.push($.finalist.uploadSchedules(
+            schedulesSuccess, schedulesFail));
+
         $("#wait-dialog").dialog("open");
         $.when.apply($, waitList).done(function() {
             $("#wait-dialog").dialog("close");
