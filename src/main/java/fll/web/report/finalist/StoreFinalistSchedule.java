@@ -26,7 +26,6 @@ import fll.Utilities;
 import fll.db.NonNumericNominees;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.report.StoreNonNumericNominees;
@@ -83,19 +82,6 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
 
       final Collection<FinalistDBRow> rows = jsonMapper.readValue(schedDataStr,
                                                                   FinalistScheduleTypeInformation.INSTANCE);
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Sched Data has "
-            + rows.size()
-            + " rows");
-        for (final FinalistDBRow row : rows) {
-          LOGGER.trace("row category: "
-              + row.getCategoryName()
-              + " time: "
-              + row.getTime()
-              + " team: "
-              + row.getTeamNumber());
-        }
-      }
 
       final Collection<FinalistCategory> categories = jsonMapper.readValue(categoryDataStr,
                                                                            FinalistCategoriesTypeInformation.INSTANCE);

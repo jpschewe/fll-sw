@@ -33,13 +33,12 @@ function FinalistScheduleParameters() {
  * to match fll.web.report.finalist.FinalistDBRow.
  
  * @param time JSJoda.LocalTime, time of the row
- * @param categoryName the category of the row
- * @param teamNumber the team in the row
+ * @param endTime JSJoda.LocalTime, end time of the row
  */
-function FinalistDBRow(categoryName, time, teamNumber) {
-    this.categoryName = categoryName;
+function FinalistDBRow(time, endTime) {
     this.time = time;
-    this.teamNumber = teamNumber;
+    this.endTime = endTime;
+    this.categories = {}; // categoryName -> teamNumber
 }
 
 /**
@@ -54,12 +53,10 @@ function FinalistCategory(categoryName, room) {
 /**
  * Matches fll.web.report.finalist.FinalistSchedule.
  *
- * @param division award group the schedule is for
  * @param categories list of FinalistCategory
  * @param schedule list of FinalistDBRow
  */
-function FinalistSchedule(divison, categories, schedule) {
-    this.division = division;
+function FinalistSchedule(categories, schedule) {
     this.categories = categories;
     this.schedule = schedule;
 }

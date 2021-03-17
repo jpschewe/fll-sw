@@ -111,19 +111,13 @@ and mark draggable things as movable. */
         Schedule</button>
     <br />
 
-    <form id='get_sched_data' method='POST'
-        action='StoreFinalistSchedule'>
-
-        <input type='hidden' id='sched_data' name='sched_data' />
-        <input type='hidden' id='category_data' name='category_data' />
-        <input type='hidden' id='division_data' name='division_data' />
-        <input type='hidden' id='non-numeric-nominees_data'
-            name='non-numeric-nominees_data' />
-        <input type='submit' value='Send Data To Server' />
-        once the schedule is finished and you are connected to the
-        network.
-    </form>
-    <button id='upload'>Test</button>
+    <input type='hidden' id='sched_data' name='sched_data' />
+    <input type='hidden' id='category_data' name='category_data' />
+    <input type='hidden' id='division_data' name='division_data' />
+    <input type='hidden' id='non-numeric-nominees_data'
+        name='non-numeric-nominees_data' />
+    <button id='upload'>Send Data To Server</button>
+    once the schedule is finished and you are connected to the network.
 
     <div id="wait-dialog">
         <p id='wait-dialog_text'>Uploading data. Please wait...</p>

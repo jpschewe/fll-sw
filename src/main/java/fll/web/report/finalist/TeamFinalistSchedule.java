@@ -213,108 +213,114 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
       final TournamentTeam team = tournamentTeams.get(teamNum);
 
       for (final FinalistSchedule schedule : schedules) {
-        final List<FinalistDBRow> finalistTimes = schedule.getScheduleForTeam(teamNum);
         final Map<String, String> rooms = schedule.getRooms();
 
-        if (!finalistTimes.isEmpty()) {
+        final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+        documentBody.appendChild(container);
+        container.setAttribute("font-weight", TITLE_FONT_WEIGHT);
+        container.setAttribute("font-size", TITLE_FONT_SIZE);
+        container.setAttribute("font-family", TITLE_FONT_FAMILY);
+        container.setAttribute("padding-after", "5px");
 
-          final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
-          documentBody.appendChild(container);
-          container.setAttribute("font-weight", TITLE_FONT_WEIGHT);
-          container.setAttribute("font-size", TITLE_FONT_SIZE);
-          container.setAttribute("font-family", TITLE_FONT_FAMILY);
-          container.setAttribute("padding-after", "5px");
+        final Element block1 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        container.appendChild(block1);
+        block1.appendChild(document.createTextNode(String.format("Finalist times for Team %d", team.getTeamNumber())));
 
-          final Element block1 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-          container.appendChild(block1);
-          block1.appendChild(document.createTextNode(String.format("Finalist times for Team %d",
-                                                                   team.getTeamNumber())));
+        final Element block2 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        container.appendChild(block2);
+        block2.appendChild(document.createTextNode(String.format("%s / %s", team.getTeamName(),
+                                                                 team.getOrganization())));
 
-          final Element block2 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-          container.appendChild(block2);
-          block2.appendChild(document.createTextNode(String.format("%s / %s", team.getTeamName(),
-                                                                   team.getOrganization())));
+        final Element block3 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        container.appendChild(block3);
+        block3.appendChild(document.createTextNode(String.format("Award Group: %s", team.getAwardGroup())));
 
-          final Element block3 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-          container.appendChild(block3);
-          block3.appendChild(document.createTextNode(String.format("Award Group: %s", team.getAwardGroup())));
+        final Element table = FOPUtils.createBasicTable(document);
+        documentBody.appendChild(table);
+        table.setAttribute("font-family", VALUE_FONT_FAMILY);
+        table.setAttribute("font-size", VALUE_FONT_SIZE);
 
-          final Element table = FOPUtils.createBasicTable(document);
-          documentBody.appendChild(table);
-          table.setAttribute("font-family", VALUE_FONT_FAMILY);
-          table.setAttribute("font-size", VALUE_FONT_SIZE);
+        table.appendChild(FOPUtils.createTableColumn(document, 1));
+        table.appendChild(FOPUtils.createTableColumn(document, 1));
+        table.appendChild(FOPUtils.createTableColumn(document, 1));
 
-          table.appendChild(FOPUtils.createTableColumn(document, 1));
-          table.appendChild(FOPUtils.createTableColumn(document, 1));
-          table.appendChild(FOPUtils.createTableColumn(document, 1));
+        final Element tableHeader = FOPUtils.createTableHeader(document);
+        table.appendChild(tableHeader);
+        tableHeader.setAttribute("font-weight", TITLE_FONT_WEIGHT);
+        tableHeader.setAttribute("font-size", TITLE_FONT_SIZE);
+        tableHeader.setAttribute("font-family", TITLE_FONT_FAMILY);
+        final Element tableHeaderRow = FOPUtils.createTableRow(document);
+        tableHeader.appendChild(tableHeaderRow);
 
-          final Element tableHeader = FOPUtils.createTableHeader(document);
-          table.appendChild(tableHeader);
-          tableHeader.setAttribute("font-weight", TITLE_FONT_WEIGHT);
-          tableHeader.setAttribute("font-size", TITLE_FONT_SIZE);
-          tableHeader.setAttribute("font-family", TITLE_FONT_FAMILY);
-          final Element tableHeaderRow = FOPUtils.createTableRow(document);
-          tableHeader.appendChild(tableHeaderRow);
+        Element cell = FOPUtils.createTableCell(document, null, "Time");
+        tableHeaderRow.appendChild(cell);
+        FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                            ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+        FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                            FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
-          Element cell = FOPUtils.createTableCell(document, null, "Time");
-          tableHeaderRow.appendChild(cell);
-          FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
-                              ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
-          FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                              FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+        cell = FOPUtils.createTableCell(document, null, "Room");
+        tableHeaderRow.appendChild(cell);
+        FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                            ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+        FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                            FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
-          cell = FOPUtils.createTableCell(document, null, "Room");
-          tableHeaderRow.appendChild(cell);
-          FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
-                              ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
-          FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                              FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+        cell = FOPUtils.createTableCell(document, null, "Category");
+        tableHeaderRow.appendChild(cell);
+        FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                            ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+        FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                            FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
-          cell = FOPUtils.createTableCell(document, null, "Category");
-          tableHeaderRow.appendChild(cell);
-          FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
-                              ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
-          FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                              FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+        final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+        table.appendChild(tableBody);
 
-          final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
-          table.appendChild(tableBody);
+        boolean teamHasSchedule = false;
 
-          for (final FinalistDBRow row : finalistTimes) {
-            final Element tableRow = FOPUtils.createTableRow(document);
-            tableBody.appendChild(tableRow);
+        for (final FinalistDBRow row : schedule.getSchedule()) {
 
-            final String categoryName = row.getCategoryName();
-            String room = rooms.get(categoryName);
-            if (null == room) {
-              room = "";
-            }
+          for (Map.Entry<String, Integer> rowEntry : row.getCategories().entrySet()) {
+            final String categoryName = rowEntry.getKey();
+            final int teamNumber = rowEntry.getValue();
+            if (teamNumber == teamNum) {
+              teamHasSchedule = true;
 
-            cell = FOPUtils.createTableCell(document, null, PdfFinalistSchedule.TIME_FORMAT.format(row.getTime()));
-            tableRow.appendChild(cell);
-            FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
-                                ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
-            FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                                FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+              final Element tableRow = FOPUtils.createTableRow(document);
+              tableBody.appendChild(tableRow);
 
-            cell = FOPUtils.createTableCell(document, null, room);
-            tableRow.appendChild(cell);
-            FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
-                                ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
-            FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                                FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+              final String room = rooms.getOrDefault(categoryName, "");
 
-            cell = FOPUtils.createTableCell(document, null, categoryName);
-            tableRow.appendChild(cell);
-            FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
-                                ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
-            FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                                FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+              cell = FOPUtils.createTableCell(document, null, PdfFinalistSchedule.TIME_FORMAT.format(row.getTime()));
+              tableRow.appendChild(cell);
+              FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                                  ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+              FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                                  FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
-          } // foreach row
-          table.setAttribute("page-break-after", "always");
+              cell = FOPUtils.createTableCell(document, null, room);
+              tableRow.appendChild(cell);
+              FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                                  ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+              FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                                  FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
-        } // non-empty list of teams
+              cell = FOPUtils.createTableCell(document, null, categoryName);
+              tableRow.appendChild(cell);
+              FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                                  ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+              FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                                  FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+            } // team number matches
+          } // foreach cateogry in the row
+
+          if (teamHasSchedule) {
+            documentBody.appendChild(container);
+          }
+
+        } // foreach row in the schedule
+
+        table.setAttribute("page-break-after", "always");
 
       } // foreach schedule
 

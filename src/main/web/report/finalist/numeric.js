@@ -81,8 +81,8 @@ function createTeamTable(teams, currentDivision, currentCategory) {
 }
 
 function updatePage() {
-  var categoryId = $.finalist.getCurrentCategoryId();
-  var currentCategory = $.finalist.getCategoryById(categoryId);
+  const categoryName = $.finalist.getCurrentCategoryName();
+  const currentCategory = $.finalist.getCategoryByName(categoryName);
   if (null == currentCategory) {
     alert("Invalid category ID found: " + categoryId);
     return;
@@ -119,7 +119,7 @@ $(document)
                             $.finalist.getNumericCategories(),
                             function(i, category) {
                               if (category.name != $.finalist.CHAMPIONSHIP_NAME) {
-                                if ($.finalist.getCurrentCategoryId() == category.catId) {
+                                if ($.finalist.getCurrentCategoryName() == category.name) {
                                   foundCurrent = true;
                                 } // current category
                                 if (!foundCurrent) {
@@ -132,14 +132,14 @@ $(document)
                       if (null == prev) {
                         location.href = "non-numeric.html";
                       } else {
-                        $.finalist.setCurrentCategoryId(prev.catId);
+                        $.finalist.setCurrentCategoryName(prev.name);
                         location.href = "numeric.html";
                       }
                     } else {
                       var championshipCategory = $.finalist
                           .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
-                      if ($.finalist.getCurrentCategoryId() == championshipCategory.catId) {
-                        $.finalist.setCurrentCategoryId(prev.catId);
+                      if ($.finalist.getCurrentCategoryName() == championshipCategory.name) {
+                        $.finalist.setCurrentCategoryName(prev.name);
                         location.href = "numeric.html";
                       }
                     }
@@ -151,7 +151,7 @@ $(document)
                   function() {
                     var championshipCategory = $.finalist
                         .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
-                    if ($.finalist.getCurrentCategoryId() == championshipCategory.catId) {
+                    if ($.finalist.getCurrentCategoryName() == championshipCategory.name) {
                       location.href = "schedule.html";
                     } else {
                       var foundCurrent = false;
@@ -163,24 +163,24 @@ $(document)
                                 if (category.name != $.finalist.CHAMPIONSHIP_NAME) {
                                   if (foundCurrent && null == next) {
                                     next = category;
-                                  } else if ($.finalist.getCurrentCategoryId() == category.catId) {
+                                  } else if ($.finalist.getCurrentCategoryName() == category.name) {
                                     foundCurrent = true;
                                   }
                                 }
                               });
                       if (null == next) {
                         $.finalist
-                            .setCurrentCategoryId(championshipCategory.catId);
+                            .setCurrentCategoryName(championshipCategory.name);
                         location.href = "numeric.html";
                       } else {
-                        $.finalist.setCurrentCategoryId(next.catId);
+                        $.finalist.setCurrentCategoryName(next.name);
                         location.href = "numeric.html";
                       }
                     }
                   });
 
-          var categoryId = $.finalist.getCurrentCategoryId();
-          var currentCategory = $.finalist.getCategoryById(categoryId);
+          const categoryName = $.finalist.getCurrentCategoryName();
+          const currentCategory = $.finalist.getCategoryByName(categoryName);
           if (null == currentCategory) {
             alert("Invalid category ID found: " + categoryId);
             return;

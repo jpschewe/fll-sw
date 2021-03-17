@@ -11,15 +11,11 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -271,40 +267,39 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
     mainTableBody.setAttribute("font-family", SCHEDULE_FONT_FAMILY);
     mainTableBody.setAttribute("font-size", SCHEDULE_FONT_SIZE);
 
-    final SortedMap<LocalTime, Map<String, FinalistDBRow>> organized = organizeSchedule(schedule);
-    organized.forEach((timeSlot,
-                       timeData) -> {
+    schedule.getSchedule().forEach(row -> {
       final Element tableRow = FOPUtils.createTableRow(document);
       mainTableBody.appendChild(tableRow);
 
       final Element tCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                     TIME_FORMAT.format(timeSlot));
+                                                     TIME_FORMAT.format(row.getTime()));
       tableRow.appendChild(tCell);
       FOPUtils.addBorders(tCell, ScheduleWriter.STANDARD_BORDER_WIDTH);
       FOPUtils.addPadding(tCell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
                           FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
       categories.stream().forEach((categoryTitle) -> {
-        final Element e = createTeamCell(connection, document, categoryTitle, timeData);
+        final Element e = createTeamCell(connection, document, categoryTitle, row);
         tableRow.appendChild(e);
-      });
+      }); // foreach category
 
-    });
+    }); // foreach time in the schedule
 
     return mainTable;
   }
 
-  private Element createTeamCell(Connection connection,
-                                 Document document,
-                                 String categoryTitle,
-                                 Map<String, FinalistDBRow> timeData) {
+  private Element createTeamCell(final Connection connection,
+                                 final Document document,
+                                 final String categoryTitle,
+                                 final FinalistDBRow row) {
     final Element cell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
     cell.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_CENTER);
 
-    if (timeData.containsKey(categoryTitle)) {
-      final FinalistDBRow scheduleRow = timeData.get(categoryTitle);
+    final Map<String, Integer> rowCategories = row.getCategories();
+    if (rowCategories.containsKey(categoryTitle)) {
+      final int teamNumber = rowCategories.get(categoryTitle);
       try {
-        final Team team = Team.getTeamFromDatabase(connection, scheduleRow.getTeamNumber());
+        final Team team = Team.getTeamFromDatabase(connection, teamNumber);
 
         final Element numEle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
         cell.appendChild(numEle);
@@ -320,7 +315,7 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
 
       } catch (final SQLException e) {
         throw new FLLRuntimeException("Error getting information for team "
-            + scheduleRow.getTeamNumber(), e);
+            + teamNumber, e);
       }
     } else {
       final Element e = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
@@ -333,22 +328,6 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
                         FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
     return cell;
-  }
-
-  /**
-   * Organize the data so that all time slots are together with a map of
-   * categories to data for the category at the time. The map is sorted by time.
-   */
-  private SortedMap<LocalTime, Map<String, FinalistDBRow>> organizeSchedule(final FinalistSchedule schedule) {
-    final SortedMap<LocalTime, Map<String, FinalistDBRow>> organized = new TreeMap<>();
-
-    schedule.getSchedule().forEach(row -> {
-      final LocalTime rowTimeSlow = row.getTime();
-      final Map<String, FinalistDBRow> timeData = organized.computeIfAbsent(rowTimeSlow, k -> new HashMap<>());
-      timeData.put(row.getCategoryName(), row);
-    });
-
-    return organized;
   }
 
 }

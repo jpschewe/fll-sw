@@ -20,7 +20,7 @@ const finalistScheduleModule = {};
     let finalistsCount = {};
 
     /**
-     * Map time string to map of category id to div cell.
+     * Map time string to map of category name to div cell.
      */
     const timeToCells = {};
 
@@ -31,11 +31,11 @@ const finalistScheduleModule = {};
      * 
      * @param searchTime
      *          the time to search for
-     * @param serachCatId
-     *          the category id to search for
+     * @param serachCatName
+     *          the category name to search for
      * @return the cell or null if not found
      */
-    function getCellForTimeAndCategory(searchTime, searchCatId) {
+    function getCellForTimeAndCategory(searchTime, searchCatName) {
         const searchTimeStr = $.finalist.timeToDisplayString(searchTime);
 
         let foundCell = null;
@@ -43,8 +43,8 @@ const finalistScheduleModule = {};
         $.each(timeToCells, function(timeStr, categoryToCells) {
             if (searchTimeStr == timeStr) {
 
-                $.each(categoryToCells, function(catId, cell) {
-                    if (catId == searchCatId) {
+                $.each(categoryToCells, function(catName, cell) {
+                    if (catName == searchCatName) {
                         foundCell = cell;
                     }
                 });
@@ -220,7 +220,7 @@ const finalistScheduleModule = {};
             playoffSchedulesSuccess, playoffSchedulesFail));
 
         const scheduleParamsSuccess = function(result) {
-            _log("Schdule parameters upload success")
+            _log("Schedule parameters upload success")
         };
         const scheduleParamsFail = function(result) {
             let message;
@@ -254,6 +254,8 @@ const finalistScheduleModule = {};
         $("#wait-dialog").dialog("open");
         $.when.apply($, waitList).done(function() {
             $("#wait-dialog").dialog("close");
+        }).fail(function() {
+            $("#wait-dialog").dialog("close");
         });
     }
 
@@ -265,7 +267,7 @@ const finalistScheduleModule = {};
         const schedRows = [];
         $.each(schedule, function(_, slot) {
             $.each($.finalist.getAllScheduledCategories(), function(_, category) {
-                const teamNum = slot.categories[category.catId];
+                const teamNum = slot.categories[category.name];
                 if (teamNum != null) {
                     const dbrow = new FinalistDBRow(category.name, slot.time, teamNum);
                     schedRows.push(dbrow);
@@ -297,8 +299,8 @@ const finalistScheduleModule = {};
         // remove team from all slots with this category
         $.each(schedule, function(i, slot) {
             let foundTeam = false;
-            $.each(slot.categories, function(categoryId, teamNumber) {
-                if (categoryId == category.catId && teamNumber == team.num) {
+            $.each(slot.categories, function(categoryName, teamNumber) {
+                if (categoryName == category.name && teamNumber == team.num) {
                     foundTeam = true;
                 }
             }); // foreach category
@@ -323,23 +325,23 @@ const finalistScheduleModule = {};
         }
 
         // remove warning from source cell as it may become empty
-        const srcCell = getCellForTimeAndCategory(srcSlot.time, category.catId);
+        const srcCell = getCellForTimeAndCategory(srcSlot.time, category.name);
         srcCell.removeClass("overlap-schedule");
         srcCell.removeClass("overlap-playoff");
 
-        if (null == destSlot.categories[category.catId]) {
+        if (null == destSlot.categories[category.catName]) {
             // no team in the destination, just delete this team from the old slot
-            delete srcSlot.categories[category.catId];
+            delete srcSlot.categories[category.catName];
         } else {
-            const oldTeamNumber = destSlot.categories[category.catId];
+            const oldTeamNumber = destSlot.categories[category.catName];
             const oldTeam = $.finalist.lookupTeam(oldTeamNumber);
 
             // clear the destination slot so that the warning check sees the correct
             // state for this team
-            delete destSlot.categories[category.catId];
+            delete destSlot.categories[category.catName];
 
             // move team to the source slot
-            srcSlot.categories[category.catId] = oldTeamNumber;
+            srcSlot.categories[category.catName] = oldTeamNumber;
 
             // check new position to set warnings
             checkForTimeOverlap(srcSlot, oldTeamNumber);
@@ -356,7 +358,7 @@ const finalistScheduleModule = {};
         // newSlot and destSlot are not the same instance.
         // 12/23/2015 JPS - not sure how this could happen, but I must have thought it
         // possible.
-        destSlot.categories[category.catId] = team.num;
+        destSlot.categories[category.catName] = team.num;
 
         // check where the team now is to see what warnings are needed
         checkForTimeOverlap(destSlot, team.num);
@@ -388,9 +390,9 @@ const finalistScheduleModule = {};
 
         const hasPlayoffConflict = $.finalist.hasPlayoffConflict(team, slot);
 
-        $.each(slot.categories, function(categoryId, checkTeamNumber) {
+        $.each(slot.categories, function(name, checkTeamNumber) {
             if (checkTeamNumber == teamNumber) {
-                const cell = getCellForTimeAndCategory(slot.time, categoryId);
+                const cell = getCellForTimeAndCategory(slot.time, name);
                 if (null != cell) {
                     if (numCategories > 1) {
                         cell.addClass('overlap-schedule');
@@ -449,9 +451,9 @@ const finalistScheduleModule = {};
             const cell = createTimeslotCell(slot, category);
             row.append(cell);
 
-            categoriesToCells[category.catId] = cell;
+            categoriesToCells[category.name] = cell;
 
-            const teamNum = slot.categories[category.catId];
+            const teamNum = slot.categories[category.name];
             if (teamNum != null) {
                 const team = $.finalist.lookupTeam(teamNum);
                 const teamDiv = createTeamDiv(team, category);
@@ -463,7 +465,7 @@ const finalistScheduleModule = {};
         timeToCells[$.finalist.timeToDisplayString(slot.time)] = categoriesToCells;
 
         // now check for overlaps in the loaded schedule
-        $.each(teamsInSlot, function(teamNum, ignore) {
+        $.each(teamsInSlot, function(teamNum, _) {
             checkForTimeOverlap(slot, teamNum);
         });
     }
@@ -483,7 +485,7 @@ const finalistScheduleModule = {};
         }); // foreach timeslot
 
         const categoryRows = [];
-        $.each($.finalist.getAllScheduledCategories(), function(i, category) {
+        $.each($.finalist.getAllScheduledCategories(), function(_, category) {
             const cat = new FinalistCategory(category.name, $.finalist.getRoom(category,
                 $.finalist.getCurrentDivision()));
             categoryRows.push(cat);
@@ -498,7 +500,7 @@ const finalistScheduleModule = {};
                 function() {
                     const championshipCategory = $.finalist
                         .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
-                    $.finalist.setCurrentCategoryId(championshipCategory.catId);
+                    $.finalist.setCurrentCategoryName(championshipCategory.name);
                     location.href = "numeric.html";
                 });
 
@@ -522,9 +524,6 @@ const finalistScheduleModule = {};
             // doesn't depend on the division, so can be done only once
             const allNonNumericNominees = $.finalist.prepareNonNumericNomineesToSend();
             $('#non-numeric-nominees_data').val($.toJSON(allNonNumericNominees));
-
-            // update the schedule data before submitting the form
-            $('#get_sched_data').submit(updateScheduleToSend);
 
             $('#regenerate_schedule').click(function() {
                 $.finalist.setSchedule($.finalist.getCurrentDivision(), null);

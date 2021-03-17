@@ -408,7 +408,6 @@ public final class GenerateDB {
                                                         final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("DROP TABLE IF EXISTS finalist_schedule");
       stmt.executeUpdate("DROP TABLE IF EXISTS finalist_categories");
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE finalist_categories (");
@@ -423,18 +422,20 @@ public final class GenerateDB {
       sql.append(")");
       stmt.executeUpdate(sql.toString());
 
+      stmt.executeUpdate("DROP TABLE IF EXISTS finalist_schedules");
       final StringBuilder scheduleSql = new StringBuilder();
-      scheduleSql.append("CREATE TABLE finalist_schedule (");
+      scheduleSql.append("CREATE TABLE finalist_schedules (");
       scheduleSql.append("  tournament INTEGER NOT NULL");
       scheduleSql.append(" ,category LONGVARCHAR NOT NULL");
       scheduleSql.append(" ,judge_time TIME NOT NULL");
+      scheduleSql.append(" ,judge_end_time TIME NOT NULL");
       scheduleSql.append(" ,team_number INTEGER NOT NULL");
       scheduleSql.append(" ,division VARCHAR(32) NOT NULL");
-      scheduleSql.append(" ,CONSTRAINT finalist_schedule_pk PRIMARY KEY (tournament, category, division, judge_time)");
+      scheduleSql.append(" ,CONSTRAINT finalist_schedules_pk PRIMARY KEY (tournament, category, division, judge_time)");
       if (createConstraints) {
-        scheduleSql.append(" ,CONSTRAINT finalist_schedule_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
-        scheduleSql.append(" ,CONSTRAINT finalist_schedule_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
-        scheduleSql.append(" ,CONSTRAINT finalist_schedule_fk3 FOREIGN KEY(tournament, category, division) REFERENCES finalist_categories(tournament, category, division)");
+        scheduleSql.append(" ,CONSTRAINT finalist_schedules_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
+        scheduleSql.append(" ,CONSTRAINT finalist_schedules_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        scheduleSql.append(" ,CONSTRAINT finalist_schedules_fk3 FOREIGN KEY(tournament, category, division) REFERENCES finalist_categories(tournament, category, division)");
       }
       scheduleSql.append(")");
       stmt.executeUpdate(scheduleSql.toString());

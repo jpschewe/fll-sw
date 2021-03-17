@@ -58,7 +58,6 @@
   
 <%FinalistLoad.outputNonNumericNominees(out, application);%>
   
-<%FinalistLoad.outputSchedules(out, application);%>
   $.finalist.setTournament(_loadingTournament);
 
   finalistScheduleLoad.loadUsingApi();

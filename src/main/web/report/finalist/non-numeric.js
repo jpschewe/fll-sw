@@ -30,7 +30,7 @@ $(document).ready(
           }
         });
         if(null != first) {
-          $.finalist.setCurrentCategoryId(first.catId);    
+          $.finalist.setCurrentCategoryName(first.name);    
           location.href="numeric.html";
         } else {
           alert("Internal error, cannot find next category");

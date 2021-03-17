@@ -8,7 +8,10 @@ package fll.web.report.finalist;
 
 import java.io.Serializable;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -19,25 +22,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public final class FinalistDBRow implements Serializable {
 
   /**
-   * @param categoryName {@link #getCategoryName()}
+   * @param endTime {@link #getEndTime()}
    * @param time {@link #getTime()}
-   * @param teamNumber {@link #getTeamNumber()}
+   * @param categories {@link #getCategories()}
    */
-  public FinalistDBRow(@JsonProperty("categoryName") final String categoryName,
-                       @JsonProperty("time") final LocalTime time,
-                       @JsonProperty("teamNumber") final int teamNumber) {
-    this.categoryName = categoryName;
+  public FinalistDBRow(@JsonProperty("time") final LocalTime time,
+                       @JsonProperty("endTime") final LocalTime endTime,
+                       @JsonProperty("categories") final Map<String, Integer> categories) {
     this.time = time;
-    this.teamNumber = teamNumber;
-  }
-
-  private final String categoryName;
-
-  /**
-   * @return name of the category being judged in
-   */
-  public String getCategoryName() {
-    return categoryName;
+    this.endTime = endTime;
+    this.categories = Collections.unmodifiableMap(new HashMap<>(categories));
   }
 
   private final LocalTime time;
@@ -49,13 +43,24 @@ public final class FinalistDBRow implements Serializable {
     return time;
   }
 
-  private final int teamNumber;
+  private final LocalTime endTime;
 
   /**
-   * @return the team number
+   * @return the end time of the finalist session
    */
-  public int getTeamNumber() {
-    return teamNumber;
+  public LocalTime getEndTime() {
+    return endTime;
+  }
+
+  private final Map<String, Integer> categories;
+
+  /**
+   * Specifies the mapping of category names to teams for this row.
+   * 
+   * @return category name to team number
+   */
+  public Map<String, Integer> getCategories() {
+    return categories;
   }
 
   /**

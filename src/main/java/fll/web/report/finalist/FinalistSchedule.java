@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -41,8 +42,10 @@ public class FinalistSchedule implements Serializable {
    */
   public FinalistSchedule(@JsonProperty("categories") final Collection<FinalistCategory> categories,
                           @JsonProperty("schedule") final Collection<FinalistDBRow> schedule) {
-    this.mSchedule = Collections.unmodifiableCollection(new LinkedList<>(schedule));
-    this.categories = Collections.unmodifiableCollection(categories);
+    final List<FinalistDBRow> rows = new LinkedList<>(schedule);
+    rows.sort(FinalistDBRow.TIME_SORT_INSTANCE);
+    this.mSchedule = Collections.unmodifiableCollection(rows);
+    this.categories = Collections.unmodifiableCollection(new LinkedList<>(categories));
 
     for (final FinalistCategory row : categories) {
       mCategoryNames.add(row.getCategoryName());
@@ -62,7 +65,6 @@ public class FinalistSchedule implements Serializable {
                           final int tournament,
                           final String awardGroup)
       throws SQLException {
-    final Collection<FinalistDBRow> newSchedule = new LinkedList<>();
     final Collection<FinalistCategory> newCategories = new LinkedList<>();
 
     try (
@@ -80,22 +82,33 @@ public class FinalistSchedule implements Serializable {
       }
 
       try (
-          PreparedStatement getSchedule = connection.prepareStatement("SELECT category, judge_time, team_number FROM finalist_schedule WHERE tournament = ? AND division = ?")) {
+          PreparedStatement getSchedule = connection.prepareStatement("SELECT category, judge_time, judge_end_time, team_number FROM finalist_schedules WHERE tournament = ? AND division = ?")) {
         getSchedule.setInt(1, tournament);
         getSchedule.setString(2, awardGroup);
+
+        final Map<LocalTime, Map<String, Integer>> categoryInfo = new HashMap<>();
+        final Map<LocalTime, LocalTime> endTimes = new HashMap<>();
         try (ResultSet schedule = getSchedule.executeQuery()) {
           while (schedule.next()) {
-            final String name = schedule.getString(1);
+            final String categoryName = schedule.getString(1);
             final LocalTime judgeTime = schedule.getTime(2).toLocalTime();
-            final int teamNumber = schedule.getInt(3);
+            final LocalTime judgeEndTime = schedule.getTime(3).toLocalTime();
+            final int teamNumber = schedule.getInt(4);
 
-            final FinalistDBRow row = new FinalistDBRow(name, judgeTime, teamNumber);
-            newSchedule.add(row);
-          }
-        }
+            endTimes.put(judgeTime, judgeEndTime);
+            categoryInfo.computeIfAbsent(judgeTime, k -> new HashMap<>()).put(categoryName, teamNumber);
+          } // foreach result
+        } // allocate ResultSet
+
+        final List<FinalistDBRow> rows = categoryInfo.entrySet().stream() //
+                                                     .map(entry -> new FinalistDBRow(entry.getKey(),
+                                                                                     endTimes.get(entry.getKey()),
+                                                                                     entry.getValue())) //
+                                                     .sorted(FinalistDBRow.TIME_SORT_INSTANCE) //
+                                                     .collect(Collectors.toList());
+        this.mSchedule = Collections.unmodifiableCollection(rows);
       }
 
-      this.mSchedule = Collections.unmodifiableCollection(newSchedule);
       this.categories = Collections.unmodifiableCollection(newCategories);
     }
   }
@@ -139,44 +152,10 @@ public class FinalistSchedule implements Serializable {
   /**
    * The full schedule.
    *
-   * @return unmodifiable collection
+   * @return unmodifiable collection sorted by time
    */
   public Collection<FinalistDBRow> getSchedule() {
     return mSchedule; // already unmodifiable from constructor
-  }
-
-  /**
-   * The schedule time slots for the specified category.
-   *
-   * @param category the category to get the schedule for
-   * @return list sorted by time
-   */
-  public List<FinalistDBRow> getScheduleForCategory(final String category) {
-    final List<FinalistDBRow> result = new LinkedList<>();
-    for (final FinalistDBRow row : mSchedule) {
-      if (row.getCategoryName().equals(category)) {
-        result.add(row);
-      }
-    }
-    Collections.sort(result, FinalistDBRow.TIME_SORT_INSTANCE);
-    return result;
-  }
-
-  /**
-   * The schedule time slots for the specified team.
-   *
-   * @param teamNumber the team to get the schedule for
-   * @return list sorted by time
-   */
-  public List<FinalistDBRow> getScheduleForTeam(final int teamNumber) {
-    final List<FinalistDBRow> result = new LinkedList<>();
-    for (final FinalistDBRow row : mSchedule) {
-      if (row.getTeamNumber() == teamNumber) {
-        result.add(row);
-      }
-    }
-    Collections.sort(result, FinalistDBRow.TIME_SORT_INSTANCE);
-    return result;
   }
 
   /**
@@ -194,7 +173,7 @@ public class FinalistSchedule implements Serializable {
       throws SQLException {
 
     try (
-        PreparedStatement deleteSchedPrep = connection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ? AND division = ?")) {
+        PreparedStatement deleteSchedPrep = connection.prepareStatement("DELETE FROM finalist_schedules WHERE tournament = ? AND division = ?")) {
       deleteSchedPrep.setInt(1, tournament);
       deleteSchedPrep.setString(2, awardGroup);
       deleteSchedPrep.executeUpdate();
@@ -220,15 +199,24 @@ public class FinalistSchedule implements Serializable {
     }
 
     try (
-        PreparedStatement insertSchedPrep = connection.prepareStatement("INSERT INTO finalist_schedule (tournament, division, category, judge_time, team_number) VALUES(?, ?, ?, ?, ?)")) {
+        PreparedStatement insertSchedPrep = connection.prepareStatement("INSERT INTO finalist_schedules (tournament, division, category, judge_time, judge_end_time, team_number) VALUES(?, ?, ?, ?, ?, ?)")) {
       insertSchedPrep.setInt(1, tournament);
       insertSchedPrep.setString(2, awardGroup);
       for (final FinalistDBRow row : mSchedule) {
-        insertSchedPrep.setString(3, row.getCategoryName());
+
         insertSchedPrep.setTime(4, Time.valueOf(row.getTime()));
-        insertSchedPrep.setInt(5, row.getTeamNumber());
-        insertSchedPrep.executeUpdate();
-      }
+        insertSchedPrep.setTime(5, Time.valueOf(row.getEndTime()));
+
+        for (final Map.Entry<String, Integer> rowEntry : row.getCategories().entrySet()) {
+          final String categoryName = rowEntry.getKey();
+          final int teamNumber = rowEntry.getValue();
+
+          insertSchedPrep.setString(3, categoryName);
+          insertSchedPrep.setInt(6, teamNumber);
+          insertSchedPrep.executeUpdate();
+        } // foreach category and team mapping
+
+      } // foreach row
     }
 
   }

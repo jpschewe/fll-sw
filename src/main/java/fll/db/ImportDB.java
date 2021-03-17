@@ -911,6 +911,12 @@ public final class ImportDB {
 
     GenerateDB.createFinalistParameterTables(connection, false);
 
+    if (!checkForColumnInTable(connection, "finalist_schedule", "judge_end_time")) {
+      try (Statement stmt = connection.createStatement()) {
+        stmt.executeUpdate("ALTER TABLE finalist_schedule ADD COLUMN judge_end_time TIME DEFAULT judge_time + INTERVAL '20'");
+      }
+    }
+
     setDBVersion(connection, 28);
   }
 
@@ -2021,9 +2027,9 @@ public final class ImportDB {
 
     // insert schedule values last
     try (
-        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_schedule (tournament, category, judge_time, team_number, division) VALUES(?, ?, ?, ?, ?)");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_schedule (tournament, category, judge_time, judge_end_time, team_number, division) VALUES(?, ?, ?, ?, ?, ?)");
 
-        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT category, judge_time, team_number, division FROM finalist_schedule WHERE tournament = ?")) {
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT category, judge_time, judge_end_time, team_number, division FROM finalist_schedule WHERE tournament = ?")) {
 
       destPrep.setInt(1, destTournamentID);
       sourcePrep.setInt(1, sourceTournamentID);
@@ -2031,8 +2037,9 @@ public final class ImportDB {
         while (sourceRS.next()) {
           destPrep.setString(2, sourceRS.getString(1));
           destPrep.setTime(3, sourceRS.getTime(2));
-          destPrep.setInt(4, sourceRS.getInt(3));
-          destPrep.setString(5, sourceRS.getString(4));
+          destPrep.setTime(4, sourceRS.getTime(3));
+          destPrep.setInt(5, sourceRS.getInt(4));
+          destPrep.setString(6, sourceRS.getString(5));
           destPrep.executeUpdate();
         }
       }

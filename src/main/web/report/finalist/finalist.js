@@ -25,9 +25,9 @@
     let _numTeamsAutoSelected;
     let _scheduleParameters;
     let _categoriesVisited;
-    let _currentCategoryId; // category to display with numeric.html
+    let _currentCategoryName; // category to display with numeric.html
     let _playoffSchedules;
-    let _schedules;
+    let _schedules; // awardGroup -> list of FinalistDBRow
 
     function _init_variables() {
         _teams = {};
@@ -38,7 +38,7 @@
         _numTeamsAutoSelected = 1;
         _scheduleParameters = {};
         _categoriesVisited = {};
-        _currentCategoryId = null;
+        _currentCategoryName = null;
         _playoffSchedules = {};
         _schedules = {};
     }
@@ -56,7 +56,7 @@
             _numTeamsAutoSelected);
         fllStorage.set(STORAGE_PREFIX, "_scheduleParameters", _scheduleParameters);
         fllStorage.set(STORAGE_PREFIX, "_categoriesVisited", _categoriesVisited);
-        fllStorage.set(STORAGE_PREFIX, "_currentCategoryId", _currentCategoryId);
+        fllStorage.set(STORAGE_PREFIX, "_currentCategoryName", _currentCategoryName);
         fllStorage.set(STORAGE_PREFIX, "_playoffSchedules", _playoffSchedules);
 
         fllStorage.set(STORAGE_PREFIX, "_schedules", _schedules);
@@ -100,9 +100,9 @@
         if (null != value) {
             _categoriesVisited = value;
         }
-        value = fllStorage.get(STORAGE_PREFIX, "_currentCategoryId");
+        value = fllStorage.get(STORAGE_PREFIX, "_currentCategoryName");
         if (null != value) {
-            _currentCategoryId = value;
+            _currentCategoryName = value;
         }
         value = fllStorage.get(STORAGE_PREFIX, "_playoffSchedules");
         if (null != value) {
@@ -127,7 +127,7 @@
      * @return true if a category with the specified name exists
      */
     function _check_duplicate_category(name) {
-        var duplicate = false;
+        let duplicate = false;
         $.each(_categories, function(_, val) {
             if (val.name == name) {
                 duplicate = true;
@@ -235,12 +235,12 @@
      */
     function _addToScheduleSlotDurations(offset) {
 
-        $.each(_schedules, function(i, schedule) {
+        $.each(_schedules, function(_, schedule) {
             if (null != schedule) {
                 var addToStart = JSJoda.Duration.ofMinutes(0);
                 var addToEnd = offset;
 
-                $.each(schedule, function(k, slot) {
+                $.each(schedule, function(_, slot) {
                     slot.time = slot.time.plus(addToStart);
                     slot.endTime = slot.endTime.plus(addToEnd);
 
@@ -279,6 +279,9 @@
     function _fixFinalistDBRow(row) {
         if (null != row.time && !(row.time instanceof JSJoda.LocalTime)) {
             row.time = JSJoda.LocalTime.parse(row.time);
+        }
+        if (null != row.endTime && !(row.endTime instanceof JSJoda.LocalTime)) {
+            row.endTime = JSJoda.LocalTime.parse(row.endTime);
         }
     }
 
@@ -534,7 +537,7 @@
          */
         getAllTeams: function() {
             var teams = [];
-            $.each(_teams, function(i, val) {
+            $.each(_teams, function(_, val) {
                 teams.push(val);
             });
             return teams;
@@ -547,7 +550,7 @@
          */
         getScoreGroups: function(teams, currentDivision) {
             var scoreGroups = {};
-            $.each(teams, function(i, team) {
+            $.each(teams, function(_, team) {
                 if ($.finalist.isTeamInDivision(team, currentDivision)) {
                     var group = team.judgingGroup;
                     scoreGroups[group] = $.finalist.getNumTeamsAutoSelected();
@@ -602,7 +605,7 @@
             var checkedEnoughTeams = false;
             var prevScores = {};
             $.finalist.sortTeamsByCategory(teams, currentCategory);
-            $.each(teams, function(i, team) {
+            $.each(teams, function(_, team) {
                 if (currentCategory.overall
                     || $.finalist.isTeamInDivision(team, currentDivision)) {
                     if (!checkedEnoughTeams) {
@@ -619,7 +622,7 @@
                                     scoreGroups[group] = scoreGroups[group] - 1;
 
                                     checkedEnoughTeams = true;
-                                    $.each(scoreGroups, function(key, value) {
+                                    $.each(scoreGroups, function(_, value) {
                                         if (value > 0) {
                                             checkedEnoughTeams = false;
                                         }
@@ -674,7 +677,7 @@
          */
         getNonNumericCategories: function() {
             var categories = [];
-            $.each(_categories, function(i, val) {
+            $.each(_categories, function(_, val) {
                 if (!val.numeric) {
                     categories.push(val);
                 }
@@ -698,7 +701,7 @@
          */
         getNumericCategories: function() {
             var categories = [];
-            $.each(_categories, function(i, val) {
+            $.each(_categories, function(_, val) {
                 if (val.numeric) {
                     categories.push(val);
                 }
@@ -722,7 +725,7 @@
          */
         getAllCategories: function() {
             var categories = [];
-            $.each(_categories, function(i, val) {
+            $.each(_categories, function(_, val) {
                 categories.push(val);
             });
             categories.sort(function(a, b) {
@@ -743,8 +746,8 @@
          * @returns {Array} sorted by name
          */
         getAllScheduledCategories: function() {
-            var categories = [];
-            $.each(_categories, function(i, category) {
+            const categories = [];
+            $.each(_categories, function(_, category) {
                 if ($.finalist.isCategoryScheduled(category)) {
                     categories.push(category);
                 }
@@ -763,25 +766,15 @@
         },
 
         /**
-         * Get a category by id
+         * Get a category by name
          * 
          * @param toFind
-         *          the id to find
+         *          the name to find
          * @returns the category or null
          */
-        getCategoryById: function(toFind) {
-            var category = null;
-            $.each(_categories, function(i, val) {
-                if (val.catId == toFind) {
-                    category = val;
-                }
-            });
-            return category;
-        },
-
         getCategoryByName: function(toFind) {
-            var category = null;
-            $.each(_categories, function(i, val) {
+            let category = null;
+            $.each(_categories, function(_, val) {
                 if (val.name == toFind) {
                     category = val;
                 }
@@ -791,11 +784,11 @@
 
         addTeamToCategory: function(category, teamNum) {
             teamNum = parseInt(teamNum, 10);
-            var index = category.teams.indexOf(teamNum);
+            const index = category.teams.indexOf(teamNum);
             if (-1 == index) {
                 if (category.overall) {
                     // clear schedule for all categories
-                    $.each($.finalist.getDivisions(), function(i, division) {
+                    $.each($.finalist.getDivisions(), function(_, division) {
                         _schedules[division] = null;
                     });
                 } else {
@@ -824,7 +817,7 @@
             if (index != -1) {
                 if (category.overall) {
                     // clear all schedules
-                    $.each($.finalist.getDivisions(), function(i, division) {
+                    $.each($.finalist.getDivisions(), function(_, division) {
                         _schedules[division] = null;
                     });
                 } else {
@@ -848,21 +841,21 @@
 
         clearTeamsInCategory: function(category, division) {
             var toRemove = [];
-            $.each(category.teams, function(index, teamNum) {
+            $.each(category.teams, function(_, teamNum) {
                 var team = $.finalist.lookupTeam(teamNum);
                 if (category.overall || $.finalist.isTeamInDivision(team, division)) {
                     toRemove.push(teamNum);
                 }
             });
 
-            $.each(toRemove, function(index, teamNum) {
+            $.each(toRemove, function(_, teamNum) {
                 $.finalist._removeTeamFromCategory(category, teamNum, false);
             });
             _save();
         },
 
-        addTeamToTimeslot: function(timeslot, categoryId, teamNum) {
-            timeslot.categories[categoryId] = teamNum;
+        addTeamToTimeslot: function(timeslot, categoryName, teamNum) {
+            timeslot.categories[categoryName] = teamNum;
         },
 
         clearTimeslot: function(timeslot) {
@@ -872,13 +865,13 @@
         /**
          * Check if this timeslot is busy for the specified category
          */
-        isTimeslotBusy: function(timeslot, categoryId) {
-            return timeslot.categories[categoryId] != null;
+        isTimeslotBusy: function(timeslot, categoryName) {
+            return timeslot.categories[categoryName] != null;
         },
 
         isTeamInTimeslot: function(timeslot, teamNum) {
             var found = false;
-            $.each(timeslot.categories, function(catId, slotTeamNum) {
+            $.each(timeslot.categories, function(_, slotTeamNum) {
                 if (teamNum == slotTeamNum) {
                     found = true;
                 }
@@ -895,7 +888,7 @@
          */
         getSchedule: function(currentDivision) {
             let schedule = _schedules[currentDivision];
-            if (null == schedule) {
+            if (null == schedule || 0 == schedule.length) {
                 schedule = $.finalist.scheduleFinalists(currentDivision);
                 _schedules[currentDivision] = schedule;
                 _save();
@@ -920,10 +913,10 @@
          *         categories that the team is being judged in
          */
         getTeamToCategoryMap: function(division) {
-            var finalistsCount = {};
-            $.each($.finalist.getAllScheduledCategories(), function(i, category) {
-                $.each(category.teams, function(j, teamNum) {
-                    var team = $.finalist.lookupTeam(teamNum);
+            const finalistsCount = {};
+            $.each($.finalist.getAllScheduledCategories(), function(_, category) {
+                $.each(category.teams, function(_, teamNum) {
+                    const team = $.finalist.lookupTeam(teamNum);
                     if (category.overall || $.finalist.isTeamInDivision(team, division)) {
                         if (null == finalistsCount[teamNum]) {
                             finalistsCount[teamNum] = [];
@@ -953,7 +946,7 @@
             // should ensure the minimum amount of time to do the finalist
             // judging
             const sortedTeams = [];
-            $.each(finalistsCount, function(teamNum, categories) {
+            $.each(finalistsCount, function(teamNum, _) {
                 sortedTeams.push(teamNum);
             });
             sortedTeams.sort(function(a, b) {
@@ -977,33 +970,33 @@
             const slotMinutes = $.finalist.getDuration(currentDivision);
             const slotDuration = JSJoda.Duration.ofMinutes(slotMinutes);
             $.finalist.log("Next timeslot starts at " + nextTime + " duration is " + slotDuration);
-            $.each(sortedTeams, function(i, teamNum) {
+            $.each(sortedTeams, function(_, teamNum) {
                 const team = $.finalist.lookupTeam(teamNum);
                 const teamCategories = finalistsCount[teamNum];
-                $.each(teamCategories, function(j, category) {
+                $.each(teamCategories, function(_, category) {
 
                     if ($.finalist.isCategoryScheduled(category)) {
 
                         let scheduled = false;
                         $.each(schedule, function(_, slot) {
                             if (!scheduled
-                                && !$.finalist.isTimeslotBusy(slot, category.catId)
+                                && !$.finalist.isTimeslotBusy(slot, category.name)
                                 && !$.finalist.isTeamInTimeslot(slot, teamNum)
                                 && !$.finalist.hasPlayoffConflict(team, slot)) {
-                                $.finalist.addTeamToTimeslot(slot, category.catId, teamNum);
+                                $.finalist.addTeamToTimeslot(slot, category.name, teamNum);
                                 scheduled = true;
                             }
                         }); // foreach timeslot
 
                         while (!scheduled) {
-                            const newSlot = new Timeslot(nextTime, slotMinutes);
-                            schedule.push(newSlot);
+                            const newRow = new FinalistDBRow(nextTime, nextTime.plus(slotDuration));
+                            schedule.push(newRow);
 
-                            nextTime = nextTime.plus(slotDuration);
+                            nextTime = newRow.endTime;
 
-                            if (!$.finalist.hasPlayoffConflict(team, newSlot)) {
+                            if (!$.finalist.hasPlayoffConflict(team, newRow)) {
                                 scheduled = true;
-                                $.finalist.addTeamToTimeslot(newSlot, category.catId, teamNum);
+                                $.finalist.addTeamToTimeslot(newRow, category.name, teamNum);
                             }
                         }
 
@@ -1034,11 +1027,11 @@
          * @return the slot that was added.
          */
         addSlotToSchedule: function(schedule) {
-            var lastSlot = schedule[schedule.length - 1];
-            var newSlot = new Timeslot(lastSlot.endTime, $.finalist.getDuration($.finalist.getCurrentDivision()));
-            schedule.push(newSlot);
+            const lastRow = schedule[schedule.length - 1];
+            const newRow = new FinalistDBRow(lastRow.endTime, lastRow.endTime.plus($.finalist.getDuration($.finalist.getCurrentDivision())));
+            schedule.push(newRow);
 
-            return newSlot;
+            return newRow;
         },
 
         /**
@@ -1146,13 +1139,13 @@
             return $.finalist.getScheduleParameters(currentDivision).intervalMinutes;
         },
 
-        setCurrentCategoryId: function(catId) {
-            _currentCategoryId = catId;
+        setCurrentCategoryName: function(name) {
+            _currentCategoryName = name;
             _save();
         },
 
-        getCurrentCategoryId: function() {
-            return _currentCategoryId;
+        getCurrentCategoryName: function() {
+            return _currentCategoryName;
         },
 
         displayNavbar: function() {
@@ -1177,15 +1170,15 @@
 
             $("#navbar").append($("<span> - </span>"));
 
-            $.each($.finalist.getNumericCategories(), function(i, category) {
+            $.each($.finalist.getNumericCategories(), function(_, category) {
                 if (category.name != $.finalist.CHAMPIONSHIP_NAME) {
                     if (window.location.pathname.match(/\/numeric.html$/)
-                        && $.finalist.getCurrentCategoryId() == category.catId) {
+                        && $.finalist.getCurrentCategoryName() == category.name) {
                         element = $("<span></span>");
                     } else {
                         element = $("<a href='numeric.html'></a>");
                         element.click(function() {
-                            $.finalist.setCurrentCategoryId(category.catId);
+                            $.finalist.setCurrentCategoryName(category.name);
                         });
                     }
                     element.text(category.name);
@@ -1199,12 +1192,12 @@
             var championshipCategory = $.finalist
                 .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
             if (window.location.pathname.match(/\/numeric.html$/)
-                && $.finalist.getCurrentCategoryId() == championshipCategory.catId) {
+                && $.finalist.getCurrentCategoryName() == championshipCategory.name) {
                 element = $("<span></span>");
             } else {
                 element = $("<a href='numeric.html'></a>");
                 element.click(function() {
-                    $.finalist.setCurrentCategoryId(championshipCategory.catId);
+                    $.finalist.setCurrentCategoryName(championshipCategory.name);
                 });
             }
             element.text($.finalist.CHAMPIONSHIP_NAME);
@@ -1277,9 +1270,9 @@
          */
         prepareNonNumericNomineesToSend: function() {
             var allNonNumericNominees = [];
-            $.each($.finalist.getNonNumericCategories(), function(i, category) {
+            $.each($.finalist.getNonNumericCategories(), function(_, category) {
                 var categoryNominees = [];
-                $.each(category.teams, function(j, teamNumber) {
+                $.each(category.teams, function(_, teamNumber) {
                     var judges = $.finalist.getNominatingJudges(category, teamNumber);
                     var nominee = new Nominee(teamNumber, judges);
                     categoryNominees.push(nominee);
@@ -1395,28 +1388,39 @@
         loadFinalistSchedules: function() {
             return $.getJSON("../../api/FinalistSchedule", function(data) {
                 $.each(data, function(awardGroup, schedule) {
+                    $.each(schedule.categories, function(_, finalistCategory) {
+                        const category = $.finalist.getCategoryByName(finalistCategory.categoryName);
+                        if (null == category) {
+                            alert("Unable to find category with name " + scheduleRow.categoryName);
+                        } else {
+                            $.finalist.setRoom(category, awardGroup, finalistCategory.room);
+
+                            // if the category is in a schedule, then it's scheduled'
+                            $.finalist.setCategoryScheduled(category, true);
+                        }
+                    });
+
                     $.each(schedule.schedule, function(_, scheduleRow) {
                         _fixFinalistDBRow(scheduleRow);
 
-                        const category = $.finalist.getCategoryByName(scheduleRow.categoryName);
-                        $.finalist.addTeamToCategory(category, scheduleRow.teamNumber);
+                        $.each(scheduleRow.categories, function(categoryName, teamNumber) {
+                            const category = $.finalist.getCategoryByName(categoryName);
+                            if (null == category) {
+                                alert("Unable to find category with name " + categoryName);
+                            } else {
+                                $.finalist.addTeamToCategory(category, teamNumber);
+                                // mark category visited so that the numeric nominees don't get reset'
+                                $.finalist.setCategoryVisited(category, awardGroup);
+                            }
+                        })
                     });
 
-                    $.each(schedule.categories, function(_, finalistCategory) {
-                        const category = $.finalist.getCategoryByName(finalistCategory.categoryName);
-                        $.finalist.setRoom(category, awardGroup, finalistCategory.room);
-
-                        // if the category is in a schedule, then it's scheduled'
-                        $.finalist.setCategoryScheduled(category, true);
-                    });
                     // _schedules is the array of FinalistDBRow objects
                     _schedules[awardGroup] = schedule.schedule;
-
-
                 })
             });
         },
-        
+
         /**
          * Upload the schedules to the server.
          * 
@@ -1425,7 +1429,22 @@
          * @return promise to execute
          */
         uploadSchedules: function(successCallback, failCallback) {
-            const dataToUpload = JSON.stringify(_schedules);
+            const scheduleMap = {}
+            $.each(_schedules, function(awardGroup, scheduleRows) {
+                if (null != awardGroup && null != scheduleRows) {
+                    const categoryRows = [];
+                    $.each($.finalist.getAllScheduledCategories(), function(_, category) {
+                        const cat = new FinalistCategory(category.name, $.finalist.getRoom(category,
+                            awardGroup));
+                        categoryRows.push(cat);
+                    }); // foreach category
+
+                    const finalistSchedule = new FinalistSchedule(categoryRows, scheduleRows);
+                    scheduleMap[awardGroup] = finalistSchedule;
+                }
+            })
+
+            const dataToUpload = JSON.stringify(scheduleMap);
             return $.ajax({
                 type: "POST",
                 dataType: "json",
