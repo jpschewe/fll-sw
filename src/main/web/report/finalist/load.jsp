@@ -42,7 +42,6 @@
     $("#wait-dialog").dialog("open");
 
     _log("Loading data");
-<%FinalistLoad.outputDivisions(out, application);%>
   
 <%FinalistLoad.outputTeamVariables(out, application);%>
   

@@ -1463,6 +1463,31 @@
             });
         },
 
+        /**
+          * Load the award groups from the server.
+          * 
+          * @return promise to execute
+          */
+        loadAwardGroups: function() {
+            return $.getJSON("../../api/AwardGroups", function(data) {
+                $.each(data, function(_, awardGroup) {
+                    $.finalist.addDivision(awardGroup);
+                })
+            });
+        },
+
+        /**
+          * Load the playoff brackets from the server.
+          * 
+          * @return promise to execute
+          */
+        loadPlayoffBrackets: function() {
+            return $.getJSON("../../api/PlayoffBrackets", function(data) {
+                $.each(data, function(_, bracket) {
+                    $.finalist.addPlayoffDivision(bracket);
+                })
+            });
+        },
 
         /**
          * Load all data from server.
@@ -1475,6 +1500,18 @@
         loadFromServer: function(doneCallback, failCallback) {
 
             const waitList = [];
+
+            const awardGroupsPromise = $.finalist.loadAwardGroups();
+            awardGroupsPromise.fail(function() {
+                failCallback("Award Groups");
+            })
+            waitList.push(awardGroupsPromise);
+
+            const playoffBracketsPromise = $.finalist.loadPlayoffBrackets();
+            playoffBracketsPromise.fail(function() {
+                failCallback("Playoff Brackets");
+            })
+            waitList.push(playoffBracketsPromise);
 
             const playoffSchedulesPromise = $.finalist.loadPlayoffSchedules();
             playoffSchedulesPromise.fail(function() {
