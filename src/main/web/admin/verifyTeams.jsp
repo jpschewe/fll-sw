@@ -6,6 +6,8 @@
 <%@ page import="javax.sql.DataSource"%>
 <%@ page import="java.sql.Connection"%>
 
+<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+
 <%
 final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();

@@ -65,9 +65,8 @@ public class CreateUser extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
-    if (!auth.isAdmin()
-        && !auth.getInSetup()) {
-      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), true)) {
       return;
     }
 

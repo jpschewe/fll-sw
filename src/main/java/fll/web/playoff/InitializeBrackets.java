@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
@@ -26,10 +27,11 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Initialize playoff brackets.
@@ -45,6 +47,11 @@ public class InitializeBrackets extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
 
     final StringBuilder message = new StringBuilder();
 
@@ -55,11 +62,9 @@ public class InitializeBrackets extends BaseFLLServlet {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-    Connection connection = null;
 
     final String redirect = "index.jsp";
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
                                                                             PlayoffSessionData.class);
@@ -103,8 +108,6 @@ public class InitializeBrackets extends BaseFLLServlet {
           + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving team data into the database", sqle);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
     SessionAttributes.appendToMessage(session, message.toString());

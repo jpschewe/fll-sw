@@ -18,6 +18,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +26,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
+import fll.web.SessionAttributes;
 import fll.web.playoff.Playoff;
 
 /**
@@ -38,6 +41,13 @@ public class PlayoffBracketsServlet extends HttpServlet {
                              final HttpServletResponse response)
       throws IOException, ServletException {
     final ServletContext application = getServletContext();
+    final HttpSession session = request.getSession();
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.isAdmin()) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+      return;
+    }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {

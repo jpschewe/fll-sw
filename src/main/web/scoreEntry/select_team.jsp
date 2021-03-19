@@ -1,5 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
+<fll-sw:required-roles roles="REF" allowSetup="false" />
+
 <% fll.web.scoreEntry.SelectTeam.populateContext(application, pageContext);%>
 
 <html>

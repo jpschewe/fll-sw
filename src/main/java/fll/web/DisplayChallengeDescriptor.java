@@ -9,6 +9,7 @@ package fll.web;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -23,7 +24,6 @@ import org.w3c.dom.ProcessingInstruction;
 
 import fll.Utilities;
 import fll.db.GlobalParameters;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -38,10 +38,14 @@ public class DisplayChallengeDescriptor extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.PUBLIC), false)) {
+      return;
+    }
+
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
       // get challenge document from the database as it will be modified to
       // include the stylesheet information and I don't want to propagate that.
@@ -57,8 +61,6 @@ public class DisplayChallengeDescriptor extends BaseFLLServlet {
       XMLUtils.writeXML(challengeDocument, response.getWriter(), Utilities.DEFAULT_CHARSET.name());
     } catch (final SQLException sqle) {
       throw new RuntimeException("Error talking to the database", sqle);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }

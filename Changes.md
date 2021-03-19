@@ -1,4 +1,13 @@
 * #909 - Use time picker widget when choosing start and end times in the finalist scheduling workflow
+* #887 - security requirements are  handled on each page now rather than in the central initialize method
+
+Release 15.9.1
+==============
+* #911, #918 - Allow the awards report to be output when there are no performance scores
+
+Release 15.9.0
+==============
+* #912 - Use the order of subjective categories in the challenge description for the awards report
 * #914 - Fix parsing of LocalTime in javascript by using the JSJoda time package
 * #905 - Make tab to skip over read-only cells on non-numeric categories page
 * #904 - Add FLL-SW version information to bug reports

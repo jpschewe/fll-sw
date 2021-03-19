@@ -1,5 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<fll-sw:required-roles roles="PUBLIC" allowSetup="false" />
+
 <html>
 <head>
 <link rel="stylesheet" type="text/css"

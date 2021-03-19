@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -38,7 +39,10 @@ import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.util.FP;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.TeamScore;
 import fll.xml.AbstractGoal;
@@ -74,6 +78,12 @@ public class PerformanceScoreReport extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
+
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);

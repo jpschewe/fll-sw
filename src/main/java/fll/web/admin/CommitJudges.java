@@ -26,8 +26,10 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -44,6 +46,12 @@ public class CommitJudges extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE), false)) {
+      return;
+    }
+
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Top of CommitJudges.processRequest");
     }

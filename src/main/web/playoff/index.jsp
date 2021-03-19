@@ -1,5 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+
 <%
 fll.web.playoff.PlayoffIndex.populateContext(application, session, pageContext);
 %>

@@ -9,6 +9,7 @@ package fll.web.admin;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -22,10 +23,11 @@ import fll.db.Queries;
 import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.web.WebUtils;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * @see ScheduleWriter#outputSubjectiveSchedulesByCategory(TournamentSchedule,
@@ -42,10 +44,14 @@ public class SubjectiveScheduleByCategory extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
@@ -65,8 +71,6 @@ public class SubjectiveScheduleByCategory extends BaseFLLServlet {
     } catch (final SQLException sqle) {
       LOGGER.error(sqle.getMessage(), sqle);
       throw new RuntimeException("Error saving team data into the database", sqle);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 

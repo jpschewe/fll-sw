@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><fll copyright="" revision="21" schemaVersion="3" title="2020 Minnesota FIRST LEGO League - RePLAY" winner="HIGH">
+<?xml version="1.0" encoding="UTF-8"?><fll copyright="" revision="22" schemaVersion="3" title="2020 Minnesota FIRST LEGO League - RePLAY" winner="HIGH">
   <Performance minimumScore="0.00" weight="1.00">
     <goal initialValue="0.00" max="1.00" min="0.00" multiplier="25.00" name="m00_small_inspection_area" required="false" scoreType="INTEGER" title="M00 - ALL Equipment Fits in Small Inspection Area"/>
     <goalGroup title="M07">
@@ -671,7 +671,7 @@
           <range max="6" min="4" shortDescription="Partially clear mission strategy" title="Developing">
             <description/>
           </range>
-          <range max="9" min="7" shortDescription="Fully clear mssion strategy" title="Accomplished">
+          <range max="9" min="7" shortDescription="Fully clear mission strategy" title="Accomplished">
             <description/>
           </range>
           <range max="12" min="10" shortDescription="" title="Exceeds">
@@ -846,19 +846,22 @@
       </goal>
     </goalGroup>
   </subjectiveCategory>
-  <nonNumericCategory perAwardGroup="true" title="Breakthrough Award">
+  <nonNumericCategory perAwardGroup="false" title="Breakthrough Award">
     <description>A team that made significant progress in their confidence and capability and who understand that what they discover is more important than what they win.</description>
   </nonNumericCategory>
-  <nonNumericCategory perAwardGroup="true" title="Rising All-Star">
+  <nonNumericCategory perAwardGroup="false" title="Rising All-Star">
     <description>A team that the judges notice and expect great things from in the future.</description>
   </nonNumericCategory>
-  <nonNumericCategory perAwardGroup="true" title="Motivate">
+  <nonNumericCategory perAwardGroup="false" title="Motivate">
     <description>A team that embraces the culture of FIRST LEGO League through team building, team spirit and displayed enthusiasm. </description>
   </nonNumericCategory>
-  <nonNumericCategory perAwardGroup="true" title="Engineering Excellence">
+  <nonNumericCategory perAwardGroup="false" title="Engineering Excellence">
     <description>This award celebrates a team with an efficiently designed robot, an innovative project solution that effectively addresses the season challenge and great Core Values evident in all they do.</description>
   </nonNumericCategory>
   <nonNumericCategory perAwardGroup="false" title="Innovation Project Model">
     <description>Referee Submitted Award for most Creative Innovation Project presented by team </description>
+  </nonNumericCategory>
+  <nonNumericCategory perAwardGroup="false" title="Creative Presentation">
+    <description>Creative Presentation is presented to the team whose presentation is both creative and well presented.</description>
   </nonNumericCategory>
 </fll>

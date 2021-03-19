@@ -2,6 +2,8 @@
   
 <%@ page import="fll.web.admin.Tables" %>
   
+<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+  
 <html>
   <head>
     <title>Table Labels</title>

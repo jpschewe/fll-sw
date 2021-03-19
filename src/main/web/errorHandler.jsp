@@ -2,6 +2,8 @@
 
 <%@ page isErrorPage="true"%>
 
+<fll-sw:required-roles roles="PUBLIC" allowSetup="false" />
+
 <html>
 <head>
 <title>An error has occurred</title>

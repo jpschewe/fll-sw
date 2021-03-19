@@ -1,5 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<fll-sw:required-roles roles="PUBLIC" allowSetup="true" />
+
 <% fll.web.DoLogin.storeParameters(request, session); %>
 
 <!DOCTYPE HTML>

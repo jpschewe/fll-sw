@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -27,11 +28,12 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.web.playoff.Playoff;
 import fll.xml.ChallengeDescription;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Gather the data required for scoreEntry.jsp.
@@ -45,9 +47,16 @@ public class GatherScoreEntryData extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
-    Connection connection = null;
-    try {
-      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.REF), false)) {
+      return;
+    }
+
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
       // support the unverified runs select box
       final String lTeamNum = request.getParameter("TeamNumber");
@@ -70,8 +79,6 @@ public class GatherScoreEntryData extends BaseFLLServlet {
         runNumberStr = request.getParameter("RunNumber");
         teamNumber = Utilities.getIntegerNumberFormat().parse(lTeamNum).intValue();
       }
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
       final int tournament = Queries.getCurrentTournament(connection);
       final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament);
       final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
@@ -193,8 +200,6 @@ public class GatherScoreEntryData extends BaseFLLServlet {
       throw new RuntimeException(pe);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 

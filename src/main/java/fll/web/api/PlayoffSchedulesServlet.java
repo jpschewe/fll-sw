@@ -53,7 +53,6 @@ public class PlayoffSchedulesServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    // only admins can access the advancing teams
     if (!auth.isAdmin()) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
@@ -86,7 +85,6 @@ public class PlayoffSchedulesServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    // only admins can edit the advancing teams
     if (!auth.isAdmin()) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;

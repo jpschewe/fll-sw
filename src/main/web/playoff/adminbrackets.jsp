@@ -1,5 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<fll-sw:required-roles roles="ADMIN,REF" allowSetup="false" />
+
 <%
 fll.web.playoff.AdminBrackets.populateContext(request, application, pageContext);
 %>

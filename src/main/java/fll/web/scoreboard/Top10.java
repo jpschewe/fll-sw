@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -36,8 +37,10 @@ import fll.db.TournamentParameters;
 import fll.flltools.displaySystem.list.SetArray;
 import fll.util.FP;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.web.report.FinalComputedScores;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
@@ -67,6 +70,12 @@ public class Top10 extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.PUBLIC), false)) {
+      return;
+    }
+
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Entering doPost");
     }
