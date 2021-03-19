@@ -313,7 +313,7 @@ function initNonNumericWinners() {
                 });
 
                 var enterNewTeam = true;
-                $.each(_nonNumericAwardWinnerData, function(i, winner) {
+                $.each(_nonNumericAwardWinners, function(i, winner) {
                     if (winner.name == name && winner.awardGroup == awardGroup) {
                         addTeam(winner, _nonNumericAwardWinnerData, categoryNameFunc,
                             awardGroup, teamList);
@@ -362,8 +362,8 @@ function initNonNumericOverallWinners() {
             });
 
             var enterNewTeam = true;
-            $.each(_nonNumericOverallAwardWinnerData, function(i, winner) {
-                if (winner.name == name && winner.awardGroup == awardGroup) {
+            $.each(_nonNumericOverallAwardWinners, function(i, winner) {
+                if (winner.name == name) {
                     addTeam(winner, _nonNumericOverallAwardWinnerData, categoryNameFunc,
                         null, teamList);
                     enterNewTeam = false;

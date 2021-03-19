@@ -6,6 +6,7 @@
 
 "use-strict";
 
+
 function selectJudgingGroup(group) {
     $.subjective.setCurrentJudgingGroup(group);
     $.mobile.navigate("#choose-category-page");
@@ -352,13 +353,13 @@ function selectTeam(team) {
 
 function populateTeams() {
     $("#teams-list_teams").empty();
-    var teams = $.subjective.getCurrentTeams();
+    const timeFormatter = JSJoda.DateTimeFormatter.ofPattern("HH:mm");
+    const teams = $.subjective.getCurrentTeams();
     $.each(teams, function(i, team) {
         var time = $.subjective.getScheduledTime(team.teamNumber);
         var timeStr = null;
         if (null != time) {
-            timeStr = time.getHours().toString().padL(2, "0") + ":"
-                + time.getMinutes().toString().padL(2, "0");
+            timeStr = time.format(timeFormatter);
         }
 
         var scoreStr;
@@ -483,6 +484,9 @@ function createNewScore() {
     score.judge = $.subjective.getCurrentJudge().id;
     score.teamNumber = $.subjective.getCurrentTeam().teamNumber;
     score.note = null;
+    score.goalComments = {};
+    score.commentThinkAbout = null;
+    score.commentGreatJob = null;
 
     return score;
 }
@@ -610,6 +614,12 @@ function addRubricToScoreEntry(table, goal, ranges) {
                                 openCommentButton.removeClass("comment-entered");
                             }
                         });
+
+                    $("#enter-score-comment-" + goal.name).popup({
+                        afteropen: function(event, ui) {
+                            $("#enter-score-comment-" + goal.name + "-text").focus();
+                        }
+                    });
 
                 } else {
                     borderClass = "border-right";
@@ -913,7 +923,12 @@ $(document)
                         + goal.name
                         + "-button");
 
-                    var comment = score.goalComments[goal.name];
+                    var comment;
+                    if (score.goalComments) {
+                        comment = score.goalComments[goal.name];
+                    } else {
+                        comment = "";
+                    }
                     if (!isBlank(comment)) {
                         openCommentButton.addClass("comment-entered");
                     } else {
@@ -1025,6 +1040,24 @@ $(document).on("pageinit", "#enter-score-page", function(event) {
         updateGreatJobButtonBackground);
     $("#enter-score-comment-think-about-close").click(
         updateThinkAboutButtonBackground);
+
+    $("#enter-score-comment-great-job").popup({
+        afteropen: function(event, ui) {
+            $("#enter-score-comment-great-job-text").focus();
+        }
+    });
+
+    $("#enter-score-comment-think-about").popup({
+        afteropen: function(event, ui) {
+            $("#enter-score-comment-think-about-text").focus();
+        }
+    });
+
+    $("#enter-score-note").popup({
+        afteropen: function(event, ui) {
+            $("#enter-score-note-text").focus();
+        }
+    });
 
 });
 

@@ -212,18 +212,18 @@ function addTeam(category) {
   });
 
   var nameEle = $("<input id='" + teamNameId(category.catId, teamIdx)
-      + "' readonly/>");
+      + "' readonly disabled/>");
   teamEle.append(nameEle);
   var orgEle = $("<input id='" + teamOrgId(category.catId, teamIdx)
-      + "' readonly/>");
+      + "' readonly disabled/>");
   teamEle.append(orgEle);
 
   var judgingStationEle = $("<input id='"
-      + teamJudgingStationId(category.catId, teamIdx) + "' readonly/>");
+      + teamJudgingStationId(category.catId, teamIdx) + "' readonly disabled/>");
   teamEle.append(judgingStationEle);
 
   var judgesEle = $("<input id='"
-      + teamJudgesId(category.catId, teamIdx) + "' readonly/>");
+      + teamJudgesId(category.catId, teamIdx) + "' readonly disabled/>");
   teamEle.append(judgesEle);
 
   var deleteButton = $("<button id='" + teamDeleteId(category.catId, teamIdx)

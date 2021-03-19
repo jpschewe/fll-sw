@@ -199,7 +199,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
         <li>
             <form
-                ACTION="<c:url value='/report/finalist/PrivateFinalistSchedule' />"
+                ACTION="<c:url value='/report/finalist/PdfFinalistSchedule' />"
                 METHOD='POST' target="_blank">
                 <select name='division'>
                     <c:forEach var="division"
@@ -207,26 +207,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
                         <option value='${division }'>${division }</option>
                     </c:forEach>
                 </select>
-                <input type='submit'
-                    value='Private Finalist Schedule (PDF)' />
-                This displays the finalist schedule for all categories.
-            </form>
-        </li>
-
-        <li>
-            <form
-                ACTION="<c:url value='/report/finalist/PublicFinalistSchedule' />"
-                METHOD='POST' target="_blank">
-                <select name='division'>
-                    <c:forEach var="division"
-                        items="${finalistDivisions }">
-                        <option value='${division }'>${division }</option>
-                    </c:forEach>
-                </select>
-                <input type='submit'
-                    value='Public Finalist Schedule (PDF)' />
-                This displays the finalist schedule for public
-                categories.
+                <input type='submit' value='Finalist Schedule (PDF)' />
             </form>
         </li>
 
