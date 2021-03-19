@@ -46,7 +46,10 @@ import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
 import fll.util.FP;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.Goal;
@@ -82,6 +85,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
 
     if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/FinalComputedScores")) {
       return;

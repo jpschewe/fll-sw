@@ -2,6 +2,8 @@
 
 <%@ page import="fll.web.scoreEntry.ScoreEntry"%>
 
+<fll-sw:required-roles roles="REF" allowSetup="false" />
+
 <%
     fll.web.scoreEntry.ScoreEntry.populateContext(request, pageContext);
 %>

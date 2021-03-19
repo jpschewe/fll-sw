@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -26,9 +27,11 @@ import fll.Utilities;
 import fll.db.NonNumericNominees;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
-
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
+import fll.web.UserRole;
 
 /**
  * Store the data from the non-numeric nominees page.
@@ -44,13 +47,16 @@ public class StoreNonNumericNominees extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
 
     final StringBuilder message = new StringBuilder();
 
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
       final int tournament = Queries.getCurrentTournament(connection);
 
@@ -63,9 +69,8 @@ public class StoreNonNumericNominees extends BaseFLLServlet {
 
       // decode JSON
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
-      
+
       LOGGER.debug("Storing nominees: {}", nomineesStr);
-      
 
       final Collection<NonNumericNominees> nominees = jsonMapper.readValue(nomineesStr,
                                                                            NonNumericNomineesTypeInformation.INSTANCE);

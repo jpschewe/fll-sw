@@ -1,6 +1,8 @@
 <%@page import="fll.web.DisplayInfo"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+
 <%
 fll.web.admin.RemoteControl.populateContext(application, pageContext);
 %>

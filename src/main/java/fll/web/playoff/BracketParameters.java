@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -23,10 +24,11 @@ import javax.sql.DataSource;
 
 import fll.db.TableInformation;
 import fll.util.FLLRuntimeException;
-
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.xml.BracketSortType;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -85,44 +87,48 @@ public class BracketParameters extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    Connection connection = null;
-    PreparedStatement delete = null;
-    PreparedStatement insert = null;
-    try {
-      final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
-                                                                            PlayoffSessionData.class);
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
 
-      final String sortStr = request.getParameter("sort");
-      if (null == sortStr
-          || "".equals(sortStr)) {
-        throw new FLLRuntimeException("Missing parameter 'sort'");
-      }
+    final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
+                                                                          PlayoffSessionData.class);
 
-      final BracketSortType sort = BracketSortType.valueOf(sortStr);
+    final String sortStr = request.getParameter("sort");
+    if (null == sortStr
+        || "".equals(sortStr)) {
+      throw new FLLRuntimeException("Missing parameter 'sort'");
+    }
 
-      data.setSort(sort);
+    final BracketSortType sort = BracketSortType.valueOf(sortStr);
 
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    data.setSort(sort);
 
-      delete = connection.prepareStatement("DELETE FROM table_division" //
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
+
+      try (PreparedStatement delete = connection.prepareStatement("DELETE FROM table_division" //
           + " WHERE tournament = ?" //
           + " AND playoff_division = ?"//
-      );
-      delete.setInt(1, data.getCurrentTournament().getTournamentID());
-      delete.setString(2, data.getBracket());
-      delete.executeUpdate();
+      )) {
+        delete.setInt(1, data.getCurrentTournament().getTournamentID());
+        delete.setString(2, data.getBracket());
+        delete.executeUpdate();
+      }
 
-      insert = connection.prepareStatement("INSERT INTO table_division (tournament, playoff_division, table_id) VALUES (?, ?, ?)");
-      insert.setInt(1, data.getCurrentTournament().getTournamentID());
-      insert.setString(2, data.getBracket());
-      final String[] tables = request.getParameterValues("tables");
-      if (null != tables) {
-        for (final String idStr : tables) {
-          final int id = Integer.parseInt(idStr);
-          insert.setInt(3, id);
-          insert.executeUpdate();
+      try (
+          PreparedStatement insert = connection.prepareStatement("INSERT INTO table_division (tournament, playoff_division, table_id) VALUES (?, ?, ?)")) {
+        insert.setInt(1, data.getCurrentTournament().getTournamentID());
+        insert.setString(2, data.getBracket());
+        final String[] tables = request.getParameterValues("tables");
+        if (null != tables) {
+          for (final String idStr : tables) {
+            final int id = Integer.parseInt(idStr);
+            insert.setInt(3, id);
+            insert.executeUpdate();
+          }
         }
       }
 
@@ -132,10 +138,6 @@ public class BracketParameters extends BaseFLLServlet {
       final String errorMessage = "There was an error talking to the database";
       LOGGER.error(errorMessage, e);
       throw new FLLRuntimeException(errorMessage, e);
-    } finally {
-      SQLFunctions.close(delete);
-      SQLFunctions.close(insert);
-      SQLFunctions.close(connection);
     }
 
     response.sendRedirect(response.encodeRedirectURL("InitializeBrackets"));

@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -22,10 +23,11 @@ import javax.sql.DataSource;
 import fll.db.Queries;
 import fll.db.TeamPropertyDifference;
 import fll.db.TeamPropertyDifference.TeamProperty;
-
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 
 /**
  * Commit changes made on resolveMissingTeams.jsp.
@@ -43,6 +45,12 @@ public class CommitTeamChanges extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
+
     final StringBuilder message = new StringBuilder();
     final ImportDbSessionInfo sessionInfo = SessionAttributes.getNonNullAttribute(session,
                                                                                   ImportDBDump.IMPORT_DB_SESSION_KEY,

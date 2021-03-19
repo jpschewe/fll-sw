@@ -1,5 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<fll-sw:required-roles roles="JUDGE" allowSetup="false" />
+
 <%@ page import="fll.web.report.finalist.FinalistLoad"%>
 
 <!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>

@@ -3,6 +3,7 @@
     <jsp:forward page="/login.jsp"></jsp:forward>
 </c:if>
 
+<fll-sw:required-roles roles="ADMIN" allowSetup="true" />
 
 <%
   fll.web.setup.SetupIndex.populateContext(application, pageContext);

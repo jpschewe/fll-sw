@@ -19,6 +19,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -39,8 +40,11 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.GatherBugReport;
+import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -65,11 +69,16 @@ public final class DumpDB extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
 
     final String label = "";
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    final ChallengeDescription challengeDescription= ApplicationAttributes.getChallengeDescription(application);
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     try (Connection connection = datasource.getConnection()) {
 
       exportDatabase(response, application, label, challengeDescription, connection);
@@ -85,7 +94,7 @@ public final class DumpDB extends BaseFLLServlet {
    * @param application used to get some information for the dump
    * @param label the label to use, may be null. Appended to the end of the
    *          filename before the suffix.
-   * @param challengeDescription the challenge 
+   * @param challengeDescription the challenge
    * @param connection database connection
    * @throws SQLException if there is an error reading from the database
    * @throws IOException if there is an error writing to the response

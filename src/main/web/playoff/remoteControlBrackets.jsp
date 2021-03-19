@@ -3,6 +3,8 @@
 
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<fll-sw:required-roles roles="PUBLIC" allowSetup="false" />
+
 <%@ page import="fll.web.playoff.RemoteControlBrackets"%>
 
 <%

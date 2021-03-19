@@ -13,6 +13,7 @@ import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -28,8 +29,10 @@ import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 
 /**
  * Create a new playoff division.
@@ -73,6 +76,12 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
+
     final StringBuilder message = new StringBuilder();
 
     String redirect = "index.jsp";

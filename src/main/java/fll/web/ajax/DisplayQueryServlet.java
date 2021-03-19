@@ -8,6 +8,7 @@ package fll.web.ajax;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -20,8 +21,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.DisplayInfo;
+import fll.web.SessionAttributes;
+import fll.web.UserRole;
 
 /**
  * Send big screen display data via JavaScript, to avoid network-timeout induced
@@ -29,13 +33,19 @@ import fll.web.DisplayInfo;
  */
 @WebServlet("/ajax/DisplayQuery")
 public class DisplayQueryServlet extends BaseFLLServlet {
-  
+
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.PUBLIC), false)) {
+      return;
+    }
+
     final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
 
     final String url = pickURL(displayInfo, request);

@@ -6,6 +6,8 @@
 <%@ page import="java.util.List"%>
 <%@ page import="fll.Utilities"%>
 
+<fll-sw:required-roles roles="PUBLIC" allowSetup="false" />
+
 <%
 //All logos shall be located under sponsor_logos in the fll web folder.
 String imagePath = application.getRealPath("/sponsor_logos");

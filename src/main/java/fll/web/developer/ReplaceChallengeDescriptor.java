@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -25,8 +26,11 @@ import org.apache.commons.fileupload.FileUploadException;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
+import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 
@@ -44,6 +48,12 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
+
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Top of ReplaceChallengeDescriptor.doPost");
     }

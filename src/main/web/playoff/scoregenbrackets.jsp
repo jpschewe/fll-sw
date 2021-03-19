@@ -10,6 +10,8 @@
 <%@ page import="org.w3c.dom.Document"%>
 <%@ page import="java.util.List"%>
 
+<fll-sw:required-roles roles="ADMIN,REF" allowSetup="false" />
+
 <script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
 
 

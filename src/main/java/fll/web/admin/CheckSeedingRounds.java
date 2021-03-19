@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -27,11 +28,12 @@ import fll.Team;
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.web.playoff.PlayoffIndex;
 import fll.web.playoff.PlayoffSessionData;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Check seeding round information for teams. Redirects to
@@ -48,10 +50,14 @@ public class CheckSeedingRounds extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
+
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
       final StringBuilder message = new StringBuilder();
 
       final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
@@ -68,8 +74,6 @@ public class CheckSeedingRounds extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("Error talking to the database", e);
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }

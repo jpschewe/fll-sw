@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
@@ -46,7 +47,10 @@ import fll.db.OverallAwardWinner;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
@@ -68,6 +72,12 @@ public class AwardsReport extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
+
     if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/AwardsReport")) {
       return;
     }
