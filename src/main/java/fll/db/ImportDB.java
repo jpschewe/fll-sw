@@ -911,9 +911,9 @@ public final class ImportDB {
 
     GenerateDB.createFinalistParameterTables(connection, false);
 
-    if (!checkForColumnInTable(connection, "finalist_schedule", "judge_end_time")) {
+    if (!checkForColumnInTable(connection, "finalist_schedules", "judge_end_time")) {
       try (Statement stmt = connection.createStatement()) {
-        stmt.executeUpdate("ALTER TABLE finalist_schedule ADD COLUMN judge_end_time TIME DEFAULT judge_time + INTERVAL '20'");
+        stmt.executeUpdate("ALTER TABLE finalist_schedules ADD COLUMN judge_end_time TIME DEFAULT judge_time + INTERVAL '20'");
       }
     }
 
@@ -991,7 +991,7 @@ public final class ImportDB {
           + " VALUES (?, ?, ?)");
           PreparedStatement getTournaments = connection.prepareStatement("SELECT tournament_id from Tournaments");
           PreparedStatement getFinalistSchedule = connection.prepareStatement("SELECT DISTINCT category, team_number " //
-              + " FROM finalist_schedule" //
+              + " FROM finalist_schedules" //
               + " WHERE tournament = ?")) {
 
         try (ResultSet tournaments = getTournaments.executeQuery()) {
@@ -1990,7 +1990,7 @@ public final class ImportDB {
 
     // do deletes first
     try (
-        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ?")) {
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_schedules WHERE tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
     }
@@ -2027,9 +2027,9 @@ public final class ImportDB {
 
     // insert schedule values last
     try (
-        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_schedule (tournament, category, judge_time, judge_end_time, team_number, division) VALUES(?, ?, ?, ?, ?, ?)");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_schedules (tournament, category, judge_time, judge_end_time, team_number, division) VALUES(?, ?, ?, ?, ?, ?)");
 
-        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT category, judge_time, judge_end_time, team_number, division FROM finalist_schedule WHERE tournament = ?")) {
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT category, judge_time, judge_end_time, team_number, division FROM finalist_schedules WHERE tournament = ?")) {
 
       destPrep.setInt(1, destTournamentID);
       sourcePrep.setInt(1, sourceTournamentID);
