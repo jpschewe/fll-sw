@@ -903,7 +903,8 @@ public final class ImportDB {
 
     if (!checkForColumnInTable(connection, "finalist_schedule", "judge_end_time")) {
       try (Statement stmt = connection.createStatement()) {
-        stmt.executeUpdate("ALTER TABLE finalist_schedule ADD COLUMN judge_end_time TIME DEFAULT judge_time + INTERVAL '20'");
+        stmt.executeUpdate("ALTER TABLE finalist_schedule ADD COLUMN judge_end_time TIME DEFAULT NULL");
+        stmt.executeUpdate("UPDATE finalist_schedule SET judge_end_time = judge_time + 20 MINUTE WHERE judge_end_time IS NULL");
       }
     }
 
