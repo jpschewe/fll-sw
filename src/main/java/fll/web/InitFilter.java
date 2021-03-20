@@ -204,9 +204,7 @@ public class InitFilter implements Filter {
 
       if (null == ApplicationAttributes.getAttribute(application, ApplicationAttributes.CHALLENGE_DESCRIPTION,
                                                      ChallengeDescription.class)) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Loading challenge descriptor");
-        }
+        LOGGER.debug("Loading challenge descriptor from database");
         try {
           // load the challenge descriptor
           final ChallengeDescription challengeDescription = GlobalParameters.getChallengeDescription(connection);
