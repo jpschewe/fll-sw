@@ -233,6 +233,10 @@ public final class ImportDB {
     }
   }
 
+  private static final String LOGS_DIRECTORY_WINDOWS = "logs\\";
+
+  private static final String BUGS_DIRECTORY_WINDOWS = "bugs\\";
+
   /**
    * <p>
    * Load a database dumped as a zipfile into an existing empty database. No
@@ -287,7 +291,8 @@ public final class ImportDB {
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
         final Map<String, String> columnTypes = loadTypeInfo(reader);
         typeInfo.put(tablename, columnTypes);
-      } else if (name.startsWith(GatherBugReport.LOGS_DIRECTORY)) {
+      } else if (name.startsWith(GatherBugReport.LOGS_DIRECTORY)
+          || name.startsWith(LOGS_DIRECTORY_WINDOWS)) {
         if (!entry.isDirectory()) {
           LOGGER.trace("Found log file "
               + name);
@@ -299,7 +304,8 @@ public final class ImportDB {
           }
           Files.copy(zipfile, outputFileName);
         }
-      } else if (name.startsWith(DumpDB.BUGS_DIRECTORY)) {
+      } else if (name.startsWith(DumpDB.BUGS_DIRECTORY)
+          || name.startsWith(BUGS_DIRECTORY_WINDOWS)) {
         if (!entry.isDirectory()) {
           LOGGER.warn("Found bug report "
               + name);
