@@ -60,6 +60,7 @@ import fll.web.developer.importdb.ImportDBDump;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
+import fll.xml.NonNumericCategory;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -102,7 +103,7 @@ public final class ImportDB {
         Statement memStmt = sourceConnection.createStatement()) {
 
       final ImportDB.ImportResult importResult = loadDatabaseDump(zipfile, sourceConnection);
-      final ChallengeDescription challengeDescription = importResult.getChallengeDescription();
+      final ChallengeDescription challengeDescription = GlobalParameters.getChallengeDescription(sourceConnection);
       GenerateDB.generateDB(challengeDescription, destConnection);
 
       // load the teams table into the destination database
@@ -342,9 +343,9 @@ public final class ImportDB {
           + dbVersion);
     }
 
-    upgradeDatabase(connection, description);
+    upgradeDatabase(connection);
 
-    return new ImportResult(description, importDirectory, hasBugs);
+    return new ImportResult(importDirectory, hasBugs);
   }
 
   /**
@@ -453,18 +454,15 @@ public final class ImportDB {
    * we're only fixing up column names and the data in the column.
    *
    * @param connection the database to upgrade
-   * @param challengeDocument the XML document specifying the challenge
    * @param description a developer friendly version of challengeDocument
    * @throws SQLException on an error
    * @throws IllegalArgumentException if the database cannot be upgraded for
    *           some reason
    */
-  private static void upgradeDatabase(final Connection connection,
-                                      final ChallengeDescription description)
-      throws SQLException, IllegalArgumentException {
+  private static void upgradeDatabase(final Connection connection) throws SQLException, IllegalArgumentException {
     int dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 1) {
-      upgrade0To1(connection, description);
+      upgrade0To1(connection);
     }
 
     // tournament parameters existed after version 1
@@ -501,11 +499,11 @@ public final class ImportDB {
     }
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 12) {
-      upgrade11To12(connection, description);
+      upgrade11To12(connection);
     }
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 13) {
-      upgrade12To13(connection, description);
+      upgrade12To13(connection);
     }
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 14) {
@@ -554,7 +552,7 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 23) {
-      upgrade22To23(connection, description);
+      upgrade22To23(connection);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -810,10 +808,10 @@ public final class ImportDB {
   }
 
   @SuppressFBWarnings(value = "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE", justification = "Category name determines the table name")
-  private static void upgrade22To23(final Connection connection,
-                                    final ChallengeDescription description)
-      throws SQLException {
+  private static void upgrade22To23(final Connection connection) throws SQLException {
     LOGGER.debug("Upgrading database from 22 to 23");
+
+    final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
 
     try (Statement stmt = connection.createStatement()) {
       for (final SubjectiveScoreCategory categoryElement : description.getSubjectiveCategories()) {
@@ -908,6 +906,45 @@ public final class ImportDB {
       }
     }
 
+    final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
+    final Collection<Tournament> tournaments = Tournament.getTournaments(connection);
+    boolean modified = false;
+
+    for (final Tournament tournament : tournaments) {
+      LOGGER.trace("Upgrading non-numeric categories in tournamnet {}", tournament.getName());
+
+      // make sure that all non-numeric categories are in the challenge description
+      final Set<String> nonNumericCategoriesInDatabase = NonNumericNominees.getCategories(connection,
+                                                                                          tournament.getTournamentID());
+      for (final String categoryTitle : nonNumericCategoriesInDatabase) {
+        LOGGER.trace("Looking for database category '{}'", categoryTitle);
+
+        if (null == description.getNonNumericCategoryByTitle(categoryTitle)) {
+          LOGGER.trace("Creating category '{}' and adding to challenge description", categoryTitle);
+
+          final NonNumericCategory newCategory = new NonNumericCategory(categoryTitle, true);
+          description.addNonNumericCategory(newCategory);
+          modified = true;
+        }
+      } // foreach category in database
+    } // foreach tournament
+
+    if (modified) {
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Inserting challenge into database. Non-numeric categories: {}",
+                     description.getNonNumericCategories().stream().map(NonNumericCategory::getTitle)
+                                .collect(Collectors.joining(", ")));
+      }
+
+      GenerateDB.insertOrUpdateChallengeDocument(description, connection);
+
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Non-numeric categories read back from database: {}",
+                     GlobalParameters.getChallengeDescription(connection).getNonNumericCategories().stream()
+                                     .map(NonNumericCategory::getTitle).collect(Collectors.joining(", ")));
+      }
+    }
+
     setDBVersion(connection, 28);
   }
 
@@ -958,14 +995,11 @@ public final class ImportDB {
    * Add non_numeric_nominees table and make sure that it's consistent with
    * finalist_categories.
    * Add room to finalist_categories table.
-   *
-   * @param connection
-   * @throws SQLException
    */
-  private static void upgrade12To13(final Connection connection,
-                                    final ChallengeDescription description)
-      throws SQLException {
+  private static void upgrade12To13(final Connection connection) throws SQLException {
     LOGGER.debug("Upgrading database from 12 to 13");
+
+    final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
 
     final Set<String> challengeSubjectiveCategories = new HashSet<>();
     for (final SubjectiveScoreCategory cat : description.getSubjectiveCategories()) {
@@ -1018,14 +1052,11 @@ public final class ImportDB {
 
   /**
    * Add mapping between schedule columns and subjective categories.
-   *
-   * @param connection
-   * @throws SQLException
    */
-  private static void upgrade11To12(final Connection connection,
-                                    final ChallengeDescription description)
-      throws SQLException {
+  private static void upgrade11To12(final Connection connection) throws SQLException {
     LOGGER.debug("Upgrading database from 11 to 12");
+
+    final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
 
     GenerateDB.createSubjectiveCategoryScheduleColumnMappingTables(connection);
     try (PreparedStatement insert = connection.prepareStatement("INSERT INTO category_schedule_column " //
@@ -1183,10 +1214,11 @@ public final class ImportDB {
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon tables in the database")
-  private static void upgrade0To1(final Connection connection,
-                                  final ChallengeDescription description)
-      throws SQLException {
+  private static void upgrade0To1(final Connection connection) throws SQLException {
     LOGGER.debug("Upgrading database from 0 to 1");
+
+    final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
+
     try (Statement stmt = connection.createStatement()) {
 
       stmt.executeUpdate("DROP Table IF EXISTS TournamentParameters");
@@ -2360,26 +2392,13 @@ public final class ImportDB {
   public static final class ImportResult {
 
     /**
-     * @param challengeDescription {@link #getChallengeDescription()}
      * @param importDirectory {@link #getImportDirectory()}
      * @param hasBugs {@link #hasBugs()}
      */
-    public ImportResult(@Nonnull final ChallengeDescription challengeDescription,
-                        @Nonnull final Path importDirectory,
+    public ImportResult(@Nonnull final Path importDirectory,
                         final boolean hasBugs) {
-      this.challengeDescription = challengeDescription;
       this.importDirectory = importDirectory;
       this.hasBugs = hasBugs;
-
-    }
-
-    private final ChallengeDescription challengeDescription;
-
-    /**
-     * @return the challenge description read in
-     */
-    public ChallengeDescription getChallengeDescription() {
-      return challengeDescription;
     }
 
     private final Path importDirectory;

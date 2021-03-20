@@ -410,8 +410,8 @@ public final class GenerateDB {
     try (Statement stmt = connection.createStatement()) {
       // drop tables first
       stmt.executeUpdate("DROP TABLE IF EXISTS finalist_schedule CASCADE");
-      stmt.executeUpdate("DROP TABLE IF EXISTS finalist_categories CASCADE");      
-      
+      stmt.executeUpdate("DROP TABLE IF EXISTS finalist_categories CASCADE");
+
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE finalist_categories (");
       sql.append("  tournament INTEGER NOT NULL");
@@ -660,6 +660,7 @@ public final class GenerateDB {
                                                      final Connection connection)
       throws SQLException {
     final boolean check = GlobalParameters.globalParameterExists(connection, GlobalParameters.CHALLENGE_DOCUMENT);
+    LOGGER.trace("Inserting challenge into database. Check: {}", check);
 
     try (PreparedStatement challengePrep = check //
         ? connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?") //
@@ -1108,7 +1109,7 @@ public final class GenerateDB {
                                                           final boolean createConstraints)
       throws SQLException {
     LOGGER.trace("Creating finalist parameter tables. Create constraints: {}", createConstraints);
-    
+
     try (Statement stmt = connection.createStatement()) {
 
       stmt.executeUpdate("DROP TABLE IF EXISTS playoff_schedules CASCADE");
