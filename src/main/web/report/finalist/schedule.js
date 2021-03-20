@@ -203,7 +203,7 @@ const finalistScheduleModule = {};
     function uploadData() {
         const waitList = [];
 
-        const playoffSchedulesSuccess = function(result) {
+        const playoffSchedulesSuccess = function(_) {
             _log("Playoff schedules upload success")
         };
         const playoffSchedulesFail = function(result) {
@@ -219,7 +219,7 @@ const finalistScheduleModule = {};
         waitList.push($.finalist.uploadPlayoffSchedules(
             playoffSchedulesSuccess, playoffSchedulesFail));
 
-        const scheduleParamsSuccess = function(result) {
+        const scheduleParamsSuccess = function(_) {
             _log("Schedule parameters upload success")
         };
         const scheduleParamsFail = function(result) {
@@ -235,7 +235,7 @@ const finalistScheduleModule = {};
         waitList.push($.finalist.uploadScheduleParameters(
             scheduleParamsSuccess, scheduleParamsFail));
 
-        const schedulesSuccess = function(result) {
+        const schedulesSuccess = function(_) {
             _log("Schdules upload success")
         };
         const schedulesFail = function(result) {
@@ -250,6 +250,22 @@ const finalistScheduleModule = {};
         }
         waitList.push($.finalist.uploadSchedules(
             schedulesSuccess, schedulesFail));
+
+        const nonNumericSuccess = function(_) {
+            _log("Non-numeric upload success")
+        };
+        const nonNumericFail = function(result) {
+            let message;
+            if (null == result) {
+                message = "Unknown server error";
+            } else {
+                message = result.message;
+            }
+
+            alert("Non-numeric nominees upload failure: " + message);
+        }
+        waitList.push($.finalist.uploadNonNumericNominees(
+            nonNumericSuccess, nonNumericFail));
 
         $("#wait-dialog").dialog("open");
         $.when.apply($, waitList).done(function() {
@@ -480,18 +496,9 @@ const finalistScheduleModule = {};
             .getCurrentDivision());
 
         $("#schedule_body").empty();
-        $.each(schedule, function(i, slot) {
+        $.each(schedule, function(_, slot) {
             addRowForSlot(slot);
         }); // foreach timeslot
-
-        const categoryRows = [];
-        $.each($.finalist.getAllScheduledCategories(), function(_, category) {
-            const cat = new FinalistCategory(category.name, $.finalist.getRoom(category,
-                $.finalist.getCurrentDivision()));
-            categoryRows.push(cat);
-        }); // foreach category
-        $('#category_data').val($.toJSON(categoryRows));
-        $('#division_data').val($.finalist.getCurrentDivision());
     }
 
     $(document).ready(
@@ -520,10 +527,6 @@ const finalistScheduleModule = {};
 
             // force an update to generate the initial page
             handleDivisionChange();
-
-            // doesn't depend on the division, so can be done only once
-            const allNonNumericNominees = $.finalist.prepareNonNumericNomineesToSend();
-            $('#non-numeric-nominees_data').val($.toJSON(allNonNumericNominees));
 
             $('#regenerate_schedule').click(function() {
                 $.finalist.setSchedule($.finalist.getCurrentDivision(), null);

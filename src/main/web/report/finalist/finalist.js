@@ -1253,35 +1253,69 @@
             _save();
         },
 
-        clearCategoryTeams: function(category) {
-            category.teams = [];
-            _save();
-        },
+        /**
+          * Load the non-numeric nominees from the server.
+          * 
+          * @return promise to execute
+          */
+        loadNonNumericNominees: function() {
+            return $.getJSON("../../api/NonNumericNominees", function(data) {
+                $.each(data, function(_, nonNumericNominee) {
+                    let category = $.finalist.getCategoryByName(nonNumericNominee.categoryName);
+                    if (null == category) {
+                        // 8/22/2020 JPS - this isn't needed other than support for old databases where
+                        // the non-numeric categories are not in the challenge description. All of these
+                        // categories are per award group.
+                        category = $.finalist.addCategory(nonNumericNominee.categoryName, false, false);
 
-        clearCategoryNominatingJudges: function(category) {
-            category.judges = {};
-            _save();
+                        // eventually throw new Error("Cannot find non-numeric category '" + nonNumericNominee.categoryName + "'");
+                    }
+
+                    $.each(nonNumericNominee.nominees, function(_, nominee) {
+                        $.finalist.addTeamToCategory(category, nominee.teamNumber);
+                        $.finalist.setNominatingJudges(category, nominee.teamNumber, nominee.judges);
+                    }); // category scores
+                }); // categories
+            });
         },
 
         /**
          * Convert the non-numeric nominee information into a list of
-         * NonNumericNominees objects. This is to prepare to send the data to the
-         * server.
+         * NonNumericNominees objects and upload to the server.
+         * @param successCallback called with the server result on success
+         * @param failCallback called with the server result on failure
+         * @return promise to execute
          */
-        prepareNonNumericNomineesToSend: function() {
-            var allNonNumericNominees = [];
+        uploadNonNumericNominees: function(successCallback, failCallback) {
+            const allNonNumericNominees = [];
             $.each($.finalist.getNonNumericCategories(), function(_, category) {
                 var categoryNominees = [];
                 $.each(category.teams, function(_, teamNumber) {
-                    var judges = $.finalist.getNominatingJudges(category, teamNumber);
-                    var nominee = new Nominee(teamNumber, judges);
+                    const judges = $.finalist.getNominatingJudges(category, teamNumber);
+                    const nominee = new Nominee(teamNumber, judges);
                     categoryNominees.push(nominee);
                 }); // foreach team
-                var nominees = new NonNumericNominees(category.name, categoryNominees);
+                const nominees = new NonNumericNominees(category.name, categoryNominees);
                 allNonNumericNominees.push(nominees);
             }); // foreach category
 
-            return allNonNumericNominees;
+            const dataToUpload = JSON.stringify(allNonNumericNominees);
+            return $.ajax({
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                url: "../../api/NonNumericNominees",
+                data: dataToUpload,
+                success: function(result) {
+                    if (result.success) {
+                        successCallback(result);
+                    } else {
+                        failCallback(result);
+                    }
+                }
+            }).fail(function(result) {
+                failCallback(result);
+            });
         },
 
         /**
@@ -1391,7 +1425,7 @@
                     $.each(schedule.categories, function(_, finalistCategory) {
                         const category = $.finalist.getCategoryByName(finalistCategory.categoryName);
                         if (null == category) {
-                            alert("Unable to find category with name " + scheduleRow.categoryName);
+                            alert("Unable to find category with name '" + finalistCategory.categoryName + "' referenced in the schedule categories'");
                         } else {
                             $.finalist.setRoom(category, awardGroup, finalistCategory.room);
 
@@ -1406,7 +1440,7 @@
                         $.each(scheduleRow.categories, function(categoryName, teamNumber) {
                             const category = $.finalist.getCategoryByName(categoryName);
                             if (null == category) {
-                                alert("Unable to find category with name " + categoryName);
+                                alert("Unable to find category with name '" + categoryName + "' referenced in the schedule rows'");
                             } else {
                                 $.finalist.addTeamToCategory(category, teamNumber);
                                 // mark category visited so that the numeric nominees don't get reset'
@@ -1699,6 +1733,12 @@
                     failCallback("Finalist Schedules");
                 })
                 waitList.push(finalistSchedulesPromise);
+
+                const nonNumericNomineesPromise = $.finalist.loadNonNumericNominees();
+                nonNumericNomineesPromise.fail(function() {
+                    failCallback("Non-numeric nominees");
+                })
+                waitList.push(nonNumericNomineesPromise);
 
                 $.when.apply($, waitList).done(function() {
                     _save();

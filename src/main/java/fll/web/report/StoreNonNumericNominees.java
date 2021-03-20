@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
@@ -32,6 +31,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.api.NonNumericNomineesServlet;
 
 /**
  * Store the data from the non-numeric nominees page.
@@ -73,7 +73,7 @@ public class StoreNonNumericNominees extends BaseFLLServlet {
       LOGGER.debug("Storing nominees: {}", nomineesStr);
 
       final Collection<NonNumericNominees> nominees = jsonMapper.readValue(nomineesStr,
-                                                                           NonNumericNomineesTypeInformation.INSTANCE);
+                                                                           NonNumericNomineesServlet.NonNumericNomineesTypeInformation.INSTANCE);
       for (final NonNumericNominees nominee : nominees) {
         nominee.store(connection, tournament);
       }
@@ -91,16 +91,6 @@ public class StoreNonNumericNominees extends BaseFLLServlet {
     session.setAttribute("message", message.toString());
     response.sendRedirect(response.encodeRedirectURL("non-numeric-nominees.jsp"));
 
-  }
-
-  /**
-   * JSON type information for a {@link Collection} of {@link NonNumericNominees}.
-   */
-  public static final class NonNumericNomineesTypeInformation extends TypeReference<Collection<NonNumericNominees>> {
-    /**
-     * Singleton instance.
-     */
-    public static final NonNumericNomineesTypeInformation INSTANCE = new NonNumericNomineesTypeInformation();
   }
 
 }

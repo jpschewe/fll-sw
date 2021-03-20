@@ -46,8 +46,6 @@
 
     _log("Loading data");
   
-<%FinalistLoad.outputNonNumericNominees(out, application);%>
-  
   $.finalist.setTournament(_loadingTournament);
 
   finalistScheduleLoad.loadUsingApi();

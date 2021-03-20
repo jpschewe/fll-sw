@@ -32,7 +32,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
-import fll.web.report.StoreNonNumericNominees;
+import fll.web.api.NonNumericNomineesServlet;
 
 /**
  * Store the data from the finalist scheduling.
@@ -104,7 +104,7 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
       schedule.store(connection, tournament, division);
 
       final Collection<NonNumericNominees> nominees = jsonMapper.readValue(nomineesStr,
-                                                                           StoreNonNumericNominees.NonNumericNomineesTypeInformation.INSTANCE);
+                                                                           NonNumericNomineesServlet.NonNumericNomineesTypeInformation.INSTANCE);
       for (final NonNumericNominees nominee : nominees) {
         nominee.store(connection, tournament);
       }
