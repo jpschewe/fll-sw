@@ -82,7 +82,7 @@ public class FinalistSchedule implements Serializable {
       }
 
       try (
-          PreparedStatement getSchedule = connection.prepareStatement("SELECT category, judge_time, judge_end_time, team_number FROM finalist_schedules WHERE tournament = ? AND division = ?")) {
+          PreparedStatement getSchedule = connection.prepareStatement("SELECT category, judge_time, judge_end_time, team_number FROM finalist_schedule WHERE tournament = ? AND division = ?")) {
         getSchedule.setInt(1, tournament);
         getSchedule.setString(2, awardGroup);
 
@@ -173,7 +173,7 @@ public class FinalistSchedule implements Serializable {
       throws SQLException {
 
     try (
-        PreparedStatement deleteSchedPrep = connection.prepareStatement("DELETE FROM finalist_schedules WHERE tournament = ? AND division = ?")) {
+        PreparedStatement deleteSchedPrep = connection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ? AND division = ?")) {
       deleteSchedPrep.setInt(1, tournament);
       deleteSchedPrep.setString(2, awardGroup);
       deleteSchedPrep.executeUpdate();
@@ -199,7 +199,7 @@ public class FinalistSchedule implements Serializable {
     }
 
     try (
-        PreparedStatement insertSchedPrep = connection.prepareStatement("INSERT INTO finalist_schedules (tournament, division, category, judge_time, judge_end_time, team_number) VALUES(?, ?, ?, ?, ?, ?)")) {
+        PreparedStatement insertSchedPrep = connection.prepareStatement("INSERT INTO finalist_schedule (tournament, division, category, judge_time, judge_end_time, team_number) VALUES(?, ?, ?, ?, ?, ?)")) {
       insertSchedPrep.setInt(1, tournament);
       insertSchedPrep.setString(2, awardGroup);
       for (final FinalistDBRow row : mSchedule) {

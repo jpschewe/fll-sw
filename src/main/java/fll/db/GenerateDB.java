@@ -426,7 +426,7 @@ public final class GenerateDB {
       stmt.executeUpdate(sql.toString());
 
       final StringBuilder scheduleSql = new StringBuilder();
-      scheduleSql.append("CREATE TABLE finalist_schedules (");
+      scheduleSql.append("CREATE TABLE finalist_schedule (");
       scheduleSql.append("  tournament INTEGER NOT NULL");
       scheduleSql.append(" ,category LONGVARCHAR NOT NULL");
       scheduleSql.append(" ,judge_time TIME NOT NULL");
