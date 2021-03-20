@@ -1294,7 +1294,7 @@
                 $.each(data, function(bracketName, playoffSchedule) {
                     _fixPlayoffSchedule(playoffSchedule);
                     _playoffSchedules[bracketName] = playoffSchedule;
-                })
+                });
             });
         },
 
@@ -1342,7 +1342,7 @@
                 $.each(data, function(awardGroup, parameters) {
                     _fixScheduleParameters(parameters);
                     _scheduleParameters[awardGroup] = parameters;
-                })
+                });
             });
         },
 
@@ -1417,7 +1417,7 @@
 
                     // _schedules is the array of FinalistDBRow objects
                     _schedules[awardGroup] = schedule.schedule;
-                })
+                });
             });
         },
 
@@ -1472,7 +1472,7 @@
             return $.getJSON("../../api/AwardGroups", function(data) {
                 $.each(data, function(_, awardGroup) {
                     $.finalist.addDivision(awardGroup);
-                })
+                });
             });
         },
 
@@ -1485,7 +1485,134 @@
             return $.getJSON("../../api/PlayoffBrackets", function(data) {
                 $.each(data, function(_, bracket) {
                     $.finalist.addPlayoffDivision(bracket);
-                })
+                });
+            });
+        },
+
+
+        /**
+          * Load the numeric categories in the challenge description from the server.
+          * 
+          * @return promise to execute
+          */
+        loadNumericCategories: function() {
+            return $.getJSON("../../api/ChallengeDescription/SubjectiveCategories", function(subjectiveCategories) {
+                $.each(subjectiveCategories, function(_, categoryDescription) {
+                    const category = $.finalist.getCategoryByName(categoryDescription.title);
+                    if (null == category) {
+                        $.finalist.addCategory(categoryDescription.title, true, false);
+                    }
+                });
+
+                let championship = $.finalist
+                    .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
+                if (null == championship) {
+                    championship = $.finalist.addCategory($.finalist.CHAMPIONSHIP_NAME, true,
+                        false);
+                }
+                $.finalist.setCategoryScheduled(championship, true);
+
+            });
+        },
+
+        /**
+          * Load the non-numeric categories in the challenge description from the server.
+          * 
+          * @return promise to execute
+          */
+        loadNonNumericCategories: function() {
+            return $.getJSON("../../api/ChallengeDescription/NonNumericCategories", function(nonNumericCategories) {
+                $.each(nonNumericCategories, function(_, categoryDescription) {
+                    const category = $.finalist.getCategoryByName(categoryDescription.title);
+                    if (null == category) {
+                        $.finalist.addCategory(categoryDescription.title, false, !categoryDescription.perAwardGroup);
+                    }
+                });
+            });
+        },
+
+        /**
+        * Load the teams from the server.
+        * 
+        * @return promise to execute
+        */
+        loadTournamentTeams: function() {
+            return $.getJSON("../../api/TournamentTeams", function(data) {
+                $.each(data, function(_, tournamentTeam) {
+                    let team = $.finalist.lookupTeam(tournamentTeam.teamNumber);
+                    if (null == team) {
+                        team = $.finalist.addTeam(tournamentTeam.teamNumber, tournamentTeam.teamName, tournamentTeam.organization, tournamentTeam.judgingGroup);
+                    }
+                    $.finalist.addTeamToDivision(team, tournamentTeam.awardGroup);
+                }); // teams
+            });
+        },
+
+        /**
+        * Load the teams in each playoff bracket from the server.
+        * 
+        * @return promise to execute
+        */
+        loadPlayoffBracketTeams: function() {
+            return $.getJSON("../../api/PlayoffBracketTeams", function(data) {
+                $.each(data, function(playoffBracket, teams) {
+                    $.each(teams, function(_, teamNumber) {
+                        const team = $.finalist.lookupTeam(teamNumber);
+                        if (null == team) {
+                            alert("Cannot find team with number " + teamNumber + " that is specified in the playoff bracket " + playoffBracket);
+                        }
+                        $.finalist.addTeamToPlayoffDivision(team, playoffBracket);
+                    }); // teams
+                }); // brackets
+            });
+        },
+
+        /**
+         * Load the overall scores from the server.
+         * 
+         * @return promise to execute
+         */
+        loadOverallScores: function() {
+            return $.getJSON("../../api/OverallScores", function(data) {
+                const championship = $.finalist
+                    .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
+                if (null == championship) {
+                    throw new Error("Missing championship category");
+                }
+
+                $.each(data, function(teamNumber, score) {
+                    const team = $.finalist.lookupTeam(teamNumber);
+                    if (null == team) {
+                        throw new Error("Cannot find team with " + teamNumber + " found in overall scores");
+                    }
+
+                    $.finalist.setCategoryScore(team, championship, score);
+                }); // scores
+            });
+        },
+
+        /**
+         * Load the scores for the numeric categories from the server.
+         * 
+         * @return promise to execute
+         */
+        loadCategoryScores: function() {
+            return $.getJSON("../../api/NumericCategoryScores", function(data) {
+                $.each(data, function(categoryName, categoryScores) {
+                    const category = $.finalist.getCategoryByName(categoryName);
+                    if (null == category) {
+                        throw new Error("Cannot find category '" + categoryName + "'");
+                    }
+
+                    $.each(categoryScores, function(teamNumber, score) {
+                        const team = $.finalist.lookupTeam(teamNumber);
+                        if (null == team) {
+                            throw new Error("Cannot find team with " + teamNumber + " found in scores for category '" + categoryName + "'");
+                        }
+
+                        $.finalist.setCategoryScore(team, category, score);
+                    }); // category scores
+                }); // categories
             });
         },
 
@@ -1499,42 +1626,87 @@
          */
         loadFromServer: function(doneCallback, failCallback) {
 
-            const waitList = [];
+            // Some things need to be loaded first
+            const waitList1 = [];
+
+            const numericCategoriesPromise = $.finalist.loadNumericCategories();
+            numericCategoriesPromise.fail(function() {
+                failCallback("Numeric categories");
+            });
+            waitList1.push(numericCategoriesPromise);
+
+            const nonNumericCategoriesPromise = $.finalist.loadNonNumericCategories();
+            nonNumericCategoriesPromise.fail(function() {
+                failCallback("Non-Numeric categories");
+            });
+            waitList1.push(nonNumericCategoriesPromise);
 
             const awardGroupsPromise = $.finalist.loadAwardGroups();
             awardGroupsPromise.fail(function() {
                 failCallback("Award Groups");
             })
-            waitList.push(awardGroupsPromise);
+            waitList1.push(awardGroupsPromise);
 
             const playoffBracketsPromise = $.finalist.loadPlayoffBrackets();
             playoffBracketsPromise.fail(function() {
                 failCallback("Playoff Brackets");
             })
-            waitList.push(playoffBracketsPromise);
+            waitList1.push(playoffBracketsPromise);
 
-            const playoffSchedulesPromise = $.finalist.loadPlayoffSchedules();
-            playoffSchedulesPromise.fail(function() {
-                failCallback("Playoff Schedules");
+            const teamsPromise = $.finalist.loadTournamentTeams();
+            teamsPromise.fail(function() {
+                failCallback("Teams");
             })
-            waitList.push(playoffSchedulesPromise);
+            waitList1.push(teamsPromise);
 
-            const finalistParamsPromise = $.finalist.loadFinalistScheduleParameters();
-            finalistParamsPromise.fail(function() {
-                failCallback("Finalist Schedule Parameters");
-            })
-            waitList.push(finalistParamsPromise);
+            $.when.apply($, waitList1).done(function() {
 
-            const finalistSchedulesPromise = $.finalist.loadFinalistSchedules();
-            finalistSchedulesPromise.fail(function() {
-                failCallback("Finalist Schedules");
-            })
-            waitList.push(finalistSchedulesPromise);
+                // everything else can be loaded in parallel
+                const waitList = [];
 
-            $.when.apply($, waitList).done(function() {
-                _save();
-                doneCallback();
+                const overallScoresPromise = $.finalist.loadOverallScores();
+                overallScoresPromise.fail(function() {
+                    failCallback("Overall scores");
+                })
+                waitList.push(overallScoresPromise);
+
+                const numericCategoryScoresPromise = $.finalist.loadCategoryScores();
+                numericCategoryScoresPromise.fail(function() {
+                    failCallback("Numeric category scores");
+                })
+                waitList.push(numericCategoryScoresPromise);
+
+                const playoffBracketTeamsPromise = $.finalist.loadPlayoffBracketTeams();
+                playoffBracketTeamsPromise.fail(function() {
+                    failCallback("Playoff bracket teams");
+                })
+                waitList.push(playoffBracketTeamsPromise);
+
+                const playoffSchedulesPromise = $.finalist.loadPlayoffSchedules();
+                playoffSchedulesPromise.fail(function() {
+                    failCallback("Playoff Schedules");
+                })
+                waitList.push(playoffSchedulesPromise);
+
+                const finalistParamsPromise = $.finalist.loadFinalistScheduleParameters();
+                finalistParamsPromise.fail(function() {
+                    failCallback("Finalist Schedule Parameters");
+                })
+                waitList.push(finalistParamsPromise);
+
+                const finalistSchedulesPromise = $.finalist.loadFinalistSchedules();
+                finalistSchedulesPromise.fail(function() {
+                    failCallback("Finalist Schedules");
+                })
+                waitList.push(finalistSchedulesPromise);
+
+                $.when.apply($, waitList).done(function() {
+                    _save();
+                    doneCallback();
+                });
+
             });
+
         }
 
     };

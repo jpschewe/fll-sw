@@ -9,8 +9,11 @@ package fll.web.api;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -28,13 +31,12 @@ import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
-import fll.web.playoff.Playoff;
 
 /**
- * Collection of names of the playoff brackets in the current tournament.
+ * Map of team number to score.
  */
-@WebServlet("/api/PlayoffBrackets")
-public class PlayoffBracketsServlet extends HttpServlet {
+@WebServlet("/api/OverallScores")
+public class OverallScoresServlet extends HttpServlet {
 
   @Override
   protected final void doGet(final HttpServletRequest request,
@@ -44,7 +46,8 @@ public class PlayoffBracketsServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.isRef()) {
+    if (!auth.isRef()
+        && !auth.isJudge()) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
@@ -60,9 +63,22 @@ public class PlayoffBracketsServlet extends HttpServlet {
 
       final int tournament = Queries.getCurrentTournament(connection);
 
-      final Collection<String> playoffBrackets = Playoff.getPlayoffBrackets(connection, tournament);
+      final Map<Integer, Double> scores = new HashMap<>();
+      try (
+          PreparedStatement prep = connection.prepareStatement("SELECT team_number, overall_score from overall_scores WHERE tournament = ?")) {
+        prep.setInt(1, tournament);
 
-      jsonMapper.writeValue(writer, playoffBrackets);
+        try (ResultSet rs = prep.executeQuery()) {
+          while (rs.next()) {
+            final int teamNumber = rs.getInt(1);
+            final double overallScore = rs.getDouble(2);
+
+            scores.put(teamNumber, overallScore);
+          } // foreach team
+        } // result set
+      } // prepared statement
+
+      jsonMapper.writeValue(writer, scores);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     }

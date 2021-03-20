@@ -72,7 +72,7 @@ function createTeamTable(teams, currentDivision, currentCategory) {
 
       var scoreCol = $("<td></td>");
       row.append(scoreCol);
-      scoreCol.text($.finalist.getCategoryScore(team, currentCategory));
+      scoreCol.text($.finalist.getCategoryScore(team, currentCategory).toFixed(2));
 
       var numFinalistCol = $("<td id='" + getNumFinalistsId(team) + "'></td>");
       row.append(numFinalistCol);

@@ -11,6 +11,8 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -31,10 +33,10 @@ import fll.web.SessionAttributes;
 import fll.web.playoff.Playoff;
 
 /**
- * Collection of names of the playoff brackets in the current tournament.
+ * Map of bracket name to collection of team numbers of teams in the bracket.
  */
-@WebServlet("/api/PlayoffBrackets")
-public class PlayoffBracketsServlet extends HttpServlet {
+@WebServlet("/api/PlayoffBracketTeams")
+public class PlayoffBracketTeamsServlet extends HttpServlet {
 
   @Override
   protected final void doGet(final HttpServletRequest request,
@@ -61,8 +63,14 @@ public class PlayoffBracketsServlet extends HttpServlet {
       final int tournament = Queries.getCurrentTournament(connection);
 
       final Collection<String> playoffBrackets = Playoff.getPlayoffBrackets(connection, tournament);
+      final Map<String, Collection<Integer>> playoffBracketTeams = new HashMap<>();
+      for (final String playoffBracket : playoffBrackets) {
+        final Collection<Integer> teams = Playoff.getTeamNumbersForPlayoffBracket(connection, tournament,
+                                                                                  playoffBracket);
+        playoffBracketTeams.put(playoffBracket, teams);
+      }
 
-      jsonMapper.writeValue(writer, playoffBrackets);
+      jsonMapper.writeValue(writer, playoffBracketTeams);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     }
