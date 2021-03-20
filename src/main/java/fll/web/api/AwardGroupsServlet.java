@@ -35,7 +35,7 @@ import fll.web.UserRole;
  * Collection of names of the award groups in the current tournament.
  */
 @WebServlet("/api/AwardGroups")
-public class AwardGroups extends HttpServlet {
+public class AwardGroupsServlet extends HttpServlet {
 
   @Override
   protected final void doGet(final HttpServletRequest request,
