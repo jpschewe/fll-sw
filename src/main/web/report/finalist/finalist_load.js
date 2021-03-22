@@ -7,14 +7,48 @@
 const finalistScheduleLoad = {}
 
 {
+
+    function clearAndLoad() {
+        $.finalist.clearAllData();
+        $.finalist.loadCategoriesAndScores(function() {
+            // success
+            $.finalist.loadNominieesAndSchedules(function() {
+                // success
+                $("#wait-dialog").dialog("close");
+                location.href = "params.html";
+            }, function(msg) {
+                // error
+                $("#wait-dialog").dialog("close");
+                alert("Failure loading nominees and schedules: " + msg);
+            });
+        }, function(msg) {
+            // error
+            $("#wait-dialog").dialog("close");
+            alert("Failure loading categories and scores: " + msg);
+        });
+    }
+
+    function refreshData() {
+        $.finalist.loadCategoriesAndScores(function() {
+            // success
+            $("#wait-dialog").dialog("close");
+            location.href = "params.html";
+        }, function(msg) {
+            // error
+            $("#wait-dialog").dialog("close");
+            alert("Failure loading categories and scores: " + msg);
+        });
+    }
+
     $(document).ready(function() {
         $("#choose_clear").hide();
+
         $("#clear").click(function() {
-            $.finalist.clearAllData();
-            loadData();
+            clearAndLoad();
         });
+
         $("#keep").click(function() {
-            loadData();
+            refreshData();
         });
 
         $("#wait-dialog").dialog({
@@ -24,37 +58,33 @@ const finalistScheduleLoad = {}
             closeOnEscape: false
         });
 
-        const allTeams = $.finalist.getAllTeams();
-        const tournament = $.finalist.getTournament();
+        $("#wait-dialog").dialog("open");
 
-        if (null != allTeams && allTeams.length > 0) {
-            if (tournament != _loadingTournament) {
-                _log("Clearing data for old tournament: " + tournament);
-                $.finalist.clearAllData();
-                loadData();
+        // get current state before anything loads
+        const currentAllTeams = $.finalist.getAllTeams();
+        const currentTournament = $.finalist.getTournament();
+
+        $.finalist.loadTournament(function() {
+            // success            
+            const loadingTournament = $.finalist.getTournament();
+
+            if (null != currentAllTeams && currentAllTeams.length > 0) {
+                if (currentTournament != loadingTournament) {
+                    _log("Clearing data for old tournament: " + currentTournament);
+                    clearAndLoad();
+                } else {
+                    $("#wait-dialog").dialog("close");
+                    $("#choose_clear").show();
+                }
             } else {
-                $("#choose_clear").show();
+                clearAndLoad();
             }
-        } else {
-            loadData();
-        }
-    });
-
-    finalistScheduleLoad.loadUsingApi = function() {
-        _log("Loading finalist scheduling data from the server");
-
-        const failCallback = function(msg) {
-            alert("Failure loading data: " + msg);
-        }
-
-        const doneCallback = function() {
+        }, function(msg) {
+            // failure
             $("#wait-dialog").dialog("close");
-            $("#choose_clear").hide();
-            location.href = "params.html";
-        }
+            alert("Failure loading teams and current tournament: " + msg);
+        });
 
-        $.finalist.loadFromServer(doneCallback, failCallback);
-
-    }
+    });
 
 } // end scope

@@ -290,6 +290,7 @@
         CHAMPIONSHIP_NAME: "Championship",
 
         clearAllData: function() {
+            _log("Clearing finalist data from local storage");
             _clear_local_storage();
             _init_variables();
         },
@@ -1651,17 +1652,42 @@
         },
 
         /**
-         * Load all data from server.
-         * 
-         * @param doneCallback
-         *          called with no arguments on success
-         * @param failCallback
-         *          called with message on failure
+         * Load the current tournament name.
          */
-        loadFromServer: function(doneCallback, failCallback) {
+        loadCurrentTournament: function() {
+            return $.getJSON("../../api/Tournaments/current", function(tournament) {
+                $.finalist.setTournament(tournament.name);
+            });
+        },
+
+        /**
+         * Load the current tournament.
+         */
+        loadTournament: function(doneCallback, failCallback) {
+            const waitList = [];
+
+            const loadCurrentTournamentPromise = $.finalist.loadCurrentTournament();
+            loadCurrentTournamentPromise.fail(function() {
+                failCallback("Current tournament");
+            })
+            waitList.push(loadCurrentTournamentPromise);
+
+            $.when.apply($, waitList).done(function() {
+                _save();
+                doneCallback();
+            });
+        },
+
+        loadCategoriesAndScores: function(doneCallback, failCallback) {
 
             // Some things need to be loaded first
             const waitList1 = [];
+
+            const teamsPromise = $.finalist.loadTournamentTeams();
+            teamsPromise.fail(function() {
+                failCallback("Teams");
+            })
+            waitList1.push(teamsPromise);
 
             const numericCategoriesPromise = $.finalist.loadNumericCategories();
             numericCategoriesPromise.fail(function() {
@@ -1687,12 +1713,6 @@
             })
             waitList1.push(playoffBracketsPromise);
 
-            const teamsPromise = $.finalist.loadTournamentTeams();
-            teamsPromise.fail(function() {
-                failCallback("Teams");
-            })
-            waitList1.push(teamsPromise);
-
             $.when.apply($, waitList1).done(function() {
 
                 // everything else can be loaded in parallel
@@ -1716,39 +1736,52 @@
                 })
                 waitList.push(playoffBracketTeamsPromise);
 
-                const playoffSchedulesPromise = $.finalist.loadPlayoffSchedules();
-                playoffSchedulesPromise.fail(function() {
-                    failCallback("Playoff Schedules");
-                })
-                waitList.push(playoffSchedulesPromise);
-
-                const finalistParamsPromise = $.finalist.loadFinalistScheduleParameters();
-                finalistParamsPromise.fail(function() {
-                    failCallback("Finalist Schedule Parameters");
-                })
-                waitList.push(finalistParamsPromise);
-
-                const finalistSchedulesPromise = $.finalist.loadFinalistSchedules();
-                finalistSchedulesPromise.fail(function() {
-                    failCallback("Finalist Schedules");
-                })
-                waitList.push(finalistSchedulesPromise);
-
-                const nonNumericNomineesPromise = $.finalist.loadNonNumericNominees();
-                nonNumericNomineesPromise.fail(function() {
-                    failCallback("Non-numeric nominees");
-                })
-                waitList.push(nonNumericNomineesPromise);
-
                 $.when.apply($, waitList).done(function() {
                     _save();
                     doneCallback();
                 });
 
             });
+        },
 
+        /**
+         * @param doneCallback
+         *          called with no arguments on success
+         * @param failCallback
+         *          called with message on failure
+         */
+        loadNominieesAndSchedules: function(doneCallback, failCallback) {
+            const waitList = [];
+
+            const playoffSchedulesPromise = $.finalist.loadPlayoffSchedules();
+            playoffSchedulesPromise.fail(function() {
+                failCallback("Playoff Schedules");
+            })
+            waitList.push(playoffSchedulesPromise);
+
+            const finalistParamsPromise = $.finalist.loadFinalistScheduleParameters();
+            finalistParamsPromise.fail(function() {
+                failCallback("Finalist Schedule Parameters");
+            })
+            waitList.push(finalistParamsPromise);
+
+            const finalistSchedulesPromise = $.finalist.loadFinalistSchedules();
+            finalistSchedulesPromise.fail(function() {
+                failCallback("Finalist Schedules");
+            })
+            waitList.push(finalistSchedulesPromise);
+
+            const nonNumericNomineesPromise = $.finalist.loadNonNumericNominees();
+            nonNumericNomineesPromise.fail(function() {
+                failCallback("Non-numeric nominees");
+            })
+            waitList.push(nonNumericNomineesPromise);
+
+            $.when.apply($, waitList).done(function() {
+                _save();
+                doneCallback();
+            });
         }
-
     };
 
     _load();

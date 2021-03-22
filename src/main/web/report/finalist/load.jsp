@@ -1,7 +1,5 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.web.report.finalist.FinalistLoad"%>
-
 <fll-sw:required-roles roles="ADMIN" allowSetup="false" />
 
 <%
@@ -39,16 +37,11 @@
 <script type='text/javascript' src='finalist_load.js'></script>
 
 <script type='text/javascript'>
-  var _loadingTournament = <%=FinalistLoad.currentTournament(application)%> ;
-
   function loadData() {
-    $("#wait-dialog").dialog("open");
 
     _log("Loading data");
-  
-  $.finalist.setTournament(_loadingTournament);
 
-  finalistScheduleLoad.loadUsingApi();
+    finalistScheduleLoad.loadData();
   }
 </script>
 
@@ -68,11 +61,12 @@
         and load from the database?
         <div>
             <button id='clear'>Yes, load from the database</button>
-            This is the most common choice.
+            This is the most common choice. This will clear any locally
+            stored data and reload from the database.
         </div>
 
         <div>
-            <button id='keep'>No, just refresh the data</button>
+            <button id='keep'>No, just refresh the list of teams and their scores</button>
             Choose this if you have made changes to finalists and have
             not saved this information to the database.
         </div>
