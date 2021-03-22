@@ -381,11 +381,12 @@ public class AwardsReport extends BaseFLLServlet {
         final List<AwardWinner> agWinners = categoryWinners.get(group);
 
         if (!agWinners.isEmpty()) {
-          final Element row = FOPUtils.createTableRow(document);
-          tableBody.appendChild(row);
 
           boolean first = true;
           for (final AwardWinner winner : agWinners) {
+            final Element row = FOPUtils.createTableRow(document);
+            tableBody.appendChild(row);
+
             if (first) {
               row.appendChild(FOPUtils.createTableCell(document, null, String.format("Winner %s:", group)));
 
@@ -414,6 +415,7 @@ public class AwardsReport extends BaseFLLServlet {
               descriptionCell.setAttribute("number-columns-spanned", String.valueOf(columnsInTable));
             }
           } // foreach winner
+
         } // have winners in award group
       } // group exists
     } // foreach award group
