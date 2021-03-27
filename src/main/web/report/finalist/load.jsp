@@ -36,15 +36,6 @@
 
 <script type='text/javascript' src='finalist_load.js'></script>
 
-<script type='text/javascript'>
-  function loadData() {
-
-    _log("Loading data");
-
-    finalistScheduleLoad.loadData();
-  }
-</script>
-
 </head>
 
 <body>
