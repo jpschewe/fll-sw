@@ -70,7 +70,7 @@ const finalistScheduleModule = {};
 
         headerRow.append($("<div class='rTableHead'>Head to Head</div>"));
 
-        $.each($.finalist.getAllScheduledCategories(), function(i, category) {
+        $.each($.finalist.getAllScheduledCategories(), function(_, category) {
             const room = $.finalist.getRoom(category, $.finalist.getCurrentDivision());
             let header;
             if (room == undefined || "" == room) {
@@ -121,7 +121,7 @@ const finalistScheduleModule = {};
             // need something to transfer, otherwise the browser won't let us drag
             dataTransfer.setData('text/text', "true");
         });
-        teamDiv.on('dragend', function(e) {
+        teamDiv.on('dragend', function(_) {
             // rawEvent.target is the source node.
             $(teamDiv).css('opacity', '1');
         });
@@ -156,8 +156,8 @@ const finalistScheduleModule = {};
                 rawEvent.dataTransfer.dropEffect = 'move'; // See the section on the
                 // DataTransfer object.
 
-                const transferObj = rawEvent.dataTransfer
-                    .getData('application/x-fll-finalist');
+                //const transferObj = rawEvent.dataTransfer
+                //    .getData('application/x-fll-finalist');
 
                 return false;
             } else {
@@ -276,27 +276,6 @@ const finalistScheduleModule = {};
     }
 
     /**
-     * Convert schedule to the JSON required to send to the server.
-     */
-    function updateScheduleToSend() {
-
-        const schedRows = [];
-        $.each(schedule, function(_, slot) {
-            $.each($.finalist.getAllScheduledCategories(), function(_, category) {
-                const teamNum = slot.categories[category.name];
-                if (teamNum != null) {
-                    const dbrow = new FinalistDBRow(category.name, slot.time, teamNum);
-                    schedRows.push(dbrow);
-                }
-            }); // foreach category
-
-        }); // foreach timeslot
-
-        const jsonData = JSON.stringify(schedRows);
-        $('#sched_data').val(jsonData);
-    }
-
-    /**
      * Move a team from it's current timeslot to the newly specified timeslot for
      * the specified category. If the specified timeslot contains another team, then
      * the two teams are swapped.
@@ -313,7 +292,7 @@ const finalistScheduleModule = {};
         var srcSlot = null;
 
         // remove team from all slots with this category
-        $.each(schedule, function(i, slot) {
+        $.each(schedule, function(_, slot) {
             let foundTeam = false;
             $.each(slot.categories, function(categoryName, teamNumber) {
                 if (categoryName == category.name && teamNumber == team.num) {
@@ -398,7 +377,7 @@ const finalistScheduleModule = {};
         const team = $.finalist.lookupTeam(teamNumber);
 
         let numCategories = 0;
-        $.each(slot.categories, function(categoryId, checkTeamNumber) {
+        $.each(slot.categories, function(_, checkTeamNumber) {
             if (checkTeamNumber == teamNumber) {
                 numCategories = numCategories + 1;
             }
@@ -463,7 +442,7 @@ const finalistScheduleModule = {};
 
         const categoriesToCells = {};
         const teamsInSlot = {};
-        $.each($.finalist.getAllScheduledCategories(), function(i, category) {
+        $.each($.finalist.getAllScheduledCategories(), function(_, category) {
             const cell = createTimeslotCell(slot, category);
             row.append(cell);
 
