@@ -6,234 +6,253 @@
 
 "use strict";
 
-function handleDivisionChange() {
-  var divIndex = $("#divisions").val();
-  var div = $.finalist.getDivisionByIndex(divIndex);
-  $.finalist.setCurrentDivision(div);
-  updatePage();
-}
+const finalistNumericModule = {};
 
-function getNumFinalistsId(team) {
-  return "num_finalists_" + team.num;
-}
+{
+    function handleDivisionChange() {
+        const divIndex = $("#divisions").val();
+        const div = $.finalist.getDivisionByIndex(divIndex);
+        $.finalist.setCurrentDivision(div);
+        updatePage();
+        $.finalist.saveToLocalStorage();
+    }
 
-function initializeFinalistCounts(teams) {
-  $.each(teams, function(i, team) {
-    // initialize to 0
-    var numFinalists = 0;
-    $.each($.finalist.getAllScheduledCategories(), function(j, category) {
-      if ($.finalist.isTeamInCategory(category, team.num)) {
-        numFinalists = numFinalists + 1;
-      }
-    });
-    $("#" + getNumFinalistsId(team)).text(numFinalists);
-  });
-}
+    function getNumFinalistsId(team) {
+        return "num_finalists_" + team.num;
+    }
 
-function createTeamTable(teams, currentDivision, currentCategory) {
-  $.each(teams, function(i, team) {
-    if (currentCategory.overall
-        || $.finalist.isTeamInDivision(team, currentDivision)) {
-      var row = $("<tr></tr>");
-      $("#data").append(row);
+    function initializeFinalistCounts(teams) {
+        $.each(teams, function(_, team) {
+            // initialize to 0
+            let numFinalists = 0;
+            $.each($.finalist.getAllScheduledCategories(), function(_, category) {
+                if ($.finalist.isTeamInCategory(category, team.num)) {
+                    numFinalists = numFinalists + 1;
+                }
+            });
+            $("#" + getNumFinalistsId(team)).text(numFinalists);
+        });
+    }
 
-      var finalistCol = $("<td></td>");
-      row.append(finalistCol);
-      var finalistCheck = $("<input type='checkbox'/>");
-      finalistCol.append(finalistCheck);
-      finalistCheck.change(function() {
-        var finalistDisplay = $("#" + getNumFinalistsId(team));
-        var numFinalists = parseInt(finalistDisplay.text(), 10);
-        if ($(this).prop("checked")) {
-          $.finalist.addTeamToCategory(currentCategory, team.num);
-          numFinalists = numFinalists + 1;
-        } else {
-          $.finalist.removeTeamFromCategory(currentCategory, team.num);
-          numFinalists = numFinalists - 1;
-        }
-        finalistDisplay.text(numFinalists);
-      });
-      if ($.finalist.isTeamInCategory(currentCategory, team.num)) {
-        finalistCheck.attr("checked", true);
-      }
+    function createTeamTable(teams, currentDivision, currentCategory) {
+        $.each(teams, function(_, team) {
+            if (currentCategory.overall
+                || $.finalist.isTeamInDivision(team, currentDivision)) {
+                const row = $("<tr></tr>");
+                $("#data").append(row);
 
-      var sgCol = $("<td></td>");
-      row.append(sgCol);
-      var group = team.judgingGroup;
-      sgCol.text(group);
-
-      var numCol = $("<td></td>");
-      row.append(numCol);
-      numCol.text(team.num);
-
-      var nameCol = $("<td></td>");
-      row.append(nameCol);
-      nameCol.text(team.name);
-
-      var scoreCol = $("<td></td>");
-      row.append(scoreCol);
-      scoreCol.text($.finalist.getCategoryScore(team, currentCategory).toFixed(2));
-
-      var numFinalistCol = $("<td id='" + getNumFinalistsId(team) + "'></td>");
-      row.append(numFinalistCol);
-    } // in correct division
-  }); // build data for each team
-}
-
-function updatePage() {
-  const categoryName = $.finalist.getCurrentCategoryName();
-  const currentCategory = $.finalist.getCategoryByName(categoryName);
-  if (null == currentCategory) {
-    alert("Invalid category ID found: " + categoryId);
-    return;
-  }
-
-  // note that this category has been visited so that it
-  // doesn't get initialized again
-  $.finalist.setCategoryVisited(currentCategory, $.finalist
-      .getCurrentDivision());
-
-  $("#data").empty();
-
-  var headerRow = $("<tr><th>Finalist?</th><th>Judging Group</th><th>Team #</th><th>Team Name</th><th>Score</th><th>Num Categories</th></tr>");
-  $("#data").append(headerRow);
-
-  var teams = $.finalist.getAllTeams();
-  $.finalist.sortTeamsByCategory(teams, currentCategory);
-
-  createTeamTable(teams, $.finalist.getCurrentDivision(), currentCategory);
-
-  initializeFinalistCounts(teams);
-}
-
-$(document)
-    .ready(
-        function() {
-          $("#previous")
-              .click(
-                  function() {
-                    var prev = null;
-                    var foundCurrent = false;
-                    $
-                        .each(
-                            $.finalist.getNumericCategories(),
-                            function(i, category) {
-                              if (category.name != $.finalist.CHAMPIONSHIP_NAME) {
-                                if ($.finalist.getCurrentCategoryName() == category.name) {
-                                  foundCurrent = true;
-                                } // current category
-                                if (!foundCurrent) {
-                                  prev = category;
-                                }
-                              } // not championship
-                            });
-
-                    if (foundCurrent) {
-                      if (null == prev) {
-                        location.href = "non-numeric.html";
-                      } else {
-                        $.finalist.setCurrentCategoryName(prev.name);
-                        location.href = "numeric.html";
-                      }
+                const finalistCol = $("<td></td>");
+                row.append(finalistCol);
+                const finalistCheck = $("<input type='checkbox'/>");
+                finalistCol.append(finalistCheck);
+                finalistCheck.change(function() {
+                    const finalistDisplay = $("#" + getNumFinalistsId(team));
+                    let numFinalists = parseInt(finalistDisplay.text(), 10);
+                    if ($(this).prop("checked")) {
+                        $.finalist.addTeamToCategory(currentCategory, team.num);
+                        numFinalists = numFinalists + 1;
                     } else {
-                      var championshipCategory = $.finalist
-                          .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
-                      if ($.finalist.getCurrentCategoryName() == championshipCategory.name) {
-                        $.finalist.setCurrentCategoryName(prev.name);
-                        location.href = "numeric.html";
-                      }
+                        $.finalist.removeTeamFromCategory(currentCategory, team.num);
+                        numFinalists = numFinalists - 1;
                     }
+                    $.finalist.saveToLocalStorage();
 
-                  });
+                    finalistDisplay.text(numFinalists);
+                });
+                if ($.finalist.isTeamInCategory(currentCategory, team.num)) {
+                    finalistCheck.attr("checked", true);
+                }
 
-          $("#next")
-              .click(
-                  function() {
-                    var championshipCategory = $.finalist
-                        .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
-                    if ($.finalist.getCurrentCategoryName() == championshipCategory.name) {
-                      location.href = "schedule.html";
-                    } else {
-                      var foundCurrent = false;
-                      var next = null;
-                      $
-                          .each(
-                              $.finalist.getNumericCategories(),
-                              function(i, category) {
-                                if (category.name != $.finalist.CHAMPIONSHIP_NAME) {
-                                  if (foundCurrent && null == next) {
-                                    next = category;
-                                  } else if ($.finalist.getCurrentCategoryName() == category.name) {
-                                    foundCurrent = true;
-                                  }
-                                }
-                              });
-                      if (null == next) {
-                        $.finalist
-                            .setCurrentCategoryName(championshipCategory.name);
-                        location.href = "numeric.html";
-                      } else {
-                        $.finalist.setCurrentCategoryName(next.name);
-                        location.href = "numeric.html";
-                      }
-                    }
-                  });
+                const sgCol = $("<td></td>");
+                row.append(sgCol);
+                const group = team.judgingGroup;
+                sgCol.text(group);
 
-          const categoryName = $.finalist.getCurrentCategoryName();
-          const currentCategory = $.finalist.getCategoryByName(categoryName);
-          if (null == currentCategory) {
+                const numCol = $("<td></td>");
+                row.append(numCol);
+                numCol.text(team.num);
+
+                const nameCol = $("<td></td>");
+                row.append(nameCol);
+                nameCol.text(team.name);
+
+                const scoreCol = $("<td></td>");
+                row.append(scoreCol);
+                scoreCol.text($.finalist.getCategoryScore(team, currentCategory).toFixed(2));
+
+                const numFinalistCol = $("<td id='" + getNumFinalistsId(team) + "'></td>");
+                row.append(numFinalistCol);
+            } // in correct division
+        }); // build data for each team
+    }
+
+    function updatePage() {
+        const categoryName = $.finalist.getCurrentCategoryName();
+        const currentCategory = $.finalist.getCategoryByName(categoryName);
+        if (null == currentCategory) {
             alert("Invalid category ID found: " + categoryId);
             return;
-          }
+        }
 
-          $("#deselect-all").click(function() {
-            $(":checkbox").each(function() {
-              if ($(this).prop('checked')) {
-                $(this).trigger('click');
-              }
-            });
-          });
+        // note that this category has been visited so that it
+        // doesn't get initialized again
+        $.finalist.setCategoryVisited(currentCategory, $.finalist
+            .getCurrentDivision());
 
-          $("#reselect").click(
-              function() {
-                var teams = $.finalist.getAllTeams();
-                var scoreGroups = $.finalist.getScoreGroups(teams, division);
-                var division = $.finalist.getCurrentDivision();
+        $("#data").empty();
 
-                $.finalist.unsetCategoryVisited(currentCategory, division);
+        const headerRow = $("<tr><th>Finalist?</th><th>Judging Group</th><th>Team #</th><th>Team Name</th><th>Score</th><th>Num Categories</th></tr>");
+        $("#data").append(headerRow);
 
-                $.finalist.initializeTeamsInNumericCategory(division,
-                    currentCategory, teams, scoreGroups);
+        const teams = $.finalist.getAllTeams();
+        $.finalist.sortTeamsByCategory(teams, currentCategory);
+
+        createTeamTable(teams, $.finalist.getCurrentDivision(), currentCategory);
+
+        initializeFinalistCounts(teams);
+        $.finalist.saveToLocalStorage();
+    }
+
+    $(document)
+        .ready(
+            function() {
+                $.finalist.loadFromLocalStorage();
+
+                $("#previous")
+                    .click(
+                        function() {
+                            let prev = null;
+                            let foundCurrent = false;
+                            $
+                                .each(
+                                    $.finalist.getNumericCategories(),
+                                    function(_, category) {
+                                        if (category.name != $.finalist.CHAMPIONSHIP_NAME) {
+                                            if ($.finalist.getCurrentCategoryName() == category.name) {
+                                                foundCurrent = true;
+                                            } // current category
+                                            if (!foundCurrent) {
+                                                prev = category;
+                                            }
+                                        } // not championship
+                                    });
+
+                            if (foundCurrent) {
+                                if (null == prev) {
+                                    location.href = "non-numeric.html";
+                                } else {
+                                    $.finalist.setCurrentCategoryName(prev.name);
+                                    $.finalist.saveToLocalStorage();
+                                    location.href = "numeric.html";
+                                }
+                            } else {
+                                const championshipCategory = $.finalist
+                                    .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
+                                if ($.finalist.getCurrentCategoryName() == championshipCategory.name) {
+                                    $.finalist.setCurrentCategoryName(prev.name);
+                                    $.finalist.saveToLocalStorage();
+
+                                    location.href = "numeric.html";
+                                }
+                            }
+
+                        });
+
+                $("#next")
+                    .click(
+                        function() {
+                            const championshipCategory = $.finalist
+                                .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
+                            if ($.finalist.getCurrentCategoryName() == championshipCategory.name) {
+                                location.href = "schedule.html";
+                            } else {
+                                let foundCurrent = false;
+                                let next = null;
+                                $
+                                    .each(
+                                        $.finalist.getNumericCategories(),
+                                        function(_, category) {
+                                            if (category.name != $.finalist.CHAMPIONSHIP_NAME) {
+                                                if (foundCurrent && null == next) {
+                                                    next = category;
+                                                } else if ($.finalist.getCurrentCategoryName() == category.name) {
+                                                    foundCurrent = true;
+                                                }
+                                            }
+                                        });
+                                if (null == next) {
+                                    $.finalist
+                                        .setCurrentCategoryName(championshipCategory.name);
+                                    $.finalist.saveToLocalStorage();
+
+                                    location.href = "numeric.html";
+                                } else {
+                                    $.finalist.setCurrentCategoryName(next.name);
+                                    $.finalist.saveToLocalStorage();
+
+                                    location.href = "numeric.html";
+                                }
+                            }
+                        });
+
+                const categoryName = $.finalist.getCurrentCategoryName();
+                const currentCategory = $.finalist.getCategoryByName(categoryName);
+                if (null == currentCategory) {
+                    alert("Invalid category ID found: " + categoryId);
+                    return;
+                }
+
+                $("#deselect-all").click(function() {
+                    $(":checkbox").each(function() {
+                        if ($(this).prop('checked')) {
+                            $(this).trigger('click');
+                        }
+                    });
+                });
+
+                $("#reselect").click(
+                    function() {
+                        const teams = $.finalist.getAllTeams();
+                        const scoreGroups = $.finalist.getScoreGroups(teams, division);
+                        const division = $.finalist.getCurrentDivision();
+
+                        $.finalist.unsetCategoryVisited(currentCategory, division);
+
+                        $.finalist.initializeTeamsInNumericCategory(division,
+                            currentCategory, teams, scoreGroups);
+                        updatePage();
+                        $.finalist.saveToLocalStorage();
+                    });
+
+                $("#category-name").text(currentCategory.name);
+
+                const roomEle = $("#room");
+                roomEle.change(function() {
+                    const roomNumber = roomEle.val();
+                    $.finalist.setRoom(currentCategory,
+                        $.finalist.getCurrentDivision(), roomNumber);
+                    $.finalist.saveToLocalStorage();
+                });
+                roomEle.val($.finalist.getRoom(currentCategory, $.finalist
+                    .getCurrentDivision()));
+
+                $("#divisions").empty();
+                $.each($.finalist.getDivisions(), function(i, division) {
+                    let selected = "";
+                    if (division == $.finalist.getCurrentDivision()) {
+                        selected = " selected ";
+                    }
+                    const divisionOption = $("<option value='" + i + "'" + selected + ">"
+                        + division + "</option>");
+                    $("#divisions").append(divisionOption);
+                }); // foreach division
+                $("#divisions").change(function() {
+                    handleDivisionChange();
+                });
+                handleDivisionChange();
+
                 updatePage();
-              });
 
-          $("#category-name").text(currentCategory.name);
-
-          var roomEle = $("#room");
-          roomEle.change(function() {
-            var roomNumber = roomEle.val();
-            $.finalist.setRoom(currentCategory,
-                $.finalist.getCurrentDivision(), roomNumber);
-          });
-          roomEle.val($.finalist.getRoom(currentCategory, $.finalist
-              .getCurrentDivision()));
-
-          $("#divisions").empty();
-          $.each($.finalist.getDivisions(), function(i, division) {
-            var selected = "";
-            if (division == $.finalist.getCurrentDivision()) {
-              selected = " selected ";
-            }
-            var divisionOption = $("<option value='" + i + "'" + selected + ">"
-                + division + "</option>");
-            $("#divisions").append(divisionOption);
-          }); // foreach division
-          $("#divisions").change(function() {
-            handleDivisionChange();
-          });
-          handleDivisionChange();
-
-          updatePage();
-
-          $.finalist.displayNavbar();
-        }); // end ready function
+                $.finalist.displayNavbar();
+            }); // end ready function
+} // scope

@@ -39,8 +39,13 @@ const finalistParamsModule = {
 
                     startTimeElement.on('changeTime', function() {
                         const newDate = startTimeElement.timepicker('getTime');
-                        const newLocalTime = JSJoda.LocalTime.of(newDate.getHours(), newDate.getMinutes());
-                        $.finalist.setPlayoffStartTime(bracketName, newLocalTime);
+                        if (null == newDate) {
+                            $.finalist.setPlayoffStartTime(bracketName, null);
+                        } else {
+                            const newLocalTime = JSJoda.LocalTime.of(newDate.getHours(), newDate.getMinutes());
+                            $.finalist.setPlayoffStartTime(bracketName, newLocalTime);
+                        }
+                        $.finalist.saveToLocalStorage();
                     });
 
                     finalistParamsModule.setTimeField(startTimeElement, playoffSchedule.startTime);
@@ -51,8 +56,13 @@ const finalistParamsModule = {
 
                     endTimeElement.on('changeTime', function() {
                         const newDate = endTimeElement.timepicker('getTime');
-                        const newLocalTime = JSJoda.LocalTime.of(newDate.getHours(), newDate.getMinutes());
-                        $.finalist.setPlayoffEndTime(bracketName, newLocalTime);
+                        if (null == newDate) {
+                            $.finalist.setPlayoffEndTime(bracketName, null);
+                        } else {
+                            const newLocalTime = JSJoda.LocalTime.of(newDate.getHours(), newDate.getMinutes());
+                            $.finalist.setPlayoffEndTime(bracketName, newLocalTime);
+                        }
+                        $.finalist.saveToLocalStorage();
                     });
 
                     finalistParamsModule.setTimeField(endTimeElement, playoffSchedule.endTime);
@@ -90,6 +100,8 @@ const finalistParamsModule = {
 
 $(document).ready(
     function() {
+        $.finalist.loadFromLocalStorage();
+
         $("#divisions").empty();
 
         const teams = $.finalist.getAllTeams();
@@ -108,6 +120,7 @@ $(document).ready(
             $.each($.finalist.getNumericCategories(), function(i, category) {
                 $.finalist.initializeTeamsInNumericCategory(division, category,
                     teams, scoreGroups);
+                $.finalist.saveToLocalStorage();
             });// foreach numeric category
         }); // foreach division
 
@@ -128,6 +141,8 @@ $(document).ready(
             const newDate = $('#startTime').timepicker('getTime');
             const newLocalTime = JSJoda.LocalTime.of(newDate.getHours(), newDate.getMinutes());
             $.finalist.setStartTime($.finalist.getCurrentDivision(), newLocalTime);
+
+            $.finalist.saveToLocalStorage();
         });
 
         $("#duration").change(function() {
@@ -141,6 +156,8 @@ $(document).ready(
             } else {
                 $.finalist.setDuration($.finalist.getCurrentDivision(), minutes);
             }
+
+            $.finalist.saveToLocalStorage();
         });
 
         $("#divisions").change(function() {
@@ -148,6 +165,8 @@ $(document).ready(
             const div = $.finalist.getDivisionByIndex(divIndex);
             $.finalist.setCurrentDivision(div);
             finalistParamsModule.updateDivision();
+
+            $.finalist.saveToLocalStorage();
         });
 
         $("#next").click(function() {
@@ -155,6 +174,8 @@ $(document).ready(
         });
 
         finalistParamsModule.populateHeadToHeadTimes();
+
+        $.finalist.saveToLocalStorage();
 
         $.finalist.displayNavbar();
 

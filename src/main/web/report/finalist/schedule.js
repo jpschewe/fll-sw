@@ -60,6 +60,7 @@ const finalistScheduleModule = {};
         const div = $.finalist.getDivisionByIndex(divIndex);
         $.finalist.setCurrentDivision(div);
         updatePage();
+        $.finalist.saveToLocalStorage();
     }
 
     function updateHeader() {
@@ -138,7 +139,7 @@ const finalistScheduleModule = {};
      * @returns jquery div object
      */
     function createTimeslotCell(slot, category) {
-        var cell = $("<div class='rTableCell'></div>");
+        const cell = $("<div class='rTableCell'></div>");
 
         cell.on('dragover', function(e) {
             let rawEvent;
@@ -270,8 +271,6 @@ const finalistScheduleModule = {};
         $("#wait-dialog").dialog("open");
         $.when.apply($, waitList).done(function() {
             $("#wait-dialog").dialog("close");
-        }).fail(function() {
-            $("#wait-dialog").dialog("close");
         });
     }
 
@@ -288,8 +287,8 @@ const finalistScheduleModule = {};
      *          the new slot to put the team in
      */
     function moveTeam(team, category, newSlot) {
-        var destSlot = null;
-        var srcSlot = null;
+        let destSlot = null;
+        let srcSlot = null;
 
         // remove team from all slots with this category
         $.each(schedule, function(_, slot) {
@@ -324,19 +323,19 @@ const finalistScheduleModule = {};
         srcCell.removeClass("overlap-schedule");
         srcCell.removeClass("overlap-playoff");
 
-        if (null == destSlot.categories[category.catName]) {
+        if (null == destSlot.categories[category.name]) {
             // no team in the destination, just delete this team from the old slot
-            delete srcSlot.categories[category.catName];
+            delete srcSlot.categories[category.name];
         } else {
-            const oldTeamNumber = destSlot.categories[category.catName];
+            const oldTeamNumber = destSlot.categories[category.name];
             const oldTeam = $.finalist.lookupTeam(oldTeamNumber);
 
             // clear the destination slot so that the warning check sees the correct
             // state for this team
-            delete destSlot.categories[category.catName];
+            delete destSlot.categories[category.name];
 
             // move team to the source slot
-            srcSlot.categories[category.catName] = oldTeamNumber;
+            srcSlot.categories[category.name] = oldTeamNumber;
 
             // check new position to set warnings
             checkForTimeOverlap(srcSlot, oldTeamNumber);
@@ -353,7 +352,7 @@ const finalistScheduleModule = {};
         // newSlot and destSlot are not the same instance.
         // 12/23/2015 JPS - not sure how this could happen, but I must have thought it
         // possible.
-        destSlot.categories[category.catName] = team.num;
+        destSlot.categories[category.name] = team.num;
 
         // check where the team now is to see what warnings are needed
         checkForTimeOverlap(destSlot, team.num);
@@ -362,6 +361,7 @@ const finalistScheduleModule = {};
         checkForTimeOverlap(srcSlot, team.num);
 
         $.finalist.setSchedule($.finalist.getCurrentDivision(), schedule);
+        $.finalist.saveToLocalStorage();
     }
 
     /**
@@ -407,8 +407,8 @@ const finalistScheduleModule = {};
 
                 } // found cell
                 else {
-                    alert("Can't find cell for " + time.hour + ":" + time.minute + " cat: "
-                        + categoryId);
+                    alert("Can't find cell for " + slot.time + " cat: "
+                        + name);
                     return;
                 }
             } // team number matches
@@ -470,7 +470,14 @@ const finalistScheduleModule = {};
         // output header
         updateHeader();
 
-        schedule = $.finalist.getSchedule($.finalist.getCurrentDivision());
+        const currentDivision = $.finalist.getCurrentDivision()
+        schedule = $.finalist.getSchedule(currentDivision);
+        if (null == schedule || 0 == schedule.length) {
+            schedule = $.finalist.scheduleFinalists(currentDivision);
+            $.finalist.setSchedule(schedule);
+            $.finalist.saveToLocalStorage();
+        }
+
         finalistsCount = $.finalist.getTeamToCategoryMap($.finalist
             .getCurrentDivision());
 
@@ -482,11 +489,14 @@ const finalistScheduleModule = {};
 
     $(document).ready(
         function() {
+            $.finalist.loadFromLocalStorage();
+
             $("#previous").click(
                 function() {
                     const championshipCategory = $.finalist
                         .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
                     $.finalist.setCurrentCategoryName(championshipCategory.name);
+                    $.finalist.saveToLocalStorage();
                     location.href = "numeric.html";
                 });
 
@@ -509,6 +519,7 @@ const finalistScheduleModule = {};
 
             $('#regenerate_schedule').click(function() {
                 $.finalist.setSchedule($.finalist.getCurrentDivision(), null);
+                $.finalist.saveToLocalStorage();
                 updatePage();
             });
 

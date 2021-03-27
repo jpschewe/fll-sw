@@ -10,28 +10,41 @@ const finalistScheduleLoad = {}
 
     function clearAndLoad() {
         $.finalist.clearAllData();
-        $.finalist.loadCategoriesAndScores(function() {
-            // success
-            $.finalist.loadNominieesAndSchedules(function() {
+
+        // need to load the tournament again since everything was just cleared
+        $.finalist.loadTournament(function() {
+            // success            
+
+            $.finalist.loadCategoriesAndScores(function() {
                 // success
-                $("#wait-dialog").dialog("close");
-                location.href = "params.html";
+                $.finalist.loadNominieesAndSchedules(function() {
+                    // success
+                    $("#wait-dialog").dialog("close");
+                    $.finalist.saveToLocalStorage();
+                    location.href = "params.html";
+                }, function(msg) {
+                    // error
+                    $("#wait-dialog").dialog("close");
+                    alert("Failure loading nominees and schedules: " + msg);
+                });
             }, function(msg) {
                 // error
                 $("#wait-dialog").dialog("close");
-                alert("Failure loading nominees and schedules: " + msg);
+                alert("Failure loading categories and scores: " + msg);
             });
         }, function(msg) {
-            // error
+            // failure
             $("#wait-dialog").dialog("close");
-            alert("Failure loading categories and scores: " + msg);
+            alert("Failure loading current tournament: " + msg);
         });
+
     }
 
     function refreshData() {
         $.finalist.loadCategoriesAndScores(function() {
             // success
             $("#wait-dialog").dialog("close");
+            $.finalist.saveToLocalStorage();
             location.href = "params.html";
         }, function(msg) {
             // error
@@ -61,6 +74,7 @@ const finalistScheduleLoad = {}
         $("#wait-dialog").dialog("open");
 
         // get current state before anything loads
+        $.finalist.loadFromLocalStorage();
         const currentAllTeams = $.finalist.getAllTeams();
         const currentTournament = $.finalist.getTournament();
 
@@ -82,7 +96,7 @@ const finalistScheduleLoad = {}
         }, function(msg) {
             // failure
             $("#wait-dialog").dialog("close");
-            alert("Failure loading teams and current tournament: " + msg);
+            alert("Failure loading current tournament: " + msg);
         });
 
     });

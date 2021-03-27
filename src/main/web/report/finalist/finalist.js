@@ -153,7 +153,6 @@
         // names of playoff brackets this team is competing in
         this.playoffDivisions = [];
         _teams[num] = this;
-        _save();
     }
 
     /**
@@ -189,7 +188,6 @@
         this.judges = {}; // teamNumber -> [judges]
 
         _categories[this.catId] = this;
-        _save();
     }
 
     /**
@@ -344,7 +342,6 @@
 
         setTournament: function(tournament) {
             _tournament = tournament;
-            _save();
         },
 
         /**
@@ -355,7 +352,6 @@
             if (-1 == $.inArray(division, _divisions)) {
                 _divisions.push(division);
             }
-            _save();
         },
 
         getDivisions: function() {
@@ -364,7 +360,6 @@
 
         setCurrentDivision: function(division) {
             _currentDivision = division;
-            _save();
         },
 
         getCurrentDivision: function() {
@@ -386,7 +381,6 @@
             if (null == existing) {
                 const playoffSchedule = new PlayoffSchedule();
                 _playoffSchedules[division] = playoffSchedule;
-                _save();
             }
         },
 
@@ -422,7 +416,6 @@
             }
             existing.startTime = time;
             _playoffSchedules[division] = existing;
-            _save();
         },
 
         /**
@@ -448,7 +441,6 @@
             }
             existing.endTime = time;
             _playoffSchedules[division] = existing;
-            _save();
         },
 
         /**
@@ -460,7 +452,6 @@
 
         setRoom: function(category, division, room) {
             category.room[division] = room;
-            _save();
         },
 
         /**
@@ -530,7 +521,6 @@
 
         setCategoryScore: function(team, category, score) {
             team.categoryScores[category.catId] = score;
-            _save;
         },
 
         /**
@@ -668,7 +658,6 @@
          */
         removeCategory: function(category) {
             delete _categories[category.catId];
-            _save();
         },
 
         /**
@@ -798,21 +787,14 @@
                 }
 
                 category.teams.push(teamNum);
-                _save();
             }
         },
 
-        /**
-         * Removes a team and saves the data.
-         */
         removeTeamFromCategory: function(category, teamNum) {
-            $.finalist._removeTeamFromCategory(category, teamNum, true);
+            $.finalist._removeTeamFromCategory(category, teamNum);
         },
 
-        /**
-         * Removes a team, but only calls save if told to.
-         */
-        _removeTeamFromCategory: function(category, teamNum, save) {
+        _removeTeamFromCategory: function(category, teamNum) {
             teamNum = parseInt(teamNum, 10);
             var index = category.teams.indexOf(teamNum);
             if (index != -1) {
@@ -828,10 +810,6 @@
 
                 category.teams.splice(index, 1);
                 delete category.judges[teamNum];
-
-                if (save) {
-                    _save();
-                }
             }
         },
 
@@ -850,9 +828,8 @@
             });
 
             $.each(toRemove, function(_, teamNum) {
-                $.finalist._removeTeamFromCategory(category, teamNum, false);
+                $.finalist._removeTeamFromCategory(category, teamNum);
             });
-            _save();
         },
 
         addTeamToTimeslot: function(timeslot, categoryName, teamNum) {
@@ -881,30 +858,17 @@
         },
 
         /**
-         * Get the schedule for the specified division. If no schedule exists, one
-         * is created.
-         * 
-         * @return the output of scheduleFinalists
-         * @see scheduleFinalists
+         * Get the schedule for the specified division.
          */
         getSchedule: function(currentDivision) {
-            let schedule = _schedules[currentDivision];
-            if (null == schedule || 0 == schedule.length) {
-                schedule = $.finalist.scheduleFinalists(currentDivision);
-                _schedules[currentDivision] = schedule;
-                _save();
-            }
-            return schedule;
+            return _schedules[currentDivision];
         },
 
         /**
          * Set the schedule for the specified division.
-         * 
-         * @see scheduleFinalists
          */
         setSchedule: function(currentDivision, schedule) {
             _schedules[currentDivision] = schedule;
-            _save();
         },
 
         /**
@@ -1113,7 +1077,6 @@
             _addTimeToSchedule(currentDivision, durationDiff);
 
             $.finalist.getScheduleParameters(currentDivision).startTime = newStartTime;
-            _save();
         },
 
 
@@ -1130,7 +1093,6 @@
             _addToScheduleSlotDurations(diffDuration);
 
             $.finalist.getScheduleParameters(currentDivision).intervalMinutes = v;
-            _save();
         },
 
         /**
@@ -1142,7 +1104,6 @@
 
         setCurrentCategoryName: function(name) {
             _currentCategoryName = name;
-            _save();
         },
 
         getCurrentCategoryName: function() {
@@ -1230,7 +1191,6 @@
          */
         setCategoryScheduled: function(category, isScheduled) {
             category.scheduled = isScheduled;
-            _save();
         },
 
         /**
@@ -1251,7 +1211,6 @@
 
         setNominatingJudges: function(category, teamNumber, judges) {
             category.judges[teamNumber] = judges;
-            _save();
         },
 
         /**
@@ -1673,7 +1632,6 @@
             waitList.push(loadCurrentTournamentPromise);
 
             $.when.apply($, waitList).done(function() {
-                _save();
                 doneCallback();
             });
         },
@@ -1737,7 +1695,6 @@
                 waitList.push(playoffBracketTeamsPromise);
 
                 $.when.apply($, waitList).done(function() {
-                    _save();
                     doneCallback();
                 });
 
@@ -1778,11 +1735,20 @@
             waitList.push(nonNumericNomineesPromise);
 
             $.when.apply($, waitList).done(function() {
-                _save();
                 doneCallback();
             });
+        },
+
+        saveToLocalStorage: function() {
+            _save();
+        },
+
+        loadFromLocalStorage() {
+            _load();
         }
     };
 
-    _load();
+    // always need to initialize variables
+    _init_variables();
+
 })(window.jQuery || window.$);
