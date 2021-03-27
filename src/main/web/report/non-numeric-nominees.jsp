@@ -12,57 +12,29 @@
 
 <title>Non-Numeric Nominees</title>
 
-<script type='text/javascript' src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+<script type='text/javascript'
+    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 <script type='text/javascript'
     src="<c:url value='/extlib/jquery-json/dist/jquery.json.min.js'/>"></script>
-<script type='text/javascript' src="<c:url value='/extlib/jStorage/jstorage.min.js'/>"></script>
+<script type='text/javascript'
+    src="<c:url value='/extlib/js-joda/packages/core/dist/js-joda.min.js'/>"></script>
+
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.css'/>" />
+<script type="text/javascript"
+    src="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.js'/>"></script>
+
+<script type='text/javascript'
+    src="<c:url value='/js/fll-functions.js'/>"></script>
 <script type='text/javascript' src="<c:url value='/js/fll-objects.js'/>"></script>
-<script type='text/javascript' src='finalist/finalist.js'></script>
-<script type='text/javascript' src='finalist/non-numeric.js'></script>
+<script type='text/javascript' src="<c:url value='/js/fll-storage.js'/>"></script>
 
-
-<script type='text/javascript'>
-  function loadData() {
-    console.log("Loading data");
-
-    var _loadingTournament =
-<%=FinalistLoad.currentTournament(application)%>
-  ;
-    var tournament = $.finalist.getTournament();
-    if (tournament != _loadingTournament) {
-      console.log("Clearing data for old tournament: " + tournament);
-      $.finalist.clearAllData();
-      console.log("Finished clearing data");
-      // make sure everything properly initializes
-      console.log("Reloading page");
-      location.reload();
-    }
-<%FinalistLoad.outputDivisions(out, application);%>
-  
-<%FinalistLoad.outputTeamVariables(out, application);%>
-  
-<%FinalistLoad.outputCategories(out, application);%>
-  
-<%FinalistLoad.outputNonNumericNominees(out, application);%>
-  $.finalist.setTournament(_loadingTournament);
-  
-  console.log("Finished loading data");
-  }
-
-  function storeNominees() {
-    var allNonNumericNominees = $.finalist.prepareNonNumericNomineesToSend();
-    $('#non-numeric-nominees_data').val($.toJSON(allNonNumericNominees));
-  }
-
-  $(document).ready(function() {
-    loadData();
-
-    $("#nominees_store").click(function() {
-      storeNominees();
-      $("#nominees_form").submit();
-    });
-  });
-</script>
+<script type='text/javascript'
+    src="<c:url value='/report/finalist/finalist.js'/>"></script>
+<script type='text/javascript'
+    src="<c:url value='/report/finalist/non-numeric_ui.js'/>"></script>
+<script type='text/javascript'
+    src="<c:url value='/report/non-numeric-nominees.js'/>"></script>
 
 </head>
 
@@ -72,23 +44,10 @@
     <%-- clear out the message, so that we don't see it again --%>
     <c:remove var="message" />
 
-    <form id='nominees_form' method='POST'
-        action='StoreNonNumericNominees'>
-
-        <input type='hidden' id='non-numeric-nominees_data'
-            name='non-numeric-nominees_data' />
-
-        <button id="nominees_store">Store Nominees</button>
-    </form>
-
     <h1>Non Numeric Categories</h1>
 
     <p>This page allows you to select teams that are nominated for
         awards that do not have scores in the database.</p>
-
-    <p>The checkbox next to the category specifies if the category
-        should be scheduled for finalist judging. If this tournament
-        does not have finalist judging this checkbox can be ignored.</p>
 
     <h2>Overall</h2>
     <p>These categories are awarded for the whole tournament rather
@@ -103,4 +62,10 @@
 
     <ul id='categories'>
     </ul>
+
+    <button id="nominees_store">Store Nominees</button>
+
+    <div id="wait-dialog">
+        <p id='wait-dialog_text'>Loading data. Please wait...</p>
+    </div>
 </html>

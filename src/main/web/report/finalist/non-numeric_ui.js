@@ -30,6 +30,15 @@ const nonNumericUi = {}
         _useStorage = value;
     }
 
+    let _useScheduledFlag = true;
+
+    /**
+     * @param value if true then show the checkboxes for marking scheduled categories. Defaults to true.
+     */
+    nonNumericUi.setUseScheduledFlag = function(value) {
+        _useScheduledFlag = value;
+    }
+
     /**
      * Initialize the UI for non-numeric nominees.
      * If local storage is not to be used, make sure to call setUseStorage(false) first.
@@ -92,17 +101,19 @@ const nonNumericUi = {}
             $("#categories").append(catEle);
         }
 
-        const scheduledCheckbox = $("<input type='checkbox' id='scheduled_"
-            + category.catId + "'/>");
-        catEle.append(scheduledCheckbox);
-        scheduledCheckbox.change(function() {
-            $.finalist.setCategoryScheduled(category, $(this).prop("checked"));
-            roomEle.prop("disabled", !(scheduledCheckbox.prop("checked")));
-            if (_useStorage) {
-                $.finalist.saveToLocalStorage();
-            }
-        });
-        scheduledCheckbox.attr("checked", $.finalist.isCategoryScheduled(category));
+        if (_useScheduledFlag) {
+            const scheduledCheckbox = $("<input type='checkbox' id='scheduled_"
+                + category.catId + "'/>");
+            catEle.append(scheduledCheckbox);
+            scheduledCheckbox.change(function() {
+                $.finalist.setCategoryScheduled(category, $(this).prop("checked"));
+                roomEle.prop("disabled", !(scheduledCheckbox.prop("checked")));
+                if (_useStorage) {
+                    $.finalist.saveToLocalStorage();
+                }
+            });
+            scheduledCheckbox.attr("checked", $.finalist.isCategoryScheduled(category));
+        }
 
         catEle.append(category.name);
         catEle.append(" - ")
