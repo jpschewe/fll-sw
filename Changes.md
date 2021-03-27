@@ -1,4 +1,5 @@
 * #909 - Use time picker widget when choosing start and end times in the finalist scheduling workflow
+* Fix bug where awards report would fail to generate when multiple winners were selected for numeric categories
 * #887 - security requirements are  handled on each page now rather than in the central initialize method
 
 Release 15.9.1
