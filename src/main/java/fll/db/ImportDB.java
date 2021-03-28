@@ -343,7 +343,7 @@ public final class ImportDB {
           + dbVersion);
     }
 
-    upgradeDatabase(connection);
+    upgradeDatabase(connection, description);
 
     return new ImportResult(importDirectory, hasBugs);
   }
@@ -454,15 +454,22 @@ public final class ImportDB {
    * we're only fixing up column names and the data in the column.
    *
    * @param connection the database to upgrade
-   * @param description a developer friendly version of challengeDocument
+   * @param descriptionFor0to1Upgrade the challenge description read from the
+   *          loaded file, only
+   *          use this for adding to the database, any upgrades to the description
+   *          should read from the database
+   * @param descriptionFor0to1Upgrade a developer friendly version of
+   *          challengeDocument
    * @throws SQLException on an error
    * @throws IllegalArgumentException if the database cannot be upgraded for
    *           some reason
    */
-  private static void upgradeDatabase(final Connection connection) throws SQLException, IllegalArgumentException {
+  private static void upgradeDatabase(final Connection connection,
+                                      final ChallengeDescription descriptionFor0to1Upgrade)
+      throws SQLException, IllegalArgumentException {
     int dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 1) {
-      upgrade0To1(connection);
+      upgrade0To1(connection, descriptionFor0to1Upgrade);
     }
 
     // tournament parameters existed after version 1
@@ -1214,10 +1221,10 @@ public final class ImportDB {
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon tables in the database")
-  private static void upgrade0To1(final Connection connection) throws SQLException {
+  private static void upgrade0To1(final Connection connection,
+                                  ChallengeDescription description)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 0 to 1");
-
-    final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
 
     try (Statement stmt = connection.createStatement()) {
 
