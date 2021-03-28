@@ -1,4 +1,4 @@
-* #447 - Allow the finalist schedule to be loaded from the database
+* #447, #908 - Allow the finalist schedule to be loaded from the database
 * #909 - Use time picker widget when choosing start and end times in the finalist scheduling workflow
 * Fix bug where awards report would fail to generate when multiple winners were selected for numeric categories
 * #887 - security requirements are  handled on each page now rather than in the central initialize method
