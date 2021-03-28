@@ -11,7 +11,8 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -29,13 +30,13 @@ import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
-import fll.web.UserRole;
+import fll.web.playoff.Playoff;
 
 /**
- * Collection of names of the award groups in the current tournament.
+ * Map of bracket name to collection of team numbers of teams in the bracket.
  */
-@WebServlet("/api/AwardGroups")
-public class AwardGroups extends HttpServlet {
+@WebServlet("/api/PlayoffBracketTeams")
+public class PlayoffBracketTeamsServlet extends HttpServlet {
 
   @Override
   protected final void doGet(final HttpServletRequest request,
@@ -45,7 +46,8 @@ public class AwardGroups extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+    if (!auth.isRef()) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
 
@@ -58,9 +60,17 @@ public class AwardGroups extends HttpServlet {
       response.setContentType("application/json");
       final PrintWriter writer = response.getWriter();
 
-      final Collection<String> awardGroups = Queries.getAwardGroups(connection);
+      final int tournament = Queries.getCurrentTournament(connection);
 
-      jsonMapper.writeValue(writer, awardGroups);
+      final Collection<String> playoffBrackets = Playoff.getPlayoffBrackets(connection, tournament);
+      final Map<String, Collection<Integer>> playoffBracketTeams = new HashMap<>();
+      for (final String playoffBracket : playoffBrackets) {
+        final Collection<Integer> teams = Playoff.getTeamNumbersForPlayoffBracket(connection, tournament,
+                                                                                  playoffBracket);
+        playoffBracketTeams.put(playoffBracket, teams);
+      }
+
+      jsonMapper.writeValue(writer, playoffBracketTeams);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     }

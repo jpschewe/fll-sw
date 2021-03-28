@@ -95,5 +95,8 @@
 .rTableBody {
     display: table-row-group;
 }
-
 /* end table tags */
+
+.no-close .ui-dialog-titlebar-close {
+    display: none;
+}

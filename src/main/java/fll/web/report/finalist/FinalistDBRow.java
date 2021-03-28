@@ -7,11 +7,12 @@
 package fll.web.report.finalist;
 
 import java.io.Serializable;
-import java.util.Calendar;
+import java.time.LocalTime;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -21,71 +22,45 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public final class FinalistDBRow implements Serializable {
 
   /**
-   * @param categoryName {@link #getCategoryName()}
-   * @param hour {@link #getHour()}
-   * @param minute {@link #getMinute()}
-   * @param teamNumber {@link #getTeamNumber()}
+   * @param endTime {@link #getEndTime()}
+   * @param time {@link #getTime()}
+   * @param categories {@link #getCategories()}
    */
-  public FinalistDBRow(@JsonProperty("categoryName") final String categoryName,
-                       @JsonProperty("hour") final int hour,
-                       @JsonProperty("minute") final int minute,
-                       @JsonProperty("teamNumber") final int teamNumber) {
-    this.categoryName = categoryName;
-    this.hour = hour;
-    this.minute = minute;
-    this.teamNumber = teamNumber;
+  public FinalistDBRow(@JsonProperty("time") final LocalTime time,
+                       @JsonProperty("endTime") final LocalTime endTime,
+                       @JsonProperty("categories") final Map<String, Integer> categories) {
+    this.time = time;
+    this.endTime = endTime;
+    this.categories = Collections.unmodifiableMap(new HashMap<>(categories));
   }
 
-  private final String categoryName;
+  private final LocalTime time;
 
   /**
-   * @return name of the category being judged in
+   * @return the time of the finalist session
    */
-  public String getCategoryName() {
-    return categoryName;
+  public LocalTime getTime() {
+    return time;
   }
 
-  private final int hour;
+  private final LocalTime endTime;
 
   /**
-   * @return the hour of the finalist session
+   * @return the end time of the finalist session
    */
-  public int getHour() {
-    return hour;
+  public LocalTime getEndTime() {
+    return endTime;
   }
 
-  private final int minute;
+  private final Map<String, Integer> categories;
 
   /**
-   * @return the minute of the finalist session
+   * Specifies the mapping of category names to teams for this row.
+   * 
+   * @return category name to team number
    */
-  public int getMinute() {
-    return minute;
-  }
-
-  /**
-   * @return the time as a {@link Date} object
-   * @see #getHour()
-   * @see #getMinute()
-   */
-  @JsonIgnore
-  public Date getTime() {
-    final Calendar cal = Calendar.getInstance();
-    cal.set(Calendar.HOUR, getHour());
-    cal.set(Calendar.MINUTE, getMinute());
-    cal.set(Calendar.SECOND, 0);
-    cal.set(Calendar.MILLISECOND, 0);
-
-    return cal.getTime();
-  }
-
-  private final int teamNumber;
-
-  /**
-   * @return the team number
-   */
-  public int getTeamNumber() {
-    return teamNumber;
+  public Map<String, Integer> getCategories() {
+    return categories;
   }
 
   /**

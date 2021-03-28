@@ -8,6 +8,9 @@ package fll.web.api;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -17,44 +20,51 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
+import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
-import fll.xml.ChallengeDescription;
 
 /**
- * Allow one to access the challenge description through the REST API.
+ * Collection of names of the award groups in the current tournament.
  */
-@WebServlet("/api/ChallengeDescription")
-public class ChallengeDescriptionServlet extends HttpServlet {
+@WebServlet("/api/AwardGroups")
+public class AwardGroupsServlet extends HttpServlet {
 
   @Override
   protected final void doGet(final HttpServletRequest request,
                              final HttpServletResponse response)
       throws IOException, ServletException {
+    final ServletContext application = getServletContext();
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.PUBLIC), false)) {
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
       return;
     }
 
-    final ServletContext application = getServletContext();
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
-    response.reset();
-    response.setContentType("application/json");
-    final PrintWriter writer = response.getWriter();
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
-    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
+      response.reset();
+      response.setContentType("application/json");
+      final PrintWriter writer = response.getWriter();
 
-    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+      final Collection<String> awardGroups = Queries.getAwardGroups(connection);
 
-    jsonMapper.writeValue(writer, challengeDescription);
+      jsonMapper.writeValue(writer, awardGroups);
+    } catch (final SQLException e) {
+      throw new RuntimeException(e);
+    }
+
   }
 
 }

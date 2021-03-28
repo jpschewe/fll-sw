@@ -13,13 +13,10 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -218,12 +215,17 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
     return document;
   }
 
+  /**
+   * Simple hour and minute time format.
+   */
+  public static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("hh:mm");
+
   private Element createMainTable(final Connection connection,
                                   final Document document,
                                   final FinalistSchedule schedule) {
 
     // convert to list to ensure we have a stable iteration order
-    final List<String> categories = new LinkedList<>(schedule.getCategories());
+    final List<String> categories = new LinkedList<>(schedule.getCategoryNames());
     final Map<String, String> categoryToRoom = schedule.getRooms();
 
     final Element mainTable = FOPUtils.createBasicTable(document);
@@ -274,39 +276,39 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
     mainTableBody.setAttribute("font-family", SCHEDULE_FONT_FAMILY);
     mainTableBody.setAttribute("font-size", SCHEDULE_FONT_SIZE);
 
-    final SortedMap<TimeSlot, Map<String, FinalistDBRow>> organized = organizeSchedule(schedule);
-    organized.forEach((timeSlot,
-                       timeData) -> {
+    schedule.getSchedule().forEach(row -> {
       final Element tableRow = FOPUtils.createTableRow(document);
       mainTableBody.appendChild(tableRow);
 
-      final Element tCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, timeSlot.formattedString());
+      final Element tCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                     TIME_FORMAT.format(row.getTime()));
       tableRow.appendChild(tCell);
       FOPUtils.addBorders(tCell, ScheduleWriter.STANDARD_BORDER_WIDTH);
       FOPUtils.addPadding(tCell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
                           FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
       categories.stream().forEach((categoryTitle) -> {
-        final Element e = createTeamCell(connection, document, categoryTitle, timeData);
+        final Element e = createTeamCell(connection, document, categoryTitle, row);
         tableRow.appendChild(e);
-      });
+      }); // foreach category
 
-    });
+    }); // foreach time in the schedule
 
     return mainTable;
   }
 
-  private Element createTeamCell(Connection connection,
-                                 Document document,
-                                 String categoryTitle,
-                                 Map<String, FinalistDBRow> timeData) {
+  private Element createTeamCell(final Connection connection,
+                                 final Document document,
+                                 final String categoryTitle,
+                                 final FinalistDBRow row) {
     final Element cell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
     cell.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_CENTER);
 
-    if (timeData.containsKey(categoryTitle)) {
-      final FinalistDBRow scheduleRow = timeData.get(categoryTitle);
+    final Map<String, Integer> rowCategories = row.getCategories();
+    if (rowCategories.containsKey(categoryTitle)) {
+      final int teamNumber = rowCategories.get(categoryTitle);
       try {
-        final Team team = Team.getTeamFromDatabase(connection, scheduleRow.getTeamNumber());
+        final Team team = Team.getTeamFromDatabase(connection, teamNumber);
 
         final Element numEle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
         cell.appendChild(numEle);
@@ -322,7 +324,7 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
 
       } catch (final SQLException e) {
         throw new FLLRuntimeException("Error getting information for team "
-            + scheduleRow.getTeamNumber(), e);
+            + teamNumber, e);
       }
     } else {
       final Element e = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
@@ -337,69 +339,4 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
     return cell;
   }
 
-  /**
-   * Organize the data so that all time slots are together with a map of
-   * categories to data for the category at the time. The map is sorted by time.
-   */
-  private SortedMap<TimeSlot, Map<String, FinalistDBRow>> organizeSchedule(final FinalistSchedule schedule) {
-    final SortedMap<TimeSlot, Map<String, FinalistDBRow>> organized = new TreeMap<>();
-
-    schedule.getSchedule().forEach(row -> {
-      final TimeSlot rowTimeSlow = new TimeSlot(row.getHour(), row.getMinute());
-      final Map<String, FinalistDBRow> timeData = organized.computeIfAbsent(rowTimeSlow, k -> new HashMap<>());
-      timeData.put(row.getCategoryName(), row);
-    });
-
-    return organized;
-  }
-
-  private static final class TimeSlot implements Comparable<TimeSlot> {
-    TimeSlot(final int hour,
-             final int minute) {
-      this.hour = hour;
-      this.minute = minute;
-    }
-
-    private final int hour;
-
-    private final int minute;
-
-    @Override
-    public int hashCode() {
-      return hour
-          ^ minute;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-      if (null == o) {
-        return false;
-      } else if (this == o) {
-        return true;
-      } else if (this.getClass().equals(o.getClass())) {
-        final TimeSlot other = (TimeSlot) o;
-        return this.hour == other.hour
-            && this.minute == other.minute;
-      } else {
-        return false;
-      }
-    }
-
-    /**
-     * @return hour and minute formatted for printing
-     */
-    public String formattedString() {
-      return String.format("%02d:%02d", this.hour, this.minute);
-    }
-
-    @Override
-    public int compareTo(final TimeSlot o) {
-      final int hourComparison = Integer.compare(this.hour, o.hour);
-      if (0 == hourComparison) {
-        return Integer.compare(this.minute, o.minute);
-      } else {
-        return hourComparison;
-      }
-    }
-  }
 }

@@ -104,9 +104,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
             <a href="non-numeric-nominees.jsp" target="_blank">Enter
                 non-numeric nominees</a>. This is used to enter the teams
             that are up for consideration for the non-scored subjective
-            categories. This information transfers over to the finalist
-            scheduling web application. This is also used in the awards
-            scripts report.
+            categories. This information can come from the subjective
+            judging application. The information entered here transfers
+            over to the finalist scheduling web application.
         </li>
 
         <li>
@@ -163,15 +163,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         see.</p>
 
     <ul>
-
-        <li>
-            <a href="non-numeric-nominees.jsp" target="_blank">Enter
-                non-numeric nominees</a>. This is used to enter the teams
-            that are up for consideration for the non-scored subjective
-            categories. This information transfers over to the finalist
-            scheduling web application. This is also used in the awards
-            scripts report.
-        </li>
 
         <li>
             <a href="finalist/load.jsp" target="_blank">Schedule
