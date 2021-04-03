@@ -261,7 +261,12 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     subjectiveTopContainer.add(mSubjectiveContainer);
 
     mSubjectiveMoveListener = e -> {
-      final int oldIndex = Utilities.getIndexOfComponent(mSubjectiveContainer, e.getComponent());
+      final JComponent container = (MovableExpandablePanel)e.getComponent();
+      if(!(container instanceof MovableExpandablePanel)) {
+        LOGGER.warn("Found something other than a MovableExpandablePanel in the subjective list");
+      }
+
+      final int oldIndex = Utilities.getIndexOfComponent(mSubjectiveContainer, container);
       if (oldIndex < 0) {
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Unable to find source of move event in subjective container");
@@ -294,7 +299,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
       mSubjectiveEditors.add(newIndex, editor);
 
       // update the UI
-      mSubjectiveContainer.add(editor, newIndex);
+      mSubjectiveContainer.add(container, newIndex);
       mSubjectiveContainer.validate();
 
       // update the order in the challenge description
@@ -352,7 +357,12 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     nonNumericCategoriesTopContainer.add(nonNumericCategoryContainer);
 
     nonNumericCategoryMoveListener = e -> {
-      final int oldIndex = Utilities.getIndexOfComponent(nonNumericCategoryContainer, e.getComponent());
+      final JComponent container = (MovableExpandablePanel)e.getComponent();
+      if(!(container instanceof MovableExpandablePanel)) {
+        LOGGER.warn("Found something other than a MovableExpandablePanel in the non-numeric list");
+      }
+      
+      final int oldIndex = Utilities.getIndexOfComponent(nonNumericCategoryContainer, container);
       if (oldIndex < 0) {
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Unable to find source of move event in non-numeric container");
@@ -385,7 +395,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
       nonNumericCategoryEditors.add(newIndex, editor);
 
       // update the UI
-      nonNumericCategoryContainer.add(editor, newIndex);
+      nonNumericCategoryContainer.add(container, newIndex);
       nonNumericCategoryContainer.validate();
 
       // update the order in the challenge description
