@@ -213,8 +213,8 @@ const finalistNumericModule = {};
                 $("#reselect").click(
                     function() {
                         const teams = $.finalist.getAllTeams();
-                        const scoreGroups = $.finalist.getScoreGroups(teams, division);
                         const division = $.finalist.getCurrentDivision();
+                        const scoreGroups = $.finalist.getScoreGroups(teams, division);
 
                         $.finalist.unsetCategoryVisited(currentCategory, division);
 
