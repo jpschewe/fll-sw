@@ -8,7 +8,7 @@ import org.apache.tools.ant.filters.FixCrLfFilter;
 
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
         gradlePluginPortal()
     }
     dependencies {
@@ -37,7 +37,7 @@ plugins {
     id "checkstyle"
         
     // Checker Framework pluggable type-checking
-    id "org.checkerframework" version "0.5.15"
+    id "org.checkerframework" version "0.5.19"
     
     // code coverage
     id "jacoco"
@@ -52,7 +52,10 @@ apply plugin: "com.cinnober.gradle.semver-git"
 
 repositories {
     mavenLocal()
-    jcenter()
+    mavenCentral()
+    maven {
+      url "https://repo.mtu.net/releases"
+    }
 }
 
 configurations {
@@ -140,6 +143,7 @@ ext {
     junit_version = "5.7.0"
     log4j_version = "2.13.3"
     spotbugs_version = "4.1.4"
+    checker_framework_version = "3.12.0"
 
     web_build_dir = new File(project.buildDir, "web")
     documentation_build_dir = new File(project.buildDir, "gen-documentation")    
@@ -224,7 +228,7 @@ dependencies {
         
   implementation(group: "com.opencsv", name: "opencsv", version: "5.3")
     
-  implementation(group: "net.mtu.eggplant", name: "JonsInfra", version: "3.0.0"   )
+  implementation(group: "net.mtu.eggplant", name: "JonsInfra", version: "3.1.0"   )
     
   implementation(group: "com.google.guava", name: "guava", version: "30.0-jre")
     
@@ -239,7 +243,9 @@ dependencies {
     exclude(group: "xml-apis", module: "xml-apis")
   }
   
-  implementation(group: "org.checkerframework", name: "checker-qual", version: "3.9.0")
+  implementation(group: "org.checkerframework", name: "checker-qual", version: project.checker_framework_version)
+  implementation(group: "org.checkerframework", name: "checker-util", version: project.checker_framework_version)
+  checkerFramework(group: "org.checkerframework", name: "checker", version: project.checker_framework_version)
     
   implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.21")
   
@@ -820,9 +826,9 @@ if (checker_dir.exists()) {
     println("Using development version of checker in: " + checker_dir)
     
     dependencies {
-        compileOnly files(file(checker_dir.toPath().resolve("checker/dist/checker-qual.jar")))
-        testCompileOnly files(file(checker_dir.toPath().resolve("checker/dist/checker-qual.jar")))
-        checkerFramework files(file(checker_dir.toPath().resolve("checker/dist/checker.jar")))
+        compileOnly(files(file(checker_dir.toPath().resolve("checker/dist/checker-qual.jar"))))
+        compileOnly(files(file(checker_dir.toPath().resolve("checker/dist/checker-util.jar"))))
+        checkerFramework(files(file(checker_dir.toPath().resolve("checker/dist/checker.jar"))))
     }
 }
 
