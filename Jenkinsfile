@@ -23,9 +23,9 @@ pipeline {
                 echo "Using stock checker framework"
         
             // setup local checker repository
-            dir("checker") {
             /*
                            echo "Using custom checker framework"                 
+            dir("checker") {
                 checkout changelog: false, 
                     poll: false, 
                     scm: [$class: 'GitSCM', 
@@ -62,16 +62,17 @@ pipeline {
                 dir("checker-framework") {
                     callGradle("assemble")
                 } // dir checker-framework
-*/
             } // dir checker
             stash name: 'checker_build_data', includes: 'checker/checker-framework/checker/dist/**'           
+*/
 
         } // steps
     } // stage
     
     stage('Copy checker build to Windows') {
         steps {
-            unstash name: 'checker_build_data'                      
+            //unstash name: 'checker_build_data'
+            echo "Using stock checker"                      
         }
     }
     
