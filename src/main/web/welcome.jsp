@@ -2,6 +2,8 @@
 
 <%@page import="fll.web.Welcome"%>
 
+<fll-sw:required-roles roles="PUBLIC" allowSetup="false" />
+
 <html>
 <head>
 

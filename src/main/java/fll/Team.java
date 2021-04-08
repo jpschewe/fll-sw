@@ -176,7 +176,6 @@ public class Team implements Serializable {
   /**
    * @return the team name shortened to {@link Team#MAX_TEAM_NAME_LEN}
    */
-  @JsonIgnore
   public String getTrimmedTeamName() {
     return StringUtils.trimString(getTeamName(), Team.MAX_TEAM_NAME_LEN);
   }

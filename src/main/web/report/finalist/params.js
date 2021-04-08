@@ -1,189 +1,182 @@
 /*
- * Copyright (c) 2012INSciTE.  All rights reserved
+ * Copyright (c) 2012 INSciTE.  All rights reserved
  * INSciTE is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-"use-strict";
+"use strict";
 
-function setTimeField(field, value) {
-  if (-1 == value) {
-    field.val("");
-  } else {
-    field.val(value);
-  }
-}
+const finalistParamsModule = {
+    initTimePicker: function(field, scrollDefault) {
+        field.timepicker({
+            step: 5,
+            minTime: '8:00am',
+            maxTime: '10:00pm',
+            scrollDefault: scrollDefault
+        });
+    },
 
-function populateHeadToHeadTimes() {
-  $("#head_head_times").empty();
+    setTimeField: function(field, value) {
+        if (value == undefined || value == null) {
+            field.timepicker('setTime', null);
+        } else {
+            const newDate = JSJoda.convert(value.atDate(JSJoda.LocalDate.now())).toDate();
+            field.timepicker('setTime', newDate);
+        }
+    },
 
-  $
-      .each(
-          $.finalist.getPlayoffDivisions(),
-          function(index, division) {
-            var startHourElement = $("<input type='text' id='start_hour_"
-                + index + "' size='2' maxlength='2'/>");
-            startHourElement
-                .change(function() {
-                  var hour = parseInt($(this).val(), 10);
-                  if (!/\S/.test($(this).val())) {
-                    $.finalist.setPlayoffStartHour(division, -1);
-                  } else if (isNaN(hour) || hour < 0 || hour > 23) {
-                    alert("Hour must be a positive integer [0 - 23]");
-                    setTimeField($(this), $.finalist
-                        .getPlayoffStartHour(division));
-                  } else {
-                    $.finalist.setPlayoffStartHour(division, hour);
-                  }
+    populateHeadToHeadTimes: function() {
+        $("#head_head_times").empty();
+
+        const defaultTime = new Date();
+
+        $
+            .each(
+                $.finalist.getPlayoffSchedules(),
+                function(bracketName, playoffSchedule) {
+                    const startTimeElement = $("<input type='text' size='8'/>");
+                    finalistParamsModule.initTimePicker(startTimeElement, defaultTime);
+
+                    startTimeElement.on('changeTime', function() {
+                        const newDate = startTimeElement.timepicker('getTime');
+                        if (null == newDate) {
+                            $.finalist.setPlayoffStartTime(bracketName, null);
+                        } else {
+                            const newLocalTime = JSJoda.LocalTime.of(newDate.getHours(), newDate.getMinutes());
+                            $.finalist.setPlayoffStartTime(bracketName, newLocalTime);
+                        }
+                        $.finalist.saveToLocalStorage();
+                    });
+
+                    finalistParamsModule.setTimeField(startTimeElement, playoffSchedule.startTime);
+
+
+                    const endTimeElement = $("<input type='text' size='8' />");
+                    finalistParamsModule.initTimePicker(endTimeElement, defaultTime);
+
+                    endTimeElement.on('changeTime', function() {
+                        const newDate = endTimeElement.timepicker('getTime');
+                        if (null == newDate) {
+                            $.finalist.setPlayoffEndTime(bracketName, null);
+                        } else {
+                            const newLocalTime = JSJoda.LocalTime.of(newDate.getHours(), newDate.getMinutes());
+                            $.finalist.setPlayoffEndTime(bracketName, newLocalTime);
+                        }
+                        $.finalist.saveToLocalStorage();
+                    });
+
+                    finalistParamsModule.setTimeField(endTimeElement, playoffSchedule.endTime);
+
+                    const paragraph = $("<p></p>");
+                    paragraph.append("<b>Head to Head bracket " + bracketName
+                        + " times</b><br/>");
+                    paragraph.append("Start: ");
+                    paragraph.append(startTimeElement);
+                    paragraph.append("<br/>");
+
+                    paragraph.append("End: ");
+                    paragraph.append(endTimeElement);
+                    paragraph.append("<br/>");
+                    $("#head_head_times").append(paragraph);
+
                 });
-            setTimeField(startHourElement, $.finalist
-                .getPlayoffStartHour(division));
 
-            var startMinuteElement = $("<input type='text' id='start_minute_"
-                + index + "' size='2' maxlength='2'/>");
-            startMinuteElement.change(function() {
-              var value = parseInt($(this).val(), 10);
-              if (!/\S/.test($(this).val())) {
-                $.finalist.setPlayoffStartMinute(division, -1);
-              } else if (isNaN(value) || value < 0 || value > 59) {
-                alert("Minute must be a positive integer [0 - 59]");
-                setTimeField($(this), $.finalist
-                    .getPlayoffStartMinute(division));
-              } else {
-                $.finalist.setPlayoffStartMinute(division, value);
-              }
-            });
-            setTimeField(startMinuteElement, $.finalist
-                .getPlayoffStartMinute(division));
+    },
 
-            var endHourElement = $("<input type='text' id='end_hour_" + index
-                + "' size='2' maxlength='2'/>");
-            endHourElement.change(function() {
-              var hour = parseInt($(this).val(), 10);
-              if (!/\S/.test($(this).val())) {
-                $.finalist.setPlayoffEndHour(division, -1);
-              } else if (isNaN(hour) || hour < 0 || hour > 23) {
-                alert("Hour must be a positive integer [0 - 23]");
-                setTimeField($(this), $.finalist.getPlayoffEndHour(division));
-              } else {
-                $.finalist.setPlayoffEndHour(division, hour);
-              }
-            });
-            setTimeField(endHourElement, $.finalist.getPlayoffEndHour(division));
+    updateDivision: function() {
+        const startTime = $.finalist.getStartTime($.finalist.getCurrentDivision());
+        const startTimeDate = JSJoda.convert(startTime.atDate(JSJoda.LocalDate.now())).toDate();
+        $("#startTime").timepicker('setTime', startTimeDate);
 
-            var endMinuteElement = $("<input type='text' id='end_minute_"
-                + index + "' size='2' maxlength='2'/>");
-            endMinuteElement
-                .change(function() {
-                  var value = parseInt($(this).val(), 10);
-                  if (!/\S/.test($(this).val())) {
-                    $.finalist.setPlayoffEndMinute(division, -1);
-                  } else if (isNaN(value) || value < 0 || value > 59) {
-                    alert("Minute must be an integer [0 - 59]");
-                    setTimeField($(this), $.finalist
-                        .getPlayoffEndMinute(division));
-                  } else {
-                    $.finalist.setPlayoffEndMinute(division, value);
-                  }
-                });
-            setTimeField(endMinuteElement, $.finalist
-                .getPlayoffEndMinute(division));
+        const duration = $.finalist.getDuration($.finalist.getCurrentDivision());
+        finalistParamsModule.setDurationDisplay(duration);
+    },
 
-            var paragraph = $("<p></p>");
-            paragraph.append("<b>Head to Head bracket " + division
-                + " times</b><br/>");
-            paragraph.append("Start: ");
-            paragraph.append(startHourElement);
-            paragraph.append(" : ");
-            paragraph.append(startMinuteElement);
-            paragraph.append("<br/>");
+    setDurationDisplay: function(duration) {
+        $("#duration").val(duration);
+    }
 
-            paragraph.append("End: ");
-            paragraph.append(endHourElement);
-            paragraph.append(" : ");
-            paragraph.append(endMinuteElement);
-            paragraph.append("<br/>");
-            $("#head_head_times").append(paragraph);
-
-          });
-
-}
+} // end scope for page
 
 $(document).ready(
     function() {
-      $("#divisions").empty();
+        $.finalist.loadFromLocalStorage();
 
-      var teams = $.finalist.getAllTeams();
-      $.each($.finalist.getDivisions(), function(i, division) {
-        var selected = "";
-        if (division == $.finalist.getCurrentDivision()) {
-          selected = " selected ";
-        }
-        var divisionOption = $("<option value='" + i + "'" + selected + ">"
-            + division + "</option>");
-        $("#divisions").append(divisionOption);
+        $("#divisions").empty();
 
-        // initialize categories with the auto selected teams
-        var scoreGroups = $.finalist.getScoreGroups(teams, division);
+        const teams = $.finalist.getAllTeams();
+        $.each($.finalist.getDivisions(), function(i, division) {
+            let selected = "";
+            if (division == $.finalist.getCurrentDivision()) {
+                selected = " selected ";
+            }
+            const divisionOption = $("<option value='" + i + "'" + selected + ">"
+                + division + "</option>");
+            $("#divisions").append(divisionOption);
 
-        $.each($.finalist.getNumericCategories(), function(i, category) {
-          $.finalist.initializeTeamsInNumericCategory(division, category,
-              teams, scoreGroups);
-        });// foreach numeric category
-      }); // foreach division
+            // initialize categories with the auto selected teams
+            const scoreGroups = $.finalist.getScoreGroups(teams, division);
 
-      $.finalist.setCurrentDivision($.finalist.getDivisionByIndex($(
-          "#divisions").val()));
+            $.each($.finalist.getNumericCategories(), function(i, category) {
+                $.finalist.initializeTeamsInNumericCategory(division, category,
+                    teams, scoreGroups);
+                $.finalist.saveToLocalStorage();
+            });// foreach numeric category
+        }); // foreach division
 
-      $("#hour").val($.finalist.getStartHour());
-      $("#minute").val($.finalist.getStartMinute());
-      $("#duration").val($.finalist.getDuration());
+        $.finalist.setCurrentDivision($.finalist.getDivisionByIndex($(
+            "#divisions").val()));
 
-      $("#hour").change(function() {
-        var hour = parseInt($(this).val(), 10);
-        if (isNaN(hour)) {
-          alert("Hour must be an integer");
-          $("#hour").val($.finalist.getStartHour());
-        } else {
-          $.finalist.setStartHour(hour);
-        }
-      });
+        $("#startTime").timepicker({
+            step: 5,
+            minTime: '8:00am',
+            maxTime: '10:00pm',
+        });
 
-      $("#minute").change(function() {
-        var minute = parseInt($(this).val(), 10);
-        if (isNaN(minute)) {
-          alert("Minute must be an integer");
-          $("#minute").val($.finalist.getStartMinute());
-        } else {
-          $.finalist.setStartMinute(minute);
-        }
-      });
+        // before change listeners to avoid loop
+        finalistParamsModule.updateDivision();
 
-      $("#duration").change(function() {
-        var duration = parseInt($(this).val(), 10);
-        if (isNaN(duration)) {
-          alert("Duration must be an integer");
-          $("#duration").val($.finalist.getDuration());
-        } else if (duration < 5) {
-          alert("Duration must be at least 5 minutes");
-          $("#duration").val($.finalist.getDuration());
-        } else {
-          $.finalist.setDuration(duration);
-        }
-      });
 
-      $("#divisions").change(function() {
-        var divIndex = $(this).val();
-        var div = $.finalist.getDivisionByIndex(divIndex);
-        $.finalist.setCurrentDivision(div);
-      });
+        $("#startTime").on('changeTime', function() {
+            const newDate = $('#startTime').timepicker('getTime');
+            const newLocalTime = JSJoda.LocalTime.of(newDate.getHours(), newDate.getMinutes());
+            $.finalist.setStartTime($.finalist.getCurrentDivision(), newLocalTime);
 
-      $("#next").click(function() {
-        location.href = "non-numeric.html";
-      });
+            $.finalist.saveToLocalStorage();
+        });
 
-      populateHeadToHeadTimes();
+        $("#duration").change(function() {
+            const minutes = parseInt($(this).val(), 10);
+            if (isNaN(minutes)) {
+                alert("Duration must be an integer");
+                finalistParamsModule.setDurationDisplay($.finalist.getDuration($.finalist.getCurrentDivision()));
+            } else if (minutes < 5) {
+                alert("Duration must be at least 5 minutes");
+                finalistParamsModule.setDurationDisplay($.finalist.getDuration($.finalist.getCurrentDivision()));
+            } else {
+                $.finalist.setDuration($.finalist.getCurrentDivision(), minutes);
+            }
 
-      $.finalist.displayNavbar();
+            $.finalist.saveToLocalStorage();
+        });
+
+        $("#divisions").change(function() {
+            const divIndex = $(this).val();
+            const div = $.finalist.getDivisionByIndex(divIndex);
+            $.finalist.setCurrentDivision(div);
+            finalistParamsModule.updateDivision();
+
+            $.finalist.saveToLocalStorage();
+        });
+
+        $("#next").click(function() {
+            location.href = "non-numeric.html";
+        });
+
+        finalistParamsModule.populateHeadToHeadTimes();
+
+        $.finalist.saveToLocalStorage();
+
+        $.finalist.displayNavbar();
 
     }); // end ready function

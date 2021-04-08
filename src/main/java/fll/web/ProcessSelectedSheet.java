@@ -6,6 +6,7 @@
 package fll.web;
 
 import java.io.IOException;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -34,6 +35,11 @@ public final class ProcessSelectedSheet extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.PUBLIC), false)) {
+      return;
+    }
 
     final StringBuilder message = new StringBuilder();
 

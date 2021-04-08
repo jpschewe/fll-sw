@@ -1,6 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
-
 <%@page import="fll.web.admin.GatherTeamData"%>
+
+<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
 
 <%
   GatherTeamData.populateContext(request, application, pageContext);

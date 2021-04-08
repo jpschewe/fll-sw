@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -44,7 +45,10 @@ import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 
@@ -60,6 +64,11 @@ public class TeamResults extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
 
     final String teamNumberStr = request.getParameter("TeamNumber");
     final int selectedTeamNumber = null == teamNumberStr ? Team.NULL_TEAM_NUMBER : Integer.parseInt(teamNumberStr);

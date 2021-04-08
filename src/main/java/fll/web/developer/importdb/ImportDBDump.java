@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletContext;
@@ -22,9 +23,11 @@ import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.ImportDB;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
+import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 
@@ -64,6 +67,12 @@ public class ImportDBDump extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
+
     final StringBuilder message = new StringBuilder();
 
     Utilities.loadDBDriver();

@@ -1,6 +1,8 @@
 <%@page import="fll.web.admin.GatherParameterInformation"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+
 <%@ page import="fll.db.TournamentParameters"%>
 
 <%

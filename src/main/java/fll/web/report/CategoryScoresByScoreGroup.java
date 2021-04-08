@@ -41,7 +41,10 @@ import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
 import fll.xml.GoalElement;
 import fll.xml.SubjectiveScoreCategory;
@@ -62,6 +65,12 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
+
     if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session,
                                                     "/report/CategoryScoresByScoreGroup")) {
       return;

@@ -33,7 +33,7 @@ import fll.xml.NonNumericCategory;
 public class NonNumericNominees {
 
   /**
-   * @param categoryName see {@link NonNumericCategory#getTitle()}
+   * @param categoryName see {@link #getCategoryName()}
    * @param nominees see {@link #getNominees()}
    */
   public NonNumericNominees(@JsonProperty("categoryName") final String categoryName,
@@ -46,8 +46,9 @@ public class NonNumericNominees {
 
   /**
    * @return title of the category for these nominees.
+   * @see NonNumericCategory#getTitle()
    */
-  public String getCategoryTitle() {
+  public String getCategoryName() {
     return mCategoryName;
   }
 

@@ -1,10 +1,12 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
+<%@ page language="java" contentType="text/html; charset=us-ascii"
     pageEncoding="UTF-8"%>
     
 <%@ page import="java.io.File"%>
 <%@ page import="java.util.ArrayList"%>
 <%@ page import="java.util.List"%>
 <%@ page import="fll.Utilities"%>
+
+<fll-sw:required-roles roles="PUBLIC" allowSetup="false" />
 
 <%
 //All logos shall be located under sponsor_logos in the fll web folder.
@@ -26,7 +28,6 @@ if(numLogos < 1) {
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Sponsor frame</title>
   <script language=javascript>
     window.setInterval("location.href='sponsors.jsp'", 15000);

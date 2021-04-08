@@ -9,6 +9,7 @@ package fll.web.report;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -21,8 +22,10 @@ import javax.sql.DataSource;
 import fll.Tournament;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.web.WebUtils;
 
 /**
@@ -44,6 +47,12 @@ public class PromptSummarizeScores extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
+
     if (null != request.getParameter("recompute")) {
       WebUtils.sendRedirect(application, response, "summarizePhase1.jsp");
     } else {
@@ -94,7 +103,7 @@ public class PromptSummarizeScores extends BaseFLLServlet {
           return false;
         } else {
           session.setAttribute(SUMMARY_REDIRECT_KEY, redirect);
-          WebUtils.sendRedirect(application, response, "promptSummarizeScores.jsp");
+          WebUtils.sendRedirect(application, response, "/report/promptSummarizeScores.jsp");
           return true;
         }
       } else {

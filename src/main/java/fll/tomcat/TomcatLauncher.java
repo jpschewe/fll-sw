@@ -148,7 +148,7 @@ public class TomcatLauncher {
 
     // add log4j access log valve
     final Log4jAccessLog accessLogValve = new Log4jAccessLog();
-    accessLogValve.setPattern("%h \"%r\" %s %S");
+    accessLogValve.setPattern("%h %{X-Forwarded-For}i \"%r\" %s %S");
     tomcat.getHost().getPipeline().addValve(accessLogValve);
   }
 

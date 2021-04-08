@@ -1,5 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+
 <html>
 <head>
 <title>Specify schedule constraints (Upload Schedule)</title>

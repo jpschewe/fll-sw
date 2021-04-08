@@ -7,6 +7,7 @@ package fll.web.admin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -18,9 +19,11 @@ import javax.servlet.http.HttpSession;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import fll.util.CellFileReader;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadSpreadsheet;
+import fll.web.UserRole;
 
 /**
  * Upload the teams to be advanced.
@@ -43,6 +46,11 @@ public final class UploadTeamTournamentAssignments extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
 
     final StringBuilder message = new StringBuilder();
 

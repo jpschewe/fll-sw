@@ -6,6 +6,8 @@
 
 package fll.web.report.finalist;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -13,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Mirrors javascript class in fll-objects.js. Property names need to match the
  * javascript/JSON.
  */
-/* package */ final class FinalistCategory {
+/* package */ final class FinalistCategory implements Serializable {
 
   /**
    * @param categoryName name of the category

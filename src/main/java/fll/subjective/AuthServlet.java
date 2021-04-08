@@ -7,6 +7,7 @@
 package fll.subjective;
 
 import java.io.IOException;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpSession;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 
 /**
  * Check that a user is authenticated as a judge and redirect to the subjective
@@ -33,6 +35,11 @@ public class AuthServlet extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.PUBLIC), false)) {
+      return;
+    }
+
     if (!auth.isJudge()) {
       session.setAttribute(SessionAttributes.REDIRECT_URL, request.getRequestURI());
       response.sendRedirect(response.encodeRedirectURL(request.getContextPath()

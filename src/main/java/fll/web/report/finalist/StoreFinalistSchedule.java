@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -26,10 +27,12 @@ import fll.Utilities;
 import fll.db.NonNumericNominees;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
-
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
-import fll.web.report.StoreNonNumericNominees;
+import fll.web.SessionAttributes;
+import fll.web.UserRole;
+import fll.web.api.NonNumericNomineesServlet;
 
 /**
  * Store the data from the finalist scheduling.
@@ -45,6 +48,11 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
 
     final StringBuilder message = new StringBuilder();
 
@@ -83,19 +91,6 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
 
       final Collection<FinalistDBRow> rows = jsonMapper.readValue(schedDataStr,
                                                                   FinalistScheduleTypeInformation.INSTANCE);
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Sched Data has "
-            + rows.size()
-            + " rows");
-        for (final FinalistDBRow row : rows) {
-          LOGGER.trace("row category: "
-              + row.getCategoryName()
-              + " time: "
-              + row.getTime()
-              + " team: "
-              + row.getTeamNumber());
-        }
-      }
 
       final Collection<FinalistCategory> categories = jsonMapper.readValue(categoryDataStr,
                                                                            FinalistCategoriesTypeInformation.INSTANCE);
@@ -105,11 +100,11 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
             + " rows");
       }
 
-      final FinalistSchedule schedule = new FinalistSchedule(tournament, division, categories, rows);
-      schedule.store(connection);
+      final FinalistSchedule schedule = new FinalistSchedule(categories, rows);
+      schedule.store(connection, tournament, division);
 
       final Collection<NonNumericNominees> nominees = jsonMapper.readValue(nomineesStr,
-                                                                           StoreNonNumericNominees.NonNumericNomineesTypeInformation.INSTANCE);
+                                                                           NonNumericNomineesServlet.NonNumericNomineesTypeInformation.INSTANCE);
       for (final NonNumericNominees nominee : nominees) {
         nominee.store(connection, tournament);
       }

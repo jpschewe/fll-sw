@@ -15,6 +15,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -36,6 +37,7 @@ import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 
 /**
  * Get and set non-numeric award winners that are per award group.
@@ -53,8 +55,8 @@ public class NonNumericAwardWinnersServlet extends HttpServlet {
       throws IOException, ServletException {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
-    if (!auth.isJudge()) {
-      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE), false)) {
       return;
     }
 
@@ -84,8 +86,8 @@ public class NonNumericAwardWinnersServlet extends HttpServlet {
       throws IOException, ServletException {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
-    if (!auth.isJudge()) {
-      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE), false)) {
       return;
     }
 

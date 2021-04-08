@@ -15,6 +15,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -29,13 +30,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
+import fll.db.AwardWinners;
 import fll.db.OverallAwardWinner;
 import fll.db.Queries;
-import fll.db.AwardWinners;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 
 /**
  * Get and set overall non-numeric award winners.
@@ -53,8 +55,8 @@ public class NonNumericOverallAwardWinnersServlet extends HttpServlet {
       throws IOException, ServletException {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
-    if (!auth.isJudge()) {
-      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE), false)) {
       return;
     }
 
@@ -83,8 +85,8 @@ public class NonNumericOverallAwardWinnersServlet extends HttpServlet {
       throws IOException, ServletException {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
-    if (!auth.isJudge()) {
-      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE), false)) {
       return;
     }
 

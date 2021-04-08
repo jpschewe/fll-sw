@@ -19,6 +19,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -32,6 +34,7 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.Utilities;
+import fll.Version;
 import fll.db.DumpDB;
 import fll.xml.ChallengeDescription;
 
@@ -47,6 +50,12 @@ public class GatherBugReport extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.PUBLIC), true)) {
+      return;
+    }
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
     final StringBuilder message = new StringBuilder();
@@ -76,6 +85,12 @@ public class GatherBugReport extends BaseFLLServlet {
                                    application.getMajorVersion(), application.getMinorVersion(), //
                                    application.getServerInfo())
                            .getBytes(Utilities.DEFAULT_CHARSET));
+
+        zipOut.putNextEntry(new ZipEntry("fll-sw_version.txt"));
+        final String versionInfo = Version.getAllVersionInformation().entrySet().stream() //
+                                          .map(e -> String.format("%s:%s", e.getKey(), e.getValue())) //
+                                          .collect(Collectors.joining("\n"));
+        zipOut.write(versionInfo.getBytes(Utilities.DEFAULT_CHARSET));
 
         addDatabase(zipOut, connection, challengeDescription);
         addLogFiles(zipOut);

@@ -1,5 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+
 <%
 fll.web.MainIndex.populateContext(request, application, pageContext);
 fll.web.admin.AdminIndex.populateContext(application, session, pageContext);

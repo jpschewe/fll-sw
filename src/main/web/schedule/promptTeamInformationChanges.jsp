@@ -1,5 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+
 <html>
 <head>
 <title>Update team information (Upload Schedule)</title>

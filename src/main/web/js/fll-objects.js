@@ -4,17 +4,41 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-"use-strict";
+"use strict";
+
+
+/**
+ * Start and end times are initialized to null.
+ *
+ * Matches fll.db.PlayoffSchedule.
+ */
+function PlayoffSchedule() {
+    this.startTime = null;
+    this.endTime = null;
+}
+
+/**
+ * Start time initialized to 2:00pm.
+ * Duration initialized to 20 minutes.
+ *
+ * Matches fll.web.report.finalist.FinalistScheduleParameters.
+ */
+function FinalistScheduleParameters() {
+    this.startTime = JSJoda.LocalTime.of(14, 0);
+    this.intervalMinutes = 20;
+}
 
 /**
  * Used for packaging up and sending to the server to put in the database. Needs
  * to match fll.web.report.finalist.FinalistDBRow.
+ 
+ * @param time JSJoda.LocalTime, time of the row
+ * @param endTime JSJoda.LocalTime, end time of the row
  */
-function FinalistDBRow(categoryName, hour, minute, teamNumber) {
-    this.categoryName = categoryName;
-    this.hour = hour;
-    this.minute = minute;
-    this.teamNumber = teamNumber;
+function FinalistDBRow(time, endTime) {
+    this.time = time;
+    this.endTime = endTime;
+    this.categories = {}; // categoryName -> teamNumber
 }
 
 /**
@@ -24,6 +48,17 @@ function FinalistDBRow(categoryName, hour, minute, teamNumber) {
 function FinalistCategory(categoryName, room) {
     this.categoryName = categoryName;
     this.room = room;
+}
+
+/**
+ * Matches fll.web.report.finalist.FinalistSchedule.
+ *
+ * @param categories list of FinalistCategory
+ * @param schedule list of FinalistDBRow
+ */
+function FinalistSchedule(categories, schedule) {
+    this.categories = categories;
+    this.schedule = schedule;
 }
 
 /**

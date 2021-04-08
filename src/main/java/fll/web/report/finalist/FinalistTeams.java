@@ -47,20 +47,22 @@ public final class FinalistTeams {
 
       final Map<Integer, TournamentTeam> allTeams = Queries.getTournamentTeams(connection, tournament);
 
-      int numRows = 0;
       for (final String division : FinalistSchedule.getAllDivisions(connection, tournament)) {
-
         final FinalistSchedule schedule = new FinalistSchedule(connection, tournament, division);
+
         for (final FinalistDBRow row : schedule.getSchedule()) {
-          final TournamentTeam team = allTeams.get(row.getTeamNumber());
-          if (null != team) {
-            ++numRows;
-            teams.add(team);
-          } else {
-            LOGGER.warn("Cannot find team for number: "
-                + row.getTeamNumber()
-                + " in finalist teams, skipping");
-          }
+          for (final Map.Entry<String, Integer> rowEntry : row.getCategories().entrySet()) {
+            final int teamNumber = rowEntry.getValue();
+
+            final TournamentTeam team = allTeams.get(teamNumber);
+            if (null != team) {
+              teams.add(team);
+            } else {
+              LOGGER.warn("Cannot find team for number: "
+                  + teamNumber
+                  + " in finalist teams, skipping");
+            }
+          } // foreach category team mapping
         } // foreach schedule row
 
       } // foreach division
@@ -69,7 +71,7 @@ public final class FinalistTeams {
 
       // used for scroll control
       final int msPerRow = GlobalParameters.getHeadToHeadMsPerRow(connection);
-      final int scrollDuration = numRows
+      final int scrollDuration = teams.size()
           * msPerRow;
 
       pageContext.setAttribute("scrollDuration", scrollDuration);

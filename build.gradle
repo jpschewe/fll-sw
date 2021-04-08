@@ -208,6 +208,7 @@ dependencies {
   implementation(group: "com.fasterxml.jackson.core", name: "jackson-databind", version: project.jackson_version)
   implementation(group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: project.jackson_version)
   implementation(group: "com.fasterxml.jackson.datatype", name: "jackson-datatype-jdk8", version: project.jackson_version)
+  implementation(group: "com.fasterxml.jackson.datatype", name: "jackson-datatype-jsr310", version: project.jackson_version)
 
   implementation(group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0")
             
