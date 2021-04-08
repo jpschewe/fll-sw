@@ -582,6 +582,11 @@
         /**
          * Initialize the teams in the specified numeric category if it has not been
          * visited yet.
+         * 
+         * @param currentDivision the award group to work with
+         * @param currentCategory the category object to initialize teams for
+         * @param teams all teams
+         * @param scoreGroups see getScoreGroups
          */
         initializeTeamsInNumericCategory: function(currentDivision,
             currentCategory, teams, scoreGroups) {
