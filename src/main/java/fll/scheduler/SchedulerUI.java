@@ -78,6 +78,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -611,6 +612,7 @@ public class SchedulerUI extends JFrame {
     mDescriptionFilename.setText(file.getName());
   }
 
+  @UnknownInitialization(JFrame.class)
   private JToolBar createDescriptionToolbar() {
     final JToolBar toolbar = new JToolBar("Description Toolbar");
     toolbar.setFloatable(false);
@@ -625,6 +627,7 @@ public class SchedulerUI extends JFrame {
     return toolbar;
   }
 
+  @UnknownInitialization(JFrame.class)
   private JToolBar createScheduleToolbar(@UnderInitialization(JFrame.class) SchedulerUI this) {
     final JToolBar toolbar = new JToolBar("Schedule Toolbar");
     toolbar.setFloatable(false);
@@ -639,6 +642,7 @@ public class SchedulerUI extends JFrame {
     return toolbar;
   }
 
+  @UnknownInitialization(JFrame.class)
   private JMenuBar createMenubar() {
     final JMenuBar menubar = new JMenuBar();
 
@@ -651,6 +655,7 @@ public class SchedulerUI extends JFrame {
     return menubar;
   }
 
+  @UnknownInitialization(JFrame.class)
   private JMenu createScheduleMenu() {
     final JMenu menu = new JMenu("Schedule");
     menu.setMnemonic('s');
@@ -664,6 +669,7 @@ public class SchedulerUI extends JFrame {
     return menu;
   }
 
+  @UnknownInitialization(JFrame.class)
   private JMenu createDescriptionMenu() {
     final JMenu menu = new JMenu("Description");
     menu.setMnemonic('d');
@@ -676,6 +682,7 @@ public class SchedulerUI extends JFrame {
     return menu;
   }
 
+  @UnknownInitialization(JFrame.class)
   private JMenu createFileMenu() {
     final JMenu menu = new JMenu("File");
     menu.setMnemonic('f');
@@ -1117,18 +1124,19 @@ public class SchedulerUI extends JFrame {
   private static final String DESCRIPTION_STARTING_DIRECTORY_PREF = "descriptionStartingDirectory";
 
   @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class isn't going to be serialized")
-  private TournamentSchedule mScheduleData;
+  private @Nullable TournamentSchedule mScheduleData;
 
-  /* package */TournamentSchedule getScheduleData() {
+  /* package */ @Nullable
+  TournamentSchedule getScheduleData() {
     return mScheduleData;
   }
 
-  private SchedParams mSchedParams;
+  private @Nullable SchedParams mSchedParams;
 
   /**
    * @return the current schedule parameters
    */
-  public SchedParams getSchedParams() {
+  public @Nullable SchedParams getSchedParams() {
     return mSchedParams;
   }
 
@@ -1140,15 +1148,17 @@ public class SchedulerUI extends JFrame {
     performanceDuration.setValue(mSchedParams.getPerformanceMinutes());
   }
 
-  private SchedulerTableModel mScheduleModel;
+  private @Nullable SchedulerTableModel mScheduleModel;
 
-  /* package */ SchedulerTableModel getScheduleModel() {
+  /* package */ @Nullable
+  SchedulerTableModel getScheduleModel() {
     return mScheduleModel;
   }
 
-  private ViolationTableModel mViolationsModel;
+  private @Nullable ViolationTableModel mViolationsModel;
 
-  /* package */ViolationTableModel getViolationsModel() {
+  /* package */ @Nullable
+  ViolationTableModel getViolationsModel() {
     return mViolationsModel;
   }
 
