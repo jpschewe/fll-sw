@@ -17,6 +17,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import fll.util.FLLInternalException;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -147,6 +150,14 @@ public final class TableInformation implements Serializable {
         final String sideA = allTables.getString(2);
         final String sideB = allTables.getString(3);
 
+        if (null == sideA
+            || null == sideB) {
+          throw new FLLInternalException("Found null table sides. sideA: "
+              + sideA
+              + " sideB: "
+              + sideB);
+        }
+
         final boolean use = tableIdsForDivision.isEmpty()
             || tableIdsForDivision.contains(pairId);
 
@@ -206,8 +217,8 @@ public final class TableInformation implements Serializable {
    * @param tableSide the table side to match
    * @return the table information or null
    */
-  public static TableInformation getTableInformationForTableSide(final List<TableInformation> tableInfo,
-                                                                 final String tableSide) {
+  public static @Nullable TableInformation getTableInformationForTableSide(final List<TableInformation> tableInfo,
+                                                                           final String tableSide) {
     for (final TableInformation info : tableInfo) {
       if (info.getSideA().equals(tableSide)
           || info.getSideB().equals(tableSide)) {
