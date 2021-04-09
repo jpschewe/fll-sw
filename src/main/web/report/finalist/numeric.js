@@ -35,11 +35,34 @@ const finalistNumericModule = {};
     }
 
     function createTeamTable(teams, currentDivision, currentCategory) {
+        let prevJudgingGroup = null;
+        let prevScore = 0;
+        let topTeams = false;
+
         $.each(teams, function(_, team) {
             if (currentCategory.overall
                 || $.finalist.isTeamInDivision(team, currentDivision)) {
                 const row = $("<tr></tr>");
                 $("#data").append(row);
+
+                const score = $.finalist.getCategoryScore(team, currentCategory);
+                const group = team.judgingGroup;
+                //  || (group == prevJudgingGroup && Math.abs(prevScore - score) < 1)
+                if (group != prevJudgingGroup) {
+                    topTeams = true;
+                    row.addClass("top-score");
+                    prevJudgingGroup = group;
+                } else {
+                    // same judging group
+                    if (topTeams && Math.abs(prevScore - score) < 1) {
+                        // close score
+                        row.addClass("top-score");
+                    } else {
+                        // don't consider other close scores as ties'
+                        topTeams = false;
+                    }
+                }
+                prevScore = score;
 
                 const finalistCol = $("<td></td>");
                 row.append(finalistCol);
@@ -65,7 +88,6 @@ const finalistNumericModule = {};
 
                 const sgCol = $("<td></td>");
                 row.append(sgCol);
-                const group = team.judgingGroup;
                 sgCol.text(group);
 
                 const numCol = $("<td></td>");
@@ -78,7 +100,7 @@ const finalistNumericModule = {};
 
                 const scoreCol = $("<td></td>");
                 row.append(scoreCol);
-                scoreCol.text($.finalist.getCategoryScore(team, currentCategory).toFixed(2));
+                scoreCol.text(score.toFixed(2));
 
                 const numFinalistCol = $("<td id='" + getNumFinalistsId(team) + "'></td>");
                 row.append(numFinalistCol);
@@ -198,7 +220,7 @@ const finalistNumericModule = {};
                 const categoryName = $.finalist.getCurrentCategoryName();
                 const currentCategory = $.finalist.getCategoryByName(categoryName);
                 if (null == currentCategory) {
-                    alert("Invalid category ID found: " + categoryId);
+                    alert("Invalid category ID found: " + categoryName);
                     return;
                 }
 
@@ -213,8 +235,8 @@ const finalistNumericModule = {};
                 $("#reselect").click(
                     function() {
                         const teams = $.finalist.getAllTeams();
-                        const scoreGroups = $.finalist.getScoreGroups(teams, division);
                         const division = $.finalist.getCurrentDivision();
+                        const scoreGroups = $.finalist.getScoreGroups(teams, division);
 
                         $.finalist.unsetCategoryVisited(currentCategory, division);
 

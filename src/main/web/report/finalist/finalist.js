@@ -558,8 +558,8 @@
             teams.sort(function(a, b) {
                 if (currentCategory.name != $.finalist.CHAMPIONSHIP_NAME) {
                     // sort by score group first
-                    var aGroup = a.judgingGroup;
-                    var bGroup = b.judgingGroup;
+                    const  aGroup = a.judgingGroup;
+                    const bGroup = b.judgingGroup;
                     if (aGroup < bGroup) {
                         return -1;
                     } else if (aGroup > bGroup) {
@@ -567,8 +567,8 @@
                     }
                     // fall through to score check
                 }
-                var aScore = $.finalist.getCategoryScore(a, currentCategory);
-                var bScore = $.finalist.getCategoryScore(b, currentCategory);
+                const aScore = $.finalist.getCategoryScore(a, currentCategory);
+                const bScore = $.finalist.getCategoryScore(b, currentCategory);
                 if (aScore == bScore) {
                     return 0;
                 } else if (aScore < bScore) {
@@ -582,6 +582,11 @@
         /**
          * Initialize the teams in the specified numeric category if it has not been
          * visited yet.
+         * 
+         * @param currentDivision the award group to work with
+         * @param currentCategory the category object to initialize teams for
+         * @param teams all teams, expected to already be sorted via sortTeamsByCategory
+         * @param scoreGroups see getScoreGroups
          */
         initializeTeamsInNumericCategory: function(currentDivision,
             currentCategory, teams, scoreGroups) {
