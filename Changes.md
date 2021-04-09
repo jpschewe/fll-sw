@@ -1,3 +1,4 @@
+* #484 - Improve usability of the numeric category finalist scheduling page
 * Added the forwarded for address to the access logs
 * #915 - Fix bug moving subjective and non-numeric categories in the challenge editor
 * #447, #908 - Allow the finalist schedule to be loaded from the database
