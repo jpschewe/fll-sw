@@ -20,6 +20,8 @@ import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.ProgressMonitor;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
 /**
  * A modal indeterminate progress dialog.
  * If a determinate progress dialog is desired, use {@link ProgressMonitor}
@@ -34,7 +36,7 @@ public class ProgressDialog extends JDialog implements CheckCanceled {
    * @param owner {@link JDialog#getOwner()}
    * @param title {@link JDialog#getTitle()}
    */
-  public ProgressDialog(final Frame owner,
+  public ProgressDialog(final @UnknownInitialization(Frame.class) Frame owner,
                         final String title) {
     super(owner, title, true);
 
