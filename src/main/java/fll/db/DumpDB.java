@@ -18,7 +18,6 @@ import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Formatter;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -156,7 +155,9 @@ public final class DumpDB extends BaseFLLServlet {
       try (ResultSet rs = metadata.getTables(null, null, "%", new String[] { "TABLE" })) {
         while (rs.next()) {
           final String tableName = rs.getString("TABLE_NAME");
-          dumpTable(output, connection, metadata, outputWriter, tableName.toLowerCase());
+          if (null != tableName) {
+            dumpTable(output, connection, metadata, outputWriter, tableName.toLowerCase());
+          }
         }
       } // ResultSet try
 
@@ -229,18 +230,21 @@ public final class DumpDB extends BaseFLLServlet {
 
         String typeName = rs.getString("TYPE_NAME");
         final String columnName = rs.getString("COLUMN_NAME");
-        if ("varchar".equalsIgnoreCase(typeName)
-            || "char".equalsIgnoreCase(typeName)
-            || "character".equalsIgnoreCase(typeName)) {
-          typeName = typeName
-              + "("
-              + rs.getInt("COLUMN_SIZE")
-              + ")";
-        }
-        csvwriter.writeNext(new String[] { columnName.toLowerCase(), typeName });
-        if (LOGGER.isTraceEnabled()) {
-          final String name = rs.getString("TABLE_NAME");
-          LOGGER.trace(new Formatter().format("Table %s Column %s has type %s", name, columnName, typeName));
+        if (null != columnName
+            && null != typeName) {
+          if ("varchar".equalsIgnoreCase(typeName)
+              || "char".equalsIgnoreCase(typeName)
+              || "character".equalsIgnoreCase(typeName)) {
+            typeName = typeName
+                + "("
+                + rs.getInt("COLUMN_SIZE")
+                + ")";
+          }
+          csvwriter.writeNext(new String[] { columnName.toLowerCase(), typeName });
+          if (LOGGER.isTraceEnabled()) {
+            final String name = rs.getString("TABLE_NAME");
+            LOGGER.trace("Table {} Column {} has type {}", name == null ? "null" : name, columnName, typeName);
+          }
         }
       }
       csvwriter.flush();
