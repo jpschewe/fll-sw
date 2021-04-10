@@ -55,11 +55,13 @@ public final class Authentication {
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
           final String roleStr = rs.getString("fll_role");
-          try {
-            final UserRole role = UserRole.valueOf(roleStr);
-            roles.add(role);
-          } catch (final IllegalArgumentException e) {
-            LOGGER.warn("Found unknown role ({}) in the database, ignoring", roleStr, e);
+          if (null != roleStr) {
+            try {
+              final UserRole role = UserRole.valueOf(roleStr);
+              roles.add(role);
+            } catch (final IllegalArgumentException e) {
+              LOGGER.warn("Found unknown role ({}) in the database, ignoring", roleStr, e);
+            }
           }
         }
       }
@@ -104,7 +106,9 @@ public final class Authentication {
         ResultSet rs = stmt.executeQuery("SELECT fll_user from fll_authentication");) {
       while (rs.next()) {
         final String user = rs.getString(1);
-        users.add(user);
+        if (null != user) {
+          users.add(user);
+        }
       }
     }
     return users;
@@ -126,7 +130,9 @@ public final class Authentication {
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
           final String user = rs.getString("fll_user");
-          users.add(user);
+          if (null != user) {
+            users.add(user);
+          }
         }
       }
     }
