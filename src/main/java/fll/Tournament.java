@@ -22,6 +22,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.GenerateDB;
 import fll.db.Queries;
@@ -40,10 +42,10 @@ public final class Tournament implements Serializable {
 
   private Tournament(@JsonProperty("tournamentID") final int tournamentID,
                      @JsonProperty("name") final String name,
-                     @JsonProperty("description") final String description,
-                     @JsonProperty("date") final LocalDate date,
-                     @JsonProperty("level") final String level,
-                     @JsonProperty("nextLevel") final String nextLevel) {
+                     @JsonProperty("description") final @Nullable String description,
+                     @JsonProperty("date") final @Nullable LocalDate date,
+                     @JsonProperty("level") final @Nullable String level,
+                     @JsonProperty("nextLevel") final @Nullable String nextLevel) {
     this.tournamentID = tournamentID;
     this.name = name;
     this.description = description;
@@ -70,7 +72,7 @@ public final class Tournament implements Serializable {
     return name;
   }
 
-  private final String description;
+  private final @Nullable String description;
 
   /**
    * @return a longer description of the tournament
@@ -79,7 +81,7 @@ public final class Tournament implements Serializable {
     return description;
   }
 
-  private final LocalDate date;
+  private final @Nullable LocalDate date;
 
   /**
    * @return date of the tournament
@@ -97,21 +99,21 @@ public final class Tournament implements Serializable {
     return null == date ? "" : StoreTournamentData.DATE_FORMATTER.format(date);
   }
 
-  private final String level;
+  private final @Nullable String level;
 
   /**
    * @return the level of the tournament, may be null
    */
-  public String getLevel() {
+  public @Nullable String getLevel() {
     return level;
   }
 
-  private final String nextLevel;
+  private final @Nullable String nextLevel;
 
   /**
    * @return the level of the tournament after this one, may be null
    */
-  public String getNextLevel() {
+  public @Nullable String getNextLevel() {
     return nextLevel;
   }
 
@@ -128,7 +130,7 @@ public final class Tournament implements Serializable {
    */
   public static void createTournament(final Connection connection,
                                       final String tournamentName,
-                                      final String description,
+                                      final @Nullable String description,
                                       final @Nullable LocalDate date,
                                       final @Nullable String level,
                                       final @Nullable String nextLevel)
@@ -175,7 +177,7 @@ public final class Tournament implements Serializable {
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
           final int tournamentID = rs.getInt(1);
-          final String name = rs.getString(2);
+          final String name = castNonNull(rs.getString(2));
           final String location = rs.getString(3);
           final java.sql.Date d = rs.getDate(4);
           final LocalDate date = null == d ? null : d.toLocalDate();
