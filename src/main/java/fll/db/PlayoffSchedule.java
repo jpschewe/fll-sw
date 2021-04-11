@@ -6,6 +6,8 @@
 
 package fll.db;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -73,9 +75,9 @@ public class PlayoffSchedule implements Serializable {
 
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
-          final String bracketName = rs.getString("bracket_name");
-          final LocalTime startTime = rs.getTime("start_time").toLocalTime();
-          final LocalTime endTime = rs.getTime("end_time").toLocalTime();
+          final String bracketName = castNonNull(rs.getString("bracket_name"));
+          final LocalTime startTime = castNonNull(rs.getTime("start_time")).toLocalTime();
+          final LocalTime endTime = castNonNull(rs.getTime("end_time")).toLocalTime();
           final PlayoffSchedule schedule = new PlayoffSchedule(startTime, endTime);
           playoffSchedules.put(bracketName, schedule);
         }
