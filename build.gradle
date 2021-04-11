@@ -817,7 +817,8 @@ checkerFramework {
         "-AonlyDefs=^fll\\.(documents|flltools|db)",
         "-Awarns",  
         "-Xmaxwarns", "10000",
-        "-AstubWarnIfNotFound"
+        "-AstubWarnIfNotFound",
+        "-Astubs=$projectDir/stubs"
     ]
 }
 
