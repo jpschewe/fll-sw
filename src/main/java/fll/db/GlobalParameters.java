@@ -14,6 +14,8 @@ import java.sql.SQLException;
 
 import javax.annotation.Nonnull;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.FLLInternalException;
@@ -153,7 +155,7 @@ public final class GlobalParameters {
     try (PreparedStatement prep = getGlobalParameterStmt(connection, parameter)) {
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
-          return rs.getString(1);
+          return castNonNull(rs.getString(1));
         } else {
           throw new IllegalArgumentException("Can't find '"
               + parameter
@@ -196,7 +198,8 @@ public final class GlobalParameters {
     try (PreparedStatement prep = getGlobalParameterStmt(connection, CHALLENGE_DOCUMENT)) {
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
-          return ChallengeParser.parse(new InputStreamReader(rs.getAsciiStream(1), Utilities.DEFAULT_CHARSET));
+          return ChallengeParser.parse(new InputStreamReader(castNonNull(rs.getAsciiStream(1)),
+                                                             Utilities.DEFAULT_CHARSET));
         } else {
           throw new FLLInternalException("Could not find challenge document in database");
         }
