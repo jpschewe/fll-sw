@@ -8,6 +8,8 @@ package fll.db;
 
 import java.io.Serializable;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Represents a different in a property for a team.
  */
@@ -32,8 +34,8 @@ public class TeamPropertyDifference implements Serializable {
    */
   public TeamPropertyDifference(final int teamNumber,
                                 final TeamProperty property,
-                                final String sourceValue,
-                                final String destValue) {
+                                final @Nullable String sourceValue,
+                                final @Nullable String destValue) {
     this.teamNumber = teamNumber;
     this.property = property;
     this.sourceValue = sourceValue;
@@ -49,21 +51,21 @@ public class TeamPropertyDifference implements Serializable {
     return teamNumber;
   }
 
-  private final String sourceValue;
+  private final @Nullable String sourceValue;
 
   /**
    * @return value in the source database
    */
-  public String getSourceValue() {
+  public @Nullable String getSourceValue() {
     return sourceValue;
   }
 
-  private final String destValue;
+  private final @Nullable String destValue;
 
   /**
    * @return value in the destination database
    */
-  public String getDestValue() {
+  public @Nullable String getDestValue() {
     return destValue;
   }
 

@@ -41,11 +41,14 @@ import java.util.zip.ZipInputStream;
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
@@ -329,10 +332,13 @@ public final class ImportDB {
     }
     for (final Map.Entry<String, String> tableEntry : tableData.entrySet()) {
       final String tablename = tableEntry.getKey();
-      final String content = tableEntry.getValue();
-      final Map<String, String> tableTypes = typeInfo.get(tablename);
 
-      Utilities.loadCSVFile(connection, tablename, tableTypes, new StringReader(content));
+      if (null != tablename) {
+        final String content = tableEntry.getValue();
+        final Map<String, String> tableTypes = typeInfo.getOrDefault(tablename, Collections.emptyMap());
+
+        Utilities.loadCSVFile(connection, tablename, tableTypes, new StringReader(content));
+      }
     }
 
     final int dbVersion = Queries.getDatabaseVersion(connection);
@@ -645,8 +651,8 @@ public final class ImportDB {
    * @param scheduleColumns the schedule columns
    * @return the column name or null if no mapping can be found
    */
-  private static String findScheduleColumnForCategory(final SubjectiveScoreCategory category,
-                                                      final Collection<String> scheduleColumns) {
+  private static @Nullable String findScheduleColumnForCategory(final SubjectiveScoreCategory category,
+                                                                final Collection<String> scheduleColumns) {
 
     // first see if there is an exact match to the name or title
     for (final String scheduleColumn : scheduleColumns) {
@@ -1039,7 +1045,7 @@ public final class ImportDB {
 
             try (ResultSet scheduleRows = getFinalistSchedule.executeQuery()) {
               while (scheduleRows.next()) {
-                final String categoryTitle = scheduleRows.getString(1);
+                final String categoryTitle = castNonNull(scheduleRows.getString(1));
                 final int team = scheduleRows.getInt(2);
 
                 if (!challengeSubjectiveCategories.contains(categoryTitle)) {
@@ -1083,7 +1089,7 @@ public final class ImportDB {
         final Collection<String> scheduleColumns = new LinkedList<>();
         try (ResultSet stations = getSubjectiveStations.executeQuery()) {
           while (stations.next()) {
-            final String name = stations.getString(1);
+            final String name = castNonNull(stations.getString(1));
             scheduleColumns.add(name);
           }
         } // stations
@@ -1236,10 +1242,10 @@ public final class ImportDB {
       // ---- switch from string tournament names to integers ----
 
       // get all data from Tournaments table
-      final Map<String, String> nameLocation = new HashMap<>();
+      final Map<String, @Nullable String> nameLocation = new HashMap<>();
       try (ResultSet rs = stmt.executeQuery("SELECT Name, Location FROM Tournaments")) {
         while (rs.next()) {
-          final String name = rs.getString(1);
+          final String name = castNonNull(rs.getString(1));
           final String location = rs.getString(2);
           nameLocation.put(name, location);
         }
@@ -1252,7 +1258,7 @@ public final class ImportDB {
       GenerateDB.tournaments(connection);
 
       // add all tournaments back
-      for (final Map.Entry<String, String> entry : nameLocation.entrySet()) {
+      for (final Map.Entry<String, @Nullable String> entry : nameLocation.entrySet()) {
         if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(entry.getKey())) {
           if (!Tournament.doesTournamentExist(connection, entry.getKey())) {
             Tournament.createTournament(connection, entry.getKey(), entry.getValue(), null, null, null);
@@ -1263,7 +1269,7 @@ public final class ImportDB {
       final Map<String, Integer> nameID = new HashMap<>();
       try (ResultSet rs = stmt.executeQuery("SELECT Name, tournament_id FROM Tournaments")) {
         while (rs.next()) {
-          final String name = rs.getString(1);
+          final String name = castNonNull(rs.getString(1));
           final int id = rs.getInt(2);
           nameID.put(name, id);
         }
@@ -2153,13 +2159,13 @@ public final class ImportDB {
       try (ResultSet sourceRS = sourcePrep.executeQuery()) {
         while (sourceRS.next()) {
           final int teamNumber = sourceRS.getInt(1);
-          final String sourceName = sourceRS.getString(2);
+          final String sourceName = castNonNull(sourceRS.getString(2));
           final String sourceOrganization = sourceRS.getString(3);
           destPrep.setInt(1, teamNumber);
 
           try (ResultSet destRS = destPrep.executeQuery()) {
             if (destRS.next()) {
-              final String destName = destRS.getString(1);
+              final String destName = castNonNull(destRS.getString(1));
               if (!Objects.equals(destName, sourceName)) {
                 differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.NAME, sourceName, destName));
               }
@@ -2365,6 +2371,8 @@ public final class ImportDB {
   /**
    * Datetime format found in the CSV dump files.
    */
+  // See https://github.com/typetools/checker-framework/issues/979
+  @SuppressWarnings("nullness")
   public static final ThreadLocal<DateFormat> CSV_TIMESTAMP_FORMATTER = new ThreadLocal<DateFormat>() {
     @Override
     protected DateFormat initialValue() {
@@ -2375,6 +2383,8 @@ public final class ImportDB {
   /**
    * Time format found in the CSV dump files.
    */
+  // See https://github.com/typetools/checker-framework/issues/979
+  @SuppressWarnings("nullness")
   public static final ThreadLocal<DateFormat> CSV_TIME_FORMATTER = new ThreadLocal<DateFormat>() {
     @Override
     protected DateFormat initialValue() {
@@ -2385,6 +2395,8 @@ public final class ImportDB {
   /**
    * Date format found in the CSV dump files.
    */
+  // See https://github.com/typetools/checker-framework/issues/979
+  @SuppressWarnings("nullness")
   public static final ThreadLocal<DateFormat> CSV_DATE_FORMATTER = new ThreadLocal<DateFormat>() {
     @Override
     protected DateFormat initialValue() {
