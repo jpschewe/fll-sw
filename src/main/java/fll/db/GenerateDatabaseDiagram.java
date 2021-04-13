@@ -18,6 +18,7 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 import fll.Utilities;
+import fll.util.FLLInternalException;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import net.sourceforge.schemaspy.Config;
@@ -50,9 +51,12 @@ public final class GenerateDatabaseDiagram {
 
       final String baseDir = "fll/resources/challenge-descriptors/";
       final String challengeName = "example-database.xml";
-      final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+      final ClassLoader classLoader = getClassLoader();
       final URL challengeUrl = classLoader.getResource(baseDir
           + challengeName);
+      if (null == challengeUrl) {
+        throw new FLLInternalException("Cannot find example-database.xml");
+      }
 
       final InputStream stream = challengeUrl.openStream();
       final Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET);
@@ -76,6 +80,20 @@ public final class GenerateDatabaseDiagram {
       LOGGER.fatal("Error creating the diagram", e);
     }
 
+  }
+
+  private static ClassLoader getClassLoader() {
+    final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+    if (null != contextClassLoader) {
+      return contextClassLoader;
+    }
+
+    final ClassLoader classClassLoader = GenerateDatabaseDiagram.getClassLoader();
+    if (null != classClassLoader) {
+      return classClassLoader;
+    }
+
+    return ClassLoader.getSystemClassLoader();
   }
 
   /**
