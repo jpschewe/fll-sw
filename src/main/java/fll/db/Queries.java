@@ -28,6 +28,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.PolyNull;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
@@ -100,9 +103,9 @@ public final class Queries {
         while (rs.next()) {
           final int teamNumber = rs.getInt("TeamNumber");
           final String org = rs.getString("Organization");
-          final String name = rs.getString("TeamName");
-          final String eventDivision = rs.getString("event_division");
-          final String judgingStation = rs.getString("judging_station");
+          final String name = castNonNull(rs.getString("TeamName"));
+          final String eventDivision = castNonNull(rs.getString("event_division"));
+          final String judgingStation = castNonNull(rs.getString("judging_station"));
 
           final TournamentTeam team = new TournamentTeam(teamNumber, org, name, eventDivision, judgingStation);
           tournamentTeams.put(teamNumber, team);
@@ -144,7 +147,7 @@ public final class Queries {
       prep.setInt(1, tournament);
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
-          final String division = rs.getString(1);
+          final String division = castNonNull(rs.getString(1));
           list.add(division);
         }
       }
@@ -201,7 +204,7 @@ public final class Queries {
       prep.setInt(1, tournament);
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
-          final String station = rs.getString(1);
+          final String station = castNonNull(rs.getString(1));
           result.add(station);
         }
       }
@@ -740,9 +743,9 @@ public final class Queries {
                 }
               }
             }
-          }
+          } // winner of the match changed
 
-        }
+        } // PreparedStatement
 
         // If the second-check flag is NO or the opposing team is not
         // verified, we set the match "winner" (possibly back) to NULL.
@@ -750,7 +753,8 @@ public final class Queries {
             || !(Queries.performanceScoreExists(connection, currentTournament, teamB, runNumber)
                 && Queries.isVerified(connection, currentTournament, teamB, runNumber))) {
           removePlayoffScore(connection, division, currentTournament, runNumber, ptLine);
-        } else {
+        } else if (null != newWinner) {
+          // have a winner to record
           final Team newLoser;
           if (newWinner.equals(team)) {
             newLoser = teamB;
@@ -1083,9 +1087,9 @@ public final class Queries {
    *         in the list of tournament teams
    * @throws SQLException on a database error
    */
-  public static String getEventDivision(final Connection connection,
-                                        final int teamNumber,
-                                        final int tournamentID)
+  public static @Nullable String getEventDivision(final Connection connection,
+                                                  final int teamNumber,
+                                                  final int tournamentID)
       throws SQLException {
     try (
         PreparedStatement prep = connection.prepareStatement("SELECT event_division FROM TournamentTeams WHERE TeamNumber = ? AND Tournament = ?")) {
@@ -1093,7 +1097,7 @@ public final class Queries {
       prep.setInt(2, tournamentID);
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
-          return rs.getString(1);
+          return castNonNull(rs.getString(1));
         } else {
           return null;
         }
@@ -2573,7 +2577,7 @@ public final class Queries {
    * @param date value to be converted
    * @return converted value
    */
-  public static Time dateToTime(final @Nullable Date date) {
+  public static @PolyNull Time dateToTime(final @PolyNull Date date) {
     if (null == date) {
       return null;
     } else {
@@ -2587,7 +2591,7 @@ public final class Queries {
    * @param t value to be converted
    * @return {@link java.util.Date}
    */
-  public static Date timeToDate(final @Nullable Time t) {
+  public static @PolyNull Date timeToDate(final @PolyNull Time t) {
     if (null == t) {
       return null;
     } else {

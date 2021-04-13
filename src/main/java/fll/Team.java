@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Comparator;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -89,7 +91,7 @@ public class Team implements Serializable {
    * @param name {@link #getTeamName()}
    */
   public Team(@JsonProperty("teamNumber") final int teamNumber,
-              @JsonProperty("organization") final String org,
+              @JsonProperty("organization") final @Nullable String org,
               @JsonProperty("teamName") final String name) {
     this.teamNumber = teamNumber;
     this.organization = org;
@@ -150,7 +152,7 @@ public class Team implements Serializable {
     return teamNumber;
   }
 
-  private final String organization;
+  private final @Nullable String organization;
 
   /**
    * The organization that the team belongs to, this may be a school or youth
@@ -158,7 +160,7 @@ public class Team implements Serializable {
    * 
    * @return organization
    */
-  public String getOrganization() {
+  public @Nullable String getOrganization() {
     return organization;
   }
 
