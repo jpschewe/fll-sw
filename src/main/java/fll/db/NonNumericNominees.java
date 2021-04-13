@@ -201,7 +201,7 @@ public class NonNumericNominees {
    */
   public static Set<String> getNomineesByJudgeForTeam(final Connection connection,
                                                       final Tournament tournament,
-                                                      final String judge,
+                                                      final @Nullable String judge,
                                                       final int teamNumber)
       throws SQLException {
     final Set<String> result = new HashSet<>();

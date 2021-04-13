@@ -103,15 +103,6 @@ public class DoLogin extends BaseFLLServlet {
       LOGGER.trace("Form parameters: {}", request.getParameterMap());
       final String user = request.getParameter("user");
 
-      // check for locked account
-      if (Authentication.isAccountLocked(connection, user)) {
-        LOGGER.warn("Account {} is locked", user);
-        SessionAttributes.appendToMessage(session,
-                                          "<p class='error'>Account is locked. Wait for it to unlock or contact an admin.</p>");
-        response.sendRedirect(response.encodeRedirectURL("/login.jsp"));
-        return;
-      }
-
       // compute hash
       final String pass = request.getParameter("pass");
       if (null == user
@@ -120,6 +111,15 @@ public class DoLogin extends BaseFLLServlet {
           || pass.isEmpty()) {
         LOGGER.warn("Form fields missing");
         SessionAttributes.appendToMessage(session, "<p class='error'>You must fill out all fields in the form.</p>");
+        response.sendRedirect(response.encodeRedirectURL("/login.jsp"));
+        return;
+      }
+
+      // check for locked account
+      if (Authentication.isAccountLocked(connection, user)) {
+        LOGGER.warn("Account {} is locked", user);
+        SessionAttributes.appendToMessage(session,
+                                          "<p class='error'>Account is locked. Wait for it to unlock or contact an admin.</p>");
         response.sendRedirect(response.encodeRedirectURL("/login.jsp"));
         return;
       }

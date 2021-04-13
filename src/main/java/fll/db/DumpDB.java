@@ -139,7 +139,7 @@ public final class DumpDB extends BaseFLLServlet {
   public static void dumpDatabase(final ZipOutputStream output,
                                   final Connection connection,
                                   final ChallengeDescription description,
-                                  final ServletContext application)
+                                  final @Nullable ServletContext application)
       throws SQLException, IOException {
     try (Statement stmt = connection.createStatement();
         OutputStreamWriter outputWriter = new OutputStreamWriter(output, Utilities.DEFAULT_CHARSET)) {

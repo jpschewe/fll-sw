@@ -24,6 +24,7 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Team;
 import fll.Utilities;
@@ -188,7 +189,7 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
             teamName = data[teamNameColumnIdx];
           }
 
-          final String organization;
+          final @Nullable String organization;
           if (organizationColumnIdx < 0) {
             organization = team.getOrganization();
           } else {

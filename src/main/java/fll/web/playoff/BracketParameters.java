@@ -68,9 +68,14 @@ public class BracketParameters extends BaseFLLServlet {
 
       final int currentTournament = data.getCurrentTournament().getTournamentID();
 
+      final String bracket = data.getBracket();
+      if (null == bracket) {
+        throw new FLLRuntimeException("Playoff session data has a null bracket");
+      }
+
       final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection,
                                                                                               currentTournament,
-                                                                                              data.getBracket());
+                                                                                              bracket);
       pageContext.setAttribute("tableInfo", tableInfo);
 
     } catch (final SQLException e) {

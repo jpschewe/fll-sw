@@ -1820,7 +1820,7 @@ public final class Queries {
   public static void updateTeam(final Connection connection,
                                 final int number,
                                 final String name,
-                                final String organization)
+                                final @Nullable String organization)
       throws SQLException {
     try (
         PreparedStatement prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ? WHERE TeamNumber = ?")) {
