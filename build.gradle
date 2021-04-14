@@ -820,6 +820,8 @@ checkerFramework {
         "-AstubWarnIfNotFound",
         "-Astubs=$projectDir/stubs"
     ]
+    
+    excludeTests = true
 }
 
 def checker_dir = file("./checker/checker-framework")
