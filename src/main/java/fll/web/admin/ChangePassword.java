@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import fll.db.Authentication;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -39,12 +41,20 @@ public class ChangePassword extends BaseFLLServlet {
       throws IOException, ServletException {
 
     final AuthenticationContext currentAuth = SessionAttributes.getAuthentication(session);
+    if (!currentAuth.getLoggedIn()) {
+      SessionAttributes.appendToMessage(session, "<p id='error'>You must be logged in to change a password</p>");
+      response.sendRedirect(response.encodeRedirectURL("changePassword.jsp"));
+      return;
+    }
+
+    // if logged in, this cannot be null
+    final String username = castNonNull(currentAuth.getUsername());
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
       final String oldPassword = request.getParameter("old_password");
-      if (!Authentication.checkValidPassword(connection, currentAuth.getUsername(), oldPassword)) {
+      if (!Authentication.checkValidPassword(connection, username, oldPassword)) {
         SessionAttributes.appendToMessage(session, "<p class='error'>Old password is incorrect</p>");
         response.sendRedirect(response.encodeRedirectURL("changePassword.jsp"));
         return;
@@ -59,13 +69,12 @@ public class ChangePassword extends BaseFLLServlet {
       }
 
       // invalidate all login keys now that the password has changed
-      Authentication.changePassword(connection, currentAuth.getUsername(), newPassword);
-      Authentication.markLoggedOut(application, currentAuth.getUsername());
+      Authentication.changePassword(connection, username, newPassword);
+      Authentication.markLoggedOut(application, username);
 
       // need to create new auth after marking logged out so that this session isn't
       // logged out
-      final AuthenticationContext newAuth = AuthenticationContext.loggedIn(currentAuth.getUsername(),
-                                                                           currentAuth.getRoles());
+      final AuthenticationContext newAuth = AuthenticationContext.loggedIn(username, currentAuth.getRoles());
 
       SessionAttributes.appendToMessage(session, "<p id='success'>Password changed for '"
           + newAuth.getUsername()

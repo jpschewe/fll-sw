@@ -24,6 +24,7 @@ import fll.Team;
 import fll.db.Queries;
 import fll.db.TableInformation;
 import fll.db.TournamentParameters;
+import fll.util.FLLInternalException;
 import net.mtu.eggplant.util.StringUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -1361,6 +1362,11 @@ public class BracketData extends BracketInfo {
 
               final TableInformation info = TableInformation.getTableInformationForTableSide(tournamentTables,
                                                                                              storedTableB);
+              if (null == info) {
+                throw new FLLInternalException("Cannot find information for table "
+                    + storedTableB);
+              }
+
               if (info.getSideA().equals(storedTableB)) {
                 tableA = info.getSideB();
               } else {
@@ -1372,6 +1378,11 @@ public class BracketData extends BracketInfo {
 
               final TableInformation info = TableInformation.getTableInformationForTableSide(tournamentTables,
                                                                                              storedTableA);
+              if (null == info) {
+                throw new FLLInternalException("Cannot find information for table "
+                    + storedTableA);
+              }
+
               if (info.getSideA().equals(storedTableA)) {
                 tableB = info.getSideB();
               } else {

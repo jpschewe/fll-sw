@@ -13,6 +13,8 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -31,7 +33,7 @@ public class TournamentTeam extends Team {
    * @param judgingGroup {@link #getJudgingGroup()}
    */
   public TournamentTeam(@JsonProperty("teamNumber") final int teamNumber,
-                        @JsonProperty("organization") final String org,
+                        @JsonProperty("organization") final @Nullable String org,
                         @JsonProperty("teamName") final String name,
                         @JsonProperty("awardGroup") final String awardGroup,
                         @JsonProperty("judgingGroup") final String judgingGroup) {

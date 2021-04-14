@@ -15,6 +15,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
@@ -95,10 +97,10 @@ public final class AwardWinners {
 
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
-          final String name = rs.getString(1);
+          final String name = castNonNull(rs.getString(1));
           final int teamNumber = rs.getInt(2);
           final String description = rs.getString(3);
-          final String awardGroup = rs.getString(4);
+          final String awardGroup = castNonNull(rs.getString(4));
 
           final AwardWinner winner = new AwardWinner(name, awardGroup, teamNumber, description);
           result.add(winner);
@@ -131,9 +133,11 @@ public final class AwardWinners {
       for (final AwardWinner winner : winners) {
         prep.setString(2, winner.getName());
         prep.setInt(3, winner.getTeamNumber());
-        if (null != winner.getDescription()
-            && !winner.getDescription().trim().isEmpty()) {
-          prep.setString(4, winner.getDescription().trim());
+
+        final String winnerDescription = winner.getDescription();
+        if (null != winnerDescription
+            && !winnerDescription.trim().isEmpty()) {
+          prep.setString(4, winnerDescription.trim());
         } else {
           prep.setNull(4, Types.LONGVARCHAR);
         }
@@ -161,7 +165,7 @@ public final class AwardWinners {
 
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
-          final String name = rs.getString(1);
+          final String name = castNonNull(rs.getString(1));
           final int teamNumber = rs.getInt(2);
           final String description = rs.getString(3);
 
@@ -201,9 +205,10 @@ public final class AwardWinners {
       for (final OverallAwardWinner winner : winners) {
         prep.setString(2, winner.getName());
         prep.setInt(3, winner.getTeamNumber());
-        if (null != winner.getDescription()
-            && !winner.getDescription().trim().isEmpty()) {
-          prep.setString(4, winner.getDescription().trim());
+        final String winnerDescription = winner.getDescription();
+        if (null != winnerDescription
+            && !winnerDescription.trim().isEmpty()) {
+          prep.setString(4, winnerDescription.trim());
         } else {
           prep.setNull(4, Types.LONGVARCHAR);
         }

@@ -23,6 +23,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import fll.Tournament;
 import fll.web.admin.StoreTournamentData;
 
@@ -146,7 +148,7 @@ public final class DelayedPerformance {
 
         while (rs.next()) {
           final int runNumber = rs.getInt("run_number");
-          final Timestamp delayUntil = rs.getTimestamp("delayed_until");
+          final Timestamp delayUntil = castNonNull(rs.getTimestamp("delayed_until"));
           final DelayedPerformance delay = new DelayedPerformance(runNumber, delayUntil.toLocalDateTime());
           delays.add(delay);
         }

@@ -18,6 +18,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import fll.util.FLLInternalException;
+
 /**
  * A team advancing to another tournament.
  */
@@ -80,6 +82,9 @@ public class AdvancingTeam implements Serializable {
         while (rs.next()) {
           final int teamNumber = rs.getInt(1);
           final String group = rs.getString(2);
+          if (null == group) {
+            throw new FLLInternalException("Database consistency error, award_group is null in advancing_teams");
+          }
           final AdvancingTeam advancing = new AdvancingTeam(teamNumber, group);
           result.add(advancing);
         }

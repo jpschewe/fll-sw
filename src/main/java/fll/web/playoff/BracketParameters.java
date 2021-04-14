@@ -30,7 +30,6 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.xml.BracketSortType;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Work with bracket_parameters.jsp.
@@ -58,26 +57,26 @@ public class BracketParameters extends BaseFLLServlet {
     pageContext.setAttribute("sortOptions", BracketSortType.class.getEnumConstants());
     pageContext.setAttribute("defaultSort", BracketSortType.SEEDING);
 
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
-
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
       final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
                                                                             PlayoffSessionData.class);
 
       final int currentTournament = data.getCurrentTournament().getTournamentID();
 
+      final String bracket = data.getBracket();
+      if (null == bracket) {
+        throw new FLLRuntimeException("Playoff session data has a null bracket");
+      }
+
       final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection,
                                                                                               currentTournament,
-                                                                                              data.getBracket());
+                                                                                              bracket);
       pageContext.setAttribute("tableInfo", tableInfo);
 
     } catch (final SQLException e) {
       LOGGER.error(e, e);
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 

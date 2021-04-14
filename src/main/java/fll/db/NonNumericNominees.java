@@ -6,6 +6,7 @@
 
 package fll.db;
 
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -134,7 +135,9 @@ public class NonNumericNominees {
       try (ResultSet rs = get.executeQuery()) {
         while (rs.next()) {
           final String category = rs.getString(1);
-          result.add(category);
+          if (null != category) {
+            result.add(category);
+          }
         }
       }
     }
@@ -165,12 +168,18 @@ public class NonNumericNominees {
       try (ResultSet rs = get.executeQuery()) {
         while (rs.next()) {
           final int team = rs.getInt("team_number");
-          final Set<String> judges = new HashSet<>();
-          try (ResultSet arrayRs = rs.getArray("judges").getResultSet()) {
-            while (arrayRs.next()) {
-              judges.add(arrayRs.getString(2));
+
+          final Set<@Nullable String> judges = new HashSet<>();
+          final Array judgesResult = rs.getArray("judges");
+          if (null != judgesResult) {
+            try (ResultSet arrayRs = judgesResult.getResultSet()) {
+              while (arrayRs.next()) {
+                final String judge = arrayRs.getString(2);
+                judges.add(judge);
+              }
             }
           }
+
           final Nominee nominee = new Nominee(team, judges);
           result.add(nominee);
         } // foreach result
@@ -192,7 +201,7 @@ public class NonNumericNominees {
    */
   public static Set<String> getNomineesByJudgeForTeam(final Connection connection,
                                                       final Tournament tournament,
-                                                      final String judge,
+                                                      final @Nullable String judge,
                                                       final int teamNumber)
       throws SQLException {
     final Set<String> result = new HashSet<>();
@@ -206,7 +215,9 @@ public class NonNumericNominees {
       try (ResultSet rs = get.executeQuery()) {
         while (rs.next()) {
           final String category = rs.getString("category");
-          result.add(category);
+          if (null != category) {
+            result.add(category);
+          }
         } // foreach result
       } // allocate query
     } // allocate prepared statement
@@ -310,7 +321,7 @@ public class NonNumericNominees {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(final @Nullable Object o) {
       if (null == o) {
         return false;
       } else if (this == o) {

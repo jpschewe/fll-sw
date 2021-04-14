@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.db.Authentication;
@@ -248,31 +250,39 @@ public class InitFilter implements Filter {
   private static void checkAuthenticationValid(final ServletContext application,
                                                final HttpSession session) {
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+    if (!auth.getLoggedIn()) {
+      // not logged in, nothing to check
+      return;
+    }
+
+    // not null because logged in
+    final String username = castNonNull(auth.getUsername());
+
     final Map<String, LocalDateTime> authLoggedOut = ApplicationAttributes.getAuthLoggedOut(application);
 
-    final LocalDateTime loggedOut = authLoggedOut.get(auth.getUsername());
+    final LocalDateTime loggedOut = authLoggedOut.get(username);
     if (null != loggedOut
         && loggedOut.isAfter(auth.getCreated())) {
-      LOGGER.info("User {} was logged out in another session. Logout time {} is after {}", auth.getUsername(),
-                  loggedOut, auth.getCreated());
+      LOGGER.info("User {} was logged out in another session. Logout time {} is after {}", username, loggedOut,
+                  auth.getCreated());
       AuthenticationContext newAuth = AuthenticationContext.notLoggedIn();
       session.setAttribute(SessionAttributes.AUTHENTICATION, newAuth);
     }
 
     final Map<String, LocalDateTime> authRefresh = ApplicationAttributes.getAuthRefresh(application);
-    final LocalDateTime refresh = authRefresh.get(auth.getUsername());
+    final LocalDateTime refresh = authRefresh.get(username);
     if (null != refresh
         && refresh.isAfter(auth.getCreated())) {
-      LOGGER.info("User {} needs authentication refreshed. Refresh time {} is after {}", auth.getUsername(), refresh,
+      LOGGER.info("User {} needs authentication refreshed. Refresh time {} is after {}", username, refresh,
                   auth.getCreated());
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       try (Connection connection = datasource.getConnection()) {
-        final Set<UserRole> roles = Authentication.getRoles(connection, auth.getUsername());
-        final AuthenticationContext newAuth = AuthenticationContext.loggedIn(auth.getUsername(), roles);
+        final Set<UserRole> roles = Authentication.getRoles(connection, username);
+        final AuthenticationContext newAuth = AuthenticationContext.loggedIn(username, roles);
         session.setAttribute(SessionAttributes.AUTHENTICATION, newAuth);
       } catch (final SQLException e) {
         throw new FLLInternalException("Error refreshing authentication information for "
-            + auth.getUsername(), e);
+            + username, e);
       }
     }
   }

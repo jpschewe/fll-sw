@@ -72,16 +72,17 @@ public class InitializeBrackets extends BaseFLLServlet {
       final Tournament currentTournament = data.getCurrentTournament();
       final int currentTournamentID = currentTournament.getTournamentID();
 
-      if (null == data.getBracket()) {
+      final String bracket = data.getBracket();
+      if (null == bracket) {
         message.append("<p class='error'>No playoff bracket specified.</p>");
-      } else if (Queries.isPlayoffDataInitialized(connection, data.getBracket())) {
+      } else if (Queries.isPlayoffDataInitialized(connection, bracket)) {
         message.append("<p class='warning'>Playoffs have already been initialized for playoff bracket "
-            + data.getBracket()
+            + bracket
             + ".</p>");
       } else {
         final List<Integer> teamNumbersInBracket = Playoff.getTeamNumbersForPlayoffBracket(connection,
                                                                                            currentTournamentID,
-                                                                                           data.getBracket());
+                                                                                           bracket);
         final Map<Integer, TournamentTeam> tournamentTeams = data.getTournamentTeams();
 
         final List<Team> teams = teamNumbersInBracket.stream().map(teamNum -> tournamentTeams.get(teamNum))
@@ -93,7 +94,7 @@ public class InitializeBrackets extends BaseFLLServlet {
           message.append(errors);
         } else {
 
-          Playoff.initializeBrackets(connection, challengeDescription, data.getBracket(), data.getEnableThird(), teams,
+          Playoff.initializeBrackets(connection, challengeDescription, bracket, data.getEnableThird(), teams,
                                      data.getSort());
         }
 

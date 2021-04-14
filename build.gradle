@@ -814,11 +814,14 @@ checkerFramework {
         "org.checkerframework.checker.nullness.NullnessChecker"
     ]
     extraJavacArgs = [
-        "-AonlyDefs=^fll\\.(documents|flltools)",
+        "-AonlyDefs=^fll\\.(documents|flltools|db)",
         "-Awarns",  
         "-Xmaxwarns", "10000",
-        "-AstubWarnIfNotFound"
+        "-AstubWarnIfNotFound",
+        "-Astubs=$projectDir/stubs"
     ]
+    
+    excludeTests = true
 }
 
 def checker_dir = file("./checker/checker-framework")

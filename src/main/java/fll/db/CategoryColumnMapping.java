@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import fll.util.FLLInternalException;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -106,6 +107,10 @@ public class CategoryColumnMapping implements Serializable {
       while (found.next()) {
         final String category = found.getString(1);
         final String column = found.getString(2);
+        if (null == category
+            || null == column) {
+          throw new FLLInternalException("Inconsistent database, category or schedule_column is null in category_schedule_column");
+        }
         final CategoryColumnMapping map = new CategoryColumnMapping(category, column);
         mappings.add(map);
       }

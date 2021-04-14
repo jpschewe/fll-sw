@@ -12,6 +12,8 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -37,7 +39,7 @@ public class OverallAwardWinner implements Serializable {
    */
   public OverallAwardWinner(@Nonnull @JsonProperty("name") final String name,
                             @JsonProperty("teamNumber") final int teamNumber,
-                            @JsonProperty("description") final String description) {
+                            @JsonProperty("description") final @Nullable String description) {
     this.name = Objects.requireNonNull(name);
     this.teamNumber = teamNumber;
     this.description = description;
@@ -62,7 +64,7 @@ public class OverallAwardWinner implements Serializable {
     return teamNumber;
   }
 
-  private final String description;
+  private final @Nullable String description;
 
   /**
    * If the award has a description, this is populated. This can be a description
@@ -71,7 +73,7 @@ public class OverallAwardWinner implements Serializable {
    * 
    * @return the description of the award, may be null
    */
-  public final String getDescription() {
+  public final @Nullable String getDescription() {
     return description;
   }
 
