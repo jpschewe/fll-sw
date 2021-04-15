@@ -54,7 +54,7 @@ public abstract class CellFileReader implements Closeable {
    * @throws InvalidFormatException if there is a problem reading the Excel file
    */
   public static CellFileReader createCellReader(final File file,
-                                                final String sheetName)
+                                                final @Nullable String sheetName)
       throws InvalidFormatException, IOException {
     return createCellReader(file.toPath(), sheetName);
   }
@@ -70,13 +70,15 @@ public abstract class CellFileReader implements Closeable {
    * @throws IOException if there is a problem reading the file
    */
   public static CellFileReader createCellReader(final Path file,
-                                                final String sheetName)
+                                                final @Nullable String sheetName)
       throws InvalidFormatException, IOException {
     if (ExcelCellReader.isExcelFile(file)) {
       try (InputStream fis = Files.newInputStream(file)) {
-        Objects.requireNonNull(sheetName, "Sheet name cannot be null when reading an Excel file");
-
-        return new ExcelCellReader(fis, sheetName);
+        if (null == sheetName) {
+          throw new IllegalArgumentException("Sheet name cannot be null when reading an Excel file");
+        } else {
+          return new ExcelCellReader(fis, sheetName);
+        }
       }
     } else {
       // determine if the file is tab separated or comma separated, check the
