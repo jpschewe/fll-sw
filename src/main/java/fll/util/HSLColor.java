@@ -266,7 +266,7 @@ public class HSLColor {
   private static float[] fromRGB(final Color color) {
     // Get RGB values in the range 0 - 1
 
-    final float[] rgb = color.getRGBColorComponents(null);
+    final float[] rgb = color.getRGBColorComponents(new float[3]);
     final float r = rgb[0];
     final float g = rgb[1];
     final float b = rgb[2];
