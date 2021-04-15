@@ -14,6 +14,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.checkerframework.checker.nullness.qual.KeyFor;
+
 /**
  * Scoring utilities.
  */
@@ -38,7 +40,7 @@ public final class ScoreUtils {
     // reorient the map to be based on teams so that we can figure out which
     // team has the most categories and schedule that team first
     final Map<Integer, List<String>> finalistsCount = new HashMap<Integer, List<String>>();
-    for(final Map.Entry<String, Collection<Integer>> entry : finalists.entrySet()) {
+    for (final Map.Entry<String, Collection<Integer>> entry : finalists.entrySet()) {
       final String category = entry.getKey();
       final Collection<Integer> teams = entry.getValue();
       for (final Integer team : teams) {
@@ -50,9 +52,10 @@ public final class ScoreUtils {
     }
     // sort the list so that the team in the most categories is first, this
     // should ensure the minimum amount of time to do the finalist judging
-    final List<Integer> sortedTeams = new LinkedList<Integer>(finalistsCount.keySet());
+    final List<@KeyFor("finalistsCount") Integer> sortedTeams = new LinkedList<Integer>(finalistsCount.keySet());
     Collections.sort(sortedTeams, new Comparator<Integer>() {
-      public int compare(final Integer teamOne, final Integer teamTwo) {
+      public int compare(final @KeyFor("finalistsCount") Integer teamOne,
+                         final @KeyFor("finalistsCount") Integer teamTwo) {
         final int numCatsOne = finalistsCount.get(teamOne).size();
         final int numCatsTwo = finalistsCount.get(teamTwo).size();
         if (numCatsOne == numCatsTwo) {
