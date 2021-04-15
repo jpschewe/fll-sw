@@ -11,9 +11,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -63,6 +62,10 @@ public class ChallengeDescription implements Serializable {
     }
 
     final Element performanceElement = (Element) ele.getElementsByTagName(PerformanceScoreCategory.TAG_NAME).item(0);
+    if (null == performanceElement) {
+      throw new IllegalArgumentException("Cannot find performance score category element");
+    }
+
     mPerformance = new PerformanceScoreCategory(performanceElement);
 
     for (final Element subjEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(SubjectiveScoreCategory.TAG_NAME))) {
@@ -85,7 +88,7 @@ public class ChallengeDescription implements Serializable {
    *
    * @param title the title of the challenge
    */
-  public ChallengeDescription(@NonNull final String title) {
+  public ChallengeDescription(final String title) {
     mTitle = title;
     mRevision = "";
     mWinner = WinnerType.HIGH;
@@ -119,7 +122,6 @@ public class ChallengeDescription implements Serializable {
    *
    * @return the title of the tournament
    */
-  @NonNull
   public String getTitle() {
     return mTitle;
   }
@@ -127,7 +129,7 @@ public class ChallengeDescription implements Serializable {
   /**
    * @param v see {@link #getTitle()}
    */
-  public void setTitle(@NonNull final String v) {
+  public void setTitle(final String v) {
     Objects.requireNonNull(v);
     mTitle = v;
   }
@@ -140,7 +142,6 @@ public class ChallengeDescription implements Serializable {
    *
    * @return the revision of the description
    */
-  @NonNull
   public String getRevision() {
     return mRevision;
   }
@@ -148,7 +149,7 @@ public class ChallengeDescription implements Serializable {
   /**
    * @param v see {@link #setRevision(String)}
    */
-  public void setRevision(@NonNull final String v) {
+  public void setRevision(final String v) {
     Objects.requireNonNull(v);
     mRevision = v;
   }
@@ -361,11 +362,11 @@ public class ChallengeDescription implements Serializable {
   }
 
   /**
-   * @param str remove carriage returns and multiple spaces
-   * @return string without the line endings and multiple spaces in a row
+   * @param str remove carriage returns and multiple spaces, may be null
+   * @return string without the line endings and multiple spaces in a row, will be
+   *         null if {@code str} is null
    */
-  @EnsuresNonNullIf(expression = "str != null", result = true)
-  /* package */ static @Nullable String removeExtraWhitespace(final @Nullable String str) {
+  /* package */ static @PolyNull String removeExtraWhitespace(final @PolyNull String str) {
     if (null == str) {
       return str;
     } else {
