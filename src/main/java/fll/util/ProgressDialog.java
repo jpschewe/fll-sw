@@ -8,11 +8,11 @@ package fll.util;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.Dialog;
 import java.awt.Frame;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -28,34 +28,7 @@ public class ProgressDialog extends JDialog implements CheckCanceled {
 
   private final Object mLock = new Object();
 
-  /**
-   * @param owner {@link JDialog#getOwner()}
-   */
-  public ProgressDialog(final Dialog owner) {
-    super(owner, true);
-
-    initComponents();
-  }
-
-  /**
-   * @param owner {@link JDialog#getOwner()}
-   * @param title {@link JDialog#getTitle()}
-   */
-  public ProgressDialog(final Dialog owner,
-                        final String title) {
-    super(owner, title, true);
-
-    initComponents();
-  }
-
-  /**
-   * @param owner {@link JDialog#getOwner()}
-   */
-  public ProgressDialog(final Frame owner) {
-    super(owner, true);
-
-    initComponents();
-  }
+  private JLabel mNote;
 
   /**
    * @param owner {@link JDialog#getOwner()}
@@ -65,32 +38,6 @@ public class ProgressDialog extends JDialog implements CheckCanceled {
                         final String title) {
     super(owner, title, true);
 
-    initComponents();
-  }
-
-  /**
-   * @param owner {@link JDialog#getOwner()}
-   */
-  public ProgressDialog(final Window owner) {
-    super(owner, Dialog.ModalityType.APPLICATION_MODAL);
-
-    initComponents();
-  }
-
-  /**
-   * @param owner {@link JDialog#getOwner()}
-   * @param title {@link JDialog#getTitle()}
-   */
-  public ProgressDialog(final Window owner,
-                        final String title) {
-    super(owner, title, Dialog.ModalityType.APPLICATION_MODAL);
-
-    initComponents();
-  }
-
-  private JLabel mNote;
-
-  private void initComponents() {
     final Container cpane = getContentPane();
     cpane.setLayout(new BorderLayout());
 
@@ -107,6 +54,13 @@ public class ProgressDialog extends JDialog implements CheckCanceled {
       @Override
       public void actionPerformed(final ActionEvent ae) {
         setCanceled(true);
+      }
+    });
+
+    addComponentListener(new ComponentAdapter() {
+      public void componentShown(ComponentEvent e) {
+        // reset the canceled flag
+        setCanceled(false);
       }
     });
 
@@ -136,18 +90,6 @@ public class ProgressDialog extends JDialog implements CheckCanceled {
     synchronized (mLock) {
       mCanceled = v;
     }
-  }
-
-  /**
-   * Overridden to reset the canceled flag.
-   */
-  @Override
-  public void setVisible(final boolean value) {
-    if (value) {
-      setCanceled(false);
-    }
-
-    super.setVisible(value);
   }
 
 }

@@ -34,6 +34,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.tika.Tika;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -44,6 +45,8 @@ public class ExcelCellReader extends CellFileReader {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  // See https://github.com/typetools/checker-framework/issues/979
+  @SuppressWarnings("nullness")
   private static final ThreadLocal<DateFormat> DATE_FORMAT_AM_PM_SS = new ThreadLocal<DateFormat>() {
     @Override
     protected DateFormat initialValue() {
@@ -193,7 +196,7 @@ public class ExcelCellReader extends CellFileReader {
 
   @Override
   @SuppressFBWarnings(value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS", justification = "Return null rather than zero length array so that we know when we hit EFO")
-  public String[] readNext() throws IOException {
+  public @Nullable String @Nullable [] readNext() throws IOException {
     if (lineNumber >= sheet.getLastRowNum()) {
       return null;
     }
@@ -204,7 +207,7 @@ public class ExcelCellReader extends CellFileReader {
       return new String[0];
     }
 
-    final List<String> data = new LinkedList<>();
+    final List<@Nullable String> data = new LinkedList<>();
     for (int cellIdx = 0; cellIdx < row.getLastCellNum(); ++cellIdx) {
       final Cell cell = row.getCell(cellIdx, MissingCellPolicy.RETURN_NULL_AND_BLANK);
       if (null == cell) {

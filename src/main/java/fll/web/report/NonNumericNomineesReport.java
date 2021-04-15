@@ -196,7 +196,8 @@ public class NonNumericNomineesReport extends BaseFLLServlet {
 
           row.appendChild(FOPUtils.createTableCell(document, null, team.getTeamName()));
 
-          row.appendChild(FOPUtils.createTableCell(document, null, team.getOrganization()));
+          final String organization = team.getOrganization();
+          row.appendChild(FOPUtils.createTableCell(document, null, null == organization ? "" : organization));
 
           if (category.getPerAwardGroup()) {
             row.appendChild(FOPUtils.createTableCell(document, null, team.getAwardGroup()));

@@ -1,0 +1,10 @@
+package java.awt;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public class Dialog extends Window {
+
+    public void setVisible(@UnknownInitialization(Dialog.class) Dialog this, boolean b);
+    
+}

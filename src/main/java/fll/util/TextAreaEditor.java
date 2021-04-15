@@ -12,6 +12,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Text editor that scrolls.
  */
@@ -46,7 +48,7 @@ public class TextAreaEditor extends JPanel {
    * @param text the text to display
    * @see JTextArea#setText(String)
    */
-  public void setText(final String text) {
+  public void setText(final @Nullable String text) {
     editor.setText(text);
   }
 }
