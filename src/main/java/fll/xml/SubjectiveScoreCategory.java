@@ -14,6 +14,7 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -58,7 +59,8 @@ public class SubjectiveScoreCategory extends ScoreCategory {
     final NodelistElementCollectionAdapter elements = new NodelistElementCollectionAdapter(ele.getElementsByTagName(SCORE_SHEET_INSTRUCTIONS_TAG_NAME));
     if (elements.hasNext()) {
       final Element descriptionEle = elements.next();
-      scoreSheetInstructions = ChallengeDescription.removeExtraWhitespace(descriptionEle.getTextContent());
+      final String text = ChallengeDescription.removeExtraWhitespace(descriptionEle.getTextContent());
+      scoreSheetInstructions = null == text ? "" : text;
     } else {
       scoreSheetInstructions = DEFAULT_SCORE_SHEET_TEXT;
     }
@@ -250,7 +252,7 @@ public class SubjectiveScoreCategory extends ScoreCategory {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(final @Nullable Object o) {
       if (null == o) {
         return false;
       } else if (this == o) {
