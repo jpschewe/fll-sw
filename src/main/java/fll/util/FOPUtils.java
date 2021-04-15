@@ -413,7 +413,7 @@ public final class FOPUtils {
    * @return the table cell
    */
   public static Element createTableCell(final Document document,
-                                        @Nullable final String textAlignment,
+                                        final @Nullable String textAlignment,
                                         final String text) {
     return createTableCell(document, textAlignment, text, 0, false);
   }
@@ -429,7 +429,7 @@ public final class FOPUtils {
    * @return see {@link #createNoWrapTableCell(Document, String, String, int)}
    */
   public static Element createNoWrapTableCell(final Document document,
-                                              final String textAlignment,
+                                              final @Nullable String textAlignment,
                                               final String text) {
     return createNoWrapTableCell(document, textAlignment, text, 0);
   }
@@ -451,7 +451,7 @@ public final class FOPUtils {
    * @see #createTableCell(Document, String, String, int, boolean)
    */
   public static Element createNoWrapTableCell(final Document document,
-                                              final String textAlignment,
+                                              final @Nullable String textAlignment,
                                               final String text,
                                               final int rotation)
       throws IllegalArgumentException {
@@ -469,7 +469,7 @@ public final class FOPUtils {
    * @throws IllegalArgumentException if the rotation is invalid
    */
   public static Element createTableCell(final Document document,
-                                        final String textAlign,
+                                        final @Nullable String textAlign,
                                         final String text,
                                         final int rotation,
                                         final boolean noWrap) {
@@ -840,7 +840,7 @@ public final class FOPUtils {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(final @Nullable Object o) {
       if (this == o) {
         return true;
       } else if (null == o) {
@@ -966,8 +966,8 @@ public final class FOPUtils {
    * @param description the challenge description
    * @return the content or null if there is no copyright
    */
-  public static Element createCopyrightFooter(final Document document,
-                                              final ChallengeDescription description) {
+  public static @Nullable Element createCopyrightFooter(final Document document,
+                                                        final ChallengeDescription description) {
     if (null == description.getCopyright()) {
       return null;
     }
