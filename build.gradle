@@ -814,11 +814,12 @@ checkerFramework {
         "org.checkerframework.checker.nullness.NullnessChecker"
     ]
     extraJavacArgs = [
-        "-AonlyDefs=^fll\\.(documents|flltools|db)",
+        "-AonlyDefs=^fll\\.(db|documents|flltools|util)",
         "-Awarns",  
         "-Xmaxwarns", "10000",
         "-AstubWarnIfNotFound",
         "-Astubs=$projectDir/stubs"
+        //,"-AstubDebug"
     ]
     
     excludeTests = true
