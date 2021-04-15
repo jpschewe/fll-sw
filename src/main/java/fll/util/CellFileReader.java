@@ -35,10 +35,10 @@ public abstract class CellFileReader implements Closeable {
   /**
    * Read the next line.
    *
-   * @return the line as an array of Strings
+   * @return the line as an array of Strings, null at the end of file
    * @throws IOException if there is an error reading the file
    */
-  public abstract @Nullable String[] readNext() throws IOException;
+  public abstract @Nullable String @Nullable [] readNext() throws IOException;
 
   @Override
   public abstract void close() throws IOException;

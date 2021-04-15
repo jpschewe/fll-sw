@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
@@ -65,7 +67,7 @@ public class CSVCellReader extends CellFileReader {
    * @throws IOException if there is an error reading from the file
    */
   @Override
-  public String[] readNext() throws IOException {
+  public @Nullable String @Nullable [] readNext() throws IOException {
     try {
       return delegate.readNext();
     } catch (final CsvValidationException e) {
