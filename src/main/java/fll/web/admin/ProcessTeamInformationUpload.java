@@ -107,7 +107,7 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
   private static void processFile(final Connection connection,
                                   final StringBuilder message,
                                   final Path file,
-                                  final String sheetName,
+                                  final @Nullable String sheetName,
                                   final String teamNumberColumnName,
                                   final String teamNameColumnName,
                                   final String organizationColumnName)
@@ -121,7 +121,8 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
     final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
 
     // parse out the first non-blank line as the names of the columns
-    String[] columnNames = reader.readNext();
+    @Nullable
+    String @Nullable [] columnNames = reader.readNext();
     while (null != columnNames
         && columnNames.length < 1) {
       columnNames = reader.readNext();

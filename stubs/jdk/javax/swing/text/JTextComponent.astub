@@ -1,0 +1,11 @@
+package javax.swing.text;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public abstract class JTextComponent extends JComponent implements Scrollable, Accessible
+{
+
+    public void setText(@Nullable String t);
+
+}
