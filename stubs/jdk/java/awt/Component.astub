@@ -1,0 +1,12 @@
+package java.awt;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public abstract class Component implements ImageObserver, MenuContainer,
+                                           Serializable
+{
+
+    public synchronized void addComponentListener(@UnknownInitialization(Component.class) Component this, ComponentListener l);
+
+}

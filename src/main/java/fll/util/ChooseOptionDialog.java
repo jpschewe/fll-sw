@@ -12,12 +12,13 @@ import java.awt.Frame;
 import java.util.List;
 import java.util.Vector;
 
-import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.ListCellRenderer;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Choose a single option from a list of options.
@@ -27,16 +28,16 @@ import javax.swing.ListCellRenderer;
  */
 public class ChooseOptionDialog<E> extends JDialog {
 
-  private E selected = null;
+  private @Nullable E selected = null;
 
   /**
    * @param parent parent frame needed for modal operation
    * @param options the options to choose from
    * @param renderer the renderer to use, may be null
    */
-  public ChooseOptionDialog(@Nonnull final Frame parent,
-                            @Nonnull final List<E> options,
-                            final ListCellRenderer<E> renderer) {
+  public ChooseOptionDialog(final Frame parent,
+                            final List<E> options,
+                            final @Nullable ListCellRenderer<E> renderer) {
     super(parent, true);
     final Container cpane = getContentPane();
     cpane.setLayout(new BorderLayout());
@@ -72,7 +73,7 @@ public class ChooseOptionDialog<E> extends JDialog {
   /**
    * @return the selected value, null if canceled or still open
    */
-  public E getSelectedValue() {
+  public @Nullable E getSelectedValue() {
     return selected;
   }
 
