@@ -70,7 +70,7 @@ class EnumeratedValuesModel extends AbstractTableModel {
     case 4:
       return "Delete";
     default:
-      return null;
+      return "";
     }
   }
 
@@ -90,7 +90,7 @@ class EnumeratedValuesModel extends AbstractTableModel {
     case 4:
       return "Delete";
     default:
-      return null;
+      return "";
     }
   }
 

@@ -17,6 +17,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.xml.AbstractGoal;
@@ -72,23 +73,27 @@ import fll.xml.VariableScope;
 
     final JButton addTerm = new JButton("Add Term");
     buttonBar.add(addTerm);
-    addTerm.addActionListener(e -> {
-      addNewTerm();
-    });
 
     buttonBar.add(Box.createHorizontalGlue());
 
     termsContainer = Box.createVerticalBox();
     this.add(termsContainer);
-    poly.getTerms().forEach(term -> {
-      addTerm(term);
-    });
 
     // floating point type
     floatingPointType = new JComboBox<>(FloatingPointType.values());
     this.add(floatingPointType);
     floatingPointType.setToolTipText("How to handle floating point values");
     floatingPointType.setSelectedItem(poly.getFloatingPoint());
+
+    // add listeners after state is initialized
+    addTerm.addActionListener(e -> {
+      addNewTerm();
+    });
+
+    poly.getTerms().forEach(term -> {
+      addTerm(term);
+    });
+
     floatingPointType.addActionListener(e -> {
       final FloatingPointType v = floatingPointType.getItemAt(floatingPointType.getSelectedIndex());
       poly.setFloatingPoint(v);
@@ -96,13 +101,14 @@ import fll.xml.VariableScope;
 
   }
 
-  private void addNewTerm() {
+  private void addNewTerm(@UnknownInitialization(PolynomialEditor.class) PolynomialEditor this) {
     final Term term = new Term();
     poly.addTerm(term);
     addTerm(term);
   }
 
-  private void addTerm(final Term term) {
+  private void addTerm(@UnknownInitialization(PolynomialEditor.class) PolynomialEditor this,
+                       final Term term) {
     final Box termContainer = Box.createVerticalBox();
 
     final Box buttonBar = Box.createHorizontalBox();

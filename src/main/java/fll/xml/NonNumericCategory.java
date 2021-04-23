@@ -10,7 +10,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -29,7 +29,7 @@ public class NonNumericCategory implements Serializable {
 
   private static final String PER_AWARD_GROUP_ATTRIBUTE = "perAwardGroup";
 
-  private final PropertyChangeSupport propChangeSupport = new PropertyChangeSupport(this);
+  private final @NotOnlyInitialized PropertyChangeSupport propChangeSupport;
 
   /**
    * @param property the property that changed
@@ -47,7 +47,7 @@ public class NonNumericCategory implements Serializable {
    *
    * @param listener the listener to add
    */
-  public final void addPropertyChangeListener(@NonNull final PropertyChangeListener listener) {
+  public final void addPropertyChangeListener(final PropertyChangeListener listener) {
     this.propChangeSupport.addPropertyChangeListener(listener);
   }
 
@@ -56,7 +56,7 @@ public class NonNumericCategory implements Serializable {
    *
    * @param listener the listener to remove
    */
-  public final void removePropertyChangeListener(@NonNull final PropertyChangeListener listener) {
+  public final void removePropertyChangeListener(final PropertyChangeListener listener) {
     this.propChangeSupport.removePropertyChangeListener(listener);
   }
 
@@ -66,6 +66,7 @@ public class NonNumericCategory implements Serializable {
    * @param ele the XML element to parse
    */
   public NonNumericCategory(final Element ele) {
+    propChangeSupport = new PropertyChangeSupport(this);
     title = ele.getAttribute(ChallengeDescription.TITLE_ATTRIBUTE);
     perAwardGroup = Boolean.valueOf(ele.getAttribute(PER_AWARD_GROUP_ATTRIBUTE));
 
@@ -85,8 +86,10 @@ public class NonNumericCategory implements Serializable {
    */
   public NonNumericCategory(final String title,
                             final boolean perAwardGroup) {
+    propChangeSupport = new PropertyChangeSupport(this);
     this.title = title;
     this.perAwardGroup = perAwardGroup;
+    this.description = "";
   }
 
   private String title;
@@ -150,7 +153,7 @@ public class NonNumericCategory implements Serializable {
     ele.setAttribute(PER_AWARD_GROUP_ATTRIBUTE, Boolean.toString(perAwardGroup));
     ele.setAttribute(ChallengeDescription.TITLE_ATTRIBUTE, title);
 
-    if (null != description) {
+    if (!description.isEmpty()) {
       final Element descriptionEle = doc.createElement(RubricRange.DESCRIPTION_TAG_NAME);
       descriptionEle.appendChild(doc.createTextNode(description));
       ele.appendChild(descriptionEle);

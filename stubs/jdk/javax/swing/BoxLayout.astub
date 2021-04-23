@@ -1,0 +1,10 @@
+package javax.swing;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public class BoxLayout implements LayoutManager2, Serializable {
+
+    public BoxLayout(@UnknownInitialization(Container.class) Container target, int axis);
+    
+}

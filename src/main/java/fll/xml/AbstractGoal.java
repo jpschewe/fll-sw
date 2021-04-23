@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -63,8 +64,8 @@ public abstract class AbstractGoal extends GoalElement {
 
   /**
    * @return the name of the goal
-   */
-  public String getName() {
+   */  
+  public String getName(@UnknownInitialization(AbstractGoal.class) AbstractGoal this) {
     return mName;
   }
 

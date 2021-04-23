@@ -6,14 +6,15 @@
 
 package fll.xml;
 
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.util.FLLInternalException;
 import fll.util.FP;
 import fll.web.playoff.TeamScore;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Condition statement in a switch case that uses numbers.
@@ -41,8 +42,8 @@ public class ConditionStatement extends AbstractConditionStatement {
    * @param variableScope where to find variables
    */
   public ConditionStatement(final Element ele,
-                            final GoalScope goalScope,
-                            final VariableScope variableScope) {
+                            final @UnknownInitialization GoalScope goalScope,
+                            final @UnknownInitialization VariableScope variableScope) {
     super(ele);
 
     final Element leftEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName(LEFT_TAG_NAME)).next();
@@ -61,7 +62,7 @@ public class ConditionStatement extends AbstractConditionStatement {
     mRight = new ComplexPolynomial();
   }
 
-  private final ComplexPolynomial mLeft;
+  private final @NotOnlyInitialized ComplexPolynomial mLeft;
 
   /**
    * @return the left side of the condition
@@ -70,7 +71,7 @@ public class ConditionStatement extends AbstractConditionStatement {
     return mLeft;
   }
 
-  private final ComplexPolynomial mRight;
+  private final @NotOnlyInitialized ComplexPolynomial mRight;
 
   /**
    * @return the right side of the condition

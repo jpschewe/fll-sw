@@ -13,7 +13,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import org.checkerframework.checker.initialization.qual.UnderInitialization;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -37,8 +37,11 @@ public class BasicPolynomial implements Evaluatable, CaseStatementResult, Serial
    * @param goalScope used to lookup goals referenced by the polynomial
    */
   public BasicPolynomial(final Element ele,
-                         final @UnderInitialization GoalScope goalScope) {
-    this(ele, goalScope, null);
+                         final @UnknownInitialization GoalScope goalScope) {
+    // casting of null to VariableScope should not be needed
+    // https://github.com/typetools/checker-framework/issues/4567
+    // should be fixed in checker 3.13+
+    this(ele, goalScope, (VariableScope) null);
   }
 
   /**
@@ -49,8 +52,8 @@ public class BasicPolynomial implements Evaluatable, CaseStatementResult, Serial
    * @param variableScope used to lookup variables
    */
   protected BasicPolynomial(final Element ele,
-                            final @UnderInitialization GoalScope goalScope,
-                            final @UnderInitialization @Nullable VariableScope variableScope) {
+                            final @UnknownInitialization GoalScope goalScope,
+                            final @UnknownInitialization @Nullable VariableScope variableScope) {
     mTerms = new LinkedList<>();
     for (final Element termEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(Term.TAG_NAME))) {
       final Term term = new Term(termEle, goalScope, variableScope);

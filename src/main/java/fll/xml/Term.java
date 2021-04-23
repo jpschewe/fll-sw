@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.checkerframework.checker.initialization.qual.UnderInitialization;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -51,8 +51,8 @@ public class Term extends Object implements Evaluatable, Serializable {
    *           variable reference is found
    */
   public Term(final Element ele,
-              final @UnderInitialization GoalScope goalScope,
-              final @Nullable VariableScope variableScope)
+              final @UnknownInitialization GoalScope goalScope,
+              final @UnknownInitialization @Nullable VariableScope variableScope)
       throws VariableRefNotAllowedException {
     super();
 

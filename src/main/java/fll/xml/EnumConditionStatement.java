@@ -6,6 +6,8 @@
 
 package fll.xml;
 
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -36,7 +38,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
    * @param goalScope where to find goals
    */
   public EnumConditionStatement(final Element ele,
-                                final GoalScope goalScope) {
+                                final @UnknownInitialization GoalScope goalScope) {
     super(ele);
 
     final Element leftEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName(ConditionStatement.LEFT_TAG_NAME)).next();
@@ -72,7 +74,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
     this.left = left;
   }
 
-  private StringValue left;
+  private @NotOnlyInitialized StringValue left;
 
   /**
    * @return the left side of the inequality
@@ -88,7 +90,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
     left = v;
   }
 
-  private StringValue right;
+  private @NotOnlyInitialized StringValue right;
 
   /**
    * @return the right side of the inequality

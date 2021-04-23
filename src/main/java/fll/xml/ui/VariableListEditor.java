@@ -20,6 +20,8 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.xml.ComputedGoal;
@@ -112,7 +114,7 @@ public class VariableListEditor extends JPanel {
     goal.getAllVariables().forEach(v -> addVariable(v));
   }
 
-  private void addNewVariable() {
+  private void addNewVariable(@UnderInitialization(VariableListEditor.class) VariableListEditor this) {
     final String name = String.format("Variable %d", editorContainer.getComponentCount());
     final Variable var = new Variable(name);
     this.goal.addVariable(var);
@@ -120,7 +122,8 @@ public class VariableListEditor extends JPanel {
     addVariable(var);
   }
 
-  private void addVariable(final Variable var) {
+  private void addVariable(@UnderInitialization(VariableListEditor.class) VariableListEditor this,
+                           final Variable var) {
     final VariableEditor variableEditor = new VariableEditor(var, goalScope);
     final MovableExpandablePanel exPanel = new MovableExpandablePanel(var.getName(), variableEditor, false, true);
     GuiUtils.addToContainer(editorContainer, exPanel);

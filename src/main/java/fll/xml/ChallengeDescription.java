@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Objects;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -364,11 +363,11 @@ public class ChallengeDescription implements Serializable {
   /**
    * @param str remove carriage returns and multiple spaces, may be null
    * @return string without the line endings and multiple spaces in a row, will be
-   *         null if {@code str} is null
+   *         the empty string if {@code str} is null
    */
-  /* package */ static @PolyNull String removeExtraWhitespace(final @PolyNull String str) {
+  /* package */ static String removeExtraWhitespace(final @Nullable String str) {
     if (null == str) {
-      return str;
+      return "";
     } else {
       return str.replaceAll("\\s+", " ");
     }

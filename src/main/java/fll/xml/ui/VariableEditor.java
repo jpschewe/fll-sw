@@ -17,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
 import fll.util.FormatterUtils;
 import fll.xml.GoalScope;
@@ -68,13 +69,6 @@ public class VariableEditor extends JPanel implements Validatable {
     add(mNameEditor, gbc);
     mNameEditor.setValue(variable.getName());
 
-    mNameEditor.addPropertyChangeListener("value", e -> {
-      final String oldName = variable.getName();
-      final String newName = mNameEditor.getText();
-      variable.setName(newName);
-      fireNameChange(oldName, newName);
-    });
-
     mNameEditor.setColumns(ChallengeDescriptionEditor.LONG_TEXT_WIDTH);
     mNameEditor.setMaximumSize(mNameEditor.getPreferredSize());
 
@@ -87,6 +81,14 @@ public class VariableEditor extends JPanel implements Validatable {
     gbc.fill = GridBagConstraints.BOTH;
     add(polyEditor, gbc);
 
+    // add listeners after state is initialized
+    mNameEditor.addPropertyChangeListener("value", e -> {
+      final String oldName = variable.getName();
+      final String newName = mNameEditor.getText();
+      variable.setName(newName);
+      fireNameChange(oldName, newName);
+    });
+
   }
 
   /**
@@ -95,7 +97,8 @@ public class VariableEditor extends JPanel implements Validatable {
    * @param oldName the old name
    * @param newName the new name
    */
-  protected void fireNameChange(final String oldName,
+  protected void fireNameChange(@UnknownInitialization(VariableEditor.class) VariableEditor this,
+                                final String oldName,
                                 final String newName) {
     firePropertyChange("name", oldName, newName);
   }

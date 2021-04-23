@@ -6,6 +6,7 @@
 
 package fll.xml;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -28,12 +29,11 @@ public class Restriction extends BasicPolynomial {
   private static final String MESSAGE_ATTRIBUTE = "message";
 
   /**
-   * 
    * @param ele the element to parse
    * @param goalScope where to find goals
    */
   public Restriction(final Element ele,
-                     final GoalScope goalScope) {
+                     final @UnknownInitialization GoalScope goalScope) {
     super(ele, goalScope);
 
     mLowerBound = Double.valueOf(ele.getAttribute(LOWER_BOUND_ATTRIBUTE));
@@ -49,7 +49,7 @@ public class Restriction extends BasicPolynomial {
     super();
     mLowerBound = Double.NEGATIVE_INFINITY;
     mUpperBound = Double.POSITIVE_INFINITY;
-    mMessage = null;
+    mMessage = "";
   }
 
   private double mLowerBound;

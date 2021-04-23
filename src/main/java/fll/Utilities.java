@@ -56,6 +56,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.db.GenerateDatabaseDiagram;
 import fll.db.ImportDB;
 import fll.util.FLLRuntimeException;
 import fll.xml.ScoreType;
@@ -888,6 +889,28 @@ public final class Utilities {
     } else {
       return new ImageIcon(url);
     }
+  }
+
+  /**
+   * Get a non-null class loader. This starts with
+   * {@link Thread#getContextClassLoader()} and then checks
+   * {@link Class#getClassLoader()} for this class and if that is null returns
+   * {@link ClassLoader#getSystemClassLoader()}.
+   * 
+   * @return non-null class loader
+   */
+  public static ClassLoader getClassLoader() {
+    final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+    if (null != contextClassLoader) {
+      return contextClassLoader;
+    }
+  
+    final ClassLoader classClassLoader = Utilities.getClassLoader();
+    if (null != classClassLoader) {
+      return classClassLoader;
+    }
+  
+    return ClassLoader.getSystemClassLoader();
   }
 
 }

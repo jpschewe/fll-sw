@@ -8,8 +8,8 @@ package fll.xml;
 
 import java.io.Serializable;
 
-import javax.annotation.Nonnull;
-
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -33,8 +33,8 @@ public class VariableRef implements Evaluatable, Serializable {
    * @param ele the XML element to parse the information from
    * @param scope the scope to lookup the variable in at evaluation time
    */
-  public VariableRef(@Nonnull final Element ele,
-                     @Nonnull final VariableScope scope) {
+  public VariableRef(final Element ele,
+                     final @UnknownInitialization VariableScope scope) {
     this(ele.getAttribute(VARIABLE_ATTRIBUTE), scope);
   }
 
@@ -42,8 +42,8 @@ public class VariableRef implements Evaluatable, Serializable {
    * @param variableName {@link #getVariableName()}
    * @param scope {@link #getVariableScope()}
    */
-  public VariableRef(@Nonnull final String variableName,
-                     @Nonnull final VariableScope scope) {
+  public VariableRef(final String variableName,
+                     final @UnknownInitialization VariableScope scope) {
     mVariableName = variableName;
     mVariableScope = scope;
   }
@@ -53,7 +53,6 @@ public class VariableRef implements Evaluatable, Serializable {
   /**
    * @return the variable name to reference
    */
-  @Nonnull
   public String getVariableName() {
     return mVariableName;
   }
@@ -61,16 +60,15 @@ public class VariableRef implements Evaluatable, Serializable {
   /**
    * @param v see {@link #getVariableName()}
    */
-  public void setVariableName(@Nonnull final String v) {
+  public void setVariableName(final String v) {
     mVariableName = v;
   }
 
-  private final VariableScope mVariableScope;
+  private final @NotOnlyInitialized VariableScope mVariableScope;
 
   /**
    * @return the scope used to lookup the variable
    */
-  @Nonnull
   public VariableScope getVariableScope() {
     return mVariableScope;
   }
@@ -80,7 +78,6 @@ public class VariableRef implements Evaluatable, Serializable {
    * @throws ScopeException if the variable cannot be found in the scope
    * @see VariableScope#getVariable(String)
    */
-  @Nonnull
   public Variable getVariable() {
     return mVariableScope.getVariable(mVariableName);
   }

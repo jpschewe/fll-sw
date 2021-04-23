@@ -6,6 +6,7 @@
 
 package fll.xml;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Element;
 
 /**
@@ -19,8 +20,8 @@ public class ComplexPolynomial extends BasicPolynomial {
    * @param variableScope where to find variables
    */
   public ComplexPolynomial(final Element ele,
-                           final GoalScope goalScope,
-                           final VariableScope variableScope) {
+                           final @UnknownInitialization GoalScope goalScope,
+                           final @UnknownInitialization VariableScope variableScope) {
     super(ele, goalScope, variableScope);
   }
 

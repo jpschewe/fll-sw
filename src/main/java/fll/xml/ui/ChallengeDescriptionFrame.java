@@ -46,6 +46,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileFilter;
 
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
@@ -96,6 +97,10 @@ public class ChallengeDescriptionFrame extends JFrame {
         // {
         InputStream stream = ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2014-world_class.xml")) {
 
+      if (null == stream) {
+        throw new RuntimeException("Cannot find default challenge description for testing");
+      }
+
       final ChallengeDescription description = ChallengeParser.parse(new InputStreamReader(stream,
                                                                                            Utilities.DEFAULT_CHARSET));
 
@@ -132,7 +137,7 @@ public class ChallengeDescriptionFrame extends JFrame {
 
   private final JScrollPane scroller;
 
-  private @Nullable ChallengeDescriptionEditor editor = null;
+  private ChallengeDescriptionEditor editor = new ChallengeDescriptionEditor(new ChallengeDescription("New"));;
 
   private static final int VERTICAL_SCROLL_INCREMENT = 20;
 
@@ -148,6 +153,9 @@ public class ChallengeDescriptionFrame extends JFrame {
 
     mCurrentFile = null;
 
+    scroller = new JScrollPane();
+    scroller.getVerticalScrollBar().setUnitIncrement(VERTICAL_SCROLL_INCREMENT);
+
     createMenuBar();
 
     final Container cpane = getContentPane();
@@ -155,8 +163,6 @@ public class ChallengeDescriptionFrame extends JFrame {
 
     cpane.add(createToolBar(), BorderLayout.PAGE_START);
 
-    scroller = new JScrollPane();
-    scroller.getVerticalScrollBar().setUnitIncrement(VERTICAL_SCROLL_INCREMENT);
     cpane.add(scroller, BorderLayout.CENTER);
 
     setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
@@ -169,7 +175,7 @@ public class ChallengeDescriptionFrame extends JFrame {
   /**
    * Create the menu bar for the frame and set it on the frame.
    */
-  private void createMenuBar() {
+  private void createMenuBar(@UnderInitialization(ChallengeDescriptionFrame.class) ChallengeDescriptionFrame this) {
     final JMenuBar menubar = new JMenuBar();
 
     menubar.add(createFileMenu());
@@ -258,14 +264,19 @@ public class ChallengeDescriptionFrame extends JFrame {
     final int returnVal = fileChooser.showOpenDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       final File currentDirectory = fileChooser.getCurrentDirectory();
+      if (null == currentDirectory) {
+        LOGGER.trace("Got null directory, assuming canceled");
+        return;
+      }
       PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
 
       final File file = fileChooser.getSelectedFile();
 
-      if (!file.exists()) {
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("User asked to open a file that doesn't exist");
-        }
+      if (null == file) {
+        LOGGER.trace("Got null file, assuming canceled");
+        return;
+      } else if (!file.exists()) {
+        LOGGER.trace("User asked to open a file that doesn't exist");
         JOptionPane.showMessageDialog(this, String.format("The file %s doesn't exist", file.getAbsolutePath()), "Error",
                                       JOptionPane.ERROR_MESSAGE);
         return;
@@ -301,7 +312,7 @@ public class ChallengeDescriptionFrame extends JFrame {
    *
    * @param file the file where the challenge is saved
    */
-  private void setCurrentFile(final File file,
+  private void setCurrentFile(final @Nullable File file,
                               final @Nullable ChallengeDescription description) {
     mCurrentFile = file;
 
@@ -418,7 +429,7 @@ public class ChallengeDescriptionFrame extends JFrame {
   /**
    * @return the path chosen by the user or null if the action is canceled
    */
-  private Path chooseScoreSheetOutputDirectory() {
+  private @Nullable Path chooseScoreSheetOutputDirectory() {
     final String startingDirectory = PREFS.get(SCORE_SHEET_STARTING_DIRECTORY_PREF, ".");
     final Path startingPath = Paths.get(startingDirectory);
 
@@ -430,6 +441,10 @@ public class ChallengeDescriptionFrame extends JFrame {
 
     if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
       final File selected = chooser.getSelectedFile();
+      if (null == selected) {
+        LOGGER.trace("Assume that the user canceled");
+        return null;
+      }
 
       final Path selectedPath = selected.toPath().toAbsolutePath();
 
@@ -500,7 +515,10 @@ public class ChallengeDescriptionFrame extends JFrame {
    * is null, then call {@link #saveAsChallengeDescription()}.
    */
   private void saveChallengeDescription() {
-    if (null == mCurrentFile) {
+    // local copy to make it clear that the variable won't change during method
+    // execution
+    final File localCurrentFile = mCurrentFile;
+    if (null == localCurrentFile) {
       saveAsChallengeDescription();
       return;
     }
@@ -512,7 +530,7 @@ public class ChallengeDescriptionFrame extends JFrame {
       return;
     }
 
-    try (Writer writer = new OutputStreamWriter(new FileOutputStream(mCurrentFile), Utilities.DEFAULT_CHARSET)) {
+    try (Writer writer = new OutputStreamWriter(new FileOutputStream(localCurrentFile), Utilities.DEFAULT_CHARSET)) {
       final Document saveDoc = editor.getDescription().toXml();
       XMLUtils.writeXML(saveDoc, writer, Utilities.DEFAULT_CHARSET.name());
     } catch (final IOException e) {
@@ -548,9 +566,18 @@ public class ChallengeDescriptionFrame extends JFrame {
     final int returnVal = fileChooser.showSaveDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       final File currentDirectory = fileChooser.getCurrentDirectory();
+      if (null == currentDirectory) {
+        LOGGER.trace("No current directory, assuming canceled");
+        return;
+      }
+
       PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
 
       File file = fileChooser.getSelectedFile();
+      if (null == file) {
+        LOGGER.trace("No selected file, assuming canceld");
+        return;
+      }
       if (!file.getName().endsWith(".xml")) {
         file = new File(file.getAbsolutePath()
             + ".xml");

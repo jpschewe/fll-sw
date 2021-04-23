@@ -59,8 +59,7 @@ public class SubjectiveScoreCategory extends ScoreCategory {
     final NodelistElementCollectionAdapter elements = new NodelistElementCollectionAdapter(ele.getElementsByTagName(SCORE_SHEET_INSTRUCTIONS_TAG_NAME));
     if (elements.hasNext()) {
       final Element descriptionEle = elements.next();
-      final String text = ChallengeDescription.removeExtraWhitespace(descriptionEle.getTextContent());
-      scoreSheetInstructions = null == text ? "" : text;
+      scoreSheetInstructions = ChallengeDescription.removeExtraWhitespace(descriptionEle.getTextContent());
     } else {
       scoreSheetInstructions = DEFAULT_SCORE_SHEET_TEXT;
     }

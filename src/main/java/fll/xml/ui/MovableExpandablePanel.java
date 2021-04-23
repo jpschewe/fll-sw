@@ -17,6 +17,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
 /**
  * Panel that has move up and move down buttons with a title and allows the main
  * component to be hidden.
@@ -116,7 +118,7 @@ public class MovableExpandablePanel extends JPanel {
      * @param source see {@link #getComponent()}
      * @param direction see {@link #getDirection()}
      */
-    public MoveEvent(final JComponent source,
+    public MoveEvent(final @UnknownInitialization(JComponent.class) JComponent source,
                      final MoveDirection direction) {
       super(source);
       mDirection = direction;
@@ -147,7 +149,7 @@ public class MovableExpandablePanel extends JPanel {
      *
      * @param e the event showing what is being moved
      */
-    void requestedMove(MoveEvent e);
+    void requestedMove(@UnknownInitialization(MoveEvent.class) MoveEvent e);
 
   }
 
@@ -172,7 +174,8 @@ public class MovableExpandablePanel extends JPanel {
    *
    * @param direction which direction the component should move
    */
-  protected void fireMoveEventListener(final MoveEvent.MoveDirection direction) {
+  protected void fireMoveEventListener(@UnknownInitialization(MovableExpandablePanel.class) MovableExpandablePanel this,
+                                       final MoveEvent.MoveDirection direction) {
     final MoveEvent event = new MoveEvent(this, direction);
 
     for (final MoveEventListener l : mListeners.getListeners(MoveEventListener.class)) {
@@ -190,7 +193,7 @@ public class MovableExpandablePanel extends JPanel {
      *
      * @param source see {@link #getComponent()}
      */
-    public DeleteEvent(final JComponent source) {
+    public DeleteEvent(final @UnknownInitialization(JComponent.class) JComponent source) {
       super(source);
     }
 
@@ -212,7 +215,7 @@ public class MovableExpandablePanel extends JPanel {
      *
      * @param e the event specifying information about the delete request
      */
-    void requestDelete(DeleteEvent e);
+    void requestDelete(@UnknownInitialization(DeleteEvent.class) DeleteEvent e);
 
   }
 
@@ -233,7 +236,7 @@ public class MovableExpandablePanel extends JPanel {
   /**
    * Send a notification about a delete event.
    */
-  protected void fireDeleteEventListener() {
+  protected void fireDeleteEventListener(@UnknownInitialization(MovableExpandablePanel.class) MovableExpandablePanel this) {
     final DeleteEvent event = new DeleteEvent(this);
 
     for (final DeleteEventListener l : mListeners.getListeners(DeleteEventListener.class)) {

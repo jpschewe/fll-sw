@@ -13,7 +13,8 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import org.checkerframework.checker.initialization.qual.UnderInitialization;
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -35,7 +36,7 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
    * @param goalScope {@link #getGoalScope()}
    */
   public ComputedGoal(final Element ele,
-                      final @UnderInitialization GoalScope goalScope) {
+                      final @UnknownInitialization GoalScope goalScope) {
     super(ele);
 
     this.goalScope = goalScope;
@@ -100,7 +101,7 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
     return mVariables.remove(v);
   }
 
-  private final SwitchStatement mSwitch;
+  private final @NotOnlyInitialized SwitchStatement mSwitch;
 
   /**
    * @return the switch statement for this goal
@@ -181,7 +182,7 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
     return ele;
   }
 
-  private final GoalScope goalScope;
+  private final @NotOnlyInitialized GoalScope goalScope;
 
   /**
    * @return where to lookup goals for the computation

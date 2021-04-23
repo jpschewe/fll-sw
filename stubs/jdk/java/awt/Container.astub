@@ -1,0 +1,11 @@
+package java.awt;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public class Container extends Component {
+
+    public void setLayout(@UnknownInitialization(Container.class) Container this, LayoutManager mgr);
+    
+    public void validate(@UnknownInitialization(Container.class) Container this);
+}

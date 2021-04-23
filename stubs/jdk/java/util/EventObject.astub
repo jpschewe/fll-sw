@@ -1,0 +1,9 @@
+package java.util;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public class EventObject implements java.io.Serializable {
+
+    public EventObject(@UnknownInitialization(Object.class) Object source);
+}

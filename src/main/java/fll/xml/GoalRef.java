@@ -7,14 +7,14 @@
 package fll.xml;
 
 import java.io.Serializable;
-import java.util.Objects;
 
-import org.checkerframework.checker.initialization.qual.UnderInitialization;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 import fll.web.playoff.TeamScore;
 
 /**
@@ -35,12 +35,12 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
    * @param ele the element to parse
    * @param scope {@link #getGoalScope()}
    */
-  public GoalRef(@NonNull final Element ele,
-                 @NonNull final @UnderInitialization GoalScope scope) {
+  public GoalRef(final Element ele,
+                 final @UnknownInitialization GoalScope scope) {
     mScoreType = GoalScoreType.fromString(ele.getAttribute(SCORE_TYPE_ATTRIBUTE));
 
     mGoalScope = scope;
-    mGoalName = Objects.requireNonNull(ele.getAttribute(GOAL_ATTRIBUTE));
+    mGoalName = ele.getAttribute(GOAL_ATTRIBUTE);
   }
 
   /**
@@ -48,9 +48,9 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
    * @param scope the scope to use to find the goal at evaluation time
    * @param scoreType see {@link #getScoreType()}
    */
-  public GoalRef(@NonNull final String goalName,
-                 @NonNull final @UnderInitialization GoalScope scope,
-                 @NonNull final GoalScoreType scoreType) {
+  public GoalRef(final String goalName,
+                 final @UnknownInitialization GoalScope scope,
+                 final GoalScoreType scoreType) {
     mScoreType = scoreType;
     mGoalScope = scope;
     mGoalName = goalName;
@@ -61,7 +61,7 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
   /**
    * @return the name of the goal referenced
    */
-  @NonNull
+
   public String getGoalName() {
     return mGoalName;
   }
@@ -69,16 +69,16 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
   /**
    * @param v see {@link #getGoalName()}
    */
-  public void setGoalName(@NonNull final String v) {
+  public void setGoalName(final String v) {
     mGoalName = v;
   }
 
-  private final GoalScope mGoalScope;
+  private final @NotOnlyInitialized GoalScope mGoalScope;
 
   /**
    * @return the scope used to lookup goals
    */
-  @NonNull
+
   public GoalScope getGoalScope() {
     return mGoalScope;
   }
@@ -89,7 +89,7 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
    * @return the goal
    * @throws ScopeException if the goal cannot be found
    */
-  @NonNull
+
   public AbstractGoal getGoal() {
     return mGoalScope.getGoal(mGoalName);
   }
@@ -99,7 +99,7 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
   /**
    * @return how the goal value should be interpreted
    */
-  @NonNull
+
   public GoalScoreType getScoreType() {
     return mScoreType;
   }
@@ -107,7 +107,7 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
   /**
    * @param v see {@link #getScoreType()}
    */
-  public void setScoreType(@NonNull final GoalScoreType v) {
+  public void setScoreType(final GoalScoreType v) {
     mScoreType = v;
   }
 
@@ -153,7 +153,17 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
   // StringValue interface
   @Override
   public String getStringValue(final TeamScore score) {
-    return score.getEnumRawScore(getGoalName());
+    final String rawScore = score.getEnumRawScore(getGoalName());
+    if (null == rawScore) {
+      throw new FLLRuntimeException("The enumerated goal "
+          + getGoalName()
+          + " has no score for team "
+          + score.getTeamNumber()
+          + " run: "
+          + score.getRunNumber());
+    } else {
+      return rawScore;
+    }
   }
 
   @Override
