@@ -6,6 +6,7 @@
 
 package fll.xml.ui;
 
+import java.awt.Component;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -18,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
 import fll.util.ChooseOptionDialog;
 import fll.util.FormatterUtils;
@@ -155,7 +157,8 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
    * @param oldTitle the old title
    * @param newTitle the new title
    */
-  protected void fireTitleChange(final String oldTitle,
+  protected void fireTitleChange(@UnknownInitialization(Component.class) SubjectiveCategoryEditor this,
+                                 final String oldTitle,
                                  final String newTitle) {
     firePropertyChange("title", oldTitle, newTitle);
   }
@@ -179,7 +182,12 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
     try {
       ChallengeParser.validateSubjectiveCategory(mSubjectiveCategory);
     } catch (final ChallengeValidationException e) {
-      messages.add(e.getMessage());
+      final String message = e.getMessage();
+      if (null != message) {
+        messages.add(message);
+      } else {
+        messages.add(e.toString());
+      }
     }
   }
 

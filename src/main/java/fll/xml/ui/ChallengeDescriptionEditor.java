@@ -295,16 +295,15 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
 
     // end non-numeric categories
 
-    // initial state
-    mDescription.getSubjectiveCategories().forEach(this::addSubjectiveCategory);
-    mDescription.getNonNumericCategories().forEach(this::addNonNumericCategory);
-
     // fill in the bottom of the panel
     topPanel.add(Box.createVerticalGlue());
 
+    // class initialized
+    mDescription.getSubjectiveCategories().forEach(this::addSubjectiveCategory);
+    mDescription.getNonNumericCategories().forEach(this::addNonNumericCategory);
   }
 
-  private void addNewSubjectiveCategory() {
+  private void addNewSubjectiveCategory(@UnknownInitialization(ChallengeDescriptionEditor.class) ChallengeDescriptionEditor this) {
     final String name = String.format("category_%d", mSubjectiveEditors.size());
     final String title = String.format("Category %d", mSubjectiveEditors.size());
 
@@ -314,7 +313,8 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     addSubjectiveCategory(cat);
   }
 
-  private void addSubjectiveCategory(final SubjectiveScoreCategory cat) {
+  private void addSubjectiveCategory(@UnknownInitialization(ChallengeDescriptionEditor.class) ChallengeDescriptionEditor this,
+                                     final SubjectiveScoreCategory cat) {
     final SubjectiveCategoryEditor editor = new SubjectiveCategoryEditor(cat, mDescription);
     editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
 
