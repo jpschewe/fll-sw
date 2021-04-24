@@ -206,7 +206,7 @@ public final class ChallengeParser {
   }
 
   private static String transform1To2(final String content) throws IOException {
-    return transformSchema(content, "fll/resurces/schema1-to-schema2.xsl");
+    return transformSchema(content, "fll/resources/schema1-to-schema2.xsl");
   }
 
   private static String transform2To3(final String content) throws IOException {
