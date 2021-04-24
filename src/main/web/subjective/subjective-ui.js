@@ -475,7 +475,7 @@ $(document).on(
     });
 
 function createNewScore() {
-    score = new Object();
+    const score = new Object();
     score.modified = false;
     score.deleted = false;
     score.noShow = false;
