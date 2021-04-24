@@ -1,0 +1,8 @@
+package javax.swing;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public abstract class AbstractButton extends JComponent implements ItemSelectable, SwingConstants {
+    public void addActionListener(@UnknownInitialization ActionListener l);
+}

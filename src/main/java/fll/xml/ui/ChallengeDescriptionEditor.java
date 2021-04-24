@@ -476,7 +476,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     }
 
     @Override
-    public void requestedMove(@UnknownInitialization(MoveEvent.class) MoveEvent e) {
+    public void requestedMove(MoveEvent e) {
 
       final JComponent container = (MovableExpandablePanel) e.getComponent();
       if (!(container instanceof MovableExpandablePanel)) {
@@ -533,7 +533,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     }
 
     @Override
-    public void requestDelete(@UnknownInitialization(DeleteEvent.class) DeleteEvent e) {
+    public void requestDelete(final DeleteEvent e) {
       final int confirm = JOptionPane.showConfirmDialog(this.challengeEditor,
                                                         "Are you sure that you want to delete the subjective category?",
                                                         "Confirm Delete", JOptionPane.YES_NO_OPTION);
@@ -568,7 +568,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     }
 
     @Override
-    public void requestedMove(@UnknownInitialization(MoveEvent.class) MoveEvent e) {
+    public void requestedMove(MoveEvent e) {
       final JComponent container = (MovableExpandablePanel) e.getComponent();
       if (!(container instanceof MovableExpandablePanel)) {
         LOGGER.warn("Found something other than a MovableExpandablePanel in the non-numeric list");
@@ -624,7 +624,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     }
 
     @Override
-    public void requestDelete(@UnknownInitialization(DeleteEvent.class) DeleteEvent e) {
+    public void requestDelete(final DeleteEvent e) {
       final int confirm = JOptionPane.showConfirmDialog(challengeEditor,
                                                         "Are you sure that you want to delete the non-numeric category?",
                                                         "Confirm Delete", JOptionPane.YES_NO_OPTION);
