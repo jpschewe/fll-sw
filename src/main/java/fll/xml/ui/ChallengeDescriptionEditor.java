@@ -29,6 +29,8 @@ import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
@@ -37,7 +39,9 @@ import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
+import fll.xml.ui.MovableExpandablePanel.DeleteEvent;
 import fll.xml.ui.MovableExpandablePanel.DeleteEventListener;
+import fll.xml.ui.MovableExpandablePanel.MoveEvent;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent.MoveDirection;
 import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
@@ -73,9 +77,9 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
 
   private final JComponent mSubjectiveContainer;
 
-  private final MoveEventListener mSubjectiveMoveListener;
+  private final @NotOnlyInitialized MoveEventListener mSubjectiveMoveListener;
 
-  private final DeleteEventListener mSubjectiveDeleteListener;
+  private final @NotOnlyInitialized DeleteEventListener mSubjectiveDeleteListener;
 
   private final ValidityPanel titleValidity;
 
@@ -87,9 +91,9 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
 
   private final JComponent nonNumericCategoryContainer;
 
-  private final MoveEventListener nonNumericCategoryMoveListener;
+  private final @NotOnlyInitialized MoveEventListener nonNumericCategoryMoveListener;
 
-  private final DeleteEventListener nonNumericCategoryDeleteListener;
+  private final @NotOnlyInitialized DeleteEventListener nonNumericCategoryDeleteListener;
 
   private final ValidityPanel nonNumericCategoriesValid;
 
@@ -260,80 +264,9 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     mSubjectiveContainer = Box.createVerticalBox();
     subjectiveTopContainer.add(mSubjectiveContainer);
 
-    mSubjectiveMoveListener = e -> {
-      final JComponent container = (MovableExpandablePanel)e.getComponent();
-      if(!(container instanceof MovableExpandablePanel)) {
-        LOGGER.warn("Found something other than a MovableExpandablePanel in the subjective list");
-      }
+    mSubjectiveMoveListener = new SubjectiveMoveListener(this);
 
-      final int oldIndex = Utilities.getIndexOfComponent(mSubjectiveContainer, container);
-      if (oldIndex < 0) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Unable to find source of move event in subjective container");
-        }
-        return;
-      }
-
-      final int newIndex;
-      if (e.getDirection() == MoveDirection.DOWN) {
-        newIndex = oldIndex
-            + 1;
-      } else {
-        newIndex = oldIndex
-            - 1;
-      }
-
-      if (newIndex < 0
-          || newIndex >= mSubjectiveContainer.getComponentCount()) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Can't move component outside the container oldIndex: "
-              + oldIndex
-              + " newIndex: "
-              + newIndex);
-        }
-        return;
-      }
-
-      // update editor list
-      final SubjectiveCategoryEditor editor = mSubjectiveEditors.remove(oldIndex);
-      mSubjectiveEditors.add(newIndex, editor);
-
-      // update the UI
-      mSubjectiveContainer.add(container, newIndex);
-      mSubjectiveContainer.validate();
-
-      // update the order in the challenge description
-      final SubjectiveScoreCategory category = mDescription.removeSubjectiveCategory(oldIndex);
-      mDescription.addSubjectiveCategory(newIndex, category);
-    };
-
-    mSubjectiveDeleteListener = e -> {
-      final int confirm = JOptionPane.showConfirmDialog(ChallengeDescriptionEditor.this,
-                                                        "Are you sure that you want to delete the subjective category?",
-                                                        "Confirm Delete", JOptionPane.YES_NO_OPTION);
-      if (confirm != JOptionPane.YES_OPTION) {
-        return;
-      }
-
-      final int index = Utilities.getIndexOfComponent(mSubjectiveContainer, e.getComponent());
-      if (index < 0) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Unable to find source of delete event in subjective category container");
-        }
-        return;
-      }
-
-      // update editor list
-      mSubjectiveEditors.remove(index);
-
-      // update the challenge description
-      mDescription.removeSubjectiveCategory(index);
-
-      // update the UI
-      GuiUtils.removeFromContainer(mSubjectiveContainer, index);
-    };
-
-    mDescription.getSubjectiveCategories().forEach(this::addSubjectiveCategory);
+    mSubjectiveDeleteListener = new SubjectiveDeleteListener(this);
 
     // non-numeric categories
 
@@ -356,82 +289,15 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     nonNumericCategoryContainer = Box.createVerticalBox();
     nonNumericCategoriesTopContainer.add(nonNumericCategoryContainer);
 
-    nonNumericCategoryMoveListener = e -> {
-      final JComponent container = (MovableExpandablePanel)e.getComponent();
-      if(!(container instanceof MovableExpandablePanel)) {
-        LOGGER.warn("Found something other than a MovableExpandablePanel in the non-numeric list");
-      }
-      
-      final int oldIndex = Utilities.getIndexOfComponent(nonNumericCategoryContainer, container);
-      if (oldIndex < 0) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Unable to find source of move event in non-numeric container");
-        }
-        return;
-      }
+    nonNumericCategoryMoveListener = new NonNumericCategoryMoveListener(this);
 
-      final int newIndex;
-      if (e.getDirection() == MoveDirection.DOWN) {
-        newIndex = oldIndex
-            + 1;
-      } else {
-        newIndex = oldIndex
-            - 1;
-      }
-
-      if (newIndex < 0
-          || newIndex >= nonNumericCategoryContainer.getComponentCount()) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("NonNumeric: Can't move component outside the container oldIndex: "
-              + oldIndex
-              + " newIndex: "
-              + newIndex);
-        }
-        return;
-      }
-
-      // update editor list
-      final NonNumericCategoryEditor editor = nonNumericCategoryEditors.remove(oldIndex);
-      nonNumericCategoryEditors.add(newIndex, editor);
-
-      // update the UI
-      nonNumericCategoryContainer.add(container, newIndex);
-      nonNumericCategoryContainer.validate();
-
-      // update the order in the challenge description
-      final NonNumericCategory category = mDescription.removeNonNumericCategory(oldIndex);
-      mDescription.addNonNumericCategory(newIndex, category);
-    };
-
-    nonNumericCategoryDeleteListener = e -> {
-      final int confirm = JOptionPane.showConfirmDialog(ChallengeDescriptionEditor.this,
-                                                        "Are you sure that you want to delete the non-numeric category?",
-                                                        "Confirm Delete", JOptionPane.YES_NO_OPTION);
-      if (confirm != JOptionPane.YES_OPTION) {
-        return;
-      }
-
-      final int index = Utilities.getIndexOfComponent(nonNumericCategoryContainer, e.getComponent());
-      if (index < 0) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Unable to find source of delete event in non-numeric category container");
-        }
-        return;
-      }
-
-      // update editor list
-      nonNumericCategoryEditors.remove(index);
-
-      // update the challenge description
-      mDescription.removeNonNumericCategory(index);
-
-      // update the UI
-      GuiUtils.removeFromContainer(nonNumericCategoryContainer, index);
-    };
-
-    mDescription.getNonNumericCategories().forEach(this::addNonNumericCategory);
+    nonNumericCategoryDeleteListener = new NonNumericCategoryDeleteListener(this);
 
     // end non-numeric categories
+
+    // initial state
+    mDescription.getSubjectiveCategories().forEach(this::addSubjectiveCategory);
+    mDescription.getNonNumericCategories().forEach(this::addNonNumericCategory);
 
     // fill in the bottom of the panel
     topPanel.add(Box.createVerticalGlue());
@@ -599,6 +465,190 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     }
 
     return valid;
+  }
+
+  private static final class SubjectiveMoveListener implements MoveEventListener {
+
+    private final @NotOnlyInitialized ChallengeDescriptionEditor challengeEditor;
+
+    private SubjectiveMoveListener(final @UnknownInitialization ChallengeDescriptionEditor challengeEditor) {
+      this.challengeEditor = challengeEditor;
+    }
+
+    @Override
+    public void requestedMove(@UnknownInitialization(MoveEvent.class) MoveEvent e) {
+
+      final JComponent container = (MovableExpandablePanel) e.getComponent();
+      if (!(container instanceof MovableExpandablePanel)) {
+        LOGGER.warn("Found something other than a MovableExpandablePanel in the subjective list");
+      }
+
+      final int oldIndex = Utilities.getIndexOfComponent(challengeEditor.mSubjectiveContainer, container);
+      if (oldIndex < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of move event in subjective container");
+        }
+        return;
+      }
+
+      final int newIndex;
+      if (e.getDirection() == MoveDirection.DOWN) {
+        newIndex = oldIndex
+            + 1;
+      } else {
+        newIndex = oldIndex
+            - 1;
+      }
+
+      if (newIndex < 0
+          || newIndex >= challengeEditor.mSubjectiveContainer.getComponentCount()) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Can't move component outside the container oldIndex: "
+              + oldIndex
+              + " newIndex: "
+              + newIndex);
+        }
+        return;
+      }
+
+      // update editor list
+      final SubjectiveCategoryEditor editor = this.challengeEditor.mSubjectiveEditors.remove(oldIndex);
+      this.challengeEditor.mSubjectiveEditors.add(newIndex, editor);
+
+      // update the UI
+      this.challengeEditor.mSubjectiveContainer.add(container, newIndex);
+      this.challengeEditor.mSubjectiveContainer.validate();
+
+      // update the order in the challenge description
+      final SubjectiveScoreCategory category = this.challengeEditor.mDescription.removeSubjectiveCategory(oldIndex);
+      this.challengeEditor.mDescription.addSubjectiveCategory(newIndex, category);
+    }
+  }
+
+  private static final class SubjectiveDeleteListener implements DeleteEventListener {
+    private final @NotOnlyInitialized ChallengeDescriptionEditor challengeEditor;
+
+    private SubjectiveDeleteListener(final @UnknownInitialization ChallengeDescriptionEditor challengeEditor) {
+      this.challengeEditor = challengeEditor;
+    }
+
+    @Override
+    public void requestDelete(@UnknownInitialization(DeleteEvent.class) DeleteEvent e) {
+      final int confirm = JOptionPane.showConfirmDialog(this.challengeEditor,
+                                                        "Are you sure that you want to delete the subjective category?",
+                                                        "Confirm Delete", JOptionPane.YES_NO_OPTION);
+      if (confirm != JOptionPane.YES_OPTION) {
+        return;
+      }
+
+      final int index = Utilities.getIndexOfComponent(this.challengeEditor.mSubjectiveContainer, e.getComponent());
+      if (index < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of delete event in subjective category container");
+        }
+        return;
+      }
+
+      // update editor list
+      this.challengeEditor.mSubjectiveEditors.remove(index);
+
+      // update the challenge description
+      this.challengeEditor.mDescription.removeSubjectiveCategory(index);
+
+      // update the UI
+      GuiUtils.removeFromContainer(this.challengeEditor.mSubjectiveContainer, index);
+    }
+  }
+
+  private static final class NonNumericCategoryMoveListener implements MoveEventListener {
+    private final @NotOnlyInitialized ChallengeDescriptionEditor challengeEditor;
+
+    private NonNumericCategoryMoveListener(final @UnknownInitialization ChallengeDescriptionEditor challengeEditor) {
+      this.challengeEditor = challengeEditor;
+    }
+
+    @Override
+    public void requestedMove(@UnknownInitialization(MoveEvent.class) MoveEvent e) {
+      final JComponent container = (MovableExpandablePanel) e.getComponent();
+      if (!(container instanceof MovableExpandablePanel)) {
+        LOGGER.warn("Found something other than a MovableExpandablePanel in the non-numeric list");
+      }
+
+      final int oldIndex = Utilities.getIndexOfComponent(challengeEditor.nonNumericCategoryContainer, container);
+      if (oldIndex < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of move event in non-numeric container");
+        }
+        return;
+      }
+
+      final int newIndex;
+      if (e.getDirection() == MoveDirection.DOWN) {
+        newIndex = oldIndex
+            + 1;
+      } else {
+        newIndex = oldIndex
+            - 1;
+      }
+
+      if (newIndex < 0
+          || newIndex >= challengeEditor.nonNumericCategoryContainer.getComponentCount()) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("NonNumeric: Can't move component outside the container oldIndex: "
+              + oldIndex
+              + " newIndex: "
+              + newIndex);
+        }
+        return;
+      }
+
+      // update editor list
+      final NonNumericCategoryEditor editor = challengeEditor.nonNumericCategoryEditors.remove(oldIndex);
+      challengeEditor.nonNumericCategoryEditors.add(newIndex, editor);
+
+      // update the UI
+      challengeEditor.nonNumericCategoryContainer.add(container, newIndex);
+      challengeEditor.nonNumericCategoryContainer.validate();
+
+      // update the order in the challenge description
+      final NonNumericCategory category = challengeEditor.mDescription.removeNonNumericCategory(oldIndex);
+      challengeEditor.mDescription.addNonNumericCategory(newIndex, category);
+    }
+  }
+
+  private static final class NonNumericCategoryDeleteListener implements DeleteEventListener {
+    private final @NotOnlyInitialized ChallengeDescriptionEditor challengeEditor;
+
+    private NonNumericCategoryDeleteListener(final @UnknownInitialization ChallengeDescriptionEditor challengeEditor) {
+      this.challengeEditor = challengeEditor;
+    }
+
+    @Override
+    public void requestDelete(@UnknownInitialization(DeleteEvent.class) DeleteEvent e) {
+      final int confirm = JOptionPane.showConfirmDialog(challengeEditor,
+                                                        "Are you sure that you want to delete the non-numeric category?",
+                                                        "Confirm Delete", JOptionPane.YES_NO_OPTION);
+      if (confirm != JOptionPane.YES_OPTION) {
+        return;
+      }
+
+      final int index = Utilities.getIndexOfComponent(challengeEditor.nonNumericCategoryContainer, e.getComponent());
+      if (index < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of delete event in non-numeric category container");
+        }
+        return;
+      }
+
+      // update editor list
+      challengeEditor.nonNumericCategoryEditors.remove(index);
+
+      // update the challenge description
+      challengeEditor.mDescription.removeNonNumericCategory(index);
+
+      // update the UI
+      GuiUtils.removeFromContainer(challengeEditor.nonNumericCategoryContainer, index);
+    }
   }
 
 }
