@@ -503,7 +503,7 @@ public class Launcher extends JFrame {
    * @param port the port to use for the web server
    */
   public Launcher(final int port) {
-    super();
+    super("FLL-SW");
     this.port = port;
 
     // allow us to prevent closing the window
