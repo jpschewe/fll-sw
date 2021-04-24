@@ -47,6 +47,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileFilter;
 
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
@@ -186,7 +187,7 @@ public class ChallengeDescriptionFrame extends JFrame {
   /**
    * @return the file menu
    */
-  private JMenu createFileMenu() {
+  private JMenu createFileMenu(@UnderInitialization(ChallengeDescriptionFrame.class) ChallengeDescriptionFrame this) {
     final JMenu menu = new JMenu("File");
     menu.setMnemonic(KeyEvent.VK_F);
 
@@ -312,7 +313,8 @@ public class ChallengeDescriptionFrame extends JFrame {
    *
    * @param file the file where the challenge is saved
    */
-  private void setCurrentFile(final @Nullable File file,
+  private void setCurrentFile(@UnknownInitialization(ChallengeDescriptionFrame.class) ChallengeDescriptionFrame this,
+                              final @Nullable File file,
                               final @Nullable ChallengeDescription description) {
     mCurrentFile = file;
 
@@ -613,7 +615,7 @@ public class ChallengeDescriptionFrame extends JFrame {
     }
   }
 
-  private JToolBar createToolBar() {
+  private JToolBar createToolBar(@UnderInitialization(ChallengeDescriptionFrame.class) ChallengeDescriptionFrame this) {
     final JToolBar toolbar = new JToolBar();
     toolbar.setFloatable(false);
 
