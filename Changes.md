@@ -1,3 +1,4 @@
+* #920 - When a team is a No Show for subjective judging, make it clear on the PDF that is output
 * #484 - Improve usability of the numeric category finalist scheduling page
 * Added the forwarded for address to the access logs
 * #915 - Fix bug moving subjective and non-numeric categories in the challenge editor

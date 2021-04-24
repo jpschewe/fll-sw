@@ -329,7 +329,7 @@ public class ScoresheetGenerator {
     final Element titleHeader = createTitleBlock(document);
     final Element goalsTable = createGoalsTable(document);
     final Element checkBlock = createCheckBlock(document);
-    final Element practiceWatermark = createPracticeWatermark(document);
+    final Element practiceWatermark = FOPUtils.createWatermark(document, "PRACTICE", WATERMARK_OPACITY);
 
     for (int sheetIndex = 0; sheetIndex < numSheets; sheetIndex++) {
       final Element sheet = createScoreSheet(document, titleHeader, goalsTable, checkBlock, practiceWatermark,
@@ -373,57 +373,6 @@ public class ScoresheetGenerator {
     sheet.appendChild(checkBlock.cloneNode(true));
 
     return sheet;
-  }
-
-  private Element createPracticeWatermark(final Document document) {
-    final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
-    container.setAttribute("absolute-position", "fixed");
-    container.setAttribute("height", String.format("%fin", FOPUtils.PAGE_LETTER_SIZE.getHeight()));
-    container.setAttribute("width", String.format("%fin", FOPUtils.PAGE_LETTER_SIZE.getWidth()));
-
-    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    container.appendChild(block);
-
-    final Element foreignObject = FOPUtils.createXslFoElement(document, "instream-foreign-object");
-    block.appendChild(foreignObject);
-    // shrink the size a bit to keep from overflowing
-    foreignObject.setAttribute("height", String.format("%fin", FOPUtils.PAGE_LETTER_SIZE.getHeight()
-        - 1));
-    foreignObject.setAttribute("width", String.format("%fin", FOPUtils.PAGE_LETTER_SIZE.getWidth()
-        - 1));
-    foreignObject.setAttribute("content-width", "scale-to-fit");
-    foreignObject.setAttribute("content-height", "scale-to-fit");
-
-    // Practice text rotated as an SVG
-    // Found an example of rotated text online and then modified the text and
-    // attributes to get the desired text
-    final Element svg = document.createElementNS(FOPUtils.SVG_NAMESPACE, "svg");
-    foreignObject.appendChild(svg);
-    final int svgWidth = 200;
-    final int svgHeight = 200;
-    svg.setAttribute("width", String.valueOf(svgWidth));
-    svg.setAttribute("height", String.valueOf(svgHeight));
-    svg.setAttribute("viewBox", String.format("0 0 %d %d", svgWidth, svgHeight));
-
-    final Element text = document.createElementNS(FOPUtils.SVG_NAMESPACE, "text");
-    svg.appendChild(text);
-    text.setAttribute("style",
-                      String.format("fill: black; fill-opacity: %f; font-family:Helvetica; font-size: 25px; font-style:normal;",
-                                    WATERMARK_OPACITY));
-    text.setAttribute("x", String.valueOf(svgWidth
-        / 2));
-    text.setAttribute("y", String.valueOf(svgHeight
-        / 2));
-    text.setAttribute("transform", String.format("rotate(-45, %d, %d)", svgWidth
-        / 2, svgHeight
-            / 2));
-
-    final Element tspan = document.createElementNS(FOPUtils.SVG_NAMESPACE, "tspan");
-    text.appendChild(tspan);
-    tspan.setAttribute("text-anchor", "middle");
-    tspan.appendChild(document.createTextNode("PRACTICE"));
-
-    return container;
   }
 
   private Element createTeamInfoBlock(final Document document,
