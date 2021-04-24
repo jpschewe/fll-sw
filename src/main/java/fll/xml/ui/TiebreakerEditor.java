@@ -9,10 +9,8 @@ package fll.xml.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.swing.BorderFactory;
@@ -22,9 +20,11 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
-
+import fll.util.FLLInternalException;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.TiebreakerTest;
 import fll.xml.ui.MovableExpandablePanel.DeleteEvent;
@@ -47,9 +47,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
   private final PerformanceScoreCategory performance;
 
-  private final List<TiebreakerTestEditor> editors = new LinkedList<>();
-
-  private final Map<TiebreakerTestEditor, MovableExpandablePanel> exPanels = new HashMap<>();
+  private final List<Pair<TiebreakerTestEditor, MovableExpandablePanel>> editors = new LinkedList<>();
 
   private final MoveEventListener moveListener;
 
@@ -112,8 +110,8 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
         }
 
         // update editor list
-        final TiebreakerTestEditor editor = editors.remove(oldIndex);
-        editors.add(newIndex, editor);
+        final Pair<TiebreakerTestEditor, MovableExpandablePanel> editorPair = editors.remove(oldIndex);
+        editors.add(newIndex, editorPair);
 
         // update the UI
         editorContainer.add(e.getComponent(), newIndex);
@@ -142,9 +140,8 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
         }
 
         // update editor list
-        final TiebreakerTestEditor editor = editors.get(index);
+        final Pair<TiebreakerTestEditor, MovableExpandablePanel> editorPair = editors.get(index);
         editors.remove(index);
-        exPanels.remove(editor);
 
         // update the UI
         GuiUtils.removeFromContainer(editorContainer, index);
@@ -159,10 +156,12 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
   private void updateTitles() {
     int index = 0;
-    for (final TiebreakerTestEditor editor : editors) {
+    for (final Pair<TiebreakerTestEditor, MovableExpandablePanel> editorPair : editors) {
+      final TiebreakerTestEditor editor = editorPair.getLeft();
+      final MovableExpandablePanel panel = editorPair.getRight();
+
       final String title = String.format(TITLE_FORMAT, index
           + 1);
-      final MovableExpandablePanel panel = exPanels.get(editor);
       panel.setTitle(title);
 
       ++index;
@@ -176,11 +175,10 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
   private void addTest(final TiebreakerTest test) {
     final TiebreakerTestEditor editor = new TiebreakerTestEditor(test, performance);
-    editors.add(editor);
 
     final MovableExpandablePanel panel = new MovableExpandablePanel(String.format(TITLE_FORMAT, editors.size()), editor,
                                                                     true, true);
-    exPanels.put(editor, panel);
+    editors.add(Pair.of(editor, panel));
 
     panel.addDeleteEventListener(deleteListener);
     panel.addMoveEventListener(moveListener);
@@ -192,7 +190,8 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
   public void commitChanges() {
     final List<TiebreakerTest> newTiebreaker = new LinkedList<>();
 
-    editors.forEach(editor -> {
+    editors.forEach(editorPair -> {
+      final TiebreakerTestEditor editor = editorPair.getLeft();
       final TiebreakerTest test = editor.getTest();
       newTiebreaker.add(test);
     });
@@ -204,7 +203,8 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
   public boolean checkValidity(final Collection<String> messagesToDisplay) {
     boolean valid = true;
 
-    for (final TiebreakerTestEditor editor : editors) {
+    for (final Pair<TiebreakerTestEditor, MovableExpandablePanel> editorPair : editors) {
+      final TiebreakerTestEditor editor = editorPair.getLeft();
       final boolean editorValid = editor.checkValidity(messagesToDisplay);
       valid &= editorValid;
     }
