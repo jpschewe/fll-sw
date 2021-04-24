@@ -6,6 +6,8 @@
 
 package fll.xml.ui;
 
+import java.awt.Container;
+
 import javax.swing.JComponent;
 
 /**
@@ -27,8 +29,9 @@ import javax.swing.JComponent;
   public static void addToContainer(final JComponent container,
                                     final JComponent element) {
     container.add(element);
-    if (null != container.getTopLevelAncestor()) {
-      container.getTopLevelAncestor().validate();
+    final Container topAncestor = container.getTopLevelAncestor();
+    if (null != topAncestor) {
+      topAncestor.validate();
     }
   }
 
@@ -42,8 +45,9 @@ import javax.swing.JComponent;
   public static void removeFromContainer(final JComponent container,
                                          final JComponent element) {
     container.remove(element);
-    if (null != container.getTopLevelAncestor()) {
-      container.getTopLevelAncestor().validate();
+    final Container topAncestor = container.getTopLevelAncestor();
+    if (null != topAncestor) {
+      topAncestor.validate();
     }
   }
 
@@ -58,8 +62,9 @@ import javax.swing.JComponent;
   public static void removeFromContainer(final JComponent container,
                                          final int index) {
     container.remove(index);
-    if (null != container.getTopLevelAncestor()) {
-      container.getTopLevelAncestor().validate();
+    final Container topAncestor = container.getTopLevelAncestor();
+    if (null != topAncestor) {
+      topAncestor.validate();
     }
   }
 
