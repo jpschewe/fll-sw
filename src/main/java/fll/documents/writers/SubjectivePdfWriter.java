@@ -898,7 +898,8 @@ public class SubjectivePdfWriter {
     }
 
     final double goalScore;
-    if (null == score) {
+    if (null == score
+        || score.getNoShow()) {
       // will compare to false for all ranges
       goalScore = Double.NaN;
     } else {
