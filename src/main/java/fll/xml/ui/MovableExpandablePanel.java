@@ -156,7 +156,7 @@ public class MovableExpandablePanel extends JPanel {
   /**
    * @param l the listener to add
    */
-  public void addMoveEventListener(final @UnknownInitialization MoveEventListener l) {
+  public void addMoveEventListener(final MoveEventListener l) {
     mListeners.add(MoveEventListener.class, l);
   }
 
