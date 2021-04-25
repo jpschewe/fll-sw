@@ -31,6 +31,7 @@ import javax.swing.border.EtchedBorder;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
@@ -303,6 +304,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     mDescription.getNonNumericCategories().forEach(this::addNonNumericCategory);
   }
 
+  @RequiresNonNull({ "mSubjectiveEditors" })
   private void addNewSubjectiveCategory(@UnknownInitialization(ChallengeDescriptionEditor.class) ChallengeDescriptionEditor this) {
     final String name = String.format("category_%d", mSubjectiveEditors.size());
     final String title = String.format("Category %d", mSubjectiveEditors.size());
@@ -313,6 +315,8 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     addSubjectiveCategory(cat);
   }
 
+  @RequiresNonNull({ "mDescription", "mSubjectiveMoveListener", "mSubjectiveDeleteListener", "mSubjectiveContainer",
+                     "mSubjectiveEditors" })
   private void addSubjectiveCategory(@UnknownInitialization(ChallengeDescriptionEditor.class) ChallengeDescriptionEditor this,
                                      final SubjectiveScoreCategory cat) {
     final SubjectiveCategoryEditor editor = new SubjectiveCategoryEditor(cat, mDescription);
