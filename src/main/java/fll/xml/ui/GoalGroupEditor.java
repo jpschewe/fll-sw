@@ -7,6 +7,8 @@
 package fll.xml.ui;
 
 import java.awt.GridBagConstraints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -19,13 +21,19 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.border.EtchedBorder;
 
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
 import fll.Utilities;
 import fll.xml.AbstractGoal;
 import fll.xml.ComputedGoal;
 import fll.xml.Goal;
 import fll.xml.GoalGroup;
 import fll.xml.GoalScope;
+import fll.xml.ui.MovableExpandablePanel.DeleteEvent;
 import fll.xml.ui.MovableExpandablePanel.DeleteEventListener;
+import fll.xml.ui.MovableExpandablePanel.MoveEvent;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent.MoveDirection;
 import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
@@ -44,9 +52,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
   private final GoalScope goalScope;
 
-  private final MoveEventListener goalMoveListener;
-
-  private final DeleteEventListener goalDeleteListener;
+  private final @NotOnlyInitialized MoveDeleteListener moveDeleteListener;
 
   /**
    * @param goalGroup the object to edit
@@ -74,84 +80,18 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
     final JButton addGoal = new JButton("Add Goal");
     buttonBox.add(addGoal);
-    addGoal.addActionListener(l -> addNewGoal());
 
     final JButton addComputedGoal = new JButton("Add Computed Goal");
     buttonBox.add(addComputedGoal);
-    addComputedGoal.addActionListener(l -> addNewComputedGoal());
+
+    new AddListener(this, addGoal, addComputedGoal);
 
     buttonBox.add(Box.createHorizontalGlue());
 
     goalEditorContainer = Box.createVerticalBox();
     container.add(goalEditorContainer);
 
-    goalMoveListener = e -> {
-      final int oldIndex = Utilities.getIndexOfComponent(goalEditorContainer, e.getComponent());
-      if (oldIndex < 0) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Unable to find source of move event in goal container");
-        }
-        return;
-      }
-
-      final int newIndex;
-      if (e.getDirection() == MoveDirection.DOWN) {
-        newIndex = oldIndex
-            + 1;
-      } else {
-        newIndex = oldIndex
-            - 1;
-      }
-
-      if (newIndex < 0
-          || newIndex >= goalEditorContainer.getComponentCount()) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Can't move component outside the container oldIndex: "
-              + oldIndex
-              + " newIndex: "
-              + newIndex);
-        }
-        return;
-      }
-
-      // update editor list
-      final AbstractGoalEditor editor = goalEditors.remove(oldIndex);
-      goalEditors.add(newIndex, editor);
-
-      // update the UI
-      goalEditorContainer.add(e.getComponent(), newIndex);
-      goalEditorContainer.validate();
-
-      // update the order in the challenge description
-      final AbstractGoal goal = this.goalGroup.removeGoal(oldIndex);
-      this.goalGroup.addGoal(newIndex, goal);
-    };
-
-    goalDeleteListener = e -> {
-      final int confirm = JOptionPane.showConfirmDialog(GoalGroupEditor.this,
-                                                        "Are you sure that you want to delete the goal?",
-                                                        "Confirm Delete", JOptionPane.YES_NO_OPTION);
-      if (confirm != JOptionPane.YES_OPTION) {
-        return;
-      }
-
-      final int index = Utilities.getIndexOfComponent(goalEditorContainer, e.getComponent());
-      if (index < 0) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Unable to find source of delete event in goal container");
-        }
-        return;
-      }
-
-      // update editor list
-      goalEditors.remove(index);
-
-      // update the challenge description
-      this.goalGroup.removeGoal(index);
-
-      // update the UI
-      GuiUtils.removeFromContainer(goalEditorContainer, index);
-    };
+    moveDeleteListener = new MoveDeleteListener(this);
 
     this.goalGroup.getGoals().forEach(this::addGoal);
   }
@@ -191,8 +131,8 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
       final String newTitle = (String) e.getNewValue();
       panel.setTitle(newTitle);
     });
-    panel.addMoveEventListener(goalMoveListener);
-    panel.addDeleteEventListener(goalDeleteListener);
+    panel.addMoveEventListener(moveDeleteListener);
+    panel.addDeleteEventListener(moveDeleteListener);
 
     goalEditors.add(editor);
 
@@ -227,6 +167,119 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
                                    name));
       }
     }
+  }
+
+  private static final class MoveDeleteListener implements MoveEventListener, DeleteEventListener {
+    private final @NotOnlyInitialized GoalGroupEditor goalGroupEditor;
+
+    private MoveDeleteListener(final @UnknownInitialization GoalGroupEditor goalGroupEditor) {
+      this.goalGroupEditor = goalGroupEditor;
+    }
+
+    @Override
+    public void requestedMove(final MoveEvent e) {
+      final int oldIndex = Utilities.getIndexOfComponent(goalGroupEditor.goalEditorContainer, e.getComponent());
+      if (oldIndex < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of move event in goal container");
+        }
+        return;
+      }
+
+      final int newIndex;
+      if (e.getDirection() == MoveDirection.DOWN) {
+        newIndex = oldIndex
+            + 1;
+      } else {
+        newIndex = oldIndex
+            - 1;
+      }
+
+      if (newIndex < 0
+          || newIndex >= goalGroupEditor.goalEditorContainer.getComponentCount()) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Can't move component outside the container oldIndex: "
+              + oldIndex
+              + " newIndex: "
+              + newIndex);
+        }
+        return;
+      }
+
+      // update editor list
+      final AbstractGoalEditor editor = goalGroupEditor.goalEditors.remove(oldIndex);
+      goalGroupEditor.goalEditors.add(newIndex, editor);
+
+      // update the UI
+      goalGroupEditor.goalEditorContainer.add(e.getComponent(), newIndex);
+      goalGroupEditor.goalEditorContainer.validate();
+
+      // update the order in the challenge description
+      final AbstractGoal goal = goalGroupEditor.goalGroup.removeGoal(oldIndex);
+      goalGroupEditor.goalGroup.addGoal(newIndex, goal);
+
+    }
+
+    @Override
+    public void requestDelete(final DeleteEvent e) {
+      final int confirm = JOptionPane.showConfirmDialog(goalGroupEditor,
+                                                        "Are you sure that you want to delete the goal?",
+                                                        "Confirm Delete", JOptionPane.YES_NO_OPTION);
+      if (confirm != JOptionPane.YES_OPTION) {
+        return;
+      }
+
+      final int index = Utilities.getIndexOfComponent(goalGroupEditor.goalEditorContainer, e.getComponent());
+      if (index < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of delete event in goal container");
+        }
+        return;
+      }
+
+      // update editor list
+      goalGroupEditor.goalEditors.remove(index);
+
+      // update the challenge description
+      goalGroupEditor.goalGroup.removeGoal(index);
+
+      // update the UI
+      GuiUtils.removeFromContainer(goalGroupEditor.goalEditorContainer, index);
+    }
+
+  } // MoveDeleteListener
+
+  private static final class AddListener implements ActionListener {
+    private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
+    private final @NotOnlyInitialized GoalGroupEditor goalGroupEditor;
+
+    private final JButton addGoal;
+
+    private final JButton addComputedGoal;
+
+    private AddListener(final @UnderInitialization GoalGroupEditor goalGroupEditor,
+                        final JButton addGoal,
+                        final JButton addComputedGoal) {
+      this.goalGroupEditor = goalGroupEditor;
+      this.addGoal = addGoal;
+      this.addComputedGoal = addComputedGoal;
+      this.addGoal.addActionListener(this);
+      this.addComputedGoal.addActionListener(this);
+    }
+
+    @Override
+    public void actionPerformed(final ActionEvent ae) {
+      final Object source = ae.getSource();
+      if (addGoal.equals(source)) {
+        goalGroupEditor.addNewGoal();
+      } else if (addComputedGoal.equals(source)) {
+        goalGroupEditor.addNewComputedGoal();
+      } else {
+        LOGGER.warn("Unknown source found, ignoring: {}", source);
+      }
+    }
+
   }
 
 }
