@@ -11,12 +11,11 @@ import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import javax.annotation.Nonnull;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.ChooseOptionDialog;
@@ -29,7 +28,7 @@ import fll.xml.GoalScoreType;
  */
 @SuppressFBWarnings(value = { "SE_BAD_FIELD",
                               "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
-/* package */ class GoalRefEditor extends JPanel {
+/* package */ class GoalRefEditor extends Box {
 
   private final GoalRef goalRef;
 
@@ -38,10 +37,10 @@ import fll.xml.GoalScoreType;
   /**
    * @param ref the object to edit
    */
-  /* package */ GoalRefEditor(@Nonnull final GoalRef ref) {
+  /* package */ GoalRefEditor(final GoalRef ref) {
+    super(BoxLayout.LINE_AXIS);
+    
     this.goalRef = ref;
-
-    setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 
     editor = new JButton(ref.getGoal().getTitle());
     add(editor);

@@ -11,10 +11,10 @@ import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.ChooseOptionDialog;
@@ -28,7 +28,7 @@ import fll.xml.SubjectiveScoreCategory;
  */
 @SuppressFBWarnings(value = { "SE_BAD_FIELD",
                               "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
-/* package */ class NominatesEditor extends JPanel {
+/* package */ class NominatesEditor extends Box {
 
   private final SubjectiveScoreCategory.Nominates nominates;
 
@@ -40,9 +40,9 @@ import fll.xml.SubjectiveScoreCategory;
    */
   /* package */ NominatesEditor(final SubjectiveScoreCategory.Nominates nominates,
                                 final ChallengeDescription description) {
-    this.nominates = nominates;
+    super(BoxLayout.LINE_AXIS);
 
-    setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+    this.nominates = nominates;
 
     editor = new JButton(nominates.getNonNumericCategoryTitle());
     add(editor);

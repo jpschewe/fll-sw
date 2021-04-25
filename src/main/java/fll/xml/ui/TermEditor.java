@@ -16,7 +16,6 @@ import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.RequiresNonNull;
@@ -35,7 +34,7 @@ import fll.xml.VariableScope;
 /**
  * Editor for {@link Term} objects.
  */
-/* package */ class TermEditor extends JPanel {
+/* package */ class TermEditor extends Box {
 
   private final Term term;
 
@@ -56,11 +55,11 @@ import fll.xml.VariableScope;
   /* package */ TermEditor(final Term term,
                            final GoalScope goalScope,
                            final @Nullable VariableScope variableScope) {
+    super(BoxLayout.Y_AXIS);
+
     this.term = term;
     this.goalScope = goalScope;
     this.variableScope = variableScope;
-
-    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
     final Box buttonBar = Box.createHorizontalBox();
     this.add(buttonBar);

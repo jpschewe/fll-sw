@@ -15,7 +15,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -36,7 +35,7 @@ import fll.xml.VariableScope;
  * Editor for {@link BasicPolynomial} and {@link ComplexPolynomial}.
  * Add changes are immediately committed to the polynomial.
  */
-/* package */ class PolynomialEditor extends JPanel implements Validatable {
+/* package */ class PolynomialEditor extends Box implements Validatable {
 
   private final BasicPolynomial poly;
 
@@ -58,12 +57,11 @@ import fll.xml.VariableScope;
   PolynomialEditor(final BasicPolynomial poly,
                    final GoalScope goalScope,
                    final @Nullable VariableScope variableScope) {
-    super();
+    super(BoxLayout.Y_AXIS);
+
     this.poly = poly;
     this.goalScope = goalScope;
     this.variableScope = variableScope;
-
-    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
     polyValid = new ValidityPanel();
     this.add(polyValid);

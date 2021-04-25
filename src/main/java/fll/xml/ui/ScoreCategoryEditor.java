@@ -24,7 +24,6 @@ import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -58,7 +57,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 /**
  * Editor for {@link ScoreCategory} objects.
  */
-public abstract class ScoreCategoryEditor extends JPanel implements Validatable {
+public abstract class ScoreCategoryEditor extends Box implements Validatable {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -77,12 +76,12 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
   private final ValidityPanel categoryValid;
 
   /**
-   * 
    * @param scoreCategory the object to edit
    */
   public ScoreCategoryEditor(final ScoreCategory scoreCategory) {
+    super(BoxLayout.PAGE_AXIS);
+
     mCategory = scoreCategory;
-    setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
     categoryValid = new ValidityPanel();
     add(categoryValid);
