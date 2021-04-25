@@ -6,6 +6,7 @@
 
 package fll.xml.ui;
 
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.ParseException;
@@ -18,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
 import fll.util.FormatterUtils;
 import fll.util.TextAreaEditor;
@@ -136,7 +138,8 @@ import fll.xml.GoalElement;
     }
   }
 
-  protected void fireTitleChange(final String oldTitle,
+  protected void fireTitleChange(@UnknownInitialization(Component.class) GoalElementEditor this,
+                                 final String oldTitle,
                                  final String newTitle) {
     firePropertyChange("title", oldTitle, newTitle);
   }
