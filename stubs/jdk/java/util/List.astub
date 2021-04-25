@@ -1,0 +1,10 @@
+package java.util;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public interface List<E> extends Collection<E> {
+
+  boolean add(@UnknownInitialization E e);
+  
+}
