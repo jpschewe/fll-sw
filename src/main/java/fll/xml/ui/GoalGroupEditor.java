@@ -24,6 +24,7 @@ import javax.swing.border.EtchedBorder;
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
 import fll.Utilities;
 import fll.xml.AbstractGoal;
@@ -114,7 +115,9 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
     addGoal(newGoal);
   }
 
-  private void addGoal(final AbstractGoal goal) {
+  @RequiresNonNull({ "moveDeleteListener", "goalEditorContainer", "goalScope" })
+  private void addGoal(@UnknownInitialization(GoalElementEditor.class) GoalGroupEditor this,
+                       final AbstractGoal goal) {
 
     final AbstractGoalEditor editor;
     if (goal instanceof Goal) {

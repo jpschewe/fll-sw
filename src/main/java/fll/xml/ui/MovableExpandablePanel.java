@@ -156,7 +156,7 @@ public class MovableExpandablePanel extends JPanel {
   /**
    * @param l the listener to add
    */
-  public void addMoveEventListener(final MoveEventListener l) {
+  public void addMoveEventListener(final @UnknownInitialization MoveEventListener l) {
     mListeners.add(MoveEventListener.class, l);
   }
 
@@ -219,7 +219,7 @@ public class MovableExpandablePanel extends JPanel {
   /**
    * @param l the listener to add
    */
-  public void addDeleteEventListener(final DeleteEventListener l) {
+  public void addDeleteEventListener(final @UnknownInitialization DeleteEventListener l) {
     mListeners.add(DeleteEventListener.class, l);
   }
 
