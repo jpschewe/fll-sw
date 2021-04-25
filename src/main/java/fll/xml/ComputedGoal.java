@@ -11,8 +11,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
@@ -58,7 +56,7 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
    * @param name see {@link #getName()}
    * @param goalScope see {@link #getGoalScope()}
    */
-  public ComputedGoal(@Nonnull final String name,
+  public ComputedGoal(final String name,
                       final GoalScope goalScope) {
     super(name);
     this.goalScope = goalScope;

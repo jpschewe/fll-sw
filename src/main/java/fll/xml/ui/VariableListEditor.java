@@ -13,7 +13,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -53,8 +52,8 @@ public class VariableListEditor extends JPanel {
    * @param goal the goal to edit variables for
    * @param goalScope where to find goals
    */
-  public VariableListEditor(@Nonnull final ComputedGoal goal,
-                            @Nonnull final GoalScope goalScope) {
+  public VariableListEditor(final ComputedGoal goal,
+                            final GoalScope goalScope) {
     super(new BorderLayout());
 
     this.goal = goal;

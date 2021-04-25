@@ -9,8 +9,6 @@ package fll.xml;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
-import javax.annotation.Nonnull;
-
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
@@ -88,7 +86,7 @@ public class Variable extends BasicPolynomial {
    * 
    * @param listener the listener to add
    */
-  public void addPropertyChangeListener(@Nonnull final PropertyChangeListener listener) {
+  public void addPropertyChangeListener(final PropertyChangeListener listener) {
     this.propChangeSupport.addPropertyChangeListener(listener);
   }
 
@@ -97,7 +95,7 @@ public class Variable extends BasicPolynomial {
    * 
    * @param listener the listener to remove
    */
-  public void removePropertyChangeListener(@Nonnull final PropertyChangeListener listener) {
+  public void removePropertyChangeListener(final PropertyChangeListener listener) {
     this.propChangeSupport.removePropertyChangeListener(listener);
   }
 

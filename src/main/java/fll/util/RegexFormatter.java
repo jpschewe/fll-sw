@@ -10,7 +10,6 @@ import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFormattedTextField;
 import javax.swing.text.DefaultFormatter;
 
@@ -31,7 +30,7 @@ public class RegexFormatter extends DefaultFormatter {
    * 
    * @param pattern {@link #getPattern()}
    */
-  public RegexFormatter(@Nonnull final Pattern pattern) {
+  public RegexFormatter(final Pattern pattern) {
     this.pattern = pattern;
   }
 

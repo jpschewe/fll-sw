@@ -8,8 +8,6 @@ package fll.xml;
 
 import java.util.Collection;
 
-import javax.annotation.Nonnull;
-
 /**
  * Used to lookup variables.
  */
@@ -22,13 +20,11 @@ public interface VariableScope {
    * @return the found variable
    * @throws ScopeException if the variable cannot be found
    */
-  @Nonnull
   Variable getVariable(String name) throws ScopeException;
 
   /**
    * @return all variables currently known to the scope
    */
-  @Nonnull
   Collection<Variable> getAllVariables();
 
 }

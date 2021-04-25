@@ -12,8 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -78,8 +76,8 @@ public class SubjectiveScoreCategory extends ScoreCategory {
    * @param name see {@link #getName()}
    * @param title see {@link #getTitle()}
    */
-  public SubjectiveScoreCategory(@Nonnull final String name,
-                                 @Nonnull final String title) {
+  public SubjectiveScoreCategory(final String name,
+                                 final String title) {
     super();
     mName = name;
     mTitle = title;
@@ -105,7 +103,6 @@ public class SubjectiveScoreCategory extends ScoreCategory {
   /**
    * @return the title of the category
    */
-  @Nonnull
   public String getTitle() {
     return mTitle;
   }

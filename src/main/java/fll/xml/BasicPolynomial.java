@@ -11,8 +11,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
@@ -76,7 +74,7 @@ public class BasicPolynomial implements Evaluatable, CaseStatementResult, Serial
   /**
    * @return the floating point type for the polynomial
    */
-  @Nonnull
+
   public FloatingPointType getFloatingPoint() {
     return mFloatingPoint;
   }
@@ -84,7 +82,7 @@ public class BasicPolynomial implements Evaluatable, CaseStatementResult, Serial
   /**
    * @param v see {@link #getFloatingPoint()}
    */
-  public void setFloatingPoint(@Nonnull final FloatingPointType v) {
+  public void setFloatingPoint(final FloatingPointType v) {
     mFloatingPoint = v;
   }
 

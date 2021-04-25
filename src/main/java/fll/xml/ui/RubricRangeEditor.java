@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -53,7 +52,7 @@ public final class RubricRangeEditor extends JPanel implements Validatable {
   /**
    * @param range the object to edit
    */
-  public RubricRangeEditor(@Nonnull final RubricRange range) {
+  public RubricRangeEditor(final RubricRange range) {
     super(new GridBagLayout());
     mRange = range;
 

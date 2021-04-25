@@ -8,8 +8,6 @@ package fll.xml;
 
 import java.io.Serializable;
 
-import javax.annotation.Nonnull;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -28,7 +26,7 @@ public abstract class AbstractConditionStatement implements Serializable {
    *
    * @param ele the element to parse
    */
-  public AbstractConditionStatement(@Nonnull final Element ele) {
+  public AbstractConditionStatement(final Element ele) {
     if (new NodelistElementCollectionAdapter(ele.getElementsByTagName(InequalityComparison.LESS_THAN.getTagName())).hasNext()) {
       mComparison = InequalityComparison.LESS_THAN;
     } else if (new NodelistElementCollectionAdapter(ele.getElementsByTagName(InequalityComparison.LESS_THAN_OR_EQUAL.getTagName())).hasNext()) {
@@ -59,7 +57,7 @@ public abstract class AbstractConditionStatement implements Serializable {
   /**
    * @return the comparator to use.
    */
-  @Nonnull
+
   public InequalityComparison getComparison() {
     return mComparison;
   }
@@ -69,7 +67,7 @@ public abstract class AbstractConditionStatement implements Serializable {
    *
    * @param v the new value for the comparator
    */
-  public void setComparison(@Nonnull final InequalityComparison v) {
+  public void setComparison(final InequalityComparison v) {
     mComparison = v;
   }
 

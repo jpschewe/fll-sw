@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -37,7 +36,7 @@ public class RestrictionListEditor extends JPanel implements Validatable {
   /**
    * @param performance where to get the restrictions to edit
    */
-  public RestrictionListEditor(@Nonnull final PerformanceScoreCategory performance) {
+  public RestrictionListEditor(final PerformanceScoreCategory performance) {
     super(new BorderLayout());
     this.performance = performance;
 

@@ -11,7 +11,6 @@ import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.Collection;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -47,8 +46,8 @@ public class VariableEditor extends JPanel implements Validatable {
    * @param variable the variable to edit
    * @param goalScope the scope to lookup goals in
    */
-  public VariableEditor(@Nonnull final Variable variable,
-                        @Nonnull final GoalScope goalScope) {
+  public VariableEditor(final Variable variable,
+                        final GoalScope goalScope) {
     super(new GridBagLayout());
 
     this.variable = variable;

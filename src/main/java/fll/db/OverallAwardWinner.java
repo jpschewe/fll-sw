@@ -10,8 +10,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -37,7 +35,7 @@ public class OverallAwardWinner implements Serializable {
    * @param teamNumber see {@link #getTeamNumber()}
    * @param description see {@link #getDescription()}
    */
-  public OverallAwardWinner(@Nonnull @JsonProperty("name") final String name,
+  public OverallAwardWinner(@JsonProperty("name") final String name,
                             @JsonProperty("teamNumber") final int teamNumber,
                             @JsonProperty("description") final @Nullable String description) {
     this.name = Objects.requireNonNull(name);
@@ -50,7 +48,7 @@ public class OverallAwardWinner implements Serializable {
   /**
    * @return display name of the category
    */
-  @Nonnull
+
   public final String getName() {
     return name;
   }

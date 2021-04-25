@@ -9,7 +9,6 @@ package fll.xml.ui;
 import java.text.ParseException;
 import java.util.Collection;
 
-import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -47,8 +46,8 @@ public class RestrictionEditor extends PolynomialEditor {
    * @param restriction the object to edit
    * @param goalScope where to get goals
    */
-  public RestrictionEditor(@Nonnull final Restriction restriction,
-                           @Nonnull final GoalScope goalScope) {
+  public RestrictionEditor(final Restriction restriction,
+                           final GoalScope goalScope) {
     super(restriction, goalScope, null);
     this.restriction = restriction;
 

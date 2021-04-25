@@ -13,8 +13,6 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -45,7 +43,7 @@ public abstract class AbstractGoal extends GoalElement {
    *
    * @param ele the XML element to parse
    */
-  public AbstractGoal(@Nonnull final Element ele) {
+  public AbstractGoal(final Element ele) {
     super(ele);
 
     mName = ele.getAttribute(NAME_ATTRIBUTE);
@@ -64,7 +62,7 @@ public abstract class AbstractGoal extends GoalElement {
 
   /**
    * @return the name of the goal
-   */  
+   */
   public String getName(@UnknownInitialization(AbstractGoal.class) AbstractGoal this) {
     return mName;
   }

@@ -30,7 +30,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -635,9 +634,9 @@ public final class ChallengeParser {
    * @param parent the element to check the children of
    * @return the list of elements, may be empty
    */
-  @Nonnull
-  public static List<Element> getChildElementsByTagName(@Nonnull final Element parent,
-                                                        @Nonnull final String tagname) {
+
+  public static List<Element> getChildElementsByTagName(final Element parent,
+                                                        final String tagname) {
     final List<Element> retval = new LinkedList<>();
     for (final Element child : new NodelistElementCollectionAdapter(parent.getChildNodes())) {
       if (tagname.equals(child.getTagName())) {

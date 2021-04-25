@@ -12,8 +12,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.annotation.Nonnull;
-
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -408,7 +406,7 @@ public final class GlobalParameters {
    * @see #STANDARDIZED_MEAN
    * @see #STANDARDIZED_MEAN_DEFAULT
    */
-  public static double getStandardizedMean(@Nonnull final Connection connection) throws SQLException {
+  public static double getStandardizedMean(final Connection connection) throws SQLException {
     return getDoubleGlobalParameter(connection, STANDARDIZED_MEAN);
   }
 
@@ -422,7 +420,7 @@ public final class GlobalParameters {
    * @see #STANDARDIZED_SIGMA
    * @see #STANDARDIZED_SIGMA_DEFAULT
    */
-  public static double getStandardizedSigma(@Nonnull final Connection connection) throws SQLException {
+  public static double getStandardizedSigma(final Connection connection) throws SQLException {
     return getDoubleGlobalParameter(connection, STANDARDIZED_SIGMA);
   }
 
@@ -445,7 +443,7 @@ public final class GlobalParameters {
    * @return the nominal scroll rate
    * @throws SQLException if there is a problem talking to the database
    */
-  public static int getAllTeamsMsPerRow(@Nonnull final Connection connection) throws SQLException {
+  public static int getAllTeamsMsPerRow(final Connection connection) throws SQLException {
     if (!globalParameterExists(connection, ALL_TEAMS_MS_PER_ROW)) {
       return ALL_TEAMS_MS_PER_ROW_DEFAULT;
     } else {
@@ -460,7 +458,7 @@ public final class GlobalParameters {
    * @param value the new value
    * @throws SQLException if there is a problem talking to the database
    */
-  public static void setAllTeamsMsPerRow(@Nonnull final Connection connection,
+  public static void setAllTeamsMsPerRow(final Connection connection,
                                          final int value)
       throws SQLException {
     setIntGlobalParameter(connection, ALL_TEAMS_MS_PER_ROW, value);
@@ -485,7 +483,7 @@ public final class GlobalParameters {
    * @return the nominal scroll rate
    * @throws SQLException if there is a problem talking to the database
    */
-  public static int getHeadToHeadMsPerRow(@Nonnull final Connection connection) throws SQLException {
+  public static int getHeadToHeadMsPerRow(final Connection connection) throws SQLException {
     if (!globalParameterExists(connection, HEAD_TO_HEAD_MS_PER_ROW)) {
       return HEAD_TO_HEAD_MS_PER_ROW_DEFAULT;
     } else {
@@ -500,7 +498,7 @@ public final class GlobalParameters {
    * @param value the new value
    * @throws SQLException if there is a problem talking to the database
    */
-  public static void setHeadToHeadMsPerRow(@Nonnull final Connection connection,
+  public static void setHeadToHeadMsPerRow(final Connection connection,
                                            final int value)
       throws SQLException {
     setIntGlobalParameter(connection, HEAD_TO_HEAD_MS_PER_ROW, value);

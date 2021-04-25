@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
@@ -71,7 +70,7 @@ public class MhubMessageHandler extends Thread {
    * 
    * @param application used to get various parameters
    */
-  public MhubMessageHandler(@Nonnull final ServletContext application) {
+  public MhubMessageHandler(final ServletContext application) {
     this.application = application;
   }
 
@@ -140,7 +139,7 @@ public class MhubMessageHandler extends Thread {
    * @param msg the message to send
    * @return if sending the message was successful
    */
-  public boolean sendMesasge(@Nonnull final BaseMessage msg) {
+  public boolean sendMesasge(final BaseMessage msg) {
     synchronized (lock) {
       if (sessionList.isEmpty()) {
         if (LOGGER.isDebugEnabled()) {
@@ -233,7 +232,7 @@ public class MhubMessageHandler extends Thread {
    * @param hostname the host to connect to
    * @param port the port to connect on
    */
-  private void createWebSocket(@Nonnull final String hostname,
+  private void createWebSocket(final String hostname,
                                final int port) {
     synchronized (lock) {
       try {
@@ -463,7 +462,7 @@ public class MhubMessageHandler extends Thread {
   // Inner classes
   private static final class SequenceNumberEntry {
 
-    private SequenceNumberEntry(@Nonnull final SequenceNumberCommand message) {
+    private SequenceNumberEntry(final SequenceNumberCommand message) {
       this.message = message;
       timeSent = LocalTime.now();
     }

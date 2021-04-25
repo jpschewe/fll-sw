@@ -8,8 +8,6 @@ package fll.xml;
 
 import java.io.Serializable;
 
-import javax.annotation.Nonnull;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -82,7 +80,7 @@ public class RubricRange implements Serializable {
    *
    * @param title the title of the range
    */
-  public RubricRange(@Nonnull final String title) {
+  public RubricRange(final String title) {
     mTitle = title;
     mMin = 0;
     mMax = 1;

@@ -11,8 +11,6 @@ import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -51,7 +49,7 @@ public abstract class GoalElement implements Serializable, Evaluatable {
    *
    * @param ele the XML element to parse
    */
-  public GoalElement(@Nonnull final Element ele) {
+  public GoalElement(final Element ele) {
     mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
 
     final List<Element> descEles = ChallengeParser.getChildElementsByTagName(ele, DESCRIPTION_TAG_NAME);
@@ -119,7 +117,7 @@ public abstract class GoalElement implements Serializable, Evaluatable {
    *
    * @param listener the listener to add
    */
-  public final void addPropertyChangeListener(@Nonnull final PropertyChangeListener listener) {
+  public final void addPropertyChangeListener(final PropertyChangeListener listener) {
     this.propChangeSupport.addPropertyChangeListener(listener);
   }
 
@@ -128,7 +126,7 @@ public abstract class GoalElement implements Serializable, Evaluatable {
    *
    * @param listener the listener to remove
    */
-  public final void removePropertyChangeListener(@Nonnull final PropertyChangeListener listener) {
+  public final void removePropertyChangeListener(final PropertyChangeListener listener) {
     this.propChangeSupport.removePropertyChangeListener(listener);
   }
 

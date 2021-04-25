@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -178,8 +177,8 @@ public final class DumpDB extends BaseFLLServlet {
    * @param zipOut the stream to write to.
    * @param application used to find the bug report files.
    */
-  private static void addBugReports(@Nonnull final ZipOutputStream zipOut,
-                                    @Nonnull final ServletContext application)
+  private static void addBugReports(final ZipOutputStream zipOut,
+                                    final ServletContext application)
       throws IOException {
 
     // add directory entry for the logs

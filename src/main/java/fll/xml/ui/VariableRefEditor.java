@@ -11,7 +11,6 @@ import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -36,7 +35,7 @@ class VariableRefEditor extends Box {
   /**
    * @param ref the object to edit
    */
-  VariableRefEditor(@Nonnull final VariableRef ref) {
+  VariableRefEditor(final VariableRef ref) {
     super(BoxLayout.LINE_AXIS);
 
     this.variableRef = ref;

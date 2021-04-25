@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -24,7 +23,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
-import fll.util.FLLInternalException;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.TiebreakerTest;
 import fll.xml.ui.MovableExpandablePanel.DeleteEvent;
@@ -53,7 +51,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
   private final DeleteEventListener deleteListener;
 
-  TiebreakerEditor(@Nonnull final PerformanceScoreCategory performance) {
+  TiebreakerEditor(final PerformanceScoreCategory performance) {
     super(new BorderLayout());
     this.performance = performance;
 
@@ -140,7 +138,6 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
         }
 
         // update editor list
-        final Pair<TiebreakerTestEditor, MovableExpandablePanel> editorPair = editors.get(index);
         editors.remove(index);
 
         // update the UI
@@ -157,7 +154,6 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
   private void updateTitles() {
     int index = 0;
     for (final Pair<TiebreakerTestEditor, MovableExpandablePanel> editorPair : editors) {
-      final TiebreakerTestEditor editor = editorPair.getLeft();
       final MovableExpandablePanel panel = editorPair.getRight();
 
       final String title = String.format(TITLE_FORMAT, index

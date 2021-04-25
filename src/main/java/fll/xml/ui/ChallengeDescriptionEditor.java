@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -116,7 +115,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
   /**
    * @param description the challenge description to edit
    */
-  public ChallengeDescriptionEditor(@Nonnull final ChallengeDescription description) {
+  public ChallengeDescriptionEditor(final ChallengeDescription description) {
     super(new BorderLayout());
     this.mDescription = description;
 

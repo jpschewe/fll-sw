@@ -10,8 +10,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -26,8 +24,8 @@ public abstract class PublishCommand extends BaseMessage implements SequenceNumb
    * @param topic see {@link #getTopic()}
    * @param node see {@link #getNode()}
    */
-  public PublishCommand(@Nonnull final String topic,
-                        @Nonnull final String node) {
+  public PublishCommand(final String topic,
+                        final String node) {
     super(MhubMessageType.PUBLISH_COMMAND);
     this.topic = topic;
     this.node = node;

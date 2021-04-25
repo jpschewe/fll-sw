@@ -11,7 +11,6 @@ import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
@@ -53,8 +52,8 @@ public class DisplaySystemHandler extends Thread {
    * @param application used to get the database connection and current display
    *          state
    */
-  public DisplaySystemHandler(@Nonnull final MhubMessageHandler messageHandler,
-                              @Nonnull final ServletContext application) {
+  public DisplaySystemHandler(final MhubMessageHandler messageHandler,
+                              final ServletContext application) {
     this.messageHandler = messageHandler;
     this.application = application;
   }
