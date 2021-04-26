@@ -80,7 +80,7 @@ public class GoalEditor extends AbstractGoalEditor {
       final Number value = (Number) mMultiplierEditor.getValue();
       if (null != value) {
         final double newValue = value.doubleValue();
-        getGoal().setMultiplier(newValue);
+        goal.setMultiplier(newValue);
       }
     });
 
@@ -96,9 +96,9 @@ public class GoalEditor extends AbstractGoalEditor {
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     add(mRequiredEditor, gbc);
-    mRequiredEditor.setSelected(getGoal().isRequired());
+    mRequiredEditor.setSelected(goal.isRequired());
     mRequiredEditor.addActionListener(e -> {
-      getGoal().setRequired(mRequiredEditor.isSelected());
+      goal.setRequired(mRequiredEditor.isSelected());
     });
 
     gbc = new GridBagConstraints();
@@ -116,7 +116,7 @@ public class GoalEditor extends AbstractGoalEditor {
 
     mScoreTypeEditor.addActionListener(e -> {
       final ScoreType value = mScoreTypeEditor.getItemAt(mScoreTypeEditor.getSelectedIndex());
-      getGoal().setScoreType(value);
+      goal.setScoreType(value);
     });
 
     gbc = new GridBagConstraints();
@@ -163,7 +163,7 @@ public class GoalEditor extends AbstractGoalEditor {
       final Number value = (Number) mMinEditor.getValue();
       if (null != value) {
         final double newValue = value.doubleValue();
-        getGoal().setMin(newValue);
+        goal.setMin(newValue);
       }
     });
 
@@ -185,7 +185,7 @@ public class GoalEditor extends AbstractGoalEditor {
       final Number value = (Number) mMaxEditor.getValue();
       if (null != value) {
         final double newValue = value.doubleValue();
-        getGoal().setMax(newValue);
+        goal.setMax(newValue);
       }
     });
 
@@ -207,21 +207,21 @@ public class GoalEditor extends AbstractGoalEditor {
       final Number value = (Number) mInitialValueEditor.getValue();
       if (null != value) {
         final double newValue = value.doubleValue();
-        getGoal().setInitialValue(newValue);
+        goal.setInitialValue(newValue);
       }
     });
 
     enumEditor = new EnumeratedValuesEditor(goal);
     cardPanel.add(enumEditor, ENUMERATED_PANEL_KEY);
 
-    cardLayout.show(cardPanel, getGoal().isEnumerated() ? ENUMERATED_PANEL_KEY : COUNT_PANEL_KEY);
+    cardLayout.show(cardPanel, goal.isEnumerated() ? ENUMERATED_PANEL_KEY : COUNT_PANEL_KEY);
 
     mEnumerated.addActionListener(e -> {
       cardLayout.show(cardPanel, mEnumerated.isSelected() ? ENUMERATED_PANEL_KEY : COUNT_PANEL_KEY);
     });
-    mEnumerated.setSelected(getGoal().isEnumerated());
+    mEnumerated.setSelected(goal.isEnumerated());
 
-    rubricEditor = new RubricEditor(getGoal());
+    rubricEditor = new RubricEditor(goal);
     gbc = new GridBagConstraints();
     gbc.weightx = 1;
     gbc.weighty = 1;
@@ -229,6 +229,8 @@ public class GoalEditor extends AbstractGoalEditor {
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.BOTH;
     add(rubricEditor, gbc);
+
+    // object initialized
 
   }
 
