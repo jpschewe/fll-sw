@@ -251,7 +251,6 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
 
     final JButton addSubjectiveCategory = new JButton("Add Subjective Category");
     subjectiveButtonBox.add(addSubjectiveCategory);
-    addSubjectiveCategory.addActionListener(l -> addNewSubjectiveCategory());
 
     subjectiveButtonBox.add(Box.createHorizontalGlue());
 
@@ -274,7 +273,6 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
 
     final JButton addNonNumericCategory = new JButton("Add Non-Numeric Category");
     nonNumericCategoriesButtonBox.add(addNonNumericCategory);
-    addNonNumericCategory.addActionListener(l -> addNewNonNumericCategory());
 
     nonNumericCategoriesButtonBox.add(Box.createHorizontalGlue());
 
@@ -288,7 +286,10 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     // fill in the bottom of the panel
     topPanel.add(Box.createVerticalGlue());
 
-    // class initialized
+    // object is initialized
+    addSubjectiveCategory.addActionListener(l -> addNewSubjectiveCategory());
+    addNonNumericCategory.addActionListener(l -> addNewNonNumericCategory());
+
     mDescription.getSubjectiveCategories().forEach(this::addSubjectiveCategory);
     mDescription.getNonNumericCategories().forEach(this::addNonNumericCategory);
   }
