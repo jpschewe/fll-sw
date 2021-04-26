@@ -94,6 +94,10 @@ public class TomcatLauncher {
           LOGGER.debug("code location file '"
               + path
               + "' using parent directory as the classes location");
+          if (null == classesPath) {
+            throw new FLLRuntimeException(path
+                + " isn't the classes directory and doesn't have a parent");
+          }
         }
       } else {
         classesPath = path;
