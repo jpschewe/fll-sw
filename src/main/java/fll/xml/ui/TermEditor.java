@@ -17,8 +17,8 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
 import fll.util.ChooseOptionDialog;
 import fll.util.FormatterUtils;
@@ -40,8 +40,6 @@ import fll.xml.VariableScope;
 
   private final GoalScope goalScope;
 
-  private final @Nullable VariableScope variableScope;
-
   private final JFormattedTextField coefficient;
 
   private final JComponent refContainer;
@@ -59,7 +57,11 @@ import fll.xml.VariableScope;
 
     this.term = term;
     this.goalScope = goalScope;
-    this.variableScope = variableScope;
+
+    coefficient = FormatterUtils.createDoubleField();
+    refContainer = Box.createVerticalBox();
+
+    // object initialized
 
     final Box buttonBar = Box.createHorizontalBox();
     this.add(buttonBar);
@@ -69,10 +71,10 @@ import fll.xml.VariableScope;
     addGoal.addActionListener(l -> addNewGoalRef());
     addGoal.setToolTipText("Add a reference to a goal");
 
-    if (null != this.variableScope) {
+    if (null != variableScope) {
       final JButton addVariable = new JButton("Add Variable");
       buttonBar.add(addVariable);
-      addVariable.addActionListener(l -> addNewVariableRef());
+      addVariable.addActionListener(l -> addNewVariableRef(variableScope));
       addVariable.setToolTipText("Add a reference to a variable");
     }
 
@@ -81,7 +83,6 @@ import fll.xml.VariableScope;
     final Box coefficientBox = Box.createHorizontalBox();
     this.add(coefficientBox);
 
-    coefficient = FormatterUtils.createDoubleField();
     coefficientBox.add(coefficient);
 
     coefficient.addPropertyChangeListener("value", e -> {
@@ -95,14 +96,13 @@ import fll.xml.VariableScope;
     coefficient.setValue(term.getCoefficient());
     coefficientBox.add(Box.createHorizontalGlue());
 
-    refContainer = Box.createVerticalBox();
     this.add(refContainer);
 
     term.getGoals().forEach(goalRef -> {
       addGoalRef(goalRef);
     });
 
-    if (null != this.variableScope) {
+    if (null != variableScope) {
       term.getVariables().forEach(varRef -> {
         addVariableRef(varRef);
       });
@@ -114,7 +114,7 @@ import fll.xml.VariableScope;
 
   }
 
-  private void addNewGoalRef() {
+  private void addNewGoalRef(@UnknownInitialization(TermEditor.class) TermEditor this) {
     final Collection<AbstractGoal> goals = goalScope.getAllGoals();
     final ChooseOptionDialog<AbstractGoal> dialog = new ChooseOptionDialog<>(JOptionPane.getRootFrame(),
                                                                              new LinkedList<>(goals),
@@ -128,7 +128,8 @@ import fll.xml.VariableScope;
     }
   }
 
-  private void addGoalRef(final GoalRef ref) {
+  private void addGoalRef(@UnknownInitialization(TermEditor.class) TermEditor this,
+                          final GoalRef ref) {
     final Box row = Box.createHorizontalBox();
 
     row.add(new JLabel("X "));
@@ -148,8 +149,8 @@ import fll.xml.VariableScope;
     GuiUtils.addToContainer(refContainer, row);
   }
 
-  @RequiresNonNull("variableScope")
-  private void addNewVariableRef() {
+  private void addNewVariableRef(@UnknownInitialization(TermEditor.class) TermEditor this,
+                                 final VariableScope variableScope) {
     final Collection<Variable> variables = variableScope.getAllVariables();
     final ChooseOptionDialog<Variable> dialog = new ChooseOptionDialog<>(JOptionPane.getRootFrame(),
                                                                          new LinkedList<>(variables),
@@ -163,7 +164,8 @@ import fll.xml.VariableScope;
     }
   }
 
-  private void addVariableRef(final VariableRef ref) {
+  private void addVariableRef(@UnknownInitialization(TermEditor.class) TermEditor this,
+                              final VariableRef ref) {
     final Box row = Box.createHorizontalBox();
 
     row.add(new JLabel("X "));
