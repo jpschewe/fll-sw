@@ -69,15 +69,6 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
     mTitleEditor.setColumns(80);
     mTitleEditor.setMaximumSize(mTitleEditor.getPreferredSize());
 
-    mTitleEditor.addPropertyChangeListener("value", e -> {
-      if (null != mSubjectiveCategory) {
-        final String oldTitle = mSubjectiveCategory.getTitle();
-        final String newTitle = mTitleEditor.getText();
-        mSubjectiveCategory.setTitle(newTitle);
-        fireTitleChange(oldTitle, newTitle);
-      }
-    });
-
     titleContainer.add(Box.createHorizontalGlue());
 
     final Box nameContainer = Box.createHorizontalBox();
@@ -90,13 +81,6 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
 
     mNameEditor.setColumns(40);
     mNameEditor.setMaximumSize(mNameEditor.getPreferredSize());
-
-    mNameEditor.addPropertyChangeListener("value", e -> {
-      if (null != mSubjectiveCategory) {
-        final String newName = mNameEditor.getText();
-        mSubjectiveCategory.setName(newName);
-      }
-    });
 
     nameContainer.add(Box.createHorizontalGlue());
 
@@ -113,7 +97,6 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
 
     final JButton addGoal = new JButton("Add Nominates");
     buttonBar.add(addGoal);
-    addGoal.addActionListener(l -> addNewNominates());
     addGoal.setToolTipText("Add a non-numeric category to nominate teams for during judging of this subjective category");
 
     buttonBar.add(Box.createHorizontalGlue());
@@ -121,10 +104,30 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
     nominatesContainer = Box.createVerticalBox();
     this.add(nominatesContainer);
 
+    // object is initialized
+    mTitleEditor.addPropertyChangeListener("value", e -> {
+      if (null != mSubjectiveCategory) {
+        final String oldTitle = mSubjectiveCategory.getTitle();
+        final String newTitle = mTitleEditor.getText();
+        mSubjectiveCategory.setTitle(newTitle);
+        fireTitleChange(oldTitle, newTitle);
+      }
+    });
+
+    mNameEditor.addPropertyChangeListener("value", e -> {
+      if (null != mSubjectiveCategory) {
+        final String newName = mNameEditor.getText();
+        mSubjectiveCategory.setName(newName);
+      }
+    });
+
+    addGoal.addActionListener(l -> addNewNominates());
+
     mSubjectiveCategory.getNominates().forEach(this::addNominates);
 
     mTitleEditor.setValue(mSubjectiveCategory.getTitle());
     mNameEditor.setValue(mSubjectiveCategory.getName());
+
   }
 
   /**
@@ -191,7 +194,7 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
     }
   }
 
-  private void addNewNominates() {
+  private void addNewNominates(@UnknownInitialization(SubjectiveCategoryEditor.class) SubjectiveCategoryEditor this) {
     final Collection<NonNumericCategory> categories = description.getNonNumericCategories();
     if (categories.isEmpty()) {
       JOptionPane.showMessageDialog(this, "You need to define some non-numeric categories first", "Error",
@@ -210,7 +213,8 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
     }
   }
 
-  private void addNominates(final SubjectiveScoreCategory.Nominates nominates) {
+  private void addNominates(@UnknownInitialization(SubjectiveCategoryEditor.class) SubjectiveCategoryEditor this,
+                            final SubjectiveScoreCategory.Nominates nominates) {
     final Box row = Box.createHorizontalBox();
 
     row.add(new JLabel("  "));
