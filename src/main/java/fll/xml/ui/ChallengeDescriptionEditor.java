@@ -464,7 +464,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     @Override
     public void requestedMove(MoveEvent e) {
 
-      final JComponent container = (MovableExpandablePanel) e.getComponent();
+      final JComponent container = e.getComponent();
       if (!(container instanceof MovableExpandablePanel)) {
         LOGGER.warn("Found something other than a MovableExpandablePanel in the subjective list");
       }
@@ -542,7 +542,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
 
     @Override
     public void requestedMove(MoveEvent e) {
-      final JComponent container = (MovableExpandablePanel) e.getComponent();
+      final JComponent container = e.getComponent();
       if (!(container instanceof MovableExpandablePanel)) {
         LOGGER.warn("Found something other than a MovableExpandablePanel in the non-numeric list");
       }
