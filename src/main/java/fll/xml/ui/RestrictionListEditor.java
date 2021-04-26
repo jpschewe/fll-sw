@@ -12,13 +12,15 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+import fll.util.GuiUtils;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.Restriction;
 
@@ -37,7 +39,7 @@ public class RestrictionListEditor extends JPanel implements Validatable {
   /**
    * @param performance where to get the restrictions to edit
    */
-  public RestrictionListEditor(@Nonnull final PerformanceScoreCategory performance) {
+  public RestrictionListEditor(final PerformanceScoreCategory performance) {
     super(new BorderLayout());
     this.performance = performance;
 
@@ -51,7 +53,6 @@ public class RestrictionListEditor extends JPanel implements Validatable {
 
     final JButton add = new JButton("Add Restriction");
     buttonBox.add(add);
-    add.addActionListener(l -> addNewRestriction());
 
     buttonBox.add(Box.createHorizontalGlue());
 
@@ -61,16 +62,20 @@ public class RestrictionListEditor extends JPanel implements Validatable {
     final MovableExpandablePanel exPanel = new MovableExpandablePanel("Restrictions", expansion, false, false);
     add(exPanel, BorderLayout.CENTER);
 
+    // object initialized
+    add.addActionListener(l -> addNewRestriction());
+
     performance.getRestrictions().forEach(this::addRestriction);
 
   }
 
-  private void addNewRestriction() {
+  private void addNewRestriction(@UnknownInitialization(RestrictionListEditor.class) RestrictionListEditor this) {
     final Restriction test = new Restriction();
     addRestriction(test);
   }
 
-  private void addRestriction(final Restriction restriction) {
+  private void addRestriction(@UnknownInitialization(RestrictionListEditor.class) RestrictionListEditor this,
+                              final Restriction restriction) {
     final RestrictionEditor editor = new RestrictionEditor(restriction, performance);
     editors.add(editor);
 

@@ -18,6 +18,9 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+import fll.util.GuiUtils;
 import fll.xml.Goal;
 import fll.xml.RubricRange;
 
@@ -33,7 +36,6 @@ public final class RubricEditor extends JPanel implements Validatable {
   private final List<RubricRangeEditor> rangeEditors = new LinkedList<>();
 
   /**
-   * 
    * @param goal the goal to edit the rubric for
    */
   public RubricEditor(final Goal goal) {
@@ -46,12 +48,14 @@ public final class RubricEditor extends JPanel implements Validatable {
 
     final JButton addRange = new JButton("Add Rubric Range");
     buttonBox.add(addRange);
-    addRange.addActionListener(l -> addNewRange());
 
     buttonBox.add(Box.createHorizontalGlue());
 
     rangeList = Box.createVerticalBox();
     rangePanel.add(rangeList, BorderLayout.CENTER);
+
+    // object initialized
+    addRange.addActionListener(l -> addNewRange());
 
     final MovableExpandablePanel rubricPanel = new MovableExpandablePanel("Rubric", rangePanel, false, false);
     add(rubricPanel, BorderLayout.CENTER);
@@ -62,13 +66,14 @@ public final class RubricEditor extends JPanel implements Validatable {
 
   }
 
-  private void addNewRange() {
+  private void addNewRange(@UnknownInitialization(RubricEditor.class) RubricEditor this) {
     final String title = String.format("Range %d", rangeEditors.size());
     final RubricRange newRange = new RubricRange(title);
     addRange(newRange);
   }
 
-  private void addRange(final RubricRange range) {
+  private void addRange(@UnknownInitialization(RubricEditor.class) RubricEditor this,
+                        final RubricRange range) {
     final RubricRangeEditor editor = new RubricRangeEditor(range);
     rangeEditors.add(editor);
 

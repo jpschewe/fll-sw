@@ -13,7 +13,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -34,7 +33,6 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
   public static final String WEIGHT_ATTRIBUTE = "weight";
 
   /**
-   * 
    * @param ele the element to parse
    */
   protected ScoreCategory(final Element ele) {
@@ -42,13 +40,13 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
 
     for (final Element goalEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
       if (Goal.TAG_NAME.equals(goalEle.getNodeName())) {
-        final Goal goal = new Goal(goalEle);
+        final GoalElement goal = new Goal(goalEle);
         goalElements.add(goal);
       } else if (ComputedGoal.TAG_NAME.equals(goalEle.getNodeName())) {
-        final ComputedGoal compGoal = new ComputedGoal(goalEle, this);
+        final GoalElement compGoal = new ComputedGoal(goalEle, this);
         goalElements.add(compGoal);
       } else if (GoalGroup.TAG_NAME.equals(goalEle.getNodeName())) {
-        final GoalGroup group = new GoalGroup(goalEle, this);
+        final GoalElement group = new GoalGroup(goalEle, this);
         goalElements.add(group);
       }
     }
@@ -196,7 +194,6 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
    * @return goal group to score, empty map if no score or a no show or no groups
    *         defined
    */
-  @NonNull
   public Map<String, Double> getGoalGroupScores(final TeamScore teamScore) {
     final Map<String, Double> goalGroupScores = new HashMap<>();
 

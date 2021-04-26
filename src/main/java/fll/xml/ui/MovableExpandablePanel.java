@@ -7,6 +7,8 @@
 package fll.xml.ui;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.EventListener;
 import java.util.EventObject;
 
@@ -16,6 +18,9 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
+
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
 /**
  * Panel that has move up and move down buttons with a title and allows the main
@@ -66,23 +71,18 @@ public class MovableExpandablePanel extends JPanel {
     if (movable) {
       final JButton moveUp = new JButton("Move Up");
       top.add(moveUp);
-      moveUp.addActionListener(e -> {
-        fireMoveEventListener(MoveEvent.MoveDirection.UP);
-      });
 
       final JButton moveDown = new JButton("Move Down");
       top.add(moveDown);
-      moveDown.addActionListener(e -> {
-        fireMoveEventListener(MoveEvent.MoveDirection.DOWN);
-      });
+
+      new MovableActionListener(this, moveUp, moveDown);
     }
 
     if (deletable) {
       final JButton delete = new JButton("Delete");
       top.add(delete);
-      delete.addActionListener(e -> {
-        fireDeleteEventListener();
-      });
+
+      new DeleteActionListener(this, delete);
     }
 
     add(view, BorderLayout.CENTER);
@@ -247,5 +247,62 @@ public class MovableExpandablePanel extends JPanel {
   public void setTitle(final String text) {
     mTitleLabel.setText(text);
   }
+
+  private static final class MovableActionListener implements ActionListener {
+    private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
+    private final @NotOnlyInitialized MovableExpandablePanel expandPanel;
+
+    private final JButton moveUp;
+
+    private final JButton moveDown;
+
+    private MovableActionListener(final @UnknownInitialization(MovableExpandablePanel.class) MovableExpandablePanel expandPanel,
+                                  final JButton moveUp,
+                                  final JButton moveDown) {
+      this.expandPanel = expandPanel;
+      this.moveUp = moveUp;
+      this.moveDown = moveDown;
+      this.moveUp.addActionListener(this);
+      this.moveDown.addActionListener(this);
+    }
+
+    @Override
+    public void actionPerformed(final ActionEvent ae) {
+      final Object source = ae.getSource();
+      if (moveUp.equals(source)) {
+        expandPanel.fireMoveEventListener(MoveEvent.MoveDirection.UP);
+      } else if (moveDown.equals(source)) {
+        expandPanel.fireMoveEventListener(MoveEvent.MoveDirection.DOWN);
+      } else {
+        LOGGER.warn("Got unknown event source of {}, ignoring", source);
+      }
+    }
+  } // MovableActionListener
+
+  private static final class DeleteActionListener implements ActionListener {
+    private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
+    private final @NotOnlyInitialized MovableExpandablePanel expandPanel;
+
+    private final JButton delete;
+
+    private DeleteActionListener(final @UnknownInitialization(MovableExpandablePanel.class) MovableExpandablePanel expandPanel,
+                                 final JButton delete) {
+      this.expandPanel = expandPanel;
+      this.delete = delete;
+      this.delete.addActionListener(this);
+    }
+
+    @Override
+    public void actionPerformed(final ActionEvent ae) {
+      final Object source = ae.getSource();
+      if (delete.equals(source)) {
+        expandPanel.fireDeleteEventListener();
+      } else {
+        LOGGER.warn("Got unknown event source of {}, ignoring", source);
+      }
+    }
+  } // DeleteActionListener
 
 }

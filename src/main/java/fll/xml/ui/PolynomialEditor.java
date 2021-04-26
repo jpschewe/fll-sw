@@ -15,10 +15,11 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.util.GuiUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.BasicPolynomial;
 import fll.xml.ComplexPolynomial;
@@ -35,7 +36,7 @@ import fll.xml.VariableScope;
  * Editor for {@link BasicPolynomial} and {@link ComplexPolynomial}.
  * Add changes are immediately committed to the polynomial.
  */
-/* package */ class PolynomialEditor extends JPanel implements Validatable {
+/* package */ class PolynomialEditor extends Box implements Validatable {
 
   private final BasicPolynomial poly;
 
@@ -57,12 +58,11 @@ import fll.xml.VariableScope;
   PolynomialEditor(final BasicPolynomial poly,
                    final GoalScope goalScope,
                    final @Nullable VariableScope variableScope) {
-    super();
+    super(BoxLayout.Y_AXIS);
+
     this.poly = poly;
     this.goalScope = goalScope;
     this.variableScope = variableScope;
-
-    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
     polyValid = new ValidityPanel();
     this.add(polyValid);
@@ -72,23 +72,27 @@ import fll.xml.VariableScope;
 
     final JButton addTerm = new JButton("Add Term");
     buttonBar.add(addTerm);
-    addTerm.addActionListener(e -> {
-      addNewTerm();
-    });
 
     buttonBar.add(Box.createHorizontalGlue());
 
     termsContainer = Box.createVerticalBox();
     this.add(termsContainer);
-    poly.getTerms().forEach(term -> {
-      addTerm(term);
-    });
 
     // floating point type
     floatingPointType = new JComboBox<>(FloatingPointType.values());
     this.add(floatingPointType);
     floatingPointType.setToolTipText("How to handle floating point values");
     floatingPointType.setSelectedItem(poly.getFloatingPoint());
+
+    // add listeners after state is initialized
+    addTerm.addActionListener(e -> {
+      addNewTerm();
+    });
+
+    poly.getTerms().forEach(term -> {
+      addTerm(term);
+    });
+
     floatingPointType.addActionListener(e -> {
       final FloatingPointType v = floatingPointType.getItemAt(floatingPointType.getSelectedIndex());
       poly.setFloatingPoint(v);
@@ -96,13 +100,14 @@ import fll.xml.VariableScope;
 
   }
 
-  private void addNewTerm() {
+  private void addNewTerm(@UnknownInitialization(PolynomialEditor.class) PolynomialEditor this) {
     final Term term = new Term();
     poly.addTerm(term);
     addTerm(term);
   }
 
-  private void addTerm(final Term term) {
+  private void addTerm(@UnknownInitialization(PolynomialEditor.class) PolynomialEditor this,
+                       final Term term) {
     final Box termContainer = Box.createVerticalBox();
 
     final Box buttonBar = Box.createHorizontalBox();

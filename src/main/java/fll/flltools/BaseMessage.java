@@ -6,20 +6,17 @@
 
 package fll.flltools;
 
-import javax.annotation.Nonnull;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * The base class for mhub messages.
- * 
  */
 public abstract class BaseMessage {
 
   /**
    * @param type see {@link #getType()}
    */
-  public BaseMessage(@Nonnull @JsonProperty("type") final MhubMessageType type) {
+  public BaseMessage(@JsonProperty("type") final MhubMessageType type) {
     this.type = type;
   }
 

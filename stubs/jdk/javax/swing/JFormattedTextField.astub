@@ -1,0 +1,9 @@
+package javax.swing;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public class JFormattedTextField extends JTextField {
+
+    public void setValue(@Nullable Object value);
+}

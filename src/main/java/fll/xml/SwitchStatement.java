@@ -12,6 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -51,8 +53,8 @@ public class SwitchStatement implements Evaluatable, CaseStatementResult, Serial
    * @param variableScope where to lookup variables
    */
   public SwitchStatement(final Element ele,
-                         final GoalScope goalScope,
-                         final VariableScope variableScope) {
+                         final @UnknownInitialization GoalScope goalScope,
+                         final @UnknownInitialization VariableScope variableScope) {
     ComplexPolynomial defaultCase = null;
     mCases = new LinkedList<>();
     for (final Element caseEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
@@ -130,7 +132,7 @@ public class SwitchStatement implements Evaluatable, CaseStatementResult, Serial
     return mCases.remove(index);
   }
 
-  private ComplexPolynomial mDefaultCase;
+  private @NotOnlyInitialized ComplexPolynomial mDefaultCase;
 
   /**
    * The default case for this switch statement.

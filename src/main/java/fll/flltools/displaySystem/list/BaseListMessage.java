@@ -6,8 +6,6 @@
 
 package fll.flltools.displaySystem.list;
 
-import javax.annotation.Nonnull;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.flltools.PublishCommand;
@@ -21,8 +19,8 @@ public abstract class BaseListMessage extends PublishCommand {
    * @param node {@link #getNode()}
    * @param action what list action to execute
    */
-  public BaseListMessage(@Nonnull final String node,
-                         @Nonnull final String action) {
+  public BaseListMessage(final String node,
+                         final String action) {
     super("list:"
         + action, node);
   }

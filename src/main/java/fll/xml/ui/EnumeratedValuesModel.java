@@ -9,7 +9,6 @@ package fll.xml.ui;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.swing.table.AbstractTableModel;
 
 import fll.util.FP;
@@ -31,7 +30,7 @@ class EnumeratedValuesModel extends AbstractTableModel {
   /**
    * @param goal the goal to modify
    */
-  EnumeratedValuesModel(@Nonnull final Goal goal) {
+  EnumeratedValuesModel(final Goal goal) {
     this.goal = goal;
     data.addAll(goal.getSortedValues());
 
@@ -70,7 +69,7 @@ class EnumeratedValuesModel extends AbstractTableModel {
     case 4:
       return "Delete";
     default:
-      return null;
+      return "";
     }
   }
 
@@ -90,7 +89,7 @@ class EnumeratedValuesModel extends AbstractTableModel {
     case 4:
       return "Delete";
     default:
-      return null;
+      return "";
     }
   }
 

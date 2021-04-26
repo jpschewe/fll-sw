@@ -6,7 +6,6 @@
 
 package fll.xml.ui;
 
-import javax.annotation.Nonnull;
 import javax.swing.JComboBox;
 
 import fll.xml.GoalScope;
@@ -29,12 +28,11 @@ public class TiebreakerTestEditor extends PolynomialEditor {
   }
 
   /**
-   * 
    * @param test the object to edit
    * @param goalScope where to find goals
    */
-  public TiebreakerTestEditor(@Nonnull final TiebreakerTest test,
-                              @Nonnull final GoalScope goalScope) {
+  public TiebreakerTestEditor(final TiebreakerTest test,
+                              final GoalScope goalScope) {
     super(test, goalScope, null);
     this.test = test;
 

@@ -13,15 +13,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
+import fll.util.GuiUtils;
 import fll.xml.ComputedGoal;
 import fll.xml.GoalScope;
 import fll.xml.Variable;
@@ -51,8 +53,8 @@ public class VariableListEditor extends JPanel {
    * @param goal the goal to edit variables for
    * @param goalScope where to find goals
    */
-  public VariableListEditor(@Nonnull final ComputedGoal goal,
-                            @Nonnull final GoalScope goalScope) {
+  public VariableListEditor(final ComputedGoal goal,
+                            final GoalScope goalScope) {
     super(new BorderLayout());
 
     this.goal = goal;
@@ -112,7 +114,7 @@ public class VariableListEditor extends JPanel {
     goal.getAllVariables().forEach(v -> addVariable(v));
   }
 
-  private void addNewVariable() {
+  private void addNewVariable(@UnderInitialization(VariableListEditor.class) VariableListEditor this) {
     final String name = String.format("Variable %d", editorContainer.getComponentCount());
     final Variable var = new Variable(name);
     this.goal.addVariable(var);
@@ -120,7 +122,8 @@ public class VariableListEditor extends JPanel {
     addVariable(var);
   }
 
-  private void addVariable(final Variable var) {
+  private void addVariable(@UnderInitialization(VariableListEditor.class) VariableListEditor this,
+                           final Variable var) {
     final VariableEditor variableEditor = new VariableEditor(var, goalScope);
     final MovableExpandablePanel exPanel = new MovableExpandablePanel(var.getName(), variableEditor, false, true);
     GuiUtils.addToContainer(editorContainer, exPanel);

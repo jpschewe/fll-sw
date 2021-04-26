@@ -12,8 +12,6 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
@@ -131,7 +129,7 @@ public class Goal extends AbstractGoal {
    *
    * @param name see {@link #getName()}
    */
-  public Goal(@Nonnull final String name) {
+  public Goal(final String name) {
     super(name);
     mMin = 0;
     mMax = 1;
@@ -291,7 +289,6 @@ public class Goal extends AbstractGoal {
   private ScoreType mScoreType;
 
   @Override
-  @Nonnull
   public ScoreType getScoreType() {
     return mScoreType;
   }
@@ -299,7 +296,7 @@ public class Goal extends AbstractGoal {
   /**
    * @param v see {@link #getScoreType()}
    */
-  public void setScoreType(@Nonnull final ScoreType v) {
+  public void setScoreType(final ScoreType v) {
     mScoreType = v;
   }
 

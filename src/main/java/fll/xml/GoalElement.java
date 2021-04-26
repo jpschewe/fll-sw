@@ -11,7 +11,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
@@ -33,12 +33,15 @@ public abstract class GoalElement implements Serializable, Evaluatable {
    */
   public static final String DESCRIPTION_TAG_NAME = "description";
 
-  private final PropertyChangeSupport propChangeSupport = new PropertyChangeSupport(this);
+  private final @NotOnlyInitialized PropertyChangeSupport propChangeSupport;
 
   /**
    * Default constructor for a new object.
    */
   public GoalElement() {
+    mTitle = "";
+    mDescription = "";
+    propChangeSupport = new PropertyChangeSupport(this);
   }
 
   /**
@@ -46,19 +49,20 @@ public abstract class GoalElement implements Serializable, Evaluatable {
    *
    * @param ele the XML element to parse
    */
-  public GoalElement(@Nonnull final Element ele) {
+  public GoalElement(final Element ele) {
     mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
 
     final List<Element> descEles = ChallengeParser.getChildElementsByTagName(ele, DESCRIPTION_TAG_NAME);
     if (descEles.size() > 0) {
       final Element descEle = descEles.get(0);
-      mDescription = descEle.getTextContent();
+      mDescription = ChallengeDescription.removeExtraWhitespace(descEle.getTextContent());
     } else {
-      mDescription = null;
+      mDescription = "";
     }
+    propChangeSupport = new PropertyChangeSupport(this);
   }
 
-  private @Nullable String mTitle;
+  private String mTitle;
 
   /**
    * @return the title of the goal.
@@ -78,13 +82,13 @@ public abstract class GoalElement implements Serializable, Evaluatable {
     firePropertyChange("title", old, v);
   }
 
-  private @Nullable String mDescription;
+  private String mDescription;
 
   /**
    * @return the description, empty string if unset
    */
   public String getDescription() {
-    return null == mDescription ? "" : mDescription.trim().replaceAll("\\s+", " ");
+    return mDescription;
   }
 
   /**
@@ -93,7 +97,7 @@ public abstract class GoalElement implements Serializable, Evaluatable {
    */
   public void setDescription(final @Nullable String v) {
     final String old = mDescription;
-    mDescription = v;
+    mDescription = ChallengeDescription.removeExtraWhitespace(v);
     firePropertyChange("description", old, v);
   }
 
@@ -113,7 +117,7 @@ public abstract class GoalElement implements Serializable, Evaluatable {
    *
    * @param listener the listener to add
    */
-  public final void addPropertyChangeListener(@Nonnull final PropertyChangeListener listener) {
+  public final void addPropertyChangeListener(final PropertyChangeListener listener) {
     this.propChangeSupport.addPropertyChangeListener(listener);
   }
 
@@ -122,7 +126,7 @@ public abstract class GoalElement implements Serializable, Evaluatable {
    *
    * @param listener the listener to remove
    */
-  public final void removePropertyChangeListener(@Nonnull final PropertyChangeListener listener) {
+  public final void removePropertyChangeListener(final PropertyChangeListener listener) {
     this.propChangeSupport.removePropertyChangeListener(listener);
   }
 
@@ -144,9 +148,10 @@ public abstract class GoalElement implements Serializable, Evaluatable {
                              final Element ele) {
     ele.setAttribute(TITLE_ATTRIBUTE, getTitle());
 
-    if (!StringUtils.isBlank(getDescription())) {
+    final String description = getDescription();
+    if (!StringUtils.isBlank(description)) {
       final Element descriptionEle = document.createElement(DESCRIPTION_TAG_NAME);
-      descriptionEle.appendChild(document.createTextNode(getDescription()));
+      descriptionEle.appendChild(document.createTextNode(description));
       ele.appendChild(descriptionEle);
     }
   }

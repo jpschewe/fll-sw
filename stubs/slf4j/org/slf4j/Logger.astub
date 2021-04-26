@@ -24,6 +24,7 @@
 package org.slf4j;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 @AnnotatedFor({"nullness"})
@@ -37,11 +38,11 @@ public interface Logger {
 
     public void trace(String msg);
 
-    public void trace(String format, @Nullable Object arg);
+    public void trace(String format, @Nullable @UnknownInitialization Object arg);
 
-    public void trace(String format, @Nullable Object arg1, @Nullable Object arg2);
+    public void trace(String format, @Nullable @UnknownInitialization Object arg1, @Nullable @UnknownInitialization Object arg2);
 
-    public void trace(String format, @Nullable Object... arguments);
+    public void trace(String format, @Nullable @UnknownInitialization Object... arguments);
 
     public void trace(String msg, Throwable t);
 
@@ -49,11 +50,11 @@ public interface Logger {
 
     public void trace(Marker marker, String msg);
 
-    public void trace(Marker marker, String format, @Nullable Object arg);
+    public void trace(Marker marker, String format, @Nullable @UnknownInitialization Object arg);
 
-    public void trace(Marker marker, String format, @Nullable Object arg1, @Nullable Object arg2);
+    public void trace(Marker marker, String format, @Nullable @UnknownInitialization Object arg1, @Nullable @UnknownInitialization Object arg2);
 
-    public void trace(Marker marker, String format, @Nullable Object... argArray);
+    public void trace(Marker marker, String format, @Nullable @UnknownInitialization Object... argArray);
 
     public void trace(Marker marker, String msg, Throwable t);
 
@@ -61,11 +62,11 @@ public interface Logger {
 
     public void debug(String msg);
 
-    public void debug(String format, @Nullable Object arg);
+    public void debug(String format, @Nullable @UnknownInitialization Object arg);
 
-    public void debug(String format, @Nullable Object arg1, @Nullable Object arg2);
+    public void debug(String format, @Nullable @UnknownInitialization Object arg1, @Nullable @UnknownInitialization Object arg2);
 
-    public void debug(String format, @Nullable Object... arguments);
+    public void debug(String format, @Nullable @UnknownInitialization Object... arguments);
 
     public void debug(String msg, Throwable t);
 
@@ -73,11 +74,11 @@ public interface Logger {
 
     public void debug(Marker marker, String msg);
 
-    public void debug(Marker marker, String format, @Nullable Object arg);
+    public void debug(Marker marker, String format, @Nullable @UnknownInitialization Object arg);
 
-    public void debug(Marker marker, String format, @Nullable Object arg1, @Nullable Object arg2);
+    public void debug(Marker marker, String format, @Nullable @UnknownInitialization Object arg1, @Nullable @UnknownInitialization Object arg2);
 
-    public void debug(Marker marker, String format, @Nullable Object... arguments);
+    public void debug(Marker marker, String format, @Nullable @UnknownInitialization Object... arguments);
 
     public void debug(Marker marker, String msg, Throwable t);
 
@@ -85,11 +86,11 @@ public interface Logger {
 
     public void info(String msg);
 
-    public void info(String format, @Nullable Object arg);
+    public void info(String format, @Nullable @UnknownInitialization Object arg);
 
-    public void info(String format, @Nullable Object arg1, @Nullable Object arg2);
+    public void info(String format, @Nullable @UnknownInitialization Object arg1, @Nullable @UnknownInitialization Object arg2);
 
-    public void info(String format, @Nullable Object... arguments);
+    public void info(String format, @Nullable @UnknownInitialization Object... arguments);
 
     public void info(String msg, Throwable t);
 
@@ -97,11 +98,11 @@ public interface Logger {
 
     public void info(Marker marker, String msg);
 
-    public void info(Marker marker, String format, @Nullable Object arg);
+    public void info(Marker marker, String format, @Nullable @UnknownInitialization Object arg);
 
-    public void info(Marker marker, String format, @Nullable Object arg1, @Nullable Object arg2);
+    public void info(Marker marker, String format, @Nullable @UnknownInitialization Object arg1, @Nullable @UnknownInitialization Object arg2);
 
-    public void info(Marker marker, String format, @Nullable Object... arguments);
+    public void info(Marker marker, String format, @Nullable @UnknownInitialization Object... arguments);
 
     public void info(Marker marker, String msg, Throwable t);
 
@@ -109,11 +110,11 @@ public interface Logger {
 
     public void warn(String msg);
 
-    public void warn(String format, @Nullable Object arg);
+    public void warn(String format, @Nullable @UnknownInitialization Object arg);
 
-    public void warn(String format, @Nullable Object... arguments);
+    public void warn(String format, @Nullable @UnknownInitialization Object... arguments);
 
-    public void warn(String format, @Nullable Object arg1, @Nullable Object arg2);
+    public void warn(String format, @Nullable @UnknownInitialization Object arg1, @Nullable @UnknownInitialization Object arg2);
 
     public void warn(String msg, Throwable t);
 
@@ -121,11 +122,11 @@ public interface Logger {
 
     public void warn(Marker marker, String msg);
 
-    public void warn(Marker marker, String format, @Nullable Object arg);
+    public void warn(Marker marker, String format, @Nullable @UnknownInitialization Object arg);
 
-    public void warn(Marker marker, String format, @Nullable Object arg1, @Nullable  Object arg2);
+    public void warn(Marker marker, String format, @Nullable @UnknownInitialization Object arg1, @Nullable @UnknownInitialization  Object arg2);
 
-    public void warn(Marker marker, String format, @Nullable Object... arguments);
+    public void warn(Marker marker, String format, @Nullable @UnknownInitialization Object... arguments);
 
     public void warn(Marker marker, String msg, Throwable t);
 
@@ -133,11 +134,11 @@ public interface Logger {
 
     public void error(String msg);
 
-    public void error(String format, @Nullable Object arg);
+    public void error(String format, @Nullable @UnknownInitialization Object arg);
 
-    public void error(String format, @Nullable Object arg1, @Nullable Object arg2);
+    public void error(String format, @Nullable @UnknownInitialization Object arg1, @Nullable @UnknownInitialization Object arg2);
 
-    public void error(String format, @Nullable Object... arguments);
+    public void error(String format, @Nullable @UnknownInitialization Object... arguments);
 
     public void error(String msg, Throwable t);
 
@@ -145,11 +146,11 @@ public interface Logger {
 
     public void error(Marker marker, String msg);
 
-    public void error(Marker marker, String format, @Nullable Object arg);
+    public void error(Marker marker, String format, @Nullable @UnknownInitialization Object arg);
 
-    public void error(Marker marker, String format, @Nullable Object arg1, @Nullable Object arg2);
+    public void error(Marker marker, String format, @Nullable @UnknownInitialization Object arg1, @Nullable @UnknownInitialization Object arg2);
 
-    public void error(Marker marker, String format, @Nullable Object... arguments);
+    public void error(Marker marker, String format, @Nullable @UnknownInitialization Object... arguments);
 
     public void error(Marker marker, String msg, Throwable t);
 }

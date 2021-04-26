@@ -51,8 +51,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-
 import org.apache.catalina.LifecycleException;
 import org.apache.http.client.ClientProtocolException;
 import org.fest.swing.image.ScreenshotTaker;
@@ -1149,7 +1147,6 @@ public final class IntegrationTestUtils {
    * @param selenium web browser driver
    * @return waiter for elements
    */
-  @Nonnull
   public static WebDriverWait createWebDriverWait(final WebDriver selenium) {
     return new WebDriverWait(selenium, WAIT_FOR_ELEMENT.getSeconds(), WAIT_FOR_ELEMENT_POLL_INTERVAL.toMillis());
   }

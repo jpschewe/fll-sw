@@ -16,9 +16,11 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
-
+import fll.util.GuiUtils;
 import fll.xml.CaseStatement;
 import fll.xml.GoalScope;
 import fll.xml.SwitchStatement;
@@ -46,9 +48,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
   private final Box stmtContainer;
 
-  private final MoveEventListener mCaseMoveListener;
-
-  private final DeleteEventListener mCaseDeleteListener;
+  private final CaseEventListener caseEventListener;
 
   private final SwitchStatement switchStmt;
 
@@ -67,8 +67,6 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
     final JButton addCase = new JButton("Add If/Then");
     buttonBox.add(addCase);
-    addCase.addActionListener(l -> addNewCaseStatement());
-
     buttonBox.add(Box.createHorizontalGlue());
 
     final Box container = Box.createVerticalBox();
@@ -82,102 +80,33 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
                                                                              false, false);
     container.add(otherwisePanel);
 
-    mCaseMoveListener = new MoveEventListener() {
+    caseEventListener = new CaseEventListener();
 
-      @Override
-      public void requestedMove(final MoveEvent e) {
-        final int oldIndex = Utilities.getIndexOfComponent(stmtContainer, e.getComponent());
-        if (oldIndex < 0) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Unable to find source of move event in statement container");
-          }
-          return;
-        }
+    // object is initialized
 
-        final int newIndex;
-        if (e.getDirection() == MoveDirection.DOWN) {
-          newIndex = oldIndex
-              + 1;
-        } else {
-          newIndex = oldIndex
-              - 1;
-        }
-
-        if (newIndex < 0
-            || newIndex >= stmtContainer.getComponentCount()) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Can't move component outside the container oldIndex: "
-                + oldIndex
-                + " newIndex: "
-                + newIndex);
-          }
-          return;
-        }
-
-        // update editor list
-        final CaseStatementEditor editor = stmtEditors.remove(oldIndex);
-        stmtEditors.add(newIndex, editor);
-
-        // update the UI
-        stmtContainer.add(e.getComponent(), newIndex);
-        stmtContainer.validate();
-
-        // update the order in the challenge description
-        final CaseStatement caseStmt = switchStmt.removeCase(oldIndex);
-        switchStmt.addCase(newIndex, caseStmt);
-      }
-    };
-
-    mCaseDeleteListener = new DeleteEventListener() {
-
-      @Override
-      public void requestDelete(final DeleteEvent e) {
-        final int confirm = JOptionPane.showConfirmDialog(SwitchStatementEditor.this,
-                                                          "Are you sure that you want to delete the case statement?",
-                                                          "Confirm Delete", JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) {
-          return;
-        }
-
-        final int index = Utilities.getIndexOfComponent(stmtContainer, e.getComponent());
-        if (index < 0) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Unable to find source of delete event in goal container");
-          }
-          return;
-        }
-
-        // update editor list
-        stmtEditors.remove(index);
-
-        // update the challenge description
-        switchStmt.removeCase(index);
-
-        // update the UI
-        GuiUtils.removeFromContainer(stmtContainer, index);
-      }
-    };
+    addCase.addActionListener(l -> addNewCaseStatement());
 
     // add the existing cases after everything is setup
     switchStmt.getCases().forEach(this::addCaseStatement);
 
   }
 
-  private void addNewCaseStatement() {
+  private void addNewCaseStatement(@UnknownInitialization(SwitchStatementEditor.class) SwitchStatementEditor this) {
     final CaseStatement stmt = new CaseStatement();
     addCaseStatement(stmt);
     this.switchStmt.addCase(stmt);
   }
 
-  private void addCaseStatement(final CaseStatement stmt) {
+  private void addCaseStatement(@UnknownInitialization(SwitchStatementEditor.class) SwitchStatementEditor this,
+                                final CaseStatement stmt) {
     final CaseStatementEditor editor = new CaseStatementEditor(stmt, goalScope, variableScope);
     stmtEditors.add(editor);
 
     final MovableExpandablePanel exPanel = new MovableExpandablePanel("If/then", editor, true, true);
     GuiUtils.addToContainer(stmtContainer, exPanel);
 
-    exPanel.addMoveEventListener(mCaseMoveListener);
-    exPanel.addDeleteEventListener(mCaseDeleteListener);
+    exPanel.addMoveEventListener(caseEventListener);
+    exPanel.addDeleteEventListener(caseEventListener);
   }
 
   /**
@@ -209,5 +138,79 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
     return valid;
   }
+
+  private final class CaseEventListener implements MoveEventListener, DeleteEventListener {
+
+    @Override
+    public void requestedMove(final MoveEvent e) {
+      final int oldIndex = Utilities.getIndexOfComponent(stmtContainer, e.getComponent());
+      if (oldIndex < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of move event in statement container");
+        }
+        return;
+      }
+
+      final int newIndex;
+      if (e.getDirection() == MoveDirection.DOWN) {
+        newIndex = oldIndex
+            + 1;
+      } else {
+        newIndex = oldIndex
+            - 1;
+      }
+
+      if (newIndex < 0
+          || newIndex >= stmtContainer.getComponentCount()) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Can't move component outside the container oldIndex: "
+              + oldIndex
+              + " newIndex: "
+              + newIndex);
+        }
+        return;
+      }
+
+      // update editor list
+      final CaseStatementEditor editor = stmtEditors.remove(oldIndex);
+      stmtEditors.add(newIndex, editor);
+
+      // update the UI
+      stmtContainer.add(e.getComponent(), newIndex);
+      stmtContainer.validate();
+
+      // update the order in the challenge description
+      final CaseStatement caseStmt = switchStmt.removeCase(oldIndex);
+      switchStmt.addCase(newIndex, caseStmt);
+    }
+
+    @Override
+    public void requestDelete(final DeleteEvent e) {
+      final int confirm = JOptionPane.showConfirmDialog(SwitchStatementEditor.this,
+                                                        "Are you sure that you want to delete the case statement?",
+                                                        "Confirm Delete", JOptionPane.YES_NO_OPTION);
+      if (confirm != JOptionPane.YES_OPTION) {
+        return;
+      }
+
+      final int index = Utilities.getIndexOfComponent(stmtContainer, e.getComponent());
+      if (index < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of delete event in goal container");
+        }
+        return;
+      }
+
+      // update editor list
+      stmtEditors.remove(index);
+
+      // update the challenge description
+      switchStmt.removeCase(index);
+
+      // update the UI
+      GuiUtils.removeFromContainer(stmtContainer, index);
+    }
+
+  } // CaseEventListener
 
 }

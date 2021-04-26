@@ -10,8 +10,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -41,8 +40,8 @@ public class GoalGroup extends GoalElement {
    * @param ele the XML element to parse
    * @param goalScope used when constructing {@link ComputedGoal} objects
    */
-  public GoalGroup(@Nonnull final Element ele,
-                   @Nonnull final GoalScope goalScope) {
+  public GoalGroup(final Element ele,
+                   final @UnknownInitialization GoalScope goalScope) {
     super(ele);
 
     for (final Element goalEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {

@@ -11,11 +11,10 @@ import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import javax.annotation.Nonnull;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.ChooseOptionDialog;
@@ -27,7 +26,7 @@ import fll.xml.VariableRef;
  */
 @SuppressFBWarnings(value = { "SE_BAD_FIELD",
                               "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
-class VariableRefEditor extends JPanel {
+class VariableRefEditor extends Box {
 
   private final VariableRef variableRef;
 
@@ -36,10 +35,10 @@ class VariableRefEditor extends JPanel {
   /**
    * @param ref the object to edit
    */
-  VariableRefEditor(@Nonnull final VariableRef ref) {
-    this.variableRef = ref;
+  VariableRefEditor(final VariableRef ref) {
+    super(BoxLayout.LINE_AXIS);
 
-    setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+    this.variableRef = ref;
 
     editor = new JButton(ref.getVariableName());
     add(editor);

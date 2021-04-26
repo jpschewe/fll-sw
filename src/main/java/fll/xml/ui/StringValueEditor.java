@@ -24,6 +24,8 @@ import javax.swing.JPanel;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.ChooseOptionDialog;
 import fll.util.FLLInternalException;
@@ -95,9 +97,8 @@ class StringValueEditor extends JPanel implements Validatable {
         }
 
         this.selectedGoal = selected;
-        goalEditor.setText(selected.getTitle());
-
         this.selectedGoal.addPropertyChangeListener(nameListener);
+        goalEditor.setText(this.selectedGoal.getTitle());
       }
     });
 
@@ -154,13 +155,14 @@ class StringValueEditor extends JPanel implements Validatable {
     boolean valid = true;
 
     if (!decision.isSelected()) {
-      if (null == selectedGoal) {
+      final AbstractGoal localSelectedGoal = selectedGoal;
+      if (null == localSelectedGoal) {
         messagesToDisplay.add("You must select a goal to reference");
         valid = false;
       } else {
-        if (!goalScope.getAllGoals().contains(selectedGoal)) {
+        if (!goalScope.getAllGoals().contains(localSelectedGoal)) {
           messagesToDisplay.add(String.format("Goal %s is not known. It may have been deleted.",
-                                              selectedGoal.getName()));
+                                              localSelectedGoal.getName()));
           valid = false;
         }
       }

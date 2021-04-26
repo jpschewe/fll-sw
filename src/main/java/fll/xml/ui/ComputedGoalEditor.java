@@ -9,8 +9,6 @@ package fll.xml.ui;
 import java.awt.GridBagConstraints;
 import java.util.Collection;
 
-import javax.annotation.Nonnull;
-
 import fll.xml.ComputedGoal;
 import fll.xml.GoalScope;
 
@@ -27,8 +25,8 @@ public class ComputedGoalEditor extends AbstractGoalEditor {
    * @param goal the goal to edit
    * @param goalScope used for looking up goals
    */
-  public ComputedGoalEditor(@Nonnull final ComputedGoal goal,
-                            @Nonnull final GoalScope goalScope) {
+  public ComputedGoalEditor(final ComputedGoal goal,
+                            final GoalScope goalScope) {
     super(goal);
 
     GridBagConstraints gbc;

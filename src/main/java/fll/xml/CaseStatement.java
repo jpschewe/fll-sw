@@ -8,6 +8,8 @@ package fll.xml;
 
 import java.io.Serializable;
 
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -38,8 +40,8 @@ public class CaseStatement implements Evaluatable, Serializable {
    * @param variableScope where to lookup referenced variables
    */
   public CaseStatement(final Element ele,
-                       final GoalScope goalScope,
-                       final VariableScope variableScope) {
+                       final @UnknownInitialization GoalScope goalScope,
+                       final @UnknownInitialization VariableScope variableScope) {
     final NodelistElementCollectionAdapter children = new NodelistElementCollectionAdapter(ele.getChildNodes());
     final Element condEle = children.next();
     if (ConditionStatement.TAG_NAME.equals(condEle.getNodeName())) {
@@ -85,7 +87,7 @@ public class CaseStatement implements Evaluatable, Serializable {
     mResult = new ComplexPolynomial();
   }
 
-  private AbstractConditionStatement mCondition;
+  private @NotOnlyInitialized AbstractConditionStatement mCondition;
 
   /**
    * The condition to evaluate.
@@ -105,7 +107,7 @@ public class CaseStatement implements Evaluatable, Serializable {
     mCondition = v;
   }
 
-  private CaseStatementResult mResult;
+  private @NotOnlyInitialized CaseStatementResult mResult;
 
   /**
    * The result of the case statement.

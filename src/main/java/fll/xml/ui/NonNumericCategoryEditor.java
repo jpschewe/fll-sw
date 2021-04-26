@@ -6,6 +6,7 @@
 
 package fll.xml.ui;
 
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.ParseException;
@@ -19,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
 import fll.util.FormatterUtils;
 import fll.util.TextAreaEditor;
@@ -37,7 +39,7 @@ import fll.xml.NonNumericCategory;
 
   private final TextAreaEditor description;
 
-  private final ValidityPanel validPanel;  
+  private final ValidityPanel validPanel;
 
   /* package */ NonNumericCategoryEditor(final NonNumericCategory category) {
     super(new GridBagLayout());
@@ -116,7 +118,8 @@ import fll.xml.NonNumericCategory;
 
   }
 
-  protected void fireTitleChange(final String oldTitle,
+  protected void fireTitleChange(@UnknownInitialization(Component.class) NonNumericCategoryEditor this,
+                                 final String oldTitle,
                                  final String newTitle) {
     firePropertyChange("title", oldTitle, newTitle);
   }

@@ -8,9 +8,6 @@ package fll.xml;
 
 import java.io.Serializable;
 
-import javax.annotation.Nonnull;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -70,7 +67,7 @@ public class RubricRange implements Serializable {
       final Element descriptionEle = descriptions.next();
       mDescription = ChallengeDescription.removeExtraWhitespace(descriptionEle.getTextContent());
     } else {
-      mDescription = null;
+      mDescription = "";
     }
 
     mShortDescription = ele.getAttribute(SHORT_DESCRIPTION_ATTRIBUTE);
@@ -83,11 +80,11 @@ public class RubricRange implements Serializable {
    *
    * @param title the title of the range
    */
-  public RubricRange(@Nonnull final String title) {
+  public RubricRange(final String title) {
     mTitle = title;
     mMin = 0;
     mMax = 1;
-    mDescription = null;
+    mDescription = "";
     mShortDescription = "";
   }
 
@@ -107,23 +104,23 @@ public class RubricRange implements Serializable {
     mTitle = v;
   }
 
-  private @Nullable String mDescription;
+  private String mDescription;
 
   /**
-   * The long description, may be null.
+   * The long description.
    * Extra whitespace is removed. All line endings
    * are removed.
    *
    * @return the long description
    */
-  public @Nullable String getDescription() {
+  public String getDescription() {
     return mDescription;
   }
 
   /**
    * @param v see {@link #getDescription()}
    */
-  public void setDescription(final @Nullable String v) {
+  public void setDescription(final String v) {
     mDescription = ChallengeDescription.removeExtraWhitespace(v);
   }
 
@@ -220,7 +217,7 @@ public class RubricRange implements Serializable {
     ele.setAttribute(MIN_ATTRIBUTE, Integer.toString(mMin));
     ele.setAttribute(MAX_ATTRIBUTE, Integer.toString(mMax));
 
-    if (null != mDescription) {
+    if (!mDescription.isEmpty()) {
       final Element descriptionEle = doc.createElement(DESCRIPTION_TAG_NAME);
       descriptionEle.appendChild(doc.createTextNode(mDescription));
       ele.appendChild(descriptionEle);

@@ -30,7 +30,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -51,6 +50,7 @@ import org.xml.sax.SAXParseException;
 
 import fll.Utilities;
 import fll.db.GenerateDB;
+import fll.util.FLLInternalException;
 import fll.util.FP;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -135,22 +135,28 @@ public final class ChallengeParser {
             + schemaVersion);
       }
 
-      final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+      final ClassLoader classLoader = Utilities.getClassLoader();
 
       final SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-      final Source schemaFile = new StreamSource(classLoader.getResourceAsStream("fll/resources/fll.xsd"));
-      final Schema schema = factory.newSchema(schemaFile);
+      try (InputStream schemaStream = classLoader.getResourceAsStream("fll/resources/fll.xsd")) {
+        if (null == schemaStream) {
+          throw new FLLInternalException("Unable to find fll.xsd");
+        }
 
-      final Document document = XMLUtils.parse(new StringReader(content), schema);
+        final Source schemaFile = new StreamSource(schemaStream);
+        final Schema schema = factory.newSchema(schemaFile);
 
-      // challenge descriptor specific checks
-      validateDocument(document);
+        final Document document = XMLUtils.parse(new StringReader(content), schema);
 
-      final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+        // challenge descriptor specific checks
+        validateDocument(document);
 
-      validateDescription(description);
+        final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
 
-      return description;
+        validateDescription(description);
+
+        return description;
+      } // schema stream
     } catch (final SAXParseException spe) {
       throw new ChallengeXMLException(String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software or an improperly formatted challenge descriptor or attempting to parse a file that is not a challenge descriptor.",
                                                     spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage()),
@@ -194,28 +200,29 @@ public final class ChallengeParser {
 
   }
 
-  /**
-   * Convert from version 0 to version 1 of the schema.
-   *
-   * @param content
-   * @return
-   */
-  private static String transform0To1(final String content) {
-    final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
-    return applyTransform(content, classLoader.getResourceAsStream("fll/resources/schema0-to-schema1.xsl"));
+  private static String transform0To1(final String content) throws IOException {
+    return transformSchema(content, "fll/resources/schema0-to-schema1.xsl");
   }
 
-  private static String transform1To2(final String content) {
-    final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
-    return applyTransform(content, classLoader.getResourceAsStream("fll/resources/schema1-to-schema2.xsl"));
+  private static String transform1To2(final String content) throws IOException {
+    return transformSchema(content, "fll/resources/schema1-to-schema2.xsl");
   }
 
-  private static String transform2To3(final String content) {
-    final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+  private static String transform2To3(final String content) throws IOException {
+    return transformSchema(content, "fll/resources/schema2-to-schema3.xsl");
+  }
 
-    return applyTransform(content, classLoader.getResourceAsStream("fll/resources/schema2-to-schema3.xsl"));
+  private static String transformSchema(final String content,
+                                        final String xsl)
+      throws IOException {
+    final ClassLoader classLoader = Utilities.getClassLoader();
+    try (InputStream stream = classLoader.getResourceAsStream(xsl)) {
+      if (null == stream) {
+        throw new FLLInternalException("Cannot find "
+            + xsl);
+      }
+      return applyTransform(content, stream);
+    }
   }
 
   /**
@@ -383,9 +390,15 @@ public final class ChallengeParser {
         // can't reference a non-enum goal with goalRef in enumCond
         final String referencedGoalName = goalRefElement.getAttribute("goal");
         final Element referencedGoalElement = simpleGoals.get(referencedGoalName);
-        if (!ChallengeParser.isEnumeratedGoal(referencedGoalElement)) {
+        if (null == referencedGoalElement) {
+          throw new ChallengeValidationException("Computed goal '"
+              + name
+              + "' references enumerated goal '"
+              + referencedGoalName
+              + "' which cannot be found");
+        } else if (!ChallengeParser.isEnumeratedGoal(referencedGoalElement)) {
           throw new InvalidEnumCondition("Computed goal '"
-              + computedGoalElement.getAttribute("name")
+              + name
               + "' has an enumGoalRef element that references goal '"
               + referencedGoalName
               + " "
@@ -555,9 +568,12 @@ public final class ChallengeParser {
     return null;
   }
 
-  private static String compareGoalDefinitions(final String category,
-                                               final Map<String, String> curGoals,
-                                               final Map<String, String> newGoals) {
+  /**
+   * @return message on an error, null otherwise
+   */
+  private static @Nullable String compareGoalDefinitions(final String category,
+                                                         final Map<String, String> curGoals,
+                                                         final Map<String, String> newGoals) {
     if (curGoals.size() != newGoals.size()) {
       return "New document has "
           + newGoals.size()
@@ -618,9 +634,9 @@ public final class ChallengeParser {
    * @param parent the element to check the children of
    * @return the list of elements, may be empty
    */
-  @Nonnull
-  public static List<Element> getChildElementsByTagName(@Nonnull final Element parent,
-                                                        @Nonnull final String tagname) {
+
+  public static List<Element> getChildElementsByTagName(final Element parent,
+                                                        final String tagname) {
     final List<Element> retval = new LinkedList<>();
     for (final Element child : new NodelistElementCollectionAdapter(parent.getChildNodes())) {
       if (tagname.equals(child.getTagName())) {
@@ -641,7 +657,7 @@ public final class ChallengeParser {
 
     final String baseDir = "fll/resources/challenge-descriptors/";
 
-    final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    final ClassLoader classLoader = Utilities.getClassLoader();
     final URL directory = classLoader.getResource(baseDir);
     if (null == directory) {
       LOGGER.warn("base dir for challenge descriptors not found");

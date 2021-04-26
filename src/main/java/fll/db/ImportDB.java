@@ -38,7 +38,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -95,7 +94,7 @@ public final class ImportDB {
    * @see ImportDB#importDatabase(Connection, Connection, String, boolean,
    *      boolean, boolean)
    */
-  @Nonnull
+
   public static ImportDB.ImportResult loadFromDumpIntoNewDB(final ZipInputStream zipfile,
                                                             final Connection destConnection)
       throws IOException, SQLException {
@@ -2414,7 +2413,7 @@ public final class ImportDB {
      * @param importDirectory {@link #getImportDirectory()}
      * @param hasBugs {@link #hasBugs()}
      */
-    public ImportResult(@Nonnull final Path importDirectory,
+    public ImportResult(final Path importDirectory,
                         final boolean hasBugs) {
       this.importDirectory = importDirectory;
       this.hasBugs = hasBugs;
@@ -2428,7 +2427,7 @@ public final class ImportDB {
      *
      * @return the directory where extra data is stored
      */
-    @Nonnull
+
     public Path getImportDirectory() {
       return importDirectory;
     }

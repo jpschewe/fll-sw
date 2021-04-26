@@ -13,8 +13,6 @@ import javax.swing.Box;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 import fll.xml.EnumConditionStatement;
 import fll.xml.GoalScope;
 import fll.xml.InequalityComparison;
@@ -30,8 +28,8 @@ import fll.xml.InequalityComparison;
 
   private final EnumConditionStatement stmt;
 
-  EnumConditionStatementEditor(@NonNull final EnumConditionStatement stmt,
-                               @NonNull final GoalScope goalScope) {
+  EnumConditionStatementEditor(final EnumConditionStatement stmt,
+                               final GoalScope goalScope) {
     super(new BorderLayout());
     this.stmt = stmt;
 

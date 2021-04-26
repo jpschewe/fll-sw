@@ -8,8 +8,6 @@ package fll.xml;
 
 import java.io.Serializable;
 
-import javax.annotation.Nonnull;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -44,8 +42,8 @@ public class EnumeratedValue implements Serializable {
    * @param value see {@link #getValue()}
    * @param score see {@link #getScore()}
    */
-  public EnumeratedValue(@Nonnull final String title,
-                         @Nonnull final String value,
+  public EnumeratedValue(final String title,
+                         final String value,
                          final double score) {
     mScore = score;
     mTitle = title;

@@ -890,4 +890,26 @@ public final class Utilities {
     }
   }
 
+  /**
+   * Get a non-null class loader. This starts with
+   * {@link Thread#getContextClassLoader()} and then checks
+   * {@link Class#getClassLoader()} for this class and if that is null returns
+   * {@link ClassLoader#getSystemClassLoader()}.
+   * 
+   * @return non-null class loader
+   */
+  public static ClassLoader getClassLoader() {
+    final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+    if (null != contextClassLoader) {
+      return contextClassLoader;
+    }
+  
+    final ClassLoader classClassLoader = Utilities.getClassLoader();
+    if (null != classClassLoader) {
+      return classClassLoader;
+    }
+  
+    return ClassLoader.getSystemClassLoader();
+  }
+
 }

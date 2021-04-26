@@ -8,8 +8,6 @@ package fll.xml;
 
 import java.util.Collection;
 
-import javax.annotation.Nonnull;
-
 /**
  * Used to lookup goals.
  */
@@ -22,13 +20,13 @@ public interface GoalScope {
    * @return the found goal
    * @throws ScopeException if the goal cannot be found
    */
-  @Nonnull
+
   AbstractGoal getGoal(String name) throws ScopeException;
 
   /**
    * @return all goals currently known to the scope
    */
-  @Nonnull
+
   Collection<AbstractGoal> getAllGoals();
 
 }

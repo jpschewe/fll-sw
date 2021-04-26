@@ -10,7 +10,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.annotation.Nonnull;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
@@ -38,7 +37,7 @@ class EnumeratedValuesEditor extends JPanel {
   /**
    * @param goal the goal to modify
    */
-  EnumeratedValuesEditor(@Nonnull final Goal goal) {
+  EnumeratedValuesEditor(final Goal goal) {
     super(new BorderLayout());
 
     this.tableModel = new EnumeratedValuesModel(goal);

@@ -47,7 +47,14 @@ public final class CaseStatementEditor extends JPanel implements Validatable {
     container.add(ifBox);
     final JLabel ifLabel = new JLabel("If");
 
-    final Font ifThenFont = new Font(ifLabel.getFont().getFontName(), Font.BOLD, 18);
+    final Font labelFont = ifLabel.getFont();
+    final String fontName;
+    if (null == labelFont) {
+      fontName = "Serif";
+    } else {
+      fontName = labelFont.getFontName();
+    }
+    final Font ifThenFont = new Font(fontName, Font.BOLD, 18);
 
     ifLabel.setFont(ifThenFont);
     ifBox.add(ifLabel);

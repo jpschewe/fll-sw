@@ -6,8 +6,6 @@
 
 package fll.flltools.displaySystem.list;
 
-import javax.annotation.Nonnull;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -17,7 +15,7 @@ public class Show extends BaseListMessage {
   /**
    * @param node {@link #getNode()}
    */
-  public Show(@Nonnull final String node) {
+  public Show(final String node) {
     super(node, "show");
   }
 
