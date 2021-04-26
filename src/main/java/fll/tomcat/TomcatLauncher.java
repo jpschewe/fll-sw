@@ -46,6 +46,7 @@ public class TomcatLauncher {
   public TomcatLauncher(final int port) {
     tomcat = new Tomcat();
 
+    // object initialized
     configureTomcat(tomcat);
 
     tomcat.setPort(port);
@@ -61,6 +62,10 @@ public class TomcatLauncher {
   public static Path getClassesPath() {
     final ProtectionDomain classDomain = TomcatLauncher.class.getProtectionDomain();
     final CodeSource codeSource = classDomain.getCodeSource();
+    if (null == codeSource) {
+      throw new FLLRuntimeException("Cannot find the code source for the protection domain. Initialization of web server cannot completed");
+    }
+
     final URL codeLocation = codeSource.getLocation();
     LOGGER.debug("codeLocation: "
         + codeLocation);
@@ -100,7 +105,7 @@ public class TomcatLauncher {
     }
   }
 
-  private void configureTomcat(final Tomcat tomcat) {
+  private static void configureTomcat(final Tomcat tomcat) {
     final Path classesPath = getClassesPath();
 
     LOGGER.debug("Found classes path: "
