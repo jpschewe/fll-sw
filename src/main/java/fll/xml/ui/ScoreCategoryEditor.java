@@ -26,6 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.border.EtchedBorder;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Utilities;
@@ -50,7 +51,9 @@ import fll.xml.StringValue;
 import fll.xml.SwitchStatement;
 import fll.xml.Term;
 import fll.xml.Variable;
+import fll.xml.ui.MovableExpandablePanel.DeleteEvent;
 import fll.xml.ui.MovableExpandablePanel.DeleteEventListener;
+import fll.xml.ui.MovableExpandablePanel.MoveEvent;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent.MoveDirection;
 import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
@@ -69,9 +72,7 @@ public abstract class ScoreCategoryEditor extends Box implements Validatable {
 
   private final ScoreCategory mCategory;
 
-  private final MoveEventListener mGoalMoveListener;
-
-  private final DeleteEventListener mGoalDeleteListener;
+  private final GoalEventListener goalEventListener;
 
   private final ValidityPanel categoryValid;
 
@@ -95,6 +96,26 @@ public abstract class ScoreCategoryEditor extends Box implements Validatable {
     weightContainer.add(mWeight);
     weightContainer.add(Box.createHorizontalGlue());
 
+    final Box buttonBox = Box.createHorizontalBox();
+    add(buttonBox);
+
+    final JButton addGoal = new JButton("Add Goal");
+    buttonBox.add(addGoal);
+
+    final JButton addComputedGoal = new JButton("Add Computed Goal");
+    buttonBox.add(addComputedGoal);
+
+    final JButton addGoalGroup = new JButton("Add Goal Group");
+    buttonBox.add(addGoalGroup);
+
+    buttonBox.add(Box.createHorizontalGlue());
+
+    mGoalEditorContainer = Box.createVerticalBox();
+    add(mGoalEditorContainer);
+
+    goalEventListener = new GoalEventListener();
+
+    // object is initialized
     mWeight.addPropertyChangeListener("value", e -> {
       if (null != mCategory) {
         final Number value = (Number) mWeight.getValue();
@@ -105,98 +126,13 @@ public abstract class ScoreCategoryEditor extends Box implements Validatable {
       }
     });
 
-    final Box buttonBox = Box.createHorizontalBox();
-    add(buttonBox);
-
-    final JButton addGoal = new JButton("Add Goal");
-    buttonBox.add(addGoal);
     addGoal.addActionListener(l -> addNewGoal());
-
-    final JButton addComputedGoal = new JButton("Add Computed Goal");
-    buttonBox.add(addComputedGoal);
     addComputedGoal.addActionListener(l -> addNewComputedGoal());
-
-    final JButton addGoalGroup = new JButton("Add Goal Group");
-    buttonBox.add(addGoalGroup);
     addGoalGroup.addActionListener(l -> addNewGoalGroup());
-
-    buttonBox.add(Box.createHorizontalGlue());
-
-    mGoalEditorContainer = Box.createVerticalBox();
-    add(mGoalEditorContainer);
-
-    mGoalMoveListener = e -> {
-      final int oldIndex = Utilities.getIndexOfComponent(mGoalEditorContainer, e.getComponent());
-      if (oldIndex < 0) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Unable to find source of move event in goal container");
-        }
-        return;
-      }
-
-      final int newIndex;
-      if (e.getDirection() == MoveDirection.DOWN) {
-        newIndex = oldIndex
-            + 1;
-      } else {
-        newIndex = oldIndex
-            - 1;
-      }
-
-      if (newIndex < 0
-          || newIndex >= mGoalEditorContainer.getComponentCount()) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Can't move component outside the container oldIndex: "
-              + oldIndex
-              + " newIndex: "
-              + newIndex);
-        }
-        return;
-      }
-
-      // update editor list
-      final GoalElementEditor editor = mGoalElementEditors.remove(oldIndex);
-      mGoalElementEditors.add(newIndex, editor);
-
-      // update the UI
-      mGoalEditorContainer.add(e.getComponent(), newIndex);
-      mGoalEditorContainer.validate();
-
-      // update the order in the challenge description
-      final GoalElement goal = mCategory.removeGoalElement(oldIndex);
-      mCategory.addGoalElement(newIndex, goal);
-    };
-
-    mGoalDeleteListener = e -> {
-      final int confirm = JOptionPane.showConfirmDialog(ScoreCategoryEditor.this,
-                                                        "Are you sure that you want to delete the goal element?",
-                                                        "Confirm Delete", JOptionPane.YES_NO_OPTION);
-      if (confirm != JOptionPane.YES_OPTION) {
-        return;
-      }
-
-      final int index = Utilities.getIndexOfComponent(mGoalEditorContainer, e.getComponent());
-      if (index < 0) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Unable to find source of delete event in goal container");
-        }
-        return;
-      }
-
-      // update editor list
-      mGoalElementEditors.remove(index);
-
-      // update the challenge description
-      mCategory.removeGoalElement(index);
-
-      // update the UI
-      GuiUtils.removeFromContainer(mGoalEditorContainer, index);
-    };
 
     mWeight.setValue(mCategory.getWeight());
 
     mCategory.getGoalElements().forEach(this::addGoalElement);
-
   }
 
   /**
@@ -206,7 +142,7 @@ public abstract class ScoreCategoryEditor extends Box implements Validatable {
     return mCategory;
   }
 
-  private void addNewGoal() {
+  private void addNewGoal(@UnknownInitialization(ScoreCategoryEditor.class) ScoreCategoryEditor this) {
     final String name = String.format("goal_%d", mCategory.getGoalElements().size());
     final String title = String.format("Goal %d", mCategory.getGoalElements().size());
     final Goal newGoal = new Goal(name);
@@ -215,7 +151,7 @@ public abstract class ScoreCategoryEditor extends Box implements Validatable {
     addGoalElement(newGoal);
   }
 
-  private void addNewComputedGoal() {
+  private void addNewComputedGoal(@UnknownInitialization(ScoreCategoryEditor.class) ScoreCategoryEditor this) {
     final String name = String.format("goal_%d", mCategory.getGoalElements().size());
     final String title = String.format("Goal %d", mCategory.getGoalElements().size());
     final ComputedGoal newGoal = new ComputedGoal(name, mCategory);
@@ -224,7 +160,7 @@ public abstract class ScoreCategoryEditor extends Box implements Validatable {
     addGoalElement(newGoal);
   }
 
-  private void addNewGoalGroup() {
+  private void addNewGoalGroup(@UnknownInitialization(ScoreCategoryEditor.class) ScoreCategoryEditor this) {
     final GoalGroup group = new GoalGroup();
     final String title = String.format("Group %d", mCategory.getGoalElements().size());
     group.setTitle(title);
@@ -232,7 +168,8 @@ public abstract class ScoreCategoryEditor extends Box implements Validatable {
     addGoalElement(group);
   }
 
-  private void addGoalElement(final GoalElement ge) {
+  private void addGoalElement(@UnknownInitialization(ScoreCategoryEditor.class) ScoreCategoryEditor this,
+                              final GoalElement ge) {
 
     final GoalElementEditor editor;
     if (ge.isGoal()) {
@@ -256,8 +193,8 @@ public abstract class ScoreCategoryEditor extends Box implements Validatable {
       final String newTitle = (String) e.getNewValue();
       panel.setTitle(newTitle);
     });
-    panel.addMoveEventListener(mGoalMoveListener);
-    panel.addDeleteEventListener(mGoalDeleteListener);
+    panel.addMoveEventListener(goalEventListener);
+    panel.addDeleteEventListener(goalEventListener);
 
     mGoalElementEditors.add(editor);
 
@@ -475,4 +412,80 @@ public abstract class ScoreCategoryEditor extends Box implements Validatable {
 
   }
 
+  private final class GoalEventListener implements MoveEventListener, DeleteEventListener {
+
+    @Override
+    public void requestDelete(DeleteEvent e) {
+      final int confirm = JOptionPane.showConfirmDialog(ScoreCategoryEditor.this,
+                                                        "Are you sure that you want to delete the goal element?",
+                                                        "Confirm Delete", JOptionPane.YES_NO_OPTION);
+      if (confirm != JOptionPane.YES_OPTION) {
+        return;
+      }
+
+      final int index = Utilities.getIndexOfComponent(mGoalEditorContainer, e.getComponent());
+      if (index < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of delete event in goal container");
+        }
+        return;
+      }
+
+      // update editor list
+      mGoalElementEditors.remove(index);
+
+      // update the challenge description
+      mCategory.removeGoalElement(index);
+
+      // update the UI
+      GuiUtils.removeFromContainer(mGoalEditorContainer, index);
+    }
+
+    /**
+     * @see fll.xml.ui.MovableExpandablePanel.MoveEventListener#requestedMove(fll.xml.ui.MovableExpandablePanel.MoveEvent)
+     */
+    @Override
+    public void requestedMove(MoveEvent e) {
+      final int oldIndex = Utilities.getIndexOfComponent(mGoalEditorContainer, e.getComponent());
+      if (oldIndex < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of move event in goal container");
+        }
+        return;
+      }
+
+      final int newIndex;
+      if (e.getDirection() == MoveDirection.DOWN) {
+        newIndex = oldIndex
+            + 1;
+      } else {
+        newIndex = oldIndex
+            - 1;
+      }
+
+      if (newIndex < 0
+          || newIndex >= mGoalEditorContainer.getComponentCount()) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Can't move component outside the container oldIndex: "
+              + oldIndex
+              + " newIndex: "
+              + newIndex);
+        }
+        return;
+      }
+
+      // update editor list
+      final GoalElementEditor editor = mGoalElementEditors.remove(oldIndex);
+      mGoalElementEditors.add(newIndex, editor);
+
+      // update the UI
+      mGoalEditorContainer.add(e.getComponent(), newIndex);
+      mGoalEditorContainer.validate();
+
+      // update the order in the challenge description
+      final GoalElement goal = mCategory.removeGoalElement(oldIndex);
+      mCategory.addGoalElement(newIndex, goal);
+    }
+
+  }
 }
