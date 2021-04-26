@@ -23,6 +23,7 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
 import fll.util.ChooseOptionDialog;
 import fll.util.FormatterUtils;
+import fll.util.GuiUtils;
 import fll.util.TextAreaEditor;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;

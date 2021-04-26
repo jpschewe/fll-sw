@@ -33,6 +33,7 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.FormatterUtils;
+import fll.util.GuiUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;

@@ -32,6 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import fll.Utilities;
 import fll.util.FLLInternalException;
 import fll.util.FormatterUtils;
+import fll.util.GuiUtils;
 import fll.xml.AbstractConditionStatement;
 import fll.xml.AbstractGoal;
 import fll.xml.BasicPolynomial;

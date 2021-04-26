@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
+import fll.util.GuiUtils;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.Restriction;
 

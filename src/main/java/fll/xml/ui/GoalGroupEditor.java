@@ -25,6 +25,7 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
 import fll.Utilities;
+import fll.util.GuiUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ComputedGoal;
 import fll.xml.Goal;

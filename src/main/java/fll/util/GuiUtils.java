@@ -4,17 +4,16 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-package fll.xml.ui;
+package fll.util;
 
 import java.awt.Container;
 
 import javax.swing.JComponent;
 
 /**
- * Some functions for working with the user interface components in the
- * challenge editor.
+ * Some functions for working with the user interface components.
  */
-/* package */ final class GuiUtils {
+public final class GuiUtils {
 
   private GuiUtils() {
   }

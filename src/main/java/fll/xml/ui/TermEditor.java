@@ -22,6 +22,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.ChooseOptionDialog;
 import fll.util.FormatterUtils;
+import fll.util.GuiUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.GoalRef;
 import fll.xml.GoalScope;

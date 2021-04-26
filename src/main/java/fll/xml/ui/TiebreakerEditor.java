@@ -24,6 +24,7 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
+import fll.util.GuiUtils;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.TiebreakerTest;
 import fll.xml.ui.MovableExpandablePanel.DeleteEvent;

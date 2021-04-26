@@ -56,7 +56,6 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.db.GenerateDatabaseDiagram;
 import fll.db.ImportDB;
 import fll.util.FLLRuntimeException;
 import fll.xml.ScoreType;

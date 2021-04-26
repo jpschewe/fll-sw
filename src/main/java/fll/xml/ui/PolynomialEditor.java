@@ -19,6 +19,7 @@ import javax.swing.JLabel;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.util.GuiUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.BasicPolynomial;
 import fll.xml.ComplexPolynomial;

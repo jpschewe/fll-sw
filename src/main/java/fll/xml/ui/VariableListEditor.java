@@ -23,6 +23,7 @@ import org.checkerframework.checker.initialization.qual.UnderInitialization;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
+import fll.util.GuiUtils;
 import fll.xml.ComputedGoal;
 import fll.xml.GoalScope;
 import fll.xml.Variable;
