@@ -9,6 +9,7 @@ package fll.xml.ui;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -171,7 +172,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
     }
   }
 
-  private final class MoveDeleteListener implements MoveEventListener, DeleteEventListener {
+  private final class MoveDeleteListener implements MoveEventListener, DeleteEventListener, Serializable {
     private MoveDeleteListener() {
     }
 
