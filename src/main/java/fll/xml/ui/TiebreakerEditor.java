@@ -20,6 +20,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
@@ -65,7 +66,6 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
     final JButton add = new JButton("Add Tiebreaker");
     buttonBox.add(add);
-    add.addActionListener(l -> addNewTest());
 
     buttonBox.add(Box.createHorizontalGlue());
 
@@ -146,6 +146,9 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
       }
     };
 
+    // object initialized
+    add.addActionListener(l -> addNewTest());
+
     performance.getTiebreaker().forEach(this::addTest);
   }
 
@@ -164,12 +167,13 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
     }
   }
 
-  private void addNewTest() {
+  private void addNewTest(@UnknownInitialization(TiebreakerEditor.class) TiebreakerEditor this) {
     final TiebreakerTest test = new TiebreakerTest();
     addTest(test);
   }
 
-  private void addTest(final TiebreakerTest test) {
+  private void addTest(@UnknownInitialization(TiebreakerEditor.class) TiebreakerEditor this,
+                       final TiebreakerTest test) {
     final TiebreakerTestEditor editor = new TiebreakerTestEditor(test, performance);
 
     final MovableExpandablePanel panel = new MovableExpandablePanel(String.format(TITLE_FORMAT, editors.size()), editor,
