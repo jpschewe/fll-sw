@@ -5,8 +5,6 @@
  */
 package fll.scheduler;
 
-import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -52,6 +50,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
 import com.opencsv.CSVWriter;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.Team;
 import fll.Tournament;
@@ -485,6 +485,11 @@ public class TournamentSchedule implements Serializable {
           } // allocate performance ResultSet
 
           final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournamentID);
+          if (null == eventDivision) {
+            throw new FLLRuntimeException("Unable to find event division for "
+                + teamNumber);
+          }
+
           ti.setDivision(eventDivision);
 
           final Team team = Team.getTeamFromDatabase(connection, teamNumber);
@@ -536,7 +541,7 @@ public class TournamentSchedule implements Serializable {
    * Check if this line is a header line. This checks for key headers and
    * returns true if they are found.
    */
-  private static boolean isHeaderLine(final String[] line) {
+  private static boolean isHeaderLine(final @Nullable String[] line) {
     boolean retval = false;
     for (final String element : line) {
       if (TEAM_NUMBER_HEADER.equals(element)) {
@@ -561,7 +566,7 @@ public class TournamentSchedule implements Serializable {
                                               final Collection<String> subjectiveHeaders)
       throws IOException {
     while (true) {
-      final String[] line = reader.readNext();
+      final @Nullable String @Nullable [] line = reader.readNext();
       if (null == line) {
         throw new RuntimeException("Cannot find header line and reached EOF");
       }
@@ -580,7 +585,7 @@ public class TournamentSchedule implements Serializable {
    * @throws FLLRuntimeException if there are problems with the performance
    *           round headers found
    */
-  private static int countNumRegularMatchPlayRounds(final String[] line) {
+  private static int countNumRegularMatchPlayRounds(final @Nullable String[] line) {
     final SortedSet<Integer> perfRounds = new TreeSet<>();
     for (final String element : line) {
       if (null != element
@@ -629,7 +634,7 @@ public class TournamentSchedule implements Serializable {
     return perfRounds.size();
   }
 
-  private static int countNumPracticeRounds(final String[] line) {
+  private static int countNumPracticeRounds(final @Nullable String[] line) {
     final SortedSet<Integer> perfRounds = new TreeSet<>();
     for (final String element : line) {
       if (null != element
@@ -693,7 +698,7 @@ public class TournamentSchedule implements Serializable {
     return perfRounds.size();
   }
 
-  private static boolean checkHeaderExists(final String[] line,
+  private static boolean checkHeaderExists(final @Nullable String[] line,
                                            final String header) {
     return null != columnForHeader(line, header);
   }
@@ -703,7 +708,7 @@ public class TournamentSchedule implements Serializable {
    *
    * @return the column, null if not found
    */
-  private static @Nullable Integer columnForHeader(final String[] line,
+  private static @Nullable Integer columnForHeader(final @Nullable String[] line,
                                                    final String header) {
     for (int i = 0; i < line.length; ++i) {
       if (header.equals(line[i])) {
@@ -718,7 +723,7 @@ public class TournamentSchedule implements Serializable {
    * it
    * not found.
    */
-  private static int getColumnForHeader(final String[] line,
+  private static int getColumnForHeader(final @Nullable String[] line,
                                         final String header)
       throws MissingColumnException {
     final Integer column = columnForHeader(line, header);
@@ -733,7 +738,7 @@ public class TournamentSchedule implements Serializable {
   }
 
   private static ColumnInformation parseHeader(final Collection<String> subjectiveHeaders,
-                                               final String[] line) {
+                                               final @Nullable String[] line) {
     final int numPerfRounds = countNumRegularMatchPlayRounds(line);
     final int numPracticeRounds = countNumPracticeRounds(line);
 
@@ -1290,7 +1295,7 @@ public class TournamentSchedule implements Serializable {
                                                final CellFileReader reader,
                                                final ColumnInformation ci)
       throws IOException, ParseException, ScheduleParseException {
-    final String[] line = reader.readNext();
+    final @Nullable String @Nullable [] line = reader.readNext();
     if (null == line) {
       return null;
     }
@@ -1317,7 +1322,8 @@ public class TournamentSchedule implements Serializable {
         final String station = entry.getValue();
         final int column = entry.getKey();
         final String str = line[column];
-        if (str.isEmpty()) {
+        if (null == str
+            || str.isEmpty()) {
           // If we got an empty string, then we must have hit the end
           return null;
         }
@@ -1331,11 +1337,19 @@ public class TournamentSchedule implements Serializable {
       // parse regular match play rounds
       for (int perfIndex = 0; perfIndex < ci.getNumPerfs(); ++perfIndex) {
         final String perf1Str = line[ci.getPerfColumn(perfIndex)];
-        if (perf1Str.isEmpty()) {
+        if (null == perf1Str
+            || perf1Str.isEmpty()) {
           // If we got an empty string, then we must have hit the end
           return null;
         }
+
         final String table = line[ci.getPerfTableColumn(perfIndex)];
+        if (null == table
+            || table.isEmpty()) {
+          // If we got an empty string, then we must have hit the end
+          return null;
+        }
+
         final String[] tablePieces = table.split(" ");
         if (tablePieces.length != 2) {
           throw new RuntimeException("Error parsing table information from: "
@@ -1364,11 +1378,18 @@ public class TournamentSchedule implements Serializable {
       // parse practice rounds
       for (int perfIndex = 0; perfIndex < ci.getNumPracticePerfs(); ++perfIndex) {
         final String perf1Str = line[ci.getPracticePerfColumn(perfIndex)];
-        if (perf1Str.isEmpty()) {
+        if (null == perf1Str
+            || perf1Str.isEmpty()) {
           // If we got an empty string, then we must have hit the end
           return null;
         }
         final String table = line[ci.getPracticePerfTableColumn(perfIndex)];
+        if (null == table
+            || table.isEmpty()) {
+          // If we got an empty string, then we must have hit the end
+          return null;
+        }
+
         final String[] tablePieces = table.split(" ");
         if (tablePieces.length != 2) {
           throw new RuntimeException("Error parsing table information from: "
@@ -1701,7 +1722,7 @@ public class TournamentSchedule implements Serializable {
      * @param practiceColumn {@link #getPracticePerfColumn(int)}
      * @param practiceTableColumn {@link #getPracticePerfTableColumn(int)}
      */
-    public ColumnInformation(final String[] headerLine,
+    public ColumnInformation(final @Nullable String[] headerLine,
                              final int teamNumColumn,
                              final int organizationColumn,
                              final int teamNameColumn,

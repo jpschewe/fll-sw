@@ -12,7 +12,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.google.common.collect.Streams;
@@ -24,13 +23,13 @@ public final class TeamScheduleInfo implements Serializable {
 
   private final int teamNumber;
 
-  private @MonotonicNonNull String teamName;
+  private @Nullable String teamName;
 
-  private @MonotonicNonNull String organization;
+  private @Nullable String organization;
 
-  private @MonotonicNonNull String awardGroup;
+  private @Nullable String awardGroup;
 
-  private @MonotonicNonNull String judgingGroup;
+  private @Nullable String judgingGroup;
 
   private final SortedSet<PerformanceTime> performances = new TreeSet<>();
 
@@ -153,7 +152,7 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * @param teamName the teamName to set
    */
-  public void setTeamName(final String teamName) {
+  public void setTeamName(final @Nullable String teamName) {
     this.teamName = teamName;
   }
 
@@ -171,7 +170,7 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * @param organization the organization to set
    */
-  public void setOrganization(final String organization) {
+  public void setOrganization(final @Nullable String organization) {
     this.organization = organization;
   }
 
@@ -189,7 +188,7 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * @param division award group to set
    */
-  public void setDivision(final String division) {
+  public void setDivision(final @Nullable String division) {
     this.awardGroup = division;
   }
 
@@ -207,7 +206,7 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * @param judge the judging group
    */
-  public void setJudgingGroup(final String judge) {
+  public void setJudgingGroup(final @Nullable String judge) {
     this.judgingGroup = judge;
   }
 
