@@ -162,7 +162,7 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private final @NotOnlyInitialized ChooseChallengeDescriptor chooseChallengeDescriptor = new ChooseChallengeDescriptor(SchedulerUI.this);
+  private final @NotOnlyInitialized ChooseChallengeDescriptor chooseChallengeDescriptor;
 
   private static final String BASE_TITLE = "FLL Scheduler";
 
@@ -172,6 +172,8 @@ public class SchedulerUI extends JFrame {
   public SchedulerUI() {
     super(BASE_TITLE);
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+    chooseChallengeDescriptor = new ChooseChallengeDescriptor(SchedulerUI.this);
 
     progressDialog = new ProgressDialog(SchedulerUI.this, "Please Wait");
     progressDialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
