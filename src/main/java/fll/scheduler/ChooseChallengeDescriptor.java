@@ -7,7 +7,6 @@
 package fll.scheduler;
 
 import java.awt.Component;
-import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -32,6 +31,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.FLLInternalException;
@@ -54,20 +54,9 @@ public class ChooseChallengeDescriptor extends JDialog {
   /**
    * @param owner parent component
    */
-  public ChooseChallengeDescriptor(final Frame owner) {
+  public ChooseChallengeDescriptor(final @UnknownInitialization(Frame.class) Frame owner) {
     super(owner, true);
-    initComponents();
-  }
 
-  /**
-   * @param owner parent component
-   */
-  public ChooseChallengeDescriptor(final Dialog owner) {
-    super(owner, true);
-    initComponents();
-  }
-
-  private void initComponents() {
     getContentPane().setLayout(new GridBagLayout());
 
     GridBagConstraints gbc = new GridBagConstraints();

@@ -36,4 +36,6 @@ public class JDialog extends Dialog implements WindowConstants,
   
   public Container getContentPane(@UnknownInitialization(JDialog.class) JDialog this);
 
+  public void setDefaultCloseOperation(@UnknownInitialization(JDialog.class) JDialog this, int operation);
+  
 }

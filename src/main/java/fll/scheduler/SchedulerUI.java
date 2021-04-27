@@ -77,6 +77,7 @@ import javax.swing.table.TableCellRenderer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -161,7 +162,7 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private final ChooseChallengeDescriptor chooseChallengeDescriptor = new ChooseChallengeDescriptor(SchedulerUI.this);
+  private final @NotOnlyInitialized ChooseChallengeDescriptor chooseChallengeDescriptor = new ChooseChallengeDescriptor(SchedulerUI.this);
 
   private static final String BASE_TITLE = "FLL Scheduler";
 
@@ -174,8 +175,6 @@ public class SchedulerUI extends JFrame {
 
     progressDialog = new ProgressDialog(SchedulerUI.this, "Please Wait");
     progressDialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-
-    setJMenuBar(createMenubar());
 
     final Container cpane = getContentPane();
     cpane.setLayout(new BorderLayout());
@@ -250,6 +249,9 @@ public class SchedulerUI extends JFrame {
 
     // --- end schedule panel
 
+    // object initialized
+    setJMenuBar(createMenubar());
+
     // initial state
     mWriteSchedulesAction.setEnabled(false);
     mDisplayGeneralScheduleAction.setEnabled(false);
@@ -293,9 +295,17 @@ public class SchedulerUI extends JFrame {
       final int returnVal = fileChooser.showSaveDialog(SchedulerUI.this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
         final File currentDirectory = fileChooser.getCurrentDirectory();
+        if (null == currentDirectory) {
+          return;
+        }
+
         PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
 
         File selectedFile = fileChooser.getSelectedFile();
+        if (null == selectedFile) {
+          return;
+        }
+
         if (!selectedFile.getName().endsWith(".properties")) {
           selectedFile = new File(selectedFile.getAbsolutePath()
               + ".properties");
@@ -482,7 +492,7 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private final ProgressDialog progressDialog;
+  private final @NotOnlyInitialized ProgressDialog progressDialog;
 
   private final class OptimizerWorker extends SwingWorker<Void, Void> {
     private final TableOptimizer optimizer;
@@ -612,8 +622,7 @@ public class SchedulerUI extends JFrame {
     mDescriptionFilename.setText(file.getName());
   }
 
-  @UnknownInitialization(JFrame.class)
-  private JToolBar createDescriptionToolbar() {
+  private JToolBar createDescriptionToolbar(@UnknownInitialization(JFrame.class) SchedulerUI this) {
     final JToolBar toolbar = new JToolBar("Description Toolbar");
     toolbar.setFloatable(false);
 
@@ -627,7 +636,6 @@ public class SchedulerUI extends JFrame {
     return toolbar;
   }
 
-  @UnknownInitialization(JFrame.class)
   private JToolBar createScheduleToolbar(@UnderInitialization(JFrame.class) SchedulerUI this) {
     final JToolBar toolbar = new JToolBar("Schedule Toolbar");
     toolbar.setFloatable(false);
@@ -642,8 +650,7 @@ public class SchedulerUI extends JFrame {
     return toolbar;
   }
 
-  @UnknownInitialization(JFrame.class)
-  private JMenuBar createMenubar() {
+  private JMenuBar createMenubar(@UnknownInitialization(JFrame.class) SchedulerUI this) {
     final JMenuBar menubar = new JMenuBar();
 
     menubar.add(createFileMenu());
@@ -655,8 +662,7 @@ public class SchedulerUI extends JFrame {
     return menubar;
   }
 
-  @UnknownInitialization(JFrame.class)
-  private JMenu createScheduleMenu() {
+  private JMenu createScheduleMenu(@UnknownInitialization(JFrame.class) SchedulerUI this) {
     final JMenu menu = new JMenu("Schedule");
     menu.setMnemonic('s');
 
@@ -669,8 +675,7 @@ public class SchedulerUI extends JFrame {
     return menu;
   }
 
-  @UnknownInitialization(JFrame.class)
-  private JMenu createDescriptionMenu() {
+  private JMenu createDescriptionMenu(@UnknownInitialization(JFrame.class) SchedulerUI this) {
     final JMenu menu = new JMenu("Description");
     menu.setMnemonic('d');
 
@@ -682,8 +687,7 @@ public class SchedulerUI extends JFrame {
     return menu;
   }
 
-  @UnknownInitialization(JFrame.class)
-  private JMenu createFileMenu() {
+  private JMenu createFileMenu(@UnknownInitialization(JFrame.class) SchedulerUI this) {
     final JMenu menu = new JMenu("File");
     menu.setMnemonic('f');
 
