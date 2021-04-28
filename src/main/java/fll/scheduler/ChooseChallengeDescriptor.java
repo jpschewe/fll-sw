@@ -49,7 +49,7 @@ public class ChooseChallengeDescriptor extends JDialog {
 
   private JLabel mFileField;
 
-  private URL mSelected = null;
+  private @Nullable URL mSelected = null;
 
   /**
    * @param owner parent component
@@ -158,7 +158,7 @@ public class ChooseChallengeDescriptor extends JDialog {
   /**
    * @return the chosen challenge descriptor, null if the user canceled.
    */
-  public URL getSelectedDescription() {
+  public @Nullable URL getSelectedDescription() {
     return mSelected;
   }
 
@@ -167,7 +167,7 @@ public class ChooseChallengeDescriptor extends JDialog {
       mDelegate = new BasicComboBoxRenderer();
     }
 
-    private final BasicComboBoxRenderer mDelegate;
+    private final ListCellRenderer<Object> mDelegate;
 
     @Override
     public Component getListCellRendererComponent(final JList<? extends DescriptionInfo> list,

@@ -68,7 +68,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
     case 0:
       return violation.getMessage();
     default:
-      return null;
+      return "";
     }
   }
 
@@ -88,7 +88,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
     case 0:
       return "Message";
     default:
-      return null;
+      return "";
     }
   }
 
