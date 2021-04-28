@@ -13,11 +13,13 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Model for displaying and editing a list of performance rounds.
  */
-/*package*/ class PerformanceRoundsModel extends AbstractTableModel {
-  private final ArrayList<LocalTime> times = new ArrayList<>();
+/* package */ class PerformanceRoundsModel extends AbstractTableModel {
+  private final ArrayList<@Nullable LocalTime> times = new ArrayList<>();
 
   PerformanceRoundsModel() {
   }
@@ -40,7 +42,7 @@ import javax.swing.table.AbstractTableModel;
     case 1:
       return "Earliest Start";
     default:
-      return null;
+      return "";
     }
   }
 
@@ -49,11 +51,13 @@ import javax.swing.table.AbstractTableModel;
                            final int columnIndex) {
     switch (columnIndex) {
     case 0:
-      return rowIndex + 1;
+      return rowIndex
+          + 1;
     case 1:
-      return times.get(rowIndex);
+      final LocalTime time = times.get(rowIndex);
+      return time == null ? "" : time;
     default:
-      return null;
+      return "";
     }
   }
 
@@ -63,7 +67,12 @@ import javax.swing.table.AbstractTableModel;
                          final int columnIndex) {
     switch (columnIndex) {
     case 1: {
-      final LocalTime newTime = (LocalTime) aValue;
+      final LocalTime newTime;
+      if (aValue instanceof LocalTime) {
+        newTime = (LocalTime) aValue;
+      } else {
+        newTime = null;
+      }
       times.set(rowIndex, newTime);
       break;
     }
@@ -98,7 +107,7 @@ import javax.swing.table.AbstractTableModel;
    * 
    * @param data the index specifies the round, null means no limit
    */
-  public void setData(final List<LocalTime> data) {
+  public void setData(final List<@Nullable LocalTime> data) {
     this.times.clear();
     this.times.addAll(data);
     fireTableDataChanged();
@@ -110,7 +119,7 @@ import javax.swing.table.AbstractTableModel;
    * @return an unmodifiable list of the limits, null means the round can start
    *         as early as it wants
    */
-  public List<LocalTime> getData() {
+  public List<@Nullable LocalTime> getData() {
     return Collections.unmodifiableList(times);
   }
 

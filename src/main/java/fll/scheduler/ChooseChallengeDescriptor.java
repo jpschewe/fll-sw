@@ -162,15 +162,15 @@ public class ChooseChallengeDescriptor extends JDialog {
     return mSelected;
   }
 
-  private static final class DescriptionInfoRenderer implements ListCellRenderer<DescriptionInfo> {
+  private static final class DescriptionInfoRenderer implements ListCellRenderer<@Nullable DescriptionInfo> {
     DescriptionInfoRenderer() {
       mDelegate = new BasicComboBoxRenderer();
     }
 
-    private final ListCellRenderer<Object> mDelegate;
+    private final ListCellRenderer<@Nullable Object> mDelegate;
 
     @Override
-    public Component getListCellRendererComponent(final JList<? extends DescriptionInfo> list,
+    public Component getListCellRendererComponent(final JList<? extends @Nullable DescriptionInfo> list,
                                                   final @Nullable DescriptionInfo descriptionInfo,
                                                   final int index,
                                                   final boolean isSelected,

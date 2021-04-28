@@ -17,7 +17,7 @@ import fll.xml.AbstractGoal;
 /**
  * Render {@link AbstractGoal} objects as their title.
  */
-/*package*/ final class AbstractGoalCellRenderer implements ListCellRenderer<AbstractGoal> {
+/* package */ final class AbstractGoalCellRenderer implements ListCellRenderer<AbstractGoal> {
 
   private final DefaultListCellRenderer delegate = new DefaultListCellRenderer();
 

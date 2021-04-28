@@ -17,6 +17,9 @@ import javax.swing.JFormattedTextField;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.MaskFormatter;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.util.FLLInternalException;
 
 /**
@@ -56,11 +59,15 @@ import fll.util.FLLInternalException;
    * Retrieve the current value as a {@link Duration} object
    *
    * @return Current value as a {@link Duration} object
-   * @throws java.text.ParseException
    */
   public Duration getDuration() {
     final String str = getDurationText((String) getValue());
     final Duration d = parseDuration(str);
+    if (null == d) {
+      throw new FLLInternalException("Unparsable duration from formatted field '"
+          + str
+          + "'");
+    }
     return d;
   }
 
@@ -71,7 +78,7 @@ import fll.util.FLLInternalException;
    * @param str the string to parse
    * @return null if the string cannot be parsed as a duration
    */
-  private static Duration parseDuration(final String str) {
+  private static @Nullable Duration parseDuration(final String str) {
     final int colonIndex = str.indexOf(':');
     if (colonIndex < 0) {
       return null;
@@ -100,7 +107,8 @@ import fll.util.FLLInternalException;
    *
    * @param duration the new value, cannot be null
    */
-  public void setDuration(final Duration duration) {
+  public void setDuration(@UnknownInitialization(ScheduleDurationField.class) ScheduleDurationField this,
+                          final Duration duration) {
     final long asMinutes = duration.toMinutes();
     final long hours = asMinutes
         / 60;

@@ -42,7 +42,7 @@ public class JudgingGroupModel extends AbstractTableModel {
     case 2:
       return "Delete";
     default:
-      return null;
+      return "";
     }
   }
 
@@ -59,7 +59,7 @@ public class JudgingGroupModel extends AbstractTableModel {
     case 2:
       return "Delete";
     default:
-      return null;
+      return "";
     }
   }
 

@@ -47,7 +47,7 @@ public class ScheduledBreakModel extends AbstractTableModel {
     case 2:
       return "Delete";
     default:
-      return null;
+      return "";
     }
   }
 
@@ -65,7 +65,7 @@ public class ScheduledBreakModel extends AbstractTableModel {
     case 2:
       return "Delete";
     default:
-      return null;
+      return "";
     }
   }
 

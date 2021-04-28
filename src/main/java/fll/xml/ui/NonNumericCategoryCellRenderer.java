@@ -12,6 +12,8 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.xml.NonNumericCategory;
 
 /**
@@ -23,7 +25,7 @@ import fll.xml.NonNumericCategory;
 
   @Override
   public Component getListCellRendererComponent(final JList<? extends NonNumericCategory> list,
-                                                final NonNumericCategory value,
+                                                final @Nullable NonNumericCategory value,
                                                 final int index,
                                                 final boolean isSelected,
                                                 final boolean cellHasFocus) {

@@ -45,7 +45,7 @@ public class SubjectiveStationModel extends AbstractTableModel {
     case 2:
       return "Delete";
     default:
-      return null;
+      return "";
     }
   }
 
@@ -61,7 +61,7 @@ public class SubjectiveStationModel extends AbstractTableModel {
     case 2:
       return "Delete";
     default:
-      return null;
+      return "";
     }
   }
 
