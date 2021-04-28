@@ -1,0 +1,14 @@
+package javax.swing;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public class JTextField extends JTextComponent implements SwingConstants {
+
+  public JTextField(@Nullable String text);
+
+  public JTextField(@Nullable String text, int columns);
+  
+  public JTextField(@Nullable Document doc, @Nullable String text, int columns);
+
+}
