@@ -619,7 +619,13 @@ public final class ScheduleWriter {
             + subjectiveStation);
       }
       final LocalTime start = stime.getTime();
-      final LocalTime end = start.plus(params.getStationByName(subjectiveStation).getDuration());
+      final SubjectiveStation station = params.getStationByName(subjectiveStation);
+      if (null == station) {
+        throw new FLLInternalException("Could not find subjective station object for '"
+            + subjectiveStation
+            + "'");
+      }
+      final LocalTime end = start.plus(station.getDuration());
       value.appendChild(document.createTextNode(String.format("%s - %s", TournamentSchedule.formatTime(start),
                                                               TournamentSchedule.formatTime(end))));
 
@@ -837,8 +843,10 @@ public final class ScheduleWriter {
       lastRow = row;
     }
 
-    // make sure the last row isn't by itself
-    FOPUtils.keepWithPreviousAlways(lastRow);
+    if (null != lastRow) {
+      // make sure the last row isn't by itself
+      FOPUtils.keepWithPreviousAlways(lastRow);
+    }
 
     return table;
   }
@@ -1011,8 +1019,10 @@ public final class ScheduleWriter {
       lastRow = row;
     }
 
-    // make sure the last row isn't by itself
-    FOPUtils.keepWithPreviousAlways(lastRow);
+    if (null != lastRow) {
+      // make sure the last row isn't by itself
+      FOPUtils.keepWithPreviousAlways(lastRow);
+    }
 
     return document;
   }
@@ -1181,8 +1191,10 @@ public final class ScheduleWriter {
       lastRow = row;
     }
 
-    // make sure the last row isn't by itself
-    FOPUtils.keepWithPreviousAlways(lastRow);
+    if (null != lastRow) {
+      // make sure the last row isn't by itself
+      FOPUtils.keepWithPreviousAlways(lastRow);
+    }
 
     return table;
 
