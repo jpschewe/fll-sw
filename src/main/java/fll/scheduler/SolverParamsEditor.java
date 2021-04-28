@@ -18,6 +18,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
+
 import fll.util.FormatterUtils;
 
 /**
@@ -139,7 +141,8 @@ public class SolverParamsEditor extends JPanel {
    * 
    * @param components the components to add
    */
-  private void addRow(final JComponent... components) {
+  private void addRow(@UnderInitialization(JPanel.class) SolverParamsEditor this,
+                      final JComponent... components) {
     GridBagConstraints gbc;
 
     // for (final JComponent comp : components) {
@@ -162,7 +165,7 @@ public class SolverParamsEditor extends JPanel {
         - 1], gbc);
   }
 
-  private SolverParams params;
+  private SolverParams params = new SolverParams();
 
   /**
    * @param params {@link #getParams()}
