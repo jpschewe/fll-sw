@@ -80,7 +80,11 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.RequiresNonNull;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
@@ -321,7 +325,8 @@ public class SchedulerUI extends JFrame {
       }
     }
 
-    try (Writer writer = new OutputStreamWriter(new FileOutputStream(mScheduleDescriptionFile),
+    // mScheduleDescriptionFile needs to be non-null by now
+    try (Writer writer = new OutputStreamWriter(new FileOutputStream(castNonNull(mScheduleDescriptionFile)),
                                                 Utilities.DEFAULT_CHARSET)) {
       final SolverParams params = mScheduleDescriptionEditor.getParams();
       final List<String> errors = params.isValid();
@@ -394,7 +399,17 @@ public class SchedulerUI extends JFrame {
     try {
       saveScheduleDescription();
 
-      final SchedulerWorker worker = new SchedulerWorker();
+      if (null == mScheduleDescriptionFile) {
+        final Formatter errorFormatter = new Formatter();
+        errorFormatter.format("Schedule description not saved, cannot run scheduler");
+        LOGGER.error(errorFormatter);
+        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Cannot Run Scheduler",
+                                      JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+
+      // description not null by now
+      final SchedulerWorker worker = new SchedulerWorker(castNonNull(mScheduleDescriptionFile));
 
       // make sure the task doesn't start until the window is up
       progressDialog.addComponentListener(new ComponentAdapter() {
@@ -432,8 +447,8 @@ public class SchedulerUI extends JFrame {
   private final class SchedulerWorker extends SwingWorker<Integer, Void> {
     private final GreedySolver solver;
 
-    SchedulerWorker() throws IOException, ParseException, InvalidParametersException {
-      this.solver = new GreedySolver(mScheduleDescriptionFile, false);
+    SchedulerWorker(final File descriptionFile) throws IOException, ParseException, InvalidParametersException {
+      this.solver = new GreedySolver(descriptionFile, false);
     }
 
     @Override
@@ -624,6 +639,7 @@ public class SchedulerUI extends JFrame {
     mDescriptionFilename.setText(file.getName());
   }
 
+  @RequiresNonNull({ "mDescriptionFilename" })
   private JToolBar createDescriptionToolbar(@UnknownInitialization(JFrame.class) SchedulerUI this) {
     final JToolBar toolbar = new JToolBar("Description Toolbar");
     toolbar.setFloatable(false);
@@ -638,6 +654,7 @@ public class SchedulerUI extends JFrame {
     return toolbar;
   }
 
+  @RequiresNonNull({ "mScheduleFilename" })
   private JToolBar createScheduleToolbar(@UnderInitialization(JFrame.class) SchedulerUI this) {
     final JToolBar toolbar = new JToolBar("Schedule Toolbar");
     toolbar.setFloatable(false);
@@ -904,8 +921,13 @@ public class SchedulerUI extends JFrame {
    */
   private void runTableOptimizer() {
     try {
-      final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData,
-                                                          mScheduleFile.getAbsoluteFile().getParentFile());
+      File scheduleDirectory = mScheduleFile.getAbsoluteFile().getParentFile();
+      if (null == scheduleDirectory) {
+        // use current working directory
+        scheduleDirectory = new File(".");
+      }
+
+      final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData, scheduleDirectory);
 
       final OptimizerWorker optimizerWorker = new OptimizerWorker(optimizer);
 
@@ -948,7 +970,7 @@ public class SchedulerUI extends JFrame {
       final String sheetName;
       if (csv) {
         reader = new CSVCellReader(selectedFile);
-        sheetName = null;
+        sheetName = "ignored";
       } else {
         sheetName = promptForSheetName(selectedFile);
         if (null == sheetName) {
@@ -1130,22 +1152,23 @@ public class SchedulerUI extends JFrame {
   private static final String DESCRIPTION_STARTING_DIRECTORY_PREF = "descriptionStartingDirectory";
 
   @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class isn't going to be serialized")
-  private @Nullable TournamentSchedule mScheduleData;
+  private @MonotonicNonNull TournamentSchedule mScheduleData;
 
-  /* package */ @Nullable
+  /* package */
   TournamentSchedule getScheduleData() {
     return mScheduleData;
   }
 
-  private @Nullable SchedParams mSchedParams;
+  private SchedParams mSchedParams = new SchedParams();
 
   /**
    * @return the current schedule parameters
    */
-  public @Nullable SchedParams getSchedParams() {
+  public SchedParams getSchedParams() {
     return mSchedParams;
   }
 
+  @RequiresNonNull({ "changeDuration", "performanceChangeDuration", "performanceDuration" })
   private void setSchedParams(@UnderInitialization(JFrame.class) SchedulerUI this,
                               final SchedParams params) {
     mSchedParams = params;
