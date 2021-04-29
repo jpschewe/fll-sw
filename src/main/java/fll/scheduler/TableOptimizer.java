@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -29,6 +30,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.Utilities;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
@@ -55,9 +58,9 @@ public class TableOptimizer {
 
   private int numSolutions = 0;
 
-  private File mBestScheduleOutputFile = null;
+  private @Nullable File mBestScheduleOutputFile = null;
 
-  private @Nullable Map<PerformanceTime, TeamScheduleInfo> bestPermutation = null;
+  private Map<PerformanceTime, TeamScheduleInfo> bestPermutation = Collections.emptyMap();
 
   private int bestScore;
 
@@ -75,7 +78,7 @@ public class TableOptimizer {
    * @return the file containing the best schedule or null if no such schedule
    *         has been found
    */
-  public File getBestScheduleOutputFile() {
+  public @Nullable File getBestScheduleOutputFile() {
     return mBestScheduleOutputFile;
   }
 
@@ -170,7 +173,7 @@ public class TableOptimizer {
       throw new IllegalArgumentException("Must have some teams to check");
     }
 
-    if (null == bestPermutation) {
+    if (bestPermutation.isEmpty()) {
       bestPermutation = getCurrentTableAssignments(time);
       bestScore = computeScheduleScore();
     }
@@ -266,21 +269,30 @@ public class TableOptimizer {
         final int teamIndex2 = ordering.get(orderIndex2);
         final TeamScheduleInfo team2 = getTeam(teams, teamIndex2);
 
+        // if the values are not null they are guaranteed to be keys for originalValues
         if (null != team1
             && null != team2) {
-          assignments.put(new PerformanceTime(time, tableColor, side1, originalValues.get(team1).isPractice()), team1);
-          assignments.put(new PerformanceTime(time, tableColor, side2, originalValues.get(team2).isPractice()), team2);
+          assignments.put(new PerformanceTime(time, tableColor, side1,
+                                              castNonNull(originalValues.get(team1)).isPractice()),
+                          team1);
+          assignments.put(new PerformanceTime(time, tableColor, side2,
+                                              castNonNull(originalValues.get(team2)).isPractice()),
+                          team2);
         } else if (null != team1
             && null == team2
             && validToHaveNullTeam) {
-          assignments.put(new PerformanceTime(time, tableColor, side1, originalValues.get(team1).isPractice()), team1);
+          assignments.put(new PerformanceTime(time, tableColor, side1,
+                                              castNonNull(originalValues.get(team1)).isPractice()),
+                          team1);
 
           // can only have 1 uneven pairing at a time
           validToHaveNullTeam = false;
         } else if (null == team1
             && null != team2
             && validToHaveNullTeam) {
-          assignments.put(new PerformanceTime(time, tableColor, side2, originalValues.get(team2).isPractice()), team2);
+          assignments.put(new PerformanceTime(time, tableColor, side2,
+                                              castNonNull(originalValues.get(team2)).isPractice()),
+                          team2);
 
           // can only have 1 uneven pairing at a time
           validToHaveNullTeam = false;
@@ -407,11 +419,12 @@ public class TableOptimizer {
     for (final ConstraintViolation violation : violations) {
       if (isPerformanceViolation(violation)) {
         final List<ConstraintViolation> vs;
-        if (teamViolations.containsKey(violation.getTeam())) {
-          vs = teamViolations.get(violation.getTeam());
+        final Integer violationTeam = violation.getTeam();
+        if (teamViolations.containsKey(violationTeam)) {
+          vs = teamViolations.get(violationTeam);
         } else {
           vs = new LinkedList<>();
-          teamViolations.put(violation.getTeam(), vs);
+          teamViolations.put(violationTeam, vs);
         }
         vs.add(violation);
       }
@@ -475,7 +488,7 @@ public class TableOptimizer {
       final String sheetName;
       if (csv) {
         reader = new CSVCellReader(schedfile);
-        sheetName = null;
+        sheetName = "ignored";
       } else {
         sheetName = SchedulerUI.promptForSheetName(schedfile);
         if (null == sheetName) {
@@ -514,8 +527,13 @@ public class TableOptimizer {
         schedule = new TournamentSchedule(name, fis, sheetName, subjectiveHeaders);
       }
 
-      final TableOptimizer optimizer = new TableOptimizer(params, schedule,
-                                                          schedfile.getAbsoluteFile().getParentFile());
+      final File schedfileDirectory = schedfile.getAbsoluteFile().getParentFile();
+      if (null == schedfileDirectory) {
+        throw new FLLRuntimeException("No directory for '"
+            + schedfile.getAbsolutePath()
+            + "'");
+      }
+      final TableOptimizer optimizer = new TableOptimizer(params, schedule, schedfileDirectory);
       final long start = System.currentTimeMillis();
       optimizer.optimize(null);
       final long stop = System.currentTimeMillis();
@@ -694,7 +712,7 @@ public class TableOptimizer {
    * @param checkCanceled if non-null, checked to see if the optimizer should
    *          exit early
    */
-  public void optimize(final CheckCanceled checkCanceled) {
+  public void optimize(final @Nullable CheckCanceled checkCanceled) {
     final Set<Integer> optimizedTeams = new HashSet<>();
     final Set<LocalTime> optimizedTimes = new HashSet<>();
 
@@ -750,6 +768,9 @@ public class TableOptimizer {
             tables = group;
           }
         }
+        if (null == tables) {
+          throw new FLLInternalException("No tables found");
+        }
         perfTables.put(time, tables);
 
         int count = 0;
@@ -768,6 +789,10 @@ public class TableOptimizer {
       final int useCount = entry.getValue();
 
       final List<String> tables = perfTables.get(time);
+      if (null == tables) {
+        throw new FLLInternalException("Cannot find tables at time: "
+            + TournamentSchedule.formatTime(time));
+      }
       if (tables.isEmpty()) {
         throw new FLLInternalException("No tables found at time: "
             + TournamentSchedule.formatTime(time));
@@ -827,7 +852,11 @@ public class TableOptimizer {
 
       } // foreach schedule item
 
-      computeBestTableOrdering(originalPerformances, time, tables, checkCanceled);
+      if (null == tables) {
+        throw new FLLRuntimeException("Cannot find any tables");
+      } else {
+        computeBestTableOrdering(originalPerformances, time, tables, checkCanceled);
+      }
 
     } // foreach time
   }
