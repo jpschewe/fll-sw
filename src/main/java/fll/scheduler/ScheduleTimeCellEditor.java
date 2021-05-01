@@ -14,6 +14,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Table cell editor for {@link LocalTime} schedule objects.
  */
@@ -35,7 +37,7 @@ import javax.swing.table.TableCellEditor;
   }
 
   @Override
-  public Object getCellEditorValue() {
+  public @Nullable Object getCellEditorValue() {
     final LocalTime value = delegate.getTime();
     return value;
   }
@@ -59,7 +61,7 @@ import javax.swing.table.TableCellEditor;
 
   @Override
   public Component getTableCellEditorComponent(final JTable table,
-                                               final Object value,
+                                               final @Nullable Object value,
                                                final boolean isSelected,
                                                final int row,
                                                final int column) {

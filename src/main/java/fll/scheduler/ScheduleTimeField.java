@@ -68,7 +68,6 @@ import fll.util.FLLInternalException;
    * Retrieve the current value as a {@link LocalTime} object
    * 
    * @return Current value as a {@link LocalTime} object, may be null
-   * @throws java.text.ParseException
    */
   public @Nullable LocalTime getTime() {
     final String str = getTimeText(getText());
@@ -89,7 +88,7 @@ import fll.util.FLLInternalException;
    * @param time the new value
    */
   public void setTime(@UnknownInitialization(ScheduleTimeField.class) ScheduleTimeField this,
-                      final LocalTime time) {
+                      final @Nullable LocalTime time) {
     if (null != time) {
       final String formatted = TIME_FORMAT.format(time);
       setValue(formatted);
