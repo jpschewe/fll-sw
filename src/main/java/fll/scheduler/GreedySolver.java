@@ -36,7 +36,11 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
 import com.opencsv.CSVWriter;
 
@@ -131,7 +135,7 @@ public class GreedySolver {
 
   private final boolean optimize;
 
-  private final FewestAssignments fewestAssignments;
+  private final @NotOnlyInitialized FewestAssignments fewestAssignments;
 
   private static final String OPTIMIZE_OPTION = "o";
 
@@ -256,7 +260,7 @@ public class GreedySolver {
     pz = new boolean[solverParameters.getNumGroups()][][][][];
     py = new boolean[solverParameters.getNumGroups()][][][][];
     subjectiveScheduled = new boolean[solverParameters.getNumGroups()][][];
-    subjectiveStations = new int[solverParameters.getNumGroups()][getNumSubjectiveStations()];
+    subjectiveStations = new int[solverParameters.getNumGroups()][solverParameters.getNumSubjectiveStations()];
     performanceScheduled = new int[solverParameters.getNumGroups()][];
 
     final List<Integer> performanceOffsets = new ArrayList<>();
@@ -286,7 +290,7 @@ public class GreedySolver {
       // compute all possible performance time slots for the table
       final List<Integer> possibleTimeSlots = new LinkedList<>();
       int perfOffsetIndex = 0;
-      while (timeslot < getNumTimeslots()) {
+      while (timeslot < numTimeslots) {
         possibleTimeSlots.add(timeslot);
 
         final int perfOffset = performanceOffsets.get(perfOffsetIndex);
@@ -308,15 +312,15 @@ public class GreedySolver {
       final int count = entry.getValue();
 
       groupNames[group] = entry.getKey();
-      sz[group] = new boolean[count][getNumSubjectiveStations()][getNumTimeslots()];
-      sy[group] = new boolean[count][getNumSubjectiveStations()][getNumTimeslots()];
-      pz[group] = new boolean[count][solverParameters.getNumTables()][2][getNumTimeslots()];
-      py[group] = new boolean[count][solverParameters.getNumTables()][2][getNumTimeslots()];
-      subjectiveScheduled[group] = new boolean[count][getNumSubjectiveStations()];
+      sz[group] = new boolean[count][solverParameters.getNumSubjectiveStations()][numTimeslots];
+      sy[group] = new boolean[count][solverParameters.getNumSubjectiveStations()][numTimeslots];
+      pz[group] = new boolean[count][solverParameters.getNumTables()][2][numTimeslots];
+      py[group] = new boolean[count][solverParameters.getNumTables()][2][numTimeslots];
+      subjectiveScheduled[group] = new boolean[count][solverParameters.getNumSubjectiveStations()];
       for (int team = 0; team < count; ++team) {
         teams.add(new SchedTeam(team, group));
 
-        for (int station = 0; station < getNumSubjectiveStations(); ++station) {
+        for (int station = 0; station < solverParameters.getNumSubjectiveStations(); ++station) {
           Arrays.fill(sz[group][team][station], false);
           Arrays.fill(sy[group][team][station], false);
         }
@@ -340,6 +344,8 @@ public class GreedySolver {
     populatePerfEarliestTimes();
 
     fewestAssignments = new FewestAssignments(this);
+
+    // object initialized
 
     // sort list of teams to make sure that the scheduler is deterministic
     Collections.sort(teams, LOWEST_TEAM_INDEX);
@@ -912,9 +918,9 @@ public class GreedySolver {
    * @param side
    * @return the team or null if no team can be found
    */
-  private SchedTeam findPrevTeamOnTable(final int timeslot,
-                                        final int table,
-                                        final int side) {
+  private @Nullable SchedTeam findPrevTeamOnTable(final int timeslot,
+                                                  final int table,
+                                                  final int side) {
     for (int slot = timeslot
         - 1; slot >= 0; --slot) {
       for (final SchedTeam team : getAllTeams()) {
@@ -970,8 +976,10 @@ public class GreedySolver {
    * Populate {@link #perfEarliestTimes} to cache performance earliest start
    * times.
    */
-  private void populatePerfEarliestTimes() {
-    final List<LocalTime> times = solverParameters.getPerformanceRoundEarliestStartTimes();
+  @RequiresNonNull({ "solverParameters" })
+  @EnsuresNonNull({ "perfEarliestTimes" })
+  private void populatePerfEarliestTimes(@UnderInitialization GreedySolver this) {
+    final List<@Nullable LocalTime> times = solverParameters.getPerformanceRoundEarliestStartTimes();
     perfEarliestTimes = new long[times.size()];
     for (int i = 0; i < perfEarliestTimes.length; ++i) {
       final LocalTime time = times.get(i);
@@ -1068,7 +1076,7 @@ public class GreedySolver {
     return Collections.unmodifiableList(teams);
   }
 
-  private CheckCanceled checkCanceled = null;
+  private @Nullable CheckCanceled checkCanceled = null;
 
   /**
    * Solve the problem.
@@ -1077,7 +1085,7 @@ public class GreedySolver {
    *          interrupted
    * @return the number of solutions found
    */
-  public int solve(final CheckCanceled checkCanceled) {
+  public int solve(final @Nullable CheckCanceled checkCanceled) {
     this.checkCanceled = checkCanceled;
 
     try {
@@ -1139,7 +1147,7 @@ public class GreedySolver {
    * @param scheduleFile
    * @return the objective value, null on failure
    */
-  private ObjectiveValue computeObjectiveValue(final File scheduleFile) {
+  private @Nullable ObjectiveValue computeObjectiveValue(final File scheduleFile) {
     final int[] numTeams = new int[solverParameters.getNumGroups()];
     final int[] latestSubjectiveTime = new int[solverParameters.getNumGroups()];
     for (int group = 0; group < numTeams.length; ++group) {
@@ -1285,7 +1293,12 @@ public class GreedySolver {
 
         // mark the performance station as used at this timeslot and advance the
         // next available slot
-        final int checkTimeslot = performanceTables.get(table).remove(0);
+        final List<Integer> availableTableSlots = performanceTables.get(table);
+        if (null == availableTableSlots) {
+          throw new FLLInternalException("Cannot find available slots for table "
+              + table);
+        }
+        final int checkTimeslot = availableTableSlots.remove(0);
         if (checkTimeslot != nextAvailablePerfSlot) {
           throw new FLLInternalException(String.format("Error the next available timeslot for the table (%d) doesn't match the one computed (%d)",
                                                        checkTimeslot, nextAvailablePerfSlot));
@@ -1320,7 +1333,12 @@ public class GreedySolver {
         }
       } else {
         for (final int table : possiblePerformanceTables) {
-          performanceTables.get(table).add(0, nextAvailablePerfSlot);
+          final List<Integer> availableTableSlots = performanceTables.get(table);
+          if (null == availableTableSlots) {
+            throw new FLLInternalException("Cannot find available slots for table "
+                + table);
+          }
+          availableTableSlots.add(0, nextAvailablePerfSlot);
         }
       }
     }
@@ -1339,8 +1357,14 @@ public class GreedySolver {
   private int findNextAvailablePerformanceSlot(final List<Integer> possiblePerformanceTables) {
     int nextAvailablePerfSlot = Integer.MAX_VALUE;
     for (int table = 0; table < solverParameters.getNumTables(); ++table) {
-      if (!performanceTables.get(table).isEmpty()) {
-        final int tableNextAvailable = performanceTables.get(table).get(0);
+      final List<Integer> tableSlotsAvailable = performanceTables.get(table);
+      if (null == tableSlotsAvailable) {
+        throw new FLLInternalException("Cannot find available slots for table "
+            + table);
+      }
+
+      if (!tableSlotsAvailable.isEmpty()) {
+        final int tableNextAvailable = tableSlotsAvailable.get(0);
 
         if (tableNextAvailable <= nextAvailablePerfSlot) {
           if (tableNextAvailable < nextAvailablePerfSlot) {
@@ -1566,10 +1590,10 @@ public class GreedySolver {
    *
    * @param slots the slots to look in
    * @param count which time to find, 1 based count
-   * @return
+   * @return the time or null if the time slot cannot be found
    */
-  private LocalTime getTime(final boolean[] slots,
-                            final int count) {
+  private @Nullable LocalTime getTime(final boolean[] slots,
+                                      final int count) {
     int n = 0;
     for (int i = 0; i < slots.length; ++i) {
       if (slots[i]) {
@@ -1652,9 +1676,9 @@ public class GreedySolver {
   @SuppressFBWarnings(value = "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", justification = "This comparator is not used in a TreeMap or other serializable class")
   private static final class FewestAssignments implements Comparator<SchedTeam> {
 
-    private final GreedySolver solver;
+    private final @NotOnlyInitialized GreedySolver solver;
 
-    FewestAssignments(final GreedySolver solver) {
+    FewestAssignments(final @UnderInitialization GreedySolver solver) {
       this.solver = solver;
     }
 
