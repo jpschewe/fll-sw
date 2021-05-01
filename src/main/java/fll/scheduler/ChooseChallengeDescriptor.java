@@ -162,32 +162,28 @@ public class ChooseChallengeDescriptor extends JDialog {
     return mSelected;
   }
 
-  private static final class DescriptionInfoRenderer implements ListCellRenderer<@Nullable DescriptionInfo> {
+  private static final class DescriptionInfoRenderer implements ListCellRenderer<DescriptionInfo> {
     DescriptionInfoRenderer() {
       mDelegate = new BasicComboBoxRenderer();
     }
 
-    private final ListCellRenderer<@Nullable Object> mDelegate;
+    private final ListCellRenderer<Object> mDelegate;
 
     @Override
-    public Component getListCellRendererComponent(final JList<? extends @Nullable DescriptionInfo> list,
-                                                  final @Nullable DescriptionInfo descriptionInfo,
+    public Component getListCellRendererComponent(final JList<? extends DescriptionInfo> list,
+                                                  final DescriptionInfo descriptionInfo,
                                                   final int index,
                                                   final boolean isSelected,
                                                   final boolean cellHasFocus) {
-      if (null == descriptionInfo) {
-        return mDelegate.getListCellRendererComponent(list, null, index, isSelected, cellHasFocus);
-      } else {
-        final String title = descriptionInfo.getTitle();
-        final String revision = descriptionInfo.getRevision();
-        final StringBuilder value = new StringBuilder();
-        value.append(title);
-        value.append('(');
-        value.append(revision);
-        value.append(')');
+      final String title = descriptionInfo.getTitle();
+      final String revision = descriptionInfo.getRevision();
+      final StringBuilder value = new StringBuilder();
+      value.append(title);
+      value.append('(');
+      value.append(revision);
+      value.append(')');
 
-        return mDelegate.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-      }
+      return mDelegate.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
     }
   }
 }
