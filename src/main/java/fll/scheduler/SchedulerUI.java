@@ -1435,7 +1435,7 @@ public class SchedulerUI extends JFrame {
    * @param columnInfo the column information
    * @return the list of subjective information the user choose
    */
-  public static List<SubjectiveStation> gatherSubjectiveStationInformation(final Component parentComponent,
+  public static List<SubjectiveStation> gatherSubjectiveStationInformation(final @Nullable Component parentComponent,
                                                                            final ColumnInformation columnInfo) {
     final List<String> unusedColumns = columnInfo.getUnusedColumns();
     final List<JCheckBox> checkboxes = new LinkedList<>();
