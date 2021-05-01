@@ -17,8 +17,6 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.apache.tools.ant.taskdefs.Classloader;
-
 import fll.Utilities;
 import fll.util.FLLInternalException;
 import fll.xml.ChallengeDescription;
