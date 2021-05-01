@@ -19,6 +19,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -254,29 +256,25 @@ public class SchedulerUI extends JFrame {
     changeDuration = FormatterUtils.createIntegerField(0, 1000);
     changeDuration.setToolTipText("The number of minutes that a team has between any 2 activities");
     addRow(constraintsPanel, new JLabel("Change time duration:"), changeDuration);
-    changeDuration.addPropertyChangeListener("value", e -> {
-      checkSchedule();
-    });
 
     performanceChangeDuration = FormatterUtils.createIntegerField(0, 1000);
     performanceChangeDuration.setToolTipText("The number of minutes that a team has between any 2 performance runs");
     addRow(constraintsPanel, new JLabel("Performance change time duration:"), performanceChangeDuration);
-    performanceChangeDuration.addPropertyChangeListener("value", e -> {
-      checkSchedule();
-    });
 
     performanceDuration = FormatterUtils.createIntegerField(1, 1000);
     performanceDuration.setToolTipText("The amount of time that the team is expected to be at the table");
     addRow(constraintsPanel, new JLabel("Performance duration:"), performanceDuration);
-    performanceDuration.addPropertyChangeListener("value", e -> {
-      checkSchedule();
-    });
 
     addRow(constraintsPanel, new JLabel("Make sure to pass these values onto your computer person with the schedule!"));
 
     // --- end schedule panel
 
     // object initialized
+    final CheckSchedule durationChangeListener = new CheckSchedule();
+    changeDuration.addPropertyChangeListener("value", durationChangeListener);
+    performanceChangeDuration.addPropertyChangeListener("value", durationChangeListener);
+    performanceDuration.addPropertyChangeListener("value", durationChangeListener);
+
     setJMenuBar(createMenubar());
 
     // initial state
@@ -285,9 +283,18 @@ public class SchedulerUI extends JFrame {
     mRunOptimizerAction.setEnabled(false);
     mReloadFileAction.setEnabled(false);
 
-    setSchedParams(new SchedParams());
+    setSchedParams(mSchedParams);
 
     pack();
+  }
+
+  private class CheckSchedule implements PropertyChangeListener {
+
+    @Override
+    public void propertyChange(final PropertyChangeEvent ignored) {
+      checkSchedule();
+    }
+
   }
 
   @SuppressFBWarnings(value = "SE_TRANSIENT_FIELD_NOT_RESTORED", justification = "There is no state needed to be kept here")
@@ -690,7 +697,7 @@ public class SchedulerUI extends JFrame {
     return toolbar;
   }
 
-  private JMenuBar createMenubar(@UnknownInitialization(JFrame.class) SchedulerUI this) {
+  private JMenuBar createMenubar(@UnknownInitialization(SchedulerUI.class) SchedulerUI this) {
     final JMenuBar menubar = new JMenuBar();
 
     menubar.add(createFileMenu());
@@ -702,7 +709,7 @@ public class SchedulerUI extends JFrame {
     return menubar;
   }
 
-  private JMenu createScheduleMenu(@UnknownInitialization(JFrame.class) SchedulerUI this) {
+  private JMenu createScheduleMenu(@UnknownInitialization(SchedulerUI.class) SchedulerUI this) {
     final JMenu menu = new JMenu("Schedule");
     menu.setMnemonic('s');
 
@@ -715,7 +722,7 @@ public class SchedulerUI extends JFrame {
     return menu;
   }
 
-  private JMenu createDescriptionMenu(@UnknownInitialization(JFrame.class) SchedulerUI this) {
+  private JMenu createDescriptionMenu(@UnknownInitialization(SchedulerUI.class) SchedulerUI this) {
     final JMenu menu = new JMenu("Description");
     menu.setMnemonic('d');
 
@@ -727,7 +734,7 @@ public class SchedulerUI extends JFrame {
     return menu;
   }
 
-  private JMenu createFileMenu(@UnknownInitialization(JFrame.class) SchedulerUI this) {
+  private JMenu createFileMenu(@UnknownInitialization(SchedulerUI.class) SchedulerUI this) {
     final JMenu menu = new JMenu("File");
     menu.setMnemonic('f');
 
@@ -1208,10 +1215,6 @@ public class SchedulerUI extends JFrame {
    * Verify the existing schedule and update the violations.
    */
   private void checkSchedule() {
-    if (null == mScheduleData) {
-      return;
-    }
-
     violationTable.clearSelection();
 
     // make sure sched params are updated based on the UI elements
