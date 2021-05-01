@@ -1112,6 +1112,7 @@ public class SchedulerUI extends JFrame {
       putValue(MNEMONIC_KEY, KeyEvent.VK_O);
     }
 
+    @SuppressFBWarnings(value = "NP_NONNULL_PARAM_VIOLATION", justification = "False positive in SpotBugs thinking that the second parameter to loaodScheduleFile cannot be null")
     @Override
     public void actionPerformed(final ActionEvent ae) {
       final String startingDirectory = PREFS.get(SCHEDULE_STARTING_DIRECTORY_PREF, null);
