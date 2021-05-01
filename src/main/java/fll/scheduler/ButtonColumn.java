@@ -25,6 +25,9 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * The ButtonColumn class provides a renderer and an editor that looks like a
  * JButton. The renderer and editor will then be used for a specified column
@@ -44,21 +47,22 @@ import javax.swing.table.TableColumnModel;
  */
 public class ButtonColumn extends AbstractCellEditor
     implements TableCellRenderer, TableCellEditor, ActionListener, MouseListener {
+
   private final JTable table;
 
   private final Action action;
 
   private int mnemonic;
 
-  private Border originalBorder;
+  private @Nullable Border originalBorder;
 
-  private Border focusBorder;
+  private @Nullable Border focusBorder;
 
   private final JButton renderButton;
 
   private final JButton editButton;
 
-  private Object editorValue;
+  private @Nullable Object editorValue;
 
   private boolean isButtonColumnEditor;
 
@@ -80,51 +84,19 @@ public class ButtonColumn extends AbstractCellEditor
     renderButton = new JButton();
     editButton = new JButton();
     editButton.setFocusPainted(false);
-    editButton.addActionListener(this);
     originalBorder = editButton.getBorder();
+    focusBorder = null;
+    editorValue = null;
+
+    // object is initialized
+
+    editButton.addActionListener(this);
     setFocusBorder(new LineBorder(Color.BLUE));
 
     final TableColumnModel columnModel = table.getColumnModel();
     columnModel.getColumn(column).setCellRenderer(this);
     columnModel.getColumn(column).setCellEditor(this);
     table.addMouseListener(this);
-  }
-
-  /**
-   * Get foreground color of the button when the cell has focus.
-   *
-   * @return the foreground color
-   */
-  public Border getFocusBorder() {
-    return focusBorder;
-  }
-
-  /**
-   * The foreground color of the button when the cell has focus.
-   *
-   * @param focusBorder the foreground color
-   */
-  public void setFocusBorder(Border focusBorder) {
-    this.focusBorder = focusBorder;
-    editButton.setBorder(focusBorder);
-  }
-
-  /**
-   * @return {@link #setMnemonic(int)}
-   */
-  public int getMnemonic() {
-    return mnemonic;
-  }
-
-  /**
-   * The mnemonic to activate the button when the cell has focus.
-   *
-   * @param mnemonic the mnemonic
-   */
-  public void setMnemonic(int mnemonic) {
-    this.mnemonic = mnemonic;
-    renderButton.setMnemonic(mnemonic);
-    editButton.setMnemonic(mnemonic);
   }
 
   @Override
@@ -144,12 +116,12 @@ public class ButtonColumn extends AbstractCellEditor
       editButton.setIcon(null);
     }
 
-    this.editorValue = value;
+    editorValue = value;
     return editButton;
   }
 
   @Override
-  public Object getCellEditorValue() {
+  public @Nullable Object getCellEditorValue() {
     return editorValue;
   }
 
@@ -241,4 +213,43 @@ public class ButtonColumn extends AbstractCellEditor
   @Override
   public void mouseExited(MouseEvent e) {
   }
+
+  /**
+   * Get foreground color of the button when the cell has focus.
+   *
+   * @return the foreground color
+   */
+  public @Nullable Border getFocusBorder() {
+    return focusBorder;
+  }
+
+  /**
+   * The foreground color of the button when the cell has focus.
+   *
+   * @param focusBorder the foreground color
+   */
+  public void setFocusBorder(@UnknownInitialization(ButtonColumn.class) ButtonColumn this,
+                             final @Nullable Border focusBorder) {
+    this.focusBorder = focusBorder;
+    editButton.setBorder(focusBorder);
+  }
+
+  /**
+   * @return {@link #setMnemonic(int)}
+   */
+  public int getMnemonic() {
+    return mnemonic;
+  }
+
+  /**
+   * The mnemonic to activate the button when the cell has focus.
+   *
+   * @param mnemonic the mnemonic
+   */
+  public void setMnemonic(int mnemonic) {
+    this.mnemonic = mnemonic;
+    renderButton.setMnemonic(mnemonic);
+    editButton.setMnemonic(mnemonic);
+  }
+
 }

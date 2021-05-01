@@ -1,0 +1,12 @@
+package javax.swing.table;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public class TableColumn implements Serializable {
+
+  public void setCellRenderer(@UnknownInitialization TableCellRenderer cellRenderer);
+  
+  public void setCellEditor(@UnknownInitialization TableCellEditor cellEditor);
+
+}

@@ -7,10 +7,12 @@ public abstract class JComponent extends Container implements Serializable,
                                                               TransferHandler.HasGetTransferHandler
 {
 
-  public void setBorder(@UnknownInitialization(JComponent.class) JComponent this, Border border);
+  public void setBorder(@UnknownInitialization(JComponent.class) JComponent this, @Nullable Border border);
+  public @Nullable Border getBorder();
 
   public void setInputVerifier(@UnknownInitialization(JComponent.class) JComponent this, InputVerifier inputVerifier);
 
   public void setToolTipText(@UnknownInitialization(JComponent.class) JComponent this, @Nullable String text);
+  public @Nullable String getToolTipText();
   
 }

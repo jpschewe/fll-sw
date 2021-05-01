@@ -7,9 +7,12 @@ public abstract class Component implements ImageObserver, MenuContainer,
                                            Serializable
 {
 
-    public synchronized void addComponentListener(@UnknownInitialization(Component.class) Component this, ComponentListener l);
+  public synchronized void addComponentListener(@UnknownInitialization(Component.class) Component this, ComponentListener l);
 
-    protected void firePropertyChange(@UnknownInitialization(Component.class) Component this, String propertyName,
-                                      Object oldValue, Object newValue);
+  protected void firePropertyChange(@UnknownInitialization(Component.class) Component this, String propertyName,
+                                    Object oldValue, Object newValue);
+
+  public synchronized void addMouseListener(@UnknownInitialization MouseListener l);
+  
 
 }
