@@ -80,7 +80,6 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
@@ -109,6 +108,30 @@ import net.mtu.eggplant.util.BasicFileFilter;
  * UI for the scheduler.
  */
 public class SchedulerUI extends JFrame {
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
+  private static final Color HARD_CONSTRAINT_COLOR = Color.RED;
+
+  private static final Color SOFT_CONSTRAINT_COLOR = Color.YELLOW;
+
+  private final JTable violationTable = new JTable();
+
+  private final JLabel mDescriptionFilename;
+
+  private final JLabel mScheduleFilename;
+
+  private final JTabbedPane mTabbedPane;
+
+  private final SolverParamsEditor mScheduleDescriptionEditor;
+
+  private final JTable mScheduleTable = new JTable();
+
+  @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class isn't going to be serialized")
+  private TournamentSchedule mScheduleData = new TournamentSchedule();
+
+  private SchedulerTableModel mScheduleModel = new SchedulerTableModel(mScheduleData);
+
+  private ViolationTableModel mViolationsModel = new ViolationTableModel(Collections.emptyList());
 
   /**
    * @param args ignored
@@ -211,7 +234,6 @@ public class SchedulerUI extends JFrame {
     mScheduleFilename = new JLabel("");
     schedulePanel.add(createScheduleToolbar(), BorderLayout.NORTH);
 
-    mScheduleTable = new JTable();
     mScheduleTable.setAutoCreateRowSorter(true);
     mScheduleTable.setDefaultRenderer(LocalTime.class, schedTableRenderer);
     mScheduleTable.setDefaultRenderer(String.class, schedTableRenderer);
@@ -219,7 +241,6 @@ public class SchedulerUI extends JFrame {
     mScheduleTable.setDefaultRenderer(Object.class, schedTableRenderer);
     final JScrollPane dataScroller = new JScrollPane(mScheduleTable);
 
-    violationTable = new JTable();
     violationTable.setDefaultRenderer(String.class, violationTableRenderer);
     violationTable.getSelectionModel().addListSelectionListener(violationSelectionListener);
     final JScrollPane violationScroller = new JScrollPane(violationTable);
@@ -271,16 +292,16 @@ public class SchedulerUI extends JFrame {
 
   @SuppressFBWarnings(value = "SE_TRANSIENT_FIELD_NOT_RESTORED", justification = "There is no state needed to be kept here")
   private final transient ListSelectionListener violationSelectionListener = e -> {
-    final int selectedRow = getViolationTable().getSelectedRow();
+    final int selectedRow = violationTable.getSelectedRow();
     if (selectedRow == -1) {
       return;
     }
 
-    final ConstraintViolation selected = getViolationsModel().getViolation(selectedRow);
+    final ConstraintViolation selected = mViolationsModel.getViolation(selectedRow);
     if (Team.NULL_TEAM_NUMBER != selected.getTeam()) {
-      final int teamIndex = getScheduleModel().getIndexOfTeam(selected.getTeam());
-      final int displayIndex = getScheduleTable().convertRowIndexToView(teamIndex);
-      getScheduleTable().changeSelection(displayIndex, 1, false, false);
+      final int teamIndex = mScheduleModel.getIndexOfTeam(selected.getTeam());
+      final int displayIndex = mScheduleTable.convertRowIndexToView(teamIndex);
+      mScheduleTable.changeSelection(displayIndex, 1, false, false);
     }
   };
 
@@ -1151,9 +1172,6 @@ public class SchedulerUI extends JFrame {
 
   private static final String DESCRIPTION_STARTING_DIRECTORY_PREF = "descriptionStartingDirectory";
 
-  @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class isn't going to be serialized")
-  private @MonotonicNonNull TournamentSchedule mScheduleData;
-
   /* package */
   TournamentSchedule getScheduleData() {
     return mScheduleData;
@@ -1168,27 +1186,12 @@ public class SchedulerUI extends JFrame {
     return mSchedParams;
   }
 
-  @RequiresNonNull({ "changeDuration", "performanceChangeDuration", "performanceDuration" })
-  private void setSchedParams(@UnderInitialization(JFrame.class) SchedulerUI this,
+  private void setSchedParams(@UnknownInitialization(SchedulerUI.class) SchedulerUI this,
                               final SchedParams params) {
     mSchedParams = params;
     changeDuration.setValue(mSchedParams.getChangetimeMinutes());
     performanceChangeDuration.setValue(mSchedParams.getPerformanceChangetimeMinutes());
     performanceDuration.setValue(mSchedParams.getPerformanceMinutes());
-  }
-
-  private @Nullable SchedulerTableModel mScheduleModel;
-
-  /* package */ @Nullable
-  SchedulerTableModel getScheduleModel() {
-    return mScheduleModel;
-  }
-
-  private @Nullable ViolationTableModel mViolationsModel;
-
-  /* package */ @Nullable
-  ViolationTableModel getViolationsModel() {
-    return mViolationsModel;
   }
 
   private void setScheduleData(final TournamentSchedule sd) {
@@ -1224,32 +1227,6 @@ public class SchedulerUI extends JFrame {
     mScheduleTable.repaint();
   }
 
-  private final JLabel mDescriptionFilename;
-
-  private final JLabel mScheduleFilename;
-
-  private final JTabbedPane mTabbedPane;
-
-  private final SolverParamsEditor mScheduleDescriptionEditor;
-
-  private final JTable mScheduleTable;
-
-  private JTable getScheduleTable() {
-    return mScheduleTable;
-  }
-
-  private final JTable violationTable;
-
-  JTable getViolationTable() {
-    return violationTable;
-  }
-
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
-  private static final Color HARD_CONSTRAINT_COLOR = Color.RED;
-
-  private static final Color SOFT_CONSTRAINT_COLOR = Color.YELLOW;
-
   private final TableCellRenderer schedTableRenderer = new DefaultTableCellRenderer() {
 
     @Override
@@ -1263,7 +1240,7 @@ public class SchedulerUI extends JFrame {
 
       final int tmRow = table.convertRowIndexToModel(row);
       final int tmCol = table.convertColumnIndexToModel(column);
-      final TeamScheduleInfo schedInfo = getScheduleModel().getSchedInfo(tmRow);
+      final TeamScheduleInfo schedInfo = mScheduleModel.getSchedInfo(tmRow);
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Checking for violations against team: "
             + schedInfo.getTeamNumber() //
@@ -1275,7 +1252,7 @@ public class SchedulerUI extends JFrame {
       }
 
       final SortedSet<ConstraintViolation.Type> violationTypes = new TreeSet<>();
-      for (final ConstraintViolation violation : getViolationsModel().getViolations()) {
+      for (final ConstraintViolation violation : mViolationsModel.getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
           final Collection<SubjectiveTime> subjectiveTimes = violation.getSubjectiveTimes();
           if (tmCol <= SchedulerTableModel.JUDGE_COLUMN
@@ -1334,7 +1311,7 @@ public class SchedulerUI extends JFrame {
             }
           } else {
             for (final SubjectiveTime subj : subjectiveTimes) {
-              if (tmCol == getScheduleModel().getColumnForSubjective(subj.getName())) {
+              if (tmCol == mScheduleModel.getColumnForSubjective(subj.getName())) {
                 violationTypes.add(violation.getType());
               }
             }
@@ -1389,7 +1366,7 @@ public class SchedulerUI extends JFrame {
 
       final int tmRow = table.convertRowIndexToModel(row);
 
-      final ConstraintViolation violation = getViolationsModel().getViolation(tmRow);
+      final ConstraintViolation violation = mViolationsModel.getViolation(tmRow);
 
       final Color violationColor = colorForViolation(violation.getType());
       setForeground(null);

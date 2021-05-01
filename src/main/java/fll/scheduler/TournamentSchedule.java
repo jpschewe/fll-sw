@@ -403,6 +403,15 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
+   * Empty tournament schedule.
+   */
+  public TournamentSchedule() {
+    numRegularMatchPlayRounds = 0;
+    numPracticeRounds = 0;
+    name = "empty";
+  }
+
+  /**
    * Load a tournament from the database.
    *
    * @param connection database connection
