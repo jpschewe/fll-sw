@@ -21,6 +21,8 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Handle updating the big screen display pages.
  */
@@ -32,7 +34,7 @@ public class DisplayWebSocket {
   /**
    * session -> display name
    */
-  private static final Map<Session, String> ALL_SESSIONS = new HashMap<>();
+  private static final Map<Session, @Nullable String> ALL_SESSIONS = new HashMap<>();
 
   private static final Object SESSIONS_LOCK = new Object();
 
@@ -43,6 +45,11 @@ public class DisplayWebSocket {
   public void onOpen(final Session session) {
     final HttpSession httpSession = (HttpSession) session.getUserProperties()
                                                          .get(GetHttpSessionConfigurator.HTTP_SESSION_KEY);
+    if (null == httpSession) {
+      LOGGER.error("Could not find HttpSession in user properties. Websocket session is not added to ALL_SESSIONS.");
+      return;
+    }
+
     final String displayName = SessionAttributes.getDisplayName(httpSession);
 
     synchronized (SESSIONS_LOCK) {
@@ -77,7 +84,7 @@ public class DisplayWebSocket {
       final Set<Session> toRemove = new HashSet<>();
 
       final String messageText = "update"; // message text doesn't matter
-      for (final Map.Entry<Session, String> entry : ALL_SESSIONS.entrySet()) {
+      for (final Map.Entry<Session, @Nullable String> entry : ALL_SESSIONS.entrySet()) {
         final Session session = entry.getKey();
         final String displayName = entry.getValue();
 
