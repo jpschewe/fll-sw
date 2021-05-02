@@ -53,7 +53,7 @@ public final class ApplicationAttributes {
    * @return the stored challenge description
    */
   public static ChallengeDescription getChallengeDescription(final ServletContext application) {
-    return getAttribute(application, CHALLENGE_DESCRIPTION, ChallengeDescription.class);
+    return getNonNullAttribute(application, CHALLENGE_DESCRIPTION, ChallengeDescription.class);
   }
 
   /**
@@ -167,8 +167,8 @@ public final class ApplicationAttributes {
   public static Map<String, LocalDateTime> getAuthLoggedOut(final ServletContext application) {
     @SuppressWarnings("unchecked") // can't get generics out of the application
     final Map<String, LocalDateTime> authLoggedOut = (Map<String, LocalDateTime>) getAttribute(application,
-                                                                                             AUTH_LOGGED_OUT,
-                                                                                             Map.class);
+                                                                                               AUTH_LOGGED_OUT,
+                                                                                               Map.class);
     if (null == authLoggedOut) {
       final Map<String, LocalDateTime> newValue = new HashMap<>();
       application.setAttribute(AUTH_LOGGED_OUT, newValue);
