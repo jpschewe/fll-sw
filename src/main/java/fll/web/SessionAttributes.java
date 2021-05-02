@@ -31,7 +31,7 @@ public final class SessionAttributes {
    * @param session where to get the information
    * @return the message to display to the user
    */
-  public static String getMessage(final HttpSession session) {
+  public static @Nullable String getMessage(final HttpSession session) {
     return getAttribute(session, MESSAGE, String.class);
   }
 

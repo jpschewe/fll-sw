@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -275,7 +276,7 @@ public final class WebUtils {
    * @param str the string that needs to be escaped
    * @return A string suitable to be used in a form field
    */
-  public static String escapeForHtmlFormValue(final @Nullable String str) {
+  public static @PolyNull String escapeForHtmlFormValue(final @PolyNull String str) {
     if (null == str) {
       return str;
     } else {

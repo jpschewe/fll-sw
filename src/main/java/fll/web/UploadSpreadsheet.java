@@ -96,6 +96,10 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
       LOGGER.debug("Redirect: {}", uploadRedirect);
 
       final FileItem fileItem = (FileItem) request.getAttribute("file");
+      if (null == fileItem) {
+        throw new FLLRuntimeException("Missing 'file' parameter");
+      }
+      
       final String extension = Utilities.determineExtension(fileItem.getName());
       final File file = File.createTempFile("fll", extension);
       LOGGER.debug("Wrote data to: {}", file.getAbsolutePath());

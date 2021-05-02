@@ -1,0 +1,18 @@
+package javax.servlet;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public interface ServletRequest {
+
+  public @Nullable Object getAttribute(String name);
+
+  public @Nullable String getCharacterEncoding();
+
+  public @Nullable String getContentType();
+  
+  public @Nullable String getParameter(String name);
+  
+  public String @Nullable [] getParameterValues(String name);
+
+}

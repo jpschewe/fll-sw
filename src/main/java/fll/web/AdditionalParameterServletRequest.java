@@ -14,6 +14,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Servlet request that supports an additional map of parameters that override
  * or add to the existing parameters.
@@ -34,7 +36,7 @@ public class AdditionalParameterServletRequest extends HttpServletRequestWrapper
   }
 
   @Override
-  public String getParameter(final String name) {
+  public @Nullable String getParameter(final String name) {
     final String[] result = this.params.get(name);
     if (null == result
         || result.length < 1) {
@@ -51,11 +53,13 @@ public class AdditionalParameterServletRequest extends HttpServletRequestWrapper
 
   @Override
   public Enumeration<String> getParameterNames() {
-    return Collections.enumeration(this.params.keySet());
+    // cast away KeyFor to comply with the interface specification
+    // https://github.com/typetools/checker-framework/issues/1653
+    return (Enumeration<String>) Collections.enumeration(this.params.keySet());
   }
 
   @Override
-  public String[] getParameterValues(final String name) {
+  public String @Nullable [] getParameterValues(final String name) {
     return params.get(name);
   }
 
