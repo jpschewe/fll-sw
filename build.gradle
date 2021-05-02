@@ -814,7 +814,8 @@ checkerFramework {
         "org.checkerframework.checker.nullness.NullnessChecker"
     ]
     extraJavacArgs = [
-        "-AonlyDefs=^fll\\.(db|documents|flltools|scheduler|subjective|tomcat|util|xml)",
+        "-AonlyDefs=^fll\\.(db|documents|flltools|scheduler|subjective|tomcat|util|web|xml)",
+        "-AskipDefs=^fll\\.web\\.(admin|ajax|api|developer|playoff|report|schedule|scoreboard|scoreEntry|setup|tags)",
         "-Awarns",  
         "-Xmaxwarns", "10000",
         "-AstubWarnIfNotFound",
