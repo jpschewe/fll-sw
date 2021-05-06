@@ -732,6 +732,7 @@ public class SubjectivePdfWriter {
                               final int[] columnWidths,
                               final @Nullable SubjectiveScore score) {
     final Element sheet = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+
     sheet.setAttribute("page-break-after", "always");
     sheet.setAttribute("font-size", String.format("%dpt", fontSize));
 
@@ -745,6 +746,12 @@ public class SubjectivePdfWriter {
     final Element comments = createCommentsBlock(document, commentHeight, score);
     sheet.appendChild(comments);
     comments.setAttribute("space-before", "3");
+
+    if (null != score
+        && score.getNoShow()) {
+      // add last so that it's on top of everything
+      sheet.appendChild(FOPUtils.createWatermark(document, "NO SHOW", WATERMARK_OPACITY));
+    }
 
     return sheet;
   }
@@ -898,7 +905,8 @@ public class SubjectivePdfWriter {
     }
 
     final double goalScore;
-    if (null == score) {
+    if (null == score
+        || score.getNoShow()) {
       // will compare to false for all ranges
       goalScore = Double.NaN;
     } else {
@@ -1180,5 +1188,7 @@ public class SubjectivePdfWriter {
 
     return commentsTable;
   }
+
+  private static final float WATERMARK_OPACITY = 0.5f;
 
 }
