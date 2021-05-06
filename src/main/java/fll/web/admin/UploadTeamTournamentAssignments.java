@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.CellFileReader;
 import fll.web.AuthenticationContext;
@@ -88,13 +89,14 @@ public final class UploadTeamTournamentAssignments extends BaseFLLServlet {
    * @throws InvalidFormatException if there is an error parsing the file
    */
   public static void putHeadersInSession(final File file,
-                                         final String sheetName,
+                                         final @Nullable String sheetName,
                                          final HttpSession session)
       throws IOException, InvalidFormatException {
     final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
 
     // parse out the first non-blank line as the names of the columns
-    String[] columnNames = reader.readNext();
+    @Nullable
+    String @Nullable [] columnNames = reader.readNext();
     while (null != columnNames
         && columnNames.length < 1) {
       columnNames = reader.readNext();

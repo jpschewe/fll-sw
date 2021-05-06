@@ -125,7 +125,7 @@ public final class UploadTeams extends BaseFLLServlet {
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
                                 "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate the list of columns to create AllTeams table")
   public static void parseFile(final File file,
-                               final String sheetName,
+                               final @Nullable String sheetName,
                                final Connection connection,
                                final HttpSession session)
       throws SQLException, IOException, InvalidFormatException {
@@ -136,7 +136,7 @@ public final class UploadTeams extends BaseFLLServlet {
 
     // parse out the first line as the names of the columns
     // final List<String> columnNames = splitLine(reader.readLine());
-    final String[] columnNames = reader.readNext();
+    final @Nullable String @Nullable [] columnNames = reader.readNext();
     if (null == columnNames) {
       LOGGER.warn("No Data in uploaded file");
       return;
@@ -217,7 +217,8 @@ public final class UploadTeams extends BaseFLLServlet {
       throws IOException, SQLException {
     try {
       // loop over the rest of the rows and insert them into AllTeams
-      String[] values;
+      @Nullable
+      String @Nullable [] values;
       while (null != (values = reader.readNext())) {
         if (values.length > 0) { // skip empty lines
 

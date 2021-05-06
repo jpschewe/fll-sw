@@ -507,7 +507,7 @@ public final class Tournament implements Serializable {
   public static void updateTournament(final Connection connection,
                                       final int tournamentID,
                                       final String name,
-                                      final String location,
+                                      final @Nullable String location,
                                       final @Nullable LocalDate date,
                                       final @Nullable String level,
                                       final @Nullable String nextLevel)
@@ -520,7 +520,12 @@ public final class Tournament implements Serializable {
         + ", next_level = ?" //
         + " WHERE tournament_id = ?")) {
       updatePrep.setString(1, name);
-      updatePrep.setString(2, location);
+      if (null != location
+          && !level.isEmpty()) {
+        updatePrep.setString(2, location);
+      } else {
+        updatePrep.setNull(2, Types.VARCHAR);
+      }
       if (null == date) {
         updatePrep.setNull(3, Types.DATE);
       } else {
