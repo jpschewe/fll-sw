@@ -98,7 +98,12 @@ public class StoreDelayedPerformance extends BaseFLLServlet {
   private static void createAndInsertPerformanceDelays(final HttpServletRequest request,
                                                        final Connection connection)
       throws SQLException {
-    final int numRows = Integer.parseInt(request.getParameter("numRows"));
+    final String numRowsStr = request.getParameter("numRows");
+    if (null == numRowsStr) {
+      throw new FLLInternalException("Missing 'numRows' parameter");
+    }
+
+    final int numRows = Integer.parseInt(numRowsStr);
 
     final Tournament currentTournament = Tournament.getCurrentTournament(connection);
 
