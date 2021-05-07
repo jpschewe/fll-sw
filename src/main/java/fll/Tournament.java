@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -304,7 +305,8 @@ public final class Tournament implements Serializable {
   }
 
   @Override
-  public boolean equals(final Object o) {
+  @EnsuresNonNullIf(expression = "#1", result = true)
+  public boolean equals(final @Nullable Object o) {
     if (o instanceof Tournament) {
       final Tournament other = (Tournament) o;
       return other.getTournamentID() == getTournamentID();

@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -248,6 +249,7 @@ public class SubjectiveScoreCategory extends ScoreCategory {
     }
 
     @Override
+    @EnsuresNonNullIf(expression = "#1", result = true)
     public boolean equals(final @Nullable Object o) {
       if (null == o) {
         return false;

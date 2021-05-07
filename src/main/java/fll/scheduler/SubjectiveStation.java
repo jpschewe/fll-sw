@@ -9,6 +9,7 @@ package fll.scheduler;
 import java.io.Serializable;
 import java.time.Duration;
 
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -61,6 +62,7 @@ public final class SubjectiveStation implements Serializable {
   }
 
   @Override
+  @EnsuresNonNullIf(expression="#1", result=true)
   public boolean equals(final @Nullable Object o) {
     if (o == this) {
       return true;

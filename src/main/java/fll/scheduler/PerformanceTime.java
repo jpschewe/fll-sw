@@ -11,6 +11,7 @@ import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.Objects;
 
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -76,6 +77,7 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
   }
 
   @Override
+  @EnsuresNonNullIf(expression="#1", result=true)
   public boolean equals(final @Nullable Object o) {
     if (o == null) {
       return false;

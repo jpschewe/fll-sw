@@ -349,4 +349,24 @@ public final class WebUtils {
     return value;
   }
 
+  /**
+   * @param request where to get the parameter from
+   * @param parameter the parameter to get
+   * @return the value
+   * @throws FLLRuntimeException if the parameter is missing
+   * @throws NumberFormatException if the value isn't parsable as a double
+   */
+  public static double getDoubleRequestParameter(final HttpServletRequest request,
+                                                 final String parameter)
+      throws FLLRuntimeException, NumberFormatException {
+    final String str = request.getParameter(parameter);
+    if (null == str) {
+      throw new FLLRuntimeException("Parameter '"
+          + parameter
+          + "' is missing");
+    }
+    final double value = Double.parseDouble(str);
+    return value;
+  }
+
 }

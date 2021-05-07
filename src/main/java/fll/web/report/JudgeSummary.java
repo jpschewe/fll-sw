@@ -11,6 +11,7 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -91,7 +92,8 @@ public final class JudgeSummary implements Serializable, Comparable<JudgeSummary
   }
 
   @Override
-  public boolean equals(final Object o) {
+  @EnsuresNonNullIf(expression="#1", result=true)
+  public boolean equals(final @Nullable Object o) {
     if (null == o) {
       return false;
     } else if (this == o) {

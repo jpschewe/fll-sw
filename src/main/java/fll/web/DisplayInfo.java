@@ -23,6 +23,7 @@ import javax.servlet.http.HttpSession;
 
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.FLLRuntimeException;
@@ -450,6 +451,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   }
 
   @Override
+  @EnsuresNonNullIf(expression = "#1", result = true)
   public boolean equals(final @Nullable Object o) {
     if (o instanceof DisplayInfo) {
       final DisplayInfo other = (DisplayInfo) o;

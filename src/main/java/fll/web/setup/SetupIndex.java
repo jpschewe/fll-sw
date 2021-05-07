@@ -24,6 +24,8 @@ import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Utilities;
 import fll.web.ApplicationAttributes;
@@ -172,7 +174,8 @@ public final class SetupIndex {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    @EnsuresNonNullIf(expression = "#1", result = true)
+    public boolean equals(final @Nullable Object o) {
       if (this == o) {
         return true;
       } else if (null == o) {

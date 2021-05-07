@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -321,6 +322,7 @@ public class NonNumericNominees {
     }
 
     @Override
+    @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(final @Nullable Object o) {
       if (null == o) {
         return false;

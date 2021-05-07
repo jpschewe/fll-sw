@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Comparator;
 
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -192,7 +193,8 @@ public class Team implements Serializable {
    * Compares team numbers.
    */
   @Override
-  public boolean equals(final Object o) {
+  @EnsuresNonNullIf(expression = "#1", result = true)
+  public boolean equals(final @Nullable Object o) {
     if (o instanceof Team) {
       final Team other = (Team) o;
       return other.getTeamNumber() == getTeamNumber();
