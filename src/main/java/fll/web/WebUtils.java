@@ -34,6 +34,8 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fll.util.FLLRuntimeException;
+
 /**
  * Some utilities for dealing with the web.
  */
@@ -326,4 +328,25 @@ public final class WebUtils {
       return requestURL.append('?').append(queryString).toString();
     }
   }
+
+  /**
+   * @param request where to get the parameter from
+   * @param parameter the parameter to get
+   * @return the value
+   * @throws FLLRuntimeException if the parameter is missing
+   * @throws NumberFormatException if the value isn't parsable as an integer
+   */
+  public static int getIntRequestParameter(final HttpServletRequest request,
+                                           final String parameter)
+      throws FLLRuntimeException, NumberFormatException {
+    final String str = request.getParameter(parameter);
+    if (null == str) {
+      throw new FLLRuntimeException("Parameter '"
+          + parameter
+          + "' is missing");
+    }
+    final int value = Integer.parseInt(str);
+    return value;
+  }
+
 }
