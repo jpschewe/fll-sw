@@ -28,6 +28,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 
 /**
  * Submit action for edit_global_parameters.jsp.
@@ -55,17 +56,18 @@ public class StoreGlobalParameters extends BaseFLLServlet {
     try (Connection connection = datasource.getConnection()) {
 
       GlobalParameters.setDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_MEAN,
-                                                Double.valueOf(request.getParameter("gStandardizedMean")));
+                                                WebUtils.getDoubleRequestParameter(request, "gStandardizedMean"));
 
       GlobalParameters.setDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_SIGMA,
-                                                Double.valueOf(request.getParameter("gStandardizedSigma")));
+                                                WebUtils.getDoubleRequestParameter(request, "gStandardizedSigma"));
 
       GlobalParameters.setIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE,
-                                             Integer.parseInt(request.getParameter("gDivisionFlipRate")));
+                                             WebUtils.getIntRequestParameter(request, "gDivisionFlipRate"));
 
-      GlobalParameters.setAllTeamsMsPerRow(connection, Integer.parseInt(request.getParameter("gAllTeamsMsPerRow")));
+      GlobalParameters.setAllTeamsMsPerRow(connection, WebUtils.getIntRequestParameter(request, "gAllTeamsMsPerRow"));
 
-      GlobalParameters.setHeadToHeadMsPerRow(connection, Integer.parseInt(request.getParameter("gHeadToHeadMsPerRow")));
+      GlobalParameters.setHeadToHeadMsPerRow(connection,
+                                             WebUtils.getIntRequestParameter(request, "gHeadToHeadMsPerRow"));
 
       final String mhubHostname = request.getParameter("gMhubHostname");
       if (StringUtils.isBlank(mhubHostname)) {
@@ -74,7 +76,7 @@ public class StoreGlobalParameters extends BaseFLLServlet {
         MhubParameters.setHostname(connection, mhubHostname.trim());
       }
 
-      MhubParameters.setPort(connection, Integer.parseInt(request.getParameter("gMhubPort")));
+      MhubParameters.setPort(connection, WebUtils.getIntRequestParameter(request, "gMhubPort"));
 
       MhubParameters.setDisplayNode(connection, request.getParameter("gMhubDisplayNode"));
 

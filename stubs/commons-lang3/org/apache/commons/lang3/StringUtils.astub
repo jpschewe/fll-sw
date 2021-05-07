@@ -1,0 +1,15 @@
+package org.apache.commons.lang3;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
+
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+  
+public class StringUtils {
+
+  @EnsuresNonNullIf(expression="#1", result=false)
+  public static boolean isBlank(final @Nullable CharSequence cs);
+
+  public static int length(final @Nullable CharSequence cs);
+
+}
