@@ -29,6 +29,7 @@ import fll.web.DisplayInfo;
 import fll.web.DisplayWebSocket;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import fll.web.playoff.H2HUpdateWebSocket;
 
 /**
@@ -67,7 +68,8 @@ public class RemoteControlPost extends BaseFLLServlet {
         LOGGER.trace("\tremoteURL "
             + request.getParameter(display.getRemoteUrlFormParamName()));
 
-        final int numBrackets = Integer.parseInt(request.getParameter(display.getHead2HeadNumBracketsFormParamName()));
+        final int numBrackets = WebUtils.getIntRequestParameter(request,
+                                                                display.getHead2HeadNumBracketsFormParamName());
         LOGGER.trace("\tnum brackets:");
         for (int i = 0; i < numBrackets; ++i) {
           LOGGER.trace("\t\tplayoffDivision "
@@ -110,7 +112,8 @@ public class RemoteControlPost extends BaseFLLServlet {
         display.setFinalistScheduleAwardGroup(request.getParameter(display.getFinalistScheduleAwardGroupFormParamName()));
 
         final List<DisplayInfo.H2HBracketDisplay> brackets = new LinkedList<>();
-        final int numBrackets = Integer.parseInt(request.getParameter(display.getHead2HeadNumBracketsFormParamName()));
+        final int numBrackets = WebUtils.getIntRequestParameter(request,
+                                                                display.getHead2HeadNumBracketsFormParamName());
         for (int bracketIdx = 0; bracketIdx < numBrackets; ++bracketIdx) {
           final String bracket = request.getParameter(display.getHead2HeadBracketFormParamName(bracketIdx));
 

@@ -8,7 +8,6 @@ package fll.web.admin;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -22,15 +21,14 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.Tournament;
-import fll.Utilities;
 import fll.db.Queries;
-import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -88,7 +86,7 @@ public class CommitTeam extends BaseFLLServlet {
     try {
       connection = datasource.getConnection();
       // parse the numbers first so that we don't get a partial commit
-      final int teamNumber = Utilities.getIntegerNumberFormat().parse(request.getParameter("teamNumber")).intValue();
+      final int teamNumber = WebUtils.getIntRequestParameter(request, "teamNumber");
 
       String redirect = null;
       if (null != request.getParameter("delete")) {
@@ -217,9 +215,6 @@ public class CommitTeam extends BaseFLLServlet {
 
       response.sendRedirect(response.encodeRedirectURL(redirect));
 
-    } catch (final ParseException pe) {
-      LOGGER.error("Error parsing team number, this is an internal error", pe);
-      throw new FLLInternalException("Error parsing team number, this is an internal error", pe);
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new FLLRuntimeException("There was an error talking to the database", e);

@@ -9,7 +9,6 @@ package fll.web.admin;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,13 +26,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
-import fll.Utilities;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 
@@ -77,7 +76,7 @@ public class VerifyJudges extends BaseFLLServlet {
       // Set. Use set so there are no duplicates
       final List<SubjectiveScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
 
-      final int numRows = Utilities.getIntegerNumberFormat().parse(request.getParameter("total_num_rows")).intValue();
+      final int numRows = WebUtils.getIntRequestParameter(request, "total_num_rows");
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Found num rows: "
             + numRows);
@@ -154,9 +153,6 @@ public class VerifyJudges extends BaseFLLServlet {
         response.sendRedirect(response.encodeRedirectURL("displayJudges.jsp"));
       }
 
-    } catch (final ParseException e) {
-      LOGGER.error("Unable to parse num_rows parameter", e);
-      throw new RuntimeException(e);
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
