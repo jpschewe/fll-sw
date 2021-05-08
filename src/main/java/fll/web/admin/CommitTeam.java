@@ -101,7 +101,7 @@ public class CommitTeam extends BaseFLLServlet {
 
         redirect = "index.jsp";
       } else {
-        final String teamName = request.getParameter("teamName");
+        final String teamName = WebUtils.getNonNullRequestParameter(request, "teamName");
         final String organization = request.getParameter("organization");
 
         if (Boolean.valueOf(request.getParameter("addTeam"))) {
@@ -167,9 +167,9 @@ public class CommitTeam extends BaseFLLServlet {
                     + tournament.getName());
               }
 
-              final String eventDivision = request.getParameter("event_division_"
+              final String eventDivision = WebUtils.getNonNullRequestParameter(request, "event_division_"
                   + tournament.getTournamentID());
-              final String judgingGroup = request.getParameter("judging_station_"
+              final String judgingGroup = WebUtils.getNonNullRequestParameter(request, "judging_station_"
                   + tournament.getTournamentID());
 
               if (!previouslyAssignedTournaments.contains(tournament.getTournamentID())) {
@@ -188,12 +188,20 @@ public class CommitTeam extends BaseFLLServlet {
 
                 final String prevEventDivision = Queries.getEventDivision(connection, teamNumber,
                                                                           tournament.getTournamentID());
+                if (null == prevEventDivision) {
+                  throw new FLLRuntimeException("Unable to find award group for team "
+                      + teamNumber);
+                }
                 if (!eventDivision.equals(prevEventDivision)) {
                   Queries.updateTeamEventDivision(connection, teamNumber, tournament.getTournamentID(), eventDivision);
                 }
 
                 final String prevJudgingGroup = Queries.getJudgingGroup(connection, teamNumber,
                                                                         tournament.getTournamentID());
+                if (null == prevJudgingGroup) {
+                  throw new FLLRuntimeException("Unable to find judging group for team "
+                      + teamNumber);
+                }
                 if (!judgingGroup.equals(prevJudgingGroup)) {
                   Queries.updateTeamJudgingGroups(connection, teamNumber, tournament.getTournamentID(), judgingGroup);
                 }
