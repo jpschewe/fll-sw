@@ -13,7 +13,6 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -23,6 +22,7 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Tournament;
 import fll.Utilities;
@@ -136,14 +136,14 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
    *
    * @throws InvalidFormatException
    */
-  private static void processFile(@Nonnull final Connection connection,
-                                  @Nonnull final StringBuilder message,
-                                  @Nonnull final File file,
-                                  final String sheetName,
-                                  @Nonnull final String teamNumberColumnName,
-                                  @Nonnull final String tournamentColumnName,
-                                  final String eventDivisionColumnName,
-                                  final String judgingStationColumnName)
+  private static void processFile(final Connection connection,
+                                  final StringBuilder message,
+                                  final File file,
+                                  final @Nullable String sheetName,
+                                  final String teamNumberColumnName,
+                                  final String tournamentColumnName,
+                                  final @Nullable String eventDivisionColumnName,
+                                  final @Nullable String judgingStationColumnName)
       throws SQLException, IOException, ParseException, InvalidFormatException {
 
     if (LOGGER.isTraceEnabled()) {
@@ -154,7 +154,8 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
     final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
 
     // parse out the first non-blank line as the names of the columns
-    String[] columnNames = reader.readNext();
+    @Nullable
+    String @Nullable [] columnNames = reader.readNext();
     while (null != columnNames
         && columnNames.length < 1) {
       columnNames = reader.readNext();
@@ -239,7 +240,8 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
     }
 
     int rowsProcessed = 0;
-    String[] data = reader.readNext();
+    @Nullable
+    String @Nullable [] data = reader.readNext();
     while (null != data) {
       if (teamNumColumnIdx < data.length
           && tournamentColumnIdx < data.length) {
@@ -249,6 +251,11 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
           final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumStr).intValue();
 
           final String tournamentName = data[tournamentColumnIdx];
+          if (null == tournamentName) {
+            throw new FLLRuntimeException("Missing tournament name for team "
+                + teamNumber);
+          }
+
           final Tournament tournament;
           if (!Tournament.doesTournamentExist(connection, tournamentName)) {
             // create the tournament
@@ -262,13 +269,15 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
           }
 
           final String eventDivision;
-          if (eventDivisionColumnIdx < 0) {
+          if (eventDivisionColumnIdx < 0
+              || null == data[eventDivisionColumnIdx]) {
             eventDivision = GenerateDB.DEFAULT_TEAM_DIVISION;
           } else {
             eventDivision = data[eventDivisionColumnIdx];
           }
           final String judgingStation;
-          if (judgingStationColumnIdx < 0) {
+          if (judgingStationColumnIdx < 0
+              || null == data[judgingStationColumnIdx]) {
             judgingStation = GenerateDB.DEFAULT_TEAM_DIVISION;
           } else {
             judgingStation = data[judgingStationColumnIdx];
