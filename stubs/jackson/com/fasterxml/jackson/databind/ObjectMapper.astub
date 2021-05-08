@@ -1,0 +1,15 @@
+package com.fasterxml.jackson.databind;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public class ObjectMapper
+  extends ObjectCodec
+  implements Versioned,
+             java.io.Serializable // as of 2.1
+{
+
+  public void writeValue(Writer w, @Nullable Object value);
+  
+}
+
