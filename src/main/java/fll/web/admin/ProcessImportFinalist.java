@@ -29,6 +29,7 @@ import fll.db.ImportDB;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 import fll.web.UserRole;
@@ -83,6 +84,9 @@ public class ProcessImportFinalist extends BaseFLLServlet {
 
           // import the database
           final FileItem dumpFileItem = (FileItem) request.getAttribute("finalistFile");
+          if (null == dumpFileItem) {
+            throw new MissingRequiredParameterException("finalistFile");
+          }
           try (ZipInputStream zipfile = new ZipInputStream(dumpFileItem.getInputStream())) {
             ImportDB.loadDatabaseDump(zipfile, memConnection);
 
@@ -129,7 +133,13 @@ public class ProcessImportFinalist extends BaseFLLServlet {
       }
 
       SessionAttributes.appendToMessage(session, message.toString());
-      response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
+
+      final String redirectUrl = SessionAttributes.getRedirectURL(session);
+      if (null != redirectUrl) {
+        response.sendRedirect(response.encodeRedirectURL(redirectUrl));
+      } else {
+        response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+      }
     } catch (final FileUploadException fue) {
       LOG.error(fue);
       throw new RuntimeException("Error handling the file upload", fue);
