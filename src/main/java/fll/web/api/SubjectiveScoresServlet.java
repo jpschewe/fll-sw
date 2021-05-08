@@ -31,6 +31,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -428,7 +430,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
      * @param numModified {@link #getNumModified()}
      */
     public UploadResult(final boolean success,
-                        final String message,
+                        final @Nullable String message,
                         final int numModified) {
       mSuccess = success;
       mMessage = message;
@@ -444,12 +446,12 @@ public class SubjectiveScoresServlet extends HttpServlet {
       return mSuccess;
     }
 
-    private final String mMessage;
+    private final @Nullable String mMessage;
 
     /**
      * @return message for the user
      */
-    public String getMessage() {
+    public @Nullable String getMessage() {
       return mMessage;
     }
 

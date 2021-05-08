@@ -41,7 +41,7 @@ public class SubjectiveScore {
     noShow = false;
     modified = false;
     deleted = false;
-    judge = null;
+    judge = "Unknown Judge";
     teamNumber = Team.NULL_TEAM_NUMBER;
     note = null;
     scoreOnServer = false;
@@ -114,19 +114,19 @@ public class SubjectiveScore {
     deleted = v;
   }
 
-  private @Nullable String judge;
+  private String judge;
 
   /**
    * @return ID of the judge that created the scores.
    */
-  public @Nullable String getJudge() {
+  public String getJudge() {
     return judge;
   }
 
   /**
    * @param v see {@link #getJudge()}
    */
-  public void setJudge(final @Nullable String v) {
+  public void setJudge(final String v) {
     judge = v;
   }
 
