@@ -369,4 +369,22 @@ public final class WebUtils {
     return value;
   }
 
+  /**
+   * @param request where to get the parameter from
+   * @param parameter the parameter to get
+   * @return the value
+   * @throws FLLRuntimeException if the parameter is missing
+   */
+  public static String getNonNullRequestParameter(final HttpServletRequest request,
+                                                  final String parameter)
+      throws FLLRuntimeException, NumberFormatException {
+    final String str = request.getParameter(parameter);
+    if (null == str) {
+      throw new FLLRuntimeException("Parameter '"
+          + parameter
+          + "' is missing");
+    }
+    return str;
+  }
+
 }

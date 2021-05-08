@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.PolyNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
@@ -89,9 +89,9 @@ public class VerifyJudges extends BaseFLLServlet {
       for (int row = 1; row <= numRows; ++row) {
         String id = request.getParameter("id"
             + row);
-        final String category = request.getParameter("cat"
+        final String category = WebUtils.getNonNullRequestParameter(request, "cat"
             + row);
-        final String station = request.getParameter("station"
+        final String station = WebUtils.getNonNullRequestParameter(request, "station"
             + row);
         if (null != id) {
           id = sanitizeJudgeId(id);
@@ -164,7 +164,7 @@ public class VerifyJudges extends BaseFLLServlet {
    * Make sure that judge ID's don't contain characters that
    * will give us problems.
    */
-  private String sanitizeJudgeId(final @Nullable String id) {
+  private @PolyNull String sanitizeJudgeId(final @PolyNull String id) {
     if (null == id) {
       return null;
     } else {
