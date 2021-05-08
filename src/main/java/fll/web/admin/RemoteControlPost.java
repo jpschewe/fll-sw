@@ -22,11 +22,13 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.DisplayInfo;
 import fll.web.DisplayWebSocket;
+import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
@@ -104,7 +106,7 @@ public class RemoteControlPost extends BaseFLLServlet {
         if (DisplayInfo.DEFAULT_DISPLAY_NAME.equals(request.getParameter(display.getRemotePageFormParamName()))) {
           display.setFollowDefault();
         } else {
-          display.setRemotePage(request.getParameter(display.getRemotePageFormParamName()));
+          display.setRemotePage(WebUtils.getNonNullRequestParameter(request, display.getRemotePageFormParamName()));
         }
 
         display.setSpecialUrl(request.getParameter(display.getSpecialUrlFormParamName()));
@@ -115,7 +117,8 @@ public class RemoteControlPost extends BaseFLLServlet {
         final int numBrackets = WebUtils.getIntRequestParameter(request,
                                                                 display.getHead2HeadNumBracketsFormParamName());
         for (int bracketIdx = 0; bracketIdx < numBrackets; ++bracketIdx) {
-          final String bracket = request.getParameter(display.getHead2HeadBracketFormParamName(bracketIdx));
+          final String bracket = WebUtils.getNonNullRequestParameter(request,
+                                                                     display.getHead2HeadBracketFormParamName(bracketIdx));
 
           final String firstRoundStr = request.getParameter(display.getHead2HeadFirstRoundFormParamName(bracketIdx));
           final int firstRound;
@@ -132,7 +135,12 @@ public class RemoteControlPost extends BaseFLLServlet {
         }
         display.setBrackets(brackets);
 
-        final List<String> judgingGroupsToDisplay = Arrays.asList(request.getParameterValues(display.getJudgingGroupsFormParamName()));
+        final String judgingGroupsFormParamName = display.getJudgingGroupsFormParamName();
+        final String @Nullable [] judgingGroupsParamValues = request.getParameterValues(judgingGroupsFormParamName);
+        if (null == judgingGroupsParamValues) {
+          throw new MissingRequiredParameterException(judgingGroupsFormParamName);
+        }
+        final List<String> judgingGroupsToDisplay = Arrays.asList(judgingGroupsParamValues);
         display.setScoreboardJudgingGroups(judgingGroupsToDisplay);
       }
     }
