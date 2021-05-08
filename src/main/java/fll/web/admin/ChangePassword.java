@@ -26,6 +26,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.WebUtils;
 
 /**
  * Java code to handle changing of passwords.
@@ -53,15 +54,15 @@ public class ChangePassword extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
-      final String oldPassword = request.getParameter("old_password");
+      final String oldPassword = WebUtils.getNonNullRequestParameter(request, "old_password");
       if (!Authentication.checkValidPassword(connection, username, oldPassword)) {
         SessionAttributes.appendToMessage(session, "<p class='error'>Old password is incorrect</p>");
         response.sendRedirect(response.encodeRedirectURL("changePassword.jsp"));
         return;
       }
 
-      final String newPassword = request.getParameter("pass");
-      final String newPasswordCheck = request.getParameter("pass_check");
+      final String newPassword = WebUtils.getNonNullRequestParameter(request, "pass");
+      final String newPasswordCheck = WebUtils.getNonNullRequestParameter(request, "pass_check");
       if (!Objects.equals(newPassword, newPasswordCheck)) {
         SessionAttributes.appendToMessage(session, "<p class='error'>New passwords don't match</p>");
         response.sendRedirect(response.encodeRedirectURL("changePassword.jsp"));
