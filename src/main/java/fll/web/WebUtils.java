@@ -34,8 +34,6 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fll.util.FLLRuntimeException;
-
 /**
  * Some utilities for dealing with the web.
  */
@@ -333,17 +331,15 @@ public final class WebUtils {
    * @param request where to get the parameter from
    * @param parameter the parameter to get
    * @return the value
-   * @throws FLLRuntimeException if the parameter is missing
+   * @throws MissingRequiredParameterException if the parameter is missing
    * @throws NumberFormatException if the value isn't parsable as an integer
    */
   public static int getIntRequestParameter(final HttpServletRequest request,
                                            final String parameter)
-      throws FLLRuntimeException, NumberFormatException {
+      throws MissingRequiredParameterException, NumberFormatException {
     final String str = request.getParameter(parameter);
     if (null == str) {
-      throw new FLLRuntimeException("Parameter '"
-          + parameter
-          + "' is missing");
+      throw new MissingRequiredParameterException(parameter);
     }
     final int value = Integer.parseInt(str);
     return value;
@@ -353,17 +349,15 @@ public final class WebUtils {
    * @param request where to get the parameter from
    * @param parameter the parameter to get
    * @return the value
-   * @throws FLLRuntimeException if the parameter is missing
+   * @throws MissingRequiredParameterException if the parameter is missing
    * @throws NumberFormatException if the value isn't parsable as a double
    */
   public static double getDoubleRequestParameter(final HttpServletRequest request,
                                                  final String parameter)
-      throws FLLRuntimeException, NumberFormatException {
+      throws MissingRequiredParameterException, NumberFormatException {
     final String str = request.getParameter(parameter);
     if (null == str) {
-      throw new FLLRuntimeException("Parameter '"
-          + parameter
-          + "' is missing");
+      throw new MissingRequiredParameterException(parameter);
     }
     final double value = Double.parseDouble(str);
     return value;
@@ -373,16 +367,14 @@ public final class WebUtils {
    * @param request where to get the parameter from
    * @param parameter the parameter to get
    * @return the value
-   * @throws FLLRuntimeException if the parameter is missing
+   * @throws MissingRequiredParameterException if the parameter is missing
    */
   public static String getNonNullRequestParameter(final HttpServletRequest request,
                                                   final String parameter)
-      throws FLLRuntimeException, NumberFormatException {
+      throws MissingRequiredParameterException {
     final String str = request.getParameter(parameter);
     if (null == str) {
-      throw new FLLRuntimeException("Parameter '"
-          + parameter
-          + "' is missing");
+      throw new MissingRequiredParameterException(parameter);
     }
     return str;
   }
