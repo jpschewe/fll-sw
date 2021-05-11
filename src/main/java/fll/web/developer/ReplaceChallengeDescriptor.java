@@ -28,6 +28,7 @@ import fll.db.GenerateDB;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 import fll.web.UserRole;
@@ -70,7 +71,9 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
 
       // create a new empty database from an XML descriptor
       final FileItem xmlFileItem = (FileItem) request.getAttribute("xmldoc");
-
+      if (null == xmlFileItem) {
+        throw new MissingRequiredParameterException("xmldoc");
+      }
       final ChallengeDescription newDescription = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
                                                                                               Utilities.DEFAULT_CHARSET));
 
