@@ -33,6 +33,7 @@ import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import fll.web.developer.importdb.ImportDBDump;
 import fll.web.developer.importdb.ImportDbSessionInfo;
 
@@ -134,12 +135,7 @@ public class ProcessImportFinalist extends BaseFLLServlet {
 
       SessionAttributes.appendToMessage(session, message.toString());
 
-      final String redirectUrl = SessionAttributes.getRedirectURL(session);
-      if (null != redirectUrl) {
-        response.sendRedirect(response.encodeRedirectURL(redirectUrl));
-      } else {
-        response.sendRedirect(response.encodeRedirectURL("index.jsp"));
-      }
+      WebUtils.sendRedirect(response, session);
     } catch (final FileUploadException fue) {
       LOG.error(fue);
       throw new RuntimeException("Error handling the file upload", fue);

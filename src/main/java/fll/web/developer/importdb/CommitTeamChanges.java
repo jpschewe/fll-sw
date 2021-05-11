@@ -28,6 +28,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 
 /**
  * Commit changes made on resolveMissingTeams.jsp.
@@ -93,7 +94,7 @@ public class CommitTeamChanges extends BaseFLLServlet {
     }
 
     session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
+    WebUtils.sendRedirect(response, session);
   }
 
   /**

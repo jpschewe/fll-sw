@@ -28,6 +28,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 
 /**
  * Servlet to check team information between the source and dest database.
@@ -83,7 +84,7 @@ public class CheckTeamInfo extends BaseFLLServlet {
     }
 
     session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
+    WebUtils.sendRedirect(response, session);
   }
 
 }

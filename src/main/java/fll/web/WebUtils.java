@@ -28,6 +28,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
@@ -379,4 +380,24 @@ public final class WebUtils {
     return str;
   }
 
+  /**
+   * Redirect to the page in {@link SessionAttributes#getRedirectURL(HttpSession)}
+   * or "/" if nothing is stored in the session.
+   * 
+   * @param response the response to redirect
+   * @param session the session to get the redirect from
+   * @throws IOException {@link HttpServletResponse#sendRedirect(String)}
+   */
+  public static void sendRedirect(final HttpServletResponse response,
+                                  final HttpSession session)
+      throws IOException {
+    final String redirect = SessionAttributes.getRedirectURL(session);
+    final String whereTo;
+    if (null != redirect) {
+      whereTo = redirect;
+    } else {
+      whereTo = "/";
+    }
+    response.sendRedirect(response.encodeRedirectURL(whereTo));
+  }
 }
