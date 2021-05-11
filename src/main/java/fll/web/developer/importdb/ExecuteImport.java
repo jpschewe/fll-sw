@@ -8,7 +8,6 @@ package fll.web.developer.importdb;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -23,6 +22,7 @@ import fll.Tournament;
 import fll.db.GlobalParameters;
 import fll.db.ImportDB;
 import fll.db.Queries;
+import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
@@ -60,12 +60,13 @@ public class ExecuteImport extends BaseFLLServlet {
                                                                                   ImportDbSessionInfo.class);
 
     final DataSource sourceDataSource = sessionInfo.getImportDataSource();
-    Objects.requireNonNull(sourceDataSource, "Missing import data source");
 
     final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
 
     final String tournament = sessionInfo.getTournamentName();
-    Objects.requireNonNull(tournament, "Missing tournament to import");
+    if (null == tournament) {
+      throw new FLLInternalException("Missing tournament to import");
+    }
 
     try (Connection sourceConnection = sourceDataSource.getConnection();
         Connection destConnection = destDataSource.getConnection()) {
