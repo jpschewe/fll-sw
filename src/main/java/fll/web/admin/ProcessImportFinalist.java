@@ -67,19 +67,16 @@ public class ProcessImportFinalist extends BaseFLLServlet {
 
       if (null != request.getAttribute("finalistFile")) {
 
-        final ImportDbSessionInfo sessionInfo = new ImportDbSessionInfo();
-
         final String databaseName = "dbimport"
             + String.valueOf(ImportDBDump.getNextDBCount());
 
         // TODO issue:123 should figure out how to clean up this database
         final DataSource importDataSource = Utilities.createMemoryDataSource(databaseName);
 
-        sessionInfo.setImportDataSource(importDataSource);
-
         // set redirect page to be the admin index
         final String finalRedirectUrl = String.format("%s/admin/index.jsp", request.getContextPath());
-        sessionInfo.setRedirectURL(finalRedirectUrl);
+
+        final ImportDbSessionInfo sessionInfo = new ImportDbSessionInfo(importDataSource, finalRedirectUrl);
 
         try (Connection memConnection = importDataSource.getConnection()) {
 

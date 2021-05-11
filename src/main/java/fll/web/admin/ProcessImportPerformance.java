@@ -67,19 +67,16 @@ public class ProcessImportPerformance extends BaseFLLServlet {
 
       if (null != request.getAttribute("performanceFile")) {
 
-        final ImportDbSessionInfo sessionInfo = new ImportDbSessionInfo();
-
         final String databaseName = "dbimport"
             + String.valueOf(ImportDBDump.getNextDBCount());
 
         // TODO issue:123 should figure out how to clean up this database
         final DataSource importDataSource = Utilities.createMemoryDataSource(databaseName);
 
-        sessionInfo.setImportDataSource(importDataSource);
-
         // set redirect page to be the judges room index
         final String finalRedirectUrl = String.format("%s/judges-room.jsp", request.getContextPath());
-        sessionInfo.setRedirectURL(finalRedirectUrl);
+
+        final ImportDbSessionInfo sessionInfo = new ImportDbSessionInfo(importDataSource, finalRedirectUrl);
 
         try (Connection memConnection = importDataSource.getConnection()) {
 

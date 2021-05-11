@@ -84,14 +84,12 @@ public class ImportDBDump extends BaseFLLServlet {
 
       if (null != request.getAttribute("importdb")) {
 
-        final ImportDbSessionInfo sessionInfo = new ImportDbSessionInfo();
-
         final String databaseName = "dbimport"
             + String.valueOf(getNextDBCount());
         // TODO issue:123 should figure out how to clean up this database
         final DataSource importDataSource = Utilities.createMemoryDataSource(databaseName);
 
-        sessionInfo.setImportDataSource(importDataSource);
+        final ImportDbSessionInfo sessionInfo = new ImportDbSessionInfo(importDataSource);
 
         try (Connection memConnection = importDataSource.getConnection()) {
 

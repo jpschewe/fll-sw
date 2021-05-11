@@ -11,9 +11,11 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Team;
 import fll.db.TeamPropertyDifference;
@@ -24,7 +26,24 @@ import fll.db.TeamPropertyDifference;
  */
 public final class ImportDbSessionInfo {
 
-  private DataSource dbimport;
+  /**
+   * @param dbimport {@link #getImportDataSource()}
+   */
+  public ImportDbSessionInfo(final DataSource dbimport) {
+    this(dbimport, "../index.jsp");
+  }
+
+  /**
+   * @param dbimport {@link #getImportDataSource()}
+   * @param redirectUrl {@link #getRedirectURL()}.
+   */
+  public ImportDbSessionInfo(final DataSource dbimport,
+                             final String redirectUrl) {
+    this.dbimport = dbimport;
+    this.redirectURL = redirectUrl;
+  }
+
+  private final DataSource dbimport;
 
   /**
    * @return The datasource for the database being imported.
@@ -33,19 +52,12 @@ public final class ImportDbSessionInfo {
     return dbimport;
   }
 
-  /**
-   * @param v see {@link #getImportDataSource()}
-   */
-  public void setImportDataSource(final DataSource v) {
-    dbimport = v;
-  }
-
-  private String selectedTournament;
+  private @MonotonicNonNull String selectedTournament;
 
   /**
    * @return see {@link #setTournamentName(String)}
    */
-  public String getTournamentName() {
+  public @Nullable String getTournamentName() {
     return selectedTournament;
   }
 
@@ -70,7 +82,6 @@ public final class ImportDbSessionInfo {
    * @return an unmodifiable collection of the missing teams
    * @see #setMissingTeams(Collection)
    */
-  @Nonnull
   public Collection<Team> getMissingTeams() {
     return Collections.unmodifiableCollection(missingTeams);
   }
@@ -153,13 +164,6 @@ public final class ImportDbSessionInfo {
    */
   public String getRedirectURL() {
     return redirectURL;
-  }
-
-  /**
-   * @param v {@link #getRedirectURL()}
-   */
-  public void setRedirectURL(final String v) {
-    redirectURL = v;
   }
 
 }
