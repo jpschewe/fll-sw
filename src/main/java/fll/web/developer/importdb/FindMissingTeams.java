@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -22,12 +21,13 @@ import javax.sql.DataSource;
 
 import fll.Team;
 import fll.db.ImportDB;
-
+import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 
 /**
  * Servlet to find teams that are missing via
@@ -59,10 +59,11 @@ public class FindMissingTeams extends BaseFLLServlet {
                                                                                   ImportDbSessionInfo.class);
 
     final String tournament = sessionInfo.getTournamentName();
-    Objects.requireNonNull(tournament, "Missing tournament to import");
+    if (null == tournament) {
+      throw new FLLInternalException("Missing tournament to import");
+    }
 
     final DataSource sourceDataSource = sessionInfo.getImportDataSource();
-    Objects.requireNonNull(sourceDataSource, "Missing import data source");
 
     final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
 
@@ -83,8 +84,7 @@ public class FindMissingTeams extends BaseFLLServlet {
     }
 
     session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getNonNullAttribute(session, "redirect_url",
-                                                                                           String.class)));
+    WebUtils.sendRedirect(response, session);
   }
 
 }
