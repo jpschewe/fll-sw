@@ -39,6 +39,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 
 /**
  * Handle AJAX query from database query page. Expects the parameter "query" to
@@ -68,12 +69,12 @@ public class QueryHandler extends BaseFLLServlet {
     }
 
     final List<String> columnNames = new LinkedList<String>();
-    final List<Map<String, String>> data = new LinkedList<Map<String, String>>();
+    final List<Map<String, @Nullable String>> data = new LinkedList<>();
     String error = null;
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection(); Statement stmt = connection.createStatement()) {
-      final String query = request.getParameter(QUERY_PARAMETER);
+      final String query = WebUtils.getNonNullRequestParameter(request, QUERY_PARAMETER);
       LOGGER.debug("Executing query '{}'", query);
 
       try (ResultSet rs = stmt.executeQuery(query)) {
@@ -83,7 +84,7 @@ public class QueryHandler extends BaseFLLServlet {
           columnNames.add(meta.getColumnName(columnNum).toLowerCase());
         }
         while (rs.next()) {
-          final Map<String, String> row = new HashMap<String, String>();
+          final Map<String, @Nullable String> row = new HashMap<>();
           for (final String columnName : columnNames) {
             final String value = rs.getString(columnName);
             row.put(columnName, value);
@@ -116,14 +117,14 @@ public class QueryHandler extends BaseFLLServlet {
      * @param error {@link #getError()}
      */
     public ResultData(@JsonProperty("columnNames") final List<String> columnNames,
-                      @JsonProperty("data") final List<Map<String, String>> data,
+                      @JsonProperty("data") final List<Map<String, @Nullable String>> data,
                       @JsonProperty("error") final @Nullable String error) {
       this.columnNames.addAll(columnNames);
       this.data.addAll(data);
       this.error = error;
     }
 
-    private final String error;
+    private final @Nullable String error;
 
     /**
      * @return If there is an error, this will be non-null.
@@ -141,12 +142,12 @@ public class QueryHandler extends BaseFLLServlet {
       return columnNames;
     }
 
-    private final List<Map<String, String>> data = new LinkedList<Map<String, String>>();
+    private final List<Map<String, @Nullable String>> data = new LinkedList<>();
 
     /**
      * @return the parsed data list of pairs of column and value
      */
-    public List<Map<String, String>> getData() {
+    public List<Map<String, @Nullable String>> getData() {
       return data;
     }
 
