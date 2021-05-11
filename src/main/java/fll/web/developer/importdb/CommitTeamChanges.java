@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.db.Queries;
 import fll.db.TeamPropertyDifference;
 import fll.db.TeamPropertyDifference.TeamProperty;
@@ -108,10 +110,14 @@ public class CommitTeamChanges extends BaseFLLServlet {
   private void applyDifference(final Connection connection,
                                final int teamNumber,
                                final TeamProperty property,
-                               final String value)
+                               final @Nullable String value)
       throws SQLException {
     switch (property) {
     case NAME:
+      if (null == value) {
+        throw new IllegalArgumentException("Team name cannot be null. Team number: "
+            + teamNumber);
+      }
       Queries.updateTeamName(connection, teamNumber, value);
       break;
     case ORGANIZATION:
