@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -22,7 +21,7 @@ import javax.sql.DataSource;
 
 import fll.db.ImportDB;
 import fll.db.TeamPropertyDifference;
-
+import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
@@ -59,10 +58,11 @@ public class CheckTeamInfo extends BaseFLLServlet {
                                                                                   ImportDbSessionInfo.class);
 
     final DataSource sourceDataSource = sessionInfo.getImportDataSource();
-    Objects.requireNonNull(sourceDataSource, "Missing import data source");
 
     final String tournament = sessionInfo.getTournamentName();
-    Objects.requireNonNull(tournament, "Missing tournament name to import");
+    if (null == tournament) {
+      throw new FLLInternalException("Missing tournament to import");
+    }
 
     final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
 
