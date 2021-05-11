@@ -25,9 +25,11 @@ import fll.db.ImportDB;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 
@@ -95,6 +97,9 @@ public class ImportDBDump extends BaseFLLServlet {
 
           // import the database
           final FileItem dumpFileItem = (FileItem) request.getAttribute("dbdump");
+          if (null == dumpFileItem) {
+            throw new MissingRequiredParameterException("dbdump");
+          }
           try (ZipInputStream zipfile = new ZipInputStream(dumpFileItem.getInputStream())) {
             final ImportDB.ImportResult importResult = ImportDB.loadDatabaseDump(zipfile, memConnection);
 
@@ -137,7 +142,7 @@ public class ImportDBDump extends BaseFLLServlet {
     }
 
     SessionAttributes.appendToMessage(session, message.toString());
-    response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
+    WebUtils.sendRedirect(response, session);
   }
 
   /**
