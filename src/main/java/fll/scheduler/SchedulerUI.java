@@ -19,6 +19,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -77,7 +79,13 @@ import javax.swing.table.TableCellRenderer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.RequiresNonNull;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
@@ -102,6 +110,30 @@ import net.mtu.eggplant.util.BasicFileFilter;
  * UI for the scheduler.
  */
 public class SchedulerUI extends JFrame {
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
+  private static final Color HARD_CONSTRAINT_COLOR = Color.RED;
+
+  private static final Color SOFT_CONSTRAINT_COLOR = Color.YELLOW;
+
+  private final JTable violationTable = new JTable();
+
+  private final JLabel mDescriptionFilename;
+
+  private final JLabel mScheduleFilename;
+
+  private final JTabbedPane mTabbedPane;
+
+  private final SolverParamsEditor mScheduleDescriptionEditor;
+
+  private final JTable mScheduleTable = new JTable();
+
+  @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class isn't going to be serialized")
+  private TournamentSchedule mScheduleData = new TournamentSchedule();
+
+  private SchedulerTableModel mScheduleModel = new SchedulerTableModel(mScheduleData);
+
+  private ViolationTableModel mViolationsModel = new ViolationTableModel(Collections.emptyList());
 
   /**
    * @param args ignored
@@ -159,7 +191,7 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private final ChooseChallengeDescriptor chooseChallengeDescriptor = new ChooseChallengeDescriptor(SchedulerUI.this);
+  private final @NotOnlyInitialized ChooseChallengeDescriptor chooseChallengeDescriptor;
 
   private static final String BASE_TITLE = "FLL Scheduler";
 
@@ -170,10 +202,10 @@ public class SchedulerUI extends JFrame {
     super(BASE_TITLE);
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
+    chooseChallengeDescriptor = new ChooseChallengeDescriptor(SchedulerUI.this);
+
     progressDialog = new ProgressDialog(SchedulerUI.this, "Please Wait");
     progressDialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-
-    setJMenuBar(createMenubar());
 
     final Container cpane = getContentPane();
     cpane.setLayout(new BorderLayout());
@@ -204,7 +236,6 @@ public class SchedulerUI extends JFrame {
     mScheduleFilename = new JLabel("");
     schedulePanel.add(createScheduleToolbar(), BorderLayout.NORTH);
 
-    mScheduleTable = new JTable();
     mScheduleTable.setAutoCreateRowSorter(true);
     mScheduleTable.setDefaultRenderer(LocalTime.class, schedTableRenderer);
     mScheduleTable.setDefaultRenderer(String.class, schedTableRenderer);
@@ -212,7 +243,6 @@ public class SchedulerUI extends JFrame {
     mScheduleTable.setDefaultRenderer(Object.class, schedTableRenderer);
     final JScrollPane dataScroller = new JScrollPane(mScheduleTable);
 
-    violationTable = new JTable();
     violationTable.setDefaultRenderer(String.class, violationTableRenderer);
     violationTable.getSelectionModel().addListSelectionListener(violationSelectionListener);
     final JScrollPane violationScroller = new JScrollPane(violationTable);
@@ -226,27 +256,55 @@ public class SchedulerUI extends JFrame {
     changeDuration = FormatterUtils.createIntegerField(0, 1000);
     changeDuration.setToolTipText("The number of minutes that a team has between any 2 activities");
     addRow(constraintsPanel, new JLabel("Change time duration:"), changeDuration);
-    changeDuration.addPropertyChangeListener("value", e -> {
-      checkSchedule();
-    });
 
     performanceChangeDuration = FormatterUtils.createIntegerField(0, 1000);
     performanceChangeDuration.setToolTipText("The number of minutes that a team has between any 2 performance runs");
     addRow(constraintsPanel, new JLabel("Performance change time duration:"), performanceChangeDuration);
-    performanceChangeDuration.addPropertyChangeListener("value", e -> {
-      checkSchedule();
-    });
 
     performanceDuration = FormatterUtils.createIntegerField(1, 1000);
     performanceDuration.setToolTipText("The amount of time that the team is expected to be at the table");
     addRow(constraintsPanel, new JLabel("Performance duration:"), performanceDuration);
-    performanceDuration.addPropertyChangeListener("value", e -> {
-      checkSchedule();
-    });
 
     addRow(constraintsPanel, new JLabel("Make sure to pass these values onto your computer person with the schedule!"));
 
     // --- end schedule panel
+
+    // object initialized
+    final CheckSchedule durationChangeListener = new CheckSchedule();
+    changeDuration.addPropertyChangeListener("value", durationChangeListener);
+    performanceChangeDuration.addPropertyChangeListener("value", durationChangeListener);
+    performanceDuration.addPropertyChangeListener("value", durationChangeListener);
+
+    // Work around https://github.com/typetools/checker-framework/issues/4667 by
+    // putting all initialization inside the constructor
+    // final JMenuBar menubar = createMenubar();
+    final JMenuBar menubar = new JMenuBar();
+
+    final JMenu fileMenu = new JMenu("File");
+    fileMenu.setMnemonic('f');
+    fileMenu.add(mPreferencesAction);
+    fileMenu.add(mExitAction);
+    menubar.add(fileMenu);
+
+    final JMenu descriptionMenu = new JMenu("Description");
+    descriptionMenu.setMnemonic('d');
+    descriptionMenu.add(mNewScheduleDescriptionAction);
+    descriptionMenu.add(mOpenScheduleDescriptionAction);
+    descriptionMenu.add(mSaveScheduleDescriptionAction);
+    descriptionMenu.add(mRunSchedulerAction);
+    menubar.add(descriptionMenu);
+
+    final JMenu scheduleMenu = new JMenu("Schedule");
+    scheduleMenu.setMnemonic('s');
+
+    scheduleMenu.add(mOpenScheduleAction);
+    scheduleMenu.add(mReloadFileAction);
+    scheduleMenu.add(mRunOptimizerAction);
+    scheduleMenu.add(mWriteSchedulesAction);
+    scheduleMenu.add(mDisplayGeneralScheduleAction);
+    menubar.add(scheduleMenu);
+
+    setJMenuBar(menubar);
 
     // initial state
     mWriteSchedulesAction.setEnabled(false);
@@ -254,23 +312,38 @@ public class SchedulerUI extends JFrame {
     mRunOptimizerAction.setEnabled(false);
     mReloadFileAction.setEnabled(false);
 
-    setSchedParams(new SchedParams());
+    // Once https://github.com/typetools/checker-framework/issues/4613 is resolved I
+    // can try and figure out what is wrong here
+    // until then I have copied the body of setSchedParams here
+    // setSchedParams(mSchedParams);
+    changeDuration.setValue(mSchedParams.getChangetimeMinutes());
+    performanceChangeDuration.setValue(mSchedParams.getPerformanceChangetimeMinutes());
+    performanceDuration.setValue(mSchedParams.getPerformanceMinutes());
 
     pack();
   }
 
+  private class CheckSchedule implements PropertyChangeListener {
+
+    @Override
+    public void propertyChange(final PropertyChangeEvent ignored) {
+      checkSchedule();
+    }
+
+  }
+
   @SuppressFBWarnings(value = "SE_TRANSIENT_FIELD_NOT_RESTORED", justification = "There is no state needed to be kept here")
   private final transient ListSelectionListener violationSelectionListener = e -> {
-    final int selectedRow = getViolationTable().getSelectedRow();
+    final int selectedRow = violationTable.getSelectedRow();
     if (selectedRow == -1) {
       return;
     }
 
-    final ConstraintViolation selected = getViolationsModel().getViolation(selectedRow);
+    final ConstraintViolation selected = mViolationsModel.getViolation(selectedRow);
     if (Team.NULL_TEAM_NUMBER != selected.getTeam()) {
-      final int teamIndex = getScheduleModel().getIndexOfTeam(selected.getTeam());
-      final int displayIndex = getScheduleTable().convertRowIndexToView(teamIndex);
-      getScheduleTable().changeSelection(displayIndex, 1, false, false);
+      final int teamIndex = mScheduleModel.getIndexOfTeam(selected.getTeam());
+      final int displayIndex = mScheduleTable.convertRowIndexToView(teamIndex);
+      mScheduleTable.changeSelection(displayIndex, 1, false, false);
     }
   };
 
@@ -291,9 +364,17 @@ public class SchedulerUI extends JFrame {
       final int returnVal = fileChooser.showSaveDialog(SchedulerUI.this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
         final File currentDirectory = fileChooser.getCurrentDirectory();
+        if (null == currentDirectory) {
+          return;
+        }
+
         PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
 
         File selectedFile = fileChooser.getSelectedFile();
+        if (null == selectedFile) {
+          return;
+        }
+
         if (!selectedFile.getName().endsWith(".properties")) {
           selectedFile = new File(selectedFile.getAbsolutePath()
               + ".properties");
@@ -307,7 +388,8 @@ public class SchedulerUI extends JFrame {
       }
     }
 
-    try (Writer writer = new OutputStreamWriter(new FileOutputStream(mScheduleDescriptionFile),
+    // mScheduleDescriptionFile needs to be non-null by now
+    try (Writer writer = new OutputStreamWriter(new FileOutputStream(castNonNull(mScheduleDescriptionFile)),
                                                 Utilities.DEFAULT_CHARSET)) {
       final SolverParams params = mScheduleDescriptionEditor.getParams();
       final List<String> errors = params.isValid();
@@ -380,7 +462,17 @@ public class SchedulerUI extends JFrame {
     try {
       saveScheduleDescription();
 
-      final SchedulerWorker worker = new SchedulerWorker();
+      if (null == mScheduleDescriptionFile) {
+        final Formatter errorFormatter = new Formatter();
+        errorFormatter.format("Schedule description not saved, cannot run scheduler");
+        LOGGER.error(errorFormatter);
+        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Cannot Run Scheduler",
+                                      JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+
+      // description not null by now
+      final SchedulerWorker worker = new SchedulerWorker(castNonNull(mScheduleDescriptionFile));
 
       // make sure the task doesn't start until the window is up
       progressDialog.addComponentListener(new ComponentAdapter() {
@@ -418,8 +510,8 @@ public class SchedulerUI extends JFrame {
   private final class SchedulerWorker extends SwingWorker<Integer, Void> {
     private final GreedySolver solver;
 
-    SchedulerWorker() throws IOException, ParseException, InvalidParametersException {
-      this.solver = new GreedySolver(mScheduleDescriptionFile, false);
+    SchedulerWorker(final File descriptionFile) throws IOException, ParseException, InvalidParametersException {
+      this.solver = new GreedySolver(descriptionFile, false);
     }
 
     @Override
@@ -480,7 +572,7 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private final ProgressDialog progressDialog;
+  private final @NotOnlyInitialized ProgressDialog progressDialog;
 
   private final class OptimizerWorker extends SwingWorker<Void, Void> {
     private final TableOptimizer optimizer;
@@ -610,7 +702,8 @@ public class SchedulerUI extends JFrame {
     mDescriptionFilename.setText(file.getName());
   }
 
-  private JToolBar createDescriptionToolbar() {
+  @RequiresNonNull({ "mDescriptionFilename" })
+  private JToolBar createDescriptionToolbar(@UnknownInitialization(JFrame.class) SchedulerUI this) {
     final JToolBar toolbar = new JToolBar("Description Toolbar");
     toolbar.setFloatable(false);
 
@@ -624,7 +717,8 @@ public class SchedulerUI extends JFrame {
     return toolbar;
   }
 
-  private JToolBar createScheduleToolbar() {
+  @RequiresNonNull({ "mScheduleFilename" })
+  private JToolBar createScheduleToolbar(@UnderInitialization(JFrame.class) SchedulerUI this) {
     final JToolBar toolbar = new JToolBar("Schedule Toolbar");
     toolbar.setFloatable(false);
 
@@ -636,53 +730,6 @@ public class SchedulerUI extends JFrame {
     toolbar.add(mDisplayGeneralScheduleAction);
 
     return toolbar;
-  }
-
-  private JMenuBar createMenubar() {
-    final JMenuBar menubar = new JMenuBar();
-
-    menubar.add(createFileMenu());
-
-    menubar.add(createDescriptionMenu());
-
-    menubar.add(createScheduleMenu());
-
-    return menubar;
-  }
-
-  private JMenu createScheduleMenu() {
-    final JMenu menu = new JMenu("Schedule");
-    menu.setMnemonic('s');
-
-    menu.add(mOpenScheduleAction);
-    menu.add(mReloadFileAction);
-    menu.add(mRunOptimizerAction);
-    menu.add(mWriteSchedulesAction);
-    menu.add(mDisplayGeneralScheduleAction);
-
-    return menu;
-  }
-
-  private JMenu createDescriptionMenu() {
-    final JMenu menu = new JMenu("Description");
-    menu.setMnemonic('d');
-
-    menu.add(mNewScheduleDescriptionAction);
-    menu.add(mOpenScheduleDescriptionAction);
-    menu.add(mSaveScheduleDescriptionAction);
-    menu.add(mRunSchedulerAction);
-
-    return menu;
-  }
-
-  private JMenu createFileMenu() {
-    final JMenu menu = new JMenu("File");
-    menu.setMnemonic('f');
-
-    menu.add(mPreferencesAction);
-    menu.add(mExitAction);
-
-    return menu;
   }
 
   private final Action mReloadFileAction = new AbstractAction("Reload Schedule") {
@@ -890,8 +937,13 @@ public class SchedulerUI extends JFrame {
    */
   private void runTableOptimizer() {
     try {
-      final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData,
-                                                          mScheduleFile.getAbsoluteFile().getParentFile());
+      File scheduleDirectory = mScheduleFile.getAbsoluteFile().getParentFile();
+      if (null == scheduleDirectory) {
+        // use current working directory
+        scheduleDirectory = new File(".");
+      }
+
+      final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData, scheduleDirectory);
 
       final OptimizerWorker optimizerWorker = new OptimizerWorker(optimizer);
 
@@ -934,7 +986,7 @@ public class SchedulerUI extends JFrame {
       final String sheetName;
       if (csv) {
         reader = new CSVCellReader(selectedFile);
-        sheetName = null;
+        sheetName = "ignored";
       } else {
         sheetName = promptForSheetName(selectedFile);
         if (null == sheetName) {
@@ -1048,6 +1100,7 @@ public class SchedulerUI extends JFrame {
       putValue(MNEMONIC_KEY, KeyEvent.VK_O);
     }
 
+    @SuppressFBWarnings(value = "NP_NONNULL_PARAM_VIOLATION", justification = "False positive in SpotBugs thinking that the second parameter to loaodScheduleFile cannot be null")
     @Override
     public void actionPerformed(final ActionEvent ae) {
       final String startingDirectory = PREFS.get(SCHEDULE_STARTING_DIRECTORY_PREF, null);
@@ -1115,14 +1168,12 @@ public class SchedulerUI extends JFrame {
 
   private static final String DESCRIPTION_STARTING_DIRECTORY_PREF = "descriptionStartingDirectory";
 
-  @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class isn't going to be serialized")
-  private TournamentSchedule mScheduleData;
-
-  /* package */TournamentSchedule getScheduleData() {
+  /* package */
+  TournamentSchedule getScheduleData() {
     return mScheduleData;
   }
 
-  private SchedParams mSchedParams;
+  private SchedParams mSchedParams = new SchedParams();
 
   /**
    * @return the current schedule parameters
@@ -1131,23 +1182,12 @@ public class SchedulerUI extends JFrame {
     return mSchedParams;
   }
 
-  private void setSchedParams(final SchedParams params) {
+  private void setSchedParams(@UnknownInitialization(SchedulerUI.class) SchedulerUI this,
+                              final SchedParams params) {
     mSchedParams = params;
     changeDuration.setValue(mSchedParams.getChangetimeMinutes());
     performanceChangeDuration.setValue(mSchedParams.getPerformanceChangetimeMinutes());
     performanceDuration.setValue(mSchedParams.getPerformanceMinutes());
-  }
-
-  private SchedulerTableModel mScheduleModel;
-
-  /* package */ SchedulerTableModel getScheduleModel() {
-    return mScheduleModel;
-  }
-
-  private ViolationTableModel mViolationsModel;
-
-  /* package */ViolationTableModel getViolationsModel() {
-    return mViolationsModel;
   }
 
   private void setScheduleData(final TournamentSchedule sd) {
@@ -1164,10 +1204,6 @@ public class SchedulerUI extends JFrame {
    * Verify the existing schedule and update the violations.
    */
   private void checkSchedule() {
-    if (null == mScheduleData) {
-      return;
-    }
-
     violationTable.clearSelection();
 
     // make sure sched params are updated based on the UI elements
@@ -1183,32 +1219,6 @@ public class SchedulerUI extends JFrame {
     mScheduleTable.repaint();
   }
 
-  private final JLabel mDescriptionFilename;
-
-  private final JLabel mScheduleFilename;
-
-  private final JTabbedPane mTabbedPane;
-
-  private final SolverParamsEditor mScheduleDescriptionEditor;
-
-  private final JTable mScheduleTable;
-
-  private JTable getScheduleTable() {
-    return mScheduleTable;
-  }
-
-  private final JTable violationTable;
-
-  JTable getViolationTable() {
-    return violationTable;
-  }
-
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
-  private static final Color HARD_CONSTRAINT_COLOR = Color.RED;
-
-  private static final Color SOFT_CONSTRAINT_COLOR = Color.YELLOW;
-
   private final TableCellRenderer schedTableRenderer = new DefaultTableCellRenderer() {
 
     @Override
@@ -1222,7 +1232,7 @@ public class SchedulerUI extends JFrame {
 
       final int tmRow = table.convertRowIndexToModel(row);
       final int tmCol = table.convertColumnIndexToModel(column);
-      final TeamScheduleInfo schedInfo = getScheduleModel().getSchedInfo(tmRow);
+      final TeamScheduleInfo schedInfo = mScheduleModel.getSchedInfo(tmRow);
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Checking for violations against team: "
             + schedInfo.getTeamNumber() //
@@ -1234,7 +1244,7 @@ public class SchedulerUI extends JFrame {
       }
 
       final SortedSet<ConstraintViolation.Type> violationTypes = new TreeSet<>();
-      for (final ConstraintViolation violation : getViolationsModel().getViolations()) {
+      for (final ConstraintViolation violation : mViolationsModel.getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
           final Collection<SubjectiveTime> subjectiveTimes = violation.getSubjectiveTimes();
           if (tmCol <= SchedulerTableModel.JUDGE_COLUMN
@@ -1293,7 +1303,7 @@ public class SchedulerUI extends JFrame {
             }
           } else {
             for (final SubjectiveTime subj : subjectiveTimes) {
-              if (tmCol == getScheduleModel().getColumnForSubjective(subj.getName())) {
+              if (tmCol == mScheduleModel.getColumnForSubjective(subj.getName())) {
                 violationTypes.add(violation.getType());
               }
             }
@@ -1348,7 +1358,7 @@ public class SchedulerUI extends JFrame {
 
       final int tmRow = table.convertRowIndexToModel(row);
 
-      final ConstraintViolation violation = getViolationsModel().getViolation(tmRow);
+      final ConstraintViolation violation = mViolationsModel.getViolation(tmRow);
 
       final Color violationColor = colorForViolation(violation.getType());
       setForeground(null);
@@ -1394,7 +1404,7 @@ public class SchedulerUI extends JFrame {
    * @param columnInfo the column information
    * @return the list of subjective information the user choose
    */
-  public static List<SubjectiveStation> gatherSubjectiveStationInformation(final Component parentComponent,
+  public static List<SubjectiveStation> gatherSubjectiveStationInformation(final @Nullable Component parentComponent,
                                                                            final ColumnInformation columnInfo) {
     final List<String> unusedColumns = columnInfo.getUnusedColumns();
     final List<JCheckBox> checkboxes = new LinkedList<>();

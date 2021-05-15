@@ -10,6 +10,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * The objective value from a schedule. It is assumed that ObectiveValue objects
  * from the same solver be compared. Comparing ObjectiveValue objects across
@@ -36,10 +38,10 @@ import java.util.Arrays;
    *          ScheduleChecker
    */
   ObjectiveValue(final int solutionNumber,
-                        final int latestPerformanceTime,
-                        final int[] numTeams,
-                        final int[] latestSubjectiveTime,
-                        final int numWarnings) {
+                 final int latestPerformanceTime,
+                 final int[] numTeams,
+                 final int[] latestSubjectiveTime,
+                 final int numWarnings) {
     if (numTeams.length != latestSubjectiveTime.length) {
       throw new IllegalArgumentException("numTeams.length must equal latestSubjectiveTime.length");
     }
@@ -127,7 +129,7 @@ import java.util.Arrays;
   }
 
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(final @Nullable Object o) {
     if (null == o) {
       return false;
     } else if (o == this) {

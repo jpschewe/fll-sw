@@ -21,6 +21,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.MaskFormatter;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.FLLInternalException;
@@ -67,9 +68,8 @@ import fll.util.FLLInternalException;
    * Retrieve the current value as a {@link LocalTime} object
    * 
    * @return Current value as a {@link LocalTime} object, may be null
-   * @throws java.text.ParseException
    */
-  public LocalTime getTime() {
+  public @Nullable LocalTime getTime() {
     final String str = getTimeText(getText());
     return TournamentSchedule.parseTime(str);
   }
@@ -87,7 +87,8 @@ import fll.util.FLLInternalException;
    * 
    * @param time the new value
    */
-  public void setTime(final LocalTime time) {
+  public void setTime(@UnknownInitialization(ScheduleTimeField.class) ScheduleTimeField this,
+                      final @Nullable LocalTime time) {
     if (null != time) {
       final String formatted = TIME_FORMAT.format(time);
       setValue(formatted);

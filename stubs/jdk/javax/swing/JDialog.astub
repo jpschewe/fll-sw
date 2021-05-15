@@ -1,15 +1,41 @@
 package javax.swing;
 
+import java.awt.Dialog;
+import java.awt.Frame;
+import java.awt.Window;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
 public class JDialog extends Dialog implements WindowConstants,
                                                Accessible,
                                                RootPaneContainer,
-                               TransferHandler.HasGetTransferHandler
+                                               TransferHandler.HasGetTransferHandler
 {
 
-    
-    public Container getContentPane(@UnknownInitialization(JDialog.class) JDialog this);
 
+  public JDialog(@UnknownInitialization(Dialog.class) Dialog owner);
+  public JDialog(@UnknownInitialization(Dialog.class) Dialog owner, boolean modal) ;
+  public JDialog(@UnknownInitialization(Dialog.class) Dialog owner, String title) ;
+  public JDialog(@UnknownInitialization(Dialog.class) Dialog owner, String title, boolean modal) ;
+  public JDialog(@UnknownInitialization(Dialog.class) Dialog owner, String title, boolean modal,
+                 GraphicsConfiguration gc) ;
+  public JDialog(@UnknownInitialization(Frame.class) Frame owner) ;
+  public JDialog(@UnknownInitialization(Frame.class) Frame owner, boolean modal) ;
+  public JDialog(@UnknownInitialization(Frame.class) Frame owner, String title) ;
+  public JDialog(@UnknownInitialization(Frame.class) Frame owner, String title, boolean modal) ;
+  public JDialog(@UnknownInitialization(Frame.class) Frame owner, String title, boolean modal,
+                 GraphicsConfiguration gc) ;
+  public JDialog(@UnknownInitialization(Window.class) Window owner) ;
+  public JDialog(@UnknownInitialization(Window.class) Window owner, ModalityType modalityType) ;
+  public JDialog(@UnknownInitialization(Window.class) Window owner, String title) ;
+  public JDialog(@UnknownInitialization(Window.class) Window owner, String title, Dialog.ModalityType modalityType) ;
+  public JDialog(@UnknownInitialization(Window.class) Window owner, String title, Dialog.ModalityType modalityType,
+                 GraphicsConfiguration gc) ;
+
+  
+  public Container getContentPane(@UnknownInitialization(JDialog.class) JDialog this);
+
+  public void setDefaultCloseOperation(@UnknownInitialization(JDialog.class) JDialog this, int operation);
+  
 }

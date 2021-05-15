@@ -8,6 +8,7 @@ package fll.scheduler;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.time.LocalTime;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
@@ -18,6 +19,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
+
+import fll.util.FLLRuntimeException;
 import fll.util.FormatterUtils;
 
 /**
@@ -139,7 +143,8 @@ public class SolverParamsEditor extends JPanel {
    * 
    * @param components the components to add
    */
-  private void addRow(final JComponent... components) {
+  private void addRow(@UnderInitialization(JPanel.class) SolverParamsEditor this,
+                      final JComponent... components) {
     GridBagConstraints gbc;
 
     // for (final JComponent comp : components) {
@@ -162,7 +167,7 @@ public class SolverParamsEditor extends JPanel {
         - 1], gbc);
   }
 
-  private SolverParams params;
+  private SolverParams params = new SolverParams();
 
   /**
    * @param params {@link #getParams()}
@@ -204,7 +209,11 @@ public class SolverParamsEditor extends JPanel {
    */
   public SolverParams getParams() {
 
-    params.setStartTime(startTimeEditor.getTime());
+    final LocalTime startTime = startTimeEditor.getTime();
+    if (null == startTime) {
+      throw new FLLRuntimeException("Null start time, cannot create solver parameters");
+    }
+    params.setStartTime(startTime);
     params.setAlternateTables(alternateTables.isSelected());
     params.setPerformanceMinutes((Integer) performanceDuration.getValue());
     params.setChangetimeMinutes((Integer) changeDuration.getValue());

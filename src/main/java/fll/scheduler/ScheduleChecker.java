@@ -484,9 +484,15 @@ public class ScheduleChecker {
    *
    * @param name the station to get the duration for
    * @return the subjectiveDuration (milliseconds)
+   * @throws IllegalArgumentException if the station name is not valid
    */
-  private Duration getSubjectiveDuration(final String name) {
+  private Duration getSubjectiveDuration(final String name) throws IllegalArgumentException {
     final SubjectiveStation station = params.getStationByName(name);
+    if (null == station) {
+      throw new IllegalArgumentException("'"
+          + name
+          + "' is not a valid station");
+    }
     return station.getDuration();
   }
 

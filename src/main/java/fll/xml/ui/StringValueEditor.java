@@ -24,8 +24,6 @@ import javax.swing.JPanel;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.ChooseOptionDialog;
 import fll.util.FLLInternalException;

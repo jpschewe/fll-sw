@@ -7,7 +7,6 @@
 package fll.scheduler;
 
 import java.awt.Component;
-import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -32,6 +31,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.FLLInternalException;
@@ -49,25 +49,14 @@ public class ChooseChallengeDescriptor extends JDialog {
 
   private JLabel mFileField;
 
-  private URL mSelected = null;
+  private @Nullable URL mSelected = null;
 
   /**
    * @param owner parent component
    */
-  public ChooseChallengeDescriptor(final Frame owner) {
+  public ChooseChallengeDescriptor(final @UnknownInitialization(Frame.class) Frame owner) {
     super(owner, true);
-    initComponents();
-  }
 
-  /**
-   * @param owner parent component
-   */
-  public ChooseChallengeDescriptor(final Dialog owner) {
-    super(owner, true);
-    initComponents();
-  }
-
-  private void initComponents() {
     getContentPane().setLayout(new GridBagLayout());
 
     GridBagConstraints gbc = new GridBagConstraints();
@@ -169,7 +158,7 @@ public class ChooseChallengeDescriptor extends JDialog {
   /**
    * @return the chosen challenge descriptor, null if the user canceled.
    */
-  public URL getSelectedDescription() {
+  public @Nullable URL getSelectedDescription() {
     return mSelected;
   }
 
@@ -178,27 +167,23 @@ public class ChooseChallengeDescriptor extends JDialog {
       mDelegate = new BasicComboBoxRenderer();
     }
 
-    private final BasicComboBoxRenderer mDelegate;
+    private final ListCellRenderer<Object> mDelegate;
 
     @Override
     public Component getListCellRendererComponent(final JList<? extends DescriptionInfo> list,
-                                                  final @Nullable DescriptionInfo descriptionInfo,
+                                                  final DescriptionInfo descriptionInfo,
                                                   final int index,
                                                   final boolean isSelected,
                                                   final boolean cellHasFocus) {
-      if (null == descriptionInfo) {
-        return mDelegate.getListCellRendererComponent(list, null, index, isSelected, cellHasFocus);
-      } else {
-        final String title = descriptionInfo.getTitle();
-        final String revision = descriptionInfo.getRevision();
-        final StringBuilder value = new StringBuilder();
-        value.append(title);
-        value.append('(');
-        value.append(revision);
-        value.append(')');
+      final String title = descriptionInfo.getTitle();
+      final String revision = descriptionInfo.getRevision();
+      final StringBuilder value = new StringBuilder();
+      value.append(title);
+      value.append('(');
+      value.append(revision);
+      value.append(')');
 
-        return mDelegate.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-      }
+      return mDelegate.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
     }
   }
 }

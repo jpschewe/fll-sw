@@ -132,7 +132,7 @@ public final class TeamScheduleInfo implements Serializable {
   }
 
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(final @Nullable Object o) {
     if (o == this) {
       return true;
     } else if (o instanceof TeamScheduleInfo) {
@@ -152,7 +152,7 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * @param teamName the teamName to set
    */
-  public void setTeamName(final String teamName) {
+  public void setTeamName(final @Nullable String teamName) {
     this.teamName = teamName;
   }
 
@@ -170,7 +170,7 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * @param organization the organization to set
    */
-  public void setOrganization(final String organization) {
+  public void setOrganization(final @Nullable String organization) {
     this.organization = organization;
   }
 
@@ -188,7 +188,7 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * @param division award group to set
    */
-  public void setDivision(final String division) {
+  public void setDivision(final @Nullable String division) {
     this.awardGroup = division;
   }
 
@@ -206,7 +206,7 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * @param judge the judging group
    */
-  public void setJudgingGroup(final String judge) {
+  public void setJudgingGroup(final @Nullable String judge) {
     this.judgingGroup = judge;
   }
 
@@ -283,12 +283,17 @@ public final class TeamScheduleInfo implements Serializable {
    * Compute a display name for the specified performance round.
    *
    * @param performance the performance information
-   * @return the name to display, null on error
+   * @return the name to display
+   * @throws IndexOutOfBoundsException if the computed round index is less than
+   *           zero
    */
   public String getRoundName(final PerformanceTime performance) {
     final int roundIndex = computeRound(performance);
     if (roundIndex < 0) {
-      return null;
+      throw new IndexOutOfBoundsException("Computed round index for "
+          + performance
+          + " is "
+          + roundIndex);
     } else {
       if (performance.isPractice()) {
         return String.format("Practice %d", roundIndex

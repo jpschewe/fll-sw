@@ -9,6 +9,8 @@ package fll.scheduler;
 import java.io.Serializable;
 import java.time.Duration;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * This is general information for a particular judging station.
  * A {@link SubjectiveTime} the use of a {@link SubjectiveStation} at a
@@ -59,7 +61,7 @@ public final class SubjectiveStation implements Serializable {
   }
 
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(final @Nullable Object o) {
     if (o == this) {
       return true;
     } else if (o == null) {

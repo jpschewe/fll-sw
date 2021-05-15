@@ -7,7 +7,6 @@
 package fll.scheduler;
 
 import java.awt.BorderLayout;
-import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -37,10 +36,6 @@ import fll.xml.SubjectiveScoreCategory;
  */
 /* package */ class MapSubjectiveHeaders extends JDialog {
 
-  private final ChallengeDescription description;
-
-  private final TournamentSchedule schedule;
-
   private final Map<ScoreCategory, JComboBox<String>> comboBoxes = new HashMap<>();
 
   private final Map<ScoreCategory, JTextField> filenameSuffixes = new HashMap<>();
@@ -55,26 +50,10 @@ import fll.xml.SubjectiveScoreCategory;
   }
 
   MapSubjectiveHeaders(final Frame owner,
-                              final ChallengeDescription description,
-                              final TournamentSchedule schedule) {
+                       final ChallengeDescription description,
+                       final TournamentSchedule schedule) {
     super(owner, true);
-    this.description = description;
-    this.schedule = schedule;
 
-    initComponents();
-  }
-
-  MapSubjectiveHeaders(final Dialog owner,
-                              final ChallengeDescription description,
-                              final TournamentSchedule schedule) {
-    super(owner, true);
-    this.description = description;
-    this.schedule = schedule;
-
-    initComponents();
-  }
-
-  private void initComponents() {
     getContentPane().setLayout(new BorderLayout());
 
     final JTextArea instructions = new JTextArea("Match the column names from the schedule data file with the subjective categories that they contain the schedule for. If you want a suffix on the filename, then fill in that column.");
@@ -151,7 +130,7 @@ import fll.xml.SubjectiveScoreCategory;
    * @param category what to find
    * @return null if not found or no suffix
    */
-  public String getFilenameSuffixForCategory(final ScoreCategory category) {
+  public @Nullable String getFilenameSuffixForCategory(final ScoreCategory category) {
     final JTextField widget = filenameSuffixes.get(category);
     if (null != widget) {
       final String text = widget.getText();

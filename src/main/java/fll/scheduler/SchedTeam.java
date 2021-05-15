@@ -6,12 +6,14 @@
 
 package fll.scheduler;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Used by {@link GreedyScheduler} to track team information.
  */
 /* packet */final class SchedTeam {
   SchedTeam(final int index,
-                   final int group) {
+            final int group) {
     this.index = index;
     this.group = group;
   }
@@ -35,7 +37,7 @@ package fll.scheduler;
   }
 
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(final @Nullable Object o) {
     if (null == o) {
       return false;
     } else if (o == this) {

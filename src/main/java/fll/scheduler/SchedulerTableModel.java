@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -99,7 +100,7 @@ import org.apache.commons.lang3.tuple.Pair;
       // columns are named by the subjective categories
       final SubjectiveTime subj = schedInfo.getSubjectiveTimeByName(getColumnName(columnIndex));
       if (null == subj) {
-        return null;
+        return "";
       } else {
         return subj.getTime();
       }
@@ -110,31 +111,35 @@ import org.apache.commons.lang3.tuple.Pair;
       final int globalRoundIndex = perfColIdx
           / NUM_COLUMNS_PER_ROUND;
 
-      final PerformanceTime performance;
+      final Optional<PerformanceTime> performance;
       final int numPracticeRounds = schedule.getNumberOfPracticeRounds();
       if (globalRoundIndex >= numPracticeRounds) {
         // regular match play rounds are in columns after the practice rounds
         final int roundIndex = globalRoundIndex
             - numPracticeRounds;
         performance = schedInfo.enumerateRegularMatchPlayPerformances().filter(p -> p.getRight() == roundIndex)
-                               .map(Pair::getLeft).findFirst().orElse(null);
+                               .map(Pair::getLeft).findFirst();
       } else {
         // practice round
         performance = schedInfo.enumeratePracticePerformances().filter(p -> p.getRight() == globalRoundIndex)
-                               .map(Pair::getLeft).findFirst().orElse(null);
+                               .map(Pair::getLeft).findFirst();
       }
 
-      switch (perfColIdx
-          % NUM_COLUMNS_PER_ROUND) {
-      case 0:
-      case 3:
-        return performance.getTime();
-      case 1:
-        return performance.getTable();
-      case 2:
-        return performance.getSide();
-      default:
-        return null;
+      if (performance.isPresent()) {
+        switch (perfColIdx
+            % NUM_COLUMNS_PER_ROUND) {
+        case 0:
+        case 3:
+          return performance.get().getTime();
+        case 1:
+          return performance.get().getTable();
+        case 2:
+          return performance.get().getSide();
+        default:
+          return "";
+        }
+      } else {
+        return "";
       }
     }
   }
@@ -207,7 +212,7 @@ import org.apache.commons.lang3.tuple.Pair;
       case 2:
         return "Side";
       default:
-        return null;
+        return "";
       }
     }
   }

@@ -37,7 +37,7 @@ public class DurationModel extends AbstractTableModel {
     case 1:
       return "Delete";
     default:
-      return null;
+      return "";
     }
   }
 
@@ -51,7 +51,7 @@ public class DurationModel extends AbstractTableModel {
     case 1:
       return "Delete";
     default:
-      return null;
+      return "";
     }
   }
 

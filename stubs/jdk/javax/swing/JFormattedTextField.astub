@@ -5,5 +5,8 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
 public class JFormattedTextField extends JTextField {
 
-    public void setValue(@Nullable Object value);
+  public void setValue(@UnknownInitialization(JFormattedTextField.class) JFormattedTextField this, @Nullable Object value);
+
+  public void setFormatterFactory(@UnknownInitialization(JFormattedTextField.class) JFormattedTextField this, AbstractFormatterFactory tf);
+
 }

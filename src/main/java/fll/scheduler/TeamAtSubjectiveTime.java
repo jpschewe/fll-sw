@@ -8,6 +8,8 @@ package fll.scheduler;
 
 import java.util.Objects;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.google.common.collect.ComparisonChain;
 
 /**
@@ -57,7 +59,7 @@ import com.google.common.collect.ComparisonChain;
   }
 
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(final @Nullable Object o) {
     if (o == this) {
       return true;
     } else if (null == o) {

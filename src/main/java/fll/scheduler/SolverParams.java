@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
 
@@ -100,7 +102,13 @@ public class SolverParams extends SchedParams {
 
     final String startTimeStr = properties.getProperty(START_TIME_KEY, null);
     if (null != startTimeStr) {
-      this.startTime = TournamentSchedule.parseTime(startTimeStr);
+      final LocalTime startTime = TournamentSchedule.parseTime(startTimeStr);
+      if (null == startTime) {
+        throw new ParseException("Unparsable start time '"
+            + startTimeStr
+            + "'", -1);
+      }
+      this.startTime = startTime;
     }
 
     final String groupCountsStr = properties.getProperty(GROUP_COUNTS_KEY);
@@ -288,7 +296,7 @@ public class SolverParams extends SchedParams {
     this.alternate = v;
   }
 
-  private final List<LocalTime> performanceEarliestStarts = new LinkedList<>();
+  private final List<@Nullable LocalTime> performanceEarliestStarts = new LinkedList<>();
 
   /**
    * @return The number of performance rounds.
@@ -304,14 +312,14 @@ public class SolverParams extends SchedParams {
    * @return unmodifiable list, index is round number, value is the earliest
    *         start time (may be null, meaning no limit)
    */
-  public List<LocalTime> getPerformanceRoundEarliestStartTimes() {
+  public List<@Nullable LocalTime> getPerformanceRoundEarliestStartTimes() {
     return Collections.unmodifiableList(performanceEarliestStarts);
   }
 
   /**
    * @param v {@link #getPerformanceRoundEarliestStartTimes()}
    */
-  public void setPerformanceRoundEarliestStartTimes(final List<LocalTime> v) {
+  public void setPerformanceRoundEarliestStartTimes(final List<@Nullable LocalTime> v) {
     performanceEarliestStarts.clear();
     performanceEarliestStarts.addAll(v);
   }
@@ -521,6 +529,11 @@ public class SolverParams extends SchedParams {
       }
 
       final LocalTime breakStart = TournamentSchedule.parseTime(startStr);
+      if (null == breakStart) {
+        throw new FLLRuntimeException("Unparsable break start time '"
+            + startStr
+            + "'");
+      }
       final int breakDurationMinutes = Integer.parseInt(durationStr);
 
       breaks.add(new ScheduledBreak(breakStart, Duration.ofMinutes(breakDurationMinutes)));

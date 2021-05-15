@@ -17,6 +17,8 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Edit a list of performance start round limits.
  */
@@ -62,14 +64,14 @@ import javax.swing.JTable;
    * @param v a list of earliest start times for each round, the indeex
    *          is the round, each value may be null meaning no limit
    */
-  public void setRounds(final List<LocalTime> v) {
+  public void setRounds(final List<@Nullable LocalTime> v) {
     this.tableModel.setData(v);
   }
 
   /**
    * @return unmodifiable map of the limits.
    */
-  public List<LocalTime> getLimits() {
+  public List<@Nullable LocalTime> getLimits() {
     return this.tableModel.getData();
   }
 

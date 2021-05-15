@@ -814,7 +814,7 @@ checkerFramework {
         "org.checkerframework.checker.nullness.NullnessChecker"
     ]
     extraJavacArgs = [
-        "-AonlyDefs=^fll\\.(db|documents|flltools|subjective|tomcat|util|xml)",
+        "-AonlyDefs=^fll\\.(db|documents|flltools|scheduler|subjective|tomcat|util|xml)",
         "-Awarns",  
         "-Xmaxwarns", "10000",
         "-AstubWarnIfNotFound",

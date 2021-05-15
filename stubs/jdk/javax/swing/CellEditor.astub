@@ -1,0 +1,10 @@
+package javax.swing;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public interface CellEditor {
+
+  public @Nullable Object getCellEditorValue();
+
+}

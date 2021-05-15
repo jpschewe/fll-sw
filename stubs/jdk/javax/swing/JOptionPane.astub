@@ -7,103 +7,103 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
 public class JOptionPane extends JComponent implements Accessible {
 
-  public JOptionPane(Object message, int messageType, int optionType,
+  public JOptionPane(@Nullable @UnknownInitialization Object message, int messageType, int optionType,
                      @Nullable Icon icon);
 
-  public JOptionPane(Object message, int messageType, int optionType,
+  public JOptionPane(@Nullable @UnknownInitialization Object message, int messageType, int optionType,
                      @Nullable Icon icon, @Nullable Object[] options);
 
-  public JOptionPane(Object message, int messageType, int optionType,
+  public JOptionPane(@Nullable @UnknownInitialization Object message, int messageType, int optionType,
                      @Nullable Icon icon, @Nullable Object[] options, @Nullable Object initialValue);
   
   
   public static int showConfirmDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                      Object message) throws HeadlessException;
+                                      @Nullable @UnknownInitialization Object message) throws HeadlessException;
   public static int showConfirmDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                      Object message, String title, int optionType)
+                                      @Nullable @UnknownInitialization Object message, String title, int optionType)
     throws HeadlessException;
   
   public static int showConfirmDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                      Object message, String title, int optionType, int messageType)
+                                      @Nullable @UnknownInitialization Object message, String title, int optionType, int messageType)
     throws HeadlessException;
   
   public static int showConfirmDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                      Object message, String title, int optionType,
+                                      @Nullable @UnknownInitialization Object message, String title, int optionType,
                                       int messageType, @Nullable Icon icon) throws HeadlessException;
 
   public static String showInputDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                       Object message) throws HeadlessException;
+                                       @Nullable @UnknownInitialization Object message) throws HeadlessException;
 
-  public static String showInputDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent, Object message,
+  public static String showInputDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent, @Nullable @UnknownInitialization Object message,
                                        Object initialSelectionValue);
 
   public static String showInputDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                       Object message, String title, int messageType)
+                                       @Nullable @UnknownInitialization Object message, String title, int messageType)
     throws HeadlessException;
 
   public static Object showInputDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                       Object message, String title, int messageType, @Nullable Icon icon,
+                                       @Nullable @UnknownInitialization Object message, String title, int messageType, @Nullable Icon icon,
                                        Object[] selectionValues, Object initialSelectionValue)
     throws HeadlessException;
 
   public static int showInternalConfirmDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                              Object message);
+                                              @Nullable @UnknownInitialization Object message);
 
   public static int showInternalConfirmDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                              Object message, String title,
+                                              @Nullable @UnknownInitialization Object message, String title,
                                               int optionType);
 
   public static int showInternalConfirmDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                              Object message,
+                                              @Nullable @UnknownInitialization Object message,
                                               String title, int optionType,
                                               int messageType);
 
   public static int showInternalConfirmDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                              Object message,
+                                              @Nullable @UnknownInitialization Object message,
                                               String title, int optionType,
                                               int messageType, @Nullable Icon icon);
 
   public static String showInternalInputDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                               Object message);
+                                               @Nullable @UnknownInitialization Object message);
 
   public static String showInternalInputDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                               Object message, String title, int messageType) ;
+                                               @Nullable @UnknownInitialization Object message, String title, int messageType) ;
 
   public static Object showInternalInputDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                               Object message, String title, int messageType, @Nullable Icon icon,
+                                               @Nullable @UnknownInitialization Object message, String title, int messageType, @Nullable Icon icon,
                                                Object[] selectionValues, Object initialSelectionValue);
 
   public static void showInternalMessageDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                               Object message);
+                                               @Nullable @UnknownInitialization Object message);
 
   public static void showInternalMessageDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                               Object message, String title,
+                                               @Nullable @UnknownInitialization Object message, String title,
                                                int messageType);
 
   public static void showInternalMessageDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                               Object message,
+                                               @Nullable @UnknownInitialization Object message,
                                                String title, int messageType,
                                                @Nullable Icon icon);
 
   public static int showInternalOptionDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                             Object message,
+                                             @Nullable @UnknownInitialization Object message,
                                              String title, int optionType,
                                              int messageType, @Nullable Icon icon,
                                              @Nullable Object[] options, @Nullable Object initialValue);
 
   public static void showMessageDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                       Object message) throws HeadlessException;
+                                       @Nullable @UnknownInitialization Object message) throws HeadlessException;
 
   public static void showMessageDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                       Object message, String title, int messageType)
+                                       @Nullable @UnknownInitialization Object message, String title, int messageType)
     throws HeadlessException;
 
   public static void showMessageDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                       Object message, String title, int messageType, @Nullable Icon icon)
+                                       @Nullable @UnknownInitialization Object message, String title, int messageType, @Nullable Icon icon)
     throws HeadlessException;
 
   public static int showOptionDialog(@Nullable @UnknownInitialization(Component.class) Component parentComponent,
-                                     Object message, String title, int optionType, int messageType,
+                                     @Nullable @UnknownInitialization Object message, String title, int optionType, int messageType,
                                      @Nullable Icon icon, @Nullable Object[] options, @Nullable Object initialValue)
     throws HeadlessException;
 

@@ -14,6 +14,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.Utilities;
 
 /**
@@ -258,7 +260,7 @@ public class SchedParams implements Serializable {
    * @param name thename of the station to find
    * @return the station, null if no station by name found
    */
-  public final SubjectiveStation getStationByName(final String name) {
+  public final @Nullable SubjectiveStation getStationByName(final String name) {
     for (final SubjectiveStation station : mSubjectiveStations) {
       if (station.getName().equals(name)) {
         return station;
