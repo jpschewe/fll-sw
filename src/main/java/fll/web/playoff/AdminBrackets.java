@@ -23,6 +23,7 @@ import fll.db.Queries;
 import fll.util.FLLInternalException;
 
 import fll.web.ApplicationAttributes;
+import fll.web.WebUtils;
 import fll.web.playoff.BracketData.TopRightCornerStyle;
 
 /**
@@ -54,8 +55,8 @@ public final class AdminBrackets {
       }
       pageContext.setAttribute("bracketName", divisionStr);
 
-      final String specifiedFirstRound = request.getParameter("firstRound");
-      final String specifiedLastRound = request.getParameter("lastRound");
+      final String specifiedFirstRound = WebUtils.getNonNullRequestParameter(request, "firstRound");
+      final String specifiedLastRound = WebUtils.getNonNullRequestParameter(request, "lastRound");
       int firstRound;
       try {
         firstRound = Integer.parseInt(specifiedFirstRound);
