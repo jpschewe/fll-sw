@@ -31,8 +31,10 @@ import fll.db.TournamentParameters;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 
 /**
  * Create a new playoff division.
@@ -109,6 +111,10 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
           redirect = "create_playoff_division.jsp";
         } else {
           final String[] selectedTeams = request.getParameterValues("selected_team");
+          if (null == selectedTeams) {
+            throw new MissingRequiredParameterException("selected_team");
+          }
+
           final List<Integer> teamNumbers = new LinkedList<>();
           for (final String teamStr : selectedTeams) {
             final int num = Integer.parseInt(teamStr);
@@ -139,7 +145,7 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
           if (paramName.startsWith("create_award_group_")) {
             final String idxStr = paramName.substring("create_award_group_".length());
             final int idx = Integer.parseInt(idxStr);
-            final String awardGroup = request.getParameter("award_group_"
+            final String awardGroup = WebUtils.getNonNullRequestParameter(request, "award_group_"
                 + idx);
 
             // get list of teams in this award group
@@ -160,7 +166,7 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
           } else if (paramName.startsWith("create_judging_group_")) {
             final String idxStr = paramName.substring("create_judging_group_".length());
             final int idx = Integer.parseInt(idxStr);
-            final String judgingGroup = request.getParameter("judging_group_"
+            final String judgingGroup = WebUtils.getNonNullRequestParameter(request, "judging_group_"
                 + idx);
 
             // get list of teams in this judging group
