@@ -157,12 +157,12 @@ public final class PlayoffSessionData implements Serializable {
     return mNumPlayoffRounds;
   }
 
-  private String mBracket;
+  private @Nullable String mBracket;
 
   /**
    * @param v {@link #getBracket()}
    */
-  public void setBracket(final String v) {
+  public void setBracket(final @Nullable String v) {
     mBracket = v;
   }
 
