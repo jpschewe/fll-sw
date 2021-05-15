@@ -52,7 +52,8 @@ public final class PlayoffSessionData implements Serializable {
 
     mUnfinishedBrackets = Playoff.getUnfinishedPlayoffBrackets(connection, mCurrentTournament.getTournamentID());
 
-    mSort = null;
+    mSort = BracketSortType.SEEDING;
+    mTeamsNeedingSeedingRuns = new LinkedList<>();
   }
 
   private boolean mEnableThird = false;
