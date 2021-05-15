@@ -39,10 +39,13 @@ public final class HttpTeamScore extends TeamScore {
   public double getRawScore(final String goalName) {
     if (!scoreExists()) {
       return Double.NaN;
-    } else if (null == request.getParameter(goalName)) {
-      return Double.NaN;
     } else {
-      return Double.parseDouble(request.getParameter(goalName));
+      final String value = request.getParameter(goalName);
+      if (null == value) {
+        return Double.NaN;
+      } else {
+        return Double.parseDouble(value);
+      }
     }
   }
 
