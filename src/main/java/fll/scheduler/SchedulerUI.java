@@ -283,7 +283,13 @@ public class SchedulerUI extends JFrame {
     mRunOptimizerAction.setEnabled(false);
     mReloadFileAction.setEnabled(false);
 
-    setSchedParams(mSchedParams);
+    // Once https://github.com/typetools/checker-framework/issues/4613 is resolved I
+    // can try and figure out what is wrong here
+    // until then I have copied the body of setSchedParams here
+    // setSchedParams(mSchedParams);
+    changeDuration.setValue(mSchedParams.getChangetimeMinutes());
+    performanceChangeDuration.setValue(mSchedParams.getPerformanceChangetimeMinutes());
+    performanceDuration.setValue(mSchedParams.getPerformanceMinutes());
 
     pack();
   }
