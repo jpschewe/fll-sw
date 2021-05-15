@@ -275,7 +275,36 @@ public class SchedulerUI extends JFrame {
     performanceChangeDuration.addPropertyChangeListener("value", durationChangeListener);
     performanceDuration.addPropertyChangeListener("value", durationChangeListener);
 
-    setJMenuBar(createMenubar());
+    // Work around https://github.com/typetools/checker-framework/issues/4667 by
+    // putting all initialization inside the constructor
+    // final JMenuBar menubar = createMenubar();
+    final JMenuBar menubar = new JMenuBar();
+
+    final JMenu fileMenu = new JMenu("File");
+    fileMenu.setMnemonic('f');
+    fileMenu.add(mPreferencesAction);
+    fileMenu.add(mExitAction);
+    menubar.add(fileMenu);
+
+    final JMenu descriptionMenu = new JMenu("Description");
+    descriptionMenu.setMnemonic('d');
+    descriptionMenu.add(mNewScheduleDescriptionAction);
+    descriptionMenu.add(mOpenScheduleDescriptionAction);
+    descriptionMenu.add(mSaveScheduleDescriptionAction);
+    descriptionMenu.add(mRunSchedulerAction);
+    menubar.add(descriptionMenu);
+
+    final JMenu scheduleMenu = new JMenu("Schedule");
+    scheduleMenu.setMnemonic('s');
+
+    scheduleMenu.add(mOpenScheduleAction);
+    scheduleMenu.add(mReloadFileAction);
+    scheduleMenu.add(mRunOptimizerAction);
+    scheduleMenu.add(mWriteSchedulesAction);
+    scheduleMenu.add(mDisplayGeneralScheduleAction);
+    menubar.add(scheduleMenu);
+
+    setJMenuBar(menubar);
 
     // initial state
     mWriteSchedulesAction.setEnabled(false);
@@ -283,7 +312,13 @@ public class SchedulerUI extends JFrame {
     mRunOptimizerAction.setEnabled(false);
     mReloadFileAction.setEnabled(false);
 
-    setSchedParams(mSchedParams);
+    // Once https://github.com/typetools/checker-framework/issues/4613 is resolved I
+    // can try and figure out what is wrong here
+    // until then I have copied the body of setSchedParams here
+    // setSchedParams(mSchedParams);
+    changeDuration.setValue(mSchedParams.getChangetimeMinutes());
+    performanceChangeDuration.setValue(mSchedParams.getPerformanceChangetimeMinutes());
+    performanceDuration.setValue(mSchedParams.getPerformanceMinutes());
 
     pack();
   }
@@ -695,53 +730,6 @@ public class SchedulerUI extends JFrame {
     toolbar.add(mDisplayGeneralScheduleAction);
 
     return toolbar;
-  }
-
-  private JMenuBar createMenubar(@UnknownInitialization(SchedulerUI.class) SchedulerUI this) {
-    final JMenuBar menubar = new JMenuBar();
-
-    menubar.add(createFileMenu());
-
-    menubar.add(createDescriptionMenu());
-
-    menubar.add(createScheduleMenu());
-
-    return menubar;
-  }
-
-  private JMenu createScheduleMenu(@UnknownInitialization(SchedulerUI.class) SchedulerUI this) {
-    final JMenu menu = new JMenu("Schedule");
-    menu.setMnemonic('s');
-
-    menu.add(mOpenScheduleAction);
-    menu.add(mReloadFileAction);
-    menu.add(mRunOptimizerAction);
-    menu.add(mWriteSchedulesAction);
-    menu.add(mDisplayGeneralScheduleAction);
-
-    return menu;
-  }
-
-  private JMenu createDescriptionMenu(@UnknownInitialization(SchedulerUI.class) SchedulerUI this) {
-    final JMenu menu = new JMenu("Description");
-    menu.setMnemonic('d');
-
-    menu.add(mNewScheduleDescriptionAction);
-    menu.add(mOpenScheduleDescriptionAction);
-    menu.add(mSaveScheduleDescriptionAction);
-    menu.add(mRunSchedulerAction);
-
-    return menu;
-  }
-
-  private JMenu createFileMenu(@UnknownInitialization(SchedulerUI.class) SchedulerUI this) {
-    final JMenu menu = new JMenu("File");
-    menu.setMnemonic('f');
-
-    menu.add(mPreferencesAction);
-    menu.add(mExitAction);
-
-    return menu;
   }
 
   private final Action mReloadFileAction = new AbstractAction("Reload Schedule") {
