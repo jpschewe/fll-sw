@@ -5,6 +5,7 @@
  */
 package fll.web.playoff;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -44,7 +45,7 @@ public abstract class TeamScore {
    *
    * @return the team
    */
-  public final int getTeamNumber() {
+  public final int getTeamNumber(@UnknownInitialization(TeamScore.class) TeamScore this) {
     return teamNumber;
   }
 
@@ -79,7 +80,7 @@ public abstract class TeamScore {
    *
    * @return the run for the scores
    */
-  public final int getRunNumber() {
+  public final int getRunNumber(@UnknownInitialization(TeamScore.class) TeamScore this) {
     return runNumber;
   }
 
