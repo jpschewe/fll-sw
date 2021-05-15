@@ -28,6 +28,8 @@ import javax.websocket.OnMessage;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,7 +40,6 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 import fll.web.GetHttpSessionConfigurator;
@@ -148,8 +149,7 @@ public class H2HUpdateWebSocket {
         }
       }
 
-      final HttpSession httpSession = (HttpSession) session.getUserProperties()
-                                                           .get(GetHttpSessionConfigurator.HTTP_SESSION_KEY);
+      final HttpSession httpSession = getHttpSession(session);
       final ServletContext httpApplication = httpSession.getServletContext();
       final DataSource datasource = ApplicationAttributes.getDataSource(httpApplication);
       try (Connection connection = datasource.getConnection()) {
@@ -166,13 +166,23 @@ public class H2HUpdateWebSocket {
     }
   }
 
+  private static HttpSession getHttpSession(final Session session) {
+    final HttpSession httpSession = (HttpSession) session.getUserProperties()
+                                                         .get(GetHttpSessionConfigurator.HTTP_SESSION_KEY);
+
+    if (null == httpSession) {
+      throw new FLLRuntimeException("Unable to find httpSession in the userProperties");
+    }
+
+    return httpSession;
+  }
+
   private static void updateDisplayedBracket(final Session session) {
 
     if (session.isOpen()) {
 
       try {
-        final HttpSession httpSession = (HttpSession) session.getUserProperties()
-                                                             .get(GetHttpSessionConfigurator.HTTP_SESSION_KEY);
+        final HttpSession httpSession = getHttpSession(session);
         final ServletContext httpApplication = httpSession.getServletContext();
 
         final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(httpApplication, httpSession);
@@ -241,13 +251,13 @@ public class H2HUpdateWebSocket {
                                     final int dbLine,
                                     final int playoffRound,
                                     final int maxPlayoffRound,
-                                    final Integer teamNumber,
-                                    final String teamName,
-                                    final Double score,
+                                    final @Nullable Integer teamNumber,
+                                    final @Nullable String teamName,
+                                    final @Nullable Double score,
                                     final ScoreType performanceScoreType,
                                     final boolean noShow,
                                     final boolean verified,
-                                    final String table) {
+                                    final @Nullable String table) {
 
     final BracketMessage message = new BracketMessage();
     message.isBracketUpdate = true;
@@ -397,7 +407,7 @@ public class H2HUpdateWebSocket {
     public boolean isBracketUpdate = false;
 
     @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
-    public BracketUpdate bracketUpdate;
+    public @Nullable BracketUpdate bracketUpdate = null;
 
     /**
      * If true then {@link #allBracketInfo} must be populated.
