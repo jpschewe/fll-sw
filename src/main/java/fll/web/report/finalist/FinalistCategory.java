@@ -8,6 +8,8 @@ package fll.web.report.finalist;
 
 import java.io.Serializable;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -22,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
    * @param room the room that the category is being judged in
    */
   FinalistCategory(@JsonProperty("categoryName") final String categoryName,
-                   @JsonProperty("room") final String room) {
+                   @JsonProperty("room") final @Nullable String room) {
     this.categoryName = categoryName;
     this.room = room;
   }
@@ -33,9 +35,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
     return categoryName;
   }
 
-  private final String room;
+  private final @Nullable String room;
 
-  public String getRoom() {
+  public @Nullable String getRoom() {
     return room;
   }
 

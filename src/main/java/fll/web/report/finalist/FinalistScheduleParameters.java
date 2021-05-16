@@ -18,6 +18,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import fll.Tournament;
 
 /**
@@ -73,8 +75,8 @@ public class FinalistScheduleParameters implements Serializable {
 
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
-          final String awardGroup = rs.getString("award_group");
-          final LocalTime startTime = rs.getTime("start_time").toLocalTime();
+          final String awardGroup = castNonNull(rs.getString("award_group"));
+          final LocalTime startTime = castNonNull(rs.getTime("start_time")).toLocalTime();
           final int slotDuration = rs.getInt("slot_duration");
           final FinalistScheduleParameters params = new FinalistScheduleParameters(startTime, slotDuration);
           parameters.put(awardGroup, params);
