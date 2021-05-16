@@ -25,8 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
@@ -182,7 +180,7 @@ public class Top10 extends BaseFLLServlet {
     void execute(String teamName,
                  int teamNumber,
                  String organization,
-                 @NonNull String formattedScore,
+                 String formattedScore,
                  int rank);
   }
 
@@ -192,8 +190,8 @@ public class Top10 extends BaseFLLServlet {
    * @return awardGroup to sorted scores
    * @throws SQLException if there is a problem talking to the database
    */
-  public static Map<String, List<ScoreEntry>> getTableAsMapByAwardGroup(@NonNull final Connection connection,
-                                                                        @NonNull final ChallengeDescription description)
+  public static Map<String, List<ScoreEntry>> getTableAsMapByAwardGroup(final Connection connection,
+                                                                        final ChallengeDescription description)
       throws SQLException {
     final Map<String, List<ScoreEntry>> data = new HashMap<>();
     final List<String> awardGroups = Queries.getAwardGroups(connection);
@@ -219,8 +217,8 @@ public class Top10 extends BaseFLLServlet {
    * @return judging station to sorted scores
    * @throws SQLException if there is a problem talking to the database
    */
-  public static Map<String, List<ScoreEntry>> getTableAsMapByJudgingStation(@NonNull final Connection connection,
-                                                                            @NonNull final ChallengeDescription description,
+  public static Map<String, List<ScoreEntry>> getTableAsMapByJudgingStation(final Connection connection,
+                                                                            final ChallengeDescription description,
                                                                             final Tournament tournament)
       throws SQLException {
     final Map<String, List<ScoreEntry>> data = new HashMap<>();
@@ -254,7 +252,7 @@ public class Top10 extends BaseFLLServlet {
     public ScoreEntry(final String teamName,
                       final int teamNumber,
                       final String organization,
-                      @NonNull final String formattedScore,
+                      final String formattedScore,
                       final int rank) {
       this.teamName = teamName;
       this.teamNumber = teamNumber;
@@ -286,7 +284,6 @@ public class Top10 extends BaseFLLServlet {
     /**
      * @return score formatted for display
      */
-    @NonNull
     public String getFormattedScore() {
       return formattedScore;
     }
@@ -320,9 +317,9 @@ public class Top10 extends BaseFLLServlet {
    * @return payload for the set array message
    * @throws SQLException on a database error
    */
-  public static SetArray.Payload getTableAsListForAwardGroup(@NonNull final Connection connection,
-                                                             @NonNull final ChallengeDescription description,
-                                                             @NonNull final String awardGroupName)
+  public static SetArray.Payload getTableAsListForAwardGroup(final Connection connection,
+                                                             final ChallengeDescription description,
+                                                             final String awardGroupName)
       throws SQLException {
     final List<List<String>> data = new LinkedList<>();
     processScoresForAwardGroup(connection, description, awardGroupName, (teamName,
@@ -355,28 +352,28 @@ public class Top10 extends BaseFLLServlet {
 
   }
 
-  private static void processScoresForAwardGroup(@NonNull final Connection connection,
+  private static void processScoresForAwardGroup(final Connection connection,
                                                  final ChallengeDescription challengeDescription,
-                                                 @NonNull final String awardGroupName,
-                                                 @NonNull final ProcessScoreEntry processor)
+                                                 final String awardGroupName,
+                                                 final ProcessScoreEntry processor)
       throws SQLException {
     processScores(connection, challengeDescription, "event_division", awardGroupName, processor);
   }
 
-  private static void processScoresForJudgingStation(@NonNull final Connection connection,
+  private static void processScoresForJudgingStation(final Connection connection,
                                                      final ChallengeDescription challengeDescription,
-                                                     @NonNull final String judgingStation,
-                                                     @NonNull final ProcessScoreEntry processor)
+                                                     final String judgingStation,
+                                                     final ProcessScoreEntry processor)
       throws SQLException {
     processScores(connection, challengeDescription, "judging_station", judgingStation, processor);
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Determine sort order based upon winner criteria")
-  private static void processScores(@NonNull final Connection connection,
+  private static void processScores(final Connection connection,
                                     final ChallengeDescription challengeDescription,
                                     final String divisionColumn, // event_division or judging_station
-                                    @NonNull final String awardGroupName,
-                                    @NonNull final ProcessScoreEntry processor)
+                                    final String awardGroupName,
+                                    final ProcessScoreEntry processor)
       throws SQLException {
     final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
     final WinnerType winnerCriteria = challengeDescription.getWinner();

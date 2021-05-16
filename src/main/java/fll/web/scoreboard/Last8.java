@@ -26,6 +26,8 @@ import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.DelayedPerformance;
@@ -224,10 +226,10 @@ public class Last8 extends BaseFLLServlet {
         try (ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
             final int teamNumber = rs.getInt("TeamNumber");
-            final String teamName = rs.getString("TeamName");
+            final String teamName = castNonNull(rs.getString("TeamName"));
 
             final String organization = rs.getString("Organization");
-            final String awardGroup = rs.getString("event_division");
+            final String awardGroup = castNonNull(rs.getString("event_division"));
 
             final String formattedScore;
             if (rs.getBoolean("NoShow")) {
