@@ -55,6 +55,9 @@ public class CheckMissingTeams extends BaseFLLServlet {
                                                                                         UploadScheduleData.class);
 
     final TournamentSchedule schedule = uploadScheduleData.getSchedule();
+    if (null == schedule) {
+      throw new FLLInternalException("Schedule is not set");
+    }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
