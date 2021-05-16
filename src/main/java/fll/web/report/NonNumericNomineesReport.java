@@ -42,6 +42,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.admin.GatherTournamentParameterInformation;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -242,8 +243,8 @@ public class NonNumericNomineesReport extends BaseFLLServlet {
     subtitleBlock.setAttribute("text-align-last", "justify");
     subtitleBlock.setAttribute("font-weight", "bold");
 
-    final String tournamentName = null == tournament.getDescription() ? tournament.getName()
-        : tournament.getDescription();
+    final String tournamentDescription = tournament.getDescription();
+    final String tournamentName = null == tournamentDescription ? tournament.getName() : tournamentDescription;
     final String tournamentTitle;
     if (null != tournament.getLevel()) {
       tournamentTitle = String.format("%s: %s", tournament.getLevel(), tournamentName);
