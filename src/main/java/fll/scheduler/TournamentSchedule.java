@@ -384,13 +384,16 @@ public class TournamentSchedule implements Serializable {
   /**
    * Common construction.
    *
+   * @param name {@link #getName()}
+   * @param reader where to read the schedule from
+   * @param subjectiveHeaders the headers for the subjective columns
    * @throws IOException if there is an error reading the file
    * @throws ScheduleParseException if there is an error parsing the schedule
    * @throws ParseException if there is an error parsing the file
    */
-  private TournamentSchedule(final String name,
-                             final CellFileReader reader,
-                             final Collection<String> subjectiveHeaders)
+  public TournamentSchedule(final String name,
+                            final CellFileReader reader,
+                            final Collection<String> subjectiveHeaders)
       throws IOException, ParseException, ScheduleParseException {
     this.name = name;
     final ColumnInformation columnInfo = findColumns(reader, subjectiveHeaders);
