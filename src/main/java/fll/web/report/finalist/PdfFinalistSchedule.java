@@ -29,6 +29,7 @@ import javax.xml.transform.TransformerException;
 
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -226,7 +227,7 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
 
     // convert to list to ensure we have a stable iteration order
     final List<String> categories = new LinkedList<>(schedule.getCategoryNames());
-    final Map<String, String> categoryToRoom = schedule.getRooms();
+    final Map<String, @Nullable String> categoryToRoom = schedule.getRooms();
 
     final Element mainTable = FOPUtils.createBasicTable(document);
 
@@ -320,7 +321,8 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
 
         final Element orgEle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
         cell.appendChild(orgEle);
-        orgEle.appendChild(document.createTextNode(team.getOrganization()));
+        final String tournamentOrganization = team.getOrganization();
+        orgEle.appendChild(document.createTextNode(null == tournamentOrganization ? "" : tournamentOrganization));
 
       } catch (final SQLException e) {
         throw new FLLRuntimeException("Error getting information for team "
