@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.db.CategoryColumnMapping;
@@ -35,19 +34,20 @@ public class UploadScheduleData implements Serializable {
    */
   public static final String KEY = "uploadScheduleData";
 
-  private File scheduleFile = null;
+  private @MonotonicNonNull File scheduleFile = null;
 
   /**
    * @return the file that was uploaded, will be null until set
    */
-  public File getScheduleFile() {
+  public @Nullable File getScheduleFile() {
     return scheduleFile;
   }
 
   /**
    * @param v see {@link #getScheduleFile()}
    */
-  public void setScheduleFile(@NonNull final File v) {
+  @EnsuresNonNull("scheduleFile")
+  public void setScheduleFile(final File v) {
     scheduleFile = v;
   }
 
@@ -71,7 +71,7 @@ public class UploadScheduleData implements Serializable {
    * @param v see {@link #getSelectedSheet()}
    */
   @EnsuresNonNull("selectedSheet")
-  public void setSelectedSheet(@NonNull final String v) {
+  public void setSelectedSheet(final String v) {
     selectedSheet = v;
   }
 
@@ -81,7 +81,6 @@ public class UploadScheduleData implements Serializable {
    * @return the violations found in the uploaded schedule, initially empty,
    *         unmodifiable collection
    */
-  @NonNull
   public Collection<ConstraintViolation> getViolations() {
     return Collections.unmodifiableCollection(violations);
   }
@@ -89,25 +88,26 @@ public class UploadScheduleData implements Serializable {
   /**
    * @param v see {@link #getViolations()}
    */
-  public void setViolations(@NonNull final Collection<ConstraintViolation> v) {
+  public void setViolations(final Collection<ConstraintViolation> v) {
     violations.clear();
     violations.addAll(v);
   }
 
-  private TournamentSchedule schedule = null;
+  private @MonotonicNonNull TournamentSchedule schedule = null;
 
   /**
    * @return the schedule being uploaded, is null until set with
    *         {@link #setSchedule(TournamentSchedule)}
    */
-  public TournamentSchedule getSchedule() {
+  public @Nullable TournamentSchedule getSchedule() {
     return schedule;
   }
 
   /**
    * @param v see {@link #getSchedule()}
    */
-  public void setSchedule(@NonNull final TournamentSchedule v) {
+  @EnsuresNonNull("schedule")
+  public void setSchedule(final TournamentSchedule v) {
     schedule = v;
   }
 
@@ -117,7 +117,6 @@ public class UploadScheduleData implements Serializable {
    * @return the mappings of categories to schedule columns, initially empty,
    *         unmodifiable collection
    */
-  @NonNull
   public Collection<CategoryColumnMapping> getCategoryColumnMappings() {
     return Collections.unmodifiableCollection(categoryColumnMappings);
   }
@@ -125,7 +124,7 @@ public class UploadScheduleData implements Serializable {
   /**
    * @param v see {@link #getCategoryColumnMappings()}
    */
-  public void setCategoryColumnMappings(@NonNull final Collection<CategoryColumnMapping> v) {
+  public void setCategoryColumnMappings(final Collection<CategoryColumnMapping> v) {
     categoryColumnMappings.clear();
     categoryColumnMappings.addAll(v);
   }
@@ -161,7 +160,6 @@ public class UploadScheduleData implements Serializable {
    * @return the unused headers from the schedule, initially empty, unmodifiable
    *         list
    */
-  @NonNull
   public List<String> getUnusedHeaders() {
     return Collections.unmodifiableList(unusedHeaders);
   }
@@ -169,7 +167,7 @@ public class UploadScheduleData implements Serializable {
   /**
    * @param v see {@link #getUnusedHeaders()}
    */
-  public void setUnusedHeaders(final @NonNull List<String> v) {
+  public void setUnusedHeaders(final List<String> v) {
     unusedHeaders.clear();
     unusedHeaders.addAll(v);
   }
@@ -184,7 +182,6 @@ public class UploadScheduleData implements Serializable {
    * @return the sched params, not that it is mutable and NOT a copy of the
    *         internal data
    */
-  @NonNull
   public SchedParams getSchedParams() {
     return schedParams;
   }
@@ -192,7 +189,7 @@ public class UploadScheduleData implements Serializable {
   /**
    * @param v the new object to use, see {@link #getSchedParams()}
    */
-  public void setSchedParams(@NonNull final SchedParams v) {
+  public void setSchedParams(final SchedParams v) {
     schedParams = v;
   }
 
