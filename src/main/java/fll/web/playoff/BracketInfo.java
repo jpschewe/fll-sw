@@ -6,6 +6,9 @@
 
 package fll.web.playoff;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+import org.checkerframework.checker.nullness.qual.EnsuresKeyFor;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -31,7 +34,7 @@ public class BracketInfo {
   /**
    * @return the first round to display
    */
-  public final int getFirstRound() {
+  public final int getFirstRound(@UnknownInitialization(BracketInfo.class) BracketInfo this) {
     return firstRound;
   }
 
@@ -40,7 +43,7 @@ public class BracketInfo {
   /**
    * @return the last round to display
    */
-  public final int getLastRound() {
+  public final int getLastRound(@UnknownInitialization(BracketInfo.class) BracketInfo this) {
     return lastRound;
   }
 
@@ -49,7 +52,7 @@ public class BracketInfo {
   /**
    * @return the name of the bracket
    */
-  public final String getBracketName() {
+  public final String getBracketName(@UnknownInitialization(BracketInfo.class) BracketInfo this) {
     return bracketName;
   }
 
