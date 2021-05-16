@@ -30,6 +30,8 @@ import org.apache.fop.apps.FopFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
@@ -196,7 +198,7 @@ public class PerformanceReport extends BaseFLLServlet {
             final int teamNumber = rs.getInt(1);
             final String teamName = rs.getString(2);
             final String organization = rs.getString(3);
-            final Array scores = rs.getArray(4);
+            final Array scores = castNonNull(rs.getArray(4)); // aggregation can't return null
             final double minScore = rs.getDouble(5);
             final double maxScore = rs.getDouble(6);
             final double average = rs.getDouble(7);
