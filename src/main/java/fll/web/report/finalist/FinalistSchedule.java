@@ -23,8 +23,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.checkerframework.checker.nullness.qual.KeyFor;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.Tournament;
 
@@ -73,7 +78,7 @@ public class FinalistSchedule implements Serializable {
       getCategories.setString(2, awardGroup);
       try (ResultSet categories = getCategories.executeQuery()) {
         while (categories.next()) {
-          final String name = categories.getString(1);
+          final String name = castNonNull(categories.getString(1));
           final String room = categories.getString(2);
           mCategoryNames.add(name);
           mRooms.put(name, room);
@@ -86,14 +91,14 @@ public class FinalistSchedule implements Serializable {
         getSchedule.setInt(1, tournament);
         getSchedule.setString(2, awardGroup);
 
-        final Map<LocalTime, Map<String, Integer>> categoryInfo = new HashMap<>();
         final Map<LocalTime, LocalTime> endTimes = new HashMap<>();
+        final Map<@KeyFor("endTimes") LocalTime, Map<String, Integer>> categoryInfo = new HashMap<>();
         try (ResultSet schedule = getSchedule.executeQuery()) {
           while (schedule.next()) {
-            final String categoryName = schedule.getString(1);
-            final LocalTime judgeTime = schedule.getTime(2).toLocalTime();
-            final LocalTime judgeEndTime = schedule.getTime(3).toLocalTime();
-            final int teamNumber = schedule.getInt(4);
+            final String categoryName = castNonNull(schedule.getString(1));
+            final LocalTime judgeTime = castNonNull(schedule.getTime(2)).toLocalTime();
+            final LocalTime judgeEndTime = castNonNull(schedule.getTime(3)).toLocalTime();
+            final Integer teamNumber = Integer.valueOf(schedule.getInt(4));
 
             endTimes.put(judgeTime, judgeEndTime);
             categoryInfo.computeIfAbsent(judgeTime, k -> new HashMap<>()).put(categoryName, teamNumber);
@@ -102,7 +107,9 @@ public class FinalistSchedule implements Serializable {
 
         final List<FinalistDBRow> rows = categoryInfo.entrySet().stream() //
                                                      .map(entry -> new FinalistDBRow(entry.getKey(),
-                                                                                     endTimes.get(entry.getKey()),
+                                                                                     // checker bug
+                                                                                     // https://github.com/typetools/checker-framework/issues/4668
+                                                                                     castNonNull(endTimes.get(entry.getKey())),
                                                                                      entry.getValue())) //
                                                      .sorted(FinalistDBRow.TIME_SORT_INSTANCE) //
                                                      .collect(Collectors.toList());
@@ -132,7 +139,7 @@ public class FinalistSchedule implements Serializable {
     return Collections.unmodifiableSet(mCategoryNames);
   }
 
-  private final Map<String, String> mRooms = new HashMap<>();
+  private final Map<String, @Nullable String> mRooms = new HashMap<>();
 
   /**
    * Unmodifiable version of the rooms for each category.
@@ -140,7 +147,7 @@ public class FinalistSchedule implements Serializable {
    * @return key=category name, value=room
    */
   @JsonIgnore
-  public Map<String, String> getRooms() {
+  public Map<String, @Nullable String> getRooms() {
     return Collections.unmodifiableMap(mRooms);
   }
 
@@ -239,7 +246,7 @@ public class FinalistSchedule implements Serializable {
       getDivisions.setInt(1, tournament);
       try (ResultSet divisions = getDivisions.executeQuery()) {
         while (divisions.next()) {
-          result.add(divisions.getString(1));
+          result.add(castNonNull(divisions.getString(1)));
         }
       }
     }
