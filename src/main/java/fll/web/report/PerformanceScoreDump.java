@@ -23,6 +23,8 @@ import javax.sql.DataSource;
 
 import com.opencsv.CSVWriter;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import fll.Utilities;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
@@ -105,12 +107,12 @@ public class PerformanceScoreDump extends BaseFLLServlet {
 
       scores = getScores.executeQuery();
       while (scores.next()) {
-        final String teamName = scores.getString(1);
+        final String teamName = castNonNull(scores.getString(1));
         final int teamNumber = scores.getInt(2);
         final int runNumber = scores.getInt(3);
         final double score = scores.getDouble(4);
-        final String eventDivision = scores.getString(5);
-        final String judgingStation = scores.getString(6);
+        final String eventDivision = castNonNull(scores.getString(5));
+        final String judgingStation = castNonNull(scores.getString(6));
 
         final String[] row = new String[] { Integer.toString(teamNumber), teamName, Integer.toString(runNumber),
                                             Utilities.getFormatForScoreType(performanceScoreType).format(score),
