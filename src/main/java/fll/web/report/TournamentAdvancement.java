@@ -28,6 +28,7 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.opencsv.CSVWriter;
 
@@ -142,7 +143,7 @@ public class TournamentAdvancement extends BaseFLLServlet {
                                                                                     tournament.getTournamentID());
 
     for (final AdvancingTeam adv : advancing) {
-      final int teamNumber = adv.getTeamNumber();
+      final Integer teamNumber = adv.getTeamNumber();
       if (!tournamentTeams.containsKey(teamNumber)) {
         throw new FLLInternalException("Team "
             + teamNumber
@@ -153,7 +154,7 @@ public class TournamentAdvancement extends BaseFLLServlet {
 
       final TournamentTeam team = tournamentTeams.get(teamNumber);
 
-      final List<String> csvData = new LinkedList<>();
+      final List<@Nullable String> csvData = new LinkedList<>();
       csvData.add(String.valueOf(teamNumber));
       csvData.add(team.getTeamName());
       csvData.add(tournament.getDescription());
@@ -172,7 +173,7 @@ public class TournamentAdvancement extends BaseFLLServlet {
                                                                                         Collections.emptyMap());
 
         if (jranks.containsKey(teamNumber)) {
-          final ImmutablePair<Integer, Double> pair = jranks.get(team.getTeamNumber());
+          final ImmutablePair<Integer, Double> pair = jranks.get(teamNumber);
 
           final String formattedScore = Utilities.getFormatForScoreType(category.getScoreType())
                                                  .format(pair.getRight());
