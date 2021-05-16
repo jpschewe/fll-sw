@@ -815,7 +815,7 @@ checkerFramework {
     ]
     extraJavacArgs = [
         "-AonlyDefs=^fll\\.(db|documents|flltools|scheduler|subjective|tomcat|util|web|xml)",
-        "-AskipDefs=^fll\\.web\\.(report|schedule|scoreboard|scoreEntry|setup|tags)",
+        "-AskipDefs=^fll\\.web\\.(schedule|scoreboard|scoreEntry|setup|tags)",
         "-Awarns",  
         "-Xmaxwarns", "10000",
         "-AstubWarnIfNotFound",
