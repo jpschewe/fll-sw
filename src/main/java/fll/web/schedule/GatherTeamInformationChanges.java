@@ -13,7 +13,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -23,6 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.TournamentTeam;
 import fll.db.Queries;
@@ -66,9 +67,16 @@ public class GatherTeamInformationChanges extends BaseFLLServlet {
       final Map<Integer, TournamentTeam> dbTeams = Queries.getTournamentTeams(connection, tournamentID);
 
       final TournamentSchedule schedule = uploadScheduleData.getSchedule();
+      if (null == schedule) {
+        throw new FLLInternalException("schedule is not set");
+      }
       schedule.getSchedule().stream().forEach(schedInfo -> {
         final TournamentTeam dbTeam = dbTeams.get(schedInfo.getTeamNumber());
-        Objects.requireNonNull(dbTeam);
+        if (null == dbTeam) {
+          throw new FLLInternalException("Team "
+              + schedInfo.getTeamNumber()
+              + " is in the schedule, but not in the TournamentTeams table in the database");
+        }
 
         if (!schedInfo.getTeamName().equals(dbTeam.getTeamName())) {
           nameDifferences.add(new TeamNameDifference(schedInfo.getTeamNumber(), dbTeam.getTeamName(),
@@ -156,8 +164,8 @@ public class GatherTeamInformationChanges extends BaseFLLServlet {
      * @param newOrganization see {@link #getNewOrganization()}
      */
     public TeamOrganizationDifference(final int number,
-                                      final String oldOrganization,
-                                      final String newOrganization) {
+                                      final @Nullable String oldOrganization,
+                                      final @Nullable String newOrganization) {
       this.number = number;
       this.oldOrganization = oldOrganization;
       this.newOrganization = newOrganization;
@@ -172,21 +180,21 @@ public class GatherTeamInformationChanges extends BaseFLLServlet {
       return number;
     }
 
-    private final String oldOrganization;
+    private final @Nullable String oldOrganization;
 
     /**
      * @return old organization for team
      */
-    public String getOldOrganization() {
+    public @Nullable String getOldOrganization() {
       return oldOrganization;
     }
 
-    private final String newOrganization;
+    private final @Nullable String newOrganization;
 
     /**
      * @return new organization for team
      */
-    public String getNewOrganization() {
+    public @Nullable String getNewOrganization() {
       return newOrganization;
     }
   }
