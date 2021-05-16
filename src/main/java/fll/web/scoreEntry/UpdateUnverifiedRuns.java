@@ -23,6 +23,8 @@ import javax.sql.DataSource;
 
 import org.apache.commons.text.StringEscapeUtils;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import fll.Team;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
@@ -70,7 +72,7 @@ public class UpdateUnverifiedRuns extends BaseFLLServlet {
         while (rs.next()) {
           final int teamNumber = rs.getInt(1);
           final int runNumber = rs.getInt(2);
-          final String name = rs.getString(3);
+          final String name = castNonNull(rs.getString(3));
           final String trimmedName = StringUtils.trimString(name, Team.MAX_TEAM_NAME_LEN);
           final String escapedName = StringEscapeUtils.escapeEcmaScript(trimmedName);
 
