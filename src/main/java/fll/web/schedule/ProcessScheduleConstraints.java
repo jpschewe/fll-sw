@@ -7,7 +7,6 @@
 package fll.web.schedule;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -45,18 +44,16 @@ public class ProcessScheduleConstraints extends BaseFLLServlet {
                                                                                         UploadScheduleData.class);
     try {
 
-      final String changeTimeDurationStr = request.getParameter("changeTimeDuration");
-      Objects.requireNonNull(changeTimeDurationStr, "Missing parameter 'changeTimeDuration'");
+      final String changeTimeDurationStr = WebUtils.getNonNullRequestParameter(request, "changeTimeDuration");
       final int changeTimeDuration = Integer.parseInt(changeTimeDurationStr);
       uploadScheduleData.getSchedParams().setChangetimeMinutes(changeTimeDuration);
 
-      final String performanceChangeTimeDurationStr = request.getParameter("performanceChangeTimeDuration");
-      Objects.requireNonNull(performanceChangeTimeDurationStr, "Missing parameter 'performanceChangeTimeDuration'");
+      final String performanceChangeTimeDurationStr = WebUtils.getNonNullRequestParameter(request,
+                                                                                          "performanceChangeTimeDuration");
       final int performanceChangeTimeDuration = Integer.parseInt(performanceChangeTimeDurationStr);
       uploadScheduleData.getSchedParams().setPerformanceChangetimeMinutes(performanceChangeTimeDuration);
 
-      final String performanceDurationStr = request.getParameter("performanceDuration");
-      Objects.requireNonNull(performanceDurationStr, "Missing parameter 'performanceDuration'");
+      final String performanceDurationStr = WebUtils.getNonNullRequestParameter(request, "performanceDuration");
       final int performanceDuration = Integer.parseInt(performanceDurationStr);
       uploadScheduleData.getSchedParams().setPerformanceMinutes(performanceDuration);
 

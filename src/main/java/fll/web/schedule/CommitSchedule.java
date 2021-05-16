@@ -12,7 +12,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -29,6 +28,7 @@ import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -69,7 +69,9 @@ public class CommitSchedule extends BaseFLLServlet {
       final int tournamentID = Queries.getCurrentTournament(connection);
 
       final TournamentSchedule schedule = uploadScheduleData.getSchedule();
-      Objects.requireNonNull(schedule);
+      if (null == schedule) {
+        throw new FLLInternalException("Schedule is not set");
+      }
 
       schedule.storeSchedule(connection, tournamentID);
 
