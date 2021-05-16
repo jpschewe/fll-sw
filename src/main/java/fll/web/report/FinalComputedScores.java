@@ -35,6 +35,8 @@ import org.apache.fop.apps.FopFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
@@ -577,8 +579,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
         while (overallResult.next()) {
           final int teamNumber = overallResult.getInt(3);
           final String organization = overallResult.getString(1);
-          final String teamName = overallResult.getString(2);
-          final String judgingGroup = overallResult.getString(5);
+          final String teamName = castNonNull(overallResult.getString(2));
+          final String judgingGroup = castNonNull(overallResult.getString(5));
 
           final double overallScore;
           final double ts = overallResult.getDouble(4);
@@ -638,7 +640,14 @@ public final class FinalComputedScores extends BaseFLLServlet {
           // category with weight > 0
           for (final ScoreCategory category : subjectiveCategories) {
             final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> catRanks = teamSubjectiveRanks.get(category);
+            if (null == catRanks) {
+              throw new FLLInternalException("team subjective rank data is not consistent with the subjective categories (catRanks). This suggests a bug in gatherRankedSubjectiveTeams.");
+            }
+
             final Map<Integer, ImmutablePair<Integer, Double>> judgingRanks = catRanks.get(judgingGroup);
+            if (null == judgingRanks) {
+              throw new FLLInternalException("team subjective rank data is not consistent with the subjective categories (judgingRanks). This suggests a bug in gatherRankedSubjectiveTeams.");
+            }
 
             final double catWeight = category.getWeight();
             if (catWeight > 0.0) {
@@ -676,7 +685,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
   }
 
   private void insertCategoryScaledScore(final Document document,
-                                         final int teamNumber,
+                                         final Integer teamNumber,
                                          final Element row,
                                          final double borderWidth,
                                          final String borderColor,
