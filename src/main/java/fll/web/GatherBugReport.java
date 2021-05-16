@@ -167,14 +167,17 @@ public class GatherBugReport extends BaseFLLServlet {
       try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(logsDirectory)) {
         for (final Path path : directoryStream) {
           if (Files.isRegularFile(path)) {
-            zipOut.putNextEntry(new ZipEntry(normalizePathname(logsDirectory.resolve(path.getFileName()).toString())));
-            try (InputStream is = Files.newInputStream(path)) {
-              is.transferTo(zipOut);
-            }
-          }
-        }
-      }
-    }
+            final Path filenamePath = path.getFileName();
+            if (null != filenamePath) {
+              zipOut.putNextEntry(new ZipEntry(normalizePathname(logsDirectory.resolve(filenamePath).toString())));
+              try (InputStream is = Files.newInputStream(path)) {
+                is.transferTo(zipOut);
+              }
+            } // valid path
+          } // regular file
+        } // foreach directory entry
+      } // allocate directory stream
+    } // logs directory exists
 
   }
 
