@@ -42,7 +42,6 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
-import fll.web.admin.GatherTournamentParameterInformation;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import net.mtu.eggplant.xml.XMLUtils;
