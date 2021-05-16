@@ -7,7 +7,6 @@
 package fll.scheduler;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalTime;
@@ -35,7 +34,6 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 
 import fll.Utilities;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
-import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.CheckCanceled;
 import fll.util.ExcelCellReader;
@@ -468,14 +466,12 @@ public class TableOptimizer {
       final CommandLine cmd = parser.parse(options, args);
 
       schedfile = new File(cmd.getOptionValue(SCHED_FILE_OPTION));
-
     } catch (final org.apache.commons.cli.ParseException pe) {
       LOGGER.error(pe.getMessage());
       usage(options);
       System.exit(1);
     }
 
-    FileInputStream fis = null;
     try {
       if (!schedfile.canRead()) {
         LOGGER.fatal(schedfile.getAbsolutePath()
@@ -483,26 +479,19 @@ public class TableOptimizer {
         System.exit(4);
       }
 
-      final boolean csv = schedfile.getName().endsWith("csv");
-      final CellFileReader reader;
       final String sheetName;
-      if (csv) {
-        reader = new CSVCellReader(schedfile);
+      if (!ExcelCellReader.isExcelFile(schedfile)) {
         sheetName = "ignored";
       } else {
         sheetName = SchedulerUI.promptForSheetName(schedfile);
         if (null == sheetName) {
           return;
         }
-        fis = new FileInputStream(schedfile);
-        reader = new ExcelCellReader(fis, sheetName);
       }
 
-      final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
-      if (null != fis) {
-        fis.close();
-        fis = null;
-      }
+      final ColumnInformation columnInfo = TournamentSchedule.findColumns(CellFileReader.createCellReader(schedfile,
+                                                                                                          sheetName),
+                                                                          new LinkedList<String>());
 
       final List<SubjectiveStation> subjectiveStations = SchedulerUI.gatherSubjectiveStationInformation(null,
                                                                                                         columnInfo);
@@ -519,13 +508,9 @@ public class TableOptimizer {
 
       final String name = Utilities.extractBasename(schedfile);
 
-      final TournamentSchedule schedule;
-      if (csv) {
-        schedule = new TournamentSchedule(name, schedfile, subjectiveHeaders);
-      } else {
-        fis = new FileInputStream(schedfile);
-        schedule = new TournamentSchedule(name, fis, sheetName, subjectiveHeaders);
-      }
+      final TournamentSchedule schedule = new TournamentSchedule(name,
+                                                                 CellFileReader.createCellReader(schedfile, sheetName),
+                                                                 subjectiveHeaders);
 
       final File schedfileDirectory = schedfile.getAbsoluteFile().getParentFile();
       if (null == schedfileDirectory) {
@@ -558,18 +543,7 @@ public class TableOptimizer {
     } catch (final InvalidFormatException e) {
       LOGGER.fatal(e, e);
       System.exit(7);
-    } finally {
-      try {
-        if (null != fis) {
-          fis.close();
-        }
-      } catch (final IOException e) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Error closing stream", e);
-        }
-      }
     }
-
   }
 
   /**

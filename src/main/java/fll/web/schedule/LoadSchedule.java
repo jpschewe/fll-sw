@@ -32,6 +32,7 @@ import fll.scheduler.SubjectiveStation;
 import fll.scheduler.TournamentSchedule;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CellFileReader;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -66,7 +67,9 @@ public class LoadSchedule extends BaseFLLServlet {
     try {
       if (!uploadScheduleData.isSubjectiveStationsSet()) {
         final File scheduleFile = uploadScheduleData.getScheduleFile();
-        Objects.requireNonNull(scheduleFile);
+        if (null == scheduleFile) {
+          throw new FLLInternalException("Schedule file is not set");
+        }
 
         final String sheetName = uploadScheduleData.getSelectedSheet();
 
@@ -99,7 +102,9 @@ public class LoadSchedule extends BaseFLLServlet {
                             final DataSource datasource) {
 
     final File scheduleFile = uploadScheduleData.getScheduleFile();
-    Objects.requireNonNull(scheduleFile);
+    if (null == scheduleFile) {
+      throw new FLLInternalException("Schedule file is not set");
+    }
 
     final String sheetName = uploadScheduleData.getSelectedSheet();
     try (Connection connection = datasource.getConnection()) {

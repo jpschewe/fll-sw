@@ -9,7 +9,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
@@ -43,7 +42,6 @@ import java.util.TreeSet;
 
 import javax.annotation.Nonnull;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -59,9 +57,7 @@ import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.documents.writers.SubjectivePdfWriter;
-import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
-import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.playoff.ScoresheetGenerator;
@@ -345,45 +341,6 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * Read the tournament schedule from a spreadsheet.
-   *
-   * @param name the name of the tournament
-   * @param stream how to access the spreadsheet
-   * @param sheetName the name of the worksheet the data is on
-   * @param subjectiveHeaders the headers for the subjective columns
-   * @throws ScheduleParseException if there is an error parsing the schedule
-   * @throws IOException if there is an error reading the stream
-   * @throws InvalidFormatException if there is an error parsing the stream
-   * @throws ParseException if there is an error parsing the data
-   */
-  public TournamentSchedule(final String name,
-                            final InputStream stream,
-                            final String sheetName,
-                            final Collection<String> subjectiveHeaders)
-      throws IOException, ParseException, InvalidFormatException, ScheduleParseException {
-    this(name, new ExcelCellReader(stream, sheetName), subjectiveHeaders);
-  }
-
-  /**
-   * Read the tournament schedule from a CSV file.
-   *
-   * @param name see {@link #getName()}
-   * @param csvFile where to read the schedule from
-   * @param subjectiveHeaders the headers for the subjective columns
-   * @throws ScheduleParseException if there is an error parsing the schedule
-   * @throws ParseException if there is an error parsing the file
-   * @throws IOException if there is an error reading the file
-   */
-  public TournamentSchedule(final String name,
-                            final File csvFile,
-                            final Collection<String> subjectiveHeaders)
-      throws IOException, ParseException, ScheduleParseException {
-    this(name, new CSVCellReader(csvFile), subjectiveHeaders);
-  }
-
-  /**
-   * Common construction.
-   *
    * @param name {@link #getName()}
    * @param reader where to read the schedule from
    * @param subjectiveHeaders the headers for the subjective columns

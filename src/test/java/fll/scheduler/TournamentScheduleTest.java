@@ -157,7 +157,8 @@ public class TournamentScheduleTest {
       }
 
       scheduleStream = scheduleResource.openStream();
-      final TournamentSchedule schedule = new TournamentSchedule("Test Tournament", scheduleStream, sheetName,
+      final TournamentSchedule schedule = new TournamentSchedule("Test Tournament",
+                                                                 new ExcelCellReader(scheduleStream, sheetName),
                                                                  subjectiveHeaders);
       scheduleStream.close();
 
@@ -246,7 +247,8 @@ public class TournamentScheduleTest {
     }
 
     scheduleStream = path.openStream();
-    final TournamentSchedule schedule = new TournamentSchedule("Test Tournament", scheduleStream, sheetName,
+    final TournamentSchedule schedule = new TournamentSchedule("Test Tournament",
+                                                               new ExcelCellReader(scheduleStream, sheetName),
                                                                subjectiveHeaders);
     scheduleStream.close();
 
