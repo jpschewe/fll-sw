@@ -9,8 +9,6 @@ package fll.web.report;
 import java.io.Serializable;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -20,7 +18,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public final class JudgeSummary implements Serializable, Comparable<JudgeSummary> {
 
-  private final String mJudge;
+  private final @Nullable String mJudge;
 
   private final String mCategory;
 
@@ -40,7 +38,6 @@ public final class JudgeSummary implements Serializable, Comparable<JudgeSummary
   /**
    * @return the score category title
    */
-  @Nonnull
   public String getCategory() {
     return mCategory;
   }
@@ -48,7 +45,6 @@ public final class JudgeSummary implements Serializable, Comparable<JudgeSummary
   /**
    * @return the judging group name
    */
-  @Nonnull
   public String getGroup() {
     return mGroup;
   }
@@ -74,9 +70,9 @@ public final class JudgeSummary implements Serializable, Comparable<JudgeSummary
    * @param numExpected {@link #getNumExpected()}
    * @param numActual {@link #getNumActual()}
    */
-  public JudgeSummary(final String judge,
-                      @Nonnull final String category,
-                      @Nonnull final String group,
+  public JudgeSummary(final @Nullable String judge,
+                      final String category,
+                      final String group,
                       final int numExpected,
                       final int numActual) {
     mJudge = judge;
@@ -92,7 +88,7 @@ public final class JudgeSummary implements Serializable, Comparable<JudgeSummary
   }
 
   @Override
-  @EnsuresNonNullIf(expression="#1", result=true)
+  @EnsuresNonNullIf(expression = "#1", result = true)
   public boolean equals(final @Nullable Object o) {
     if (null == o) {
       return false;
