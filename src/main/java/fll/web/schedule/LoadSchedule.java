@@ -7,9 +7,7 @@
 package fll.web.schedule;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -34,7 +32,6 @@ import fll.scheduler.SubjectiveStation;
 import fll.scheduler.TournamentSchedule;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CellFileReader;
-import fll.util.ExcelCellReader;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -107,8 +104,6 @@ public class LoadSchedule extends BaseFLLServlet {
     final String sheetName = uploadScheduleData.getSelectedSheet();
     try (Connection connection = datasource.getConnection()) {
 
-      final boolean isCsvFile = !ExcelCellReader.isExcelFile(scheduleFile);
-
       final String fullname = scheduleFile.getName();
       final int dotIndex = fullname.lastIndexOf('.');
       final String name;
@@ -124,14 +119,10 @@ public class LoadSchedule extends BaseFLLServlet {
       for (final SubjectiveStation station : subjectiveStations) {
         subjectiveHeaders.add(station.getName());
       }
-      final TournamentSchedule schedule;
-      if (isCsvFile) {
-        schedule = new TournamentSchedule(name, scheduleFile, subjectiveHeaders);
-      } else {
-        try (InputStream stream = new FileInputStream(scheduleFile)) {
-          schedule = new TournamentSchedule(name, stream, sheetName, subjectiveHeaders);
-        }
-      }
+      final TournamentSchedule schedule = new TournamentSchedule(name,
+                                                                 CellFileReader.createCellReader(scheduleFile,
+                                                                                                 sheetName),
+                                                                 subjectiveHeaders);
       uploadScheduleData.setSchedule(schedule);
 
       if (!scheduleFile.delete()) {
