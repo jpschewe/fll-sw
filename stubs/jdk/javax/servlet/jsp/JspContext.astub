@@ -1,0 +1,10 @@
+package javax.servlet.jsp;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public abstract class JspContext {
+
+  public abstract void setAttribute(String name, @Nullable Object value);
+
+}

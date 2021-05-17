@@ -134,7 +134,7 @@ public final class MhubParameters {
    * @see #getDisplayNode(Connection)
    */
   public static void setDisplayNode(final Connection connection,
-                                    final String node)
+                                    final @Nullable String node)
       throws SQLException {
     if (StringUtils.isBlank(node)) {
       GlobalParameters.setStringGlobalParameter(connection, DISPLAY_NODE_KEY, DEFAULT_DISPLAY_NODE);

@@ -26,6 +26,8 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.ScoreStandardization;
 import fll.db.Queries;
@@ -96,9 +98,9 @@ public final class SummarizePhase1 {
         getJudges.setInt(1, tournamentID);
         try (ResultSet judges = getJudges.executeQuery()) {
           while (judges.next()) {
-            final String judge = judges.getString(1);
-            final String categoryName = judges.getString(2);
-            final String station = judges.getString(3);
+            final String judge = castNonNull(judges.getString(1));
+            final String categoryName = castNonNull(judges.getString(2));
+            final String station = castNonNull(judges.getString(3));
 
             final int numExpected = getNumScoresExpected(connection, tournamentID, station);
             final int numActual = getNumScoresEntered(connection, judge, categoryName, station, tournamentID);

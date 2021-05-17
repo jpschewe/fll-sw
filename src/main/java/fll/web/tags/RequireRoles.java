@@ -18,6 +18,8 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
@@ -28,7 +30,7 @@ import fll.web.UserRole;
 public class RequireRoles extends TagSupport {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-  
+
   /**
    * Simple constructor.
    */
@@ -39,7 +41,7 @@ public class RequireRoles extends TagSupport {
   @Override
   public int doEndTag() throws JspException {
     LOGGER.debug("Top of RequireRoles.doEndTag");
-    
+
     final HttpSession session = pageContext.getSession();
     final ServletRequest request = pageContext.getRequest();
     final ServletResponse response = pageContext.getResponse();
@@ -88,7 +90,7 @@ public class RequireRoles extends TagSupport {
     }
   }
 
-  private String roles = null;
+  private @Nullable String roles = null;
 
   /**
    * @param roles the string of roles that are required

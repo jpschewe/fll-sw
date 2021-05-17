@@ -28,8 +28,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -275,7 +277,7 @@ public final class WebUtils {
    * @param str the string that needs to be escaped
    * @return A string suitable to be used in a form field
    */
-  public static String escapeForHtmlFormValue(final @Nullable String str) {
+  public static @PolyNull String escapeForHtmlFormValue(final @PolyNull String str) {
     if (null == str) {
       return str;
     } else {
@@ -324,5 +326,78 @@ public final class WebUtils {
     } else {
       return requestURL.append('?').append(queryString).toString();
     }
+  }
+
+  /**
+   * @param request where to get the parameter from
+   * @param parameter the parameter to get
+   * @return the value
+   * @throws MissingRequiredParameterException if the parameter is missing
+   * @throws NumberFormatException if the value isn't parsable as an integer
+   */
+  public static int getIntRequestParameter(final HttpServletRequest request,
+                                           final String parameter)
+      throws MissingRequiredParameterException, NumberFormatException {
+    final String str = request.getParameter(parameter);
+    if (null == str) {
+      throw new MissingRequiredParameterException(parameter);
+    }
+    final int value = Integer.parseInt(str);
+    return value;
+  }
+
+  /**
+   * @param request where to get the parameter from
+   * @param parameter the parameter to get
+   * @return the value
+   * @throws MissingRequiredParameterException if the parameter is missing
+   * @throws NumberFormatException if the value isn't parsable as a double
+   */
+  public static double getDoubleRequestParameter(final HttpServletRequest request,
+                                                 final String parameter)
+      throws MissingRequiredParameterException, NumberFormatException {
+    final String str = request.getParameter(parameter);
+    if (null == str) {
+      throw new MissingRequiredParameterException(parameter);
+    }
+    final double value = Double.parseDouble(str);
+    return value;
+  }
+
+  /**
+   * @param request where to get the parameter from
+   * @param parameter the parameter to get
+   * @return the value
+   * @throws MissingRequiredParameterException if the parameter is missing
+   */
+  public static String getNonNullRequestParameter(final HttpServletRequest request,
+                                                  final String parameter)
+      throws MissingRequiredParameterException {
+    final String str = request.getParameter(parameter);
+    if (null == str) {
+      throw new MissingRequiredParameterException(parameter);
+    }
+    return str;
+  }
+
+  /**
+   * Redirect to the page in {@link SessionAttributes#getRedirectURL(HttpSession)}
+   * or "/" if nothing is stored in the session.
+   * 
+   * @param response the response to redirect
+   * @param session the session to get the redirect from
+   * @throws IOException {@link HttpServletResponse#sendRedirect(String)}
+   */
+  public static void sendRedirect(final HttpServletResponse response,
+                                  final HttpSession session)
+      throws IOException {
+    final String redirect = SessionAttributes.getRedirectURL(session);
+    final String whereTo;
+    if (null != redirect) {
+      whereTo = redirect;
+    } else {
+      whereTo = "/";
+    }
+    response.sendRedirect(response.encodeRedirectURL(whereTo));
   }
 }

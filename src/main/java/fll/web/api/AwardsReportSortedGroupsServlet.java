@@ -32,6 +32,8 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
@@ -159,7 +161,8 @@ public class AwardsReportSortedGroupsServlet extends HttpServlet {
       prep.setInt(1, tournamentId);
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
-          final String awardGroup = rs.getString("award_group");
+          // database ensures not null
+          final String awardGroup = castNonNull(rs.getString("award_group"));
           result.add(awardGroup);
         }
       }

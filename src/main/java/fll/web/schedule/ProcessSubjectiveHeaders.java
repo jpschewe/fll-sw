@@ -68,7 +68,7 @@ public class ProcessSubjectiveHeaders extends BaseFLLServlet {
           final int headerIndex = Integer.parseInt(value);
           final String header = unusedHeaders.get(headerIndex);
 
-          final String durationStr = request.getParameter(cat.getName()
+          final String durationStr = WebUtils.getNonNullRequestParameter(request, cat.getName()
               + ":duration");
 
           final int duration = Integer.parseInt(durationStr);

@@ -25,6 +25,7 @@ import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -113,9 +114,15 @@ public final class GatherTeamData {
         final Map<Integer, String> currentJudgingStations = new HashMap<>();
         for (final Tournament tournament : tournaments) {
           final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournament.getTournamentID());
+          final String judgingStation = Queries.getJudgingGroup(connection, teamNumber, tournament.getTournamentID());
+          if (null == eventDivision
+              || null == judgingStation) {
+            throw new FLLRuntimeException("Unable to find award group or judging station for team "
+                + teamNumber);
+          }
+
           currentEventDivisions.put(tournament.getTournamentID(), eventDivision);
 
-          final String judgingStation = Queries.getJudgingGroup(connection, teamNumber, tournament.getTournamentID());
           currentJudgingStations.put(tournament.getTournamentID(), judgingStation);
         }
         page.setAttribute("currentEventDivisions", currentEventDivisions);

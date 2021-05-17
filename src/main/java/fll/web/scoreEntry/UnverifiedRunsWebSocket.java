@@ -27,8 +27,7 @@ public class UnverifiedRunsWebSocket {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  @GuardedBy("SESSIONS_LOCK")
-  private static final Set<Session> ALL_SESSIONS = new HashSet<>();
+  private static final @GuardedBy("SESSIONS_LOCK") Set<Session> ALL_SESSIONS = new HashSet<>();
 
   private static final Object SESSIONS_LOCK = new Object();
 
@@ -47,11 +46,11 @@ public class UnverifiedRunsWebSocket {
    */
   @OnClose
   public void onClose(final Session session) {
-    synchronized(SESSIONS_LOCK) {
+    synchronized (SESSIONS_LOCK) {
       internalRemoveSession(session);
     }
   }
-  
+
   /**
    * Notify all clients that they should update.
    */

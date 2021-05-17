@@ -36,6 +36,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
@@ -47,6 +48,7 @@ import com.opencsv.CSVWriter;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.scheduler.SchedParams.InvalidParametersException;
+import fll.util.CellFileReader;
 import fll.util.CheckCanceled;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -1122,7 +1124,9 @@ public class GreedySolver {
                                                                  .collect(Collectors.toList());
 
     try {
-      final TournamentSchedule schedule = new TournamentSchedule(datafile.getName(), scheduleFile, subjectiveHeaders);
+      final TournamentSchedule schedule = new TournamentSchedule(datafile.getName(),
+                                                                 CellFileReader.createCellReader(scheduleFile, null),
+                                                                 subjectiveHeaders);
       final ScheduleChecker checker = new ScheduleChecker(this.solverParameters, schedule);
       final List<ConstraintViolation> violations = checker.verifySchedule();
       for (final ConstraintViolation violation : violations) {
@@ -1136,9 +1140,11 @@ public class GreedySolver {
     } catch (final IOException e) {
       throw new FLLRuntimeException("Should not have an IOException trying to get warnings from CSV file", e);
     } catch (final ParseException e) {
-      throw new FLLRuntimeException("Should not have an ParseException trying to get warnings from CSV file", e);
+      throw new FLLRuntimeException("Should not have a ParseException trying to get warnings from CSV file", e);
     } catch (final ScheduleParseException e) {
-      throw new FLLRuntimeException("Should not have an ScheduleParseException trying to get warnings from CSV file",
+      throw new FLLRuntimeException("Should not have a ScheduleParseException trying to get warnings from CSV file", e);
+    } catch (final InvalidFormatException e) {
+      throw new FLLRuntimeException("Should not have an InvalidFormatException trying to get warnings from CSV file",
                                     e);
     }
   }

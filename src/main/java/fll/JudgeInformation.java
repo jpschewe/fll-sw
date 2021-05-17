@@ -14,10 +14,13 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Judge information.
@@ -76,7 +79,8 @@ public final class JudgeInformation implements Serializable {
   }
 
   @Override
-  public boolean equals(final Object o) {
+  @EnsuresNonNullIf(expression = "#1", result = true)
+  public boolean equals(final @Nullable Object o) {
     if (null == o) {
       return false;
     } else if (o == this) {

@@ -92,7 +92,6 @@ import fll.Team;
 import fll.Utilities;
 import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
-import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
@@ -742,20 +741,15 @@ public class SchedulerUI extends JFrame {
 
     @Override
     public void actionPerformed(final ActionEvent ae) {
-      FileInputStream fis = null;
       try {
         final File selectedFile = getScheduleFile();
         final String sheetName = getCurrentSheetName();
         final String name = Utilities.extractBasename(selectedFile);
 
-        final TournamentSchedule newData;
-        if (null == sheetName) {
-          // if no sheet name, assume CSV file
-          newData = new TournamentSchedule(name, selectedFile, mScheduleData.getSubjectiveStations());
-        } else {
-          fis = new FileInputStream(selectedFile);
-          newData = new TournamentSchedule(name, fis, sheetName, mScheduleData.getSubjectiveStations());
-        }
+        final TournamentSchedule newData = new TournamentSchedule(name,
+                                                                  CellFileReader.createCellReader(selectedFile,
+                                                                                                  sheetName),
+                                                                  mScheduleData.getSubjectiveStations());
         setScheduleData(newData);
       } catch (final IOException e) {
         final Formatter errorFormatter = new Formatter();
@@ -781,17 +775,6 @@ public class SchedulerUI extends JFrame {
         LOGGER.error(errorFormatter, e);
         JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file",
                                       JOptionPane.ERROR_MESSAGE);
-      } finally {
-        try {
-          if (null != fis) {
-            fis.close();
-          }
-        } catch (final IOException e) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Exception closing stream", e);
-          }
-        }
-
       }
     }
   };
@@ -979,34 +962,26 @@ public class SchedulerUI extends JFrame {
    */
   private void loadScheduleFile(final File selectedFile,
                                 final @Nullable List<SubjectiveStation> subjectiveStations) {
-    FileInputStream fis = null;
     try {
       final boolean csv = !ExcelCellReader.isExcelFile(selectedFile);
-      final CellFileReader reader;
       final String sheetName;
       if (csv) {
-        reader = new CSVCellReader(selectedFile);
         sheetName = "ignored";
       } else {
         sheetName = promptForSheetName(selectedFile);
         if (null == sheetName) {
           return;
         }
-        fis = new FileInputStream(selectedFile);
-        reader = new ExcelCellReader(fis, sheetName);
       }
 
       final List<SubjectiveStation> newSubjectiveStations;
       if (null == subjectiveStations) {
-        final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
+        final ColumnInformation columnInfo = TournamentSchedule.findColumns(CellFileReader.createCellReader(selectedFile,
+                                                                                                            sheetName),
+                                                                            new LinkedList<String>());
         newSubjectiveStations = gatherSubjectiveStationInformation(SchedulerUI.this, columnInfo);
       } else {
         newSubjectiveStations = subjectiveStations;
-      }
-
-      if (null != fis) {
-        fis.close();
-        fis = null;
       }
 
       mSchedParams.setSubjectiveStations(newSubjectiveStations);
@@ -1018,13 +993,10 @@ public class SchedulerUI extends JFrame {
 
       final String name = Utilities.extractBasename(selectedFile);
 
-      final TournamentSchedule schedule;
-      if (csv) {
-        schedule = new TournamentSchedule(name, selectedFile, subjectiveHeaders);
-      } else {
-        fis = new FileInputStream(selectedFile);
-        schedule = new TournamentSchedule(name, fis, sheetName, subjectiveHeaders);
-      }
+      final TournamentSchedule schedule = new TournamentSchedule(name,
+                                                                 CellFileReader.createCellReader(selectedFile,
+                                                                                                 sheetName),
+                                                                 subjectiveHeaders);
       mScheduleFile = selectedFile;
       mScheduleSheetName = sheetName;
       setScheduleData(schedule);
@@ -1072,16 +1044,6 @@ public class SchedulerUI extends JFrame {
       LOGGER.error(errorFormatter, e);
       JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
       return;
-    } finally {
-      try {
-        if (null != fis) {
-          fis.close();
-        }
-      } catch (final IOException e) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Error closing stream", e);
-        }
-      }
     }
   }
 

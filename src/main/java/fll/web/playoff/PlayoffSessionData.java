@@ -52,7 +52,8 @@ public final class PlayoffSessionData implements Serializable {
 
     mUnfinishedBrackets = Playoff.getUnfinishedPlayoffBrackets(connection, mCurrentTournament.getTournamentID());
 
-    mSort = null;
+    mSort = BracketSortType.SEEDING;
+    mTeamsNeedingSeedingRuns = new LinkedList<>();
   }
 
   private boolean mEnableThird = false;
@@ -157,12 +158,12 @@ public final class PlayoffSessionData implements Serializable {
     return mNumPlayoffRounds;
   }
 
-  private String mBracket;
+  private @Nullable String mBracket;
 
   /**
    * @param v {@link #getBracket()}
    */
-  public void setBracket(final String v) {
+  public void setBracket(final @Nullable String v) {
     mBracket = v;
   }
 

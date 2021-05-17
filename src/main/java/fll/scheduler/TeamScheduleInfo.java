@@ -12,6 +12,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.google.common.collect.Streams;
@@ -132,6 +133,7 @@ public final class TeamScheduleInfo implements Serializable {
   }
 
   @Override
+  @EnsuresNonNullIf(expression="#1", result=true)
   public boolean equals(final @Nullable Object o) {
     if (o == this) {
       return true;

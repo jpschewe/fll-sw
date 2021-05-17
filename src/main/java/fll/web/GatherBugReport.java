@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -87,9 +88,12 @@ public class GatherBugReport extends BaseFLLServlet {
                            .getBytes(Utilities.DEFAULT_CHARSET));
 
         zipOut.putNextEntry(new ZipEntry("fll-sw_version.txt"));
-        final String versionInfo = Version.getAllVersionInformation().entrySet().stream() //
-                                          .map(e -> String.format("%s:%s", e.getKey(), e.getValue())) //
-                                          .collect(Collectors.joining("\n"));
+        // Temporary variable is needed due to bug in checker 3.13
+        // https://github.com/typetools/checker-framework/issues/4614
+        final Map<String, String> versionInformation = Version.getAllVersionInformation();
+        final String versionInfo = versionInformation.entrySet().stream() //
+                                                     .map(e -> String.format("%s:%s", e.getKey(), e.getValue())) //
+                                                     .collect(Collectors.joining("\n"));
         zipOut.write(versionInfo.getBytes(Utilities.DEFAULT_CHARSET));
 
         addDatabase(zipOut, connection, challengeDescription);
@@ -163,14 +167,17 @@ public class GatherBugReport extends BaseFLLServlet {
       try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(logsDirectory)) {
         for (final Path path : directoryStream) {
           if (Files.isRegularFile(path)) {
-            zipOut.putNextEntry(new ZipEntry(normalizePathname(logsDirectory.resolve(path.getFileName()).toString())));
-            try (InputStream is = Files.newInputStream(path)) {
-              is.transferTo(zipOut);
-            }
-          }
-        }
-      }
-    }
+            final Path filenamePath = path.getFileName();
+            if (null != filenamePath) {
+              zipOut.putNextEntry(new ZipEntry(normalizePathname(logsDirectory.resolve(filenamePath).toString())));
+              try (InputStream is = Files.newInputStream(path)) {
+                is.transferTo(zipOut);
+              }
+            } // valid path
+          } // regular file
+        } // foreach directory entry
+      } // allocate directory stream
+    } // logs directory exists
 
   }
 

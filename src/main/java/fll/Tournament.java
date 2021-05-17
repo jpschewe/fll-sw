@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -304,7 +305,8 @@ public final class Tournament implements Serializable {
   }
 
   @Override
-  public boolean equals(final Object o) {
+  @EnsuresNonNullIf(expression = "#1", result = true)
+  public boolean equals(final @Nullable Object o) {
     if (o instanceof Tournament) {
       final Tournament other = (Tournament) o;
       return other.getTournamentID() == getTournamentID();
@@ -507,7 +509,7 @@ public final class Tournament implements Serializable {
   public static void updateTournament(final Connection connection,
                                       final int tournamentID,
                                       final String name,
-                                      final String location,
+                                      final @Nullable String location,
                                       final @Nullable LocalDate date,
                                       final @Nullable String level,
                                       final @Nullable String nextLevel)
@@ -520,7 +522,12 @@ public final class Tournament implements Serializable {
         + ", next_level = ?" //
         + " WHERE tournament_id = ?")) {
       updatePrep.setString(1, name);
-      updatePrep.setString(2, location);
+      if (null != location
+          && !level.isEmpty()) {
+        updatePrep.setString(2, location);
+      } else {
+        updatePrep.setNull(2, Types.VARCHAR);
+      }
       if (null == date) {
         updatePrep.setNull(3, Types.DATE);
       } else {

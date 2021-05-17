@@ -125,7 +125,7 @@ public final class UploadTeams extends BaseFLLServlet {
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
                                 "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate the list of columns to create AllTeams table")
   public static void parseFile(final File file,
-                               final String sheetName,
+                               final @Nullable String sheetName,
                                final Connection connection,
                                final HttpSession session)
       throws SQLException, IOException, InvalidFormatException {
@@ -136,7 +136,7 @@ public final class UploadTeams extends BaseFLLServlet {
 
     // parse out the first line as the names of the columns
     // final List<String> columnNames = splitLine(reader.readLine());
-    final String[] columnNames = reader.readNext();
+    final @Nullable String @Nullable [] columnNames = reader.readNext();
     if (null == columnNames) {
       LOGGER.warn("No Data in uploaded file");
       return;
@@ -217,7 +217,8 @@ public final class UploadTeams extends BaseFLLServlet {
       throws IOException, SQLException {
     try {
       // loop over the rest of the rows and insert them into AllTeams
-      String[] values;
+      @Nullable
+      String @Nullable [] values;
       while (null != (values = reader.readNext())) {
         if (values.length > 0) { // skip empty lines
 
@@ -367,6 +368,15 @@ public final class UploadTeams extends BaseFLLServlet {
       while (rs.next()) {
         // convert TeamNumber to an integer
         final String teamNumStr = rs.getString(1);
+
+        if (null == teamNumStr) {
+          out.println("<font color='red'>Error team number '"
+              + teamNumStr
+              + "' is not numeric.<br/>");
+          out.println("Go back and check your input file for errors.<br/></font>");
+          return false;
+        }
+
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Inserting "
               + teamNumStr
@@ -506,9 +516,9 @@ public final class UploadTeams extends BaseFLLServlet {
                                 "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for AllTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
   private static void updateTournamentTeams(final Connection connection,
                                             final String teamNumberColumn,
-                                            final String tournamentColumn,
-                                            final String eventDivisionColumn,
-                                            final String judgingStationColumn)
+                                            final @Nullable String tournamentColumn,
+                                            final @Nullable String eventDivisionColumn,
+                                            final @Nullable String judgingStationColumn)
       throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
@@ -557,6 +567,23 @@ public final class UploadTeams extends BaseFLLServlet {
         while (rs.next()) {
           final int teamNumber = rs.getInt(1);
           final String tournamentName = rs.getString(2);
+          if (null == tournamentName) {
+            LOGGER.debug("Team {} is missing tournament, skipping", teamNumber);
+            continue;
+          }
+
+          final String eventDivision = rs.getString(3);
+          if (null == eventDivision) {
+            LOGGER.debug("Team {} is missing award group, skipping", teamNumber);
+            continue;
+          }
+
+          final String judgingStation = rs.getString(4);
+          if (null == judgingStation) {
+            LOGGER.debug("Team {} is missing judging station, skipping", teamNumber);
+            continue;
+          }
+
           final Tournament tournament;
           if (!Tournament.doesTournamentExist(connection, tournamentName)) {
             Tournament.createTournament(connection, tournamentName, tournamentName, null, null, null);
@@ -564,9 +591,6 @@ public final class UploadTeams extends BaseFLLServlet {
           } else {
             tournament = Tournament.findTournamentByName(connection, tournamentName);
           }
-
-          final String eventDivision = rs.getString(3);
-          final String judgingStation = rs.getString(4);
 
           Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
                                       judgingStation);

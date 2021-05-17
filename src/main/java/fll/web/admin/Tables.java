@@ -21,6 +21,7 @@ import javax.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
@@ -171,9 +172,9 @@ public final class Tables {
    */
   private static void generateRow(final JspWriter out,
                                   final int row,
-                                  final String sideA,
-                                  final String sideB,
-                                  final String delete)
+                                  final @Nullable String sideA,
+                                  final @Nullable String sideB,
+                                  final @Nullable String delete)
       throws IOException {
     out.println("<tr>");
     out.print("  <td><input type='text' name='SideA"
@@ -255,12 +256,13 @@ public final class Tables {
    * response back to index.jsp.
    *
    * @param tournament the current tournament
+   * @return the error message or null if no errors
    */
-  private static String commitData(final HttpServletRequest request,
-                                   final HttpServletResponse response,
-                                   final HttpSession session,
-                                   final Connection connection,
-                                   final int tournament)
+  private static @Nullable String commitData(final HttpServletRequest request,
+                                             final HttpServletResponse response,
+                                             final HttpSession session,
+                                             final Connection connection,
+                                             final int tournament)
       throws SQLException, IOException {
     final List<ImmutablePair<String, String>> tables = new LinkedList<>();
 
@@ -275,8 +277,10 @@ public final class Tables {
       if (null == delete
           || delete.equals("")) {
         // Don't put blank entries in the database
-        if (!(sideA.trim().equals("")
-            && sideB.trim().equals(""))) {
+        if (null != sideA
+            && !sideA.trim().equals("")
+            && null != sideB
+            && !sideB.trim().equals("")) {
           tables.add(ImmutablePair.of(sideA, sideB));
         }
       }

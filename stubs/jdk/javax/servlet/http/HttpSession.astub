@@ -1,0 +1,11 @@
+package javax.servlet.http;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public interface HttpSession {
+
+  public void setAttribute(String name, @Nullable Object value);
+  public @Nullable Object getAttribute(String name);
+
+}

@@ -29,9 +29,11 @@ import fll.db.ImportDB;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import fll.web.developer.importdb.ImportDBDump;
 import fll.web.developer.importdb.ImportDbSessionInfo;
 
@@ -65,24 +67,24 @@ public class ProcessImportFinalist extends BaseFLLServlet {
 
       if (null != request.getAttribute("finalistFile")) {
 
-        final ImportDbSessionInfo sessionInfo = new ImportDbSessionInfo();
-
         final String databaseName = "dbimport"
             + String.valueOf(ImportDBDump.getNextDBCount());
 
         // TODO issue:123 should figure out how to clean up this database
         final DataSource importDataSource = Utilities.createMemoryDataSource(databaseName);
 
-        sessionInfo.setImportDataSource(importDataSource);
-
         // set redirect page to be the admin index
         final String finalRedirectUrl = String.format("%s/admin/index.jsp", request.getContextPath());
-        sessionInfo.setRedirectURL(finalRedirectUrl);
+
+        final ImportDbSessionInfo sessionInfo = new ImportDbSessionInfo(importDataSource, finalRedirectUrl);
 
         try (Connection memConnection = importDataSource.getConnection()) {
 
           // import the database
           final FileItem dumpFileItem = (FileItem) request.getAttribute("finalistFile");
+          if (null == dumpFileItem) {
+            throw new MissingRequiredParameterException("finalistFile");
+          }
           try (ZipInputStream zipfile = new ZipInputStream(dumpFileItem.getInputStream())) {
             ImportDB.loadDatabaseDump(zipfile, memConnection);
 
@@ -129,7 +131,8 @@ public class ProcessImportFinalist extends BaseFLLServlet {
       }
 
       SessionAttributes.appendToMessage(session, message.toString());
-      response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
+
+      WebUtils.sendRedirect(response, session);
     } catch (final FileUploadException fue) {
       LOG.error(fue);
       throw new RuntimeException("Error handling the file upload", fue);

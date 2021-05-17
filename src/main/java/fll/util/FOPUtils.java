@@ -33,6 +33,7 @@ import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.MimeConstants;
 import org.apache.xmlgraphics.java2d.Dimension2DDouble;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -840,6 +841,7 @@ public final class FOPUtils {
     }
 
     @Override
+    @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(final @Nullable Object o) {
       if (this == o) {
         return true;

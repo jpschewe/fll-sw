@@ -23,9 +23,12 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.diffplug.common.base.Errors;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
@@ -667,7 +670,7 @@ public final class Playoff {
       try (ResultSet divisions = divisionsPrep.executeQuery()) {
 
         while (divisions.next()) {
-          final String eventDivision = divisions.getString(1);
+          final String eventDivision = castNonNull(divisions.getString(1));
 
           // find max run number for ANY team in the specified division, not
           // necessarily those in our list
@@ -823,7 +826,7 @@ public final class Playoff {
       prep.setInt(1, tournament);
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
-          final String division = rs.getString(1);
+          final String division = castNonNull(rs.getString(1));
           list.add(division);
         }
       }
@@ -1055,7 +1058,7 @@ public final class Playoff {
       prep.setInt(2, tournament);
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
-          final String bracket = rs.getString(1);
+          final String bracket = castNonNull(rs.getString(1));
           ret.add(bracket);
         }
       }
@@ -1064,14 +1067,15 @@ public final class Playoff {
   }
 
   /**
-   * Given a team and run number, get the playoff division.
+   * Given a team and run number, get the playoff bracket.
    *
    * @param connection database connection
    * @param teamNumber the team number
    * @param tournamentId the tournament
    * @param runNumber the performance run number
-   * @return the division or null if not found
+   * @return the division
    * @throws SQLException on database error
+   * @throws IllegalArgumentException if the the playoff bracket cannot be found
    */
   public static String getPlayoffDivision(final Connection connection,
                                           final int tournamentId,
@@ -1087,10 +1091,15 @@ public final class Playoff {
       prep.setInt(3, tournamentId);
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
-          final String division = rs.getString(1);
+          final String division = castNonNull(rs.getString(1));
           return division;
         } else {
-          return null;
+          throw new IllegalArgumentException("Cannot find playoff bracket for team "
+              + teamNumber
+              + " run number "
+              + runNumber
+              + " in tournament "
+              + tournamentId);
         }
       }
     }
@@ -1575,7 +1584,8 @@ public final class Playoff {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    @EnsuresNonNullIf(expression = "#1", result = true)
+    public boolean equals(final @Nullable Object o) {
       if (this == o) {
         return true;
       } else if (null == o) {

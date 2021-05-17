@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -165,7 +166,8 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
    * Create the result set.
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table")
-  private ResultSet createResultSet(final Connection connection,
+  private ResultSet createResultSet(@UnknownInitialization(TeamScore.class) DatabaseTeamScore this,
+                                    final Connection connection,
                                     final int tournament,
                                     final String categoryName)
       throws SQLException {

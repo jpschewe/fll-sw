@@ -18,6 +18,8 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -232,8 +234,9 @@ public final class FinalistLoad {
           output.format("  %s = $.finalist.addCategory(%s, false, false);%n", categoryVar, quotedCatTitle);
           output.format("}%n");
         }
-        
-        // clear judges and teams from category as we want to use whatever is coming from the database
+
+        // clear judges and teams from category as we want to use whatever is coming
+        // from the database
         output.format("$.finalist.clearCategoryTeams(%s);%n", categoryVar);
         output.format("$.finalist.clearCategoryNominatingJudges(%s);%n", categoryVar);
 
@@ -337,10 +340,10 @@ public final class FinalistLoad {
         output.format("var division = '%s';%n", division);
 
         final FinalistSchedule schedule = new FinalistSchedule(connection, tournament, division);
-        for (final Map.Entry<String, String> entry : schedule.getRooms().entrySet()) {
+        for (final Map.Entry<String, @Nullable String> entry : schedule.getRooms().entrySet()) {
           final String categoryTitle = entry.getKey();
           final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);
-          final String room = entry.getValue();
+          final @Nullable String room = entry.getValue();
 
           output.format("{%n"); // scope so that variable names are easy
 

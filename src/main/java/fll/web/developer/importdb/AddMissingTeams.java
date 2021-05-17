@@ -28,6 +28,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 
 /**
  * Add teams after promptCreateMissingTeams.jsp.
@@ -81,6 +82,6 @@ public class AddMissingTeams extends BaseFLLServlet {
     }
 
     session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
+    WebUtils.sendRedirect(response, session);
   }
 }

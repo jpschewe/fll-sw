@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -172,7 +174,7 @@ public class JudgesServlet extends HttpServlet {
      * @param numNewJudges {@link #getNumNewJudges()}
      */
     public UploadResult(final boolean success,
-                        final String message,
+                        final @Nullable String message,
                         final int numNewJudges) {
       mSuccess = success;
       mMessage = message;
@@ -188,12 +190,12 @@ public class JudgesServlet extends HttpServlet {
       return mSuccess;
     }
 
-    private final String mMessage;
+    private final @Nullable String mMessage;
 
     /**
      * @return message for the user
      */
-    public String getMessage() {
+    public @Nullable String getMessage() {
       return mMessage;
     }
 

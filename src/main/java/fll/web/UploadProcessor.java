@@ -5,7 +5,6 @@
  */
 package fll.web;
 
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,10 +36,8 @@ public final class UploadProcessor {
    */
   public static void processUpload(final HttpServletRequest request) throws FileUploadException {
     // Parse the request
-    final List<?> items = UPLOAD.parseRequest(request);
-    final Iterator<?> iter = items.iterator();
-    while (iter.hasNext()) {
-      final FileItem item = (FileItem) iter.next();
+    final List<FileItem> items = UPLOAD.parseRequest(request);
+    for (final FileItem item : items) {
       if (item.isFormField()) {
         request.setAttribute(item.getFieldName(), item.getString());
       } else {

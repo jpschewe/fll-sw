@@ -25,6 +25,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 
 /**
  * Servlet to check if the tournament exists in the dest database.
@@ -107,7 +108,7 @@ public class CheckTournamentExists extends BaseFLLServlet {
     }
 
     session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
+    WebUtils.sendRedirect(response, session);
   }
 
 }

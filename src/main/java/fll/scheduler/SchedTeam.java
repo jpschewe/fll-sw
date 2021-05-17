@@ -6,6 +6,7 @@
 
 package fll.scheduler;
 
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -37,6 +38,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
   }
 
   @Override
+  @EnsuresNonNullIf(expression="#1", result=true)
   public boolean equals(final @Nullable Object o) {
     if (null == o) {
       return false;

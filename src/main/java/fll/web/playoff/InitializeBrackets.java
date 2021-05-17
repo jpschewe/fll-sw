@@ -26,6 +26,7 @@ import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
+import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
@@ -85,14 +86,20 @@ public class InitializeBrackets extends BaseFLLServlet {
                                                                                            bracket);
         final Map<Integer, TournamentTeam> tournamentTeams = data.getTournamentTeams();
 
-        final List<Team> teams = teamNumbersInBracket.stream().map(teamNum -> tournamentTeams.get(teamNum))
-                                                     .collect(Collectors.toList());
-
         final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournamentID,
                                                                   teamNumbersInBracket);
         if (null != errors) {
           message.append(errors);
         } else {
+          final List<Team> teams = teamNumbersInBracket.stream().map(teamNum -> {
+            if (tournamentTeams.containsKey(teamNum)) {
+              return tournamentTeams.get(teamNum);
+            } else {
+              throw new FLLInternalException("Inconsistency between database and stored playoff information. Cannot find "
+                  + teamNum
+                  + " in the database");
+            }
+          }).collect(Collectors.toList());
 
           Playoff.initializeBrackets(connection, challengeDescription, bracket, data.getEnableThird(), teams,
                                      data.getSort());

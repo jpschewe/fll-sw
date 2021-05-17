@@ -98,7 +98,10 @@ public class TeamResults extends BaseFLLServlet {
           if (Team.NULL_TEAM_NUMBER == selectedTeamNumber
               || selectedTeamNumber == team.getTeamNumber()) {
             final TeamScheduleInfo schedInfo = schedule.getSchedInfoForTeam(team.getTeamNumber());
-
+            if (null == schedInfo) {
+              throw new FLLInternalException("Schedule and team data is inconsistent. Cannot find schedule information for "
+                  + team.getTeamNumber());
+            }
             writeTeamEntries(zipOut, description, connection, tournament, scheduleColumnMappings, team, schedInfo);
           }
         }

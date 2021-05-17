@@ -16,6 +16,8 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.Utilities;
 import fll.flltools.MhubMessageHandler;
 
@@ -27,7 +29,7 @@ public class FLLContextListener implements ServletContextListener {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  private MhubMessageHandler mhubMessageHandler = null;
+  private @Nullable MhubMessageHandler mhubMessageHandler = null;
 
   @Override
   public void contextInitialized(final ServletContextEvent event) {

@@ -22,6 +22,9 @@ import javax.xml.transform.TransformerException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -34,6 +37,7 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
 import fll.util.FP;
+import fll.web.WebUtils;
 import fll.web.report.FinalComputedScores;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -157,9 +161,9 @@ public class ScoresheetGenerator {
     this.tournamentName = tournamentObj.getName();
     final ScoreType performanceScoreType = description.getPerformance().getScoreType();
 
-    final String numMatchesStr = request.getParameter("numMatches");
+    final String numMatchesStr = WebUtils.getNonNullRequestParameter(request, "numMatches");
 
-    final String division = request.getParameter("division");
+    final String division = WebUtils.getNonNullRequestParameter(request, "division");
 
     // called with specific sheets to print
     final int numMatches = Integer.parseInt(numMatchesStr);
@@ -172,7 +176,7 @@ public class ScoresheetGenerator {
     for (int i = 1; i <= numMatches; i++) {
       final String checkX = "print"
           + i;
-      checkedMatches[i] = null != request.getParameter(checkX);
+      checkedMatches[i] = !StringUtils.isBlank(request.getParameter(checkX));
       if (checkedMatches[i]) {
         checkedMatchCount++;
       }
@@ -200,18 +204,20 @@ public class ScoresheetGenerator {
       int j = 0;
       for (int i = 1; i <= numMatches; i++) {
         if (checkedMatches[i]) {
-          final String round = request.getParameter("round"
+          final String round = WebUtils.getNonNullRequestParameter(request, "round"
               + i);
           final int playoffRound = Integer.parseInt(round);
 
           // Get teamA info
-          final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamA"
-              + i)));
+          final Team teamA = Team.getTeamFromDatabase(connection,
+                                                      Integer.parseInt(WebUtils.getNonNullRequestParameter(request,
+                                                                                                           "teamA"
+                                                                                                               + i)));
           this.name[j] = teamA.getTrimmedTeamName();
           this.number[j] = teamA.getTeamNumber();
           this.round[j] = "Round P"
               + round;
-          this.table[j] = request.getParameter("tableA"
+          this.table[j] = WebUtils.getNonNullRequestParameter(request, "tableA"
               + i);
 
           final int performanceRunA = Playoff.getRunNumber(connection, division, teamA.getTeamNumber(), playoffRound);
@@ -235,13 +241,15 @@ public class ScoresheetGenerator {
           j++;
 
           // Get teamB info
-          final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamB"
-              + i)));
+          final Team teamB = Team.getTeamFromDatabase(connection,
+                                                      Integer.parseInt(WebUtils.getNonNullRequestParameter(request,
+                                                                                                           "teamB"
+                                                                                                               + i)));
           this.name[j] = teamB.getTrimmedTeamName();
           this.number[j] = teamB.getTeamNumber();
           this.round[j] = "Round P"
               + round;
-          this.table[j] = request.getParameter("tableB"
+          this.table[j] = WebUtils.getNonNullRequestParameter(request, "tableB"
               + i);
 
           final int performanceRunB = Playoff.getRunNumber(connection, division, teamB.getTeamNumber(), playoffRound);
@@ -274,7 +282,8 @@ public class ScoresheetGenerator {
    * before the
    * call to this method is made.
    */
-  private void initializeArrays() {
+  @EnsuresNonNull({ "table", "name", "round", "number", "divisionLabel", "division", "time", "isPractice" })
+  private void initializeArrays(@UnderInitialization ScoresheetGenerator this) {
     table = new String[numSheets];
     name = new String[numSheets];
     round = new String[numSheets];
@@ -679,8 +688,8 @@ public class ScoresheetGenerator {
    */
   private Element outputGoal(final Document document,
                              final AbstractGoal goal,
-                             final String goalGroupTitle,
-                             final Element rowToAppendTo) {
+                             final @Nullable String goalGroupTitle,
+                             final @Nullable Element rowToAppendTo) {
     final Element row;
     if (null == rowToAppendTo) {
       row = FOPUtils.createTableRow(document);
@@ -776,7 +785,7 @@ public class ScoresheetGenerator {
 
   private String[] round;
 
-  private Integer[] number;
+  private @Nullable Integer[] number;
 
   private static final String HEAD_TO_HEAD_LABEL = "Head to head Bracket:";
 
@@ -789,7 +798,7 @@ public class ScoresheetGenerator {
 
   private String[] division;
 
-  private String[] time;
+  private @Nullable String[] time;
 
   private boolean[] isPractice;
 

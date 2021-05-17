@@ -21,7 +21,9 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.FLLRuntimeException;
@@ -140,8 +142,8 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * @param application where the displays are stored
    * @param displayInfo the display to be deleted
    */
-  public static void deleteDisplay(@NonNull final ServletContext application,
-                                   @NonNull final DisplayInfo displayInfo) {
+  public static void deleteDisplay(final ServletContext application,
+                                   final DisplayInfo displayInfo) {
     if (!displayInfo.isDefaultDisplay()) {
       synchronized (LOCK) {
         final SortedSet<DisplayInfo> displayInformation = internalGetDisplayInformation(application);
@@ -158,9 +160,9 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * @return a non-null {@link DisplayInfo} object
    * @see #getInfoForDisplay(ServletContext, String)
    */
-  @NonNull
-  public static DisplayInfo getInfoForDisplay(@NonNull final ServletContext application,
-                                              @NonNull final HttpSession session) {
+
+  public static DisplayInfo getInfoForDisplay(final ServletContext application,
+                                              final HttpSession session) {
     final String displayName = SessionAttributes.getDisplayName(session);
     return getInfoForDisplay(application, displayName);
   }
@@ -188,7 +190,6 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   /**
    * Create a {@link DisplayInfo} object with {@link #DEFAULT_DISPLAY_NAME}.
    */
-  @NonNull
   private static DisplayInfo createDefault() {
     final DisplayInfo def = new DisplayInfo(DEFAULT_DISPLAY_NAME);
     def.setRemotePage(WELCOME_REMOTE_PAGE);
@@ -203,13 +204,12 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    *         display first
    * @param application the application context to find information in
    */
-  @NonNull
-  public static Collection<DisplayInfo> getDisplayInformation(@NonNull final ServletContext application) {
+
+  public static Collection<DisplayInfo> getDisplayInformation(final ServletContext application) {
     return Collections.unmodifiableCollection(internalGetDisplayInformation(application));
   }
 
-  @NonNull
-  private static SortedSet<DisplayInfo> internalGetDisplayInformation(@NonNull final ServletContext application) {
+  private static SortedSet<DisplayInfo> internalGetDisplayInformation(final ServletContext application) {
     @SuppressWarnings("unchecked")
     SortedSet<DisplayInfo> displayInformation = ApplicationAttributes.getAttribute(application,
                                                                                    ApplicationAttributes.DISPLAY_INFORMATION,
@@ -234,8 +234,8 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * @param application where to find display information
    * @return a non-null {@link DisplayInfo} object
    */
-  @NonNull
-  public static DisplayInfo findOrCreateDefaultDisplay(@NonNull final ServletContext application) {
+
+  public static DisplayInfo findOrCreateDefaultDisplay(final ServletContext application) {
     final Collection<DisplayInfo> displayInformation = getDisplayInformation(application);
     for (final DisplayInfo info : displayInformation) {
       if (info.getName().equals(DEFAULT_DISPLAY_NAME)) {
@@ -257,8 +257,8 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * @param name the name of the display to find
    * @return the display or null if not known
    */
-  public static @Nullable DisplayInfo getNamedDisplay(@NonNull final ServletContext application,
-                                                      final String name) {
+  public static @Nullable DisplayInfo getNamedDisplay(final ServletContext application,
+                                                      final @Nullable String name) {
     final Collection<DisplayInfo> displayInformation = getDisplayInformation(application);
     for (final DisplayInfo info : displayInformation) {
       if (info.getName().equals(name)) {
@@ -296,7 +296,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   /**
    * @return when the display was last seen
    */
-  @NonNull
+
   public LocalTime getLastSeen() {
     return mLastSeen;
   }
@@ -306,7 +306,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    *
    * @param application used to store the updated {@link DisplayInfo} object.
    */
-  public void updateLastSeen(@NonNull final ServletContext application) {
+  public void updateLastSeen(final ServletContext application) {
     mLastSeen = LocalTime.now();
 
     LOGGER.trace("updateLastSeen: "
@@ -361,7 +361,6 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   }
 
   /**
-   * 
    * @param v {@link #getRemotePage()}
    */
   public void setRemotePage(final String v) {
@@ -452,7 +451,8 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   }
 
   @Override
-  public boolean equals(final Object o) {
+  @EnsuresNonNullIf(expression = "#1", result = true)
+  public boolean equals(final @Nullable Object o) {
     if (o instanceof DisplayInfo) {
       final DisplayInfo other = (DisplayInfo) o;
       return other.getName().equals(getName());
@@ -546,35 +546,35 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     return SPECIAL_REMOTE_PAGE.equals(mRemotePage);
   }
 
-  private String mSpecialUrl;
+  private @Nullable String mSpecialUrl = null;
 
   /**
    * @return the special URL to display
    */
-  public String getSpecialUrl() {
+  public @Nullable String getSpecialUrl() {
     return mSpecialUrl;
   }
 
   /**
    * @param v see {@link #getSpecialUrl()}
    */
-  public void setSpecialUrl(final String v) {
+  public void setSpecialUrl(final @Nullable String v) {
     mSpecialUrl = v;
   }
 
-  private String mFinalistScheduleAwardGroup;
+  private @Nullable String mFinalistScheduleAwardGroup;
 
   /**
    * @return which award group to show the finalist schedule for
    */
-  public String getFinalistScheduleAwardGroup() {
+  public @Nullable String getFinalistScheduleAwardGroup() {
     return mFinalistScheduleAwardGroup;
   }
 
   /**
    * @param v see {@link #getFinalistScheduleAwardGroup()}
    */
-  public void setFinalistScheduleAwardGroup(final String v) {
+  public void setFinalistScheduleAwardGroup(final @Nullable String v) {
     mFinalistScheduleAwardGroup = v;
   }
 
@@ -605,7 +605,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
      * @param bracket {@link #getBracket()}
      * @param firstRound {@link #getFirstRound()}
      */
-    public H2HBracketDisplay(final DisplayInfo parent,
+    public H2HBracketDisplay(final @UnknownInitialization DisplayInfo parent,
                              final int index,
                              final String bracket,
                              final int firstRound) {
@@ -615,7 +615,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
       mFirstRound = firstRound;
     }
 
-    private final DisplayInfo mParent;
+    private final @NotOnlyInitialized DisplayInfo mParent;
 
     private final int mIndex;
 
@@ -668,7 +668,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    *         meaning
    *         display all
    */
-  @NonNull
+
   public List<String> getScoreboardJudgingGroups() {
     return Collections.unmodifiableList(scoreboardJudgingGroups);
   }
@@ -690,7 +690,6 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * @param allJudgingGroups filter from this list
    * @return the configured judging groups or all if none are configured
    */
-  @NonNull
   public List<String> determineScoreboardJudgingGroups(final List<String> allJudgingGroups) {
     final List<String> configuredGroups = getScoreboardJudgingGroups();
     if (configuredGroups.isEmpty()) {

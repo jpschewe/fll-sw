@@ -26,6 +26,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 
 /**
  * Submit action for edit_tournament_parameters.jsp.
@@ -53,13 +54,14 @@ public class StoreTournamentParameters extends BaseFLLServlet {
     try (Connection connection = datasource.getConnection()) {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
 
-      final int numSeedingRounds = Integer.parseInt(request.getParameter("seeding_rounds"));
+      final int numSeedingRounds = WebUtils.getIntRequestParameter(request, "seeding_rounds");
       TournamentParameters.setNumSeedingRounds(connection, tournament.getTournamentID(), numSeedingRounds);
 
       final boolean runningHeadToHead = "on".equals(request.getParameter("running_head_to_head"));
       TournamentParameters.setRunningHeadToHead(connection, tournament.getTournamentID(), runningHeadToHead);
 
-      final int performanceAdvancementPercentage = Integer.parseInt(request.getParameter("performance_advancement_percentage"));
+      final int performanceAdvancementPercentage = WebUtils.getIntRequestParameter(request,
+                                                                                   "performance_advancement_percentage");
       TournamentParameters.setPerformanceAdvancementPercentage(connection, tournament.getTournamentID(),
                                                                performanceAdvancementPercentage);
 

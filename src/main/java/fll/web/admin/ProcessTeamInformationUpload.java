@@ -38,6 +38,7 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadSpreadsheet;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 
 /**
  * Handle bulk team information changes.
@@ -78,8 +79,8 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
         throw new FLLRuntimeException("Cannot find 'teamNumber' request parameter");
       }
 
-      final String teamNameColumnName = request.getParameter("teamName");
-      final String organizationColumnName = request.getParameter("organization");
+      final String teamNameColumnName = WebUtils.getNonNullRequestParameter(request, "teamName");
+      final String organizationColumnName = WebUtils.getNonNullRequestParameter(request, "organization");
 
       final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
 
@@ -173,7 +174,8 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
     }
 
     int rowsProcessed = 0;
-    String[] data = reader.readNext();
+    @Nullable
+    String @Nullable [] data = reader.readNext();
     while (null != data) {
       if (teamNumColumnIdx < data.length) {
         final String teamNumStr = data[teamNumColumnIdx];
@@ -188,6 +190,10 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
             teamName = team.getTeamName();
           } else {
             teamName = data[teamNameColumnIdx];
+            if (null == teamName) {
+              throw new FLLRuntimeException("Team name is missing for "
+                  + teamNumber);
+            }
           }
 
           final @Nullable String organization;

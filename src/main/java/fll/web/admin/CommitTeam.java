@@ -8,7 +8,6 @@ package fll.web.admin;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -22,15 +21,14 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.Tournament;
-import fll.Utilities;
 import fll.db.Queries;
-import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -88,7 +86,7 @@ public class CommitTeam extends BaseFLLServlet {
     try {
       connection = datasource.getConnection();
       // parse the numbers first so that we don't get a partial commit
-      final int teamNumber = Utilities.getIntegerNumberFormat().parse(request.getParameter("teamNumber")).intValue();
+      final int teamNumber = WebUtils.getIntRequestParameter(request, "teamNumber");
 
       String redirect = null;
       if (null != request.getParameter("delete")) {
@@ -103,7 +101,7 @@ public class CommitTeam extends BaseFLLServlet {
 
         redirect = "index.jsp";
       } else {
-        final String teamName = request.getParameter("teamName");
+        final String teamName = WebUtils.getNonNullRequestParameter(request, "teamName");
         final String organization = request.getParameter("organization");
 
         if (Boolean.valueOf(request.getParameter("addTeam"))) {
@@ -169,9 +167,9 @@ public class CommitTeam extends BaseFLLServlet {
                     + tournament.getName());
               }
 
-              final String eventDivision = request.getParameter("event_division_"
+              final String eventDivision = WebUtils.getNonNullRequestParameter(request, "event_division_"
                   + tournament.getTournamentID());
-              final String judgingGroup = request.getParameter("judging_station_"
+              final String judgingGroup = WebUtils.getNonNullRequestParameter(request, "judging_station_"
                   + tournament.getTournamentID());
 
               if (!previouslyAssignedTournaments.contains(tournament.getTournamentID())) {
@@ -190,12 +188,20 @@ public class CommitTeam extends BaseFLLServlet {
 
                 final String prevEventDivision = Queries.getEventDivision(connection, teamNumber,
                                                                           tournament.getTournamentID());
+                if (null == prevEventDivision) {
+                  throw new FLLRuntimeException("Unable to find award group for team "
+                      + teamNumber);
+                }
                 if (!eventDivision.equals(prevEventDivision)) {
                   Queries.updateTeamEventDivision(connection, teamNumber, tournament.getTournamentID(), eventDivision);
                 }
 
                 final String prevJudgingGroup = Queries.getJudgingGroup(connection, teamNumber,
                                                                         tournament.getTournamentID());
+                if (null == prevJudgingGroup) {
+                  throw new FLLRuntimeException("Unable to find judging group for team "
+                      + teamNumber);
+                }
                 if (!judgingGroup.equals(prevJudgingGroup)) {
                   Queries.updateTeamJudgingGroups(connection, teamNumber, tournament.getTournamentID(), judgingGroup);
                 }
@@ -217,9 +223,6 @@ public class CommitTeam extends BaseFLLServlet {
 
       response.sendRedirect(response.encodeRedirectURL(redirect));
 
-    } catch (final ParseException pe) {
-      LOGGER.error("Error parsing team number, this is an internal error", pe);
-      throw new FLLInternalException("Error parsing team number, this is an internal error", pe);
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new FLLRuntimeException("There was an error talking to the database", e);

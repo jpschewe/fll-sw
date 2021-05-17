@@ -25,6 +25,7 @@ import fll.scheduler.ConstraintViolation;
 import fll.scheduler.SchedParams;
 import fll.scheduler.ScheduleChecker;
 import fll.scheduler.TournamentSchedule;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -59,6 +60,9 @@ public class CheckViolations extends BaseFLLServlet {
                                                                                         UploadScheduleData.class);
 
     final TournamentSchedule schedule = uploadScheduleData.getSchedule();
+    if (null == schedule) {
+      throw new FLLInternalException("Schedule is not set");
+    }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {

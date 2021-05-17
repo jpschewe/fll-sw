@@ -31,6 +31,8 @@ import javax.xml.transform.TransformerException;
 
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
+import org.checkerframework.checker.nullness.qual.KeyFor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -215,14 +217,14 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
 
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection,
                                                                                     tournament.getTournamentID());
-    final List<Integer> teamNumbers = new LinkedList<Integer>(tournamentTeams.keySet());
+    final List<@KeyFor("tournamentTeams") Integer> teamNumbers = new LinkedList<>(tournamentTeams.keySet());
     Collections.sort(teamNumbers);
 
-    for (final int teamNum : teamNumbers) {
+    for (final @KeyFor("tournamentTeams") Integer teamNum : teamNumbers) {
       final TournamentTeam team = tournamentTeams.get(teamNum);
 
       for (final FinalistSchedule schedule : schedules) {
-        final Map<String, String> rooms = schedule.getRooms();
+        final Map<String, @Nullable String> rooms = schedule.getRooms();
 
         final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
         documentBody.appendChild(container);
@@ -298,7 +300,7 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
               final Element tableRow = FOPUtils.createTableRow(document);
               tableBody.appendChild(tableRow);
 
-              final String room = rooms.getOrDefault(categoryName, "");
+              final @Nullable String room = rooms.getOrDefault(categoryName, "");
 
               cell = FOPUtils.createTableCell(document, null, PdfFinalistSchedule.TIME_FORMAT.format(row.getTime()));
               tableRow.appendChild(cell);
@@ -307,7 +309,7 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
               FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
                                   FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
-              cell = FOPUtils.createTableCell(document, null, room);
+              cell = FOPUtils.createTableCell(document, null, null == room ? "" : room);
               tableRow.appendChild(cell);
               FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
                                   ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
