@@ -52,8 +52,8 @@ public final class ScoreUtils {
     }
     // sort the list so that the team in the most categories is first, this
     // should ensure the minimum amount of time to do the finalist judging
-    final List<@KeyFor("finalistsCount") Integer> sortedTeams = new LinkedList<Integer>(finalistsCount.keySet());
-    Collections.sort(sortedTeams, new Comparator<Integer>() {
+    final List<@KeyFor("finalistsCount") Integer> sortedTeams = new LinkedList<>(finalistsCount.keySet());
+    Collections.sort(sortedTeams, new Comparator<@KeyFor("finalistsCount") Integer>() {
       public int compare(final @KeyFor("finalistsCount") Integer teamOne,
                          final @KeyFor("finalistsCount") Integer teamTwo) {
         final int numCatsOne = finalistsCount.get(teamOne).size();

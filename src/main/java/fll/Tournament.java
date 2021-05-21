@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -290,7 +291,7 @@ public final class Tournament implements Serializable {
       prep.setInt(1, tournamentID);
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
-          final String name = rs.getString(1);
+          final String name = castNonNull(rs.getString(1));
           final String location = rs.getString(2);
           final java.sql.Date d = rs.getDate(3);
           final LocalDate date = null == d ? null : d.toLocalDate();
@@ -375,7 +376,8 @@ public final class Tournament implements Serializable {
             return false;
           } else if (null == performanceSeedingModified) {
             // subjective may have changed
-            return summaryComputed.before(subjectiveModified);
+            return null == subjectiveModified
+                || summaryComputed.before(subjectiveModified);
           } else if (null == subjectiveModified) {
             // performance may have changed
             return summaryComputed.before(performanceSeedingModified);
@@ -523,7 +525,7 @@ public final class Tournament implements Serializable {
         + " WHERE tournament_id = ?")) {
       updatePrep.setString(1, name);
       if (null != location
-          && !level.isEmpty()) {
+          && !StringUtils.isBlank(level)) {
         updatePrep.setString(2, location);
       } else {
         updatePrep.setNull(2, Types.VARCHAR);
