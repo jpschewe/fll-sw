@@ -510,7 +510,8 @@ public class BracketData extends BracketInfo {
     this.bracketData = new RoundData[getLastRound()
         - getFirstRound()];
     for (int i = getFirstRound(); i <= getLastRound(); i++) {
-      bracketData[i] = new RoundData();
+      final int bracketDataIndex = getBracketDataIndex(i);
+      bracketData[bracketDataIndex] = new RoundData();
     }
 
     try (
