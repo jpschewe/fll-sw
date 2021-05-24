@@ -113,37 +113,42 @@ public class RemoteControlPost extends BaseFLLServlet {
 
         display.setFinalistScheduleAwardGroup(request.getParameter(display.getFinalistScheduleAwardGroupFormParamName()));
 
-        final List<DisplayInfo.H2HBracketDisplay> brackets = new LinkedList<>();
-        final int numBrackets = WebUtils.getIntRequestParameter(request,
-                                                                display.getHead2HeadNumBracketsFormParamName());
-        for (int bracketIdx = 0; bracketIdx < numBrackets; ++bracketIdx) {
-          final String bracket = WebUtils.getNonNullRequestParameter(request,
-                                                                     display.getHead2HeadBracketFormParamName(bracketIdx));
+        if (display.isHeadToHead()) {
+          final List<DisplayInfo.H2HBracketDisplay> brackets = new LinkedList<>();
+          final int numBrackets = WebUtils.getIntRequestParameter(request,
+                                                                  display.getHead2HeadNumBracketsFormParamName());
+          for (int bracketIdx = 0; bracketIdx < numBrackets; ++bracketIdx) {
+            final String bracket = WebUtils.getNonNullRequestParameter(request,
+                                                                       display.getHead2HeadBracketFormParamName(bracketIdx));
 
-          final String firstRoundStr = request.getParameter(display.getHead2HeadFirstRoundFormParamName(bracketIdx));
-          final int firstRound;
-          if (null == firstRoundStr) {
-            // there are no head to head rounds yet, just use 1
-            firstRound = 1;
-          } else {
-            firstRound = Integer.parseInt(firstRoundStr);
+            final String firstRoundStr = request.getParameter(display.getHead2HeadFirstRoundFormParamName(bracketIdx));
+            final int firstRound;
+            if (null == firstRoundStr) {
+              // there are no head to head rounds yet, just use 1
+              firstRound = 1;
+            } else {
+              firstRound = Integer.parseInt(firstRoundStr);
+            }
+
+            final DisplayInfo.H2HBracketDisplay bracketInfo = new DisplayInfo.H2HBracketDisplay(display, bracketIdx,
+                                                                                                bracket, firstRound);
+            brackets.add(bracketInfo);
           }
+          display.setBrackets(brackets);
+        } // head to head
 
-          final DisplayInfo.H2HBracketDisplay bracketInfo = new DisplayInfo.H2HBracketDisplay(display, bracketIdx,
-                                                                                              bracket, firstRound);
-          brackets.add(bracketInfo);
-        }
-        display.setBrackets(brackets);
+        if (display.isScoreboard()) {
+          final String judgingGroupsFormParamName = display.getJudgingGroupsFormParamName();
+          final String @Nullable [] judgingGroupsParamValues = request.getParameterValues(judgingGroupsFormParamName);
+          if (null == judgingGroupsParamValues) {
+            throw new MissingRequiredParameterException(judgingGroupsFormParamName);
+          }
+          final List<String> judgingGroupsToDisplay = Arrays.asList(judgingGroupsParamValues);
+          display.setScoreboardJudgingGroups(judgingGroupsToDisplay);
+        } // scoreboard
 
-        final String judgingGroupsFormParamName = display.getJudgingGroupsFormParamName();
-        final String @Nullable [] judgingGroupsParamValues = request.getParameterValues(judgingGroupsFormParamName);
-        if (null == judgingGroupsParamValues) {
-          throw new MissingRequiredParameterException(judgingGroupsFormParamName);
-        }
-        final List<String> judgingGroupsToDisplay = Arrays.asList(judgingGroupsParamValues);
-        display.setScoreboardJudgingGroups(judgingGroupsToDisplay);
-      }
-    }
+      } // display to keep
+    } // foreach display
 
     for (final DisplayInfo display : toDelete) {
       DisplayInfo.deleteDisplay(application, display);
