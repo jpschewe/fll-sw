@@ -370,9 +370,7 @@ public final class UploadTeams extends BaseFLLServlet {
         final String teamNumStr = rs.getString(1);
 
         if (null == teamNumStr) {
-          out.println("<font color='red'>Error team number '"
-              + teamNumStr
-              + "' is not numeric.<br/>");
+          out.println("<font color='red'>Error team number 'null' is not numeric.<br/>");
           out.println("Go back and check your input file for errors.<br/></font>");
           return false;
         }
