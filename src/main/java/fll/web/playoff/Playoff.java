@@ -17,7 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -94,18 +93,7 @@ public final class Playoff {
       Collections.sort(seedingOrder, Team.TEAM_NAME_COMPARATOR);
     } else if (BracketSortType.RANDOM == bracketSort) {
       seedingOrder = teams;
-      // assign a random number to each team
-      final double[] randoms = new double[seedingOrder.size()];
-      final Random generator = new Random();
-      for (int i = 0; i < randoms.length; ++i) {
-        randoms[i] = generator.nextDouble();
-      }
-      Collections.sort(seedingOrder, (one,
-                                      two) -> {
-        final int oneIdx = seedingOrder.indexOf(one);
-        final int twoIdx = seedingOrder.indexOf(two);
-        return Double.compare(randoms[oneIdx], randoms[twoIdx]);
-      });
+      Collections.shuffle(seedingOrder);
     } else {
       // standard seeding
       final int tournament = Queries.getCurrentTournament(connection);
