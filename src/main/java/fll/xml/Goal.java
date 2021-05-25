@@ -76,10 +76,10 @@ public class Goal extends AbstractGoal {
   public Goal(final Element ele) {
     super(ele);
 
-    mMin = Double.valueOf(ele.getAttribute(MIN_ATTRIBUTE));
-    mMax = Double.valueOf(ele.getAttribute(MAX_ATTRIBUTE));
-    mMultiplier = Double.valueOf(ele.getAttribute(MULTIPLIER_ATTRIBUTE));
-    mInitialValue = Double.valueOf(ele.getAttribute(INITIAL_VALUE_ATTRIBUTE));
+    mMin = Double.parseDouble(ele.getAttribute(MIN_ATTRIBUTE));
+    mMax = Double.parseDouble(ele.getAttribute(MAX_ATTRIBUTE));
+    mMultiplier = Double.parseDouble(ele.getAttribute(MULTIPLIER_ATTRIBUTE));
+    mInitialValue = Double.parseDouble(ele.getAttribute(INITIAL_VALUE_ATTRIBUTE));
 
     mScoreType = ChallengeParser.getScoreType(ele);
 

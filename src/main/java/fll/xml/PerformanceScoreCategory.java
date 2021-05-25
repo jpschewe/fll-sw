@@ -44,7 +44,7 @@ public class PerformanceScoreCategory extends ScoreCategory {
   public PerformanceScoreCategory(final Element ele) {
     super(ele);
 
-    mMinimumScore = Double.valueOf(ele.getAttribute(MINIMUM_SCORE_ATTRIBUTE));
+    mMinimumScore = Double.parseDouble(ele.getAttribute(MINIMUM_SCORE_ATTRIBUTE));
 
     mRestrictions = new LinkedList<>();
     for (final Element restrictEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(Restriction.TAG_NAME))) {

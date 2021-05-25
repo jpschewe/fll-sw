@@ -34,7 +34,7 @@ public class EnumeratedValue implements Serializable {
    */
   public EnumeratedValue(final Element ele) {
     this(ele.getAttribute(TITLE_ATTRIBUTE), ele.getAttribute(VALUE_ATTRIBUTE),
-         Double.valueOf(ele.getAttribute(SCORE_ATTRIBUTE)));
+         Double.parseDouble(ele.getAttribute(SCORE_ATTRIBUTE)));
   }
 
   /**

@@ -58,7 +58,7 @@ public class Term extends Object implements Evaluatable, Serializable {
 
     double coefficient = 1;
     for (final Element constantEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(CONSTANT_TAG_NAME))) {
-      final double value = Double.valueOf(constantEle.getAttribute(CONSTANT_VALUE_ATTRIBUTE));
+      final double value = Double.parseDouble(constantEle.getAttribute(CONSTANT_VALUE_ATTRIBUTE));
       coefficient = coefficient
           * value;
     }

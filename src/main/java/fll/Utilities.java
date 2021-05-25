@@ -286,7 +286,7 @@ public final class Utilities {
           || "".equals(data.trim())) {
         prep.setNull(index, Types.DOUBLE);
       } else {
-        final double value = Double.valueOf(data);
+        final double value = Double.parseDouble(data);
         prep.setDouble(index, value);
       }
     } else if ("boolean".equals(typeLower)) {
@@ -294,7 +294,7 @@ public final class Utilities {
           || "".equals(data.trim())) {
         prep.setNull(index, Types.BOOLEAN);
       } else {
-        final boolean value = Boolean.valueOf(data);
+        final boolean value = Boolean.parseBoolean(data);
         prep.setBoolean(index, value);
       }
     } else if ("time".equals(typeLower)) {
@@ -820,10 +820,10 @@ public final class Utilities {
    */
   public static ObjectMapper createJsonMapper() {
     return new ObjectMapper() //
-        .registerModule(new Jdk8Module()) //
-        .registerModule(new JavaTimeModule()) //
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) //
-        ;
+                             .registerModule(new Jdk8Module()) //
+                             .registerModule(new JavaTimeModule()) //
+                             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) //
+    ;
   }
 
   /**
@@ -903,12 +903,12 @@ public final class Utilities {
     if (null != contextClassLoader) {
       return contextClassLoader;
     }
-  
+
     final ClassLoader classClassLoader = Utilities.getClassLoader();
     if (null != classClassLoader) {
       return classClassLoader;
     }
-  
+
     return ClassLoader.getSystemClassLoader();
   }
 

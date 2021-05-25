@@ -36,8 +36,8 @@ public class Restriction extends BasicPolynomial {
                      final @UnknownInitialization GoalScope goalScope) {
     super(ele, goalScope);
 
-    mLowerBound = Double.valueOf(ele.getAttribute(LOWER_BOUND_ATTRIBUTE));
-    mUpperBound = Double.valueOf(ele.getAttribute(UPPER_BOUND_ATTRIBUTE));
+    mLowerBound = Double.parseDouble(ele.getAttribute(LOWER_BOUND_ATTRIBUTE));
+    mUpperBound = Double.parseDouble(ele.getAttribute(UPPER_BOUND_ATTRIBUTE));
     mMessage = ele.getAttribute(MESSAGE_ATTRIBUTE);
   }
 

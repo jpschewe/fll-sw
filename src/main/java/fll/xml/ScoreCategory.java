@@ -36,7 +36,7 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
    * @param ele the element to parse
    */
   protected ScoreCategory(final Element ele) {
-    mWeight = Double.valueOf(ele.getAttribute(WEIGHT_ATTRIBUTE));
+    mWeight = Double.parseDouble(ele.getAttribute(WEIGHT_ATTRIBUTE));
 
     for (final Element goalEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
       if (Goal.TAG_NAME.equals(goalEle.getNodeName())) {
