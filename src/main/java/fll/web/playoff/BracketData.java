@@ -508,7 +508,8 @@ public class BracketData extends BracketInfo {
     this.finalsRound = Queries.getNumPlayoffRounds(pConnection, currentTournament, getBracketName());
 
     this.bracketData = new RoundData[getLastRound()
-        - getFirstRound()];
+        - getFirstRound()
+        + 1];
     for (int i = getFirstRound(); i <= getLastRound(); i++) {
       final int bracketDataIndex = getBracketDataIndex(i);
       bracketData[bracketDataIndex] = new RoundData();
