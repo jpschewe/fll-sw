@@ -27,7 +27,7 @@ plugins {
     id "org.unbroken-dome.test-sets" version "3.0.1"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
-    id "com.github.spotbugs" version "4.6.0"
+    id "com.github.spotbugs" version "4.7.1"
     id "org.myire.munge" version "1.0" // transformer for spotbugs XML
     id "de.aaschmid.cpd" version "3.1"
     id "edu.sc.seis.launch4j" version "2.4.8"
@@ -142,7 +142,7 @@ ext {
     poi_version = "4.1.2"
     junit_version = "5.7.0"
     log4j_version = "2.13.3"
-    spotbugs_version = "4.1.4"
+    spotbugs_version = "4.2.3"
     checker_framework_version = "3.13.0"
 
     web_build_dir = new File(project.buildDir, "web")
