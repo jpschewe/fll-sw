@@ -627,6 +627,7 @@ public class FullTournamentTest {
         + "report/PlayoffReport"), "application/pdf", null);
   }
 
+  @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
   private void checkRankAndScores(final String testTournamentName) throws IOException {
     // check ranking and scores
     final double scoreFP = 1E-1; // just check to one decimal place
