@@ -116,6 +116,7 @@ public class QueryHandler extends BaseFLLServlet {
      * @param data {@link #getData()}
      * @param error {@link #getError()}
      */
+    @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
     public ResultData(@JsonProperty("columnNames") final List<String> columnNames,
                       @JsonProperty("data") final List<Map<String, @Nullable String>> data,
                       @JsonProperty("error") final @Nullable String error) {

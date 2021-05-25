@@ -19,6 +19,7 @@ import java.util.Properties;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
 
@@ -319,6 +320,7 @@ public class SolverParams extends SchedParams {
   /**
    * @param v {@link #getPerformanceRoundEarliestStartTimes()}
    */
+  @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
   public void setPerformanceRoundEarliestStartTimes(final List<@Nullable LocalTime> v) {
     performanceEarliestStarts.clear();
     performanceEarliestStarts.addAll(v);

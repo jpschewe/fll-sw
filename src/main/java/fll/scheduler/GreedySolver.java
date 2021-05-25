@@ -978,6 +978,7 @@ public class GreedySolver {
    * Populate {@link #perfEarliestTimes} to cache performance earliest start
    * times.
    */
+  @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
   @RequiresNonNull({ "solverParameters" })
   @EnsuresNonNull({ "perfEarliestTimes" })
   private void populatePerfEarliestTimes(@UnderInitialization GreedySolver this) {

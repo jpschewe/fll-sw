@@ -51,6 +51,7 @@ import com.opencsv.CSVWriter;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
@@ -510,6 +511,7 @@ public class TournamentSchedule implements Serializable {
    * Check if this line is a header line. This checks for key headers and
    * returns true if they are found.
    */
+  @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
   private static boolean isHeaderLine(final @Nullable String[] line) {
     boolean retval = false;
     for (final String element : line) {
@@ -554,6 +556,7 @@ public class TournamentSchedule implements Serializable {
    * @throws FLLRuntimeException if there are problems with the performance
    *           round headers found
    */
+  @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
   private static int countNumRegularMatchPlayRounds(final @Nullable String[] line) {
     final SortedSet<Integer> perfRounds = new TreeSet<>();
     for (final String element : line) {
@@ -603,6 +606,7 @@ public class TournamentSchedule implements Serializable {
     return perfRounds.size();
   }
 
+  @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
   private static int countNumPracticeRounds(final @Nullable String[] line) {
     final SortedSet<Integer> perfRounds = new TreeSet<>();
     for (final String element : line) {
@@ -677,6 +681,7 @@ public class TournamentSchedule implements Serializable {
    *
    * @return the column, null if not found
    */
+  @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
   private static @Nullable Integer columnForHeader(final @Nullable String[] line,
                                                    final String header) {
     for (int i = 0; i < line.length; ++i) {
@@ -1691,6 +1696,7 @@ public class TournamentSchedule implements Serializable {
      * @param practiceColumn {@link #getPracticePerfColumn(int)}
      * @param practiceTableColumn {@link #getPracticePerfTableColumn(int)}
      */
+    @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
     public ColumnInformation(final @Nullable String[] headerLine,
                              final int teamNumColumn,
                              final int organizationColumn,

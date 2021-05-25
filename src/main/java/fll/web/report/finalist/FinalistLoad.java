@@ -23,6 +23,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.NonNumericNominees;
@@ -324,6 +325,7 @@ public final class FinalistLoad {
    * @param application the application context
    * @throws SQLException if there is a database error
    */
+  @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
   public static void outputSchedules(final Writer writer,
                                      final ServletContext application)
       throws SQLException {
