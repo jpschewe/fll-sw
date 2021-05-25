@@ -693,6 +693,7 @@ public class BracketData extends BracketInfo {
    * @param lid the leaf id to parse
    * @return (bracket index, dbLine, playoffRound) or null if it's not parsable
    */
+  @SuppressFBWarnings(value = "NP_NONNULL_RETURN_VIOLATION", justification = "Spotbugs false positive")
   public static @Nullable ImmutableTriple<Integer, Integer, Integer> parseLeafId(final String lid) {
     final String[] pieces = lid.split("\\-");
     if (pieces.length >= 3) {
