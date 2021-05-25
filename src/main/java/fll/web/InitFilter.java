@@ -90,9 +90,8 @@ public class InitFilter implements Filter {
           LOGGER.debug("Returning after initialize did redirect");
           return;
         }
-      } else if (null != path
-          && path.startsWith(httpRequest.getContextPath()
-              + "/setup")) {
+      } else if (path.startsWith(httpRequest.getContextPath()
+          + "/setup")) {
         possiblyInstallSetupAuthentication(application, session);
       }
 
@@ -120,28 +119,26 @@ public class InitFilter implements Filter {
    */
   private boolean needsInit(final String contextPath,
                             final String path) {
-    if (null != path) {
-      if (path.startsWith(contextPath
-          + "/style") //
-          || path.startsWith(contextPath
-              + "/images") //
-          || path.startsWith(contextPath
-              + "/sponsor_logos") //
-          || path.startsWith(contextPath
-              + "/wiki") //
-          || path.endsWith(".jpg") //
-          || path.endsWith(".gif") //
-          || path.endsWith(".png") //
-          || path.endsWith(".html") //
-          || path.endsWith(".ico")) {
-        return false;
-      } else if (path.startsWith(contextPath
-          + "/setup")) {
-        return false;
-      } else if (path.startsWith(contextPath
-          + "/robots.txt")) {
-        return false;
-      }
+    if (path.startsWith(contextPath
+        + "/style") //
+        || path.startsWith(contextPath
+            + "/images") //
+        || path.startsWith(contextPath
+            + "/sponsor_logos") //
+        || path.startsWith(contextPath
+            + "/wiki") //
+        || path.endsWith(".jpg") //
+        || path.endsWith(".gif") //
+        || path.endsWith(".png") //
+        || path.endsWith(".html") //
+        || path.endsWith(".ico")) {
+      return false;
+    } else if (path.startsWith(contextPath
+        + "/setup")) {
+      return false;
+    } else if (path.startsWith(contextPath
+        + "/robots.txt")) {
+      return false;
     }
     return true;
   }
