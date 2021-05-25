@@ -658,7 +658,7 @@ public class FullTournamentTest {
       final int teamNumber = Integer.parseInt(row.get("team_number"));
       assertEquals(division1ExpectedRank[rank], teamNumber, "Division I Ranking is incorrect for rank: "
           + rank);
-      final double score = Double.valueOf(row.get("overall_score"));
+      final double score = Double.parseDouble(row.get("overall_score"));
       assertEquals(division1ExpectedScores[rank], score, scoreFP, "Overall score incorrect for team: "
           + teamNumber);
 
@@ -678,7 +678,7 @@ public class FullTournamentTest {
       final int teamNumber = Integer.parseInt(row.get("team_number"));
       assertEquals(division2ExpectedRank[rank], teamNumber, "Division II Ranking is incorrect for rank: "
           + rank);
-      final double score = Double.valueOf(row.get("overall_score"));
+      final double score = Double.parseDouble(row.get("overall_score"));
       assertEquals(division2ExpectedScores[rank], score, scoreFP, "Overall score incorrect for team: "
           + teamNumber);
 
