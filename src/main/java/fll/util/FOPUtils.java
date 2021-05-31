@@ -28,6 +28,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXResult;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
@@ -841,7 +842,7 @@ public final class FOPUtils {
     }
 
     @Override
-    @EnsuresNonNullIf(expression="#1", result=true)
+    @EnsuresNonNullIf(expression = "#1", result = true)
     public boolean equals(final @Nullable Object o) {
       if (this == o) {
         return true;
@@ -970,7 +971,7 @@ public final class FOPUtils {
    */
   public static @Nullable Element createCopyrightFooter(final Document document,
                                                         final ChallengeDescription description) {
-    if (null == description.getCopyright()) {
+    if (StringUtils.isBlank(description.getCopyright())) {
       return null;
     }
 
