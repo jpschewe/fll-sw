@@ -824,43 +824,48 @@
         uploadData: function(scoresSuccess, scoresFail, judgesSuccess, judgesFail,
             loadSuccess, loadFail) {
 
-            $
-                .getJSON(
-                    "CheckAuth",
-                    function(data) {
-                        if (data.authenticated) {
-                            $.subjective
-                                .getServerTournament(function(serverTournament) {
-                                    var storedTournament = $.subjective.getTournament();
-                                    if (null == storedTournament) {
-                                        loadFail("Internal error, no saved tournament");
-                                    } else if (storedTournament.name != serverTournament.name
-                                        || storedTournament.tournamentID != serverTournament.tournamentID) {
-                                        loadFail("Tournament mismatch local: "
-                                            + storedTournament.name + "("
-                                            + storedTournament.tournamentID + ")"
-                                            + " server: " + serverTournament.name + "("
-                                            + serverTournament.tournamentID + ")");
-                                    } else {
-                                        var waitList = []
-                                        waitList.push($.subjective.uploadScores(
-                                            scoresSuccess, scoresFail));
-                                        waitList.push($.subjective.uploadJudges(
-                                            judgesSuccess, judgesFail));
+            $.subjective.checkServerStatus(function() {
+                $
+                    .getJSON(
+                        "CheckAuth",
+                        function(data) {
+                            if (data.authenticated) {
+                                $.subjective
+                                    .getServerTournament(function(serverTournament) {
+                                        var storedTournament = $.subjective.getTournament();
+                                        if (null == storedTournament) {
+                                            loadFail("Internal error, no saved tournament");
+                                        } else if (storedTournament.name != serverTournament.name
+                                            || storedTournament.tournamentID != serverTournament.tournamentID) {
+                                            loadFail("Tournament mismatch local: "
+                                                + storedTournament.name + "("
+                                                + storedTournament.tournamentID + ")"
+                                                + " server: " + serverTournament.name + "("
+                                                + serverTournament.tournamentID + ")");
+                                        } else {
+                                            var waitList = []
+                                            waitList.push($.subjective.uploadScores(
+                                                scoresSuccess, scoresFail));
+                                            waitList.push($.subjective.uploadJudges(
+                                                judgesSuccess, judgesFail));
 
-                                        $.when.apply($, waitList).done(function() {
-                                            $.subjective.loadFromServer(function() {
-                                                loadSuccess();
-                                            }, function() {
-                                                loadFail("Error getting updated scores");
-                                            }, false);
-                                        });
-                                    }
-                                });
-                        } else {
-                            location.href = "Auth";
-                        }
-                    });
+                                            $.when.apply($, waitList).done(function() {
+                                                $.subjective.loadFromServer(function() {
+                                                    loadSuccess();
+                                                }, function() {
+                                                    loadFail("Error getting updated scores");
+                                                }, false);
+                                            });
+                                        }
+                                    });
+                            } else {
+                                location.href = "Auth";
+                            }
+                        });
+            }, // server online
+                function() {
+                    loadFail("Server is offline, please connect to the network before synchronizing");
+                }); // server offline
         },
 
         /**
@@ -888,7 +893,67 @@
             return _scoreEntryBackPage;
         },
 
-    };
+        /**
+         * Check if the server is reachable.
+         *
+         * @param onlineCallback function to execute if the server is reachable
+         * @param offlineCallback function to execute if the server is not reachable 
+         */
+        checkServerStatus: function(onlineCallback, offlineCallback) {
+            $.mobile.loading("show");
+
+            $.subjective.log("Checking server status");
+            const FETCH_TIMEOUT = 1000; // milliseconds            
+            let didTimeOut = false;
+
+            new Promise(function(resolve, reject) {
+                const timeout = setTimeout(function() {
+                    didTimeOut = true;
+                    reject(new Error('Request timed out'));
+                }, FETCH_TIMEOUT);
+
+                const request = new Request("../images/blank.gif", {
+                    headers: new Headers({
+                        'pragma': 'no-cache',
+                        'cache-control': 'no-cache'
+                    })
+                });
+
+                fetch(request)
+                    .then(function(response) {
+                        // Clear the timeout as cleanup
+                        clearTimeout(timeout);
+                        if (!didTimeOut) {
+                            console.log('fetch good! ', response);
+                            resolve(response);
+                        }
+                    })
+                    .catch(function(err) {
+                        console.log('Server offline ', err);
+
+                        // Rejection already happened with setTimeout
+                        if (didTimeOut) {
+                            return;
+                        }
+                        // Reject with error
+                        reject(err);
+                    });
+            })
+                .then(function() {
+                    // Request success and no timeout
+                    console.log("server online");
+                    onlineCallback();
+                })
+                .catch(function(err) {
+                    // Error: response error, request timeout or runtime error
+                    console.log("server offline: ", err);
+                    offlineCallback();
+                });
+
+        },
+
+
+    }; // end $.subjective definition 
 
     // ///// Load data //////////
     _loadFromDisk();
