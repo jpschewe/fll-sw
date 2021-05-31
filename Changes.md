@@ -1,3 +1,4 @@
+* #907 - Add weighted rank column to final computed scores
 * #925 - Move breadcrumbs to the top of the subjective application
 * #920 - When a team is a No Show for subjective judging, make it clear on the PDF that is output
 * #484 - Improve usability of the numeric category finalist scheduling page
