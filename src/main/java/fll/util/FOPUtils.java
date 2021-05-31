@@ -701,7 +701,7 @@ public final class FOPUtils {
    */
   public static Element createBlankLine(final Document document) {
     final Element block = createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    final Element leader = createXslFoElement(document, "leader");
+    final Element leader = createXslFoElement(document, FOPUtils.LEADER_TAG);
     block.appendChild(leader);
     return block;
   }
@@ -715,7 +715,7 @@ public final class FOPUtils {
                                              final int thickness) {
     final Element lineBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
 
-    final Element line = FOPUtils.createXslFoElement(document, "leader");
+    final Element line = FOPUtils.createXslFoElement(document, FOPUtils.LEADER_TAG);
     line.setAttribute("leader-pattern", "rule");
     line.setAttribute("leader-length", "100%");
     line.setAttribute("rule-style", "solid");

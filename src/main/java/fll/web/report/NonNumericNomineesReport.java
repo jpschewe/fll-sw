@@ -252,7 +252,7 @@ public class NonNumericNomineesReport extends BaseFLLServlet {
     }
     subtitleBlock.appendChild(document.createTextNode(tournamentTitle));
 
-    final Element subtitleCenter = FOPUtils.createXslFoElement(document, "leader");
+    final Element subtitleCenter = FOPUtils.createXslFoElement(document, FOPUtils.LEADER_TAG);
     subtitleBlock.appendChild(subtitleCenter);
     subtitleCenter.setAttribute("leader-pattern", "space");
 
