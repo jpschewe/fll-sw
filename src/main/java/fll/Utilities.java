@@ -79,10 +79,11 @@ public final class Utilities {
   };
 
   /**
-   * @return Single instance of the floating point NumberFormat instance to save
-   *         on
-   *         overhead
-   *         and to use for consistency of formatting.
+   * Single instance of the floating point NumberFormat instance to save
+   * on overhead and to use for consistency of formatting.
+   * Has 2 decimal digits.
+   * 
+   * @return single instance
    */
   public static NumberFormat getFloatingPointNumberFormat() {
     return FLOATING_POINT_NUMBER_FORMAT_INSTANCE.get();

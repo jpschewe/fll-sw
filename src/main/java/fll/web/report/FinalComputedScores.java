@@ -296,7 +296,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
     }
 
     divTable.appendChild(FOPUtils.createTableColumn(document, 15)); // performance
-    divTable.appendChild(FOPUtils.createTableColumn(document, 15)); // overall
+    divTable.appendChild(FOPUtils.createTableColumn(document, 10)); // weighted rank
+    divTable.appendChild(FOPUtils.createTableColumn(document, 10)); // overall
 
     final Element tableHeader = createTableHeader(document, subjectiveCategories, challengeDescription);
     divTable.appendChild(tableHeader);
@@ -636,6 +637,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
           row2.appendChild(scaledCell);
           FOPUtils.addBottomBorder(scaledCell, row2BorderWidth, row2BorderColor);
 
+          double weightedRank = 0;
+
           // Next, one column containing the scaled score for each subjective
           // category with weight > 0
           for (final ScoreCategory category : subjectiveCategories) {
@@ -651,12 +654,40 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
             final double catWeight = category.getWeight();
             if (catWeight > 0.0) {
-              insertCategoryScaledScore(document, teamNumber, row2, row2BorderWidth, row2BorderColor, judgingRanks);
+              final int catRank = insertCategoryScaledScore(document, teamNumber, row2, row2BorderWidth,
+                                                            row2BorderColor, judgingRanks);
+              if (catRank > 0) {
+                weightedRank += catWeight
+                    * catRank;
+              } else {
+                weightedRank = Double.NaN;
+              }
+
             } // non-zero category weight
           } // foreach category
 
           // 2nd to last column has the scaled performance score
-          insertCategoryScaledScore(document, teamNumber, row2, row2BorderWidth, row2BorderColor, teamPerformanceRanks);
+          final int perfRank = insertCategoryScaledScore(document, teamNumber, row2, row2BorderWidth, row2BorderColor,
+                                                         teamPerformanceRanks);
+          if (perfRank > 0) {
+
+            weightedRank += performanceCategory.getWeight()
+                * perfRank;
+          } else {
+            weightedRank = Double.NaN;
+          }
+
+          // insert weighted rank
+          final Element weightedRankCell;
+          if (Double.isNaN(weightedRank)) {
+            weightedRankCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Missing Score");
+            weightedRankCell.setAttribute("color", "red");
+          } else {
+            weightedRankCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                        Utilities.getFloatingPointNumberFormat().format(weightedRank));
+          }
+          row2.appendChild(weightedRankCell);
+          FOPUtils.addBottomBorder(weightedRankCell, row2BorderWidth, row2BorderColor);
 
           // Last column contains the overall scaled score
           final Element overallCell;
@@ -684,12 +715,12 @@ public final class FinalComputedScores extends BaseFLLServlet {
     return tableBody;
   }
 
-  private void insertCategoryScaledScore(final Document document,
-                                         final Integer teamNumber,
-                                         final Element row,
-                                         final double borderWidth,
-                                         final String borderColor,
-                                         final Map<Integer, ImmutablePair<Integer, Double>> rankInCategory) {
+  private int insertCategoryScaledScore(final Document document,
+                                        final Integer teamNumber,
+                                        final Element row,
+                                        final double borderWidth,
+                                        final String borderColor,
+                                        final Map<Integer, ImmutablePair<Integer, Double>> rankInCategory) {
     final double scaledScore;
     final int rank;
     if (rankInCategory.containsKey(teamNumber)) {
@@ -729,6 +760,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
     if (Double.isNaN(scaledScore)) {
       subjCell.setAttribute("color", "red");
     }
+
+    return rank;
   }
 
   private void insertRawPerformanceScore(final Connection connection,
@@ -805,6 +838,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Performance"));
 
+    row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Weighted Rank"));
     row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Overall Score"));
 
     // row 2 needs a bottom border, the border is added to each cell
@@ -817,9 +851,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
     FOPUtils.addBottomBorder(teamNumCell, 1);
     teamNumCell.setAttribute("font-weight", "bold");
 
-    final Element blankCell1 = FOPUtils.createTableCell(document, null, "");
-    row2.appendChild(blankCell1);
-    FOPUtils.addBottomBorder(blankCell1, 1);
+    final Element blankJudgingGroup = FOPUtils.createTableCell(document, null, "");
+    row2.appendChild(blankJudgingGroup);
+    FOPUtils.addBottomBorder(blankJudgingGroup, 1);
 
     final Element weightCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Weight:");
     FOPUtils.addBottomBorder(weightCell, 1);
@@ -840,9 +874,13 @@ public final class FinalComputedScores extends BaseFLLServlet {
     FOPUtils.addBottomBorder(perfCell, 1);
     row2.appendChild(perfCell);
 
-    final Element blankCell2 = FOPUtils.createTableCell(document, null, "");
-    FOPUtils.addBottomBorder(blankCell2, 1);
-    row2.appendChild(blankCell2); // under overall score
+    final Element blankWeightedRank = FOPUtils.createTableCell(document, null, "");
+    FOPUtils.addBottomBorder(blankWeightedRank, 1);
+    row2.appendChild(blankWeightedRank);
+
+    final Element blankOverallScore = FOPUtils.createTableCell(document, null, "");
+    FOPUtils.addBottomBorder(blankOverallScore, 1);
+    row2.appendChild(blankOverallScore);
 
     return tableHeader;
   }
