@@ -1,7 +1,5 @@
 package fll.documents.writers;
 
-import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
-
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -20,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.xml.transform.TransformerException;
 
@@ -31,6 +30,8 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.SubjectiveScore;
 import fll.Utilities;
@@ -262,6 +263,7 @@ public class SubjectivePdfWriter {
 
     final Element categoryTeamNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     categoryTeamNumberContainer.appendChild(categoryTeamNumberBlock);
+    categoryTeamNumberBlock.setAttribute("text-align-last", "justify");
 
     final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
     categoryTeamNumberBlock.appendChild(categoryTitle);
@@ -272,6 +274,19 @@ public class SubjectivePdfWriter {
     categoryTeamNumberBlock.appendChild(teamNumberEle);
     teamNumberEle.setAttribute("font-size", "12pt");
     teamNumberEle.appendChild(document.createTextNode(String.format("    Team Number: %d", teamNumber)));
+
+    // space between team number and judge initials
+    final Element spacer = FOPUtils.createXslFoElement(document, FOPUtils.LEADER_TAG);
+    spacer.setAttribute("leader-pattern", "space");
+    categoryTeamNumberBlock.appendChild(spacer);
+
+    final String judgeInitials = getJudgeInitials(score);
+    final Element judgesInitialsElement = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+    categoryTeamNumberBlock.appendChild(judgesInitialsElement);
+    judgesInitialsElement.setAttribute("font-size", "6pt");
+    judgesInitialsElement.setAttribute("font-weight", "normal");
+    judgesInitialsElement.setAttribute("font-style", "italic");
+    judgesInitialsElement.appendChild(document.createTextNode(judgeInitials));
 
     final String scheduledTimeStr;
     if (null == scheduledTime) {
@@ -1190,5 +1205,16 @@ public class SubjectivePdfWriter {
   }
 
   private static final float WATERMARK_OPACITY = 0.5f;
+
+  private static String getJudgeInitials(final @Nullable SubjectiveScore score) {
+    if (null == score) {
+      return "";
+    } else {
+      final String judge = score.getJudge();
+      final String initials = Arrays.stream(judge.split(" ")).map(s -> s.substring(0, 1)).collect(Collectors.joining());
+      return initials;
+    }
+
+  }
 
 }
