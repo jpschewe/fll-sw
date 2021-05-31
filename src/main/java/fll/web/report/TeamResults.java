@@ -30,6 +30,7 @@ import javax.xml.transform.TransformerException;
 
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
 import fll.SubjectiveScore;
@@ -98,10 +99,6 @@ public class TeamResults extends BaseFLLServlet {
           if (Team.NULL_TEAM_NUMBER == selectedTeamNumber
               || selectedTeamNumber == team.getTeamNumber()) {
             final TeamScheduleInfo schedInfo = schedule.getSchedInfoForTeam(team.getTeamNumber());
-            if (null == schedInfo) {
-              throw new FLLInternalException("Schedule and team data is inconsistent. Cannot find schedule information for "
-                  + team.getTeamNumber());
-            }
             writeTeamEntries(zipOut, description, connection, tournament, scheduleColumnMappings, team, schedInfo);
           }
         }
@@ -118,7 +115,7 @@ public class TeamResults extends BaseFLLServlet {
                                 final Tournament tournament,
                                 final Collection<CategoryColumnMapping> scheduleColumnMappings,
                                 final TournamentTeam team,
-                                final TeamScheduleInfo schedInfo)
+                                final @Nullable TeamScheduleInfo schedInfo)
       throws SQLException, IOException {
     final String directory = String.valueOf(team.getTeamNumber());
 
@@ -144,6 +141,11 @@ public class TeamResults extends BaseFLLServlet {
       if (null == scheduleColumn) {
         scheduledTime = null;
       } else {
+        if (null == schedInfo) {
+          throw new FLLInternalException("Schedule and team data is inconsistent. Cannot find schedule information for "
+              + team.getTeamNumber());
+        }
+
         final SubjectiveTime stime = schedInfo.getSubjectiveTimeByName(scheduleColumn);
         if (null == stime) {
           scheduledTime = null;
