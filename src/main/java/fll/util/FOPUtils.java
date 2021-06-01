@@ -28,6 +28,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXResult;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
@@ -700,7 +701,7 @@ public final class FOPUtils {
    */
   public static Element createBlankLine(final Document document) {
     final Element block = createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    final Element leader = createXslFoElement(document, "leader");
+    final Element leader = createXslFoElement(document, FOPUtils.LEADER_TAG);
     block.appendChild(leader);
     return block;
   }
@@ -714,7 +715,7 @@ public final class FOPUtils {
                                              final int thickness) {
     final Element lineBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
 
-    final Element line = FOPUtils.createXslFoElement(document, "leader");
+    final Element line = FOPUtils.createXslFoElement(document, FOPUtils.LEADER_TAG);
     line.setAttribute("leader-pattern", "rule");
     line.setAttribute("leader-length", "100%");
     line.setAttribute("rule-style", "solid");
@@ -841,7 +842,7 @@ public final class FOPUtils {
     }
 
     @Override
-    @EnsuresNonNullIf(expression="#1", result=true)
+    @EnsuresNonNullIf(expression = "#1", result = true)
     public boolean equals(final @Nullable Object o) {
       if (this == o) {
         return true;
@@ -970,7 +971,7 @@ public final class FOPUtils {
    */
   public static @Nullable Element createCopyrightFooter(final Document document,
                                                         final ChallengeDescription description) {
-    if (null == description.getCopyright()) {
+    if (StringUtils.isBlank(description.getCopyright())) {
       return null;
     }
 

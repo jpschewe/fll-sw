@@ -1,3 +1,4 @@
+* #926 - Add judge initials to the subjective rubrics
 * #922 - If the server is offline when synchronizing subjective scores, give the user a reasonable error message
 * #907 - Add weighted rank column to final computed scores
 * #925 - Move breadcrumbs to the top of the subjective application
