@@ -275,19 +275,6 @@ public class SubjectivePdfWriter {
     teamNumberEle.setAttribute("font-size", "12pt");
     teamNumberEle.appendChild(document.createTextNode(String.format("    Team Number: %d", teamNumber)));
 
-    // space between team number and judge initials
-    final Element spacer = FOPUtils.createXslFoElement(document, FOPUtils.LEADER_TAG);
-    spacer.setAttribute("leader-pattern", "space");
-    categoryTeamNumberBlock.appendChild(spacer);
-
-    final String judgeInitials = getJudgeInitials(score);
-    final Element judgesInitialsElement = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
-    categoryTeamNumberBlock.appendChild(judgesInitialsElement);
-    judgesInitialsElement.setAttribute("font-size", "6pt");
-    judgesInitialsElement.setAttribute("font-weight", "normal");
-    judgesInitialsElement.setAttribute("font-style", "italic");
-    judgesInitialsElement.appendChild(document.createTextNode(judgeInitials));
-
     final String scheduledTimeStr;
     if (null == scheduledTime) {
       scheduledTimeStr = "N/A";
@@ -315,10 +302,31 @@ public class SubjectivePdfWriter {
     teamNameCell.setAttribute("font-size", "12pt");
     teamNameCell.setAttribute("font-weight", "bold");
 
-    final Element tournamentCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, tournamentName);
-    row2.appendChild(tournamentCell);
-    tournamentCell.setAttribute("font-size", "6pt");
-    tournamentCell.setAttribute("font-style", "italic");
+    final Element tournamentNameJudgeInitialsCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+    row2.appendChild(tournamentNameJudgeInitialsCell);
+
+    final Element tournamentNameJudgeInitialsContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    tournamentNameJudgeInitialsCell.appendChild(tournamentNameJudgeInitialsContainer);
+    tournamentNameJudgeInitialsContainer.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_RIGHT);
+
+    final Element tournamentNameElement = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+    tournamentNameJudgeInitialsContainer.appendChild(tournamentNameElement);
+    tournamentNameElement.setAttribute("font-size", "6pt");
+    tournamentNameElement.setAttribute("font-style", "italic");
+    tournamentNameElement.appendChild(document.createTextNode(tournamentName));
+
+    // space before the judge initials
+    final Element spacer = FOPUtils.createXslFoElement(document, FOPUtils.LEADER_TAG);
+    spacer.setAttribute("leader-pattern", "space");
+    tournamentNameJudgeInitialsContainer.appendChild(spacer);
+
+    final String judgeInitials = getJudgeInitials(score);
+    final Element judgesInitialsElement = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+    tournamentNameJudgeInitialsContainer.appendChild(judgesInitialsElement);
+    judgesInitialsElement.setAttribute("font-size", "6pt");
+    judgesInitialsElement.setAttribute("font-weight", "normal");
+    judgesInitialsElement.setAttribute("font-style", "italic");
+    judgesInitialsElement.appendChild(document.createTextNode(judgeInitials));
 
     addInstructions(document, header, score);
 
