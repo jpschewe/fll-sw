@@ -749,7 +749,7 @@
          * @return the promise from the AJAX function
          */
         uploadScores: function(doneCallback, failCallback) {
-            var dataToUpload = $.toJSON(_allScores);
+            var dataToUpload = JSON.stringify(_allScores);
             return $.ajax({
                 type: "POST",
                 dataType: "json",
@@ -779,7 +779,7 @@
          * @return the promise from the AJAX function
          */
         uploadJudges: function(doneCallback, failCallback) {
-            var dataToUpload = $.toJSON(_judges);
+            var dataToUpload = JSON.stringify(_judges);
             return $.ajax({
                 type: "POST",
                 dataType: "json",

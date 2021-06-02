@@ -89,7 +89,7 @@ function serverLoadPage() {
     $("#index-page_choose_clear").hide();
 
     $.getJSON("CheckAuth", function(data) {
-        $.subjective.log("data: " + $.toJSON(data));
+        $.subjective.log("data: " + JSON.stringify(data));
 
         if (data.authenticated) {
             $("#index-page_clear").click(function() {
