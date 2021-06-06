@@ -143,7 +143,7 @@ ext {
     junit_version = "5.7.0"
     log4j_version = "2.13.3"
     spotbugs_version = "4.2.3"
-    checker_framework_version = "3.13.0"
+    checker_framework_version = "3.14.0"
 
     web_build_dir = new File(project.buildDir, "web")
     documentation_build_dir = new File(project.buildDir, "gen-documentation")    
