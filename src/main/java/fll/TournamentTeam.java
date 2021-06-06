@@ -17,6 +17,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
@@ -121,9 +123,9 @@ public class TournamentTeam extends Team {
       try (ResultSet rs = stmt.executeQuery()) {
         if (rs.next()) {
           final String org = rs.getString(1);
-          final String name = rs.getString(2);
-          final String awardGroup = rs.getString(3);
-          final String judgingGroup = rs.getString(4);
+          final String name = castNonNull(rs.getString(2));
+          final String awardGroup = castNonNull(rs.getString(3));
+          final String judgingGroup = castNonNull(rs.getString(4));
 
           final TournamentTeam x = new TournamentTeam(teamNumber, org, name, awardGroup, judgingGroup);
           return x;
