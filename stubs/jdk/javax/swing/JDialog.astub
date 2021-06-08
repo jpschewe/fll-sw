@@ -33,6 +33,8 @@ public class JDialog extends Dialog implements WindowConstants,
   public JDialog(@UnknownInitialization(Window.class) Window owner, String title, Dialog.ModalityType modalityType,
                  GraphicsConfiguration gc) ;
 
+
+  public Container getRootPane(@UnknownInitialization(JDialog.class) JDialog this);
   
   public Container getContentPane(@UnknownInitialization(JDialog.class) JDialog this);
 

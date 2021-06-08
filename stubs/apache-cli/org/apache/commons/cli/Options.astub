@@ -1,0 +1,10 @@
+package org.apache.commons.cli;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public class Options implements Serializable {
+
+  public Options addOption(@Nullable String opt, String longOpt, boolean hasArg, String description);
+
+}

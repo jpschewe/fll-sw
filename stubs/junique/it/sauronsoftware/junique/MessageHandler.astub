@@ -1,0 +1,9 @@
+package it.sauronsoftware.junique;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+public interface MessageHandler {
+
+  public @Nullable String handle(String message);
+
+}

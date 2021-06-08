@@ -9,6 +9,8 @@ public class JFrame  extends Frame implements WindowConstants,
                                               TransferHandler.HasGetTransferHandler
 {
 
+  public Container getRootPane(@UnknownInitialization(JFrame.class) JFrame this);
+  
   public Container getContentPane(@UnknownInitialization(JFrame.class) JFrame this);
 
   public void setJMenuBar(@UnknownInitialization(JFrame.class) JFrame this, final JMenuBar menubar);
