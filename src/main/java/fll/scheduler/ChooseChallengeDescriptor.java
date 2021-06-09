@@ -103,7 +103,9 @@ public class ChooseChallengeDescriptor extends JDialog {
         final int returnVal = fileChooser.showOpenDialog(ChooseChallengeDescriptor.this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
           final File selectedFile = fileChooser.getSelectedFile();
-          mFileField.setText(selectedFile.getAbsolutePath());
+          if (null != selectedFile) {
+            mFileField.setText(selectedFile.getAbsolutePath());
+          }
         }
       }
     });

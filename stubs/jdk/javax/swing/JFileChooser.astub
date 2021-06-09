@@ -1,0 +1,12 @@
+package javax.swing;
+
+import java.awt.Component;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public class JFileChooser extends JComponent implements Accessible {
+
+  public int showOpenDialog(@UnknownInitialization(Component.class) Component parent) throws HeadlessException;
+  
+}

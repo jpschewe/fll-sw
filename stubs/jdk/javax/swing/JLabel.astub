@@ -1,0 +1,11 @@
+package javax.swing;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public class JLabel extends JComponent implements SwingConstants, Accessible
+{
+
+  public void setText(@Nullable String text);
+  
+}
