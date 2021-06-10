@@ -88,7 +88,8 @@ public class ProgressDialog extends JDialog implements CheckCanceled {
     }
   }
 
-  private void setCanceled(final boolean v) {
+  private void setCanceled(@UnknownInitialization(ProgressDialog.class) ProgressDialog this,
+                           final boolean v) {
     synchronized (mLock) {
       mCanceled = v;
     }
