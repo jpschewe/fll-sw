@@ -52,7 +52,10 @@ public final class Version {
       // convert to String, String
       final Map<String, String> map = new HashMap<>();
       for (final String name : versionProps.stringPropertyNames()) {
-        map.put(name, versionProps.getProperty(name));
+        final String value = versionProps.getProperty(name);
+        if (null != value) {
+          map.put(name, value);
+        }
       }
 
       VERSION_INFORMATION = Collections.unmodifiableMap(map);
