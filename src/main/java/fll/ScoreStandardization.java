@@ -12,6 +12,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.xml.ChallengeDescription;
@@ -275,7 +277,7 @@ public final class ScoreStandardization {
         selectPrep.setInt(3, teamNumber);
         try (ResultSet selectResult = selectPrep.executeQuery()) {
           while (selectResult.next()) {
-            final String categoryName = selectResult.getString(1);
+            final String categoryName = castNonNull(selectResult.getString(1));
 
             if (categoryWeights.containsKey(categoryName)) {
               final double weight = categoryWeights.get(categoryName);
