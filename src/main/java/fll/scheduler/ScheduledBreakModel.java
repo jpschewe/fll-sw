@@ -12,12 +12,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.swing.table.AbstractTableModel;
-
 /**
  * Model for displaying and editing a list of scheduled breaks.
  */
-public class ScheduledBreakModel extends AbstractTableModel {
+public class ScheduledBreakModel extends EditableTableModel {
 
   private final ArrayList<ScheduledBreak> breaks = new ArrayList<>();
 
@@ -142,6 +140,7 @@ public class ScheduledBreakModel extends AbstractTableModel {
    * be 12:00 and the duration
    * will be 30 minutes.
    */
+  @Override
   public void addNewRow() {
     final ScheduledBreak newBreak = new ScheduledBreak(LocalTime.of(12, 0), Duration.ofMinutes(30));
     breaks.add(newBreak);
@@ -150,11 +149,7 @@ public class ScheduledBreakModel extends AbstractTableModel {
             - 1);
   }
 
-  /**
-   * Delete the specified row.
-   * 
-   * @param row the row index to delete
-   */
+  @Override
   public void deleteRow(final int row) {
     breaks.remove(row);
     fireTableRowsDeleted(row, row);
