@@ -20,6 +20,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -115,9 +117,9 @@ public final class JudgeInformation implements Serializable {
       stmt.setInt(1, tournament);
       rs = stmt.executeQuery();
       while (rs.next()) {
-        final String id = rs.getString(1);
-        final String category = rs.getString(2);
-        final String station = rs.getString(3);
+        final String id = castNonNull(rs.getString(1));
+        final String category = castNonNull(rs.getString(2));
+        final String station = castNonNull(rs.getString(3));
         final JudgeInformation judge = new JudgeInformation(id, category, station);
         judges.add(judge);
       }

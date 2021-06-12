@@ -10,12 +10,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.swing.table.AbstractTableModel;
-
 /**
  * Model for displaying and editing the list of integer durations.
  */
-public class DurationModel extends AbstractTableModel {
+public class DurationModel extends EditableTableModel {
 
   private final List<Integer> durations = new ArrayList<>();
 
@@ -115,6 +113,7 @@ public class DurationModel extends AbstractTableModel {
   /**
    * Add a new row to the table. The duration will be 1.
    */
+  @Override
   public void addNewRow() {
     durations.add(1);
     fireTableRowsInserted(durations.size()
@@ -122,11 +121,7 @@ public class DurationModel extends AbstractTableModel {
             - 1);
   }
 
-  /**
-   * Delete the specified row.
-   *
-   * @param row the index of the row to delete
-   */
+  @Override
   public void deleteRow(final int row) {
     durations.remove(row);
     fireTableRowsDeleted(row, row);

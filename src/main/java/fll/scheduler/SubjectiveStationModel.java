@@ -10,12 +10,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.swing.table.AbstractTableModel;
-
 /**
  * Model for displaying and editing a list of {@link SubjectiveStation} objects.
  */
-public class SubjectiveStationModel extends AbstractTableModel {
+public class SubjectiveStationModel extends EditableTableModel {
 
   private final List<SubjectiveStation> stations = new ArrayList<>();
 
@@ -135,6 +133,7 @@ public class SubjectiveStationModel extends AbstractTableModel {
    * Add a new row to the table. The name will be auto generated. The duration
    * will be {@link SchedParams#DEFAULT_SUBJECTIVE_MINUTES}.
    */
+  @Override
   public void addNewRow() {
     final SubjectiveStation newStation = new SubjectiveStation(GreedySolver.getSubjectiveColumnName(stations.size()),
                                                                SchedParams.DEFAULT_SUBJECTIVE_MINUTES);
@@ -144,11 +143,7 @@ public class SubjectiveStationModel extends AbstractTableModel {
             - 1);
   }
 
-  /**
-   * Delete the specified row.
-   * 
-   * @param row row index to delete
-   */
+  @Override
   public void deleteRow(final int row) {
     stations.remove(row);
     fireTableRowsDeleted(row, row);

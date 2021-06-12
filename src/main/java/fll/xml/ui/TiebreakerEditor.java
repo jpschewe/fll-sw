@@ -47,15 +47,14 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
   private final PerformanceScoreCategory performance;
 
-  private final List<Pair<TiebreakerTestEditor, MovableExpandablePanel>> editors = new LinkedList<>();
+  private final List<Pair<TiebreakerTestEditor, MovableExpandablePanel>> editors;
 
-  private final MoveEventListener moveListener;
-
-  private final DeleteEventListener deleteListener;
+  private final EditorListener editorListener;
 
   TiebreakerEditor(final PerformanceScoreCategory performance) {
     super(new BorderLayout());
     this.performance = performance;
+    editors = new LinkedList<>();
 
     editorContainer = Box.createVerticalBox();
 
@@ -76,76 +75,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
     final MovableExpandablePanel exPanel = new MovableExpandablePanel("Tie breakers", expansion, false, false);
     add(exPanel, BorderLayout.CENTER);
 
-    moveListener = new MoveEventListener() {
-
-      @Override
-      public void requestedMove(final MoveEvent e) {
-        final int oldIndex = Utilities.getIndexOfComponent(editorContainer, e.getComponent());
-        if (oldIndex < 0) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Unable to find source of move event in statement container");
-          }
-          return;
-        }
-
-        final int newIndex;
-        if (e.getDirection() == MoveDirection.DOWN) {
-          newIndex = oldIndex
-              + 1;
-        } else {
-          newIndex = oldIndex
-              - 1;
-        }
-
-        if (newIndex < 0
-            || newIndex >= editorContainer.getComponentCount()) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Can't move component outside the container oldIndex: "
-                + oldIndex
-                + " newIndex: "
-                + newIndex);
-          }
-          return;
-        }
-
-        // update editor list
-        final Pair<TiebreakerTestEditor, MovableExpandablePanel> editorPair = editors.remove(oldIndex);
-        editors.add(newIndex, editorPair);
-
-        // update the UI
-        editorContainer.add(e.getComponent(), newIndex);
-        editorContainer.validate();
-        updateTitles();
-      }
-    };
-
-    deleteListener = new DeleteEventListener() {
-
-      @Override
-      public void requestDelete(final DeleteEvent e) {
-        final int confirm = JOptionPane.showConfirmDialog(TiebreakerEditor.this,
-                                                          "Are you sure that you want to delete the tie breaker?",
-                                                          "Confirm Delete", JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) {
-          return;
-        }
-
-        final int index = Utilities.getIndexOfComponent(editorContainer, e.getComponent());
-        if (index < 0) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Unable to find source of delete event in tiebreaker container");
-          }
-          return;
-        }
-
-        // update editor list
-        editors.remove(index);
-
-        // update the UI
-        GuiUtils.removeFromContainer(editorContainer, index);
-        updateTitles();
-      }
-    };
+    editorListener = new EditorListener(editorContainer, editors);
 
     // object initialized
     add.addActionListener(l -> addNewTest());
@@ -155,7 +85,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
   private static final String TITLE_FORMAT = "Tiebreaker %d";
 
-  private void updateTitles() {
+  private static void updateTitles(final List<Pair<TiebreakerTestEditor, MovableExpandablePanel>> editors) {
     int index = 0;
     for (final Pair<TiebreakerTestEditor, MovableExpandablePanel> editorPair : editors) {
       final MovableExpandablePanel panel = editorPair.getRight();
@@ -181,8 +111,8 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
                                                                     true, true);
     editors.add(Pair.of(editor, panel));
 
-    panel.addDeleteEventListener(deleteListener);
-    panel.addMoveEventListener(moveListener);
+    panel.addDeleteEventListener(editorListener);
+    panel.addMoveEventListener(editorListener);
 
     panel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));
     GuiUtils.addToContainer(editorContainer, panel);
@@ -211,6 +141,85 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
     }
 
     return valid;
+  }
+
+  private static final class EditorListener implements MoveEventListener, DeleteEventListener {
+
+    private final JComponent editorContainer;
+
+    private final List<Pair<TiebreakerTestEditor, MovableExpandablePanel>> editors;
+
+    EditorListener(final JComponent editorContainer,
+                   final List<Pair<TiebreakerTestEditor, MovableExpandablePanel>> editors) {
+      this.editorContainer = editorContainer;
+      this.editors = editors;
+    }
+
+    @Override
+    public void requestedMove(final MoveEvent e) {
+      final int oldIndex = Utilities.getIndexOfComponent(editorContainer, e.getComponent());
+      if (oldIndex < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of move event in statement container");
+        }
+        return;
+      }
+
+      final int newIndex;
+      if (e.getDirection() == MoveDirection.DOWN) {
+        newIndex = oldIndex
+            + 1;
+      } else {
+        newIndex = oldIndex
+            - 1;
+      }
+
+      if (newIndex < 0
+          || newIndex >= editorContainer.getComponentCount()) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Can't move component outside the container oldIndex: "
+              + oldIndex
+              + " newIndex: "
+              + newIndex);
+        }
+        return;
+      }
+
+      // update editor list
+      final Pair<TiebreakerTestEditor, MovableExpandablePanel> editorPair = editors.remove(oldIndex);
+      editors.add(newIndex, editorPair);
+
+      // update the UI
+      editorContainer.add(e.getComponent(), newIndex);
+      editorContainer.validate();
+      updateTitles(editors);
+    }
+
+    @Override
+    public void requestDelete(final DeleteEvent e) {
+      final int confirm = JOptionPane.showConfirmDialog(editorContainer,
+                                                        "Are you sure that you want to delete the tie breaker?",
+                                                        "Confirm Delete", JOptionPane.YES_NO_OPTION);
+      if (confirm != JOptionPane.YES_OPTION) {
+        return;
+      }
+
+      final int index = Utilities.getIndexOfComponent(editorContainer, e.getComponent());
+      if (index < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of delete event in tiebreaker container");
+        }
+        return;
+      }
+
+      // update editor list
+      editors.remove(index);
+
+      // update the UI
+      GuiUtils.removeFromContainer(editorContainer, index);
+      updateTitles(editors);
+    }
+
   }
 
 }

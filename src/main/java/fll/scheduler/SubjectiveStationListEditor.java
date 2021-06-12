@@ -11,8 +11,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -22,8 +20,6 @@ import javax.swing.JTable;
  * Edit a list of {@link SubjectiveStation} objects.
  */
 /* package */ class SubjectiveStationListEditor extends JComponent {
-
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final SubjectiveStationModel tableModel;
 
@@ -40,7 +36,7 @@ import javax.swing.JTable;
     table.setDefaultEditor(String.class, new NameCellEditor());
     table.setDefaultEditor(Integer.class, new IntegerCellEditor(1, 1000));
 
-    new ButtonColumn(table, deleteAction, 2);
+    new ButtonColumn(table, new EditableTableDeleteAction(tableModel), 2);
 
     final JButton addButton = new JButton("Add Row");
     addButton.addActionListener(new ActionListener() {
@@ -53,22 +49,6 @@ import javax.swing.JTable;
     add(table, BorderLayout.CENTER);
     add(table.getTableHeader(), BorderLayout.NORTH);
   }
-
-  private final Action deleteAction = new AbstractAction() {
-    @Override
-    public void actionPerformed(final ActionEvent ae) {
-      final String cmd = ae.getActionCommand();
-      try {
-        final int row = Integer.parseInt(cmd);
-        tableModel.deleteRow(row);
-      } catch (final NumberFormatException nfe) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Can't parse row number from action command: "
-              + cmd, nfe);
-        }
-      }
-    }
-  };
 
   public void setStations(final List<SubjectiveStation> stations) {
     this.tableModel.setData(stations);

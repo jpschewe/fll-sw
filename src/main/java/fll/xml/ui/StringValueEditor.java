@@ -74,10 +74,26 @@ class StringValueEditor extends JPanel implements Validatable {
 
     goalEditor = new JButton(value.isGoalRef() ? NO_GOAL : value.getRawStringValue());
 
-    if (value.isGoalRef()) {
-      final GoalRef goalRef = (GoalRef) value;
-      goalRef.getGoal().addPropertyChangeListener(nameListener);
-    }
+    final Box goalPanel = Box.createHorizontalBox();
+    panel.add(goalPanel, GOAL_PANEL);
+    goalPanel.add(goalEditor);
+    goalPanel.add(Box.createHorizontalGlue());
+
+    stringEditor = FormatterUtils.createStringField();
+    panel.add(stringEditor, STRING_PANEL);
+    stringEditor.setText(value.getRawStringValue());
+
+    nameListener = new PropertyChangeListener() {
+      @Override
+      public void propertyChange(final PropertyChangeEvent evt) {
+        if ("title".equals(evt.getPropertyName())) {
+          final String newTitle = (String) evt.getNewValue();
+          goalEditor.setText(newTitle);
+        }
+      }
+    };
+
+    // initialized
 
     goalEditor.setToolTipText("Click to change the referenced goal");
     goalEditor.addActionListener(l -> {
@@ -100,15 +116,6 @@ class StringValueEditor extends JPanel implements Validatable {
       }
     });
 
-    final Box goalPanel = Box.createHorizontalBox();
-    panel.add(goalPanel, GOAL_PANEL);
-    goalPanel.add(goalEditor);
-    goalPanel.add(Box.createHorizontalGlue());
-
-    stringEditor = FormatterUtils.createStringField();
-    panel.add(stringEditor, STRING_PANEL);
-    stringEditor.setText(value.getRawStringValue());
-
     decision.addActionListener(e -> {
       if (decision.isSelected()) {
         layout.show(panel, STRING_PANEL);
@@ -116,6 +123,11 @@ class StringValueEditor extends JPanel implements Validatable {
         layout.show(panel, GOAL_PANEL);
       }
     });
+
+    if (value.isGoalRef()) {
+      final GoalRef goalRef = (GoalRef) value;
+      goalRef.getGoal().addPropertyChangeListener(nameListener);
+    }
 
     // initial setup
     if (value.isStringConstant()) {
@@ -138,15 +150,7 @@ class StringValueEditor extends JPanel implements Validatable {
     }
   }
 
-  private final PropertyChangeListener nameListener = new PropertyChangeListener() {
-    @Override
-    public void propertyChange(final PropertyChangeEvent evt) {
-      if ("title".equals(evt.getPropertyName())) {
-        final String newTitle = (String) evt.getNewValue();
-        goalEditor.setText(newTitle);
-      }
-    }
-  };
+  private final PropertyChangeListener nameListener;
 
   @Override
   public boolean checkValidity(Collection<String> messagesToDisplay) {

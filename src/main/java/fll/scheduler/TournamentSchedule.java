@@ -921,7 +921,7 @@ public class TournamentSchedule implements Serializable {
                                      final String baseFileName,
                                      final ChallengeDescription description,
                                      @Nonnull final Map<ScoreCategory, String> categoryToSchedule,
-                                     @Nonnull final Map<ScoreCategory, String> filenameSuffixes)
+                                     @Nonnull final Map<ScoreCategory, @Nullable String> filenameSuffixes)
       throws IOException {
 
     // setup the sheets from the sucked in xml

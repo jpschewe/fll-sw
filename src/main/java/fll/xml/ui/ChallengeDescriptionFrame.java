@@ -212,8 +212,12 @@ public class ChallengeDescriptionFrame extends JFrame {
     return menu;
   }
 
-  private final Action mOpenAction = new AbstractAction("Open...") {
-    {
+  private final Action mOpenAction = new OpenAction();
+
+  private final class OpenAction extends AbstractAction {
+    OpenAction() {
+      super("Open...");
+
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Open16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Open24.gif"));
       putValue(SHORT_DESCRIPTION, "Open an existing challenge description");
@@ -226,7 +230,7 @@ public class ChallengeDescriptionFrame extends JFrame {
       promptForSaveOfCurrentDescription();
       openChallengeDescription();
     }
-  };
+  }
 
   private void promptForSaveOfCurrentDescription() {
     final int result = JOptionPane.showConfirmDialog(this, "Do you want to save the current challenge description?",
@@ -236,8 +240,11 @@ public class ChallengeDescriptionFrame extends JFrame {
     }
   }
 
-  private final Action mNewAction = new AbstractAction("New") {
-    {
+  private final Action mNewAction = new NewAction();
+
+  private final class NewAction extends AbstractAction {
+    NewAction() {
+      super("New");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/New16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/New24.gif"));
       putValue(SHORT_DESCRIPTION, "Create a new challenge description");
@@ -250,7 +257,7 @@ public class ChallengeDescriptionFrame extends JFrame {
       promptForSaveOfCurrentDescription();
       setCurrentFile(null, null);
     }
-  };
+  }
 
   private void openChallengeDescription() {
     final String startingDirectory = PREFS.get(DESCRIPTION_STARTING_DIRECTORY_PREF, null);
@@ -333,8 +340,11 @@ public class ChallengeDescriptionFrame extends JFrame {
     }
   }
 
-  private final Action mExitAction = new AbstractAction("Exit") {
-    {
+  private final Action mExitAction = new ExitAction();
+
+  private final class ExitAction extends AbstractAction {
+    ExitAction() {
+      super("Exit");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Stop16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Stop24.gif"));
       putValue(SHORT_DESCRIPTION, "Exit the application");
@@ -346,7 +356,7 @@ public class ChallengeDescriptionFrame extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       exit();
     }
-  };
+  }
 
   private void exit() {
     promptForSaveOfCurrentDescription();
@@ -356,8 +366,12 @@ public class ChallengeDescriptionFrame extends JFrame {
     setVisible(false);
   }
 
-  private final Action mSaveAction = new AbstractAction("Save") {
-    {
+  private final Action mSaveAction = new SaveAction();
+
+  private final class SaveAction extends AbstractAction {
+
+    SaveAction() {
+      super("Save");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Save16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Save24.gif"));
       putValue(SHORT_DESCRIPTION, "Save the challenge description file with the current name");
@@ -369,10 +383,14 @@ public class ChallengeDescriptionFrame extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       saveChallengeDescription();
     }
-  };
+  }
 
-  private final Action mSaveAsAction = new AbstractAction("Save As...") {
-    {
+  private final Action mSaveAsAction = new SaveAsAction();
+
+  private final class SaveAsAction extends AbstractAction {
+    SaveAsAction() {
+      super("Save As...");
+
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/SaveAs16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/SaveAs24.gif"));
       putValue(SHORT_DESCRIPTION, "Save the challenge description file with a new name");
@@ -385,10 +403,13 @@ public class ChallengeDescriptionFrame extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       saveAsChallengeDescription();
     }
-  };
+  }
 
-  private final Action validateAction = new AbstractAction("Validate") {
-    {
+  private final Action validateAction = new ValidateAction();
+
+  private final class ValidateAction extends AbstractAction {
+    ValidateAction() {
+      super("Validate");
       // putValue(SMALL_ICON,
       // GraphicsUtils.getIcon("toolbarButtonGraphics/general/SaveAs16.gif"));
       // putValue(LARGE_ICON_KEY,
@@ -401,7 +422,7 @@ public class ChallengeDescriptionFrame extends JFrame {
       validateChallengeDescription();
 
     }
-  };
+  }
 
   private boolean validateChallengeDescription() {
     final Collection<String> messages = new LinkedList<>();
@@ -415,8 +436,11 @@ public class ChallengeDescriptionFrame extends JFrame {
     return valid;
   }
 
-  private final Action generateScoreSheetsAction = new AbstractAction("Generate Score Sheets...") {
-    {
+  private final Action generateScoreSheetsAction = new GenerateScoreSheetsAction();
+
+  private final class GenerateScoreSheetsAction extends AbstractAction {
+    GenerateScoreSheetsAction() {
+      super("Generate Score Sheets...");
       putValue(SHORT_DESCRIPTION, "Write out blank score sheets");
     }
 
@@ -424,7 +448,7 @@ public class ChallengeDescriptionFrame extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       writeScoreSheets();
     }
-  };
+  }
 
   private static final String SCORE_SHEET_STARTING_DIRECTORY_PREF = "scoreSheetStartingDirectory";
 

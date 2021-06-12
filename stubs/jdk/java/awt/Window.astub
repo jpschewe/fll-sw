@@ -1,5 +1,7 @@
 package java.awt;
 
+import java.awt.Component;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
@@ -8,5 +10,15 @@ public class Window extends Container implements Accessible {
   public void pack(@UnknownInitialization(Window.class) Window this);
 
   public void setSize(@UnknownInitialization(Window.class) Window this, int width, int height);
+
+  public synchronized void addWindowListener(@UnknownInitialization(Window.class) Window this,
+                                             WindowListener l);
+
+  public void setLocationRelativeTo(@UnknownInitialization(Window.class) Window this, @UnknownInitialization(Component.class) @Nullable Component c);
+
+  public synchronized void setIconImages(@UnknownInitialization(Window.class) Window this, java.util.List<? extends Image> icons);
+
+  public void dispose(@UnknownInitialization(Window.class) Window this);
+  
   
 }

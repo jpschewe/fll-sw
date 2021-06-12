@@ -1,0 +1,15 @@
+package javax.swing;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public abstract class AbstractAction implements Action, Cloneable, Serializable {
+
+  
+  public void putValue(@UnknownInitialization(AbstractAction.class) AbstractAction this,
+                       String key, @Nullable Object newValue);
+
+  public void setEnabled(@UnknownInitialization(AbstractAction.class) AbstractAction this,
+                         boolean newValue);
+  
+}

@@ -18,11 +18,15 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.GenerateDB;
 import fll.db.NonNumericNominees;
+import fll.util.FLLInternalException;
 import fll.xml.AbstractGoal;
 import fll.xml.Goal;
 import fll.xml.NonNumericCategory;
@@ -253,11 +257,9 @@ public class SubjectiveScore {
   /**
    * @param v see {@link #getGoalComments()}
    */
-  public void setGoalComments(final @Nullable Map<String, String> v) {
+  public void setGoalComments(final Map<String, String> v) {
     goalComments.clear();
-    if (null != v) {
-      goalComments.putAll(v);
-    }
+    goalComments.putAll(v);
   }
 
   private final Set<String> nonNumericNominations = new HashSet<>();
@@ -334,7 +336,7 @@ public class SubjectiveScore {
     final SubjectiveScore score = new SubjectiveScore();
     score.setScoreOnServer(true);
 
-    final String judge = rs.getString("Judge");
+    final String judge = castNonNull(rs.getString("Judge"));
 
     score.setTeamNumber(rs.getInt("TeamNumber"));
     score.setJudge(judge);
@@ -349,6 +351,11 @@ public class SubjectiveScore {
     for (final AbstractGoal goal : category.getAllGoals()) {
       if (goal.isEnumerated()) {
         final String value = rs.getString(goal.getName());
+        if (null == value) {
+          throw new FLLInternalException("Found enumerated goal '"
+              + goal.getName()
+              + "' with null value in the database");
+        }
         enumSubScores.put(goal.getName(), value);
       } else {
         final double value = rs.getDouble(goal.getName());
@@ -357,7 +364,9 @@ public class SubjectiveScore {
 
       final String commentColumn = GenerateDB.getGoalCommentColumnName(goal);
       final String comment = rs.getString(commentColumn);
-      goalComments.put(goal.getName(), comment);
+      if (!StringUtils.isBlank(comment)) {
+        goalComments.put(goal.getName(), comment);
+      }
     } // foreach goal
     score.setStandardSubScores(standardSubScores);
     score.setEnumSubScores(enumSubScores);

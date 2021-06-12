@@ -1,0 +1,10 @@
+package javax.swing.event;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public class EventListenerList implements Serializable {
+
+  public synchronized <T extends EventListener> void add(Class<T> t, @UnknownInitialization T l);
+
+}

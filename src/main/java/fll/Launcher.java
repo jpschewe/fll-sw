@@ -15,7 +15,6 @@ import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Window;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
@@ -61,7 +60,10 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.Authentication;
@@ -271,7 +273,8 @@ public class Launcher extends JFrame {
         final char[] passCheck = console.readPassword("Repeat password: ");
 
         done = true;
-        if (!USERNAME_PATTERN.matcher(user).matches()) {
+        if (null == user
+            || !USERNAME_PATTERN.matcher(user).matches()) {
           console.writer().format("Username can only contain letters, numbers and underscore%n");
           done = false;
         }
@@ -287,12 +290,12 @@ public class Launcher extends JFrame {
         if (done) {
           // create the user
           final Collection<String> existingUsers = Authentication.getUsers(connection);
-          if (existingUsers.contains(user)) {
+          if (existingUsers.contains(castNonNull(user))) {
             console.writer().format("The username '%s' already exists in the database%n", user);
             done = false;
           } else {
-            Authentication.addUser(connection, user, String.valueOf(pass));
-            Authentication.setRoles(connection, user, Collections.singleton(UserRole.ADMIN));
+            Authentication.addUser(connection, castNonNull(user), String.valueOf(castNonNull(pass)));
+            Authentication.setRoles(connection, castNonNull(user), Collections.singleton(UserRole.ADMIN));
           }
         } // create user
 
@@ -306,7 +309,7 @@ public class Launcher extends JFrame {
   }
 
   private static final class AdminUserPrompt extends JDialog {
-    AdminUserPrompt(final JFrame parent) {
+    AdminUserPrompt(final @UnknownInitialization(JFrame.class) JFrame parent) {
       super(parent, "Create Admin User", true);
       setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
@@ -401,25 +404,25 @@ public class Launcher extends JFrame {
     /**
      * @return was the dialog canceled?
      */
-    public boolean isCanceled() {
+    public boolean isCanceled(@UnknownInitialization(AdminUserPrompt.class) AdminUserPrompt this) {
       return canceled;
     }
 
-    private String user;
+    private @Nullable String user = null;
 
     /**
      * @return the specified user
      */
-    public String getUser() {
+    public @Nullable String getUser(@UnknownInitialization(AdminUserPrompt.class) AdminUserPrompt this) {
       return user;
     }
 
-    private String password;
+    private @Nullable String password = null;
 
     /**
      * @return the specified password
      */
-    public String getPassword() {
+    public @Nullable String getPassword(@UnknownInitialization(AdminUserPrompt.class) AdminUserPrompt this) {
       return password;
     }
 
@@ -428,7 +431,7 @@ public class Launcher extends JFrame {
   /**
    * Create an admin user from the GUI.
    */
-  private void createAdminUserGui() {
+  private void createAdminUserGui(@UnknownInitialization(Launcher.class) Launcher this) {
     final DataSource datasource = createDatasource();
     try (Connection connection = datasource.getConnection()) {
       if (!Utilities.testDatabaseInitialized(connection)) {
@@ -448,15 +451,21 @@ public class Launcher extends JFrame {
       final String user = dialog.getUser();
       final String pass = dialog.getPassword();
 
-      // create the user
-      final Collection<String> existingUsers = Authentication.getUsers(connection);
-      if (existingUsers.contains(user)) {
-        final String message = String.format("The username '%s' already exists in the database", user);
-        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+      if (null == user) {
+        JOptionPane.showMessageDialog(this, "Username cannot be null", "Error", JOptionPane.ERROR_MESSAGE);
+      } else if (null == pass) {
+        JOptionPane.showMessageDialog(this, "Password cannot be null", "Error", JOptionPane.ERROR_MESSAGE);
       } else {
-        Authentication.addUser(connection, user, String.valueOf(pass));
-        Authentication.setRoles(connection, user, Collections.singleton(UserRole.ADMIN));
-        JOptionPane.showMessageDialog(this, "User successfully created", "Success", JOptionPane.INFORMATION_MESSAGE);
+        // create the user
+        final Collection<String> existingUsers = Authentication.getUsers(connection);
+        if (existingUsers.contains(user)) {
+          final String message = String.format("The username '%s' already exists in the database", user);
+          JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+        } else {
+          Authentication.addUser(connection, user, String.valueOf(pass));
+          Authentication.setRoles(connection, user, Collections.singleton(UserRole.ADMIN));
+          JOptionPane.showMessageDialog(this, "User successfully created", "Success", JOptionPane.INFORMATION_MESSAGE);
+        }
       }
 
     } catch (final SQLException e) {
@@ -509,18 +518,6 @@ public class Launcher extends JFrame {
     // allow us to prevent closing the window
     setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
-    addWindowListener(new WindowAdapter() {
-      @Override
-      public void windowClosing(final WindowEvent e) {
-        maybeExit();
-      }
-    });
-
-    // ensure the webserver gets shutdown
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      stopWebserver();
-    }));
-
     setApplicationIcon(this);
 
     final Container cpane = getContentPane();
@@ -539,32 +536,69 @@ public class Launcher extends JFrame {
     cpane.add(buttonBox, BorderLayout.CENTER);
 
     webserverStartButton = new JButton("Start web server");
-
-    webserverStartButton.addActionListener(ae -> {
-      startWebserver(true);
-    });
     buttonBox.add(webserverStartButton);
 
     webserverStopButton = new JButton("Stop web server");
-    webserverStopButton.addActionListener(ae -> {
-      stopWebserver();
-    });
     buttonBox.add(webserverStopButton);
 
     mainPage = new JButton("Visit the main web page");
-    mainPage.addActionListener(ae -> {
-      loadFllHtml();
-    });
     buttonBox.add(mainPage);
 
     final JButton docsPage = new JButton("View the documentation");
-    docsPage.addActionListener(ae -> {
-      loadDocsHtml();
-    });
     buttonBox.add(docsPage);
 
     final JButton sponsorLogos = new JButton("Sponsor Logos");
     sponsorLogos.setToolTipText("Opens the directory where the sponsor logos go");
+    buttonBox.add(sponsorLogos);
+
+    final JButton slideshow = new JButton("Slide show");
+    slideshow.setToolTipText("Opens the directory where the slideshow images go");
+    buttonBox.add(slideshow);
+
+    final JButton custom = new JButton("Custom files");
+    custom.setToolTipText("Opens the directory where to put extra files to display on the big screen display");
+    buttonBox.add(custom);
+
+    final JButton schedulerButton = new JButton("Scheduler");
+    buttonBox.add(schedulerButton);
+
+    final JButton challengeEditorButton = new JButton("Challenge Editor");
+    buttonBox.add(challengeEditorButton);
+
+    final JButton createAdminUser = new JButton("Create Admin User");
+    buttonBox.add(createAdminUser);
+
+    final JButton exit = new JButton("Exit");
+    cpane.add(exit, BorderLayout.SOUTH);
+
+    // initialized
+    addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosing(final WindowEvent e) {
+        maybeExit();
+      }
+    });
+
+    // ensure the webserver gets shutdown
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      stopWebserver();
+    }));
+
+    webserverStartButton.addActionListener(ae -> {
+      startWebserver(true);
+    });
+    webserverStopButton.addActionListener(ae -> {
+      stopWebserver();
+    });
+
+    mainPage.addActionListener(ae -> {
+      loadFllHtml();
+    });
+
+    docsPage.addActionListener(ae -> {
+      loadDocsHtml();
+    });
+
     sponsorLogos.addActionListener(ae -> {
       final Path dir = getSponsorLogosDirectory();
       if (null != dir) {
@@ -580,10 +614,15 @@ public class Launcher extends JFrame {
         JOptionPane.showMessageDialog(this, "Cannot find sponsor_logos directory.", "ERROR", JOptionPane.ERROR_MESSAGE);
       }
     });
-    buttonBox.add(sponsorLogos);
 
-    final JButton slideshow = new JButton("Slide show");
-    slideshow.setToolTipText("Opens the directory where the slideshow images go");
+    schedulerButton.addActionListener(ae -> {
+      launchScheduler();
+    });
+
+    challengeEditorButton.addActionListener(ae -> {
+      launchChallengeEditor();
+    });
+
     slideshow.addActionListener(ae -> {
       final Path dir = getSlideshowDirectory();
       if (null != dir) {
@@ -599,10 +638,6 @@ public class Launcher extends JFrame {
         JOptionPane.showMessageDialog(this, "Cannot find slideshow directory.", "ERROR", JOptionPane.ERROR_MESSAGE);
       }
     });
-    buttonBox.add(slideshow);
-
-    final JButton custom = new JButton("Custom files");
-    custom.setToolTipText("Opens the directory where to put extra files to display on the big screen display");
     custom.addActionListener(ae -> {
       final Path dir = getCustomDirectory();
       if (null != dir) {
@@ -618,31 +653,12 @@ public class Launcher extends JFrame {
         JOptionPane.showMessageDialog(this, "Cannot find custom directory.", "ERROR", JOptionPane.ERROR_MESSAGE);
       }
     });
-    buttonBox.add(custom);
-
-    final JButton schedulerButton = new JButton("Scheduler");
-    schedulerButton.addActionListener(ae -> {
-      launchScheduler();
-    });
-    buttonBox.add(schedulerButton);
-
-    final JButton challengeEditorButton = new JButton("Challenge Editor");
-    challengeEditorButton.addActionListener(ae -> {
-      launchChallengeEditor();
-    });
-    buttonBox.add(challengeEditorButton);
-
-    final JButton createAdminUser = new JButton("Create Admin User");
     createAdminUser.addActionListener(ae -> {
       createAdminUserGui();
     });
-    buttonBox.add(createAdminUser);
-
-    final JButton exit = new JButton("Exit");
     exit.addActionListener(ae -> {
       maybeExit();
     });
-    cpane.add(exit, BorderLayout.SOUTH);
 
     pack();
 
@@ -653,7 +669,7 @@ public class Launcher extends JFrame {
    * Prompt the user if the webserver is running.
    */
   @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "This method is ment to close the application")
-  private void maybeExit() {
+  private void maybeExit(@UnknownInitialization(Launcher.class) Launcher this) {
     if (mServerOnline) {
       final int result = JOptionPane.showConfirmDialog(this,
                                                        "Closing the launcher will stop the web server. Are you sure you want to close?",
@@ -671,7 +687,7 @@ public class Launcher extends JFrame {
     System.exit(0);
   }
 
-  private void startWebserverMonitor() {
+  private void startWebserverMonitor(@UnknownInitialization(Launcher.class) Launcher this) {
     final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     executorService.scheduleWithFixedDelay(() -> {
       checkWebserver();
@@ -681,7 +697,7 @@ public class Launcher extends JFrame {
   /**
    * Check if the webserver is up and update the status label.
    */
-  private void checkWebserver() {
+  private void checkWebserver(@UnknownInitialization(Launcher.class) Launcher this) {
     boolean newServerOnline = false;
     LOGGER.trace("Checking if the server is online");
     try (Socket s = new Socket("localhost", port)) {
@@ -708,9 +724,9 @@ public class Launcher extends JFrame {
     mainPage.setEnabled(mServerOnline);
   }
 
-  private SchedulerUI scheduler = null;
+  private @Nullable SchedulerUI scheduler = null;
 
-  private void launchScheduler() {
+  private void launchScheduler(@UnknownInitialization(Launcher.class) Launcher this) {
     if (null != scheduler) {
       scheduler.setVisible(true);
     } else {
@@ -747,9 +763,9 @@ public class Launcher extends JFrame {
     }
   }
 
-  private ChallengeDescriptionFrame challengeEditor = null;
+  private @Nullable ChallengeDescriptionFrame challengeEditor = null;
 
-  private void launchChallengeEditor() {
+  private void launchChallengeEditor(@UnknownInitialization(Launcher.class) Launcher this) {
     if (null != challengeEditor) {
       challengeEditor.setVisible(true);
     } else {
@@ -782,7 +798,8 @@ public class Launcher extends JFrame {
 
   private @Nullable TomcatLauncher webserverLauncher = null;
 
-  private void startWebserver(final boolean loadFrontPage) {
+  private void startWebserver(@UnknownInitialization(Launcher.class) Launcher this,
+                              final boolean loadFrontPage) {
     if (null == webserverLauncher) {
       webserverLauncher = new TomcatLauncher(port);
     }
@@ -799,7 +816,7 @@ public class Launcher extends JFrame {
     }
   }
 
-  private void stopWebserver() {
+  private void stopWebserver(@UnknownInitialization(Launcher.class) Launcher this) {
     if (null != webserverLauncher) {
       try {
         webserverLauncher.stop();
@@ -812,8 +829,8 @@ public class Launcher extends JFrame {
     }
   }
 
-  private Path createFllFileWithPort(final Path sourceFllHtml,
-                                     final int port)
+  private static Path createFllFileWithPort(final Path sourceFllHtml,
+                                            final int port)
       throws IOException {
     final String content = new String(Files.readAllBytes(sourceFllHtml), Utilities.DEFAULT_CHARSET);
     final String newContent = content.replaceAll(":9080", String.format(":%d", port));
@@ -829,7 +846,7 @@ public class Launcher extends JFrame {
   /**
    * Open up the main page.
    */
-  private void loadFllHtml() {
+  private void loadFllHtml(@UnknownInitialization(Launcher.class) Launcher this) {
     final Path fllHtml = getFLLHtmlFile();
     if (null == fllHtml) {
       JOptionPane.showMessageDialog(this, "Cannot find fll-sw.html, you will need to open this is your browser.");
@@ -850,7 +867,7 @@ public class Launcher extends JFrame {
    *
    * @return null if the file cannot be found
    */
-  private @Nullable Path getFLLHtmlFile() {
+  private @Nullable Path getFLLHtmlFile(@UnknownInitialization(Launcher.class) Launcher this) {
     final Path classesPath = TomcatLauncher.getClassesPath();
 
     final String[] possibleLocations = { //
@@ -871,7 +888,7 @@ public class Launcher extends JFrame {
   /**
    * @return the directory or null if not found
    */
-  private @Nullable Path getSponsorLogosDirectory() {
+  private @Nullable Path getSponsorLogosDirectory(@UnknownInitialization(Launcher.class) Launcher this) {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
     if (null == webroot) {
@@ -890,7 +907,7 @@ public class Launcher extends JFrame {
   /**
    * @return the directory or null if not found
    */
-  private @Nullable Path getSlideshowDirectory() {
+  private @Nullable Path getSlideshowDirectory(@UnknownInitialization(Launcher.class) Launcher this) {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
     if (null == webroot) {
@@ -909,7 +926,7 @@ public class Launcher extends JFrame {
   /**
    * @return the directory or null if not found
    */
-  private @Nullable Path getCustomDirectory() {
+  private @Nullable Path getCustomDirectory(@UnknownInitialization(Launcher.class) Launcher this) {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
     if (null == webroot) {
@@ -928,7 +945,7 @@ public class Launcher extends JFrame {
   /**
    * Open up the main page.
    */
-  private void loadDocsHtml() {
+  private void loadDocsHtml(@UnknownInitialization(Launcher.class) Launcher this) {
     final Path docsHtml = getDocsHtmlFile();
     if (null == docsHtml) {
       JOptionPane.showMessageDialog(this, "Cannot find docs index.html, you will need to open this is your browser.");
@@ -947,7 +964,7 @@ public class Launcher extends JFrame {
    *
    * @return null if the file cannot be found
    */
-  private @Nullable Path getDocsHtmlFile() {
+  private @Nullable Path getDocsHtmlFile(@UnknownInitialization(Launcher.class) Launcher this) {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final String[] possibleLocations = { //
                                          "../web/documentation", // distribution
@@ -967,10 +984,14 @@ public class Launcher extends JFrame {
 
   private static final int[] ICON_SIZES = new int[] { 8, 16, 32, 64, 128, 256, 512, 1024 };
 
-  private static void setApplicationIcon(final Window window) {
+  private static void setApplicationIcon(final @UnknownInitialization(JFrame.class) JFrame window) {
     try {
       // get images from small to large
       final URL imageURL = Launcher.class.getResource("/fll/resources/fll-sw.png");
+      if (null == imageURL) {
+        LOGGER.error("Cannot find application icon, not setting");
+        return;
+      }
       final BufferedImage original = ImageIO.read(imageURL);
 
       final List<BufferedImage> images = new LinkedList<>();

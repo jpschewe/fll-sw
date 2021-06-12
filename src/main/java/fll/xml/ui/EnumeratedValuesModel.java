@@ -9,8 +9,7 @@ package fll.xml.ui;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.table.AbstractTableModel;
-
+import fll.scheduler.EditableTableModel;
 import fll.util.FP;
 import fll.xml.EnumeratedValue;
 import fll.xml.Goal;
@@ -19,7 +18,7 @@ import fll.xml.Goal;
  * Table model for working with the {@link EnumeratedValue} objects in a
  * {@link Goal}. This also specifies the initial value.
  */
-class EnumeratedValuesModel extends AbstractTableModel {
+class EnumeratedValuesModel extends EditableTableModel {
 
   private final Goal goal;
 
@@ -159,9 +158,7 @@ class EnumeratedValuesModel extends AbstractTableModel {
     fireTableCellUpdated(rowIndex, columnIndex);
   }
 
-  /**
-   * Add a new row to the table.
-   */
+  @Override
   public void addNewRow() {
     final EnumeratedValue newValue = new EnumeratedValue("title"
         + data.size(), "value"
@@ -175,11 +172,7 @@ class EnumeratedValuesModel extends AbstractTableModel {
             - 1);
   }
 
-  /**
-   * Delete the specified row.
-   * 
-   * @param row the index of the row to remove
-   */
+  @Override
   public void deleteRow(final int row) {
     final EnumeratedValue deleted = data.remove(row);
     initialValue.remove(row);

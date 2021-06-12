@@ -18,6 +18,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import net.mtu.eggplant.util.StringUtils;
 
 /**
@@ -129,7 +131,7 @@ public class Team implements Serializable {
       try (ResultSet rs = stmt.executeQuery()) {
         if (rs.next()) {
           final String org = rs.getString(1);
-          final String name = rs.getString(2);
+          final String name = castNonNull(rs.getString(2));
 
           final Team x = new Team(teamNumber, org, name);
           return x;

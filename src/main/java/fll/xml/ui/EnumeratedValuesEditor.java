@@ -10,8 +10,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -19,16 +17,14 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 
 import fll.scheduler.ButtonColumn;
+import fll.scheduler.EditableTableDeleteAction;
 import fll.util.DatabaseNameCellEditor;
-
 import fll.xml.Goal;
 
 /**
  * Panel for editing the {@link Goal#getValues()} of a {@link Goal}.
  */
 class EnumeratedValuesEditor extends JPanel {
-
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final JTable table;
 
@@ -45,7 +41,7 @@ class EnumeratedValuesEditor extends JPanel {
 
     table.getColumnModel().getColumn(1).setCellEditor(new DatabaseNameCellEditor());
 
-    new ButtonColumn(table, deleteAction, 4);
+    new ButtonColumn(table, new EditableTableDeleteAction(tableModel), 4);
 
     final JButton addButton = new JButton("Add Row");
     addButton.addActionListener(new ActionListener() {
@@ -63,22 +59,6 @@ class EnumeratedValuesEditor extends JPanel {
     buttonBox.add(Box.createHorizontalGlue());
 
   }
-
-  private final Action deleteAction = new AbstractAction() {
-    @Override
-    public void actionPerformed(final ActionEvent ae) {
-      final String cmd = ae.getActionCommand();
-      try {
-        final int row = Integer.parseInt(cmd);
-        tableModel.deleteRow(row);
-      } catch (final NumberFormatException nfe) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Can't parse row number from action command: "
-              + cmd, nfe);
-        }
-      }
-    }
-  };
 
   /**
    * Make sure that everything in the widget is written to the underlying

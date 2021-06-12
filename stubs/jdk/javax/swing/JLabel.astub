@@ -1,10 +1,11 @@
-package java.awt;
+package javax.swing;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
-public class Dialog extends Window {
+public class JLabel extends JComponent implements SwingConstants, Accessible
+{
 
-  public void setVisible(@UnknownInitialization(Dialog.class) Dialog this, boolean b);
+  public void setText(@Nullable String text);
   
 }

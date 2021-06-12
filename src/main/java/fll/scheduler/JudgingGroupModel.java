@@ -11,12 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.table.AbstractTableModel;
-
 /**
  * Model for displaying and editing the list of judging groups.
  */
-public class JudgingGroupModel extends AbstractTableModel {
+public class JudgingGroupModel extends EditableTableModel {
 
   private final List<String> judges = new ArrayList<>();
 
@@ -142,6 +140,7 @@ public class JudgingGroupModel extends AbstractTableModel {
    * Add a new row to the table. The name will be auto generated. The count will
    * be 1.
    */
+  @Override
   public void addNewRow() {
     judges.add(String.format("group-%d", judges.size()));
     counts.add(1);
@@ -150,11 +149,7 @@ public class JudgingGroupModel extends AbstractTableModel {
             - 1);
   }
 
-  /**
-   * Delete the specified row.
-   * 
-   * @param row the row index to delete
-   */
+  @Override
   public void deleteRow(final int row) {
     judges.remove(row);
     counts.remove(row);

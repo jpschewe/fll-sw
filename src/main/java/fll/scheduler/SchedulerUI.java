@@ -76,7 +76,6 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
@@ -276,6 +275,9 @@ public class SchedulerUI extends JFrame {
 
     // Work around https://github.com/typetools/checker-framework/issues/4667 by
     // putting all initialization inside the constructor
+    // Working with checker more I suspect this issue is because of
+    // https://github.com/typetools/checker-framework/issues/4667 and how
+    // @NotOnlyInitialized works
     // final JMenuBar menubar = createMenubar();
     final JMenuBar menubar = new JMenuBar();
 
@@ -363,11 +365,9 @@ public class SchedulerUI extends JFrame {
       final int returnVal = fileChooser.showSaveDialog(SchedulerUI.this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
         final File currentDirectory = fileChooser.getCurrentDirectory();
-        if (null == currentDirectory) {
-          return;
+        if (null != currentDirectory) {
+          PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
         }
-
-        PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
 
         File selectedFile = fileChooser.getSelectedFile();
         if (null == selectedFile) {
@@ -411,8 +411,11 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private final Action mSaveScheduleDescriptionAction = new AbstractAction("Save Schedule Description") {
-    {
+  private final Action mSaveScheduleDescriptionAction = new SaveScheduleDescriptionAction();
+
+  private final class SaveScheduleDescriptionAction extends AbstractAction {
+    SaveScheduleDescriptionAction() {
+      super("Save Schedule Description");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Save16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Save24.gif"));
       putValue(SHORT_DESCRIPTION, "Save the schedule description file");
@@ -424,10 +427,13 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       saveScheduleDescription();
     }
-  };
+  }
 
-  private final Action mNewScheduleDescriptionAction = new AbstractAction("New Schedule Description") {
-    {
+  private final Action mNewScheduleDescriptionAction = new NewScheduleDescriptionAction();
+
+  private final class NewScheduleDescriptionAction extends AbstractAction {
+    NewScheduleDescriptionAction() {
+      super("New Schedule Description");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/New16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/New24.gif"));
       putValue(SHORT_DESCRIPTION, "Createa a new schedule description file");
@@ -439,7 +445,7 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       newScheduleDescription();
     }
-  };
+  }
 
   private void newScheduleDescription() {
     final int result = JOptionPane.showConfirmDialog(SchedulerUI.this,
@@ -616,8 +622,11 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private final Action mRunSchedulerAction = new AbstractAction("Run Scheduler") {
-    {
+  private final Action mRunSchedulerAction = new RunSchedulerAction();
+
+  private final class RunSchedulerAction extends AbstractAction {
+    RunSchedulerAction() {
+      super("Run Scheduler");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/TipOfTheDay16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/TipOfTheDay24.gif"));
       putValue(SHORT_DESCRIPTION, "Run the scheduler on the current description");
@@ -628,10 +637,13 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       runScheduler();
     }
-  };
+  }
 
-  private final Action mOpenScheduleDescriptionAction = new AbstractAction("Open Schedule Description") {
-    {
+  private final Action mOpenScheduleDescriptionAction = new OpenScheduleDescriptionAction();
+
+  private final class OpenScheduleDescriptionAction extends AbstractAction {
+    OpenScheduleDescriptionAction() {
+      super("Open Schedule Description");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Open16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Open24.gif"));
       putValue(SHORT_DESCRIPTION, "Open the schedule description file");
@@ -652,8 +664,11 @@ public class SchedulerUI extends JFrame {
 
       final int returnVal = fileChooser.showOpenDialog(SchedulerUI.this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
+
         final File currentDirectory = fileChooser.getCurrentDirectory();
-        PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
+        if (null != currentDirectory) {
+          PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
+        }
 
         final File selectedFile = fileChooser.getSelectedFile();
         if (null != selectedFile
@@ -668,7 +683,7 @@ public class SchedulerUI extends JFrame {
         }
       }
     }
-  };
+  }
 
   private void loadScheduleDescription(final File file) {
     final Properties properties = new Properties();
@@ -731,8 +746,11 @@ public class SchedulerUI extends JFrame {
     return toolbar;
   }
 
-  private final Action mReloadFileAction = new AbstractAction("Reload Schedule") {
-    {
+  private final Action mReloadFileAction = new ReloadFileAction();
+
+  private final class ReloadFileAction extends AbstractAction {
+    ReloadFileAction() {
+      super("Reload Schedule");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Refresh16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Refresh24.gif"));
       putValue(SHORT_DESCRIPTION, "Reload the file and check for violations");
@@ -777,10 +795,13 @@ public class SchedulerUI extends JFrame {
                                       JOptionPane.ERROR_MESSAGE);
       }
     }
-  };
+  }
 
-  private final Action mPreferencesAction = new AbstractAction("Preferences") {
-    {
+  private final Action mPreferencesAction = new PreferencesAction();
+
+  private final class PreferencesAction extends AbstractAction {
+    PreferencesAction() {
+      super("Preferences");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Preferences16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Preferences24.gif"));
       putValue(SHORT_DESCRIPTION, "Set scheduling preferences");
@@ -791,10 +812,13 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       JOptionPane.showMessageDialog(SchedulerUI.this, "Not implemented yet");
     }
-  };
+  }
 
-  private final Action mExitAction = new AbstractAction("Exit") {
-    {
+  private final Action mExitAction = new ExitAction();
+
+  private final class ExitAction extends AbstractAction {
+    ExitAction() {
+      super("Exit");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Stop16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Stop24.gif"));
       putValue(SHORT_DESCRIPTION, "Exit the application");
@@ -806,10 +830,13 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       SchedulerUI.this.setVisible(false);
     }
-  };
+  }
 
-  private final Action mDisplayGeneralScheduleAction = new AbstractAction("General Schedule") {
-    {
+  private final Action mDisplayGeneralScheduleAction = new DisplayGeneralScheduleAction();
+
+  private final class DisplayGeneralScheduleAction extends AbstractAction {
+    DisplayGeneralScheduleAction() {
+      super("General Schedule");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/History16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/History24.gif"));
       putValue(SHORT_DESCRIPTION, "Display the general schedule");
@@ -821,10 +848,13 @@ public class SchedulerUI extends JFrame {
       final String schedule = getScheduleData().computeGeneralSchedule();
       JOptionPane.showMessageDialog(SchedulerUI.this, schedule, "General Schedule", JOptionPane.INFORMATION_MESSAGE);
     }
-  };
+  }
 
-  private final Action mWriteSchedulesAction = new AbstractAction("Write Detailed Schedules") {
-    {
+  private final Action mWriteSchedulesAction = new WriteSchedulesAction();
+
+  private final class WriteSchedulesAction extends AbstractAction {
+    WriteSchedulesAction() {
+      super("Write Detailed Schedules");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Export16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Export24.gif"));
       putValue(SHORT_DESCRIPTION, "Write out the detailed schedules as a PDF");
@@ -833,14 +863,23 @@ public class SchedulerUI extends JFrame {
 
     @Override
     public void actionPerformed(final ActionEvent ae) {
-      FileOutputStream scoresheetFos = null;
       try {
         final File directory = getScheduleFile().getParentFile();
+        if (null == directory) {
+          final String message = "Cannot find a parent directory for "
+              + getScheduleFile()
+              + ", skipping writing of schedules";
+          LOGGER.warn("Cannot find a parent directory for {}, skipping writing of schedules", getScheduleFile());
+          JOptionPane.showMessageDialog(SchedulerUI.this, "Schedules not written", message,
+                                        JOptionPane.WARNING_MESSAGE);
+          return;
+        }
+
         final String baseFilename = Utilities.extractBasename(getScheduleFile());
         LOGGER.info("Writing detailed schedules to "
             + directory.getAbsolutePath());
 
-        getScheduleData().outputDetailedSchedules(getSchedParams(), getScheduleFile().getParentFile(), baseFilename);
+        getScheduleData().outputDetailedSchedules(getSchedParams(), directory, baseFilename);
         JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedule written '"
             + directory.getAbsolutePath()
             + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
@@ -864,9 +903,10 @@ public class SchedulerUI extends JFrame {
 
               final File scoresheetFile = new File(directory, baseFilename
                   + "-scoresheets.pdf");
-              scoresheetFos = new FileOutputStream(scoresheetFile);
+              try (FileOutputStream scoresheetFos = new FileOutputStream(scoresheetFile)) {
 
-              getScheduleData().outputPerformanceSheets(tournamentName, scoresheetFos, description);
+                getScheduleData().outputPerformanceSheets(tournamentName, scoresheetFos, description);
+              }
 
               final MapSubjectiveHeaders mapDialog = new MapSubjectiveHeaders(SchedulerUI.this, description,
                                                                               getScheduleData());
@@ -874,7 +914,7 @@ public class SchedulerUI extends JFrame {
               mapDialog.setVisible(true);
               if (!mapDialog.isCanceled()) {
                 final Map<ScoreCategory, String> categoryToSchedule = new HashMap<>();
-                final Map<ScoreCategory, String> filenameSuffixes = new HashMap<>();
+                final Map<ScoreCategory, @Nullable String> filenameSuffixes = new HashMap<>();
                 for (final SubjectiveScoreCategory scoreCategory : description.getSubjectiveCategories()) {
                   final String scheduleColumn = mapDialog.getSubjectiveHeaderForCategory(scoreCategory);
                   if (null == scheduleColumn) {
@@ -908,11 +948,9 @@ public class SchedulerUI extends JFrame {
         LOGGER.error(errorFormatter, e);
         JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
         return;
-      } finally {
-        IOUtils.closeQuietly(scoresheetFos);
       }
     }
-  };
+  }
 
   /**
    * Run the table optimizer on the current schedule and open the resulting
@@ -1047,15 +1085,24 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private final Action mRunOptimizerAction = new AbstractAction("Run Table Optimizer") {
+  private final Action mRunOptimizerAction = new RunOptimizerAction();
+
+  private final class RunOptimizerAction extends AbstractAction {
+    RunOptimizerAction() {
+      super("Run Table Optimizer");
+    }
+
     @Override
     public void actionPerformed(final ActionEvent ae) {
       runTableOptimizer();
     }
-  };
+  }
 
-  private final Action mOpenScheduleAction = new AbstractAction("Open Schedule") {
-    {
+  private final Action mOpenScheduleAction = new OpenScheduleAction();
+
+  private final class OpenScheduleAction extends AbstractAction {
+    OpenScheduleAction() {
+      super("Open Schedule");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Open16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Open24.gif"));
       putValue(SHORT_DESCRIPTION, "Open a schedule file");
@@ -1078,7 +1125,9 @@ public class SchedulerUI extends JFrame {
       final int returnVal = fileChooser.showOpenDialog(SchedulerUI.this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
         final File currentDirectory = fileChooser.getCurrentDirectory();
-        PREFS.put(SCHEDULE_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
+        if (null != currentDirectory) {
+          PREFS.put(SCHEDULE_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
+        }
 
         final File selectedFile = fileChooser.getSelectedFile();
         if (null != selectedFile
@@ -1097,7 +1146,7 @@ public class SchedulerUI extends JFrame {
         }
       }
     }
-  };
+  }
 
   /**
    * If there is more than 1 sheet, prompt, otherwise just use the sheet.
@@ -1181,11 +1230,13 @@ public class SchedulerUI extends JFrame {
     mScheduleTable.repaint();
   }
 
-  private final TableCellRenderer schedTableRenderer = new DefaultTableCellRenderer() {
+  private final TableCellRenderer schedTableRenderer = new SchedTableRenderer();
+
+  private final class SchedTableRenderer extends DefaultTableCellRenderer {
 
     @Override
     public Component getTableCellRendererComponent(final JTable table,
-                                                   final Object value,
+                                                   final @Nullable Object value,
                                                    final boolean isSelected,
                                                    final boolean hasFocus,
                                                    final int row,
@@ -1311,7 +1362,7 @@ public class SchedulerUI extends JFrame {
   private final TableCellRenderer violationTableRenderer = new DefaultTableCellRenderer() {
     @Override
     public Component getTableCellRendererComponent(final JTable table,
-                                                   final Object value,
+                                                   final @Nullable Object value,
                                                    final boolean isSelected,
                                                    final boolean hasFocus,
                                                    final int row,

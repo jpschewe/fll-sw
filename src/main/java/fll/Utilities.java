@@ -67,7 +67,10 @@ public final class Utilities {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  private static final ThreadLocal<NumberFormat> FLOATING_POINT_NUMBER_FORMAT_INSTANCE = new ThreadLocal<NumberFormat>() {
+  private static final FloatingPointNumberFormat FLOATING_POINT_NUMBER_FORMAT_INSTANCE = new FloatingPointNumberFormat();
+
+  @SuppressWarnings("nullness:type.argument") // initialValue returns non-null
+  private static final class FloatingPointNumberFormat extends ThreadLocal<NumberFormat> {
     @Override
     protected NumberFormat initialValue() {
       final NumberFormat format = NumberFormat.getInstance();
@@ -76,7 +79,7 @@ public final class Utilities {
       format.setMinimumFractionDigits(2);
       return format;
     }
-  };
+  }
 
   /**
    * Single instance of the floating point NumberFormat instance to save
@@ -89,7 +92,10 @@ public final class Utilities {
     return FLOATING_POINT_NUMBER_FORMAT_INSTANCE.get();
   }
 
-  private static final ThreadLocal<NumberFormat> XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE = new ThreadLocal<NumberFormat>() {
+  private static final XmlFloatingPointNumberFormat XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE = new XmlFloatingPointNumberFormat();
+
+  @SuppressWarnings("nullness:type.argument") // initialValue returns non-null
+  private static final class XmlFloatingPointNumberFormat extends ThreadLocal<NumberFormat> {
     @Override
     protected NumberFormat initialValue() {
       final NumberFormat format = NumberFormat.getInstance();
@@ -113,7 +119,10 @@ public final class Utilities {
     return XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.get();
   }
 
-  private static final ThreadLocal<NumberFormat> INTEGER_NUMBER_FORMAT_INSTANCE = new ThreadLocal<NumberFormat>() {
+  private static final IntegerNumberFormat INTEGER_NUMBER_FORMAT_INSTANCE = new IntegerNumberFormat();
+
+  @SuppressWarnings("nullness:type.argument") // initialValue returns non-null
+  private static final class IntegerNumberFormat extends ThreadLocal<NumberFormat> {
     @Override
     protected NumberFormat initialValue() {
       return NumberFormat.getIntegerInstance();
@@ -364,10 +373,13 @@ public final class Utilities {
    */
   public static boolean testDatabaseInitialized(final Connection connection) throws SQLException {
     // get list of tables that already exist
+    final String desiredParam = "tournament_parameters".toLowerCase();
     final DatabaseMetaData metadata = connection.getMetaData();
     try (ResultSet rs = metadata.getTables(null, null, "%", null)) {
       while (rs.next()) {
-        if ("tournament_parameters".toLowerCase().equals(rs.getString(3).toLowerCase())) {
+        final String value = rs.getString(3);
+        if (null != value
+            && desiredParam.equals(value.toLowerCase())) {
           return true;
         }
       }
@@ -560,7 +572,7 @@ public final class Utilities {
    * @param filename the filename
    * @return the extension, or null if there isn't one
    */
-  public static String determineExtension(final String filename) {
+  public static @Nullable String determineExtension(final String filename) {
     final int dotIndex = filename.lastIndexOf('.');
     final String extension;
     if (-1 != dotIndex) {
