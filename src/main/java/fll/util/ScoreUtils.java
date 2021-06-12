@@ -69,7 +69,7 @@ public final class ScoreUtils {
     });
 
     final List<Map<String, Integer>> schedule = new LinkedList<Map<String, Integer>>();
-    for (final int team : sortedTeams) {
+    for (final Integer team : sortedTeams) {
       for (final String category : finalistsCount.get(team)) {
         boolean scheduled = false;
         final Iterator<Map<String, Integer>> iter = schedule.iterator();
