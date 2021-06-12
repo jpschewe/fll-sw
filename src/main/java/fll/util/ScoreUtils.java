@@ -16,6 +16,8 @@ import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.KeyFor;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 /**
  * Scoring utilities.
  */
@@ -52,12 +54,12 @@ public final class ScoreUtils {
     }
     // sort the list so that the team in the most categories is first, this
     // should ensure the minimum amount of time to do the finalist judging
-    final List<@KeyFor("finalistsCount") Integer> sortedTeams = new LinkedList<>(finalistsCount.keySet());
-    Collections.sort(sortedTeams, new Comparator<@KeyFor("finalistsCount") Integer>() {
-      public int compare(final @KeyFor("finalistsCount") Integer teamOne,
-                         final @KeyFor("finalistsCount") Integer teamTwo) {
-        final int numCatsOne = finalistsCount.get(teamOne).size();
-        final int numCatsTwo = finalistsCount.get(teamTwo).size();
+    final List<Map.Entry<Integer, List<String>>> sortedTeams = new LinkedList<>(finalistsCount.entrySet());
+    Collections.sort(sortedTeams, new Comparator<Map.Entry<Integer, List<String>>>() {
+      public int compare(final Map.Entry<Integer, List<String>> one,
+                         final Map.Entry<Integer, List<String>> two) {
+        final int numCatsOne = one.getValue().size();
+        final int numCatsTwo = two.getValue().size();
         if (numCatsOne == numCatsTwo) {
           return 0;
         } else if (numCatsOne < numCatsTwo) {
@@ -69,8 +71,10 @@ public final class ScoreUtils {
     });
 
     final List<Map<String, Integer>> schedule = new LinkedList<Map<String, Integer>>();
-    for (final Integer team : sortedTeams) {
-      for (final String category : finalistsCount.get(team)) {
+    for (final Map.Entry<Integer, List<String>> sortedTeamsEntry : sortedTeams) {
+      final Integer team = sortedTeamsEntry.getKey();
+      final List<String> categories = sortedTeamsEntry.getValue();
+      for (final String category : categories) {
         boolean scheduled = false;
         final Iterator<Map<String, Integer>> iter = schedule.iterator();
         while (iter.hasNext()
