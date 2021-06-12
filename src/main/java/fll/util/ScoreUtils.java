@@ -14,10 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.checkerframework.checker.nullness.qual.KeyFor;
-
-import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
-
 /**
  * Scoring utilities.
  */
