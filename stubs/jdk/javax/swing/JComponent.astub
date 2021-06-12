@@ -14,5 +14,9 @@ public abstract class JComponent extends Container implements Serializable,
 
   public void setToolTipText(@UnknownInitialization(JComponent.class) JComponent this, @Nullable String text);
   public @Nullable String getToolTipText();
+
+  public void setForeground(@Nullable Color c);
+  
+  public void setBackground(@Nullable Color c);
   
 }

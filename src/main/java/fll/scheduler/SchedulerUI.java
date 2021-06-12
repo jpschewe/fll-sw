@@ -76,7 +76,6 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
@@ -366,11 +365,9 @@ public class SchedulerUI extends JFrame {
       final int returnVal = fileChooser.showSaveDialog(SchedulerUI.this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
         final File currentDirectory = fileChooser.getCurrentDirectory();
-        if (null == currentDirectory) {
-          return;
+        if (null != currentDirectory) {
+          PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
         }
-
-        PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
 
         File selectedFile = fileChooser.getSelectedFile();
         if (null == selectedFile) {
@@ -667,8 +664,11 @@ public class SchedulerUI extends JFrame {
 
       final int returnVal = fileChooser.showOpenDialog(SchedulerUI.this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
+
         final File currentDirectory = fileChooser.getCurrentDirectory();
-        PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
+        if (null != currentDirectory) {
+          PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
+        }
 
         final File selectedFile = fileChooser.getSelectedFile();
         if (null != selectedFile
@@ -863,14 +863,23 @@ public class SchedulerUI extends JFrame {
 
     @Override
     public void actionPerformed(final ActionEvent ae) {
-      FileOutputStream scoresheetFos = null;
       try {
         final File directory = getScheduleFile().getParentFile();
+        if (null == directory) {
+          final String message = "Cannot find a parent directory for "
+              + getScheduleFile()
+              + ", skipping writing of schedules";
+          LOGGER.warn("Cannot find a parent directory for {}, skipping writing of schedules", getScheduleFile());
+          JOptionPane.showMessageDialog(SchedulerUI.this, "Schedules not written", message,
+                                        JOptionPane.WARNING_MESSAGE);
+          return;
+        }
+
         final String baseFilename = Utilities.extractBasename(getScheduleFile());
         LOGGER.info("Writing detailed schedules to "
             + directory.getAbsolutePath());
 
-        getScheduleData().outputDetailedSchedules(getSchedParams(), getScheduleFile().getParentFile(), baseFilename);
+        getScheduleData().outputDetailedSchedules(getSchedParams(), directory, baseFilename);
         JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedule written '"
             + directory.getAbsolutePath()
             + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
@@ -894,9 +903,10 @@ public class SchedulerUI extends JFrame {
 
               final File scoresheetFile = new File(directory, baseFilename
                   + "-scoresheets.pdf");
-              scoresheetFos = new FileOutputStream(scoresheetFile);
+              try (FileOutputStream scoresheetFos = new FileOutputStream(scoresheetFile)) {
 
-              getScheduleData().outputPerformanceSheets(tournamentName, scoresheetFos, description);
+                getScheduleData().outputPerformanceSheets(tournamentName, scoresheetFos, description);
+              }
 
               final MapSubjectiveHeaders mapDialog = new MapSubjectiveHeaders(SchedulerUI.this, description,
                                                                               getScheduleData());
@@ -904,7 +914,7 @@ public class SchedulerUI extends JFrame {
               mapDialog.setVisible(true);
               if (!mapDialog.isCanceled()) {
                 final Map<ScoreCategory, String> categoryToSchedule = new HashMap<>();
-                final Map<ScoreCategory, String> filenameSuffixes = new HashMap<>();
+                final Map<ScoreCategory, @Nullable String> filenameSuffixes = new HashMap<>();
                 for (final SubjectiveScoreCategory scoreCategory : description.getSubjectiveCategories()) {
                   final String scheduleColumn = mapDialog.getSubjectiveHeaderForCategory(scoreCategory);
                   if (null == scheduleColumn) {
@@ -938,8 +948,6 @@ public class SchedulerUI extends JFrame {
         LOGGER.error(errorFormatter, e);
         JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
         return;
-      } finally {
-        IOUtils.closeQuietly(scoresheetFos);
       }
     }
   }
@@ -1117,7 +1125,9 @@ public class SchedulerUI extends JFrame {
       final int returnVal = fileChooser.showOpenDialog(SchedulerUI.this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
         final File currentDirectory = fileChooser.getCurrentDirectory();
-        PREFS.put(SCHEDULE_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
+        if (null != currentDirectory) {
+          PREFS.put(SCHEDULE_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
+        }
 
         final File selectedFile = fileChooser.getSelectedFile();
         if (null != selectedFile
@@ -1220,11 +1230,13 @@ public class SchedulerUI extends JFrame {
     mScheduleTable.repaint();
   }
 
-  private final TableCellRenderer schedTableRenderer = new DefaultTableCellRenderer() {
+  private final TableCellRenderer schedTableRenderer = new SchedTableRenderer();
+
+  private final class SchedTableRenderer extends DefaultTableCellRenderer {
 
     @Override
     public Component getTableCellRendererComponent(final JTable table,
-                                                   final Object value,
+                                                   final @Nullable Object value,
                                                    final boolean isSelected,
                                                    final boolean hasFocus,
                                                    final int row,
@@ -1350,7 +1362,7 @@ public class SchedulerUI extends JFrame {
   private final TableCellRenderer violationTableRenderer = new DefaultTableCellRenderer() {
     @Override
     public Component getTableCellRendererComponent(final JTable table,
-                                                   final Object value,
+                                                   final @Nullable Object value,
                                                    final boolean isSelected,
                                                    final boolean hasFocus,
                                                    final int row,

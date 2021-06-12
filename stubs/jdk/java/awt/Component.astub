@@ -13,6 +13,8 @@ public abstract class Component implements ImageObserver, MenuContainer,
                                     Object oldValue, Object newValue);
 
   public synchronized void addMouseListener(@UnknownInitialization MouseListener l);
-  
+
+  public void setForeground(@Nullable Color c);
+  public void setBackground(@Nullable Color c);
 
 }
