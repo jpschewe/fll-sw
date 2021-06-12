@@ -414,8 +414,11 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private final Action mSaveScheduleDescriptionAction = new AbstractAction("Save Schedule Description") {
-    {
+  private final Action mSaveScheduleDescriptionAction = new SaveScheduleDescriptionAction();
+
+  private final class SaveScheduleDescriptionAction extends AbstractAction {
+    SaveScheduleDescriptionAction() {
+      super("Save Schedule Description");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Save16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Save24.gif"));
       putValue(SHORT_DESCRIPTION, "Save the schedule description file");
@@ -427,10 +430,13 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       saveScheduleDescription();
     }
-  };
+  }
 
-  private final Action mNewScheduleDescriptionAction = new AbstractAction("New Schedule Description") {
-    {
+  private final Action mNewScheduleDescriptionAction = new NewScheduleDescriptionAction();
+
+  private final class NewScheduleDescriptionAction extends AbstractAction {
+    NewScheduleDescriptionAction() {
+      super("New Schedule Description");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/New16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/New24.gif"));
       putValue(SHORT_DESCRIPTION, "Createa a new schedule description file");
@@ -442,7 +448,7 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       newScheduleDescription();
     }
-  };
+  }
 
   private void newScheduleDescription() {
     final int result = JOptionPane.showConfirmDialog(SchedulerUI.this,
@@ -619,8 +625,11 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private final Action mRunSchedulerAction = new AbstractAction("Run Scheduler") {
-    {
+  private final Action mRunSchedulerAction = new RunSchedulerAction();
+
+  private final class RunSchedulerAction extends AbstractAction {
+    RunSchedulerAction() {
+      super("Run Scheduler");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/TipOfTheDay16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/TipOfTheDay24.gif"));
       putValue(SHORT_DESCRIPTION, "Run the scheduler on the current description");
@@ -631,10 +640,13 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       runScheduler();
     }
-  };
+  }
 
-  private final Action mOpenScheduleDescriptionAction = new AbstractAction("Open Schedule Description") {
-    {
+  private final Action mOpenScheduleDescriptionAction = new OpenScheduleDescriptionAction();
+
+  private final class OpenScheduleDescriptionAction extends AbstractAction {
+    OpenScheduleDescriptionAction() {
+      super("Open Schedule Description");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Open16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Open24.gif"));
       putValue(SHORT_DESCRIPTION, "Open the schedule description file");
@@ -671,7 +683,7 @@ public class SchedulerUI extends JFrame {
         }
       }
     }
-  };
+  }
 
   private void loadScheduleDescription(final File file) {
     final Properties properties = new Properties();
@@ -734,8 +746,11 @@ public class SchedulerUI extends JFrame {
     return toolbar;
   }
 
-  private final Action mReloadFileAction = new AbstractAction("Reload Schedule") {
-    {
+  private final Action mReloadFileAction = new ReloadFileAction();
+
+  private final class ReloadFileAction extends AbstractAction {
+    ReloadFileAction() {
+      super("Reload Schedule");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Refresh16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Refresh24.gif"));
       putValue(SHORT_DESCRIPTION, "Reload the file and check for violations");
@@ -780,10 +795,13 @@ public class SchedulerUI extends JFrame {
                                       JOptionPane.ERROR_MESSAGE);
       }
     }
-  };
+  }
 
-  private final Action mPreferencesAction = new AbstractAction("Preferences") {
-    {
+  private final Action mPreferencesAction = new PreferencesAction();
+
+  private final class PreferencesAction extends AbstractAction {
+    PreferencesAction() {
+      super("Preferences");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Preferences16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Preferences24.gif"));
       putValue(SHORT_DESCRIPTION, "Set scheduling preferences");
@@ -794,10 +812,13 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       JOptionPane.showMessageDialog(SchedulerUI.this, "Not implemented yet");
     }
-  };
+  }
 
-  private final Action mExitAction = new AbstractAction("Exit") {
-    {
+  private final Action mExitAction = new ExitAction();
+
+  private final class ExitAction extends AbstractAction {
+    ExitAction() {
+      super("Exit");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Stop16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Stop24.gif"));
       putValue(SHORT_DESCRIPTION, "Exit the application");
@@ -809,10 +830,13 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       SchedulerUI.this.setVisible(false);
     }
-  };
+  }
 
-  private final Action mDisplayGeneralScheduleAction = new AbstractAction("General Schedule") {
-    {
+  private final Action mDisplayGeneralScheduleAction = new DisplayGeneralScheduleAction();
+
+  private final class DisplayGeneralScheduleAction extends AbstractAction {
+    DisplayGeneralScheduleAction() {
+      super("General Schedule");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/History16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/History24.gif"));
       putValue(SHORT_DESCRIPTION, "Display the general schedule");
@@ -824,10 +848,13 @@ public class SchedulerUI extends JFrame {
       final String schedule = getScheduleData().computeGeneralSchedule();
       JOptionPane.showMessageDialog(SchedulerUI.this, schedule, "General Schedule", JOptionPane.INFORMATION_MESSAGE);
     }
-  };
+  }
 
-  private final Action mWriteSchedulesAction = new AbstractAction("Write Detailed Schedules") {
-    {
+  private final Action mWriteSchedulesAction = new WriteSchedulesAction();
+
+  private final class WriteSchedulesAction extends AbstractAction {
+    WriteSchedulesAction() {
+      super("Write Detailed Schedules");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Export16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Export24.gif"));
       putValue(SHORT_DESCRIPTION, "Write out the detailed schedules as a PDF");
@@ -915,7 +942,7 @@ public class SchedulerUI extends JFrame {
         IOUtils.closeQuietly(scoresheetFos);
       }
     }
-  };
+  }
 
   /**
    * Run the table optimizer on the current schedule and open the resulting
@@ -1050,15 +1077,24 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private final Action mRunOptimizerAction = new AbstractAction("Run Table Optimizer") {
+  private final Action mRunOptimizerAction = new RunOptimizerAction();
+
+  private final class RunOptimizerAction extends AbstractAction {
+    RunOptimizerAction() {
+      super("Run Table Optimizer");
+    }
+
     @Override
     public void actionPerformed(final ActionEvent ae) {
       runTableOptimizer();
     }
-  };
+  }
 
-  private final Action mOpenScheduleAction = new AbstractAction("Open Schedule") {
-    {
+  private final Action mOpenScheduleAction = new OpenScheduleAction();
+
+  private final class OpenScheduleAction extends AbstractAction {
+    OpenScheduleAction() {
+      super("Open Schedule");
       putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Open16.gif"));
       putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Open24.gif"));
       putValue(SHORT_DESCRIPTION, "Open a schedule file");
@@ -1100,7 +1136,7 @@ public class SchedulerUI extends JFrame {
         }
       }
     }
-  };
+  }
 
   /**
    * If there is more than 1 sheet, prompt, otherwise just use the sheet.
