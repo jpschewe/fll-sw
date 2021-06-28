@@ -524,11 +524,7 @@ public final class ScoreEntry {
     writer.println("<tr><td colspan='4' class='goal-group-spacer'>&nbsp;</td></tr>");
     if (!StringUtils.isBlank(category)) {
       writer.println("<tr>");
-      writer.println("<td colspan='2' class='center truncate'><b>"
-          + category
-          + "</b></td>");
-      // repeat category over the count and score columns
-      writer.println("<td colspan='2' class='center truncate'><b>"
+      writer.println("<td colspan='4' class='center truncate'><b>"
           + category
           + "</b></td>");
       writer.println("</tr>");
