@@ -240,9 +240,7 @@ function check_restrictions() {
           valign="middle">
 
           <table
-            class='score-entry'
-            border='1'
-            bordercolor='#808080'>
+            class='score-entry'>
             <colgroup>
               <!--  goal -->
               <col width="50%" />

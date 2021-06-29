@@ -1,9 +1,29 @@
-TD {
-    font-family: arial
-}
-
 table .score-entry {
     width: 100%;
+}
+
+.score-entry th, .score-entry td {
+    border: 1px solid #808080;
+    font-size: large;
+}
+
+.score-entry label {
+    display: block;
+}
+
+.score-entry label input {
+    display: none;
+}
+
+.score-entry input+span {
+    width: 100%;
+    display: inline-block;
+    background: #ddd;
+    text-align: center;
+}
+
+.score-entry input:checked+span {
+    background: #ccc;
 }
 
 #floating-messages {
@@ -28,7 +48,6 @@ table .score-entry {
 }
 
 td .goal-title {
-    font-size: medium;
     font-weight: bold;
     text-align: right;
 }

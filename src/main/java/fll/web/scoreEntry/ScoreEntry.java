@@ -561,9 +561,9 @@ public final class ScoreEntry {
         generateEnumeratedGoalButtons(goal, name, writer);
         writer.println("  </td>");
       } else {
-        writer.println("  <td>");
+        writer.println("  <td><!-- start simple goal buttons -->");
         generateSimpleGoalButtons(goal, name, writer);
-        writer.println("  </td>");
+        writer.println("  </td><!-- after simple goal buttons -->");
       } // end simple goal
     } // goal
 
@@ -588,15 +588,15 @@ public final class ScoreEntry {
                                                 final String name,
                                                 final JspWriter writer)
       throws IOException {
-    // start inc/dec buttons
-    writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='150'>");
-    writer.println("      <tr align='center'>");
-
+    
     final double min = goalEle.getMin();
     final double max = goalEle.getMax();
     if (goalEle.isYesNo()) {
       generateYesNoButtons(name, writer);
     } else {
+      writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='150'> <!-- start inc/dec table -->");
+      writer.println("      <tr align='center'>");
+
       final double range = max
           - min;
       final int maxRangeIncrement = (int) Math.floor(range);
@@ -624,11 +624,9 @@ public final class ScoreEntry {
 
       generateIncDecButton(name, maxRangeIncrement, writer);
 
+      writer.println("       </tr>");
+      writer.println("    </table><!-- end inc dec table -->");
     }
-    writer.println("       </tr>");
-    writer.println("    </table>");
-    writer.println("  </td>");
-    // end inc/dec buttons
 
     // count
     writer.println("  <td align='right'>");
@@ -698,7 +696,7 @@ public final class ScoreEntry {
     // generate radio buttons with calls to set<name>
 
     // order of yes/no buttons needs to match order in generateRefreshBody
-    writer.println("        <td>");
+    writer.println("        <label>");
     writer.println("          <input type='radio' id='"
         + name
         + "_no' name='"
@@ -706,12 +704,9 @@ public final class ScoreEntry {
         + "' value='0' onclick='"
         + getSetMethodName(name)
         + "(0)'>");
-    writer.println("          <label for='"
-        + name
-        + "_no'>No</label>");
-
-    writer.println("          &nbsp;&nbsp;");
-
+    writer.println("        <span>No</span>");
+    writer.println("        </label>");
+    writer.println("        <label>");
     writer.println("          <input type='radio' id='"
         + name
         + "_yes' name='"
@@ -719,10 +714,8 @@ public final class ScoreEntry {
         + "' value='1' onclick='"
         + getSetMethodName(name)
         + "(1)'>");
-    writer.println("          <label for='"
-        + name
-        + "_yes'>Yes</label>");
-    writer.println("        </td>");
+    writer.println("        <span>Yes</span>");
+    writer.println("        </label>");
   }
 
   /**
@@ -815,36 +808,29 @@ public final class ScoreEntry {
                                                     final String goalName,
                                                     final JspWriter writer)
       throws IOException {
-    writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='100%'>");
-
     for (final EnumeratedValue valueEle : goal.getSortedValues()) {
       final String valueTitle = valueEle.getTitle();
       final String value = valueEle.getValue();
       final String id = getIDForEnumRadio(goalName, value);
-      writer.println("      <tr>");
-      writer.println("        <td class='right'>");
+
+      writer.println("      <label>");
       writer.println("          <input type='radio' name='"
           + goalName
           + "' value='"
           + value
           + "' id='"
           + id
-          + "' ' onclick='"
+          + "' onclick='"
           + getSetMethodName(goalName)
           + "(\""
           + value
-          + "\")'>");
-      writer.println("        </td>");
-      writer.println("        <td><label for='"
-          + id
-          + "'/>");
+          + "\")'/>");
+      writer.println("        <span>");
       writer.println("          "
           + valueTitle);
-      writer.println("        </td>");
-      writer.println("      </tr>");
+      writer.println("        </span>");
+      writer.println("      </label>");
     }
-
-    writer.println("        </table>");
 
     writer.println("  <td align='right'>");
     writer.println("    <input type='text' name='"
