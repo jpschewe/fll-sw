@@ -454,6 +454,10 @@ tasks.register("jspToClasses", JavaCompile) {
     destinationDir(jspJavaClasses)
 
     classpath = configurations.jspc + sourceSets.main.runtimeClasspath
+    
+    checkerFramework {
+      skipCheckerFramework = true
+    }
 }
 check.dependsOn(jspToClasses)
 run.dependsOn(jspToClasses)
