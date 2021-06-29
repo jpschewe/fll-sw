@@ -1,3 +1,4 @@
+* Fix initial display of conditions in challenge description editor
 * #865 - Remove use of jquery-json in favor of standard JSON object included in current browsers
 * #926 - Add judge initials to the subjective rubrics
 * #922 - If the server is offline when synchronizing subjective scores, give the user a reasonable error message
