@@ -47,6 +47,7 @@ import fll.xml.InequalityComparison;
     comparisonEditor.addActionListener(e -> {
       stmt.setComparison(comparisonEditor.getItemAt(comparisonEditor.getSelectedIndex()));
     });
+    comparisonEditor.setSelectedItem(stmt.getComparison());
 
     rightEditor = new StringValueEditor(stmt.getRight(), goalScope);
     container.add(rightEditor);

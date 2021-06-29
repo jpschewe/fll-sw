@@ -48,6 +48,7 @@ import fll.xml.VariableScope;
     comparisonEditor.addActionListener(e -> {
       stmt.setComparison(comparisonEditor.getItemAt(comparisonEditor.getSelectedIndex()));
     });
+    comparisonEditor.setSelectedItem(stmt.getComparison());
 
     rightEditor = new PolynomialEditor(stmt.getRight(), goalScope, variableScope);
     container.add(rightEditor);
