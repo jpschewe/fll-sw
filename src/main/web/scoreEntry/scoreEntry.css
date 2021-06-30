@@ -2,33 +2,45 @@ table .score-entry {
     width: 100%;
 }
 
+.score-entry .slider {
+    width: 100%;
+}
+
 .score-entry th, .score-entry td {
     border: 1px solid #808080;
     font-size: large;
 }
 
-.score-entry .slider {
-    width: 100%;
+.score-entry .enum-button {
+    display: block;
+    border: 1px solid #AAAAAA;
 }
 
-.score-entry label {
-    display: block;
-    border: 1px solid #ccc;
+.score-entry .y-n-button {
+    display: inline-block;
+    border: 1px solid #AAAAAA;
+    width: 48%;
 }
 
 .score-entry label input {
     display: none;
 }
 
-.score-entry input+span {
-    width: 100%;
+.score-entry .y-n-button input+span {
     display: inline-block;
-    background: #ddd;
+    width: 100%;
+    background: #DDDDDD;
     text-align: center;
 }
 
+.score-entry .enum-button input+span {
+    background: #DDDDDD;
+    text-align: center;
+    display: block;
+}
+
 .score-entry input:checked+span {
-    background: #ccc;
+    background: #AAAAAA;
 }
 
 #floating-messages {

@@ -742,12 +742,12 @@ public final class ScoreEntry {
     // generate radio buttons with calls to set<name>
 
     // order of yes/no buttons needs to match order in generateRefreshBody
-    writer.println(String.format("        <label>"));
+    writer.println(String.format("        <label class='y-n-button'>"));
     writer.println(String.format("          <input type='radio' id='%s_no' name='%s' value='0' onclick='%s(0)'>", name,
                                  name, getSetMethodName(name)));
     writer.println(String.format("        <span id='%s_no_span'>No</span>", name));
     writer.println(String.format("        </label>"));
-    writer.println(String.format("        <label>"));
+    writer.println(String.format("        <label class='y-n-button'>"));
     writer.println(String.format("          <input type='radio' id='%s_yes' name='%s' value='1' onclick='%s(1)'>", name,
                                  name, getSetMethodName(name)));
     writer.println(String.format("        <span id='%s_yes_span'>Yes</span>", name));
@@ -851,7 +851,7 @@ public final class ScoreEntry {
       final String value = valueEle.getValue();
       final String id = getIDForEnumRadio(goalName, value);
 
-      writer.println("      <label>");
+      writer.println("      <label class='enum-button'>");
       writer.println(String.format("          <input type='radio' name='%s' value='%s' id='%s' onclick='%s(\"%s\")'/>",
                                    goalName, value, id, getSetMethodName(goalName), value));
       writer.println(String.format("        <span id='%s_span'>", id));
