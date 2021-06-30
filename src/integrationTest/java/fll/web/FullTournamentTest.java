@@ -875,29 +875,8 @@ public class FullTournamentTest {
                   }
                   selenium.findElement(By.id(buttonID)).click();
                 } else {
-                  final int initialValue = (int) goal.getInitialValue();
                   final int value = rs.getInt(name);
-                  final String buttonID;
-                  final int difference;
-                  if (initialValue < value) {
-                    // increment
-                    difference = value
-                        - initialValue;
-                    buttonID = ScoreEntry.getIncDecButtonID(name, 1);
-                  } else if (value < initialValue) {
-                    // decrement
-                    difference = initialValue
-                        - value;
-                    buttonID = ScoreEntry.getIncDecButtonID(name, -1);
-                  } else {
-                    // no change
-                    difference = 0;
-                    buttonID = null;
-                  }
-                  for (int i = 0; i < difference; ++i) {
-                    selenium.findElement(By.id(buttonID)).click();
-                  }
-
+                  selenium.findElement(By.id(name)).sendKeys(String.valueOf(value));
                 }
               } // !computed
             } // foreach goal
