@@ -991,7 +991,7 @@ public class FullTournamentTest {
             } // foreach goal
 
             // Set the verified field to yes
-            seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("Verified_yes"))).click();
+            seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("Verified_yes_span"))).click();
 
             // submit score
             selenium.findElement(By.id("submit_score")).click();
