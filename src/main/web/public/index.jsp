@@ -28,11 +28,6 @@ fll.web.PublicIndex.populateContext(application, pageContext);
         <li>Current Tournament -&gt; ${tournamentName }</li>
 
         <li>
-            <a href='<c:url value="/challenge.xml"/>'>Challenge
-                Descriptor</a>
-        </li>
-
-        <li>
             <a href='<c:url value="/welcome.jsp"/>'>Welcome Page</a>
         <li>
             <a href='<c:url value="/scoreboard/main.jsp" />'>Performance
@@ -60,7 +55,7 @@ fll.web.PublicIndex.populateContext(application, pageContext);
         <li>
             <a
                 href='<c:url value="/report/finalist/FinalistTeams.jsp"/>'>
-                Finalist Teams</a>
+                Finalist Teams (State only)</a>
         </li>
 
 
