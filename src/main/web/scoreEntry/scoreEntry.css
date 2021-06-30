@@ -7,6 +7,10 @@ table .score-entry {
     font-size: large;
 }
 
+.score-entry .slider {
+    width: 100%;
+}
+
 .score-entry label {
     display: block;
     border: 1px solid #ccc;

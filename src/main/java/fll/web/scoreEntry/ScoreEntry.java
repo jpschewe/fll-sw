@@ -70,6 +70,11 @@ public final class ScoreEntry {
    */
   private static final int INDENT_LEVEL = 2;
 
+  /**
+   * Maximum range to use a slider for.
+   */
+  private static final int SLIDER_RANGE_MAX = 20;
+
   private ScoreEntry() {
   }
 
@@ -101,12 +106,44 @@ public final class ScoreEntry {
                                   final HttpSession session,
                                   final PageContext pageContext)
       throws IOException, SQLException {
+
+    setupRangeSliders(writer, application);
+
     final boolean editFlag = (Boolean) pageContext.getAttribute("EditFlag");
     if (editFlag) {
       generateInitForScoreEdit(writer, application, session);
     } else {
       generateInitForNewScore(writer, application);
     }
+  }
+
+  private static void setupRangeSliders(final JspWriter writer,
+                                        final ServletContext application)
+      throws IOException {
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
+    final PerformanceScoreCategory performanceElement = description.getPerformance();
+
+    for (final AbstractGoal element : performanceElement.getAllGoals()) {
+      if (!element.isComputed()) {
+        final Goal goal = (Goal) element;
+
+        final double min = goal.getMin();
+        final double max = goal.getMax();
+        final double range = max
+            - min
+            + 1;
+        final String name = goal.getName();
+
+        if (!goal.isYesNo()
+            && !goal.isEnumerated()
+            && range <= SLIDER_RANGE_MAX) {
+          writer.println(String.format("  document.scoreEntry.%s.oninput = function() {", getSliderName(name)));
+          writer.println(String.format("    document.scoreEntry.%s.innerHTML = this.value;", name));
+          writer.println(String.format("    %s(this.value);", getSetMethodName(name)));
+          writer.println("  };");
+        } // use slider
+      } // not computed
+    } // foreach goal
   }
 
   /**
@@ -300,6 +337,9 @@ public final class ScoreEntry {
         final double multiplier = goal.getMultiplier();
         final double min = goal.getMin();
         final double max = goal.getMax();
+        final double range = max
+            - min
+            + 1;
         final String rawVarName = getVarNameForRawScore(name);
         final String computedVarName = getVarNameForComputedScore(name);
 
@@ -352,6 +392,11 @@ public final class ScoreEntry {
           // set the count form element
           formatter.format("document.scoreEntry.%s.value = %s;%n", name, rawVarName);
           formatter.format("%s = %s * %s;%n", computedVarName, rawVarName, multiplier);
+
+          // link slider to count column
+          if (range <= SLIDER_RANGE_MAX) {
+            formatter.format("document.scoreEntry.%s.value = %s;%n", getSliderName(name), rawVarName);
+          }
         }
 
         // add to the total score
@@ -585,17 +630,24 @@ public final class ScoreEntry {
                                                 final JspWriter writer)
       throws IOException {
 
-    writer.println("  <td><!-- start simple goal buttons -->");
+    // edit cell
+    writer.println("  <td>");
     final double min = goalEle.getMin();
     final double max = goalEle.getMax();
+    final double range = max
+        - min
+        + 1;
     if (goalEle.isYesNo()) {
       generateYesNoButtons(name, writer);
+    } else if (range <= SLIDER_RANGE_MAX) {
+      // use slider
+      writer.println(String.format("<input type='range' min='%d' max='%d' class='slider' id='%s' />", (int) min,
+                                   (int) max, getSliderName(name)));
     } else {
-      writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='150'> <!-- start inc/dec table -->");
+      // use buttons
+      writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='150'>");
       writer.println("      <tr align='center'>");
 
-      final double range = max
-          - min;
       final int maxRangeIncrement = (int) Math.floor(range);
 
       generateIncDecButton(name, -1
@@ -622,25 +674,21 @@ public final class ScoreEntry {
       generateIncDecButton(name, maxRangeIncrement, writer);
 
       writer.println("       </tr>");
-      writer.println("    </table><!-- end inc dec table -->");
+      writer.println("    </table>");
     }
-    writer.println("  </td><!-- after simple goal buttons -->");
+    writer.println("  </td>");
 
-    // count
+    // count cell
     writer.println("  <td align='right'>");
-    if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
-        && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-      writer.println("    <input type='text' name='"
-          + name
-          + "_radioValue' size='3' align='right' readonly tabindex='-1'>");
+    if (goalEle.isYesNo()) {
+      writer.println(String.format("    <input type='text' name='%s_radioValue' size='3' align='right' readonly tabindex='-1'>",
+                                   name));
     } else {
       // allow these to be editable
-      writer.println("    <input type='text' name='"
-          + name
-          + "' size='3' align='right' onChange='"
-          + getCheckMethodName(name)
-          + "()'>");
+      writer.println(String.format("    <input type='text' name='%s' size='3' align='right' onChange='%s()'>", name,
+                                   getCheckMethodName(name)));
     }
+    writer.println("  </td>");
   }
 
   /**
@@ -868,6 +916,14 @@ public final class ScoreEntry {
   private static String getVarNameForRawScore(final String goalName) {
     return goalName
         + "_raw";
+  }
+
+  /**
+   * The name of the slider for the specified goal.
+   */
+  private static String getSliderName(final String goalName) {
+    return goalName
+        + "_slider";
   }
 
   /**
