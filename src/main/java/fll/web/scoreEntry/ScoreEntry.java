@@ -557,13 +557,9 @@ public final class ScoreEntry {
     } else {
       if (goal.isEnumerated()) {
         // enumerated
-        writer.println("  <td>");
         generateEnumeratedGoalButtons(goal, name, writer);
-        writer.println("  </td>");
       } else {
-        writer.println("  <td><!-- start simple goal buttons -->");
         generateSimpleGoalButtons(goal, name, writer);
-        writer.println("  </td><!-- after simple goal buttons -->");
       } // end simple goal
     } // goal
 
@@ -588,7 +584,8 @@ public final class ScoreEntry {
                                                 final String name,
                                                 final JspWriter writer)
       throws IOException {
-    
+
+    writer.println("  <td><!-- start simple goal buttons -->");
     final double min = goalEle.getMin();
     final double max = goalEle.getMax();
     if (goalEle.isYesNo()) {
@@ -627,6 +624,7 @@ public final class ScoreEntry {
       writer.println("       </tr>");
       writer.println("    </table><!-- end inc dec table -->");
     }
+    writer.println("  </td><!-- after simple goal buttons -->");
 
     // count
     writer.println("  <td align='right'>");
@@ -696,26 +694,16 @@ public final class ScoreEntry {
     // generate radio buttons with calls to set<name>
 
     // order of yes/no buttons needs to match order in generateRefreshBody
-    writer.println("        <label>");
-    writer.println("          <input type='radio' id='"
-        + name
-        + "_no' name='"
-        + name
-        + "' value='0' onclick='"
-        + getSetMethodName(name)
-        + "(0)'>");
-    writer.println("        <span>No</span>");
-    writer.println("        </label>");
-    writer.println("        <label>");
-    writer.println("          <input type='radio' id='"
-        + name
-        + "_yes' name='"
-        + name
-        + "' value='1' onclick='"
-        + getSetMethodName(name)
-        + "(1)'>");
-    writer.println("        <span>Yes</span>");
-    writer.println("        </label>");
+    writer.println(String.format("        <label>"));
+    writer.println(String.format("          <input type='radio' id='%s_no' name='%s' value='0' onclick='%s(0)'>", name,
+                                 name, getSetMethodName(name)));
+    writer.println(String.format("        <span id='%s_no_span'>No</span>", name));
+    writer.println(String.format("        </label>"));
+    writer.println(String.format("        <label>"));
+    writer.println(String.format("          <input type='radio' id='%s_yes' name='%s' value='1' onclick='%s(1)'>", name,
+                                 name, getSetMethodName(name)));
+    writer.println(String.format("        <span id='%s_yes_span'>Yes</span>", name));
+    writer.println(String.format("        </label>"));
   }
 
   /**
@@ -808,34 +796,29 @@ public final class ScoreEntry {
                                                     final String goalName,
                                                     final JspWriter writer)
       throws IOException {
+
+    writer.println("  <td>");
     for (final EnumeratedValue valueEle : goal.getSortedValues()) {
       final String valueTitle = valueEle.getTitle();
       final String value = valueEle.getValue();
       final String id = getIDForEnumRadio(goalName, value);
 
       writer.println("      <label>");
-      writer.println("          <input type='radio' name='"
-          + goalName
-          + "' value='"
-          + value
-          + "' id='"
-          + id
-          + "' onclick='"
-          + getSetMethodName(goalName)
-          + "(\""
-          + value
-          + "\")'/>");
-      writer.println("        <span>");
+      writer.println(String.format("          <input type='radio' name='%s' value='%s' id='%s' onclick='%s(\"%s\")'/>",
+                                   goalName, value, id, getSetMethodName(goalName), value));
+      writer.println(String.format("        <span id='%s_span'>", id));
       writer.println("          "
           + valueTitle);
       writer.println("        </span>");
       writer.println("      </label>");
     }
+    writer.println("  </td>");
 
     writer.println("  <td align='right'>");
     writer.println("    <input type='text' name='"
         + goalName
-        + "_radioValue' size='10' align='right' readonly tabindex='-1'>");
+        + "_radioValue' size='10' align='right' readonly tabindex='-1'/>");
+    writer.println("  </td>");
 
   }
 

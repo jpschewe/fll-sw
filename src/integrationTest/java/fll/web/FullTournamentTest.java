@@ -861,16 +861,17 @@ public class FullTournamentTest {
                 if (goal.isEnumerated()) {
                   final String valueStr = rs.getString(name);
                   final String radioID = ScoreEntry.getIDForEnumRadio(name, valueStr);
-                  selenium.findElement(By.id(radioID)).click();
+                  selenium.findElement(By.id(radioID
+                      + "_span")).click();
                 } else if (goal.isYesNo()) {
                   final int value = rs.getInt(name);
                   final String buttonID;
                   if (0 == value) {
                     buttonID = name
-                        + "_no";
+                        + "_no_span";
                   } else {
                     buttonID = name
-                        + "_yes";
+                        + "_yes_span";
                   }
                   selenium.findElement(By.id(buttonID)).click();
                 } else {
