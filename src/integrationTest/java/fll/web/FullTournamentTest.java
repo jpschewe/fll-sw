@@ -876,7 +876,7 @@ public class FullTournamentTest {
                   selenium.findElement(By.id(buttonID)).click();
                 } else {
                   final int value = rs.getInt(name);
-                  selenium.findElement(By.id(name)).sendKeys(String.valueOf(value));
+                  selenium.findElement(By.name(name)).sendKeys(String.valueOf(value));
                 }
               } // !computed
             } // foreach goal
