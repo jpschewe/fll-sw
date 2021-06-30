@@ -9,6 +9,7 @@ table .score-entry {
 
 .score-entry label {
     display: block;
+    border: 1px solid #ccc;
 }
 
 .score-entry label input {
