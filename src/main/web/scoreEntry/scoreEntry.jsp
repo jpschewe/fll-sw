@@ -64,9 +64,6 @@ EditFlag = true;
     <c:if test="${not isBye}">
 
 function init() {
-  // disable text selection
-  document.onselectstart=new Function ("return false")
-
   <%ScoreEntry.generateInit(out, application, session, pageContext);%>
 
   refresh();
