@@ -31,6 +31,10 @@ OPTION {
     background-color: black;
     color: #e0e0e0;
 }
+
+#container, #container table, #container select {
+    width: 100%;
+}
 </style>
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js' />"></script>
@@ -133,8 +137,14 @@ OPTION {
     <c:remove var="message" />
 
 
-    <table>
+    <table id='container'>
         <!-- outer table -->
+
+        <colgroup>
+            <col width="50%" />
+            <col width="50%" />
+        </colgroup>
+
         <tr>
             <td>
                 <form action="GatherScoreEntryData" method="POST"
@@ -246,7 +256,6 @@ OPTION {
                         <tr>
                             <!-- submit button -->
                             <td align='left'>
-                                <!--<font face='arial' size='4'><b>Submit</b></font>-->
                                 <input class='dark_bg' type="submit"
                                     id="verify_submit"
                                     value="Verify Score">

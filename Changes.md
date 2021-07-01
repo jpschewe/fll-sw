@@ -1,3 +1,4 @@
+* #934 - make team selection boxes before score entry larger
 * #927 - UI changes to make performance score entry more friendly on tablet devices
 * Fix initial display of conditions in challenge description editor
 * #865 - Remove use of jquery-json in favor of standard JSON object included in current browsers
