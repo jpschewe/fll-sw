@@ -14,7 +14,6 @@
    OPTION {color:#e0e0e0; }
    .dark_bg  {font-size:10pt; font-weight:bold; background-color:black; color:#e0e0e0; }
   </style>
-<script type="text/javascript" src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 <script type='text/javascript' src="<c:url value='/js/fll-functions.js' />"></script>
 
 <script type='text/javascript'>
@@ -73,7 +72,7 @@ function openSocket() {
   socket.onclose = socketClosed;
 }
 
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
   editFlagBoxClicked();
   reloadRuns();
   
