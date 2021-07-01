@@ -1,3 +1,4 @@
+* #927 - UI changes to make performance score entry more friendly on tablet devices
 * Fix initial display of conditions in challenge description editor
 * #865 - Remove use of jquery-json in favor of standard JSON object included in current browsers
 * #926 - Add judge initials to the subjective rubrics
