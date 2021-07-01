@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -19,8 +20,7 @@ import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import fll.util.FLLInternalException;
-import net.mtu.eggplant.util.sql.SQLFunctions;
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 /**
  * Information about a tournament table.
@@ -96,23 +96,18 @@ public final class TableInformation implements Serializable {
                                                     final String division)
       throws SQLException {
     final List<Integer> tableIds = new LinkedList<>();
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT table_id FROM table_division" //
-          + " WHERE playoff_division = ?"//
-          + " AND tournament = ?" //
-      );
+    try (PreparedStatement prep = connection.prepareStatement("SELECT table_id FROM table_division" //
+        + " WHERE playoff_division = ?"//
+        + " AND tournament = ?" //
+    )) {
       prep.setString(1, division);
       prep.setInt(2, tournament);
-      rs = prep.executeQuery();
-      while (rs.next()) {
-        final int id = rs.getInt(1);
-        tableIds.add(id);
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final int id = rs.getInt(1);
+          tableIds.add(id);
+        }
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
     return tableIds;
   }
@@ -133,79 +128,63 @@ public final class TableInformation implements Serializable {
     final List<Integer> tableIdsForDivision = getTablesForDivision(connection, tournament, division);
 
     final List<TableInformation> tableInfo = new LinkedList<>();
-    PreparedStatement getAllTables = null;
-    ResultSet allTables = null;
-    PreparedStatement prep = null;
-    ResultSet rs = null;
     final Map<Integer, Integer> tableUsage = new HashMap<>();
-    try {
-      // get all tables
-      getAllTables = connection.prepareStatement("select tablenames.PairID, tablenames.SideA, tablenames.SideB" //
-          + " FROM tablenames" //
-          + " WHERE tablenames.Tournament = ?");
+    try (
+        PreparedStatement getAllTables = connection.prepareStatement("select tablenames.PairID, tablenames.SideA, tablenames.SideB" //
+            + " FROM tablenames" //
+            + " WHERE tablenames.Tournament = ?")) {
       getAllTables.setInt(1, tournament);
-      allTables = getAllTables.executeQuery();
-      while (allTables.next()) {
-        final int pairId = allTables.getInt(1);
-        final String sideA = allTables.getString(2);
-        final String sideB = allTables.getString(3);
+      try (ResultSet allTables = getAllTables.executeQuery()) {
+        while (allTables.next()) {
+          final int pairId = allTables.getInt(1);
+          final String sideA = castNonNull(allTables.getString(2));
+          final String sideB = castNonNull(allTables.getString(3));
 
-        if (null == sideA
-            || null == sideB) {
-          throw new FLLInternalException("Found null table sides. sideA: "
-              + sideA
-              + " sideB: "
-              + sideB);
-        }
+          final boolean use = tableIdsForDivision.isEmpty()
+              || tableIdsForDivision.contains(pairId);
 
-        final boolean use = tableIdsForDivision.isEmpty()
-            || tableIdsForDivision.contains(pairId);
+          final TableInformation info = new TableInformation(pairId, sideA, sideB, use);
+          tableInfo.add(info);
+        } // foreach result
+      } // allTables
+    } // getAllTables
 
-        final TableInformation info = new TableInformation(pairId, sideA, sideB, use);
-        tableInfo.add(info);
-      }
-
-      // sort by the usage
-      prep = connection.prepareStatement("select tablenames.PairID, COUNT(tablenames.PairID) as c"//
-          + " FROM PlayoffData, tablenames" //
-          + " WHERE PlayoffData.Tournament = ?" //
-          + " AND PlayoffData.Tournament = tablenames.Tournament" //
-          + " AND AssignedTable IS NOT NULL" //
-          + " AND (PlayoffData.AssignedTable = tablenames.SideA OR PlayoffData.AssignedTable = tablenames.SideB)"//
-          + " GROUP BY tablenames.PairID");
+    // sort by the usage
+    try (PreparedStatement prep = connection.prepareStatement("select tablenames.PairID, COUNT(tablenames.PairID) as c"//
+        + " FROM PlayoffData, tablenames" //
+        + " WHERE PlayoffData.Tournament = ?" //
+        + " AND PlayoffData.Tournament = tablenames.Tournament" //
+        + " AND AssignedTable IS NOT NULL" //
+        + " AND (PlayoffData.AssignedTable = tablenames.SideA OR PlayoffData.AssignedTable = tablenames.SideB)"//
+        + " GROUP BY tablenames.PairID")) {
       prep.setInt(1, tournament);
 
       // get table usage
-      rs = prep.executeQuery();
-      while (rs.next()) {
-        final int pairId = rs.getInt(1);
-        final int count = rs.getInt(2);
-        tableUsage.put(pairId, count);
-      }
-
-      // sort by table usage
-      Collections.sort(tableInfo, (one,
-                                   two) -> {
-        final Integer oneUse = tableUsage.get(one.getId());
-        final Integer twoUse = tableUsage.get(two.getId());
-        if (null == oneUse
-            && null == twoUse) {
-          return 0;
-        } else if (null == oneUse) {
-          return -1;
-        } else if (null == twoUse) {
-          return 1;
-        } else {
-          return oneUse.compareTo(twoUse);
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final int pairId = rs.getInt(1);
+          final int count = rs.getInt(2);
+          tableUsage.put(pairId, count);
         }
-      });
+      } // result set
+    } // prepared statement
 
-    } finally {
-      SQLFunctions.close(allTables);
-      SQLFunctions.close(getAllTables);
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
+    // sort by table usage
+    Collections.sort(tableInfo, (one,
+                                 two) -> {
+      final Integer oneUse = tableUsage.get(one.getId());
+      final Integer twoUse = tableUsage.get(two.getId());
+      if (null == oneUse
+          && null == twoUse) {
+        return 0;
+      } else if (null == oneUse) {
+        return -1;
+      } else if (null == twoUse) {
+        return 1;
+      } else {
+        return oneUse.compareTo(twoUse);
+      }
+    });
 
     return tableInfo;
   }
