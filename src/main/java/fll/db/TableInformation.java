@@ -22,6 +22,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
+import fll.Tournament;
+
 /**
  * Information about a tournament table.
  */
@@ -205,6 +207,33 @@ public final class TableInformation implements Serializable {
       }
     }
     return null;
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournament tournament to get tables for
+   * @return all table names at the tournament
+   */
+  public static Collection<String> getAllTableNames(final Connection connection,
+                                                    final Tournament tournament)
+      throws SQLException {
+    final Collection<String> tables = new LinkedList<>();
+
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT sidea, sideb FROM tablenames WHERE tournament = ?")) {
+      prep.setInt(1, tournament.getTournamentID());
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final String sideA = castNonNull(rs.getString(1));
+          tables.add(sideA);
+
+          final String sideB = castNonNull(rs.getString(2));
+          tables.add(sideB);
+        }
+      } // result set
+    } // prepared statement
+
+    return tables;
   }
 
 }

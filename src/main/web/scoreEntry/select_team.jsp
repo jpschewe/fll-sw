@@ -40,6 +40,8 @@ OPTION {
     src="<c:url value='/js/fll-functions.js' />"></script>
 
 <script type='text/javascript'>
+  const scoreEntrySelectedTable = "${scoreEntrySelectedTable}";
+
   function editFlagBoxClicked() {
     var text = document.getElementById('select_number_text');
     if (document.selectTeam.EditFlag.checked) {
@@ -95,9 +97,13 @@ OPTION {
 
   document.addEventListener('DOMContentLoaded', function() {
     editFlagBoxClicked();
-    reloadRuns();
 
-    openSocket();
+    if (!scoreEntrySelectedTable) {
+      // only use unverified code when not using the tablets 
+
+      reloadRuns();
+      openSocket();
+    }
   });
 </script>
 </head>
@@ -132,17 +138,43 @@ OPTION {
         </tr>
     </table>
 
+
+
     <div class='status-message'>${message}</div>
     <%-- clear out the message, so that we don't see it again --%>
     <c:remove var="message" />
+
+    <div>
+        <c:choose>
+            <c:when test="${not empty scoreEntrySelectedTable}">
+Entering scores for table ${scoreEntrySelectedTable}.
+</c:when>
+            <c:otherwise>
+Entering scores for all tables.
+</c:otherwise>
+        </c:choose>
+        Visit <a href="choose-table.jsp">this page</a> to change the
+        table that scores are being entered for. This controls the order
+        of the teams listed in the left selection list.
+    </div>
+
 
 
     <table id='container'>
         <!-- outer table -->
 
         <colgroup>
-            <col width="50%" />
-            <col width="50%" />
+            <c:choose>
+                <c:when test="${not empty scoreEntrySelectedTable}">
+                    <!-- tablet entry -->
+                    <col width="100%" />
+                </c:when>
+                <c:otherwise>
+                    <!-- computer entry -->
+                    <col width="50%" />
+                    <col width="50%" />
+                </c:otherwise>
+            </c:choose>
         </colgroup>
 
         <tr>
@@ -232,47 +264,55 @@ OPTION {
             </td>
             <!-- left table -->
 
-            <td valign='top'>
+            <c:if test="${empty scoreEntrySelectedTable}">
+                <%-- no verification when using tablet for entry --%>
+
+                <td valign='top'>
+                    <!-- right table -->
+                    <form action="GatherScoreEntryData" method="POST"
+                        name="verify">
+                        <input type="hidden" name='EditFlag'
+                            value="true" />
+
+                        <table>
+                            <tr align='left' valign='top'>
+                                <td>
+                                    <!-- pick team from a list -->
+                                    <br>
+                                    <font face='arial' size='4'>Unverified
+                                        Runs:</font>
+                                    <br>
+                                    <select size='20'
+                                        id='select-verify-teamnumber'
+                                        name='TeamNumber'
+                                        ondblclick='verify.submit()'>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <!-- submit button -->
+                                <td align='left'>
+                                    <input class='dark_bg' type="submit"
+                                        id="verify_submit"
+                                        value="Verify Score">
+                                </td>
+                            </tr>
+
+                        </table>
+                    </form>
+                </td>
                 <!-- right table -->
-                <form action="GatherScoreEntryData" method="POST"
-                    name="verify">
-                    <input type="hidden" name='EditFlag' value="true" />
+            </c:if>
 
-                    <table>
-                        <tr align='left' valign='top'>
-                            <td>
-                                <!-- pick team from a list -->
-                                <br>
-                                <font face='arial' size='4'>Unverified
-                                    Runs:</font>
-                                <br>
-                                <select size='20'
-                                    id='select-verify-teamnumber'
-                                    name='TeamNumber'
-                                    ondblclick='verify.submit()'>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <!-- submit button -->
-                            <td align='left'>
-                                <input class='dark_bg' type="submit"
-                                    id="verify_submit"
-                                    value="Verify Score">
-                            </td>
-                        </tr>
-
-                    </table>
-                </form>
-            </td>
-            <!-- right table -->
         </tr>
 
     </table>
     <!-- outer table -->
 
-    <script type="text/javascript" id="reloadruns"
-        src="UpdateUnverifiedRuns"></script>
+    <c:if test="${not empty scoreEntrySelectedTable}">
+        <script type="text/javascript" id="reloadruns"
+            src="UpdateUnverifiedRuns"></script>
+    </c:if>
 
 </body>
 </html>
