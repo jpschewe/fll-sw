@@ -609,7 +609,7 @@ public final class ScoreEntry {
     } // goal
 
     // computed score
-    writer.println("  <td align='right'>");
+    writer.println("  <td align='right' class='score-cell'>");
     writer.println("    <input type='text' name='score_"
         + name
         + "' size='3' align='right' readonly tabindex='-1'>");

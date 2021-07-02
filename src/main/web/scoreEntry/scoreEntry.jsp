@@ -51,6 +51,10 @@ body {
 <script type="text/javascript"
     src="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.js' />"></script>
 
+<c:if test="${not empty scoreEntrySelectedTable}">
+    <link rel="stylesheet" type="text/css" href="hide-score.css" />
+</c:if>
+
 <script
   type='text/javascript'
   src='scoreEntry.js'></script>
@@ -252,7 +256,7 @@ function check_restrictions() {
               <td colspan='2'><font size='4'><u>Goal</u></font></td>
               <td align='right'><font size='4'><u>Count</u></font>
               </td>
-              <td align='right'><font size='4'><u>Score</u></font>
+              <td align='right' class='score-cell'><font size='4'><u>Score</u></font>
               </td>
             </tr>
 
@@ -279,7 +283,7 @@ function check_restrictions() {
                 <tr>
                   <td colspan='3'><font size='4'><u>Total
                         Score:</u></font></td>
-                  <td align='right'><input
+                  <td align='right' class='score-cell'><input
                     type='text'
                     name='totalScore'
                     size='3'
