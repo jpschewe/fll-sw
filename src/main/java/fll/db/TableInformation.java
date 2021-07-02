@@ -213,6 +213,7 @@ public final class TableInformation implements Serializable {
    * @param connection database connection
    * @param tournament tournament to get tables for
    * @return all table names at the tournament
+   * @throws SQLException on database error
    */
   public static Collection<String> getAllTableNames(final Connection connection,
                                                     final Tournament tournament)
