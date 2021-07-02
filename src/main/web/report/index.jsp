@@ -121,6 +121,11 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         </li>
 
         <li>
+            <a href="edit-advancing-teams.jsp" target="_blank">Enter
+                the teams advancing to the next level of tournament</a>
+        </li>
+
+        <li>
             <a href="AwardsReport" target="_blank">Report of winners
                 for the tournament.</a> This can be published on the web or
             used for the awards ceremony.
