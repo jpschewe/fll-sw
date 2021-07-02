@@ -637,6 +637,17 @@ public final class ScoreEntry {
     writer.newLine();
   }
 
+  private static final int TICK_WIDTH = 2;
+
+  private static final int TICK_HEIGHT = 15;
+
+  private static void outputTickMark(final JspWriter writer,
+                                     final double xPosition)
+      throws IOException {
+    writer.println(String.format("<rect x=\"%.2f%%\" y=\"0\" width=\"%d\" height=\"100%%\"></rect>", xPosition,
+                                 TICK_WIDTH));
+  }
+
   /**
    * Generate a the buttons for a simple goal.
    */
@@ -656,8 +667,32 @@ public final class ScoreEntry {
       generateYesNoButtons(name, writer);
     } else if (range <= SLIDER_RANGE_MAX) {
       // use slider
-      writer.println(String.format("<input type='range' min='%d' max='%d' class='slider' id='%s' />", (int) min,
-                                   (int) max, getSliderName(name)));
+      writer.println(String.format("<input class='range' type='range' min='%d' max='%d' class='slider' id='%s' />",
+                                   (int) min, (int) max, getSliderName(name)));
+      // tick marks
+      final int numInternalTicks = (int) (max
+          - min
+          - 1);
+      final double increment = 100.0
+          / (max
+              - min);
+
+      writer.println(String.format("<svg role=\"presentation\" width=\"100%%\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\">",
+                                   TICK_HEIGHT));
+
+      outputTickMark(writer, 0);
+
+      for (int i = 0; i < numInternalTicks; ++i) {
+        final double xPosition = increment
+            * (i
+                + 1);
+        outputTickMark(writer, xPosition);
+      }
+
+      // last tick is at 99% otherwise it doesn't show
+      outputTickMark(writer, 99);
+      writer.println("</svg>");
+
     } else {
       // use buttons
       writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='150'>");

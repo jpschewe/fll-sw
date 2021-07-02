@@ -73,3 +73,13 @@ td .goal-title {
     background-color: black;
     line-height: 2px;
 }
+
+input.range {
+    bottom: -10px;
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
