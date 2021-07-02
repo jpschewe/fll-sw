@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 import org.apache.commons.lang3.tuple.Pair;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
@@ -127,6 +128,7 @@ public final class SelectTeam {
     return maxRunNumbers;
   }
 
+  @SuppressFBWarnings(value = "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", justification = "only used for sort, not stored")
   private static final class TeamSort implements Comparator<TournamentTeam> {
     private final Map<Integer, Integer> maxRunNumbers;
 
