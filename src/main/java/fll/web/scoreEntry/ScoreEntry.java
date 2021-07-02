@@ -23,6 +23,7 @@ import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Team;
 import fll.db.Queries;
@@ -205,12 +206,16 @@ public final class ScoreEntry {
    * @param writer where to write the text
    * @param application application context
    * @param pageContext used to get the edit flag state
+   * @param session used to determine when running on a tablet
    * @throws IOException if there is an error writing to {@code writer}
    */
   public static void generateIncrementMethods(final Writer writer,
                                               final ServletContext application,
+                                              final HttpSession session,
                                               final PageContext pageContext)
       throws IOException {
+    final @Nullable String scoreEntrySelectedTable = (String) session.getAttribute("scoreEntrySelectedTable");
+
     final boolean editFlag = (Boolean) pageContext.getAttribute("EditFlag");
 
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
@@ -286,7 +291,8 @@ public final class ScoreEntry {
     formatter.format("function %s(newValue) {%n", getSetMethodName("Verified"));
     formatter.format("  Verified = newValue;%n");
 
-    if (!editFlag) {
+    if (!editFlag
+        && null == scoreEntrySelectedTable) {
       formatter.format("  if (newValue == 1) {");
       formatter.format("    $('#verification-warning').show();");
       formatter.format("  } else if (newValue == 0) {");
@@ -523,12 +529,21 @@ public final class ScoreEntry {
    * the score has been double-checked or not.
    * 
    * @param writer where to write the HTML
+   * @param session used to get information about scoring on a tablet
    * @throws IOException if there is an error writing to {@code writer}
    */
-  public static void generateVerificationInput(final JspWriter writer) throws IOException {
+  public static void generateVerificationInput(final JspWriter writer,
+                                               final HttpSession session)
+      throws IOException {
+    final @Nullable String scoreEntrySelectedTable = (String) session.getAttribute("scoreEntrySelectedTable");
+
     writer.println("<!-- Score Verification -->");
     writer.println("    <tr>");
-    writer.println("      <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Score entry verified:</font></td>");
+    if (null == scoreEntrySelectedTable) {
+      writer.println("      <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Score entry verified:</font></td>");
+    } else {
+      writer.println("<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Team Agrees with the score entry:</font></td>");
+    }
     writer.println("      <td><table border='0' cellpadding='0' cellspacing='0' width='150'><tr align='center'>");
     generateYesNoButtons("Verified", writer);
     writer.println("      </tr></table></td>");

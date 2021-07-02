@@ -109,7 +109,7 @@ function check_restrictions() {
 <%ScoreEntry.generateIsConsistent(out, application);%>
 
 
-<%ScoreEntry.generateIncrementMethods(out, application, pageContext);%>
+<%ScoreEntry.generateIncrementMethods(out, application, session, pageContext);%>
 </c:if> <!-- end check for bye -->
 
 </script>
@@ -291,7 +291,7 @@ function check_restrictions() {
                     tabindex='-1'></td>
                 </tr>
                 <%
-                  ScoreEntry.generateVerificationInput(out);
+                  ScoreEntry.generateVerificationInput(out, session);
                 %>
               </c:otherwise>
             </c:choose>
