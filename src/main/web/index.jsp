@@ -36,7 +36,7 @@ fll.web.MainIndex.populateContext(request, application, pageContext);
     <ul>
         <c:if test="${authentication.ref}">
             <li>
-                <a href="scoreEntry/select_team.jsp">Score Entry</a> -
+                <a href="scoreEntry/choose-table.jsp">Score Entry</a> -
                 follow this link on the performance score entry
                 computers.
             </li>

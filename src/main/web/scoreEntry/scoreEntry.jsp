@@ -51,6 +51,10 @@ body {
 <script type="text/javascript"
     src="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.js' />"></script>
 
+<c:if test="${not empty scoreEntrySelectedTable}">
+    <link rel="stylesheet" type="text/css" href="hide-score.css" />
+</c:if>
+
 <script
   type='text/javascript'
   src='scoreEntry.js'></script>
@@ -64,9 +68,6 @@ EditFlag = true;
     <c:if test="${not isBye}">
 
 function init() {
-  // disable text selection
-  document.onselectstart=new Function ("return false")
-
   <%ScoreEntry.generateInit(out, application, session, pageContext);%>
 
   refresh();
@@ -108,7 +109,7 @@ function check_restrictions() {
 <%ScoreEntry.generateIsConsistent(out, application);%>
 
 
-<%ScoreEntry.generateIncrementMethods(out, application, pageContext);%>
+<%ScoreEntry.generateIncrementMethods(out, application, session, pageContext);%>
 </c:if> <!-- end check for bye -->
 
 </script>
@@ -240,9 +241,7 @@ function check_restrictions() {
           valign="middle">
 
           <table
-            class='score-entry'
-            border='1'
-            bordercolor='#808080'>
+            class='score-entry'>
             <colgroup>
               <!--  goal -->
               <col width="50%" />
@@ -257,7 +256,7 @@ function check_restrictions() {
               <td colspan='2'><font size='4'><u>Goal</u></font></td>
               <td align='right'><font size='4'><u>Count</u></font>
               </td>
-              <td align='right'><font size='4'><u>Score</u></font>
+              <td align='right' class='score-cell'><font size='4'><u>Score</u></font>
               </td>
             </tr>
 
@@ -284,7 +283,7 @@ function check_restrictions() {
                 <tr>
                   <td colspan='3'><font size='4'><u>Total
                         Score:</u></font></td>
-                  <td align='right'><input
+                  <td align='right' class='score-cell'><input
                     type='text'
                     name='totalScore'
                     size='3'
@@ -292,7 +291,7 @@ function check_restrictions() {
                     tabindex='-1'></td>
                 </tr>
                 <%
-                  ScoreEntry.generateVerificationInput(out);
+                  ScoreEntry.generateVerificationInput(out, session);
                 %>
               </c:otherwise>
             </c:choose>

@@ -1,9 +1,46 @@
-TD {
-    font-family: arial
-}
-
 table .score-entry {
     width: 100%;
+}
+
+.score-entry .slider {
+    width: 100%;
+}
+
+.score-entry th, .score-entry td {
+    border: 1px solid #808080;
+    font-size: large;
+}
+
+.score-entry .enum-button {
+    display: block;
+    border: 1px solid #AAAAAA;
+}
+
+.score-entry .y-n-button {
+    display: inline-block;
+    border: 1px solid #AAAAAA;
+    width: 48%;
+}
+
+.score-entry label input {
+    display: none;
+}
+
+.score-entry .y-n-button input+span {
+    display: inline-block;
+    width: 100%;
+    background: #DDDDDD;
+    text-align: center;
+}
+
+.score-entry .enum-button input+span {
+    background: #DDDDDD;
+    text-align: center;
+    display: block;
+}
+
+.score-entry input:checked+span {
+    background: #00FF00;
 }
 
 #floating-messages {
@@ -28,7 +65,6 @@ table .score-entry {
 }
 
 td .goal-title {
-    font-size: medium;
     font-weight: bold;
     text-align: right;
 }
@@ -36,4 +72,14 @@ td .goal-title {
 .goal-group-spacer {
     background-color: black;
     line-height: 2px;
+}
+
+input.range {
+    bottom: -10px;
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
 }

@@ -50,6 +50,8 @@ import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.EnumeratedValue;
+import fll.xml.GoalElement;
+import fll.xml.GoalGroup;
 import fll.xml.PerformanceScoreCategory;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -248,75 +250,21 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     final PerformanceScoreCategory performance = challenge.getPerformance();
 
     final DatabaseTeamScore[] scores = getScores(connection, tournament, team, numSeedingRounds);
-    for (final AbstractGoal goal : performance.getAllGoals()) {
-      final double bestScore = bestScoreForGoal(scores, goal);
-
-      final Element row = FOPUtils.createTableRow(document);
-      tableBody.appendChild(row);
-      FOPUtils.keepWithPrevious(row);
-
-      final StringBuilder goalTitle = new StringBuilder();
-      goalTitle.append(goal.getTitle());
-      if (goal.isComputed()) {
-        goalTitle.append(" (computed)");
+    for (final GoalElement goalEle : performance.getGoalElements()) {
+      if (goalEle.isGoalGroup()) {
+        outputGoalGroup(document, tableBody, performance, scores, (GoalGroup) goalEle);
+      } else if (goalEle.isGoal()) {
+        outputGoal(document, tableBody, performance, scores, (AbstractGoal) goalEle);
+      } else {
+        throw new FLLInternalException("Unexpected goal element type: "
+            + goalEle.getClass());
       }
-      Element cell = createCell(document, goalTitle.toString());
-      row.appendChild(cell);
-      cell.setAttribute("font-family", TITLE_FONT_FAMILY);
-      cell.setAttribute("font-size", TITLE_FONT_SIZE);
-      cell.setAttribute("font-weight", TITLE_FONT_WEIGHT);
+    }
 
-      for (final TeamScore score : scores) {
-        if (!score.scoreExists()
-            || score.isBye()
-            || score.isNoShow()) {
-          row.appendChild(createCell(document, ""));
-        } else {
-          final double computedValue = goal.evaluate(score);
+    for (final AbstractGoal goal : performance.getAllGoals()) {
 
-          final StringBuilder cellStr = new StringBuilder();
-          if (!goal.isComputed()) {
-            if (goal.isEnumerated()) {
-              final String enumValue = score.getEnumRawScore(goal.getName());
-              boolean found = false;
-              for (final EnumeratedValue ev : goal.getValues()) {
-                if (ev.getValue().equals(enumValue)) {
-                  cellStr.append(ev.getTitle()
-                      + " -> ");
-                  found = true;
-                  break;
-                }
-              }
-              if (!found) {
-                LOG.warn("Could not find enumerated title for "
-                    + enumValue);
-                cellStr.append(enumValue
-                    + " -> ");
-              }
-            } else {
-              if (goal.isYesNo()) {
-                if (FP.greaterThan(score.getRawScore(goal.getName()), 0, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-                  cellStr.append("Yes -> ");
-                } else {
-                  cellStr.append("No -> ");
-                }
-              } else {
-                final double rawValue = goal.getRawScore(score);
-                cellStr.append(Utilities.getFormatForScoreType(goal.getScoreType()).format(rawValue)
-                    + " -> ");
-              }
-            } // not enumerated
-          } // not computed
+      outputGoal(document, tableBody, performance, scores, goal);
 
-          cellStr.append(Utilities.getFormatForScoreType(performance.getScoreType()).format(computedValue));
-          cell = createCell(document, cellStr.toString());
-          row.appendChild(cell);
-          if (FP.equals(bestScore, computedValue, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-            cell.setAttribute("font-weight", "bold");
-          }
-        } // exists, non-bye, non-no show
-
-      } // foreach score
     } // foreach goal
 
     // totals
@@ -363,6 +311,107 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     legendBlock.setAttribute("space-before", "2pt");
 
     return container;
+  }
+
+  private static void outputGoalGroup(final Document document,
+                                      final Element tableBody,
+                                      final PerformanceScoreCategory performance,
+                                      final DatabaseTeamScore[] scores,
+                                      final GoalGroup group) {
+    final int numCols = scores.length
+        + 1;
+
+    // description
+    final Element row = FOPUtils.createTableRow(document);
+    tableBody.appendChild(row);
+    FOPUtils.keepWithPrevious(row);
+
+    final Element titleCell = createCell(document, group.getTitleAndDescription());
+    row.appendChild(titleCell);
+    titleCell.setAttribute("font-family", TITLE_FONT_FAMILY);
+    titleCell.setAttribute("font-size", TITLE_FONT_SIZE);
+    titleCell.setAttribute("font-weight", TITLE_FONT_WEIGHT);
+    titleCell.setAttribute("number-columns-spanned", String.valueOf(numCols));
+
+    FOPUtils.addTopBorder(titleCell, 2);
+
+    for (final AbstractGoal goal : group.getGoals()) {
+      outputGoal(document, tableBody, performance, scores, goal);
+    }
+  }
+
+  private static void outputGoal(final Document document,
+                                 final Element tableBody,
+                                 final PerformanceScoreCategory performance,
+                                 final DatabaseTeamScore[] scores,
+                                 final AbstractGoal goal) {
+    final double bestScore = bestScoreForGoal(scores, goal);
+
+    final Element row = FOPUtils.createTableRow(document);
+    tableBody.appendChild(row);
+    FOPUtils.keepWithPrevious(row);
+
+    final StringBuilder goalTitle = new StringBuilder();
+    goalTitle.append(goal.getTitle());
+    if (goal.isComputed()) {
+      goalTitle.append(" (computed)");
+    }
+    final Element titleCell = createCell(document, goalTitle.toString());
+    row.appendChild(titleCell);
+    titleCell.setAttribute("font-family", TITLE_FONT_FAMILY);
+    titleCell.setAttribute("font-size", TITLE_FONT_SIZE);
+    titleCell.setAttribute("font-weight", TITLE_FONT_WEIGHT);
+
+    for (final TeamScore score : scores) {
+      if (!score.scoreExists()
+          || score.isBye()
+          || score.isNoShow()) {
+        row.appendChild(createCell(document, ""));
+      } else {
+        final double computedValue = goal.evaluate(score);
+
+        final StringBuilder cellStr = new StringBuilder();
+        if (!goal.isComputed()) {
+          if (goal.isEnumerated()) {
+            final String enumValue = score.getEnumRawScore(goal.getName());
+            boolean found = false;
+            for (final EnumeratedValue ev : goal.getValues()) {
+              if (ev.getValue().equals(enumValue)) {
+                cellStr.append(ev.getTitle()
+                    + " -> ");
+                found = true;
+                break;
+              }
+            }
+            if (!found) {
+              LOG.warn("Could not find enumerated title for "
+                  + enumValue);
+              cellStr.append(enumValue
+                  + " -> ");
+            }
+          } else {
+            if (goal.isYesNo()) {
+              if (FP.greaterThan(score.getRawScore(goal.getName()), 0, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+                cellStr.append("Yes -> ");
+              } else {
+                cellStr.append("No -> ");
+              }
+            } else {
+              final double rawValue = goal.getRawScore(score);
+              cellStr.append(Utilities.getFormatForScoreType(goal.getScoreType()).format(rawValue)
+                  + " -> ");
+            }
+          } // not enumerated
+        } // not computed
+
+        cellStr.append(Utilities.getFormatForScoreType(performance.getScoreType()).format(computedValue));
+        final Element scoreCell = createCell(document, cellStr.toString());
+        row.appendChild(scoreCell);
+        if (FP.equals(bestScore, computedValue, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+          scoreCell.setAttribute("font-weight", "bold");
+        }
+      } // exists, non-bye, non-no show
+    } // foreach score
   }
 
   /**

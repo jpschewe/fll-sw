@@ -15,7 +15,6 @@
     border: 1px solid black;
     width: 80%;
     padding: 3px;
-    font-family: sans-serif;
     font-size: 10pt;
 }
 
@@ -96,7 +95,6 @@
     display: table-row-group;
 }
 /* end table tags */
-
 .no-close .ui-dialog-titlebar-close {
     display: none;
 }

@@ -1,3 +1,7 @@
+* #945 - hide the score column when using the tablets to enter performance scores
+* #935 - allow a ref to specify which table they are scoring for and sort the teams based on the schedule for that table
+* #934 - make team selection boxes before score entry larger
+* #927 - UI changes to make performance score entry more friendly on tablet devices
 * Fix initial display of conditions in challenge description editor
 * #865 - Remove use of jquery-json in favor of standard JSON object included in current browsers
 * #926 - Add judge initials to the subjective rubrics

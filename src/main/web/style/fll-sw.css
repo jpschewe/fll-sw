@@ -1,6 +1,7 @@
 @import url("base.css");
 
-BODY { 
-  background: #FFFCFF;
-  margin-top: 4;
+BODY {
+    background: #FFFCFF;
+    margin-top: 4;
+    font-family: sans-serif;
 }

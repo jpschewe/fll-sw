@@ -207,7 +207,7 @@ public class TestAJAXBrackets {
       }
       scoreEntryWindow.findElement(By.id("verify_submit")).click();
 
-      scoreEntryWindow.findElement(By.id("Verified_yes")).click();
+      scoreEntryWindow.findElement(By.id("Verified_yes_span")).click();
 
       IntegrationTestUtils.submitPerformanceScore(scoreEntryWindow, scoreEntryWait);
 

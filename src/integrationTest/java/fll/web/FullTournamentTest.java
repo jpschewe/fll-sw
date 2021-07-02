@@ -861,42 +861,22 @@ public class FullTournamentTest {
                 if (goal.isEnumerated()) {
                   final String valueStr = rs.getString(name);
                   final String radioID = ScoreEntry.getIDForEnumRadio(name, valueStr);
-                  selenium.findElement(By.id(radioID)).click();
+                  selenium.findElement(By.id(radioID
+                      + "_span")).click();
                 } else if (goal.isYesNo()) {
                   final int value = rs.getInt(name);
                   final String buttonID;
                   if (0 == value) {
                     buttonID = name
-                        + "_no";
+                        + "_no_span";
                   } else {
                     buttonID = name
-                        + "_yes";
+                        + "_yes_span";
                   }
                   selenium.findElement(By.id(buttonID)).click();
                 } else {
-                  final int initialValue = (int) goal.getInitialValue();
                   final int value = rs.getInt(name);
-                  final String buttonID;
-                  final int difference;
-                  if (initialValue < value) {
-                    // increment
-                    difference = value
-                        - initialValue;
-                    buttonID = ScoreEntry.getIncDecButtonID(name, 1);
-                  } else if (value < initialValue) {
-                    // decrement
-                    difference = initialValue
-                        - value;
-                    buttonID = ScoreEntry.getIncDecButtonID(name, -1);
-                  } else {
-                    // no change
-                    difference = 0;
-                    buttonID = null;
-                  }
-                  for (int i = 0; i < difference; ++i) {
-                    selenium.findElement(By.id(buttonID)).click();
-                  }
-
+                  selenium.findElement(By.name(name)).sendKeys(String.valueOf(value));
                 }
               } // !computed
             } // foreach goal
@@ -1011,7 +991,7 @@ public class FullTournamentTest {
             } // foreach goal
 
             // Set the verified field to yes
-            seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("Verified_yes"))).click();
+            seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("Verified_yes_span"))).click();
 
             // submit score
             selenium.findElement(By.id("submit_score")).click();

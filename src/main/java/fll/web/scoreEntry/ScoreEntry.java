@@ -23,6 +23,7 @@ import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Team;
 import fll.db.Queries;
@@ -70,6 +71,11 @@ public final class ScoreEntry {
    */
   private static final int INDENT_LEVEL = 2;
 
+  /**
+   * Maximum range to use a slider for.
+   */
+  private static final int SLIDER_RANGE_MAX = 20;
+
   private ScoreEntry() {
   }
 
@@ -101,12 +107,44 @@ public final class ScoreEntry {
                                   final HttpSession session,
                                   final PageContext pageContext)
       throws IOException, SQLException {
+
+    setupRangeSliders(writer, application);
+
     final boolean editFlag = (Boolean) pageContext.getAttribute("EditFlag");
     if (editFlag) {
       generateInitForScoreEdit(writer, application, session);
     } else {
       generateInitForNewScore(writer, application);
     }
+  }
+
+  private static void setupRangeSliders(final JspWriter writer,
+                                        final ServletContext application)
+      throws IOException {
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
+    final PerformanceScoreCategory performanceElement = description.getPerformance();
+
+    for (final AbstractGoal element : performanceElement.getAllGoals()) {
+      if (!element.isComputed()) {
+        final Goal goal = (Goal) element;
+
+        final double min = goal.getMin();
+        final double max = goal.getMax();
+        final double range = max
+            - min
+            + 1;
+        final String name = goal.getName();
+
+        if (!goal.isYesNo()
+            && !goal.isEnumerated()
+            && range <= SLIDER_RANGE_MAX) {
+          writer.println(String.format("  document.scoreEntry.%s.oninput = function() {", getSliderName(name)));
+          writer.println(String.format("    document.scoreEntry.%s.innerHTML = this.value;", name));
+          writer.println(String.format("    %s(this.value);", getSetMethodName(name)));
+          writer.println("  };");
+        } // use slider
+      } // not computed
+    } // foreach goal
   }
 
   /**
@@ -168,12 +206,16 @@ public final class ScoreEntry {
    * @param writer where to write the text
    * @param application application context
    * @param pageContext used to get the edit flag state
+   * @param session used to determine when running on a tablet
    * @throws IOException if there is an error writing to {@code writer}
    */
   public static void generateIncrementMethods(final Writer writer,
                                               final ServletContext application,
+                                              final HttpSession session,
                                               final PageContext pageContext)
       throws IOException {
+    final @Nullable String scoreEntrySelectedTable = (String) session.getAttribute("scoreEntrySelectedTable");
+
     final boolean editFlag = (Boolean) pageContext.getAttribute("EditFlag");
 
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
@@ -249,7 +291,8 @@ public final class ScoreEntry {
     formatter.format("function %s(newValue) {%n", getSetMethodName("Verified"));
     formatter.format("  Verified = newValue;%n");
 
-    if (!editFlag) {
+    if (!editFlag
+        && null == scoreEntrySelectedTable) {
       formatter.format("  if (newValue == 1) {");
       formatter.format("    $('#verification-warning').show();");
       formatter.format("  } else if (newValue == 0) {");
@@ -300,6 +343,9 @@ public final class ScoreEntry {
         final double multiplier = goal.getMultiplier();
         final double min = goal.getMin();
         final double max = goal.getMax();
+        final double range = max
+            - min
+            + 1;
         final String rawVarName = getVarNameForRawScore(name);
         final String computedVarName = getVarNameForComputedScore(name);
 
@@ -352,6 +398,11 @@ public final class ScoreEntry {
           // set the count form element
           formatter.format("document.scoreEntry.%s.value = %s;%n", name, rawVarName);
           formatter.format("%s = %s * %s;%n", computedVarName, rawVarName, multiplier);
+
+          // link slider to count column
+          if (range <= SLIDER_RANGE_MAX) {
+            formatter.format("document.scoreEntry.%s.value = %s;%n", getSliderName(name), rawVarName);
+          }
         }
 
         // add to the total score
@@ -478,12 +529,21 @@ public final class ScoreEntry {
    * the score has been double-checked or not.
    * 
    * @param writer where to write the HTML
+   * @param session used to get information about scoring on a tablet
    * @throws IOException if there is an error writing to {@code writer}
    */
-  public static void generateVerificationInput(final JspWriter writer) throws IOException {
+  public static void generateVerificationInput(final JspWriter writer,
+                                               final HttpSession session)
+      throws IOException {
+    final @Nullable String scoreEntrySelectedTable = (String) session.getAttribute("scoreEntrySelectedTable");
+
     writer.println("<!-- Score Verification -->");
     writer.println("    <tr>");
-    writer.println("      <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Score entry verified:</font></td>");
+    if (null == scoreEntrySelectedTable) {
+      writer.println("      <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Score entry verified:</font></td>");
+    } else {
+      writer.println("<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Team Agrees with the score entry:</font></td>");
+    }
     writer.println("      <td><table border='0' cellpadding='0' cellspacing='0' width='150'><tr align='center'>");
     generateYesNoButtons("Verified", writer);
     writer.println("      </tr></table></td>");
@@ -519,16 +579,12 @@ public final class ScoreEntry {
   private static void generateGoalGroup(final JspWriter writer,
                                         final GoalGroup group)
       throws IOException {
-    final String category = group.getTitle();
+    final String category = group.getTitleAndDescription();
 
     writer.println("<tr><td colspan='4' class='goal-group-spacer'>&nbsp;</td></tr>");
     if (!StringUtils.isBlank(category)) {
       writer.println("<tr>");
-      writer.println("<td colspan='2' class='center truncate'><b>"
-          + category
-          + "</b></td>");
-      // repeat category over the count and score columns
-      writer.println("<td colspan='2' class='center truncate'><b>"
+      writer.println("<td colspan='4' class='center truncate'><b>"
           + category
           + "</b></td>");
       writer.println("</tr>");
@@ -561,18 +617,14 @@ public final class ScoreEntry {
     } else {
       if (goal.isEnumerated()) {
         // enumerated
-        writer.println("  <td>");
         generateEnumeratedGoalButtons(goal, name, writer);
-        writer.println("  </td>");
       } else {
-        writer.println("  <td>");
         generateSimpleGoalButtons(goal, name, writer);
-        writer.println("  </td>");
       } // end simple goal
     } // goal
 
     // computed score
-    writer.println("  <td align='right'>");
+    writer.println("  <td align='right' class='score-cell'>");
     writer.println("    <input type='text' name='score_"
         + name
         + "' size='3' align='right' readonly tabindex='-1'>");
@@ -585,6 +637,17 @@ public final class ScoreEntry {
     writer.newLine();
   }
 
+  private static final int TICK_WIDTH = 2;
+
+  private static final int TICK_HEIGHT = 15;
+
+  private static void outputTickMark(final JspWriter writer,
+                                     final double xPosition)
+      throws IOException {
+    writer.println(String.format("<rect x=\"%.2f%%\" y=\"0\" width=\"%d\" height=\"100%%\"></rect>", xPosition,
+                                 TICK_WIDTH));
+  }
+
   /**
    * Generate a the buttons for a simple goal.
    */
@@ -592,17 +655,49 @@ public final class ScoreEntry {
                                                 final String name,
                                                 final JspWriter writer)
       throws IOException {
-    // start inc/dec buttons
-    writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='150'>");
-    writer.println("      <tr align='center'>");
 
+    // edit cell
+    writer.println("  <td>");
     final double min = goalEle.getMin();
     final double max = goalEle.getMax();
+    final double range = max
+        - min
+        + 1;
     if (goalEle.isYesNo()) {
       generateYesNoButtons(name, writer);
+    } else if (range <= SLIDER_RANGE_MAX) {
+      // use slider
+      writer.println(String.format("<input class='range' type='range' min='%d' max='%d' class='slider' id='%s' />",
+                                   (int) min, (int) max, getSliderName(name)));
+      // tick marks
+      final int numInternalTicks = (int) (max
+          - min
+          - 1);
+      final double increment = 100.0
+          / (max
+              - min);
+
+      writer.println(String.format("<svg role=\"presentation\" width=\"100%%\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\">",
+                                   TICK_HEIGHT));
+
+      outputTickMark(writer, 0);
+
+      for (int i = 0; i < numInternalTicks; ++i) {
+        final double xPosition = increment
+            * (i
+                + 1);
+        outputTickMark(writer, xPosition);
+      }
+
+      // last tick is at 99% otherwise it doesn't show
+      outputTickMark(writer, 99);
+      writer.println("</svg>");
+
     } else {
-      final double range = max
-          - min;
+      // use buttons
+      writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='150'>");
+      writer.println("      <tr align='center'>");
+
       final int maxRangeIncrement = (int) Math.floor(range);
 
       generateIncDecButton(name, -1
@@ -628,27 +723,22 @@ public final class ScoreEntry {
 
       generateIncDecButton(name, maxRangeIncrement, writer);
 
+      writer.println("       </tr>");
+      writer.println("    </table>");
     }
-    writer.println("       </tr>");
-    writer.println("    </table>");
     writer.println("  </td>");
-    // end inc/dec buttons
 
-    // count
+    // count cell
     writer.println("  <td align='right'>");
-    if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
-        && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-      writer.println("    <input type='text' name='"
-          + name
-          + "_radioValue' size='3' align='right' readonly tabindex='-1'>");
+    if (goalEle.isYesNo()) {
+      writer.println(String.format("    <input type='text' name='%s_radioValue' size='3' align='right' readonly tabindex='-1'>",
+                                   name));
     } else {
       // allow these to be editable
-      writer.println("    <input type='text' name='"
-          + name
-          + "' size='3' align='right' onChange='"
-          + getCheckMethodName(name)
-          + "()'>");
+      writer.println(String.format("    <input type='text' name='%s' size='3' align='right' onChange='%s()'>", name,
+                                   getCheckMethodName(name)));
     }
+    writer.println("  </td>");
   }
 
   /**
@@ -702,31 +792,16 @@ public final class ScoreEntry {
     // generate radio buttons with calls to set<name>
 
     // order of yes/no buttons needs to match order in generateRefreshBody
-    writer.println("        <td>");
-    writer.println("          <input type='radio' id='"
-        + name
-        + "_no' name='"
-        + name
-        + "' value='0' onclick='"
-        + getSetMethodName(name)
-        + "(0)'>");
-    writer.println("          <label for='"
-        + name
-        + "_no'>No</label>");
-
-    writer.println("          &nbsp;&nbsp;");
-
-    writer.println("          <input type='radio' id='"
-        + name
-        + "_yes' name='"
-        + name
-        + "' value='1' onclick='"
-        + getSetMethodName(name)
-        + "(1)'>");
-    writer.println("          <label for='"
-        + name
-        + "_yes'>Yes</label>");
-    writer.println("        </td>");
+    writer.println(String.format("        <label class='y-n-button'>"));
+    writer.println(String.format("          <input type='radio' id='%s_no' name='%s' value='0' onclick='%s(0)'>", name,
+                                 name, getSetMethodName(name)));
+    writer.println(String.format("        <span id='%s_no_span'>No</span>", name));
+    writer.println(String.format("        </label>"));
+    writer.println(String.format("        <label class='y-n-button'>"));
+    writer.println(String.format("          <input type='radio' id='%s_yes' name='%s' value='1' onclick='%s(1)'>", name,
+                                 name, getSetMethodName(name)));
+    writer.println(String.format("        <span id='%s_yes_span'>Yes</span>", name));
+    writer.println(String.format("        </label>"));
   }
 
   /**
@@ -819,41 +894,29 @@ public final class ScoreEntry {
                                                     final String goalName,
                                                     final JspWriter writer)
       throws IOException {
-    writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='100%'>");
 
+    writer.println("  <td>");
     for (final EnumeratedValue valueEle : goal.getSortedValues()) {
       final String valueTitle = valueEle.getTitle();
       final String value = valueEle.getValue();
       final String id = getIDForEnumRadio(goalName, value);
-      writer.println("      <tr>");
-      writer.println("        <td class='right'>");
-      writer.println("          <input type='radio' name='"
-          + goalName
-          + "' value='"
-          + value
-          + "' id='"
-          + id
-          + "' ' onclick='"
-          + getSetMethodName(goalName)
-          + "(\""
-          + value
-          + "\")'>");
-      writer.println("        </td>");
-      writer.println("        <td><label for='"
-          + id
-          + "'/>");
+
+      writer.println("      <label class='enum-button'>");
+      writer.println(String.format("          <input type='radio' name='%s' value='%s' id='%s' onclick='%s(\"%s\")'/>",
+                                   goalName, value, id, getSetMethodName(goalName), value));
+      writer.println(String.format("        <span id='%s_span'>", id));
       writer.println("          "
           + valueTitle);
-      writer.println("        </td>");
-      writer.println("      </tr>");
+      writer.println("        </span>");
+      writer.println("      </label>");
     }
-
-    writer.println("        </table>");
+    writer.println("  </td>");
 
     writer.println("  <td align='right'>");
     writer.println("    <input type='text' name='"
         + goalName
-        + "_radioValue' size='10' align='right' readonly tabindex='-1'>");
+        + "_radioValue' size='10' align='right' readonly tabindex='-1'/>");
+    writer.println("  </td>");
 
   }
 
@@ -903,6 +966,14 @@ public final class ScoreEntry {
   private static String getVarNameForRawScore(final String goalName) {
     return goalName
         + "_raw";
+  }
+
+  /**
+   * The name of the slider for the specified goal.
+   */
+  private static String getSliderName(final String goalName) {
+    return goalName
+        + "_slider";
   }
 
   /**

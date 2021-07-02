@@ -126,7 +126,7 @@ public class TestPlayoffs {
     selenium.findElement(By.id("enter_submit")).click();
 
     selenium.findElement(By.name("g1")).sendKeys(String.valueOf(teamNumber));
-    selenium.findElement(By.id("Verified_yes")).click();
+    selenium.findElement(By.id("Verified_yes_span")).click();
 
     IntegrationTestUtils.submitPerformanceScore(selenium, seleniumWait);
   }

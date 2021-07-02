@@ -74,8 +74,7 @@ public final class TeamScheduleInfo implements Serializable {
 
   /**
    * @return stream of all regular match play performance rounds and their index
-   *         within
-   *         practice rounds
+   *         within in the rounds, so round #1 shows up as index 0.
    */
   public Stream<Pair<PerformanceTime, Long>> enumerateRegularMatchPlayPerformances() {
     return Streams.mapWithIndex(allPerformances().filter(Predicate.not(PerformanceTime::isPractice)), (performance,
@@ -133,7 +132,7 @@ public final class TeamScheduleInfo implements Serializable {
   }
 
   @Override
-  @EnsuresNonNullIf(expression="#1", result=true)
+  @EnsuresNonNullIf(expression = "#1", result = true)
   public boolean equals(final @Nullable Object o) {
     if (o == this) {
       return true;
