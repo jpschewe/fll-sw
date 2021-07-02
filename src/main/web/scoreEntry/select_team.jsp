@@ -3,7 +3,7 @@
 <fll-sw:required-roles roles="REF" allowSetup="false" />
 
 <%
-fll.web.scoreEntry.SelectTeam.populateContext(application, pageContext);
+fll.web.scoreEntry.SelectTeam.populateContext(application, session, pageContext);
 %>
 
 <html>
@@ -147,15 +147,14 @@ OPTION {
     <div>
         <c:choose>
             <c:when test="${not empty scoreEntrySelectedTable}">
-Entering scores for table ${scoreEntrySelectedTable}.
+Entering scores for table ${scoreEntrySelectedTable}. Teams are sorted in schedule order with this table first.
 </c:when>
             <c:otherwise>
-Entering scores for all tables.
+Entering scores for all tables. Teams are sorted in schedule order.
 </c:otherwise>
         </c:choose>
         Visit <a href="choose-table.jsp">this page</a> to change the
-        table that scores are being entered for. This controls the order
-        of the teams listed in the left selection list.
+        table that scores are being entered for.
     </div>
 
 
@@ -309,7 +308,7 @@ Entering scores for all tables.
     </table>
     <!-- outer table -->
 
-    <c:if test="${not empty scoreEntrySelectedTable}">
+    <c:if test="${empty scoreEntrySelectedTable}">
         <script type="text/javascript" id="reloadruns"
             src="UpdateUnverifiedRuns"></script>
     </c:if>
