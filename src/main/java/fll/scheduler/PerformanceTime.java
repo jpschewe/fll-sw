@@ -9,7 +9,6 @@ package fll.scheduler;
 import java.io.Serializable;
 import java.time.LocalTime;
 import java.util.Comparator;
-import java.util.Objects;
 
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -62,6 +61,13 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
     return side;
   }
 
+  /**
+   * @return table and side as they would appear in a printed schedule
+   */
+  public String getTableAndSide() {
+    return String.format("%s %d", getTable(), getSide());
+  }
+
   private final LocalTime time;
 
   /**
@@ -77,7 +83,7 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
   }
 
   @Override
-  @EnsuresNonNullIf(expression="#1", result=true)
+  @EnsuresNonNullIf(expression = "#1", result = true)
   public boolean equals(final @Nullable Object o) {
     if (o == null) {
       return false;
@@ -99,6 +105,10 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
     }
   }
 
+  /**
+   * Sorts first by time (earliest first), then table (lexiographic), then
+   * practice vs. regular match.
+   */
   @Override
   public int compareTo(final PerformanceTime other) {
     if (null != this.time) {
@@ -148,9 +158,6 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
     @Override
     public int compare(final PerformanceTime o1,
                        final PerformanceTime o2) {
-      Objects.requireNonNull(o1);
-      Objects.requireNonNull(o2);
-
       final int tableCompare = o1.compareTable(o2);
       if (0 == tableCompare) {
         final int timeCompare = o1.time.compareTo(o2.time);
