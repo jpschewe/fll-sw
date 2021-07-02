@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -146,6 +147,29 @@ public class GoalGroup extends GoalElement {
   @Override
   public boolean isGoalGroup() {
     return true;
+  }
+
+  /**
+   * The title joined with the description by " - ".
+   * Always returns a non-null string.
+   * 
+   * @return the title and description
+   */
+  public String getTitleAndDescription() {
+    final String title = getTitle();
+    final String description = getDescription();
+    final StringBuilder sb = new StringBuilder();
+    if (!StringUtils.isBlank(title)) {
+      sb.append(title);
+      if (!StringUtils.isBlank(description)) {
+        sb.append(" - ");
+        sb.append(description);
+      }
+    } else if (!StringUtils.isBlank(description)) {
+      sb.append(description);
+    }
+    final String category = sb.toString();
+    return category;
   }
 
 }

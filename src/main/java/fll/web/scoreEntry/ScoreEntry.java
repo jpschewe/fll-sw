@@ -579,7 +579,7 @@ public final class ScoreEntry {
   private static void generateGoalGroup(final JspWriter writer,
                                         final GoalGroup group)
       throws IOException {
-    final String category = group.getTitle();
+    final String category = group.getTitleAndDescription();
 
     writer.println("<tr><td colspan='4' class='goal-group-spacer'>&nbsp;</td></tr>");
     if (!StringUtils.isBlank(category)) {
