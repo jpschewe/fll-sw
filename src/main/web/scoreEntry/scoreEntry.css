@@ -40,7 +40,7 @@ table .score-entry {
 }
 
 .score-entry input:checked+span {
-    background: #AAAAAA;
+    background: #00FF00;
 }
 
 #floating-messages {
