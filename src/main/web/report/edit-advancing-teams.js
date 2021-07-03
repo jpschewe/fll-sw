@@ -74,19 +74,21 @@ function storeAdvancingTeams() {
 
     if (advancing.length) {
         // send to server
-        var jsonData = JSON.stringify(advancing);
-        $.ajax({
-            type: "POST",
-            dataType: "json",
-            contentType: "application/json",
-            url: "/api/AdvancingTeams",
-            data: jsonData,
-            success: function(response) {
-                if (!response.success) {
-                    alert("Error sending advancing teams: " + response.message);
-                }
+
+        fetch("/api/AdvancingTeams",
+            {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(advancing)
+            }
+        ).then(function(response) {
+            if (!response.ok) {
+                alert("Error sending group advancing teams: " + response.message);
             }
         });
+
     } else {
         _log("No advancing teams to store");
     }
@@ -504,17 +506,17 @@ function storeSortedGroups() {
     });
 
     // send to server
-    var jsonData = JSON.stringify(groups);
-    $.ajax({
-        type: "POST",
-        dataType: "json",
-        contentType: "application/json",
-        url: "/api/AwardsReportSortedGroups",
-        data: jsonData,
-        success: function(response) {
-            if (!response.success) {
-                alert("Error sending group sort information: " + response.message);
-            }
+    fetch("/api/AwardsReportSortedGroups",
+        {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(groups)
+        }
+    ).then(function(response) {
+        if (!response.ok) {
+            alert("Error sending group sort information: " + response.message);
         }
     });
 
