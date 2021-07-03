@@ -10,9 +10,6 @@
 <script type='text/javascript'
     src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 
-<script type='text/javascript'
-    src="<c:url value='/extlib/jStorage/jstorage.min.js'/>"></script>
-
 <script type='text/javascript' src="<c:url value='/js/fll-objects.js'/>"></script>
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js'/>"></script>

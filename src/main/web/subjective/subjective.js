@@ -156,11 +156,7 @@
      * Clear anything from local storage with a prefix of STORAGE_PREFIX.
      */
     function _clear_local_storage() {
-        $.each($.jStorage.index(), function(index, value) {
-            if (value.substring(0, STORAGE_PREFIX.length) == STORAGE_PREFIX) {
-                $.jStorage.deleteKey(value);
-            }
-        });
+        fllStorage.clearNamespace(STORAGE_PREFIX);
     }
 
     function _loadTournament() {
