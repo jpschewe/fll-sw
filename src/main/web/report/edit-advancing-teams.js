@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function storeAdvancingTeams() {
     var advancing = [];
-    $.each(_advancingTeamData, function(i, data) {
+    _advancingTeamData.forEach(function(data) {
         var adTeam = createAdvancingTeam(data);
         if (adTeam) {
             advancing.push(adTeam);
@@ -95,8 +95,8 @@ function storeAdvancingTeams() {
 function loadTeams() {
     _teams = {};
 
-    return $.getJSON("/api/TournamentTeams", function(teams) {
-        $.each(teams, function(i, team) {
+    return fetch("/api/TournamentTeams").then(checkJsonResponse).then(function(teams) {
+        teams.forEach(function(team) {
             _teams[team.teamNumber] = team;
         });
     });
@@ -110,7 +110,7 @@ function loadTeams() {
 function loadAwardGroups() {
     _awardGroups = [];
 
-    return $.getJSON("/api/AwardGroups", function(data) {
+    return fetch("/api/AwardGroups").then(checkJsonResponse).then(function(data) {
         _awardGroups = data;
     });
 }
@@ -118,7 +118,7 @@ function loadAwardGroups() {
 function loadAdvancingTeams() {
     _advancingTeams = [];
 
-    return $.getJSON("/api/AdvancingTeams", function(data) {
+    return fetch("/api/AdvancingTeams").then(checkJsonResponse).then(function(data) {
         _advancingTeams = data;
     });
 }
@@ -138,30 +138,30 @@ function loadFromServer(doneCallback, failCallback) {
     var waitList = []
 
     var teamsPromise = loadTeams();
-    teamsPromise.fail(function() {
+    teamsPromise.catch(function() {
         failCallback("Teams");
     });
     waitList.push(teamsPromise);
 
     var loadAwardGroupsPromise = loadAwardGroups();
-    loadAwardGroupsPromise.fail(function() {
+    loadAwardGroupsPromise.catch(function() {
         failCallback("Award groups");
     });
     waitList.push(loadAwardGroupsPromise);
 
     var loadAdvancingTeamsPromise = loadAdvancingTeams();
-    loadAdvancingTeamsPromise.fail(function() {
+    loadAdvancingTeamsPromise.catch(function() {
         failCallback("Advancing Teams");
     });
     waitList.push(loadAdvancingTeamsPromise);
 
     var loadSortedGroupsPromise = loadSortedGroups();
-    loadSortedGroupsPromise.fail(function() {
+    loadSortedGroupsPromise.catch(function() {
         failCallback("Sorted groups");
     });
     waitList.push(loadSortedGroupsPromise);
 
-    $.when.apply($, waitList).done(function() {
+    Promise.all(waitList).then(function(_) {
         doneCallback();
     });
 }
@@ -195,19 +195,19 @@ function initPage() {
         advancingTeamsEle.removeChild(advancingTeamsEle.firstChild);
     }
 
-    $.each(_awardGroups, function(i, group) {
+    _awardGroups.forEach(function(group) {
         addAdvancingGroup(group, false);
     });
 
     var knownGroups = [];
-    $.each(_advancingTeams, function(i, advancing) {
+    _advancingTeams.forEach(function(advancing) {
         if (!knownGroups.includes(advancing.group)
             && !_awardGroups.includes(advancing.group)) {
             knownGroups.push(advancing.group);
         }
     });
 
-    $.each(knownGroups, function(i, group) {
+    knownGroups.forEach(function(group) {
         addAdvancingGroup(group, true);
     });
 
@@ -391,7 +391,7 @@ function addAdvancingTeam(advancing, dataList, groupNameFunc, teamList) {
 var _initialSortedGroups = [];
 
 function loadSortedGroups() {
-    return $.getJSON("/api/AwardsReportSortedGroups", function(data) {
+    return fetch("/api/AwardsReportSortedGroups").then(checkJsonResponse).then(function(data) {
         _initialSortedGroups = data;
     });
 }
