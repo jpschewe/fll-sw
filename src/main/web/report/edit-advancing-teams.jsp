@@ -7,6 +7,9 @@
 <head>
 <title>Edit advancing teams</title>
 
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/style/fll-sw.css'/>" />
+
 <script type='text/javascript'
     src="<c:url value='/extlib/jStorage/jstorage.min.js'/>"></script>
 

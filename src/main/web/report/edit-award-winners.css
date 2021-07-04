@@ -1,0 +1,8 @@
+#container table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+#container td, #container th, #container table {
+    border: 1px solid black;
+}

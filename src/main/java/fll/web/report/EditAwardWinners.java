@@ -22,6 +22,7 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.AwardWinner;
 import fll.db.AwardWinners;
+import fll.db.OverallAwardWinner;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -29,7 +30,10 @@ import fll.web.ApplicationAttributes;
 /**
  * Support code for edit-award-winners.jsp.
  */
-public class EditAwardWinners {
+public final class EditAwardWinners {
+
+  private EditAwardWinners() {
+  }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -56,6 +60,26 @@ public class EditAwardWinners {
         awardGroupToWinners.computeIfAbsent(winner.getAwardGroup(), k -> new LinkedList<>()).add(winner);
       }
       page.setAttribute("subjectiveAwardWinners", subjectiveAwardWinners);
+
+      final List<AwardWinner> extraAwardWinnersList = AwardWinners.getExtraAwardWinners(connection,
+                                                                                        tournament.getTournamentID());
+      // category -> awardGroup -> winners
+      final Map<String, Map<String, List<AwardWinner>>> extraAwardWinners = new HashMap<>();
+      for (final AwardWinner winner : extraAwardWinnersList) {
+        final Map<String, List<AwardWinner>> awardGroupToWinners = extraAwardWinners.computeIfAbsent(winner.getName(),
+                                                                                                     k -> new HashMap<>());
+        awardGroupToWinners.computeIfAbsent(winner.getAwardGroup(), k -> new LinkedList<>()).add(winner);
+      }
+      page.setAttribute("extraAwardWinners", extraAwardWinners);
+
+      final List<OverallAwardWinner> overallAwardWinnersList = AwardWinners.getOverallAwardWinners(connection,
+                                                                                                   tournament.getTournamentID());
+      // category -> winners
+      final Map<String, List<OverallAwardWinner>> overallAwardWinners = new HashMap<>();
+      for (final OverallAwardWinner winner : overallAwardWinnersList) {
+        overallAwardWinners.computeIfAbsent(winner.getName(), k -> new LinkedList<>()).add(winner);
+      }
+      page.setAttribute("overallAwardWinners", overallAwardWinners);
 
     } catch (final SQLException e) {
       LOGGER.error(e, e);

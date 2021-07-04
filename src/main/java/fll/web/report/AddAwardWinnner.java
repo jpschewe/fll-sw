@@ -24,6 +24,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import fll.Tournament;
 import fll.db.AwardWinner;
 import fll.db.AwardWinners;
+import fll.db.OverallAwardWinner;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -32,6 +33,7 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
+import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
 
 /**
@@ -54,7 +56,7 @@ public class AddAwardWinnner extends BaseFLLServlet {
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
     final String categoryTitle = WebUtils.getNonNullRequestParameter(request, "categoryTitle");
-    final @Nullable String awardGroup = request.getParameter("awardGroup");
+    final @Nullable String awardGroup = WebUtils.getParameterOrNull(request, "awardGroup");
     final String awardType = WebUtils.getNonNullRequestParameter(request, "awardType");
     final @Nullable String description = request.getParameter("description");
     final int place = WebUtils.getIntRequestParameter(request, "place");
@@ -79,13 +81,35 @@ public class AddAwardWinnner extends BaseFLLServlet {
 
         final AwardWinner winner = new AwardWinner(categoryTitle, awardGroup, teamNumber, description, place);
         AwardWinners.addChallengeAwardWinner(connection, tournament.getTournamentID(), winner);
+      } else if ("non-numeric".equals(awardType)) {
+        final @Nullable NonNumericCategory category = challengeDescription.getNonNumericCategoryByTitle(categoryTitle);
+        if (null == category) {
+          throw new FLLInternalException("Cannot find non-numeric category with title '"
+              + categoryTitle
+              + "'");
+        }
 
-        response.sendRedirect("edit-award-winners.jsp");
+        if (category.getPerAwardGroup()) {
+          if (null == awardGroup) {
+            throw new FLLInternalException("Award group cannot be null for non-numeric award that is per award group");
+          }
+          final AwardWinner winner = new AwardWinner(categoryTitle, awardGroup, teamNumber, description, place);
+          AwardWinners.addExtraAwardWinner(connection, tournament.getTournamentID(), winner);
+        } else {
+          final OverallAwardWinner winner = new OverallAwardWinner(categoryTitle, teamNumber, description, place);
+          AwardWinners.addOverallAwardWinner(connection, tournament.getTournamentID(), winner);
+        }
+
+      } else if ("championship".equals(awardType)) {
+        final AwardWinner winner = new AwardWinner(categoryTitle, awardGroup, teamNumber, description, place);
+        AwardWinners.addExtraAwardWinner(connection, tournament.getTournamentID(), winner);
       } else {
         throw new FLLInternalException("Unknown award type: '"
             + awardType
             + "'");
       }
+
+      response.sendRedirect("edit-award-winners.jsp");
     } catch (final SQLException e) {
       throw new FLLInternalException("Error storing award winners", e);
     }
