@@ -6,9 +6,6 @@
 
 "use strict";
 
-// team number -> team
-var _teams = {};
-
 // list of names
 var _awardGroups = [];
 
@@ -94,16 +91,6 @@ function storeAdvancingTeams() {
     }
 }
 
-function loadTeams() {
-    _teams = {};
-
-    return fetch("/api/TournamentTeams").then(checkJsonResponse).then(function(teams) {
-        teams.forEach(function(team) {
-            _teams[team.teamNumber] = team;
-        });
-    });
-}
-
 /**
  * Load the award groups.
  * 
@@ -139,7 +126,7 @@ function loadFromServer(doneCallback, failCallback) {
 
     var waitList = []
 
-    var teamsPromise = loadTeams();
+    var teamsPromise = fllTeams.loadTeams();
     teamsPromise.catch(function() {
         failCallback("Teams");
     });
@@ -283,14 +270,14 @@ function addAdvancingGroup(group, editable) {
     groupItem.appendChild(teamList);
 
     addTeamButton.addEventListener('click', function() {
-        addAdvancingTeam(null, _advancingTeamData, nameFunc, teamList);
+        addAdvancingTeam(null, _advancingTeamData, nameFunc, teamList, editable ? null : group);
     });
 
     var enterNewTeam = true;
     if (group) {
         _advancingTeams.forEach(function(advancing) {
             if (advancing.group == group) {
-                addAdvancingTeam(advancing, _advancingTeamData, nameFunc, teamList);
+                addAdvancingTeam(advancing, _advancingTeamData, nameFunc, teamList, editable ? null : group);
                 enterNewTeam = false;
             }
         });
@@ -298,7 +285,7 @@ function addAdvancingGroup(group, editable) {
 
     if (enterNewTeam) {
         // add an empty team if there weren't any loaded from the server
-        addAdvancingTeam(null, _advancingTeamData, nameFunc, teamList);
+        addAdvancingTeam(null, _advancingTeamData, nameFunc, teamList, editable ? null : group);
     }
 
     addGroupToSort(nameFunc());
@@ -316,8 +303,9 @@ function addAdvancingGroup(group, editable) {
  *          function to get the group name
  * @param teamList
  *          the list element to add to
+ * @param awardGroup the award group to filter to, may be null
  */
-function addAdvancingTeam(advancing, dataList, groupNameFunc, teamList) {
+function addAdvancingTeam(advancing, dataList, groupNameFunc, teamList, awardGroup) {
 
     var teamEle = document.createElement("li");
     teamList.appendChild(teamEle);
@@ -344,27 +332,7 @@ function addAdvancingTeam(advancing, dataList, groupNameFunc, teamList) {
     var data = new AdvancingTeamData(groupNameFunc, numEle);
     dataList.push(data);
 
-    numEle.onchange = function() {
-        var teamNum = numEle.value;
-        var prevTeam = nameEle.data;
-        if (!teamNum || "" == teamNum) {
-            nameEle.value = "";
-            orgEle.value = "";
-            agEle.value = "";
-        } else {
-            var team = _teams[teamNum];
-            if (typeof (team) == 'undefined') {
-                alert("Team number " + teamNum + " does not exist");
-                nameEle.value = prevTeam;
-                teamNum = prevTeam; // for the set of oldVal below
-            } else {
-                nameEle.value = team.teamName;
-                orgEle.value = team.organization;
-                agEle.value = team.awardGroup;
-            }
-        }
-        nameEle.data = teamNum;
-    };
+    fllTeams.autoPopulate(numEle, nameEle, orgEle, agEle, awardGroup)
 
     var deleteButton = document.createElement("button");
     deleteButton.innerHTML = "Delete";

@@ -15,6 +15,8 @@
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js'/>"></script>
 
+<script type='text/javascript' src="<c:url value='/js/fll-teams.js'/>"></script>
+
 <script type='text/javascript' src="edit-advancing-teams.js"></script>
 
 </head>
