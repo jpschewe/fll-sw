@@ -45,7 +45,7 @@ public final class AwardWinners {
   /**
    * @param connection database connection
    * @param tournamentId the tournament to get winners for
-   * @return the winners sorted by category, award group, team number
+   * @return the winners sorted by category, award group, place, team number
    * @throws SQLException if an error occurs talking to the database
    * @see #storeChallengeAwardWinners(Connection, int, Collection)
    */
@@ -74,7 +74,7 @@ public final class AwardWinners {
   /**
    * @param connection database connection
    * @param tournamentId the tournament to get winners for
-   * @return the winners sorted by category, award group, team number
+   * @return the winners sorted by category, award group, place, team number
    * @throws SQLException if an error occurs talking to the database
    * @see #storeExtraAwardWinners(Connection, int, Collection)
    */
@@ -90,9 +90,10 @@ public final class AwardWinners {
                                                    final String tablename)
       throws SQLException {
     final List<AwardWinner> result = new LinkedList<>();
-    try (PreparedStatement prep = connection.prepareStatement("SELECT name, team_number, description, award_group FROM "
-        + tablename
-        + " WHERE tournament_id = ? ORDER BY name, award_group, team_number")) {
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT name, team_number, description, award_group, place FROM "
+            + tablename
+            + " WHERE tournament_id = ? ORDER BY name, award_group, place, team_number")) {
       prep.setInt(1, tournamentId);
 
       try (ResultSet rs = prep.executeQuery()) {
@@ -101,8 +102,9 @@ public final class AwardWinners {
           final int teamNumber = rs.getInt(2);
           final String description = rs.getString(3);
           final String awardGroup = castNonNull(rs.getString(4));
+          final int place = rs.getInt(5);
 
-          final AwardWinner winner = new AwardWinner(name, awardGroup, teamNumber, description);
+          final AwardWinner winner = new AwardWinner(name, awardGroup, teamNumber, description, place);
           result.add(winner);
         }
       }
@@ -125,8 +127,8 @@ public final class AwardWinners {
 
     try (PreparedStatement prep = connection.prepareStatement("INSERT INTO "
         + tablename //
-        + " ( tournament_id, name, team_number, description, award_group)" //
-        + " VALUES(?, ?, ?, ?, ?)" //
+        + " ( tournament_id, name, team_number, description, award_group, place)" //
+        + " VALUES(?, ?, ?, ?, ?, ?)" //
     )) {
       prep.setInt(1, tournamentId);
 
@@ -142,6 +144,7 @@ public final class AwardWinners {
           prep.setNull(4, Types.LONGVARCHAR);
         }
         prep.setString(5, winner.getAwardGroup());
+        prep.setInt(6, winner.getPlace());
         prep.executeUpdate();
       }
     }
@@ -150,7 +153,7 @@ public final class AwardWinners {
   /**
    * @param connection database connection
    * @param tournamentId the tournament to get winners for
-   * @return the winners sorted by category, team number
+   * @return the winners sorted by category, place, team number
    * @throws SQLException if an error occurs talking to the database
    * @see #storeOverallAwardWinners(Connection, int, Collection)
    */
@@ -159,8 +162,8 @@ public final class AwardWinners {
       throws SQLException {
     final List<OverallAwardWinner> result = new LinkedList<>();
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT name, team_number, description FROM subjective_overall_award"
-            + " WHERE tournament_id = ? ORDER BY name, team_number")) {
+        PreparedStatement prep = connection.prepareStatement("SELECT name, team_number, description, place FROM subjective_overall_award"
+            + " WHERE tournament_id = ? ORDER BY name, place, team_number")) {
       prep.setInt(1, tournamentId);
 
       try (ResultSet rs = prep.executeQuery()) {
@@ -168,8 +171,9 @@ public final class AwardWinners {
           final String name = castNonNull(rs.getString(1));
           final int teamNumber = rs.getInt(2);
           final String description = rs.getString(3);
+          final int place = rs.getInt(4);
 
-          final OverallAwardWinner winner = new OverallAwardWinner(name, teamNumber, description);
+          final OverallAwardWinner winner = new OverallAwardWinner(name, teamNumber, description, place);
           result.add(winner);
         }
       }
@@ -197,8 +201,8 @@ public final class AwardWinners {
     }
 
     try (PreparedStatement prep = connection.prepareStatement("INSERT INTO subjective_overall_award"
-        + " ( tournament_id, name, team_number, description)" //
-        + " VALUES(?, ?, ?, ?)" //
+        + " ( tournament_id, name, team_number, description, place)" //
+        + " VALUES(?, ?, ?, ?, ?)" //
     )) {
       prep.setInt(1, tournamentId);
 
@@ -212,6 +216,8 @@ public final class AwardWinners {
         } else {
           prep.setNull(4, Types.LONGVARCHAR);
         }
+        prep.setInt(5, winner.getPlace());
+
         prep.executeUpdate();
       }
     }

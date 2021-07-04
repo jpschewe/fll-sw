@@ -1,20 +1,19 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+<fll-sw:required-roles roles="ADMIN,JUDGE" allowSetup="false" />
+
+<%
+fll.web.report.EditAwardWinners.populateContext(application, pageContext);
+%>
 
 <!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
 <html>
 <head>
 <title>Edit award winners</title>
 
-<script type='text/javascript'
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-
 <script type='text/javascript' src="<c:url value='/js/fll-objects.js'/>"></script>
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js'/>"></script>
-
-<script type='text/javascript' src="edit-award-winners.js"></script>
 
 </head>
 
@@ -26,38 +25,84 @@
     <%-- clear out the message, so that we don't see it again --%>
     <c:remove var="message" />
 
-    <h2>Instructions</h2>
-    <p>Enter team numbers in the first box for each award. Enter the
-        description for the award in the space under the team; this
-        field may be left blank if no description is needed.</p>
+    <!-- all winners ${subjectiveAwardWinners} -->
 
-    <h2>Challenge awards</h2>
-    <p>Specify the winners for each of the subjective categories
-        defined in the challenge description.</p>
-    <ul id="challenge-award-winners"></ul>
+    <c:forEach items="${challengeDescription.subjectiveCategories}"
+        var="category">
+        <h1>${category.title}</h1>
+        <c:forEach items="${awardGroups}" var="awardGroup">
 
-    <h2>Non-Numeric awards per award group</h2>
-    <p>Specify the winners of additional awards that are per award
-        group.</p>
-    <ul id="non-numeric-award-winners"></ul>
+            <h2>${awardGroup}</h2>
+            <form action="add-award-winner.jsp" method="POST">
+                <input type="hidden" name="category"
+                    value="${category.name}" />
+                <input type="hidden" name="awardGroup"
+                    value="${awardGroup}" />
+                <input type="submit" value="Add Team"
+                    name="${awardGroup}" />
+            </form>
 
-    <h2>Non-Numeric overall awards</h2>
-    <p>Specify the winners of awards that are not per award group
-        (judges, etc.)</p>
-    <ul id="non-numeric-overall-award-winners"></ul>
+            <!-- winners for ${category.title} -> ${subjectiveAwardWinners[category.title]} -->
+            <!-- winners for ${category.title} and ${awardGroup} -> ${subjectiveAwardWinners[category.title][awardGroup]} -->
+            <table>
+                <tr>
+                    <th>Place</th>
+                    <th>Number</th>
+                    <th>Name</th>
+                    <th>Organization</th>
+                    <th>Description</th>
+                    <th></th>
+                </tr>
+                <c:forEach
+                    items="${subjectiveAwardWinners[category.title][awardGroup]}"
+                    var="winner">
+                    <tr>
+                        <td>${winner.place}</td>
+                        <td>${winner.teamNumber}</td>
+                        <td>${teams[winner.teamNumber].teamName}</td>
+                        <td>${teams[winner.teamNumber].organization}</td>
+                        <td>${winner.description}</td>
+                        <td>
+                            <form action="DeleteAwardWinner"
+                                method="POST">
+                                <input type="hidden" name="category"
+                                    value="${category.name}" />
+                                <input type="hidden" name="awardGroup"
+                                    value="${awardGroup}" />
+                                <input type="hidden"
+                                    value="${winner.teamNumber}" />
+                                <div>
+                                    <input type="submit" value="Edit" />
+                                </div>
+                                <div>
+                                    <input type="submit" value="Delete" />
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </table>
 
-    <h2>Advancing Teams</h2>
-    <p>Specify the teams advancing to the next tournament. The group
-        names will be used in the awards report.</p>
-    <button id="advancing-teams_add-group">Add Group</button>
-    <ul id="advancing-teams"></ul>
+        </c:forEach>
+        <%-- foreach award group --%>
+
+        <%-- foreach subjective category --%>
+    </c:forEach>
+
+    <c:forEach items="${challengeDescription.nonNumericCategories}"
+        var="category">
+        <h1>${category.title}</h1>
+
+        <c:choose>
+            <c:when test="${category.perAwardGroup}">
+    award groups
+            </c:when>
+            <c:otherwise>
+            overall
+            </c:otherwise>
+        </c:choose>
+    </c:forEach>
 
 
-    <h2>Order of award groups</h2>
-    <p>Specify the sort order for the award groups when printing.
-        Put a number next to each group name. The groups will be output
-        from lowest number to highest.</p>
-    <ul id="award-group-order"></ul>
-
-    <button id="store_winners">Store Data</button>
+    <input type="submit" value="Store Data" />
 </html>

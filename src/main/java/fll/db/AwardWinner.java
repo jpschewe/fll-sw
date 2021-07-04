@@ -35,12 +35,14 @@ public class AwardWinner extends OverallAwardWinner implements Serializable {
    * @param awardGroup see {@link #getAwardGroup()}
    * @param teamNumber see {@link #getTeamNumber()}
    * @param description see {@link #getDescription()}
+   * @param place {@link #getPlace}
    */
   public AwardWinner(@JsonProperty("name") final String name,
                      @JsonProperty("awardGroup") final String awardGroup,
                      @JsonProperty("teamNumber") final int teamNumber,
-                     @JsonProperty("description") final @Nullable String description) {
-    super(name, teamNumber, description);
+                     @JsonProperty("description") final @Nullable String description,
+                     @JsonProperty("place") final int place) {
+    super(name, teamNumber, description, place);
     this.awardGroup = Objects.requireNonNull(awardGroup);
   }
 
