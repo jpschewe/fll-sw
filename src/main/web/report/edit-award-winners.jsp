@@ -66,6 +66,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                         <th>Organization</th>
                         <th>Description</th>
                     </tr>
+                    <c:set var="prevPlace" value="0" />
                     <c:forEach
                         items="${subjectiveAwardWinners[category.title][awardGroup]}"
                         var="winner">
@@ -92,12 +93,27 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                                     </div>
                                 </form>
                             </td>
-                            <td>${winner.place}</td>
+                            <c:choose>
+                                <c:when
+                                    test="${prevPlace == winner.place }">
+                                    <c:set var="placeClass" value="tie" />
+                                </c:when>
+                                <c:when
+                                    test="${prevPlace+1 != winner.place}">
+                                    <c:set var="placeClass"
+                                        value="skipped-place" />
+                                </c:when>
+                                <c:otherwise>
+                                    <c:set var="placeClass" value="" />
+                                </c:otherwise>
+                            </c:choose>
+                            <td class="${placeClass}">${winner.place}</td>
                             <td>${winner.teamNumber}</td>
                             <td>${teams[winner.teamNumber].teamName}</td>
                             <td>${teams[winner.teamNumber].organization}</td>
                             <td>${winner.description}</td>
                         </tr>
+                        <c:set var="prevPlace" value="${winner.place}" />
                     </c:forEach>
                 </table>
 
@@ -147,6 +163,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                                 <th>Organization</th>
                                 <th>Description</th>
                             </tr>
+                            <c:set var="prevPlace" value="0" />
                             <c:forEach
                                 items="${extraAwardWinners[category.title][awardGroup]}"
                                 var="winner">
@@ -176,12 +193,30 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                                             </div>
                                         </form>
                                     </td>
-                                    <td>${winner.place}</td>
+                                    <c:choose>
+                                        <c:when
+                                            test="${prevPlace == winner.place }">
+                                            <c:set var="placeClass"
+                                                value="tie" />
+                                        </c:when>
+                                        <c:when
+                                            test="${prevPlace+1 != winner.place}">
+                                            <c:set var="placeClass"
+                                                value="skipped-place" />
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:set var="placeClass"
+                                                value="" />
+                                        </c:otherwise>
+                                    </c:choose>
+                                    <td class="${placeClass}">${winner.place}</td>
                                     <td>${winner.teamNumber}</td>
                                     <td>${teams[winner.teamNumber].teamName}</td>
                                     <td>${teams[winner.teamNumber].organization}</td>
                                     <td>${winner.description}</td>
                                 </tr>
+                                <c:set var="prevPlace"
+                                    value="${winner.place}" />
                             </c:forEach>
                         </table>
 
@@ -217,6 +252,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                             <th>Organization</th>
                             <th>Description</th>
                         </tr>
+                        <c:set var="prevPlace" value="0" />
                         <c:forEach
                             items="${overallAwardWinners[category.title]}"
                             var="winner">
@@ -244,12 +280,29 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                                         </div>
                                     </form>
                                 </td>
-                                <td>${winner.place}</td>
+                                <c:choose>
+                                    <c:when
+                                        test="${prevPlace == winner.place }">
+                                        <c:set var="placeClass"
+                                            value="tie" />
+                                    </c:when>
+                                    <c:when
+                                        test="${prevPlace+1 != winner.place}">
+                                        <c:set var="placeClass"
+                                            value="skipped-place" />
+                                    </c:when>
+                                    <c:otherwise>
+                                        <c:set var="placeClass" value="" />
+                                    </c:otherwise>
+                                </c:choose>
+                                <td class="${placeClass}">${winner.place}</td>
                                 <td>${winner.teamNumber}</td>
                                 <td>${teams[winner.teamNumber].teamName}</td>
                                 <td>${teams[winner.teamNumber].organization}</td>
                                 <td>${winner.description}</td>
                             </tr>
+                            <c:set var="prevPlace"
+                                value="${winner.place}" />
                         </c:forEach>
                     </table>
                     <!-- end overall award -->
@@ -290,6 +343,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                     <th>Organization</th>
                     <th>Description</th>
                 </tr>
+                <c:set var="prevPlace" value="0" />
                 <c:forEach
                     items="${extraAwardWinners['Championship'][awardGroup]}"
                     var="winner">
@@ -314,12 +368,26 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                                 </div>
                             </form>
                         </td>
-                        <td>${winner.place}</td>
+                        <c:choose>
+                            <c:when test="${prevPlace == winner.place }">
+                                <c:set var="placeClass" value="tie" />
+                            </c:when>
+                            <c:when
+                                test="${prevPlace+1 != winner.place}">
+                                <c:set var="placeClass"
+                                    value="skipped-place" />
+                            </c:when>
+                            <c:otherwise>
+                                <c:set var="placeClass" value="" />
+                            </c:otherwise>
+                        </c:choose>
+                        <td class="${placeClass}">${winner.place}</td>
                         <td>${winner.teamNumber}</td>
                         <td>${teams[winner.teamNumber].teamName}</td>
                         <td>${teams[winner.teamNumber].organization}</td>
                         <td>${winner.description}</td>
                     </tr>
+                    <c:set var="prevPlace" value="${winner.place}" />
                 </c:forEach>
             </table>
 
