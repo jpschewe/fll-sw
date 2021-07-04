@@ -101,6 +101,10 @@ public class AddAwardWinnner extends BaseFLLServlet {
         }
 
       } else if ("championship".equals(awardType)) {
+        if (null == awardGroup) {
+          throw new FLLInternalException("Award group cannot be null for Championship award");
+        }
+
         final AwardWinner winner = new AwardWinner(categoryTitle, awardGroup, teamNumber, description, place);
         AwardWinners.addExtraAwardWinner(connection, tournament.getTournamentID(), winner);
       } else {
