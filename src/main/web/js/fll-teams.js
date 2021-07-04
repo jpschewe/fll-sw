@@ -50,13 +50,13 @@ const fllTeams = {};
                 var team = _teams[teamNum];
                 if (typeof (team) == 'undefined') {
                     alert("Team number " + teamNum + " does not exist");
-                    nameEle.value = prevTeam;
-                    teamNum = prevTeam; // for the set of oldVal below
+                    numEle.value = prevTeam;
+                    teamNum = prevTeam; // for storing at the bottom of the method
                 } else {
                     if (awardGroup && awardGroup != team.awardGroup) {
                         alert("Team number " + teamNum + " is in the award group '" + team.awardGroup + "' and only teams in award group '" + awardGroup + "' are allowed'");
-                        nameEle.value = prevTeam;
-                        teamNum = prevTeam; // for the set of oldVal below
+                        numEle.value = prevTeam;
+                        teamNum = prevTeam; // for storing at the bottom of the method
                     } else {
                         nameEle.value = team.teamName;
                         orgEle.value = team.organization;

@@ -2,7 +2,7 @@
 
 <fll-sw:required-roles roles="ADMIN" allowSetup="false" />
 
-<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
+<!DOCTYPE HTML>
 <html>
 <head>
 <title>Edit advancing teams</title>
@@ -18,6 +18,11 @@
 <script type='text/javascript' src="<c:url value='/js/fll-teams.js'/>"></script>
 
 <script type='text/javascript' src="edit-advancing-teams.js"></script>
+
+<script type="text/javascript">
+  // award group to filter to, may be empty
+  const awardGroup = "${awardGroup}";
+</script>
 
 </head>
 

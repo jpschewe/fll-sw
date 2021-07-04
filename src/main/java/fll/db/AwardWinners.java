@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -43,6 +44,20 @@ public final class AwardWinners {
   }
 
   /**
+   * @param connection where to store the data
+   * @param tournamentId the tournament
+   * @param winner the winner to add
+   * @throws SQLException on a database error
+   * @see #storeChallengeAwardWinners(Connection, int, Collection)
+   */
+  public static void addChallengeAwardWinner(final Connection connection,
+                                             final int tournamentId,
+                                             final AwardWinner winner)
+      throws SQLException {
+    addAwardWinners(connection, tournamentId, Collections.singleton(winner), "subjective_challenge_award");
+  }
+
+  /**
    * @param connection database connection
    * @param tournamentId the tournament to get winners for
    * @return the winners sorted by category, award group, place, team number
@@ -56,8 +71,7 @@ public final class AwardWinners {
   }
 
   /**
-   * Store the winners of additional awards that are not in the challenge
-   * description and are handed out per award group.
+   * Store the winners of non-numeric awards and are handed out per award group.
    * 
    * @param connection where to store
    * @param tournamentId the tournament
@@ -69,6 +83,20 @@ public final class AwardWinners {
                                             final Collection<AwardWinner> winners)
       throws SQLException {
     storeAwardWinners(connection, tournamentId, winners, "subjective_extra_award");
+  }
+
+  /**
+   * @param connection where to store the data
+   * @param tournamentId the tournament
+   * @param winner the winner to add
+   * @throws SQLException on a database error
+   * @see #storeExtraAwardWinners(Connection, int, Collection)
+   */
+  public static void addExtraAwardWinner(final Connection connection,
+                                         final int tournamentId,
+                                         final AwardWinner winner)
+      throws SQLException {
+    addAwardWinners(connection, tournamentId, Collections.singleton(winner), "subjective_extra_award");
   }
 
   /**
@@ -125,13 +153,21 @@ public final class AwardWinners {
       delete.executeUpdate();
     }
 
+    addAwardWinners(connection, tournamentId, winners, tablename);
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Table name is passed to method")
+  private static void addAwardWinners(final Connection connection,
+                                      final int tournamentId,
+                                      final Collection<AwardWinner> winners,
+                                      final String tablename)
+      throws SQLException {
     try (PreparedStatement prep = connection.prepareStatement("INSERT INTO "
         + tablename //
         + " ( tournament_id, name, team_number, description, award_group, place)" //
         + " VALUES(?, ?, ?, ?, ?, ?)" //
     )) {
       prep.setInt(1, tournamentId);
-
       for (final AwardWinner winner : winners) {
         prep.setString(2, winner.getName());
         prep.setInt(3, winner.getTeamNumber());
@@ -182,8 +218,8 @@ public final class AwardWinners {
   }
 
   /**
-   * Store the winners of additional awards that are not in the challenge
-   * description and are handed out per tournament.
+   * Store the winners of additional non-numeric awards that are handed out per
+   * tournament.
    * 
    * @param connection where to store
    * @param tournamentId the tournament
@@ -200,6 +236,27 @@ public final class AwardWinners {
       delete.executeUpdate();
     }
 
+    addOverallAwardWinners(connection, tournamentId, winners);
+  }
+
+  /**
+   * @param connection where to store the data
+   * @param tournamentId the tournament
+   * @param winner the winner to add
+   * @throws SQLException on a database error
+   * @see #storeOverallAwardWinners(Connection, int, Collection)
+   */
+  public static void addOverallAwardWinner(final Connection connection,
+                                           final int tournamentId,
+                                           final OverallAwardWinner winner)
+      throws SQLException {
+    addOverallAwardWinners(connection, tournamentId, Collections.singleton(winner));
+  }
+
+  private static void addOverallAwardWinners(final Connection connection,
+                                             final int tournamentId,
+                                             final Collection<OverallAwardWinner> winners)
+      throws SQLException {
     try (PreparedStatement prep = connection.prepareStatement("INSERT INTO subjective_overall_award"
         + " ( tournament_id, name, team_number, description, place)" //
         + " VALUES(?, ?, ?, ?, ?)" //

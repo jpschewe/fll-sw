@@ -6,7 +6,7 @@
 fll.web.report.EditAwardWinners.populateContext(application, pageContext);
 %>
 
-<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
+<!DOCTYPE HTML>
 <html>
 <head>
 <title>Edit award winners</title>
@@ -25,25 +25,22 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
     <%-- clear out the message, so that we don't see it again --%>
     <c:remove var="message" />
 
-    <!-- all winners ${subjectiveAwardWinners} -->
-
     <c:forEach items="${challengeDescription.subjectiveCategories}"
         var="category">
         <h1>${category.title}</h1>
         <c:forEach items="${awardGroups}" var="awardGroup">
 
             <h2>${awardGroup}</h2>
+
             <form action="add-award-winner.jsp" method="POST">
-                <input type="hidden" name="category"
-                    value="${category.name}" />
+                <input type="hidden" name="categoryTitle"
+                    value="${category.title}" />
                 <input type="hidden" name="awardGroup"
                     value="${awardGroup}" />
-                <input type="submit" value="Add Team"
-                    name="${awardGroup}" />
+                <input type="hidden" name="awardType" value="subjective" />
+                <input type="submit" value="Add Team" />
             </form>
 
-            <!-- winners for ${category.title} -> ${subjectiveAwardWinners[category.title]} -->
-            <!-- winners for ${category.title} and ${awardGroup} -> ${subjectiveAwardWinners[category.title][awardGroup]} -->
             <table>
                 <tr>
                     <th>Place</th>
@@ -63,19 +60,22 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                         <td>${teams[winner.teamNumber].organization}</td>
                         <td>${winner.description}</td>
                         <td>
-                            <form action="DeleteAwardWinner"
+                            <form action="EditOrDeleteAwardWinner"
                                 method="POST">
-                                <input type="hidden" name="category"
-                                    value="${category.name}" />
+                                <input type="hidden"
+                                    name="categoryTitle"
+                                    value="${category.title}" />
                                 <input type="hidden" name="awardGroup"
                                     value="${awardGroup}" />
-                                <input type="hidden"
+                                <input type="hidden" name="teamNumber"
                                     value="${winner.teamNumber}" />
                                 <div>
-                                    <input type="submit" value="Edit" />
+                                    <input type="submit" name="edit"
+                                        value="Edit" />
                                 </div>
                                 <div>
-                                    <input type="submit" value="Delete" />
+                                    <input type="submit" name="delete"
+                                        value="Delete" />
                                 </div>
                             </form>
                         </td>
