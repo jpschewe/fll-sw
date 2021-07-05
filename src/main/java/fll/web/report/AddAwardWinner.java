@@ -88,7 +88,7 @@ public class AddAwardWinner extends BaseFLLServlet {
           }
 
           winner = AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
-                                                        teamNumber);
+                                                         teamNumber);
         } else if ("non-numeric".equals(awardType)) {
           final @Nullable NonNumericCategory category = challengeDescription.getNonNumericCategoryByTitle(categoryTitle);
           if (null == category) {
@@ -102,10 +102,10 @@ public class AddAwardWinner extends BaseFLLServlet {
               throw new FLLInternalException("Award group cannot be null for non-numeric award that is per award group");
             }
             winner = AwardWinners.getNonNumericAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
-                                                      teamNumber);
+                                                           teamNumber);
           } else {
-            winner = AwardWinners.getNonNumericOverallAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
-                                                        teamNumber);
+            winner = AwardWinners.getNonNumericOverallAwardWinner(connection, tournament.getTournamentID(),
+                                                                  categoryTitle, teamNumber);
           }
         } else if ("championship".equals(awardType)) {
           if (null == awardGroup) {
@@ -113,7 +113,7 @@ public class AddAwardWinner extends BaseFLLServlet {
           }
 
           winner = AwardWinners.getNonNumericAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
-                                                    teamNumber);
+                                                         teamNumber);
         } else {
           throw new FLLInternalException("Unknown award type: '"
               + awardType
@@ -179,7 +179,14 @@ public class AddAwardWinner extends BaseFLLServlet {
         if (edit) {
           AwardWinners.updateSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
         } else {
-          AwardWinners.addSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
+          if (null != AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
+                                                            teamNumber)) {
+            SessionAttributes.appendToMessage(session,
+                                              String.format("<div class='error'>Team %d is already receiving award %s, cannot add a second time.</div>",
+                                                            teamNumber, categoryTitle));
+          } else {
+            AwardWinners.addSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
+          }
         }
       } else if ("non-numeric".equals(awardType)) {
         final @Nullable NonNumericCategory category = challengeDescription.getNonNumericCategoryByTitle(categoryTitle);
@@ -197,14 +204,28 @@ public class AddAwardWinner extends BaseFLLServlet {
           if (edit) {
             AwardWinners.updateNonNumericAwardWinner(connection, tournament.getTournamentID(), winner);
           } else {
-            AwardWinners.addNonNumericAwardWinner(connection, tournament.getTournamentID(), winner);
+            if (null != AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
+                                                              teamNumber)) {
+              SessionAttributes.appendToMessage(session,
+                                                String.format("<div class='error'>Team %d is already receiving award %s, cannot add a second time.</div>",
+                                                              teamNumber, categoryTitle));
+            } else {
+              AwardWinners.addNonNumericAwardWinner(connection, tournament.getTournamentID(), winner);
+            }
           }
         } else {
           final OverallAwardWinner winner = new OverallAwardWinner(categoryTitle, teamNumber, description, place);
           if (edit) {
             AwardWinners.updateNonNumericOverallAwardWinner(connection, tournament.getTournamentID(), winner);
           } else {
-            AwardWinners.addNonNumerciOverallAwardWinner(connection, tournament.getTournamentID(), winner);
+            if (null != AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
+                                                              teamNumber)) {
+              SessionAttributes.appendToMessage(session,
+                                                String.format("<div class='error'>Team %d is already receiving award %s, cannot add a second time.</div>",
+                                                              teamNumber, categoryTitle));
+            } else {
+              AwardWinners.addNonNumerciOverallAwardWinner(connection, tournament.getTournamentID(), winner);
+            }
           }
         }
 
@@ -217,7 +238,14 @@ public class AddAwardWinner extends BaseFLLServlet {
         if (edit) {
           AwardWinners.updateNonNumericAwardWinner(connection, tournament.getTournamentID(), winner);
         } else {
-          AwardWinners.addNonNumericAwardWinner(connection, tournament.getTournamentID(), winner);
+          if (null != AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
+                                                            teamNumber)) {
+            SessionAttributes.appendToMessage(session,
+                                              String.format("<div class='error'>Team %d is already receiving award %s, cannot add a second time.</div>",
+                                                            teamNumber, categoryTitle));
+          } else {
+            AwardWinners.addNonNumericAwardWinner(connection, tournament.getTournamentID(), winner);
+          }
         }
       } else {
         throw new FLLInternalException("Unknown award type: '"
