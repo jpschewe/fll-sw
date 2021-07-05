@@ -197,13 +197,17 @@ public class FooterFilter implements Filter {
     formatter.format("  <ul>%n");
     formatter.format("    <li><a href='%s/index.jsp'>Main Index</a></li>%n", contextPath);
 
-    if (auth.isJudge()) {
-      formatter.format("    <li><a href='%s/judges-room.jsp'>Judges Room</a></li>%n", contextPath);
-    }
-
     if (auth.isAdmin()) {
       formatter.format("    <li><a href='%s/admin/performance-area.jsp'>Scoring Coordinator</a></li>%n", contextPath);
       formatter.format("    <li><a href='%s/admin/index.jsp'>Admin</a></li>%n", contextPath);
+    }
+
+    if (auth.isHeadJudge()) {
+      formatter.format("    <li><a href='%s/judges-room.jsp'>Judges Room</a></li>%n", contextPath);
+    }
+
+    if (auth.isJudge()) {
+      formatter.format("    <li><a href='%s/subjective/Auth'>Subjective Judging</a></li>%n", contextPath);
     }
 
     if (auth.isRef()) {

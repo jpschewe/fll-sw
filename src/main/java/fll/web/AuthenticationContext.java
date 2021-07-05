@@ -108,11 +108,20 @@ public final class AuthenticationContext implements Serializable {
   }
 
   /**
-   * @return is this user a judge or admin
+   * @return is this user a judge, head judge or admin
    */
   public boolean isJudge() {
     return roles.contains(UserRole.ADMIN)
-        || roles.contains(UserRole.JUDGE);
+        || roles.contains(UserRole.JUDGE)
+        || roles.contains(UserRole.HEAD_JUDGE);
+  }
+
+  /**
+   * @return is this user a head judge or admin
+   */
+  public boolean isHeadJudge() {
+    return roles.contains(UserRole.ADMIN)
+        || roles.contains(UserRole.HEAD_JUDGE);
   }
 
   /**
