@@ -193,7 +193,7 @@ public class AwardsReport extends BaseFLLServlet {
                                              final Tournament tournament,
                                              final List<String> sortedAwardGroups)
       throws SQLException {
-    final List<AwardWinner> winners = AwardWinners.getChallengeAwardWinners(connection, tournament.getTournamentID());
+    final List<AwardWinner> winners = AwardWinners.getSubjectiveAwardWinners(connection, tournament.getTournamentID());
 
     final List<String> categoryOrder = description.getSubjectiveCategories().stream() //
                                                   .map(SubjectiveScoreCategory::getTitle) //
@@ -208,7 +208,7 @@ public class AwardsReport extends BaseFLLServlet {
                                          final Tournament tournament,
                                          final List<String> sortedAwardGroups)
       throws SQLException {
-    final List<AwardWinner> winners = AwardWinners.getExtraAwardWinners(connection, tournament.getTournamentID());
+    final List<AwardWinner> winners = AwardWinners.getNonNumericAwardWinners(connection, tournament.getTournamentID());
 
     final List<String> categoryOrder = description.getNonNumericCategories().stream() //
                                                   .map(NonNumericCategory::getTitle) //
@@ -255,7 +255,7 @@ public class AwardsReport extends BaseFLLServlet {
                                            final Element documentBody,
                                            final Tournament tournament)
       throws SQLException {
-    final List<OverallAwardWinner> winners = AwardWinners.getOverallAwardWinners(connection,
+    final List<OverallAwardWinner> winners = AwardWinners.getNonNumericOverallAwardWinners(connection,
                                                                                  tournament.getTournamentID());
 
     final Map<String, List<OverallAwardWinner>> organizedWinners = new HashMap<>();

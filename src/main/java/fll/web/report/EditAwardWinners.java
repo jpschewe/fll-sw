@@ -50,7 +50,7 @@ public final class EditAwardWinners {
       final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, tournament.getTournamentID());
       page.setAttribute("teams", teams);
 
-      final List<AwardWinner> subjectiveAwardWinnersList = AwardWinners.getChallengeAwardWinners(connection,
+      final List<AwardWinner> subjectiveAwardWinnersList = AwardWinners.getSubjectiveAwardWinners(connection,
                                                                                                  tournament.getTournamentID());
       // category -> awardGroup -> winners
       final Map<String, Map<String, List<AwardWinner>>> subjectiveAwardWinners = new HashMap<>();
@@ -61,7 +61,7 @@ public final class EditAwardWinners {
       }
       page.setAttribute("subjectiveAwardWinners", subjectiveAwardWinners);
 
-      final List<AwardWinner> extraAwardWinnersList = AwardWinners.getExtraAwardWinners(connection,
+      final List<AwardWinner> extraAwardWinnersList = AwardWinners.getNonNumericAwardWinners(connection,
                                                                                         tournament.getTournamentID());
       // category -> awardGroup -> winners
       final Map<String, Map<String, List<AwardWinner>>> extraAwardWinners = new HashMap<>();
@@ -72,7 +72,7 @@ public final class EditAwardWinners {
       }
       page.setAttribute("extraAwardWinners", extraAwardWinners);
 
-      final List<OverallAwardWinner> overallAwardWinnersList = AwardWinners.getOverallAwardWinners(connection,
+      final List<OverallAwardWinner> overallAwardWinnersList = AwardWinners.getNonNumericOverallAwardWinners(connection,
                                                                                                    tournament.getTournamentID());
       // category -> winners
       final Map<String, List<OverallAwardWinner>> overallAwardWinners = new HashMap<>();

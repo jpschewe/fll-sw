@@ -87,7 +87,7 @@ public class AddAwardWinner extends BaseFLLServlet {
                 + "'");
           }
 
-          winner = AwardWinners.getChallengeAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
+          winner = AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
                                                         teamNumber);
         } else if ("non-numeric".equals(awardType)) {
           final @Nullable NonNumericCategory category = challengeDescription.getNonNumericCategoryByTitle(categoryTitle);
@@ -101,10 +101,10 @@ public class AddAwardWinner extends BaseFLLServlet {
             if (null == awardGroup) {
               throw new FLLInternalException("Award group cannot be null for non-numeric award that is per award group");
             }
-            winner = AwardWinners.getExtraAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
+            winner = AwardWinners.getNonNumericAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
                                                       teamNumber);
           } else {
-            winner = AwardWinners.getOverallAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
+            winner = AwardWinners.getNonNumericOverallAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
                                                         teamNumber);
           }
         } else if ("championship".equals(awardType)) {
@@ -112,7 +112,7 @@ public class AddAwardWinner extends BaseFLLServlet {
             throw new FLLInternalException("Award group cannot be null for Championship award");
           }
 
-          winner = AwardWinners.getExtraAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
+          winner = AwardWinners.getNonNumericAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
                                                     teamNumber);
         } else {
           throw new FLLInternalException("Unknown award type: '"
@@ -177,9 +177,9 @@ public class AddAwardWinner extends BaseFLLServlet {
 
         final AwardWinner winner = new AwardWinner(categoryTitle, awardGroup, teamNumber, description, place);
         if (edit) {
-          AwardWinners.updateChallengeAwardWinner(connection, tournament.getTournamentID(), winner);
+          AwardWinners.updateSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
         } else {
-          AwardWinners.addChallengeAwardWinner(connection, tournament.getTournamentID(), winner);
+          AwardWinners.addSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
         }
       } else if ("non-numeric".equals(awardType)) {
         final @Nullable NonNumericCategory category = challengeDescription.getNonNumericCategoryByTitle(categoryTitle);
@@ -195,16 +195,16 @@ public class AddAwardWinner extends BaseFLLServlet {
           }
           final AwardWinner winner = new AwardWinner(categoryTitle, awardGroup, teamNumber, description, place);
           if (edit) {
-            AwardWinners.updateExtraAwardWinner(connection, tournament.getTournamentID(), winner);
+            AwardWinners.updateNonNumericAwardWinner(connection, tournament.getTournamentID(), winner);
           } else {
-            AwardWinners.addExtraAwardWinner(connection, tournament.getTournamentID(), winner);
+            AwardWinners.addNonNumericAwardWinner(connection, tournament.getTournamentID(), winner);
           }
         } else {
           final OverallAwardWinner winner = new OverallAwardWinner(categoryTitle, teamNumber, description, place);
           if (edit) {
-            AwardWinners.updateOverallAwardWinner(connection, tournament.getTournamentID(), winner);
+            AwardWinners.updateNonNumericOverallAwardWinner(connection, tournament.getTournamentID(), winner);
           } else {
-            AwardWinners.addOverallAwardWinner(connection, tournament.getTournamentID(), winner);
+            AwardWinners.addNonNumerciOverallAwardWinner(connection, tournament.getTournamentID(), winner);
           }
         }
 
@@ -215,9 +215,9 @@ public class AddAwardWinner extends BaseFLLServlet {
 
         final AwardWinner winner = new AwardWinner(categoryTitle, awardGroup, teamNumber, description, place);
         if (edit) {
-          AwardWinners.updateExtraAwardWinner(connection, tournament.getTournamentID(), winner);
+          AwardWinners.updateNonNumericAwardWinner(connection, tournament.getTournamentID(), winner);
         } else {
-          AwardWinners.addExtraAwardWinner(connection, tournament.getTournamentID(), winner);
+          AwardWinners.addNonNumericAwardWinner(connection, tournament.getTournamentID(), winner);
         }
       } else {
         throw new FLLInternalException("Unknown award type: '"

@@ -70,7 +70,7 @@ public class DeleteAwardWinnner extends BaseFLLServlet {
               + "'");
         }
 
-        AwardWinners.deleteChallengeAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
+        AwardWinners.deleteSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
       } else if ("non-numeric".equals(awardType)) {
         final @Nullable NonNumericCategory category = challengeDescription.getNonNumericCategoryByTitle(categoryTitle);
         if (null == category) {
@@ -80,13 +80,13 @@ public class DeleteAwardWinnner extends BaseFLLServlet {
         }
 
         if (category.getPerAwardGroup()) {
-          AwardWinners.deleteExtraAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
+          AwardWinners.deleteNonNumericAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
         } else {
-          AwardWinners.deleteOverallAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
+          AwardWinners.deleteNonNumericOverallAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
         }
 
       } else if ("championship".equals(awardType)) {
-        AwardWinners.deleteExtraAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
+        AwardWinners.deleteNonNumericAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
       } else {
         throw new FLLInternalException("Unknown award type: '"
             + awardType
