@@ -203,6 +203,35 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
             </ul>
         </li>
 
+
+        <li>
+            Import performance data into the judges server.
+            <form name="import-performance"
+                action="<c:url value='/admin/ProcessImportPerformance' />"
+                target="_import_performance" method="POST"
+                ENCTYPE="multipart/form-data">
+                Specify the file that was exported from the performance
+                server
+                <input type="file" size="32" name="performanceFile" />
+
+                <!-- performance file upload button -->
+                <input id='uploadPerformanceData' type="submit"
+                    value="Upload" />
+            </form>
+        </li>
+
+        <li>
+            <a href="<c:url value='/admin/DownloadJudgesDatabase' />">Download
+                the final judges room database</a> and send it to the head
+            computer person
+        </li>
+
+        <li>
+            <a href="<c:url value='/admin/ExportFinalistData' />">Export
+                finalist data</a> to bring to the performance computer
+        </li>
+
+
         <li>
             <a href='database.flldb'>Download the final database</a> -
             send this to the lead Scoring Coordinator

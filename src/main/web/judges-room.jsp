@@ -56,57 +56,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
     <h2>Tournament steps</h2>
     <ol>
-        <li>
-            <a target="_init" href="<c:url value='/setup' />">Database
-                setup</a> - Initialize the database first thing in the
-            morning or the night before. This has probably already been
-            done.
-        </li>
-
-        <li>
-            Make sure that the correct tournament is selected.
-            <ul>
-                <li>The current tournament is
-                    ${currentTournament.description }.</li>
-                <li>
-                    <form id='currentTournament'
-                        action="<c:url value='/admin/SetCurrentTournament' />"
-                        method="post">
-                        Change tournament to
-                        <select id='currentTournamentSelect'
-                            name='currentTournament'>
-                            <c:forEach items="${tournaments }"
-                                var="tournament">
-                                <c:choose>
-                                    <c:when
-                                        test="${tournament.tournamentID == currentTournament.tournamentID}">
-                                        <option selected
-                                            value='${tournament.tournamentID }'>${tournament.description}
-                                            [ ${tournament.name } ]</option>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <option
-                                            value='${tournament.tournamentID }'>${tournament.description}
-                                            [ ${tournament.name } ]</option>
-                                    </c:otherwise>
-                                </c:choose>
-                            </c:forEach>
-                        </select>
-                        <input type='submit' name='change_tournament'
-                            value='Submit'>
-                    </form>
-                </li>
-
-            </ul>
-        </li>
-
-        <li>
-            <a target="_edit_parameters"
-                href="<c:url value='/admin/edit_tournament_parameters.jsp'/>">Edit
-                tournament parameters</a> - should not be needed for most
-            tournaments.
-        </li>
-
 
         <li>
             Enter subjective scores. This is done through the <a
@@ -115,26 +64,16 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
                 web application</a>.
         </li>
 
-
-        <li>
-            <form name="import-performance"
-                action="<c:url value='/admin/ProcessImportPerformance' />"
-                target="_import_performance" method="POST"
-                ENCTYPE="multipart/form-data">
-                Specify the file that was exported from the performance
-                server
-                <input type="file" size="32" name="performanceFile" />
-
-                <!-- performance file upload button -->
-                <input id='uploadPerformanceData' type="submit"
-                    value="Upload" />
-            </form>
-        </li>
-
         <li>
             <a href="<c:url value='/report/edit-award-winners.jsp' />"
                 target="_blank">Enter the winners of awards for use
                 in the awards report</a>
+        </li>
+
+        <li>
+            <a href="<c:url value='/report/edit-advancing-teams.jsp' />"
+                target="_blank">Enter the advancing teams for use in
+                the awards report</a>
         </li>
 
         <li>
@@ -157,12 +96,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
                 will not be accurate. <a
                     href='javascript:hide("ReportHelp")'>[hide]</a>
             </div>
-        </li>
-
-        <li>
-            <a href="<c:url value='/admin/DownloadJudgesDatabase' />">Download
-                the final judges room database</a> and send it to the head
-            computer person
         </li>
 
     </ol>
@@ -215,11 +148,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
             <a
                 href="<c:url value='/report/finalist/TeamFinalistSchedule' />"
                 target="_blank">Finalist Schedule for each team</a>
-        </li>
-
-        <li>
-            <a href="<c:url value='/admin/ExportFinalistData' />">Export
-                finalist data</a> to bring to the performance computer
         </li>
 
     </ul>
