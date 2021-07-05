@@ -1,3 +1,4 @@
+* #932 - Add top navigation bar
 * #923 - Rework editing of award winners to allow multiple editors at the same time and to support multiple winners for each award
 * #945 - hide the score column when using the tablets to enter performance scores
 * #935 - allow a ref to specify which table they are scoring for and sort the teams based on the schedule for that table

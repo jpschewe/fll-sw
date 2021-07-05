@@ -26,7 +26,7 @@ import javax.servlet.http.HttpSession;
 import fll.Version;
 
 /**
- * Ensure that all HTML pages get the same footer.
+ * Ensure that all HTML pages get the same navbar and footer.
  */
 @WebFilter("/*")
 public class FooterFilter implements Filter {
@@ -53,65 +53,75 @@ public class FooterFilter implements Filter {
       final String path = httpRequest.getRequestURI();
 
       final String contentType = wrapper.getContentType();
+      LOGGER.debug("Page: {} content type: {}", httpRequest.getRequestURL(), contentType);
+
       if (wrapper.isStringUsed()) {
         if (null != contentType
             && contentType.startsWith("text/html")) {
           final String url = httpRequest.getRequestURI();
 
           final String origStr = wrapper.getString();
-          if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace(new Formatter().format("html page: %s content type: %s ###%s###", httpRequest.getRequestURL(),
-                                                contentType, origStr));
-          }
 
           final PrintWriter writer = response.getWriter();
 
           final CharArrayWriter caw = new CharArrayWriter();
-          final int bodyIndex = origStr.indexOf("</body>");
+          final int bodyIndex = origStr.indexOf("<body>");
+          final int bodyEndIndex = origStr.indexOf("</body>");
+          LOGGER.trace("Body index {} body end index {}", bodyIndex, bodyEndIndex);
+
           if (-1 != bodyIndex
+              && -1 != bodyEndIndex
               && !noFooter(url)) {
             caw.write(origStr.substring(0, bodyIndex
                 - 1));
+
+            if (!path.startsWith(httpRequest.getContextPath()
+                + "/public")) {
+              addNavbar(caw, httpRequest);
+            } else {
+              LOGGER.debug("Skipping navbar");
+            }
+
+            caw.write(origStr.substring(bodyIndex, bodyEndIndex
+                - 1));
+
             if (path.startsWith(httpRequest.getContextPath()
                 + "/public")) {
               addPublicFooter(caw, httpRequest);
             } else {
               addFooter(caw, httpRequest);
             }
+
+            caw.write(origStr.substring(bodyEndIndex, origStr.length()));
+
             response.setContentLength(caw.toString().length());
             writer.print(caw.toString());
           } else {
+            LOGGER.debug("No navbar/footer");
+
             writer.print(origStr);
           }
           writer.close();
         } else {
           final String origStr = wrapper.getString();
-          if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace(new Formatter().format("non-html text page: %s content type: %s ###%s###",
-                                                httpRequest.getRequestURL(), contentType, origStr));
-          }
+          LOGGER.debug("non-html text page: {} content type: {}", httpRequest.getRequestURL(), contentType);
 
           final PrintWriter writer = response.getWriter();
           writer.print(origStr);
           writer.close();
         }
       } else if (wrapper.isBinaryUsed()) {
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace(new Formatter().format("binary page: %s content type: %s", httpRequest.getRequestURL(),
-                                              contentType));
-        }
+        LOGGER.debug("binary page: {} content type: {}", httpRequest.getRequestURL(), contentType);
 
         final byte[] origData = wrapper.getBinary();
         final ServletOutputStream out = response.getOutputStream();
         out.write(origData);
         out.close();
       } else {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("No output stream used, just returning page: "
-              + httpRequest.getRequestURL());
-        }
+        LOGGER.debug("No output stream used, just returning page: {}", httpRequest.getRequestURL());
       }
     } else {
+      LOGGER.debug("Not HttpRequest ({}) and HttpRespones ({})", request.getClass(), response.getClass());
       chain.doFilter(request, response);
     }
   }
@@ -156,36 +166,68 @@ public class FooterFilter implements Filter {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    final String contextPath = request.getContextPath();
     final Formatter formatter = new Formatter(caw);
-    formatter.format("<hr />");
-    formatter.format("<table style='border-spacing: 5px'>");
+    formatter.format("<hr />%n");
+    formatter.format("<table style='border-spacing: 5px'>%n");
 
-    formatter.format("  <tr>");
-    formatter.format("    <td><a href='%s/admin/performance-area.jsp' target='_top'>Scoring Coordinator</a></td>",
-                     contextPath);
-    formatter.format("    <td><a href='%s/judges-room.jsp' target='_top'>Judges Room</a></td>", contextPath);
-    formatter.format("    <td><a href='%s/index.jsp' target='_top'>Main Index</a></td>", contextPath);
-    formatter.format("    <td><a href='%s/admin/index.jsp' target='_top'>Admin Index</a></td>", contextPath);
-    formatter.format("  </tr>");
-
-    final int numColumns = 4;
-    final int halfNumColumns = numColumns
-        / 2;
-    final int lastHalfNumColumns = numColumns
-        - halfNumColumns;
     if (auth.getLoggedIn()) {
-      formatter.format("  <tr><td colspan='%d'>Logged in as %s</td><td colspan='%d'><a href='%s/DoLogout'>Log Out</a></td></tr>",
-                       halfNumColumns, auth.getUsername(), lastHalfNumColumns, contextPath);
+      formatter.format("  <tr><td>Logged in as %s</td></tr>%n", auth.getUsername());
     } else {
-      formatter.format("  <tr><td colspan='%d'>Not logged in</td><td colspan='%d'><a href='%s/login.jsp'>Log In</a></td></tr>",
-                       halfNumColumns, lastHalfNumColumns, contextPath);
+      formatter.format("  <tr><td>Not logged in</td></tr>%n");
     }
 
-    formatter.format("  <tr><td colspan='%d'>Software version: %s</td></tr>", numColumns, Version.getVersion());
+    formatter.format("  <tr><td>Software version: %s</td></tr>%n", Version.getVersion());
 
-    formatter.format("</table>");
-    formatter.format("%n</body></html>");
+    formatter.format("</table>%n");
+  }
+
+  /**
+   * Writer the navbar to the char array writer.
+   */
+  private static void addNavbar(final CharArrayWriter caw,
+                                final HttpServletRequest request)
+      throws IOException {
+    final HttpSession session = request.getSession();
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    final String contextPath = request.getContextPath();
+    final Formatter formatter = new Formatter(caw);
+
+    formatter.format("<div class='navbar'>%n");
+    formatter.format("  <ul>%n");
+    formatter.format("    <li><a href='%s/index.jsp'>Main Index</a></li>%n", contextPath);
+
+    if (auth.isJudge()) {
+      formatter.format("    <li><a href='%s/judges-room.jsp'>Judges Room</a></li>%n", contextPath);
+    }
+
+    if (auth.isAdmin()) {
+      formatter.format("    <li><a href='%s/admin/performance-area.jsp'>Scoring Coordinator</a></li>%n", contextPath);
+      formatter.format("    <li><a href='%s/admin/index.jsp'>Admin</a></li>%n", contextPath);
+    }
+
+    if (auth.isRef()) {
+      formatter.format("    <li><a href='%s/scoreEntry/choose-table.jsp'>Score Entry</a></li>%n", contextPath);
+    }
+
+    formatter.format("    <li class='dropdown'>%n");
+    formatter.format("      <a href='' class='dropbtn'>Scoreboard</a>%n");
+    formatter.format("      <div class='dropdown-content'>%n");
+    formatter.format("        <a href='%s/scoreboard/allteams.jsp'>All Teams, All Performance Runs</a>%n", contextPath);
+    formatter.format("        <a href='%s/scoreboard/Last8'>Most recent performance scores</a>%n", contextPath);
+    formatter.format("        <a href='%s/scoreboard/Top10'>Top scores</a>%n", contextPath);
+    formatter.format("      </div>%n");
+    formatter.format("    </li>%n");
+
+    if (!auth.getLoggedIn()) {
+      formatter.format("    <li><a href='%s/login.jsp'>Login</a></li>%n", contextPath);
+    }
+    if (auth.getLoggedIn()) {
+      formatter.format("    <li><a href='%s/DoLogout'>Logout</a></li>%n", contextPath);
+    }
+
+    formatter.format("  </ul>%n");
+    formatter.format("</div>%n");
   }
 
   /**
@@ -196,19 +238,15 @@ public class FooterFilter implements Filter {
       throws IOException {
     final String contextPath = request.getContextPath();
     final Formatter formatter = new Formatter(caw);
-    formatter.format("<hr />");
-    formatter.format("<table>");
-    formatter.format("  <tr>");
-    formatter.format("    <td><a href='%s/public/index.jsp' target='_top'>Public Index</a></td>", contextPath);
-    formatter.format("  </tr>");
-    formatter.format("  <tr><td>Software version: %s</td></tr>", Version.getVersion());
-    formatter.format("</table>");
-    formatter.format("%n</body></html>");
+    formatter.format("<hr />%n");
+    formatter.format("<table>%n");
+    formatter.format("  <tr>%n");
+    formatter.format("    <td><a href='%s/public/index.jsp' target='_top'>Public Index</a></td>%n", contextPath);
+    formatter.format("  </tr>%n");
+    formatter.format("  <tr><td>Software version: %s</td></tr>%n", Version.getVersion());
+    formatter.format("</table>%n");
   }
 
-  /**
-   * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
-   */
   @Override
   public void init(final FilterConfig filterConfig) throws ServletException {
     // nothing
