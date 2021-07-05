@@ -22,6 +22,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const agEle = document.getElementById("awardGroup");
 
         fllTeams.autoPopulate(numEle, nameEle, orgEle, agEle, awardGroup);
+
+        // call onchange to populate the other fields in case the team number is populated for edit
+        numEle.onchange();
     });
 
 });

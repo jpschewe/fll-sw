@@ -2,6 +2,10 @@
 
 <fll-sw:required-roles roles="JUDGE" allowSetup="false" />
 
+<%
+fll.web.report.AddAwardWinner.populateContext(request, response, application, session, pageContext);
+%>
+
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -39,17 +43,33 @@
         <input type="hidden" name="awardGroup"
             value="${param.awardGroup}" />
         <input type="hidden" name="awardType" value="${param.awardType}" />
+        <input type="hidden" name="edit" value="${param.edit}" />
 
         <div>
             <label for="place">Place:</label>
             <input type="number" min="1" required name="place"
-                id="place" />
+                id="place" value="${winner.place}" />
         </div>
 
         <div>
             <label for="teamNumber">Team Number:</label>
-            <input type="number" required name="teamNumber"
-                id="teamNumber" />
+
+            <c:choose>
+                <c:when test="${param.edit == 'true'}">
+                    <input type="number" readonly disabled
+                        id="teamNumber" value="${winner.teamNumber}" />
+                    <input type="hidden" name="teamNumber"
+                        value="${winner.teamNumber}" />
+                </c:when>
+                <c:otherwise>
+                    <input type="number" required name="teamNumber"
+                        id="teamNumber" value="${winner.teamNumber}" />
+                </c:otherwise>
+            </c:choose>
+
+            <input type="number" ${teamNumberAttributes}
+                name="teamNumber" id="teamNumber"
+                value="${winner.teamNumber}" />
         </div>
 
         <div>
@@ -69,15 +89,15 @@
 
         <div>
             <label for="description">Description:</label>
-            <textarea name="description" rows="10" cols="50"></textarea>
+            <textarea name="description" rows="10" cols="50">${winner.description}</textarea>
         </div>
 
         <div>
-            <input type="submit" value="Add Team" />
+            <input type="submit" value="Submit Changes" />
         </div>
 
         <div>
-            <button id="cancel">Cancel Add of Team</button>
+            <button id="cancel">Cancel</button>
         </div>
 
     </form>

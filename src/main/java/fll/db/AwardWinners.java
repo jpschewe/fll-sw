@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -58,6 +60,20 @@ public final class AwardWinners {
   }
 
   /**
+   * @param connection where to store the data
+   * @param tournamentId the tournament
+   * @param winner the winner to add
+   * @throws SQLException on a database error
+   * @see #storeChallengeAwardWinners(Connection, int, Collection)
+   */
+  public static void updateChallengeAwardWinner(final Connection connection,
+                                                final int tournamentId,
+                                                final AwardWinner winner)
+      throws SQLException {
+    updateAwardWinner(connection, tournamentId, winner, "subjective_challenge_award");
+  }
+
+  /**
    * @param connection database connection
    * @param tournamentId tournament to work with
    * @param name {@link AwardWinner#getName()}
@@ -70,6 +86,22 @@ public final class AwardWinners {
                                                 final int teamNumber)
       throws SQLException {
     deleteAwardWinner(connection, tournamentId, name, teamNumber, "subjective_challenge_award");
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournamentId tournament to work with
+   * @param name {@link AwardWinner#getName()}
+   * @param teamNumber {@link AwardWinner#getTeamNumber()}
+   * @return the winner object or null if not found
+   * @throws SQLException on a database error
+   */
+  public static @Nullable AwardWinner getChallengeAwardWinner(final Connection connection,
+                                                              final int tournamentId,
+                                                              final String name,
+                                                              final int teamNumber)
+      throws SQLException {
+    return getAwardWinner(connection, tournamentId, name, teamNumber, "subjective_challenge_award");
   }
 
   /**
@@ -115,6 +147,20 @@ public final class AwardWinners {
   }
 
   /**
+   * @param connection where to store the data
+   * @param tournamentId the tournament
+   * @param winner the winner to add
+   * @throws SQLException on a database error
+   * @see #storeExtraAwardWinners(Connection, int, Collection)
+   */
+  public static void updateExtraAwardWinner(final Connection connection,
+                                            final int tournamentId,
+                                            final AwardWinner winner)
+      throws SQLException {
+    updateAwardWinner(connection, tournamentId, winner, "subjective_extra_award");
+  }
+
+  /**
    * @param connection database connection
    * @param tournamentId tournament to work with
    * @param name {@link AwardWinner#getName()}
@@ -127,6 +173,22 @@ public final class AwardWinners {
                                             final int teamNumber)
       throws SQLException {
     deleteAwardWinner(connection, tournamentId, name, teamNumber, "subjective_extra_award");
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournamentId tournament to work with
+   * @param name {@link AwardWinner#getName()}
+   * @param teamNumber {@link AwardWinner#getTeamNumber()}
+   * @return the winner object or null if not found
+   * @throws SQLException on a database error
+   */
+  public static @Nullable AwardWinner getExtraAwardWinner(final Connection connection,
+                                                          final int tournamentId,
+                                                          final String name,
+                                                          final int teamNumber)
+      throws SQLException {
+    return getAwardWinner(connection, tournamentId, name, teamNumber, "subjective_extra_award");
   }
 
   /**
@@ -168,6 +230,36 @@ public final class AwardWinners {
       }
     }
     return result;
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Table name is passed to method")
+  private static @Nullable AwardWinner getAwardWinner(final Connection connection,
+                                                      final int tournamentId,
+                                                      final String name,
+                                                      final int teamNumber,
+                                                      final String tablename)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT description, award_group, place FROM "
+        + tablename
+        + " WHERE tournament_id = ?" //
+        + " AND team_number = ?" //
+    )) {
+      prep.setInt(1, tournamentId);
+      prep.setInt(2, teamNumber);
+
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          final String description = rs.getString(1);
+          final String awardGroup = castNonNull(rs.getString(2));
+          final int place = rs.getInt(3);
+
+          final AwardWinner winner = new AwardWinner(name, awardGroup, teamNumber, description, place);
+          return winner;
+        } else {
+          return null;
+        }
+      }
+    }
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Table name is passed to method")
@@ -213,6 +305,35 @@ public final class AwardWinners {
         prep.setInt(6, winner.getPlace());
         prep.executeUpdate();
       }
+    }
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Table name is passed to method")
+  private static void updateAwardWinner(final Connection connection,
+                                        final int tournamentId,
+                                        final OverallAwardWinner winner,
+                                        final String tablename)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("UPDATE "
+        + tablename //
+        + " SET description = ?, place = ?" //
+        + " WHERE tournament_id = ?" //
+        + " AND name = ?" //
+        + " AND team_number = ?" //
+    )) {
+      prep.setInt(3, tournamentId);
+      prep.setString(4, winner.getName());
+      prep.setInt(5, winner.getTeamNumber());
+
+      final String winnerDescription = winner.getDescription();
+      if (null != winnerDescription
+          && !winnerDescription.trim().isEmpty()) {
+        prep.setString(1, winnerDescription.trim());
+      } else {
+        prep.setNull(1, Types.LONGVARCHAR);
+      }
+      prep.setInt(2, winner.getPlace());
+      prep.executeUpdate();
     }
   }
 
@@ -332,6 +453,19 @@ public final class AwardWinners {
   /**
    * @param connection database connection
    * @param tournamentId tournament to work with
+   * @param winner object to update in the database
+   * @throws SQLException on a database error
+   */
+  public static void updateOverallAwardWinner(final Connection connection,
+                                              final int tournamentId,
+                                              final OverallAwardWinner winner)
+      throws SQLException {
+    updateAwardWinner(connection, tournamentId, winner, "subjective_overall_award");
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournamentId tournament to work with
    * @param name {@link OverallAwardWinner#getName()}
    * @param teamNumber {@link OverallAwardWinner#getTeamNumber()}
    * @throws SQLException on a database error
@@ -342,6 +476,40 @@ public final class AwardWinners {
                                               final int teamNumber)
       throws SQLException {
     deleteAwardWinner(connection, tournamentId, name, teamNumber, "subjective_overall_award");
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournamentId tournament to work with
+   * @param name {@link AwardWinner#getName()}
+   * @param teamNumber {@link AwardWinner#getTeamNumber()}
+   * @return the winner object or null if not found
+   * @throws SQLException on a database error
+   */
+  public static @Nullable OverallAwardWinner getOverallAwardWinner(final Connection connection,
+                                                                   final int tournamentId,
+                                                                   final String name,
+                                                                   final int teamNumber)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT description, place FROM subjective_overall_award"
+        + " WHERE tournament_id = ?" //
+        + " AND team_number = ?" //
+    )) {
+      prep.setInt(1, tournamentId);
+      prep.setInt(2, teamNumber);
+
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          final String description = rs.getString(1);
+          final int place = rs.getInt(2);
+
+          final OverallAwardWinner winner = new OverallAwardWinner(name, teamNumber, description, place);
+          return winner;
+        } else {
+          return null;
+        }
+      }
+    }
   }
 
 }
