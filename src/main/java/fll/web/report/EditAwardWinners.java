@@ -37,6 +37,12 @@ public final class EditAwardWinners {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  /**
+   * Setup variables for edit-award-winers.jsp.
+   * 
+   * @param application application variables
+   * @param page page variables
+   */
   public static void populateContext(final ServletContext application,
                                      final PageContext page) {
 
@@ -51,7 +57,7 @@ public final class EditAwardWinners {
       page.setAttribute("teams", teams);
 
       final List<AwardWinner> subjectiveAwardWinnersList = AwardWinners.getSubjectiveAwardWinners(connection,
-                                                                                                 tournament.getTournamentID());
+                                                                                                  tournament.getTournamentID());
       // category -> awardGroup -> winners
       final Map<String, Map<String, List<AwardWinner>>> subjectiveAwardWinners = new HashMap<>();
       for (final AwardWinner winner : subjectiveAwardWinnersList) {
@@ -62,7 +68,7 @@ public final class EditAwardWinners {
       page.setAttribute("subjectiveAwardWinners", subjectiveAwardWinners);
 
       final List<AwardWinner> extraAwardWinnersList = AwardWinners.getNonNumericAwardWinners(connection,
-                                                                                        tournament.getTournamentID());
+                                                                                             tournament.getTournamentID());
       // category -> awardGroup -> winners
       final Map<String, Map<String, List<AwardWinner>>> extraAwardWinners = new HashMap<>();
       for (final AwardWinner winner : extraAwardWinnersList) {
@@ -73,7 +79,7 @@ public final class EditAwardWinners {
       page.setAttribute("extraAwardWinners", extraAwardWinners);
 
       final List<OverallAwardWinner> overallAwardWinnersList = AwardWinners.getNonNumericOverallAwardWinners(connection,
-                                                                                                   tournament.getTournamentID());
+                                                                                                             tournament.getTournamentID());
       // category -> winners
       final Map<String, List<OverallAwardWinner>> overallAwardWinners = new HashMap<>();
       for (final OverallAwardWinner winner : overallAwardWinnersList) {

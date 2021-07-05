@@ -47,7 +47,6 @@ public final class AwardWinners {
    * @param tournamentId the tournament
    * @param winner the winner to add
    * @throws SQLException on a database error
-   * @see #storeChallengeAwardWinners(Connection, int, Collection)
    */
   public static void updateSubjectiveAwardWinner(final Connection connection,
                                                  final int tournamentId,
@@ -117,7 +116,6 @@ public final class AwardWinners {
    * @param tournamentId the tournament
    * @param winner the winner to add
    * @throws SQLException on a database error
-   * @see #storeExtraAwardWinners(Connection, int, Collection)
    */
   public static void updateNonNumericAwardWinner(final Connection connection,
                                                  final int tournamentId,
@@ -162,7 +160,6 @@ public final class AwardWinners {
    * @param tournamentId the tournament to get winners for
    * @return the winners sorted by category, award group, place, team number
    * @throws SQLException if an error occurs talking to the database
-   * @see #storeExtraAwardWinners(Connection, int, Collection)
    */
   public static List<AwardWinner> getNonNumericAwardWinners(final Connection connection,
                                                             final int tournamentId)
