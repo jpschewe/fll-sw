@@ -66,10 +66,6 @@ fll.web.report.AddAwardWinner.populateContext(request, response, application, se
                         id="teamNumber" value="${winner.teamNumber}" />
                 </c:otherwise>
             </c:choose>
-
-            <input type="number" ${teamNumberAttributes}
-                name="teamNumber" id="teamNumber"
-                value="${winner.teamNumber}" />
         </div>
 
         <div>
