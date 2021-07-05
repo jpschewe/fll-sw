@@ -27,7 +27,7 @@
     <c:forEach items="${winners}" var="winner">
         <tr>
             <td>
-                <form action="EditOrDeleteAwardWinner" method="POST">
+                <form action="FIXME" method="POST">
                     <input type="hidden" name="categoryTitle"
                         value="${categoryTitle}" />
                     <input type="hidden" name="awardGroup"
@@ -37,9 +37,18 @@
                     <div>
                         <input type="submit" name="edit" value="Edit" />
                     </div>
+                </form>
+                <form action="DeleteAwardWinner" method="POST">
+                    <input type="hidden" name="categoryTitle"
+                        value="${categoryTitle}" />
+                    <input type="hidden" name="awardType"
+                        value="${awardType}" />
+                    <input type="hidden" name="teamNumber"
+                        value="${winner.teamNumber}" />
                     <div>
                         <input type="submit" name="delete"
-                            value="Delete" />
+                            value="Delete"
+                            onclick="return confirm('Are you sure you want to delete this team from this award?')" />
                     </div>
                 </form>
             </td>

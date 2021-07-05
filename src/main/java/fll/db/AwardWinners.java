@@ -59,6 +59,21 @@ public final class AwardWinners {
 
   /**
    * @param connection database connection
+   * @param tournamentId tournament to work with
+   * @param name {@link AwardWinner#getName()}
+   * @param teamNumber {@link AwardWinner#getTeamNumber()}
+   * @throws SQLException on a database error
+   */
+  public static void deleteChallengeAwardWinner(final Connection connection,
+                                                final int tournamentId,
+                                                final String name,
+                                                final int teamNumber)
+      throws SQLException {
+    deleteAwardWinner(connection, tournamentId, name, teamNumber, "subjective_challenge_award");
+  }
+
+  /**
+   * @param connection database connection
    * @param tournamentId the tournament to get winners for
    * @return the winners sorted by category, award group, place, team number
    * @throws SQLException if an error occurs talking to the database
@@ -97,6 +112,21 @@ public final class AwardWinners {
                                          final AwardWinner winner)
       throws SQLException {
     addAwardWinners(connection, tournamentId, Collections.singleton(winner), "subjective_extra_award");
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournamentId tournament to work with
+   * @param name {@link AwardWinner#getName()}
+   * @param teamNumber {@link AwardWinner#getTeamNumber()}
+   * @throws SQLException on a database error
+   */
+  public static void deleteExtraAwardWinner(final Connection connection,
+                                            final int tournamentId,
+                                            final String name,
+                                            final int teamNumber)
+      throws SQLException {
+    deleteAwardWinner(connection, tournamentId, name, teamNumber, "subjective_extra_award");
   }
 
   /**
@@ -183,6 +213,25 @@ public final class AwardWinners {
         prep.setInt(6, winner.getPlace());
         prep.executeUpdate();
       }
+    }
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Table name is passed to method")
+  private static void deleteAwardWinner(final Connection connection,
+                                        final int tournamentId,
+                                        final String name,
+                                        final int teamNumber,
+                                        final String tablename)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("DELETE FROM "
+        + tablename //
+        + " WHERE tournament_id = ?" //
+        + " AND name = ?" //
+        + " AND team_number = ? ")) {
+      prep.setInt(1, tournamentId);
+      prep.setString(2, name);
+      prep.setInt(3, teamNumber);
+      prep.executeUpdate();
     }
   }
 
@@ -278,6 +327,21 @@ public final class AwardWinners {
         prep.executeUpdate();
       }
     }
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournamentId tournament to work with
+   * @param name {@link OverallAwardWinner#getName()}
+   * @param teamNumber {@link OverallAwardWinner#getTeamNumber()}
+   * @throws SQLException on a database error
+   */
+  public static void deleteOverallAwardWinner(final Connection connection,
+                                              final int tournamentId,
+                                              final String name,
+                                              final int teamNumber)
+      throws SQLException {
+    deleteAwardWinner(connection, tournamentId, name, teamNumber, "subjective_overall_award");
   }
 
 }

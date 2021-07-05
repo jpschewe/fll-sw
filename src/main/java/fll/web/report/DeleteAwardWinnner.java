@@ -22,9 +22,7 @@ import javax.sql.DataSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Tournament;
-import fll.db.AwardWinner;
 import fll.db.AwardWinners;
-import fll.db.OverallAwardWinner;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -37,10 +35,10 @@ import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
 
 /**
- * Support for add-award-winner.jsp.
+ * Delete a team from an award.
  */
-@WebServlet("/report/AddAwardWinner")
-public class AddAwardWinnner extends BaseFLLServlet {
+@WebServlet("/report/DeleteAwardWinner")
+public class DeleteAwardWinnner extends BaseFLLServlet {
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -56,10 +54,7 @@ public class AddAwardWinnner extends BaseFLLServlet {
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
     final String categoryTitle = WebUtils.getNonNullRequestParameter(request, "categoryTitle");
-    final @Nullable String awardGroup = WebUtils.getParameterOrNull(request, "awardGroup");
     final String awardType = WebUtils.getNonNullRequestParameter(request, "awardType");
-    final @Nullable String description = request.getParameter("description");
-    final int place = WebUtils.getIntRequestParameter(request, "place");
     final int teamNumber = WebUtils.getIntRequestParameter(request, "teamNumber");
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -68,10 +63,6 @@ public class AddAwardWinnner extends BaseFLLServlet {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
 
       if ("subjective".equals(awardType)) {
-        if (null == awardGroup) {
-          throw new FLLInternalException("Award group cannot be null for subjective awards");
-        }
-
         final @Nullable SubjectiveScoreCategory category = challengeDescription.getSubjectiveCategoryByTitle(categoryTitle);
         if (null == category) {
           throw new FLLInternalException("Cannot find subjective category with title '"
@@ -79,8 +70,7 @@ public class AddAwardWinnner extends BaseFLLServlet {
               + "'");
         }
 
-        final AwardWinner winner = new AwardWinner(categoryTitle, awardGroup, teamNumber, description, place);
-        AwardWinners.addChallengeAwardWinner(connection, tournament.getTournamentID(), winner);
+        AwardWinners.deleteChallengeAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
       } else if ("non-numeric".equals(awardType)) {
         final @Nullable NonNumericCategory category = challengeDescription.getNonNumericCategoryByTitle(categoryTitle);
         if (null == category) {
@@ -90,23 +80,13 @@ public class AddAwardWinnner extends BaseFLLServlet {
         }
 
         if (category.getPerAwardGroup()) {
-          if (null == awardGroup) {
-            throw new FLLInternalException("Award group cannot be null for non-numeric award that is per award group");
-          }
-          final AwardWinner winner = new AwardWinner(categoryTitle, awardGroup, teamNumber, description, place);
-          AwardWinners.addExtraAwardWinner(connection, tournament.getTournamentID(), winner);
+          AwardWinners.deleteExtraAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
         } else {
-          final OverallAwardWinner winner = new OverallAwardWinner(categoryTitle, teamNumber, description, place);
-          AwardWinners.addOverallAwardWinner(connection, tournament.getTournamentID(), winner);
+          AwardWinners.deleteOverallAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
         }
 
       } else if ("championship".equals(awardType)) {
-        if (null == awardGroup) {
-          throw new FLLInternalException("Award group cannot be null for Championship award");
-        }
-
-        final AwardWinner winner = new AwardWinner(categoryTitle, awardGroup, teamNumber, description, place);
-        AwardWinners.addExtraAwardWinner(connection, tournament.getTournamentID(), winner);
+        AwardWinners.deleteExtraAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
       } else {
         throw new FLLInternalException("Unknown award type: '"
             + awardType
@@ -115,7 +95,7 @@ public class AddAwardWinnner extends BaseFLLServlet {
 
       response.sendRedirect("edit-award-winners.jsp");
     } catch (final SQLException e) {
-      throw new FLLInternalException("Error adding/editing award winner", e);
+      throw new FLLInternalException("Error deleting award winner", e);
     }
   }
 
