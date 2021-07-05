@@ -39,11 +39,11 @@ fll.web.PublicIndex.populateContext(application, pageContext);
                 Teams, All Performance Runs</a>
         </li>
         <li>
-            <a href='<c:url value="/scoreboard/Last8"/>'>Last 8
+            <a href='<c:url value="/scoreboard/Last8"/>'>Most recent
                 performance scores</a>
         </li>
         <li>
-            <a href='<c:url value="/scoreboard/Top10"/>'>Top 10
+            <a href='<c:url value="/scoreboard/Top10"/>'>Top
                 performance scores</a>
         </li>
 
