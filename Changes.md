@@ -1,3 +1,4 @@
+* #937 - Add head judge role and make the judges room page easier to navigate for the head judge
 * #932 - Add top navigation bar
 * #923 - Rework editing of award winners to allow multiple editors at the same time and to support multiple winners for each award
 * #945 - hide the score column when using the tablets to enter performance scores
