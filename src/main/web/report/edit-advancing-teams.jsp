@@ -50,4 +50,5 @@
     <ul id="award-group-order"></ul>
 
     <button id="store_winners">Store Data</button>
+</body>
 </html>
