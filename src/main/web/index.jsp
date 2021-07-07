@@ -56,12 +56,20 @@ fll.web.MainIndex.populateContext(request, application, pageContext);
             projector.
         </li>
 
-        <c:if test="${authentication.admin}">
+        <c:if test="${authentication.headJudge}">
             <li>
-                <a href="<c:url value='/judges-room.jsp' />">Judges
-                    room</a> - follow this link on the judges room server
+                <a href="<c:url value='/head-judge.jsp' />">Head
+                    Judge</a>
             </li>
+        </c:if>
 
+        <c:if test="${authentication.judge}">
+            <li>
+                <a href="<c:url value='/judge-index.jsp' />">Judge</a>
+            </li>
+        </c:if>
+
+        <c:if test="${authentication.admin}">
             <li>
                 <a href="<c:url value='/admin/performance-area.jsp' />">Scoring
                     Coordinator</a>

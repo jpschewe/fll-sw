@@ -201,14 +201,14 @@ public final class AuthenticationContext implements Serializable {
     } else if (requiredRoles.contains(UserRole.PUBLIC)) {
       return true;
     } else {
-      if (!roles.containsAll(requiredRoles)) {
-        LOGGER.debug("Missing a required role {} does not contain one of {}, redirecting to login.jsp", roles,
-                     requiredRoles);
+      if (!roles.stream().filter(requiredRoles::contains).findAny().isPresent()) {
+        LOGGER.debug("Missing a required role. User roles {} does not contain one of {}, redirecting to login.jsp",
+                     roles, requiredRoles);
 
         SessionAttributes.appendToMessage(session,
-                                          "<p>You need to be logged in as a user with the following roles to view this page: "
+                                          "<p>You need to be logged in as a user with one of the following roles to view this page: "
                                               + requiredRoles.stream().map(Object::toString)
-                                                             .collect(Collectors.joining(","))
+                                                             .collect(Collectors.joining(", "))
                                               + "</p>");
         request.getRequestDispatcher("/login.jsp").forward(request, response);
         return false;
