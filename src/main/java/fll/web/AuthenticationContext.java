@@ -200,6 +200,10 @@ public final class AuthenticationContext implements Serializable {
       return true;
     } else if (requiredRoles.contains(UserRole.PUBLIC)) {
       return true;
+    } else if (requiredRoles.contains(UserRole.JUDGE)
+        && isHeadJudge()) {
+      // head judge can do anything a judge can do
+      return true;
     } else {
       if (!roles.stream().filter(requiredRoles::contains).findAny().isPresent()) {
         LOGGER.debug("Missing a required role. User roles {} does not contain one of {}, redirecting to login.jsp",
