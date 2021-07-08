@@ -14,15 +14,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
-<script type="text/javascript">
-  function display(id) {
-    document.getElementById(id).style.display = "block";
-  }
-  function hide(id) {
-    document.getElementById(id).style.display = "none";
-  }
-</script>
-
 </head>
 
 <body>
@@ -47,58 +38,35 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         electronic devices to connect to this server.</p>
     <ul>
         <c:forEach items="${urls}" var="url">
-            <li>
-                <a href="${url }">${url }</a>
+            <li class="no-marker">
+                <a class="wide" href="${url }">${url }</a>
             </li>
         </c:forEach>
     </ul>
 
 
     <h2>Tournament steps</h2>
-    <ol>
+    <a class="wide" target="_subjective"
+        href="<c:url value='/subjective/Auth' />">Enter subjective
+        scores. This is done through the subjective web application</a>
 
-        <li>
-            Enter subjective scores. This is done through the <a
-                target="_subjective"
-                href="<c:url value='/subjective/Auth' />">subjective
-                web application</a>.
-        </li>
+    <a class="wide"
+        href="<c:url value='/report/edit-award-winners.jsp' />"
+        target="_blank">Enter the winners of awards for use in the
+        awards report</a>
 
-        <li>
-            <a href="<c:url value='/report/edit-award-winners.jsp' />"
-                target="_blank">Enter the winners of awards for use
-                in the awards report</a>
-        </li>
+    <a class="wide"
+        href="<c:url value='/report/edit-advancing-teams.jsp' />"
+        target="_blank">Enter the advancing teams for use in the
+        awards report</a>
 
-        <li>
-            <a href="<c:url value='/report/edit-advancing-teams.jsp' />"
-                target="_blank">Enter the advancing teams for use in
-                the awards report</a>
-        </li>
+    <a class="wide" href="<c:url value='/report/AwardsReport' />"
+        target="_blank">Report of winners for the tournament. This
+        can be published on the web or used for the awards ceremony.</a>
 
-        <li>
-            <a href="<c:url value='/report/AwardsReport' />"
-                target="_blank">Report of winners for the
-                tournament.</a> This can be published on the web or used for
-            the awards ceremony.
-        </li>
-
-        <li>
-            <a target="_report"
-                href="<c:url value='/report/index.jsp' />">Generate
-                reports</a> - this is done once all of the subjective scores
-            are in. <a href='javascript:display("ReportHelp")'>[help]</a>
-            <div id='ReportHelp' class='help' style='display: none'>
-                It is best to not generate the reports until all scores
-                are in. However one can generate reports early to see
-                the results of one award group. You just need to be
-                aware that the reports for the unfinished award group
-                will not be accurate. <a
-                    href='javascript:hide("ReportHelp")'>[hide]</a>
-            </div>
-        </li>
-
-    </ol>
+    <a class="wide" target="_report"
+        href="<c:url value='/report/index.jsp' />">Generate reports
+        - this is done once all of the subjective scores are in.</a>
 
     <h2>Finalist scheduling</h2>
     <p>This is used at tournaments where there is more than 1
@@ -109,48 +77,38 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
     <p>Before using these links the initial head to head brackets
         need to be assigned in the performance area and the performance
-        dump needs to be imported using the link above.</p>
+        dump needs to be imported into this server.</p>
 
-    <ul>
+    <a class="wide"
+        href="<c:url value='/report/non-numeric-nominees.jsp' />"
+        target="_blank">Enter non-numeric nominees. This is used to
+        enter the teams that are up for consideration for the non-scored
+        subjective categories. This information transfers over to the
+        finalist scheduling web application. This is also used in the
+        awards scripts report.</a>
 
-        <li>
-            <a href="<c:url value='/report/non-numeric-nominees.jsp' />"
-                target="_blank">Enter non-numeric nominees</a>. This is
-            used to enter the teams that are up for consideration for
-            the non-scored subjective categories. This information
-            transfers over to the finalist scheduling web application.
-            This is also used in the awards scripts report.
-        </li>
+    <a class="wide" href="<c:url value='/report/finalist/load.jsp' />"
+        target="_blank">Schedule Finalists. Before visiting this
+        page, all subjective scores need to be uploaded and any head to
+        head brackets that will occur during the finalist judging should
+        be created to avoid scheduling conflicts.</a>
 
-        <li>
-            <a href="<c:url value='/report/finalist/load.jsp' />"
-                target="_blank">Schedule Finalists</a>. Before visiting
-            this page, all subjective scores need to be uploaded and any
-            head to head brackets that will occur during the finalist
-            judging should be created to avoid scheduling conflicts.
-        </li>
+    <div class="wide">
+        <form
+            ACTION="<c:url value='/report/finalist/PdfFinalistSchedule' />"
+            METHOD='POST' target="_blank">
+            <select name='division'>
+                <c:forEach var="division" items="${finalistDivisions }">
+                    <option value='${division }'>${division }</option>
+                </c:forEach>
+            </select>
+            <input type='submit' value='Finalist Schedule (PDF)' />
+        </form>
+    </div>
 
-        <li>
-            <form
-                ACTION="<c:url value='/report/finalist/PdfFinalistSchedule' />"
-                METHOD='POST' target="_blank">
-                <select name='division'>
-                    <c:forEach var="division"
-                        items="${finalistDivisions }">
-                        <option value='${division }'>${division }</option>
-                    </c:forEach>
-                </select>
-                <input type='submit' value='Finalist Schedule (PDF)' />
-            </form>
-        </li>
-
-        <li>
-            <a
-                href="<c:url value='/report/finalist/TeamFinalistSchedule' />"
-                target="_blank">Finalist Schedule for each team</a>
-        </li>
-
-    </ul>
+    <a class="wide"
+        href="<c:url value='/report/finalist/TeamFinalistSchedule' />"
+        target="_blank">Finalist Schedule for each team</a>
 
 
 </body>
