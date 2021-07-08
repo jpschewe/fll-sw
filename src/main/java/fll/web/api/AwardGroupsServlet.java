@@ -45,7 +45,8 @@ public class AwardGroupsServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE), false)) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
 

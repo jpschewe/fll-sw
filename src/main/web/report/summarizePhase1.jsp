@@ -1,7 +1,7 @@
 <%@page import="fll.web.report.SummarizePhase1"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="HEAD_JUDGE" allowSetup="false" />
+<fll-sw:required-roles roles="JUDGE" allowSetup="false" />
 
 <%
     SummarizePhase1.populateContext(request, application, session, pageContext);
