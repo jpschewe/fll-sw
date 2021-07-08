@@ -10,7 +10,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
 <html>
 <head>
-<title>Judges room</title>
+<title>Head Judge links</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
@@ -26,7 +26,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 </head>
 
 <body>
-    <h1>Judges room for ${challengeDescription.title }</h1>
+    <h1>Head Judge links</h1>
 
     <div class='status-message'>${message}</div>
     <%-- clear out the message, so that we don't see it again --%>

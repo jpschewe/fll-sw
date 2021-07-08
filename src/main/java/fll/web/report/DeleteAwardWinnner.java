@@ -47,7 +47,7 @@ public class DeleteAwardWinnner extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE), false)) {
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE, UserRole.HEAD_JUDGE), false)) {
       return;
     }
 
@@ -82,7 +82,8 @@ public class DeleteAwardWinnner extends BaseFLLServlet {
         if (category.getPerAwardGroup()) {
           AwardWinners.deleteNonNumericAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
         } else {
-          AwardWinners.deleteNonNumericOverallAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
+          AwardWinners.deleteNonNumericOverallAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
+                                                          teamNumber);
         }
 
       } else if ("championship".equals(awardType)) {

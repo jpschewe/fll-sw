@@ -28,7 +28,7 @@ fll.web.MainIndex.populateContext(request, application, pageContext);
             [${tournament.name}]</b>
     </p>
 
-    <h2>Computer types</h2>
+    <h2>Main links</h2>
 
     <c:if test="${authentication.ref}">
         <a class="wide" href="scoreEntry/choose-table.jsp">Score
@@ -46,10 +46,18 @@ fll.web.MainIndex.populateContext(request, application, pageContext);
         this link on the computer that's used to display scores with the
         projector.</a>
 
-    <c:if test="${authentication.admin}">
-        <a class="wide" href="<c:url value='/judges-room.jsp' />">Judges
-            room - follow this link on the judges room server</a>
 
+    <c:if test="${authentication.headJudge}">
+        <a class="wide" href="<c:url value='/head-judge.jsp' />">Head
+            Judge</a>
+    </c:if>
+
+    <c:if test="${authentication.judge}">
+        <a class="wide" href="<c:url value='/judge-index.jsp' />">Judge</a>
+    </c:if>
+
+
+    <c:if test="${authentication.admin}">
         <a class="wide"
             href="<c:url value='/admin/performance-area.jsp' />">Scoring
             Coordinator</a>

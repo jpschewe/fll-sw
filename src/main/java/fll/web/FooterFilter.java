@@ -203,7 +203,11 @@ public class FooterFilter implements Filter {
     }
 
     if (auth.isHeadJudge()) {
-      formatter.format("    <li><a href='%s/judges-room.jsp'>Judges Room</a></li>%n", contextPath);
+      formatter.format("    <li><a href='%s/head-judge.jsp'>Head Judge</a></li>%n", contextPath);
+    }
+
+    if (auth.isJudge()) {
+      formatter.format("    <li><a href='%s/judge-index.jsp'>Judge</a></li>%n", contextPath);
     }
 
     if (auth.isJudge()) {
