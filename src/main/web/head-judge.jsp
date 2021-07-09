@@ -93,18 +93,21 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         head brackets that will occur during the finalist judging should
         be created to avoid scheduling conflicts.</a>
 
-    <div class="wide">
-        <form
-            ACTION="<c:url value='/report/finalist/PdfFinalistSchedule' />"
-            METHOD='POST' target="_blank">
-            <select name='division'>
-                <c:forEach var="division" items="${finalistDivisions }">
-                    <option value='${division }'>${division }</option>
-                </c:forEach>
-            </select>
-            <input type='submit' value='Finalist Schedule (PDF)' />
-        </form>
-    </div>
+    <c:if test="{not empty finalistDivisions}">
+        <div class="wide">
+            <form
+                ACTION="<c:url value='/report/finalist/PdfFinalistSchedule' />"
+                METHOD='POST' target="_blank">
+                <select name='division'>
+                    <c:forEach var="division"
+                        items="${finalistDivisions }">
+                        <option value='${division }'>${division }</option>
+                    </c:forEach>
+                </select>
+                <input type='submit' value='Finalist Schedule (PDF)' />
+            </form>
+        </div>
+    </c:if>
 
     <a class="wide"
         href="<c:url value='/report/finalist/TeamFinalistSchedule' />"
