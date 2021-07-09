@@ -118,8 +118,6 @@ fll.web.MainIndex.populateContext(request, application, pageContext);
     </c:if>
 
     <h2>Other useful pages</h2>
-    <a class="wide" href="DoLogout">Log a computer out so that they
-        need to enter the password again to change scores.</a>
 
     <a class="wide" href='scoreboard/index.jsp'>Score board</a>
 
