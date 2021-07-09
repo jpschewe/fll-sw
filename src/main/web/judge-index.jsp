@@ -43,26 +43,20 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         electronic devices to connect to this server.</p>
     <ul>
         <c:forEach items="${urls}" var="url">
-            <li>
-                <a href="${url }">${url }</a>
+            <li class="no-marker">
+                <a class="wide" href="${url }">${url }</a>
             </li>
         </c:forEach>
     </ul>
 
-    <ul>
-        <li>
-            Enter subjective scores. This is done through the <a
-                target="_subjective"
-                href="<c:url value='/subjective/Auth' />">subjective
-                web application</a>.
-        </li>
+    <a class="wide" target="_subjective"
+        href="<c:url value='/subjective/Auth' />">Enter subjective
+        scores. This is done through the subjective web application</a>.
 
-        <li>
-            <a href="<c:url value='/report/edit-award-winners.jsp' />"
-                target="_blank">Enter the winners of awards for use
-                in the awards report</a>
-        </li>
-    </ul>
+    <a class="wide"
+        href="<c:url value='/report/edit-award-winners.jsp' />"
+        target="_blank">Enter the winners of awards for use in the
+        awards report</a>
 
     <h2>Finalist scheduling</h2>
     <p>This is used at tournaments where there is more than 1
@@ -75,25 +69,19 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         need to be assigned in the performance area and the performance
         dump needs to be imported using the link above.</p>
 
-    <ul>
+    <a class="wide"
+        href="<c:url value='/report/non-numeric-nominees.jsp' />"
+        target="_blank">Enter non-numeric nominees. This is used to
+        enter the teams that are up for consideration for the non-scored
+        subjective categories. This information transfers over to the
+        finalist scheduling web application. This is also used in the
+        awards scripts report.</a>
 
-        <li>
-            <a href="<c:url value='/report/non-numeric-nominees.jsp' />"
-                target="_blank">Enter non-numeric nominees</a>. This is
-            used to enter the teams that are up for consideration for
-            the non-scored subjective categories. This information
-            transfers over to the finalist scheduling web application.
-            This is also used in the awards scripts report.
-        </li>
+    <a class="wide" href="<c:url value='/report/finalist/load.jsp' />"
+        target="_blank">Schedule Finalists. Before visiting this
+        page, all subjective scores need to be uploaded and any head to
+        head brackets that will occur during the finalist judging should
+        be created to avoid scheduling conflicts.</a>
 
-        <li>
-            <a href="<c:url value='/report/finalist/load.jsp' />"
-                target="_blank">Schedule Finalists</a>. Before visiting
-            this page, all subjective scores need to be uploaded and any
-            head to head brackets that will occur during the finalist
-            judging should be created to avoid scheduling conflicts.
-        </li>
-
-    </ul>
 </body>
 </html>
