@@ -87,7 +87,7 @@ public class FooterFilter implements Filter {
 
             if (path.startsWith(httpRequest.getContextPath()
                 + "/public")) {
-              addPublicFooter(caw, httpRequest);
+              addPublicFooter(caw);
             } else {
               addFooter(caw, httpRequest);
             }
@@ -241,16 +241,10 @@ public class FooterFilter implements Filter {
   /**
    * Writer the footer for public pages to the char array writer.
    */
-  private static void addPublicFooter(final CharArrayWriter caw,
-                                      final HttpServletRequest request)
-      throws IOException {
-    final String contextPath = request.getContextPath();
+  private static void addPublicFooter(final CharArrayWriter caw) throws IOException {
     final Formatter formatter = new Formatter(caw);
     formatter.format("<hr />%n");
     formatter.format("<table>%n");
-    formatter.format("  <tr>%n");
-    formatter.format("    <td><a href='%s/public/index.jsp' target='_top'>Public Index</a></td>%n", contextPath);
-    formatter.format("  </tr>%n");
     formatter.format("  <tr><td>Software version: %s</td></tr>%n", Version.getVersion());
     formatter.format("</table>%n");
   }
