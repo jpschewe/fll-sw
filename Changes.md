@@ -1,3 +1,4 @@
+* #954 - Increase the font size on the login page
 * #928 - modify layout of links on index pages to be more friendly
 * #937 - Add head judge role and make the judges room page easier to navigate for the head judge
 * #932 - Add top navigation bar
