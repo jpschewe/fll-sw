@@ -48,7 +48,7 @@ fll.web.report.AddAwardWinner.populateContext(request, response, application, se
         <div>
             <label for="place">Place:</label>
             <input type="number" min="1" required name="place"
-                id="place" value="${winner.place}" />
+                id="place" value="${winner.place}" autofocus="autofocus" />
         </div>
 
         <div>
