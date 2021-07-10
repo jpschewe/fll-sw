@@ -255,6 +255,14 @@ public class ChallengeDescription implements Serializable {
     return mSubjectiveCategories.stream().filter(c -> c.getName().equals(name)).findAny().orElse(null);
   }
 
+  /**
+   * @param title category title
+   * @return the category or null if not found
+   */
+  public @Nullable SubjectiveScoreCategory getSubjectiveCategoryByTitle(final String title) {
+    return mSubjectiveCategories.stream().filter(c -> c.getTitle().equals(title)).findAny().orElse(null);
+  }
+
   private final LinkedList<NonNumericCategory> nonNumericCategories = new LinkedList<>();
 
   /**

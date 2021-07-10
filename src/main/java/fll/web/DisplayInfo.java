@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
@@ -82,8 +83,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * Create a string that's a valid HTML name.
    */
   private static @Nullable String sanitizeDisplayName(final @Nullable String str) {
-    if (null == str
-        || "".equals(str)) {
+    if (StringUtils.isBlank(str)) {
       return null;
     } else if (DEFAULT_DISPLAY_NAME.equalsIgnoreCase(str)) {
       return "_default"; // make sure this display doesn't conflict with the
@@ -117,10 +117,12 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     session.removeAttribute(SessionAttributes.DISPLAY_NAME);
 
     final String sanitized = sanitizeDisplayName(name);
+
     if (null == sanitized) {
       // nothing to store
       return;
     }
+
     session.setAttribute(SessionAttributes.DISPLAY_NAME, sanitized);
 
     synchronized (LOCK) {

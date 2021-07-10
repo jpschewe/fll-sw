@@ -593,6 +593,11 @@ public final class ImportDB {
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 29) {
+      upgrade28To29(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
           + dbVersion);
@@ -958,6 +963,30 @@ public final class ImportDB {
     }
 
     setDBVersion(connection, 28);
+  }
+
+  private static void upgrade28To29(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 28 to 29");
+
+    if (!checkForColumnInTable(connection, "subjective_overall_award", "place")) {
+      try (Statement stmt = connection.createStatement()) {
+        stmt.executeUpdate("ALTER TABLE subjective_overall_award ADD COLUMN place INTEGER DEFAULT 1");
+      }
+    }
+
+    if (!checkForColumnInTable(connection, "subjective_extra_award", "place")) {
+      try (Statement stmt = connection.createStatement()) {
+        stmt.executeUpdate("ALTER TABLE subjective_extra_award ADD COLUMN place INTEGER DEFAULT 1");
+      }
+    }
+
+    if (!checkForColumnInTable(connection, "subjective_challenge_award", "place")) {
+      try (Statement stmt = connection.createStatement()) {
+        stmt.executeUpdate("ALTER TABLE subjective_challenge_award ADD COLUMN place INTEGER DEFAULT 1");
+      }
+    }
+
+    setDBVersion(connection, 29);
   }
 
   /**
@@ -2228,8 +2257,8 @@ public final class ImportDB {
       throws SQLException {
     try (
         PreparedStatement destDelete = destinationConnection.prepareStatement("DELETE FROM subjective_overall_award WHERE tournament_id = ?");
-        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO subjective_overall_award (tournament_id, name, team_number, description) VALUES(?, ?, ?, ?)");
-        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT name, team_number, description FROM subjective_overall_award WHERE tournament_id = ?")) {
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO subjective_overall_award (tournament_id, name, team_number, description, place) VALUES(?, ?, ?, ?, ?)");
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT name, team_number, description, place FROM subjective_overall_award WHERE tournament_id = ?")) {
       LOGGER.debug("Importing subjective overall award");
 
       // do drops first
@@ -2245,6 +2274,7 @@ public final class ImportDB {
           destPrep.setString(2, sourceRS.getString(1));
           destPrep.setInt(3, sourceRS.getInt(2));
           destPrep.setString(4, sourceRS.getString(3));
+          destPrep.setInt(5, sourceRS.getInt(4));
           destPrep.executeUpdate();
         }
       }
@@ -2281,8 +2311,8 @@ public final class ImportDB {
         + " WHERE tournament_id = ?");
         PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO "
             + tablename
-            + " (tournament_id, name, team_number, description, award_group) VALUES(?, ?, ?, ?, ?)");
-        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT name, team_number, description, award_group FROM "
+            + " (tournament_id, name, team_number, description, award_group, place) VALUES(?, ?, ?, ?, ?, ?)");
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT name, team_number, description, award_group, place FROM "
             + tablename
             + " WHERE tournament_id = ?")) {
 
@@ -2300,6 +2330,7 @@ public final class ImportDB {
           destPrep.setInt(3, sourceRS.getInt(2));
           destPrep.setString(4, sourceRS.getString(3));
           destPrep.setString(5, sourceRS.getString(4));
+          destPrep.setInt(6, sourceRS.getInt(5));
           destPrep.executeUpdate();
         }
       }

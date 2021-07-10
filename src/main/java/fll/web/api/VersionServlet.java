@@ -8,7 +8,6 @@ package fll.web.api;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -23,7 +22,6 @@ import fll.Utilities;
 import fll.Version;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
-import fll.web.UserRole;
 
 /**
  * GET: "version".
@@ -38,7 +36,8 @@ public class VersionServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.PUBLIC), false)) {
+    if (!auth.isPublic()) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
 

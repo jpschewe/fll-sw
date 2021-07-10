@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -29,7 +28,6 @@ import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
-import fll.web.UserRole;
 
 /**
  * Collection of names of the award groups in the current tournament.
@@ -45,7 +43,8 @@ public class AwardGroupsServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+    if (!auth.isJudge()) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
 

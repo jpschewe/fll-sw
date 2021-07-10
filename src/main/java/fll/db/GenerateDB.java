@@ -33,7 +33,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 28;
+  public static final int DATABASE_VERSION = 29;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -974,6 +974,7 @@ public final class GenerateDB {
       subjectiveOverallAward.append(" ,name LONGVARCHAR NOT NULL");
       subjectiveOverallAward.append(" ,team_number INTEGER NOT NULL");
       subjectiveOverallAward.append(" ,description LONGVARCHAR");
+      subjectiveOverallAward.append(" ,place INTEGER NOT NULL");
       if (createConstraints) {
         subjectiveOverallAward.append(" ,CONSTRAINT subjective_overall_award_pk PRIMARY KEY (tournament_id, name, team_number)");
         subjectiveOverallAward.append(" ,CONSTRAINT subjective_overall_award_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
@@ -991,6 +992,7 @@ public final class GenerateDB {
       subjectiveExtraAward.append(" ,team_number INTEGER NOT NULL");
       subjectiveExtraAward.append(" ,description LONGVARCHAR");
       subjectiveExtraAward.append(" ,award_group LONGVARCHAR NOT NULL");
+      subjectiveExtraAward.append(" ,place INTEGER NOT NULL");
       if (createConstraints) {
         subjectiveExtraAward.append(" ,CONSTRAINT subjective_extra_award_pk PRIMARY KEY (tournament_id, name, team_number)");
         subjectiveExtraAward.append(" ,CONSTRAINT subjective_extra_award_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
@@ -1008,6 +1010,7 @@ public final class GenerateDB {
       subjectiveChallengeAward.append(" ,team_number INTEGER NOT NULL");
       subjectiveChallengeAward.append(" ,description LONGVARCHAR");
       subjectiveChallengeAward.append(" ,award_group LONGVARCHAR NOT NULL");
+      subjectiveChallengeAward.append(" ,place INTEGER NOT NULL");
       if (createConstraints) {
         subjectiveChallengeAward.append(" ,CONSTRAINT subjective_challenge_award_pk PRIMARY KEY (tournament_id, name, team_number)");
         subjectiveChallengeAward.append(" ,CONSTRAINT subjective_challenge_award_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");

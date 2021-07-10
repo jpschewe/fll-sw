@@ -15,7 +15,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -36,7 +35,6 @@ import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
-import fll.web.UserRole;
 
 /**
  * Collection of advancing team numbers in the current tournament.
@@ -55,7 +53,8 @@ public class AdvancingTeamsServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+    if (!auth.isHeadJudge()) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
 
@@ -85,7 +84,8 @@ public class AdvancingTeamsServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+    if (!auth.isHeadJudge()) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
 

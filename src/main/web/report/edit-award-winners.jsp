@@ -1,23 +1,24 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+<fll-sw:required-roles roles="ADMIN,JUDGE" allowSetup="false" />
 
-<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
+<%
+fll.web.report.EditAwardWinners.populateContext(application, pageContext);
+%>
+
+<!DOCTYPE HTML>
 <html>
 <head>
 <title>Edit award winners</title>
 
-<script type='text/javascript'
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/style/fll-sw.css'/>" />
 
-<script type='text/javascript'
-    src="<c:url value='/extlib/jStorage/jstorage.min.js'/>"></script>
+<link rel="stylesheet" type="text/css" href="edit-award-winners.css" />
 
 <script type='text/javascript' src="<c:url value='/js/fll-objects.js'/>"></script>
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js'/>"></script>
-
-<script type='text/javascript' src="edit-award-winners.js"></script>
 
 </head>
 
@@ -29,38 +30,84 @@
     <%-- clear out the message, so that we don't see it again --%>
     <c:remove var="message" />
 
-    <h2>Instructions</h2>
-    <p>Enter team numbers in the first box for each award. Enter the
-        description for the award in the space under the team; this
-        field may be left blank if no description is needed.</p>
+    <div id="container">
+        <!-- subjective categories -->
+        <c:forEach items="${challengeDescription.subjectiveCategories}"
+            var="category">
+            <h1>${category.title}</h1>
+            <c:forEach items="${awardGroups}" var="awardGroup">
 
-    <h2>Challenge awards</h2>
-    <p>Specify the winners for each of the subjective categories
-        defined in the challenge description.</p>
-    <ul id="challenge-award-winners"></ul>
+                <h2>${awardGroup}</h2>
+                <c:set var="winners"
+                    value="${subjectiveAwardWinners[category.title][awardGroup]}" />
+                <c:set var="categoryTitle" value="${category.title}" />
+                <c:set var="awardType" value="${subjectiveAwardType}" />
 
-    <h2>Non-Numeric awards per award group</h2>
-    <p>Specify the winners of additional awards that are per award
-        group.</p>
-    <ul id="non-numeric-award-winners"></ul>
+                <%@ include file="edit-award-winners-table.jspf"%>
 
-    <h2>Non-Numeric overall awards</h2>
-    <p>Specify the winners of awards that are not per award group
-        (judges, etc.)</p>
-    <ul id="non-numeric-overall-award-winners"></ul>
+            </c:forEach>
+            <%-- foreach award group --%>
 
-    <h2>Advancing Teams</h2>
-    <p>Specify the teams advancing to the next tournament. The group
-        names will be used in the awards report.</p>
-    <button id="advancing-teams_add-group">Add Group</button>
-    <ul id="advancing-teams"></ul>
+            <%-- foreach subjective category --%>
+        </c:forEach>
+        <!-- end subjective categories -->
 
+        <c:forEach items="${challengeDescription.nonNumericCategories}"
+            var="category">
+            <h1>${category.title}</h1>
 
-    <h2>Order of award groups</h2>
-    <p>Specify the sort order for the award groups when printing.
-        Put a number next to each group name. The groups will be output
-        from lowest number to highest.</p>
-    <ul id="award-group-order"></ul>
+            <c:choose>
+                <c:when test="${category.perAwardGroup}">
+                    <!-- per award group award -->
+                    <c:forEach items="${awardGroups}" var="awardGroup">
 
-    <button id="store_winners">Store Data</button>
+                        <h2>${awardGroup}</h2>
+                        <c:set var="winners"
+                            value="${extraAwardWinners[category.title][awardGroup]}" />
+                        <c:set var="categoryTitle"
+                            value="${category.title}" />
+                        <c:set var="awardType"
+                            value="${nonNumericAwardType}" />
+
+                        <%@ include file="edit-award-winners-table.jspf"%>
+
+                    </c:forEach>
+                    <%-- foreach award group --%>
+                    <!-- end per award group award -->
+                </c:when>
+                <c:otherwise>
+                    <c:set var="awardGroup" value="" />
+                    <c:set var="winners"
+                        value="${overallAwardWinners[category.title]}" />
+                    <c:set var="categoryTitle" value="${category.title}" />
+                    <c:set var="awardType"
+                        value="${nonNumericAwardType}" />
+
+                    <%@ include file="edit-award-winners-table.jspf"%>
+
+                    <!-- end overall award -->
+                </c:otherwise>
+            </c:choose>
+        </c:forEach>
+
+        <!-- championship -->
+        <h1>Championship</h1>
+        <c:forEach items="${awardGroups}" var="awardGroup">
+
+            <h2>${awardGroup}</h2>
+
+            <c:set var="categoryTitle" value="${championshipAwardName}" />
+            <c:set var="winners"
+                value="${extraAwardWinners[categoryTitle][awardGroup]}" />
+
+            <c:set var="awardType" value="${championshipAwardType}" />
+
+            <%@ include file="edit-award-winners-table.jspf"%>
+
+        </c:forEach>
+        <%-- foreach award group --%>
+        <!-- end championship -->
+
+    </div>
+</body>
 </html>

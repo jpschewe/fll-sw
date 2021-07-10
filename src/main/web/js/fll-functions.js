@@ -1,4 +1,4 @@
-; "use-script";
+"use-script";
 
 /**
  * Log the console if it's available.
@@ -46,3 +46,12 @@ function isBlank(str) {
     return (!str || /^\s*$/.test(str));
 }
 
+/**
+ * Return a promise that on success passes along the JSON from the response and rejects on an invalid HTTP response.
+ */
+function checkJsonResponse(response) {
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+}

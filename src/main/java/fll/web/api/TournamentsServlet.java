@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -32,7 +31,6 @@ import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
-import fll.web.UserRole;
 
 /**
  * Get list of {@link Tournament} objects.
@@ -47,7 +45,8 @@ public class TournamentsServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.PUBLIC), false)) {
+    if (!auth.isPublic()) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
 

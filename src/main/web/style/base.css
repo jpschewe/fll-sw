@@ -98,3 +98,23 @@
 .no-close .ui-dialog-titlebar-close {
     display: none;
 }
+
+a.wide, div.wide {
+    display: block;
+    text-decoration: none;
+    padding: 10px;
+    margin-bottom: 1px;
+    border: 1px solid #ddd;
+}
+
+a.wide:hover {
+    background-color: #ddd;
+}
+
+a.wide:visited, a.wide:link {
+    color: inherit;
+}
+
+li.no-marker {
+    list-style-type: none;
+}

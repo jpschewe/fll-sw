@@ -22,48 +22,33 @@ fll.web.PublicIndex.populateContext(application, pageContext);
 
     Below are listed the web pages that are available to the public.
 
-    <ul>
+    <c:if test="$not empty ScorePageText}">
+        <div class="wide">${ScorePageText }</div>
+    </c:if>
 
-        <li>${ScorePageText }</li>
-        <li>Current Tournament -&gt; ${tournamentName }</li>
+    <div class="wide">Current Tournament -&gt; ${tournamentName }</div>
 
-        <li>
-            <a href='<c:url value="/welcome.jsp"/>'>Welcome Page</a>
-        <li>
-            <a href='<c:url value="/scoreboard/main.jsp" />'>Performance
-                Scoreboard</a>
-        </li>
+    <a class="wide" href='<c:url value="/welcome.jsp"/>'>Welcome
+        Page</a>
+    <a class="wide" href='<c:url value="/scoreboard/main.jsp" />'>Performance
+        Scoreboard</a>
 
-        <li>
-            <a href='<c:url value="/scoreboard/allteams.jsp"/>'>All
-                Teams, All Performance Runs</a>
-        </li>
-        <li>
-            <a href='<c:url value="/scoreboard/Last8"/>'>Last 8
-                performance scores</a>
-        </li>
-        <li>
-            <a href='<c:url value="/scoreboard/Top10"/>'>Top 10
-                performance scores</a>
-        </li>
+    <a class="wide" href='<c:url value="/scoreboard/allteams.jsp"/>'>All
+        Teams, All Performance Runs</a>
 
-        <li>
-            <a href='<c:url value="/playoff/remoteMain.jsp"/>'>Head
-                to head brackets that are currently on the big screen</a>
-        </li>
+    <a class="wide" href='<c:url value="/scoreboard/Last8"/>'>Most
+        recent performance scores</a>
 
-        <li>
-            <a
-                href='<c:url value="/report/finalist/FinalistTeams.jsp"/>'>
-                Finalist Teams (State only)</a>
-        </li>
+    <a class="wide" href='<c:url value="/scoreboard/Top10"/>'>Top
+        performance scores</a>
 
+    <a class="wide" href='<c:url value="/playoff/remoteMain.jsp"/>'>Head
+        to head brackets that are currently on the big screen</a>
+    <a class="wide"
+        href='<c:url value="/report/finalist/FinalistTeams.jsp"/>'>
+        Finalist Teams (State only)</a>
 
-        <li>
-            <a href='<c:url value="/credits/credits.jsp"/>'>Credits</a>
-        </li>
-
-    </ul>
+    <a class="wide" href='<c:url value="/credits/credits.jsp"/>'>Credits</a>
 
 </body>
 

@@ -1,3 +1,8 @@
+* #954 - Increase the font size on the login page
+* #928 - modify layout of links on index pages to be more friendly
+* #937 - Add head judge role and make the judges room page easier to navigate for the head judge
+* #932 - Add top navigation bar
+* #923 - Rework editing of award winners to allow multiple editors at the same time and to support multiple winners for each award
 * #945 - hide the score column when using the tablets to enter performance scores
 * #935 - allow a ref to specify which table they are scoring for and sort the teams based on the schedule for that table
 * #934 - make team selection boxes before score entry larger

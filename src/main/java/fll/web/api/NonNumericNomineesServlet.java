@@ -56,7 +56,7 @@ public class NonNumericNomineesServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.isAdmin()) {
+    if (!auth.isJudge()) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
@@ -93,7 +93,7 @@ public class NonNumericNomineesServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.isAdmin()) {
+    if (!auth.isJudge()) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }

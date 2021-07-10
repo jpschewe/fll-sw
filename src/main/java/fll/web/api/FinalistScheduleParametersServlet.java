@@ -53,7 +53,7 @@ public class FinalistScheduleParametersServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.isAdmin()) {
+    if (!auth.isHeadJudge()) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
@@ -85,7 +85,7 @@ public class FinalistScheduleParametersServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.isAdmin()) {
+    if (!auth.isHeadJudge()) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
