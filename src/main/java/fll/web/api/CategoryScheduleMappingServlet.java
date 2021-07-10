@@ -29,7 +29,6 @@ import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Get returns a Collection of @link{CategoryColumnMapping} objects.
@@ -54,9 +53,7 @@ public class CategoryScheduleMappingServlet extends HttpServlet {
     final ServletContext application = getServletContext();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
@@ -72,8 +69,6 @@ public class CategoryScheduleMappingServlet extends HttpServlet {
     } catch (final SQLException e) {
       LOGGER.fatal("Database Exception", e);
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }
