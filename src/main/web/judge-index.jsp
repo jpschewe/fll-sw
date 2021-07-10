@@ -51,8 +51,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
     <ul>
         <li>
-            Enter subjective scores. This is done through the
-            <a target="_subjective"
+            Enter subjective scores. This is done through the <a
+                target="_subjective"
                 href="<c:url value='/subjective/Auth' />">subjective
                 web application</a>.
         </li>
@@ -84,14 +84,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
             the non-scored subjective categories. This information
             transfers over to the finalist scheduling web application.
             This is also used in the awards scripts report.
-        </li>
-
-        <li>
-            <a href="<c:url value='/report/finalist/load.jsp' />"
-                target="_blank">Schedule Finalists</a>. Before visiting
-            this page, all subjective scores need to be uploaded and any
-            head to head brackets that will occur during the finalist
-            judging should be created to avoid scheduling conflicts.
         </li>
 
     </ul>
