@@ -151,6 +151,8 @@ public class FooterFilter implements Filter {
       return true;
     } else if (url.indexOf("login.jsp") != -1) {
       return true;
+    } else if (url.indexOf("finalist/load.jsp") != -1) {
+      return true;
     } else {
       return false;
     }
@@ -211,7 +213,8 @@ public class FooterFilter implements Filter {
     }
 
     if (auth.isJudge()) {
-      formatter.format("    <li><a href='%s/subjective/Auth'>Subjective Judging</a></li>%n", contextPath);
+      formatter.format("    <li><a href='%s/subjective/Auth' target='_subjective'>Subjective Judging</a></li>%n",
+                       contextPath);
     }
 
     if (auth.isRef()) {

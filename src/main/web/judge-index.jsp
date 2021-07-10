@@ -77,11 +77,5 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         finalist scheduling web application. This is also used in the
         awards scripts report.</a>
 
-    <a class="wide" href="<c:url value='/report/finalist/load.jsp' />"
-        target="_blank">Schedule Finalists. Before visiting this
-        page, all subjective scores need to be uploaded and any head to
-        head brackets that will occur during the finalist judging should
-        be created to avoid scheduling conflicts.</a>
-
 </body>
 </html>
