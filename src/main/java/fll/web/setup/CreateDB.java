@@ -34,10 +34,10 @@ import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
-import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 
@@ -72,10 +72,7 @@ public class CreateDB extends BaseFLLServlet {
       UploadProcessor.processUpload(request);
 
       if (null != request.getAttribute("chooseDescription")) {
-        final String description = (String) request.getAttribute("description");
-        if (null == description) {
-          throw new MissingRequiredParameterException("description");
-        }
+        final String description = WebUtils.getNonNullRequestParameter(request, "description");
 
         try {
           final URL descriptionURL = new URL(description);
