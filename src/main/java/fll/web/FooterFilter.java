@@ -211,7 +211,8 @@ public class FooterFilter implements Filter {
     }
 
     if (auth.isJudge()) {
-      formatter.format("    <li><a href='%s/subjective/Auth'>Subjective Judging</a></li>%n", contextPath);
+      formatter.format("    <li><a href='%s/subjective/Auth' target='_subjective'>Subjective Judging</a></li>%n",
+                       contextPath);
     }
 
     if (auth.isRef()) {

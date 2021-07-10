@@ -51,8 +51,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
     <ul>
         <li>
-            Enter subjective scores. This is done through the <a
-                target="_subjective"
+            Enter subjective scores. This is done through the
+            <a target="_subjective"
                 href="<c:url value='/subjective/Auth' />">subjective
                 web application</a>.
         </li>

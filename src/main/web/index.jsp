@@ -44,9 +44,9 @@ fll.web.MainIndex.populateContext(request, application, pageContext);
 
         <c:if test="${authentication.judge}">
             <li>
-                <a href="subjective/Auth">Subjective Judging</a> -
-                follow this link on the subjective judge's electronic
-                devices.
+                <a href="subjective/Auth" target="_subjective">Subjective
+                    Judging</a> - follow this link on the subjective judge's
+                electronic devices.
             </li>
         </c:if>
 
