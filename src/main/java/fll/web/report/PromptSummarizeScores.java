@@ -49,7 +49,7 @@ public class PromptSummarizeScores extends BaseFLLServlet {
       throws IOException, ServletException {
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE), false)) {
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.HEAD_JUDGE), false)) {
       return;
     }
 
@@ -85,6 +85,13 @@ public class PromptSummarizeScores extends BaseFLLServlet {
                                               final String redirect) {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("top check if summary updated");
+    }
+
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+    if (!auth.isHeadJudge()) {
+      // only the head judge can summarize scores, so don't prompt others to summarize
+      // the scores
+      return false;
     }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
