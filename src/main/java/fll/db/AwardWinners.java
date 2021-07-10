@@ -25,6 +25,13 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * {@link OverallAwardWinner}.
  */
 public final class AwardWinners {
+
+  /**
+   * Display name for the pre-defined Championship award.
+   * This must match the value of CHAMPIONSHIP_NAME in finalist.js.
+   */
+  public static final String CHAMPIONSHIP_AWARD_NAME = "Championship";
+
   private AwardWinners() {
   }
 

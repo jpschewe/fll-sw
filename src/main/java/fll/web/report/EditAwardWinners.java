@@ -38,6 +38,21 @@ public final class EditAwardWinners {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
+   * Award type for {@link AwardWinners#CHAMPIONSHIP_AWARD_NAME}.
+   */
+  public static final String CHAMPIONSHIP_AWARD_TYPE = "championship";
+
+  /**
+   * Award type for non-numeric awards.
+   */
+  public static final String NON_NUMERIC_AWARD_TYPE = "non-numeric";
+
+  /**
+   * Award type for subjective challenge awards.
+   */
+  public static final String SUBJECTIVE_AWARD_TYPE = "subjective";
+
+  /**
    * Setup variables for edit-award-winers.jsp.
    * 
    * @param application application variables
@@ -86,6 +101,11 @@ public final class EditAwardWinners {
         overallAwardWinners.computeIfAbsent(winner.getName(), k -> new LinkedList<>()).add(winner);
       }
       page.setAttribute("overallAwardWinners", overallAwardWinners);
+
+      page.setAttribute("championshipAwardName", AwardWinners.CHAMPIONSHIP_AWARD_NAME);
+      page.setAttribute("championshipAwardType", CHAMPIONSHIP_AWARD_TYPE);
+      page.setAttribute("nonNumericAwardType", NON_NUMERIC_AWARD_TYPE);
+      page.setAttribute("subjectiveAwardType", SUBJECTIVE_AWARD_TYPE);
 
     } catch (final SQLException e) {
       LOGGER.error(e, e);

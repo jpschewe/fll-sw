@@ -41,7 +41,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                 <c:set var="winners"
                     value="${subjectiveAwardWinners[category.title][awardGroup]}" />
                 <c:set var="categoryTitle" value="${category.title}" />
-                <c:set var="awardType" value="subjective" />
+                <c:set var="awardType" value="${subjectiveAwardType}" />
 
                 <%@ include file="edit-award-winners-table.jspf"%>
 
@@ -66,7 +66,8 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                             value="${extraAwardWinners[category.title][awardGroup]}" />
                         <c:set var="categoryTitle"
                             value="${category.title}" />
-                        <c:set var="awardType" value="non-numeric" />
+                        <c:set var="awardType"
+                            value="${nonNumericAwardType}" />
 
                         <%@ include file="edit-award-winners-table.jspf"%>
 
@@ -79,7 +80,8 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                     <c:set var="winners"
                         value="${overallAwardWinners[category.title]}" />
                     <c:set var="categoryTitle" value="${category.title}" />
-                    <c:set var="awardType" value="non-numeric" />
+                    <c:set var="awardType"
+                        value="${nonNumericAwardType}" />
 
                     <%@ include file="edit-award-winners-table.jspf"%>
 
@@ -94,11 +96,11 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
 
             <h2>${awardGroup}</h2>
 
+            <c:set var="categoryTitle" value="${championshipAwardName}" />
             <c:set var="winners"
-                value="${extraAwardWinners['Championship'][awardGroup]}" />
+                value="${extraAwardWinners[categoryTitle][awardGroup]}" />
 
-            <c:set var="categoryTitle" value="Championship" />
-            <c:set var="awardType" value="championship" />
+            <c:set var="awardType" value="${championshipAwardType}" />
 
             <%@ include file="edit-award-winners-table.jspf"%>
 

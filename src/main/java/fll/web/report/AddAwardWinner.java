@@ -75,7 +75,7 @@ public class AddAwardWinner extends BaseFLLServlet {
         final Tournament tournament = Tournament.getCurrentTournament(connection);
 
         final @Nullable OverallAwardWinner winner;
-        if ("subjective".equals(awardType)) {
+        if (EditAwardWinners.SUBJECTIVE_AWARD_TYPE.equals(awardType)) {
           if (null == awardGroup) {
             throw new FLLInternalException("Award group cannot be null for subjective awards");
           }
@@ -89,7 +89,7 @@ public class AddAwardWinner extends BaseFLLServlet {
 
           winner = AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
                                                          teamNumber);
-        } else if ("non-numeric".equals(awardType)) {
+        } else if (EditAwardWinners.NON_NUMERIC_AWARD_TYPE.equals(awardType)) {
           final @Nullable NonNumericCategory category = challengeDescription.getNonNumericCategoryByTitle(categoryTitle);
           if (null == category) {
             throw new FLLInternalException("Cannot find non-numeric category with title '"
@@ -107,7 +107,7 @@ public class AddAwardWinner extends BaseFLLServlet {
             winner = AwardWinners.getNonNumericOverallAwardWinner(connection, tournament.getTournamentID(),
                                                                   categoryTitle, teamNumber);
           }
-        } else if ("championship".equals(awardType)) {
+        } else if (EditAwardWinners.CHAMPIONSHIP_AWARD_TYPE.equals(awardType)) {
           if (null == awardGroup) {
             throw new FLLInternalException("Award group cannot be null for Championship award");
           }
@@ -163,7 +163,7 @@ public class AddAwardWinner extends BaseFLLServlet {
 
       final Tournament tournament = Tournament.getCurrentTournament(connection);
 
-      if ("subjective".equals(awardType)) {
+      if (EditAwardWinners.SUBJECTIVE_AWARD_TYPE.equals(awardType)) {
         if (null == awardGroup) {
           throw new FLLInternalException("Award group cannot be null for subjective awards");
         }
@@ -188,7 +188,7 @@ public class AddAwardWinner extends BaseFLLServlet {
             AwardWinners.addSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
           }
         }
-      } else if ("non-numeric".equals(awardType)) {
+      } else if (EditAwardWinners.NON_NUMERIC_AWARD_TYPE.equals(awardType)) {
         final @Nullable NonNumericCategory category = challengeDescription.getNonNumericCategoryByTitle(categoryTitle);
         if (null == category) {
           throw new FLLInternalException("Cannot find non-numeric category with title '"
@@ -229,7 +229,7 @@ public class AddAwardWinner extends BaseFLLServlet {
           }
         }
 
-      } else if ("championship".equals(awardType)) {
+      } else if (EditAwardWinners.CHAMPIONSHIP_AWARD_TYPE.equals(awardType)) {
         if (null == awardGroup) {
           throw new FLLInternalException("Award group cannot be null for Championship award");
         }

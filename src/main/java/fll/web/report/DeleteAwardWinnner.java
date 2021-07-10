@@ -62,7 +62,7 @@ public class DeleteAwardWinnner extends BaseFLLServlet {
 
       final Tournament tournament = Tournament.getCurrentTournament(connection);
 
-      if ("subjective".equals(awardType)) {
+      if (EditAwardWinners.SUBJECTIVE_AWARD_TYPE.equals(awardType)) {
         final @Nullable SubjectiveScoreCategory category = challengeDescription.getSubjectiveCategoryByTitle(categoryTitle);
         if (null == category) {
           throw new FLLInternalException("Cannot find subjective category with title '"
@@ -71,7 +71,7 @@ public class DeleteAwardWinnner extends BaseFLLServlet {
         }
 
         AwardWinners.deleteSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
-      } else if ("non-numeric".equals(awardType)) {
+      } else if (EditAwardWinners.NON_NUMERIC_AWARD_TYPE.equals(awardType)) {
         final @Nullable NonNumericCategory category = challengeDescription.getNonNumericCategoryByTitle(categoryTitle);
         if (null == category) {
           throw new FLLInternalException("Cannot find non-numeric category with title '"
@@ -86,7 +86,7 @@ public class DeleteAwardWinnner extends BaseFLLServlet {
                                                           teamNumber);
         }
 
-      } else if ("championship".equals(awardType)) {
+      } else if (EditAwardWinners.CHAMPIONSHIP_AWARD_TYPE.equals(awardType)) {
         AwardWinners.deleteNonNumericAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
       } else {
         throw new FLLInternalException("Unknown award type: '"
