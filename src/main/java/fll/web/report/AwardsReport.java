@@ -157,12 +157,14 @@ public class AwardsReport extends BaseFLLServlet {
     final List<String> sortedAwardGroups = AwardsReportSortedGroupsServlet.getAwardGroupsSorted(connection,
                                                                                                 tournament.getTournamentID());
 
+    addSubjectiveExtraWinners(connection, description, document, documentBody, tournament, sortedAwardGroups, true);
+
     addPerformance(connection, document, documentBody, description, sortedAwardGroups);
 
     addHeadToHead(connection, tournament, description, document, documentBody, sortedAwardGroups);
 
     addSubjectiveChallengeWinners(connection, description, document, documentBody, tournament, sortedAwardGroups);
-    addSubjectiveExtraWinners(connection, description, document, documentBody, tournament, sortedAwardGroups);
+    addSubjectiveExtraWinners(connection, description, document, documentBody, tournament, sortedAwardGroups, false);
     addSubjectiveOverallWinners(connection, description, document, documentBody, tournament);
 
     final List<AdvancingTeam> advancing = AdvancingTeam.loadAdvancingTeams(connection, tournament.getTournamentID());
@@ -204,7 +206,7 @@ public class AwardsReport extends BaseFLLServlet {
     final List<String> categoryOrder = description.getSubjectiveCategories().stream() //
                                                   .map(SubjectiveScoreCategory::getTitle) //
                                                   .collect(Collectors.toList());
-    addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups, categoryOrder, true);
+    addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups, categoryOrder, true, false);
   }
 
   private void addSubjectiveExtraWinners(final Connection connection,
@@ -212,7 +214,8 @@ public class AwardsReport extends BaseFLLServlet {
                                          final Document document,
                                          final Element documentBody,
                                          final Tournament tournament,
-                                         final List<String> sortedAwardGroups)
+                                         final List<String> sortedAwardGroups,
+                                         final boolean displayChampionship)
       throws SQLException {
     final List<AwardWinner> winners = AwardWinners.getNonNumericAwardWinners(connection, tournament.getTournamentID());
 
@@ -220,16 +223,23 @@ public class AwardsReport extends BaseFLLServlet {
                                                   .map(NonNumericCategory::getTitle) //
                                                   .collect(Collectors.toList());
 
-    addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups, categoryOrder, false);
+    // show places when showing championship
+    addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups, categoryOrder,
+                         displayChampionship, displayChampionship);
   }
 
+  /**
+   * @param displayChampionship if true, then display only the championship award,
+   *          otherwise skip the championship award
+   */
   private void addSubjectiveWinners(final Connection connection,
                                     final Document document,
                                     final Element documentBody,
                                     final List<AwardWinner> winners,
                                     final List<String> sortedAwardGroups,
                                     final List<String> categoryOrder,
-                                    final boolean displayPlace)
+                                    final boolean displayPlace,
+                                    final boolean displayChampionship)
       throws SQLException {
     final Map<String, Map<String, List<AwardWinner>>> organizedWinners = new HashMap<>();
     for (final AwardWinner winner : winners) {
@@ -247,11 +257,16 @@ public class AwardsReport extends BaseFLLServlet {
       }
     });
     for (final String categoryName : fullOrder) {
-      if (organizedWinners.containsKey(categoryName)) {
-        final Map<String, List<AwardWinner>> categoryWinners = organizedWinners.get(categoryName);
-        final Element container = addSubjectiveAwardGroupWinners(connection, document, categoryName, categoryWinners,
-                                                                 sortedAwardGroups, displayPlace);
-        documentBody.appendChild(container);
+      if ((displayChampionship
+          && AwardWinners.CHAMPIONSHIP_AWARD_NAME.equals(categoryName))
+          || (!displayChampionship
+              && !AwardWinners.CHAMPIONSHIP_AWARD_NAME.equals(categoryName))) {
+        if (organizedWinners.containsKey(categoryName)) {
+          final Map<String, List<AwardWinner>> categoryWinners = organizedWinners.get(categoryName);
+          final Element container = addSubjectiveAwardGroupWinners(connection, document, categoryName, categoryWinners,
+                                                                   sortedAwardGroups, displayPlace);
+          documentBody.appendChild(container);
+        }
       }
     }
   }
