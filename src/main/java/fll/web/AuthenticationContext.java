@@ -108,6 +108,13 @@ public final class AuthenticationContext implements Serializable {
   }
 
   /**
+   * @return is this user a public user, currently everyone is public
+   */
+  public boolean isPublic() {
+    return true;
+  }
+
+  /**
    * @return is this user a judge, head judge or admin
    */
   public boolean isJudge() {
@@ -198,7 +205,8 @@ public final class AuthenticationContext implements Serializable {
       return true;
     } else if (isAdmin()) {
       return true;
-    } else if (requiredRoles.contains(UserRole.PUBLIC)) {
+    } else if (requiredRoles.contains(UserRole.PUBLIC)
+        && isPublic()) {
       return true;
     } else if (requiredRoles.contains(UserRole.JUDGE)
         && isHeadJudge()) {

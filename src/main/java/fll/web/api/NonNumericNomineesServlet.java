@@ -39,7 +39,6 @@ import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
-import fll.web.UserRole;
 
 /**
  * Collection {@link NonNumericNominees}.
@@ -57,7 +56,7 @@ public class NonNumericNomineesServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE), false)) {
+    if (!auth.isJudge()) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
@@ -94,7 +93,7 @@ public class NonNumericNomineesServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.isAdmin()) {
+    if (!auth.isJudge()) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }

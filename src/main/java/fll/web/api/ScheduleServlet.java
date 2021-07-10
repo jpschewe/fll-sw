@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -29,7 +28,6 @@ import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
-import fll.web.UserRole;
 
 /**
  * API access to the tournament schedule.
@@ -44,7 +42,8 @@ public class ScheduleServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.PUBLIC), false)) {
+    if (!auth.isPublic()) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
 
