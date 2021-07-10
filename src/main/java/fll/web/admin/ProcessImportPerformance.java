@@ -74,7 +74,7 @@ public class ProcessImportPerformance extends BaseFLLServlet {
         final DataSource importDataSource = Utilities.createMemoryDataSource(databaseName);
 
         // set redirect page to be the judges room index
-        final String finalRedirectUrl = String.format("%s/judges-room.jsp", request.getContextPath());
+        final String finalRedirectUrl = String.format("%s/admin/performance-area.jsp", request.getContextPath());
 
         final ImportDbSessionInfo sessionInfo = new ImportDbSessionInfo(importDataSource, finalRedirectUrl);
 

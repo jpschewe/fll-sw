@@ -87,7 +87,7 @@ public class FooterFilter implements Filter {
 
             if (path.startsWith(httpRequest.getContextPath()
                 + "/public")) {
-              addPublicFooter(caw, httpRequest);
+              addPublicFooter(caw);
             } else {
               addFooter(caw, httpRequest);
             }
@@ -197,13 +197,21 @@ public class FooterFilter implements Filter {
     formatter.format("  <ul>%n");
     formatter.format("    <li><a href='%s/index.jsp'>Main Index</a></li>%n", contextPath);
 
-    if (auth.isJudge()) {
-      formatter.format("    <li><a href='%s/judges-room.jsp'>Judges Room</a></li>%n", contextPath);
-    }
-
     if (auth.isAdmin()) {
       formatter.format("    <li><a href='%s/admin/performance-area.jsp'>Scoring Coordinator</a></li>%n", contextPath);
       formatter.format("    <li><a href='%s/admin/index.jsp'>Admin</a></li>%n", contextPath);
+    }
+
+    if (auth.isHeadJudge()) {
+      formatter.format("    <li><a href='%s/head-judge.jsp'>Head Judge</a></li>%n", contextPath);
+    }
+
+    if (auth.isJudge()) {
+      formatter.format("    <li><a href='%s/judge-index.jsp'>Judge</a></li>%n", contextPath);
+    }
+
+    if (auth.isJudge()) {
+      formatter.format("    <li><a href='%s/subjective/Auth'>Subjective Judging</a></li>%n", contextPath);
     }
 
     if (auth.isRef()) {
@@ -233,16 +241,10 @@ public class FooterFilter implements Filter {
   /**
    * Writer the footer for public pages to the char array writer.
    */
-  private static void addPublicFooter(final CharArrayWriter caw,
-                                      final HttpServletRequest request)
-      throws IOException {
-    final String contextPath = request.getContextPath();
+  private static void addPublicFooter(final CharArrayWriter caw) throws IOException {
     final Formatter formatter = new Formatter(caw);
     formatter.format("<hr />%n");
     formatter.format("<table>%n");
-    formatter.format("  <tr>%n");
-    formatter.format("    <td><a href='%s/public/index.jsp' target='_top'>Public Index</a></td>%n", contextPath);
-    formatter.format("  </tr>%n");
     formatter.format("  <tr><td>Software version: %s</td></tr>%n", Version.getVersion());
     formatter.format("</table>%n");
   }

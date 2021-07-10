@@ -220,10 +220,13 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
     final List<@KeyFor("tournamentTeams") Integer> teamNumbers = new LinkedList<>(tournamentTeams.keySet());
     Collections.sort(teamNumbers);
 
+    boolean outputData = false;
     for (final @KeyFor("tournamentTeams") Integer teamNum : teamNumbers) {
       final TournamentTeam team = tournamentTeams.get(teamNum);
 
       for (final FinalistSchedule schedule : schedules) {
+        outputData = true;
+
         final Map<String, @Nullable String> rooms = schedule.getRooms();
 
         final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
@@ -336,6 +339,12 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
       } // foreach schedule
 
     } // foreach team
+
+    if (!outputData) {
+      final Element noDataElement = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      documentBody.appendChild(noDataElement);
+      noDataElement.appendChild(document.createTextNode("There are no schedules to output"));
+    }
 
     return document;
   }
