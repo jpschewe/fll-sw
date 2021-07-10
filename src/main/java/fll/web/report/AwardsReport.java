@@ -388,7 +388,7 @@ public class AwardsReport extends BaseFLLServlet {
         final List<AwardWinner> agWinners = categoryWinners.get(group);
 
         if (!agWinners.isEmpty()) {
-          boolean first = true;
+          boolean firstWinner = true;
           for (final AwardWinner winner : agWinners) {
             final Element row = FOPUtils.createTableRow(document);
             tableBody.appendChild(row);
@@ -399,19 +399,21 @@ public class AwardsReport extends BaseFLLServlet {
               FOPUtils.addTopBorder(row, AWARD_GROUP_SEPARATOR_WIDTH);
             }
 
-            if (first) {
-              row.appendChild(FOPUtils.createTableCell(document, null, String.format("Winner %s:", group)));
-
-              first = false;
+            if (firstWinner) {
+              firstWinner = false;
             } else {
               FOPUtils.addTopBorder(row, WINNER_SEPARATOR_WIDTH);
             }
 
-            row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.getTeamNumber())));
+            row.appendChild(FOPUtils.createTableCell(document, null,
+                                                     String.format("%s #%d:", group, winner.getPlace())));
+
+            row.appendChild(FOPUtils.createTableCell(document, null, String.format("%d", winner.getTeamNumber())));
 
             final int teamNumber = winner.getTeamNumber();
             final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-            row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(team.getTeamName())));
+            row.appendChild(FOPUtils.createTableCell(document, null, String.format("%s - %s", team.getTeamName(),
+                                                                                   team.getOrganization())));
 
             if (null != winner.getDescription()) {
               final Element descriptionRow = FOPUtils.createTableRow(document);
