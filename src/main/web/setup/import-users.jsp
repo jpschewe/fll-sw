@@ -16,7 +16,7 @@
     <p>Import users from previous database. Select the users to
         keep.</p>
 
-    <form action="ImportUsers" method="POST">
+    <form action="ImportUsers" id='import-users-form' method="POST">
         <table>
             <tr>
                 <th>Import</th>
