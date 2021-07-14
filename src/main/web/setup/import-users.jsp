@@ -33,7 +33,7 @@
 
         </table>
 
-        <input type="submit" value="Import Users" />
+        <input type="submit" name="import_users" value="Import Users" />
     </form>
 
 </body>

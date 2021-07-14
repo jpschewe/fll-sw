@@ -285,6 +285,10 @@ public final class IntegrationTestUtils {
 
     driverWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
+    if (isElementPresent(driver, By.name("import_users"))) {
+      driver.findElement(By.name("import_users")).click();
+    }
+
     LOGGER.trace("Found database success, calling createUser");
     createUser(driver, driverWait);
 
@@ -340,6 +344,10 @@ public final class IntegrationTestUtils {
       waitForDatabaseInit();
 
       seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
+
+      if (isElementPresent(selenium, By.name("import_users"))) {
+        selenium.findElement(By.name("import_users")).click();
+      }
 
       createUser(selenium, seleniumWait);
 
