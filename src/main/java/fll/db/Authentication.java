@@ -265,7 +265,7 @@ public final class Authentication {
    * 
    * @param connection database connection
    * @param account account to add
-   * @throws SQLExceptionon a database error
+   * @throws SQLException a database error
    */
   public static void addAccount(final Connection connection,
                                 final CreateDB.UserAccount account)
