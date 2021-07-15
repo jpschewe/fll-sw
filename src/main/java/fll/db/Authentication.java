@@ -28,6 +28,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.UserRole;
+import fll.web.setup.CreateDB;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -244,12 +245,33 @@ public final class Authentication {
     }
 
     final String hashedPass = computePasswordHash(pass);
+    addUserWithHashedPassword(connection, user, hashedPass);
+  }
+
+  private static void addUserWithHashedPassword(final Connection connection,
+                                                final String user,
+                                                final String hashedPass)
+      throws SQLException {
     try (
         PreparedStatement addUser = connection.prepareStatement("INSERT INTO fll_authentication (fll_user, fll_pass) VALUES(?, ?)")) {
       addUser.setString(1, user);
       addUser.setString(2, hashedPass);
       addUser.executeUpdate();
     }
+  }
+
+  /**
+   * Add a previously saved account.
+   * 
+   * @param connection database connection
+   * @param account account to add
+   * @throws SQLException a database error
+   */
+  public static void addAccount(final Connection connection,
+                                final CreateDB.UserAccount account)
+      throws SQLException {
+    addUserWithHashedPassword(connection, account.getUsername(), account.getHashedPassword());
+    setRoles(connection, account.getUsername(), account.getRoles());
   }
 
   private static String computePasswordHash(final String password) {

@@ -7,11 +7,17 @@ package fll.web.setup;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.zip.ZipInputStream;
 
@@ -25,6 +31,8 @@ import javax.sql.DataSource;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.Utilities;
 import fll.db.Authentication;
@@ -51,6 +59,11 @@ public class CreateDB extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  /**
+   * Session key for the previous accounts. Collection of {@link UserAccount}.
+   */
+  public static final String PREVIOUS_ACCOUNTS = "previousAccounts";
+
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -68,9 +81,22 @@ public class CreateDB extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
+      final Collection<UserAccount> accounts = new LinkedList<>();
+      if (Utilities.testDatabaseInitialized(connection)) {
+        for (final String username : Authentication.getUsers(connection)) {
+          // password cannot be null for users that are known to be in the database
+          final String hashedPassword = castNonNull(Authentication.getHashedPassword(connection, username));
+          final Set<UserRole> roles = Authentication.getRoles(connection, username);
+
+          final UserAccount account = new UserAccount(username, hashedPassword, roles);
+          accounts.add(account);
+        }
+      }
+
       // must be first to ensure the form parameters are set
       UploadProcessor.processUpload(request);
 
+      boolean success = false;
       if (null != request.getAttribute("chooseDescription")) {
         final String description = (String) request.getAttribute("description");
         if (null == description) {
@@ -86,17 +112,7 @@ public class CreateDB extends BaseFLLServlet {
 
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
 
-          message.append("<p id='success'><i>Successfully initialized database</i></p>");
-          if (Authentication.getAdminUsers(connection).isEmpty()) {
-            redirect = "/admin/createUsername.jsp?ADMIN";
-          } else {
-            redirect = "/admin/ask-create-admin.jsp";
-          }
-
-          // setup special authentication for setup
-          LOGGER.info("Installing in-setup auth");
-          session.setAttribute(SessionAttributes.AUTHENTICATION, AuthenticationContext.inSetup());
-
+          success = true;
         } catch (final MalformedURLException e) {
           throw new FLLInternalException("Could not parse URL from choosen description: "
               + description, e);
@@ -108,7 +124,6 @@ public class CreateDB extends BaseFLLServlet {
         if (null == xmlFileItem
             || xmlFileItem.getSize() < 1) {
           message.append("<p class='error'>XML description document not specified</p>");
-          redirect = "/setup";
         } else {
           final ChallengeDescription challengeDescription = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
                                                                                                         Utilities.DEFAULT_CHARSET));
@@ -117,15 +132,7 @@ public class CreateDB extends BaseFLLServlet {
 
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
 
-          message.append("<p id='success'><i>Successfully initialized database</i></p>");
-          if (Authentication.getAdminUsers(connection).isEmpty()) {
-            redirect = "/admin/createUsername.jsp?ADMIN";
-          } else {
-            redirect = "/admin/ask-create-admin.jsp";
-          }
-
-          // setup special authentication for setup
-          session.setAttribute(SessionAttributes.AUTHENTICATION, AuthenticationContext.inSetup());
+          success = true;
         }
       } else if (null != request.getAttribute("createdb")) {
         // import a database from a dump
@@ -134,7 +141,6 @@ public class CreateDB extends BaseFLLServlet {
         if (null == dumpFileItem
             || dumpFileItem.getSize() < 1) {
           message.append("<p class='error'>Database dump not specified</p>");
-          redirect = "/setup";
         } else {
 
           final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileItem.getInputStream()),
@@ -150,21 +156,42 @@ public class CreateDB extends BaseFLLServlet {
           // remove application variables that depend on the database
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
 
-          message.append("<p id='success'><i>Successfully initialized database from dump</i></p>");
-          if (Authentication.getAdminUsers(connection).isEmpty()) {
-            redirect = "/admin/createUsername.jsp?ADMIN";
-          } else {
-            redirect = "/admin/ask-create-admin.jsp";
+          final Collection<String> newDbUsers = Authentication.getUsers(connection);
+          final Iterator<UserAccount> accountIter = accounts.iterator();
+          while (accountIter.hasNext()) {
+            final UserAccount account = accountIter.next();
+            if (newDbUsers.contains(account.getUsername())) {
+              // don't give the option to overwrite users
+              accountIter.remove();
+            }
           }
 
-          // setup special authentication for setup
-          session.setAttribute(SessionAttributes.AUTHENTICATION, AuthenticationContext.inSetup());
+          success = true;
         }
 
       } else {
         message.append("<p class='error'>Unknown form state, expected form fields not seen: "
             + request
             + "</p>");
+      }
+
+      if (success) {
+        message.append("<p id='success'><i>Successfully initialized database</i></p>");
+
+        // setup special authentication for setup
+        session.setAttribute(SessionAttributes.AUTHENTICATION, AuthenticationContext.inSetup());
+
+        if (accounts.isEmpty()) {
+          if (Authentication.getAdminUsers(connection).isEmpty()) {
+            redirect = "/admin/createUsername.jsp?ADMIN";
+          } else {
+            redirect = "/admin/ask-create-admin.jsp";
+          }
+        } else {
+          session.setAttribute(PREVIOUS_ACCOUNTS, accounts);
+          redirect = "/setup/import-users.jsp";
+        }
+      } else {
         redirect = "/setup";
       }
 
@@ -188,10 +215,56 @@ public class CreateDB extends BaseFLLServlet {
       redirect = "/setup";
     }
 
-    session.setAttribute("message", message.toString());
+    SessionAttributes.appendToMessage(session, message.toString());
     response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
         + redirect));
 
+  }
+
+  /**
+   * Store user account information for inserting into a new database.
+   */
+  public static final class UserAccount implements Serializable {
+
+    private final String username;
+
+    /**
+     * @return username
+     */
+    public String getUsername() {
+      return username;
+    }
+
+    private final String hashedPassword;
+
+    /**
+     * @return hashed password
+     */
+    public String getHashedPassword() {
+      return hashedPassword;
+    }
+
+    private final HashSet<UserRole> roles;
+
+    /**
+     * @return unmodifiable set of roles
+     */
+    public Set<UserRole> getRoles() {
+      return Collections.unmodifiableSet(roles);
+    }
+
+    /**
+     * @param username {@link #getUsername()}
+     * @param hashedPassword {@link #getHashedPassword()}
+     * @param roles {@link #getRoles()}
+     */
+    /* package */ UserAccount(final String username,
+                              final String hashedPassword,
+                              final Set<UserRole> roles) {
+      this.username = username;
+      this.hashedPassword = hashedPassword;
+      this.roles = new HashSet<>(roles);
+    }
   }
 
 }

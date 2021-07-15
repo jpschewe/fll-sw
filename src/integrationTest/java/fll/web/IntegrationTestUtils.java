@@ -7,7 +7,6 @@
 package fll.web;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -46,6 +45,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -80,6 +80,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.w3c.dom.Document;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static org.hamcrest.Matchers.lessThan;
 
 import fll.Launcher;
 import fll.TestUtils;
@@ -285,6 +287,8 @@ public final class IntegrationTestUtils {
 
     driverWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
+    handleImportUsers(driver);
+
     LOGGER.trace("Found database success, calling createUser");
     createUser(driver, driverWait);
 
@@ -341,6 +345,7 @@ public final class IntegrationTestUtils {
 
       seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
+      handleImportUsers(selenium);
       createUser(selenium, seleniumWait);
 
       login(selenium);
@@ -350,6 +355,21 @@ public final class IntegrationTestUtils {
       }
     }
     login(selenium);
+  }
+
+  private static void handleImportUsers(final WebDriver driver) {
+    if (isElementPresent(driver, By.name("import_users"))) {
+      // uncheck all usernames
+
+      final WebElement parent = driver.findElement(By.id("import-users-form"));
+
+      final List<WebElement> children = parent.findElements(By.cssSelector("input:checked[type='checkbox']"));
+      for (final WebElement input : children) {
+        input.click();
+      }
+
+      driver.findElement(By.name("import_users")).click();
+    }
   }
 
   /**
