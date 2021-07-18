@@ -47,8 +47,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById("store_winners").addEventListener('click', function() {
-        storeAdvancingTeams();
-        storeSortedGroups();
+        const fail_callback = function(msg) {
+            alert(msg);
+        };
+
+        var promises = [];
+        const advancingPromise = storeAdvancingTeams(fail_callback);
+        promises.push(advancingPromise);
+
+        const sortedGroupsPromise = storeSortedGroups(fail_callback);
+        promises.push(sortedGroupsPromise);
+
+        Promise.all(promises).catch(function(msg) {
+            alert("Error storing data: " + msg);
+        }).then(function(_) {
+            alert("Advancing Teams stored on the server")
+        });
+
     });
 
     var advancingGroupCount = 1;
@@ -60,6 +75,9 @@ document.addEventListener('DOMContentLoaded', function() {
 }); // end ready function
 
 
+/**
+ * @return a promise that stores the advancing teams
+ */
 function storeAdvancingTeams() {
     var advancing = [];
     _advancingTeamData.forEach(function(data) {
@@ -72,7 +90,7 @@ function storeAdvancingTeams() {
     if (advancing.length) {
         // send to server
 
-        fetch("/api/AdvancingTeams",
+        return fetch("/api/AdvancingTeams",
             {
                 method: "POST",
                 headers: {
@@ -82,12 +100,14 @@ function storeAdvancingTeams() {
             }
         ).then(function(response) {
             if (!response.ok) {
-                alert("Error sending group advancing teams: " + response.message);
+                throw "Error sending group advancing teams: " + response.message;
             }
         });
 
     } else {
-        _log("No advancing teams to store");
+        return new Promise(function() {
+            _log("No advancing teams to store");
+        });
     }
 }
 
@@ -450,6 +470,9 @@ function renameGroupToSort(oldName, newName) {
     }
 }
 
+/**
+ * @return a Promise for storing the sorted gruops
+ */
 function storeSortedGroups() {
     // gather list elements that have the group sort information
     var groupElements = [];
@@ -474,7 +497,7 @@ function storeSortedGroups() {
     });
 
     // send to server
-    fetch("/api/AwardsReportSortedGroups",
+    return fetch("/api/AwardsReportSortedGroups",
         {
             method: "POST",
             headers: {
@@ -484,7 +507,7 @@ function storeSortedGroups() {
         }
     ).then(function(response) {
         if (!response.ok) {
-            alert("Error sending group sort information: " + response.message);
+            throw "Error sending group sort information: " + response.message;
         }
     });
 
