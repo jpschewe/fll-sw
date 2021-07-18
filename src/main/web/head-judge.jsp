@@ -50,6 +50,10 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         href="<c:url value='/subjective/Auth' />">Enter subjective
         scores. This is done through the subjective web application</a>
 
+    <a class="wide" target="_report"
+        href="<c:url value='/report/index.jsp' />">Generate reports
+        - this is done once all of the subjective scores are in.</a>
+
     <a class="wide"
         href="<c:url value='/report/edit-award-winners.jsp' />"
         target="_blank">Enter the winners of awards for use in the
@@ -64,9 +68,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         target="_blank">Report of winners for the tournament. This
         can be published on the web or used for the awards ceremony.</a>
 
-    <a class="wide" target="_report"
-        href="<c:url value='/report/index.jsp' />">Generate reports
-        - this is done once all of the subjective scores are in.</a>
 
     <h2>Finalist scheduling</h2>
     <p>This is used at tournaments where there is more than 1
