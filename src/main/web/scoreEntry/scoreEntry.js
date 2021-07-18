@@ -17,6 +17,7 @@ $(document)
             $("#yesno-dialog").dialog({
                 autoOpen: false,
                 modal: true,
+                position: { my: "center top", at: "center top", of: window, collision: "none" },
                 buttons: [{
                     text: "Yes",
                     id: "yesno-dialog_yes",
