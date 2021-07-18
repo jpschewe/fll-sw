@@ -92,6 +92,8 @@ public class GatherScoreEntryData extends BaseFLLServlet {
       // the next run the team will be competing in
       final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumber());
 
+      final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, tournament);
+
       // what run number we're going to edit/enter
       int lRunNumber;
       if (Boolean.valueOf(request.getParameter("EditFlag"))) {
@@ -122,7 +124,6 @@ public class GatherScoreEntryData extends BaseFLLServlet {
           lRunNumber = runNumber;
         }
       } else {
-        final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, tournament);
         if (runningHeadToHead
             && nextRunNumber > numSeedingRounds) {
           if (null == Playoff.involvedInUnfinishedPlayoff(connection, tournament,
@@ -146,7 +147,8 @@ public class GatherScoreEntryData extends BaseFLLServlet {
       session.setAttribute("lRunNumber", lRunNumber);
 
       final String roundText;
-      if (lRunNumber > numSeedingRounds) {
+      if (runningHeadToHead
+          && lRunNumber > numSeedingRounds) {
         final String division = Playoff.getPlayoffDivision(connection, tournament, teamNumber, lRunNumber);
         final int playoffRun = Playoff.getPlayoffRound(connection, tournament, division, lRunNumber);
         roundText = "Playoff&nbsp;Round&nbsp;"
