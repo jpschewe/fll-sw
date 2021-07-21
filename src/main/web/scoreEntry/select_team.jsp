@@ -12,14 +12,29 @@ fll.web.scoreEntry.SelectTeam.populateContext(application, session, pageContext)
     href="<c:url value='/style/fll-sw.css'/>" />
 <title>Score Entry [Select Team]</title>
 
-<style title='local_style' type='text/css'>
+<c:choose>
+    <c:when test="${not empty scoreEntrySelectedTable}">
+        <style title='select_style' type='text/css'>
 SELECT {
-    line-height: 150%;
+    font-size: x-large;
+    font-weight: bold;
+    background: black;
+    color: #e0e0e0;
+    font-weight: bold;
+}
+</style>
+    </c:when>
+    <c:otherwise>
+        <style title='select_style' type='text/css'>
+SELECT {
     font-weight: bold;
     background: black;
     color: #e0e0e0;
 }
-
+</style>
+    </c:otherwise>
+</c:choose>
+<style title='local_style' type='text/css'>
 OPTION {
     color: #e0e0e0;
 }
