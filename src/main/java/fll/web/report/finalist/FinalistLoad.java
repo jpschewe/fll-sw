@@ -358,20 +358,6 @@ public final class FinalistLoad {
           output.format("}%n");
         }
 
-        /*
-         * TODO ticket 447
-         * output.format("var schedule = [];%n");
-         *
-         * for (final FinalistDBRow row : schedule.getSchedule()) {
-         * var time = new Time(hours, minutes);
-         * var newSlot = new Timeslot(time, slotDuration);
-         * schedule.push(newSlot);
-         * }
-         *
-         * output.format("$.finalist.sortSchedule(schedule);%n");
-         * output.format("$.finalist.setSchedule(division, schedule);%n");
-         */
-
         output.format("}%n");
 
       }

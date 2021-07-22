@@ -15,6 +15,13 @@ fll.web.scoreEntry.ChooseTable.populateContext(application, pageContext);
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js' />"></script>
 
+
+<style type='text/css'>
+input, select {
+    font-size: x-large;
+}
+</style>
+
 </head>
 
 <body>

@@ -34,6 +34,10 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         generated. You will be returned to this page if there are no
         errors summarizing scores.</a>
 
+    <a class="wide" href="NonNumericNomineesReport" target="_blank">Report
+        showing the teams that have been nominated for non-numeric
+        awards</a>
+
     <a class="wide" href="topScoreReportPerAwardGroup.jsp">Top
         performance scores by award group. This creates a text report of
         the top regular match play round scores by award group.</a>
@@ -71,10 +75,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         This information can come from the subjective judging
         application. The information entered here transfers over to the
         finalist scheduling web application.</a>
-
-    <a class="wide" href="NonNumericNomineesReport" target="_blank">Report
-        showing the teams that have been nominated for non-numeric
-        awards</a>
 
     <a class="wide" href="edit-award-winners.jsp" target="_blank">Enter
         the winners of awards for use in the awards report</a>

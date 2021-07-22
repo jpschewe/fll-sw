@@ -12,30 +12,40 @@ fll.web.scoreEntry.SelectTeam.populateContext(application, session, pageContext)
     href="<c:url value='/style/fll-sw.css'/>" />
 <title>Score Entry [Select Team]</title>
 
-<style title='local_style' type='text/css'>
+<c:choose>
+    <c:when test="${not empty scoreEntrySelectedTable}">
+        <style title='select_style' type='text/css'>
 SELECT {
-    line-height: 150%;
-    font-size: 10pt;
+    font-size: x-large;
+    font-weight: bold;
+    background: black;
+    color: #e0e0e0;
+    font-weight: bold;
+}
+</style>
+    </c:when>
+    <c:otherwise>
+        <style title='select_style' type='text/css'>
+SELECT {
     font-weight: bold;
     background: black;
     color: #e0e0e0;
 }
-
+</style>
+    </c:otherwise>
+</c:choose>
+<style title='local_style' type='text/css'>
 OPTION {
     color: #e0e0e0;
 }
 
 .dark_bg {
-    font-size: 10pt;
     font-weight: bold;
     background-color: black;
     color: #e0e0e0;
 }
-
-#container, #container table, #container select {
-    width: 100%;
-}
 </style>
+
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js' />"></script>
 
@@ -187,9 +197,12 @@ Entering scores for all tables. Teams are sorted in schedule order.
                             <!-- pick team from a list -->
                             <td>
                                 <br>
-                                <font face='arial' size='4'>Select
-                                    team for this scorecard:</font>
-                                <br>
+                                <span style="vertical-align: top">Select
+                                    team to enter score for:</span>
+                                <c:if
+                                    test="${empty scoreEntrySelectedTable}">
+                                    <br />
+                                </c:if>
                                 <select size='20' id='select-teamnumber'
                                     name='TeamNumber'
                                     ondblclick='selectTeam.submit()'>
@@ -227,6 +240,12 @@ Entering scores for all tables. Teams are sorted in schedule order.
                                     <tr>
                                         <!-- pick run number -->
                                         <td align='left'>
+                                            <b>
+                                                <span
+                                                    id='select_number_text'>Select
+                                                    Run Number for
+                                                    editing</span>
+                                            </b>
                                             <select name='RunNumber'
                                                 disabled='disabled'>
                                                 <option value='0'>Last
@@ -238,12 +257,6 @@ Entering scores for all tables. Teams are sorted in schedule order.
                                                         value='${index }'>${index }</option>
                                                 </c:forEach>
                                             </select>
-                                            <b>
-                                                <span
-                                                    id='select_number_text'>Select
-                                                    Run Number for
-                                                    editing</span>
-                                            </b>
                                         </td>
                                     </tr>
                                 </table>

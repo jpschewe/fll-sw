@@ -58,24 +58,5 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         target="_blank">Enter the winners of awards for use in the
         awards report</a>
 
-    <h2>Finalist scheduling</h2>
-    <p>This is used at tournaments where there is more than 1
-        judging group in an award group. This is typically the case at a
-        state tournament where all teams are competing for first place
-        in each category, but there are too many teams for one judge to
-        see.</p>
-
-    <p>Before using these links the initial head to head brackets
-        need to be assigned in the performance area and the performance
-        dump needs to be imported using the link above.</p>
-
-    <a class="wide"
-        href="<c:url value='/report/non-numeric-nominees.jsp' />"
-        target="_blank">Enter non-numeric nominees. This is used to
-        enter the teams that are up for consideration for the non-scored
-        subjective categories. This information transfers over to the
-        finalist scheduling web application. This is also used in the
-        awards scripts report.</a>
-
 </body>
 </html>

@@ -374,7 +374,6 @@ public class AwardsReport extends BaseFLLServlet {
 
   /**
    * @param categoryWinners awardGroup to list of winners
-   * @param displayPlace TODO
    */
   private Element addSubjectiveAwardGroupWinners(final Connection connection,
                                                  final Document document,
