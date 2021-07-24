@@ -11,13 +11,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.db.Authentication;
@@ -53,11 +53,11 @@ public class DoLogin extends BaseFLLServlet {
     session.setAttribute(SessionAttributes.REDIRECT_URL, origUri);
 
     LOGGER.debug("Request is for {}", request.getRequestURI());
-    LOGGER.debug("forward.request_uri: {}", request.getAttribute("javax.servlet.forward.request_uri"));
-    LOGGER.debug("forward.context_path: {}", request.getAttribute("javax.servlet.forward.context_path"));
-    LOGGER.debug("forward.servlet_path: {}", request.getAttribute("javax.servlet.forward.servlet_path"));
-    LOGGER.debug("forward.path_info: {}", request.getAttribute("javax.servlet.forward.path_info"));
-    LOGGER.debug("forward.query_string: {}", request.getAttribute("javax.servlet.forward.query_string"));
+    LOGGER.debug("forward.request_uri: {}", request.getAttribute("jakarta.servlet.forward.request_uri"));
+    LOGGER.debug("forward.context_path: {}", request.getAttribute("jakarta.servlet.forward.context_path"));
+    LOGGER.debug("forward.servlet_path: {}", request.getAttribute("jakarta.servlet.forward.servlet_path"));
+    LOGGER.debug("forward.path_info: {}", request.getAttribute("jakarta.servlet.forward.path_info"));
+    LOGGER.debug("forward.query_string: {}", request.getAttribute("jakarta.servlet.forward.query_string"));
   }
 
   @Override

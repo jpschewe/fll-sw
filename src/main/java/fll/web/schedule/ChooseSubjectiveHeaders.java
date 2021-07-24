@@ -6,7 +6,7 @@
 
 package fll.web.schedule;
 
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.PageContext;
 
 import fll.scheduler.SchedParams;
 

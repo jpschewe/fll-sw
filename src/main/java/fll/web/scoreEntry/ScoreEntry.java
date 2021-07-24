@@ -15,11 +15,11 @@ import java.util.Collection;
 import java.util.Formatter;
 import java.util.List;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;

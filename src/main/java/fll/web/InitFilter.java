@@ -12,17 +12,17 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
@@ -64,11 +64,11 @@ public class InitFilter implements Filter {
 
       LOGGER.trace("Redirect URL is {}", SessionAttributes.getRedirectURL(session));
       LOGGER.trace("Request is for {}", req.getRequestURI());
-      LOGGER.trace("forward.request_uri: {}", req.getAttribute("javax.servlet.forward.request_uri"));
-      LOGGER.trace("forward.context_path: {}", req.getAttribute("javax.servlet.forward.context_path"));
-      LOGGER.trace("forward.servlet_path: {}", req.getAttribute("javax.servlet.forward.servlet_path"));
-      LOGGER.trace("forward.path_info: {}", req.getAttribute("javax.servlet.forward.path_info"));
-      LOGGER.trace("forward.query_string: {}", req.getAttribute("javax.servlet.forward.query_string"));
+      LOGGER.trace("forward.request_uri: {}", req.getAttribute("jakarta.servlet.forward.request_uri"));
+      LOGGER.trace("forward.context_path: {}", req.getAttribute("jakarta.servlet.forward.context_path"));
+      LOGGER.trace("forward.servlet_path: {}", req.getAttribute("jakarta.servlet.forward.servlet_path"));
+      LOGGER.trace("forward.path_info: {}", req.getAttribute("jakarta.servlet.forward.path_info"));
+      LOGGER.trace("forward.query_string: {}", req.getAttribute("jakarta.servlet.forward.query_string"));
 
       final HttpServletRequest httpRequest = FormParameterStorage.applyParameters(req, session);
 

@@ -21,16 +21,10 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.zip.ZipInputStream;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
+import org.apache.tomcat.util.http.fileupload.FileItem;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
@@ -48,6 +42,12 @@ import fll.web.UploadProcessor;
 import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Create a new database either from an xml descriptor or from a database dump.

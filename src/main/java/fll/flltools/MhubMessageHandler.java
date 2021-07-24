@@ -23,17 +23,17 @@ import java.util.Map;
 import java.util.Objects;
 
 import javax.annotation.concurrent.ThreadSafe;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 import javax.sql.DataSource;
-import javax.websocket.ClientEndpoint;
-import javax.websocket.ContainerProvider;
-import javax.websocket.DeploymentException;
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.ContainerProvider;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnError;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
+import jakarta.websocket.WebSocketContainer;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 

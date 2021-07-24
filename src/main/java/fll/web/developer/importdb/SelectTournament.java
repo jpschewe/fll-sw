@@ -10,8 +10,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import javax.servlet.http.HttpSession;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.PageContext;
 
 import fll.Tournament;
 import fll.web.SessionAttributes;

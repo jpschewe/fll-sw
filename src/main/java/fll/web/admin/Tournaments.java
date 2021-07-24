@@ -11,8 +11,8 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.servlet.ServletContext;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 

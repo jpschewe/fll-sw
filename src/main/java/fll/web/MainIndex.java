@@ -9,9 +9,9 @@ package fll.web;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import fll.Tournament;

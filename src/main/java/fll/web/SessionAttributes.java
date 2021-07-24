@@ -5,7 +5,7 @@
  */
 package fll.web;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 

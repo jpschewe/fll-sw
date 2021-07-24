@@ -20,7 +20,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
