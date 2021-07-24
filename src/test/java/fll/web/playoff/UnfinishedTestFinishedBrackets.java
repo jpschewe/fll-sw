@@ -7,13 +7,16 @@
 package fll.web.playoff;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import static org.hamcrest.Matchers.is;
 
 /**
  * Test that {@link Playoff#isPlayoffBracketUnfinished(Connection, int, String)}
@@ -24,8 +27,8 @@ public final class UnfinishedTestFinishedBrackets extends UnfinishedBaseTest {
   /**
    * @return bracket names for {@link #test(String)}
    */
-  public static String[] names() {
-    return UnfinishedBaseTest.FINISHED_BRACKET_NAMES;
+  public static Stream<String> names() {
+    return Arrays.stream(UnfinishedBaseTest.FINISHED_BRACKET_NAMES);
   }
 
   /**

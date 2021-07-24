@@ -23,5 +23,13 @@ https://github.com/spotbugs/spotbugs/issues/756 -->
     <Bug pattern="UPM_UNCALLED_PRIVATE_METHOD" />
   </Match>
 
+  <!--  TODO: ignore exposing of internal state for now, but may want to change this later -->
+  <Match>
+    <Bug pattern="EI_EXPOSE_REP" />
+  </Match>
+  <Match>
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  
 </FindBugsFilter>
 
