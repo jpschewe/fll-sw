@@ -33,7 +33,7 @@ plugins {
     id "edu.sc.seis.launch4j" version "2.5.0"
     id "com.gorylenko.gradle-git-properties" version "2.3.1"
     id "com.github.ben-manes.versions" version "0.39.0" // adds dependencyUpdates task
-    id "de.undercouch.download" version "4.1.1" // file download
+    id "de.undercouch.download" version "4.1.2" // file download
     id "checkstyle"
         
     // Checker Framework pluggable type-checking
@@ -141,7 +141,7 @@ ext {
     tomcat_version = "9.0.39"
     poi_version = "5.0.0"
     junit_version = "5.7.2"
-    log4j_version = "2.13.1"
+    log4j_version = "2.14.1"
     spotbugs_version = "4.3.0"
     checker_framework_version = "3.14.0"
 
@@ -212,7 +212,7 @@ dependencies {
 
   implementation(group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0")
             
-  implementation(group: "dnsjava", name: "dnsjava", version: "3.3.1")
+  implementation(group: "dnsjava", name: "dnsjava", version: "3.4.0")
     
   implementation(group: "commons-fileupload", name: "commons-fileupload", version: "1.4")
     
