@@ -140,9 +140,9 @@ ext {
     slf4j_version = "1.7.30"
     tomcat_version = "9.0.39"
     poi_version = "4.1.2"
-    junit_version = "5.7.0"
-    log4j_version = "2.13.3"
-    spotbugs_version = "4.2.3"
+    junit_version = "5.7.2"
+    log4j_version = "2.13.1"
+    spotbugs_version = "4.3.0"
     checker_framework_version = "3.14.0"
 
     web_build_dir = new File(project.buildDir, "web")
@@ -187,7 +187,7 @@ dependencies {
   implementation(group: "javax.servlet", name: "javax.servlet-api", version: "4.0.1")
   runtimeOnly(group: "javax.servlet", name: "jstl", version: "1.2")
 
-  implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.11")
+  implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.12.0")
   implementation(group: "commons-cli", name: "commons-cli", version: "1.4")
   implementation(group: "org.hsqldb", name: "hsqldb", version: "2.5.1")
     
@@ -226,11 +226,11 @@ dependencies {
     
   implementation(group: "net.java.linoleum", name: "jlfgr", version: "1_0")
         
-  implementation(group: "com.opencsv", name: "opencsv", version: "5.3")
+  implementation(group: "com.opencsv", name: "opencsv", version: "5.5.1")
     
   implementation(group: "net.mtu.eggplant", name: "JonsInfra", version: "3.2.0"   )
     
-  implementation(group: "com.google.guava", name: "guava", version: "30.0-jre")
+  implementation(group: "com.google.guava", name: "guava", version: "30.1.1-jre")
     
   implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.5") {
     // only needed for BMP and TIFF formats
@@ -259,13 +259,13 @@ dependencies {
   integrationTestImplementation(sourceSets.test.output)
         
   integrationTestImplementation(group: "org.easytesting", name: "fest-swing", version: "1.2.1")
-  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.44.0") {
+  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.51.0") {
       
     // xml APIs are part of the JDK
     exclude(group: "xml-apis", module: "xml-apis")
   }
   integrationTestImplementation(group: "org.seleniumhq.selenium", name: "selenium-server", version: "3.141.59")
-  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "4.2.2")
+  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "4.4.3")
   
   // make selenium log to log4j
   integrationTestImplementation(group: "org.apache.logging.log4j", name: "log4j-jul", version: project.log4j_version)
