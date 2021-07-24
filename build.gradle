@@ -24,7 +24,7 @@ plugins {
     id "java"
     id "distribution"
     id "com.dorongold.task-tree" version "2.1.0"
-    id "org.unbroken-dome.test-sets" version "3.0.1"
+    id "org.unbroken-dome.test-sets" version "4.0.0"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
     id "com.github.spotbugs" version "4.7.2"
@@ -137,9 +137,9 @@ repositories {
 
 ext {
     jackson_version = "2.12.4"
-    slf4j_version = "1.7.30"
+    slf4j_version = "1.7.32"
     tomcat_version = "9.0.39"
-    poi_version = "4.1.2"
+    poi_version = "5.0.0"
     junit_version = "5.7.2"
     log4j_version = "2.13.1"
     spotbugs_version = "4.3.0"
@@ -189,7 +189,7 @@ dependencies {
 
   implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.12.0")
   implementation(group: "commons-cli", name: "commons-cli", version: "1.4")
-  implementation(group: "org.hsqldb", name: "hsqldb", version: "2.5.1")
+  implementation(group: "org.hsqldb", name: "hsqldb", version: "2.6.0")
     
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-slf4j-impl", version: project.log4j_version)
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-jcl", version: project.log4j_version)
@@ -216,7 +216,7 @@ dependencies {
     
   implementation(group: "commons-fileupload", name: "commons-fileupload", version: "1.4")
     
-  implementation(group: "org.apache.tika", name: "tika-core", version: "1.24.1")
+  implementation(group: "org.apache.tika", name: "tika-core", version: "2.0.0")
     
   implementation(group: "com.diffplug.durian", name: "durian-core", version: "1.2.0")
         
@@ -232,7 +232,7 @@ dependencies {
     
   implementation(group: "com.google.guava", name: "guava", version: "30.1.1-jre")
     
-  implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.5") {
+  implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.6") {
     // only needed for BMP and TIFF formats
     exclude(group: "com.sun.media", module: "jai-codec")
     
@@ -247,7 +247,7 @@ dependencies {
   implementation(group: "org.checkerframework", name: "checker-util", version: project.checker_framework_version)
   checkerFramework(group: "org.checkerframework", name: "checker", version: project.checker_framework_version)
     
-  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.21")
+  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.24")
   
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-api", version: project.junit_version)
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-params", version: project.junit_version)
