@@ -193,7 +193,7 @@ Entering scores for all tables. Teams are sorted in schedule order.
 
         <tr>
             <td>
-                <form action="GatherScoreEntryData" method="POST"
+                <form action="scoreEntry.jsp" method="POST"
                     name="selectTeam">
                     <table>
                         <!-- left table -->
@@ -286,7 +286,7 @@ Entering scores for all tables. Teams are sorted in schedule order.
 
                 <td valign='top'>
                     <!-- right table -->
-                    <form action="GatherScoreEntryData" method="POST"
+                    <form action="scoreEntry.jsp" method="POST"
                         name="verify">
                         <input type="hidden" name='EditFlag'
                             value="true" />

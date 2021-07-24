@@ -5,7 +5,7 @@
 <fll-sw:required-roles roles="REF" allowSetup="false" />
 
 <%
-    fll.web.scoreEntry.ScoreEntry.populateContext(request, session, pageContext);
+    fll.web.scoreEntry.ScoreEntry.populateContext(application, request, response, session, pageContext);
 %>
 
 <html>
