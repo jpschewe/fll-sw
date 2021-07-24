@@ -604,7 +604,7 @@ tasks.withType(SpotBugsTask) {
 }
 
 gitProperties {
-    gitPropertiesDir = "${buildDir}/resources/main/fll/resources"
+    gitPropertiesResourceDir = file("${buildDir}/resources/main/fll/resources")
 }
 
 tasks.register("writeLaunchJar", Jar) {
