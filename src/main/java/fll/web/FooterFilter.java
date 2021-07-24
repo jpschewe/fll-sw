@@ -153,6 +153,9 @@ public class FooterFilter implements Filter {
       return true;
     } else if (url.indexOf("finalist/load.jsp") != -1) {
       return true;
+    } else if (url.indexOf("scoreEntry/GatherScoreEntryData") != -1
+        || url.indexOf("scoreEntry/scoreEntry.jsp") != -1) {
+      return true;
     } else {
       return false;
     }
