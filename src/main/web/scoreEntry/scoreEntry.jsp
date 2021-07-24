@@ -5,7 +5,7 @@
 <fll-sw:required-roles roles="REF" allowSetup="false" />
 
 <%
-    fll.web.scoreEntry.ScoreEntry.populateContext(request, pageContext);
+    fll.web.scoreEntry.ScoreEntry.populateContext(request, session, pageContext);
 %>
 
 <html>
@@ -19,6 +19,7 @@
   </c:otherwise>
 </c:choose>
 
+<!-- is practice ${practice} -->
 <link
   rel="stylesheet"
   type="text/css"
@@ -51,7 +52,7 @@ body {
 <script type="text/javascript"
     src="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.js' />"></script>
 
-<c:if test="${not empty scoreEntrySelectedTable}">
+<c:if test="${not showScores}">
     <link rel="stylesheet" type="text/css" href="hide-score.css" />
 </c:if>
 
@@ -109,8 +110,16 @@ function check_restrictions() {
 <%ScoreEntry.generateIsConsistent(out, application);%>
 
 
-<%ScoreEntry.generateIncrementMethods(out, application, session, pageContext);%>
+<%ScoreEntry.generateIncrementMethods(out, application, request, session, pageContext);%>
+
 </c:if> <!-- end check for bye -->
+
+document.addEventListener('DOMContentLoaded', function() {
+  const resetButton = document.getElementById("reset_score");
+  if(resetButton) {
+      resetButton.addEventListener('click', init);
+  }
+});
 
 </script>
 
@@ -208,7 +217,18 @@ function check_restrictions() {
                     <td><font
                       face="Arial"
                       size="4"
-                      color='#0000ff'>#${team.teamNumber}&nbsp;${team.organization}&nbsp;${team.teamName}&nbsp;--&nbsp;${roundText}</font>
+                      color='#0000ff'>
+
+                                                <c:choose>
+                                                    <c:when
+                                                        test="${practice}">
+                      Practice
+                      </c:when>
+                                                    <c:otherwise>
+                      #${team.teamNumber}&nbsp;${team.organization}&nbsp;${team.teamName}&nbsp;--&nbsp;${roundText}
+                      </c:otherwise>
+                                                </c:choose>
+                                            </font>
                     </td>
                   </tr>
                 </table> <!--  end inner box on title -->
@@ -291,13 +311,19 @@ function check_restrictions() {
                     tabindex='-1'></td>
                 </tr>
                 <%
-                  ScoreEntry.generateVerificationInput(out, session);
+                  ScoreEntry.generateVerificationInput(out, request, session);
                 %>
               </c:otherwise>
             </c:choose>
             <!-- end check for bye -->
 
             <tr>
+<c:choose>
+<c:when test="${practice}">
+<td colspan='3'>&nbsp;</td>
+<td><button type='button' id='reset_score'>Reset Form</button></td>
+</c:when>
+<c:otherwise>
               <td
                 colspan='3'
                 align='right'>
@@ -334,7 +360,10 @@ function check_restrictions() {
                   value='No Show'>No Show</button></td>
               </c:if>
               
+            </c:otherwise>
+            </c:choose>
             </tr>
+            
           </table> <!-- end score entry table  -->
 
         </td>

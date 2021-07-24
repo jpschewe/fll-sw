@@ -167,6 +167,11 @@ Entering scores for all tables. Teams are sorted in schedule order.
         table that scores are being entered for.
     </div>
 
+    <div>
+        <a class="wide"
+            href="<c:url value='/scoreEntry/scoreEntry.jsp?tablet=true&practice=true&showScores=false'/>">Practice
+            round score entry</a>
+    </div>
 
 
     <table id='container'>

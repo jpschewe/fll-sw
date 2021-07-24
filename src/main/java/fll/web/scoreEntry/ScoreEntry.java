@@ -23,7 +23,6 @@ import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Team;
 import fll.db.Queries;
@@ -79,15 +78,33 @@ public final class ScoreEntry {
   private ScoreEntry() {
   }
 
+  private static boolean isTabletEntry(final HttpServletRequest request,
+                                       final HttpSession session) {
+    return !StringUtils.isBlank((String) session.getAttribute("scoreEntrySelectedTable"))
+        || !StringUtils.isBlank(request.getParameter("tablet"));
+  }
+
   /**
    * Set variables in the page context.
+   * Checks request for "displayScores" to force display of scores, even
+   * when using a tablet.
    *
    * @param request the web request
    * @param pageContext where to store the values
+   * @param session get session variables
+   * @see #isTabletEntry(HttpServletRequest, HttpSession)
    */
   public static void populateContext(final HttpServletRequest request,
+                                     final HttpSession session,
                                      final PageContext pageContext) {
     pageContext.setAttribute("EditFlag", Boolean.valueOf(request.getParameter("EditFlag")));
+
+    final boolean tabletEntry = isTabletEntry(request, session);
+    final boolean showScores = !tabletEntry
+        || Boolean.parseBoolean(request.getParameter("showScores"));
+    pageContext.setAttribute("showScores", showScores);
+
+    pageContext.setAttribute("practice", Boolean.valueOf(request.getParameter("practice")));
   }
 
   /**
@@ -205,16 +222,18 @@ public final class ScoreEntry {
    *
    * @param writer where to write the text
    * @param application application context
+   * @param request used to get information about tablet entry
    * @param pageContext used to get the edit flag state
    * @param session used to determine when running on a tablet
    * @throws IOException if there is an error writing to {@code writer}
    */
   public static void generateIncrementMethods(final Writer writer,
                                               final ServletContext application,
+                                              final HttpServletRequest request,
                                               final HttpSession session,
                                               final PageContext pageContext)
       throws IOException {
-    final @Nullable String scoreEntrySelectedTable = (String) session.getAttribute("scoreEntrySelectedTable");
+    final boolean tabletEntry = isTabletEntry(request, session);
 
     final boolean editFlag = (Boolean) pageContext.getAttribute("EditFlag");
 
@@ -292,7 +311,7 @@ public final class ScoreEntry {
     formatter.format("  Verified = newValue;%n");
 
     if (!editFlag
-        && null == scoreEntrySelectedTable) {
+        && !tabletEntry) {
       formatter.format("  if (newValue == 1) {");
       formatter.format("    $('#verification-warning').show();");
       formatter.format("  } else if (newValue == 0) {");
@@ -529,17 +548,19 @@ public final class ScoreEntry {
    * the score has been double-checked or not.
    * 
    * @param writer where to write the HTML
+   * @param request used to get information about tablet entry
    * @param session used to get information about scoring on a tablet
    * @throws IOException if there is an error writing to {@code writer}
    */
   public static void generateVerificationInput(final JspWriter writer,
+                                               final HttpServletRequest request,
                                                final HttpSession session)
       throws IOException {
-    final @Nullable String scoreEntrySelectedTable = (String) session.getAttribute("scoreEntrySelectedTable");
+    final boolean tabletEntry = isTabletEntry(request, session);
 
     writer.println("<!-- Score Verification -->");
     writer.println("    <tr>");
-    if (null == scoreEntrySelectedTable) {
+    if (!tabletEntry) {
       writer.println("      <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Score entry verified:</font></td>");
     } else {
       writer.println("<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Team Agrees with the score entry:</font></td>");
