@@ -69,7 +69,7 @@ EditFlag = true;
     <c:if test="${not isBye}">
 
 function init() {
-  <%ScoreEntry.generateInit(out, application, session, pageContext);%>
+  <%ScoreEntry.generateInit(out, application, pageContext);%>
 
   refresh();
   

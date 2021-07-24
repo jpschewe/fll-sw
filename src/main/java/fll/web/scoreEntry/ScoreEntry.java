@@ -278,14 +278,12 @@ public final class ScoreEntry {
    *
    * @param writer where to write HTML
    * @param application application context
-   * @param session session context
    * @throws IOException if there is an error writing to the output stream
    * @throws SQLException if there is a problem talking to the database
    * @param pageContext used to get the edit flag
    */
   public static void generateInit(final JspWriter writer,
                                   final ServletContext application,
-                                  final HttpSession session,
                                   final PageContext pageContext)
       throws IOException, SQLException {
 
@@ -293,7 +291,7 @@ public final class ScoreEntry {
 
     final boolean editFlag = (Boolean) pageContext.getAttribute("EditFlag");
     if (editFlag) {
-      generateInitForScoreEdit(writer, application, session);
+      generateInitForScoreEdit(writer, application, pageContext);
     } else {
       generateInitForNewScore(writer, application);
     }
@@ -995,17 +993,18 @@ public final class ScoreEntry {
    * 
    * @param writer where to write the HTML
    * @param application used to get the challenge description
-   * @param session used to get information about the current score entry
+   * @param page used to get page variables
    * @throws SQLException on a database error
    * @throws IOException if there is a problem writing to {@code writer}
    */
   public static void generateInitForScoreEdit(final JspWriter writer,
                                               final ServletContext application,
-                                              final HttpSession session)
+                                              final PageContext page)
       throws SQLException, IOException {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
-    final int teamNumber = SessionAttributes.getNonNullAttribute(session, "team", Team.class).getTeamNumber();
-    final int runNumber = SessionAttributes.getNonNullAttribute(session, "lRunNumber", Number.class).intValue();
+    final Team team = (Team) page.getAttribute("team");
+    final int teamNumber = team.getTeamNumber();
+    final int runNumber = ((Number) page.getAttribute("lRunNumber")).intValue();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
