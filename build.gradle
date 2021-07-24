@@ -23,7 +23,7 @@ buildscript {
 plugins {
     id "java"
     id "distribution"
-    id "com.dorongold.task-tree" version "1.5"
+    id "com.dorongold.task-tree" version "2.1.0"
     id "org.unbroken-dome.test-sets" version "3.0.1"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
@@ -32,7 +32,7 @@ plugins {
     id "de.aaschmid.cpd" version "3.1"
     id "edu.sc.seis.launch4j" version "2.4.8"
     id "com.gorylenko.gradle-git-properties" version "2.2.4"
-    id "com.github.ben-manes.versions" version "0.33.0" // adds dependencyUpdates task
+    id "com.github.ben-manes.versions" version "0.39.0" // adds dependencyUpdates task
     id "de.undercouch.download" version "4.1.1" // file download
     id "checkstyle"
         
@@ -136,7 +136,7 @@ repositories {
 }
 
 ext {
-    jackson_version = "2.12.1"
+    jackson_version = "2.12.4"
     slf4j_version = "1.7.30"
     tomcat_version = "9.0.39"
     poi_version = "4.1.2"
