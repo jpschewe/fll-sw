@@ -158,14 +158,14 @@ ext {
     // java download urls
     java_download_base = project.buildDir.toPath().resolve("bundled-java")
     
-    java_windows_url = "https://download.java.net/java/GA/jdk12.0.2/e482c34c86bd4bf8b56c0b35558996b9/10/GPL/openjdk-12.0.2_windows-x64_bin.zip"
-    java_windows_checksum = "a30bed3d6d62f6ae1052aaf3c6956aaee8e3deb2f50f155575112f3f29411fba"
+    java_windows_url = "https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_windows-x64_bin.zip"
+    java_windows_checksum = "cf39490fe042dba1b61d6e9a395095279a69e70086c8c8d5466d9926d80976d8"
     
-    java_mac_url = "https://download.java.net/java/GA/jdk12.0.2/e482c34c86bd4bf8b56c0b35558996b9/10/GPL/openjdk-12.0.2_osx-x64_bin.tar.gz"
-    java_mac_checksum = "675a739ab89b28a8db89510f87cb2ec3206ec6662fb4b4996264c16c72cdd2a1"
+    java_mac_url = "https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_osx-x64_bin.tar.gz"
+    java_mac_checksum = "fa07eee08fa0f3de541ee1770de0cdca2ae3876f3bd78c329f27e85c287cd070"
     
-    java_linux_url = "https://download.java.net/java/GA/jdk12.0.2/e482c34c86bd4bf8b56c0b35558996b9/10/GPL/openjdk-12.0.2_linux-x64_bin.tar.gz"
-    java_linux_checksum = "75998a6ebf477467aa5fb68227a67733f0e77e01f737d4dfbc01e617e59106ed"
+    java_linux_url = "https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz"
+    java_linux_checksum = "99be79935354f5c0df1ad293620ea36d13f48ec3ea870c838f20c504c9668b57"
 }
 
 
