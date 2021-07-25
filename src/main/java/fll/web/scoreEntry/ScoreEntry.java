@@ -273,7 +273,7 @@ public final class ScoreEntry {
 
   /**
    * Calls either {@link #generateInitForNewScore(JspWriter, ServletContext)} or
-   * {@link #generateInitForScoreEdit(JspWriter, ServletContext, HttpSession)}
+   * {@link #generateInitForScoreEdit(JspWriter, ServletContext, PageContext)}
    * based on the value of the EditFlag.
    *
    * @param writer where to write HTML
