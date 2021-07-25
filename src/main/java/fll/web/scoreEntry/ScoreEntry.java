@@ -11,26 +11,33 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Team;
+import fll.TournamentTeam;
+import fll.Utilities;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FP;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
+import fll.web.playoff.Playoff;
 import fll.xml.AbstractConditionStatement;
 import fll.xml.AbstractGoal;
 import fll.xml.BasicPolynomial;
@@ -79,32 +86,204 @@ public final class ScoreEntry {
   private ScoreEntry() {
   }
 
+  private static boolean isTabletEntry(final HttpServletRequest request,
+                                       final HttpSession session) {
+    return !StringUtils.isBlank((String) session.getAttribute("scoreEntrySelectedTable"))
+        || !StringUtils.isBlank(request.getParameter("tablet"));
+  }
+
   /**
    * Set variables in the page context.
+   * Checks request for "displayScores" to force display of scores, even
+   * when using a tablet.
    *
+   * @param application for application variables
    * @param request the web request
+   * @param response used to redirect on an error
    * @param pageContext where to store the values
+   * @param session get session variables
+   * @see #isTabletEntry(HttpServletRequest, HttpSession)
    */
-  public static void populateContext(final HttpServletRequest request,
+  public static void populateContext(final ServletContext application,
+                                     final HttpServletRequest request,
+                                     final HttpServletResponse response,
+                                     final HttpSession session,
                                      final PageContext pageContext) {
     pageContext.setAttribute("EditFlag", Boolean.valueOf(request.getParameter("EditFlag")));
+
+    final boolean tabletEntry = isTabletEntry(request, session);
+    final boolean showScores = !tabletEntry
+        || Boolean.parseBoolean(request.getParameter("showScores"));
+    pageContext.setAttribute("showScores", showScores);
+
+    pageContext.setAttribute("practice", Boolean.valueOf(request.getParameter("practice")));
+
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
+
+      // support the unverified runs select box
+      final String lTeamNum = request.getParameter("TeamNumber");
+      if (null == lTeamNum) {
+        SessionAttributes.appendToMessage(session,
+                                          "<p name='error' class='error'>Attempted to load score entry page without providing a team number.</p>");
+        response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
+        return;
+      }
+      final int dashIndex = lTeamNum.indexOf('-');
+      final int teamNumber;
+      final String runNumberStr;
+      if (dashIndex > 0) {
+        // teamNumber - runNumber
+        final String teamStr = lTeamNum.substring(0, dashIndex);
+        teamNumber = Integer.parseInt(teamStr);
+        runNumberStr = lTeamNum.substring(dashIndex
+            + 1);
+      } else {
+        runNumberStr = request.getParameter("RunNumber");
+        teamNumber = Utilities.getIntegerNumberFormat().parse(lTeamNum).intValue();
+      }
+      final int tournament = Queries.getCurrentTournament(connection);
+      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament);
+      final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
+      if (!tournamentTeams.containsKey(Integer.valueOf(teamNumber))) {
+        throw new RuntimeException("Selected team number is not valid: "
+            + teamNumber);
+      }
+      final Team team = tournamentTeams.get(Integer.valueOf(teamNumber));
+      pageContext.setAttribute("team", team);
+
+      // the next run the team will be competing in
+      final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumber());
+
+      final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, tournament);
+
+      // what run number we're going to edit/enter
+      int lRunNumber;
+      if (Boolean.valueOf(request.getParameter("EditFlag"))) {
+        if (null == runNumberStr) {
+          SessionAttributes.appendToMessage(session,
+                                            "<p name='error' class='error'>Please choose a run number when editing scores</p>");
+          response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
+          return;
+        }
+        final int runNumber = Utilities.getIntegerNumberFormat().parse(runNumberStr).intValue();
+        if (runNumber == 0) {
+          lRunNumber = nextRunNumber
+              - 1;
+          if (lRunNumber < 1) {
+            SessionAttributes.appendToMessage(session,
+                                              "<p name='error' class='error'>Selected team has no performance score for this tournament.</p>");
+            response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
+            return;
+          }
+        } else {
+          if (!Queries.performanceScoreExists(connection, tournament, teamNumber, runNumber)) {
+            SessionAttributes.appendToMessage(session, "<p name='error' class='error'>Team has not yet competed in run "
+                + runNumber
+                + ".  Please choose a valid run number.</p>");
+            response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
+            return;
+          }
+          lRunNumber = runNumber;
+        }
+      } else {
+        if (runningHeadToHead
+            && nextRunNumber > numSeedingRounds) {
+          if (null == Playoff.involvedInUnfinishedPlayoff(connection, tournament,
+                                                          Collections.singletonList(teamNumber))) {
+            SessionAttributes.appendToMessage(session, "<p name='error' class='error'>Selected team ("
+                + teamNumber
+                + ") is not involved in an unfinished head to head bracket. Please double check that the head to head brackets were properly initialized"
+                + " If you were intending to double check a score, you probably just forgot to check"
+                + " the box for doing so.</p>");
+            response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
+            return;
+          } else if (!Queries.didTeamReachPlayoffRound(connection, nextRunNumber, teamNumber)) {
+            SessionAttributes.appendToMessage(session,
+                                              "<p name='error' class='error' id='error-not-advanced'>Selected team has not advanced to the next head to head round.</p>");
+            response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
+            return;
+          }
+        }
+        lRunNumber = nextRunNumber;
+      }
+      pageContext.setAttribute("lRunNumber", lRunNumber);
+
+      final String roundText;
+      if (runningHeadToHead
+          && lRunNumber > numSeedingRounds) {
+        final String division = Playoff.getPlayoffDivision(connection, tournament, teamNumber, lRunNumber);
+        final int playoffRun = Playoff.getPlayoffRound(connection, tournament, division, lRunNumber);
+        roundText = "Playoff&nbsp;Round&nbsp;"
+            + playoffRun;
+      } else {
+        roundText = "Run&nbsp;Number&nbsp;"
+            + lRunNumber;
+      }
+      pageContext.setAttribute("roundText", roundText);
+
+      final double minimumAllowedScore = challengeDescription.getPerformance().getMinimumScore();
+      pageContext.setAttribute("minimumAllowedScore", minimumAllowedScore);
+
+      // check if this is the last run a team has completed
+      final int maxRunCompleted = Queries.getMaxRunNumber(connection, teamNumber);
+      pageContext.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == maxRunCompleted));
+
+      // check if the score being edited is a bye
+      pageContext.setAttribute("isBye", Boolean.valueOf(Queries.isBye(connection, tournament, teamNumber, lRunNumber)));
+      pageContext.setAttribute("isNoShow",
+                               Boolean.valueOf(Queries.isNoShow(connection, tournament, teamNumber, lRunNumber)));
+
+      // check if previous run is verified
+      final boolean previousVerified;
+      if (lRunNumber > 1) {
+        previousVerified = Queries.isVerified(connection, tournament, teamNumber, lRunNumber
+            - 1);
+      } else {
+        previousVerified = true;
+      }
+      pageContext.setAttribute("previousVerified", previousVerified);
+
+      if (lRunNumber <= numSeedingRounds) {
+        if (Boolean.valueOf(request.getParameter("EditFlag"))) {
+          pageContext.setAttribute("top_info_color", "yellow");
+        } else {
+          pageContext.setAttribute("top_info_color", "#e0e0e0");
+        }
+      } else {
+        pageContext.setAttribute("top_info_color", "#00ff00");
+      }
+
+      if (Boolean.valueOf(request.getParameter("EditFlag"))) {
+        session.setAttribute("body_background", "yellow");
+      } else {
+        session.setAttribute("body_background", "transparent");
+      }
+
+    } catch (final ParseException pe) {
+      throw new FLLInternalException(pe);
+    } catch (final SQLException e) {
+      throw new FLLInternalException(e);
+    } catch (final IOException e) {
+      throw new FLLInternalException(e);
+    }
   }
 
   /**
    * Calls either {@link #generateInitForNewScore(JspWriter, ServletContext)} or
-   * {@link #generateInitForScoreEdit(JspWriter, ServletContext, HttpSession)}
+   * {@link #generateInitForScoreEdit(JspWriter, ServletContext, PageContext)}
    * based on the value of the EditFlag.
    *
    * @param writer where to write HTML
    * @param application application context
-   * @param session session context
    * @throws IOException if there is an error writing to the output stream
    * @throws SQLException if there is a problem talking to the database
    * @param pageContext used to get the edit flag
    */
   public static void generateInit(final JspWriter writer,
                                   final ServletContext application,
-                                  final HttpSession session,
                                   final PageContext pageContext)
       throws IOException, SQLException {
 
@@ -112,7 +291,7 @@ public final class ScoreEntry {
 
     final boolean editFlag = (Boolean) pageContext.getAttribute("EditFlag");
     if (editFlag) {
-      generateInitForScoreEdit(writer, application, session);
+      generateInitForScoreEdit(writer, application, pageContext);
     } else {
       generateInitForNewScore(writer, application);
     }
@@ -205,16 +384,18 @@ public final class ScoreEntry {
    *
    * @param writer where to write the text
    * @param application application context
+   * @param request used to get information about tablet entry
    * @param pageContext used to get the edit flag state
    * @param session used to determine when running on a tablet
    * @throws IOException if there is an error writing to {@code writer}
    */
   public static void generateIncrementMethods(final Writer writer,
                                               final ServletContext application,
+                                              final HttpServletRequest request,
                                               final HttpSession session,
                                               final PageContext pageContext)
       throws IOException {
-    final @Nullable String scoreEntrySelectedTable = (String) session.getAttribute("scoreEntrySelectedTable");
+    final boolean tabletEntry = isTabletEntry(request, session);
 
     final boolean editFlag = (Boolean) pageContext.getAttribute("EditFlag");
 
@@ -292,7 +473,7 @@ public final class ScoreEntry {
     formatter.format("  Verified = newValue;%n");
 
     if (!editFlag
-        && null == scoreEntrySelectedTable) {
+        && !tabletEntry) {
       formatter.format("  if (newValue == 1) {");
       formatter.format("    $('#verification-warning').show();");
       formatter.format("  } else if (newValue == 0) {");
@@ -529,17 +710,19 @@ public final class ScoreEntry {
    * the score has been double-checked or not.
    * 
    * @param writer where to write the HTML
+   * @param request used to get information about tablet entry
    * @param session used to get information about scoring on a tablet
    * @throws IOException if there is an error writing to {@code writer}
    */
   public static void generateVerificationInput(final JspWriter writer,
+                                               final HttpServletRequest request,
                                                final HttpSession session)
       throws IOException {
-    final @Nullable String scoreEntrySelectedTable = (String) session.getAttribute("scoreEntrySelectedTable");
+    final boolean tabletEntry = isTabletEntry(request, session);
 
     writer.println("<!-- Score Verification -->");
     writer.println("    <tr>");
-    if (null == scoreEntrySelectedTable) {
+    if (!tabletEntry) {
       writer.println("      <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Score entry verified:</font></td>");
     } else {
       writer.println("<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Team Agrees with the score entry:</font></td>");
@@ -810,17 +993,18 @@ public final class ScoreEntry {
    * 
    * @param writer where to write the HTML
    * @param application used to get the challenge description
-   * @param session used to get information about the current score entry
+   * @param page used to get page variables
    * @throws SQLException on a database error
    * @throws IOException if there is a problem writing to {@code writer}
    */
   public static void generateInitForScoreEdit(final JspWriter writer,
                                               final ServletContext application,
-                                              final HttpSession session)
+                                              final PageContext page)
       throws SQLException, IOException {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
-    final int teamNumber = SessionAttributes.getNonNullAttribute(session, "team", Team.class).getTeamNumber();
-    final int runNumber = SessionAttributes.getNonNullAttribute(session, "lRunNumber", Number.class).intValue();
+    final Team team = (Team) page.getAttribute("team");
+    final int teamNumber = team.getTeamNumber();
+    final int runNumber = ((Number) page.getAttribute("lRunNumber")).intValue();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
