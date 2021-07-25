@@ -4,14 +4,19 @@
 <fll-sw:required-roles roles="ADMIN" allowSetup="false" />
 
 <%
-    fll.web.playoff.BracketParameters.populateContext(application, session, pageContext);
+fll.web.playoff.BracketParameters.populateContext(application, session, pageContext);
 %>
 
 <html>
 <head>
 <title>Bracket Parameters</title>
 
-<script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
+<script type='text/javascript'
+    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/style/fll-sw.css'/>" />
+</head>
 
 <script type='text/javascript'>
   function sanityCheck() {
@@ -62,8 +67,10 @@
         <c:if test="${not empty tableInfo}">
             <p>
                 Choose which table pairs will be used for this playoff
-                bracket. <i>If running parallel head to head runs
-                    you should only select 1 table pair for each bracket</i>.
+                bracket.
+                <i>If running parallel head to head runs you should
+                    only select 1 table pair for each bracket</i>
+                .
             </p>
 
 

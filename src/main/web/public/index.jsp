@@ -48,6 +48,10 @@ fll.web.PublicIndex.populateContext(application, pageContext);
         href='<c:url value="/report/finalist/FinalistTeams.jsp"/>'>
         Finalist Teams (State only)</a>
 
+    <a class="wide"
+        href="<c:url value='/scoreEntry/scoreEntry.jsp?tablet=true&practice=true&showScores=true'/>">Practice
+        score entry</a>
+
     <a class="wide" href='<c:url value="/credits/credits.jsp"/>'>Credits</a>
 
 </body>

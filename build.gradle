@@ -130,11 +130,6 @@ integrationTest {
     ]    
 }
 
-repositories {
-    //mavenLocal()
-    jcenter()
-}
-
 ext {
     jackson_version = "2.12.4"
     slf4j_version = "1.7.32"
@@ -375,7 +370,7 @@ tasks.register("run", JavaExec) {
     
     classpath = sourceSets.main.runtimeClasspath
         
-    main = project.mainClassName
+    mainClass = project.mainClassName
     
     jvmArgs = [
         // Add the JAVA 9 specific start-up parameters required by Tomcat
@@ -435,7 +430,7 @@ tasks.register("jspToJava", JavaExec) {
     }
 
     classpath = configurations.jspc + sourceSets.main.runtimeClasspath
-    main = "org.apache.jasper.JspC"
+    mainClass = "org.apache.jasper.JspC"
     jvmArgs = ["-Dlog4j2.configurationFile=$buildDir/log4j.jspc.properties"] //, "-Dlog4j.debug"] 
 
     args "-webapp", jspSrc,
@@ -460,7 +455,7 @@ tasks.register("jspToClasses", JavaCompile) {
     description = "Test compile JSP files"
 
     source(jspJavaSrc)
-    destinationDir(jspJavaClasses)
+    destinationDirectory = jspJavaClasses
 
     classpath = configurations.jspc + sourceSets.main.runtimeClasspath
     
@@ -531,7 +526,7 @@ tasks.register("createDatabaseDiagram", JavaExec) {
     
     classpath = sourceSets.main.runtimeClasspath
     
-    main = "fll.db.GenerateDatabaseDiagram"
+    mainClass = "fll.db.GenerateDatabaseDiagram"
     args (new File(project.documentation_build_dir, "database-diagram").absolutePath)
 }
 distributionDependencies.dependsOn(createDatabaseDiagram)
@@ -856,6 +851,6 @@ jacocoTestReport {
     executionData tasks.withType(Test)
 
     reports {
-        xml.enabled true
+        xml.required=true
     }
 }

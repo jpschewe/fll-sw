@@ -1,3 +1,4 @@
+* #953 - Add version of score entry form for practice rounds
 * #951 - Allow users to be carried over through a database initialization
 * #954 - Increase the font size on the login page
 * #928 - modify layout of links on index pages to be more friendly

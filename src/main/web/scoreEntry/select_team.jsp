@@ -167,6 +167,11 @@ Entering scores for all tables. Teams are sorted in schedule order.
         table that scores are being entered for.
     </div>
 
+    <div>
+        <a class="wide"
+            href="<c:url value='/scoreEntry/scoreEntry.jsp?tablet=true&practice=true&showScores=false'/>">Practice
+            round score entry</a>
+    </div>
 
 
     <table id='container'>
@@ -188,7 +193,7 @@ Entering scores for all tables. Teams are sorted in schedule order.
 
         <tr>
             <td>
-                <form action="GatherScoreEntryData" method="POST"
+                <form action="scoreEntry.jsp" method="POST"
                     name="selectTeam">
                     <table>
                         <!-- left table -->
@@ -281,7 +286,7 @@ Entering scores for all tables. Teams are sorted in schedule order.
 
                 <td valign='top'>
                     <!-- right table -->
-                    <form action="GatherScoreEntryData" method="POST"
+                    <form action="scoreEntry.jsp" method="POST"
                         name="verify">
                         <input type="hidden" name='EditFlag'
                             value="true" />
