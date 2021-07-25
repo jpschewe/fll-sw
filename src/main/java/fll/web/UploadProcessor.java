@@ -33,7 +33,7 @@ public final class UploadProcessor {
    *
    * @param request the web request
    * @throws FileUploadException see
-   *           {@link ServletFileUpload#parseRequest(HttpServletRequest)}
+   *           {@link ServletFileUpload#parseRequest(org.apache.tomcat.util.http.fileupload.RequestContext)}
    */
   public static void processUpload(final HttpServletRequest request) throws FileUploadException {
     // Parse the request
