@@ -23,21 +23,21 @@ buildscript {
 plugins {
     id "java"
     id "distribution"
-    id "com.dorongold.task-tree" version "1.5"
-    id "org.unbroken-dome.test-sets" version "3.0.1"
+    id "com.dorongold.task-tree" version "2.1.0"
+    id "org.unbroken-dome.test-sets" version "4.0.0"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
-    id "com.github.spotbugs" version "4.7.1"
+    id "com.github.spotbugs" version "4.7.2"
     id "org.myire.munge" version "1.0" // transformer for spotbugs XML
-    id "de.aaschmid.cpd" version "3.1"
-    id "edu.sc.seis.launch4j" version "2.4.8"
-    id "com.gorylenko.gradle-git-properties" version "2.2.4"
-    id "com.github.ben-manes.versions" version "0.33.0" // adds dependencyUpdates task
-    id "de.undercouch.download" version "4.1.1" // file download
+    id "de.aaschmid.cpd" version "3.2"
+    id "edu.sc.seis.launch4j" version "2.5.0"
+    id "com.gorylenko.gradle-git-properties" version "2.3.1"
+    id "com.github.ben-manes.versions" version "0.39.0" // adds dependencyUpdates task
+    id "de.undercouch.download" version "4.1.2" // file download
     id "checkstyle"
         
     // Checker Framework pluggable type-checking
-    id "org.checkerframework" version "0.5.20"
+    id "org.checkerframework" version "0.5.23"
     
     // code coverage
     id "jacoco"
@@ -81,7 +81,7 @@ eclipse {
 }
 
 dependencies {
-  jspc("org.apache.ant:ant:1.10.9")
+  jspc("org.apache.ant:ant:1.10.11")
 }
 
 testSets {
@@ -136,14 +136,14 @@ repositories {
 }
 
 ext {
-    jackson_version = "2.12.1"
-    slf4j_version = "1.7.30"
+    jackson_version = "2.12.4"
+    slf4j_version = "1.7.32"
     tomcat_version = "9.0.39"
-    poi_version = "4.1.2"
-    junit_version = "5.7.0"
-    log4j_version = "2.13.3"
-    spotbugs_version = "4.2.3"
-    checker_framework_version = "3.14.0"
+    poi_version = "5.0.0"
+    junit_version = "5.7.2"
+    log4j_version = "2.14.1"
+    spotbugs_version = "4.3.0"
+    checker_framework_version = "3.16.0"
 
     web_build_dir = new File(project.buildDir, "web")
     documentation_build_dir = new File(project.buildDir, "gen-documentation")    
@@ -187,9 +187,9 @@ dependencies {
   implementation(group: "javax.servlet", name: "javax.servlet-api", version: "4.0.1")
   runtimeOnly(group: "javax.servlet", name: "jstl", version: "1.2")
 
-  implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.11")
+  implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.12.0")
   implementation(group: "commons-cli", name: "commons-cli", version: "1.4")
-  implementation(group: "org.hsqldb", name: "hsqldb", version: "2.5.1")
+  implementation(group: "org.hsqldb", name: "hsqldb", version: "2.6.0")
     
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-slf4j-impl", version: project.log4j_version)
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-jcl", version: project.log4j_version)
@@ -212,11 +212,11 @@ dependencies {
 
   implementation(group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0")
             
-  implementation(group: "dnsjava", name: "dnsjava", version: "3.3.1")
+  implementation(group: "dnsjava", name: "dnsjava", version: "3.4.0")
     
   implementation(group: "commons-fileupload", name: "commons-fileupload", version: "1.4")
     
-  implementation(group: "org.apache.tika", name: "tika-core", version: "1.24.1")
+  implementation(group: "org.apache.tika", name: "tika-core", version: "2.0.0")
     
   implementation(group: "com.diffplug.durian", name: "durian-core", version: "1.2.0")
         
@@ -226,13 +226,13 @@ dependencies {
     
   implementation(group: "net.java.linoleum", name: "jlfgr", version: "1_0")
         
-  implementation(group: "com.opencsv", name: "opencsv", version: "5.3")
+  implementation(group: "com.opencsv", name: "opencsv", version: "5.5.1")
     
   implementation(group: "net.mtu.eggplant", name: "JonsInfra", version: "3.2.0"   )
     
-  implementation(group: "com.google.guava", name: "guava", version: "30.0-jre")
+  implementation(group: "com.google.guava", name: "guava", version: "30.1.1-jre")
     
-  implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.5") {
+  implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.6") {
     // only needed for BMP and TIFF formats
     exclude(group: "com.sun.media", module: "jai-codec")
     
@@ -247,7 +247,7 @@ dependencies {
   implementation(group: "org.checkerframework", name: "checker-util", version: project.checker_framework_version)
   checkerFramework(group: "org.checkerframework", name: "checker", version: project.checker_framework_version)
     
-  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.21")
+  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.24")
   
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-api", version: project.junit_version)
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-params", version: project.junit_version)
@@ -259,13 +259,13 @@ dependencies {
   integrationTestImplementation(sourceSets.test.output)
         
   integrationTestImplementation(group: "org.easytesting", name: "fest-swing", version: "1.2.1")
-  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.44.0") {
+  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.51.0") {
       
     // xml APIs are part of the JDK
     exclude(group: "xml-apis", module: "xml-apis")
   }
   integrationTestImplementation(group: "org.seleniumhq.selenium", name: "selenium-server", version: "3.141.59")
-  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "4.2.2")
+  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "4.4.3")
   
   // make selenium log to log4j
   integrationTestImplementation(group: "org.apache.logging.log4j", name: "log4j-jul", version: project.log4j_version)
@@ -604,7 +604,7 @@ tasks.withType(SpotBugsTask) {
 }
 
 gitProperties {
-    gitPropertiesDir = "${buildDir}/resources/main/fll/resources"
+    gitPropertiesResourceDir = file("${buildDir}/resources/main/fll/resources")
 }
 
 tasks.register("writeLaunchJar", Jar) {

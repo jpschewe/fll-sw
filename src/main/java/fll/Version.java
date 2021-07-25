@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Get version information about the FLL software.
  *
@@ -92,6 +94,7 @@ public final class Version {
    * @return all version information stored in version.properties, unmodifiable
    *         map
    */
+  @SuppressFBWarnings(value = "MS_EXPOSE_REP", justification = "Returned value is an unmodifiable map")
   public static Map<String, String> getAllVersionInformation() {
     return VERSION_INFORMATION;
   }
