@@ -154,18 +154,16 @@ OPTION {
     <%-- clear out the message, so that we don't see it again --%>
     <c:remove var="message" />
 
-    <div>
-        <c:choose>
+    <a class="wide" href="choose-table.jsp"> <c:choose>
             <c:when test="${not empty scoreEntrySelectedTable}">
 Entering scores for table ${scoreEntrySelectedTable}. Teams are sorted in schedule order with this table first.
 </c:when>
             <c:otherwise>
 Entering scores for all tables. Teams are sorted in schedule order.
 </c:otherwise>
-        </c:choose>
-        Visit <a href="choose-table.jsp">this page</a> to change the
-        table that scores are being entered for.
-    </div>
+        </c:choose> Click here to change the table that scores are being entered
+        for.
+    </a>
 
     <div>
         <a class="wide"
