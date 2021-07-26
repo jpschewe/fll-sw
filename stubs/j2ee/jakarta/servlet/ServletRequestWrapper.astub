@@ -1,4 +1,4 @@
-package javax.servlet;
+package jakarta.servlet;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;

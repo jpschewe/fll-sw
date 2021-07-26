@@ -10,8 +10,8 @@ import java.io.File;
 import java.util.Formatter;
 import java.util.List;
 
-import javax.servlet.ServletContext;
-import javax.servlet.jsp.JspWriter;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.jsp.JspWriter;
 
 import fll.Utilities;
 

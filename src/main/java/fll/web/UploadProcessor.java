@@ -7,13 +7,14 @@ package fll.web;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
+import org.apache.tomcat.util.http.fileupload.FileItem;
+import org.apache.tomcat.util.http.fileupload.FileItemFactory;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletRequestContext;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Process uploads from JSP pages.
@@ -32,11 +33,11 @@ public final class UploadProcessor {
    *
    * @param request the web request
    * @throws FileUploadException see
-   *           {@link ServletFileUpload#parseRequest(HttpServletRequest)}
+   *           {@link ServletFileUpload#parseRequest(org.apache.tomcat.util.http.fileupload.RequestContext)}
    */
   public static void processUpload(final HttpServletRequest request) throws FileUploadException {
     // Parse the request
-    final List<FileItem> items = UPLOAD.parseRequest(request);
+    final List<FileItem> items = UPLOAD.parseRequest(new ServletRequestContext(request));
     for (final FileItem item : items) {
       if (item.isFormField()) {
         request.setAttribute(item.getFieldName(), item.getString());

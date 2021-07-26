@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<web-app metadata-complete="false" version="3.0">
+<web-app metadata-complete="false" version="5.0">
 
     <session-config>
         <!-- this controls how long a login can live without a page being loaded -->

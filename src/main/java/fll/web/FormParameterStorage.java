@@ -10,9 +10,9 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -70,11 +70,11 @@ public final class FormParameterStorage implements Serializable {
     }
 
     LOGGER.debug("Request is for {}", request.getRequestURI());
-    LOGGER.debug("forward.request_uri: {}", request.getAttribute("javax.servlet.forward.request_uri"));
-    LOGGER.debug("forward.context_path: {}", request.getAttribute("javax.servlet.forward.context_path"));
-    LOGGER.debug("forward.servlet_path: {}", request.getAttribute("javax.servlet.forward.servlet_path"));
-    LOGGER.debug("forward.path_info: {}", request.getAttribute("javax.servlet.forward.path_info"));
-    LOGGER.debug("forward.query_string: {}", request.getAttribute("javax.servlet.forward.query_string"));
+    LOGGER.debug("forward.request_uri: {}", request.getAttribute("jakarta.servlet.forward.request_uri"));
+    LOGGER.debug("forward.context_path: {}", request.getAttribute("jakarta.servlet.forward.context_path"));
+    LOGGER.debug("forward.servlet_path: {}", request.getAttribute("jakarta.servlet.forward.servlet_path"));
+    LOGGER.debug("forward.path_info: {}", request.getAttribute("jakarta.servlet.forward.path_info"));
+    LOGGER.debug("forward.query_string: {}", request.getAttribute("jakarta.servlet.forward.query_string"));
   }
 
   /**

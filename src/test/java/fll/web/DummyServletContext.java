@@ -14,17 +14,17 @@ import java.util.EventListener;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterRegistration;
-import javax.servlet.FilterRegistration.Dynamic;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.SessionTrackingMode;
-import javax.servlet.descriptor.JspConfigDescriptor;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.FilterRegistration.Dynamic;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRegistration;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.SessionTrackingMode;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
 
 /**
  * Dummy ServletContext for testing that does nothing. Subclasses override the
@@ -33,7 +33,7 @@ import javax.servlet.descriptor.JspConfigDescriptor;
 public class DummyServletContext implements ServletContext {
 
   /**
-   * @see javax.servlet.ServletContext#addFilter(java.lang.String,
+   * @see jakarta.servlet.ServletContext#addFilter(java.lang.String,
    *      java.lang.String)
    */
   @Override
@@ -43,8 +43,8 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#addFilter(java.lang.String,
-   *      javax.servlet.Filter)
+   * @see jakarta.servlet.ServletContext#addFilter(java.lang.String,
+   *      jakarta.servlet.Filter)
    */
   @Override
   public Dynamic addFilter(final String arg0,
@@ -53,7 +53,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#addFilter(java.lang.String,
+   * @see jakarta.servlet.ServletContext#addFilter(java.lang.String,
    *      java.lang.Class)
    */
   @Override
@@ -63,58 +63,58 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#addListener(java.lang.Class)
+   * @see jakarta.servlet.ServletContext#addListener(java.lang.Class)
    */
   @Override
   public void addListener(final Class<? extends EventListener> arg0) {
   }
 
   /**
-   * @see javax.servlet.ServletContext#addListener(java.lang.String)
+   * @see jakarta.servlet.ServletContext#addListener(java.lang.String)
    */
   @Override
   public void addListener(final String arg0) {
   }
 
   /**
-   * @see javax.servlet.ServletContext#addListener(java.util.EventListener)
+   * @see jakarta.servlet.ServletContext#addListener(java.util.EventListener)
    */
   @Override
   public <T extends EventListener> void addListener(final T arg0) {
   }
 
   /**
-   * @see javax.servlet.ServletContext#addServlet(java.lang.String,
+   * @see jakarta.servlet.ServletContext#addServlet(java.lang.String,
    *      java.lang.String)
    */
   @Override
-  public javax.servlet.ServletRegistration.Dynamic addServlet(final String arg0,
+  public jakarta.servlet.ServletRegistration.Dynamic addServlet(final String arg0,
                                                               final String arg1) {
     return null;
   }
 
   /**
-   * @see javax.servlet.ServletContext#addServlet(java.lang.String,
-   *      javax.servlet.Servlet)
+   * @see jakarta.servlet.ServletContext#addServlet(java.lang.String,
+   *      jakarta.servlet.Servlet)
    */
   @Override
-  public javax.servlet.ServletRegistration.Dynamic addServlet(final String arg0,
+  public jakarta.servlet.ServletRegistration.Dynamic addServlet(final String arg0,
                                                               final Servlet arg1) {
     return null;
   }
 
   /**
-   * @see javax.servlet.ServletContext#addServlet(java.lang.String,
+   * @see jakarta.servlet.ServletContext#addServlet(java.lang.String,
    *      java.lang.Class)
    */
   @Override
-  public javax.servlet.ServletRegistration.Dynamic addServlet(final String arg0,
+  public jakarta.servlet.ServletRegistration.Dynamic addServlet(final String arg0,
                                                               final Class<? extends Servlet> arg1) {
     return null;
   }
 
   /**
-   * @see javax.servlet.ServletContext#createFilter(java.lang.Class)
+   * @see jakarta.servlet.ServletContext#createFilter(java.lang.Class)
    */
   @Override
   public <T extends Filter> T createFilter(final Class<T> arg0) throws ServletException {
@@ -122,7 +122,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#createListener(java.lang.Class)
+   * @see jakarta.servlet.ServletContext#createListener(java.lang.Class)
    */
   @Override
   public <T extends EventListener> T createListener(final Class<T> arg0) throws ServletException {
@@ -130,7 +130,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#createServlet(java.lang.Class)
+   * @see jakarta.servlet.ServletContext#createServlet(java.lang.Class)
    */
   @Override
   public <T extends Servlet> T createServlet(final Class<T> arg0) throws ServletException {
@@ -138,14 +138,14 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#declareRoles(java.lang.String[])
+   * @see jakarta.servlet.ServletContext#declareRoles(java.lang.String[])
    */
   @Override
   public void declareRoles(final String... arg0) {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getAttribute(java.lang.String)
+   * @see jakarta.servlet.ServletContext#getAttribute(java.lang.String)
    */
   @Override
   public Object getAttribute(final String arg0) {
@@ -153,7 +153,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getAttributeNames()
+   * @see jakarta.servlet.ServletContext#getAttributeNames()
    */
   @Override
   public Enumeration<String> getAttributeNames() {
@@ -161,7 +161,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getClassLoader()
+   * @see jakarta.servlet.ServletContext#getClassLoader()
    */
   @Override
   public ClassLoader getClassLoader() {
@@ -169,7 +169,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getContext(java.lang.String)
+   * @see jakarta.servlet.ServletContext#getContext(java.lang.String)
    */
   @Override
   public ServletContext getContext(final String arg0) {
@@ -177,7 +177,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getContextPath()
+   * @see jakarta.servlet.ServletContext#getContextPath()
    */
   @Override
   public String getContextPath() {
@@ -185,7 +185,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getDefaultSessionTrackingModes()
+   * @see jakarta.servlet.ServletContext#getDefaultSessionTrackingModes()
    */
   @Override
   public Set<SessionTrackingMode> getDefaultSessionTrackingModes() {
@@ -193,7 +193,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getEffectiveMajorVersion()
+   * @see jakarta.servlet.ServletContext#getEffectiveMajorVersion()
    */
   @Override
   public int getEffectiveMajorVersion() {
@@ -201,7 +201,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getEffectiveMinorVersion()
+   * @see jakarta.servlet.ServletContext#getEffectiveMinorVersion()
    */
   @Override
   public int getEffectiveMinorVersion() {
@@ -209,7 +209,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getEffectiveSessionTrackingModes()
+   * @see jakarta.servlet.ServletContext#getEffectiveSessionTrackingModes()
    */
   @Override
   public Set<SessionTrackingMode> getEffectiveSessionTrackingModes() {
@@ -217,7 +217,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getFilterRegistration(java.lang.String)
+   * @see jakarta.servlet.ServletContext#getFilterRegistration(java.lang.String)
    */
   @Override
   public FilterRegistration getFilterRegistration(final String arg0) {
@@ -225,7 +225,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getFilterRegistrations()
+   * @see jakarta.servlet.ServletContext#getFilterRegistrations()
    */
   @Override
   public Map<String, ? extends FilterRegistration> getFilterRegistrations() {
@@ -233,7 +233,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getInitParameter(java.lang.String)
+   * @see jakarta.servlet.ServletContext#getInitParameter(java.lang.String)
    */
   @Override
   public String getInitParameter(final String arg0) {
@@ -241,7 +241,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getInitParameterNames()
+   * @see jakarta.servlet.ServletContext#getInitParameterNames()
    */
   @Override
   public Enumeration<String> getInitParameterNames() {
@@ -249,7 +249,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getJspConfigDescriptor()
+   * @see jakarta.servlet.ServletContext#getJspConfigDescriptor()
    */
   @Override
   public JspConfigDescriptor getJspConfigDescriptor() {
@@ -257,7 +257,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getMajorVersion()
+   * @see jakarta.servlet.ServletContext#getMajorVersion()
    */
   @Override
   public int getMajorVersion() {
@@ -265,7 +265,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getMimeType(java.lang.String)
+   * @see jakarta.servlet.ServletContext#getMimeType(java.lang.String)
    */
   @Override
   public String getMimeType(final String arg0) {
@@ -273,7 +273,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getMinorVersion()
+   * @see jakarta.servlet.ServletContext#getMinorVersion()
    */
   @Override
   public int getMinorVersion() {
@@ -281,7 +281,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getNamedDispatcher(java.lang.String)
+   * @see jakarta.servlet.ServletContext#getNamedDispatcher(java.lang.String)
    */
   @Override
   public RequestDispatcher getNamedDispatcher(final String arg0) {
@@ -289,7 +289,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getRealPath(java.lang.String)
+   * @see jakarta.servlet.ServletContext#getRealPath(java.lang.String)
    */
   @Override
   public String getRealPath(final String arg0) {
@@ -297,7 +297,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getRequestDispatcher(java.lang.String)
+   * @see jakarta.servlet.ServletContext#getRequestDispatcher(java.lang.String)
    */
   @Override
   public RequestDispatcher getRequestDispatcher(final String arg0) {
@@ -305,7 +305,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getResource(java.lang.String)
+   * @see jakarta.servlet.ServletContext#getResource(java.lang.String)
    */
   @Override
   public URL getResource(final String arg0) throws MalformedURLException {
@@ -313,7 +313,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getResourceAsStream(java.lang.String)
+   * @see jakarta.servlet.ServletContext#getResourceAsStream(java.lang.String)
    */
   @Override
   public InputStream getResourceAsStream(final String arg0) {
@@ -321,7 +321,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getResourcePaths(java.lang.String)
+   * @see jakarta.servlet.ServletContext#getResourcePaths(java.lang.String)
    */
   @Override
   public Set<String> getResourcePaths(final String arg0) {
@@ -329,7 +329,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getServerInfo()
+   * @see jakarta.servlet.ServletContext#getServerInfo()
    */
   @Override
   public String getServerInfo() {
@@ -344,7 +344,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getServletContextName()
+   * @see jakarta.servlet.ServletContext#getServletContextName()
    */
   @Override
   public String getServletContextName() {
@@ -352,7 +352,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getServletNames()
+   * @see jakarta.servlet.ServletContext#getServletNames()
    */
   @Override
   @Deprecated
@@ -362,7 +362,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getServletRegistration(java.lang.String)
+   * @see jakarta.servlet.ServletContext#getServletRegistration(java.lang.String)
    */
   @Override
   public ServletRegistration getServletRegistration(final String arg0) {
@@ -370,7 +370,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getServletRegistrations()
+   * @see jakarta.servlet.ServletContext#getServletRegistrations()
    */
   @Override
   public Map<String, ? extends ServletRegistration> getServletRegistrations() {
@@ -378,7 +378,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getServlets()
+   * @see jakarta.servlet.ServletContext#getServlets()
    */
   @Override
   @Deprecated
@@ -388,7 +388,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getSessionCookieConfig()
+   * @see jakarta.servlet.ServletContext#getSessionCookieConfig()
    */
   @Override
   public SessionCookieConfig getSessionCookieConfig() {
@@ -396,14 +396,14 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#log(java.lang.String)
+   * @see jakarta.servlet.ServletContext#log(java.lang.String)
    */
   @Override
   public void log(final String arg0) {
   }
 
   /**
-   * @see javax.servlet.ServletContext#log(java.lang.Exception,
+   * @see jakarta.servlet.ServletContext#log(java.lang.Exception,
    *      java.lang.String)
    */
   @Override
@@ -414,7 +414,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#log(java.lang.String,
+   * @see jakarta.servlet.ServletContext#log(java.lang.String,
    *      java.lang.Throwable)
    */
   @Override
@@ -423,14 +423,14 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#removeAttribute(java.lang.String)
+   * @see jakarta.servlet.ServletContext#removeAttribute(java.lang.String)
    */
   @Override
   public void removeAttribute(final String arg0) {
   }
 
   /**
-   * @see javax.servlet.ServletContext#setAttribute(java.lang.String,
+   * @see jakarta.servlet.ServletContext#setAttribute(java.lang.String,
    *      java.lang.Object)
    */
   @Override
@@ -439,7 +439,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#setInitParameter(java.lang.String,
+   * @see jakarta.servlet.ServletContext#setInitParameter(java.lang.String,
    *      java.lang.String)
    */
   @Override
@@ -449,7 +449,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#setSessionTrackingModes(java.util.Set)
+   * @see jakarta.servlet.ServletContext#setSessionTrackingModes(java.util.Set)
    */
   @Override
   public void setSessionTrackingModes(final Set<SessionTrackingMode> arg0)
@@ -457,7 +457,7 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see javax.servlet.ServletContext#getVirtualServerName()
+   * @see jakarta.servlet.ServletContext#getVirtualServerName()
    */
   @Override
   public String getVirtualServerName() {

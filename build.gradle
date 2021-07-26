@@ -133,7 +133,7 @@ integrationTest {
 ext {
     jackson_version = "2.12.4"
     slf4j_version = "1.7.32"
-    tomcat_version = "9.0.39"
+    tomcat_version = "10.0.8"
     poi_version = "5.0.0"
     junit_version = "5.7.2"
     log4j_version = "2.14.1"
@@ -153,14 +153,14 @@ ext {
     // java download urls
     java_download_base = project.buildDir.toPath().resolve("bundled-java")
     
-    java_windows_url = "https://download.java.net/java/GA/jdk12.0.2/e482c34c86bd4bf8b56c0b35558996b9/10/GPL/openjdk-12.0.2_windows-x64_bin.zip"
-    java_windows_checksum = "a30bed3d6d62f6ae1052aaf3c6956aaee8e3deb2f50f155575112f3f29411fba"
+    java_windows_url = "https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_windows-x64_bin.zip"
+    java_windows_checksum = "cf39490fe042dba1b61d6e9a395095279a69e70086c8c8d5466d9926d80976d8"
     
-    java_mac_url = "https://download.java.net/java/GA/jdk12.0.2/e482c34c86bd4bf8b56c0b35558996b9/10/GPL/openjdk-12.0.2_osx-x64_bin.tar.gz"
-    java_mac_checksum = "675a739ab89b28a8db89510f87cb2ec3206ec6662fb4b4996264c16c72cdd2a1"
+    java_mac_url = "https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_osx-x64_bin.tar.gz"
+    java_mac_checksum = "f365750d4be6111be8a62feda24e265d97536712bc51783162982b8ad96a70ee"
     
-    java_linux_url = "https://download.java.net/java/GA/jdk12.0.2/e482c34c86bd4bf8b56c0b35558996b9/10/GPL/openjdk-12.0.2_linux-x64_bin.tar.gz"
-    java_linux_checksum = "75998a6ebf477467aa5fb68227a67733f0e77e01f737d4dfbc01e617e59106ed"
+    java_linux_url = "https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz"
+    java_linux_checksum = "99be79935354f5c0df1ad293620ea36d13f48ec3ea870c838f20c504c9668b57"
 }
 
 
@@ -172,6 +172,11 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
+configurations {
+    all*.exclude(group: "xml-apis", module: "xmlParserAPIs")
+    all*.exclude(group: "xml-apis", module: "xml-apis")
+}
+
 dependencies {
   implementation(group: "org.apache.tomcat.embed", name: "tomcat-embed-core", version: project.tomcat_version)
   implementation(group: "org.apache.tomcat.embed", name: "tomcat-embed-jasper", version: project.tomcat_version)
@@ -180,7 +185,9 @@ dependencies {
   implementation(group: "org.apache.tomcat", name: "tomcat-jasper-el", version: project.tomcat_version)
   implementation(group: "org.apache.tomcat", name: "tomcat-jsp-api", version: project.tomcat_version)
   implementation(group: "javax.servlet", name: "javax.servlet-api", version: "4.0.1")
-  runtimeOnly(group: "javax.servlet", name: "jstl", version: "1.2")
+  
+  //missing TLD files implementation(group: "jakarta.servlet.jsp.jstl", name: "jakarta.servlet.jsp.jstl-api", version: "2.0.0")
+  implementation(group: "org.glassfish.web", name: "jakarta.servlet.jsp.jstl", version: "2.0.0")
 
   implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.12.0")
   implementation(group: "commons-cli", name: "commons-cli", version: "1.4")
@@ -194,7 +201,11 @@ dependencies {
     
   implementation(group: "org.slf4j", name: "slf4j-api", version: project.slf4j_version)
     
-  implementation(group: "org.apache.poi", name: "poi-ooxml", version: project.poi_version)
+  implementation(group: "org.apache.poi", name: "poi-ooxml", version: project.poi_version) {
+    // xml APIs are part of the JDK
+    exclude(group: "xml-apis", module: "xml-apis")
+    exclude(group: "xml-apis", module: "xml-apis-ext")
+  }
     
   implementation(group: "com.github.spotbugs", name: "spotbugs-annotations", version: project.spotbugs_version)
   compileOnly(group: "net.jcip", name: "jcip-annotations", version: "1.0")
@@ -208,9 +219,7 @@ dependencies {
   implementation(group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0")
             
   implementation(group: "dnsjava", name: "dnsjava", version: "3.4.0")
-    
-  implementation(group: "commons-fileupload", name: "commons-fileupload", version: "1.4")
-    
+       
   implementation(group: "org.apache.tika", name: "tika-core", version: "2.0.0")
     
   implementation(group: "com.diffplug.durian", name: "durian-core", version: "1.2.0")

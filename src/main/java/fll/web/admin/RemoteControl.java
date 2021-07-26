@@ -11,8 +11,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
-import javax.servlet.ServletContext;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import fll.Tournament;

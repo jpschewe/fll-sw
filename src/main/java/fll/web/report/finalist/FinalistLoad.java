@@ -15,7 +15,7 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
