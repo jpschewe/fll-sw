@@ -125,6 +125,12 @@ fll.web.MainIndex.populateContext(request, application, pageContext);
         <a class="wide" href="developer/index.jsp">Developer page</a>
     </c:if>
 
+    <c:if test="${authentication.ref}">
+        <a class="wide"
+            href="<c:url value='/scoreEntry/scoreEntry.jsp?tablet=true&practice=true&showScores=true'/>">Practice
+            score entry to publish</a>
+    </c:if>
+
     <a class="wide" href="credits/credits.jsp">Credits</a>
 
 </body>
