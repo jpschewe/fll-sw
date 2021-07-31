@@ -11,7 +11,6 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -537,52 +536,30 @@ public final class GenerateDB {
     }
   }
 
-  private static void renameTournament(final Connection connection,
-                                       final int tournament,
-                                       final String newName)
-      throws SQLException {
-    try (
-        PreparedStatement prep = connection.prepareStatement("UPDATE Tournaments SET Name = ? WHERE tournament_id = ?")) {
-      prep.setString(1, newName);
-      prep.setInt(2, tournament);
-      prep.executeUpdate();
-    }
-  }
-
   /**
    * Create the "internal" tournament used for default parameters, if needed.
    */
   /* package */static void createInternalTournament(final Connection connection) throws SQLException {
     // make sure another tournament with the internal name doesn't exist
-    try (PreparedStatement prep = connection.prepareStatement("SELECT tournament_id FROM Tournaments WHERE Name = ?")) {
-      prep.setString(1, INTERNAL_TOURNAMENT_NAME);
-      try (ResultSet rs = prep.executeQuery()) {
-        if (rs.next()) {
-          final int importedInternal = rs.getInt(1);
-          if (importedInternal != INTERNAL_TOURNAMENT_ID) {
-            renameTournament(connection, importedInternal, "Imported-"
-                + INTERNAL_TOURNAMENT_NAME);
-          }
-        }
-      }
+    if (Tournament.doesTournamentExist(connection, INTERNAL_TOURNAMENT_NAME)) {
+      final Tournament importedInternal = Tournament.findTournamentByName(connection, INTERNAL_TOURNAMENT_NAME);
+      Tournament.deleteTournament(connection, importedInternal.getTournamentID());
+      Tournament.createTournament(connection, "Imported-"
+          + importedInternal.getName(), importedInternal.getDescription(), importedInternal.getDate(),
+                                  importedInternal.getLevel(), importedInternal.getNextLevel());
     }
 
     // check if a tournament exists with the internal id
-    try (PreparedStatement prep = connection.prepareStatement("SELECT Name FROM Tournaments WHERE tournament_id = ?")) {
-      prep.setInt(1, INTERNAL_TOURNAMENT_ID);
-      try (ResultSet rs = prep.executeQuery()) {
-        if (!rs.next()) {
-
-          // need to create
-          try (
-              PreparedStatement prepInsert = connection.prepareStatement("INSERT INTO Tournaments (tournament_id, Name) VALUES(?, ?)")) {
-            prepInsert.setInt(1, INTERNAL_TOURNAMENT_ID);
-            prepInsert.setString(2, INTERNAL_TOURNAMENT_NAME);
-            prepInsert.executeUpdate();
-          } // allocate insert
-        } // if tournament does not exist
-      } // allocate result set
-    } // allocate check
+    if (!Tournament.doesTournamentExist(connection, INTERNAL_TOURNAMENT_ID)) {
+      // need to create
+      // cannot use standard method as we need to set the tournament id
+      try (
+          PreparedStatement prepInsert = connection.prepareStatement("INSERT INTO Tournaments (tournament_id, Name) VALUES(?, ?)")) {
+        prepInsert.setInt(1, INTERNAL_TOURNAMENT_ID);
+        prepInsert.setString(2, INTERNAL_TOURNAMENT_NAME);
+        prepInsert.executeUpdate();
+      }
+    }
   }
 
   /**
