@@ -40,6 +40,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,7 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
+import fll.TournamentLevel;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.TeamPropertyDifference.TeamProperty;
@@ -123,6 +125,23 @@ public final class ImportDB {
             destPrep.setString(3, org);
             destPrep.executeUpdate();
           }
+        }
+      }
+
+      // create all of the tournament levels
+      for (final TournamentLevel sourceLevel : TournamentLevel.getAllLevels(sourceConnection)) {
+        if (!TournamentLevel.levelExists(destConnection, sourceLevel.getName())) {
+          TournamentLevel.createTournamentLevel(destConnection, sourceLevel.getName());
+        }
+      }
+      // set next level for destination levels
+      for (final TournamentLevel sourceLevel : TournamentLevel.getAllLevels(sourceConnection)) {
+        if (TournamentLevel.NO_NEXT_LEVEL_ID != sourceLevel.getNextLevelId()) {
+          final TournamentLevel sourceNextLevel = TournamentLevel.getById(sourceConnection,
+                                                                          sourceLevel.getNextLevelId());
+          final TournamentLevel destLevel = TournamentLevel.getByName(destConnection, sourceLevel.getName());
+          final TournamentLevel destNextLevel = TournamentLevel.getByName(destConnection, sourceNextLevel.getName());
+          TournamentLevel.updateTournamentLevel(destConnection, destLevel.getId(), destLevel.getName(), destNextLevel);
         }
       }
 
@@ -598,6 +617,11 @@ public final class ImportDB {
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 30) {
+      upgrade29To30(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
           + dbVersion);
@@ -989,6 +1013,88 @@ public final class ImportDB {
     setDBVersion(connection, 29);
   }
 
+  private static void upgrade29To30(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 29 to 30");
+
+    int mismatchCount = 0;
+
+    // create the table and the default level
+    GenerateDB.createTournamentLevelsTable(connection);
+
+    try (Statement stmt = connection.createStatement()) {
+      // add level_id column to tournaments table
+      stmt.executeUpdate("ALTER TABLE tournaments ADD COLUMN level_id INTEGER");
+
+      final TournamentLevel defaultLevel = TournamentLevel.getByName(connection,
+                                                                     TournamentLevel.DEFAULT_TOURNAMENT_LEVEL_NAME);
+
+      // create all levels
+      final Map<String, @Nullable String> nextLevels = new HashMap<>();
+      final Map<String, TournamentLevel> createdLevels = new HashMap<>();
+
+      final Map<ImmutablePair<@Nullable String, @Nullable String>, TournamentLevel> levelAssignments = new HashMap<>();
+      try (ResultSet rs = stmt.executeQuery("SELECT DISTINCT level, next_level FROM Tournaments")) {
+        while (rs.next()) {
+          final @Nullable String levelName = rs.getString("level");
+          final @Nullable String nextLevelName = rs.getString("next_level");
+
+          final ImmutablePair<@Nullable String, @Nullable String> levelPair = ImmutablePair.of(levelName,
+                                                                                               nextLevelName);
+          final TournamentLevel level;
+          if (null == levelName) {
+            level = defaultLevel;
+          } else {
+            if (!createdLevels.containsKey(levelName)) {
+              final String newLevelName;
+              if (!nextLevels.containsKey(levelName)) {
+                newLevelName = levelName;
+                nextLevels.put(levelName, nextLevelName);
+              } else {
+                // check for mismatch
+                final @Nullable String nextLevelNameStored = nextLevels.get(levelName);
+                if (!Objects.equals(nextLevelName, nextLevelNameStored)) {
+                  // mismatch
+                  // need to specify a new name for level
+                  newLevelName = String.format("%s_%d", levelName, mismatchCount);
+                  ++mismatchCount;
+                } else {
+                  newLevelName = levelName;
+                  nextLevels.put(levelName, nextLevelName);
+                }
+              }
+
+              level = TournamentLevel.createTournamentLevel(connection, newLevelName);
+              createdLevels.put(newLevelName, level);
+            } else {
+              level = createdLevels.get(levelName);
+            }
+
+            if (null != nextLevelName) {
+              final TournamentLevel nextLevel;
+              if (!createdLevels.containsKey(nextLevelName)) {
+                nextLevel = TournamentLevel.createTournamentLevel(connection, nextLevelName);
+                createdLevels.put(nextLevelName, nextLevel);
+              } else {
+                nextLevel = TournamentLevel.getByName(connection, nextLevelName);
+              }
+              TournamentLevel.updateTournamentLevel(connection, level.getId(), levelName, nextLevel);
+            }
+          } // non-null level
+
+          // track the level object for the pair
+          levelAssignments.put(levelPair, level);
+        } // foreach pair
+      } // result set
+    } // statement
+
+    // FIXME assign levels to tournaments
+
+    // FIXME need to update import code to handle new table and new column in
+    // tournaments
+
+    setDBVersion(connection, 30);
+  }
+
   /**
    * Check for a column in a table. This checks table names both upper and lower
    * case.
@@ -1357,6 +1463,8 @@ public final class ImportDB {
    * will delete all information related to the specified tournament from the
    * destination database and then copy the information from the source
    * database.
+   * The destination database needs the tournament and it's levels already
+   * created.
    *
    * @param sourceConnection a connection to the source database
    * @param destinationConnection a connection to the destination database
