@@ -823,8 +823,9 @@ checkerFramework {
     ]
     extraJavacArgs = [
         //"-AonlyDefs=^fll\\.(db|documents|flltools|scheduler|subjective|tomcat|util|web|xml)",
-        "-Awarns",  
+        //"-Awarns",  
         "-Xmaxwarns", "10000",
+        "-Xmaxerrs", "10000",
         "-AstubWarnIfNotFound",
         "-Astubs=$projectDir/stubs"
         //,"-AstubDebug"
