@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.util.FLLInternalException;
@@ -400,6 +402,25 @@ public final class TournamentLevel {
       prep.setInt(3, levelId);
       prep.executeUpdate();
     }
+  }
+
+  @Override
+  public boolean equals(final @Nullable Object o) {
+    if (null == o) {
+      return false;
+    } else if (this == o) {
+      return true;
+    } else if (this.getClass().equals(o.getClass())) {
+      final TournamentLevel other = (TournamentLevel) o;
+      return getId() == other.getId();
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public int hashCode() {
+    return getId();
   }
 
 }
