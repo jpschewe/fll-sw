@@ -1,12 +1,7 @@
 const DELETE_PREFIX = "delete_";
-const NEXT_PREFIX = "next_";
 const ROW_PREFIX = "row_";
 
-const NEW_LEVEL_ID_PREFIX = "new_";
 var nextNewLevelIndex = 1;
-
-const NONE_OPTION_VALUE = "none";
-const NONE_OPTION_TITLE = "None";
 
 document.addEventListener("DOMContentLoaded", function() {
     const buttons = document.getElementsByTagName("button");
@@ -69,6 +64,7 @@ function addRow(newId, newLevelName) {
     newInputCell.appendChild(newInput);
     newInput.setAttribute("type", "text");
     newInput.setAttribute("id", newId);
+    newInput.setAttribute("name", newId);
     newInput.value = newLevelName;
     initLevelNameInput(newInput);
 
@@ -78,6 +74,7 @@ function addRow(newId, newLevelName) {
     const newSelect = document.createElement("select");
     newSelectCell.appendChild(newSelect);
     newSelect.setAttribute("id", NEXT_PREFIX + newId);
+    newSelect.setAttribute("name", NEXT_PREFIX + newId);
 
     const newDeleteCell = document.createElement("td");
     newRow.appendChild(newDeleteCell);
