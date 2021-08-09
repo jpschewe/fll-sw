@@ -133,8 +133,7 @@ public class CreateTournament extends BaseFLLServlet {
     createTournamentLevels(sourceConnection, destConnection, sourceTournament.getTournamentID());
 
     Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getDescription(),
-                                sourceTournament.getDate(), sourceTournament.getLevel(),
-                                sourceTournament.getNextLevel());
+                                sourceTournament.getDate(), sourceTournament.getLevel());
 
     message.append("<p>Created tournament "
         + sourceTournament.getName()

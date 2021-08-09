@@ -11,10 +11,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
+
+import com.diffplug.common.base.Errors;
 
 import fll.TournamentLevel;
 import fll.TournamentLevel.NoSuchTournamentLevelException;
@@ -60,6 +64,13 @@ public class EditLevels extends BaseFLLServlet {
       page.setAttribute("NONE_OPTION_VALUE", NONE_OPTION_VALUE);
       page.setAttribute("NONE_OPTION_TITLE", NONE_OPTION_TITLE);
 
+      final Set<TournamentLevel> referencedLevels = levels.stream() //
+                                                          .filter(Errors.rethrow()
+                                                                        .wrapPredicate(l -> TournamentLevel.getNumTournamentsAtLevel(connection,
+                                                                                                                                     l) > 0)) //
+                                                          .collect(Collectors.toSet());
+      page.setAttribute("referencedLevels", referencedLevels);
+
     } catch (final SQLException e) {
       throw new FLLInternalException("Error populating context for editing of tournament levels", e);
     }
@@ -75,6 +86,9 @@ public class EditLevels extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection(); Statement stmt = connection.createStatement()) {
 
+      final Set<TournamentLevel> prevLevels = TournamentLevel.getAllLevels(connection);
+
+      final Set<Integer> levelsSeen = new HashSet<>();
       final Map<String, String[]> parameterMap = request.getParameterMap();
       final Map<String, LevelInfo> webIdToInfo = new HashMap<>();
 
@@ -101,6 +115,7 @@ public class EditLevels extends BaseFLLServlet {
             try {
               final int levelId = Integer.parseInt(parameterName);
               level = TournamentLevel.getById(connection, levelId);
+              levelsSeen.add(levelId);
             } catch (final NumberFormatException e) {
               throw new FLLInternalException("Found existing tournament level id that isn't an integer", e);
             } catch (final NoSuchTournamentLevelException e) {
@@ -134,6 +149,13 @@ public class EditLevels extends BaseFLLServlet {
         } else {
           LOGGER.debug("Not setting next tournament for '{}' as it is the none value '{}'", level.getName(),
                        nextLevelWebId);
+        }
+      }
+
+      // delete any levels not seen
+      for (final TournamentLevel level : prevLevels) {
+        if (!levelsSeen.contains(level.getId())) {
+          TournamentLevel.deleteLevel(connection, level);
         }
       }
 

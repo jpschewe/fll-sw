@@ -404,6 +404,22 @@ public final class TournamentLevel {
     }
   }
 
+  /**
+   * Delete a level.
+   * 
+   * @param connection database connection
+   * @param level the level to delete
+   * @throws SQLException on a database error
+   */
+  public static void deleteLevel(final Connection connection,
+                                 final TournamentLevel level)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("DELETE FROM tournament_level WHERE level_id = ?")) {
+      prep.setInt(1, level.getId());
+      prep.executeUpdate();
+    }
+  }
+
   @Override
   public boolean equals(final @Nullable Object o) {
     if (null == o) {

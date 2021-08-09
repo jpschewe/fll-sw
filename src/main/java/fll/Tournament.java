@@ -17,7 +17,6 @@ import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -27,9 +26,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.TournamentLevel.NoSuchTournamentLevelException;
 import fll.db.GenerateDB;
 import fll.db.Queries;
-import fll.web.admin.StoreTournamentData;
+import fll.util.FLLInternalException;
+import fll.web.admin.Tournaments;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 
@@ -46,14 +47,12 @@ public final class Tournament implements Serializable {
                      @JsonProperty("name") final String name,
                      @JsonProperty("description") final @Nullable String description,
                      @JsonProperty("date") final @Nullable LocalDate date,
-                     @JsonProperty("level") final @Nullable String level,
-                     @JsonProperty("nextLevel") final @Nullable String nextLevel) {
+                     @JsonProperty("level") final TournamentLevel level) {
     this.tournamentID = tournamentID;
     this.name = name;
     this.description = description;
     this.date = date;
     this.level = level;
-    this.nextLevel = nextLevel;
   }
 
   private final int tournamentID;
@@ -94,29 +93,20 @@ public final class Tournament implements Serializable {
 
   /**
    * @return {@link #getDate()} formatted for jQuery UI
-   * @see StoreTournamentData#DATE_FORMATTER
+   * @see Tournaments#DATE_FORMATTER
    */
   @JsonIgnore
   public String getDateString() {
-    return null == date ? "" : StoreTournamentData.DATE_FORMATTER.format(date);
+    return null == date ? "" : Tournaments.DATE_FORMATTER.format(date);
   }
 
-  private final @Nullable String level;
+  private final TournamentLevel level;
 
   /**
-   * @return the level of the tournament, may be null
+   * @return the level of the tournament
    */
-  public @Nullable String getLevel() {
+  public TournamentLevel getLevel() {
     return level;
-  }
-
-  private final @Nullable String nextLevel;
-
-  /**
-   * @return the level of the tournament after this one, may be null
-   */
-  public @Nullable String getNextLevel() {
-    return nextLevel;
   }
 
   /**
@@ -127,18 +117,16 @@ public final class Tournament implements Serializable {
    * @param description see {@link #getDescription()}
    * @param date see {@link #getDate()}
    * @param level see {@link #getLevel()}
-   * @param nextLevel see {@link #getNextLevel()}
    * @throws SQLException on a database error
    */
   public static void createTournament(final Connection connection,
                                       final String tournamentName,
                                       final @Nullable String description,
                                       final @Nullable LocalDate date,
-                                      final @Nullable String level,
-                                      final @Nullable String nextLevel)
+                                      final TournamentLevel level)
       throws SQLException {
     try (
-        PreparedStatement prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location, tournament_date, level, next_level) VALUES (?, ?, ?, ?, ?)")) {
+        PreparedStatement prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location, tournament_date, level_id) VALUES (?, ?, ?, ?)")) {
       prep.setString(1, tournamentName);
       prep.setString(2, description);
       if (null == date) {
@@ -146,18 +134,7 @@ public final class Tournament implements Serializable {
       } else {
         prep.setDate(3, java.sql.Date.valueOf(date));
       }
-      if (null != level
-          && !level.trim().isEmpty()) {
-        prep.setString(4, level.trim());
-      } else {
-        prep.setNull(4, Types.LONGVARCHAR);
-      }
-      if (null != nextLevel
-          && !nextLevel.trim().isEmpty()) {
-        prep.setString(5, nextLevel.trim());
-      } else {
-        prep.setNull(5, Types.LONGVARCHAR);
-      }
+      prep.setInt(4, level.getId());
       prep.executeUpdate();
     }
   }
@@ -174,7 +151,7 @@ public final class Tournament implements Serializable {
   public static List<Tournament> getTournaments(final Connection connection) throws SQLException {
     final List<Tournament> retval = new LinkedList<Tournament>();
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT tournament_id, Name, Location, tournament_date, level, next_level FROM Tournaments WHERE tournament_id <> ? ORDER BY tournament_date, location ")) {
+        PreparedStatement prep = connection.prepareStatement("SELECT tournament_id, Name, Location, tournament_date, level_id FROM Tournaments WHERE tournament_id <> ? ORDER BY tournament_date, location ")) {
       prep.setInt(1, GenerateDB.INTERNAL_TOURNAMENT_ID);
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
@@ -184,11 +161,17 @@ public final class Tournament implements Serializable {
           final java.sql.Date d = rs.getDate(4);
           final LocalDate date = null == d ? null : d.toLocalDate();
 
-          final String level = rs.getString(5);
-          final String nextLevel = rs.getString(6);
+          final int levelId = rs.getInt(5);
+          try {
+            final TournamentLevel level = TournamentLevel.getById(connection, levelId);
 
-          final Tournament tournament = new Tournament(tournamentID, name, location, date, level, nextLevel);
-          retval.add(tournament);
+            final Tournament tournament = new Tournament(tournamentID, name, location, date, level);
+            retval.add(tournament);
+          } catch (final NoSuchTournamentLevelException e) {
+            throw new FLLInternalException("Error looking up level for tournament '"
+                + name
+                + "'", e);
+          }
         }
       }
     }
@@ -219,7 +202,7 @@ public final class Tournament implements Serializable {
                                                 final String name)
       throws SQLException, UnknownTournamentException {
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT tournament_id, Location, tournament_date, level, next_level FROM Tournaments WHERE Name = ?")) {
+        PreparedStatement prep = connection.prepareStatement("SELECT tournament_id, Location, tournament_date, level_id FROM Tournaments WHERE Name = ?")) {
       prep.setString(1, name);
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
@@ -227,10 +210,17 @@ public final class Tournament implements Serializable {
           final String location = rs.getString(2);
           final java.sql.Date d = rs.getDate(3);
           final LocalDate date = null == d ? null : d.toLocalDate();
-          final String level = rs.getString(4);
-          final String nextLevel = rs.getString(5);
+          final int levelId = rs.getInt(4);
 
-          return new Tournament(id, name, location, date, level, nextLevel);
+          try {
+            final TournamentLevel level = TournamentLevel.getById(connection, levelId);
+
+            return new Tournament(id, name, location, date, level);
+          } catch (final NoSuchTournamentLevelException e) {
+            throw new FLLInternalException("Error looking up level for tournament '"
+                + name
+                + "'", e);
+          }
         } else {
           throw new UnknownTournamentException(name);
         }
@@ -247,8 +237,7 @@ public final class Tournament implements Serializable {
   public static boolean doesTournamentExist(final Connection connection,
                                             final int id)
       throws SQLException {
-    try (
-        PreparedStatement prep = connection.prepareStatement("SELECT Name, Location, tournament_date, level, next_level FROM Tournaments WHERE tournament_id = ?")) {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT Name FROM Tournaments WHERE tournament_id = ?")) {
       prep.setInt(1, id);
       try (ResultSet rs = prep.executeQuery()) {
         return rs.next();
@@ -265,8 +254,7 @@ public final class Tournament implements Serializable {
   public static boolean doesTournamentExist(final Connection connection,
                                             final String name)
       throws SQLException {
-    try (
-        PreparedStatement prep = connection.prepareStatement("SELECT Name, Location, tournament_date, level, next_level FROM Tournaments WHERE Name = ?")) {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT Name FROM Tournaments WHERE Name = ?")) {
       prep.setString(1, name);
       try (ResultSet rs = prep.executeQuery()) {
         return rs.next();
@@ -287,7 +275,7 @@ public final class Tournament implements Serializable {
                                               final int tournamentID)
       throws SQLException, UnknownTournamentException {
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT Name, Location, tournament_date, level, next_level FROM Tournaments WHERE tournament_id = ?")) {
+        PreparedStatement prep = connection.prepareStatement("SELECT Name, Location, tournament_date, level_id FROM Tournaments WHERE tournament_id = ?")) {
       prep.setInt(1, tournamentID);
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
@@ -295,9 +283,16 @@ public final class Tournament implements Serializable {
           final String location = rs.getString(2);
           final java.sql.Date d = rs.getDate(3);
           final LocalDate date = null == d ? null : d.toLocalDate();
-          final String level = rs.getString(4);
-          final String nextLevel = rs.getString(5);
-          return new Tournament(tournamentID, name, location, date, level, nextLevel);
+          final int levelId = rs.getInt(4);
+          try {
+            final TournamentLevel level = TournamentLevel.getById(connection, levelId);
+            return new Tournament(tournamentID, name, location, date, level);
+          } catch (final NoSuchTournamentLevelException e) {
+            throw new FLLInternalException("Error looking up level for tournament '"
+                + name
+                + "'", e);
+          }
+
         } else {
           throw new UnknownTournamentException(tournamentID);
         }
@@ -308,7 +303,11 @@ public final class Tournament implements Serializable {
   @Override
   @EnsuresNonNullIf(expression = "#1", result = true)
   public boolean equals(final @Nullable Object o) {
-    if (o instanceof Tournament) {
+    if (null == o) {
+      return false;
+    } else if (this == o) {
+      return true;
+    } else if (o.getClass().equals(this.getClass())) {
       final Tournament other = (Tournament) o;
       return other.getTournamentID() == getTournamentID();
     } else {
@@ -501,32 +500,28 @@ public final class Tournament implements Serializable {
    * 
    * @param tournamentID which tournament to modify
    * @param name see {@link #getName()}
-   * @param location see {@link #getDescription()}
+   * @param description see {@link #getDescription()}
    * @param date see {@link #getDate()}
    * @param level see {@link #getLevel()}
-   * @param nextLevel see {@link #getNextLevel()}
-   * @param connection dadtabase connection
+   * @param connection database connection
    * @throws SQLException on a database error
    */
   public static void updateTournament(final Connection connection,
                                       final int tournamentID,
                                       final String name,
-                                      final @Nullable String location,
+                                      final @Nullable String description,
                                       final @Nullable LocalDate date,
-                                      final @Nullable String level,
-                                      final @Nullable String nextLevel)
+                                      final TournamentLevel level)
       throws SQLException {
     try (PreparedStatement updatePrep = connection.prepareStatement("UPDATE Tournaments SET" //
         + " Name = ?" //
         + ", Location = ?" //
         + ", tournament_date = ?" //
-        + ", level = ?" //
-        + ", next_level = ?" //
+        + ", level_id = ?" //
         + " WHERE tournament_id = ?")) {
       updatePrep.setString(1, name);
-      if (null != location
-          && !StringUtils.isBlank(level)) {
-        updatePrep.setString(2, location);
+      if (null != description) {
+        updatePrep.setString(2, description);
       } else {
         updatePrep.setNull(2, Types.VARCHAR);
       }
@@ -535,19 +530,8 @@ public final class Tournament implements Serializable {
       } else {
         updatePrep.setDate(3, java.sql.Date.valueOf(date));
       }
-      if (null != level
-          && !level.trim().isEmpty()) {
-        updatePrep.setString(4, level.trim());
-      } else {
-        updatePrep.setNull(4, Types.VARCHAR);
-      }
-      if (null != nextLevel
-          && !nextLevel.trim().isEmpty()) {
-        updatePrep.setString(5, nextLevel.trim());
-      } else {
-        updatePrep.setNull(5, Types.VARCHAR);
-      }
-      updatePrep.setInt(6, tournamentID);
+      updatePrep.setInt(4, level.getId());
+      updatePrep.setInt(5, tournamentID);
       updatePrep.executeUpdate();
     }
   }

@@ -39,6 +39,7 @@ import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Tournament;
+import fll.TournamentLevel;
 import fll.Utilities;
 import fll.db.AdvancingTeam;
 import fll.db.AwardWinner;
@@ -567,14 +568,9 @@ public class AwardsReport extends BaseFLLServlet {
     subtitleBlock.setAttribute("font-weight", "bold");
 
     final String tournamentDescription = tournament.getDescription();
-    final String tournamentLevel = tournament.getLevel();
+    final TournamentLevel tournamentLevel = tournament.getLevel();
     final String tournamentName = null == tournamentDescription ? tournament.getName() : tournamentDescription;
-    final String tournamentTitle;
-    if (null != tournamentLevel) {
-      tournamentTitle = String.format("%s: %s", tournamentLevel, tournamentName);
-    } else {
-      tournamentTitle = tournamentName;
-    }
+    final String tournamentTitle = String.format("%s: %s", tournamentLevel.getName(), tournamentName);
     subtitleBlock.appendChild(document.createTextNode(tournamentTitle));
 
     final Element subtitleCenter = FOPUtils.createXslFoElement(document, FOPUtils.LEADER_TAG);
@@ -634,12 +630,15 @@ public class AwardsReport extends BaseFLLServlet {
     final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(categoryTitleBlock);
     categoryTitleBlock.setAttribute("font-weight", "bold");
-    if (null != tournament.getNextLevel()) {
-      categoryTitleBlock.appendChild(document.createTextNode(String.format("Teams advancing to %s",
-                                                                           tournament.getNextLevel())));
+    final TournamentLevel tournamentLevel = tournament.getLevel();
+    if (TournamentLevel.NO_NEXT_LEVEL_ID != tournamentLevel.getNextLevelId()) {
+      final TournamentLevel nextLevel = TournamentLevel.getById(connection, tournamentLevel.getNextLevelId());
+      final int numTournamentsAtNextLevel = TournamentLevel.getNumTournamentsAtLevel(connection, nextLevel);
+      categoryTitleBlock.appendChild(document.createTextNode(String.format("Teams advancing to the %s tournament%s",
+                                                                           nextLevel.getName(),
+                                                                           numTournamentsAtNextLevel > 1 ? "s" : "")));
     } else {
-      categoryTitleBlock.appendChild(document.createTextNode(String.format("Teams advancing to the next tournament",
-                                                                           tournament.getNextLevel())));
+      categoryTitleBlock.appendChild(document.createTextNode("Teams advancing to the next tournament"));
     }
 
     final Element table = FOPUtils.createBasicTable(document);

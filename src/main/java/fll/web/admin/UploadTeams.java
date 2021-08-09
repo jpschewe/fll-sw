@@ -21,13 +21,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -35,6 +28,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
+import fll.TournamentLevel;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
@@ -46,6 +40,13 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadSpreadsheet;
 import fll.web.UserRole;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.JspWriter;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -584,7 +585,9 @@ public final class UploadTeams extends BaseFLLServlet {
 
           final Tournament tournament;
           if (!Tournament.doesTournamentExist(connection, tournamentName)) {
-            Tournament.createTournament(connection, tournamentName, tournamentName, null, null, null);
+            Tournament.createTournament(connection, tournamentName, tournamentName, null,
+                                        TournamentLevel.getByName(connection,
+                                                                  TournamentLevel.DEFAULT_TOURNAMENT_LEVEL_NAME));
             tournament = Tournament.findTournamentByName(connection, tournamentName);
           } else {
             tournament = Tournament.findTournamentByName(connection, tournamentName);

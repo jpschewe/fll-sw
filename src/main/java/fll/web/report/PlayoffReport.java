@@ -17,12 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
 
@@ -32,6 +26,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.Tournament;
+import fll.TournamentLevel;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
@@ -45,6 +40,12 @@ import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.playoff.Playoff;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -329,14 +330,10 @@ public class PlayoffReport extends BaseFLLServlet {
     subtitleBlock.setAttribute("font-weight", "bold");
 
     final String tournamentDescription = tournament.getDescription();
-    final String tournamentLevel = tournament.getLevel();
+    final TournamentLevel tournamentLevel = tournament.getLevel();
     final String tournamentName = null == tournamentDescription ? tournament.getName() : tournamentDescription;
-    final String tournamentTitle;
-    if (null != tournamentLevel) {
-      tournamentTitle = String.format("%s: %s", tournamentLevel, tournamentName);
-    } else {
-      tournamentTitle = tournamentName;
-    }
+    final String tournamentTitle = String.format("%s: %s", tournamentLevel.getName(), tournamentName);
+
     subtitleBlock.appendChild(document.createTextNode(tournamentTitle));
 
     final Element subtitleCenter = FOPUtils.createXslFoElement(document, FOPUtils.LEADER_TAG);

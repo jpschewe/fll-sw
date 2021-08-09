@@ -36,6 +36,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import fll.TestUtils;
 import fll.Tournament;
+import fll.TournamentLevel;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
@@ -109,7 +110,9 @@ public class TournamentScheduleTest {
 
       GenerateDB.generateDB(description, memConnection);
 
-      Tournament.createTournament(memConnection, tournamentName, null, null, null, null);
+      Tournament.createTournament(memConnection, tournamentName, null, null,
+                                  TournamentLevel.getByName(memConnection,
+                                                            TournamentLevel.DEFAULT_TOURNAMENT_LEVEL_NAME));
       final Tournament tournament = Tournament.findTournamentByName(memConnection, tournamentName);
       assertNotNull(tournament);
 

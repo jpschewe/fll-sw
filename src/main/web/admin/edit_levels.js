@@ -3,33 +3,10 @@ const ROW_PREFIX = "row_";
 
 var nextNewLevelIndex = 1;
 
-document.addEventListener("DOMContentLoaded", function() {
-    const buttons = document.getElementsByTagName("button");
-    for (var i = 0; i < buttons.length; ++i) {
-        const button = buttons[i];
-        if (button.id && button.id.startsWith(DELETE_PREFIX)) {
-            initDeleteButton(button);
-        }
-    }
-
-    const inputs = document.getElementsByTagName("input");
-    for (var i = 0; i < inputs.length; ++i) {
-        initLevelNameInput(inputs[i]);
-    }
-
-    const addButton = document.getElementById("add");
-    addButton.addEventListener('click', addNewRow);
-
-    const saveButton = document.getElementById("save");
-    saveButton.addEventListener('click', function() {
-        if (validateNames()) {
-            const form = document.getElementById("level_form");
-            form.submit();
-        }
-    });
-
-    init();
-});
+var referencedLevels = [];
+function addReferencedLevel(id) {
+    referencedLevels.push(id);
+}
 
 function selectNextLevel(levelId, nextLevelId) {
     const select = document.getElementById(NEXT_PREFIX + levelId);
@@ -79,12 +56,16 @@ function addRow(newId, newLevelName) {
     const newDeleteCell = document.createElement("td");
     newRow.appendChild(newDeleteCell);
 
-    const newDeleteButton = document.createElement("button");
-    newDeleteCell.appendChild(newDeleteButton);
-    newDeleteButton.setAttribute("id", DELETE_PREFIX + newId);
-    initDeleteButton(newDeleteButton);
-    newDeleteButton.setAttribute("type", "button");
-    newDeleteButton.innerHTML = "Delete";
+    if (referencedLevels.includes(newId)) {
+        newDeleteCell.innerText = "Referenced by a tournament";
+    } else {
+        const newDeleteButton = document.createElement("button");
+        newDeleteCell.appendChild(newDeleteButton);
+        newDeleteButton.setAttribute("id", DELETE_PREFIX + newId);
+        initDeleteButton(newDeleteButton);
+        newDeleteButton.setAttribute("type", "button");
+        newDeleteButton.innerText = "Delete";
+    }
 
     // add all existing select elements
     const inputs = document.getElementsByTagName("input");
@@ -95,14 +76,14 @@ function addRow(newId, newLevelName) {
         if (input != newInput) {
             const newOption = document.createElement("option");
             newOption.setAttribute("value", input.id);
-            newOption.innerHTML = input.value;
+            newOption.innerText = input.value;
             newSelect.appendChild(newOption);
         }
     }
 
     const noneOption = document.createElement("option");
     noneOption.setAttribute("value", NONE_OPTION_VALUE);
-    noneOption.innerHTML = NONE_OPTION_TITLE;
+    noneOption.innerText = NONE_OPTION_TITLE;
 
     newSelect.appendChild(noneOption);
 
@@ -118,11 +99,10 @@ function addNewLevelOption(newId, newLevelName) {
 
         const newOption = document.createElement("option");
         newOption.setAttribute("value", newId);
-        newOption.innerHTML = newLevelName;
+        newOption.innerText = newLevelName;
 
         var added = false;
         const options = select.getElementsByTagName("option");
-        var noneOption = null;
         for (var j = 0; j < options.length; ++j) {
             const option = options[j];
             if (option.value == NONE_OPTION_VALUE) {
@@ -140,7 +120,7 @@ function addNewLevelOption(newId, newLevelName) {
 }
 
 function initLevelNameInput(input) {
-    input.addEventListener("input", function(event) {
+    input.addEventListener("input", function() {
         const levelId = input.id;
         changeLevelName(levelId, input.value);
     });
@@ -174,7 +154,7 @@ function changeLevelName(levelId, levelNewName) {
         for (var j = 0; j < options.length; ++j) {
             const option = options[j];
             if (option.value == levelId) {
-                option.innerHTML = levelNewName;
+                option.innerText = levelNewName;
             }
         }
     }

@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.Tournament;
-import fll.web.admin.StoreTournamentData;
+import fll.web.admin.Tournaments;
 
 /**
  * Utilities for working with delaying the display of performance scores.
@@ -73,12 +73,12 @@ public final class DelayedPerformance {
 
   /**
    * @return delay until formatted for use with jquery-ui date picker
-   * @see StoreTournamentData#DATE_FORMATTER
+   * @see Tournaments#DATE_FORMATTER
    * @see #getDelayUntil()
    */
   @JsonIgnore
   public String getDelayUntilDateString() {
-    return delayUntil.toLocalDate().format(StoreTournamentData.DATE_FORMATTER);
+    return delayUntil.toLocalDate().format(Tournaments.DATE_FORMATTER);
   }
 
   /**

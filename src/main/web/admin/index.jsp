@@ -91,6 +91,20 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
         </li>
 
         <li>
+            <a id='add-edit-levels'
+                href='<c:url value="edit_levels.jsp"/>'>Add or Edit
+                Tournament Levels</a> <a
+                href='javascript:display("EditTournamentLevelHelp")'>[help]</a>
+            <div id='EditTournamentLevelHelp' class='help'
+                style='display: none'>
+                This is an optional step. Use this page to modify the
+                levels that tournaments are assigned to.
+                <br>
+                <a href='javascript:hide("EditTournamentLevelHelp")'>[hide]</a>
+            </div>
+        </li>
+
+        <li>
             <a id='add-edit-tournaments'
                 href='<c:url value="tournaments.jsp"/>'>Add or Edit
                 Tournaments</a> <a

@@ -13,18 +13,13 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Tournament;
+import fll.TournamentLevel;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
@@ -38,6 +33,12 @@ import fll.web.SessionAttributes;
 import fll.web.UploadSpreadsheet;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -259,7 +260,9 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
           final Tournament tournament;
           if (!Tournament.doesTournamentExist(connection, tournamentName)) {
             // create the tournament
-            Tournament.createTournament(connection, tournamentName, tournamentName, null, null, null);
+            Tournament.createTournament(connection, tournamentName, tournamentName, null,
+                                        TournamentLevel.getByName(connection,
+                                                                  TournamentLevel.DEFAULT_TOURNAMENT_LEVEL_NAME));
             tournament = Tournament.findTournamentByName(connection, tournamentName);
             message.append("<p>Created tournament '"
                 + tournamentName

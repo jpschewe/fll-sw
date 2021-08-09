@@ -24,6 +24,10 @@ fll.web.admin.EditLevels.populateContext(application, pageContext);
   const NONE_OPTION_TITLE = "${NONE_OPTION_TITLE}";
 
   function init() {
+    <c:forEach items="${referencedLevels}" var="level">
+    addReferencedLevel("${level.id}");
+    </c:forEach>
+
     <c:forEach items="${levels}" var="level">
     addRow("${level.id}", "${level.name}");
     </c:forEach>
@@ -39,6 +43,34 @@ fll.web.admin.EditLevels.populateContext(application, pageContext);
     </c:choose>
     </c:forEach>
   }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const buttons = document.getElementsByTagName("button");
+    for (var i = 0; i < buttons.length; ++i) {
+      const button = buttons[i];
+      if (button.id && button.id.startsWith(DELETE_PREFIX)) {
+        initDeleteButton(button);
+      }
+    }
+
+    const inputs = document.getElementsByTagName("input");
+    for (var i = 0; i < inputs.length; ++i) {
+      initLevelNameInput(inputs[i]);
+    }
+
+    const addButton = document.getElementById("add");
+    addButton.addEventListener('click', addNewRow);
+
+    const saveButton = document.getElementById("save");
+    saveButton.addEventListener('click', function() {
+      if (validateNames()) {
+        const form = document.getElementById("level_form");
+        form.submit();
+      }
+    });
+
+    init();
+  });
 </script>
 
 </head>
