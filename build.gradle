@@ -548,7 +548,7 @@ createExe {
     productName = "FLL-SW"
     copyright = "GPL"
     
-    bundledJrePath = "jdk-12.0.2"
+    bundledJrePath = "jdk-11.0.2"
     bundledJre64Bit = true
     bundledJreAsFallback = false
 
