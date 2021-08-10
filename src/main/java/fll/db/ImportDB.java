@@ -152,8 +152,7 @@ public final class ImportDB {
       // don't worry about bringing the times over, this way they will all be
       // null and this will force score summarization
       for (final Tournament sourceTournament : Tournament.getTournaments(sourceConnection)) {
-        if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(sourceTournament.getName())
-            && GenerateDB.INTERNAL_TOURNAMENT_ID != sourceTournament.getTournamentID()) {
+        if (GenerateDB.INTERNAL_TOURNAMENT_ID != sourceTournament.getTournamentID()) {
           createTournament(sourceTournament, destConnection);
         }
       }
