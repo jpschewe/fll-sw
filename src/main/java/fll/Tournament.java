@@ -145,7 +145,7 @@ public final class Tournament implements Serializable {
    * internal tournament.
    * 
    * @param connection database connection
-   * @return list of tournament tournaments
+   * @return list of tournament tournaments, excludes the internal tournament
    * @throws SQLException on a database error
    */
   public static List<Tournament> getTournaments(final Connection connection) throws SQLException {

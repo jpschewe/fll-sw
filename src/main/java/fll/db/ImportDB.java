@@ -1106,12 +1106,17 @@ public final class ImportDB {
 
             final ImmutablePair<@Nullable String, @Nullable String> levelPair = ImmutablePair.of(levelName,
                                                                                                  nextLevelName);
-            @Nullable
-            TournamentLevel level = levelAssignments.get(levelPair);
-            if (null == level) {
-              LOGGER.warn("Unable to find created level for tournament with id: {} levelName: {} nextLevelName: {}, using default level",
-                          tournamentId, levelName, nextLevelName);
-              level = defaultLevel;
+
+            TournamentLevel level;
+            if (GenerateDB.INTERNAL_TOURNAMENT_ID == tournamentId) {
+              level = TournamentLevel.getById(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
+            } else {
+              level = levelAssignments.get(levelPair);
+              if (null == level) {
+                LOGGER.warn("Unable to find created level for tournament with id: {} levelName: {} nextLevelName: {}, using default level",
+                            tournamentId, levelName, nextLevelName);
+                level = defaultLevel;
+              }
             }
             Tournament.updateTournament(connection, tournamentId, name, location, date, level);
           }

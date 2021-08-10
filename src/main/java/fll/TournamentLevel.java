@@ -19,6 +19,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
+import fll.db.GenerateDB;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 
@@ -136,7 +137,7 @@ public final class TournamentLevel {
   }
 
   /**
-   * Check if a level exists with the specified name.
+   * Check if a level exists with the specified {@link #getName()}.
    * 
    * @param connection database connection
    * @param name name of the level to find
@@ -156,14 +157,37 @@ public final class TournamentLevel {
   }
 
   /**
+   * Check if a level exists with the specified {@link #getId()}.
+   * 
    * @param connection database connection
-   * @return all levels specified in the database
+   * @param id id of the level to find
+   * @return true if the level is found in the database
+   * @throws SQLException on a database error
+   */
+  public static boolean levelExists(final Connection connection,
+                                    final int id)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT level_name FROM tournament_level WHERE level_id = ?")) {
+      prep.setInt(1, id);
+      try (ResultSet rs = prep.executeQuery()) {
+        return rs.next();
+      }
+    }
+  }
+
+  /**
+   * @param connection database connection
+   * @return all levels specified in the database, excludes the internal
+   *         tournament level
    * @throws SQLException on a database error
    */
   public static Set<TournamentLevel> getAllLevels(final Connection connection) throws SQLException {
     final Set<TournamentLevel> levels = new HashSet<>();
-    try (Statement stmt = connection.createStatement()) {
-      try (ResultSet rs = stmt.executeQuery("SELECT level_id, level_name, next_level_id FROM tournament_level")) {
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT level_id, level_name, next_level_id FROM tournament_level WHERE level_id <> ?")) {
+      prep.setInt(1, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
+      try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
           final int id = rs.getInt("level_id");
           final String name = castNonNull(rs.getString("level_name"));
