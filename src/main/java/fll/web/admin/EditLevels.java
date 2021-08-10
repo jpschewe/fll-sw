@@ -50,6 +50,10 @@ public class EditLevels extends BaseFLLServlet {
 
   private static final String NONE_OPTION_TITLE = "None";
 
+  /**
+   * @param application read application variables
+   * @param page set variables for rendering the page
+   */
   public static void populateContext(final ServletContext application,
                                      final PageContext page) {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);

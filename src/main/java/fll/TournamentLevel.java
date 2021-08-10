@@ -6,6 +6,7 @@
 
 package fll;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,6 +18,8 @@ import java.util.stream.Collectors;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.db.GenerateDB;
@@ -26,7 +29,7 @@ import fll.util.FLLRuntimeException;
 /**
  * The level of a tournament, such as "Regional", "Sectional", "State".
  */
-public final class TournamentLevel {
+public final class TournamentLevel implements Serializable {
 
   /**
    * ID used to signify that there is no next level.
@@ -38,9 +41,9 @@ public final class TournamentLevel {
    * @param name {@link #getName()}
    * @param nextLevelId {@link #getNextLevelId()}
    */
-  private TournamentLevel(final int id,
-                          final String name,
-                          final int nextLevelId) {
+  private TournamentLevel(@JsonProperty("id") final int id,
+                          @JsonProperty("name") final String name,
+                          @JsonProperty("nextLevelId") final int nextLevelId) {
     this.name = name;
     this.id = id;
     this.nextLevelId = nextLevelId;
