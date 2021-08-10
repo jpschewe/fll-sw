@@ -93,7 +93,7 @@ public class WebTest {
 
       IntegrationTestUtils.setTournament(selenium, seleniumWait, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
-      IntegrationTestUtils.setTournament(selenium, seleniumWait, GenerateDB.DROP_TOURNAMENT_NAME);
+      IntegrationTestUtils.setTournament(selenium, seleniumWait, "DROP");
     } catch (final IOException | RuntimeException | AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;

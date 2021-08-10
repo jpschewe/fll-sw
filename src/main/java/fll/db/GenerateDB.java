@@ -59,11 +59,6 @@ public final class GenerateDB {
   public static final String DUMMY_TOURNAMENT_NAME = "DUMMY";
 
   /**
-   * Name of tournament for teams that dropped.
-   */
-  public static final String DROP_TOURNAMENT_NAME = "DROP";
-
-  /**
    * Internal tournament ID.
    */
   public static final int INTERNAL_TOURNAMENT_ID = -1;
