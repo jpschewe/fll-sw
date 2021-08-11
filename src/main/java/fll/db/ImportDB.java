@@ -946,27 +946,35 @@ public final class ImportDB {
     }
 
     final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
-    final Collection<Tournament> tournaments = Tournament.getTournaments(connection);
     boolean modified = false;
 
-    for (final Tournament tournament : tournaments) {
-      LOGGER.trace("Upgrading non-numeric categories in tournamnet {}", tournament.getName());
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT Name, tournament_id FROM tournaments WHERE tournament_id <> ?")) {
+      prep.setInt(1, GenerateDB.INTERNAL_TOURNAMENT_ID);
 
-      // make sure that all non-numeric categories are in the challenge description
-      final Set<String> nonNumericCategoriesInDatabase = NonNumericNominees.getCategories(connection,
-                                                                                          tournament.getTournamentID());
-      for (final String categoryTitle : nonNumericCategoriesInDatabase) {
-        LOGGER.trace("Looking for database category '{}'", categoryTitle);
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final String name = rs.getString("Name");
+          final int tournamentId = rs.getInt("tournament_id");
 
-        if (null == description.getNonNumericCategoryByTitle(categoryTitle)) {
-          LOGGER.trace("Creating category '{}' and adding to challenge description", categoryTitle);
+          LOGGER.trace("Upgrading non-numeric categories in tournamnet {}", name);
 
-          final NonNumericCategory newCategory = new NonNumericCategory(categoryTitle, true);
-          description.addNonNumericCategory(newCategory);
-          modified = true;
+          // make sure that all non-numeric categories are in the challenge description
+          final Set<String> nonNumericCategoriesInDatabase = NonNumericNominees.getCategories(connection, tournamentId);
+          for (final String categoryTitle : nonNumericCategoriesInDatabase) {
+            LOGGER.trace("Looking for database category '{}'", categoryTitle);
+
+            if (null == description.getNonNumericCategoryByTitle(categoryTitle)) {
+              LOGGER.trace("Creating category '{}' and adding to challenge description", categoryTitle);
+
+              final NonNumericCategory newCategory = new NonNumericCategory(categoryTitle, true);
+              description.addNonNumericCategory(newCategory);
+              modified = true;
+            }
+          } // foreach category in database
         }
-      } // foreach category in database
-    } // foreach tournament
+      } // result set
+    } // prepared statement
 
     if (modified) {
       if (LOGGER.isTraceEnabled()) {
