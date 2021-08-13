@@ -11,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -627,16 +628,22 @@ public final class GenerateDB {
                                                 final boolean headToHead)
       throws SQLException {
     try (
-        PreparedStatement globalInsert = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)")) {
+        PreparedStatement globalInsert = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
+        PreparedStatement findTournament = connection.prepareStatement("SELECT tournament_id FROM Tournaments WHERE Name = ?")) {
       // Global Parameters
 
       boolean check;
       check = GlobalParameters.globalParameterExists(connection, GlobalParameters.CURRENT_TOURNAMENT);
       if (!check) {
-        final Tournament dummyTournament = Tournament.findTournamentByName(connection, DUMMY_TOURNAMENT_NAME);
-        globalInsert.setString(2, GlobalParameters.CURRENT_TOURNAMENT);
-        globalInsert.setInt(1, dummyTournament.getTournamentID());
-        globalInsert.executeUpdate();
+        findTournament.setString(1, DUMMY_TOURNAMENT_NAME);
+        try (ResultSet rs = findTournament.executeQuery()) {
+          if (rs.next()) {
+            final int tournamentId = rs.getInt(1);
+            globalInsert.setString(2, GlobalParameters.CURRENT_TOURNAMENT);
+            globalInsert.setInt(1, tournamentId);
+            globalInsert.executeUpdate();
+          }
+        }
       }
 
       check = GlobalParameters.globalParameterExists(connection, GlobalParameters.STANDARDIZED_MEAN);

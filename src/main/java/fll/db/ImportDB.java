@@ -974,7 +974,7 @@ public final class ImportDB {
           } // foreach category in database
         }
       } // result set
-    } // prepared statement
+    } // prepared statement1
 
     if (modified) {
       if (LOGGER.isTraceEnabled()) {
@@ -1429,7 +1429,7 @@ public final class ImportDB {
       // drop Tournaments table
       stmt.executeUpdate("DROP TABLE Tournaments");
 
-      // create Tournaments table
+      GenerateDB.createTournamentLevelsTable(connection);
       GenerateDB.tournaments(connection);
 
       try {
@@ -1485,6 +1485,11 @@ public final class ImportDB {
 
       // create new tournament parameters table
       GenerateDB.tournamentParameters(connection);
+
+      // head to head was always run in the early tournaments
+      // needs to execute after the tournaments and tournament_parameters tables are
+      // created
+      GenerateDB.setDefaultParameters(connection, true);
 
       // set the version to 1 - this will have been set while creating
       // global_parameters, but we need to force it to 1 for later upgrade
