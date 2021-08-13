@@ -56,23 +56,6 @@ public class EditTournamentsTest {
       LOGGER.trace("Waiting for addRow to be clickable, then clicking");
       seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("addRow"))).click();
 
-      // get num rows
-      LOGGER.trace("Waiting for numRows");
-      final WebElement numRowsEle = seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.name("numRows")));
-      final String numRowsStr = numRowsEle.getAttribute("value");
-      assertNotNull(numRowsStr);
-      final int numRows = Integer.parseInt(numRowsStr);
-
-      // type in tournament name
-      final int lastRowIdx = numRows
-          - 1;
-      final String lastRowName = "name"
-          + lastRowIdx;
-      LOGGER.trace("Looking for {}", lastRowName);
-      final WebElement lastRow = selenium.findElement(By.name(lastRowName));
-
-      LOGGER.trace("Entering tournament name");
-      lastRow.sendKeys("test tournament");
       LOGGER.trace("Clicking on commit");
       selenium.findElement(By.name("commit")).click();
 
