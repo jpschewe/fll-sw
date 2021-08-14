@@ -122,7 +122,7 @@ public class StoreDelayedPerformance extends BaseFLLServlet {
           && null != timeStr) {
         final int runNumber = Integer.parseInt(runNumberStr);
 
-        final LocalDate date = LocalDate.parse(dateStr, StoreTournamentData.DATE_FORMATTER);
+        final LocalDate date = LocalDate.parse(dateStr, Tournaments.DATE_FORMATTER);
 
         final LocalTime time = LocalTime.parse(timeStr, DelayedPerformance.TIME_FORMATTER);
 

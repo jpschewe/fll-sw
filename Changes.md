@@ -1,3 +1,4 @@
+* #950 - Make Tournament Level a first class object, this will allow parts of the award script to be attached to a tournament level, all tournaments now have a level
 * #953 - Add version of score entry form for practice rounds
 * #951 - Allow users to be carried over through a database initialization
 * #954 - Increase the font size on the login page

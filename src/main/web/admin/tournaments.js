@@ -6,86 +6,135 @@
 
 "use strict";
 
-function addTournament() {
-  var numRows = parseInt($('#numRows').val());
-  var newTournamentId = $('#newTournamentId').val();
+// keep the keys of new tournaments unique
+var nextNewTournamentKey = 1;
 
-  var trElement = $("<tr></tr>");
+// row index keeps counting up, even if rows are deleted
+var nextRowIndex = 1;
 
-  var td1Element = $("<td></td>");
-  var keyElement = $("<input type=\"hidden\" name=\"key" + numRows
-      + "\" value=\"" + newTournamentId + "\" />");
-  td1Element.append(keyElement);
+var tournamentsWithScores = [];
 
-  var dateElement = $("<input type=\"text\" name=\"date" + numRows
-      + "\" size=\"8\" />");
-  dateElement.datepicker();
-  td1Element.append(dateElement);
-  trElement.append(td1Element);
+function addNewTournament() {
+    const keyIndex = nextNewTournamentKey;
+    ++nextNewTournamentKey;
 
-  var td2Element = $("<td></td>");
-  var nameElement = $("<input type=\"text\" id=\"name" + numRows
-      + "\" name=\"name" + numRows + "\" maxlength=\"128\" size=\"20\" />");
-  td2Element.append(nameElement);
-  trElement.append(td2Element);
+    const name = "Tournament " + keyIndex;
+    const key = NEW_TOURNAMENT_PREFIX + keyIndex;
+    addTournament(key, name, null, null, null);
+}
 
-  var td3Element = $("<td></td>");
-  var descriptionElement = $("<input type=\"text\" name=\"description"
-      + numRows + "\" size=\"64\" />");
-  td3Element.append(descriptionElement);
-  trElement.append(td3Element);
+function addTournament(key, name, description, date, level) {
+    const rowIndex = nextRowIndex;
+    ++nextRowIndex;
 
-  var td4Element = $("<td></td>");
-  var levelElement = $("<input type=\"text\" name=\"level" + numRows
-      + "\" size=\"20\" maxlength=\"128\" />");
-  td4Element.append(levelElement);
-  trElement.append(td4Element);
+    const table = document.getElementById("tournamentsTable");
 
-  var td5Element = $("<td></td>");
-  var nextLevelElement = $("<input type=\"text\" name=\"nextLevel" + numRows
-      + "\" size=\"20\" maxlength=\"128\" />");
-  td5Element.append(nextLevelElement);
-  trElement.append(td5Element);
+    const row = document.createElement("tr");
+    table.append(row);
 
-  $('#tournamentsTable tbody').append(trElement);
+    const dateCell = document.createElement("td");
+    row.appendChild(dateCell);
+    const keyElement = document.createElement("input");
+    dateCell.appendChild(keyElement);
+    keyElement.setAttribute("type", "hidden");
+    keyElement.setAttribute("name", KEY_PREFIX + rowIndex);
+    keyElement.setAttribute("value", key);
 
-  $('#numRows').val(numRows + 1);
+    const dateElement = document.createElement("input");
+    dateCell.appendChild(dateElement);
+    dateElement.setAttribute("type", "text");
+    dateElement.setAttribute("size", "8");
+    dateElement.setAttribute("name", DATE_PREFIX + rowIndex);
+    if (date) {
+        dateElement.value = date;
+    }
+    $(dateElement).datepicker();
+
+    const nameCell = document.createElement("td");
+    row.appendChild(nameCell);
+    const nameElement = document.createElement("input");
+    nameCell.appendChild(nameElement);
+    nameElement.setAttribute("type", "text");
+    nameElement.setAttribute("id", NAME_PREFIX + rowIndex);
+    nameElement.setAttribute("name", NAME_PREFIX + rowIndex);
+    nameElement.setAttribute("maxlength", "128");
+    nameElement.setAttribute("size", "20");
+    nameElement.value = name;
+
+
+    const descriptionCell = document.createElement("td");
+    row.appendChild(descriptionCell);
+    const descriptionElement = document.createElement("input");
+    descriptionCell.appendChild(descriptionElement);
+    descriptionElement.setAttribute("type", "text");
+    descriptionElement.setAttribute("name", DESCRIPTION_PREFIX + rowIndex);
+    descriptionElement.setAttribute("size", "64");
+    if (description) {
+        descriptionElement.value = description;
+    }
+
+    const levelCell = document.createElement("td");
+    row.appendChild(levelCell);
+    const levelElement = document.createElement("select");
+    levelCell.appendChild(levelElement);
+    levelElement.setAttribute("name", LEVEL_PREFIX + rowIndex);
+    populateLevelSelect(levelElement);
+    if (level) {
+        levelElement.value = level;
+    }
+
+    const deleteCell = document.createElement("td");
+    row.appendChild(deleteCell);
+    if (key == currentTournamentId) {
+        deleteCell.innerHTML = "Current Tournament";
+    } else if (tournamentsWithScores.includes(key)) {
+        deleteCell.innerHTML = "Has Scores";
+    } else {
+        const deleteButton = document.createElement("button");
+        deleteCell.appendChild(deleteButton);
+        deleteButton.setAttribute("type", "button");
+        deleteButton.innerHTML = "Delete";
+        deleteButton.addEventListener("click", function() {
+            row.remove();
+        });
+    }
 }
 
 function checkTournamentNames() {
-  var numRows = parseInt($('#numRows').val());
+    const tournamentsSeen = [];
 
-  var tournamentsSeen = [];
-  for (var idx = 0; idx < numRows; ++idx) {
-    var name = $('#name' + idx).val();
-    _log("Checking index: " + idx + " name: " + name + " against: "
-        + tournamentsSeen);
-    if (name) {
-      if (tournamentsSeen.includes(name)) {
-        alert("Multiple tournaments have the name '" + name + "'");
-        return false;
-      }
-      tournamentsSeen.push(name);
+    const inputs = document.getElementsByTagName("input");
+    for (var i = 0; i < inputs.length; ++i) {
+        const input = inputs[i];
+        const elementName = input.getAttribute("name");
+        if (elementName && elementName.startsWith(NAME_PREFIX)) {
+            const name = input.value;
+            if (name) {
+                _log("Checking name: " + name + " against: "
+                    + tournamentsSeen);
+                if (tournamentsSeen.includes(name)) {
+                    alert("Multiple tournaments have the name '" + name + "'");
+                    return false;
+                }
+                tournamentsSeen.push(name);
+            } else {
+                alert("All tournaments must have names");
+                return false;
+            }
+        }
     }
-  }
 
-  return true;
+    return true;
 }
 
 function setupDatepickers() {
-  var numRows = parseInt($('#numRows').val());
-  for (var idx = 0; idx < numRows; ++idx) {
-    $('#date' + idx).datepicker();
-  }
+    const inputs = document.getElementsByTagName("input");
+    for (var i = 0; i < inputs.length; ++i) {
+        const input = inputs[i];
+        const name = input.getAttribute("name");
+        if (name && name.startsWith(DATE_PREFIX)) {
+            $(input).datepicker();
+        }
+    }
 }
 
-$(document).ready(function() {
-
-  $('#addRow').click(function(e) {
-    addTournament();
-    e.preventDefault();
-  });
-
-  setupDatepickers();
-
-}); // end ready function

@@ -19,12 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -35,6 +29,7 @@ import com.opencsv.CSVWriter;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.ScoreStandardization;
 import fll.Tournament;
+import fll.TournamentLevel;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.AdvancingTeam;
@@ -51,6 +46,12 @@ import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * CSV file containing information about the teams advancing to another
@@ -158,8 +159,14 @@ public class TournamentAdvancement extends BaseFLLServlet {
       csvData.add(String.valueOf(teamNumber));
       csvData.add(team.getTeamName());
       csvData.add(tournament.getDescription());
-      csvData.add(tournament.getLevel());
-      csvData.add(tournament.getNextLevel());
+      final TournamentLevel tournamentLevel = tournament.getLevel();
+      csvData.add(tournamentLevel.getName());
+      if (TournamentLevel.NO_NEXT_LEVEL_ID == tournamentLevel.getNextLevelId()) {
+        csvData.add("");
+      } else {
+        final TournamentLevel nextLevel = TournamentLevel.getById(connection, tournamentLevel.getNextLevelId());
+        csvData.add(nextLevel.getName());
+      }
       csvData.add(team.getAwardGroup());
       csvData.add(team.getJudgingGroup());
 

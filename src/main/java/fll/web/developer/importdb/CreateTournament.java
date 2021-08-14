@@ -7,6 +7,8 @@ package fll.web.developer.importdb;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Set;
 
@@ -19,6 +21,7 @@ import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.Tournament;
+import fll.TournamentLevel;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -126,9 +129,12 @@ public class CreateTournament extends BaseFLLServlet {
                                        final HttpSession session)
       throws SQLException {
     final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournamentName);
+
+    createTournamentLevels(sourceConnection, destConnection, sourceTournament.getTournamentID());
+
     Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getDescription(),
-                                sourceTournament.getDate(), sourceTournament.getLevel(),
-                                sourceTournament.getNextLevel());
+                                sourceTournament.getDate(), sourceTournament.getLevel());
+
     message.append("<p>Created tournament "
         + sourceTournament.getName()
         + "</p>");
@@ -137,6 +143,53 @@ public class CreateTournament extends BaseFLLServlet {
       session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentExists");
     }
 
+  }
+
+  /**
+   * This assumes that the level to next level associations are the same between
+   * source and destination. This method just checks that the level for
+   * {@code sourceTournamentID} or one of it's next levels exists.
+   */
+  private static void createTournamentLevels(final Connection sourceConnection,
+                                             final Connection destinationConnection,
+                                             final int sourceTournamentID)
+      throws SQLException {
+    try (
+        PreparedStatement getLevelId = sourceConnection.prepareStatement("SELECT level_id FROM tournaments WHERE tournament_id = ?")) {
+      getLevelId.setInt(1, sourceTournamentID);
+      try (ResultSet rs = getLevelId.executeQuery()) {
+        if (rs.next()) {
+          final int sourceLevelId = rs.getInt(1);
+          final TournamentLevel sourceLevel = TournamentLevel.getById(sourceConnection, sourceLevelId);
+          findOrCreateTournamentLevel(sourceConnection, sourceLevel, destinationConnection);
+        }
+        // else nothing to do
+      }
+    }
+  }
+
+  /**
+   * @param sourceConnection source database
+   * @param sourceLevel source level that needs to exist in the destination
+   *          database
+   * @param destConnection destination database
+   * @return level in the destination database
+   * @throws SQLException on a database error
+   */
+  private static TournamentLevel findOrCreateTournamentLevel(final Connection sourceConnection,
+                                                             final TournamentLevel sourceLevel,
+                                                             final Connection destConnection)
+      throws SQLException {
+    final TournamentLevel destLevel;
+    if (TournamentLevel.levelExists(destConnection, sourceLevel.getName())) {
+      destLevel = TournamentLevel.getByName(destConnection, sourceLevel.getName());
+    } else if (TournamentLevel.NO_NEXT_LEVEL_ID == sourceLevel.getNextLevelId()) {
+      destLevel = TournamentLevel.createTournamentLevel(sourceConnection, sourceLevel.getName());
+    } else {
+      final TournamentLevel sourceNextLevel = TournamentLevel.getById(sourceConnection, sourceLevel.getNextLevelId());
+      destLevel = findOrCreateTournamentLevel(sourceConnection, sourceNextLevel, destConnection);
+    }
+    return destLevel;
   }
 
 }

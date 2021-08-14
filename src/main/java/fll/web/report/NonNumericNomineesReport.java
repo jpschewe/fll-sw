@@ -244,12 +244,7 @@ public class NonNumericNomineesReport extends BaseFLLServlet {
 
     final String tournamentDescription = tournament.getDescription();
     final String tournamentName = null == tournamentDescription ? tournament.getName() : tournamentDescription;
-    final String tournamentTitle;
-    if (null != tournament.getLevel()) {
-      tournamentTitle = String.format("%s: %s", tournament.getLevel(), tournamentName);
-    } else {
-      tournamentTitle = tournamentName;
-    }
+    final String tournamentTitle = String.format("%s: %s", tournament.getLevel(), tournamentName);
     subtitleBlock.appendChild(document.createTextNode(tournamentTitle));
 
     final Element subtitleCenter = FOPUtils.createXslFoElement(document, FOPUtils.LEADER_TAG);

@@ -30,6 +30,45 @@ fll.web.admin.Tournaments.populateContext(application, pageContext);
 
 <script type="text/javascript" src="tournaments.js"></script>
 
+<script type="text/javascript">
+  const NEW_TOURNAMENT_PREFIX = "${NEW_TOURNAMENT_PREFIX}";
+  const KEY_PREFIX = "${KEY_PREFIX}";
+  const NAME_PREFIX = "${NAME_PREFIX}";
+  const DESCRIPTION_PREFIX = "${DESCRIPTION_PREFIX}";
+  const DATE_PREFIX = "${DATE_PREFIX}";
+  const LEVEL_PREFIX = "${LEVEL_PREFIX}";
+  const currentTournamentId = "${currentTournamentId}";
+
+  /**
+   * Add all tournament levels to the specified DOM select element.
+   */
+  function populateLevelSelect(levelSelect) {
+    <c:forEach items="${tournamentLevels}" var="level" varStatus="loop">
+    const newOption${loop.index} = document.createElement("option");
+    newOption${loop.index}.setAttribute("value", "${level.id}");
+    newOption${loop.index}.innerText = "${level.name}";
+    levelSelect.appendChild(newOption${loop.index});
+    </c:forEach>
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("addRow").addEventListener("click", function() {
+      addNewTournament();
+    });
+
+    setupDatepickers();
+    
+    <c:forEach items="${tournamentsWithScores}" var="tournamentId">
+    tournamentsWithScores.push("${tournamentId}");
+    </c:forEach>
+
+    <c:forEach items="${tournaments}" var="tournament">
+    addTournament("${tournament.tournamentID}", "${tournament.name}",
+        "${tournament.description}", "${tournament.dateString}",
+        "${tournament.level.id}");
+    </c:forEach>
+  });
+</script>
 </head>
 
 <body>
@@ -59,11 +98,8 @@ fll.web.admin.Tournaments.populateContext(application, pageContext);
             This field is used in the awards report.</li>
     </ul>
 
-    <form action="<c:url value='/admin/StoreTournamentData' />"
-        method="POST" name="tournaments">
-
-        <input type="hidden" id="newTournamentId"
-            value="${newTournamentId}" />
+    <form action="<c:url value='/admin/Tournaments' />" method="POST"
+        name="tournaments">
 
         <table border="1" id="tournamentsTable">
             <tr>
@@ -71,58 +107,13 @@ fll.web.admin.Tournaments.populateContext(application, pageContext);
                 <th>Short Name</th>
                 <th>Long Name</th>
                 <th>Level</th>
-                <th>Next Level</th>
+                <th>&nbsp;</th>
             </tr>
 
-            <c:forEach items="${tournaments }" var="tournament"
-                varStatus="loopStatus">
-                <tr>
-                    <td>
-                        <input type="hidden"
-                            name="key${loopStatus.index}"
-                            value="${tournament.tournamentID}" />
-                        <input type="text"
-                            name="date${loopStatus.index}"
-                            id="date${loopStatus.index}"
-                            value="${tournament.dateString}" size="8" />
-                    </td>
-
-                    <td>
-                        <input type="text"
-                            name="name${loopStatus.index}"
-                            id="name${loopStatus.index}"
-                            value="${tournament.name}" maxlength="128"
-                            size="20" />
-                    </td>
-
-                    <td>
-                        <input type="text"
-                            name="description${loopStatus.index}"
-                            value="${tournament.description}" size="64" />
-                    </td>
-
-                    <td>
-                        <input type="text"
-                            name="level${loopStatus.index}"
-                            value="${tournament.level}" size="20"
-                            maxlength="128" />
-                    </td>
-
-                    <td>
-                        <input type="text"
-                            name="nextLevel${loopStatus.index}"
-                            value="${tournament.nextLevel}" size="20"
-                            maxlength="128" />
-                    </td>
-
-                </tr>
-            </c:forEach>
         </table>
 
-        <input type="hidden" name="numRows" id="numRows"
-            value="${fn:length(tournaments)}" />
         <!--  -->
-        <button id='addRow'>Add Row</button>
+        <button id='addRow' type='button'>Add Row</button>
         <!--  -->
         <input type='submit' name='commit' value='Finished'
             onclick='return checkTournamentNames()' />

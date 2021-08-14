@@ -23,6 +23,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
@@ -40,6 +41,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +54,12 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
+import fll.TournamentLevel;
+import fll.TournamentLevel.NoSuchTournamentLevelException;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.TeamPropertyDifference.TeamProperty;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.GatherBugReport;
 import fll.web.UserRole;
@@ -126,12 +131,28 @@ public final class ImportDB {
         }
       }
 
+      // create all of the tournament levels
+      for (final TournamentLevel sourceLevel : TournamentLevel.getAllLevels(sourceConnection)) {
+        if (!TournamentLevel.levelExists(destConnection, sourceLevel.getName())) {
+          TournamentLevel.createTournamentLevel(destConnection, sourceLevel.getName());
+        }
+      }
+      // set next level for destination levels
+      for (final TournamentLevel sourceLevel : TournamentLevel.getAllLevels(sourceConnection)) {
+        if (TournamentLevel.NO_NEXT_LEVEL_ID != sourceLevel.getNextLevelId()) {
+          final TournamentLevel sourceNextLevel = TournamentLevel.getById(sourceConnection,
+                                                                          sourceLevel.getNextLevelId());
+          final TournamentLevel destLevel = TournamentLevel.getByName(destConnection, sourceLevel.getName());
+          final TournamentLevel destNextLevel = TournamentLevel.getByName(destConnection, sourceNextLevel.getName());
+          TournamentLevel.updateTournamentLevel(destConnection, destLevel.getId(), destLevel.getName(), destNextLevel);
+        }
+      }
+
       // load all of the tournaments
       // don't worry about bringing the times over, this way they will all be
       // null and this will force score summarization
       for (final Tournament sourceTournament : Tournament.getTournaments(sourceConnection)) {
-        if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(sourceTournament.getName())
-            && GenerateDB.INTERNAL_TOURNAMENT_ID != sourceTournament.getTournamentID()) {
+        if (GenerateDB.INTERNAL_TOURNAMENT_ID != sourceTournament.getTournamentID()) {
           createTournament(sourceTournament, destConnection);
         }
       }
@@ -195,8 +216,7 @@ public final class ImportDB {
     // exist
     if (!Tournament.doesTournamentExist(destConnection, sourceTournament.getName())) {
       Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getDescription(),
-                                  sourceTournament.getDate(), sourceTournament.getLevel(),
-                                  sourceTournament.getNextLevel());
+                                  sourceTournament.getDate(), sourceTournament.getLevel());
     }
   }
 
@@ -477,10 +497,6 @@ public final class ImportDB {
       upgrade0To1(connection, descriptionFor0to1Upgrade);
     }
 
-    // tournament parameters existed after version 1
-    // previous tournaments always ran head to head
-    GenerateDB.setDefaultParameters(connection, true);
-
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 2) {
       upgrade1To2(connection);
@@ -596,6 +612,13 @@ public final class ImportDB {
     if (dbVersion < 29) {
       upgrade28To29(connection);
     }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 30) {
+      upgrade29To30(connection);
+    }
+
+    GenerateDB.setDefaultParameters(connection, true);
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
@@ -897,9 +920,8 @@ public final class ImportDB {
   private static void upgrade26To27(final Connection connection) throws SQLException {
     LOGGER.debug("Upgrading database from 26to 27");
 
-    // add level and next_level to Tournaments
     try (Statement stmt = connection.createStatement()) {
-      // need to check for columns as the upgrpade from 25 to 26 may do this
+      // need to check for columns as the upgrade from 25 to 26 may do this
       if (!checkForColumnInTable(connection, "fll_authentication", "num_failures")) {
         stmt.executeUpdate("ALTER TABLE fll_authentication ADD COLUMN num_failures INTEGER DEFAULT 0 NOT NULL");
       }
@@ -924,27 +946,35 @@ public final class ImportDB {
     }
 
     final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
-    final Collection<Tournament> tournaments = Tournament.getTournaments(connection);
     boolean modified = false;
 
-    for (final Tournament tournament : tournaments) {
-      LOGGER.trace("Upgrading non-numeric categories in tournamnet {}", tournament.getName());
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT Name, tournament_id FROM tournaments WHERE tournament_id <> ?")) {
+      prep.setInt(1, GenerateDB.INTERNAL_TOURNAMENT_ID);
 
-      // make sure that all non-numeric categories are in the challenge description
-      final Set<String> nonNumericCategoriesInDatabase = NonNumericNominees.getCategories(connection,
-                                                                                          tournament.getTournamentID());
-      for (final String categoryTitle : nonNumericCategoriesInDatabase) {
-        LOGGER.trace("Looking for database category '{}'", categoryTitle);
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final String name = rs.getString("Name");
+          final int tournamentId = rs.getInt("tournament_id");
 
-        if (null == description.getNonNumericCategoryByTitle(categoryTitle)) {
-          LOGGER.trace("Creating category '{}' and adding to challenge description", categoryTitle);
+          LOGGER.trace("Upgrading non-numeric categories in tournamnet {}", name);
 
-          final NonNumericCategory newCategory = new NonNumericCategory(categoryTitle, true);
-          description.addNonNumericCategory(newCategory);
-          modified = true;
+          // make sure that all non-numeric categories are in the challenge description
+          final Set<String> nonNumericCategoriesInDatabase = NonNumericNominees.getCategories(connection, tournamentId);
+          for (final String categoryTitle : nonNumericCategoriesInDatabase) {
+            LOGGER.trace("Looking for database category '{}'", categoryTitle);
+
+            if (null == description.getNonNumericCategoryByTitle(categoryTitle)) {
+              LOGGER.trace("Creating category '{}' and adding to challenge description", categoryTitle);
+
+              final NonNumericCategory newCategory = new NonNumericCategory(categoryTitle, true);
+              description.addNonNumericCategory(newCategory);
+              modified = true;
+            }
+          } // foreach category in database
         }
-      } // foreach category in database
-    } // foreach tournament
+      } // result set
+    } // prepared statement1
 
     if (modified) {
       if (LOGGER.isTraceEnabled()) {
@@ -987,6 +1017,123 @@ public final class ImportDB {
     }
 
     setDBVersion(connection, 29);
+  }
+
+  private static void upgrade29To30(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 29 to 30");
+
+    int mismatchCount = 0;
+
+    // table can be created during upgrade from 0 to 1 to support creating the
+    // default tournament
+    final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
+    if (!tables.contains("tournament_level")) {
+      // create the table and the default level
+      GenerateDB.createTournamentLevelsTable(connection);
+    }
+
+    // the column can exist in a 0 to 1 upgrade
+    if (!checkForColumnInTable(connection, "tournaments", "level_id")) {
+      try (Statement stmt = connection.createStatement()) {
+        // add level_id column to tournaments table
+        stmt.executeUpdate("ALTER TABLE tournaments ADD COLUMN level_id INTEGER");
+
+        final TournamentLevel defaultLevel = TournamentLevel.getByName(connection,
+                                                                       TournamentLevel.DEFAULT_TOURNAMENT_LEVEL_NAME);
+
+        // create all levels
+        final Map<String, @Nullable String> nextLevels = new HashMap<>();
+        final Map<String, TournamentLevel> createdLevels = new HashMap<>();
+
+        final Map<ImmutablePair<@Nullable String, @Nullable String>, TournamentLevel> levelAssignments = new HashMap<>();
+        try (ResultSet rs = stmt.executeQuery("SELECT DISTINCT level, next_level FROM Tournaments")) {
+          while (rs.next()) {
+            final @Nullable String levelName = rs.getString("level");
+            final @Nullable String nextLevelName = rs.getString("next_level");
+
+            final ImmutablePair<@Nullable String, @Nullable String> levelPair = ImmutablePair.of(levelName,
+                                                                                                 nextLevelName);
+            final TournamentLevel level;
+            if (null == levelName) {
+              level = defaultLevel;
+            } else {
+              if (!createdLevels.containsKey(levelName)) {
+                final String newLevelName;
+                if (!nextLevels.containsKey(levelName)) {
+                  newLevelName = levelName;
+                  nextLevels.put(levelName, nextLevelName);
+                } else {
+                  // check for mismatch
+                  final @Nullable String nextLevelNameStored = nextLevels.get(levelName);
+                  if (!Objects.equals(nextLevelName, nextLevelNameStored)) {
+                    // mismatch
+                    // need to specify a new name for level
+                    newLevelName = String.format("%s_%d", levelName, mismatchCount);
+                    ++mismatchCount;
+                  } else {
+                    newLevelName = levelName;
+                    nextLevels.put(levelName, nextLevelName);
+                  }
+                }
+
+                level = TournamentLevel.createTournamentLevel(connection, newLevelName);
+                createdLevels.put(newLevelName, level);
+              } else {
+                level = createdLevels.get(levelName);
+              }
+
+              if (null != nextLevelName) {
+                final TournamentLevel nextLevel;
+                if (!createdLevels.containsKey(nextLevelName)) {
+                  nextLevel = TournamentLevel.createTournamentLevel(connection, nextLevelName);
+                  createdLevels.put(nextLevelName, nextLevel);
+                } else {
+                  nextLevel = TournamentLevel.getByName(connection, nextLevelName);
+                }
+                TournamentLevel.updateTournamentLevel(connection, level.getId(), levelName, nextLevel);
+              }
+            } // non-null level
+
+            // track the level object for the pair
+            levelAssignments.put(levelPair, level);
+          } // foreach pair
+        } // result set
+
+        // assign levels to tournaments
+        try (
+            ResultSet rs = stmt.executeQuery("SELECT tournament_id, Name, Location, tournament_date, level, next_level FROM Tournaments")) {
+          while (rs.next()) {
+            final int tournamentId = rs.getInt("tournament_id");
+            final @Nullable String levelName = rs.getString("level");
+            final @Nullable String nextLevelName = rs.getString("next_level");
+            final @Nullable String location = rs.getString("Location");
+            final String name = castNonNull(rs.getString("Name"));
+            final java.sql.@Nullable Date d = rs.getDate("tournament_date");
+            final LocalDate date = null == d ? null : d.toLocalDate();
+
+            final ImmutablePair<@Nullable String, @Nullable String> levelPair = ImmutablePair.of(levelName,
+                                                                                                 nextLevelName);
+
+            TournamentLevel level;
+            if (GenerateDB.INTERNAL_TOURNAMENT_ID == tournamentId) {
+              level = TournamentLevel.getById(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
+            } else {
+              level = levelAssignments.get(levelPair);
+              if (null == level) {
+                LOGGER.warn("Unable to find created level for tournament with id: {} levelName: {} nextLevelName: {}, using default level",
+                            tournamentId, levelName, nextLevelName);
+                level = defaultLevel;
+              }
+            }
+            Tournament.updateTournament(connection, tournamentId, name, location, date, level);
+          }
+        } // result set
+
+      } // statement
+
+    } // if level_id column doesn't exist in tournaments table
+
+    setDBVersion(connection, 30);
   }
 
   /**
@@ -1282,17 +1429,26 @@ public final class ImportDB {
       // drop Tournaments table
       stmt.executeUpdate("DROP TABLE Tournaments");
 
-      // create Tournaments table
+      GenerateDB.createTournamentLevelsTable(connection);
       GenerateDB.tournaments(connection);
 
-      // add all tournaments back
-      for (final Map.Entry<String, @Nullable String> entry : nameLocation.entrySet()) {
-        if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(entry.getKey())) {
-          if (!Tournament.doesTournamentExist(connection, entry.getKey())) {
-            Tournament.createTournament(connection, entry.getKey(), entry.getValue(), null, null, null);
+      try {
+        final TournamentLevel defaultLevel = TournamentLevel.getByName(connection,
+                                                                       TournamentLevel.DEFAULT_TOURNAMENT_LEVEL_NAME);
+
+        // add all tournaments back
+        for (final Map.Entry<String, @Nullable String> entry : nameLocation.entrySet()) {
+          if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(entry.getKey())) {
+            if (!Tournament.doesTournamentExist(connection, entry.getKey())) {
+              Tournament.createTournament(connection, entry.getKey(), entry.getValue(), null, defaultLevel);
+            }
           }
         }
+
+      } catch (final NoSuchTournamentLevelException e) {
+        throw new FLLInternalException("Cannot find the default tournament level named", e);
       }
+
       // get map of names to ids
       final Map<String, Integer> nameID = new HashMap<>();
       try (ResultSet rs = stmt.executeQuery("SELECT Name, tournament_id FROM Tournaments")) {
@@ -1330,6 +1486,11 @@ public final class ImportDB {
       // create new tournament parameters table
       GenerateDB.tournamentParameters(connection);
 
+      // head to head was always run in the early tournaments
+      // needs to execute after the tournaments and tournament_parameters tables are
+      // created
+      GenerateDB.setDefaultParameters(connection, true);
+
       // set the version to 1 - this will have been set while creating
       // global_parameters, but we need to force it to 1 for later upgrade
       // functions to not be confused
@@ -1357,6 +1518,8 @@ public final class ImportDB {
    * will delete all information related to the specified tournament from the
    * destination database and then copy the information from the source
    * database.
+   * The destination database needs the tournament and it's levels already
+   * created.
    *
    * @param sourceConnection a connection to the source database
    * @param destinationConnection a connection to the destination database

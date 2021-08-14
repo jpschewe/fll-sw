@@ -10,12 +10,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.Tournament;
@@ -30,6 +24,12 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Servlet to do the actual import.

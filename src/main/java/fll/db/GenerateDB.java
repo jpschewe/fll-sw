@@ -18,7 +18,10 @@ import java.sql.Statement;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
+import fll.TournamentLevel;
+import fll.TournamentLevel.NoSuchTournamentLevelException;
 import fll.Utilities;
+import fll.util.FLLInternalException;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
@@ -57,11 +60,6 @@ public final class GenerateDB {
   public static final String DUMMY_TOURNAMENT_NAME = "DUMMY";
 
   /**
-   * Name of tournament for teams that dropped.
-   */
-  public static final String DROP_TOURNAMENT_NAME = "DROP";
-
-  /**
    * Internal tournament ID.
    */
   public static final int INTERNAL_TOURNAMENT_ID = -1;
@@ -69,7 +67,17 @@ public final class GenerateDB {
   /**
    * Internal tournament name.
    */
-  public static final String INTERNAL_TOURNAMENT_NAME = "INTERNAL";
+  public static final String INTERNAL_TOURNAMENT_NAME = "__INTERNAL__";
+
+  /**
+   * ID for {@link #INTERNAL_TOURNAMENT_LEVEL_NAME}}.
+   */
+  public static final int INTERNAL_TOURNAMENT_LEVEL_ID = INTERNAL_TOURNAMENT_ID;
+
+  /**
+   * Name of level for {@link #INTERNAL_TOURNAMENT_NAME}.
+   */
+  public static final String INTERNAL_TOURNAMENT_LEVEL_NAME = INTERNAL_TOURNAMENT_NAME;
 
   /**
    * Name of the performance table.
@@ -109,6 +117,7 @@ public final class GenerateDB {
       createAuthenticationRoles(connection, true);
 
       // Table structure for table 'Tournaments'
+      createTournamentLevelsTable(connection);
       tournaments(connection);
 
       // Table structure for table 'Teams'
@@ -522,30 +531,53 @@ public final class GenerateDB {
           + " ,subjective_modified TIMESTAMP DEFAULT NULL" //
           + " ,summary_computed TIMESTAMP DEFAULT NULL" //
           + " ,tournament_date DATE DEFAULT NULL" //
-          + " ,level VARCHAR(128) DEFAULT NULL" //
-          + " ,next_level VARCHAR(128) DEFAULT NULL" //
+          + " ,level_id INTEGER NOT NULL" //
           + " ,CONSTRAINT tournaments_pk PRIMARY KEY (tournament_id)" //
           + " ,CONSTRAINT name_unique UNIQUE(Name)" //
           + ")");
-      Tournament.createTournament(connection, DUMMY_TOURNAMENT_NAME, "Default dummy tournament", null, null, null);
-      Tournament.createTournament(connection, DROP_TOURNAMENT_NAME, "Dummy tournament for teams that drop out", null,
-                                  null, null);
+
+      try {
+        final TournamentLevel defaultLevel = TournamentLevel.getByName(connection,
+                                                                       TournamentLevel.DEFAULT_TOURNAMENT_LEVEL_NAME);
+        Tournament.createTournament(connection, DUMMY_TOURNAMENT_NAME, "Default dummy tournament", null, defaultLevel);
+      } catch (final NoSuchTournamentLevelException e) {
+        throw new FLLInternalException("Cannot find the default tournament level named", e);
+      }
 
       // add internal tournament for default values and such
       createInternalTournament(connection);
-
     }
   }
 
-  private static void renameTournament(final Connection connection,
-                                       final int tournament,
-                                       final String newName)
-      throws SQLException {
-    try (
-        PreparedStatement prep = connection.prepareStatement("UPDATE Tournaments SET Name = ? WHERE tournament_id = ?")) {
-      prep.setString(1, newName);
-      prep.setInt(2, tournament);
-      prep.executeUpdate();
+  /**
+   * Create the "internal" tournament used for default parameters, if needed.
+   */
+  /* package */static void createInternalTournamentLevel(final Connection connection) throws SQLException {
+    // make sure another level with the internal name doesn't exist
+    if (TournamentLevel.levelExists(connection, INTERNAL_TOURNAMENT_LEVEL_NAME)) {
+      final TournamentLevel level = TournamentLevel.getByName(connection, INTERNAL_TOURNAMENT_LEVEL_NAME);
+      if (INTERNAL_TOURNAMENT_LEVEL_ID != level.getId()) {
+        if (TournamentLevel.NO_NEXT_LEVEL_ID == level.getNextLevelId()) {
+          TournamentLevel.updateTournamentLevel(connection, level.getId(), "Imported-"
+              + level.getName());
+        } else {
+          final TournamentLevel nextLevel = TournamentLevel.getById(connection, level.getNextLevelId());
+          TournamentLevel.updateTournamentLevel(connection, level.getId(), "Imported-"
+              + level.getName(), nextLevel);
+        }
+      }
+    }
+
+    // check for internal tournament level by id
+    if (!TournamentLevel.levelExists(connection, INTERNAL_TOURNAMENT_LEVEL_ID)) {
+      // cannot use standard method as we need to set the id
+      try (
+          PreparedStatement prepInsert = connection.prepareStatement("INSERT INTO tournament_level (level_id, level_name, next_level_id) VALUES(?, ?, ?)")) {
+        prepInsert.setInt(1, INTERNAL_TOURNAMENT_LEVEL_ID);
+        prepInsert.setString(2, INTERNAL_TOURNAMENT_LEVEL_NAME);
+        prepInsert.setInt(3, TournamentLevel.NO_NEXT_LEVEL_ID);
+        prepInsert.executeUpdate();
+      }
     }
   }
 
@@ -553,36 +585,36 @@ public final class GenerateDB {
    * Create the "internal" tournament used for default parameters, if needed.
    */
   /* package */static void createInternalTournament(final Connection connection) throws SQLException {
+    createInternalTournamentLevel(connection);
+
     // make sure another tournament with the internal name doesn't exist
-    try (PreparedStatement prep = connection.prepareStatement("SELECT tournament_id FROM Tournaments WHERE Name = ?")) {
-      prep.setString(1, INTERNAL_TOURNAMENT_NAME);
-      try (ResultSet rs = prep.executeQuery()) {
-        if (rs.next()) {
-          final int importedInternal = rs.getInt(1);
-          if (importedInternal != INTERNAL_TOURNAMENT_ID) {
-            renameTournament(connection, importedInternal, "Imported-"
-                + INTERNAL_TOURNAMENT_NAME);
-          }
-        }
+    if (Tournament.doesTournamentExist(connection, INTERNAL_TOURNAMENT_NAME)) {
+      final Tournament importedInternal = Tournament.findTournamentByName(connection, INTERNAL_TOURNAMENT_NAME);
+      if (INTERNAL_TOURNAMENT_ID != importedInternal.getTournamentID()) {
+        Tournament.updateTournament(connection, importedInternal.getTournamentID(), "Imported-"
+            + importedInternal.getName(), importedInternal.getDescription(), importedInternal.getDate(),
+                                    importedInternal.getLevel());
       }
     }
 
     // check if a tournament exists with the internal id
-    try (PreparedStatement prep = connection.prepareStatement("SELECT Name FROM Tournaments WHERE tournament_id = ?")) {
-      prep.setInt(1, INTERNAL_TOURNAMENT_ID);
-      try (ResultSet rs = prep.executeQuery()) {
-        if (!rs.next()) {
+    if (!Tournament.doesTournamentExist(connection, INTERNAL_TOURNAMENT_ID)) {
+      try {
+        final TournamentLevel internalLevel = TournamentLevel.getById(connection, INTERNAL_TOURNAMENT_LEVEL_ID);
 
-          // need to create
-          try (
-              PreparedStatement prepInsert = connection.prepareStatement("INSERT INTO Tournaments (tournament_id, Name) VALUES(?, ?)")) {
-            prepInsert.setInt(1, INTERNAL_TOURNAMENT_ID);
-            prepInsert.setString(2, INTERNAL_TOURNAMENT_NAME);
-            prepInsert.executeUpdate();
-          } // allocate insert
-        } // if tournament does not exist
-      } // allocate result set
-    } // allocate check
+        // cannot use standard method as we need to set the id
+        try (
+            PreparedStatement prepInsert = connection.prepareStatement("INSERT INTO Tournaments (tournament_id, Name, level_id) VALUES(?, ?, ?)")) {
+          prepInsert.setInt(1, INTERNAL_TOURNAMENT_ID);
+          prepInsert.setString(2, INTERNAL_TOURNAMENT_NAME);
+          prepInsert.setInt(3, internalLevel.getId());
+          prepInsert.executeUpdate();
+        }
+
+      } catch (final NoSuchTournamentLevelException e) {
+        throw new FLLInternalException("Cannot find the default tournament level", e);
+      }
+    }
   }
 
   /**
@@ -595,19 +627,23 @@ public final class GenerateDB {
   /* package */static void setDefaultParameters(final Connection connection,
                                                 final boolean headToHead)
       throws SQLException {
-    createInternalTournament(connection);
-
     try (
-        PreparedStatement globalInsert = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)")) {
+        PreparedStatement globalInsert = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
+        PreparedStatement findTournament = connection.prepareStatement("SELECT tournament_id FROM Tournaments WHERE Name = ?")) {
       // Global Parameters
 
       boolean check;
       check = GlobalParameters.globalParameterExists(connection, GlobalParameters.CURRENT_TOURNAMENT);
       if (!check) {
-        final Tournament dummyTournament = Tournament.findTournamentByName(connection, DUMMY_TOURNAMENT_NAME);
-        globalInsert.setString(2, GlobalParameters.CURRENT_TOURNAMENT);
-        globalInsert.setInt(1, dummyTournament.getTournamentID());
-        globalInsert.executeUpdate();
+        findTournament.setString(1, DUMMY_TOURNAMENT_NAME);
+        try (ResultSet rs = findTournament.executeQuery()) {
+          if (rs.next()) {
+            final int tournamentId = rs.getInt(1);
+            globalInsert.setString(2, GlobalParameters.CURRENT_TOURNAMENT);
+            globalInsert.setInt(1, tournamentId);
+            globalInsert.executeUpdate();
+          }
+        }
       }
 
       check = GlobalParameters.globalParameterExists(connection, GlobalParameters.STANDARDIZED_MEAN);
@@ -1145,6 +1181,30 @@ public final class GenerateDB {
       sql2.append(")");
       stmt.executeUpdate(sql2.toString());
 
+    }
+  }
+
+  /**
+   * Create the tournament levels table and create the default level.
+   * 
+   * @param connection database connection
+   * @throws SQLException on a database error
+   */
+  /* package */ static void createTournamentLevelsTable(final Connection connection) throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("DROP TABLE IF EXISTS tournament_level");
+
+      stmt.executeUpdate("CREATE TABLE tournament_level ("
+          + "  level_id INTEGER GENERATED BY DEFAULT AS IDENTITY" //
+          + " ,level_name LONGVARCHAR NOT NULL" //
+          + " ,next_level_id INTEGER NOT NULL" //
+          + " ,CONSTRAINT tournament_level_pk PRIMARY KEY (level_id)" //
+          + " ,CONSTRAINT tournament_level_name_unique UNIQUE(level_name)" //
+          + ")");
+
+      createInternalTournamentLevel(connection);
+
+      TournamentLevel.createTournamentLevel(connection, TournamentLevel.DEFAULT_TOURNAMENT_LEVEL_NAME);
     }
   }
 
