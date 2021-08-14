@@ -186,7 +186,12 @@ public abstract class AbstractGoal extends GoalElement {
     @Override
     public int compare(final EnumeratedValue one,
                        final EnumeratedValue two) {
-      return Double.compare(one.getScore(), two.getScore());
+      final int scoreCompare = Double.compare(one.getScore(), two.getScore());
+      if (0 == scoreCompare) {
+        return one.getValue().compareTo(two.getValue());
+      } else {
+        return scoreCompare;
+      }
     }
   }
 
