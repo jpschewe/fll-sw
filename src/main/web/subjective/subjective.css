@@ -92,3 +92,7 @@ span.sliderTickMark {
 .split_30_70 .ui-block-b {
     width: 70%;
 }
+
+.ui-footer button.score-entry-button {
+    width: 95%;
+}
