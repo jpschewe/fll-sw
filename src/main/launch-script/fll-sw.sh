@@ -31,7 +31,7 @@ esac
 
 if $linux ; then
     # check for bundled JDK
-    for dir in "${mypath}"/jdk-*; do
+    for dir in "${mypath}"/jdk*; do
         if [ -e "${dir}/bin/java" ]; then
             JAVA_HOME=${dir}
         fi
@@ -41,7 +41,7 @@ fi
 
 if $darwin ; then
     # check for bundled JDK
-    for dir in "${mypath}"/jdk-*/Contents/Home; do
+    for dir in "${mypath}"/jdk*/Contents/Home; do
         if [ -e "${dir}/bin/java" ]; then
             JAVA_HOME=${dir}
         fi

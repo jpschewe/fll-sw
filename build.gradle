@@ -548,7 +548,7 @@ createExe {
     productName = "FLL-SW"
     copyright = "GPL"
     
-    bundledJrePath = "jdk-11.0.2"
+    bundledJrePath = "jdk"
     bundledJre64Bit = true
     bundledJreAsFallback = false
 
@@ -672,9 +672,17 @@ tasks.register("verifyJavaWindows", Verify) {
     checksum(project.java_windows_checksum)
 }
 tasks.register("uncompressJavaWindows", Copy) {
+    def basePath = project.java_download_base.resolve("linux")
+
     dependsOn(verifyJavaWindows)    
     from(zipTree(downloadJavaWindows.dest))
-    into(project.java_download_base.resolve("windows"))
+    into(basePath)
+    
+    doLast {
+        // there is always 1 directory at the top
+        def toMove = java.nio.file.Files.newDirectoryStream(basePath).iterator().next()
+        java.nio.file.Files.move(toMove, basePath.resolve("jdk"))
+    }        
 } 
 uncompressJavaWindows.doFirst {
     // Need to remove read-only file from JDK release
@@ -727,9 +735,16 @@ tasks.register("verifyJavaLinux", Verify) {
     checksum(project.java_linux_checksum)
 }
 tasks.register("uncompressJavaLinux", Copy) {
+    def basePath = project.java_download_base.resolve("linux")
     dependsOn(verifyJavaLinux)    
     from(tarTree(downloadJavaLinux.dest))
-    into(project.java_download_base.resolve("linux"))
+    into(basePath)
+    
+    doLast {
+        // there is always 1 directory at the top
+        def toMove = java.nio.file.Files.newDirectoryStream(basePath).iterator().next()
+        java.nio.file.Files.move(toMove, basePath.resolve("jdk"))
+    }    
 } 
 uncompressJavaLinux.doFirst {
     // Need to remove read-only file from JDK release
@@ -785,9 +800,16 @@ tasks.register("verifyJavaMac", Verify) {
     checksum(project.java_mac_checksum)
 }
 tasks.register("uncompressJavaMac", Copy) {
+    def basePath = project.java_download_base.resolve("mac") 
     dependsOn(verifyJavaMac)      
     from(tarTree(downloadJavaMac.dest))
-    into(project.java_download_base.resolve("mac"))
+    into(basePath)
+    
+    doLast {
+        // there is always 1 directory at the top
+        def toMove = java.nio.file.Files.newDirectoryStream(basePath).iterator().next()
+        java.nio.file.Files.move(toMove, basePath.resolve("jdk"))
+    }
 } 
 uncompressJavaMac.doFirst {
     // Need to remove read-only file from JDK release
