@@ -1029,7 +1029,7 @@ public final class ImportDB {
     final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
     if (!tables.contains("tournament_level")) {
       // create the table and the default level
-      GenerateDB.createTournamentLevelsTable(connection);
+      GenerateDB.createTournamentLevelsTable(connection, false);
     }
 
     // the column can exist in a 0 to 1 upgrade
@@ -1429,7 +1429,7 @@ public final class ImportDB {
       // drop Tournaments table
       stmt.executeUpdate("DROP TABLE Tournaments");
 
-      GenerateDB.createTournamentLevelsTable(connection);
+      GenerateDB.createTournamentLevelsTable(connection, false);
       GenerateDB.tournaments(connection);
 
       try {
