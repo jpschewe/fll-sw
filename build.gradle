@@ -672,7 +672,7 @@ tasks.register("verifyJavaWindows", Verify) {
     checksum(project.java_windows_checksum)
 }
 tasks.register("uncompressJavaWindows", Copy) {
-    def basePath = project.java_download_base.resolve("linux")
+    def basePath = project.java_download_base.resolve("windows")
 
     dependsOn(verifyJavaWindows)    
     from(zipTree(downloadJavaWindows.dest))
