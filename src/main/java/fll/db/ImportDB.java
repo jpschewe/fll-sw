@@ -1646,6 +1646,32 @@ public final class ImportDB {
 
   }
 
+  private static void copyData(final PreparedStatement sourcePrep,
+                               final PreparedStatement destPrep)
+      throws SQLException {
+    try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+      final int columnCount = sourceRS.getMetaData().getColumnCount();
+
+      boolean needsExecute = false;
+      while (sourceRS.next()) {
+        for (int i = 1; i <= columnCount; i++) {
+          Object sourceObj = sourceRS.getObject(i);
+          if ("".equals(sourceObj)) {
+            sourceObj = null;
+          }
+          destPrep.setObject(i
+              + 1, sourceObj);
+        }
+        needsExecute = true;
+        destPrep.addBatch();
+      }
+
+      if (needsExecute) {
+        destPrep.executeBatch();
+      }
+    } // sourceRs
+  }
+
   private static void importTournamentData(final Connection sourceConnection,
                                            final Connection destinationConnection,
                                            final int sourceTournamentID,
@@ -1694,19 +1720,7 @@ public final class ImportDB {
       sourcePrep.setInt(1, sourceTournamentID);
 
       destPrep.setInt(1, destTournamentID);
-      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-        while (sourceRS.next()) {
-          for (int i = 1; i <= 2; i++) {
-            Object sourceObj = sourceRS.getObject(i);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i
-                + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-      }
+      copyData(sourcePrep, destPrep);
     }
 
     try (
@@ -1717,19 +1731,7 @@ public final class ImportDB {
             + " VALUES (?, ?, ?, ?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
-      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-        while (sourceRS.next()) {
-          for (int i = 1; i <= 5; i++) {
-            Object sourceObj = sourceRS.getObject(i);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i
-                + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-      }
+      copyData(sourcePrep, destPrep);
     }
 
     try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number, name, subj_time" //
@@ -1740,19 +1742,7 @@ public final class ImportDB {
 
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
-      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-        while (sourceRS.next()) {
-          for (int i = 1; i <= 3; i++) {
-            Object sourceObj = sourceRS.getObject(i);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i
-                + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-      }
+      copyData(sourcePrep, destPrep);
     }
   }
 
@@ -1774,19 +1764,7 @@ public final class ImportDB {
             + "VALUES (?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
-      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-        while (sourceRS.next()) {
-          for (int i = 1; i <= 2; i++) {
-            Object sourceObj = sourceRS.getObject(i);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i
-                + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-      }
+      copyData(sourcePrep, destPrep);
     }
   }
 
@@ -1810,19 +1788,7 @@ public final class ImportDB {
             + "LineNumber, Team, AssignedTable, Printed, run_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
-      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-        while (sourceRS.next()) {
-          for (int i = 1; i <= 7; i++) {
-            Object sourceObj = sourceRS.getObject(i);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i
-                + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-      }
+      copyData(sourcePrep, destPrep);
     }
   }
 
@@ -1883,19 +1849,7 @@ public final class ImportDB {
 
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
-      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-        while (sourceRS.next()) {
-          for (int i = 1; i <= 3; i++) {
-            Object sourceObj = sourceRS.getObject(i);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i
-                + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-      } // result set
+      copyData(sourcePrep, destPrep);
     } // prepared statements
 
     try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT playoff_division, table_id"
@@ -1905,19 +1859,7 @@ public final class ImportDB {
       sourcePrep.setInt(1, sourceTournamentID);
 
       destPrep.setInt(1, destTournamentID);
-      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-        while (sourceRS.next()) {
-          for (int i = 1; i <= 2; i++) {
-            Object sourceObj = sourceRS.getObject(i);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i
-                + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-      } // result set
+      copyData(sourcePrep, destPrep);
     } // prepared statements
 
   }
@@ -2023,21 +1965,7 @@ public final class ImportDB {
 
       destPrep.setInt(1, destTournamentID);
       sourcePrep.setInt(1, sourceTournamentID);
-      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-        while (sourceRS.next()) {
-          // skip tournament column
-          for (int i = 1; i < numColumns; i++) {
-            Object sourceObj = sourceRS.getObject(i
-                + 1);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i
-                + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-      }
+      copyData(sourcePrep, destPrep);
     }
 
   }
