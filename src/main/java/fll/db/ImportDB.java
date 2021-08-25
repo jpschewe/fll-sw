@@ -166,6 +166,13 @@ public final class ImportDB {
         importDatabase(sourceConnection, destConnection, tournament, true, true, true);
       }
 
+      // for each tournament level import the data relating to the tournament level
+      // NOTE: all levels were created above
+      for (final TournamentLevel sourceLevel : TournamentLevel.getAllLevels(sourceConnection)) {
+        final TournamentLevel destLevel = TournamentLevel.getByName(destConnection, sourceLevel.getName());
+        importTournamentLevelData(sourceConnection, destConnection, sourceLevel.getId(), destLevel.getId());
+      }
+
       final String sourceSelectedTournamentName = Tournament.getCurrentTournament(sourceConnection).getName();
       final Tournament destSelectedTournament = Tournament.findTournamentByName(destConnection,
                                                                                 sourceSelectedTournamentName);
@@ -1644,6 +1651,40 @@ public final class ImportDB {
       } // result set
     } // prepared statements
 
+  }
+
+  private static void importTournamentLevelData(final Connection sourceConnection,
+                                                final Connection destConnection,
+                                                final int sourceLevelId,
+                                                final int destLevelId)
+      throws SQLException {
+    importIgnoredCategories(sourceConnection, destConnection, sourceLevelId, destLevelId);
+
+  }
+
+  private static void importIgnoredCategories(final Connection sourceConnection,
+                                              final Connection destConnection,
+                                              final int sourceLevelId,
+                                              final int destLevelId)
+      throws SQLException {
+    try (
+        PreparedStatement delete = destConnection.prepareStatement("DELETE FROM categories_ignored WHERE level_id = ?")) {
+      delete.setInt(1, destLevelId);
+      delete.executeUpdate();
+    }
+
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT category_identifier, category_type" //
+        + " FROM categories_ignored WHERE level_id = ?");
+        PreparedStatement destPrep = destConnection.prepareStatement("INSERT INTO categories_ignored" //
+            + " (level_id, category_identifier, category_type)" //
+            + " VALUES (?, ?, ?)")) {
+
+      sourcePrep.setInt(1, sourceLevelId);
+      destPrep.setInt(1, destLevelId);
+
+      destPrep.setInt(1, destLevelId);
+      copyData(sourcePrep, destPrep);
+    }
   }
 
   private static void copyData(final PreparedStatement sourcePrep,
