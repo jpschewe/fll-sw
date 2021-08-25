@@ -1690,8 +1690,15 @@ public final class ImportDB {
   private static void copyData(final PreparedStatement sourcePrep,
                                final PreparedStatement destPrep)
       throws SQLException {
+    copyData(sourcePrep, destPrep, -1);
+  }
+
+  private static void copyData(final PreparedStatement sourcePrep,
+                               final PreparedStatement destPrep,
+                               final int columnCountOverride)
+      throws SQLException {
     try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-      final int columnCount = sourceRS.getMetaData().getColumnCount();
+      final int columnCount = -1 == columnCountOverride ? sourceRS.getMetaData().getColumnCount() : columnCountOverride;
 
       boolean needsExecute = false;
       while (sourceRS.next()) {
@@ -2006,7 +2013,8 @@ public final class ImportDB {
 
       destPrep.setInt(1, destTournamentID);
       sourcePrep.setInt(1, sourceTournamentID);
-      copyData(sourcePrep, destPrep);
+      copyData(sourcePrep, destPrep, numColumns
+          - 1);
     }
 
   }
