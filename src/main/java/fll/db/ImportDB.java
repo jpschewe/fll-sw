@@ -618,6 +618,11 @@ public final class ImportDB {
       upgrade29To30(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 31) {
+      upgrade30To31(connection);
+    }
+
     GenerateDB.setDefaultParameters(connection, true);
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -1134,6 +1139,18 @@ public final class ImportDB {
     } // if level_id column doesn't exist in tournaments table
 
     setDBVersion(connection, 30);
+  }
+
+  /**
+   * Adds categories_ignored table that tracks categories to ignore per tournament
+   * level.
+   */
+  private static void upgrade30To31(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 30 to 31");
+
+    GenerateDB.createCategoriesIgnored(connection, false);
+
+    setDBVersion(connection, 31);
   }
 
   /**

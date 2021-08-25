@@ -36,7 +36,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 29;
+  public static final int DATABASE_VERSION = 31;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -1214,6 +1214,35 @@ public final class GenerateDB {
       createInternalTournamentLevel(connection);
 
       TournamentLevel.createTournamentLevel(connection, TournamentLevel.DEFAULT_TOURNAMENT_LEVEL_NAME);
+    }
+  }
+
+  /**
+   * Table of categories to not award at a tournament level.
+   * 
+   * @param connection database connections
+   * @param createConstrints if constraints should be created
+   * @throws SQLException on a database error
+   */
+  /* package */ static void createCategoriesIgnored(final Connection connection,
+                                                    final boolean createConstrints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("DROP TABLE IF EXISTS categories_ignored");
+
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE categories_ignored (");
+      sql.append("  level_id INTEGER NOT NULL");
+      sql.append(" ,category_identifier LONGVARCHAR NOT NULL");
+      sql.append(" ,category_type VARCHAR NOT NULL");
+      if (createConstrints) {
+        sql.append(" ,CONSTRAINT categories_ignored_pk PRIMARY KEY (level_id, category_identifier)");
+        sql.append(" ,CONSTRAINT categories_ignored_level_fk FOREIGN KEY(level_id) REFERENCES tournament_level(level_id) ON DELETE CASCADE");
+      }
+      sql.append(")");
+
+      stmt.executeUpdate(sql.toString());
+
     }
   }
 
