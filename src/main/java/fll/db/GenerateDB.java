@@ -1234,7 +1234,7 @@ public final class GenerateDB {
       sql.append("CREATE TABLE categories_ignored (");
       sql.append("  level_id INTEGER NOT NULL");
       sql.append(" ,category_identifier LONGVARCHAR NOT NULL");
-      sql.append(" ,category_type VARCHAR NOT NULL");
+      sql.append(" ,category_type VARCHAR(64) NOT NULL");
       if (createConstrints) {
         sql.append(" ,CONSTRAINT categories_ignored_pk PRIMARY KEY (level_id, category_identifier)");
         sql.append(" ,CONSTRAINT categories_ignored_level_fk FOREIGN KEY(level_id) REFERENCES tournament_level(level_id) ON DELETE CASCADE");
