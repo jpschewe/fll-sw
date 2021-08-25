@@ -1690,11 +1690,13 @@ public final class ImportDB {
   private static void copyData(final PreparedStatement sourcePrep,
                                final PreparedStatement destPrep)
       throws SQLException {
-    copyData(sourcePrep, destPrep, -1);
+    copyData(sourcePrep, 0, destPrep, 1, -1);
   }
 
   private static void copyData(final PreparedStatement sourcePrep,
+                               final int sourceOffset,
                                final PreparedStatement destPrep,
+                               final int destOffset,
                                final int columnCountOverride)
       throws SQLException {
     try (ResultSet sourceRS = sourcePrep.executeQuery()) {
@@ -1703,12 +1705,13 @@ public final class ImportDB {
       boolean needsExecute = false;
       while (sourceRS.next()) {
         for (int i = 1; i <= columnCount; i++) {
-          Object sourceObj = sourceRS.getObject(i);
+          Object sourceObj = sourceRS.getObject(i
+              + sourceOffset);
           if ("".equals(sourceObj)) {
             sourceObj = null;
           }
           destPrep.setObject(i
-              + 1, sourceObj);
+              + destOffset, sourceObj);
         }
         needsExecute = true;
         destPrep.addBatch();
@@ -2013,7 +2016,7 @@ public final class ImportDB {
 
       destPrep.setInt(1, destTournamentID);
       sourcePrep.setInt(1, sourceTournamentID);
-      copyData(sourcePrep, destPrep, numColumns
+      copyData(sourcePrep, 1, destPrep, 1, numColumns
           - 1);
     }
 
