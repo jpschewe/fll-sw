@@ -87,7 +87,7 @@ public final class GenerateDB {
   /**
    * Generate a completely new DB from a challenge description. This also stores
    * the description
-   * in the database for later use.
+   * in the database for later use. Any existing data in the database is removed.
    *
    * @param description tournament description
    * @param connection connection to the database to create the tables in
@@ -110,6 +110,9 @@ public final class GenerateDB {
       // threads
       stmt.executeUpdate("SET DATABASE TRANSACTION CONTROL MVCC");
 
+      // make sure the database is empty
+      stmt.executeUpdate("DROP SCHEMA PUBLIC CASCADE");
+
       createGlobalParameters(description, connection);
 
       // authentication tables
@@ -121,7 +124,6 @@ public final class GenerateDB {
       tournaments(connection);
 
       // Table structure for table 'Teams'
-      stmt.executeUpdate("DROP TABLE IF EXISTS Teams CASCADE");
       stmt.executeUpdate("CREATE TABLE Teams ("
           + "  TeamNumber integer NOT NULL," //
           + "  TeamName varchar(255) default '"
@@ -150,7 +152,6 @@ public final class GenerateDB {
       }
 
       // Table structure for table 'tablenames'
-      stmt.executeUpdate("DROP TABLE IF EXISTS tablenames CASCADE");
       stmt.executeUpdate("CREATE TABLE tablenames ("
           + "  Tournament INTEGER NOT NULL," //
           + "  PairID INTEGER NOT NULL," //
@@ -163,7 +164,6 @@ public final class GenerateDB {
       createTableDivision(connection, true);
 
       // table to hold head-to-head playoff meta-data
-      stmt.executeUpdate("DROP TABLE IF EXISTS PlayoffData CASCADE");
       stmt.executeUpdate("CREATE TABLE PlayoffData ("
           + " event_division varchar(32) NOT NULL," //
           + " Tournament INTEGER  NOT NULL," //
@@ -190,7 +190,6 @@ public final class GenerateDB {
       createAutomaticFinishedPlayoffTable(connection, true);
 
       // table to hold team numbers of teams in this tournament
-      stmt.executeUpdate("DROP TABLE IF EXISTS TournamentTeams CASCADE");
       stmt.executeUpdate("CREATE TABLE TournamentTeams ("
           + "  TeamNumber integer NOT NULL" //
           + " ,Tournament INTEGER NOT NULL" //
@@ -214,7 +213,6 @@ public final class GenerateDB {
       createFinalistScheduleTables(connection, true);
 
       // Table structure for table 'Judges'
-      stmt.executeUpdate("DROP TABLE IF EXISTS Judges CASCADE");
       stmt.executeUpdate("CREATE TABLE Judges ("
           + "  id varchar(64) NOT NULL,"//
           + "  category longvarchar NOT NULL," //
@@ -233,9 +231,6 @@ public final class GenerateDB {
       {
         final PerformanceScoreCategory performanceElement = description.getPerformance();
         final String tableName = PERFORMANCE_TABLE_NAME;
-        stmt.executeUpdate("DROP TABLE IF EXISTS "
-            + tableName
-            + " CASCADE");
         createStatement.append("CREATE TABLE "
             + tableName
             + " (");
@@ -286,9 +281,6 @@ public final class GenerateDB {
 
         final String tableName = categoryElement.getName();
 
-        stmt.executeUpdate("DROP TABLE IF EXISTS "
-            + tableName
-            + " CASCADE");
         createStatement.append("CREATE TABLE "
             + tableName
             + " (");
@@ -387,8 +379,6 @@ public final class GenerateDB {
                                                           final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("DROP TABLE IF EXISTS non_numeric_nominees CASCADE");
-
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE non_numeric_nominees (");
       sql.append("  tournament INTEGER NOT NULL");
@@ -401,7 +391,6 @@ public final class GenerateDB {
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
-
     }
   }
 
@@ -417,10 +406,6 @@ public final class GenerateDB {
                                                         final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-      // drop tables first
-      stmt.executeUpdate("DROP TABLE IF EXISTS finalist_schedule CASCADE");
-      stmt.executeUpdate("DROP TABLE IF EXISTS finalist_categories CASCADE");
-
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE finalist_categories (");
       sql.append("  tournament INTEGER NOT NULL");
@@ -461,9 +446,6 @@ public final class GenerateDB {
    */
   public static void createAuthentication(final Connection connection) throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-
-      stmt.executeUpdate("DROP TABLE IF EXISTS fll_authentication CASCADE");
-      connection.commit();
       stmt.executeUpdate("CREATE TABLE fll_authentication ("
           + "  fll_user varchar(64) NOT NULL" //
           + " ,fll_pass char(32)"//
@@ -485,8 +467,6 @@ public final class GenerateDB {
                                                final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("DROP TABLE IF EXISTS auth_roles CASCADE");
-
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE auth_roles (");
       sql.append("  fll_user VARCHAR(64) NOT NULL");
@@ -504,7 +484,6 @@ public final class GenerateDB {
   /** Table structure for table 'tournament_parameters' */
   /* package */static void tournamentParameters(final Connection connection) throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("DROP TABLE IF EXISTS tournament_parameters CASCADE");
       stmt.executeUpdate("CREATE TABLE tournament_parameters ("
           + "  param varchar(64) NOT NULL" //
           + " ,param_value longvarchar NOT NULL" //
@@ -520,8 +499,6 @@ public final class GenerateDB {
    */
   /* package */static void tournaments(final Connection connection) throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-
-      stmt.executeUpdate("DROP TABLE IF EXISTS Tournaments CASCADE");
 
       stmt.executeUpdate("CREATE TABLE Tournaments ("
           + "  tournament_id INTEGER GENERATED BY DEFAULT AS IDENTITY" //
@@ -721,8 +698,6 @@ public final class GenerateDB {
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
 
-      stmt.executeUpdate("DROP TABLE IF EXISTS global_parameters CASCADE");
-
       stmt.executeUpdate("CREATE TABLE global_parameters (" //
           + "  param varchar(64) NOT NULL" //
           + " ,param_value longvarchar NOT NULL" //
@@ -786,7 +761,6 @@ public final class GenerateDB {
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
 
-      stmt.executeUpdate("DROP TABLE IF EXISTS table_division CASCADE");
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE table_division (");
       sql.append("  playoff_division VARCHAR(32) NOT NULL");
@@ -813,7 +787,6 @@ public final class GenerateDB {
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
 
-      stmt.executeUpdate("DROP TABLE IF EXISTS schedule CASCADE");
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE schedule (");
       sql.append("  tournament INTEGER NOT NULL");
@@ -827,7 +800,6 @@ public final class GenerateDB {
       sql.append(")");
       stmt.executeUpdate(sql.toString());
 
-      stmt.executeUpdate("DROP TABLE IF EXISTS sched_perf_rounds CASCADE");
       final StringBuilder perfRoundsSql = new StringBuilder();
       perfRoundsSql.append("CREATE TABLE sched_perf_rounds (");
       perfRoundsSql.append("  tournament INTEGER NOT NULL");
@@ -843,7 +815,6 @@ public final class GenerateDB {
       perfRoundsSql.append(")");
       stmt.executeUpdate(perfRoundsSql.toString());
 
-      stmt.executeUpdate("DROP TABLE IF EXISTS sched_subjective CASCADE");
       final StringBuilder subjectiveSql = new StringBuilder();
       subjectiveSql.append("CREATE TABLE sched_subjective (");
       subjectiveSql.append("  tournament INTEGER NOT NULL");
@@ -870,7 +841,6 @@ public final class GenerateDB {
                                                                 final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("DROP TABLE IF EXISTS subjective_computed_scores CASCADE");
 
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE subjective_computed_scores (");
@@ -904,7 +874,6 @@ public final class GenerateDB {
                                                    final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("DROP TABLE IF EXISTS final_scores CASCADE");
 
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE final_scores (");
@@ -935,7 +904,6 @@ public final class GenerateDB {
                                                      final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("DROP TABLE IF EXISTS overall_scores CASCADE");
 
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE overall_scores (");
@@ -964,7 +932,6 @@ public final class GenerateDB {
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
 
-      stmt.executeUpdate("DROP TABLE IF EXISTS category_schedule_column CASCADE");
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE category_schedule_column (");
       sql.append("  tournament INTEGER NOT NULL");
@@ -985,7 +952,6 @@ public final class GenerateDB {
   /* package */ static void createPlayoffBracketTeams(final Connection connection) throws SQLException {
     try (Statement stmt = connection.createStatement()) {
 
-      stmt.executeUpdate("DROP TABLE IF EXISTS playoff_bracket_teams CASCADE");
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE playoff_bracket_teams (");
       sql.append("  tournament_id INTEGER NOT NULL");
@@ -1002,7 +968,6 @@ public final class GenerateDB {
                                                               final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("DROP TABLE IF EXISTS subjective_overall_award CASCADE");
 
       final StringBuilder subjectiveOverallAward = new StringBuilder();
       subjectiveOverallAward.append("CREATE TABLE subjective_overall_award (");
@@ -1019,8 +984,6 @@ public final class GenerateDB {
       subjectiveOverallAward.append(")");
       stmt.executeUpdate(subjectiveOverallAward.toString());
 
-      stmt.executeUpdate("DROP TABLE IF EXISTS subjective_extra_award CASCADE");
-
       final StringBuilder subjectiveExtraAward = new StringBuilder();
       subjectiveExtraAward.append("CREATE TABLE subjective_extra_award (");
       subjectiveExtraAward.append("  tournament_id INTEGER NOT NULL");
@@ -1036,8 +999,6 @@ public final class GenerateDB {
       }
       subjectiveExtraAward.append(")");
       stmt.executeUpdate(subjectiveExtraAward.toString());
-
-      stmt.executeUpdate("DROP TABLE IF EXISTS subjective_challenge_award CASCADE");
 
       final StringBuilder subjectiveChallengeAward = new StringBuilder();
       subjectiveChallengeAward.append("CREATE TABLE subjective_challenge_award (");
@@ -1061,7 +1022,6 @@ public final class GenerateDB {
                                                       final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("DROP TABLE IF EXISTS advancing_teams CASCADE");
 
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE advancing_teams (");
@@ -1082,7 +1042,6 @@ public final class GenerateDB {
                                                                 final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("DROP TABLE IF EXISTS automatic_finished_playoff CASCADE");
 
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE automatic_finished_playoff (");
@@ -1102,7 +1061,6 @@ public final class GenerateDB {
                                                   final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("DROP TABLE IF EXISTS award_group_order CASCADE");
 
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE award_group_order (");
@@ -1122,7 +1080,6 @@ public final class GenerateDB {
                                                           final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("DROP TABLE IF EXISTS delayed_performance");
 
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE delayed_performance (");
@@ -1151,8 +1108,6 @@ public final class GenerateDB {
 
     try (Statement stmt = connection.createStatement()) {
 
-      stmt.executeUpdate("DROP TABLE IF EXISTS playoff_schedules CASCADE");
-
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE playoff_schedules (");
       sql.append("    tournament_id INTEGER NOT NULL");
@@ -1165,8 +1120,6 @@ public final class GenerateDB {
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
-
-      stmt.executeUpdate("DROP TABLE IF EXISTS finalist_parameters CASCADE");
 
       final StringBuilder sql2 = new StringBuilder();
       sql2.append("CREATE TABLE finalist_parameters (");
@@ -1192,7 +1145,6 @@ public final class GenerateDB {
    */
   /* package */ static void createTournamentLevelsTable(final Connection connection) throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("DROP TABLE IF EXISTS tournament_level");
 
       stmt.executeUpdate("CREATE TABLE tournament_level ("
           + "  level_id INTEGER GENERATED BY DEFAULT AS IDENTITY" //
