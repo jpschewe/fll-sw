@@ -326,6 +326,8 @@ public final class GenerateDB {
       createDelayedPerformanceTable(connection, true);
 
       createFinalistParameterTables(connection, true);
+      
+      createCategoriesIgnored(connection, true);
 
       // --------------- create views ---------------
 
@@ -1180,8 +1182,6 @@ public final class GenerateDB {
                                                     final boolean createConstrints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("DROP TABLE IF EXISTS categories_ignored");
-
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE categories_ignored (");
       sql.append("  level_id INTEGER NOT NULL");
