@@ -90,7 +90,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         This is a zip file containing the results to return to the
         teams. This will take some time to generate, be patient.</a>
 
-
     <div class="wide">
         <form action='TeamResults' method='post' target="_blank">
             Results for a single team
@@ -105,6 +104,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
             <input type='submit' value='Get Results' />
         </form>
     </div>
+
+    <a class="wide" href="<c:url value='/report/awards/index.jsp'/>">Edit
+        awards report and rewards script properties.</a>
 
 
     <h2>Finalist scheduling</h2>
