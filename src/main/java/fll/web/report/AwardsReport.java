@@ -37,6 +37,8 @@ import org.apache.fop.apps.FopFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.diffplug.common.base.Errors;
+
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
@@ -44,6 +46,7 @@ import fll.Utilities;
 import fll.db.AdvancingTeam;
 import fll.db.AwardWinner;
 import fll.db.AwardWinners;
+import fll.db.CategoriesIgnored;
 import fll.db.OverallAwardWinner;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
@@ -210,6 +213,20 @@ public class AwardsReport extends BaseFLLServlet {
     addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups, categoryOrder, true, false);
   }
 
+  private static boolean isNonNumericAwarded(final Connection connection,
+                                             final ChallengeDescription description,
+                                             final TournamentLevel level,
+                                             final AwardWinner winner)
+      throws SQLException {
+    final NonNumericCategory category = description.getNonNumericCategoryByTitle(winner.getName());
+    if (null == category) {
+      // assume the category is something that isn't in the description
+      return true;
+    } else {
+      return !CategoriesIgnored.isNonNumericCategoryIgnored(connection, level, category);
+    }
+  }
+
   private void addSubjectiveExtraWinners(final Connection connection,
                                          final ChallengeDescription description,
                                          final Document document,
@@ -218,7 +235,15 @@ public class AwardsReport extends BaseFLLServlet {
                                          final List<String> sortedAwardGroups,
                                          final boolean displayChampionship)
       throws SQLException {
-    final List<AwardWinner> winners = AwardWinners.getNonNumericAwardWinners(connection, tournament.getTournamentID());
+    final TournamentLevel level = tournament.getLevel();
+
+    final List<AwardWinner> winners = AwardWinners.getNonNumericAwardWinners(connection, tournament.getTournamentID())
+                                                  .stream() //
+                                                  .filter(Errors.rethrow()
+                                                                .wrapPredicate(w -> isNonNumericAwarded(connection,
+                                                                                                        description,
+                                                                                                        level, w))) //
+                                                  .collect(Collectors.toList());
 
     final List<String> categoryOrder = description.getNonNumericCategories().stream() //
                                                   .map(NonNumericCategory::getTitle) //
