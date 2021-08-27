@@ -110,14 +110,13 @@ ensure your code is correct.
 
 # References to Documentation
 
-  * [Java](http://download.oracle.com/javase/8/docs/api/index.html)
-  * [Tomcat API - 9](http://tomcat.apache.org/tomcat-9.0-doc/api/index.html)
-  * [EL - 3.0](http://docs.oracle.com/javaee/7/api/javax/el/package-summary.html)
-  * [Servlet - 3.1](http://docs.oracle.com/javaee/7/api/javax/servlet/package-summary.html)
+  * [Java](https://docs.oracle.com/en/java/javase/11/docs/api/index.html)
+  * [Tomcat API - 10](http://tomcat.apache.org/tomcat-10.0-doc/api/index.html)
+  * [EL - 4.0](http://docs.oracle.com/javaee/7/api/javax/el/package-summary.html)
+  * [Servlet - 5.0](http://docs.oracle.com/javaee/7/api/javax/servlet/package-summary.html)
   * [JSP - 2.3](http://docs.oracle.com/javaee/7/api/javax/servlet/jsp/package-summary.html)
-  * [WebsSocket - 1.0](http://docs.oracle.com/javaee/7/api/javax/websocket/package-summary.html)
+  * [WebsSocket - 2.0](http://docs.oracle.com/javaee/7/api/javax/websocket/package-summary.html)
   * [JSTL - core tag library](http://download.oracle.com/docs/cd/E17802_01/products/products/jsp/jstl/1.1/docs/tlddocs/index.html)
-  * [HSQL - embedded database](http://www.hsqldb.org/web/hsqlDocsFrame.html)
   * [Apache FOP - PDF library](https://xmlgraphics.apache.org/fop/)
 
 # Project goals
@@ -149,6 +148,10 @@ I want this software to be easy to install and run.
 Everything that the software needs is integrated into the build as much as possible, so that the user can just download a
 release and go.
 
+## Minimize javascript libraries
+
+Avoid pulling in javascript libraries with lots of dependencies. Right now there is an effort go remove jQuery from most
+pages now that vanilla javascript can do most everything that jQuery was used for in the past.
 
 
 # Making a release
