@@ -13,19 +13,26 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
+import com.diffplug.common.base.Errors;
+
 import fll.Tournament;
+import fll.TournamentLevel;
 import fll.TournamentTeam;
 import fll.db.AwardWinner;
 import fll.db.AwardWinners;
+import fll.db.CategoriesIgnored;
 import fll.db.OverallAwardWinner;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.xml.ChallengeDescription;
+import fll.xml.NonNumericCategory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Support code for edit-award-winners.jsp.
@@ -61,9 +68,19 @@ public final class EditAwardWinners {
   public static void populateContext(final ServletContext application,
                                      final PageContext page) {
 
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
+      final TournamentLevel level = tournament.getLevel();
+
+      final List<NonNumericCategory> nonNumericCategories = description.getNonNumericCategories().stream() //
+                                                                       .filter(Errors.rethrow()
+                                                                                     .wrapPredicate(c -> !CategoriesIgnored.isNonNumericCategoryIgnored(connection,
+                                                                                                                                                        level,
+                                                                                                                                                        c))) //
+                                                                       .collect(Collectors.toList());
+      page.setAttribute("nonNumericCategories", nonNumericCategories);
 
       final Collection<String> awardGroups = Queries.getAwardGroups(connection, tournament.getTournamentID());
       page.setAttribute("awardGroups", awardGroups);

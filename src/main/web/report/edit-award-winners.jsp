@@ -52,7 +52,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
         </c:forEach>
         <!-- end subjective categories -->
 
-        <c:forEach items="${challengeDescription.nonNumericCategories}"
+        <c:forEach items="${nonNumericCategories}"
             var="category">
             <h1>${category.title}</h1>
 
