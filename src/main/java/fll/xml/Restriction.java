@@ -6,6 +6,10 @@
 
 package fll.xml;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -98,6 +102,16 @@ public class Restriction extends BasicPolynomial {
    */
   public void setMessage(final String v) {
     mMessage = v;
+  }
+
+  /**
+   * @return the goals that the goals that are referenced (computed)
+   */
+  public List<GoalRef> getReferencedGoals() {
+    return getTerms().stream() //
+                     .map(Term::getGoals) //
+                     .flatMap(Collection::stream) //
+                     .collect(Collectors.toList());
   }
 
   /**
