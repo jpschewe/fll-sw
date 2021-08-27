@@ -166,6 +166,13 @@ public final class ImportDB {
         importDatabase(sourceConnection, destConnection, tournament, true, true, true);
       }
 
+      // for each tournament level import the data relating to the tournament level
+      // NOTE: all levels were created above
+      for (final TournamentLevel sourceLevel : TournamentLevel.getAllLevels(sourceConnection)) {
+        final TournamentLevel destLevel = TournamentLevel.getByName(destConnection, sourceLevel.getName());
+        importTournamentLevelData(sourceConnection, destConnection, sourceLevel.getId(), destLevel.getId());
+      }
+
       final String sourceSelectedTournamentName = Tournament.getCurrentTournament(sourceConnection).getName();
       final Tournament destSelectedTournament = Tournament.findTournamentByName(destConnection,
                                                                                 sourceSelectedTournamentName);
@@ -618,6 +625,11 @@ public final class ImportDB {
       upgrade29To30(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 31) {
+      upgrade30To31(connection);
+    }
+
     GenerateDB.setDefaultParameters(connection, true);
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -1029,7 +1041,7 @@ public final class ImportDB {
     final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
     if (!tables.contains("tournament_level")) {
       // create the table and the default level
-      GenerateDB.createTournamentLevelsTable(connection);
+      GenerateDB.createTournamentLevelsTable(connection, false);
     }
 
     // the column can exist in a 0 to 1 upgrade
@@ -1134,6 +1146,18 @@ public final class ImportDB {
     } // if level_id column doesn't exist in tournaments table
 
     setDBVersion(connection, 30);
+  }
+
+  /**
+   * Adds categories_ignored table that tracks categories to ignore per tournament
+   * level.
+   */
+  private static void upgrade30To31(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 30 to 31");
+
+    GenerateDB.createCategoriesIgnored(connection, false);
+
+    setDBVersion(connection, 31);
   }
 
   /**
@@ -1429,7 +1453,7 @@ public final class ImportDB {
       // drop Tournaments table
       stmt.executeUpdate("DROP TABLE Tournaments");
 
-      GenerateDB.createTournamentLevelsTable(connection);
+      GenerateDB.createTournamentLevelsTable(connection, false);
       GenerateDB.tournaments(connection);
 
       try {
@@ -1629,6 +1653,76 @@ public final class ImportDB {
 
   }
 
+  private static void importTournamentLevelData(final Connection sourceConnection,
+                                                final Connection destConnection,
+                                                final int sourceLevelId,
+                                                final int destLevelId)
+      throws SQLException {
+    importIgnoredCategories(sourceConnection, destConnection, sourceLevelId, destLevelId);
+
+  }
+
+  private static void importIgnoredCategories(final Connection sourceConnection,
+                                              final Connection destConnection,
+                                              final int sourceLevelId,
+                                              final int destLevelId)
+      throws SQLException {
+    try (
+        PreparedStatement delete = destConnection.prepareStatement("DELETE FROM categories_ignored WHERE level_id = ?")) {
+      delete.setInt(1, destLevelId);
+      delete.executeUpdate();
+    }
+
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT category_identifier, category_type" //
+        + " FROM categories_ignored WHERE level_id = ?");
+        PreparedStatement destPrep = destConnection.prepareStatement("INSERT INTO categories_ignored" //
+            + " (level_id, category_identifier, category_type)" //
+            + " VALUES (?, ?, ?)")) {
+
+      sourcePrep.setInt(1, sourceLevelId);
+      destPrep.setInt(1, destLevelId);
+
+      destPrep.setInt(1, destLevelId);
+      copyData(sourcePrep, destPrep);
+    }
+  }
+
+  private static void copyData(final PreparedStatement sourcePrep,
+                               final PreparedStatement destPrep)
+      throws SQLException {
+    copyData(sourcePrep, 0, destPrep, 1, -1);
+  }
+
+  private static void copyData(final PreparedStatement sourcePrep,
+                               final int sourceOffset,
+                               final PreparedStatement destPrep,
+                               final int destOffset,
+                               final int columnCountOverride)
+      throws SQLException {
+    try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+      final int columnCount = -1 == columnCountOverride ? sourceRS.getMetaData().getColumnCount() : columnCountOverride;
+
+      boolean needsExecute = false;
+      while (sourceRS.next()) {
+        for (int i = 1; i <= columnCount; i++) {
+          Object sourceObj = sourceRS.getObject(i
+              + sourceOffset);
+          if ("".equals(sourceObj)) {
+            sourceObj = null;
+          }
+          destPrep.setObject(i
+              + destOffset, sourceObj);
+        }
+        needsExecute = true;
+        destPrep.addBatch();
+      }
+
+      if (needsExecute) {
+        destPrep.executeBatch();
+      }
+    } // sourceRs
+  }
+
   private static void importTournamentData(final Connection sourceConnection,
                                            final Connection destinationConnection,
                                            final int sourceTournamentID,
@@ -1677,19 +1771,7 @@ public final class ImportDB {
       sourcePrep.setInt(1, sourceTournamentID);
 
       destPrep.setInt(1, destTournamentID);
-      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-        while (sourceRS.next()) {
-          for (int i = 1; i <= 2; i++) {
-            Object sourceObj = sourceRS.getObject(i);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i
-                + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-      }
+      copyData(sourcePrep, destPrep);
     }
 
     try (
@@ -1700,19 +1782,7 @@ public final class ImportDB {
             + " VALUES (?, ?, ?, ?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
-      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-        while (sourceRS.next()) {
-          for (int i = 1; i <= 5; i++) {
-            Object sourceObj = sourceRS.getObject(i);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i
-                + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-      }
+      copyData(sourcePrep, destPrep);
     }
 
     try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number, name, subj_time" //
@@ -1723,19 +1793,7 @@ public final class ImportDB {
 
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
-      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-        while (sourceRS.next()) {
-          for (int i = 1; i <= 3; i++) {
-            Object sourceObj = sourceRS.getObject(i);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i
-                + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-      }
+      copyData(sourcePrep, destPrep);
     }
   }
 
@@ -1757,19 +1815,7 @@ public final class ImportDB {
             + "VALUES (?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
-      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-        while (sourceRS.next()) {
-          for (int i = 1; i <= 2; i++) {
-            Object sourceObj = sourceRS.getObject(i);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i
-                + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-      }
+      copyData(sourcePrep, destPrep);
     }
   }
 
@@ -1793,19 +1839,7 @@ public final class ImportDB {
             + "LineNumber, Team, AssignedTable, Printed, run_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
-      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-        while (sourceRS.next()) {
-          for (int i = 1; i <= 7; i++) {
-            Object sourceObj = sourceRS.getObject(i);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i
-                + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-      }
+      copyData(sourcePrep, destPrep);
     }
   }
 
@@ -1866,19 +1900,7 @@ public final class ImportDB {
 
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
-      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-        while (sourceRS.next()) {
-          for (int i = 1; i <= 3; i++) {
-            Object sourceObj = sourceRS.getObject(i);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i
-                + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-      } // result set
+      copyData(sourcePrep, destPrep);
     } // prepared statements
 
     try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT playoff_division, table_id"
@@ -1888,19 +1910,7 @@ public final class ImportDB {
       sourcePrep.setInt(1, sourceTournamentID);
 
       destPrep.setInt(1, destTournamentID);
-      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-        while (sourceRS.next()) {
-          for (int i = 1; i <= 2; i++) {
-            Object sourceObj = sourceRS.getObject(i);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i
-                + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-      } // result set
+      copyData(sourcePrep, destPrep);
     } // prepared statements
 
   }
@@ -2006,21 +2016,8 @@ public final class ImportDB {
 
       destPrep.setInt(1, destTournamentID);
       sourcePrep.setInt(1, sourceTournamentID);
-      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
-        while (sourceRS.next()) {
-          // skip tournament column
-          for (int i = 1; i < numColumns; i++) {
-            Object sourceObj = sourceRS.getObject(i
-                + 1);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i
-                + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-      }
+      copyData(sourcePrep, 1, destPrep, 1, numColumns
+          - 1);
     }
 
   }
