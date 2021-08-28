@@ -641,6 +641,13 @@ public final class ScoreEntry {
 
     final Collection<Restriction> restrictions = performanceElement.getRestrictions();
 
+    // variables to track which goals need to be highlighted
+    for (final AbstractGoal goal : performanceElement.getAllGoals()) {
+      if (!goal.isComputed()) {
+        formatter.format("  var %s_error = false;%n", goal.getName());
+      }
+    }
+
     // output actual check of restriction
     int restrictIdx = 0;
     for (final Restriction restrictEle : restrictions) {
@@ -656,9 +663,31 @@ public final class ScoreEntry {
       // add error text to score-errors div
       formatter.format("    $('#score-errors').append('<div>%s</div>');%n", message);
       formatter.format("    error_found = true;%n");
+
+      for (final GoalRef ref : restrictEle.getReferencedGoals()) {
+        formatter.format("    %s_error = true;%n", ref.getGoalName());
+      }
       formatter.format("  }%n");
       ++restrictIdx;
     }
+
+    // highlight or clear errors
+    for (final AbstractGoal goal : performanceElement.getAllGoals()) {
+      if (!goal.isComputed()) {
+        formatter.format("if(%s_error) {%n", goal.getName());
+        formatter.format("  const ele = document.getElementById(\"%s_row\");%n", goal.getName());
+        formatter.format("  if(!ele.classList.contains(\"restriction-error\")) {%n");
+        formatter.format("    ele.classList.add(\"restriction-error\");%n");
+        formatter.format("  }%n");
+        formatter.format("} else {%n");
+        formatter.format("  const ele = document.getElementById(\"%s_row\");%n", goal.getName());
+        formatter.format("  if(ele.classList.contains(\"restriction-error\")) {%n");
+        formatter.format("    ele.classList.remove(\"restriction-error\");%n");
+        formatter.format("  }%n");
+        formatter.format("}%n");
+      }
+    }
+
   }
 
   /**
@@ -803,7 +832,9 @@ public final class ScoreEntry {
     writer.println("<!-- "
         + name
         + " -->");
-    writer.println("<tr>");
+    writer.println("<tr id='"
+        + name
+        + "_row'>");
     writer.println("  <td class='goal-title'>");
     writer.println("    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
         + title

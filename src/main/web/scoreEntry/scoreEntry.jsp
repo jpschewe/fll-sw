@@ -39,6 +39,10 @@ table#top_info {
 body {
     background-color: ${body_background};
 }
+
+.restriction-error {
+    background-color: red;
+}
 </style>
 
 <script
