@@ -1,0 +1,17 @@
+
+<div>
+    <c:if test="${not empty level or not empty tournament}">
+        <div>
+            <label>
+                Specify value:
+                <input type="checkbox" name="${sectionName}_specified"
+                    id="${sectionName}_specified" />
+            </label>
+        </div>
+    </c:if>
+
+    <textarea cols="80" rows="10" id="${sectionName}_text">${sectionText}</textarea>
+
+    <div class="macro-buttons" id="${sectionName}_macros"></div>
+
+</div>

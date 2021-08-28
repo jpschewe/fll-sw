@@ -1,0 +1,4 @@
+textarea, .macro-buttons {
+    display: inline-block;
+    vertical-align: top;
+}

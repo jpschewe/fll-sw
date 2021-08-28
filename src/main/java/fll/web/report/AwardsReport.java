@@ -592,9 +592,8 @@ public class AwardsReport extends BaseFLLServlet {
     subtitleBlock.setAttribute("text-align-last", "justify");
     subtitleBlock.setAttribute("font-weight", "bold");
 
-    final String tournamentDescription = tournament.getDescription();
     final TournamentLevel tournamentLevel = tournament.getLevel();
-    final String tournamentName = null == tournamentDescription ? tournament.getName() : tournamentDescription;
+    final String tournamentName = tournament.getTitle();
     final String tournamentTitle = String.format("%s: %s", tournamentLevel.getName(), tournamentName);
     subtitleBlock.appendChild(document.createTextNode(tournamentTitle));
 
