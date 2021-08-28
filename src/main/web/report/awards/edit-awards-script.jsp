@@ -49,45 +49,13 @@ awardsScriptModule.init = ( )=> {
 <body>
 
     <form action="EditAwardsScript" method="POST">
-        <div>Editing the awards script for the ${descriptionText}.</div>
+        <p>Editing the awards script for the ${descriptionText}.</p>
 
-        <div>The text specified for a tournament level overrides
-            the text specified for the season. The text specified for a
-            tournament overrides the text specified at the tournament's
-            level.</div>
-        <c:choose>
-            <c:when test="${not empty level}">
-                <div>The checkbox next to each section specifies
-                    if the value should be entered here or inherited
-                    from the season script. If the box is checked, what
-                    is entered here will be used. If the box is
-                    unchecked the value from the season script is used.
-                    This is particularly important to note if the text
-                    in the season script is edited after the text for
-                    the tournament script. In this case if the checkbox
-                    is checked, the changes from the season script will
-                    not be seen.</div>
-            </c:when>
-            <c:when test="${not empty tournament}">
-                <div>The checkbox next to each section specifies
-                    if the value should be entered here or inherited
-                    from the tournament level script. If the box is
-                    checked, what is entered here will be used. If the
-                    box is unchecked the value from the tournament level
-                    script is used. This is particularly important to
-                    note if the text in the tournament level script is
-                    edited after the text for the tournament script. In
-                    this case if the checkbox is checked, the changes
-                    from the tournament level will not be seen.</div>
-            </c:when>
-        </c:choose>
-
-        <div>The text sections have macros available that can be
+        <p>The text sections have macros available that can be
             inserted into the text. These will be replaced with the
             appropriate value when the report is generated. Put the
             cursor where you want to insert the macro and then click the
-            appropriate macro button.</div>
-
+            appropriate macro button.</p>
 
         <div>
             <c:choose>

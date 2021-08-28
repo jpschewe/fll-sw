@@ -59,7 +59,7 @@ public class EditAwardsScript extends BaseFLLServlet {
 
     try (Connection connection = datasource.getConnection()) {
 
-      final @Nullable TournamentLevel level;
+      final @Nullable TournamentLevel tournamentLevel;
       final @Nullable Tournament tournament;
       final @Nullable String levelId = request.getParameter("level");
       final @Nullable String tournamentId = request.getParameter("tournament");
@@ -68,33 +68,33 @@ public class EditAwardsScript extends BaseFLLServlet {
         throw new FLLRuntimeException("Cannot specify both a tournament id and a tournament level id");
       } else if (null != levelId) {
         final int id = Integer.parseInt(levelId);
-        level = TournamentLevel.getById(connection, id);
+        tournamentLevel = TournamentLevel.getById(connection, id);
         tournament = null;
-        page.setAttribute("descriptionText", String.format("tournament level %s", level.getName()));
-        page.setAttribute("tournamentLevel", level);
+        page.setAttribute("descriptionText", String.format("tournament level %s", tournamentLevel.getName()));
+        page.setAttribute("tournamentLevel", tournamentLevel);
       } else if (null != tournamentId) {
         final int id = Integer.parseInt(tournamentId);
         tournament = Tournament.findTournamentByID(connection, id);
-        level = tournament.getLevel();
+        tournamentLevel = tournament.getLevel();
         page.setAttribute("descriptionText",
                           String.format("tournament %s - %s", tournament.getName(), tournament.getDescription()));
         page.setAttribute("tournament", tournament);
       } else {
         page.setAttribute("descriptionText", "season");
         tournament = null;
-        level = null;
+        tournamentLevel = null;
       }
-      page.setAttribute("level", level);
+      page.setAttribute("tournamentLevel", tournamentLevel);
       page.setAttribute("tournament", tournament);
 
       page.setAttribute("subjectiveCategories", description.getSubjectiveCategories());
 
       final List<NonNumericCategory> nonNumericCategories;
-      if (null != level) {
+      if (null != tournamentLevel) {
         nonNumericCategories = description.getNonNumericCategories().stream() //
                                           .filter(Errors.rethrow()
                                                         .wrapPredicate(c -> !CategoriesIgnored.isNonNumericCategoryIgnored(connection,
-                                                                                                                           level,
+                                                                                                                           tournamentLevel,
                                                                                                                            c))) //
                                           .collect(Collectors.toList());
       } else {
