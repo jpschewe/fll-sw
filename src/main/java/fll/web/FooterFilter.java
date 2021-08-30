@@ -65,15 +65,18 @@ public class FooterFilter implements Filter {
           final PrintWriter writer = response.getWriter();
 
           final CharArrayWriter caw = new CharArrayWriter();
-          final int bodyIndex = origStr.indexOf("<body>");
+          final String bodyTag = "<body>";
+          final int bodyIndex = origStr.indexOf(bodyTag);
           final int bodyEndIndex = origStr.indexOf("</body>");
           LOGGER.trace("Body index {} body end index {}", bodyIndex, bodyEndIndex);
 
           if (-1 != bodyIndex
               && -1 != bodyEndIndex
               && !noFooter(url)) {
-            caw.write(origStr.substring(0, bodyIndex
-                - 1));
+
+            final int endOfBodyTagIndex = bodyIndex
+                + bodyTag.length();
+            caw.write(origStr.substring(0, endOfBodyTagIndex));
 
             if (!path.startsWith(httpRequest.getContextPath()
                 + "/public")) {
@@ -82,7 +85,7 @@ public class FooterFilter implements Filter {
               LOGGER.debug("Skipping navbar");
             }
 
-            caw.write(origStr.substring(bodyIndex, bodyEndIndex
+            caw.write(origStr.substring(endOfBodyTagIndex, bodyEndIndex
                 - 1));
 
             if (path.startsWith(httpRequest.getContextPath()
@@ -94,8 +97,9 @@ public class FooterFilter implements Filter {
 
             caw.write(origStr.substring(bodyEndIndex, origStr.length()));
 
-            response.setContentLength(caw.toString().length());
-            writer.print(caw.toString());
+            final String modified = caw.toString();
+            response.setContentLength(modified.getBytes().length);
+            writer.print(modified);
           } else {
             LOGGER.debug("No navbar/footer");
 
