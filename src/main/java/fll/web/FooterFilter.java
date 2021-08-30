@@ -22,7 +22,7 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
+import fll.Utilities;
 import fll.Version;
 
 /**
@@ -98,7 +98,7 @@ public class FooterFilter implements Filter {
             caw.write(origStr.substring(bodyEndIndex, origStr.length()));
 
             final String modified = caw.toString();
-            response.setContentLength(modified.getBytes().length);
+            response.setContentLength(modified.getBytes(Utilities.DEFAULT_CHARSET).length);
             writer.print(modified);
           } else {
             LOGGER.debug("No navbar/footer");
