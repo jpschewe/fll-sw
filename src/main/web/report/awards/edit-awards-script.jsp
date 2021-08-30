@@ -20,19 +20,15 @@ fll.web.report.awards.EditAwardsScript.populateContext(request, application, pag
 <script type="text/javascript" src="edit-awards-script.js"></script>
 
 <script type="text/javascript">
-awardsScriptModule.init = ( )=> {
-  const macros = [];
-  
-  // FIXME loop over macros known in Java
-  macros.push(awardsScriptModule.createMacro("numTrainedOfficials", "Number of Trained Officials"));
-  macros.push(awardsScriptModule.createMacro("hostSchool", "Host School"));
-  macros.push(awardsScriptModule.createMacro("tournamentDirectors", "Tournament Directors"));
-  macros.push(awardsScriptModule.createMacro("tournamentLevel", "Tournament Level"));
-  macros.push(awardsScriptModule.createMacro("tournamentNextLevel", "Next Tournament Level"));
-  macros.push(awardsScriptModule.createMacro("numTeamsAdvancing", "Number of Teams Advancing"));
+awardsScriptModule.init = ( ) => {
+
+  const macros = [];  
+  <c:forEach items="${macros}" var="macro">
+  macros.push(awardsScriptModule.createMacro("${macro.text}", "${macro.title}"));
+  </c:forEach>
 
   <c:forEach items="${sections}" var="section"> 
-  awardsScriptModule.configureTextEntry(macros, "${section}", ${sectionSpecified[section]});
+  awardsScriptModule.configureTextEntry(macros, "${section.identifier}", ${sectionSpecified[section]});
   </c:forEach>
   
   <c:forEach items="${subjectiveCategories}" var="category">
@@ -44,8 +40,8 @@ awardsScriptModule.init = ( )=> {
   </c:forEach>
 
 };
-
 </script>
+
 <body>
 
     <form action="EditAwardsScript" method="POST">
@@ -57,30 +53,18 @@ awardsScriptModule.init = ( )=> {
             cursor where you want to insert the macro and then click the
             appropriate macro button.</p>
 
-        <div>
-            <c:choose>
-                <c:when test="${not empty tournament}">
-${tournament.title} - ${tournament.dateString}
-</c:when>
-                <c:otherwise>
-                    <i>Tournament Location - Date</i>
-                </c:otherwise>
-            </c:choose>
-        </div>
         <hr />
 
-        <c:set var="sectionName" value="front_matter" />
-        <c:set var="sectionText">
-        ${frontMatterText}
-        </c:set>
+        <!-- FRONT_MATTER: ${FRONT_MATTER} -->
+        <!-- identifier: ${FRONT_MATTER.identifier} -->
+        <c:set var="sectionName">${FRONT_MATTER.identifier}</c:set>
+        <c:set var="sectionTextValue">${sectionText[FRONT_MATTER]}</c:set>
         <%@ include file="edit-awards-script_textarea-macros.jspf"%>
         <hr />
 
 
-        <c:set var="sectionName" value="sponsors_intro" />
-        <c:set var="sectionText">
-        ${sponsorsIntroText}
-        </c:set>
+        <c:set var="sectionName">${SPONSORS_INTRO.identifier}</c:set>
+        <c:set var="sectionTextValue">${sectionText[SPONSORS_INTRO]}</c:set>
         <%@ include file="edit-awards-script_textarea-macros.jspf"%>
         <hr />
 
@@ -93,18 +77,14 @@ ${tournament.title} - ${tournament.dateString}
         <div>FIXME: user entered sponsor names</div>
         <hr />
 
-        <c:set var="sectionName" value="sponsors_recognition" />
-        <c:set var="sectionText">
-        ${sponsorsRecognitionText}
-        </c:set>
+        <c:set var="sectionName">${SPONSORS_RECOGNITION.identifier}</c:set>
+        <c:set var="sectionTextValue">${sectionText[SPONSORS_RECOGNITION]}</c:set>
         <%@ include file="edit-awards-script_textarea-macros.jspf"%>
         <hr />
 
 
-        <c:set var="sectionName" value="volunteers" />
-        <c:set var="sectionText">
-        ${volunteersText}
-        </c:set>
+        <c:set var="sectionName">${VOLUNTEERS.identifier}</c:set>
+        <c:set var="sectionTextValue">${sectionText[VOLUNTEERS]}</c:set>
         <%@ include file="edit-awards-script_textarea-macros.jspf"%>
         <hr />
 
@@ -137,10 +117,8 @@ ${tournament.title} - ${tournament.dateString}
             Presenter:
             <input type="text" />
         </div>
-        <c:set var="sectionName" value="category_championship" />
-        <c:set var="sectionText">
-        ${categoryChampionshipText}
-        </c:set>
+        <c:set var="sectionName">${CATEGORY_CHAMPIONSHIP.identifier}</c:set>
+        <c:set var="sectionTextValue">${sectionText[CATEGORY_CHAMPIONSHIP]}</c:set>
         <%@ include file="edit-awards-script_textarea-macros.jspf"%>
         <hr />
 
@@ -149,10 +127,8 @@ ${tournament.title} - ${tournament.dateString}
             Presenter:
             <input type="text" />
         </div>
-        <c:set var="sectionName" value="category_performance" />
-        <c:set var="sectionText">
-        ${categoryPerformanceText}
-        </c:set>
+        <c:set var="sectionName">${CATEGORY_PERFORMANCE.identifier}</c:set>
+        <c:set var="sectionTextValue">${sectionText[CATEGORY_PERFORMANCE]}</c:set>
         <%@ include file="edit-awards-script_textarea-macros.jspf"%>
         <hr />
 
@@ -163,10 +139,8 @@ ${tournament.title} - ${tournament.dateString}
                 Presenter:
                 <input type="text" />
             </div>
-            <c:set var="sectionName" value="category_${category.name}" />
-            <c:set var="sectionText">
-        ${subjectiveCategoryText[category.name]}
-        </c:set>
+            <c:set var="sectionName">category_${category.name}</c:set>
+            <c:set var="sectionTextValue">${subjectiveCategoryText[category.name]}</c:set>
             <%@ include file="edit-awards-script_textarea-macros.jspf"%>
             <hr />
         </c:forEach>
@@ -184,19 +158,15 @@ ${tournament.title} - ${tournament.dateString}
                 Presenter:
                 <input type="text" />
             </div>
-            <c:set var="sectionName" value="category_${category.title}" />
-            <c:set var="sectionText">
-        ${nonNumericCategoryText[category.title]}
-        </c:set>
+            <c:set var="sectionName">category_${category.title}</c:set>
+            <c:set var="sectionTextValue">${nonNumericCategoryText[category.title]}</c:set>
             <%@ include file="edit-awards-script_textarea-macros.jspf"%>
             <hr />
         </c:forEach>
 
 
-        <c:set var="sectionName" value="end_awards" />
-        <c:set var="sectionText">
-        ${endAwardsText}
-        </c:set>
+        <c:set var="sectionName">${END_AWARDS.identifier}</c:set>
+        <c:set var="sectionTextValue">${sectionText[END_AWARDS]}</c:set>
         <%@ include file="edit-awards-script_textarea-macros.jspf"%>
         <hr />
 
@@ -207,16 +177,16 @@ ${tournament.title} - ${tournament.dateString}
         <hr />
 
 
-        <c:set var="sectionName" value="footer" />
-        <c:set var="sectionText">
-        ${footerText}
-        </c:set>
+        <c:set var="sectionName">${FOOTER.identifier}</c:set>
+        <c:set var="sectionTextValue">${sectionText[FOOTER]}</c:set>
         <%@ include file="edit-awards-script_textarea-macros.jspf"%>
         <hr />
 
         <input type="submit" value="Submit" />
 
     </form>
-
+    <!-- before end body -->
 </body>
+<!-- before html -->
 </html>
+<!--  end -->

@@ -7,6 +7,8 @@ package fll.db;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
@@ -14,6 +16,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import org.apache.commons.io.IOUtils;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
@@ -36,7 +40,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 31;
+  public static final int DATABASE_VERSION = 32;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -326,8 +330,10 @@ public final class GenerateDB {
       createDelayedPerformanceTable(connection, true);
 
       createFinalistParameterTables(connection, true);
-      
+
       createCategoriesIgnored(connection, true);
+
+      createAwardsScriptTables(connection, true);
 
       // --------------- create views ---------------
 
@@ -1198,4 +1204,112 @@ public final class GenerateDB {
     }
   }
 
+  /**
+   * Create tables used to store information about the awards script.
+   * This also populates the default values.
+   * 
+   * @param connection database connections
+   * @param createConstrints if constraints should be created
+   * @throws SQLException on a database error
+   */
+  /* package */ static void createAwardsScriptTables(final Connection connection,
+                                                     final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+
+      // store text for sections
+      {
+        final StringBuilder sql = new StringBuilder();
+
+        sql.append("CREATE TABLE awards_script_text (");
+        sql.append("  section_name VARCHAR(64) NOT NULL");
+        sql.append(" ,tournament_level_id INTEGER NOT NULL");
+        sql.append(" ,tournament_id INTEGER NOT NULL");
+        sql.append(" ,layer_rank INTEGER NOT NULL");
+        sql.append(" ,text LONGVARCHAR NOT NULL");
+        if (createConstraints) {
+          sql.append(" ,CONSTRAINT awards_script_text_pk PRIMARY KEY (section_name, tournament_level_id, tournament_id, layer_rank)");
+        }
+        sql.append(")");
+        stmt.executeUpdate(sql.toString());
+
+        try (PreparedStatement insert = connection.prepareStatement("INSERT INTO awards_script_text"
+            + " (section_name, tournament_level_id, tournament_id, layer_rank, text)"//
+            + " VALUES(?, ?, ?, ?, ?)")) {
+          insert.setInt(2, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
+          insert.setInt(3, GenerateDB.INTERNAL_TOURNAMENT_ID);
+          insert.setInt(4, AwardsScript.Layer.SEASON.getRank());
+
+          final ClassLoader loader = Utilities.getClassLoader();
+
+          for (final AwardsScript.Section section : AwardsScript.Section.values()) {
+            try (InputStream stream = loader.getResourceAsStream(String.format("fll/resources/awards-script/%s.txt",
+                                                                               section.name()))) {
+              if (null != stream) {
+                final String text = IOUtils.toString(stream, Utilities.DEFAULT_CHARSET);
+
+                insert.setString(1, section.name());
+                insert.setString(5, text);
+                insert.executeUpdate();
+              }
+            } catch (final IOException e) {
+              LOGGER.warn("Error loading default text for section {}, skipping", section.name(), e);
+            }
+          }
+        }
+
+      }
+
+      // store values for macros
+      {
+        final StringBuilder sql = new StringBuilder();
+        sql.append("CREATE TABLE awards_script_parameters (");
+        sql.append("  param_name VARCHAR(64) NOT NULL");
+        sql.append(" ,param_value LONGVARCHAR NOT NULL");
+        sql.append(" ,tournament_level_id INTEGER NOT NULL");
+        sql.append(" ,tournament_id INTEGER NOT NULL");
+        sql.append(" ,layer_rank INTEGER NOT NULL");
+        if (createConstraints) {
+          sql.append(" ,CONSTRAINT awards_script_parameters_pk PRIMARY KEY (param_name, tournament_level_id, tournament_id)");
+        }
+        sql.append(")");
+        stmt.executeUpdate(sql.toString());
+      }
+
+      // store awards order
+      {
+        final StringBuilder sql = new StringBuilder();
+        sql.append("CREATE TABLE awards_script_award_order (");
+        sql.append("  tournament_level_id INTEGER NOT NULL");
+        sql.append(" ,tournament_id INTEGER NOT NULL");
+        sql.append(" ,layer_rank INTEGER NOT NULL");
+        sql.append(" ,award LONGVARCHAR NOT NULL");
+        sql.append(" ,award_rank INTEGER NOT NULL");
+        if (createConstraints) {
+          sql.append(" ,CONSTRAINT awards_script_award_order_pk PRIMARY KEY (award, tournament_level_id, tournament_id)");
+        }
+        sql.append(")");
+        stmt.executeUpdate(sql.toString());
+      }
+
+      // store sponsor order
+      {
+        final StringBuilder sql = new StringBuilder();
+        sql.append("CREATE TABLE awards_script_sponsor_order (");
+        sql.append("  tournament_level_id INTEGER NOT NULL");
+        sql.append(" ,tournament_id INTEGER NOT NULL");
+        sql.append(" ,layer_rank INTEGER NOT NULL");
+        sql.append(" ,sponsor LONGVARCHAR NOT NULL");
+        sql.append(" ,sponsor_rank INTEGER NOT NULL");
+        if (createConstraints) {
+          sql.append(" ,CONSTRAINT awards_script_sponsor_order_pk PRIMARY KEY (sponsor, tournament_level_id, tournament_id)");
+        }
+        sql.append(")");
+        stmt.executeUpdate(sql.toString());
+      }
+
+      // FIXME add these tables to the database import process
+
+    }
+  }
 }

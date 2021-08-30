@@ -630,6 +630,11 @@ public final class ImportDB {
       upgrade30To31(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 32) {
+      upgrade31To32(connection);
+    }
+
     GenerateDB.setDefaultParameters(connection, true);
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -1158,6 +1163,17 @@ public final class ImportDB {
     GenerateDB.createCategoriesIgnored(connection, false);
 
     setDBVersion(connection, 31);
+  }
+
+  /**
+   * Adds awards script tables.
+   */
+  private static void upgrade31To32(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 31 to 32");
+
+    GenerateDB.createAwardsScriptTables(connection, false);
+
+    setDBVersion(connection, 32);
   }
 
   /**

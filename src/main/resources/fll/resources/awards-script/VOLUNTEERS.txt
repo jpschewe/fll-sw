@@ -1,0 +1,12 @@
+Before announcing the awards, I want to acknowledge the MANY people who have made this day and season possible:
+- Our host school ${hostSchool} as well as
+
+- ${tournamentDirectors} our Tournament Directors.
+
+- Thank you to the teams, their parents and especially the coaches - they are the real heroes of the program, without them you would not be here. 
+
+- A HUGE thank you to the event volunteers - judges, referees, computer folks and team volunteers - all who stepped forward to support this program and volunteered here today.
+
+This year, we will be emailing the rubrics and judges' comments to the coach and the awards and participation medals have been given to coaches upon check-in will be sent via snail mail. 
+
+Teams advancing to the ${tournamentNextLevel} tournament(s) will be announced at the end of the ceremony and an email will be sent to the coaches with more details about registration.
