@@ -14,6 +14,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.Tournament;
@@ -334,6 +336,124 @@ public final class AwardsScript {
         }
       }
     }
+  }
+
+  /**
+   * @param connection database connection
+   * @param section the section to check for
+   * @throws SQLException on a database error
+   */
+  public static void clearSectionTextForSeason(final Connection connection,
+                                               final Section section)
+      throws SQLException {
+    updateSectionTextFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                         Layer.SEASON, section, null);
+  }
+
+  /**
+   * @param connection database connection
+   * @param section the section to check for
+   * @param level the tournament level
+   * @throws SQLException on a database error
+   */
+  public static void clearSectionTextForTournamentLevel(final Connection connection,
+                                                        final TournamentLevel level,
+                                                        final Section section)
+      throws SQLException {
+    updateSectionTextFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, Layer.TOURNAMENT_LEVEL, section,
+                         null);
+  }
+
+  /**
+   * @param connection database connection
+   * @param section the section to check for
+   * @param tournament the tournament
+   * @throws SQLException on a database error
+   */
+  public static void clearSectionTextForTournament(final Connection connection,
+                                                   final Tournament tournament,
+                                                   final Section section)
+      throws SQLException {
+    updateSectionTextFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                         Layer.TOURNAMENT, section, null);
+  }
+
+  /**
+   * @param connection database connection
+   * @param section the section to check for
+   * @param text the new text
+   * @throws SQLException on a database error
+   */
+  public static void updateSectionTextForSeason(final Connection connection,
+                                                final Section section,
+                                                final String text)
+      throws SQLException {
+    updateSectionTextFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                         Layer.SEASON, section, text);
+  }
+
+  /**
+   * @param connection database connection
+   * @param section the section to check for
+   * @param level the tournament level
+   * @param text the new text
+   * @throws SQLException on a database error
+   */
+  public static void updateSectionTextForTournamentLevel(final Connection connection,
+                                                         final TournamentLevel level,
+                                                         final Section section,
+                                                         final String text)
+      throws SQLException {
+    updateSectionTextFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, Layer.TOURNAMENT_LEVEL, section,
+                         text);
+  }
+
+  /**
+   * @param connection database connection
+   * @param section the section to check for
+   * @param tournament the tournament
+   * @param text the new text
+   * @throws SQLException on a database error
+   */
+  public static void updateSectionTextForTournament(final Connection connection,
+                                                    final Tournament tournament,
+                                                    final Section section,
+                                                    final String text)
+      throws SQLException {
+    updateSectionTextFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                         Layer.TOURNAMENT, section, text);
+  }
+
+  private static void updateSectionTextFor(final Connection connection,
+                                           final int tournamentLevelId,
+                                           final int tournamentId,
+                                           final Layer layer,
+                                           final Section section,
+                                           final @Nullable String text)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("DELETE FROM awards_script_text" //
+        + " WHERE tournament_level_id = ?" //
+        + " AND tournament_id = ?" //
+        + " AND section_name = ?")) {
+      prep.setInt(1, tournamentLevelId);
+      prep.setInt(2, tournamentId);
+      prep.setString(3, section.name());
+      prep.executeUpdate();
+    }
+
+    if (null != text) {
+      try (PreparedStatement prep = connection.prepareStatement("INSERT INTO awards_script_text" //
+          + " (tournament_level_id, tournament_id, layer_rank, section_name, text)" //
+          + " VALUES(?, ?, ?, ?, ?)")) {
+        prep.setInt(1, tournamentLevelId);
+        prep.setInt(2, tournamentId);
+        prep.setInt(3, layer.getRank());
+        prep.setString(4, section.name());
+        prep.setString(5, text);
+        prep.executeUpdate();
+      }
+    }
+
   }
 
   /**

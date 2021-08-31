@@ -8,7 +8,8 @@
         </label>
     </div>
 
-    <textarea cols="80" rows="10" id="${sectionName}_text">${sectionTextValue}</textarea>
+    <textarea cols="80" rows="10" name="${sectionName}_text"
+        id="${sectionName}_text">${sectionTextValue}</textarea>
 
     <div class="macro-buttons" id="${sectionName}_macros"></div>
 

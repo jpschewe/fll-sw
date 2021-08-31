@@ -41,10 +41,14 @@ awardsScriptModule.init = ( ) => {
 
 };
 </script>
-
 <body>
 
     <form action="EditAwardsScript" method="POST">
+
+        <input type="hidden" name="level" value="${tournamentLevel.id}" />
+        <input type="hidden" name="tournament"
+            value="${tournament.tournamentID}" />
+
         <p>Editing the awards script for the ${descriptionText}.</p>
 
         <p>The text sections have macros available that can be
@@ -54,6 +58,8 @@ awardsScriptModule.init = ( ) => {
             appropriate macro button.</p>
 
         <hr />
+
+        <div>Tournament Location - Tournament Date</div>
 
         <!-- FRONT_MATTER: ${FRONT_MATTER} -->
         <!-- identifier: ${FRONT_MATTER.identifier} -->
