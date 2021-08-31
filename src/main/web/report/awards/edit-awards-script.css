@@ -4,5 +4,5 @@ textarea, .macro-buttons {
 }
 
 textarea:disabled, input:disabled {
-    background-color: grey;
+    background-color: lightgrey;
 }

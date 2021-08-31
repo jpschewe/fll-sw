@@ -97,7 +97,7 @@ public class EditAwardsScript extends BaseFLLServlet {
 
       page.setAttribute("subjectiveCategories", description.getSubjectiveCategories());
 
-      // FIXME populate
+      // FIXME populate 8/31/21 pending answer from Jeannie
       final Map<SubjectiveScoreCategory, String> subjectiveCategoryText = new HashMap<>();
       page.setAttribute("subjectiveCategoryText", subjectiveCategoryText);
       final Map<SubjectiveScoreCategory, Boolean> subjectiveCategorySpecified = new HashMap<>();
@@ -116,89 +116,99 @@ public class EditAwardsScript extends BaseFLLServlet {
       }
       page.setAttribute("nonNumericCategories", nonNumericCategories);
 
-      // FIXME populate
+      // FIXME populate 8/31/21 pending answer from Jeannie
       final Map<NonNumericCategory, String> nonNumericCategoryText = new HashMap<>();
       page.setAttribute("nonNumericCategoryText", nonNumericCategoryText);
       final Map<NonNumericCategory, Boolean> nonNumericCategorySpecified = new HashMap<>();
       page.setAttribute("nonNumericCategorySpecified", nonNumericCategorySpecified);
 
-      // FIXME section names that need to have values populated in the script
-      // sections:
-      // front_matter
-      // sponsors_intro
-      // sponsors_recognition
-      // volunteers
-      // category_championship
-      // category_performance
-      // subjective category_${category.name}
-      // non-numeric category_${category.title}
-      // end_awards
-      // footer
-      // subjectiveCategoryText{}
-      // nonNumericCategoryText{}
+      loadMacroInformation(page, connection, tournamentLevel, tournament, layer);
 
-      page.setAttribute("macros", AwardsScript.Macro.values());
-      Arrays.stream(AwardsScript.Macro.values()).forEach(s -> page.setAttribute(s.name(), s));
-
-      // Look for all macro values in the database. Not all macro values are in the
-      // database, but this is OK as the page won't check these maps for macros that
-      // aren't in the database and the lookup functions handle the missing values
-      final Map<AwardsScript.Macro, Boolean> macroSpecified = new HashMap<>();
-      final Map<AwardsScript.Macro, String> macroValue = new HashMap<>();
-      for (final AwardsScript.Macro macro : AwardsScript.Macro.values()) {
-        switch (layer) {
-        case SEASON:
-          macroSpecified.put(macro, AwardsScript.isMacroSpecifiedForSeason(connection, macro));
-          macroValue.put(macro, AwardsScript.getMacroValueForSeason(connection, macro));
-          break;
-        case TOURNAMENT:
-          macroSpecified.put(macro, AwardsScript.isMacroSpecifiedForTournament(connection, tournament, macro));
-          macroValue.put(macro, AwardsScript.getMacroValueForTournament(connection, tournament, macro));
-          break;
-        case TOURNAMENT_LEVEL:
-          macroSpecified.put(macro,
-                             AwardsScript.isMacroSpecifiedForTournamentLevel(connection, tournamentLevel, macro));
-          macroValue.put(macro, AwardsScript.getMacroValueForTournamentLevel(connection, tournamentLevel, macro));
-          break;
-        default:
-          throw new FLLInternalException("Unknown awards script layer: "
-              + layer);
-        }
-      }
-      page.setAttribute("macroSpecified", macroSpecified);
-      page.setAttribute("macroValue", macroValue);
-
-      page.setAttribute("sections", AwardsScript.Section.values());
-      Arrays.stream(AwardsScript.Section.values()).forEach(s -> page.setAttribute(s.name(), s));
-
-      final Map<AwardsScript.Section, Boolean> sectionSpecified = new HashMap<>();
-      final Map<AwardsScript.Section, String> sectionText = new HashMap<>();
-      for (final AwardsScript.Section section : AwardsScript.Section.values()) {
-        switch (layer) {
-        case SEASON:
-          sectionSpecified.put(section, AwardsScript.isSectionSpecifiedForSeason(connection, section));
-          sectionText.put(section, AwardsScript.getSectionTextForSeason(connection, section));
-          break;
-        case TOURNAMENT:
-          sectionSpecified.put(section, AwardsScript.isSectionSpecifiedForTournament(connection, tournament, section));
-          sectionText.put(section, AwardsScript.getSectionTextForTournament(connection, tournament, section));
-          break;
-        case TOURNAMENT_LEVEL:
-          sectionSpecified.put(section,
-                               AwardsScript.isSectionSpecifiedForTournamentLevel(connection, tournamentLevel, section));
-          sectionText.put(section, AwardsScript.getSectionTextForTournamentLevel(connection, tournamentLevel, section));
-          break;
-        default:
-          throw new FLLInternalException("Unknown awards script layer: "
-              + layer);
-        }
-      }
-      page.setAttribute("sectionSpecified", sectionSpecified);
-      page.setAttribute("sectionText", sectionText);
+      loadSectionInformation(page, connection, tournamentLevel, tournament, layer);
 
     } catch (final SQLException e) {
       throw new FLLInternalException("Error getting values for editing awards script", e);
     }
+  }
+
+  private static void loadSectionInformation(final PageContext page,
+                                             Connection connection,
+                                             final TournamentLevel tournamentLevel,
+                                             final Tournament tournament,
+                                             final AwardsScript.Layer layer)
+      throws SQLException {
+    page.setAttribute("sections", AwardsScript.Section.values());
+    Arrays.stream(AwardsScript.Section.values()).forEach(s -> page.setAttribute(s.name(), s));
+
+    final Map<AwardsScript.Section, Boolean> sectionSpecified = new HashMap<>();
+    final Map<AwardsScript.Section, String> sectionText = new HashMap<>();
+    for (final AwardsScript.Section section : AwardsScript.Section.values()) {
+      final boolean specified;
+      String text;
+      switch (layer) {
+      case SEASON:
+        specified = AwardsScript.isSectionSpecifiedForSeason(connection, section);
+        text = AwardsScript.getSectionTextForSeason(connection, section);
+        break;
+      case TOURNAMENT:
+        specified = AwardsScript.isSectionSpecifiedForTournament(connection, tournament, section);
+        text = AwardsScript.getSectionTextForTournament(connection, tournament, section);
+        break;
+      case TOURNAMENT_LEVEL:
+        specified = AwardsScript.isSectionSpecifiedForTournamentLevel(connection, tournamentLevel, section);
+        text = AwardsScript.getSectionTextForTournamentLevel(connection, tournamentLevel, section);
+        break;
+      default:
+        throw new FLLInternalException("Unknown awards script layer: "
+            + layer);
+      }
+
+      if (!specified) {
+        // display the value that would be used to the user
+        text = AwardsScript.getSectionText(connection, tournament, section);
+      }
+      sectionText.put(section, text);
+      sectionSpecified.put(section, specified);
+    }
+    page.setAttribute("sectionSpecified", sectionSpecified);
+    page.setAttribute("sectionText", sectionText);
+  }
+
+  private static void loadMacroInformation(final PageContext page,
+                                           final Connection connection,
+                                           final TournamentLevel tournamentLevel,
+                                           final Tournament tournament,
+                                           final AwardsScript.Layer layer)
+      throws SQLException {
+    page.setAttribute("macros", AwardsScript.Macro.values());
+    Arrays.stream(AwardsScript.Macro.values()).forEach(s -> page.setAttribute(s.name(), s));
+
+    // Look for all macro values in the database. Not all macro values are in the
+    // database, but this is OK as the page won't check these maps for macros that
+    // aren't in the database and the lookup functions handle the missing values
+    final Map<AwardsScript.Macro, Boolean> macroSpecified = new HashMap<>();
+    final Map<AwardsScript.Macro, String> macroValue = new HashMap<>();
+    for (final AwardsScript.Macro macro : AwardsScript.Macro.values()) {
+      switch (layer) {
+      case SEASON:
+        macroSpecified.put(macro, AwardsScript.isMacroSpecifiedForSeason(connection, macro));
+        macroValue.put(macro, AwardsScript.getMacroValueForSeason(connection, macro));
+        break;
+      case TOURNAMENT:
+        macroSpecified.put(macro, AwardsScript.isMacroSpecifiedForTournament(connection, tournament, macro));
+        macroValue.put(macro, AwardsScript.getMacroValueForTournament(connection, tournament, macro));
+        break;
+      case TOURNAMENT_LEVEL:
+        macroSpecified.put(macro, AwardsScript.isMacroSpecifiedForTournamentLevel(connection, tournamentLevel, macro));
+        macroValue.put(macro, AwardsScript.getMacroValueForTournamentLevel(connection, tournamentLevel, macro));
+        break;
+      default:
+        throw new FLLInternalException("Unknown awards script layer: "
+            + layer);
+      }
+    }
+    page.setAttribute("macroSpecified", macroSpecified);
+    page.setAttribute("macroValue", macroValue);
   }
 
   /**
