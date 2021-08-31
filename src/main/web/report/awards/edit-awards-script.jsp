@@ -24,8 +24,12 @@ awardsScriptModule.init = ( ) => {
 
   const macros = [];  
   <c:forEach items="${macros}" var="macro">
-  macros.push(awardsScriptModule.createMacro("${macro.text}", "${macro.title}"));
+  const macro_${macro.text} = awardsScriptModule.createMacro("${macro.text}", "${macro.title}");
+  macros.push(macro_${macro.text});
+
+  awardsScriptModule.configureMacroEntry(macro_${macro.text}, ${macroSpecified[macro]}, ${macroValue[macro]});
   </c:forEach>
+  
 
   <c:forEach items="${sections}" var="section"> 
   awardsScriptModule.configureTextEntry(macros, "${section.identifier}", ${sectionSpecified[section]});
@@ -59,10 +63,66 @@ awardsScriptModule.init = ( ) => {
 
         <hr />
 
-        <div>Tournament Location - Tournament Date</div>
+        <h1>Macro Values</h1>
+        <div>Some of the macros need values populated. These
+            values can be populated at any layer of the script.</div>
 
-        <!-- FRONT_MATTER: ${FRONT_MATTER} -->
-        <!-- identifier: ${FRONT_MATTER.identifier} -->
+        <h2>${NUM_TRAINED_OFFICIALS.title}</h2>
+        <div>
+            <label>
+                Specify value:
+                <input type="checkbox"
+                    name="${NUM_TRAINED_OFFICIALS.text}_specified"
+                    id="${NUM_TRAINED_OFFICIALS.text}_specified" />
+            </label>
+            <input type="text"
+                name="${NUM_TRAINED_OFFICIALS.text}_value"
+                id="${NUM_TRAINED_OFFICIALS.text}_value" />
+        </div>
+
+        <h2>${HOST_SCHOOL.title}</h2>
+        <div>
+            <label>
+                Specify value:
+                <input type="checkbox"
+                    name="${HOST_SCHOOL.text}_specified"
+                    id="${HOST_SCHOOL.text}_specified" />
+            </label>
+            <input type="text" name="${HOST_SCHOOL.text}_value"
+                id="${HOST_SCHOOL.text}_value" />
+        </div>
+
+        <h2>${TOURNAMENT_DIRECTORS.title}</h2>
+        <div>
+            <label>
+                Specify value:
+                <input type="checkbox"
+                    name="${TOURNAMENT_DIRECTORS.text}_specified"
+                    id="${TOURNAMENT_DIRECTORS.text}_specified" />
+            </label>
+            <input type="text" name="${TOURNAMENT_DIRECTORS.text}_value"
+                id="${TOURNAMENT_DIRECTORS.text}_value" />
+        </div>
+
+        <h2>${NUM_TEAMS_ADVANCING.title}</h2>
+        <div>
+            <label>
+                Specify value:
+                <input type="checkbox"
+                    name="${NUM_TEAMS_ADVANCING.text}_specified"
+                    id="${NUM_TEAMS_ADVANCING.text}_specified" />
+            </label>
+            <input type="text" name="${NUM_TEAMS_ADVANCING.text}_value"
+                id="${NUM_TEAMS_ADVANCING.text}_value" />
+        </div>
+
+
+        <hr />
+        <h1>Awards script sections</h1>
+
+        <div>Tournament Location - Tournament Date</div>
+        <hr />
+
         <c:set var="sectionName">${FRONT_MATTER.identifier}</c:set>
         <c:set var="sectionTextValue">${sectionText[FRONT_MATTER]}</c:set>
         <%@ include file="edit-awards-script_textarea-macros.jspf"%>
@@ -189,7 +249,6 @@ awardsScriptModule.init = ( ) => {
         <hr />
 
         <input type="submit" value="Submit" />
-
     </form>
     <!-- before end body -->
 </body>

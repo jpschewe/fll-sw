@@ -137,10 +137,36 @@ public class EditAwardsScript extends BaseFLLServlet {
       // subjectiveCategoryText{}
       // nonNumericCategoryText{}
 
-      // FIXME put default values into the GenerateDB code, possibly read text out of
-      // files
-
       page.setAttribute("macros", AwardsScript.Macro.values());
+      Arrays.stream(AwardsScript.Macro.values()).forEach(s -> page.setAttribute(s.name(), s));
+
+      // Look for all macro values in the database. Not all macro values are in the
+      // database, but this is OK as the page won't check these maps for macros that
+      // aren't in the database and the lookup functions handle the missing values
+      final Map<AwardsScript.Macro, Boolean> macroSpecified = new HashMap<>();
+      final Map<AwardsScript.Macro, String> macroValue = new HashMap<>();
+      for (final AwardsScript.Macro macro : AwardsScript.Macro.values()) {
+        switch (layer) {
+        case SEASON:
+          macroSpecified.put(macro, AwardsScript.isMacroSpecifiedForSeason(connection, macro));
+          macroValue.put(macro, AwardsScript.getMacroValueForSeason(connection, macro));
+          break;
+        case TOURNAMENT:
+          macroSpecified.put(macro, AwardsScript.isMacroSpecifiedForTournament(connection, tournament, macro));
+          macroValue.put(macro, AwardsScript.getMacroValueForTournament(connection, tournament, macro));
+          break;
+        case TOURNAMENT_LEVEL:
+          macroSpecified.put(macro,
+                             AwardsScript.isMacroSpecifiedForTournamentLevel(connection, tournamentLevel, macro));
+          macroValue.put(macro, AwardsScript.getMacroValueForTournamentLevel(connection, tournamentLevel, macro));
+          break;
+        default:
+          throw new FLLInternalException("Unknown awards script layer: "
+              + layer);
+        }
+      }
+      page.setAttribute("macroSpecified", macroSpecified);
+      page.setAttribute("macroValue", macroValue);
 
       page.setAttribute("sections", AwardsScript.Section.values());
       Arrays.stream(AwardsScript.Section.values()).forEach(s -> page.setAttribute(s.name(), s));
@@ -150,16 +176,16 @@ public class EditAwardsScript extends BaseFLLServlet {
       for (final AwardsScript.Section section : AwardsScript.Section.values()) {
         switch (layer) {
         case SEASON:
-          sectionSpecified.put(section, AwardsScript.getSectionSpecifiedForSeason(connection, section));
+          sectionSpecified.put(section, AwardsScript.isSectionSpecifiedForSeason(connection, section));
           sectionText.put(section, AwardsScript.getSectionTextForSeason(connection, section));
           break;
         case TOURNAMENT:
-          sectionSpecified.put(section, AwardsScript.getSectionSpecifiedForTournament(connection, tournament, section));
+          sectionSpecified.put(section, AwardsScript.isSectionSpecifiedForTournament(connection, tournament, section));
           sectionText.put(section, AwardsScript.getSectionTextForTournament(connection, tournament, section));
           break;
         case TOURNAMENT_LEVEL:
-          sectionSpecified.put(section, AwardsScript.getSectionSpecifiedForTournamentLevel(connection, tournamentLevel,
-                                                                                           section));
+          sectionSpecified.put(section,
+                               AwardsScript.isSectionSpecifiedForTournamentLevel(connection, tournamentLevel, section));
           sectionText.put(section, AwardsScript.getSectionTextForTournamentLevel(connection, tournamentLevel, section));
           break;
         default:
@@ -216,45 +242,9 @@ public class EditAwardsScript extends BaseFLLServlet {
 
       final AwardsScript.Layer layer = determineAwardsScriptLayer(tournamentLevel, tournament);
 
-      for (final AwardsScript.Section section : AwardsScript.Section.values()) {
-        final @Nullable String specifiedStr = request.getParameter(String.format("%s_specified",
-                                                                                 section.getIdentifier()));
-        if (null != specifiedStr) {
-          final String text = WebUtils.getNonNullRequestParameter(request,
-                                                                  String.format("%s_text", section.getIdentifier()));
+      storeSectionText(request, connection, tournamentLevel, tournament, layer);
 
-          switch (layer) {
-          case SEASON:
-            AwardsScript.updateSectionTextForSeason(connection, section, text);
-            break;
-          case TOURNAMENT:
-            AwardsScript.updateSectionTextForTournament(connection, tournament, section, text);
-            break;
-          case TOURNAMENT_LEVEL:
-            AwardsScript.updateSectionTextForTournamentLevel(connection, tournamentLevel, section, text);
-            break;
-          default:
-            throw new FLLInternalException("Unknown awards script layer: "
-                + layer);
-
-          }
-        } else {
-          switch (layer) {
-          case SEASON:
-            AwardsScript.clearSectionTextForSeason(connection, section);
-            break;
-          case TOURNAMENT:
-            AwardsScript.clearSectionTextForTournament(connection, tournament, section);
-            break;
-          case TOURNAMENT_LEVEL:
-            AwardsScript.clearSectionTextForTournamentLevel(connection, tournamentLevel, section);
-            break;
-          default:
-            throw new FLLInternalException("Unknown awards script layer: "
-                + layer);
-          }
-        }
-      }
+      storeMacroValues(request, connection, tournamentLevel, tournament, layer);
 
       final String layerText;
       switch (layer) {
@@ -280,6 +270,98 @@ public class EditAwardsScript extends BaseFLLServlet {
       throw new FLLInternalException("Error storing values for award script", e);
     }
 
+  }
+
+  private void storeSectionText(final HttpServletRequest request,
+                                Connection connection,
+                                final TournamentLevel tournamentLevel,
+                                final Tournament tournament,
+                                final AwardsScript.Layer layer)
+      throws SQLException {
+    for (final AwardsScript.Section section : AwardsScript.Section.values()) {
+      final @Nullable String specifiedStr = request.getParameter(String.format("%s_specified",
+                                                                               section.getIdentifier()));
+      if (null != specifiedStr) {
+        final String text = WebUtils.getNonNullRequestParameter(request,
+                                                                String.format("%s_text", section.getIdentifier()));
+
+        switch (layer) {
+        case SEASON:
+          AwardsScript.updateSectionTextForSeason(connection, section, text);
+          break;
+        case TOURNAMENT:
+          AwardsScript.updateSectionTextForTournament(connection, tournament, section, text);
+          break;
+        case TOURNAMENT_LEVEL:
+          AwardsScript.updateSectionTextForTournamentLevel(connection, tournamentLevel, section, text);
+          break;
+        default:
+          throw new FLLInternalException("Unknown awards script layer: "
+              + layer);
+
+        }
+      } else {
+        switch (layer) {
+        case SEASON:
+          AwardsScript.clearSectionTextForSeason(connection, section);
+          break;
+        case TOURNAMENT:
+          AwardsScript.clearSectionTextForTournament(connection, tournament, section);
+          break;
+        case TOURNAMENT_LEVEL:
+          AwardsScript.clearSectionTextForTournamentLevel(connection, tournamentLevel, section);
+          break;
+        default:
+          throw new FLLInternalException("Unknown awards script layer: "
+              + layer);
+        }
+      }
+    }
+  }
+
+  private void storeMacroValues(final HttpServletRequest request,
+                                Connection connection,
+                                final TournamentLevel tournamentLevel,
+                                final Tournament tournament,
+                                final AwardsScript.Layer layer)
+      throws SQLException {
+    for (final AwardsScript.Macro macro : AwardsScript.Macro.values()) {
+      final @Nullable String specifiedStr = request.getParameter(String.format("%s_specified", macro.getText()));
+      if (null != specifiedStr) {
+        final String value = WebUtils.getNonNullRequestParameter(request, String.format("%s_value", macro.getText()));
+
+        switch (layer) {
+        case SEASON:
+          AwardsScript.updateMacroValueForSeason(connection, macro, value);
+          break;
+        case TOURNAMENT:
+          AwardsScript.updateMacroValueForTournament(connection, tournament, macro, value);
+          break;
+        case TOURNAMENT_LEVEL:
+          AwardsScript.updateMacroValueForTournamentLevel(connection, tournamentLevel, macro, value);
+          break;
+        default:
+          throw new FLLInternalException("Unknown awards script layer: "
+              + layer);
+
+        }
+      } else {
+        switch (layer) {
+        case SEASON:
+          AwardsScript.clearMacroValueForSeason(connection, macro);
+          break;
+        case TOURNAMENT:
+          AwardsScript.clearMacroValueForTournament(connection, tournament, macro);
+          break;
+        case TOURNAMENT_LEVEL:
+          AwardsScript.clearMacroValueForTournamentLevel(connection, tournamentLevel, macro);
+          break;
+        default:
+          throw new FLLInternalException("Unknown awards script layer: "
+              + layer);
+        }
+      }
+    }
   }
 
 }

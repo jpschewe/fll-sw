@@ -6,15 +6,15 @@ const awardsScriptModule = {};
 {
 
     /**
-     * @param name the macro name that codes in the text
+     * @param text the name that appears in text
      * @param title the user-friendly name of the macro
      */
-    awardsScriptModule.createMacro = function(name, title) {
+    awardsScriptModule.createMacro = function(text, title) {
         return {
-            name: name,
+            text: text,
             title: title
         };
-    }
+    };
 
 
     /**
@@ -29,8 +29,9 @@ const awardsScriptModule = {};
         if (checkbox) {
             checkbox.addEventListener('change', () => {
                 textElement.disabled = !checkbox.checked;
+
                 macros.forEach(function(macro) {
-                    const buttonId = sectionName + "_" + macro.name;
+                    const buttonId = sectionName + "_" + macro.text;
                     const button = document.getElementById(buttonId);
                     button.disabled = !checkbox.checked;
                 });
@@ -53,10 +54,10 @@ const awardsScriptModule = {};
             const button = document.createElement("button");
             div.appendChild(button);
             button.setAttribute("type", "button");
-            button.setAttribute("id", sectionName + "_" + macro.name);
+            button.setAttribute("id", sectionName + "_" + macro.text);
             button.innerText = macro.title;
             button.addEventListener('click', () => {
-                insertAtCaret(textElement, '${' + macro.name + '}');
+                insertAtCaret(textElement, '${' + macro.text + '}');
             });
 
         });
@@ -64,11 +65,28 @@ const awardsScriptModule = {};
         textElement.disabled = !sectionSpecified;
 
         macros.forEach(function(macro) {
-            const buttonId = sectionName + "_" + macro.name;
+            const buttonId = sectionName + "_" + macro.text;
             const button = document.getElementById(buttonId);
             button.disabled = !sectionSpecified;
         });
 
+    };
+
+    awardsScriptModule.configureMacroEntry = function(macro, macroSpecified, macroValue) {
+        const checkbox = document.getElementById(macro.text + "_specified");
+        if (checkbox) {
+            const input = document.getElementById(macro.text + "_value");
+
+            checkbox.addEventListener('change', () => {
+                input.disabled = !checkbox.checked;
+            });
+
+            if (macroSpecified) {
+                input.value = macroValue;
+            }
+            checkbox.checked = macroSpecified;
+            input.disabled = !macroSpecified;
+        }
     };
 
     document.addEventListener('DOMContentLoaded', () => {

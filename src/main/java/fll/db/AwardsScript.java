@@ -20,6 +20,7 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 
 import fll.Tournament;
 import fll.TournamentLevel;
+import fll.util.FLLInternalException;
 
 /**
  * Methods for working with the awards script.
@@ -220,11 +221,11 @@ public final class AwardsScript {
    * @return if the section has a value for the season
    * @throws SQLException on a database error
    */
-  public static boolean getSectionSpecifiedForSeason(final Connection connection,
-                                                     final Section section)
+  public static boolean isSectionSpecifiedForSeason(final Connection connection,
+                                                    final Section section)
       throws SQLException {
-    return getSectionSpecifiedFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
-                                  GenerateDB.INTERNAL_TOURNAMENT_ID, section);
+    return isSectionSpecifiedFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                                 section);
   }
 
   /**
@@ -234,11 +235,11 @@ public final class AwardsScript {
    * @return if the section has a value for the specified tournament level
    * @throws SQLException on a database error
    */
-  public static boolean getSectionSpecifiedForTournamentLevel(final Connection connection,
-                                                              final TournamentLevel level,
-                                                              final Section section)
+  public static boolean isSectionSpecifiedForTournamentLevel(final Connection connection,
+                                                             final TournamentLevel level,
+                                                             final Section section)
       throws SQLException {
-    return getSectionSpecifiedFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, section);
+    return isSectionSpecifiedFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, section);
   }
 
   /**
@@ -248,18 +249,18 @@ public final class AwardsScript {
    * @return if the section has a value for the specified tournament
    * @throws SQLException on a database error
    */
-  public static boolean getSectionSpecifiedForTournament(final Connection connection,
-                                                         final Tournament tournament,
-                                                         final Section section)
+  public static boolean isSectionSpecifiedForTournament(final Connection connection,
+                                                        final Tournament tournament,
+                                                        final Section section)
       throws SQLException {
-    return getSectionSpecifiedFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
-                                  section);
+    return isSectionSpecifiedFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                                 section);
   }
 
-  private static boolean getSectionSpecifiedFor(final Connection connection,
-                                                final int tournamentLevelId,
-                                                final int tournamentId,
-                                                final Section section)
+  private static boolean isSectionSpecifiedFor(final Connection connection,
+                                               final int tournamentLevelId,
+                                               final int tournamentId,
+                                               final Section section)
       throws SQLException {
     try (PreparedStatement prep = connection.prepareStatement("SELECT section_name FROM awards_script_text" //
         + "  WHERE section_name = ?" //
@@ -530,6 +531,324 @@ public final class AwardsScript {
         } else {
           // can't find anything
           return Collections.emptyList();
+        }
+
+      }
+    }
+  }
+
+  /**
+   * @param connection database connection
+   * @param macro the macro to check for
+   * @return if the parameter has a value for the season
+   * @throws SQLException on a database error
+   */
+  public static boolean isMacroSpecifiedForSeason(final Connection connection,
+                                                  final Macro macro)
+      throws SQLException {
+    return isParameterSpecifiedFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
+                                   GenerateDB.INTERNAL_TOURNAMENT_ID, macro.name());
+  }
+
+  /**
+   * @param connection database connection
+   * @param macro the macro to check for
+   * @param level the tournament level
+   * @return if the section has a value for the specified tournament level
+   * @throws SQLException on a database error
+   */
+  public static boolean isMacroSpecifiedForTournamentLevel(final Connection connection,
+                                                           final TournamentLevel level,
+                                                           final Macro macro)
+      throws SQLException {
+    return isParameterSpecifiedFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, macro.name());
+  }
+
+  /**
+   * @param connection database connection
+   * @param macro the macro to check for
+   * @param tournament the tournament
+   * @return if the section has a value for the specified tournament
+   * @throws SQLException on a database error
+   */
+  public static boolean isMacroSpecifiedForTournament(final Connection connection,
+                                                      final Tournament tournament,
+                                                      final Macro macro)
+      throws SQLException {
+    return isParameterSpecifiedFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                                   macro.name());
+  }
+
+  /**
+   * @param connection database connection
+   * @param macro the macro to get the value for
+   * @return macro value for the season
+   * @throws SQLException on a database error
+   */
+  public static String getMacroValueForSeason(final Connection connection,
+                                              final Macro macro)
+      throws SQLException {
+    return getParameterValueFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                                macro.name());
+  }
+
+  /**
+   * @param connection database connection
+   * @param macro the macro to get the value for
+   * @param level the tournament level
+   * @return macro value for the specified tournament level
+   * @throws SQLException on a database error
+   */
+  public static String getMacroValueForTournamentLevel(final Connection connection,
+                                                       final TournamentLevel level,
+                                                       final Macro macro)
+      throws SQLException {
+    return getParameterValueFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, macro.name());
+  }
+
+  /**
+   * @param connection database connection
+   * @param macro the macro to get the value for
+   * @param tournament the tournament
+   * @return macro value for the specified tournament
+   * @throws SQLException on a database error
+   */
+  public static String getMacroValueForTournament(final Connection connection,
+                                                  final Tournament tournament,
+                                                  final Macro macro)
+      throws SQLException {
+    return getParameterValueFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                                macro.name());
+  }
+
+  /**
+   * @param connection database connection
+   * @param macro the macro to clear the value
+   * @throws SQLException on a database error
+   */
+  public static void clearMacroValueForSeason(final Connection connection,
+                                              final Macro macro)
+      throws SQLException {
+    updateParameterValueFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                            Layer.SEASON, macro.name(), null);
+  }
+
+  /**
+   * @param connection database connection
+   * @param macro the macro to clear the value
+   * @param level the tournament level
+   * @throws SQLException on a database error
+   */
+  public static void clearMacroValueForTournamentLevel(final Connection connection,
+                                                       final TournamentLevel level,
+                                                       final Macro macro)
+      throws SQLException {
+    updateParameterValueFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, Layer.TOURNAMENT_LEVEL,
+                            macro.name(), null);
+  }
+
+  /**
+   * @param connection database connection
+   * @param macro the macro to clear the value
+   * @param tournament the tournament
+   * @throws SQLException on a database error
+   */
+  public static void clearMacroValueForTournament(final Connection connection,
+                                                  final Tournament tournament,
+                                                  final Macro macro)
+      throws SQLException {
+    updateParameterValueFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                            Layer.TOURNAMENT, macro.name(), null);
+  }
+
+  /**
+   * @param connection database connection
+   * @param macro the macro to update the value of
+   * @param value the new value
+   * @throws SQLException on a database error
+   */
+  public static void updateMacroValueForSeason(final Connection connection,
+                                               final Macro macro,
+                                               final String value)
+      throws SQLException {
+    updateParameterValueFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                            Layer.SEASON, macro.name(), value);
+  }
+
+  /**
+   * @param connection database connection
+   * @param macro the macro to update the value of
+   * @param level the tournament level
+   * @param value the new value
+   * @throws SQLException on a database error
+   */
+  public static void updateMacroValueForTournamentLevel(final Connection connection,
+                                                        final TournamentLevel level,
+                                                        final Macro macro,
+                                                        final String value)
+      throws SQLException {
+    updateParameterValueFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, Layer.TOURNAMENT_LEVEL,
+                            macro.name(), value);
+  }
+
+  /**
+   * @param connection database connection
+   * @param macro the macro to update the value of
+   * @param tournament the tournament
+   * @param value the new value
+   * @throws SQLException on a database error
+   */
+  public static void updateMacroValueForTournament(final Connection connection,
+                                                   final Tournament tournament,
+                                                   final Macro macro,
+                                                   final String value)
+      throws SQLException {
+    updateParameterValueFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                            Layer.TOURNAMENT, macro.name(), value);
+  }
+
+  private static boolean isParameterSpecifiedFor(final Connection connection,
+                                                 final int tournamentLevelId,
+                                                 final int tournamentId,
+                                                 final String paramName)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT param_value FROM awards_script_parameters" //
+        + "  WHERE param_name = ?" //
+        + "    AND tournament_level_id = ?" //
+        + "    AND tournament_id = ?")) {
+      prep.setString(1, paramName);
+      prep.setInt(2, tournamentLevelId);
+      prep.setInt(3, tournamentId);
+      try (ResultSet rs = prep.executeQuery()) {
+        return rs.next();
+      }
+    }
+  }
+
+  private static String getParameterValueFor(final Connection connection,
+                                             final int tournamentLevelId,
+                                             final int tournamentId,
+                                             final String paramName)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT param_value FROM awards_script_parameters" //
+        + "  WHERE param_name = ?" //
+        + "    AND tournament_level_id = ?" //
+        + "    AND tournament_id = ?")) {
+      prep.setString(1, paramName);
+      prep.setInt(2, tournamentLevelId);
+      prep.setInt(3, tournamentId);
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          return castNonNull(rs.getString(1));
+        } else {
+          return "";
+        }
+      }
+    }
+  }
+
+  private static void updateParameterValueFor(final Connection connection,
+                                              final int tournamentLevelId,
+                                              final int tournamentId,
+                                              final Layer layer,
+                                              final String paramName,
+                                              final @Nullable String paramValue)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("DELETE FROM awards_script_parameters" //
+        + " WHERE tournament_level_id = ?" //
+        + " AND tournament_id = ?" //
+        + " AND param_name = ?")) {
+      prep.setInt(1, tournamentLevelId);
+      prep.setInt(2, tournamentId);
+      prep.setString(3, paramName);
+      prep.executeUpdate();
+    }
+
+    if (null != paramValue) {
+      try (PreparedStatement prep = connection.prepareStatement("INSERT INTO awards_script_parameters" //
+          + " (tournament_level_id, tournament_id, layer_rank, param_name, param_value)" //
+          + " VALUES(?, ?, ?, ?, ?)")) {
+        prep.setInt(1, tournamentLevelId);
+        prep.setInt(2, tournamentId);
+        prep.setInt(3, layer.getRank());
+        prep.setString(4, paramName);
+        prep.setString(5, paramValue);
+        prep.executeUpdate();
+      }
+    }
+  }
+
+  /**
+   * Get the text for a macro.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament that the script is being generated for
+   * @param macro the macro in the script
+   * @return the value, "UNKNOWN" if it cannot be resolved
+   * @throws SQLException on a database error
+   */
+  public static String getMacroValue(final Connection connection,
+                                     final Tournament tournament,
+                                     final Macro macro)
+      throws SQLException {
+
+    switch (macro) {
+    case TOURNAMENT_LEVEL:
+      return tournament.getLevel().getName();
+    case TOURNAMENT_NEXT_LEVEL: {
+      final int nextLevelId = tournament.getLevel().getNextLevelId();
+      if (TournamentLevel.NO_NEXT_LEVEL_ID == nextLevelId) {
+        return "No Next Level";
+      } else {
+        return TournamentLevel.getById(connection, nextLevelId).getName();
+      }
+    }
+    case HOST_SCHOOL:
+    case NUM_TEAMS_ADVANCING:
+    case NUM_TRAINED_OFFICIALS:
+    case TOURNAMENT_DIRECTORS: {
+      final @Nullable String value = getParameterValue(connection, tournament, macro.name());
+      if (null == value) {
+        return "UNKNOWN";
+      }
+    }
+    default:
+      throw new FLLInternalException("Unknown macro: "
+          + macro);
+    }
+  }
+
+  private static @Nullable String getParameterValue(final Connection connection,
+                                                    final Tournament tournament,
+                                                    final String paramName)
+      throws SQLException {
+
+    try (PreparedStatement prep = connection.prepareStatement("select param_value from awards_script_parameters"
+        + "    WHERE param_name = ?"
+        // season
+        + "        AND ( (tournament_level_id = ? AND tournament_id = ?)"
+        // tournament level
+        + "            OR (tournament_level_id = ? AND tournament_id = ?)"
+        // tournament
+        + "            OR (tournament_level_id = ? AND tournament_id = ?) ) ORDER BY layer_rank DESC")) {
+      prep.setString(1, paramName);
+      // season
+      prep.setInt(2, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
+      prep.setInt(3, GenerateDB.INTERNAL_TOURNAMENT_ID);
+
+      // tournament level
+      prep.setInt(4, tournament.getLevel().getId());
+      prep.setInt(5, GenerateDB.INTERNAL_TOURNAMENT_ID);
+
+      // tournament
+      prep.setInt(6, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
+      prep.setInt(7, tournament.getTournamentID());
+
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          return rs.getString("param_value");
+        } else {
+          return null;
         }
 
       }
