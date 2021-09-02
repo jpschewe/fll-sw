@@ -16,6 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Formatter;
 
 import org.apache.commons.io.IOUtils;
 
@@ -1204,6 +1205,30 @@ public final class GenerateDB {
     }
   }
 
+  private static void createAwardsScriptTable(final Connection connection,
+                                              final boolean createConstraints,
+                                              final String tableName,
+                                              final String keyColumn,
+                                              final String valueColumn)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      final Formatter sql = new Formatter();
+
+      sql.format("CREATE TABLE %s (", tableName);
+      sql.format("  tournament_level_id INTEGER NOT NULL");
+      sql.format(" ,tournament_id INTEGER NOT NULL");
+      sql.format(" ,layer_rank INTEGER NOT NULL");
+      sql.format(" ,%s VARCHAR(64) NOT NULL", keyColumn);
+      sql.format(" ,%s LONGVARCHAR NOT NULL", valueColumn);
+      if (createConstraints) {
+        sql.format(" ,CONSTRAINT %s_pk PRIMARY KEY (%s, tournament_level_id, tournament_id, layer_rank)", tableName,
+                   keyColumn);
+      }
+      sql.format(")");
+      stmt.executeUpdate(sql.toString());
+    }
+  }
+
   /**
    * Create tables used to store information about the awards script.
    * This also populates the default values.
@@ -1218,63 +1243,35 @@ public final class GenerateDB {
     try (Statement stmt = connection.createStatement()) {
 
       // store text for sections
-      {
-        final StringBuilder sql = new StringBuilder();
+      createAwardsScriptTable(connection, createConstraints, "awards_script_text", "section_name", "text");
 
-        sql.append("CREATE TABLE awards_script_text (");
-        sql.append("  section_name VARCHAR(64) NOT NULL");
-        sql.append(" ,tournament_level_id INTEGER NOT NULL");
-        sql.append(" ,tournament_id INTEGER NOT NULL");
-        sql.append(" ,layer_rank INTEGER NOT NULL");
-        sql.append(" ,text LONGVARCHAR NOT NULL");
-        if (createConstraints) {
-          sql.append(" ,CONSTRAINT awards_script_text_pk PRIMARY KEY (section_name, tournament_level_id, tournament_id, layer_rank)");
-        }
-        sql.append(")");
-        stmt.executeUpdate(sql.toString());
+      try (PreparedStatement insert = connection.prepareStatement("INSERT INTO awards_script_text"
+          + " (section_name, tournament_level_id, tournament_id, layer_rank, text)"//
+          + " VALUES(?, ?, ?, ?, ?)")) {
+        insert.setInt(2, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
+        insert.setInt(3, GenerateDB.INTERNAL_TOURNAMENT_ID);
+        insert.setInt(4, AwardsScript.Layer.SEASON.getRank());
 
-        try (PreparedStatement insert = connection.prepareStatement("INSERT INTO awards_script_text"
-            + " (section_name, tournament_level_id, tournament_id, layer_rank, text)"//
-            + " VALUES(?, ?, ?, ?, ?)")) {
-          insert.setInt(2, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
-          insert.setInt(3, GenerateDB.INTERNAL_TOURNAMENT_ID);
-          insert.setInt(4, AwardsScript.Layer.SEASON.getRank());
+        final ClassLoader loader = Utilities.getClassLoader();
 
-          final ClassLoader loader = Utilities.getClassLoader();
+        for (final AwardsScript.Section section : AwardsScript.Section.values()) {
+          try (InputStream stream = loader.getResourceAsStream(String.format("fll/resources/awards-script/%s.txt",
+                                                                             section.name()))) {
+            if (null != stream) {
+              final String text = IOUtils.toString(stream, Utilities.DEFAULT_CHARSET);
 
-          for (final AwardsScript.Section section : AwardsScript.Section.values()) {
-            try (InputStream stream = loader.getResourceAsStream(String.format("fll/resources/awards-script/%s.txt",
-                                                                               section.name()))) {
-              if (null != stream) {
-                final String text = IOUtils.toString(stream, Utilities.DEFAULT_CHARSET);
-
-                insert.setString(1, section.name());
-                insert.setString(5, text);
-                insert.executeUpdate();
-              }
-            } catch (final IOException e) {
-              LOGGER.warn("Error loading default text for section {}, skipping", section.name(), e);
+              insert.setString(1, section.name());
+              insert.setString(5, text);
+              insert.executeUpdate();
             }
+          } catch (final IOException e) {
+            LOGGER.warn("Error loading default text for section {}, skipping", section.name(), e);
           }
         }
-
       }
 
       // store values for macros
-      {
-        final StringBuilder sql = new StringBuilder();
-        sql.append("CREATE TABLE awards_script_parameters (");
-        sql.append("  param_name VARCHAR(64) NOT NULL");
-        sql.append(" ,param_value LONGVARCHAR NOT NULL");
-        sql.append(" ,tournament_level_id INTEGER NOT NULL");
-        sql.append(" ,tournament_id INTEGER NOT NULL");
-        sql.append(" ,layer_rank INTEGER NOT NULL");
-        if (createConstraints) {
-          sql.append(" ,CONSTRAINT awards_script_parameters_pk PRIMARY KEY (param_name, tournament_level_id, tournament_id)");
-        }
-        sql.append(")");
-        stmt.executeUpdate(sql.toString());
-      }
+      createAwardsScriptTable(connection, createConstraints, "awards_script_parameters", "param_name", "param_value");
 
       // store awards order
       {

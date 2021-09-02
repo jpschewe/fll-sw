@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.TournamentLevel;
 import fll.util.FLLInternalException;
@@ -191,15 +193,28 @@ public final class AwardsScript {
                                       final Tournament tournament,
                                       final Section section)
       throws SQLException {
-    try (PreparedStatement prep = connection.prepareStatement("select text from awards_script_text"
-        + "    WHERE section_name = ?"
-        // season
-        + "        AND ( (tournament_level_id = ? AND tournament_id = ?)"
-        // tournament level
-        + "            OR (tournament_level_id = ? AND tournament_id = ?)"
-        // tournament
-        + "            OR (tournament_level_id = ? AND tournament_id = ?) ) ORDER BY layer_rank DESC")) {
-      prep.setString(1, section.name());
+    return getValue(connection, tournament, "awards_script_text", "section_name", section.name(), "text", "");
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Table and column names are passed in")
+  private static String getValue(final Connection connection,
+                                 final Tournament tournament,
+                                 final String tableName,
+                                 final String keyColumn,
+                                 final String keyValue,
+                                 final String valueColumn,
+                                 final String defaultValue)
+      throws SQLException {
+    final Formatter sql = new Formatter();
+    sql.format("SELECT %s FROM %s WHERE %s = ?", valueColumn, tableName, keyColumn);
+    // season
+    sql.format("        AND ( (tournament_level_id = ? AND tournament_id = ?)");
+    // tournament level
+    sql.format("            OR (tournament_level_id = ? AND tournament_id = ?)");
+    // tournament
+    sql.format("            OR (tournament_level_id = ? AND tournament_id = ?) ) ORDER BY layer_rank DESC");
+    try (PreparedStatement prep = connection.prepareStatement(sql.toString())) {
+      prep.setString(1, keyValue);
       // season
       prep.setInt(2, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
       prep.setInt(3, GenerateDB.INTERNAL_TOURNAMENT_ID);
@@ -214,9 +229,9 @@ public final class AwardsScript {
 
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
-          return castNonNull(rs.getString("text"));
+          return castNonNull(rs.getString(1));
         } else {
-          return "";
+          return defaultValue;
         }
 
       }
@@ -270,11 +285,26 @@ public final class AwardsScript {
                                                final int tournamentId,
                                                final Section section)
       throws SQLException {
-    try (PreparedStatement prep = connection.prepareStatement("SELECT section_name FROM awards_script_text" //
-        + "  WHERE section_name = ?" //
-        + "    AND tournament_level_id = ?" //
-        + "    AND tournament_id = ?")) {
-      prep.setString(1, section.name());
+    return isValueSpecifiedFor(connection, tournamentLevelId, tournamentId, "awards_script_text", "section_name",
+                               section.name());
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Table and column names are passed in")
+  private static boolean isValueSpecifiedFor(final Connection connection,
+                                             final int tournamentLevelId,
+                                             final int tournamentId,
+                                             final String tableName,
+                                             final String keyColumn,
+                                             final String keyValue)
+      throws SQLException {
+    final Formatter sql = new Formatter();
+    sql.format("SELECT %s FROM %s", keyColumn, tableName);
+    sql.format("  WHERE %s = ?", keyColumn);
+    sql.format("    AND tournament_level_id = ?");
+    sql.format("    AND tournament_id = ?");
+
+    try (PreparedStatement prep = connection.prepareStatement(sql.toString())) {
+      prep.setString(1, keyValue);
       prep.setInt(2, tournamentLevelId);
       prep.setInt(3, tournamentId);
       try (ResultSet rs = prep.executeQuery()) {
@@ -330,18 +360,35 @@ public final class AwardsScript {
                                           final int tournamentId,
                                           final Section section)
       throws SQLException {
-    try (PreparedStatement prep = connection.prepareStatement("SELECT text FROM awards_script_text" //
-        + "  WHERE section_name = ?" //
-        + "    AND tournament_level_id = ?" //
-        + "    AND tournament_id = ?")) {
-      prep.setString(1, section.name());
+    return getValueFor(connection, tournamentLevelId, tournamentId, "awards_script_text", "section_name",
+                       section.name(), "text", "");
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Table and column names are passed in")
+  private static String getValueFor(final Connection connection,
+                                    final int tournamentLevelId,
+                                    final int tournamentId,
+                                    final String tableName,
+                                    final String keyColumn,
+                                    final String keyValue,
+                                    final String valueColumn,
+                                    final String defaultValue)
+      throws SQLException {
+    final Formatter sql = new Formatter();
+    sql.format("SELECT %s FROM %s", valueColumn, tableName);
+    sql.format("  WHERE %s = ?", keyColumn);
+    sql.format("    AND tournament_level_id = ?");
+    sql.format("    AND tournament_id = ?");
+
+    try (PreparedStatement prep = connection.prepareStatement(sql.toString())) {
+      prep.setString(1, keyValue);
       prep.setInt(2, tournamentLevelId);
       prep.setInt(3, tournamentId);
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
           return castNonNull(rs.getString(1));
         } else {
-          return "";
+          return defaultValue;
         }
       }
     }
@@ -440,25 +487,45 @@ public final class AwardsScript {
                                            final Section section,
                                            final @Nullable String text)
       throws SQLException {
-    try (PreparedStatement prep = connection.prepareStatement("DELETE FROM awards_script_text" //
-        + " WHERE tournament_level_id = ?" //
-        + " AND tournament_id = ?" //
-        + " AND section_name = ?")) {
+    updateValueFor(connection, tournamentLevelId, tournamentId, layer, "awards_script_text", "section_name",
+                   section.name(), "text", text);
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Table and column names are passed in")
+  private static void updateValueFor(final Connection connection,
+                                     final int tournamentLevelId,
+                                     final int tournamentId,
+                                     final Layer layer,
+                                     final String tableName,
+                                     final String keyColumn,
+                                     final String keyValue,
+                                     final String valueColumn,
+                                     final @Nullable String newValue)
+      throws SQLException {
+    final Formatter deleteSql = new Formatter();
+    deleteSql.format("DELETE FROM %s", tableName);
+    deleteSql.format(" WHERE tournament_level_id = ?");
+    deleteSql.format(" AND tournament_id = ?");
+    deleteSql.format(" AND %s = ?", keyColumn);
+    try (PreparedStatement prep = connection.prepareStatement(deleteSql.toString())) {
       prep.setInt(1, tournamentLevelId);
       prep.setInt(2, tournamentId);
-      prep.setString(3, section.name());
+      prep.setString(3, keyValue);
       prep.executeUpdate();
     }
 
-    if (null != text) {
-      try (PreparedStatement prep = connection.prepareStatement("INSERT INTO awards_script_text" //
-          + " (tournament_level_id, tournament_id, layer_rank, section_name, text)" //
-          + " VALUES(?, ?, ?, ?, ?)")) {
+    if (null != newValue) {
+      final Formatter insertSql = new Formatter();
+      insertSql.format("INSERT INTO %s", tableName);
+      insertSql.format(" (tournament_level_id, tournament_id, layer_rank, %s, %s)", keyColumn, valueColumn);
+      insertSql.format(" VALUES(?, ?, ?, ?, ?)");
+
+      try (PreparedStatement prep = connection.prepareStatement(insertSql.toString())) {
         prep.setInt(1, tournamentLevelId);
         prep.setInt(2, tournamentId);
         prep.setInt(3, layer.getRank());
-        prep.setString(4, section.name());
-        prep.setString(5, text);
+        prep.setString(4, keyValue);
+        prep.setString(5, newValue);
         prep.executeUpdate();
       }
     }
@@ -720,17 +787,8 @@ public final class AwardsScript {
                                                  final int tournamentId,
                                                  final String paramName)
       throws SQLException {
-    try (PreparedStatement prep = connection.prepareStatement("SELECT param_value FROM awards_script_parameters" //
-        + "  WHERE param_name = ?" //
-        + "    AND tournament_level_id = ?" //
-        + "    AND tournament_id = ?")) {
-      prep.setString(1, paramName);
-      prep.setInt(2, tournamentLevelId);
-      prep.setInt(3, tournamentId);
-      try (ResultSet rs = prep.executeQuery()) {
-        return rs.next();
-      }
-    }
+    return isValueSpecifiedFor(connection, tournamentLevelId, tournamentId, "awards_script_parameters", "param_name",
+                               paramName);
   }
 
   private static String getParameterValueFor(final Connection connection,
@@ -738,21 +796,8 @@ public final class AwardsScript {
                                              final int tournamentId,
                                              final String paramName)
       throws SQLException {
-    try (PreparedStatement prep = connection.prepareStatement("SELECT param_value FROM awards_script_parameters" //
-        + "  WHERE param_name = ?" //
-        + "    AND tournament_level_id = ?" //
-        + "    AND tournament_id = ?")) {
-      prep.setString(1, paramName);
-      prep.setInt(2, tournamentLevelId);
-      prep.setInt(3, tournamentId);
-      try (ResultSet rs = prep.executeQuery()) {
-        if (rs.next()) {
-          return castNonNull(rs.getString(1));
-        } else {
-          return "";
-        }
-      }
-    }
+    return getValueFor(connection, tournamentLevelId, tournamentId, "awards_script_parameters", "param_name", paramName,
+                       "param_value", "");
   }
 
   private static void updateParameterValueFor(final Connection connection,
@@ -762,28 +807,8 @@ public final class AwardsScript {
                                               final String paramName,
                                               final @Nullable String paramValue)
       throws SQLException {
-    try (PreparedStatement prep = connection.prepareStatement("DELETE FROM awards_script_parameters" //
-        + " WHERE tournament_level_id = ?" //
-        + " AND tournament_id = ?" //
-        + " AND param_name = ?")) {
-      prep.setInt(1, tournamentLevelId);
-      prep.setInt(2, tournamentId);
-      prep.setString(3, paramName);
-      prep.executeUpdate();
-    }
-
-    if (null != paramValue) {
-      try (PreparedStatement prep = connection.prepareStatement("INSERT INTO awards_script_parameters" //
-          + " (tournament_level_id, tournament_id, layer_rank, param_name, param_value)" //
-          + " VALUES(?, ?, ?, ?, ?)")) {
-        prep.setInt(1, tournamentLevelId);
-        prep.setInt(2, tournamentId);
-        prep.setInt(3, layer.getRank());
-        prep.setString(4, paramName);
-        prep.setString(5, paramValue);
-        prep.executeUpdate();
-      }
-    }
+    updateValueFor(connection, tournamentLevelId, tournamentId, layer, "awards_script_parameters", "param_name",
+                   paramName, "param_value", paramValue);
   }
 
   /**
@@ -815,10 +840,8 @@ public final class AwardsScript {
     case NUM_TEAMS_ADVANCING:
     case NUM_TRAINED_OFFICIALS:
     case TOURNAMENT_DIRECTORS: {
-      final @Nullable String value = getParameterValue(connection, tournament, macro.name());
-      if (null == value) {
-        return "UNKNOWN";
-      }
+      return getValue(connection, tournament, "awards_script_parameters", "param_name", macro.name(), "param_value",
+                      "UNKNOWN");
     }
     default:
       throw new FLLInternalException("Unknown macro: "
