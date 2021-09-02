@@ -116,9 +116,17 @@ public final class AwardsScript {
      */
     CATEGORY_CHAMPIONSHIP,
     /**
+     * Presenter for the championship category.
+     */
+    CATEGORY_CHAMPIONSHIP_PRESENTER,
+    /**
      * Text for the performance category.
      */
     CATEGORY_PERFORMANCE,
+    /**
+     * Presenter for the performance category.
+     */
+    CATEGORY_PERFORMANCE_PRESENTER,
     /**
      * Text for the end of the awards, before the advancing teams.
      */

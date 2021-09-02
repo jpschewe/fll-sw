@@ -180,8 +180,14 @@ awardsScriptModule.init = ( ) => {
 
         <h2>Championship</h2>
         <div>
-            Presenter:
-            <input type="text" />
+            Specify Presenter
+            <input type="checkbox"
+                name="${CATEGORY_CHAMPIONSHIP_PRESENTER.identifier}_specified"
+                id="${CATEGORY_CHAMPIONSHIP_PRESENTER.identifier}_specified" />
+            <input type="text"
+                name="${CATEGORY_CHAMPIONSHIP_PRESENTER.identifier}_text"
+                id="${CATEGORY_CHAMPIONSHIP_PRESENTER.identifier}_text"
+                value="${sectionText[CATEGORY_CHAMPIONSHIP_PRESENTER]}" />
         </div>
         <c:set var="sectionName">${CATEGORY_CHAMPIONSHIP.identifier}</c:set>
         <c:set var="sectionTextValue">${sectionText[CATEGORY_CHAMPIONSHIP]}</c:set>
@@ -190,8 +196,14 @@ awardsScriptModule.init = ( ) => {
 
         <h2>Robot Performance Awards</h2>
         <div>
-            Presenter:
-            <input type="text" />
+            Specify Presenter
+            <input type="checkbox"
+                name="${CATEGORY_PERFORMANCE_PRESENTER.identifier}_specified"
+                id="${CATEGORY_PERFORMANCe_PRESENTER.identifier}_specified" />
+            <input type="text"
+                name="${CATEGORY_PERFORMANCE_PRESENTER.identifier}_text"
+                id="${CATEGORY_PERFORMANCE_PRESENTER.identifier}_text"
+                value="${sectionText[CATEGORY_PERFORMANCE_PRESENTER]}" />
         </div>
         <c:set var="sectionName">${CATEGORY_PERFORMANCE.identifier}</c:set>
         <c:set var="sectionTextValue">${sectionText[CATEGORY_PERFORMANCE]}</c:set>
