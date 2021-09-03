@@ -2,7 +2,7 @@
 <div>
     <div>
         <label>
-            Specify value:
+            Specify text:
             <input type="checkbox" name="${sectionName}_specified"
                 id="${sectionName}_specified" />
         </label>

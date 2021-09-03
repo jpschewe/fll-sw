@@ -37,10 +37,14 @@ awardsScriptModule.init = ( ) => {
   
   <c:forEach items="${subjectiveCategories}" var="category">
   awardsScriptModule.configureTextEntry(macros, "category_${category.name}", ${subjectiveCategorySpecified[category]});
+  
+  awardsScriptModule.configurePresenterEntry("category_${category.name}", ${subjectiveCategoryPresenterSpecified[category]});
   </c:forEach>
   
   <c:forEach items="${nonNumericCategories}" var="category">
   awardsScriptModule.configureTextEntry(macros, "category_${category.title}", ${nonNumericCategorySpecified[category]});
+  
+  awardsScriptModule.configurePresenterEntry("category_${category.title}", ${nonNumericCategoryPresenterSpecified[category]});  
   </c:forEach>
 
 };
@@ -214,16 +218,21 @@ awardsScriptModule.init = ( ) => {
         <c:forEach items="${subjectiveCategories}" var="category">
             <h3>Category ${category.title}</h3>
             <div>
-                Presenter:
-                <input type="text" />
+                Specify Presenter
+                <input type="checkbox"
+                    name="category_${category.name}_presenter_specified"
+                    id="category_${category.name}_presenter_specified" />
+                <input type="text"
+                    name="category_${category.name}_presenter_text"
+                    id="category_${category.name}_presenter_text"
+                    value="${subjectiveCategoryPresenter[category]}" />
             </div>
             <c:set var="sectionName">category_${category.name}</c:set>
-            <c:set var="sectionTextValue">${subjectiveCategoryText[category.name]}</c:set>
+            <c:set var="sectionTextValue">${subjectiveCategoryText[category]}</c:set>
             <%@ include file="edit-awards-script_textarea-macros.jspf"%>
             <hr />
         </c:forEach>
 
-        <!-- FIXME: make the default text for non-numeric categories be the description of the category -->
         <h2>Non-numeric awards</h2>
         <div>
             The categories that have awards are <a
@@ -233,11 +242,17 @@ awardsScriptModule.init = ( ) => {
         <c:forEach items="${nonNumericCategories}" var="category">
             <h3>Category ${category.title}</h3>
             <div>
-                Presenter:
-                <input type="text" />
+                Specify Presenter
+                <input type="checkbox"
+                    name="category_${category.title}_presenter_specified"
+                    id="category_${category.title}_presenter_specified" />
+                <input type="text"
+                    name="category_${category.title}_presenter_text"
+                    id="category_${category.title}_presenter_text"
+                    value="${nonNumericCategoryPresenter[category]}" />
             </div>
             <c:set var="sectionName">category_${category.title}</c:set>
-            <c:set var="sectionTextValue">${nonNumericCategoryText[category.title]}</c:set>
+            <c:set var="sectionTextValue">${nonNumericCategoryText[category]}</c:set>
             <%@ include file="edit-awards-script_textarea-macros.jspf"%>
             <hr />
         </c:forEach>

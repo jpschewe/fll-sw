@@ -17,6 +17,7 @@ const awardsScriptModule = {};
     };
 
 
+
     /**
      * @param macros array of macro objects
      * @param sectionName name of the section, must be a valid HTML identifier
@@ -75,6 +76,28 @@ const awardsScriptModule = {};
         }
 
         textElement.disabled = !sectionSpecified;
+    };
+
+    /**
+     * Configure the checkbox and text entry for a presenter. Looks for 
+     * sectionName_presenter_text and sectionName_presenter_specified.
+     * 
+     * @param sectionName name of the section, must be a valid HTML identifier
+     * @param presenterSpecified true if the presenter is currently specified 
+     */
+    awardsScriptModule.configurePresenterEntry = function(sectionName, presenterSpecified) {
+        const textElement = document.getElementById(sectionName + "_presenter_text");
+
+        const checkbox = document.getElementById(sectionName + "_presenter_specified");
+        if (checkbox) {
+            checkbox.addEventListener('change', () => {
+                textElement.disabled = !checkbox.checked;
+            });
+
+            checkbox.checked = presenterSpecified;
+        }
+
+        textElement.disabled = !presenterSpecified;
     };
 
     awardsScriptModule.configureMacroEntry = function(macro, macroSpecified, macroValue) {

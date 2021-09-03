@@ -1273,6 +1273,14 @@ public final class GenerateDB {
       // store values for macros
       createAwardsScriptTable(connection, createConstraints, "awards_script_parameters", "param_name", "param_value");
 
+      // store descriptions for categories and presenters
+      createAwardsScriptTable(connection, createConstraints, "awards_script_subjective_text", "category_name", "text");
+      createAwardsScriptTable(connection, createConstraints, "awards_script_subjective_presenter", "category_name",
+                              "presenter");
+      createAwardsScriptTable(connection, createConstraints, "awards_script_nonnumeric_text", "category_title", "text");
+      createAwardsScriptTable(connection, createConstraints, "awards_script_nonnumeric_presenter", "category_title",
+                              "presenter");
+
       // store awards order
       {
         final StringBuilder sql = new StringBuilder();

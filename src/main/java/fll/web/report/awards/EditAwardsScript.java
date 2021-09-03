@@ -95,32 +95,9 @@ public class EditAwardsScript extends BaseFLLServlet {
       page.setAttribute("tournamentLevel", tournamentLevel);
       page.setAttribute("tournament", tournament);
 
-      page.setAttribute("subjectiveCategories", description.getSubjectiveCategories());
+      loadSubjectiveCategoryInfo(page, description, connection, tournamentLevel, tournament, layer);
 
-      // FIXME populate 8/31/21 pending answer from Jeannie
-      final Map<SubjectiveScoreCategory, String> subjectiveCategoryText = new HashMap<>();
-      page.setAttribute("subjectiveCategoryText", subjectiveCategoryText);
-      final Map<SubjectiveScoreCategory, Boolean> subjectiveCategorySpecified = new HashMap<>();
-      page.setAttribute("subjectiveCategorySpecified", subjectiveCategorySpecified);
-
-      final List<NonNumericCategory> nonNumericCategories;
-      if (null != tournamentLevel) {
-        nonNumericCategories = description.getNonNumericCategories().stream() //
-                                          .filter(Errors.rethrow()
-                                                        .wrapPredicate(c -> !CategoriesIgnored.isNonNumericCategoryIgnored(connection,
-                                                                                                                           tournamentLevel,
-                                                                                                                           c))) //
-                                          .collect(Collectors.toList());
-      } else {
-        nonNumericCategories = description.getNonNumericCategories();
-      }
-      page.setAttribute("nonNumericCategories", nonNumericCategories);
-
-      // FIXME populate 8/31/21 pending answer from Jeannie
-      final Map<NonNumericCategory, String> nonNumericCategoryText = new HashMap<>();
-      page.setAttribute("nonNumericCategoryText", nonNumericCategoryText);
-      final Map<NonNumericCategory, Boolean> nonNumericCategorySpecified = new HashMap<>();
-      page.setAttribute("nonNumericCategorySpecified", nonNumericCategorySpecified);
+      loadNonNumericCategoryInfo(page, description, connection, tournamentLevel, tournament, layer);
 
       loadMacroInformation(page, connection, tournamentLevel, tournament, layer);
 
@@ -131,8 +108,160 @@ public class EditAwardsScript extends BaseFLLServlet {
     }
   }
 
+  private static List<NonNumericCategory> getNonNumericCategories(final ChallengeDescription description,
+                                                                  final Connection connection,
+                                                                  final TournamentLevel tournamentLevel) {
+    if (null != tournamentLevel) {
+      return description.getNonNumericCategories().stream() //
+                        .filter(Errors.rethrow()
+                                      .wrapPredicate(c -> !CategoriesIgnored.isNonNumericCategoryIgnored(connection,
+                                                                                                         tournamentLevel,
+                                                                                                         c))) //
+                        .collect(Collectors.toList());
+    } else {
+      return description.getNonNumericCategories();
+    }
+  }
+
+  private static List<SubjectiveScoreCategory> getSubjectiveCategories(final ChallengeDescription description) {
+    // extra method in case we later ignore some categories like the non-numeric
+    // categories
+    return description.getSubjectiveCategories();
+  }
+
+  private static void loadSubjectiveCategoryInfo(final PageContext page,
+                                                 final ChallengeDescription description,
+                                                 final Connection connection,
+                                                 final TournamentLevel tournamentLevel,
+                                                 final Tournament tournament,
+                                                 final AwardsScript.Layer layer)
+      throws SQLException {
+    final List<SubjectiveScoreCategory> subjectiveCategories = getSubjectiveCategories(description);
+    page.setAttribute("subjectiveCategories", subjectiveCategories);
+
+    final Map<SubjectiveScoreCategory, String> subjectiveCategoryText = new HashMap<>();
+    final Map<SubjectiveScoreCategory, Boolean> subjectiveCategorySpecified = new HashMap<>();
+    final Map<SubjectiveScoreCategory, String> subjectiveCategoryPresenter = new HashMap<>();
+    final Map<SubjectiveScoreCategory, Boolean> subjectiveCategoryPresenterSpecified = new HashMap<>();
+
+    for (final SubjectiveScoreCategory category : subjectiveCategories) {
+      final boolean textSpecified;
+      String text;
+      final boolean presenterSpecified;
+      String presenter;
+      switch (layer) {
+      case SEASON:
+        textSpecified = AwardsScript.isCategoryTextSpecifiedForSeason(connection, category);
+        text = AwardsScript.getCategoryTextForSeason(connection, category);
+        presenterSpecified = AwardsScript.isPresenterSpecifiedForSeason(connection, category);
+        presenter = AwardsScript.getPresenterForSeason(connection, category);
+        break;
+      case TOURNAMENT:
+        textSpecified = AwardsScript.isCategoryTextSpecifiedForTournament(connection, tournament, category);
+        text = AwardsScript.getCategoryTextForTournament(connection, tournament, category);
+        presenterSpecified = AwardsScript.isPresenterSpecifiedForTournament(connection, tournament, category);
+        presenter = AwardsScript.getPresenterForTournament(connection, tournament, category);
+        break;
+      case TOURNAMENT_LEVEL:
+        textSpecified = AwardsScript.isCategoryTextSpecifiedForTournamentLevel(connection, tournamentLevel, category);
+        text = AwardsScript.getCategoryTextForTournamentLevel(connection, tournamentLevel, category);
+        presenterSpecified = AwardsScript.isPresenterSpecifiedForTournamentLevel(connection, tournamentLevel, category);
+        presenter = AwardsScript.getPresenterForTournamentLevel(connection, tournamentLevel, category);
+        break;
+      default:
+        throw new FLLInternalException("Unknown awards script layer: "
+            + layer);
+      }
+
+      if (!textSpecified) {
+        // display the value that would be used to the user
+        text = AwardsScript.getCategoryText(connection, tournament, category);
+      }
+      if (!presenterSpecified) {
+        // display the value that would be used to the user
+        presenter = AwardsScript.getPresenter(connection, tournament, category);
+      }
+
+      subjectiveCategoryText.put(category, text);
+      subjectiveCategorySpecified.put(category, textSpecified);
+      subjectiveCategoryPresenter.put(category, presenter);
+      subjectiveCategoryPresenterSpecified.put(category, presenterSpecified);
+    }
+
+    page.setAttribute("subjectiveCategoryText", subjectiveCategoryText);
+    page.setAttribute("subjectiveCategorySpecified", subjectiveCategorySpecified);
+    page.setAttribute("subjectiveCategoryPresenter", subjectiveCategoryPresenter);
+    page.setAttribute("subjectiveCategoryPresenterSpecified", subjectiveCategoryPresenterSpecified);
+  }
+
+  private static void loadNonNumericCategoryInfo(final PageContext page,
+                                                 final ChallengeDescription description,
+                                                 final Connection connection,
+                                                 final TournamentLevel tournamentLevel,
+                                                 final Tournament tournament,
+                                                 final AwardsScript.Layer layer)
+      throws SQLException {
+    final List<NonNumericCategory> nonNumericCategories = getNonNumericCategories(description, connection,
+                                                                                  tournamentLevel);
+    page.setAttribute("nonNumericCategories", nonNumericCategories);
+
+    final Map<NonNumericCategory, String> nonNumericCategoryText = new HashMap<>();
+    final Map<NonNumericCategory, Boolean> nonNumericCategorySpecified = new HashMap<>();
+    final Map<NonNumericCategory, String> nonNumericCategoryPresenter = new HashMap<>();
+    final Map<NonNumericCategory, Boolean> nonNumericCategoryPresenterSpecified = new HashMap<>();
+
+    for (final NonNumericCategory category : nonNumericCategories) {
+      final boolean textSpecified;
+      String text;
+      final boolean presenterSpecified;
+      String presenter;
+      switch (layer) {
+      case SEASON:
+        textSpecified = AwardsScript.isCategoryTextSpecifiedForSeason(connection, category);
+        text = AwardsScript.getCategoryTextForSeason(connection, category);
+        presenterSpecified = AwardsScript.isPresenterSpecifiedForSeason(connection, category);
+        presenter = AwardsScript.getPresenterForSeason(connection, category);
+        break;
+      case TOURNAMENT:
+        textSpecified = AwardsScript.isCategoryTextSpecifiedForTournament(connection, tournament, category);
+        text = AwardsScript.getCategoryTextForTournament(connection, tournament, category);
+        presenterSpecified = AwardsScript.isPresenterSpecifiedForTournament(connection, tournament, category);
+        presenter = AwardsScript.getPresenterForTournament(connection, tournament, category);
+        break;
+      case TOURNAMENT_LEVEL:
+        textSpecified = AwardsScript.isCategoryTextSpecifiedForTournamentLevel(connection, tournamentLevel, category);
+        text = AwardsScript.getCategoryTextForTournamentLevel(connection, tournamentLevel, category);
+        presenterSpecified = AwardsScript.isPresenterSpecifiedForTournamentLevel(connection, tournamentLevel, category);
+        presenter = AwardsScript.getPresenterForTournamentLevel(connection, tournamentLevel, category);
+        break;
+      default:
+        throw new FLLInternalException("Unknown awards script layer: "
+            + layer);
+      }
+
+      if (!textSpecified) {
+        // display the value that would be used to the user
+        text = AwardsScript.getCategoryText(connection, tournament, category);
+      }
+      if (!presenterSpecified) {
+        // display the value that would be used to the user
+        presenter = AwardsScript.getPresenter(connection, tournament, category);
+      }
+
+      nonNumericCategoryText.put(category, text);
+      nonNumericCategorySpecified.put(category, textSpecified);
+      nonNumericCategoryPresenter.put(category, presenter);
+      nonNumericCategoryPresenterSpecified.put(category, presenterSpecified);
+    }
+
+    page.setAttribute("nonNumericCategoryText", nonNumericCategoryText);
+    page.setAttribute("nonNumericCategorySpecified", nonNumericCategorySpecified);
+    page.setAttribute("nonNumericCategoryPresenter", nonNumericCategoryPresenter);
+    page.setAttribute("nonNumericCategoryPresenterSpecified", nonNumericCategoryPresenterSpecified);
+  }
+
   private static void loadSectionInformation(final PageContext page,
-                                             Connection connection,
+                                             final Connection connection,
                                              final TournamentLevel tournamentLevel,
                                              final Tournament tournament,
                                              final AwardsScript.Layer layer)
@@ -254,6 +383,12 @@ public class EditAwardsScript extends BaseFLLServlet {
 
       storeSectionText(request, connection, tournamentLevel, tournament, layer);
 
+      storeSubjectiveCategoryText(request, description, connection, tournamentLevel, tournament, layer);
+      storeSubjectiveCategoryPresenters(request, description, connection, tournamentLevel, tournament, layer);
+
+      storeNonNumericCategoryText(request, description, connection, tournamentLevel, tournament, layer);
+      storeNonNumericCategoryPresenters(request, description, connection, tournamentLevel, tournament, layer);
+
       storeMacroValues(request, connection, tournamentLevel, tournament, layer);
 
       final String layerText;
@@ -283,7 +418,7 @@ public class EditAwardsScript extends BaseFLLServlet {
   }
 
   private void storeSectionText(final HttpServletRequest request,
-                                Connection connection,
+                                final Connection connection,
                                 final TournamentLevel tournamentLevel,
                                 final Tournament tournament,
                                 final AwardsScript.Layer layer)
@@ -330,7 +465,7 @@ public class EditAwardsScript extends BaseFLLServlet {
   }
 
   private void storeMacroValues(final HttpServletRequest request,
-                                Connection connection,
+                                final Connection connection,
                                 final TournamentLevel tournamentLevel,
                                 final Tournament tournament,
                                 final AwardsScript.Layer layer)
@@ -365,6 +500,206 @@ public class EditAwardsScript extends BaseFLLServlet {
           break;
         case TOURNAMENT_LEVEL:
           AwardsScript.clearMacroValueForTournamentLevel(connection, tournamentLevel, macro);
+          break;
+        default:
+          throw new FLLInternalException("Unknown awards script layer: "
+              + layer);
+        }
+      }
+    }
+  }
+
+  private void storeSubjectiveCategoryText(final HttpServletRequest request,
+                                           final ChallengeDescription description,
+                                           final Connection connection,
+                                           final TournamentLevel tournamentLevel,
+                                           final Tournament tournament,
+                                           final AwardsScript.Layer layer)
+      throws SQLException {
+    final List<SubjectiveScoreCategory> categories = getSubjectiveCategories(description);
+
+    for (final SubjectiveScoreCategory category : categories) {
+      final @Nullable String specifiedStr = request.getParameter(String.format("category_%s_specified",
+                                                                               category.getName()));
+      if (null != specifiedStr) {
+        final String text = WebUtils.getNonNullRequestParameter(request,
+                                                                String.format("category_%s_text", category.getName()));
+
+        switch (layer) {
+        case SEASON:
+          AwardsScript.updateCategoryTextForSeason(connection, category, text);
+          break;
+        case TOURNAMENT:
+          AwardsScript.updateCategoryTextForTournament(connection, tournament, category, text);
+          break;
+        case TOURNAMENT_LEVEL:
+          AwardsScript.updateCategoryTextForTournamentLevel(connection, tournamentLevel, category, text);
+          break;
+        default:
+          throw new FLLInternalException("Unknown awards script layer: "
+              + layer);
+
+        }
+      } else {
+        switch (layer) {
+        case SEASON:
+          AwardsScript.clearCategoryTextForSeason(connection, category);
+          break;
+        case TOURNAMENT:
+          AwardsScript.clearCategoryTextForTournament(connection, tournament, category);
+          break;
+        case TOURNAMENT_LEVEL:
+          AwardsScript.clearCategoryTextForTournamentLevel(connection, tournamentLevel, category);
+          break;
+        default:
+          throw new FLLInternalException("Unknown awards script layer: "
+              + layer);
+        }
+      }
+    }
+  }
+
+  private void storeNonNumericCategoryText(final HttpServletRequest request,
+                                           final ChallengeDescription description,
+                                           final Connection connection,
+                                           final TournamentLevel tournamentLevel,
+                                           final Tournament tournament,
+                                           final AwardsScript.Layer layer)
+      throws SQLException {
+    final List<NonNumericCategory> categories = getNonNumericCategories(description, connection, tournamentLevel);
+
+    for (final NonNumericCategory category : categories) {
+      final @Nullable String specifiedStr = request.getParameter(String.format("category_%s_specified",
+                                                                               category.getTitle()));
+      if (null != specifiedStr) {
+        final String text = WebUtils.getNonNullRequestParameter(request,
+                                                                String.format("category_%s_text", category.getTitle()));
+
+        switch (layer) {
+        case SEASON:
+          AwardsScript.updateCategoryTextForSeason(connection, category, text);
+          break;
+        case TOURNAMENT:
+          AwardsScript.updateCategoryTextForTournament(connection, tournament, category, text);
+          break;
+        case TOURNAMENT_LEVEL:
+          AwardsScript.updateCategoryTextForTournamentLevel(connection, tournamentLevel, category, text);
+          break;
+        default:
+          throw new FLLInternalException("Unknown awards script layer: "
+              + layer);
+
+        }
+      } else {
+        switch (layer) {
+        case SEASON:
+          AwardsScript.clearCategoryTextForSeason(connection, category);
+          break;
+        case TOURNAMENT:
+          AwardsScript.clearCategoryTextForTournament(connection, tournament, category);
+          break;
+        case TOURNAMENT_LEVEL:
+          AwardsScript.clearCategoryTextForTournamentLevel(connection, tournamentLevel, category);
+          break;
+        default:
+          throw new FLLInternalException("Unknown awards script layer: "
+              + layer);
+        }
+      }
+    }
+  }
+
+  private void storeSubjectiveCategoryPresenters(final HttpServletRequest request,
+                                                 final ChallengeDescription description,
+                                                 final Connection connection,
+                                                 final TournamentLevel tournamentLevel,
+                                                 final Tournament tournament,
+                                                 final AwardsScript.Layer layer)
+      throws SQLException {
+    final List<SubjectiveScoreCategory> categories = getSubjectiveCategories(description);
+
+    for (final SubjectiveScoreCategory category : categories) {
+      final @Nullable String specifiedStr = request.getParameter(String.format("category_%s_presenter_specified",
+                                                                               category.getName()));
+      if (null != specifiedStr) {
+        final String text = WebUtils.getNonNullRequestParameter(request, String.format("category_%s_presenter_text",
+                                                                                       category.getName()));
+
+        switch (layer) {
+        case SEASON:
+          AwardsScript.updatePresenterForSeason(connection, category, text);
+          break;
+        case TOURNAMENT:
+          AwardsScript.updatePresenterForTournament(connection, tournament, category, text);
+          break;
+        case TOURNAMENT_LEVEL:
+          AwardsScript.updatePresenterForTournamentLevel(connection, tournamentLevel, category, text);
+          break;
+        default:
+          throw new FLLInternalException("Unknown awards script layer: "
+              + layer);
+
+        }
+      } else {
+        switch (layer) {
+        case SEASON:
+          AwardsScript.clearPresenterForSeason(connection, category);
+          break;
+        case TOURNAMENT:
+          AwardsScript.clearPresenterForTournament(connection, tournament, category);
+          break;
+        case TOURNAMENT_LEVEL:
+          AwardsScript.clearPresenterForTournamentLevel(connection, tournamentLevel, category);
+          break;
+        default:
+          throw new FLLInternalException("Unknown awards script layer: "
+              + layer);
+        }
+      }
+    }
+  }
+
+  private void storeNonNumericCategoryPresenters(final HttpServletRequest request,
+                                                 final ChallengeDescription description,
+                                                 final Connection connection,
+                                                 final TournamentLevel tournamentLevel,
+                                                 final Tournament tournament,
+                                                 final AwardsScript.Layer layer)
+      throws SQLException {
+    final List<NonNumericCategory> categories = getNonNumericCategories(description, connection, tournamentLevel);
+
+    for (final NonNumericCategory category : categories) {
+      final @Nullable String specifiedStr = request.getParameter(String.format("category_%s_presenter_specified",
+                                                                               category.getTitle()));
+      if (null != specifiedStr) {
+        final String text = WebUtils.getNonNullRequestParameter(request, String.format("category_%s_presenter_text",
+                                                                                       category.getTitle()));
+
+        switch (layer) {
+        case SEASON:
+          AwardsScript.updatePresenterForSeason(connection, category, text);
+          break;
+        case TOURNAMENT:
+          AwardsScript.updatePresenterForTournament(connection, tournament, category, text);
+          break;
+        case TOURNAMENT_LEVEL:
+          AwardsScript.updatePresenterForTournamentLevel(connection, tournamentLevel, category, text);
+          break;
+        default:
+          throw new FLLInternalException("Unknown awards script layer: "
+              + layer);
+
+        }
+      } else {
+        switch (layer) {
+        case SEASON:
+          AwardsScript.clearPresenterForSeason(connection, category);
+          break;
+        case TOURNAMENT:
+          AwardsScript.clearPresenterForTournament(connection, tournament, category);
+          break;
+        case TOURNAMENT_LEVEL:
+          AwardsScript.clearPresenterForTournamentLevel(connection, tournamentLevel, category);
           break;
         default:
           throw new FLLInternalException("Unknown awards script layer: "
