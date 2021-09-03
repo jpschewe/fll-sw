@@ -638,6 +638,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           FOPUtils.addBottomBorder(scaledCell, row2BorderWidth, row2BorderColor);
 
           double weightedRank = 0;
+          int elementsInWeightedRank = 0;
 
           // Next, one column containing the scaled score for each subjective
           // category with weight > 0
@@ -662,6 +663,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
               } else {
                 weightedRank = Double.NaN;
               }
+              ++elementsInWeightedRank;
 
             } // non-zero category weight
           } // foreach category
@@ -676,6 +678,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           } else {
             weightedRank = Double.NaN;
           }
+          ++elementsInWeightedRank;
 
           // insert weighted rank
           final Element weightedRankCell;
@@ -684,7 +687,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
             weightedRankCell.setAttribute("color", "red");
           } else {
             weightedRankCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                        Utilities.getFloatingPointNumberFormat().format(weightedRank));
+                                                        Utilities.getFloatingPointNumberFormat().format(weightedRank
+                                                            / elementsInWeightedRank));
           }
           row2.appendChild(weightedRankCell);
           FOPUtils.addBottomBorder(weightedRankCell, row2BorderWidth, row2BorderColor);
