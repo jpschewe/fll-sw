@@ -1229,6 +1229,29 @@ public final class GenerateDB {
     }
   }
 
+  private static void createAwardsScriptRankTable(final Connection connection,
+                                                  final boolean createConstraints,
+                                                  final String tableName,
+                                                  final String keyColumn,
+                                                  final String rankColumn)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      final Formatter sql = new Formatter();
+      sql.format("CREATE TABLE %s (", tableName);
+      sql.format("  tournament_level_id INTEGER NOT NULL");
+      sql.format(" ,tournament_id INTEGER NOT NULL");
+      sql.format(" ,layer_rank INTEGER NOT NULL");
+      sql.format(" ,%s LONGVARCHAR NOT NULL", keyColumn);
+      sql.format(" ,%s INTEGER NOT NULL", rankColumn);
+      if (createConstraints) {
+        sql.format(" ,CONSTRAINT %s_pk PRIMARY KEY (%s, tournament_level_id, tournament_id)", tableName, keyColumn);
+      }
+      sql.format(")");
+      stmt.executeUpdate(sql.toString());
+    }
+
+  }
+
   /**
    * Create tables used to store information about the awards script.
    * This also populates the default values.
@@ -1282,36 +1305,11 @@ public final class GenerateDB {
                               "presenter");
 
       // store awards order
-      {
-        final StringBuilder sql = new StringBuilder();
-        sql.append("CREATE TABLE awards_script_award_order (");
-        sql.append("  tournament_level_id INTEGER NOT NULL");
-        sql.append(" ,tournament_id INTEGER NOT NULL");
-        sql.append(" ,layer_rank INTEGER NOT NULL");
-        sql.append(" ,award LONGVARCHAR NOT NULL");
-        sql.append(" ,award_rank INTEGER NOT NULL");
-        if (createConstraints) {
-          sql.append(" ,CONSTRAINT awards_script_award_order_pk PRIMARY KEY (award, tournament_level_id, tournament_id)");
-        }
-        sql.append(")");
-        stmt.executeUpdate(sql.toString());
-      }
+      createAwardsScriptRankTable(connection, createConstraints, "awards_script_award_order", "award", "award_rank");
 
       // store sponsor order
-      {
-        final StringBuilder sql = new StringBuilder();
-        sql.append("CREATE TABLE awards_script_sponsor_order (");
-        sql.append("  tournament_level_id INTEGER NOT NULL");
-        sql.append(" ,tournament_id INTEGER NOT NULL");
-        sql.append(" ,layer_rank INTEGER NOT NULL");
-        sql.append(" ,sponsor LONGVARCHAR NOT NULL");
-        sql.append(" ,sponsor_rank INTEGER NOT NULL");
-        if (createConstraints) {
-          sql.append(" ,CONSTRAINT awards_script_sponsor_order_pk PRIMARY KEY (sponsor, tournament_level_id, tournament_id)");
-        }
-        sql.append(")");
-        stmt.executeUpdate(sql.toString());
-      }
+      createAwardsScriptRankTable(connection, createConstraints, "awards_script_sponsor_order", "sponsor",
+                                  "sponsor_rank");
 
       // FIXME add these tables to the database import process
 

@@ -46,6 +46,11 @@ awardsScriptModule.init = ( ) => {
   
   awardsScriptModule.configurePresenterEntry("category_${category.title}", ${nonNumericCategoryPresenterSpecified[category]});  
   </c:forEach>
+  
+  awardsScriptModule.setSponsorsSpecified(${sponsorsSpecified});
+  <c:forEach items="${sponsors}" var="sponsor">
+  awardsScriptModule.addSponsor("${sponsor}");
+  </c:forEach>
 
 };
 </script>
@@ -139,12 +144,15 @@ awardsScriptModule.init = ( ) => {
         <hr />
 
 
-        <div>FIXME: disable editing unless the checkbox is checked</div>
+        <h2>Sponsors</h2>
         <label>
             Specify value:
-            <input type="checkbox" name="sponsors_names_specified" />
+            <input id="sponsors_specified" name="sponsors_specified"
+                type="checkbox" />
         </label>
-        <div>FIXME: user entered sponsor names</div>
+        <button type="button" id="add_sponsor">Add Sponsor</button>
+
+        <div id="sponsors"></div>
         <hr />
 
         <c:set var="sectionName">${SPONSORS_RECOGNITION.identifier}</c:set>
@@ -275,7 +283,7 @@ awardsScriptModule.init = ( ) => {
         <%@ include file="edit-awards-script_textarea-macros.jspf"%>
         <hr />
 
-        <input type="submit" value="Submit" />
+        <input type="submit" id="submit_data" value="Submit" />
     </form>
     <!-- before end body -->
 </body>

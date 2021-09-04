@@ -11,12 +11,16 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.diffplug.common.base.Errors;
@@ -102,6 +106,8 @@ public class EditAwardsScript extends BaseFLLServlet {
       loadMacroInformation(page, connection, tournamentLevel, tournament, layer);
 
       loadSectionInformation(page, connection, tournamentLevel, tournament, layer);
+
+      loadSponsors(page, connection, tournamentLevel, tournament, layer);
 
     } catch (final SQLException e) {
       throw new FLLInternalException("Error getting values for editing awards script", e);
@@ -390,6 +396,8 @@ public class EditAwardsScript extends BaseFLLServlet {
       storeNonNumericCategoryPresenters(request, description, connection, tournamentLevel, tournament, layer);
 
       storeMacroValues(request, connection, tournamentLevel, tournament, layer);
+
+      storeSponsors(request, connection, tournamentLevel, tournament, layer);
 
       final String layerText;
       switch (layer) {
@@ -705,6 +713,115 @@ public class EditAwardsScript extends BaseFLLServlet {
           throw new FLLInternalException("Unknown awards script layer: "
               + layer);
         }
+      }
+    }
+  }
+
+  private static void loadSponsors(final PageContext page,
+                                   final Connection connection,
+                                   final TournamentLevel tournamentLevel,
+                                   final Tournament tournament,
+                                   final AwardsScript.Layer layer)
+      throws SQLException {
+
+    final boolean sponsorsSpecified;
+    List<String> sponsors;
+    switch (layer) {
+    case SEASON:
+      sponsorsSpecified = AwardsScript.isSponsorsSpecifiedForSeason(connection);
+      sponsors = AwardsScript.getSponsorsForSeason(connection);
+      break;
+    case TOURNAMENT:
+      sponsorsSpecified = AwardsScript.isSponsorsSpecifiedForTournament(connection, tournament);
+      sponsors = AwardsScript.getSponsorsForTournament(connection, tournament);
+      break;
+    case TOURNAMENT_LEVEL:
+      sponsorsSpecified = AwardsScript.isSponsorsSpecifiedForTournamentLevel(connection, tournamentLevel);
+      sponsors = AwardsScript.getSponsorsForTournamentLevel(connection, tournamentLevel);
+      break;
+    default:
+      throw new FLLInternalException("Unknown awards script layer: "
+          + layer);
+    }
+
+    if (!sponsorsSpecified) {
+      // display the value that would be used to the user
+      sponsors = AwardsScript.getSponsors(connection, tournament);
+    }
+
+    page.setAttribute("sponsorsSpecified", sponsorsSpecified);
+    page.setAttribute("sponsors", sponsors);
+  }
+
+  private static final String SPONSOR_PARAMETER_PREFIX = "sponsor_";
+
+  private static List<String> findSponsors(final HttpServletRequest request) {
+
+    // Find all request parameters that start with the right prefix and parse them
+    // into integers.
+    // store the values in a SortedMap so that walking the map sorts the sponsor
+    // names by rank.
+    final SortedMap<Integer, String> sponsorMap = new TreeMap<>();
+    for (final Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+      final String key = entry.getKey();
+      if (key.startsWith(SPONSOR_PARAMETER_PREFIX)) {
+        final String value = entry.getValue()[0];
+        if (!StringUtils.isBlank(value)) {
+          final String rankStr = key.substring(SPONSOR_PARAMETER_PREFIX.length(), key.length());
+          try {
+            final Integer rank = Integer.valueOf(rankStr);
+            sponsorMap.put(rank, value);
+          } catch (final NumberFormatException nfe) {
+            throw new FLLInternalException(String.format("Got error parsing sponsor rank from '%s', skipping", key));
+          }
+        }
+      }
+    }
+
+    final List<String> sponsors = new LinkedList<>(sponsorMap.values());
+    return sponsors;
+  }
+
+  private static void storeSponsors(final HttpServletRequest request,
+                                    final Connection connection,
+                                    final TournamentLevel tournamentLevel,
+                                    final Tournament tournament,
+                                    final AwardsScript.Layer layer)
+      throws SQLException {
+
+    final @Nullable String specifiedStr = request.getParameter(String.format("sponsors_specified"));
+    if (null != specifiedStr) {
+      final List<String> sponsors = findSponsors(request);
+
+      switch (layer) {
+      case SEASON:
+        AwardsScript.updateSponsorsForSeason(connection, sponsors);
+        break;
+      case TOURNAMENT:
+        AwardsScript.updateSponsorsForTournament(connection, tournament, sponsors);
+        break;
+      case TOURNAMENT_LEVEL:
+        AwardsScript.updateSponsorsForTournamentLevel(connection, tournamentLevel, sponsors);
+        break;
+      default:
+        throw new FLLInternalException("Unknown awards script layer: "
+            + layer);
+
+      }
+    } else {
+      switch (layer) {
+      case SEASON:
+        AwardsScript.clearSponsorsForSeason(connection);
+        break;
+      case TOURNAMENT:
+        AwardsScript.clearSponsorsForTournament(connection, tournament);
+        break;
+      case TOURNAMENT_LEVEL:
+        AwardsScript.clearSponsorsForTournamentLevel(connection, tournamentLevel);
+        break;
+      default:
+        throw new FLLInternalException("Unknown awards script layer: "
+            + layer);
       }
     }
   }

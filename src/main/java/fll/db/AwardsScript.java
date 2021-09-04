@@ -37,6 +37,8 @@ public final class AwardsScript {
    * not used.
    */
 
+  private static final String SPONSORS_SPECIFIED_PARAM = "sponsors_specified";
+
   private AwardsScript() {
   }
 
@@ -546,14 +548,15 @@ public final class AwardsScript {
                                          final Tournament tournament)
       throws SQLException {
     try (
-        PreparedStatement findLayer = connection.prepareStatement("SELECT MAX(layer_rank) FROM awards_script_award_order"
-            + "    WHERE "
+        PreparedStatement findLayer = connection.prepareStatement("SELECT MAX(layer_rank) FROM awards_script_parameters"
+            + "  WHERE "
             // season
-            + "        ( (tournament_level_id = ? AND tournament_id = ?)"
+            + "  ( (tournament_level_id = ? AND tournament_id = ?)"
             // tournament level
-            + "            OR (tournament_level_id = ? AND tournament_id = ?)"
+            + "      OR (tournament_level_id = ? AND tournament_id = ?)"
             // tournament
-            + "            OR (tournament_level_id = ? AND tournament_id = ?) ) ORDER BY layer_rank DESC")) {
+            + "      OR (tournament_level_id = ? AND tournament_id = ?) )" //
+            + "  AND param_name = ? AND param_value = ?")) {
       // season
       findLayer.setInt(1, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
       findLayer.setInt(2, GenerateDB.INTERNAL_TOURNAMENT_ID);
@@ -566,11 +569,16 @@ public final class AwardsScript {
       findLayer.setInt(5, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
       findLayer.setInt(6, tournament.getTournamentID());
 
+      findLayer.setString(7, SPONSORS_SPECIFIED_PARAM);
+      findLayer.setBoolean(8, true);
+
       try (ResultSet layer = findLayer.executeQuery()) {
         if (layer.next()) {
           final int layerRank = layer.getInt(1);
 
-          try (PreparedStatement prep = connection.prepareStatement("SELECT award FROM awards_script_award_order"
+          // Another way to write this query would be with a switch statement on the
+          // layer. This would remove all of the "OR" statements.
+          try (PreparedStatement prep = connection.prepareStatement("SELECT sponsor FROM awards_script_sponsor_order"
               + "    WHERE "
               // season
               + "        ( (tournament_level_id = ? AND tournament_id = ?)"
@@ -579,7 +587,7 @@ public final class AwardsScript {
               // tournament
               + "            OR (tournament_level_id = ? AND tournament_id = ?) )"
               + "        AND layer_rank = ?"
-              + "    ORDER BY award_rank ASC")) {
+              + "    ORDER BY sponsor_rank ASC")) {
             // season
             prep.setInt(1, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
             prep.setInt(2, GenerateDB.INTERNAL_TOURNAMENT_ID);
@@ -611,6 +619,269 @@ public final class AwardsScript {
         }
 
       }
+    }
+  }
+
+  /**
+   * @param connection database connection
+   * @return if the sponsors have a value for the season
+   * @throws SQLException on a database error
+   */
+  public static boolean isSponsorsSpecifiedForSeason(final Connection connection) throws SQLException {
+    return isSponsorsSpecifiedFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
+                                  GenerateDB.INTERNAL_TOURNAMENT_ID);
+  }
+
+  /**
+   * @param connection database connection
+   * @param level the tournament level
+   * @return if the sponsors has a value for the specified tournament level
+   * @throws SQLException on a database error
+   */
+  public static boolean isSponsorsSpecifiedForTournamentLevel(final Connection connection,
+                                                              final TournamentLevel level)
+      throws SQLException {
+    return isSponsorsSpecifiedFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID);
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournament the tournament
+   * @return if the sponsors has a value for the specified tournament
+   * @throws SQLException on a database error
+   */
+  public static boolean isSponsorsSpecifiedForTournament(final Connection connection,
+                                                         final Tournament tournament)
+      throws SQLException {
+    return isSponsorsSpecifiedFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID());
+  }
+
+  private static boolean isSponsorsSpecifiedFor(final Connection connection,
+                                                final int tournamentLevelId,
+                                                final int tournamentId)
+      throws SQLException {
+    final String value = getValueFor(connection, tournamentLevelId, tournamentId, "awards_script_parameters",
+                                     "param_name", SPONSORS_SPECIFIED_PARAM, "param_value", Boolean.FALSE.toString());
+    final boolean result = Boolean.parseBoolean(value);
+    return result;
+  }
+
+  /**
+   * @param connection database connection
+   * @return sponsors value for the season
+   * @throws SQLException on a database error
+   */
+  public static List<String> getSponsorsForSeason(final Connection connection) throws SQLException {
+    return getSponsorsFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
+  }
+
+  /**
+   * @param connection database connection
+   * @param level the tournament level
+   * @return sponsors for the specified tournament level
+   * @throws SQLException on a database error
+   */
+  public static List<String> getSponsorsForTournamentLevel(final Connection connection,
+                                                           final TournamentLevel level)
+      throws SQLException {
+    return getSponsorsFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID);
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournament the tournament
+   * @return sponsors for the specified tournament
+   * @throws SQLException on a database error
+   */
+  public static List<String> getSponsorsForTournament(final Connection connection,
+                                                      final Tournament tournament)
+      throws SQLException {
+    return getSponsorsFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID());
+  }
+
+  /**
+   * @param connection database connection
+   * @param sponsors the new sponsors
+   * @throws SQLException on a database error
+   */
+  public static void updateSponsorsForSeason(final Connection connection,
+                                             final List<String> sponsors)
+      throws SQLException {
+    updateSponsorsFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                      Layer.SEASON, sponsors);
+  }
+
+  /**
+   * @param connection database connection
+   * @param level the tournament level
+   * @param sponsors the new sponsors
+   * @throws SQLException on a database error
+   */
+  public static void updateSponsorsForTournamentLevel(final Connection connection,
+                                                      final TournamentLevel level,
+                                                      final List<String> sponsors)
+      throws SQLException {
+    updateSponsorsFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, Layer.TOURNAMENT_LEVEL, sponsors);
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournament the tournament
+   * @param sponsors the new sponsors
+   * @throws SQLException on a database error
+   */
+  public static void updateSponsorsForTournament(final Connection connection,
+                                                 final Tournament tournament,
+                                                 final List<String> sponsors)
+      throws SQLException {
+    updateSponsorsFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                      Layer.TOURNAMENT, sponsors);
+  }
+
+  /**
+   * @param connection database connection
+   * @throws SQLException on a database error
+   */
+  public static void clearSponsorsForSeason(final Connection connection) throws SQLException {
+    clearSponsorsFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                     Layer.SEASON);
+  }
+
+  /**
+   * @param connection database connection
+   * @param level the tournament level
+   * @throws SQLException on a database error
+   */
+  public static void clearSponsorsForTournamentLevel(final Connection connection,
+                                                     final TournamentLevel level)
+      throws SQLException {
+    clearSponsorsFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, Layer.TOURNAMENT_LEVEL);
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournament the tournament
+   * @throws SQLException on a database error
+   */
+  public static void clearSponsorsForTournament(final Connection connection,
+                                                final Tournament tournament)
+      throws SQLException {
+    clearSponsorsFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                     Layer.TOURNAMENT);
+  }
+
+  private static void updateSponsorsFor(final Connection connection,
+                                        final int tournamentLevelId,
+                                        final int tournamentId,
+                                        final Layer layer,
+                                        final List<String> sponsors)
+      throws SQLException {
+    updateParameterValueFor(connection, tournamentLevelId, tournamentId, layer, SPONSORS_SPECIFIED_PARAM,
+                            Boolean.TRUE.toString());
+
+    updateRankTable(connection, tournamentLevelId, tournamentId, layer, "awards_script_sponsor_order", "sponsor",
+                    "sponsor_rank", sponsors);
+  }
+
+  private static void clearSponsorsFor(final Connection connection,
+                                       final int tournamentLevelId,
+                                       final int tournamentId,
+                                       final Layer layer)
+      throws SQLException {
+    updateParameterValueFor(connection, tournamentLevelId, tournamentId, layer, SPONSORS_SPECIFIED_PARAM,
+                            Boolean.FALSE.toString());
+
+    clearRankTable(connection, tournamentLevelId, tournamentId, "awards_script_sponsor_order");
+  }
+
+  private static List<String> getSponsorsFor(final Connection connection,
+                                             final int tournamentLevelId,
+                                             final int tournamentId)
+      throws SQLException {
+    return getRankTable(connection, tournamentLevelId, tournamentId, "awards_script_sponsor_order", "sponsor",
+                        "sponsor_rank");
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Table and column names are passed in")
+  private static List<String> getRankTable(final Connection connection,
+                                           final int tournamentLevelId,
+                                           final int tournamentId,
+                                           final String tableName,
+                                           final String keyColumn,
+                                           final String rankColumn)
+      throws SQLException {
+
+    final Formatter sql = new Formatter();
+    sql.format("SELECT %s, %s FROM %s", keyColumn, rankColumn, tableName);
+    sql.format(" WHERE tournament_level_id = ? AND tournament_id = ?");
+    sql.format("  ORDER BY %s ASC", rankColumn);
+
+    try (PreparedStatement prep = connection.prepareStatement(sql.toString())) {
+      prep.setInt(1, tournamentLevelId);
+      prep.setInt(2, tournamentId);
+
+      final List<String> values = new LinkedList<>();
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final String value = castNonNull(rs.getString(1));
+          values.add(value);
+        }
+      }
+      return values;
+    }
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Table and column names are passed in")
+  private static void updateRankTable(final Connection connection,
+                                      final int tournamentLevelId,
+                                      final int tournamentId,
+                                      final Layer layer,
+                                      final String tableName,
+                                      final String keyColumn,
+                                      final String rankColumn,
+                                      final List<String> newValue)
+      throws SQLException {
+    clearRankTable(connection, tournamentLevelId, tournamentId, tableName);
+
+    if (!newValue.isEmpty()) {
+      final Formatter insertSql = new Formatter();
+      insertSql.format("INSERT INTO %s", tableName);
+      insertSql.format(" (tournament_level_id, tournament_id, layer_rank, %s, %s)", keyColumn, rankColumn);
+      insertSql.format(" VALUES(?, ?, ?, ?, ?)");
+
+      try (PreparedStatement prep = connection.prepareStatement(insertSql.toString())) {
+        prep.setInt(1, tournamentLevelId);
+        prep.setInt(2, tournamentId);
+        prep.setInt(3, layer.getRank());
+
+        int rank = 0;
+        for (final String value : newValue) {
+          prep.setString(4, value);
+          prep.setInt(5, rank);
+          prep.addBatch();
+
+          ++rank;
+        }
+
+        prep.executeBatch();
+      }
+    }
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Table name is passed in")
+  private static void clearRankTable(final Connection connection,
+                                     final int tournamentLevelId,
+                                     final int tournamentId,
+                                     final String tableName)
+      throws SQLException {
+    final Formatter deleteSql = new Formatter();
+    deleteSql.format("DELETE FROM %s", tableName);
+    deleteSql.format(" WHERE tournament_level_id = ?");
+    deleteSql.format(" AND tournament_id = ?");
+    try (PreparedStatement prep = connection.prepareStatement(deleteSql.toString())) {
+      prep.setInt(1, tournamentLevelId);
+      prep.setInt(2, tournamentId);
+      prep.executeUpdate();
     }
   }
 
