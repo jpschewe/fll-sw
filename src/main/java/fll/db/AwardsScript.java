@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Formatter;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -23,6 +24,10 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.TournamentLevel;
 import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
+import fll.xml.Category;
+import fll.xml.ChallengeDescription;
+import fll.xml.ChampionshipCategory;
 import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
 
@@ -38,6 +43,8 @@ public final class AwardsScript {
    */
 
   private static final String SPONSORS_SPECIFIED_PARAM = "sponsors_specified";
+
+  private static final String AWARD_ORDER_SPECIFIED_PARAM = "award_order_specified";
 
   private AwardsScript() {
   }
@@ -2020,4 +2027,341 @@ public final class AwardsScript {
     updatePresenterFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
                        Layer.TOURNAMENT, category, null);
   }
+
+  /**
+   * Get the award order for the script.
+   * 
+   * @param connection database connection
+   * @param description for finding the categories
+   * @param tournament the tournament that the script is being generated for
+   * @return the categories in order
+   * @throws SQLException on a database error
+   */
+  public static List<Category> getAwardOrder(final ChallengeDescription description,
+                                             final Connection connection,
+                                             final Tournament tournament)
+      throws SQLException {
+    try (
+        PreparedStatement findLayer = connection.prepareStatement("SELECT MAX(layer_rank) FROM awards_script_parameters"
+            + "  WHERE "
+            // season
+            + "  ( (tournament_level_id = ? AND tournament_id = ?)"
+            // tournament level
+            + "      OR (tournament_level_id = ? AND tournament_id = ?)"
+            // tournament
+            + "      OR (tournament_level_id = ? AND tournament_id = ?) )" //
+            + "  AND param_name = ? AND param_value = ?")) {
+      // season
+      findLayer.setInt(1, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
+      findLayer.setInt(2, GenerateDB.INTERNAL_TOURNAMENT_ID);
+
+      // tournament level
+      findLayer.setInt(3, tournament.getLevel().getId());
+      findLayer.setInt(4, GenerateDB.INTERNAL_TOURNAMENT_ID);
+
+      // tournament
+      findLayer.setInt(5, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
+      findLayer.setInt(6, tournament.getTournamentID());
+
+      findLayer.setString(7, AWARD_ORDER_SPECIFIED_PARAM);
+      findLayer.setBoolean(8, true);
+
+      try (ResultSet layer = findLayer.executeQuery()) {
+        if (layer.next()) {
+          final int layerRank = layer.getInt(1);
+
+          // Another way to write this query would be with a switch statement on the
+          // layer. This would remove all of the "OR" statements.
+          try (PreparedStatement prep = connection.prepareStatement("SELECT award FROM awards_script_award_order"
+              + "    WHERE "
+              // season
+              + "        ( (tournament_level_id = ? AND tournament_id = ?)"
+              // tournament level
+              + "            OR (tournament_level_id = ? AND tournament_id = ?)"
+              // tournament
+              + "            OR (tournament_level_id = ? AND tournament_id = ?) )"
+              + "        AND layer_rank = ?"
+              + "    ORDER BY award_rank ASC")) {
+            // season
+            prep.setInt(1, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
+            prep.setInt(2, GenerateDB.INTERNAL_TOURNAMENT_ID);
+
+            // tournament level
+            prep.setInt(3, tournament.getLevel().getId());
+            prep.setInt(4, GenerateDB.INTERNAL_TOURNAMENT_ID);
+
+            // tournament
+            prep.setInt(5, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
+            prep.setInt(6, tournament.getTournamentID());
+
+            prep.setInt(7, layerRank);
+
+            try (ResultSet rs = prep.executeQuery()) {
+              final List<Category> awardOrder = new LinkedList<>();
+
+              while (rs.next()) {
+                final String categoryTitle = castNonNull(rs.getString(1));
+                final Category category = getCategoryByTitle(description, categoryTitle);
+                awardOrder.add(category);
+              }
+
+              if (awardOrder.isEmpty()) {
+                return getDefaultAwardOrder(description);
+              } else {
+                return awardOrder;
+              }
+            }
+
+          }
+        } else {
+          // can't find anything
+          return getDefaultAwardOrder(description);
+        }
+
+      }
+    }
+  }
+
+  /**
+   * Find a category given it's title.
+   * 
+   * @param description
+   * @param title the title of the category to find
+   * @return the category
+   * @throws FLLRuntimeException if the category cannot be found
+   */
+  public static Category getCategoryByTitle(final ChallengeDescription description,
+                                            final String title) {
+    if (ChampionshipCategory.INSTANCE.getTitle().equals(title)) {
+      return ChampionshipCategory.INSTANCE;
+    } else if (description.getPerformance().getTitle().equals(title)) {
+      return description.getPerformance();
+    } else {
+      final @Nullable SubjectiveScoreCategory subjective = description.getSubjectiveCategoryByTitle(title);
+      if (null != subjective) {
+        return subjective;
+      } else {
+        final @Nullable NonNumericCategory nonNumeric = description.getNonNumericCategoryByTitle(title);
+        if (null != nonNumeric) {
+          return nonNumeric;
+        } else {
+          throw new FLLRuntimeException("Cannot find category with title '"
+              + title
+              + "'");
+        }
+      }
+    }
+  }
+
+  /**
+   * @param description challenge description for awards
+   * @return the default award order when none is specified
+   */
+  private static List<Category> getDefaultAwardOrder(final ChallengeDescription description) {
+    final List<Category> awardOrder = new LinkedList<>();
+    awardOrder.addAll(description.getSubjectiveCategories());
+    awardOrder.addAll(description.getNonNumericCategories());
+    awardOrder.add(description.getPerformance());
+    awardOrder.add(ChampionshipCategory.INSTANCE);
+    return awardOrder;
+  }
+
+  /**
+   * @param connection database connection
+   * @return if the award order has a value for the season
+   * @throws SQLException on a database error
+   */
+  public static boolean isAwardOrderSpecifiedForSeason(final Connection connection) throws SQLException {
+    return isAwardOrderSpecifiedFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
+                                    GenerateDB.INTERNAL_TOURNAMENT_ID);
+  }
+
+  /**
+   * @param connection database connection
+   * @param level the tournament level
+   * @return if the award order has a value for the specified tournament level
+   * @throws SQLException on a database error
+   */
+  public static boolean isAwardOrderSpecifiedForTournamentLevel(final Connection connection,
+                                                                final TournamentLevel level)
+      throws SQLException {
+    return isAwardOrderSpecifiedFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID);
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournament the tournament
+   * @return if the award order has a value for the specified tournament
+   * @throws SQLException on a database error
+   */
+  public static boolean isAwardOrderSpecifiedForTournament(final Connection connection,
+                                                           final Tournament tournament)
+      throws SQLException {
+    return isAwardOrderSpecifiedFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID());
+  }
+
+  private static boolean isAwardOrderSpecifiedFor(final Connection connection,
+                                                  final int tournamentLevelId,
+                                                  final int tournamentId)
+      throws SQLException {
+    final String value = getValueFor(connection, tournamentLevelId, tournamentId, "awards_script_parameters",
+                                     "param_name", AWARD_ORDER_SPECIFIED_PARAM, "param_value",
+                                     Boolean.FALSE.toString());
+    final boolean result = Boolean.parseBoolean(value);
+    return result;
+  }
+
+  /**
+   * @param description used to find the categories
+   * @param connection database connection
+   * @return award order value for the season
+   * @throws SQLException on a database error
+   */
+  public static List<Category> getAwardOrderForSeason(final ChallengeDescription description,
+                                                      final Connection connection)
+      throws SQLException {
+    return getAwardOrderFor(description, connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
+                            GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
+  }
+
+  /**
+   * @param description used to find the categories
+   * @param connection database connection
+   * @param level the tournament level
+   * @return award order for the specified tournament level
+   * @throws SQLException on a database error
+   */
+  public static List<Category> getAwardOrderForTournamentLevel(final ChallengeDescription description,
+                                                               final Connection connection,
+                                                               final TournamentLevel level)
+      throws SQLException {
+    return getAwardOrderFor(description, connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID);
+  }
+
+  /**
+   * @param description used to find the categories
+   * @param connection database connection
+   * @param tournament the tournament
+   * @return sponsors for the specified tournament
+   * @throws SQLException on a database error
+   */
+  public static List<Category> getAwardOrderForTournament(final ChallengeDescription description,
+                                                          final Connection connection,
+                                                          final Tournament tournament)
+      throws SQLException {
+    return getAwardOrderFor(description, connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
+                            tournament.getTournamentID());
+  }
+
+  /**
+   * @param connection database connection
+   * @param awardOrder the new award order
+   * @throws SQLException on a database error
+   */
+  public static void updateAwardOrderForSeason(final Connection connection,
+                                               final List<Category> awardOrder)
+      throws SQLException {
+    updateAwardOrderFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                        Layer.SEASON, awardOrder);
+  }
+
+  /**
+   * @param connection database connection
+   * @param level the tournament level
+   * @param awardOrder the new award order
+   * @throws SQLException on a database error
+   */
+  public static void updateAwardOrderForTournamentLevel(final Connection connection,
+                                                        final TournamentLevel level,
+                                                        final List<Category> awardOrder)
+      throws SQLException {
+    updateAwardOrderFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, Layer.TOURNAMENT_LEVEL,
+                        awardOrder);
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournament the tournament
+   * @param awardOrder the new award order
+   * @throws SQLException on a database error
+   */
+  public static void updateAwardOrderForTournament(final Connection connection,
+                                                   final Tournament tournament,
+                                                   final List<Category> awardOrder)
+      throws SQLException {
+    updateAwardOrderFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                        Layer.TOURNAMENT, awardOrder);
+  }
+
+  /**
+   * @param connection database connection
+   * @throws SQLException on a database error
+   */
+  public static void clearAwardOrderForSeason(final Connection connection) throws SQLException {
+    clearAwardOrderFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                       Layer.SEASON);
+  }
+
+  /**
+   * @param connection database connection
+   * @param level the tournament level
+   * @throws SQLException on a database error
+   */
+  public static void clearAwardOrderForTournamentLevel(final Connection connection,
+                                                       final TournamentLevel level)
+      throws SQLException {
+    clearAwardOrderFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, Layer.TOURNAMENT_LEVEL);
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournament the tournament
+   * @throws SQLException on a database error
+   */
+  public static void clearAwardOrderForTournament(final Connection connection,
+                                                  final Tournament tournament)
+      throws SQLException {
+    clearAwardOrderFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                       Layer.TOURNAMENT);
+  }
+
+  private static void updateAwardOrderFor(final Connection connection,
+                                          final int tournamentLevelId,
+                                          final int tournamentId,
+                                          final Layer layer,
+                                          final List<Category> awardOrder)
+      throws SQLException {
+    updateParameterValueFor(connection, tournamentLevelId, tournamentId, layer, AWARD_ORDER_SPECIFIED_PARAM,
+                            Boolean.TRUE.toString());
+
+    final List<String> categoryTitles = awardOrder.stream() //
+                                                  .map(Category::getTitle) //
+                                                  .collect(Collectors.toList());
+
+    updateRankTable(connection, tournamentLevelId, tournamentId, layer, "awards_script_award_order", "award",
+                    "award_rank", categoryTitles);
+  }
+
+  private static void clearAwardOrderFor(final Connection connection,
+                                         final int tournamentLevelId,
+                                         final int tournamentId,
+                                         final Layer layer)
+      throws SQLException {
+    updateParameterValueFor(connection, tournamentLevelId, tournamentId, layer, AWARD_ORDER_SPECIFIED_PARAM,
+                            Boolean.FALSE.toString());
+
+    clearRankTable(connection, tournamentLevelId, tournamentId, "awards_script_award_order");
+  }
+
+  private static List<Category> getAwardOrderFor(final ChallengeDescription description,
+                                                 final Connection connection,
+                                                 final int tournamentLevelId,
+                                                 final int tournamentId)
+      throws SQLException {
+    return getRankTable(connection, tournamentLevelId, tournamentId, "awards_script_award_order", "award",
+                        "award_rank").stream() //
+                                     .map(s -> getCategoryByTitle(description, s)) //
+                                     .collect(Collectors.toList());
+  }
+
 }

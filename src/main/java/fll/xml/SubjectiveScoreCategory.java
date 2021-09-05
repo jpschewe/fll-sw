@@ -22,7 +22,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 /**
  * Description of a subjective category.
  */
-public class SubjectiveScoreCategory extends ScoreCategory {
+public class SubjectiveScoreCategory extends ScoreCategory implements Category {
 
   /**
    * Name of the XML tag used for this class.
@@ -101,9 +101,7 @@ public class SubjectiveScoreCategory extends ScoreCategory {
 
   private String mTitle;
 
-  /**
-   * @return the title of the category
-   */
+  @Override
   public String getTitle() {
     return mTitle;
   }

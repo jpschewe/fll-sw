@@ -6,6 +6,7 @@ const awardsScriptModule = {};
 {
 
     function syncSponsorsDisabledState() {
+        const sponsors = document.getElementById("sponsors");
         const specifiedEle = document.getElementById("sponsors_specified");
         const addSponsorButton = document.getElementById("add_sponsor");
         sponsors.querySelectorAll("input, button").forEach(ele => { ele.disabled = !specifiedEle.checked; })
@@ -180,7 +181,79 @@ const awardsScriptModule = {};
      */
     function finalizeFormData() {
         finalizeSponsorFields();
+        finalizeAwardOrderFields();
     }
+
+    awardsScriptModule.setAwardOrderSpecified = function(specified) {
+        const specifiedEle = document.getElementById("awardOrder_specified");
+        specifiedEle.checked = specified;
+        syncAwardOrderDisabledState();
+    };
+
+    /** 
+     * Set names of award order fields to sort properly when parsed on the server.
+     */
+    function finalizeAwardOrderFields() {
+        const container = document.getElementById("award_order");
+        const children = container.children;
+        for (var index = 0; index < children.length; ++index) {
+            const div = children[index];
+            const inputElement = div.querySelectorAll("input")[0]
+            inputElement.setAttribute("name", "award_order_" + index);
+        }
+    }
+
+    function syncAwardOrderDisabledState() {
+        const container = document.getElementById("award_order");
+        const specifiedEle = document.getElementById("awardOrder_specified");
+        container.querySelectorAll("button").forEach(ele => { ele.disabled = !specifiedEle.checked; })
+    }
+
+    function initAwardOrder() {
+        const awardOrderSpecifiedEle = document.getElementById("awardOrder_specified");
+        awardOrderSpecifiedEle.addEventListener("change", () => {
+            awardsScriptModule.setAwardOrderSpecified(awardOrderSpecifiedEle.checked);
+        });
+    }
+
+    awardsScriptModule.addToAwardOrder = function(category_title) {
+        const container = document.getElementById("award_order");
+
+        const element = document.createElement("div");
+        container.appendChild(element);
+
+        const moveUp = document.createElement("button");
+        element.appendChild(moveUp);
+        moveUp.setAttribute("type", "button");
+        moveUp.innerText = "Move Up";
+        moveUp.addEventListener("click", () => {
+            const prev = element.previousElementSibling;
+            if (prev) {
+                container.insertBefore(element, prev);
+            }
+        });
+
+        const moveDown = document.createElement("button");
+        element.appendChild(moveDown);
+        moveDown.setAttribute("type", "button");
+        moveDown.innerText = "Move Down";
+        moveDown.addEventListener("click", () => {
+            const next = element.nextElementSibling;
+            if (next) {
+                container.insertBefore(next, element);
+            }
+        });
+
+        const hiddenInput = document.createElement("input");
+        element.appendChild(hiddenInput);
+        hiddenInput.value = category_title;
+        hiddenInput.setAttribute("type", "hidden");
+
+        const text = document.createTextNode(category_title);
+        element.appendChild(text);
+
+        syncAwardOrderDisabledState();
+    };
 
     /** 
      * Set names of sponsor fields to sort properly when parsed on the server.
@@ -200,9 +273,7 @@ const awardsScriptModule = {};
         const addSponsorButton = document.getElementById("add_sponsor");
 
         specifiedEle.addEventListener("change", () => {
-            const sponsors = document.getElementById("sponsors");
-            sponsors.querySelectorAll("input, button").forEach(ele => { ele.disabled = !specifiedEle.checked; });
-            addSponsorButton.disabled = !specifiedEle.checked;
+            awardsScriptionModule.setSponsorsSpecified(specifiedEle.checked);
         });
 
 
@@ -215,6 +286,8 @@ const awardsScriptModule = {};
         document.getElementById("submit_data").addEventListener("click", finalizeFormData);
 
         initSponsorsFields();
+
+        initAwardOrder();
 
         awardsScriptModule.init();
     });

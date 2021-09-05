@@ -27,7 +27,6 @@ import com.diffplug.common.base.Errors;
 
 import fll.Tournament;
 import fll.TournamentLevel;
-import fll.db.AwardWinners;
 import fll.db.AwardsScript;
 import fll.db.AwardsScript.Layer;
 import fll.db.CategoriesIgnored;
@@ -38,7 +37,9 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
+import fll.xml.Category;
 import fll.xml.ChallengeDescription;
+import fll.xml.ChampionshipCategory;
 import fll.xml.NonNumericCategory;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
@@ -111,7 +112,9 @@ public class EditAwardsScript extends BaseFLLServlet {
 
       loadSponsors(page, connection, tournamentLevel, tournament, layer);
 
-      page.setAttribute("championshipAwardTitle", AwardWinners.CHAMPIONSHIP_AWARD_TITLE);
+      loadAwardOrder(description, page, connection, tournamentLevel, tournament, layer);
+
+      page.setAttribute("championshipAwardTitle", ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE);
       page.setAttribute("performanceAwardTitle", PerformanceScoreCategory.CATEGORY_TITLE);
 
     } catch (final SQLException e) {
@@ -403,6 +406,8 @@ public class EditAwardsScript extends BaseFLLServlet {
       storeMacroValues(request, connection, tournamentLevel, tournament, layer);
 
       storeSponsors(request, connection, tournamentLevel, tournament, layer);
+
+      storeAwardOrder(description, request, connection, tournamentLevel, tournament, layer);
 
       final String layerText;
       switch (layer) {
@@ -823,6 +828,121 @@ public class EditAwardsScript extends BaseFLLServlet {
         break;
       case TOURNAMENT_LEVEL:
         AwardsScript.clearSponsorsForTournamentLevel(connection, tournamentLevel);
+        break;
+      default:
+        throw new FLLInternalException("Unknown awards script layer: "
+            + layer);
+      }
+    }
+  }
+
+  private static void loadAwardOrder(final ChallengeDescription description,
+                                     final PageContext page,
+                                     final Connection connection,
+                                     final TournamentLevel tournamentLevel,
+                                     final Tournament tournament,
+                                     final AwardsScript.Layer layer)
+      throws SQLException {
+
+    final boolean awardOrderSpecified;
+    List<Category> awardOrder;
+    switch (layer) {
+    case SEASON:
+      awardOrderSpecified = AwardsScript.isAwardOrderSpecifiedForSeason(connection);
+      awardOrder = AwardsScript.getAwardOrderForSeason(description, connection);
+      break;
+    case TOURNAMENT:
+      awardOrderSpecified = AwardsScript.isAwardOrderSpecifiedForTournament(connection, tournament);
+      awardOrder = AwardsScript.getAwardOrderForTournament(description, connection, tournament);
+      break;
+    case TOURNAMENT_LEVEL:
+      awardOrderSpecified = AwardsScript.isAwardOrderSpecifiedForTournamentLevel(connection, tournamentLevel);
+      awardOrder = AwardsScript.getAwardOrderForTournamentLevel(description, connection, tournamentLevel);
+      break;
+    default:
+      throw new FLLInternalException("Unknown awards script layer: "
+          + layer);
+    }
+
+    if (!awardOrderSpecified) {
+      // display the value that would be used to the user
+      awardOrder = AwardsScript.getAwardOrder(description, connection, tournament);
+    }
+
+    page.setAttribute("awardOrderSpecified", awardOrderSpecified);
+    page.setAttribute("awardOrder", awardOrder);
+  }
+
+  private static final String AWARD_ORDER_PARAMETER_PREFIX = "award_order_";
+
+  private static List<Category> findAwardOrder(final ChallengeDescription description,
+                                               final HttpServletRequest request) {
+
+    // Find all request parameters that start with the right prefix and parse them
+    // into integers.
+    // store the values in a SortedMap so that walking the map sorts the sponsor
+    // names by rank.
+    final SortedMap<Integer, String> sponsorMap = new TreeMap<>();
+    for (final Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+      final String key = entry.getKey();
+      if (key.startsWith(AWARD_ORDER_PARAMETER_PREFIX)) {
+        final String value = entry.getValue()[0];
+        if (!StringUtils.isBlank(value)) {
+          final String rankStr = key.substring(AWARD_ORDER_PARAMETER_PREFIX.length(), key.length());
+          try {
+            final Integer rank = Integer.valueOf(rankStr);
+            sponsorMap.put(rank, value);
+          } catch (final NumberFormatException nfe) {
+            throw new FLLInternalException(String.format("Got error parsing award order rank from '%s', skipping",
+                                                         key));
+          }
+        }
+      }
+    }
+
+    final List<Category> awardOrder = sponsorMap.values().stream()
+                                                .map(s -> AwardsScript.getCategoryByTitle(description, s))
+                                                .collect(Collectors.toList());
+    return awardOrder;
+  }
+
+  private static void storeAwardOrder(final ChallengeDescription description,
+                                      final HttpServletRequest request,
+                                      final Connection connection,
+                                      final TournamentLevel tournamentLevel,
+                                      final Tournament tournament,
+                                      final AwardsScript.Layer layer)
+      throws SQLException {
+
+    final @Nullable String specifiedStr = request.getParameter(String.format("awardOrder_specified"));
+    if (null != specifiedStr) {
+      final List<Category> awardOrder = findAwardOrder(description, request);
+
+      switch (layer) {
+      case SEASON:
+        AwardsScript.updateAwardOrderForSeason(connection, awardOrder);
+        break;
+      case TOURNAMENT:
+        AwardsScript.updateAwardOrderForTournament(connection, tournament, awardOrder);
+        break;
+      case TOURNAMENT_LEVEL:
+        AwardsScript.updateAwardOrderForTournamentLevel(connection, tournamentLevel, awardOrder);
+        break;
+      default:
+        throw new FLLInternalException("Unknown awards script layer: "
+            + layer);
+
+      }
+    } else {
+      switch (layer) {
+      case SEASON:
+        AwardsScript.clearAwardOrderForSeason(connection);
+        break;
+      case TOURNAMENT:
+        AwardsScript.clearAwardOrderForTournament(connection, tournament);
+        break;
+      case TOURNAMENT_LEVEL:
+        AwardsScript.clearAwardOrderForTournamentLevel(connection, tournamentLevel);
         break;
       default:
         throw new FLLInternalException("Unknown awards script layer: "

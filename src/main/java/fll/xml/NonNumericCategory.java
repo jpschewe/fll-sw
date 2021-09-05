@@ -20,7 +20,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 /**
  * A category that doesn't have a score.
  */
-public class NonNumericCategory implements Serializable {
+public class NonNumericCategory implements Category, Serializable {
 
   /**
    * Name of the XML tag used for this class.
@@ -97,6 +97,7 @@ public class NonNumericCategory implements Serializable {
   /**
    * @return the title
    */
+  @Override
   public String getTitle() {
     return title;
   }

@@ -51,6 +51,12 @@ awardsScriptModule.init = ( ) => {
   <c:forEach items="${sponsors}" var="sponsor">
   awardsScriptModule.addSponsor("${sponsor}");
   </c:forEach>
+  
+  awardsScriptModule.setAwardOrderSpecified(${awardOrderSpecified});
+  <c:forEach items="${awardOrder}" var="category">
+  awardsScriptModule.addToAwardOrder("${category.title}");
+  </c:forEach>
+
 
 };
 </script>
@@ -168,19 +174,22 @@ awardsScriptModule.init = ( ) => {
 
 
         <h2>Award presentation order</h2>
-        <div>FIXME: specify award order, iterates through all
-            awards and then allows them to be moved up and down.
-            Checkbox to see if it is being specified</div>
+
+        <div>
+            The order of the award groups for each category is the same
+            as the <a
+                href="<c:url value='/report/edit-advancing-teams.jsp'/>">award
+                group order for advancing teams.</a>
+        </div>
+
         <label>
             Specify value:
-            <input type="checkbox" name="award_order_specified" />
+            <input type="checkbox" name="awardOrder_specified"
+                id="awardOrder_specified" />
         </label>
-        <table>
-            <tr>
-                <th>Award</th>
-            </tr>
+        <div id="award_order"></div>
 
-        </table>
+        <h1>Awards</h1>
 
         <div>
             Enter the text for each award. The information about why

@@ -58,6 +58,7 @@ import fll.web.UserRole;
 import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
+import fll.xml.ChampionshipCategory;
 import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -284,9 +285,9 @@ public class AwardsReport extends BaseFLLServlet {
     });
     for (final String categoryName : fullOrder) {
       if ((displayChampionship
-          && AwardWinners.CHAMPIONSHIP_AWARD_TITLE.equals(categoryName))
+          && ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE.equals(categoryName))
           || (!displayChampionship
-              && !AwardWinners.CHAMPIONSHIP_AWARD_TITLE.equals(categoryName))) {
+              && !ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE.equals(categoryName))) {
         if (organizedWinners.containsKey(categoryName)) {
           final Map<String, List<AwardWinner>> categoryWinners = organizedWinners.get(categoryName);
           final Element container = addSubjectiveAwardGroupWinners(connection, document, categoryName, categoryWinners,

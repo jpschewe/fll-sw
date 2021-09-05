@@ -49,7 +49,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import fll.Utilities;
-import fll.db.AwardWinners;
 import fll.db.GenerateDB;
 import fll.util.FLLInternalException;
 import fll.util.FP;
@@ -268,9 +267,9 @@ public final class ChallengeParser {
    * @throws ChallengeValidationException if there is an error
    */
   public static void validateNonNumericCategory(final NonNumericCategory category) throws ChallengeValidationException {
-    if (category.getTitle().equals(AwardWinners.CHAMPIONSHIP_AWARD_TITLE)) {
+    if (category.getTitle().equals(ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE)) {
       throw new ChallengeValidationException(String.format("The category title '%s' is reserved and cannot be used for a non-numeric category.",
-                                                           AwardWinners.CHAMPIONSHIP_AWARD_TITLE));
+                                                           ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE));
     }
     if (category.getTitle().equals(PerformanceScoreCategory.CATEGORY_TITLE)) {
       throw new ChallengeValidationException(String.format("The category title '%s' is reserved and cannot be used for a non-numeric category.",
@@ -288,9 +287,9 @@ public final class ChallengeParser {
       throws ChallengeValidationException {
     validateCategoryRubric(category);
 
-    if (category.getTitle().equals(AwardWinners.CHAMPIONSHIP_AWARD_TITLE)) {
+    if (category.getTitle().equals(ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE)) {
       throw new ChallengeValidationException(String.format("The category title '%s' is reserved and cannot be used for a subjective category.",
-                                                           AwardWinners.CHAMPIONSHIP_AWARD_TITLE));
+                                                           ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE));
     }
     if (category.getTitle().equals(PerformanceScoreCategory.CATEGORY_TITLE)) {
       throw new ChallengeValidationException(String.format("The category title '%s' is reserved and cannot be used for a subjective category.",

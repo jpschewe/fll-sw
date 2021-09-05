@@ -24,7 +24,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 /**
  * Description of the performance.
  */
-public class PerformanceScoreCategory extends ScoreCategory {
+public class PerformanceScoreCategory extends ScoreCategory implements Category {
 
   /**
    * Category name for {@link #getName()}.
@@ -35,6 +35,14 @@ public class PerformanceScoreCategory extends ScoreCategory {
    * Category title.
    */
   public static final String CATEGORY_TITLE = "Performance";
+
+  /**
+   * @return {@link #CATEGORY_TITLE}
+   */
+  @Override
+  public String getTitle() {
+    return CATEGORY_TITLE;
+  }
 
   /**
    * XML tag used for the category.

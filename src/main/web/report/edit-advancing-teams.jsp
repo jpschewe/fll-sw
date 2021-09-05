@@ -45,6 +45,7 @@
 
     <h2>Order of award groups</h2>
     <p>Specify the sort order for the award groups when printing.
+        This is used in both the awards report and the awards script.
         Put a number next to each group name. The groups will be output
         from lowest number to highest.</p>
     <ul id="award-group-order"></ul>
