@@ -27,6 +27,7 @@ import com.diffplug.common.base.Errors;
 
 import fll.Tournament;
 import fll.TournamentLevel;
+import fll.db.AwardWinners;
 import fll.db.AwardsScript;
 import fll.db.AwardsScript.Layer;
 import fll.db.CategoriesIgnored;
@@ -39,6 +40,7 @@ import fll.web.SessionAttributes;
 import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
+import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -108,6 +110,9 @@ public class EditAwardsScript extends BaseFLLServlet {
       loadSectionInformation(page, connection, tournamentLevel, tournament, layer);
 
       loadSponsors(page, connection, tournamentLevel, tournament, layer);
+
+      page.setAttribute("championshipAwardTitle", AwardWinners.CHAMPIONSHIP_AWARD_TITLE);
+      page.setAttribute("performanceAwardTitle", PerformanceScoreCategory.CATEGORY_TITLE);
 
     } catch (final SQLException e) {
       throw new FLLInternalException("Error getting values for editing awards script", e);

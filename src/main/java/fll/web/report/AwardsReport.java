@@ -284,9 +284,9 @@ public class AwardsReport extends BaseFLLServlet {
     });
     for (final String categoryName : fullOrder) {
       if ((displayChampionship
-          && AwardWinners.CHAMPIONSHIP_AWARD_NAME.equals(categoryName))
+          && AwardWinners.CHAMPIONSHIP_AWARD_TITLE.equals(categoryName))
           || (!displayChampionship
-              && !AwardWinners.CHAMPIONSHIP_AWARD_NAME.equals(categoryName))) {
+              && !AwardWinners.CHAMPIONSHIP_AWARD_TITLE.equals(categoryName))) {
         if (organizedWinners.containsKey(categoryName)) {
           final Map<String, List<AwardWinner>> categoryWinners = organizedWinners.get(categoryName);
           final Element container = addSubjectiveAwardGroupWinners(connection, document, categoryName, categoryWinners,

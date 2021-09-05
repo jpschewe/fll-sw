@@ -167,6 +167,7 @@ awardsScriptModule.init = ( ) => {
         <hr />
 
 
+        <h2>Award presentation order</h2>
         <div>FIXME: specify award order, iterates through all
             awards and then allows them to be moved up and down.
             Checkbox to see if it is being specified</div>
@@ -188,9 +189,7 @@ awardsScriptModule.init = ( ) => {
                 target="_blank">awards for the tournament</a>.
         </div>
 
-        <h1>Awards</h1>
-
-        <h2>Championship</h2>
+        <h2>${championshipAwardTitle}</h2>
         <div>
             Specify Presenter
             <input type="checkbox"
@@ -206,12 +205,12 @@ awardsScriptModule.init = ( ) => {
         <%@ include file="edit-awards-script_textarea-macros.jspf"%>
         <hr />
 
-        <h2>Robot Performance Awards</h2>
+        <h2>${performanceAwardTitle}</h2>
         <div>
             Specify Presenter
             <input type="checkbox"
                 name="${CATEGORY_PERFORMANCE_PRESENTER.identifier}_specified"
-                id="${CATEGORY_PERFORMANCe_PRESENTER.identifier}_specified" />
+                id="${CATEGORY_PERFORMANCE_PRESENTER.identifier}_specified" />
             <input type="text"
                 name="${CATEGORY_PERFORMANCE_PRESENTER.identifier}_text"
                 id="${CATEGORY_PERFORMANCE_PRESENTER.identifier}_text"

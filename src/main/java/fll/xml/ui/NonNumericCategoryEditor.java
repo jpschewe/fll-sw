@@ -24,6 +24,8 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
 import fll.util.FormatterUtils;
 import fll.util.TextAreaEditor;
+import fll.xml.ChallengeParser;
+import fll.xml.ChallengeValidationException;
 import fll.xml.NonNumericCategory;
 
 /**
@@ -153,6 +155,17 @@ import fll.xml.NonNumericCategory;
 
     if (StringUtils.isBlank(titleEditor.getText())) {
       messages.add("The non-numeric category must have a title");
+    }
+
+    try {
+      ChallengeParser.validateNonNumericCategory(category);
+    } catch (final ChallengeValidationException e) {
+      final String message = e.getMessage();
+      if (null != message) {
+        messages.add(message);
+      } else {
+        messages.add(e.toString());
+      }
     }
 
     if (!messages.isEmpty()) {
