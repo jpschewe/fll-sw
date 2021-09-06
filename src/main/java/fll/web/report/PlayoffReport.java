@@ -359,7 +359,7 @@ public class PlayoffReport extends BaseFLLServlet {
 
     if (null != tournament.getLevel()) {
       titleBuilder.append(" ");
-      titleBuilder.append(tournament.getLevel());
+      titleBuilder.append(tournament.getLevel().getName());
     }
 
     titleBuilder.append(" Head to Head Winners");

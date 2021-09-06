@@ -633,7 +633,7 @@ public class AwardsReport extends BaseFLLServlet {
 
     if (null != tournament.getLevel()) {
       titleBuilder.append(" ");
-      titleBuilder.append(tournament.getLevel());
+      titleBuilder.append(tournament.getLevel().getName());
     }
 
     titleBuilder.append(" Award Winners");
