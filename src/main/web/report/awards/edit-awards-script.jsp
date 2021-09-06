@@ -138,19 +138,21 @@ awardsScriptModule.init = ( ) => {
         <div>Tournament Location - Tournament Date</div>
         <hr />
 
+        <h2>Introduction</h2>
+
         <c:set var="sectionName">${FRONT_MATTER.identifier}</c:set>
         <c:set var="sectionTextValue">${sectionText[FRONT_MATTER]}</c:set>
         <%@ include file="edit-awards-script_textarea-macros.jspf"%>
         <hr />
 
 
+        <h2>Sponsors</h2>
+
         <c:set var="sectionName">${SPONSORS_INTRO.identifier}</c:set>
         <c:set var="sectionTextValue">${sectionText[SPONSORS_INTRO]}</c:set>
         <%@ include file="edit-awards-script_textarea-macros.jspf"%>
         <hr />
 
-
-        <h2>Sponsors</h2>
         <label>
             Specify value:
             <input id="sponsors_specified" name="sponsors_specified"
@@ -189,7 +191,7 @@ awardsScriptModule.init = ( ) => {
         </label>
         <div id="award_order"></div>
 
-        <h1>Awards</h1>
+        <h2>Awards</h2>
 
         <div>
             Enter the text for each award. The information about why
@@ -198,7 +200,7 @@ awardsScriptModule.init = ( ) => {
                 target="_blank">awards for the tournament</a>.
         </div>
 
-        <h2>${championshipAwardTitle}</h2>
+        <h3>${championshipAwardTitle}</h3>
         <div>
             Specify Presenter
             <input type="checkbox"
@@ -214,7 +216,7 @@ awardsScriptModule.init = ( ) => {
         <%@ include file="edit-awards-script_textarea-macros.jspf"%>
         <hr />
 
-        <h2>${performanceAwardTitle}</h2>
+        <h3>${performanceAwardTitle}</h3>
         <div>
             Specify Presenter
             <input type="checkbox"
@@ -230,9 +232,9 @@ awardsScriptModule.init = ( ) => {
         <%@ include file="edit-awards-script_textarea-macros.jspf"%>
         <hr />
 
-        <h2>Subjective awards</h2>
+        <h3>Subjective awards</h3>
         <c:forEach items="${subjectiveCategories}" var="category">
-            <h3>Category ${category.title}</h3>
+            <h4>Category ${category.title}</h4>
             <div>
                 Specify Presenter
                 <input type="checkbox"
@@ -249,14 +251,14 @@ awardsScriptModule.init = ( ) => {
             <hr />
         </c:forEach>
 
-        <h2>Non-numeric awards</h2>
+        <h3>Non-numeric awards</h3>
         <div>
             The categories that have awards are <a
                 href="<c:url value='/report/awards/edit-categories-awarded.jsp'/>"
                 target="_blank">specified per tournament level</a>.
         </div>
         <c:forEach items="${nonNumericCategories}" var="category">
-            <h3>Category ${category.title}</h3>
+            <h4>Category ${category.title}</h4>
             <div>
                 Specify Presenter
                 <input type="checkbox"
