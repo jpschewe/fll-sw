@@ -100,8 +100,7 @@ public final class GenerateDB {
    * @throws UnsupportedEncodingException if the challenge description cannot be
    *           decoded
    */
-  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
-                                "OBL_UNSATISFIED_OBLIGATION" }, justification = "Need dynamic data for default values, Bug in findbugs - ticket:2924739")
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need dynamic data for default values, Bug in findbugs - ticket:2924739")
   public static void generateDB(final ChallengeDescription description,
                                 final Connection connection)
       throws SQLException, UnsupportedEncodingException {
@@ -1205,6 +1204,7 @@ public final class GenerateDB {
     }
   }
 
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "table and columns are passed in")
   private static void createAwardsScriptTable(final Connection connection,
                                               final boolean createConstraints,
                                               final String tableName,
@@ -1229,6 +1229,7 @@ public final class GenerateDB {
     }
   }
 
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "table and columns are passed in")
   private static void createAwardsScriptRankTable(final Connection connection,
                                                   final boolean createConstraints,
                                                   final String tableName,

@@ -2125,7 +2125,7 @@ public final class AwardsScript {
   /**
    * Find a category given it's title.
    * 
-   * @param description
+   * @param description challenge description for award
    * @param title the title of the category to find
    * @return the category
    * @throws FLLRuntimeException if the category cannot be found
