@@ -70,6 +70,7 @@ public final class Tournament implements Serializable {
    * @return the {@link #getDescription()} if not null, otherwise
    *         {@link #getName()}
    */
+  @JsonIgnore
   public String getTitle() {
     if (null == description) {
       return name;
