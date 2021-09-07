@@ -1046,4 +1046,19 @@ public final class FOPUtils {
     return container;
   }
 
+  /**
+   * Create a standard bullet label for a list element.
+   * 
+   * @param document used to create elements
+   * @return list item label element
+   */
+  public static Element createSimpleListItemLabel(final Document document) {
+    final Element itemLabel = FOPUtils.createXslFoElement(document, "list-item-label");
+
+    final Element bodyBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    itemLabel.appendChild(bodyBlock);
+    bodyBlock.appendChild(document.createTextNode("\u2022"));
+
+    return itemLabel;
+  }
 }

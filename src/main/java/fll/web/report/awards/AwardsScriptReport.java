@@ -11,7 +11,12 @@ import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Formatter;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -27,6 +32,8 @@ import org.w3c.dom.Element;
 import fll.Tournament;
 import fll.TournamentLevel;
 import fll.db.AwardsScript;
+import fll.db.CategoriesIgnored;
+import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
@@ -35,9 +42,17 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.report.AwardsReport;
 import fll.web.report.PromptSummarizeScores;
+import fll.web.report.finalist.FinalistSchedule;
+import fll.web.scoreboard.Top10;
+import fll.xml.Category;
 import fll.xml.ChallengeDescription;
+import fll.xml.ChampionshipCategory;
+import fll.xml.NonNumericCategory;
+import fll.xml.PerformanceScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -67,7 +82,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/awards/AwardsScriptReport")) {
+    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session,
+                                                    "/report/awards/AwardsScriptReport")) {
       return;
     }
 
@@ -112,8 +128,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
     }
   }
 
-  private Document generateDocument(ChallengeDescription description,
-                                    Connection connection)
+  private Document generateDocument(final ChallengeDescription description,
+                                    final Connection connection)
       throws SQLException {
     final Tournament tournament = Tournament.getCurrentTournament(connection);
 
@@ -155,29 +171,343 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    final Element intro = createFrontMatter(connection, tournament, document, templateContext);
+    final Element intro = createSectionBlock(connection, tournament, document, templateContext,
+                                             AwardsScript.Section.FRONT_MATTER);
     documentBody.appendChild(intro);
+
+    final Element sponsors = createSponsors(connection, tournament, document, templateContext);
+    documentBody.appendChild(sponsors);
+
+    final Element volunteers = createVolunteers(connection, tournament, document, templateContext);
+    documentBody.appendChild(volunteers);
+    volunteers.setAttribute("page-break-after", "always");
+
+    addAwards(description, connection, tournament, document, templateContext, documentBody);
+
+    final Element endAwards = createSectionBlock(connection, tournament, document, templateContext,
+                                                 AwardsScript.Section.END_AWARDS);
+    documentBody.appendChild(endAwards);
+
+    // FIXME advancing teams
+
+    final Element footerSection = createSectionBlock(connection, tournament, document, templateContext,
+                                                     AwardsScript.Section.FOOTER);
+    documentBody.appendChild(footerSection);
 
     return document;
   }
 
-  private Element createFrontMatter(final Connection connection,
-                                    final Tournament tournament,
-                                    final Document document,
-                                    final VelocityContext templateContext)
+  private List<String> getAwardGroupOrder(final Connection connection,
+                                          final Tournament tournament)
+      throws SQLException {
+    final Collection<String> allAwardGroups = Queries.getAwardGroups(connection, tournament.getTournamentID());
+    final List<String> sortedAwardGroups = AwardsReportSortedGroupsServlet.getAwardGroupsSorted(connection,
+                                                                                                tournament.getTournamentID());
+
+    // in case any of the award groups missing
+    final List<String> localSortedGroups = new LinkedList<>(sortedAwardGroups);
+    allAwardGroups.stream().filter(e -> !localSortedGroups.contains(e)).forEach(localSortedGroups::add);
+
+    return localSortedGroups;
+  }
+
+  private void addAwards(final ChallengeDescription description,
+                         final Connection connection,
+                         final Tournament tournament,
+                         final Document document,
+                         final VelocityContext templateContext,
+                         final Element documentBody)
+      throws SQLException {
+    final List<String> awardGroupOrder = getAwardGroupOrder(connection, tournament);
+    final List<Category> awardOrder = AwardsScript.getAwardOrder(description, connection, tournament);
+
+    final Map<String, FinalistSchedule> finalistSchedulesPerAwardGroup = FinalistSchedule.loadSchedules(connection,
+                                                                                                        tournament);
+
+    for (final Category category : awardOrder) {
+      if (category instanceof NonNumericCategory
+          && CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournament.getLevel(),
+                                                           (NonNumericCategory) category)) {
+        continue;
+      }
+      final Element categoryPage;
+      if (category instanceof PerformanceScoreCategory) {
+        categoryPage = createPerformanceCategory(description, connection, tournament, document, templateContext,
+                                                 awardGroupOrder, (PerformanceScoreCategory) category);
+      } else {
+        categoryPage = createCategory(connection, tournament, document, templateContext, awardGroupOrder, category);
+      }
+      documentBody.appendChild(categoryPage);
+      categoryPage.setAttribute("page-break-after", "always");
+    }
+  }
+
+  private String getCategoryDescription(final Connection connection,
+                                        final Tournament tournament,
+                                        final VelocityContext templateContext,
+                                        final Category category)
+      throws SQLException {
+    final String rawText;
+    if (category instanceof SubjectiveScoreCategory) {
+      rawText = AwardsScript.getCategoryText(connection, tournament, (SubjectiveScoreCategory) category);
+    } else if (category instanceof NonNumericCategory) {
+      rawText = AwardsScript.getCategoryText(connection, tournament, (NonNumericCategory) category);
+    } else if (category instanceof ChampionshipCategory) {
+      rawText = AwardsScript.getSectionText(connection, tournament, AwardsScript.Section.CATEGORY_CHAMPIONSHIP);
+    } else if (category instanceof PerformanceScoreCategory) {
+      rawText = AwardsScript.getSectionText(connection, tournament, AwardsScript.Section.CATEGORY_PERFORMANCE);
+    } else {
+      rawText = "Unknown Category";
+    }
+
+    try (StringWriter writer = new StringWriter()) {
+      if (!Velocity.evaluate(templateContext, writer, category.getTitle(), rawText)) {
+        throw new FLLRuntimeException(String.format("Error evaluating template for category %s", category.getTitle()));
+      }
+      return writer.toString();
+    } catch (final IOException e) {
+      throw new FLLInternalException("Should not get IO exception writing to a string", e);
+    }
+  }
+
+  private String getCategoryPresenter(final Connection connection,
+                                      final Tournament tournament,
+                                      final Category category)
+      throws SQLException {
+    if (category instanceof SubjectiveScoreCategory) {
+      return AwardsScript.getPresenter(connection, tournament, (SubjectiveScoreCategory) category);
+    } else if (category instanceof NonNumericCategory) {
+      return AwardsScript.getPresenter(connection, tournament, (NonNumericCategory) category);
+    } else if (category instanceof ChampionshipCategory) {
+      return AwardsScript.getSectionText(connection, tournament, AwardsScript.Section.CATEGORY_CHAMPIONSHIP_PRESENTER);
+    } else if (category instanceof PerformanceScoreCategory) {
+      return AwardsScript.getSectionText(connection, tournament, AwardsScript.Section.CATEGORY_PERFORMANCE_PRESENTER);
+    } else {
+      return "Unknown Category";
+    }
+  }
+
+  private Element createCategory(final Connection connection,
+                                 final Tournament tournament,
+                                 final Document document,
+                                 final VelocityContext templateContext,
+                                 final List<String> awardGroupOrder,
+                                 final Category category)
+      throws SQLException {
+    final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
+    final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(categoryTitle);
+    categoryTitle.appendChild(document.createTextNode(category.getTitle()));
+    categoryTitle.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
+
+    final Element categoryDescription = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(categoryDescription);
+    categoryDescription.appendChild(document.createTextNode(getCategoryDescription(connection, tournament,
+                                                                                   templateContext, category)));
+
+    final Element categoryPresenter = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(categoryPresenter);
+    final String presenterText = String.format("Presenter: %s", getCategoryPresenter(connection, tournament, category));
+    categoryPresenter.appendChild(document.createTextNode(presenterText));
+
+    if (category.getPerAwardGroup()) {
+      for (final String awardGroup : awardGroupOrder) {
+        // FIXME output award group
+
+        // FIXME finalists
+        // Finalists (yellow background) |
+        // The finalists are:
+        // team 1234 - name
+        // ...
+
+        // FIXME nth place ... 1st place
+
+        /*
+         * 1st place winner (span 4 rows, yellow background) | The winner is: \n team
+         * number \n team name \n description
+         * 
+         */
+      }
+    } else {
+      // FIXME
+    }
+
+    return container;
+  }
+
+  private static final int AWARD_PLACE_WIDTH = 1;
+
+  private static final int AWARD_WINNER_WIDTH = 4;
+
+  private Element createPerformanceCategory(final ChallengeDescription description,
+                                            final Connection connection,
+                                            final Tournament tournament,
+                                            final Document document,
+                                            final VelocityContext templateContext,
+                                            final List<String> awardGroupOrder,
+                                            final PerformanceScoreCategory category)
+      throws SQLException {
+    final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
+    final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(categoryTitle);
+    categoryTitle.appendChild(document.createTextNode(category.getTitle()));
+    categoryTitle.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
+
+    final Element categoryDescription = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(categoryDescription);
+    categoryDescription.appendChild(document.createTextNode(getCategoryDescription(connection, tournament,
+                                                                                   templateContext, category)));
+
+    final Element categoryPresenter = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(categoryPresenter);
+    final String presenterText = String.format("Presenter: %s", getCategoryPresenter(connection, tournament, category));
+    categoryPresenter.appendChild(document.createTextNode(presenterText));
+
+    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
+
+    for (final String awardGroup : awardGroupOrder) {
+      if (scores.containsKey(awardGroup)) {
+        final Element awardGroupBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        container.appendChild(awardGroupBlock);
+        awardGroupBlock.appendChild(document.createTextNode(String.format("Award Group: %s", awardGroup)));
+        awardGroupBlock.setAttribute("font-weight", "bold");
+
+        final List<Top10.ScoreEntry> scoreList = scores.get(awardGroup);
+
+        final Optional<Top10.ScoreEntry> winner = scoreList.stream().findFirst();
+        if (winner.isPresent()) {
+          // TODO: allow the user to specify how many performance awards
+          // TODO: check for ties, refactor code to use a method for this rather than just
+          // a constant FP?
+          // TODO: support multiple places
+
+          final Element table = FOPUtils.createBasicTable(document);
+          container.appendChild(table);
+
+          table.appendChild(FOPUtils.createTableColumn(document, AWARD_PLACE_WIDTH));
+          table.appendChild(FOPUtils.createTableColumn(document, AWARD_WINNER_WIDTH));
+
+          final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+          table.appendChild(tableBody);
+
+          final Element row = FOPUtils.createTableRow(document);
+          tableBody.appendChild(row);
+
+          final int place = 1;
+          final boolean tie = false;
+          final String placeTitle = String.format("%d%s Place Winner", place, suffixForPlace(place));
+
+          // TODO: make this cell yellow background?
+          final Element placeCell = FOPUtils.createTableCell(document, null, placeTitle);
+          row.appendChild(placeCell);
+
+          final Element teamCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+          row.appendChild(teamCell);
+
+          final Element teamPlaceBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+          teamCell.appendChild(teamPlaceBlock);
+          final String teamPlaceFormat;
+          if (tie) {
+            teamPlaceFormat = "Tied for %d%s place in award group %s with a score of %s is:";
+          } else {
+            teamPlaceFormat = "The %d%s place team in award group %s with a score of %s is:";
+          }
+          teamPlaceBlock.appendChild(document.createTextNode(String.format(teamPlaceFormat, place,
+                                                                           suffixForPlace(place), awardGroup,
+                                                                           winner.get().getFormattedScore())));
+
+          final Element teamNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+          teamCell.appendChild(teamNumberBlock);
+          teamNumberBlock.appendChild(document.createTextNode(String.format("%d", winner.get().getTeamNumber())));
+
+          final Element teamNameBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+          teamCell.appendChild(teamNameBlock);
+          teamNameBlock.appendChild(document.createTextNode(winner.get().getTeamName()));
+
+          final Element teamOrganizationBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+          teamCell.appendChild(teamOrganizationBlock);
+          teamOrganizationBlock.appendChild(document.createTextNode(winner.get().getOrganization()));
+        }
+      }
+    }
+
+    return container;
+  }
+
+  private static String suffixForPlace(final int place) {
+    final int lastDigit = place
+        % 10;
+    switch (lastDigit) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+    }
+  }
+
+  private Element createSponsors(final Connection connection,
+                                 final Tournament tournament,
+                                 final Document document,
+                                 final VelocityContext templateContext)
       throws SQLException {
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
     final Element mainBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(mainBlock);
 
-    final String frontMatterText = AwardsScript.getSectionText(connection, tournament,
-                                                               AwardsScript.Section.FRONT_MATTER);
+    try (StringWriter writer = new StringWriter()) {
+      final String rawText = AwardsScript.getSectionText(connection, tournament, AwardsScript.Section.SPONSORS_INTRO);
+
+      if (!Velocity.evaluate(templateContext, writer, AwardsScript.Section.FRONT_MATTER.name(), rawText)) {
+        throw new FLLRuntimeException(String.format("Error evaluating template for section %s",
+                                                    AwardsScript.Section.SPONSORS_INTRO));
+      }
+      mainBlock.appendChild(document.createTextNode(writer.toString()));
+    } catch (final IOException e) {
+      throw new FLLInternalException("Should not get IO exception writing to a string", e);
+    }
+
+    final List<String> sponsors = AwardsScript.getSponsors(connection, tournament);
+    if (!sponsors.isEmpty()) {
+      final Element list = FOPUtils.createXslFoElement(document, "list-block");
+      mainBlock.appendChild(list);
+      list.setAttribute("provisional-distance-between-starts", "10pt");
+
+      sponsors.forEach(s -> {
+        final Element listItem = FOPUtils.createXslFoElement(document, "list-item");
+        list.appendChild(listItem);
+        listItem.setAttribute("keep-together.within-page", "always");
+
+        final Element itemLabel = FOPUtils.createSimpleListItemLabel(document);
+        listItem.appendChild(itemLabel);
+        itemLabel.setAttribute("end-indent", "label-end()");
+        itemLabel.setAttribute("start-indent", "6pt");
+
+        final Element itemBody = FOPUtils.createXslFoElement(document, "list-item-body");
+        listItem.appendChild(itemBody);
+        itemBody.setAttribute("start-indent", "body-start()");
+
+        final Element bodyBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        itemBody.appendChild(bodyBlock);
+        bodyBlock.appendChild(document.createTextNode(s));
+      });
+    } else {
+      mainBlock.appendChild(document.createTextNode("No sponsors specified"));
+    }
 
     try (StringWriter writer = new StringWriter()) {
-      if (!Velocity.evaluate(templateContext, writer, AwardsScript.Section.FRONT_MATTER.name(), frontMatterText)) {
+      final String rawText = AwardsScript.getSectionText(connection, tournament,
+                                                         AwardsScript.Section.SPONSORS_RECOGNITION);
+
+      if (!Velocity.evaluate(templateContext, writer, AwardsScript.Section.FRONT_MATTER.name(), rawText)) {
         throw new FLLRuntimeException(String.format("Error evaluating template for section %s",
-                                                    AwardsScript.Section.FRONT_MATTER));
+                                                    AwardsScript.Section.SPONSORS_RECOGNITION));
       }
       mainBlock.appendChild(document.createTextNode(writer.toString()));
     } catch (final IOException e) {
@@ -242,6 +572,39 @@ public class AwardsScriptReport extends BaseFLLServlet {
     staticContent.appendChild(FOPUtils.createBlankLine(document));
 
     return staticContent;
+  }
+
+  private Element createVolunteers(final Connection connection,
+                                   final Tournament tournament,
+                                   final Document document,
+                                   final VelocityContext templateContext)
+      throws SQLException {
+    return createSectionBlock(connection, tournament, document, templateContext, AwardsScript.Section.VOLUNTEERS);
+  }
+
+  private Element createSectionBlock(final Connection connection,
+                                     final Tournament tournament,
+                                     final Document document,
+                                     final VelocityContext templateContext,
+                                     final AwardsScript.Section section)
+      throws SQLException {
+    final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
+    final Element mainBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(mainBlock);
+
+    final String rawText = AwardsScript.getSectionText(connection, tournament, section);
+
+    try (StringWriter writer = new StringWriter()) {
+      if (!Velocity.evaluate(templateContext, writer, section.name(), rawText)) {
+        throw new FLLRuntimeException(String.format("Error evaluating template for section %s", section));
+      }
+      mainBlock.appendChild(document.createTextNode(writer.toString()));
+    } catch (final IOException e) {
+      throw new FLLInternalException("Should not get IO exception writing to a string", e);
+    }
+
+    return container;
   }
 
 }

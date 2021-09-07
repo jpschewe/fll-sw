@@ -19,5 +19,10 @@ public interface Category extends Serializable {
    * @return display string for the category
    */
   String getTitle();
-  
+
+  /**
+   * @return if the winners are per award group, otherwise per tournament
+   */
+  boolean getPerAwardGroup();
+
 }

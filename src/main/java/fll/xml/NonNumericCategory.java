@@ -115,9 +115,7 @@ public class NonNumericCategory implements Category, Serializable {
 
   private boolean perAwardGroup = true;
 
-  /**
-   * @return if the winners are per award group, otherwise per tournament
-   */
+  @Override
   public boolean getPerAwardGroup() {
     return perAwardGroup;
   }

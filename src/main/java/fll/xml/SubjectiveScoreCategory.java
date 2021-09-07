@@ -263,4 +263,9 @@ public class SubjectiveScoreCategory extends ScoreCategory implements Category {
 
   }
 
+  @Override
+  public boolean getPerAwardGroup() {
+    return true;
+  }
+
 }

@@ -259,4 +259,9 @@ public class PerformanceScoreCategory extends ScoreCategory implements Category 
     return CATEGORY_NAME;
   }
 
+  @Override
+  public boolean getPerAwardGroup() {
+    return true;
+  }
+
 }

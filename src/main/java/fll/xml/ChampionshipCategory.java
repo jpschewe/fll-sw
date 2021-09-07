@@ -33,5 +33,10 @@ public final class ChampionshipCategory implements Category {
   public String getTitle() {
     return CHAMPIONSHIP_AWARD_TITLE;
   }
-  
+
+  @Override
+  public boolean getPerAwardGroup() {
+    return true;
+  }
+
 }
