@@ -16,21 +16,29 @@ import java.util.Formatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
+import org.checkerframework.checker.nullness.qual.KeyFor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.diffplug.common.base.Errors;
+
+import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
+import fll.Utilities;
 import fll.db.AwardsScript;
 import fll.db.CategoriesIgnored;
 import fll.db.Queries;
@@ -44,6 +52,7 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.report.AwardsReport;
+import fll.web.report.FinalComputedScores;
 import fll.web.report.PromptSummarizeScores;
 import fll.web.report.finalist.FinalistSchedule;
 import fll.web.scoreboard.Top10;
@@ -52,6 +61,7 @@ import fll.xml.ChallengeDescription;
 import fll.xml.ChampionshipCategory;
 import fll.xml.NonNumericCategory;
 import fll.xml.PerformanceScoreCategory;
+import fll.xml.ScoreType;
 import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -352,6 +362,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                             final List<String> awardGroupOrder,
                                             final PerformanceScoreCategory category)
       throws SQLException {
+    final ScoreType performanceScoreType = category.getScoreType();
+
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
     final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
@@ -380,14 +392,40 @@ public class AwardsScriptReport extends BaseFLLServlet {
         awardGroupBlock.appendChild(document.createTextNode(String.format("Award Group: %s", awardGroup)));
         awardGroupBlock.setAttribute("font-weight", "bold");
 
-        final List<Top10.ScoreEntry> scoreList = scores.get(awardGroup);
+        final Map<Integer, ImmutablePair<Integer, Double>> teamPerformanceRanks = FinalComputedScores.gatherRankedPerformanceTeams(connection,
+                                                                                                                                   description.getWinner(),
+                                                                                                                                   tournament,
+                                                                                                                                   awardGroup);
 
-        final Optional<Top10.ScoreEntry> winner = scoreList.stream().findFirst();
-        if (winner.isPresent()) {
-          // TODO: allow the user to specify how many performance awards
-          // TODO: check for ties, refactor code to use a method for this rather than just
-          // a constant FP?
-          // TODO: support multiple places
+        // place -> {teams}
+        final SortedMap<Integer, List<Integer>> placesToTeams = new TreeMap<>();
+        teamPerformanceRanks.entrySet().stream() //
+                            .forEach(e -> {
+                              placesToTeams.computeIfAbsent(e.getValue().getLeft(), k -> new LinkedList<>())
+                                           .add(e.getKey());
+                            });
+
+        // FIXME: make this a parameter that can be specified
+        final int numAwards = 2;
+        final Stream<Map.Entry<@KeyFor("placesToTeams") Integer, List<Integer>>> winners = placesToTeams.entrySet()
+                                                                                                        .stream()
+                                                                                                        .limit(numAwards);
+
+        winners.forEach(e -> {
+          final @KeyFor("placesToTeams") Integer place = e.getKey();
+          final List<Integer> teamsInPlace = e.getValue();
+          if (teamsInPlace.isEmpty()) {
+            throw new FLLInternalException("No teams in place "
+                + place);
+          }
+
+          final Integer firstTeamNumber = teamsInPlace.get(0);
+          final ImmutablePair<Integer, Double> pair = teamPerformanceRanks.get(firstTeamNumber);
+          if (null == pair) {
+            throw new FLLInternalException("No score information for team "
+                + firstTeamNumber);
+          }
+          final double score = pair.getRight();
 
           final Element table = FOPUtils.createBasicTable(document);
           container.appendChild(table);
@@ -401,9 +439,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
           final Element row = FOPUtils.createTableRow(document);
           tableBody.appendChild(row);
 
-          final int place = 1;
-          final boolean tie = false;
-          final String placeTitle = String.format("%d%s Place Winner", place, suffixForPlace(place));
+          final boolean tie = teamsInPlace.size() > 1;
+          final String placeTitle = String.format("%d%s Place Winner%s", place, suffixForPlace(place), tie ? "s" : "");
 
           // TODO: make this cell yellow background?
           final Element placeCell = FOPUtils.createTableCell(document, null, placeTitle);
@@ -416,26 +453,34 @@ public class AwardsScriptReport extends BaseFLLServlet {
           teamCell.appendChild(teamPlaceBlock);
           final String teamPlaceFormat;
           if (tie) {
-            teamPlaceFormat = "Tied for %d%s place in award group %s with a score of %s is:";
+            teamPlaceFormat = "The teams tied for %d%s place with a score of %s is:";
           } else {
-            teamPlaceFormat = "The %d%s place team in award group %s with a score of %s is:";
+            teamPlaceFormat = "The %d%s place team with a score of %s is:";
           }
+          final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
+
           teamPlaceBlock.appendChild(document.createTextNode(String.format(teamPlaceFormat, place,
-                                                                           suffixForPlace(place), awardGroup,
-                                                                           winner.get().getFormattedScore())));
+                                                                           suffixForPlace(place), formattedScore)));
 
-          final Element teamNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-          teamCell.appendChild(teamNumberBlock);
-          teamNumberBlock.appendChild(document.createTextNode(String.format("%d", winner.get().getTeamNumber())));
+          teamsInPlace.stream().forEach(Errors.rethrow().wrap(teamNumber -> {
+            final Team team = Team.getTeamFromDatabase(connection, teamNumber);
 
-          final Element teamNameBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-          teamCell.appendChild(teamNameBlock);
-          teamNameBlock.appendChild(document.createTextNode(winner.get().getTeamName()));
+            final Element teamNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+            teamCell.appendChild(teamNumberBlock);
+            teamNumberBlock.appendChild(document.createTextNode(String.format("%d", teamNumber)));
 
-          final Element teamOrganizationBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-          teamCell.appendChild(teamOrganizationBlock);
-          teamOrganizationBlock.appendChild(document.createTextNode(winner.get().getOrganization()));
-        }
+            final Element teamNameBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+            teamCell.appendChild(teamNameBlock);
+            teamNameBlock.appendChild(document.createTextNode(team.getTeamName()));
+
+            final Element teamOrganizationBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+            teamCell.appendChild(teamOrganizationBlock);
+            final String organization = team.getOrganization();
+            teamOrganizationBlock.appendChild(document.createTextNode(null == organization ? "" : organization));
+          }));
+
+        });
+
       }
     }
 
