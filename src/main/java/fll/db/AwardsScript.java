@@ -76,7 +76,12 @@ public final class AwardsScript {
     /**
      * Number of teams advancing from the tournament.
      */
-    NUM_TEAMS_ADVANCING("numTeamsAdvancing", "Number of Teams Advancing");
+    NUM_TEAMS_ADVANCING("numTeamsAdvancing", "Number of Teams Advancing"),
+
+    /**
+     * Number of performance rounds that count toward awards.
+     */
+    NUM_REGULAR_MATCH_PLAY_ROUNDS("numRegularMatchPlayRounds", "Number of Regular Match Play Rounds");
 
     Macro(final String text,
           final String title) {
@@ -1108,6 +1113,7 @@ public final class AwardsScript {
     switch (macro) {
     case TOURNAMENT_LEVEL:
       return tournament.getLevel().getName();
+
     case TOURNAMENT_NEXT_LEVEL: {
       final int nextLevelId = tournament.getLevel().getNextLevelId();
       if (TournamentLevel.NO_NEXT_LEVEL_ID == nextLevelId) {
@@ -1116,6 +1122,10 @@ public final class AwardsScript {
         return TournamentLevel.getById(connection, nextLevelId).getName();
       }
     }
+
+    case NUM_REGULAR_MATCH_PLAY_ROUNDS:
+      return Integer.toString(TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID()));
+
     case HOST_SCHOOL:
     case NUM_TEAMS_ADVANCING:
     case NUM_TRAINED_OFFICIALS:
@@ -1123,6 +1133,7 @@ public final class AwardsScript {
       return getValue(connection, tournament, "awards_script_parameters", "param_name", macro.name(), "param_value",
                       "UNKNOWN");
     }
+
     default:
       throw new FLLInternalException("Unknown macro: "
           + macro);
