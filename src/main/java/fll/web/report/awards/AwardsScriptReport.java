@@ -340,6 +340,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
   private static final int AWARD_WINNER_WIDTH = 4;
 
+  private static final String CATEGORY_TITLE_FONT_SIZE = "16pt";
+
   private Element createPerformanceCategory(final ChallengeDescription description,
                                             final Connection connection,
                                             final Tournament tournament,
@@ -352,8 +354,10 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(categoryTitle);
-    categoryTitle.appendChild(document.createTextNode(category.getTitle()));
+    categoryTitle.appendChild(document.createTextNode(String.format("%s Award", category.getTitle())));
     categoryTitle.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
+    categoryTitle.setAttribute("font-weight", "bold");
+    categoryTitle.setAttribute("font-size", CATEGORY_TITLE_FONT_SIZE);
 
     final Element categoryDescription = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(categoryDescription);
