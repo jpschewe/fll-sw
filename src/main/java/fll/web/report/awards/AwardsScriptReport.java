@@ -174,9 +174,11 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final Element intro = createSectionBlock(connection, tournament, document, templateContext,
                                              AwardsScript.Section.FRONT_MATTER);
     documentBody.appendChild(intro);
+    intro.setAttribute("space-after", "0.25in");
 
     final Element sponsors = createSponsors(connection, tournament, document, templateContext);
     documentBody.appendChild(sponsors);
+    sponsors.setAttribute("space-after", "0.25in");
 
     final Element volunteers = createVolunteers(connection, tournament, document, templateContext);
     documentBody.appendChild(volunteers);
