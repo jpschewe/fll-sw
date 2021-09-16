@@ -334,23 +334,34 @@ public class EditAwardsScript extends BaseFLLServlet {
     final Map<AwardsScript.Macro, Boolean> macroSpecified = new HashMap<>();
     final Map<AwardsScript.Macro, String> macroValue = new HashMap<>();
     for (final AwardsScript.Macro macro : AwardsScript.Macro.values()) {
+      final boolean specified;
+      String value;
+
       switch (layer) {
       case SEASON:
-        macroSpecified.put(macro, AwardsScript.isMacroSpecifiedForSeason(connection, macro));
-        macroValue.put(macro, AwardsScript.getMacroValueForSeason(connection, macro));
+        specified = AwardsScript.isMacroSpecifiedForSeason(connection, macro);
+        value = AwardsScript.getMacroValueForSeason(connection, macro);
         break;
       case TOURNAMENT:
-        macroSpecified.put(macro, AwardsScript.isMacroSpecifiedForTournament(connection, tournament, macro));
-        macroValue.put(macro, AwardsScript.getMacroValueForTournament(connection, tournament, macro));
+        specified = AwardsScript.isMacroSpecifiedForTournament(connection, tournament, macro);
+        value = AwardsScript.getMacroValueForTournament(connection, tournament, macro);
         break;
       case TOURNAMENT_LEVEL:
-        macroSpecified.put(macro, AwardsScript.isMacroSpecifiedForTournamentLevel(connection, tournamentLevel, macro));
-        macroValue.put(macro, AwardsScript.getMacroValueForTournamentLevel(connection, tournamentLevel, macro));
+        specified = AwardsScript.isMacroSpecifiedForTournamentLevel(connection, tournamentLevel, macro);
+        value = AwardsScript.getMacroValueForTournamentLevel(connection, tournamentLevel, macro);
         break;
       default:
         throw new FLLInternalException("Unknown awards script layer: "
             + layer);
       }
+
+      if (!specified) {
+        value = AwardsScript.getMacroValue(connection, tournament, macro);
+      }
+
+      macroSpecified.put(macro, specified);
+      macroValue.put(macro, value);
+
     }
     page.setAttribute("macroSpecified", macroSpecified);
     page.setAttribute("macroValue", macroValue);
