@@ -509,25 +509,28 @@ public class AwardsScriptReport extends BaseFLLServlet {
       throws SQLException {
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
-    final Element mainBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    container.appendChild(mainBlock);
-
     try (StringWriter writer = new StringWriter()) {
+      final Element startBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      container.appendChild(startBlock);
+
       final String rawText = AwardsScript.getSectionText(connection, tournament, AwardsScript.Section.SPONSORS_INTRO);
 
       if (!Velocity.evaluate(templateContext, writer, AwardsScript.Section.FRONT_MATTER.name(), rawText)) {
         throw new FLLRuntimeException(String.format("Error evaluating template for section %s",
                                                     AwardsScript.Section.SPONSORS_INTRO));
       }
-      mainBlock.appendChild(document.createTextNode(writer.toString()));
+      startBlock.appendChild(document.createTextNode(writer.toString()));
     } catch (final IOException e) {
       throw new FLLInternalException("Should not get IO exception writing to a string", e);
     }
 
+    final Element listBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(listBlock);
+
     final List<String> sponsors = AwardsScript.getSponsors(connection, tournament);
     if (!sponsors.isEmpty()) {
       final Element list = FOPUtils.createXslFoElement(document, "list-block");
-      mainBlock.appendChild(list);
+      listBlock.appendChild(list);
       list.setAttribute("provisional-distance-between-starts", "10pt");
 
       sponsors.forEach(s -> {
@@ -549,10 +552,14 @@ public class AwardsScriptReport extends BaseFLLServlet {
         bodyBlock.appendChild(document.createTextNode(s));
       });
     } else {
-      mainBlock.appendChild(document.createTextNode("No sponsors specified"));
+      listBlock.appendChild(document.createTextNode("No sponsors specified"));
+      listBlock.setAttribute("font-style", "italic");
     }
 
     try (StringWriter writer = new StringWriter()) {
+      final Element endBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      container.appendChild(endBlock);
+
       final String rawText = AwardsScript.getSectionText(connection, tournament,
                                                          AwardsScript.Section.SPONSORS_RECOGNITION);
 
@@ -560,7 +567,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
         throw new FLLRuntimeException(String.format("Error evaluating template for section %s",
                                                     AwardsScript.Section.SPONSORS_RECOGNITION));
       }
-      mainBlock.appendChild(document.createTextNode(writer.toString()));
+      endBlock.appendChild(document.createTextNode(writer.toString()));
     } catch (final IOException e) {
       throw new FLLInternalException("Should not get IO exception writing to a string", e);
     }
