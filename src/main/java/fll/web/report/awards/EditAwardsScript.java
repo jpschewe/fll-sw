@@ -114,6 +114,8 @@ public class EditAwardsScript extends BaseFLLServlet {
 
       loadAwardOrder(description, page, connection, tournamentLevel, tournament, layer);
 
+      loadNumPerformanceAwards(page, connection, tournamentLevel, tournament, layer);
+
       page.setAttribute("championshipAwardTitle", ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE);
       page.setAttribute("performanceAwardTitle", PerformanceScoreCategory.CATEGORY_TITLE);
 
@@ -408,6 +410,8 @@ public class EditAwardsScript extends BaseFLLServlet {
       storeSponsors(request, connection, tournamentLevel, tournament, layer);
 
       storeAwardOrder(description, request, connection, tournamentLevel, tournament, layer);
+
+      storeNumPerformanceAwards(request, connection, tournamentLevel, tournament, layer);
 
       final String layerText;
       switch (layer) {
@@ -836,6 +840,42 @@ public class EditAwardsScript extends BaseFLLServlet {
     }
   }
 
+  private static void loadNumPerformanceAwards(final PageContext page,
+                                               final Connection connection,
+                                               final TournamentLevel tournamentLevel,
+                                               final Tournament tournament,
+                                               final AwardsScript.Layer layer)
+      throws SQLException {
+
+    final boolean specified;
+    int value;
+    switch (layer) {
+    case SEASON:
+      specified = AwardsScript.isNumPerformanceAwardsSpecifiedForSeason(connection);
+      value = AwardsScript.getNumPerformanceAwardsForSeason(connection);
+      break;
+    case TOURNAMENT:
+      specified = AwardsScript.isNumPerformanceAwardsSpecifiedForTournament(connection, tournament);
+      value = AwardsScript.getNumPerformanceAwardsForTournament(connection, tournament);
+      break;
+    case TOURNAMENT_LEVEL:
+      specified = AwardsScript.isNumPerformanceAwardsSpecifiedForTournamentLevel(connection, tournamentLevel);
+      value = AwardsScript.getNumPerformanceAwardsForTournamentLevel(connection, tournamentLevel);
+      break;
+    default:
+      throw new FLLInternalException("Unknown awards script layer: "
+          + layer);
+    }
+
+    if (!specified) {
+      // display the value that would be used to the user
+      value = AwardsScript.getNumPerformanceAwards(connection, tournament);
+    }
+
+    page.setAttribute("numPerformanceAwardsSpecified", specified);
+    page.setAttribute("numPerformanceAwardsValue", value);
+  }
+
   private static void loadAwardOrder(final ChallengeDescription description,
                                      final PageContext page,
                                      final Connection connection,
@@ -943,6 +983,49 @@ public class EditAwardsScript extends BaseFLLServlet {
         break;
       case TOURNAMENT_LEVEL:
         AwardsScript.clearAwardOrderForTournamentLevel(connection, tournamentLevel);
+        break;
+      default:
+        throw new FLLInternalException("Unknown awards script layer: "
+            + layer);
+      }
+    }
+  }
+
+  private static void storeNumPerformanceAwards(final HttpServletRequest request,
+                                                final Connection connection,
+                                                final TournamentLevel tournamentLevel,
+                                                final Tournament tournament,
+                                                final AwardsScript.Layer layer)
+      throws SQLException {
+
+    final @Nullable String specifiedStr = request.getParameter(String.format("num_performance_awards_specified"));
+    if (null != specifiedStr) {
+      final int value = WebUtils.getIntRequestParameter(request, "num_performance_awards_value");
+
+      switch (layer) {
+      case SEASON:
+        AwardsScript.updateNumPerformanceAwardsForSeason(connection, value);
+        break;
+      case TOURNAMENT:
+        AwardsScript.updateNumPerformanceAwardsForTournament(connection, tournament, value);
+        break;
+      case TOURNAMENT_LEVEL:
+        AwardsScript.updateNumPerformanceAwardsForTournamentLevel(connection, tournamentLevel, value);
+        break;
+      default:
+        throw new FLLInternalException("Unknown awards script layer: "
+            + layer);
+      }
+    } else {
+      switch (layer) {
+      case SEASON:
+        AwardsScript.clearNumPerformanceAwardsForSeason(connection);
+        break;
+      case TOURNAMENT:
+        AwardsScript.clearNumPerformanceAwardsForTournament(connection, tournament);
+        break;
+      case TOURNAMENT_LEVEL:
+        AwardsScript.clearNumPerformanceAwardsForTournamentLevel(connection, tournamentLevel);
         break;
       default:
         throw new FLLInternalException("Unknown awards script layer: "

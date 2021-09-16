@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
@@ -45,6 +46,10 @@ public final class AwardsScript {
   private static final String SPONSORS_SPECIFIED_PARAM = "sponsors_specified";
 
   private static final String AWARD_ORDER_SPECIFIED_PARAM = "award_order_specified";
+
+  private static final String NUM_PERFORMANCE_AWARDS_PARAM = "num_performance_awards";
+
+  private static final int NUM_PERFORMANCE_AWARDS_DEFAULT = 1;
 
   private AwardsScript() {
   }
@@ -2178,6 +2183,208 @@ public final class AwardsScript {
   }
 
   /**
+   * Get the number of performance awards for the script.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament that the script is being generated for
+   * @return the categories in order
+   * @throws SQLException on a database error
+   */
+  public static int getNumPerformanceAwards(final Connection connection,
+                                            final Tournament tournament)
+      throws SQLException {
+    final String value = getParameterValue(connection, tournament, NUM_PERFORMANCE_AWARDS_PARAM);
+    if (null == value) {
+      return NUM_PERFORMANCE_AWARDS_DEFAULT;
+    } else {
+      return Integer.parseInt(value);
+    }
+  }
+
+  /**
+   * @param connection database connection
+   * @return if the number of performance awards has a value for the season
+   * @throws SQLException on a database error
+   */
+  public static boolean isNumPerformanceAwardsSpecifiedForSeason(final Connection connection) throws SQLException {
+    return isNumPerformanceAwardsSpecifiedFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
+                                              GenerateDB.INTERNAL_TOURNAMENT_ID);
+  }
+
+  /**
+   * @param connection database connection
+   * @param level the tournament level
+   * @return if the number of performance awards has a value for the specified
+   *         tournament level
+   * @throws SQLException on a database error
+   */
+  public static boolean isNumPerformanceAwardsSpecifiedForTournamentLevel(final Connection connection,
+                                                                          final TournamentLevel level)
+      throws SQLException {
+    return isNumPerformanceAwardsSpecifiedFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID);
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournament the tournament
+   * @return if the number of performance awards has a value for the specified
+   *         tournament
+   * @throws SQLException on a database error
+   */
+  public static boolean isNumPerformanceAwardsSpecifiedForTournament(final Connection connection,
+                                                                     final Tournament tournament)
+      throws SQLException {
+    return isNumPerformanceAwardsSpecifiedFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
+                                              tournament.getTournamentID());
+  }
+
+  private static boolean isNumPerformanceAwardsSpecifiedFor(final Connection connection,
+                                                            final int tournamentLevelId,
+                                                            final int tournamentId)
+      throws SQLException {
+    return isParameterSpecifiedFor(connection, tournamentLevelId, tournamentId, NUM_PERFORMANCE_AWARDS_PARAM);
+  }
+
+  /**
+   * @param connection database connection
+   * @return number of performance awards for the season
+   * @throws SQLException on a database error
+   */
+  public static int getNumPerformanceAwardsForSeason(final Connection connection) throws SQLException {
+    return getNumPerformanceAwardsFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
+                                      GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
+  }
+
+  /**
+   * @param connection database connection
+   * @param level the tournament level
+   * @return number of performance awards for the specified tournament level
+   * @throws SQLException on a database error
+   */
+  public static int getNumPerformanceAwardsForTournamentLevel(final Connection connection,
+                                                              final TournamentLevel level)
+      throws SQLException {
+    return getNumPerformanceAwardsFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID);
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournament the tournament
+   * @return number of performance awards for the specified tournament
+   * @throws SQLException on a database error
+   */
+  public static int getNumPerformanceAwardsForTournament(final Connection connection,
+                                                         final Tournament tournament)
+      throws SQLException {
+    return getNumPerformanceAwardsFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
+                                      tournament.getTournamentID());
+  }
+
+  /**
+   * @param connection database connection
+   * @param value the new number of performance awards
+   * @throws SQLException on a database error
+   */
+  public static void updateNumPerformanceAwardsForSeason(final Connection connection,
+                                                         final int value)
+      throws SQLException {
+    updateNumPerformanceAwardsFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
+                                  GenerateDB.INTERNAL_TOURNAMENT_ID, Layer.SEASON, value);
+  }
+
+  /**
+   * @param connection database connection
+   * @param level the tournament level
+   * @param value the new number of performance awards
+   * @throws SQLException on a database error
+   */
+  public static void updateNumPerformanceAwardsForTournamentLevel(final Connection connection,
+                                                                  final TournamentLevel level,
+                                                                  final int value)
+      throws SQLException {
+    updateNumPerformanceAwardsFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, Layer.TOURNAMENT_LEVEL,
+                                  value);
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournament the tournament
+   * @param value the new number of performance awards
+   * @throws SQLException on a database error
+   */
+  public static void updateNumPerformanceAwardsForTournament(final Connection connection,
+                                                             final Tournament tournament,
+                                                             final int value)
+      throws SQLException {
+    updateNumPerformanceAwardsFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                                  Layer.TOURNAMENT, value);
+  }
+
+  /**
+   * @param connection database connection
+   * @throws SQLException on a database error
+   */
+  public static void clearNumPerformanceAwardsForSeason(final Connection connection) throws SQLException {
+    clearNumPerformanceAwardsFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                                 Layer.SEASON);
+  }
+
+  /**
+   * @param connection database connection
+   * @param level the tournament level
+   * @throws SQLException on a database error
+   */
+  public static void clearNumPerformanceAwardsForTournamentLevel(final Connection connection,
+                                                                 final TournamentLevel level)
+      throws SQLException {
+    clearNumPerformanceAwardsFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, Layer.TOURNAMENT_LEVEL);
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournament the tournament
+   * @throws SQLException on a database error
+   */
+  public static void clearNumPerformanceAwardsForTournament(final Connection connection,
+                                                            final Tournament tournament)
+      throws SQLException {
+    clearNumPerformanceAwardsFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                                 Layer.TOURNAMENT);
+  }
+
+  private static void updateNumPerformanceAwardsFor(final Connection connection,
+                                                    final int tournamentLevelId,
+                                                    final int tournamentId,
+                                                    final Layer layer,
+                                                    final int value)
+      throws SQLException {
+    updateParameterValueFor(connection, tournamentLevelId, tournamentId, layer, NUM_PERFORMANCE_AWARDS_PARAM,
+                            String.valueOf(value));
+  }
+
+  private static void clearNumPerformanceAwardsFor(final Connection connection,
+                                                   final int tournamentLevelId,
+                                                   final int tournamentId,
+                                                   final Layer layer)
+      throws SQLException {
+    updateParameterValueFor(connection, tournamentLevelId, tournamentId, layer, NUM_PERFORMANCE_AWARDS_PARAM, null);
+  }
+
+  private static int getNumPerformanceAwardsFor(final Connection connection,
+                                                final int tournamentLevelId,
+                                                final int tournamentId)
+      throws SQLException {
+
+    final String value = getParameterValueFor(connection, tournamentLevelId, tournamentId,
+                                              NUM_PERFORMANCE_AWARDS_PARAM);
+    if (StringUtils.isBlank(value)) {
+      return NUM_PERFORMANCE_AWARDS_DEFAULT;
+    } else {
+      return Integer.parseInt(value);
+    }
+  }
+
+  /**
    * @param connection database connection
    * @return if the award order has a value for the season
    * @throws SQLException on a database error
@@ -2253,7 +2460,7 @@ public final class AwardsScript {
    * @param description used to find the categories
    * @param connection database connection
    * @param tournament the tournament
-   * @return sponsors for the specified tournament
+   * @return award order for the specified tournament
    * @throws SQLException on a database error
    */
   public static List<Category> getAwardOrderForTournament(final ChallengeDescription description,

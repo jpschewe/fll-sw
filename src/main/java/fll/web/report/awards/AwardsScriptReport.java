@@ -385,6 +385,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
 
+    final int numAwards = AwardsScript.getNumPerformanceAwards(connection, tournament);
+
     for (final String awardGroup : awardGroupOrder) {
       if (scores.containsKey(awardGroup)) {
         final Element awardGroupBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
@@ -405,8 +407,6 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                            .add(e.getKey());
                             });
 
-        // FIXME: make this a parameter that can be specified
-        final int numAwards = 2;
         final Stream<Map.Entry<@KeyFor("placesToTeams") Integer, List<Integer>>> winners = placesToTeams.entrySet()
                                                                                                         .stream()
                                                                                                         .limit(numAwards);

@@ -108,20 +108,23 @@ const awardsScriptModule = {};
         textElement.disabled = !presenterSpecified;
     };
 
-    awardsScriptModule.configureMacroEntry = function(macro, macroSpecified, macroValue) {
-        const checkbox = document.getElementById(macro.text + "_specified");
+    /**
+     * @param baseName the base name for the field, _specified and _value will be appended
+     * @param specified boolean stating if the parameter has been specified
+     * @param value the value of the parameter 
+     */
+    awardsScriptModule.configureParameterEntry = function(baseName, specified, value) {
+        const checkbox = document.getElementById(baseName + "_specified");
         if (checkbox) {
-            const input = document.getElementById(macro.text + "_value");
+            const input = document.getElementById(baseName + "_value");
 
             checkbox.addEventListener('change', () => {
                 input.disabled = !checkbox.checked;
             });
 
-            if (macroSpecified) {
-                input.value = macroValue;
-            }
-            checkbox.checked = macroSpecified;
-            input.disabled = !macroSpecified;
+            input.value = value;
+            checkbox.checked = specified;
+            input.disabled = !specified;
         }
     };
 

@@ -27,9 +27,11 @@ awardsScriptModule.init = ( ) => {
   const macro_${macro.text} = awardsScriptModule.createMacro("${macro.text}", "${macro.title}");
   macros.push(macro_${macro.text});
 
-  awardsScriptModule.configureMacroEntry(macro_${macro.text}, ${macroSpecified[macro]}, ${macroValue[macro]});
+  awardsScriptModule.configureParameterEntry("${macro.text}", ${macroSpecified[macro]}, "${macroValue[macro]}");
   </c:forEach>
-  
+
+  awardsScriptModule.configureParameterEntry("num_performance_awards", ${numPerformanceAwardsSpecified}, ${numPerformanceAwardsValue});
+
 
   <c:forEach items="${sections}" var="section"> 
   awardsScriptModule.configureTextEntry(macros, "${section.identifier}", ${sectionSpecified[section]});
@@ -78,9 +80,23 @@ awardsScriptModule.init = ( ) => {
 
         <hr />
 
-        <h1>Macro Values</h1>
-        <div>Some of the macros need values populated. These
-            values can be populated at any layer of the script.</div>
+        <h1>Parameter Values</h1>
+        <div>Some parameters need to be specifed as they do not
+            exist elsewhere in the database. These values can be
+            populated at any layer of the script.</div>
+
+        <h2>Number of Performance Awards</h2>
+        <div>
+            <label>
+                Specify value:
+                <input type="checkbox"
+                    name="num_performance_awards_specified"
+                    id="num_performance_awards_specified" />
+            </label>
+            <input type="number" name="num_performance_awards_value"
+                id="num_performance_awards_value" />
+        </div>
+
 
         <h2>${NUM_TRAINED_OFFICIALS.title}</h2>
         <div>
@@ -90,7 +106,7 @@ awardsScriptModule.init = ( ) => {
                     name="${NUM_TRAINED_OFFICIALS.text}_specified"
                     id="${NUM_TRAINED_OFFICIALS.text}_specified" />
             </label>
-            <input type="text"
+            <input type="number"
                 name="${NUM_TRAINED_OFFICIALS.text}_value"
                 id="${NUM_TRAINED_OFFICIALS.text}_value" />
         </div>
@@ -127,7 +143,8 @@ awardsScriptModule.init = ( ) => {
                     name="${NUM_TEAMS_ADVANCING.text}_specified"
                     id="${NUM_TEAMS_ADVANCING.text}_specified" />
             </label>
-            <input type="text" name="${NUM_TEAMS_ADVANCING.text}_value"
+            <input type="number"
+                name="${NUM_TEAMS_ADVANCING.text}_value"
                 id="${NUM_TEAMS_ADVANCING.text}_value" />
         </div>
 
