@@ -12,13 +12,16 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.sql.DataSource;
@@ -30,6 +33,7 @@ import org.apache.fop.apps.FopFactory;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.checkerframework.checker.nullness.qual.KeyFor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -39,8 +43,10 @@ import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
 import fll.Utilities;
+import fll.db.AwardWinners;
 import fll.db.AwardsScript;
 import fll.db.CategoriesIgnored;
+import fll.db.OverallAwardWinner;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -54,6 +60,7 @@ import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.report.AwardsReport;
 import fll.web.report.FinalComputedScores;
 import fll.web.report.PromptSummarizeScores;
+import fll.web.report.finalist.FinalistDBRow;
 import fll.web.report.finalist.FinalistSchedule;
 import fll.web.scoreboard.Top10;
 import fll.xml.Category;
@@ -242,10 +249,14 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                                            (NonNumericCategory) category)) {
         continue;
       }
+
       final Element categoryPage;
       if (category instanceof PerformanceScoreCategory) {
         categoryPage = createPerformanceCategory(description, connection, tournament, document, templateContext,
                                                  awardGroupOrder, (PerformanceScoreCategory) category);
+      } else if (category instanceof NonNumericCategory) {
+        categoryPage = createNonNumericCategory(connection, tournament, document, templateContext, awardGroupOrder,
+                                                (NonNumericCategory) category, finalistSchedulesPerAwardGroup);
       } else {
         categoryPage = createCategory(connection, tournament, document, templateContext, awardGroupOrder, category);
       }
@@ -453,7 +464,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
           teamCell.appendChild(teamPlaceBlock);
           final String teamPlaceFormat;
           if (tie) {
-            teamPlaceFormat = "The teams tied for %d%s place with a score of %s is:";
+            teamPlaceFormat = "The teams tied for %d%s place with a score of %s are:";
           } else {
             teamPlaceFormat = "The %d%s place team with a score of %s is:";
           }
@@ -485,6 +496,207 @@ public class AwardsScriptReport extends BaseFLLServlet {
     }
 
     return container;
+  }
+
+  /*
+   * private static Set<Integer> getFinalistsForCategory(final Map<String,
+   * FinalistSchedule> finalistSchedulesPerAwardGroup,
+   * final String awardGroup,
+   * final String categoryTitle) {
+   * final FinalistSchedule schedule =
+   * finalistSchedulesPerAwardGroup.get(awardGroup);
+   * if (null != schedule) {
+   * return schedule.getSchedule().stream() //
+   * .map(FinalistDBRow::getCategories) //
+   * .map(map -> map.get(categoryTitle)) // FIXME has nullable issues
+   * .filter(Objects::nonNull) //
+   * .collect(Collectors.toSet());
+   * } else {
+   * return Collections.emptySet();
+   * }
+   * }
+   */
+
+  private Element createNonNumericCategory(final Connection connection,
+                                           final Tournament tournament,
+                                           final Document document,
+                                           final VelocityContext templateContext,
+                                           final List<String> awardGroupOrder,
+                                           final NonNumericCategory category,
+                                           final Map<String, FinalistSchedule> finalistSchedulesPerAwardGroup)
+      throws SQLException {
+    if (category.getPerAwardGroup()) {
+      final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
+      final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      container.appendChild(categoryTitle);
+      categoryTitle.appendChild(document.createTextNode(String.format("Per-award group non-numeric categories are not yet supported: %s",
+                                                                      category.getTitle())));
+
+      /*
+       * 
+       * 
+       * 
+       * // FIXME move this up to calling method?
+       * final List<AwardWinner> winners =
+       * AwardWinners.getNonNumericAwardWinners(connection,
+       * tournament.getTournamentID())
+       * .stream() //
+       * .filter(Errors.rethrow()
+       * .wrapPredicate(w -> AwardsReport.isNonNumericAwarded(connection,
+       * description,
+       * tournament.getLevel(),
+       * w))) //
+       * .collect(Collectors.toList());
+       */
+
+      return container;
+    } else {
+      return createNonNumericOverallCategory(connection, tournament, document, templateContext, category,
+                                             finalistSchedulesPerAwardGroup);
+    }
+  }
+
+  private Element createNonNumericOverallCategory(final Connection connection,
+                                                  final Tournament tournament,
+                                                  final Document document,
+                                                  final VelocityContext templateContext,
+                                                  final NonNumericCategory category,
+                                                  final Map<String, FinalistSchedule> finalistSchedulesPerAwardGroup)
+      throws SQLException {
+
+    final List<OverallAwardWinner> winners = AwardWinners.getNonNumericOverallAwardWinners(connection,
+                                                                                           tournament.getTournamentID());
+
+    // category -> [winners]
+    final Map<String, List<OverallAwardWinner>> organizedWinners = new HashMap<>();
+    for (final OverallAwardWinner winner : winners) {
+      final List<OverallAwardWinner> categoryWinners = organizedWinners.computeIfAbsent(winner.getName(),
+                                                                                        k -> new LinkedList<>());
+      categoryWinners.add(winner);
+    }
+
+    final List<OverallAwardWinner> categoryWinners = organizedWinners.getOrDefault(category.getTitle(),
+                                                                                   Collections.emptyList());
+    if (!categoryWinners.isEmpty()) {
+      Collections.sort(categoryWinners);
+
+      final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
+      final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      container.appendChild(categoryTitle);
+      categoryTitle.appendChild(document.createTextNode(String.format("%s Award", category.getTitle())));
+      categoryTitle.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
+      categoryTitle.setAttribute("font-weight", "bold");
+      categoryTitle.setAttribute("font-size", CATEGORY_TITLE_FONT_SIZE);
+
+      final Element categoryDescription = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      container.appendChild(categoryDescription);
+      categoryDescription.appendChild(document.createTextNode(getCategoryDescription(connection, tournament,
+                                                                                     templateContext, category)));
+
+      final Element categoryPresenter = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      container.appendChild(categoryPresenter);
+      final String presenterText = String.format("Presenter: %s",
+                                                 getCategoryPresenter(connection, tournament, category));
+      categoryPresenter.appendChild(document.createTextNode(presenterText));
+      /*
+       * final Set<Integer> finalists =
+       * getFinalistsForCategory(finalistSchedulesPerAwardGroup, awardGroup,
+       * category.getTitle());
+       * if (!finalists.isEmpty()) {
+       * // FIXME output finalists
+       * }
+       */
+
+      // place -> {teams}
+      final SortedMap<Integer, List<OverallAwardWinner>> placesToWinners = new TreeMap<>();
+      categoryWinners.stream() //
+                     .forEach(w -> {
+                       placesToWinners.computeIfAbsent(w.getPlace(), k -> new LinkedList<>()).add(w);
+                     });
+
+      placesToWinners.entrySet().forEach(e -> {
+        final @KeyFor("placesToWinners") Integer place = e.getKey();
+        final List<OverallAwardWinner> winnersInPlace = e.getValue();
+        if (winnersInPlace.isEmpty()) {
+          throw new FLLInternalException("No teams in place "
+              + place);
+        }
+
+        final Element table = FOPUtils.createBasicTable(document);
+        container.appendChild(table);
+
+        table.appendChild(FOPUtils.createTableColumn(document, AWARD_PLACE_WIDTH));
+        table.appendChild(FOPUtils.createTableColumn(document, AWARD_WINNER_WIDTH));
+
+        final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+        table.appendChild(tableBody);
+
+        final Element row = FOPUtils.createTableRow(document);
+        tableBody.appendChild(row);
+
+        final boolean tie = winnersInPlace.size() > 1;
+        final String placeTitle = String.format("%d%s Place Winner%s", place, suffixForPlace(place), tie ? "s" : "");
+
+        // TODO: make this cell yellow background?
+        final Element placeCell = FOPUtils.createTableCell(document, null, placeTitle);
+        row.appendChild(placeCell);
+
+        final Element teamCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+        row.appendChild(teamCell);
+
+        final Element teamPlaceBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        teamCell.appendChild(teamPlaceBlock);
+        final String teamPlaceFormat;
+        if (tie) {
+          teamPlaceFormat = "The teams tied for %d%s place are:";
+        } else {
+          teamPlaceFormat = "The %d%s place team is:";
+        }
+        teamPlaceBlock.appendChild(document.createTextNode(String.format(teamPlaceFormat, place,
+                                                                         suffixForPlace(place))));
+
+        winnersInPlace.stream().forEach(Errors.rethrow().wrap(winner -> {
+          final Team team = Team.getTeamFromDatabase(connection, winner.getTeamNumber());
+
+          final Element teamContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+          teamCell.appendChild(teamContainer);
+          teamContainer.setAttribute("space-before", "0.25in");
+
+          final Element teamNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+          teamContainer.appendChild(teamNumberBlock);
+          teamNumberBlock.appendChild(document.createTextNode(String.format("%d", winner.getTeamNumber())));
+
+          final Element teamNameBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+          teamContainer.appendChild(teamNameBlock);
+          teamNameBlock.appendChild(document.createTextNode(team.getTeamName()));
+
+          final Element teamOrganizationBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+          teamContainer.appendChild(teamOrganizationBlock);
+          final String organization = team.getOrganization();
+          teamOrganizationBlock.appendChild(document.createTextNode(null == organization ? "" : organization));
+
+          final @Nullable String description = winner.getDescription();
+          if (null != description) {
+            final Element descriptionBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+            teamContainer.appendChild(descriptionBlock);
+            descriptionBlock.appendChild(document.createTextNode(description));
+          }
+        }));
+
+      });
+      return container;
+    } else {
+      final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
+      final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      container.appendChild(categoryTitle);
+      categoryTitle.appendChild(document.createTextNode(String.format("No winners for %s", category.getTitle())));
+
+      return container;
+    }
+
   }
 
   private static String suffixForPlace(final int place) {

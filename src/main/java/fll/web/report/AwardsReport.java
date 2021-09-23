@@ -214,10 +214,18 @@ public class AwardsReport extends BaseFLLServlet {
     addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups, categoryOrder, true, false);
   }
 
-  private static boolean isNonNumericAwarded(final Connection connection,
-                                             final ChallengeDescription description,
-                                             final TournamentLevel level,
-                                             final AwardWinner winner)
+  /**
+   * @param connection database connection
+   * @param description challenge description
+   * @param level tournament level
+   * @param winner winner to check
+   * @return true if the winner should be given an award for this tournament level
+   * @throws SQLException
+   */
+  public static boolean isNonNumericAwarded(final Connection connection,
+                                            final ChallengeDescription description,
+                                            final TournamentLevel level,
+                                            final AwardWinner winner)
       throws SQLException {
     final NonNumericCategory category = description.getNonNumericCategoryByTitle(winner.getName());
     if (null == category) {
@@ -268,6 +276,7 @@ public class AwardsReport extends BaseFLLServlet {
                                     final boolean displayPlace,
                                     final boolean displayChampionship)
       throws SQLException {
+    // category -> award group -> winners
     final Map<String, Map<String, List<AwardWinner>>> organizedWinners = new HashMap<>();
     for (final AwardWinner winner : winners) {
       final Map<String, List<AwardWinner>> agWinners = organizedWinners.computeIfAbsent(winner.getName(),
@@ -307,6 +316,7 @@ public class AwardsReport extends BaseFLLServlet {
     final List<OverallAwardWinner> winners = AwardWinners.getNonNumericOverallAwardWinners(connection,
                                                                                            tournament.getTournamentID());
 
+    // category -> [winners]
     final Map<String, List<OverallAwardWinner>> organizedWinners = new HashMap<>();
     for (final OverallAwardWinner winner : winners) {
       final List<OverallAwardWinner> categoryWinners = organizedWinners.computeIfAbsent(winner.getName(),
