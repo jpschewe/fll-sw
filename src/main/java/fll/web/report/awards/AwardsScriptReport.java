@@ -609,84 +609,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
             finalistContainer.setAttribute("space-after", BLOCK_SPACING);
           }
 
-          // place -> {teams}
-          final SortedMap<Integer, List<OverallAwardWinner>> placesToWinners = new TreeMap<>();
-          agWinners.stream() //
-                   .forEach(w -> {
-                     placesToWinners.computeIfAbsent(w.getPlace(), k -> new LinkedList<>()).add(w);
-                   });
+          outputWinners(connection, document, container, agWinners);
 
-          placesToWinners.entrySet().forEach(e -> {
-            final @KeyFor("placesToWinners") Integer place = e.getKey();
-            final List<OverallAwardWinner> winnersInPlace = e.getValue();
-            if (winnersInPlace.isEmpty()) {
-              throw new FLLInternalException("No teams in place "
-                  + place);
-            }
-
-            final Element table = FOPUtils.createBasicTable(document);
-            container.appendChild(table);
-
-            table.appendChild(FOPUtils.createTableColumn(document, AWARD_PLACE_WIDTH));
-            table.appendChild(FOPUtils.createTableColumn(document, AWARD_WINNER_WIDTH));
-
-            final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
-            table.appendChild(tableBody);
-
-            final Element row = FOPUtils.createTableRow(document);
-            tableBody.appendChild(row);
-
-            final boolean tie = winnersInPlace.size() > 1;
-            final String placeTitle = String.format("%d%s Place Winner%s", place, suffixForPlace(place),
-                                                    tie ? "s" : "");
-
-            // TODO: make this cell yellow background?
-            final Element placeCell = FOPUtils.createTableCell(document, null, placeTitle);
-            row.appendChild(placeCell);
-
-            final Element teamCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
-            row.appendChild(teamCell);
-
-            final Element teamPlaceBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-            teamCell.appendChild(teamPlaceBlock);
-            final String teamPlaceFormat;
-            if (tie) {
-              teamPlaceFormat = "The teams tied for %d%s place are:";
-            } else {
-              teamPlaceFormat = "The %d%s place team is:";
-            }
-            teamPlaceBlock.appendChild(document.createTextNode(String.format(teamPlaceFormat, place,
-                                                                             suffixForPlace(place))));
-
-            winnersInPlace.stream().forEach(Errors.rethrow().wrap(winner -> {
-              final Team team = Team.getTeamFromDatabase(connection, winner.getTeamNumber());
-
-              final Element teamContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
-              teamCell.appendChild(teamContainer);
-              teamContainer.setAttribute("space-before", BLOCK_SPACING);
-
-              final Element teamNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-              teamContainer.appendChild(teamNumberBlock);
-              teamNumberBlock.appendChild(document.createTextNode(String.format("%d", winner.getTeamNumber())));
-
-              final Element teamNameBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-              teamContainer.appendChild(teamNameBlock);
-              teamNameBlock.appendChild(document.createTextNode(team.getTeamName()));
-
-              final Element teamOrganizationBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-              teamContainer.appendChild(teamOrganizationBlock);
-              final String organization = team.getOrganization();
-              teamOrganizationBlock.appendChild(document.createTextNode(null == organization ? "" : organization));
-
-              final @Nullable String description = winner.getDescription();
-              if (null != description) {
-                final Element descriptionBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-                teamContainer.appendChild(descriptionBlock);
-                descriptionBlock.appendChild(document.createTextNode(String.format("Description: %s", description)));
-              }
-            }));
-
-          });
         } else {
           final Element emptyBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
           container.appendChild(emptyBlock);
@@ -704,6 +628,88 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     return container;
 
+  }
+
+  private static void outputWinners(final Connection connection,
+                                    final Document document,
+                                    final Element container,
+                                    final List<? extends OverallAwardWinner> winners) {
+    // place -> {teams}
+    final SortedMap<Integer, List<OverallAwardWinner>> placesToWinners = new TreeMap<>();
+    winners.stream() //
+           .forEach(w -> {
+             placesToWinners.computeIfAbsent(w.getPlace(), k -> new LinkedList<>()).add(w);
+           });
+
+    placesToWinners.entrySet().forEach(e -> {
+      final @KeyFor("placesToWinners") Integer place = e.getKey();
+      final List<OverallAwardWinner> winnersInPlace = e.getValue();
+      if (winnersInPlace.isEmpty()) {
+        throw new FLLInternalException("No teams in place "
+            + place);
+      }
+
+      final Element table = FOPUtils.createBasicTable(document);
+      container.appendChild(table);
+
+      table.appendChild(FOPUtils.createTableColumn(document, AWARD_PLACE_WIDTH));
+      table.appendChild(FOPUtils.createTableColumn(document, AWARD_WINNER_WIDTH));
+
+      final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+      table.appendChild(tableBody);
+
+      final Element row = FOPUtils.createTableRow(document);
+      tableBody.appendChild(row);
+
+      final boolean tie = winnersInPlace.size() > 1;
+      final String placeTitle = String.format("%d%s Place Winner%s", place, suffixForPlace(place), tie ? "s" : "");
+
+      // TODO: make this cell yellow background?
+      final Element placeCell = FOPUtils.createTableCell(document, null, placeTitle);
+      row.appendChild(placeCell);
+
+      final Element teamCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+      row.appendChild(teamCell);
+
+      final Element teamPlaceBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      teamCell.appendChild(teamPlaceBlock);
+      final String teamPlaceFormat;
+      if (tie) {
+        teamPlaceFormat = "The teams tied for %d%s place are:";
+      } else {
+        teamPlaceFormat = "The %d%s place team is:";
+      }
+      teamPlaceBlock.appendChild(document.createTextNode(String.format(teamPlaceFormat, place, suffixForPlace(place))));
+
+      winnersInPlace.stream().forEach(Errors.rethrow().wrap(winner -> {
+        final Team team = Team.getTeamFromDatabase(connection, winner.getTeamNumber());
+
+        final Element teamContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+        teamCell.appendChild(teamContainer);
+        teamContainer.setAttribute("space-before", BLOCK_SPACING);
+
+        final Element teamNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        teamContainer.appendChild(teamNumberBlock);
+        teamNumberBlock.appendChild(document.createTextNode(String.format("%d", winner.getTeamNumber())));
+
+        final Element teamNameBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        teamContainer.appendChild(teamNameBlock);
+        teamNameBlock.appendChild(document.createTextNode(team.getTeamName()));
+
+        final Element teamOrganizationBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        teamContainer.appendChild(teamOrganizationBlock);
+        final String organization = team.getOrganization();
+        teamOrganizationBlock.appendChild(document.createTextNode(null == organization ? "" : organization));
+
+        final @Nullable String description = winner.getDescription();
+        if (null != description) {
+          final Element descriptionBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+          teamContainer.appendChild(descriptionBlock);
+          descriptionBlock.appendChild(document.createTextNode(String.format("Description: %s", description)));
+        }
+      }));
+
+    });
   }
 
   private Element createNonNumericOverallCategory(final Connection connection,
@@ -745,83 +751,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
         finalistContainer.setAttribute("space-after", BLOCK_SPACING);
       }
 
-      // place -> {teams}
-      final SortedMap<Integer, List<OverallAwardWinner>> placesToWinners = new TreeMap<>();
-      categoryWinners.stream() //
-                     .forEach(w -> {
-                       placesToWinners.computeIfAbsent(w.getPlace(), k -> new LinkedList<>()).add(w);
-                     });
+      outputWinners(connection, document, container, categoryWinners);
 
-      placesToWinners.entrySet().forEach(e -> {
-        final @KeyFor("placesToWinners") Integer place = e.getKey();
-        final List<OverallAwardWinner> winnersInPlace = e.getValue();
-        if (winnersInPlace.isEmpty()) {
-          throw new FLLInternalException("No teams in place "
-              + place);
-        }
-
-        final Element table = FOPUtils.createBasicTable(document);
-        container.appendChild(table);
-
-        table.appendChild(FOPUtils.createTableColumn(document, AWARD_PLACE_WIDTH));
-        table.appendChild(FOPUtils.createTableColumn(document, AWARD_WINNER_WIDTH));
-
-        final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
-        table.appendChild(tableBody);
-
-        final Element row = FOPUtils.createTableRow(document);
-        tableBody.appendChild(row);
-
-        final boolean tie = winnersInPlace.size() > 1;
-        final String placeTitle = String.format("%d%s Place Winner%s", place, suffixForPlace(place), tie ? "s" : "");
-
-        // TODO: make this cell yellow background?
-        final Element placeCell = FOPUtils.createTableCell(document, null, placeTitle);
-        row.appendChild(placeCell);
-
-        final Element teamCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
-        row.appendChild(teamCell);
-
-        final Element teamPlaceBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-        teamCell.appendChild(teamPlaceBlock);
-        final String teamPlaceFormat;
-        if (tie) {
-          teamPlaceFormat = "The teams tied for %d%s place are:";
-        } else {
-          teamPlaceFormat = "The %d%s place team is:";
-        }
-        teamPlaceBlock.appendChild(document.createTextNode(String.format(teamPlaceFormat, place,
-                                                                         suffixForPlace(place))));
-
-        winnersInPlace.stream().forEach(Errors.rethrow().wrap(winner -> {
-          final Team team = Team.getTeamFromDatabase(connection, winner.getTeamNumber());
-
-          final Element teamContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
-          teamCell.appendChild(teamContainer);
-          teamContainer.setAttribute("space-before", BLOCK_SPACING);
-
-          final Element teamNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-          teamContainer.appendChild(teamNumberBlock);
-          teamNumberBlock.appendChild(document.createTextNode(String.format("%d", winner.getTeamNumber())));
-
-          final Element teamNameBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-          teamContainer.appendChild(teamNameBlock);
-          teamNameBlock.appendChild(document.createTextNode(team.getTeamName()));
-
-          final Element teamOrganizationBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-          teamContainer.appendChild(teamOrganizationBlock);
-          final String organization = team.getOrganization();
-          teamOrganizationBlock.appendChild(document.createTextNode(null == organization ? "" : organization));
-
-          final @Nullable String description = winner.getDescription();
-          if (null != description) {
-            final Element descriptionBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-            teamContainer.appendChild(descriptionBlock);
-            descriptionBlock.appendChild(document.createTextNode(String.format("Description: %s", description)));
-          }
-        }));
-
-      });
     } else {
       final Element emptyBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
       container.appendChild(emptyBlock);
