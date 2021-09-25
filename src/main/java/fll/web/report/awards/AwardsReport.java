@@ -4,7 +4,7 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-package fll.web.report;
+package fll.web.report.awards;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -56,6 +56,8 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.api.AwardsReportSortedGroupsServlet;
+import fll.web.report.PlayoffReport;
+import fll.web.report.PromptSummarizeScores;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChampionshipCategory;
@@ -225,7 +227,7 @@ public class AwardsReport extends BaseFLLServlet {
   public static boolean isNonNumericAwarded(final Connection connection,
                                             final ChallengeDescription description,
                                             final TournamentLevel level,
-                                            final AwardWinner winner)
+                                            final OverallAwardWinner winner)
       throws SQLException {
     final NonNumericCategory category = description.getNonNumericCategoryByTitle(winner.getName());
     if (null == category) {
@@ -264,6 +266,22 @@ public class AwardsReport extends BaseFLLServlet {
   }
 
   /**
+   * @param winners the winners to organize
+   * @return category -> award group -> [winners]
+   */
+  /*package*/ static Map<String, Map<String, List<AwardWinner>>> organizeAwardWinners(final List<AwardWinner> winners) {
+    final Map<String, Map<String, List<AwardWinner>>> organizedWinners = new HashMap<>();
+    for (final AwardWinner winner : winners) {
+      final Map<String, List<AwardWinner>> agWinners = organizedWinners.computeIfAbsent(winner.getName(),
+                                                                                        k -> new HashMap<>());
+      final List<AwardWinner> categoryWinners = agWinners.computeIfAbsent(winner.getAwardGroup(),
+                                                                          k -> new LinkedList<>());
+      categoryWinners.add(winner);
+    }
+    return organizedWinners;
+  }
+
+  /**
    * @param displayChampionship if true, then display only the championship award,
    *          otherwise skip the championship award
    */
@@ -276,15 +294,7 @@ public class AwardsReport extends BaseFLLServlet {
                                     final boolean displayPlace,
                                     final boolean displayChampionship)
       throws SQLException {
-    // category -> award group -> winners
-    final Map<String, Map<String, List<AwardWinner>>> organizedWinners = new HashMap<>();
-    for (final AwardWinner winner : winners) {
-      final Map<String, List<AwardWinner>> agWinners = organizedWinners.computeIfAbsent(winner.getName(),
-                                                                                        k -> new HashMap<>());
-      final List<AwardWinner> categoryWinners = agWinners.computeIfAbsent(winner.getAwardGroup(),
-                                                                          k -> new LinkedList<>());
-      categoryWinners.add(winner);
-    }
+    final Map<String, Map<String, List<AwardWinner>>> organizedWinners = organizeAwardWinners(winners);
 
     final List<String> fullOrder = new LinkedList<String>(categoryOrder);
     organizedWinners.keySet().forEach(c -> {
@@ -308,21 +318,14 @@ public class AwardsReport extends BaseFLLServlet {
   }
 
   private void addSubjectiveOverallWinners(final Connection connection,
-                                           ChallengeDescription description,
+                                           final ChallengeDescription description,
                                            final Document document,
                                            final Element documentBody,
                                            final Tournament tournament)
       throws SQLException {
-    final List<OverallAwardWinner> winners = AwardWinners.getNonNumericOverallAwardWinners(connection,
-                                                                                           tournament.getTournamentID());
 
-    // category -> [winners]
-    final Map<String, List<OverallAwardWinner>> organizedWinners = new HashMap<>();
-    for (final OverallAwardWinner winner : winners) {
-      final List<OverallAwardWinner> categoryWinners = organizedWinners.computeIfAbsent(winner.getName(),
-                                                                                        k -> new LinkedList<>());
-      categoryWinners.add(winner);
-    }
+    final Map<String, List<OverallAwardWinner>> organizedWinners = getNonNumericOverallWinners(description, connection,
+                                                                                               tournament);
 
     final List<String> categoryOrder = description.getNonNumericCategories().stream() //
                                                   .map(NonNumericCategory::getTitle) //
@@ -742,6 +745,38 @@ public class AwardsReport extends BaseFLLServlet {
     emptyRow.appendChild(emptyCell);
     emptyCell.setAttribute("number-columns-spanned", String.valueOf(columnsInTable));
 
+  }
+
+  /**
+   * @param description challenge description
+   * @param connection database connection
+   * @param tournament the tournament
+   * @return category -> [winners]
+   * @throws SQLException on a database error
+   */
+  /*package*/ static Map<String, List<OverallAwardWinner>> getNonNumericOverallWinners(final ChallengeDescription description,
+                                                                                  final Connection connection,
+                                                                                  final Tournament tournament)
+      throws SQLException {
+    final List<OverallAwardWinner> winners = AwardWinners.getNonNumericOverallAwardWinners(connection,
+                                                                                           tournament.getTournamentID())
+                                                         .stream() //
+                                                         .filter(Errors.rethrow()
+                                                                       .wrapPredicate(w -> isNonNumericAwarded(connection,
+                                                                                                               description,
+                                                                                                               tournament.getLevel(),
+                                                                                                               w))) //
+                                                         .collect(Collectors.toList());
+
+    // category -> [winners]
+    final Map<String, List<OverallAwardWinner>> organizedWinners = new HashMap<>();
+    for (final OverallAwardWinner winner : winners) {
+      final List<OverallAwardWinner> categoryWinners = organizedWinners.computeIfAbsent(winner.getName(),
+                                                                                        k -> new LinkedList<>());
+      categoryWinners.add(winner);
+    }
+
+    return organizedWinners;
   }
 
 }

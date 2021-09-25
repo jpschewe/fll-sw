@@ -14,7 +14,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Formatter;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +43,7 @@ import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
 import fll.Utilities;
+import fll.db.AwardWinner;
 import fll.db.AwardWinners;
 import fll.db.AwardsScript;
 import fll.db.CategoriesIgnored;
@@ -58,7 +58,6 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.api.AwardsReportSortedGroupsServlet;
-import fll.web.report.AwardsReport;
 import fll.web.report.FinalComputedScores;
 import fll.web.report.PromptSummarizeScores;
 import fll.web.report.finalist.FinalistDBRow;
@@ -244,6 +243,21 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final Map<String, FinalistSchedule> finalistSchedulesPerAwardGroup = FinalistSchedule.loadSchedules(connection,
                                                                                                         tournament);
 
+    final List<AwardWinner> nonNumericPerAwardGroupWinners = AwardWinners.getNonNumericAwardWinners(connection,
+                                                                                                    tournament.getTournamentID())
+                                                                         .stream() //
+                                                                         .filter(Errors.rethrow()
+                                                                                       .wrapPredicate(w -> AwardsReport.isNonNumericAwarded(connection,
+                                                                                                                                            description,
+                                                                                                                                            tournament.getLevel(),
+                                                                                                                                            w))) //
+                                                                         .collect(Collectors.toList());
+    final Map<String, Map<String, List<AwardWinner>>> organizedNonNumericPerAwardGroupWinners = AwardsReport.organizeAwardWinners(nonNumericPerAwardGroupWinners);
+
+    final Map<String, List<OverallAwardWinner>> nonNumericOverallWinners = AwardsReport.getNonNumericOverallWinners(description,
+                                                                                                                    connection,
+                                                                                                                    tournament);
+
     for (final Category category : awardOrder) {
       if (category instanceof NonNumericCategory
           && CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournament.getLevel(),
@@ -256,8 +270,20 @@ public class AwardsScriptReport extends BaseFLLServlet {
         categoryPage = createPerformanceCategory(description, connection, tournament, document, templateContext,
                                                  awardGroupOrder, (PerformanceScoreCategory) category);
       } else if (category instanceof NonNumericCategory) {
-        categoryPage = createNonNumericCategory(connection, tournament, document, templateContext, awardGroupOrder,
-                                                (NonNumericCategory) category, finalistSchedulesPerAwardGroup);
+        final NonNumericCategory nonNumericCategory = (NonNumericCategory) category;
+        if (category.getPerAwardGroup()) {
+          final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
+          final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+          container.appendChild(categoryTitle);
+          categoryTitle.appendChild(document.createTextNode(String.format("Per-award group non-numeric categories are not yet supported: %s",
+                                                                          category.getTitle())));
+          categoryPage = container;
+        } else {
+          categoryPage = createNonNumericOverallCategory(connection, tournament, document, templateContext,
+                                                         nonNumericCategory, nonNumericOverallWinners,
+                                                         finalistSchedulesPerAwardGroup);
+        }
       } else {
         categoryPage = createCategory(connection, tournament, document, templateContext, awardGroupOrder, category);
       }
@@ -530,67 +556,16 @@ public class AwardsScriptReport extends BaseFLLServlet {
     }
   }
 
-  private Element createNonNumericCategory(final Connection connection,
-                                           final Tournament tournament,
-                                           final Document document,
-                                           final VelocityContext templateContext,
-                                           final List<String> awardGroupOrder,
-                                           final NonNumericCategory category,
-                                           final Map<String, FinalistSchedule> finalistSchedulesPerAwardGroup)
-      throws SQLException {
-    if (category.getPerAwardGroup()) {
-      final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
-
-      final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-      container.appendChild(categoryTitle);
-      categoryTitle.appendChild(document.createTextNode(String.format("Per-award group non-numeric categories are not yet supported: %s",
-                                                                      category.getTitle())));
-
-      /*
-       * 
-       * 
-       * 
-       * // FIXME move this up to calling method?
-       * final List<AwardWinner> winners =
-       * AwardWinners.getNonNumericAwardWinners(connection,
-       * tournament.getTournamentID())
-       * .stream() //
-       * .filter(Errors.rethrow()
-       * .wrapPredicate(w -> AwardsReport.isNonNumericAwarded(connection,
-       * description,
-       * tournament.getLevel(),
-       * w))) //
-       * .collect(Collectors.toList());
-       */
-
-      return container;
-    } else {
-      return createNonNumericOverallCategory(connection, tournament, document, templateContext, category,
-                                             finalistSchedulesPerAwardGroup);
-    }
-  }
-
   private Element createNonNumericOverallCategory(final Connection connection,
                                                   final Tournament tournament,
                                                   final Document document,
                                                   final VelocityContext templateContext,
                                                   final NonNumericCategory category,
+                                                  final Map<String, List<OverallAwardWinner>> winners,
                                                   final Map<String, FinalistSchedule> finalistSchedulesPerAwardGroup)
       throws SQLException {
 
-    final List<OverallAwardWinner> winners = AwardWinners.getNonNumericOverallAwardWinners(connection,
-                                                                                           tournament.getTournamentID());
-
-    // category -> [winners]
-    final Map<String, List<OverallAwardWinner>> organizedWinners = new HashMap<>();
-    for (final OverallAwardWinner winner : winners) {
-      final List<OverallAwardWinner> categoryWinners = organizedWinners.computeIfAbsent(winner.getName(),
-                                                                                        k -> new LinkedList<>());
-      categoryWinners.add(winner);
-    }
-
-    final List<OverallAwardWinner> categoryWinners = organizedWinners.getOrDefault(category.getTitle(),
-                                                                                   Collections.emptyList());
+    final List<OverallAwardWinner> categoryWinners = winners.getOrDefault(category.getTitle(), Collections.emptyList());
     if (!categoryWinners.isEmpty()) {
       Collections.sort(categoryWinners);
 
