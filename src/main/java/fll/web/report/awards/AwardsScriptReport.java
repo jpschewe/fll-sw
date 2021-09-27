@@ -367,6 +367,17 @@ public class AwardsScriptReport extends BaseFLLServlet {
     return categoryPresenter;
   }
 
+  private Element createCategoryTitle(final Document document,
+                                      final Category category) {
+    final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    categoryTitle.appendChild(document.createTextNode(String.format("%s Award", category.getTitle())));
+    categoryTitle.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
+    categoryTitle.setAttribute("font-weight", "bold");
+    categoryTitle.setAttribute("font-size", CATEGORY_TITLE_FONT_SIZE);
+
+    return categoryTitle;
+  }
+
   private Element createPerformanceCategory(final ChallengeDescription description,
                                             final Connection connection,
                                             final Tournament tournament,
@@ -379,20 +390,15 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
-    final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    final Element categoryTitle = createCategoryTitle(document, category);
     container.appendChild(categoryTitle);
-    categoryTitle.appendChild(document.createTextNode(String.format("%s Award", category.getTitle())));
-    categoryTitle.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
-    categoryTitle.setAttribute("font-weight", "bold");
-    categoryTitle.setAttribute("font-size", CATEGORY_TITLE_FONT_SIZE);
 
     final Element categoryDescription = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(categoryDescription);
     categoryDescription.appendChild(document.createTextNode(getCategoryDescription(connection, tournament,
                                                                                    templateContext, category)));
 
-    final Element categoryPresenter = createPresenter(document, connection, tournament, category)
-        ;
+    final Element categoryPresenter = createPresenter(document, connection, tournament, category);
     container.appendChild(categoryPresenter);
 
     final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
@@ -477,19 +483,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
           teamsInPlace.stream().forEach(Errors.rethrow().wrap(teamNumber -> {
             final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-
-            final Element teamNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-            teamCell.appendChild(teamNumberBlock);
-            teamNumberBlock.appendChild(document.createTextNode(String.format("%d", teamNumber)));
-
-            final Element teamNameBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-            teamCell.appendChild(teamNameBlock);
-            teamNameBlock.appendChild(document.createTextNode(team.getTeamName()));
-
-            final Element teamOrganizationBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-            teamCell.appendChild(teamOrganizationBlock);
-            final String organization = team.getOrganization();
-            teamOrganizationBlock.appendChild(document.createTextNode(null == organization ? "" : organization));
+            addTeamToCell(document, teamCell, team);
           }));
 
         });
@@ -544,12 +538,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final Map<String, List<AwardWinner>> categoryWinners = winners.getOrDefault(category.getTitle(),
                                                                                 Collections.emptyMap());
     if (!categoryWinners.isEmpty()) {
-      final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      final Element categoryTitle = createCategoryTitle(document, category);
       container.appendChild(categoryTitle);
-      categoryTitle.appendChild(document.createTextNode(String.format("%s Award", category.getTitle())));
-      categoryTitle.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
-      categoryTitle.setAttribute("font-weight", "bold");
-      categoryTitle.setAttribute("font-size", CATEGORY_TITLE_FONT_SIZE);
 
       final Element categoryDescription = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
       container.appendChild(categoryDescription);
@@ -655,27 +645,12 @@ public class AwardsScriptReport extends BaseFLLServlet {
       winnersInPlace.stream().forEach(Errors.rethrow().wrap(winner -> {
         final Team team = Team.getTeamFromDatabase(connection, winner.getTeamNumber());
 
-        final Element teamContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
-        teamCell.appendChild(teamContainer);
-        teamContainer.setAttribute("space-before", BLOCK_SPACING);
-
-        final Element teamNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-        teamContainer.appendChild(teamNumberBlock);
-        teamNumberBlock.appendChild(document.createTextNode(String.format("%d", winner.getTeamNumber())));
-
-        final Element teamNameBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-        teamContainer.appendChild(teamNameBlock);
-        teamNameBlock.appendChild(document.createTextNode(team.getTeamName()));
-
-        final Element teamOrganizationBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-        teamContainer.appendChild(teamOrganizationBlock);
-        final String organization = team.getOrganization();
-        teamOrganizationBlock.appendChild(document.createTextNode(null == organization ? "" : organization));
+        addTeamToCell(document, teamCell, team);
 
         final @Nullable String description = winner.getDescription();
         if (null != description) {
           final Element descriptionBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-          teamContainer.appendChild(descriptionBlock);
+          teamCell.appendChild(descriptionBlock);
           descriptionBlock.appendChild(document.createTextNode(String.format("Description: %s", description)));
         }
       }));
@@ -697,12 +672,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
     if (!categoryWinners.isEmpty()) {
       Collections.sort(categoryWinners);
 
-      final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      final Element categoryTitle = createCategoryTitle(document, category);
       container.appendChild(categoryTitle);
-      categoryTitle.appendChild(document.createTextNode(String.format("%s Award", category.getTitle())));
-      categoryTitle.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
-      categoryTitle.setAttribute("font-weight", "bold");
-      categoryTitle.setAttribute("font-size", CATEGORY_TITLE_FONT_SIZE);
 
       final Element categoryDescription = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
       container.appendChild(categoryDescription);
@@ -756,27 +727,31 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     finalists.stream().forEach(Errors.rethrow().wrap(teamNumber -> {
       final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-
-      final Element teamContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
-      teamCell.appendChild(teamContainer);
-      teamContainer.setAttribute("space-before", BLOCK_SPACING);
-
-      final Element teamNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-      teamContainer.appendChild(teamNumberBlock);
-      teamNumberBlock.appendChild(document.createTextNode(String.format("%d", team.getTeamNumber())));
-
-      final Element teamNameBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-      teamContainer.appendChild(teamNameBlock);
-      teamNameBlock.appendChild(document.createTextNode(team.getTeamName()));
-
-      final Element teamOrganizationBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-      teamContainer.appendChild(teamOrganizationBlock);
-      final String organization = team.getOrganization();
-      teamOrganizationBlock.appendChild(document.createTextNode(null == organization ? "" : organization));
-
+      addTeamToCell(document, teamCell, team);
     }));
 
     return container;
+  }
+
+  private static void addTeamToCell(final Document document,
+                                    final Element teamCell,
+                                    final Team team) {
+    final Element teamContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+    teamCell.appendChild(teamContainer);
+    teamContainer.setAttribute("space-before", BLOCK_SPACING);
+
+    final Element teamNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    teamContainer.appendChild(teamNumberBlock);
+    teamNumberBlock.appendChild(document.createTextNode(String.format("%d", team.getTeamNumber())));
+
+    final Element teamNameBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    teamContainer.appendChild(teamNameBlock);
+    teamNameBlock.appendChild(document.createTextNode(team.getTeamName()));
+
+    final Element teamOrganizationBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    teamContainer.appendChild(teamOrganizationBlock);
+    final String organization = team.getOrganization();
+    teamOrganizationBlock.appendChild(document.createTextNode(null == organization ? "" : organization));
   }
 
   private static String suffixForPlace(final int place) {
