@@ -355,6 +355,18 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
   private static final String BLOCK_SPACING = "0.25in";
 
+  private Element createPresenter(final Document document,
+                                  final Connection connection,
+                                  final Tournament tournament,
+                                  final Category category)
+      throws SQLException {
+    final Element categoryPresenter = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    final String presenterText = String.format("Presented By: %s",
+                                               getCategoryPresenter(connection, tournament, category));
+    categoryPresenter.appendChild(document.createTextNode(presenterText));
+    return categoryPresenter;
+  }
+
   private Element createPerformanceCategory(final ChallengeDescription description,
                                             final Connection connection,
                                             final Tournament tournament,
@@ -379,11 +391,9 @@ public class AwardsScriptReport extends BaseFLLServlet {
     categoryDescription.appendChild(document.createTextNode(getCategoryDescription(connection, tournament,
                                                                                    templateContext, category)));
 
-    final Element categoryPresenter = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    final Element categoryPresenter = createPresenter(document, connection, tournament, category)
+        ;
     container.appendChild(categoryPresenter);
-    final String presenterText = String.format("Presented By: %s",
-                                               getCategoryPresenter(connection, tournament, category));
-    categoryPresenter.appendChild(document.createTextNode(presenterText));
 
     final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
 
@@ -546,11 +556,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
       categoryDescription.appendChild(document.createTextNode(getCategoryDescription(connection, tournament,
                                                                                      templateContext, category)));
 
-      final Element categoryPresenter = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      final Element categoryPresenter = createPresenter(document, connection, tournament, category);
       container.appendChild(categoryPresenter);
-      final String presenterText = String.format("Presented By: %s",
-                                                 getCategoryPresenter(connection, tournament, category));
-      categoryPresenter.appendChild(document.createTextNode(presenterText));
 
       for (final String awardGroup : awardGroupOrder) {
         final List<AwardWinner> agWinners = categoryWinners.getOrDefault(awardGroup, Collections.emptyList());
@@ -702,11 +709,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
       categoryDescription.appendChild(document.createTextNode(getCategoryDescription(connection, tournament,
                                                                                      templateContext, category)));
 
-      final Element categoryPresenter = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      final Element categoryPresenter = createPresenter(document, connection, tournament, category);
       container.appendChild(categoryPresenter);
-      final String presenterText = String.format("Presented By: %s",
-                                                 getCategoryPresenter(connection, tournament, category));
-      categoryPresenter.appendChild(document.createTextNode(presenterText));
 
       final List<Integer> finalists = getFinalistsForCategory(finalistSchedulesPerAwardGroup, category.getTitle());
       if (!finalists.isEmpty()) {
