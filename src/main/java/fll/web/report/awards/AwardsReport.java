@@ -224,7 +224,7 @@ public class AwardsReport extends BaseFLLServlet {
    * @param level tournament level
    * @param winner winner to check
    * @return true if the winner should be given an award for this tournament level
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
   public static boolean isNonNumericAwarded(final Connection connection,
                                             final ChallengeDescription description,
