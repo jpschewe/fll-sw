@@ -176,6 +176,8 @@ public class AwardsReport extends BaseFLLServlet {
 
     final List<AdvancingTeam> advancing = AdvancingTeam.loadAdvancingTeams(connection, tournament.getTournamentID());
     if (!advancing.isEmpty()) {
+      documentBody.appendChild(FOPUtils.createHorizontalLine(document, AWARD_SEPARATOR_WIDTH));
+
       final Element advancingElement = addAdvancingTeams(advancing, connection, document, tournament,
                                                          sortedAwardGroups);
       documentBody.appendChild(advancingElement);
@@ -269,7 +271,7 @@ public class AwardsReport extends BaseFLLServlet {
    * @param winners the winners to organize
    * @return category -> award group -> [winners]
    */
-  /*package*/ static Map<String, Map<String, List<AwardWinner>>> organizeAwardWinners(final List<AwardWinner> winners) {
+  /* package */ static Map<String, Map<String, List<AwardWinner>>> organizeAwardWinners(final List<AwardWinner> winners) {
     final Map<String, Map<String, List<AwardWinner>>> organizedWinners = new HashMap<>();
     for (final AwardWinner winner : winners) {
       final Map<String, List<AwardWinner>> agWinners = organizedWinners.computeIfAbsent(winner.getName(),
@@ -653,17 +655,24 @@ public class AwardsReport extends BaseFLLServlet {
     return titleBuilder.toString();
   }
 
-  private Element addAdvancingTeams(final List<AdvancingTeam> advancing,
-                                    final Connection connection,
-                                    final Document document,
-                                    final Tournament tournament,
-                                    final List<String> sortedGroups)
+  /**
+   * @param advancing the teams advancing
+   * @param connection database connection
+   * @param document used to create elements
+   * @param tournament the tournament
+   * @param sortedGroups the groups for advancement in sorted order
+   * @return an element to add to the main document
+   * @throws SQLException on a database error
+   */
+  /* package */ static Element addAdvancingTeams(final List<AdvancingTeam> advancing,
+                                                 final Connection connection,
+                                                 final Document document,
+                                                 final Tournament tournament,
+                                                 final List<String> sortedGroups)
       throws SQLException {
 
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     container.setAttribute("keep-together.within-page", "always");
-
-    container.appendChild(FOPUtils.createHorizontalLine(document, AWARD_SEPARATOR_WIDTH));
 
     final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(categoryTitleBlock);
@@ -710,12 +719,12 @@ public class AwardsReport extends BaseFLLServlet {
     return container;
   }
 
-  private void outputAdvancingTeams(final Connection connection,
-                                    final Document document,
-                                    final Element tableBody,
-                                    final String group,
-                                    final List<AdvancingTeam> groupAdvancing,
-                                    final int columnsInTable)
+  private static void outputAdvancingTeams(final Connection connection,
+                                           final Document document,
+                                           final Element tableBody,
+                                           final String group,
+                                           final List<AdvancingTeam> groupAdvancing,
+                                           final int columnsInTable)
       throws SQLException {
 
     boolean first = true;
@@ -754,9 +763,9 @@ public class AwardsReport extends BaseFLLServlet {
    * @return category -> [winners]
    * @throws SQLException on a database error
    */
-  /*package*/ static Map<String, List<OverallAwardWinner>> getNonNumericOverallWinners(final ChallengeDescription description,
-                                                                                  final Connection connection,
-                                                                                  final Tournament tournament)
+  /* package */ static Map<String, List<OverallAwardWinner>> getNonNumericOverallWinners(final ChallengeDescription description,
+                                                                                         final Connection connection,
+                                                                                         final Tournament tournament)
       throws SQLException {
     final List<OverallAwardWinner> winners = AwardWinners.getNonNumericOverallAwardWinners(connection,
                                                                                            tournament.getTournamentID())

@@ -43,6 +43,7 @@ import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
 import fll.Utilities;
+import fll.db.AdvancingTeam;
 import fll.db.AwardWinner;
 import fll.db.AwardWinners;
 import fll.db.AwardsScript;
@@ -188,12 +189,12 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    final Element intro = createSectionBlock(connection, tournament, document, templateContext,
+    final Element intro = createSectionBlock(connection, document, tournament, templateContext,
                                              AwardsScript.Section.FRONT_MATTER);
     documentBody.appendChild(intro);
     intro.setAttribute("space-after", BLOCK_SPACING);
 
-    final Element sponsors = createSponsors(connection, tournament, document, templateContext);
+    final Element sponsors = createSponsors(connection, document, tournament, templateContext);
     documentBody.appendChild(sponsors);
     sponsors.setAttribute("space-after", BLOCK_SPACING);
 
@@ -201,19 +202,39 @@ public class AwardsScriptReport extends BaseFLLServlet {
     documentBody.appendChild(volunteers);
     volunteers.setAttribute("page-break-after", "always");
 
-    addAwards(description, connection, tournament, document, templateContext, documentBody);
+    addAwards(description, connection, document, tournament, templateContext, documentBody);
 
-    final Element endAwards = createSectionBlock(connection, tournament, document, templateContext,
+    final Element endAwards = createSectionBlock(connection, document, tournament, templateContext,
                                                  AwardsScript.Section.END_AWARDS);
     documentBody.appendChild(endAwards);
 
-    // FIXME advancing teams
+    final Element advancing = createAdvancingTeams(connection, document, tournament);
+    documentBody.appendChild(advancing);
 
-    final Element footerSection = createSectionBlock(connection, tournament, document, templateContext,
+    final Element footerSection = createSectionBlock(connection, document, tournament, templateContext,
                                                      AwardsScript.Section.FOOTER);
     documentBody.appendChild(footerSection);
 
     return document;
+  }
+
+  private Element createAdvancingTeams(final Connection connection,
+                                       final Document document,
+                                       final Tournament tournament)
+      throws SQLException {
+    final List<String> sortedAwardGroups = AwardsReportSortedGroupsServlet.getAwardGroupsSorted(connection,
+                                                                                                tournament.getTournamentID());
+
+    final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
+    final List<AdvancingTeam> advancing = AdvancingTeam.loadAdvancingTeams(connection, tournament.getTournamentID());
+    if (!advancing.isEmpty()) {
+      final Element advancingElement = AwardsReport.addAdvancingTeams(advancing, connection, document, tournament,
+                                                                      sortedAwardGroups);
+      container.appendChild(advancingElement);
+    }
+
+    return container;
   }
 
   private List<String> getAwardGroupOrder(final Connection connection,
@@ -232,8 +253,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
   private void addAwards(final ChallengeDescription description,
                          final Connection connection,
-                         final Tournament tournament,
                          final Document document,
+                         final Tournament tournament,
                          final VelocityContext templateContext,
                          final Element documentBody)
       throws SQLException {
@@ -781,8 +802,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
   }
 
   private Element createSponsors(final Connection connection,
-                                 final Tournament tournament,
                                  final Document document,
+                                 final Tournament tournament,
                                  final VelocityContext templateContext)
       throws SQLException {
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
@@ -915,12 +936,12 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                    final Document document,
                                    final VelocityContext templateContext)
       throws SQLException {
-    return createSectionBlock(connection, tournament, document, templateContext, AwardsScript.Section.VOLUNTEERS);
+    return createSectionBlock(connection, document, tournament, templateContext, AwardsScript.Section.VOLUNTEERS);
   }
 
   private Element createSectionBlock(final Connection connection,
-                                     final Tournament tournament,
                                      final Document document,
+                                     final Tournament tournament,
                                      final VelocityContext templateContext,
                                      final AwardsScript.Section section)
       throws SQLException {
