@@ -263,9 +263,12 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final Map<String, Map<String, List<AwardWinner>>> organizedSubjectiveWinners = AwardsReport.organizeAwardWinners(subjectiveWinners);
 
     for (final Category category : awardOrder) {
+      LOGGER.trace("Processing category {}", category.getTitle());
+
       if (category instanceof NonNumericCategory
           && CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournament.getLevel(),
                                                            (NonNumericCategory) category)) {
+        LOGGER.debug("Ignoring category {}", category.getTitle());
         continue;
       }
 
@@ -289,12 +292,20 @@ public class AwardsScriptReport extends BaseFLLServlet {
         categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, document, templateContext,
                                                             awardGroupOrder, (SubjectiveScoreCategory) category,
                                                             organizedSubjectiveWinners, finalistSchedulesPerAwardGroup);
+      } else if (category instanceof ChampionshipCategory) {
+        categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, document, templateContext,
+                                                            awardGroupOrder, category, organizedSubjectiveWinners,
+                                                            finalistSchedulesPerAwardGroup);
       } else {
         categoryPage = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
         categoryPage.appendChild(document.createTextNode(String.format("Category %s is of an unknown type: %s",
                                                                        category.getTitle(),
                                                                        category.getClass().getName())));
       }
+      // debug
+      categoryPage.appendChild(document.createTextNode(String.format("DEBUG: %s", category.getTitle())));
+      // end debug
+
       documentBody.appendChild(categoryPage);
       categoryPage.setAttribute("page-break-after", "always");
     }
@@ -534,21 +545,21 @@ public class AwardsScriptReport extends BaseFLLServlet {
       throws SQLException {
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
+    final Element categoryTitle = createCategoryTitle(document, category);
+    container.appendChild(categoryTitle);
+
+    final Element categoryDescription = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(categoryDescription);
+    categoryDescription.appendChild(document.createTextNode(getCategoryDescription(connection, tournament,
+                                                                                   templateContext, category)));
+
+    final Element categoryPresenter = createPresenter(document, connection, tournament, category);
+    container.appendChild(categoryPresenter);
+
     // award group -> [winner]
     final Map<String, List<AwardWinner>> categoryWinners = winners.getOrDefault(category.getTitle(),
                                                                                 Collections.emptyMap());
     if (!categoryWinners.isEmpty()) {
-      final Element categoryTitle = createCategoryTitle(document, category);
-      container.appendChild(categoryTitle);
-
-      final Element categoryDescription = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-      container.appendChild(categoryDescription);
-      categoryDescription.appendChild(document.createTextNode(getCategoryDescription(connection, tournament,
-                                                                                     templateContext, category)));
-
-      final Element categoryPresenter = createPresenter(document, connection, tournament, category);
-      container.appendChild(categoryPresenter);
-
       for (final String awardGroup : awardGroupOrder) {
         final List<AwardWinner> agWinners = categoryWinners.getOrDefault(awardGroup, Collections.emptyList());
         if (!agWinners.isEmpty()) {
