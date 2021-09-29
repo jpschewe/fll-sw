@@ -85,7 +85,7 @@ awardsScriptModule.init = ( ) => {
             exist elsewhere in the database. These values can be
             populated at any layer of the script.</div>
 
-        <h2>Number of Performance Awards</h2>
+        <h2>Number of Performance Awards per Award Group</h2>
         <div>
             <label>
                 Specify value:
