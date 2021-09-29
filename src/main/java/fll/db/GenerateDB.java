@@ -1311,9 +1311,7 @@ public final class GenerateDB {
       // store sponsor order
       createAwardsScriptRankTable(connection, createConstraints, "awards_script_sponsor_order", "sponsor",
                                   "sponsor_rank");
-
-      // FIXME add these tables to the database import process
-
     }
   }
+  
 }
