@@ -232,6 +232,10 @@ public class AwardsScriptReport extends BaseFLLServlet {
       final Element advancingElement = AwardsReport.addAdvancingTeams(advancing, connection, document, tournament,
                                                                       sortedAwardGroups);
       container.appendChild(advancingElement);
+    } else {
+      final Element emptyBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      container.appendChild(emptyBlock);
+      emptyBlock.appendChild(document.createTextNode("No advancing teams"));
     }
 
     return container;
