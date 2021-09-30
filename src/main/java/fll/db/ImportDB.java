@@ -1841,7 +1841,7 @@ public final class ImportDB {
 
   }
 
-  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "table and columns are passed in")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "table and columns are passed in")
   private static void importAwardsScriptTable(final Connection sourceConnection,
                                               final Connection destinationConnection,
                                               final int sourceTournamentID,
