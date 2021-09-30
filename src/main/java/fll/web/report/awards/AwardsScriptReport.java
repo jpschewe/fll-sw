@@ -323,9 +323,6 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                                                        category.getTitle(),
                                                                        category.getClass().getName())));
       }
-      // debug
-      categoryPage.appendChild(document.createTextNode(String.format("DEBUG: %s", category.getTitle())));
-      // end debug
 
       documentBody.appendChild(categoryPage);
       categoryPage.setAttribute("page-break-after", "always");
