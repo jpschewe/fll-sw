@@ -71,15 +71,13 @@ public class FooterFilter implements Filter {
           LOGGER.trace("Body index {} body end index {}", bodyIndex, bodyEndIndex);
 
           if (-1 != bodyIndex
-              && -1 != bodyEndIndex
-              && !noFooter(url)) {
+              && -1 != bodyEndIndex) {
 
             final int endOfBodyTagIndex = bodyIndex
                 + bodyTag.length();
             caw.write(origStr.substring(0, endOfBodyTagIndex));
 
-            if (!path.startsWith(httpRequest.getContextPath()
-                + "/public")) {
+            if (!noNavbar(url)) {
               addNavbar(caw, httpRequest);
             } else {
               LOGGER.debug("Skipping navbar");
@@ -88,11 +86,13 @@ public class FooterFilter implements Filter {
             caw.write(origStr.substring(endOfBodyTagIndex, bodyEndIndex
                 - 1));
 
-            if (path.startsWith(httpRequest.getContextPath()
-                + "/public")) {
-              addPublicFooter(caw);
-            } else {
-              addFooter(caw, httpRequest);
+            if (!noFooter(url)) {
+              if (path.startsWith(httpRequest.getContextPath()
+                  + "/public")) {
+                addPublicFooter(caw);
+              } else {
+                addFooter(caw, httpRequest);
+              }
             }
 
             caw.write(origStr.substring(bodyEndIndex, origStr.length()));
@@ -137,6 +137,38 @@ public class FooterFilter implements Filter {
    */
   private static boolean noFooter(final String url) {
     if (url.endsWith("welcome.jsp")) {
+      return true;
+    } else if (url.indexOf("scoreboard") != -1
+        && !url.endsWith("index.jsp")) {
+      return true;
+    } else if (url.indexOf("playoff/remoteMain.jsp") != -1) {
+      return true;
+    } else if (url.indexOf("playoff/title.jsp") != -1) {
+      return true;
+    } else if (url.indexOf("playoff/remoteControlBrackets.jsp") != -1) {
+      return true;
+    } else if (url.indexOf("playoff/sponsors.jsp") != -1) {
+      return true;
+    } else if (url.indexOf("report/finalist/FinalistTeams.jsp") != -1) {
+      return true;
+    } else if (url.indexOf("slideshow.jsp") != -1) {
+      return true;
+    } else if (url.indexOf("finalist/load.jsp") != -1) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * @param url the url to check
+   * @return true for all urls that should have no footer
+   */
+  private static boolean noNavbar(final String url) {
+
+    if (url.indexOf("/public") != -1) {
+      return true;
+    } else if (url.endsWith("welcome.jsp")) {
       return true;
     } else if (url.indexOf("scoreboard") != -1
         && !url.endsWith("index.jsp")) {
