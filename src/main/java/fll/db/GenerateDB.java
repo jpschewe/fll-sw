@@ -1313,5 +1313,5 @@ public final class GenerateDB {
                                   "sponsor_rank");
     }
   }
-  
+
 }

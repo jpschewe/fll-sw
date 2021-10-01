@@ -50,6 +50,7 @@ import fll.db.AwardsScript;
 import fll.db.CategoriesIgnored;
 import fll.db.OverallAwardWinner;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
@@ -64,9 +65,7 @@ import fll.web.report.PromptSummarizeScores;
 import fll.web.report.finalist.FinalistDBRow;
 import fll.web.report.finalist.FinalistSchedule;
 import fll.web.scoreboard.Top10;
-import fll.xml.Category;
 import fll.xml.ChallengeDescription;
-import fll.xml.ChampionshipCategory;
 import fll.xml.NonNumericCategory;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreType;
@@ -263,7 +262,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
                          final Element documentBody)
       throws SQLException {
     final List<String> awardGroupOrder = getAwardGroupOrder(connection, tournament);
-    final List<Category> awardOrder = AwardsScript.getAwardOrder(description, connection, tournament);
+    final List<AwardCategory> awardOrder = AwardsScript.getAwardOrder(description, connection, tournament);
 
     final Map<String, FinalistSchedule> finalistSchedulesPerAwardGroup = FinalistSchedule.loadSchedules(connection,
                                                                                                         tournament);
@@ -287,7 +286,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                                                                        tournament.getTournamentID());
     final Map<String, Map<String, List<AwardWinner>>> organizedSubjectiveWinners = AwardsReport.organizeAwardWinners(subjectiveWinners);
 
-    for (final Category category : awardOrder) {
+    for (final AwardCategory category : awardOrder) {
       LOGGER.trace("Processing category {}", category.getTitle());
 
       if (category instanceof NonNumericCategory
@@ -297,7 +296,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
         continue;
       }
 
-      final Element categoryPage;
+      final @Nullable Element categoryPage;
       if (category instanceof PerformanceScoreCategory) {
         categoryPage = createPerformanceCategory(description, connection, tournament, document, templateContext,
                                                  awardGroupOrder, (PerformanceScoreCategory) category);
@@ -321,6 +320,14 @@ public class AwardsScriptReport extends BaseFLLServlet {
         categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, document, templateContext,
                                                             awardGroupOrder, category, organizedSubjectiveWinners,
                                                             finalistSchedulesPerAwardGroup);
+      } else if (category instanceof HeadToHeadCategory) {
+        if (TournamentParameters.getRunningHeadToHead(connection, tournament.getTournamentID())) {
+          categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, document, templateContext,
+                                                              awardGroupOrder, category, organizedSubjectiveWinners,
+                                                              finalistSchedulesPerAwardGroup);
+        } else {
+          categoryPage = null;
+        }
       } else {
         categoryPage = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
         categoryPage.appendChild(document.createTextNode(String.format("Category %s is of an unknown type: %s",
@@ -328,15 +335,17 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                                                        category.getClass().getName())));
       }
 
-      documentBody.appendChild(categoryPage);
-      categoryPage.setAttribute("page-break-after", "always");
+      if (null != categoryPage) {
+        documentBody.appendChild(categoryPage);
+        categoryPage.setAttribute("page-break-after", "always");
+      }
     }
   }
 
   private String getCategoryDescription(final Connection connection,
                                         final Tournament tournament,
                                         final VelocityContext templateContext,
-                                        final Category category)
+                                        final AwardCategory category)
       throws SQLException {
     final String rawText;
     if (category instanceof SubjectiveScoreCategory) {
@@ -345,6 +354,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
       rawText = AwardsScript.getCategoryText(connection, tournament, (NonNumericCategory) category);
     } else if (category instanceof ChampionshipCategory) {
       rawText = AwardsScript.getSectionText(connection, tournament, AwardsScript.Section.CATEGORY_CHAMPIONSHIP);
+    } else if (category instanceof HeadToHeadCategory) {
+      rawText = AwardsScript.getSectionText(connection, tournament, AwardsScript.Section.CATEGORY_HEAD2HEAD);
     } else if (category instanceof PerformanceScoreCategory) {
       rawText = AwardsScript.getSectionText(connection, tournament, AwardsScript.Section.CATEGORY_PERFORMANCE);
     } else {
@@ -363,7 +374,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
   private String getCategoryPresenter(final Connection connection,
                                       final Tournament tournament,
-                                      final Category category)
+                                      final AwardCategory category)
       throws SQLException {
     if (category instanceof SubjectiveScoreCategory) {
       return AwardsScript.getPresenter(connection, tournament, (SubjectiveScoreCategory) category);
@@ -371,6 +382,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
       return AwardsScript.getPresenter(connection, tournament, (NonNumericCategory) category);
     } else if (category instanceof ChampionshipCategory) {
       return AwardsScript.getSectionText(connection, tournament, AwardsScript.Section.CATEGORY_CHAMPIONSHIP_PRESENTER);
+    } else if (category instanceof HeadToHeadCategory) {
+      return AwardsScript.getSectionText(connection, tournament, AwardsScript.Section.CATEGORY_HEAD2HEAD_PRESENTER);
     } else if (category instanceof PerformanceScoreCategory) {
       return AwardsScript.getSectionText(connection, tournament, AwardsScript.Section.CATEGORY_PERFORMANCE_PRESENTER);
     } else {
@@ -391,7 +404,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
   private Element createPresenter(final Document document,
                                   final Connection connection,
                                   final Tournament tournament,
-                                  final Category category)
+                                  final AwardCategory category)
       throws SQLException {
     final Element categoryPresenter = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     final String presenterText = String.format("Presented By: %s",
@@ -401,7 +414,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
   }
 
   private Element createCategoryTitle(final Document document,
-                                      final Category category) {
+                                      final AwardCategory category) {
     final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     categoryTitle.appendChild(document.createTextNode(String.format("%s Award", category.getTitle())));
     categoryTitle.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
@@ -561,7 +574,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                                        final Document document,
                                                        final VelocityContext templateContext,
                                                        final List<String> awardGroupOrder,
-                                                       final Category category,
+                                                       final AwardCategory category,
                                                        final Map<String, Map<String, List<AwardWinner>>> winners,
                                                        final Map<String, FinalistSchedule> finalistSchedulesPerAwardGroup)
       throws SQLException {

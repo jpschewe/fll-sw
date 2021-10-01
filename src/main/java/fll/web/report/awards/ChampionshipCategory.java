@@ -4,13 +4,12 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-package fll.xml;
+package fll.web.report.awards;
 
 /**
- * Champtionship category. There isn't much to this class other than properties
- * to make it behave like standard categories.
+ * Store information about the championship.
  */
-public final class ChampionshipCategory implements Category {
+public final class ChampionshipCategory implements AwardCategory {
 
   /**
    * Single instance.

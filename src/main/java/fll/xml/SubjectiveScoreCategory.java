@@ -17,12 +17,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.web.report.awards.AwardCategory;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Description of a subjective category.
  */
-public class SubjectiveScoreCategory extends ScoreCategory implements Category {
+public class SubjectiveScoreCategory extends ScoreCategory implements AwardCategory {
 
   /**
    * Name of the XML tag used for this class.

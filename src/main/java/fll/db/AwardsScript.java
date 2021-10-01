@@ -26,9 +26,10 @@ import fll.Tournament;
 import fll.TournamentLevel;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-import fll.xml.Category;
+import fll.web.report.awards.AwardCategory;
+import fll.web.report.awards.ChampionshipCategory;
+import fll.web.report.awards.HeadToHeadCategory;
 import fll.xml.ChallengeDescription;
-import fll.xml.ChampionshipCategory;
 import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
 
@@ -142,6 +143,14 @@ public final class AwardsScript {
      * Presenter for the championship category.
      */
     CATEGORY_CHAMPIONSHIP_PRESENTER,
+    /**
+     * Text for the head to head category.
+     */
+    CATEGORY_HEAD2HEAD,
+    /**
+     * Presenter for the head to head category.
+     */
+    CATEGORY_HEAD2HEAD_PRESENTER,
     /**
      * Text for the performance category.
      */
@@ -2053,9 +2062,9 @@ public final class AwardsScript {
    * @return the categories in order
    * @throws SQLException on a database error
    */
-  public static List<Category> getAwardOrder(final ChallengeDescription description,
-                                             final Connection connection,
-                                             final Tournament tournament)
+  public static List<AwardCategory> getAwardOrder(final ChallengeDescription description,
+                                                  final Connection connection,
+                                                  final Tournament tournament)
       throws SQLException {
     try (
         PreparedStatement findLayer = connection.prepareStatement("SELECT MAX(layer_rank) FROM awards_script_parameters"
@@ -2113,11 +2122,11 @@ public final class AwardsScript {
             prep.setInt(7, layerRank);
 
             try (ResultSet rs = prep.executeQuery()) {
-              final List<Category> awardOrder = new LinkedList<>();
+              final List<AwardCategory> awardOrder = new LinkedList<>();
 
               while (rs.next()) {
                 final String categoryTitle = castNonNull(rs.getString(1));
-                final Category category = getCategoryByTitle(description, categoryTitle);
+                final AwardCategory category = getCategoryByTitle(description, categoryTitle);
                 awardOrder.add(category);
               }
 
@@ -2146,10 +2155,12 @@ public final class AwardsScript {
    * @return the category
    * @throws FLLRuntimeException if the category cannot be found
    */
-  public static Category getCategoryByTitle(final ChallengeDescription description,
-                                            final String title) {
+  public static AwardCategory getCategoryByTitle(final ChallengeDescription description,
+                                                 final String title) {
     if (ChampionshipCategory.INSTANCE.getTitle().equals(title)) {
       return ChampionshipCategory.INSTANCE;
+    } else if (HeadToHeadCategory.INSTANCE.getTitle().equals(title)) {
+      return HeadToHeadCategory.INSTANCE;
     } else if (description.getPerformance().getTitle().equals(title)) {
       return description.getPerformance();
     } else {
@@ -2173,11 +2184,12 @@ public final class AwardsScript {
    * @param description challenge description for awards
    * @return the default award order when none is specified
    */
-  private static List<Category> getDefaultAwardOrder(final ChallengeDescription description) {
-    final List<Category> awardOrder = new LinkedList<>();
+  private static List<AwardCategory> getDefaultAwardOrder(final ChallengeDescription description) {
+    final List<AwardCategory> awardOrder = new LinkedList<>();
     awardOrder.addAll(description.getSubjectiveCategories());
     awardOrder.addAll(description.getNonNumericCategories());
     awardOrder.add(description.getPerformance());
+    awardOrder.add(HeadToHeadCategory.INSTANCE);
     awardOrder.add(ChampionshipCategory.INSTANCE);
     return awardOrder;
   }
@@ -2435,8 +2447,8 @@ public final class AwardsScript {
    * @return award order value for the season
    * @throws SQLException on a database error
    */
-  public static List<Category> getAwardOrderForSeason(final ChallengeDescription description,
-                                                      final Connection connection)
+  public static List<AwardCategory> getAwardOrderForSeason(final ChallengeDescription description,
+                                                           final Connection connection)
       throws SQLException {
     return getAwardOrderFor(description, connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
                             GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
@@ -2449,9 +2461,9 @@ public final class AwardsScript {
    * @return award order for the specified tournament level
    * @throws SQLException on a database error
    */
-  public static List<Category> getAwardOrderForTournamentLevel(final ChallengeDescription description,
-                                                               final Connection connection,
-                                                               final TournamentLevel level)
+  public static List<AwardCategory> getAwardOrderForTournamentLevel(final ChallengeDescription description,
+                                                                    final Connection connection,
+                                                                    final TournamentLevel level)
       throws SQLException {
     return getAwardOrderFor(description, connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID);
   }
@@ -2463,9 +2475,9 @@ public final class AwardsScript {
    * @return award order for the specified tournament
    * @throws SQLException on a database error
    */
-  public static List<Category> getAwardOrderForTournament(final ChallengeDescription description,
-                                                          final Connection connection,
-                                                          final Tournament tournament)
+  public static List<AwardCategory> getAwardOrderForTournament(final ChallengeDescription description,
+                                                               final Connection connection,
+                                                               final Tournament tournament)
       throws SQLException {
     return getAwardOrderFor(description, connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
                             tournament.getTournamentID());
@@ -2477,7 +2489,7 @@ public final class AwardsScript {
    * @throws SQLException on a database error
    */
   public static void updateAwardOrderForSeason(final Connection connection,
-                                               final List<Category> awardOrder)
+                                               final List<AwardCategory> awardOrder)
       throws SQLException {
     updateAwardOrderFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
                         Layer.SEASON, awardOrder);
@@ -2491,7 +2503,7 @@ public final class AwardsScript {
    */
   public static void updateAwardOrderForTournamentLevel(final Connection connection,
                                                         final TournamentLevel level,
-                                                        final List<Category> awardOrder)
+                                                        final List<AwardCategory> awardOrder)
       throws SQLException {
     updateAwardOrderFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, Layer.TOURNAMENT_LEVEL,
                         awardOrder);
@@ -2505,7 +2517,7 @@ public final class AwardsScript {
    */
   public static void updateAwardOrderForTournament(final Connection connection,
                                                    final Tournament tournament,
-                                                   final List<Category> awardOrder)
+                                                   final List<AwardCategory> awardOrder)
       throws SQLException {
     updateAwardOrderFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
                         Layer.TOURNAMENT, awardOrder);
@@ -2547,13 +2559,13 @@ public final class AwardsScript {
                                           final int tournamentLevelId,
                                           final int tournamentId,
                                           final Layer layer,
-                                          final List<Category> awardOrder)
+                                          final List<AwardCategory> awardOrder)
       throws SQLException {
     updateParameterValueFor(connection, tournamentLevelId, tournamentId, layer, AWARD_ORDER_SPECIFIED_PARAM,
                             Boolean.TRUE.toString());
 
     final List<String> categoryTitles = awardOrder.stream() //
-                                                  .map(Category::getTitle) //
+                                                  .map(AwardCategory::getTitle) //
                                                   .collect(Collectors.toList());
 
     updateRankTable(connection, tournamentLevelId, tournamentId, layer, "awards_script_award_order", "award",
@@ -2571,10 +2583,10 @@ public final class AwardsScript {
     clearRankTable(connection, tournamentLevelId, tournamentId, "awards_script_award_order");
   }
 
-  private static List<Category> getAwardOrderFor(final ChallengeDescription description,
-                                                 final Connection connection,
-                                                 final int tournamentLevelId,
-                                                 final int tournamentId)
+  private static List<AwardCategory> getAwardOrderFor(final ChallengeDescription description,
+                                                      final Connection connection,
+                                                      final int tournamentLevelId,
+                                                      final int tournamentId)
       throws SQLException {
     return getRankTable(connection, tournamentLevelId, tournamentId, "awards_script_award_order", "award",
                         "award_rank").stream() //

@@ -37,9 +37,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
-import fll.xml.Category;
 import fll.xml.ChallengeDescription;
-import fll.xml.ChampionshipCategory;
 import fll.xml.NonNumericCategory;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
@@ -117,6 +115,7 @@ public class EditAwardsScript extends BaseFLLServlet {
       loadNumPerformanceAwards(page, connection, tournamentLevel, tournament, layer);
 
       page.setAttribute("championshipAwardTitle", ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE);
+      page.setAttribute("head2headAwardTitle", HeadToHeadCategory.AWARD_TITLE);
       page.setAttribute("performanceAwardTitle", PerformanceScoreCategory.CATEGORY_TITLE);
 
     } catch (final SQLException e) {
@@ -896,7 +895,7 @@ public class EditAwardsScript extends BaseFLLServlet {
       throws SQLException {
 
     final boolean awardOrderSpecified;
-    List<Category> awardOrder;
+    List<AwardCategory> awardOrder;
     switch (layer) {
     case SEASON:
       awardOrderSpecified = AwardsScript.isAwardOrderSpecifiedForSeason(connection);
@@ -926,8 +925,8 @@ public class EditAwardsScript extends BaseFLLServlet {
 
   private static final String AWARD_ORDER_PARAMETER_PREFIX = "award_order_";
 
-  private static List<Category> findAwardOrder(final ChallengeDescription description,
-                                               final HttpServletRequest request) {
+  private static List<AwardCategory> findAwardOrder(final ChallengeDescription description,
+                                                    final HttpServletRequest request) {
 
     // Find all request parameters that start with the right prefix and parse them
     // into integers.
@@ -951,9 +950,9 @@ public class EditAwardsScript extends BaseFLLServlet {
       }
     }
 
-    final List<Category> awardOrder = sponsorMap.values().stream()
-                                                .map(s -> AwardsScript.getCategoryByTitle(description, s))
-                                                .collect(Collectors.toList());
+    final List<AwardCategory> awardOrder = sponsorMap.values().stream()
+                                                     .map(s -> AwardsScript.getCategoryByTitle(description, s))
+                                                     .collect(Collectors.toList());
     return awardOrder;
   }
 
@@ -967,7 +966,7 @@ public class EditAwardsScript extends BaseFLLServlet {
 
     final @Nullable String specifiedStr = request.getParameter(String.format("awardOrder_specified"));
     if (null != specifiedStr) {
-      final List<Category> awardOrder = findAwardOrder(description, request);
+      final List<AwardCategory> awardOrder = findAwardOrder(description, request);
 
       switch (layer) {
       case SEASON:

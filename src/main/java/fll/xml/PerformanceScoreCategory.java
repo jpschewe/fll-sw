@@ -19,12 +19,13 @@ import org.w3c.dom.NodeList;
 
 import fll.Utilities;
 import fll.web.playoff.TeamScore;
+import fll.web.report.awards.AwardCategory;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Description of the performance.
  */
-public class PerformanceScoreCategory extends ScoreCategory implements Category {
+public class PerformanceScoreCategory extends ScoreCategory implements AwardCategory {
 
   /**
    * Category name for {@link #getName()}.

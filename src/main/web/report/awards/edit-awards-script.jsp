@@ -233,6 +233,22 @@ awardsScriptModule.init = ( ) => {
         <%@ include file="edit-awards-script_textarea-macros.jspf"%>
         <hr />
 
+        <h3>${head2headAwardTitle}</h3>
+        <div>
+            Specify Presenter
+            <input type="checkbox"
+                name="${CATEGORY_HEAD2HEAD_PRESENTER.identifier}_specified"
+                id="${CATEGORY_HEAD2HEAD_PRESENTER.identifier}_specified" />
+            <input type="text"
+                name="${CATEGORY_HEAD2HEAD_PRESENTER.identifier}_text"
+                id="${CATEGORY_HEAD2HEAD_PRESENTER.identifier}_text"
+                value="${sectionText[CATEGORY_HEAD2HEAD_PRESENTER]}" />
+        </div>
+        <c:set var="sectionName">${CATEGORY_HEAD2HEAD.identifier}</c:set>
+        <c:set var="sectionTextValue">${sectionText[CATEGORY_HEAD2HEAD]}</c:set>
+        <%@ include file="edit-awards-script_textarea-macros.jspf"%>
+        <hr />
+
         <h3>${performanceAwardTitle}</h3>
         <div>
             Specify Presenter

@@ -60,7 +60,6 @@ import fll.web.report.PlayoffReport;
 import fll.web.report.PromptSummarizeScores;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
-import fll.xml.ChampionshipCategory;
 import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.xml.XMLUtils;

@@ -15,12 +15,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.web.report.awards.AwardCategory;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * A category that doesn't have a score.
  */
-public class NonNumericCategory implements Category, Serializable {
+public class NonNumericCategory implements AwardCategory, Serializable {
 
   /**
    * Name of the XML tag used for this class.

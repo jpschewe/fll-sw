@@ -4,16 +4,14 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-package fll.xml;
+package fll.web.report.awards;
 
 import java.io.Serializable;
 
 /**
- * Common elements of {@link NonNumericCategory},
- * {@link SubjectiveScoreCategory}, {@link PerformanceScoreCategory},
- * {@link ChampionshipCategory}.
+ * Common elements for categories that are given awards.
  */
-public interface Category extends Serializable {
+public interface AwardCategory extends Serializable {
 
   /**
    * @return display string for the category
