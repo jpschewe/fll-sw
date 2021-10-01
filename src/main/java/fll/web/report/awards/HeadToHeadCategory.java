@@ -19,7 +19,7 @@ public final class HeadToHeadCategory implements AwardCategory {
   /**
    * Display name for the pre-defined category.
    */
-  public static final String AWARD_TITLE = "Head to Head";
+  public static final String AWARD_TITLE = "Head to Head Brackets";
 
   private HeadToHeadCategory() {
   }
