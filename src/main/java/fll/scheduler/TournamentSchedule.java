@@ -809,6 +809,7 @@ public class TournamentSchedule implements Serializable {
    * @throws IOException
    * @throws ScheduleParseException if there is an error with the schedule
    */
+  @RequiresNonNull("matches")
   private void parseData(@UnderInitialization(TournamentSchedule.class) TournamentSchedule this,
                          final CellFileReader reader,
                          final ColumnInformation ci)
@@ -837,6 +838,7 @@ public class TournamentSchedule implements Serializable {
    * Populate internal caches with the data from this newly created
    * {@link TeamScheduleInfo}.
    */
+  @RequiresNonNull("matches")
   private void cacheTeamScheduleInformation(@UnderInitialization(TournamentSchedule.class) TournamentSchedule this,
                                             final TeamScheduleInfo ti) {
     addToSchedule(ti);
@@ -1186,7 +1188,7 @@ public class TournamentSchedule implements Serializable {
    * @param ti the schedule info
    * @param performance the performance to add
    */
-  @RequiresNonNull("this.matches")
+  @RequiresNonNull("matches")
   private void addToMatches(@UnknownInitialization TournamentSchedule this,
                             final TeamScheduleInfo ti,
                             final PerformanceTime performance) {

@@ -716,7 +716,8 @@ public class SchedulerUI extends JFrame {
     mDescriptionFilename.setText(file.getName());
   }
 
-  @RequiresNonNull({ "mDescriptionFilename" })
+  @RequiresNonNull({ "mDescriptionFilename", "mNewScheduleDescriptionAction", "mOpenScheduleDescriptionAction",
+                     "mSaveScheduleDescriptionAction", "mRunSchedulerAction" })
   private JToolBar createDescriptionToolbar(@UnknownInitialization(JFrame.class) SchedulerUI this) {
     final JToolBar toolbar = new JToolBar("Description Toolbar");
     toolbar.setFloatable(false);
@@ -731,7 +732,8 @@ public class SchedulerUI extends JFrame {
     return toolbar;
   }
 
-  @RequiresNonNull({ "mScheduleFilename" })
+  @RequiresNonNull({ "mScheduleFilename", "mOpenScheduleAction", "mReloadFileAction", "mWriteSchedulesAction",
+                     "mDisplayGeneralScheduleAction" })
   private JToolBar createScheduleToolbar(@UnderInitialization(JFrame.class) SchedulerUI this) {
     final JToolBar toolbar = new JToolBar("Schedule Toolbar");
     toolbar.setFloatable(false);
