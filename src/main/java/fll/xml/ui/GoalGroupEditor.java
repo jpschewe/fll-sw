@@ -115,7 +115,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
     addGoal(newGoal);
   }
 
-  @RequiresNonNull({ "moveDeleteListener", "goalEditorContainer", "goalScope" })
+  @RequiresNonNull({ "moveDeleteListener", "goalEditorContainer", "goalScope", "goalEditors" })
   private void addGoal(@UnknownInitialization(GoalElementEditor.class) GoalGroupEditor this,
                        final AbstractGoal goal) {
 
