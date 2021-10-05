@@ -37,7 +37,7 @@ plugins {
     id "checkstyle"
         
     // Checker Framework pluggable type-checking
-    id "org.checkerframework" version "0.5.23"
+    id "org.checkerframework" version "0.6.2"
     
     // code coverage
     id "jacoco"
@@ -138,7 +138,7 @@ ext {
     junit_version = "5.7.2"
     log4j_version = "2.14.1"
     spotbugs_version = "4.3.0"
-    checker_framework_version = "3.16.0"
+    checker_framework_version = "3.18.1"
 
     web_build_dir = new File(project.buildDir, "web")
     documentation_build_dir = new File(project.buildDir, "gen-documentation")    
