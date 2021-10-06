@@ -1,3 +1,4 @@
+* #963 - Provide friendly feedback when a team number is not selected for verification
 * #936 - highlight goals involved in restriction errors
 * #957 - Allow one to specify non-numeric categories that are not awarded for a particular tournament level
 * #933 - Make buttons on subjective score entry larger
