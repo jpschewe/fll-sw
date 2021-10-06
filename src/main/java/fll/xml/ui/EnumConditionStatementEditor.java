@@ -10,7 +10,6 @@ import java.awt.BorderLayout;
 import java.util.Collection;
 
 import javax.swing.Box;
-import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
 import fll.xml.EnumConditionStatement;
@@ -41,8 +40,8 @@ import fll.xml.InequalityComparison;
     leftEditor = new StringValueEditor(stmt.getLeft(), goalScope);
     container.add(leftEditor);
 
-    final JComboBox<InequalityComparison> comparisonEditor = new JComboBox<>(new InequalityComparison[] { InequalityComparison.EQUAL_TO,
-                                                                                                          InequalityComparison.NOT_EQUAL_TO });
+    final InequalityEditor comparisonEditor = new InequalityEditor(new InequalityComparison[] { InequalityComparison.EQUAL_TO,
+                                                                                                InequalityComparison.NOT_EQUAL_TO });
     container.add(comparisonEditor);
     comparisonEditor.addActionListener(e -> {
       stmt.setComparison(comparisonEditor.getItemAt(comparisonEditor.getSelectedIndex()));

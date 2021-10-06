@@ -10,17 +10,19 @@ package fll.xml;
  * Inequality values.
  */
 public enum InequalityComparison {
-  LESS_THAN("less-than"), //
-  LESS_THAN_OR_EQUAL("less-than-or-equal"), //
-  GREATER_THAN("greater-than"), //
-  GREATER_THAN_OR_EQUAL("greater-than-or-equal"), //
-  EQUAL_TO("equal-to"), //
-  NOT_EQUAL_TO("not-equal-to");
+  LESS_THAN("less-than", "less than"), //
+  LESS_THAN_OR_EQUAL("less-than-or-equal", "less than or equal to"), //
+  GREATER_THAN("greater-than", "greater than"), //
+  GREATER_THAN_OR_EQUAL("greater-than-or-equal", "greater than or equal to"), //
+  EQUAL_TO("equal-to", "equal to"), //
+  NOT_EQUAL_TO("not-equal-to", "not equal to");
 
   private final String tagName;
 
-  InequalityComparison(final String tagName) {
+  InequalityComparison(final String tagName,
+                       final String display) {
     this.tagName = tagName;
+    this.display = display;
   }
 
   /**
@@ -28,6 +30,15 @@ public enum InequalityComparison {
    */
   public String getTagName() {
     return tagName;
+  }
+
+  private final String display;
+
+  /**
+   * @return human readable string
+   */
+  public String getDisplay() {
+    return display;
   }
 
 }
