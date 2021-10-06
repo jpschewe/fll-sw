@@ -57,7 +57,7 @@ public class RestrictionEditor extends PolynomialEditor {
     lowerBound = FormatterUtils.createDoubleField();
     lowerBound.setValue(restriction.getLowerBound());
     lowerBoundBox.add(lowerBound);
-    lowerBoundBox.add(new JLabel(" <= "));
+    lowerBoundBox.add(new JLabel(" is less than or equal to "));
     lowerBoundBox.add(Box.createHorizontalGlue());
 
     lowerBound.addPropertyChangeListener("value", e -> {
@@ -70,7 +70,7 @@ public class RestrictionEditor extends PolynomialEditor {
 
     final Box upperBoundBox = Box.createHorizontalBox();
     this.add(upperBoundBox);
-    upperBoundBox.add(new JLabel(" <= "));
+    upperBoundBox.add(new JLabel(" is less than or equal to "));
     upperBound = FormatterUtils.createDoubleField();
     upperBound.setValue(restriction.getUpperBound());
     upperBoundBox.add(upperBound);

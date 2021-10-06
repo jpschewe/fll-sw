@@ -1,3 +1,4 @@
+* #943 - Use words instead of symbols for inequalities in restrictions
 * #936 - highlight goals involved in restriction errors
 * #957 - Allow one to specify non-numeric categories that are not awarded for a particular tournament level
 * #933 - Make buttons on subjective score entry larger
