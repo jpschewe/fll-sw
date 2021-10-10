@@ -791,16 +791,17 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     final Element teamNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     teamContainer.appendChild(teamNumberBlock);
-    teamNumberBlock.appendChild(document.createTextNode(String.format("%d", team.getTeamNumber())));
+    teamNumberBlock.appendChild(document.createTextNode(String.format("Number: %d", team.getTeamNumber())));
 
     final Element teamNameBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     teamContainer.appendChild(teamNameBlock);
-    teamNameBlock.appendChild(document.createTextNode(team.getTeamName()));
+    teamNameBlock.appendChild(document.createTextNode(String.format("Name: %s", team.getTeamName())));
 
     final Element teamOrganizationBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     teamContainer.appendChild(teamOrganizationBlock);
     final String organization = team.getOrganization();
-    teamOrganizationBlock.appendChild(document.createTextNode(null == organization ? "" : organization));
+    teamOrganizationBlock.appendChild(document.createTextNode(String.format("Organization: %s",
+                                                                            null == organization ? "" : organization)));
   }
 
   private static String suffixForPlace(final int place) {
