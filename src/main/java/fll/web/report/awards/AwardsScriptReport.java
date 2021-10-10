@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -42,7 +43,6 @@ import com.diffplug.common.base.Errors;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
-import fll.Utilities;
 import fll.db.AdvancingTeam;
 import fll.db.AwardWinner;
 import fll.db.AwardWinners;
@@ -68,7 +68,6 @@ import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import fll.xml.PerformanceScoreCategory;
-import fll.xml.ScoreType;
 import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -432,7 +431,6 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                             final List<String> awardGroupOrder,
                                             final PerformanceScoreCategory category)
       throws SQLException {
-    final ScoreType performanceScoreType = category.getScoreType();
 
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
@@ -453,6 +451,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     for (final String awardGroup : awardGroupOrder) {
       if (scores.containsKey(awardGroup)) {
+        final List<Top10.ScoreEntry> rawScoresforAwardGroup = scores.get(awardGroup);
+
         final Element awardGroupBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
         container.appendChild(awardGroupBlock);
         awardGroupBlock.appendChild(document.createTextNode(String.format("Award Group: %s", awardGroup)));
@@ -485,12 +485,16 @@ public class AwardsScriptReport extends BaseFLLServlet {
           }
 
           final Integer firstTeamNumber = teamsInPlace.get(0);
-          final ImmutablePair<Integer, Double> pair = teamPerformanceRanks.get(firstTeamNumber);
-          if (null == pair) {
-            throw new FLLInternalException("No score information for team "
+          final Optional<Top10.ScoreEntry> firstTeamEntry = rawScoresforAwardGroup.stream() //
+                                                                                  .filter(x -> x.getTeamNumber() == firstTeamNumber.intValue()) //
+                                                                                  .findAny();
+
+          if (!firstTeamEntry.isPresent()) {
+            throw new FLLRuntimeException("Unable to find the performance score for team "
                 + firstTeamNumber);
           }
-          final double score = pair.getRight();
+
+          final String formattedScore = firstTeamEntry.get().getFormattedScore();
 
           final Element table = FOPUtils.createBasicTable(document);
           container.appendChild(table);
@@ -522,7 +526,6 @@ public class AwardsScriptReport extends BaseFLLServlet {
           } else {
             teamPlaceFormat = "The %d%s place team with a score of %s is:";
           }
-          final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
 
           teamPlaceBlock.appendChild(document.createTextNode(String.format(teamPlaceFormat, place,
                                                                            suffixForPlace(place), formattedScore)));
