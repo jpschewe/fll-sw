@@ -848,7 +848,6 @@ public class AwardsScriptReport extends BaseFLLServlet {
     if (!sponsors.isEmpty()) {
       final Element list = FOPUtils.createXslFoElement(document, "list-block");
       listBlock.appendChild(list);
-      list.setAttribute("provisional-distance-between-starts", "10pt");
 
       sponsors.forEach(s -> {
         final Element listItem = FOPUtils.createXslFoElement(document, "list-item");
