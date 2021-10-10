@@ -276,7 +276,7 @@ const awardsScriptModule = {};
         const addSponsorButton = document.getElementById("add_sponsor");
 
         specifiedEle.addEventListener("change", () => {
-            awardsScriptionModule.setSponsorsSpecified(specifiedEle.checked);
+            awardsScriptModule.setSponsorsSpecified(specifiedEle.checked);
         });
 
 
