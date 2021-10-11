@@ -266,7 +266,7 @@ dependencies {
   integrationTestImplementation(sourceSets.test.output)
         
   integrationTestImplementation(group: "org.easytesting", name: "fest-swing", version: "1.2.1")
-  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.51.0") {
+  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.53.0") {
       
     // xml APIs are part of the JDK
     exclude(group: "xml-apis", module: "xml-apis")
