@@ -102,13 +102,14 @@ public final class ScoreEntry {
    * @param response used to redirect on an error
    * @param pageContext where to store the values
    * @param session get session variables
+   * @return true if the page should continue loading, false if it should stop
    * @see #isTabletEntry(HttpServletRequest, HttpSession)
    */
-  public static void populateContext(final ServletContext application,
-                                     final HttpServletRequest request,
-                                     final HttpServletResponse response,
-                                     final HttpSession session,
-                                     final PageContext pageContext) {
+  public static boolean populateContext(final ServletContext application,
+                                        final HttpServletRequest request,
+                                        final HttpServletResponse response,
+                                        final HttpSession session,
+                                        final PageContext pageContext) {
     final boolean edit = Boolean.parseBoolean(request.getParameter("EditFlag"));
 
     final boolean tabletEntry = isTabletEntry(request, session);
@@ -141,7 +142,7 @@ public final class ScoreEntry {
           SessionAttributes.appendToMessage(session,
                                             "<p name='error' class='error'>Attempted to load score entry page without providing a team number.</p>");
           response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
-          return;
+          return false;
         }
         final int dashIndex = lTeamNum.indexOf('-');
         final int teamNumber;
@@ -178,7 +179,7 @@ public final class ScoreEntry {
             SessionAttributes.appendToMessage(session,
                                               "<p name='error' class='error'>Please choose a run number when editing scores</p>");
             response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
-            return;
+            return false;
           }
           final int runNumber = Utilities.getIntegerNumberFormat().parse(runNumberStr).intValue();
           if (runNumber == 0) {
@@ -188,7 +189,7 @@ public final class ScoreEntry {
               SessionAttributes.appendToMessage(session,
                                                 "<p name='error' class='error'>Selected team has no performance score for this tournament.</p>");
               response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
-              return;
+              return false;
             }
           } else {
             if (!Queries.performanceScoreExists(connection, tournament, teamNumber, runNumber)) {
@@ -197,7 +198,7 @@ public final class ScoreEntry {
                                                     + runNumber
                                                     + ".  Please choose a valid run number.</p>");
               response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
-              return;
+              return false;
             }
             lRunNumber = runNumber;
           }
@@ -212,12 +213,12 @@ public final class ScoreEntry {
                   + " If you were intending to double check a score, you probably just forgot to check"
                   + " the box for doing so.</p>");
               response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
-              return;
+              return false;
             } else if (!Queries.didTeamReachPlayoffRound(connection, nextRunNumber, teamNumber)) {
               SessionAttributes.appendToMessage(session,
                                                 "<p name='error' class='error' id='error-not-advanced'>Selected team has not advanced to the next head to head round.</p>");
               response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
-              return;
+              return false;
             }
           }
           lRunNumber = nextRunNumber;
@@ -284,6 +285,8 @@ public final class ScoreEntry {
     } else {
       pageContext.setAttribute("body_background", "transparent");
     }
+
+    return true;
   }
 
   /**
