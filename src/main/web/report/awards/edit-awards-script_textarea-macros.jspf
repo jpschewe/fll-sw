@@ -1,0 +1,16 @@
+
+<div>
+    <div>
+        <label>
+            Specify text:
+            <input type="checkbox" name="${sectionName}_specified"
+                id="${sectionName}_specified" />
+        </label>
+    </div>
+
+    <textarea cols="80" rows="10" name="${sectionName}_text"
+        id="${sectionName}_text">${sectionTextValue}</textarea>
+
+    <div class="macro-buttons" id="${sectionName}_macros"></div>
+
+</div>

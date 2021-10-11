@@ -253,6 +253,9 @@ dependencies {
     
   implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.24")
   
+  // for templating reports
+  implementation(group: "org.apache.velocity", name: "velocity-engine-core", version: "2.3")
+  
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-api", version: project.junit_version)
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-params", version: project.junit_version)
   testRuntimeOnly(group: "org.junit.jupiter", name: "junit-jupiter-engine", version: project.junit_version)

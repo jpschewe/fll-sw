@@ -1,0 +1,15 @@
+What a great day! Thank you for all your hard work preparing your research projects and robots for today's event. 
+
+High Tech Kids has been working hard this year to bring you quality events and programs to the state of Minnesota. We are always interested in your feedback and a coach survey will be emailed after the event. Please help us improve and tell our story of your experience to our funders. 
+
+High Tech Kids is also the FIRST partner for FIRST Tech Challenge, a follow on program for students in 7th through 12th grade. We have lots of information on our website and would be happy to answer questions about that program as well.
+
+We are always in need of volunteers. Today's event required ${numTrainedOfficials} trained officials. Coaches and parents make some of the best referees and judges, please consider helping at future tournaments. Talk to us today or contact Barb or Norm at High Tech Kids for more information on how you can make a difference!
+
+Today we will be advancing ${numTeamsAdvancing} teams to the ${tournamentNextLevel} tournament. 
+
+The Minnesota Boston Scientific State Championship will be held on Saturday, March 20th. 
+
+Please remember that advancement is not determined solely by the highest robot score. It is a combination of how the team did in each judging session (Research, Core Values, and Robot Design & Programming) AS WELL AS their highest score on the performance table. 
+
+I will now announce the teams advancing.

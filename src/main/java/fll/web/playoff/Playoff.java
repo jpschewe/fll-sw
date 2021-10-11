@@ -205,8 +205,8 @@ public final class Playoff {
     try (
         DatabaseTeamScore teamAScore = new DatabaseTeamScore(GenerateDB.PERFORMANCE_TABLE_NAME, tournament,
                                                              teamA.getTeamNumber(), runNumber, connection);
-        DatabaseTeamScore teamBScore = new DatabaseTeamScore("Performance", tournament, teamB.getTeamNumber(),
-                                                             runNumber, connection)) {
+        DatabaseTeamScore teamBScore = new DatabaseTeamScore(PerformanceScoreCategory.CATEGORY_TITLE, tournament,
+                                                             teamB.getTeamNumber(), runNumber, connection)) {
       final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
                                      teamBScore);
       return retval;

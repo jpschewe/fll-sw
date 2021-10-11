@@ -36,6 +36,7 @@ import fll.util.FormatterUtils;
 import fll.util.GuiUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
+import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
 import fll.xml.ui.MovableExpandablePanel.DeleteEvent;
@@ -236,8 +237,8 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
 
     mPerformanceEditor = new PerformanceEditor(mDescription.getPerformance());
     mPerformanceEditor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
-    final MovableExpandablePanel performance = new MovableExpandablePanel("Performance", mPerformanceEditor, false,
-                                                                          false);
+    final MovableExpandablePanel performance = new MovableExpandablePanel(PerformanceScoreCategory.CATEGORY_TITLE,
+                                                                          mPerformanceEditor, false, false);
     performanceBox.add(performance, BorderLayout.CENTER);
 
     final Box subjectiveTopContainer = Box.createVerticalBox();

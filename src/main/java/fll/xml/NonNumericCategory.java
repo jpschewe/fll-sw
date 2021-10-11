@@ -15,12 +15,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.web.report.awards.AwardCategory;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * A category that doesn't have a score.
  */
-public class NonNumericCategory implements Serializable {
+public class NonNumericCategory implements AwardCategory, Serializable {
 
   /**
    * Name of the XML tag used for this class.
@@ -97,6 +98,7 @@ public class NonNumericCategory implements Serializable {
   /**
    * @return the title
    */
+  @Override
   public String getTitle() {
     return title;
   }
@@ -114,9 +116,7 @@ public class NonNumericCategory implements Serializable {
 
   private boolean perAwardGroup = true;
 
-  /**
-   * @return if the winners are per award group, otherwise per tournament
-   */
+  @Override
   public boolean getPerAwardGroup() {
     return perAwardGroup;
   }

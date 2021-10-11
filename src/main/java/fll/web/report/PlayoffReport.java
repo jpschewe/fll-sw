@@ -38,6 +38,7 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.playoff.Playoff;
+import fll.web.report.awards.AwardsReport;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
 import jakarta.servlet.ServletContext;
@@ -359,7 +360,7 @@ public class PlayoffReport extends BaseFLLServlet {
 
     if (null != tournament.getLevel()) {
       titleBuilder.append(" ");
-      titleBuilder.append(tournament.getLevel());
+      titleBuilder.append(tournament.getLevel().getName());
     }
 
     titleBuilder.append(" Head to Head Winners");

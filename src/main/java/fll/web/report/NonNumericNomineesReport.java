@@ -42,6 +42,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.report.awards.AwardsReport;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -244,7 +245,7 @@ public class NonNumericNomineesReport extends BaseFLLServlet {
 
     final String tournamentDescription = tournament.getDescription();
     final String tournamentName = null == tournamentDescription ? tournament.getName() : tournamentDescription;
-    final String tournamentTitle = String.format("%s: %s", tournament.getLevel(), tournamentName);
+    final String tournamentTitle = String.format("%s: %s", tournament.getLevel().getName(), tournamentName);
     subtitleBlock.appendChild(document.createTextNode(tournamentTitle));
 
     final Element subtitleCenter = FOPUtils.createXslFoElement(document, FOPUtils.LEADER_TAG);
@@ -270,7 +271,7 @@ public class NonNumericNomineesReport extends BaseFLLServlet {
 
     if (null != tournament.getLevel()) {
       titleBuilder.append(" ");
-      titleBuilder.append(tournament.getLevel());
+      titleBuilder.append(tournament.getLevel().getName());
     }
 
     titleBuilder.append(" Non-numeric Nominees");

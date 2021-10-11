@@ -1,0 +1,8 @@
+textarea, .macro-buttons {
+    display: inline-block;
+    vertical-align: top;
+}
+
+textarea:disabled, input:disabled {
+    background-color: lightgrey;
+}

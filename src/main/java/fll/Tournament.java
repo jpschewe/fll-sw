@@ -67,6 +67,19 @@ public final class Tournament implements Serializable {
   private final String name;
 
   /**
+   * @return the {@link #getDescription()} if not null, otherwise
+   *         {@link #getName()}
+   */
+  @JsonIgnore
+  public String getTitle() {
+    if (null == description) {
+      return name;
+    } else {
+      return description;
+    }
+  }
+
+  /**
    * @return a short name for the tournament
    */
   public String getName() {

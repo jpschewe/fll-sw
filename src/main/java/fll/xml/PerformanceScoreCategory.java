@@ -19,17 +19,36 @@ import org.w3c.dom.NodeList;
 
 import fll.Utilities;
 import fll.web.playoff.TeamScore;
+import fll.web.report.awards.AwardCategory;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Description of the performance.
  */
-public class PerformanceScoreCategory extends ScoreCategory {
+public class PerformanceScoreCategory extends ScoreCategory implements AwardCategory {
+
+  /**
+   * Category name for {@link #getName()}.
+   */
+  public static final String CATEGORY_NAME = "performance";
+
+  /**
+   * Category title.
+   */
+  public static final String CATEGORY_TITLE = "Performance";
+
+  /**
+   * @return {@link #CATEGORY_TITLE}
+   */
+  @Override
+  public String getTitle() {
+    return CATEGORY_TITLE;
+  }
 
   /**
    * XML tag used for the category.
    */
-  public static final String TAG_NAME = "Performance";
+  public static final String TAG_NAME = CATEGORY_TITLE;
 
   /**
    * XML tag for tie breakers.
@@ -236,14 +255,14 @@ public class PerformanceScoreCategory extends ScoreCategory {
     return ele;
   }
 
-  /**
-   * Category name for {@link #getName()}.
-   */
-  public static final String CATEGORY_NAME = "performance";
-
   @Override
   public String getName() {
     return CATEGORY_NAME;
+  }
+
+  @Override
+  public boolean getPerAwardGroup() {
+    return true;
   }
 
 }

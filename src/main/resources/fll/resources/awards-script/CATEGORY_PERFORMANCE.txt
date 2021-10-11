@@ -1,0 +1,1 @@
+The Robot Performance Award is presented to the team whose robot achieved the highest score in the ${numRegularMatchPlayRounds} official performance rounds. 

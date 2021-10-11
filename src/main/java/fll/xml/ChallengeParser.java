@@ -52,6 +52,8 @@ import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.util.FLLInternalException;
 import fll.util.FP;
+import fll.web.report.awards.ChampionshipCategory;
+import fll.web.report.awards.HeadToHeadCategory;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -256,6 +258,29 @@ public final class ChallengeParser {
   private static void validateDescription(final ChallengeDescription description) throws ChallengeValidationException {
     description.getSubjectiveCategories().forEach(ChallengeParser::validateSubjectiveCategory);
 
+    description.getNonNumericCategories().forEach(ChallengeParser::validateNonNumericCategory);
+
+  }
+
+  /**
+   * Run validity checks on the specified non-numeric category.
+   * 
+   * @param category the category to check
+   * @throws ChallengeValidationException if there is an error
+   */
+  public static void validateNonNumericCategory(final NonNumericCategory category) throws ChallengeValidationException {
+    if (category.getTitle().equals(ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE)) {
+      throw new ChallengeValidationException(String.format("The category title '%s' is reserved and cannot be used for a non-numeric category.",
+                                                           ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE));
+    }
+    if (category.getTitle().equals(PerformanceScoreCategory.CATEGORY_TITLE)) {
+      throw new ChallengeValidationException(String.format("The category title '%s' is reserved and cannot be used for a non-numeric category.",
+                                                           PerformanceScoreCategory.CATEGORY_TITLE));
+    }
+    if (category.getTitle().equals(HeadToHeadCategory.AWARD_TITLE)) {
+      throw new ChallengeValidationException(String.format("The category title '%s' is reserved and cannot be used for a non-numeric category.",
+                                                           HeadToHeadCategory.AWARD_TITLE));
+    }
   }
 
   /**
@@ -267,6 +292,24 @@ public final class ChallengeParser {
   public static void validateSubjectiveCategory(final SubjectiveScoreCategory category)
       throws ChallengeValidationException {
     validateCategoryRubric(category);
+
+    if (category.getTitle().equals(ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE)) {
+      throw new ChallengeValidationException(String.format("The category title '%s' is reserved and cannot be used for a subjective category.",
+                                                           ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE));
+    }
+    if (category.getTitle().equals(HeadToHeadCategory.AWARD_TITLE)) {
+      throw new ChallengeValidationException(String.format("The category title '%s' is reserved and cannot be used for a subjective category.",
+                                                           HeadToHeadCategory.AWARD_TITLE));
+    }
+    if (category.getTitle().equals(PerformanceScoreCategory.CATEGORY_TITLE)) {
+      throw new ChallengeValidationException(String.format("The category title '%s' is reserved and cannot be used for a subjective category.",
+                                                           PerformanceScoreCategory.CATEGORY_TITLE));
+    }
+    if (category.getName().equals(PerformanceScoreCategory.CATEGORY_NAME)) {
+      throw new ChallengeValidationException(String.format("The category name '%s' is reserved and cannot be used for a subjective category.",
+                                                           PerformanceScoreCategory.CATEGORY_NAME));
+    }
+
   }
 
   private static void validateCategoryRubric(final SubjectiveScoreCategory category)

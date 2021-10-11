@@ -17,12 +17,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.web.report.awards.AwardCategory;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Description of a subjective category.
  */
-public class SubjectiveScoreCategory extends ScoreCategory {
+public class SubjectiveScoreCategory extends ScoreCategory implements AwardCategory {
 
   /**
    * Name of the XML tag used for this class.
@@ -101,9 +102,7 @@ public class SubjectiveScoreCategory extends ScoreCategory {
 
   private String mTitle;
 
-  /**
-   * @return the title of the category
-   */
+  @Override
   public String getTitle() {
     return mTitle;
   }
@@ -263,6 +262,11 @@ public class SubjectiveScoreCategory extends ScoreCategory {
       }
     }
 
+  }
+
+  @Override
+  public boolean getPerAwardGroup() {
+    return true;
   }
 
 }

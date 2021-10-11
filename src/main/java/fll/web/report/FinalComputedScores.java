@@ -53,6 +53,7 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.playoff.DatabaseTeamScore;
+import fll.web.report.awards.AwardsReport;
 import fll.xml.ChallengeDescription;
 import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
@@ -840,7 +841,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
       }
     }
 
-    row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Performance"));
+    row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                              PerformanceScoreCategory.CATEGORY_TITLE));
 
     row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Weighted Rank"));
     row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Overall Score"));

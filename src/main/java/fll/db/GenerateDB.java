@@ -7,6 +7,8 @@ package fll.db;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
@@ -14,6 +16,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Formatter;
+
+import org.apache.commons.io.IOUtils;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
@@ -36,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 31;
+  public static final int DATABASE_VERSION = 32;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -95,8 +100,7 @@ public final class GenerateDB {
    * @throws UnsupportedEncodingException if the challenge description cannot be
    *           decoded
    */
-  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
-                                "OBL_UNSATISFIED_OBLIGATION" }, justification = "Need dynamic data for default values, Bug in findbugs - ticket:2924739")
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need dynamic data for default values, Bug in findbugs - ticket:2924739")
   public static void generateDB(final ChallengeDescription description,
                                 final Connection connection)
       throws SQLException, UnsupportedEncodingException {
@@ -326,8 +330,10 @@ public final class GenerateDB {
       createDelayedPerformanceTable(connection, true);
 
       createFinalistParameterTables(connection, true);
-      
+
       createCategoriesIgnored(connection, true);
+
+      createAwardsScriptTables(connection, true);
 
       // --------------- create views ---------------
 
@@ -1195,6 +1201,116 @@ public final class GenerateDB {
 
       stmt.executeUpdate(sql.toString());
 
+    }
+  }
+
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "table and columns are passed in")
+  private static void createAwardsScriptTable(final Connection connection,
+                                              final boolean createConstraints,
+                                              final String tableName,
+                                              final String keyColumn,
+                                              final String valueColumn)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      final Formatter sql = new Formatter();
+
+      sql.format("CREATE TABLE %s (", tableName);
+      sql.format("  tournament_level_id INTEGER NOT NULL");
+      sql.format(" ,tournament_id INTEGER NOT NULL");
+      sql.format(" ,layer_rank INTEGER NOT NULL");
+      sql.format(" ,%s VARCHAR(64) NOT NULL", keyColumn);
+      sql.format(" ,%s LONGVARCHAR NOT NULL", valueColumn);
+      if (createConstraints) {
+        sql.format(" ,CONSTRAINT %s_pk PRIMARY KEY (%s, tournament_level_id, tournament_id, layer_rank)", tableName,
+                   keyColumn);
+      }
+      sql.format(")");
+      stmt.executeUpdate(sql.toString());
+    }
+  }
+
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "table and columns are passed in")
+  private static void createAwardsScriptRankTable(final Connection connection,
+                                                  final boolean createConstraints,
+                                                  final String tableName,
+                                                  final String keyColumn,
+                                                  final String rankColumn)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      final Formatter sql = new Formatter();
+      sql.format("CREATE TABLE %s (", tableName);
+      sql.format("  tournament_level_id INTEGER NOT NULL");
+      sql.format(" ,tournament_id INTEGER NOT NULL");
+      sql.format(" ,layer_rank INTEGER NOT NULL");
+      sql.format(" ,%s LONGVARCHAR NOT NULL", keyColumn);
+      sql.format(" ,%s INTEGER NOT NULL", rankColumn);
+      if (createConstraints) {
+        sql.format(" ,CONSTRAINT %s_pk PRIMARY KEY (%s, tournament_level_id, tournament_id)", tableName, keyColumn);
+      }
+      sql.format(")");
+      stmt.executeUpdate(sql.toString());
+    }
+
+  }
+
+  /**
+   * Create tables used to store information about the awards script.
+   * This also populates the default values.
+   * 
+   * @param connection database connections
+   * @param createConstrints if constraints should be created
+   * @throws SQLException on a database error
+   */
+  /* package */ static void createAwardsScriptTables(final Connection connection,
+                                                     final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+
+      // store text for sections
+      createAwardsScriptTable(connection, createConstraints, "awards_script_text", "section_name", "text");
+
+      try (PreparedStatement insert = connection.prepareStatement("INSERT INTO awards_script_text"
+          + " (section_name, tournament_level_id, tournament_id, layer_rank, text)"//
+          + " VALUES(?, ?, ?, ?, ?)")) {
+        insert.setInt(2, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID);
+        insert.setInt(3, GenerateDB.INTERNAL_TOURNAMENT_ID);
+        insert.setInt(4, AwardsScript.Layer.SEASON.getRank());
+
+        final ClassLoader loader = Utilities.getClassLoader();
+
+        for (final AwardsScript.Section section : AwardsScript.Section.values()) {
+          try (InputStream stream = loader.getResourceAsStream(String.format("fll/resources/awards-script/%s.txt",
+                                                                             section.name()))) {
+            if (null != stream) {
+              final String text = IOUtils.toString(stream, Utilities.DEFAULT_CHARSET);
+
+              insert.setString(1, section.name());
+              insert.setString(5, text);
+              insert.executeUpdate();
+            }
+          } catch (final IOException e) {
+            LOGGER.warn("Error loading default text for section {}, skipping", section.name(), e);
+          }
+        }
+      }
+
+      // store values for macros
+      createAwardsScriptTable(connection, createConstraints, "awards_script_parameters", "param_name", "param_value");
+
+      // store descriptions for categories and presenters
+      createAwardsScriptTable(connection, createConstraints, "awards_script_subjective_text", "category_name", "text");
+      createAwardsScriptTable(connection, createConstraints, "awards_script_subjective_presenter", "category_name",
+                              "presenter");
+      createAwardsScriptTable(connection, createConstraints, "awards_script_nonnumeric_text", "category_title", "text");
+      createAwardsScriptTable(connection, createConstraints, "awards_script_nonnumeric_presenter", "category_title",
+                              "presenter");
+
+      // store awards order
+      createAwardsScriptRankTable(connection, createConstraints, "awards_script_award_order", "award", "award_rank");
+
+      // store sponsor order
+      createAwardsScriptRankTable(connection, createConstraints, "awards_script_sponsor_order", "sponsor",
+                                  "sponsor_rank");
     }
   }
 

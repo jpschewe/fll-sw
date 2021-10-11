@@ -55,4 +55,26 @@ public class AwardWinner extends OverallAwardWinner implements Serializable {
     return awardGroup;
   }
 
+  @Override
+  public int hashCode() {
+    return Objects.hash(getName(), getTeamNumber(), getAwardGroup());
+  }
+
+  @Override
+  public boolean equals(final @Nullable Object o) {
+    if (null == o) {
+      return false;
+    } else if (this == o) {
+      return true;
+    } else if (this.getClass().equals(o.getClass())) {
+      final AwardWinner other = (AwardWinner) o;
+      return this.getPlace() == other.getPlace() //
+          && this.getTeamNumber() == other.getTeamNumber() //
+          && this.getName().equals(other.getName()) //
+          && this.getAwardGroup().equals(other.getAwardGroup());
+    } else {
+      return false;
+    }
+  }
+
 }

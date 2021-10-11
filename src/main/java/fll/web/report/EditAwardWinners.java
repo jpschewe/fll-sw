@@ -29,6 +29,7 @@ import fll.db.OverallAwardWinner;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.report.awards.ChampionshipCategory;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import jakarta.servlet.ServletContext;
@@ -45,7 +46,7 @@ public final class EditAwardWinners {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
-   * Award type for {@link AwardWinners#CHAMPIONSHIP_AWARD_NAME}.
+   * Award type for {@link ChampionshipCategory#CHAMPIONSHIP_AWARD_TITLE}.
    */
   public static final String CHAMPIONSHIP_AWARD_TYPE = "championship";
 
@@ -119,7 +120,7 @@ public final class EditAwardWinners {
       }
       page.setAttribute("overallAwardWinners", overallAwardWinners);
 
-      page.setAttribute("championshipAwardName", AwardWinners.CHAMPIONSHIP_AWARD_NAME);
+      page.setAttribute("championshipAwardName", ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE);
       page.setAttribute("championshipAwardType", CHAMPIONSHIP_AWARD_TYPE);
       page.setAttribute("nonNumericAwardType", NON_NUMERIC_AWARD_TYPE);
       page.setAttribute("subjectiveAwardType", SUBJECTIVE_AWARD_TYPE);

@@ -22,7 +22,7 @@ import fll.xml.SubjectiveScoreCategory;
  * Represents the winner of an award. Needs to match the Javascript class in
  * js/fll-objects.js.
  */
-public class OverallAwardWinner implements Serializable {
+public class OverallAwardWinner implements Serializable, Comparable<OverallAwardWinner> {
 
   /**
    * Used for JSON deserialization.
@@ -89,6 +89,43 @@ public class OverallAwardWinner implements Serializable {
    */
   public final int getPlace() {
     return place;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getName(), getTeamNumber());
+  }
+
+  @Override
+  public boolean equals(final @Nullable Object o) {
+    if (null == o) {
+      return false;
+    } else if (this == o) {
+      return true;
+    } else if (this.getClass().equals(o.getClass())) {
+      final OverallAwardWinner other = (OverallAwardWinner) o;
+      return this.getPlace() == other.getPlace() //
+          && this.getTeamNumber() == other.getTeamNumber() //
+          && this.getName().equals(other.getName());
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public int compareTo(final OverallAwardWinner o) {
+    final int nameCompare = getName().compareTo(o.getName());
+    if (nameCompare == 0) {
+      if (getPlace() < o.getPlace()) {
+        return -1;
+      } else if (getPlace() > o.getPlace()) {
+        return 1;
+      } else {
+        return Integer.compare(getTeamNumber(), o.getTeamNumber());
+      }
+    } else {
+      return nameCompare;
+    }
   }
 
 }
