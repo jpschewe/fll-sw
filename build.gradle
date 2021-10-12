@@ -224,7 +224,7 @@ dependencies {
     
   implementation(group: "com.diffplug.durian", name: "durian-core", version: "1.2.0")
         
-  implementation(group: "it.sauronsoftware", name: "junique", version: "1.0.4")
+  implementation(group: "it.sauronsoftware", name: "junique", version: "1.0.5")
             
   implementation(group: "com.googlecode.log4jdbc", name: "log4jdbc", version: "1.2")
     
