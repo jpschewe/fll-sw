@@ -1,3 +1,5 @@
+Release 16.0.0
+==============
 * #211 - Generate the script for the awards ceremony
 * #963 - Provide friendly feedback when a team number is not selected for verification
 * #943 - Use words instead of symbols for inequalities in restrictions
