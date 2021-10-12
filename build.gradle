@@ -27,10 +27,10 @@ plugins {
     id "org.unbroken-dome.test-sets" version "4.0.0"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
-    id "com.github.spotbugs" version "4.7.2"
+    id "com.github.spotbugs" version "4.7.6"
     id "org.myire.munge" version "1.0" // transformer for spotbugs XML
-    id "de.aaschmid.cpd" version "3.2"
-    id "edu.sc.seis.launch4j" version "2.5.0"
+    id "de.aaschmid.cpd" version "3.3"
+    id "edu.sc.seis.launch4j" version "2.5.1"
     id "com.gorylenko.gradle-git-properties" version "2.3.1"
     id "com.github.ben-manes.versions" version "0.39.0" // adds dependencyUpdates task
     id "de.undercouch.download" version "4.1.2" // file download
@@ -131,13 +131,13 @@ integrationTest {
 }
 
 ext {
-    jackson_version = "2.12.4"
+    jackson_version = "2.13.0"
     slf4j_version = "1.7.32"
-    tomcat_version = "10.0.8"
+    tomcat_version = "10.0.12"
     poi_version = "5.0.0"
-    junit_version = "5.7.2"
+    junit_version = "5.8.1"
     log4j_version = "2.14.1"
-    spotbugs_version = "4.3.0"
+    spotbugs_version = "4.4.1"
     checker_framework_version = "3.18.1"
 
     web_build_dir = new File(project.buildDir, "web")
@@ -218,23 +218,23 @@ dependencies {
 
   implementation(group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0")
             
-  implementation(group: "dnsjava", name: "dnsjava", version: "3.4.0")
+  implementation(group: "dnsjava", name: "dnsjava", version: "3.4.2")
        
-  implementation(group: "org.apache.tika", name: "tika-core", version: "2.0.0")
+  implementation(group: "org.apache.tika", name: "tika-core", version: "2.1.0")
     
   implementation(group: "com.diffplug.durian", name: "durian-core", version: "1.2.0")
         
-  implementation(group: "it.sauronsoftware", name: "junique", version: "1.0.4")
+  implementation(group: "it.sauronsoftware", name: "junique", version: "1.0.5")
             
   implementation(group: "com.googlecode.log4jdbc", name: "log4jdbc", version: "1.2")
     
   implementation(group: "net.java.linoleum", name: "jlfgr", version: "1_0")
         
-  implementation(group: "com.opencsv", name: "opencsv", version: "5.5.1")
+  implementation(group: "com.opencsv", name: "opencsv", version: "5.5.2")
     
   implementation(group: "net.mtu.eggplant", name: "JonsInfra", version: "3.2.0"   )
     
-  implementation(group: "com.google.guava", name: "guava", version: "30.1.1-jre")
+  implementation(group: "com.google.guava", name: "guava", version: "31.0.1-jre")
     
   implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.6") {
     // only needed for BMP and TIFF formats
@@ -266,13 +266,13 @@ dependencies {
   integrationTestImplementation(sourceSets.test.output)
         
   integrationTestImplementation(group: "org.easytesting", name: "fest-swing", version: "1.2.1")
-  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.51.0") {
+  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.53.0") {
       
     // xml APIs are part of the JDK
     exclude(group: "xml-apis", module: "xml-apis")
   }
   integrationTestImplementation(group: "org.seleniumhq.selenium", name: "selenium-server", version: "3.141.59")
-  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "4.4.3")
+  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "5.0.3")
   
   // make selenium log to log4j
   integrationTestImplementation(group: "org.apache.logging.log4j", name: "log4j-jul", version: project.log4j_version)
