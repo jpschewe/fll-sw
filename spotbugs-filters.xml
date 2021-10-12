@@ -12,13 +12,20 @@
 
 
   <!-- spotbugs issue with JDK 11+
-https://github.com/spotbugs/spotbugs/issues/756 -->
+       https://github.com/spotbugs/spotbugs/issues/756 -->
   <Match>
     <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE" />
   </Match>
 
+  <!-- spotbugs issue with JDK 11+
+       https://github.com/spotbugs/spotbugs/issues/868 -->
+  <Match>
+    <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE" />
+  </Match>
+  
+  
   <!-- spotbugs issue https://github.com/spotbugs/spotbugs/issues/811
--->
+  -->
   <Match>
     <Bug pattern="UPM_UNCALLED_PRIVATE_METHOD" />
   </Match>
