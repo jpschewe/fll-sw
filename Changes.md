@@ -1,3 +1,5 @@
+* #940 - make if/then/else obvious in the challenge description editor
+
 Release 16.0.0
 ==============
 * #211 - Generate the script for the awards ceremony

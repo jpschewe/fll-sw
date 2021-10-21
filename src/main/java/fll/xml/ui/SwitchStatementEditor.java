@@ -7,10 +7,13 @@
 package fll.xml.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -54,6 +57,28 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
   private final PolynomialEditor otherwiseEditor;
 
+  /* package */ static final Color IF_COLOR = Color.ORANGE;
+
+  /* package */ static final Color THEN_COLOR = Color.BLUE;
+
+  /* package */ static final Color ELSE_COLOR = Color.CYAN;
+
+  private static final int IF_THEN_LABEL_FONT_STYLE = Font.BOLD;
+
+  private static final int IF_THEN_LABEL_FONT_SIZE = 18;
+
+  private Font getIfThenFont() {
+    final Font labelFont = getFont();
+    final String fontName;
+    if (null == labelFont) {
+      fontName = "Serif";
+    } else {
+      fontName = labelFont.getFontName();
+    }
+    final Font ifThenFont = new Font(fontName, IF_THEN_LABEL_FONT_STYLE, IF_THEN_LABEL_FONT_SIZE);
+    return ifThenFont;
+  }
+
   SwitchStatementEditor(final SwitchStatement switchStmt,
                         final GoalScope goalScope,
                         final VariableScope variableScope) {
@@ -76,9 +101,11 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
     container.add(stmtContainer);
 
     otherwiseEditor = new PolynomialEditor(switchStmt.getDefaultCase(), goalScope, variableScope);
-    final MovableExpandablePanel otherwisePanel = new MovableExpandablePanel("Otherwise goal value is", otherwiseEditor,
+    otherwiseEditor.setBorder(BorderFactory.createLineBorder(SwitchStatementEditor.ELSE_COLOR));
+    final MovableExpandablePanel otherwisePanel = new MovableExpandablePanel("Otherwise value is", otherwiseEditor,
                                                                              false, false);
     container.add(otherwisePanel);
+    otherwisePanel.setTitleFont(getIfThenFont());
 
     caseEventListener = new CaseEventListener();
 
@@ -88,7 +115,6 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
     // add the existing cases after everything is setup
     switchStmt.getCases().forEach(this::addCaseStatement);
-
   }
 
   private void addNewCaseStatement(@UnknownInitialization(SwitchStatementEditor.class) SwitchStatementEditor this) {
@@ -99,7 +125,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
   private void addCaseStatement(@UnknownInitialization(SwitchStatementEditor.class) SwitchStatementEditor this,
                                 final CaseStatement stmt) {
-    final CaseStatementEditor editor = new CaseStatementEditor(stmt, goalScope, variableScope);
+    final CaseStatementEditor editor = new CaseStatementEditor(stmt, goalScope, variableScope, getIfThenFont());
     stmtEditors.add(editor);
 
     final MovableExpandablePanel exPanel = new MovableExpandablePanel("If/then", editor, true, true);

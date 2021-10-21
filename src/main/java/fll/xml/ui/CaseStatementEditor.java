@@ -6,11 +6,12 @@
 
 package fll.xml.ui;
 
-import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.util.Collection;
 
-import javax.swing.Box;
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -33,47 +34,43 @@ public final class CaseStatementEditor extends JPanel implements Validatable {
    * @param stmt the object to edit
    * @param goalScope used to find goals
    * @param variableScope used to find variables
+   * @param ifThenFont the font to use for the if/else labels
    */
   public CaseStatementEditor(final CaseStatement stmt,
                              final GoalScope goalScope,
-                             final VariableScope variableScope) {
-    super(new BorderLayout());
+                             final VariableScope variableScope,
+                             final Font ifThenFont) {
+    super(new GridBagLayout());
     this.stmt = stmt;
 
-    final Box container = Box.createVerticalBox();
-    add(container, BorderLayout.CENTER);
+    GridBagConstraints gbc;
 
-    final Box ifBox = Box.createHorizontalBox();
-    container.add(ifBox);
     final JLabel ifLabel = new JLabel("If");
-
-    final Font labelFont = ifLabel.getFont();
-    final String fontName;
-    if (null == labelFont) {
-      fontName = "Serif";
-    } else {
-      fontName = labelFont.getFontName();
-    }
-    final Font ifThenFont = new Font(fontName, Font.BOLD, 18);
+    gbc = new GridBagConstraints();
+    add(ifLabel, gbc);
 
     ifLabel.setFont(ifThenFont);
-    ifBox.add(ifLabel);
-
-    ifBox.add(Box.createHorizontalGlue());
 
     conditionEditor = new AbstractConditionStatementEditor(stmt.getCondition(), goalScope, variableScope);
-    container.add(conditionEditor);
+    conditionEditor.setBorder(BorderFactory.createLineBorder(SwitchStatementEditor.IF_COLOR));
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    add(conditionEditor, gbc);
 
-    final Box thenBox = Box.createHorizontalBox();
-    container.add(thenBox);
-    final JLabel thenLabel = new JLabel("Then goal value is");
+    final JLabel thenLabel = new JLabel("Then value is");
     thenLabel.setFont(ifThenFont);
-    thenBox.add(thenLabel);
-    thenBox.add(Box.createHorizontalGlue());
+    gbc = new GridBagConstraints();
+    add(thenLabel, gbc);
 
     resultEditor = new CaseStatementResultEditor(stmt.getResult(), goalScope, variableScope);
-    container.add(resultEditor);
-
+    resultEditor.setBorder(BorderFactory.createLineBorder(SwitchStatementEditor.THEN_COLOR));
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    add(resultEditor, gbc);
   }
 
   /**
