@@ -1,0 +1,759 @@
+<?xml version="1.0" encoding="UTF-8"?><fll copyright="Changing wording in subjective" revision="15" schemaVersion="3" title="2021 Minnesota FIRST LEGO League - Cargo Connect" winner="HIGH">
+  <Performance minimumScore="0.00" weight="1.00">
+    <goalGroup title="M00">
+      <description>EQUIPMENT INSPECTION BONUS</description>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m00_small_inspection_area" required="false" scoreType="INTEGER" title="ALL Equipment Fits in Small Inspection Area"/>
+    </goalGroup>
+    <goalGroup title="M01 ">
+      <description>INNOVATION PROJECT MODEL</description>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m01_innovation_project" required="false" scoreType="INTEGER" title="Innovation Project Model Touching Cargo Connect circle"/>
+    </goalGroup>
+    <goalGroup title="M02 - UNUSED CAPACITY">
+      <description>Unused Capacity</description>
+      <goal initialValue="0.00" name="m02_unused_capacity" required="false" scoreType="INTEGER" title="Blue Hinged Container is Completely Closed AND">
+        <value score="0.00" title="No" value="None"/>
+        <value score="20.00" title="Partly Full 1-5 pcs" value="partly_full"/>
+        <value score="30.00" title="Completely Full 6 pcs" value="completelyfull"/>
+      </goal>
+    </goalGroup>
+    <goalGroup title="M03 - UNLOAD CARGO PLANE">
+      <description>Unload Cargo Plane</description>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m03_cargo_door_down" required="false" scoreType="INTEGER" title="Cargo Plane Door Completely Down, Touching Black Frame"/>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m03_plane_unloaded" required="false" scoreType="INTEGER" title="Cargo Plane Unloaded - Container Completely Separated from Plane"/>
+    </goalGroup>
+    <goalGroup title="M04 - TRANSPORTATION JOURNEY">
+      <description>Transporation Journey</description>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m04_truck" required="false" scoreType="INTEGER" title="Truck Completely past Blue Line, On Mat"/>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m04_airplane" required="false" scoreType="INTEGER" title="Airplane Completely past Blue Line, On Mat"/>
+      <computedGoal name="m04_both" title="Airplane and Truck BOTH Completely Past Blue Line">
+        <switch>
+          <case>
+            <condition>
+              <left floatingPoint="truncate">
+                <term>
+                  <constant value="1.00"/>
+                  <goalRef goal="m04_truck" scoreType="raw"/>
+                </term>
+                <term>
+                  <constant value="1.00"/>
+                  <goalRef goal="m04_airplane" scoreType="raw"/>
+                </term>
+              </left>
+              <greater-than-or-equal/>
+              <right floatingPoint="truncate">
+                <term>
+                  <constant value="2.00"/>
+                </term>
+              </right>
+            </condition>
+            <result floatingPoint="truncate">
+              <term>
+                <constant value="10.00"/>
+              </term>
+            </result>
+          </case>
+          <default floatingPoint="truncate">
+            <term>
+              <constant value="0.00"/>
+            </term>
+          </default>
+        </switch>
+      </computedGoal>
+    </goalGroup>
+    <goalGroup title="M05 - SWITCH ENGINE">
+      <description>Switch Engine</description>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m_05_switch" required="false" scoreType="INTEGER" title="Switch Engine Yellow Bar All the Way Down/South"/>
+    </goalGroup>
+    <goalGroup title="M06 - ACCIDENT AVOIDANCE">
+      <description>Accident Avoidance</description>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="0.00" name="m06_parked_over_blue" required="false" scoreType="INTEGER" title="Robot Parked Over Blue Accident Avoidance Line"/>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="0.00" name="m06_yellow_knocked_over" required="false" scoreType="INTEGER" title="Yellow Panel Knocked Over"/>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="0.00" name="m06_black_frame_down" required="false" scoreType="INTEGER" title="Black Frame Knocked Down - Mission will score ZERO"/>
+      <computedGoal name="m06_score" title="M06 Score">
+        <switch>
+          <case>
+            <condition>
+              <left floatingPoint="truncate">
+                <term>
+                  <constant value="1.00"/>
+                  <goalRef goal="m06_black_frame_down" scoreType="raw"/>
+                </term>
+              </left>
+              <equal-to/>
+              <right floatingPoint="truncate">
+                <term>
+                  <constant value="1.00"/>
+                </term>
+              </right>
+            </condition>
+            <result floatingPoint="truncate">
+              <term>
+                <constant value="0.00"/>
+              </term>
+            </result>
+          </case>
+          <case>
+            <condition>
+              <left floatingPoint="truncate">
+                <term>
+                  <constant value="1.00"/>
+                  <goalRef goal="m06_parked_over_blue" scoreType="raw"/>
+                </term>
+              </left>
+              <equal-to/>
+              <right floatingPoint="truncate">
+                <term>
+                  <constant value="1.00"/>
+                </term>
+              </right>
+            </condition>
+            <switch>
+              <case>
+                <condition>
+                  <left floatingPoint="truncate">
+                    <term>
+                      <constant value="1.00"/>
+                      <goalRef goal="m06_yellow_knocked_over" scoreType="raw"/>
+                    </term>
+                  </left>
+                  <equal-to/>
+                  <right floatingPoint="truncate">
+                    <term>
+                      <constant value="1.00"/>
+                    </term>
+                  </right>
+                </condition>
+                <result floatingPoint="truncate">
+                  <term>
+                    <constant value="30.00"/>
+                  </term>
+                </result>
+              </case>
+              <default floatingPoint="truncate">
+                <term>
+                  <constant value="20.00"/>
+                </term>
+              </default>
+            </switch>
+          </case>
+          <default floatingPoint="truncate">
+            <term>
+              <constant value="0.00"/>
+            </term>
+          </default>
+        </switch>
+      </computedGoal>
+    </goalGroup>
+    <goalGroup title="M07 - UNLOAD CARGO SHIP">
+      <description>Unload Cargo Ship</description>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m07_container_not_touching" required="false" scoreType="INTEGER" title="Container No Longer Touching Cargo Ship's East Deck"/>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m07_container_east" required="false" scoreType="INTEGER" title="Container Completely East of Cargo Ship's East Deck"/>
+    </goalGroup>
+    <goalGroup title="M08 - AIR DROP">
+      <description>Air Drop</description>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m08_food_separated" required="false" scoreType="INTEGER" title="Food Package Separated from Your Helicopter"/>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m08_other_food_package" required="false" scoreType="INTEGER" title="Food Package from Other Helicopter in your Cargo Connect Circle"/>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m08_both_separated_package" required="false" scoreType="INTEGER" title="Both Team's Separated Their Food Package from Their Helicopters"/>
+    </goalGroup>
+    <goalGroup title="M09 - TRAIN TRACKS">
+      <description>Train Tracks</description>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m09_track_down" required="false" scoreType="INTEGER" title="Train Track Completely Down/West"/>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m09_train_latched" required="false" scoreType="INTEGER" title="Train Latched at End of Tracks"/>
+    </goalGroup>
+    <goalGroup title="M10 - SORTING CENTER">
+      <description>Sorting Center</description>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m10_orange_container_in_blue" required="false" scoreType="INTEGER" title="Light Orange Container Only Container Completely in Blue Sorting Area Box"/>
+    </goalGroup>
+    <goalGroup title="M11 - HOME DELIVERY">
+      <goal initialValue="0.00" name="m11_package_delivered" required="false" scoreType="INTEGER" title="Package on Doorstep Not Touching Any Equipment">
+        <value score="0.00" title="No" value="no"/>
+        <value score="20.00" title="Partly" value="partly"/>
+        <value score="30.00" title="Completely" value="completely"/>
+      </goal>
+    </goalGroup>
+    <goalGroup title="M12 - LARGE DELIVERY">
+      <goal initialValue="0.00" name="m12_turbine_blade" required="false" scoreType="INTEGER" title="Turbine Blade Touching Only Blue Holder">
+        <value score="0.00" title="No" value="no"/>
+        <value score="20.00" title="And the Mat" value="mat"/>
+        <value score="30.00" title="And Nothing Else" value="nothing"/>
+      </goal>
+      <goal initialValue="0.00" name="m12_chicken_statue" required="false" scoreType="INTEGER" title="Chicken Statue Upright with Base in its Circle">
+        <value score="0.00" title="No" value="no"/>
+        <value score="5.00" title="Base Partly In" value="partly"/>
+        <value score="10.00" title="Base Completely In" value="completely"/>
+      </goal>
+    </goalGroup>
+    <goalGroup title="M13 - PLATOONING TRUCKS">
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m13_latched_outside_home" required="false" scoreType="INTEGER" title="Both Trucks Latched Together Completely Outside of Home"/>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m13_latched_to_bridge" required="false" scoreType="INTEGER" title="A Truck Latched to the Bridge"/>
+      <computedGoal name="m13_bonus" title="Both Trucks Latched Outside Home AND A Truck Latched to Bridge">
+        <switch>
+          <case>
+            <condition>
+              <left floatingPoint="truncate">
+                <term>
+                  <constant value="1.00"/>
+                  <goalRef goal="m13_latched_outside_home" scoreType="raw"/>
+                </term>
+                <term>
+                  <constant value="1.00"/>
+                  <goalRef goal="m13_latched_to_bridge" scoreType="raw"/>
+                </term>
+              </left>
+              <greater-than-or-equal/>
+              <right floatingPoint="truncate">
+                <term>
+                  <constant value="2.00"/>
+                </term>
+              </right>
+            </condition>
+            <result floatingPoint="truncate">
+              <term>
+                <constant value="10.00"/>
+              </term>
+            </result>
+          </case>
+          <default floatingPoint="truncate">
+            <term>
+              <constant value="0.00"/>
+            </term>
+          </default>
+        </switch>
+      </computedGoal>
+    </goalGroup>
+    <goalGroup title="M14 - BRIDGE">
+      <goal initialValue="0.00" max="2.00" min="0.00" multiplier="10.00" name="m14_bridge_lowered" required="false" scoreType="INTEGER" title="# of Bridge Decks Lowered Resting on Center Support"/>
+    </goalGroup>
+    <goalGroup title="M15 - LOAD CARGO">
+      <goal initialValue="0.00" max="2.00" min="0.00" multiplier="10.00" name="m15_containers_platooning" required="false" scoreType="INTEGER" title="# Containers On &amp; Touching Only Platooning Trucks Completely Outside Home"/>
+      <goal initialValue="0.00" max="2.00" min="0.00" multiplier="20.00" name="m15_containers_train" required="false" scoreType="INTEGER" title="# Containers On &amp; Touching Only Train"/>
+      <goal initialValue="0.00" max="2.00" min="0.00" multiplier="30.00" name="m15_containers_deck" required="false" scoreType="INTEGER" title="# Containers On &amp; Touching Only Cargo Ship's West Deck"/>
+    </goalGroup>
+    <goalGroup title="M16 - CARGO CONNECT">
+      <goal initialValue="0.00" max="8.00" min="0.00" multiplier="5.00" name="m16_containers_partly_any_circle" required="false" scoreType="INTEGER" title="# Containers PARTLY in ANY Circle"/>
+      <goal initialValue="0.00" max="8.00" min="0.00" multiplier="10.00" name="m16_containers_completely_any_circle" required="false" scoreType="INTEGER" title="# Containers COMPLETELY in ANY Circle"/>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m16_blue_container_blue_circle" required="false" scoreType="INTEGER" title="Blue Container (Not Hinged) Completely in Blue Circle"/>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m16_green_container_green_circle" required="false" scoreType="INTEGER" title="Lime Green Container Completely in Green Circle"/>
+      <goal initialValue="0.00" max="6.00" min="0.00" multiplier="10.00" name="m16_circle_container_completely_in" required="false" scoreType="INTEGER" title="# Circles with at Least One Container Completely In"/>
+    </goalGroup>
+    <goalGroup title="M17 - PRECISION TOKENS REMAINING ON FIELD">
+      <goal initialValue="50.00" name="m17_precision_tokens" required="false" scoreType="INTEGER" title="# Precision Tokens Remaining on Field">
+        <value score="0.00" title="Zero" value="zero"/>
+        <value score="10.00" title="1" value="one"/>
+        <value score="15.00" title="2" value="two"/>
+        <value score="25.00" title="3" value="three"/>
+        <value score="35.00" title="4" value="four"/>
+        <value score="50.00" title="5" value="five"/>
+        <value score="50.00" title="6" value="six"/>
+      </goal>
+    </goalGroup>
+    <goalGroup title="GRACIOUS PROFESSIONALISM DISPLAYED AT THE ROBOT GAME TABLE">
+      <goal initialValue="3.00" max="4.00" min="2.00" multiplier="0.00" name="gp_score" required="false" scoreType="INTEGER" title="GP - Does not affect Robot Game Score"/>
+    </goalGroup>
+    <restriction floatingPoint="truncate" lowerBound="0.00" message="Container Must be No Longer Touching East Deck to Score Completely East of Deck" upperBound="1.00">
+      <term>
+        <constant value="1.00"/>
+        <goalRef goal="m07_container_not_touching" scoreType="raw"/>
+      </term>
+      <term>
+        <constant value="-1.00"/>
+        <goalRef goal="m07_container_east" scoreType="raw"/>
+      </term>
+    </restriction>
+    <restriction floatingPoint="truncate" lowerBound="0.00" message="Food Package must be released from own helicopter" upperBound="1.00">
+      <term>
+        <constant value="1.00"/>
+        <goalRef goal="m08_food_separated" scoreType="raw"/>
+      </term>
+      <term>
+        <constant value="-1.00"/>
+        <goalRef goal="m08_both_separated_package" scoreType="raw"/>
+      </term>
+    </restriction>
+    <restriction floatingPoint="truncate" lowerBound="0.00" message="Color match containers inconsistent with number of circles with complete containers" upperBound="100.00">
+      <term>
+        <constant value="-1.00"/>
+        <goalRef goal="m16_green_container_green_circle" scoreType="raw"/>
+      </term>
+      <term>
+        <constant value="-1.00"/>
+        <goalRef goal="m16_blue_container_blue_circle" scoreType="raw"/>
+      </term>
+      <term>
+        <constant value="1.00"/>
+        <goalRef goal="m16_circle_container_completely_in" scoreType="raw"/>
+      </term>
+    </restriction>
+    <restriction floatingPoint="truncate" lowerBound="0.00" message="Number of containers completely in circles inconsistent with circles with complete containers" upperBound="100.00">
+      <term>
+        <constant value="1.00"/>
+        <goalRef goal="m16_containers_completely_any_circle" scoreType="computed"/>
+      </term>
+      <term>
+        <constant value="-1.00"/>
+        <goalRef goal="m16_circle_container_completely_in" scoreType="computed"/>
+      </term>
+    </restriction>
+    <restriction floatingPoint="truncate" lowerBound="0.00" message="Must have 1 circle when some containers completely in" upperBound="100.00">
+      <term>
+        <constant value="-1.00"/>
+        <goalRef goal="m16_containers_completely_any_circle" scoreType="raw"/>
+      </term>
+      <term>
+        <constant value="1.00"/>
+        <goalRef goal="m16_containers_completely_any_circle" scoreType="raw"/>
+        <goalRef goal="m16_circle_container_completely_in" scoreType="raw"/>
+      </term>
+    </restriction>
+    <restriction floatingPoint="truncate" lowerBound="-1.00" message="Too many containers" upperBound="7.00">
+      <term>
+        <constant value="1.00"/>
+        <goalRef goal="m10_orange_container_in_blue" scoreType="raw"/>
+      </term>
+      <term>
+        <constant value="-1.00"/>
+        <goalRef goal="m03_plane_unloaded" scoreType="raw"/>
+      </term>
+      <term>
+        <constant value="1.00"/>
+        <goalRef goal="m15_containers_train" scoreType="raw"/>
+      </term>
+      <term>
+        <constant value="1.00"/>
+        <goalRef goal="m15_containers_deck" scoreType="raw"/>
+      </term>
+      <term>
+        <constant value="1.00"/>
+        <goalRef goal="m16_containers_partly_any_circle" scoreType="raw"/>
+      </term>
+      <term>
+        <constant value="1.00"/>
+        <goalRef goal="m16_containers_completely_any_circle" scoreType="raw"/>
+      </term>
+    </restriction>
+  </Performance>
+  <subjectiveCategory name="core_values" title="Core Values" weight="1.00">
+    <scoreSheetInstructions>The Core Values should be the lens through which you watch the team's presentations. All team members should demonstrate the Core Values in everything they do. This rubric should be used to record the Core Values observed throughout the judging session. Core Values will also be evaluated at each Robot Game with Gracious Professionalism scores, which will feed into a team's overall Core Values rank.</scoreSheetInstructions>
+    <goalGroup title="Discovery">
+      <description>- Team explored new skills and ideas.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="discovery" required="false" scoreType="INTEGER" title="Discovery">
+        <description>Team explored new skills and ideas.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimally observed across the team." title="Beginning"/>
+          <range max="6" min="4" shortDescription="Inconsistently observed across the team." title="Developing"/>
+          <range max="9" min="7" shortDescription="Consistently observed across the team." title="Accomplished"/>
+          <range max="12" min="10" shortDescription="Explain how team exceeds:" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Innovation">
+      <description>- Team used creativity and persistence to solve problems.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="innovation" required="false" scoreType="INTEGER" title="Innovation">
+        <description>Team used creativity and persistence to solve problems</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimally observed across the team." title="Beginning"/>
+          <range max="6" min="4" shortDescription="Inconsistently observed across the team." title="Developing"/>
+          <range max="9" min="7" shortDescription="Consistently observed across the team." title="Accomplished"/>
+          <range max="12" min="10" shortDescription="Explain how team exceeds:" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Impact">
+      <description>- Team applied what they learned to improve their world.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="inclusion" required="false" scoreType="INTEGER" title="Impact">
+        <description>Team applied what they learned to improve their world.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimally observed across the team." title="Beginning"/>
+          <range max="6" min="4" shortDescription="Inconsistently observed across the team." title="Developing"/>
+          <range max="9" min="7" shortDescription="Consistently observed across the team." title="Accomplished">
+            <description> </description>
+          </range>
+          <range max="12" min="10" shortDescription="Explain how team exceeds:" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Inclusion">
+      <description>- Team demonstrated respect and embraced their differences.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="inclusion1" required="false" scoreType="INTEGER" title="Inclusion">
+        <description>Team demonstrated respect and embraced their differences.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimally observed across the team." title="Beginning"/>
+          <range max="6" min="4" shortDescription="Inconsistently observed across the team." title="Developing"/>
+          <range max="9" min="7" shortDescription="Consistently observed across the team." title="Accomplished"/>
+          <range max="12" min="10" shortDescription="Explain how team exceeds:" title="Exceeds">
+            <description> </description>
+          </range>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Teamwork">
+      <description>- Team clearly showed they had worked as a team throughout their journey</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="teamwork" required="false" scoreType="INTEGER" title="Teamwork">
+        <description>Team clearly showed they had worked as a team throughout their journey.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimally observed across the team." title="Beginning"/>
+          <range max="6" min="4" shortDescription="Inconsistently observed across the team." title="Developing"/>
+          <range max="9" min="7" shortDescription="Consistently observed across the team." title="Accomplished"/>
+          <range max="12" min="10" shortDescription="Explain how team exceeds:" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Fun">
+      <description>- Teams clearly had fun and celebrated what they have achieved.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="fun" required="false" scoreType="INTEGER" title="Fun">
+        <description>Team clearly showed they had worked as a team throughout their journey.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimally observed across the team." title="Beginning"/>
+          <range max="6" min="4" shortDescription="Inconsistently observed across the team." title="Developing"/>
+          <range max="9" min="7" shortDescription="Consistently observed across the team." title="Accomplished"/>
+          <range max="12" min="10" shortDescription="Explain how team exceeds:" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <nominates nonNumericCategoryTitle="Breakthrough Award"/>
+    <nominates nonNumericCategoryTitle="Rising All-Star"/>
+    <nominates nonNumericCategoryTitle="Motivate"/>
+  </subjectiveCategory>
+  <subjectiveCategory name="project" title="Innovation Project" weight="1.00">
+    <scoreSheetInstructions>Teams should communicate to the judges their achievement in each of the following criteria. This rubric should be filled out during the Innovation Project presentation. Judges are required to tick one box on each separate line to indicate the level the team has achieved. If the team exceeds, please make a short comment in the Exceeds box.</scoreSheetInstructions>
+    <goalGroup title=" Identify">
+      <description>- Team had a clearly defined problem that was well researched.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="identify_1" required="true" scoreType="INTEGER" title="Identify1">
+        <description>Team had a clearly defined problem.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Problem not clearly defined" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partially clear definition of the problem" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear definition of the problem" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="How has the team exceeded?" title="Exceeds"/>
+        </rubric>
+      </goal>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="identify_2" required="false" scoreType="INTEGER" title="Identify2">
+        <description>Team problem was well researched.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimal research" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partial research from more than one source" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear, detailed research from a variety of sources" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="How has the team exceeded?" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Design">
+      <description>- Team generated innovative ideas independently before selecting and planning which one to develop.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="design_1" required="true" scoreType="INTEGER" title="Design1">
+        <description>Team generated innovative ideas independently before selecting which one to develop.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimal evidence of an inclusive selection process" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partial evidence of an inclusive selection process" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear evidence of an inclusive selection process" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="How has the team exceeded?" title="Exceeds"/>
+        </rubric>
+      </goal>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="design_2" required="false" scoreType="INTEGER" title="Design2">
+        <description>Team showed evidence of planning which idea to develop.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimal evidence of an effective plan" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partial evidence of an effective plan" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear evidence of an effective plan" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="How has the team exceeded?" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Create">
+      <description>- Team developed an original idea or built on an existing one with a prototype model/drawing to represent their solution.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="create_1" required="true" scoreType="INTEGER" title="Create1">
+        <description>Team developed an original idea or built on an existing one .</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimal development of innovative solution" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partial development of innovative solution" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear development of innovative solution" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="How has the team exceeded?" title="Exceeds"/>
+        </rubric>
+      </goal>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="create_2" required="false" scoreType="INTEGER" title="Create2">
+        <description>Team developed a prototype model/drawing to represent their solution.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Unclear model/drawing of solution" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Simple model/drawing that helps to share the solution" title="Developing"/>
+          <range max="9" min="7" shortDescription="Detailed model/drawing that helps to share the solution" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="How has the team exceeded?" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Iterate">
+      <description>- Team shared their ideas, collected feedback and included improvements in their solution.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="goal_0" required="false" scoreType="INTEGER" title="Iterate1">
+        <description>Team shared their solution/ideas.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimal sharing of their solution" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Shared their solution with user OR professional" title="Developing"/>
+          <range max="9" min="7" shortDescription="Shared their solution with user AND professional" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="How has the team exceeded?" title="Exceeds"/>
+        </rubric>
+      </goal>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="iterate_2" required="false" scoreType="INTEGER" title="Iterate2">
+        <description>Team shared improvements in their solution.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimal evidence of improvements in their solution" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partial evidence of improvements in their solution" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear evidence of improvements in their solution" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="How has the team exceeded?" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Communicate">
+      <description>- Team shared a creative and effective presentation of their current solution and its impact on their users.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="communicate_1" required="false" scoreType="INTEGER" title="Communicate1">
+        <description>Team shared a creative and effective presentation of their current solution.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Presentation minimally engaging" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Presentation partially engaging" title="Developing"/>
+          <range max="9" min="7" shortDescription="Presentation engaging" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="How has the team exceeded?" title="Exceeds"/>
+        </rubric>
+      </goal>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="communicate_2" required="false" scoreType="INTEGER" title="Communicate2">
+        <description>Team shared their current solution and its impact on their users.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Solution and its potential impact on others unclear" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Solution and its potential impact on others partially clear" title="Developing"/>
+          <range max="9" min="7" shortDescription="Solution and its potential impact on others clear" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="How has the team exceeded?" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+  </subjectiveCategory>
+  <subjectiveCategory name="robot_design" title="Robot Design" weight="0.50">
+    <scoreSheetInstructions>Teams should communicate to the judges their achievement in each of the following criteria. This rubric should be filled out during the Robot Design explanation. Judges are required to tick one box on each separate line to indicate the level the team has achieved. If the team exceeds, please make a short comment in the Exceeds box.</scoreSheetInstructions>
+    <goalGroup title="Identify">
+      <description>- Team had a clearly defined mission strategy and explored building and coding skills they needed.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="identify_one" required="false" scoreType="INTEGER" title="Identify1">
+        <description>Team had a clear mission strategy for the robot and attachments</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Unclear mission strategy" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partially clear mission strategy" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear mission strategy" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="identify_two" required="false" scoreType="INTEGER" title="Identify2">
+        <description>Team members learned about robot building.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Limited evidence of building and coding skills in all team members" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Inconsistent evidence of building and coding skills in all team members" title="Developing"/>
+          <range max="9" min="7" shortDescription="Consistent evidence of building and coding skills in all team members" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Design">
+      <description>- Team produced innovative designs and a clear workplan, seeking guidance as needed</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="design_1" required="false" scoreType="INTEGER" title="Design1">
+        <description>Team had a plan for building their robot</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimal evidence of an effective plan" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partial evidence of an effective plan" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear evidence of an effective plan" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="design_2" required="false" scoreType="INTEGER" title="Design2">
+        <description>Team explained the innovative features of their robot</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimal explanation of robot and code's innovative features" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partial explanation of robot and code's innovative features " title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear explanation of robot and code's innovative features" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Create">
+      <description>- Team developed an effective robot and code solution matching their mission strategy.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="create_1" required="false" scoreType="INTEGER" title="Create1">
+        <description>Team explained their robot, attachments and sensors.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Limited explanation of their robot and its attachment and sensor functionality" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Simple explanation of their robot and its attachment and sensor functionality" title="Developing"/>
+          <range max="9" min="7" shortDescription="Detailed explanation of their robot and its attachment and sensor functionality" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="create_2" required="false" scoreType="INTEGER" title="Create2">
+        <description>Team explained how their robot will complete the missions</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Unclear explanation of how code makes their robot act" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partially clear explanation of how code makes their robot act" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear explanation of how code makes their robot act" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Iterate">
+      <description>- Team repeatedly tested their robot and code to identify areas for improvement and incorporated the findings into their current solution.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="iterate_1" required="false" scoreType="INTEGER" title="Iterate1">
+        <description>Team explained how they tested their robot</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimal evidence of testing their robot and code" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partial evidence of testing their robot and code" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear evidence of testing their robot and code" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="iterate_2" required="false" scoreType="INTEGER" title="Iterate2">
+        <description>Team made improvements to their robot </description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimal evidence their robot and code was improved" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partial evidence their robot and code was improved" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear evidence their robot and code was improved" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Communicate">
+      <description>Team's explanation of the robot design process was effective and showed how all team members have been involved.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="communicate_1" required="false" scoreType="INTEGER" title="Communicate1">
+        <description>Team explained their robot design process</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Unclear explanation of robot or code design process" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partially clear explanation of robot or code design process" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear explanation of robot or code design process" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="communicate_2" required="false" scoreType="INTEGER" title="Communicate2">
+        <description>All team members were involved with the robot design.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimal evidence that all team members were involved" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partial evidence that all team members were involved" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear evidence that all team members were involved" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+  </subjectiveCategory>
+  <subjectiveCategory name="robot_programming" title="Programming" weight="0.50">
+    <scoreSheetInstructions>Teams should communicate to the judges their achievement in each of the following criteria. This rubric should be filled out during the Robot Design explanation. Judges are required to tick one box on each separate line to indicate the level the team has achieved. If the team exceeds, please make a short comment in the Exceeds box.</scoreSheetInstructions>
+    <goalGroup title="Identify">
+      <description>- Team had a clearly defined mission strategy and explored building and coding skills they needed.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="identify_one" required="false" scoreType="INTEGER" title="Identify1">
+        <description>Team had a clear mission strategy for the programs written</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Unclear mission strategy" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partially clear mission strategy" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear mission strategy" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="identify_two" required="false" scoreType="INTEGER" title="Identify2">
+        <description>Team members learned about coding</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Limited evidence of building and coding skills in all team members" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Inconsistent evidence of building and coding skills in all team members" title="Developing"/>
+          <range max="9" min="7" shortDescription="Consistent evidence of building and coding skills in all team members" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Design">
+      <description>- Team produced innovative designs and a clear workplan, seeking guidance as needed.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="design_1" required="false" scoreType="INTEGER" title="Design1">
+        <description>Team had a plan for writing their programs.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimal evidence of an effective plan" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partial evidence of an effective plan" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear evidence of an effective plan" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="design_2" required="false" scoreType="INTEGER" title="Design2">
+        <description>Team explained the innovative features of their code</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimal explanation of robot and code's innovative features" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partial explanation of robot and code's innovative features " title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear explanation of robot and code's innovative features" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Create">
+      <description>- Team developed an effective robot and code solution matching their mission strategy.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="create_1" required="false" scoreType="INTEGER" title="Create1">
+        <description>Team explained their programs, and use of sensors</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Limited explanation of their robot and its attachment and sensor functionality" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Simple explanation of their robot and its attachment and sensor functionality" title="Developing"/>
+          <range max="9" min="7" shortDescription="Detailed explanation of their robot and its attachment and sensor functionality" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="create_2" required="false" scoreType="INTEGER" title="Create2">
+        <description>Team explained how their code makes their robot act. </description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Unclear explanation of how code makes their robot act" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partially clear explanation of how code makes their robot act" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear explanation of how code makes their robot act" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Iterate">
+      <description>- Team repeatedly tested their robot and code to identify areas for improvement and incorporated the findings into their current solution.</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="iterate_1" required="false" scoreType="INTEGER" title="Iterate1">
+        <description>Team explained how they tested their code</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimal evidence of testing their robot and code" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partial evidence of testing their robot and code" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear evidence of testing their robot and code" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="iterate_2" required="false" scoreType="INTEGER" title="Iterate2">
+        <description>Team made improvements to their code</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimal evidence their robot and code was improved" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partial evidence their robot and code was improved" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear evidence their robot and code was improved" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+    <goalGroup title="Communicate">
+      <description>Team's explanation of the robot design process was effective and showed how all team members have been involved</description>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="communicate_1" required="false" scoreType="INTEGER" title="Communicate1">
+        <description>Team clearly explained their program design process</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Unclear explanation of robot or code design process" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partially clear explanation of robot or code design process" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear explanation of robot or code design process" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="communicate_2" required="false" scoreType="INTEGER" title="Communicate2">
+        <description>All team members were involved with the program design process.</description>
+        <rubric>
+          <range max="3" min="1" shortDescription="Minimal evidence that all team members were involved" title="Beginning"/>
+          <range max="6" min="4" shortDescription="Partial evidence that all team members were involved" title="Developing"/>
+          <range max="9" min="7" shortDescription="Clear evidence that all team members involved" title="Accomplished"/>
+          <range max="12" min="10" shortDescription="" title="Exceeds"/>
+        </rubric>
+      </goal>
+    </goalGroup>
+  </subjectiveCategory>
+  <nonNumericCategory perAwardGroup="false" title="Engineering Excellence">
+    <description>This award celebrates a team with an efficiently designed robot, an innovative project solution that effectively addresses the season challenge, and Core Values evident in all they do.</description>
+  </nonNumericCategory>
+  <nonNumericCategory perAwardGroup="false" title="Breakthrough Award">
+    <description>A team that made significant progress in their confidence and capability and who understand that what they discover is more important than what they win.</description>
+  </nonNumericCategory>
+  <nonNumericCategory perAwardGroup="false" title="Rising All-Star">
+    <description>A team that the judges notice and expect great things from in the future.</description>
+  </nonNumericCategory>
+  <nonNumericCategory perAwardGroup="false" title="Motivate">
+    <description>A team that embraces the culture of FIRST LEGO League through team building, team spirit, and displayed enthusiasm.</description>
+  </nonNumericCategory>
+  <nonNumericCategory perAwardGroup="false" title="Judges Award">
+    <description>This award is given at the Judges discretion to a team that deserves recognition but does not fit it another category.</description>
+  </nonNumericCategory>
+  <nonNumericCategory perAwardGroup="false" title="Innovation Project Model">
+    <description>Referee Submitted Award for most Creative Innovation Project presented by team </description>
+  </nonNumericCategory>
+</fll>

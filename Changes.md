@@ -1,3 +1,7 @@
+Release 16.0.1
+==============
+* 2021 Minnesota challenge description
+
 Release 16.0.0
 ==============
 * #211 - Generate the script for the awards ceremony
