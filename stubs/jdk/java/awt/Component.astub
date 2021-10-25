@@ -17,4 +17,6 @@ public abstract class Component implements ImageObserver, MenuContainer,
   public void setForeground(@Nullable Color c);
   public void setBackground(@Nullable Color c);
 
+  public Font getFont(@UnknownInitialization(Component.class) Component this);
+  
 }
