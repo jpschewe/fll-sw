@@ -1,3 +1,5 @@
+* #962 - Reword team acceptance of performance entries
+
 Release 16.0.1
 ==============
 * 2021 Minnesota challenge description

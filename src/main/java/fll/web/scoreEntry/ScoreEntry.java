@@ -772,7 +772,7 @@ public final class ScoreEntry {
     if (!tabletEntry) {
       writer.println("      <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Score entry verified:</font></td>");
     } else {
-      writer.println("<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Team Agrees with the score entry:</font></td>");
+      writer.println("<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Team Agrees with the above entries:</font></td>");
     }
     writer.println("      <td><table border='0' cellpadding='0' cellspacing='0' width='150'><tr align='center'>");
     generateYesNoButtons("Verified", writer);
