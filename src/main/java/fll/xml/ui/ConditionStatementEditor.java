@@ -10,7 +10,6 @@ import java.awt.BorderLayout;
 import java.util.Collection;
 
 import javax.swing.Box;
-import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
 import fll.xml.ConditionStatement;
@@ -38,12 +37,12 @@ import fll.xml.VariableScope;
     leftEditor = new PolynomialEditor(stmt.getLeft(), goalScope, variableScope);
     container.add(leftEditor);
 
-    final JComboBox<InequalityComparison> comparisonEditor = new JComboBox<>(new InequalityComparison[] { InequalityComparison.GREATER_THAN,
-                                                                                                          InequalityComparison.GREATER_THAN_OR_EQUAL,
-                                                                                                          InequalityComparison.LESS_THAN,
-                                                                                                          InequalityComparison.LESS_THAN_OR_EQUAL,
-                                                                                                          InequalityComparison.EQUAL_TO,
-                                                                                                          InequalityComparison.NOT_EQUAL_TO });
+    final InequalityEditor comparisonEditor = new InequalityEditor(new InequalityComparison[] { InequalityComparison.GREATER_THAN,
+                                                                                                InequalityComparison.GREATER_THAN_OR_EQUAL,
+                                                                                                InequalityComparison.LESS_THAN,
+                                                                                                InequalityComparison.LESS_THAN_OR_EQUAL,
+                                                                                                InequalityComparison.EQUAL_TO,
+                                                                                                InequalityComparison.NOT_EQUAL_TO });
     container.add(comparisonEditor);
     comparisonEditor.addActionListener(e -> {
       stmt.setComparison(comparisonEditor.getItemAt(comparisonEditor.getSelectedIndex()));

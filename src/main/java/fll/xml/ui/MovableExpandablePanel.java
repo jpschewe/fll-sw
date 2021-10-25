@@ -7,6 +7,7 @@
 package fll.xml.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.EventListener;
@@ -31,6 +32,13 @@ public class MovableExpandablePanel extends JPanel {
   private boolean mExpanded = false;
 
   private final JLabel mTitleLabel;
+
+  /**
+   * @param f the font to use for the title
+   */
+  public void setTitleFont(final Font f) {
+    mTitleLabel.setFont(f);
+  }
 
   /**
    * @param title the title to display

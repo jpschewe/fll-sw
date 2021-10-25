@@ -1,3 +1,4 @@
+* #940 - make if/then/else obvious in the challenge description editor
 * #962 - Reword team acceptance of performance entries
 
 Release 16.0.1
