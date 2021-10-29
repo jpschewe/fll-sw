@@ -1,0 +1,3310 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+  
+  
+    <title>Score Entry</title>
+  
+
+
+<!-- is practice true -->
+<link rel="stylesheet" type="text/css" href="2021-score-entry_files/fll-sw.css">
+
+<link rel="stylesheet" type="text/css" href="2021-score-entry_files/scoreEntry.css">
+
+<!-- a couple of things come from the JSP, so need to be inline -->
+<style type="text/css">
+table#top_info {
+    background-color: #e0e0e0;
+
+}
+body {
+    background-color: transparent;
+}
+
+.restriction-error {
+    background-color: red;
+}
+</style>
+
+<script type="text/javascript" src="2021-score-entry_files/jquery-1.js"></script>
+
+<link rel="stylesheet" type="text/css" href="2021-score-entry_files/jquery-ui.css">
+
+<script type="text/javascript" src="2021-score-entry_files/jquery-ui.js"></script>
+
+
+    <link rel="stylesheet" type="text/css" href="2021-score-entry_files/hide-score.css">
+
+
+<script type="text/javascript" src="2021-score-entry_files/scoreEntry.js"></script>
+
+<script type="text/javascript">
+var EditFlag = false;
+
+
+    
+
+function init() {
+    document.scoreEntry.m14_bridge_lowered_slider.oninput = function() {
+    document.scoreEntry.m14_bridge_lowered.innerHTML = this.value;
+    set_m14_bridge_lowered(this.value);
+  };
+  document.scoreEntry.m15_containers_platooning_slider.oninput = function() {
+    document.scoreEntry.m15_containers_platooning.innerHTML = this.value;
+    set_m15_containers_platooning(this.value);
+  };
+  document.scoreEntry.m15_containers_train_slider.oninput = function() {
+    document.scoreEntry.m15_containers_train.innerHTML = this.value;
+    set_m15_containers_train(this.value);
+  };
+  document.scoreEntry.m15_containers_deck_slider.oninput = function() {
+    document.scoreEntry.m15_containers_deck.innerHTML = this.value;
+    set_m15_containers_deck(this.value);
+  };
+  document.scoreEntry.m16_containers_partly_any_circle_slider.oninput = function() {
+    document.scoreEntry.m16_containers_partly_any_circle.innerHTML = this.value;
+    set_m16_containers_partly_any_circle(this.value);
+  };
+  document.scoreEntry.m16_containers_completely_any_circle_slider.oninput = function() {
+    document.scoreEntry.m16_containers_completely_any_circle.innerHTML = this.value;
+    set_m16_containers_completely_any_circle(this.value);
+  };
+  document.scoreEntry.m16_circle_container_completely_in_slider.oninput = function() {
+    document.scoreEntry.m16_circle_container_completely_in.innerHTML = this.value;
+    set_m16_circle_container_completely_in(this.value);
+  };
+  document.scoreEntry.gp_score_slider.oninput = function() {
+    document.scoreEntry.gp_score.innerHTML = this.value;
+    set_gp_score(this.value);
+  };
+  m00_small_inspection_area_raw = 0.0;
+  m01_innovation_project_raw = 0.0;
+  m02_unused_capacity_raw = "None";
+  m03_cargo_door_down_raw = 0.0;
+  m03_plane_unloaded_raw = 0.0;
+  m04_truck_raw = 0.0;
+  m04_airplane_raw = 0.0;
+  m_05_switch_raw = 0.0;
+  m06_parked_over_blue_raw = 0.0;
+  m06_yellow_knocked_over_raw = 0.0;
+  m06_black_frame_down_raw = 0.0;
+  m07_container_not_touching_raw = 0.0;
+  m07_container_east_raw = 0.0;
+  m08_food_separated_raw = 0.0;
+  m08_other_food_package_raw = 0.0;
+  m08_both_separated_package_raw = 0.0;
+  m09_track_down_raw = 0.0;
+  m09_train_latched_raw = 0.0;
+  m10_orange_container_in_blue_raw = 0.0;
+  m11_package_delivered_raw = "no";
+  m12_turbine_blade_raw = "no";
+  m12_chicken_statue_raw = "no";
+  m13_latched_outside_home_raw = 0.0;
+  m13_latched_to_bridge_raw = 0.0;
+  m14_bridge_lowered_raw = 0.0;
+  m15_containers_platooning_raw = 0.0;
+  m15_containers_train_raw = 0.0;
+  m15_containers_deck_raw = 0.0;
+  m16_containers_partly_any_circle_raw = 0.0;
+  m16_containers_completely_any_circle_raw = 0.0;
+  m16_blue_container_blue_circle_raw = 0.0;
+  m16_green_container_green_circle_raw = 0.0;
+  m16_circle_container_completely_in_raw = 0.0;
+  m17_precision_tokens_raw = "five";
+  m17_precision_tokens_raw = "six";
+  gp_score_raw = 3.0;
+  Verified = 0;
+
+
+  refresh();
+  
+  /* Saves total score for smarter notification popups */
+  savedTotalScore = document.scoreEntry.totalScore.value;
+}
+
+function refresh() { 
+  var score = 0;
+
+  // m00_small_inspection_area
+if(m00_small_inspection_area_raw == 0) {
+  document.scoreEntry.m00_small_inspection_area[0].checked = true
+  document.scoreEntry.m00_small_inspection_area_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m00_small_inspection_area[1].checked = true
+  document.scoreEntry.m00_small_inspection_area_radioValue.value = 'YES'
+}
+m00_small_inspection_area_computed = m00_small_inspection_area_raw * 20.0;
+score += m00_small_inspection_area_computed;
+document.scoreEntry.score_m00_small_inspection_area.value = m00_small_inspection_area_computed;
+
+// m01_innovation_project
+if(m01_innovation_project_raw == 0) {
+  document.scoreEntry.m01_innovation_project[0].checked = true
+  document.scoreEntry.m01_innovation_project_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m01_innovation_project[1].checked = true
+  document.scoreEntry.m01_innovation_project_radioValue.value = 'YES'
+}
+m01_innovation_project_computed = m01_innovation_project_raw * 20.0;
+score += m01_innovation_project_computed;
+document.scoreEntry.score_m01_innovation_project.value = m01_innovation_project_computed;
+
+// m02_unused_capacity
+if(m02_unused_capacity_raw == "None") {
+  document.scoreEntry.m02_unused_capacity[0].checked = true;
+  m02_unused_capacity_computed = 0.000000 * 1.0;
+  document.scoreEntry.m02_unused_capacity_radioValue.value = 'NONE'
+} else if(m02_unused_capacity_raw == "partly_full") {
+  document.scoreEntry.m02_unused_capacity[1].checked = true;
+  m02_unused_capacity_computed = 20.000000 * 1.0;
+  document.scoreEntry.m02_unused_capacity_radioValue.value = 'PARTLY_FULL'
+} else if(m02_unused_capacity_raw == "completelyfull") {
+  document.scoreEntry.m02_unused_capacity[2].checked = true;
+  m02_unused_capacity_computed = 30.000000 * 1.0;
+  document.scoreEntry.m02_unused_capacity_radioValue.value = 'COMPLETELYFULL'
+}
+score += m02_unused_capacity_computed;
+document.scoreEntry.score_m02_unused_capacity.value = m02_unused_capacity_computed;
+
+// m03_cargo_door_down
+if(m03_cargo_door_down_raw == 0) {
+  document.scoreEntry.m03_cargo_door_down[0].checked = true
+  document.scoreEntry.m03_cargo_door_down_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m03_cargo_door_down[1].checked = true
+  document.scoreEntry.m03_cargo_door_down_radioValue.value = 'YES'
+}
+m03_cargo_door_down_computed = m03_cargo_door_down_raw * 20.0;
+score += m03_cargo_door_down_computed;
+document.scoreEntry.score_m03_cargo_door_down.value = m03_cargo_door_down_computed;
+
+// m03_plane_unloaded
+if(m03_plane_unloaded_raw == 0) {
+  document.scoreEntry.m03_plane_unloaded[0].checked = true
+  document.scoreEntry.m03_plane_unloaded_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m03_plane_unloaded[1].checked = true
+  document.scoreEntry.m03_plane_unloaded_radioValue.value = 'YES'
+}
+m03_plane_unloaded_computed = m03_plane_unloaded_raw * 10.0;
+score += m03_plane_unloaded_computed;
+document.scoreEntry.score_m03_plane_unloaded.value = m03_plane_unloaded_computed;
+
+// m04_truck
+if(m04_truck_raw == 0) {
+  document.scoreEntry.m04_truck[0].checked = true
+  document.scoreEntry.m04_truck_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m04_truck[1].checked = true
+  document.scoreEntry.m04_truck_radioValue.value = 'YES'
+}
+m04_truck_computed = m04_truck_raw * 10.0;
+score += m04_truck_computed;
+document.scoreEntry.score_m04_truck.value = m04_truck_computed;
+
+// m04_airplane
+if(m04_airplane_raw == 0) {
+  document.scoreEntry.m04_airplane[0].checked = true
+  document.scoreEntry.m04_airplane_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m04_airplane[1].checked = true
+  document.scoreEntry.m04_airplane_radioValue.value = 'YES'
+}
+m04_airplane_computed = m04_airplane_raw * 10.0;
+score += m04_airplane_computed;
+document.scoreEntry.score_m04_airplane.value = m04_airplane_computed;
+
+compute_m04_both();
+score += m04_both_computed;
+
+// m_05_switch
+if(m_05_switch_raw == 0) {
+  document.scoreEntry.m_05_switch[0].checked = true
+  document.scoreEntry.m_05_switch_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m_05_switch[1].checked = true
+  document.scoreEntry.m_05_switch_radioValue.value = 'YES'
+}
+m_05_switch_computed = m_05_switch_raw * 20.0;
+score += m_05_switch_computed;
+document.scoreEntry.score_m_05_switch.value = m_05_switch_computed;
+
+// m06_parked_over_blue
+if(m06_parked_over_blue_raw == 0) {
+  document.scoreEntry.m06_parked_over_blue[0].checked = true
+  document.scoreEntry.m06_parked_over_blue_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m06_parked_over_blue[1].checked = true
+  document.scoreEntry.m06_parked_over_blue_radioValue.value = 'YES'
+}
+m06_parked_over_blue_computed = m06_parked_over_blue_raw * 0.0;
+score += m06_parked_over_blue_computed;
+document.scoreEntry.score_m06_parked_over_blue.value = m06_parked_over_blue_computed;
+
+// m06_yellow_knocked_over
+if(m06_yellow_knocked_over_raw == 0) {
+  document.scoreEntry.m06_yellow_knocked_over[0].checked = true
+  document.scoreEntry.m06_yellow_knocked_over_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m06_yellow_knocked_over[1].checked = true
+  document.scoreEntry.m06_yellow_knocked_over_radioValue.value = 'YES'
+}
+m06_yellow_knocked_over_computed = m06_yellow_knocked_over_raw * 0.0;
+score += m06_yellow_knocked_over_computed;
+document.scoreEntry.score_m06_yellow_knocked_over.value = m06_yellow_knocked_over_computed;
+
+// m06_black_frame_down
+if(m06_black_frame_down_raw == 0) {
+  document.scoreEntry.m06_black_frame_down[0].checked = true
+  document.scoreEntry.m06_black_frame_down_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m06_black_frame_down[1].checked = true
+  document.scoreEntry.m06_black_frame_down_radioValue.value = 'YES'
+}
+m06_black_frame_down_computed = m06_black_frame_down_raw * 0.0;
+score += m06_black_frame_down_computed;
+document.scoreEntry.score_m06_black_frame_down.value = m06_black_frame_down_computed;
+
+compute_m06_score();
+score += m06_score_computed;
+
+// m07_container_not_touching
+if(m07_container_not_touching_raw == 0) {
+  document.scoreEntry.m07_container_not_touching[0].checked = true
+  document.scoreEntry.m07_container_not_touching_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m07_container_not_touching[1].checked = true
+  document.scoreEntry.m07_container_not_touching_radioValue.value = 'YES'
+}
+m07_container_not_touching_computed = m07_container_not_touching_raw * 20.0;
+score += m07_container_not_touching_computed;
+document.scoreEntry.score_m07_container_not_touching.value = m07_container_not_touching_computed;
+
+// m07_container_east
+if(m07_container_east_raw == 0) {
+  document.scoreEntry.m07_container_east[0].checked = true
+  document.scoreEntry.m07_container_east_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m07_container_east[1].checked = true
+  document.scoreEntry.m07_container_east_radioValue.value = 'YES'
+}
+m07_container_east_computed = m07_container_east_raw * 10.0;
+score += m07_container_east_computed;
+document.scoreEntry.score_m07_container_east.value = m07_container_east_computed;
+
+// m08_food_separated
+if(m08_food_separated_raw == 0) {
+  document.scoreEntry.m08_food_separated[0].checked = true
+  document.scoreEntry.m08_food_separated_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m08_food_separated[1].checked = true
+  document.scoreEntry.m08_food_separated_radioValue.value = 'YES'
+}
+m08_food_separated_computed = m08_food_separated_raw * 20.0;
+score += m08_food_separated_computed;
+document.scoreEntry.score_m08_food_separated.value = m08_food_separated_computed;
+
+// m08_other_food_package
+if(m08_other_food_package_raw == 0) {
+  document.scoreEntry.m08_other_food_package[0].checked = true
+  document.scoreEntry.m08_other_food_package_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m08_other_food_package[1].checked = true
+  document.scoreEntry.m08_other_food_package_radioValue.value = 'YES'
+}
+m08_other_food_package_computed = m08_other_food_package_raw * 10.0;
+score += m08_other_food_package_computed;
+document.scoreEntry.score_m08_other_food_package.value = m08_other_food_package_computed;
+
+// m08_both_separated_package
+if(m08_both_separated_package_raw == 0) {
+  document.scoreEntry.m08_both_separated_package[0].checked = true
+  document.scoreEntry.m08_both_separated_package_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m08_both_separated_package[1].checked = true
+  document.scoreEntry.m08_both_separated_package_radioValue.value = 'YES'
+}
+m08_both_separated_package_computed = m08_both_separated_package_raw * 10.0;
+score += m08_both_separated_package_computed;
+document.scoreEntry.score_m08_both_separated_package.value = m08_both_separated_package_computed;
+
+// m09_track_down
+if(m09_track_down_raw == 0) {
+  document.scoreEntry.m09_track_down[0].checked = true
+  document.scoreEntry.m09_track_down_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m09_track_down[1].checked = true
+  document.scoreEntry.m09_track_down_radioValue.value = 'YES'
+}
+m09_track_down_computed = m09_track_down_raw * 20.0;
+score += m09_track_down_computed;
+document.scoreEntry.score_m09_track_down.value = m09_track_down_computed;
+
+// m09_train_latched
+if(m09_train_latched_raw == 0) {
+  document.scoreEntry.m09_train_latched[0].checked = true
+  document.scoreEntry.m09_train_latched_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m09_train_latched[1].checked = true
+  document.scoreEntry.m09_train_latched_radioValue.value = 'YES'
+}
+m09_train_latched_computed = m09_train_latched_raw * 20.0;
+score += m09_train_latched_computed;
+document.scoreEntry.score_m09_train_latched.value = m09_train_latched_computed;
+
+// m10_orange_container_in_blue
+if(m10_orange_container_in_blue_raw == 0) {
+  document.scoreEntry.m10_orange_container_in_blue[0].checked = true
+  document.scoreEntry.m10_orange_container_in_blue_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m10_orange_container_in_blue[1].checked = true
+  document.scoreEntry.m10_orange_container_in_blue_radioValue.value = 'YES'
+}
+m10_orange_container_in_blue_computed = m10_orange_container_in_blue_raw * 20.0;
+score += m10_orange_container_in_blue_computed;
+document.scoreEntry.score_m10_orange_container_in_blue.value = m10_orange_container_in_blue_computed;
+
+// m11_package_delivered
+if(m11_package_delivered_raw == "no") {
+  document.scoreEntry.m11_package_delivered[0].checked = true;
+  m11_package_delivered_computed = 0.000000 * 1.0;
+  document.scoreEntry.m11_package_delivered_radioValue.value = 'NO'
+} else if(m11_package_delivered_raw == "partly") {
+  document.scoreEntry.m11_package_delivered[1].checked = true;
+  m11_package_delivered_computed = 20.000000 * 1.0;
+  document.scoreEntry.m11_package_delivered_radioValue.value = 'PARTLY'
+} else if(m11_package_delivered_raw == "completely") {
+  document.scoreEntry.m11_package_delivered[2].checked = true;
+  m11_package_delivered_computed = 30.000000 * 1.0;
+  document.scoreEntry.m11_package_delivered_radioValue.value = 'COMPLETELY'
+}
+score += m11_package_delivered_computed;
+document.scoreEntry.score_m11_package_delivered.value = m11_package_delivered_computed;
+
+// m12_turbine_blade
+if(m12_turbine_blade_raw == "no") {
+  document.scoreEntry.m12_turbine_blade[0].checked = true;
+  m12_turbine_blade_computed = 0.000000 * 1.0;
+  document.scoreEntry.m12_turbine_blade_radioValue.value = 'NO'
+} else if(m12_turbine_blade_raw == "mat") {
+  document.scoreEntry.m12_turbine_blade[1].checked = true;
+  m12_turbine_blade_computed = 20.000000 * 1.0;
+  document.scoreEntry.m12_turbine_blade_radioValue.value = 'MAT'
+} else if(m12_turbine_blade_raw == "nothing") {
+  document.scoreEntry.m12_turbine_blade[2].checked = true;
+  m12_turbine_blade_computed = 30.000000 * 1.0;
+  document.scoreEntry.m12_turbine_blade_radioValue.value = 'NOTHING'
+}
+score += m12_turbine_blade_computed;
+document.scoreEntry.score_m12_turbine_blade.value = m12_turbine_blade_computed;
+
+// m12_chicken_statue
+if(m12_chicken_statue_raw == "no") {
+  document.scoreEntry.m12_chicken_statue[0].checked = true;
+  m12_chicken_statue_computed = 0.000000 * 1.0;
+  document.scoreEntry.m12_chicken_statue_radioValue.value = 'NO'
+} else if(m12_chicken_statue_raw == "partly") {
+  document.scoreEntry.m12_chicken_statue[1].checked = true;
+  m12_chicken_statue_computed = 5.000000 * 1.0;
+  document.scoreEntry.m12_chicken_statue_radioValue.value = 'PARTLY'
+} else if(m12_chicken_statue_raw == "completely") {
+  document.scoreEntry.m12_chicken_statue[2].checked = true;
+  m12_chicken_statue_computed = 10.000000 * 1.0;
+  document.scoreEntry.m12_chicken_statue_radioValue.value = 'COMPLETELY'
+}
+score += m12_chicken_statue_computed;
+document.scoreEntry.score_m12_chicken_statue.value = m12_chicken_statue_computed;
+
+// m13_latched_outside_home
+if(m13_latched_outside_home_raw == 0) {
+  document.scoreEntry.m13_latched_outside_home[0].checked = true
+  document.scoreEntry.m13_latched_outside_home_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m13_latched_outside_home[1].checked = true
+  document.scoreEntry.m13_latched_outside_home_radioValue.value = 'YES'
+}
+m13_latched_outside_home_computed = m13_latched_outside_home_raw * 10.0;
+score += m13_latched_outside_home_computed;
+document.scoreEntry.score_m13_latched_outside_home.value = m13_latched_outside_home_computed;
+
+// m13_latched_to_bridge
+if(m13_latched_to_bridge_raw == 0) {
+  document.scoreEntry.m13_latched_to_bridge[0].checked = true
+  document.scoreEntry.m13_latched_to_bridge_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m13_latched_to_bridge[1].checked = true
+  document.scoreEntry.m13_latched_to_bridge_radioValue.value = 'YES'
+}
+m13_latched_to_bridge_computed = m13_latched_to_bridge_raw * 10.0;
+score += m13_latched_to_bridge_computed;
+document.scoreEntry.score_m13_latched_to_bridge.value = m13_latched_to_bridge_computed;
+
+compute_m13_bonus();
+score += m13_bonus_computed;
+
+// m14_bridge_lowered
+document.scoreEntry.m14_bridge_lowered.value = m14_bridge_lowered_raw;
+m14_bridge_lowered_computed = m14_bridge_lowered_raw * 10.0;
+document.scoreEntry.m14_bridge_lowered_slider.value = m14_bridge_lowered_raw;
+score += m14_bridge_lowered_computed;
+document.scoreEntry.score_m14_bridge_lowered.value = m14_bridge_lowered_computed;
+
+// m15_containers_platooning
+document.scoreEntry.m15_containers_platooning.value = m15_containers_platooning_raw;
+m15_containers_platooning_computed = m15_containers_platooning_raw * 10.0;
+document.scoreEntry.m15_containers_platooning_slider.value = m15_containers_platooning_raw;
+score += m15_containers_platooning_computed;
+document.scoreEntry.score_m15_containers_platooning.value = m15_containers_platooning_computed;
+
+// m15_containers_train
+document.scoreEntry.m15_containers_train.value = m15_containers_train_raw;
+m15_containers_train_computed = m15_containers_train_raw * 20.0;
+document.scoreEntry.m15_containers_train_slider.value = m15_containers_train_raw;
+score += m15_containers_train_computed;
+document.scoreEntry.score_m15_containers_train.value = m15_containers_train_computed;
+
+// m15_containers_deck
+document.scoreEntry.m15_containers_deck.value = m15_containers_deck_raw;
+m15_containers_deck_computed = m15_containers_deck_raw * 30.0;
+document.scoreEntry.m15_containers_deck_slider.value = m15_containers_deck_raw;
+score += m15_containers_deck_computed;
+document.scoreEntry.score_m15_containers_deck.value = m15_containers_deck_computed;
+
+// m16_containers_partly_any_circle
+document.scoreEntry.m16_containers_partly_any_circle.value = m16_containers_partly_any_circle_raw;
+m16_containers_partly_any_circle_computed = m16_containers_partly_any_circle_raw * 5.0;
+document.scoreEntry.m16_containers_partly_any_circle_slider.value = m16_containers_partly_any_circle_raw;
+score += m16_containers_partly_any_circle_computed;
+document.scoreEntry.score_m16_containers_partly_any_circle.value = m16_containers_partly_any_circle_computed;
+
+// m16_containers_completely_any_circle
+document.scoreEntry.m16_containers_completely_any_circle.value = m16_containers_completely_any_circle_raw;
+m16_containers_completely_any_circle_computed = m16_containers_completely_any_circle_raw * 10.0;
+document.scoreEntry.m16_containers_completely_any_circle_slider.value = m16_containers_completely_any_circle_raw;
+score += m16_containers_completely_any_circle_computed;
+document.scoreEntry.score_m16_containers_completely_any_circle.value = m16_containers_completely_any_circle_computed;
+
+// m16_blue_container_blue_circle
+if(m16_blue_container_blue_circle_raw == 0) {
+  document.scoreEntry.m16_blue_container_blue_circle[0].checked = true
+  document.scoreEntry.m16_blue_container_blue_circle_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m16_blue_container_blue_circle[1].checked = true
+  document.scoreEntry.m16_blue_container_blue_circle_radioValue.value = 'YES'
+}
+m16_blue_container_blue_circle_computed = m16_blue_container_blue_circle_raw * 20.0;
+score += m16_blue_container_blue_circle_computed;
+document.scoreEntry.score_m16_blue_container_blue_circle.value = m16_blue_container_blue_circle_computed;
+
+// m16_green_container_green_circle
+if(m16_green_container_green_circle_raw == 0) {
+  document.scoreEntry.m16_green_container_green_circle[0].checked = true
+  document.scoreEntry.m16_green_container_green_circle_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m16_green_container_green_circle[1].checked = true
+  document.scoreEntry.m16_green_container_green_circle_radioValue.value = 'YES'
+}
+m16_green_container_green_circle_computed = m16_green_container_green_circle_raw * 20.0;
+score += m16_green_container_green_circle_computed;
+document.scoreEntry.score_m16_green_container_green_circle.value = m16_green_container_green_circle_computed;
+
+// m16_circle_container_completely_in
+document.scoreEntry.m16_circle_container_completely_in.value = m16_circle_container_completely_in_raw;
+m16_circle_container_completely_in_computed = m16_circle_container_completely_in_raw * 10.0;
+document.scoreEntry.m16_circle_container_completely_in_slider.value = m16_circle_container_completely_in_raw;
+score += m16_circle_container_completely_in_computed;
+document.scoreEntry.score_m16_circle_container_completely_in.value = m16_circle_container_completely_in_computed;
+
+// m17_precision_tokens
+if(m17_precision_tokens_raw == "zero") {
+  document.scoreEntry.m17_precision_tokens[0].checked = true;
+  m17_precision_tokens_computed = 0.000000 * 1.0;
+  document.scoreEntry.m17_precision_tokens_radioValue.value = 'ZERO'
+} else if(m17_precision_tokens_raw == "one") {
+  document.scoreEntry.m17_precision_tokens[1].checked = true;
+  m17_precision_tokens_computed = 10.000000 * 1.0;
+  document.scoreEntry.m17_precision_tokens_radioValue.value = 'ONE'
+} else if(m17_precision_tokens_raw == "two") {
+  document.scoreEntry.m17_precision_tokens[2].checked = true;
+  m17_precision_tokens_computed = 15.000000 * 1.0;
+  document.scoreEntry.m17_precision_tokens_radioValue.value = 'TWO'
+} else if(m17_precision_tokens_raw == "three") {
+  document.scoreEntry.m17_precision_tokens[3].checked = true;
+  m17_precision_tokens_computed = 25.000000 * 1.0;
+  document.scoreEntry.m17_precision_tokens_radioValue.value = 'THREE'
+} else if(m17_precision_tokens_raw == "four") {
+  document.scoreEntry.m17_precision_tokens[4].checked = true;
+  m17_precision_tokens_computed = 35.000000 * 1.0;
+  document.scoreEntry.m17_precision_tokens_radioValue.value = 'FOUR'
+} else if(m17_precision_tokens_raw == "five") {
+  document.scoreEntry.m17_precision_tokens[5].checked = true;
+  m17_precision_tokens_computed = 50.000000 * 1.0;
+  document.scoreEntry.m17_precision_tokens_radioValue.value = 'FIVE'
+} else if(m17_precision_tokens_raw == "six") {
+  document.scoreEntry.m17_precision_tokens[6].checked = true;
+  m17_precision_tokens_computed = 50.000000 * 1.0;
+  document.scoreEntry.m17_precision_tokens_radioValue.value = 'SIX'
+}
+score += m17_precision_tokens_computed;
+document.scoreEntry.score_m17_precision_tokens.value = m17_precision_tokens_computed;
+
+// gp_score
+document.scoreEntry.gp_score.value = gp_score_raw;
+gp_score_computed = gp_score_raw * 0.0;
+document.scoreEntry.gp_score_slider.value = gp_score_raw;
+score += gp_score_computed;
+document.scoreEntry.score_gp_score.value = gp_score_computed;
+
+if(Verified == 0) {
+  document.scoreEntry.Verified[0].checked = true
+} else {
+  document.scoreEntry.Verified[1].checked = true
+}
+
+
+  //check for minimum total score
+  if(score < 0.0) {
+    score = 0.0;
+  }
+
+  document.scoreEntry.totalScore.value = score;
+
+  check_restrictions();
+}
+
+function check_restrictions() {
+  var error_found = false;
+  $("#score-errors").empty();
+  
+  var m00_small_inspection_area_error = false;
+  var m01_innovation_project_error = false;
+  var m02_unused_capacity_error = false;
+  var m03_cargo_door_down_error = false;
+  var m03_plane_unloaded_error = false;
+  var m04_truck_error = false;
+  var m04_airplane_error = false;
+  var m_05_switch_error = false;
+  var m06_parked_over_blue_error = false;
+  var m06_yellow_knocked_over_error = false;
+  var m06_black_frame_down_error = false;
+  var m07_container_not_touching_error = false;
+  var m07_container_east_error = false;
+  var m08_food_separated_error = false;
+  var m08_other_food_package_error = false;
+  var m08_both_separated_package_error = false;
+  var m09_track_down_error = false;
+  var m09_train_latched_error = false;
+  var m10_orange_container_in_blue_error = false;
+  var m11_package_delivered_error = false;
+  var m12_turbine_blade_error = false;
+  var m12_chicken_statue_error = false;
+  var m13_latched_outside_home_error = false;
+  var m13_latched_to_bridge_error = false;
+  var m14_bridge_lowered_error = false;
+  var m15_containers_platooning_error = false;
+  var m15_containers_train_error = false;
+  var m15_containers_deck_error = false;
+  var m16_containers_partly_any_circle_error = false;
+  var m16_containers_completely_any_circle_error = false;
+  var m16_blue_container_blue_circle_error = false;
+  var m16_green_container_green_circle_error = false;
+  var m16_circle_container_completely_in_error = false;
+  var m17_precision_tokens_error = false;
+  var gp_score_error = false;
+  var restriction_0_value = parseInt(1.000000* m07_container_not_touching_raw + -1.000000* m07_container_east_raw);
+  if(restriction_0_value > 1.000000 || restriction_0_value < 0.000000) {
+    $('#score-errors').append('<div>Container Must be No Longer Touching East Deck to Score Completely East of Deck</div>');
+    error_found = true;
+    m07_container_not_touching_error = true;
+    m07_container_east_error = true;
+  }
+  var restriction_1_value = parseInt(1.000000* m08_food_separated_raw + -1.000000* m08_both_separated_package_raw);
+  if(restriction_1_value > 1.000000 || restriction_1_value < 0.000000) {
+    $('#score-errors').append('<div>Food Package must be released from own helicopter</div>');
+    error_found = true;
+    m08_food_separated_error = true;
+    m08_both_separated_package_error = true;
+  }
+  var restriction_2_value = parseInt(-1.000000* m16_green_container_green_circle_raw + -1.000000* m16_blue_container_blue_circle_raw + 1.000000* m16_circle_container_completely_in_raw);
+  if(restriction_2_value > 100.000000 || restriction_2_value < 0.000000) {
+    $('#score-errors').append('<div>Color match containers inconsistent with number of circles with complete containers</div>');
+    error_found = true;
+    m16_green_container_green_circle_error = true;
+    m16_blue_container_blue_circle_error = true;
+    m16_circle_container_completely_in_error = true;
+  }
+  var restriction_3_value = parseInt(1.000000* m16_containers_completely_any_circle_computed + -1.000000* m16_circle_container_completely_in_computed);
+  if(restriction_3_value > 100.000000 || restriction_3_value < 0.000000) {
+    $('#score-errors').append('<div>Number of containers completely in circles inconsistent with circles with complete containers</div>');
+    error_found = true;
+    m16_containers_completely_any_circle_error = true;
+    m16_circle_container_completely_in_error = true;
+  }
+  var restriction_4_value = parseInt(-1.000000* m16_containers_completely_any_circle_raw + 1.000000* m16_containers_completely_any_circle_raw* m16_circle_container_completely_in_raw);
+  if(restriction_4_value > 100.000000 || restriction_4_value < 0.000000) {
+    $('#score-errors').append('<div>Must have 1 circle when some containers completely in</div>');
+    error_found = true;
+    m16_containers_completely_any_circle_error = true;
+    m16_containers_completely_any_circle_error = true;
+    m16_circle_container_completely_in_error = true;
+  }
+  var restriction_5_value = parseInt(1.000000* m10_orange_container_in_blue_raw + -1.000000* m03_plane_unloaded_raw + 1.000000* m15_containers_train_raw + 1.000000* m15_containers_deck_raw + 1.000000* m16_containers_partly_any_circle_raw + 1.000000* m16_containers_completely_any_circle_raw);
+  if(restriction_5_value > 7.000000 || restriction_5_value < -1.000000) {
+    $('#score-errors').append('<div>Too many containers</div>');
+    error_found = true;
+    m10_orange_container_in_blue_error = true;
+    m03_plane_unloaded_error = true;
+    m15_containers_train_error = true;
+    m15_containers_deck_error = true;
+    m16_containers_partly_any_circle_error = true;
+    m16_containers_completely_any_circle_error = true;
+  }
+if(m00_small_inspection_area_error) {
+  const ele = document.getElementById("m00_small_inspection_area_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m00_small_inspection_area_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m01_innovation_project_error) {
+  const ele = document.getElementById("m01_innovation_project_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m01_innovation_project_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m02_unused_capacity_error) {
+  const ele = document.getElementById("m02_unused_capacity_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m02_unused_capacity_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m03_cargo_door_down_error) {
+  const ele = document.getElementById("m03_cargo_door_down_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m03_cargo_door_down_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m03_plane_unloaded_error) {
+  const ele = document.getElementById("m03_plane_unloaded_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m03_plane_unloaded_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m04_truck_error) {
+  const ele = document.getElementById("m04_truck_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m04_truck_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m04_airplane_error) {
+  const ele = document.getElementById("m04_airplane_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m04_airplane_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m_05_switch_error) {
+  const ele = document.getElementById("m_05_switch_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m_05_switch_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m06_parked_over_blue_error) {
+  const ele = document.getElementById("m06_parked_over_blue_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m06_parked_over_blue_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m06_yellow_knocked_over_error) {
+  const ele = document.getElementById("m06_yellow_knocked_over_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m06_yellow_knocked_over_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m06_black_frame_down_error) {
+  const ele = document.getElementById("m06_black_frame_down_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m06_black_frame_down_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m07_container_not_touching_error) {
+  const ele = document.getElementById("m07_container_not_touching_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m07_container_not_touching_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m07_container_east_error) {
+  const ele = document.getElementById("m07_container_east_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m07_container_east_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m08_food_separated_error) {
+  const ele = document.getElementById("m08_food_separated_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m08_food_separated_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m08_other_food_package_error) {
+  const ele = document.getElementById("m08_other_food_package_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m08_other_food_package_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m08_both_separated_package_error) {
+  const ele = document.getElementById("m08_both_separated_package_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m08_both_separated_package_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m09_track_down_error) {
+  const ele = document.getElementById("m09_track_down_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m09_track_down_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m09_train_latched_error) {
+  const ele = document.getElementById("m09_train_latched_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m09_train_latched_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m10_orange_container_in_blue_error) {
+  const ele = document.getElementById("m10_orange_container_in_blue_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m10_orange_container_in_blue_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m11_package_delivered_error) {
+  const ele = document.getElementById("m11_package_delivered_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m11_package_delivered_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m12_turbine_blade_error) {
+  const ele = document.getElementById("m12_turbine_blade_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m12_turbine_blade_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m12_chicken_statue_error) {
+  const ele = document.getElementById("m12_chicken_statue_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m12_chicken_statue_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m13_latched_outside_home_error) {
+  const ele = document.getElementById("m13_latched_outside_home_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m13_latched_outside_home_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m13_latched_to_bridge_error) {
+  const ele = document.getElementById("m13_latched_to_bridge_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m13_latched_to_bridge_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m14_bridge_lowered_error) {
+  const ele = document.getElementById("m14_bridge_lowered_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m14_bridge_lowered_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m15_containers_platooning_error) {
+  const ele = document.getElementById("m15_containers_platooning_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m15_containers_platooning_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m15_containers_train_error) {
+  const ele = document.getElementById("m15_containers_train_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m15_containers_train_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m15_containers_deck_error) {
+  const ele = document.getElementById("m15_containers_deck_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m15_containers_deck_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m16_containers_partly_any_circle_error) {
+  const ele = document.getElementById("m16_containers_partly_any_circle_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m16_containers_partly_any_circle_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m16_containers_completely_any_circle_error) {
+  const ele = document.getElementById("m16_containers_completely_any_circle_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m16_containers_completely_any_circle_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m16_blue_container_blue_circle_error) {
+  const ele = document.getElementById("m16_blue_container_blue_circle_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m16_blue_container_blue_circle_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m16_green_container_green_circle_error) {
+  const ele = document.getElementById("m16_green_container_green_circle_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m16_green_container_green_circle_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m16_circle_container_completely_in_error) {
+  const ele = document.getElementById("m16_circle_container_completely_in_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m16_circle_container_completely_in_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m17_precision_tokens_error) {
+  const ele = document.getElementById("m17_precision_tokens_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m17_precision_tokens_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(gp_score_error) {
+  const ele = document.getElementById("gp_score_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("gp_score_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+
+
+  if(error_found) {
+    $("#submit_score").attr('disabled', true);
+    $("#score-errors").show();
+  } else {
+    $("#submit_score").attr('disabled', false);
+    $("#score-errors").hide();
+  }
+}
+
+function isConsistent() {
+  //m00_small_inspection_area
+  if(m00_small_inspection_area_raw < 0.0 || m00_small_inspection_area_raw > 1.0) {
+    return false;
+  }
+
+  //m01_innovation_project
+  if(m01_innovation_project_raw < 0.0 || m01_innovation_project_raw > 1.0) {
+    return false;
+  }
+
+  //m02_unused_capacity
+  // nothing to check
+
+  //m03_cargo_door_down
+  if(m03_cargo_door_down_raw < 0.0 || m03_cargo_door_down_raw > 1.0) {
+    return false;
+  }
+
+  //m03_plane_unloaded
+  if(m03_plane_unloaded_raw < 0.0 || m03_plane_unloaded_raw > 1.0) {
+    return false;
+  }
+
+  //m04_truck
+  if(m04_truck_raw < 0.0 || m04_truck_raw > 1.0) {
+    return false;
+  }
+
+  //m04_airplane
+  if(m04_airplane_raw < 0.0 || m04_airplane_raw > 1.0) {
+    return false;
+  }
+
+  //m_05_switch
+  if(m_05_switch_raw < 0.0 || m_05_switch_raw > 1.0) {
+    return false;
+  }
+
+  //m06_parked_over_blue
+  if(m06_parked_over_blue_raw < 0.0 || m06_parked_over_blue_raw > 1.0) {
+    return false;
+  }
+
+  //m06_yellow_knocked_over
+  if(m06_yellow_knocked_over_raw < 0.0 || m06_yellow_knocked_over_raw > 1.0) {
+    return false;
+  }
+
+  //m06_black_frame_down
+  if(m06_black_frame_down_raw < 0.0 || m06_black_frame_down_raw > 1.0) {
+    return false;
+  }
+
+  //m07_container_not_touching
+  if(m07_container_not_touching_raw < 0.0 || m07_container_not_touching_raw > 1.0) {
+    return false;
+  }
+
+  //m07_container_east
+  if(m07_container_east_raw < 0.0 || m07_container_east_raw > 1.0) {
+    return false;
+  }
+
+  //m08_food_separated
+  if(m08_food_separated_raw < 0.0 || m08_food_separated_raw > 1.0) {
+    return false;
+  }
+
+  //m08_other_food_package
+  if(m08_other_food_package_raw < 0.0 || m08_other_food_package_raw > 1.0) {
+    return false;
+  }
+
+  //m08_both_separated_package
+  if(m08_both_separated_package_raw < 0.0 || m08_both_separated_package_raw > 1.0) {
+    return false;
+  }
+
+  //m09_track_down
+  if(m09_track_down_raw < 0.0 || m09_track_down_raw > 1.0) {
+    return false;
+  }
+
+  //m09_train_latched
+  if(m09_train_latched_raw < 0.0 || m09_train_latched_raw > 1.0) {
+    return false;
+  }
+
+  //m10_orange_container_in_blue
+  if(m10_orange_container_in_blue_raw < 0.0 || m10_orange_container_in_blue_raw > 1.0) {
+    return false;
+  }
+
+  //m11_package_delivered
+  // nothing to check
+
+  //m12_turbine_blade
+  // nothing to check
+
+  //m12_chicken_statue
+  // nothing to check
+
+  //m13_latched_outside_home
+  if(m13_latched_outside_home_raw < 0.0 || m13_latched_outside_home_raw > 1.0) {
+    return false;
+  }
+
+  //m13_latched_to_bridge
+  if(m13_latched_to_bridge_raw < 0.0 || m13_latched_to_bridge_raw > 1.0) {
+    return false;
+  }
+
+  //m14_bridge_lowered
+  if(m14_bridge_lowered_raw < 0.0 || m14_bridge_lowered_raw > 2.0) {
+    return false;
+  }
+
+  //m15_containers_platooning
+  if(m15_containers_platooning_raw < 0.0 || m15_containers_platooning_raw > 2.0) {
+    return false;
+  }
+
+  //m15_containers_train
+  if(m15_containers_train_raw < 0.0 || m15_containers_train_raw > 2.0) {
+    return false;
+  }
+
+  //m15_containers_deck
+  if(m15_containers_deck_raw < 0.0 || m15_containers_deck_raw > 2.0) {
+    return false;
+  }
+
+  //m16_containers_partly_any_circle
+  if(m16_containers_partly_any_circle_raw < 0.0 || m16_containers_partly_any_circle_raw > 8.0) {
+    return false;
+  }
+
+  //m16_containers_completely_any_circle
+  if(m16_containers_completely_any_circle_raw < 0.0 || m16_containers_completely_any_circle_raw > 8.0) {
+    return false;
+  }
+
+  //m16_blue_container_blue_circle
+  if(m16_blue_container_blue_circle_raw < 0.0 || m16_blue_container_blue_circle_raw > 1.0) {
+    return false;
+  }
+
+  //m16_green_container_green_circle
+  if(m16_green_container_green_circle_raw < 0.0 || m16_green_container_green_circle_raw > 1.0) {
+    return false;
+  }
+
+  //m16_circle_container_completely_in
+  if(m16_circle_container_completely_in_raw < 0.0 || m16_circle_container_completely_in_raw > 6.0) {
+    return false;
+  }
+
+  //m17_precision_tokens
+  // nothing to check
+
+  //gp_score
+  if(gp_score_raw < 2.0 || gp_score_raw > 4.0) {
+    return false;
+  }
+
+  return true;
+}
+
+
+
+// m00_small_inspection_area
+var m00_small_inspection_area_raw;
+var m00_small_inspection_area_computed;
+function set_m00_small_inspection_area(newValue) {
+  var temp = m00_small_inspection_area_raw;
+  m00_small_inspection_area_raw = newValue;
+  if(!isConsistent()) {
+    m00_small_inspection_area_raw = temp;
+  }
+  refresh();
+}
+function check_m00_small_inspection_area() {
+  var str = document.scoreEntry.m00_small_inspection_area.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m00_small_inspection_area(num);
+  }
+  refresh();
+}
+
+
+// m01_innovation_project
+var m01_innovation_project_raw;
+var m01_innovation_project_computed;
+function set_m01_innovation_project(newValue) {
+  var temp = m01_innovation_project_raw;
+  m01_innovation_project_raw = newValue;
+  if(!isConsistent()) {
+    m01_innovation_project_raw = temp;
+  }
+  refresh();
+}
+function check_m01_innovation_project() {
+  var str = document.scoreEntry.m01_innovation_project.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m01_innovation_project(num);
+  }
+  refresh();
+}
+
+
+// m02_unused_capacity
+var m02_unused_capacity_raw;
+var m02_unused_capacity_computed;
+function set_m02_unused_capacity(newValue) {
+  var temp = m02_unused_capacity_raw;
+  m02_unused_capacity_raw = newValue;
+  if(!isConsistent()) {
+    m02_unused_capacity_raw = temp;
+  }
+  refresh();
+}
+function check_m02_unused_capacity() {
+  var str = document.scoreEntry.m02_unused_capacity.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m02_unused_capacity(num);
+  }
+  refresh();
+}
+
+
+// m03_cargo_door_down
+var m03_cargo_door_down_raw;
+var m03_cargo_door_down_computed;
+function set_m03_cargo_door_down(newValue) {
+  var temp = m03_cargo_door_down_raw;
+  m03_cargo_door_down_raw = newValue;
+  if(!isConsistent()) {
+    m03_cargo_door_down_raw = temp;
+  }
+  refresh();
+}
+function check_m03_cargo_door_down() {
+  var str = document.scoreEntry.m03_cargo_door_down.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m03_cargo_door_down(num);
+  }
+  refresh();
+}
+
+
+// m03_plane_unloaded
+var m03_plane_unloaded_raw;
+var m03_plane_unloaded_computed;
+function set_m03_plane_unloaded(newValue) {
+  var temp = m03_plane_unloaded_raw;
+  m03_plane_unloaded_raw = newValue;
+  if(!isConsistent()) {
+    m03_plane_unloaded_raw = temp;
+  }
+  refresh();
+}
+function check_m03_plane_unloaded() {
+  var str = document.scoreEntry.m03_plane_unloaded.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m03_plane_unloaded(num);
+  }
+  refresh();
+}
+
+
+// m04_truck
+var m04_truck_raw;
+var m04_truck_computed;
+function set_m04_truck(newValue) {
+  var temp = m04_truck_raw;
+  m04_truck_raw = newValue;
+  if(!isConsistent()) {
+    m04_truck_raw = temp;
+  }
+  refresh();
+}
+function check_m04_truck() {
+  var str = document.scoreEntry.m04_truck.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m04_truck(num);
+  }
+  refresh();
+}
+
+
+// m04_airplane
+var m04_airplane_raw;
+var m04_airplane_computed;
+function set_m04_airplane(newValue) {
+  var temp = m04_airplane_raw;
+  m04_airplane_raw = newValue;
+  if(!isConsistent()) {
+    m04_airplane_raw = temp;
+  }
+  refresh();
+}
+function check_m04_airplane() {
+  var str = document.scoreEntry.m04_airplane.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m04_airplane(num);
+  }
+  refresh();
+}
+
+
+// m04_both
+var m04_both_computed;
+function compute_m04_both() {
+  if(parseInt(1.000000* m04_truck_raw + 1.000000* m04_airplane_raw) >= parseInt(2.000000)) {
+    m04_both_computed = parseInt(10.000000);
+  } else {
+    m04_both_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_m04_both.value = m04_both_computed;
+}
+// m_05_switch
+var m_05_switch_raw;
+var m_05_switch_computed;
+function set_m_05_switch(newValue) {
+  var temp = m_05_switch_raw;
+  m_05_switch_raw = newValue;
+  if(!isConsistent()) {
+    m_05_switch_raw = temp;
+  }
+  refresh();
+}
+function check_m_05_switch() {
+  var str = document.scoreEntry.m_05_switch.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m_05_switch(num);
+  }
+  refresh();
+}
+
+
+// m06_parked_over_blue
+var m06_parked_over_blue_raw;
+var m06_parked_over_blue_computed;
+function set_m06_parked_over_blue(newValue) {
+  var temp = m06_parked_over_blue_raw;
+  m06_parked_over_blue_raw = newValue;
+  if(!isConsistent()) {
+    m06_parked_over_blue_raw = temp;
+  }
+  refresh();
+}
+function check_m06_parked_over_blue() {
+  var str = document.scoreEntry.m06_parked_over_blue.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m06_parked_over_blue(num);
+  }
+  refresh();
+}
+
+
+// m06_yellow_knocked_over
+var m06_yellow_knocked_over_raw;
+var m06_yellow_knocked_over_computed;
+function set_m06_yellow_knocked_over(newValue) {
+  var temp = m06_yellow_knocked_over_raw;
+  m06_yellow_knocked_over_raw = newValue;
+  if(!isConsistent()) {
+    m06_yellow_knocked_over_raw = temp;
+  }
+  refresh();
+}
+function check_m06_yellow_knocked_over() {
+  var str = document.scoreEntry.m06_yellow_knocked_over.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m06_yellow_knocked_over(num);
+  }
+  refresh();
+}
+
+
+// m06_black_frame_down
+var m06_black_frame_down_raw;
+var m06_black_frame_down_computed;
+function set_m06_black_frame_down(newValue) {
+  var temp = m06_black_frame_down_raw;
+  m06_black_frame_down_raw = newValue;
+  if(!isConsistent()) {
+    m06_black_frame_down_raw = temp;
+  }
+  refresh();
+}
+function check_m06_black_frame_down() {
+  var str = document.scoreEntry.m06_black_frame_down.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m06_black_frame_down(num);
+  }
+  refresh();
+}
+
+
+// m06_score
+var m06_score_computed;
+function compute_m06_score() {
+  if(parseInt(1.000000* m06_black_frame_down_raw) == parseInt(1.000000)) {
+    m06_score_computed = parseInt(0.000000);
+  } else if(parseInt(1.000000* m06_parked_over_blue_raw) == parseInt(1.000000)) {
+    if(parseInt(1.000000* m06_yellow_knocked_over_raw) == parseInt(1.000000)) {
+      m06_score_computed = parseInt(30.000000);
+    } else {
+      m06_score_computed = parseInt(20.000000);
+    }
+  } else {
+    m06_score_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_m06_score.value = m06_score_computed;
+}
+// m07_container_not_touching
+var m07_container_not_touching_raw;
+var m07_container_not_touching_computed;
+function set_m07_container_not_touching(newValue) {
+  var temp = m07_container_not_touching_raw;
+  m07_container_not_touching_raw = newValue;
+  if(!isConsistent()) {
+    m07_container_not_touching_raw = temp;
+  }
+  refresh();
+}
+function check_m07_container_not_touching() {
+  var str = document.scoreEntry.m07_container_not_touching.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m07_container_not_touching(num);
+  }
+  refresh();
+}
+
+
+// m07_container_east
+var m07_container_east_raw;
+var m07_container_east_computed;
+function set_m07_container_east(newValue) {
+  var temp = m07_container_east_raw;
+  m07_container_east_raw = newValue;
+  if(!isConsistent()) {
+    m07_container_east_raw = temp;
+  }
+  refresh();
+}
+function check_m07_container_east() {
+  var str = document.scoreEntry.m07_container_east.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m07_container_east(num);
+  }
+  refresh();
+}
+
+
+// m08_food_separated
+var m08_food_separated_raw;
+var m08_food_separated_computed;
+function set_m08_food_separated(newValue) {
+  var temp = m08_food_separated_raw;
+  m08_food_separated_raw = newValue;
+  if(!isConsistent()) {
+    m08_food_separated_raw = temp;
+  }
+  refresh();
+}
+function check_m08_food_separated() {
+  var str = document.scoreEntry.m08_food_separated.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m08_food_separated(num);
+  }
+  refresh();
+}
+
+
+// m08_other_food_package
+var m08_other_food_package_raw;
+var m08_other_food_package_computed;
+function set_m08_other_food_package(newValue) {
+  var temp = m08_other_food_package_raw;
+  m08_other_food_package_raw = newValue;
+  if(!isConsistent()) {
+    m08_other_food_package_raw = temp;
+  }
+  refresh();
+}
+function check_m08_other_food_package() {
+  var str = document.scoreEntry.m08_other_food_package.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m08_other_food_package(num);
+  }
+  refresh();
+}
+
+
+// m08_both_separated_package
+var m08_both_separated_package_raw;
+var m08_both_separated_package_computed;
+function set_m08_both_separated_package(newValue) {
+  var temp = m08_both_separated_package_raw;
+  m08_both_separated_package_raw = newValue;
+  if(!isConsistent()) {
+    m08_both_separated_package_raw = temp;
+  }
+  refresh();
+}
+function check_m08_both_separated_package() {
+  var str = document.scoreEntry.m08_both_separated_package.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m08_both_separated_package(num);
+  }
+  refresh();
+}
+
+
+// m09_track_down
+var m09_track_down_raw;
+var m09_track_down_computed;
+function set_m09_track_down(newValue) {
+  var temp = m09_track_down_raw;
+  m09_track_down_raw = newValue;
+  if(!isConsistent()) {
+    m09_track_down_raw = temp;
+  }
+  refresh();
+}
+function check_m09_track_down() {
+  var str = document.scoreEntry.m09_track_down.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m09_track_down(num);
+  }
+  refresh();
+}
+
+
+// m09_train_latched
+var m09_train_latched_raw;
+var m09_train_latched_computed;
+function set_m09_train_latched(newValue) {
+  var temp = m09_train_latched_raw;
+  m09_train_latched_raw = newValue;
+  if(!isConsistent()) {
+    m09_train_latched_raw = temp;
+  }
+  refresh();
+}
+function check_m09_train_latched() {
+  var str = document.scoreEntry.m09_train_latched.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m09_train_latched(num);
+  }
+  refresh();
+}
+
+
+// m10_orange_container_in_blue
+var m10_orange_container_in_blue_raw;
+var m10_orange_container_in_blue_computed;
+function set_m10_orange_container_in_blue(newValue) {
+  var temp = m10_orange_container_in_blue_raw;
+  m10_orange_container_in_blue_raw = newValue;
+  if(!isConsistent()) {
+    m10_orange_container_in_blue_raw = temp;
+  }
+  refresh();
+}
+function check_m10_orange_container_in_blue() {
+  var str = document.scoreEntry.m10_orange_container_in_blue.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m10_orange_container_in_blue(num);
+  }
+  refresh();
+}
+
+
+// m11_package_delivered
+var m11_package_delivered_raw;
+var m11_package_delivered_computed;
+function set_m11_package_delivered(newValue) {
+  var temp = m11_package_delivered_raw;
+  m11_package_delivered_raw = newValue;
+  if(!isConsistent()) {
+    m11_package_delivered_raw = temp;
+  }
+  refresh();
+}
+function check_m11_package_delivered() {
+  var str = document.scoreEntry.m11_package_delivered.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m11_package_delivered(num);
+  }
+  refresh();
+}
+
+
+// m12_turbine_blade
+var m12_turbine_blade_raw;
+var m12_turbine_blade_computed;
+function set_m12_turbine_blade(newValue) {
+  var temp = m12_turbine_blade_raw;
+  m12_turbine_blade_raw = newValue;
+  if(!isConsistent()) {
+    m12_turbine_blade_raw = temp;
+  }
+  refresh();
+}
+function check_m12_turbine_blade() {
+  var str = document.scoreEntry.m12_turbine_blade.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m12_turbine_blade(num);
+  }
+  refresh();
+}
+
+
+// m12_chicken_statue
+var m12_chicken_statue_raw;
+var m12_chicken_statue_computed;
+function set_m12_chicken_statue(newValue) {
+  var temp = m12_chicken_statue_raw;
+  m12_chicken_statue_raw = newValue;
+  if(!isConsistent()) {
+    m12_chicken_statue_raw = temp;
+  }
+  refresh();
+}
+function check_m12_chicken_statue() {
+  var str = document.scoreEntry.m12_chicken_statue.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m12_chicken_statue(num);
+  }
+  refresh();
+}
+
+
+// m13_latched_outside_home
+var m13_latched_outside_home_raw;
+var m13_latched_outside_home_computed;
+function set_m13_latched_outside_home(newValue) {
+  var temp = m13_latched_outside_home_raw;
+  m13_latched_outside_home_raw = newValue;
+  if(!isConsistent()) {
+    m13_latched_outside_home_raw = temp;
+  }
+  refresh();
+}
+function check_m13_latched_outside_home() {
+  var str = document.scoreEntry.m13_latched_outside_home.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m13_latched_outside_home(num);
+  }
+  refresh();
+}
+
+
+// m13_latched_to_bridge
+var m13_latched_to_bridge_raw;
+var m13_latched_to_bridge_computed;
+function set_m13_latched_to_bridge(newValue) {
+  var temp = m13_latched_to_bridge_raw;
+  m13_latched_to_bridge_raw = newValue;
+  if(!isConsistent()) {
+    m13_latched_to_bridge_raw = temp;
+  }
+  refresh();
+}
+function check_m13_latched_to_bridge() {
+  var str = document.scoreEntry.m13_latched_to_bridge.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m13_latched_to_bridge(num);
+  }
+  refresh();
+}
+
+
+// m13_bonus
+var m13_bonus_computed;
+function compute_m13_bonus() {
+  if(parseInt(1.000000* m13_latched_outside_home_raw + 1.000000* m13_latched_to_bridge_raw) >= parseInt(2.000000)) {
+    m13_bonus_computed = parseInt(10.000000);
+  } else {
+    m13_bonus_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_m13_bonus.value = m13_bonus_computed;
+}
+// m14_bridge_lowered
+var m14_bridge_lowered_raw;
+var m14_bridge_lowered_computed;
+function set_m14_bridge_lowered(newValue) {
+  var temp = m14_bridge_lowered_raw;
+  m14_bridge_lowered_raw = newValue;
+  if(!isConsistent()) {
+    m14_bridge_lowered_raw = temp;
+  }
+  refresh();
+}
+function check_m14_bridge_lowered() {
+  var str = document.scoreEntry.m14_bridge_lowered.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m14_bridge_lowered(num);
+  }
+  refresh();
+}
+function increment_m14_bridge_lowered(increment) {
+  var temp = m14_bridge_lowered_raw
+  m14_bridge_lowered_raw += increment;
+  if(m14_bridge_lowered_raw > 2.0) {
+    m14_bridge_lowered_raw = 2.0;
+   }
+  if(m14_bridge_lowered_raw < 0.0) {
+    m14_bridge_lowered_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m14_bridge_lowered_raw = temp;
+  }
+  refresh();
+}
+
+
+// m15_containers_platooning
+var m15_containers_platooning_raw;
+var m15_containers_platooning_computed;
+function set_m15_containers_platooning(newValue) {
+  var temp = m15_containers_platooning_raw;
+  m15_containers_platooning_raw = newValue;
+  if(!isConsistent()) {
+    m15_containers_platooning_raw = temp;
+  }
+  refresh();
+}
+function check_m15_containers_platooning() {
+  var str = document.scoreEntry.m15_containers_platooning.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m15_containers_platooning(num);
+  }
+  refresh();
+}
+function increment_m15_containers_platooning(increment) {
+  var temp = m15_containers_platooning_raw
+  m15_containers_platooning_raw += increment;
+  if(m15_containers_platooning_raw > 2.0) {
+    m15_containers_platooning_raw = 2.0;
+   }
+  if(m15_containers_platooning_raw < 0.0) {
+    m15_containers_platooning_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m15_containers_platooning_raw = temp;
+  }
+  refresh();
+}
+
+
+// m15_containers_train
+var m15_containers_train_raw;
+var m15_containers_train_computed;
+function set_m15_containers_train(newValue) {
+  var temp = m15_containers_train_raw;
+  m15_containers_train_raw = newValue;
+  if(!isConsistent()) {
+    m15_containers_train_raw = temp;
+  }
+  refresh();
+}
+function check_m15_containers_train() {
+  var str = document.scoreEntry.m15_containers_train.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m15_containers_train(num);
+  }
+  refresh();
+}
+function increment_m15_containers_train(increment) {
+  var temp = m15_containers_train_raw
+  m15_containers_train_raw += increment;
+  if(m15_containers_train_raw > 2.0) {
+    m15_containers_train_raw = 2.0;
+   }
+  if(m15_containers_train_raw < 0.0) {
+    m15_containers_train_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m15_containers_train_raw = temp;
+  }
+  refresh();
+}
+
+
+// m15_containers_deck
+var m15_containers_deck_raw;
+var m15_containers_deck_computed;
+function set_m15_containers_deck(newValue) {
+  var temp = m15_containers_deck_raw;
+  m15_containers_deck_raw = newValue;
+  if(!isConsistent()) {
+    m15_containers_deck_raw = temp;
+  }
+  refresh();
+}
+function check_m15_containers_deck() {
+  var str = document.scoreEntry.m15_containers_deck.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m15_containers_deck(num);
+  }
+  refresh();
+}
+function increment_m15_containers_deck(increment) {
+  var temp = m15_containers_deck_raw
+  m15_containers_deck_raw += increment;
+  if(m15_containers_deck_raw > 2.0) {
+    m15_containers_deck_raw = 2.0;
+   }
+  if(m15_containers_deck_raw < 0.0) {
+    m15_containers_deck_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m15_containers_deck_raw = temp;
+  }
+  refresh();
+}
+
+
+// m16_containers_partly_any_circle
+var m16_containers_partly_any_circle_raw;
+var m16_containers_partly_any_circle_computed;
+function set_m16_containers_partly_any_circle(newValue) {
+  var temp = m16_containers_partly_any_circle_raw;
+  m16_containers_partly_any_circle_raw = newValue;
+  if(!isConsistent()) {
+    m16_containers_partly_any_circle_raw = temp;
+  }
+  refresh();
+}
+function check_m16_containers_partly_any_circle() {
+  var str = document.scoreEntry.m16_containers_partly_any_circle.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m16_containers_partly_any_circle(num);
+  }
+  refresh();
+}
+function increment_m16_containers_partly_any_circle(increment) {
+  var temp = m16_containers_partly_any_circle_raw
+  m16_containers_partly_any_circle_raw += increment;
+  if(m16_containers_partly_any_circle_raw > 8.0) {
+    m16_containers_partly_any_circle_raw = 8.0;
+   }
+  if(m16_containers_partly_any_circle_raw < 0.0) {
+    m16_containers_partly_any_circle_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m16_containers_partly_any_circle_raw = temp;
+  }
+  refresh();
+}
+
+
+// m16_containers_completely_any_circle
+var m16_containers_completely_any_circle_raw;
+var m16_containers_completely_any_circle_computed;
+function set_m16_containers_completely_any_circle(newValue) {
+  var temp = m16_containers_completely_any_circle_raw;
+  m16_containers_completely_any_circle_raw = newValue;
+  if(!isConsistent()) {
+    m16_containers_completely_any_circle_raw = temp;
+  }
+  refresh();
+}
+function check_m16_containers_completely_any_circle() {
+  var str = document.scoreEntry.m16_containers_completely_any_circle.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m16_containers_completely_any_circle(num);
+  }
+  refresh();
+}
+function increment_m16_containers_completely_any_circle(increment) {
+  var temp = m16_containers_completely_any_circle_raw
+  m16_containers_completely_any_circle_raw += increment;
+  if(m16_containers_completely_any_circle_raw > 8.0) {
+    m16_containers_completely_any_circle_raw = 8.0;
+   }
+  if(m16_containers_completely_any_circle_raw < 0.0) {
+    m16_containers_completely_any_circle_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m16_containers_completely_any_circle_raw = temp;
+  }
+  refresh();
+}
+
+
+// m16_blue_container_blue_circle
+var m16_blue_container_blue_circle_raw;
+var m16_blue_container_blue_circle_computed;
+function set_m16_blue_container_blue_circle(newValue) {
+  var temp = m16_blue_container_blue_circle_raw;
+  m16_blue_container_blue_circle_raw = newValue;
+  if(!isConsistent()) {
+    m16_blue_container_blue_circle_raw = temp;
+  }
+  refresh();
+}
+function check_m16_blue_container_blue_circle() {
+  var str = document.scoreEntry.m16_blue_container_blue_circle.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m16_blue_container_blue_circle(num);
+  }
+  refresh();
+}
+
+
+// m16_green_container_green_circle
+var m16_green_container_green_circle_raw;
+var m16_green_container_green_circle_computed;
+function set_m16_green_container_green_circle(newValue) {
+  var temp = m16_green_container_green_circle_raw;
+  m16_green_container_green_circle_raw = newValue;
+  if(!isConsistent()) {
+    m16_green_container_green_circle_raw = temp;
+  }
+  refresh();
+}
+function check_m16_green_container_green_circle() {
+  var str = document.scoreEntry.m16_green_container_green_circle.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m16_green_container_green_circle(num);
+  }
+  refresh();
+}
+
+
+// m16_circle_container_completely_in
+var m16_circle_container_completely_in_raw;
+var m16_circle_container_completely_in_computed;
+function set_m16_circle_container_completely_in(newValue) {
+  var temp = m16_circle_container_completely_in_raw;
+  m16_circle_container_completely_in_raw = newValue;
+  if(!isConsistent()) {
+    m16_circle_container_completely_in_raw = temp;
+  }
+  refresh();
+}
+function check_m16_circle_container_completely_in() {
+  var str = document.scoreEntry.m16_circle_container_completely_in.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m16_circle_container_completely_in(num);
+  }
+  refresh();
+}
+function increment_m16_circle_container_completely_in(increment) {
+  var temp = m16_circle_container_completely_in_raw
+  m16_circle_container_completely_in_raw += increment;
+  if(m16_circle_container_completely_in_raw > 6.0) {
+    m16_circle_container_completely_in_raw = 6.0;
+   }
+  if(m16_circle_container_completely_in_raw < 0.0) {
+    m16_circle_container_completely_in_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m16_circle_container_completely_in_raw = temp;
+  }
+  refresh();
+}
+
+
+// m17_precision_tokens
+var m17_precision_tokens_raw;
+var m17_precision_tokens_computed;
+function set_m17_precision_tokens(newValue) {
+  var temp = m17_precision_tokens_raw;
+  m17_precision_tokens_raw = newValue;
+  if(!isConsistent()) {
+    m17_precision_tokens_raw = temp;
+  }
+  refresh();
+}
+function check_m17_precision_tokens() {
+  var str = document.scoreEntry.m17_precision_tokens.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m17_precision_tokens(num);
+  }
+  refresh();
+}
+
+
+// gp_score
+var gp_score_raw;
+var gp_score_computed;
+function set_gp_score(newValue) {
+  var temp = gp_score_raw;
+  gp_score_raw = newValue;
+  if(!isConsistent()) {
+    gp_score_raw = temp;
+  }
+  refresh();
+}
+function check_gp_score() {
+  var str = document.scoreEntry.gp_score.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_gp_score(num);
+  }
+  refresh();
+}
+function increment_gp_score(increment) {
+  var temp = gp_score_raw
+  gp_score_raw += increment;
+  if(gp_score_raw > 4.0) {
+    gp_score_raw = 4.0;
+   }
+  if(gp_score_raw < 2.0) {
+    gp_score_raw = 2.0;
+   }
+  if(!isConsistent()) {
+    gp_score_raw = temp;
+  }
+  refresh();
+}
+
+
+// Verified 
+var Verified;
+function set_Verified(newValue) {
+  Verified = newValue;
+  refresh();
+}
+
+
+
+
+ <!-- end check for bye -->
+
+document.addEventListener('DOMContentLoaded', function() {
+  const resetButton = document.getElementById("reset_score");
+  if(resetButton) {
+      resetButton.addEventListener('click', init);
+  }
+});
+
+</script>
+
+</head>
+
+<body>
+
+  <div id="floating-messages">
+    <div id="score-errors" style="display: none;"></div>
+    <div id="verification-warning" style="display: none;">Are you sure this score has
+      been Verified? Normally scores are not verified on the initial
+      entry.</div>
+  </div>
+
+  <form action="SubmitScoreEntry" method="POST" name="scoreEntry" id="scoreEntry">
+    <input type="hidden" id="NoShow" name="NoShow" value="false">
+    <input type="hidden" id="delete" name="delete" value="false">
+
+      <input type="hidden" name="EditFlag" id="EditFlag" value="false" readonly="readonly">
+    
+    <input type="hidden" name="RunNumber" value="" readonly="readonly"> <input type="hidden" name="TeamNumber" value="" readonly="readonly">
+
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
+      <!-- info bar -->
+      <tbody><tr>
+        <td valign="middle" align="center">
+          <!-- top info bar (team name etc) -->
+          <table id="top_info" width="100%" cellspacing="0" cellpadding="0" border="1">
+            <tbody><tr valign="middle" align="center">
+              <td>
+
+                <table width="90%" cellspacing="0" cellpadding="5" border="0">
+                  <!--  inner box on title -->
+                  <tbody><tr>
+                    <td valign="middle" align="center">
+                        
+                        
+                          <font size="4" face="Arial">Score Entry</font>
+                        
+                      </td>
+                  </tr>
+                  <tr align="center">
+                    <td><font size="4" face="Arial" color="#0000ff">
+
+                                                
+                                                    
+                      Practice
+                      
+                                                    
+                                                
+                                            </font>
+                    </td>
+                  </tr>
+                </tbody></table> <!--  end inner box on title -->
+
+              </td>
+            </tr>
+            <!-- team info -->
+
+            
+
+          </tbody></table> <!--  end info bar -->
+
+        </td>
+      </tr>
+
+
+      <!-- score entry -->
+      <tr>
+        <td valign="middle" align="center">
+
+          <table class="score-entry">
+            <colgroup>
+              <!--  goal -->
+              <col width="50%">
+              <!-- buttons -->
+              <col width="30%">
+              <!-- count -->
+              <col width="10%">
+              <!--  score -->
+              <col width="10%">
+            </colgroup>
+            <tbody><tr>
+              <td colspan="2"><font size="4"><u>Goal</u></font></td>
+              <td align="right"><font size="4"><u>Count</u></font>
+              </td>
+              <td class="score-cell" align="right"><font size="4"><u>Score</u></font>
+              </td>
+            </tr>
+
+            
+              
+              
+                
+                <tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M00 - EQUIPMENT INSPECTION BONUS</b></td>
+</tr>
+<!-- m00_small_inspection_area -->
+<tr id="m00_small_inspection_area_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ALL Equipment Fits in Small Inspection Area:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m00_small_inspection_area_no" name="m00_small_inspection_area" value="0" onclick="set_m00_small_inspection_area(0)" checked="checked">
+        <span id="m00_small_inspection_area_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m00_small_inspection_area_yes" name="m00_small_inspection_area" value="1" onclick="set_m00_small_inspection_area(1)">
+        <span id="m00_small_inspection_area_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m00_small_inspection_area_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m00_small_inspection_area" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m00_small_inspection_area -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M01  - INNOVATION PROJECT MODEL</b></td>
+</tr>
+<!-- m01_innovation_project -->
+<tr id="m01_innovation_project_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Innovation Project Model Touching Cargo Connect circle:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m01_innovation_project_no" name="m01_innovation_project" value="0" onclick="set_m01_innovation_project(0)" checked="checked">
+        <span id="m01_innovation_project_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m01_innovation_project_yes" name="m01_innovation_project" value="1" onclick="set_m01_innovation_project(1)">
+        <span id="m01_innovation_project_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m01_innovation_project_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m01_innovation_project" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m01_innovation_project -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M02 - UNUSED CAPACITY - Unused Capacity</b></td>
+</tr>
+<!-- m02_unused_capacity -->
+<tr id="m02_unused_capacity_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Blue Hinged Container is Completely Closed AND:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m02_unused_capacity" value="None" id="m02_unused_capacity_None" onclick='set_m02_unused_capacity("None")' checked="checked">
+        <span id="m02_unused_capacity_None_span">
+          No
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m02_unused_capacity" value="partly_full" id="m02_unused_capacity_partly_full" onclick='set_m02_unused_capacity("partly_full")'>
+        <span id="m02_unused_capacity_partly_full_span">
+          Partly Full 1-5 pcs
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m02_unused_capacity" value="completelyfull" id="m02_unused_capacity_completelyfull" onclick='set_m02_unused_capacity("completelyfull")'>
+        <span id="m02_unused_capacity_completelyfull_span">
+          Completely Full 6 pcs
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m02_unused_capacity_radioValue" size="10" readonly="readonly" tabindex="-1" value="NONE" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m02_unused_capacity" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m02_unused_capacity -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M03 - UNLOAD CARGO PLANE - Unload Cargo Plane</b></td>
+</tr>
+<!-- m03_cargo_door_down -->
+<tr id="m03_cargo_door_down_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cargo Plane Door Completely Down, Touching Black Frame:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m03_cargo_door_down_no" name="m03_cargo_door_down" value="0" onclick="set_m03_cargo_door_down(0)" checked="checked">
+        <span id="m03_cargo_door_down_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m03_cargo_door_down_yes" name="m03_cargo_door_down" value="1" onclick="set_m03_cargo_door_down(1)">
+        <span id="m03_cargo_door_down_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m03_cargo_door_down_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m03_cargo_door_down" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m03_cargo_door_down -->
+
+<!-- m03_plane_unloaded -->
+<tr id="m03_plane_unloaded_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cargo Plane Unloaded - Container Completely Separated from Plane:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m03_plane_unloaded_no" name="m03_plane_unloaded" value="0" onclick="set_m03_plane_unloaded(0)" checked="checked">
+        <span id="m03_plane_unloaded_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m03_plane_unloaded_yes" name="m03_plane_unloaded" value="1" onclick="set_m03_plane_unloaded(1)">
+        <span id="m03_plane_unloaded_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m03_plane_unloaded_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m03_plane_unloaded" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m03_plane_unloaded -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M04 - TRANSPORTATION JOURNEY - Transporation Journey</b></td>
+</tr>
+<!-- m04_truck -->
+<tr id="m04_truck_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Truck Completely past Blue Line, On Mat:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m04_truck_no" name="m04_truck" value="0" onclick="set_m04_truck(0)" checked="checked">
+        <span id="m04_truck_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m04_truck_yes" name="m04_truck" value="1" onclick="set_m04_truck(1)">
+        <span id="m04_truck_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m04_truck_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m04_truck" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m04_truck -->
+
+<!-- m04_airplane -->
+<tr id="m04_airplane_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Airplane Completely past Blue Line, On Mat:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m04_airplane_no" name="m04_airplane" value="0" onclick="set_m04_airplane(0)" checked="checked">
+        <span id="m04_airplane_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m04_airplane_yes" name="m04_airplane" value="1" onclick="set_m04_airplane(1)">
+        <span id="m04_airplane_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m04_airplane_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m04_airplane" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m04_airplane -->
+
+<!-- m04_both -->
+<tr id="m04_both_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Airplane and Truck BOTH Completely Past Blue Line:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m04_both" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m04_both -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M05 - SWITCH ENGINE - Switch Engine</b></td>
+</tr>
+<!-- m_05_switch -->
+<tr id="m_05_switch_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Switch Engine Yellow Bar All the Way Down/South:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m_05_switch_no" name="m_05_switch" value="0" onclick="set_m_05_switch(0)" checked="checked">
+        <span id="m_05_switch_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m_05_switch_yes" name="m_05_switch" value="1" onclick="set_m_05_switch(1)">
+        <span id="m_05_switch_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m_05_switch_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m_05_switch" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m_05_switch -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M06 - ACCIDENT AVOIDANCE - Accident Avoidance</b></td>
+</tr>
+<!-- m06_parked_over_blue -->
+<tr id="m06_parked_over_blue_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Robot Parked Over Blue Accident Avoidance Line:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m06_parked_over_blue_no" name="m06_parked_over_blue" value="0" onclick="set_m06_parked_over_blue(0)" checked="checked">
+        <span id="m06_parked_over_blue_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m06_parked_over_blue_yes" name="m06_parked_over_blue" value="1" onclick="set_m06_parked_over_blue(1)">
+        <span id="m06_parked_over_blue_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m06_parked_over_blue_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m06_parked_over_blue" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m06_parked_over_blue -->
+
+<!-- m06_yellow_knocked_over -->
+<tr id="m06_yellow_knocked_over_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Yellow Panel Knocked Over:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m06_yellow_knocked_over_no" name="m06_yellow_knocked_over" value="0" onclick="set_m06_yellow_knocked_over(0)" checked="checked">
+        <span id="m06_yellow_knocked_over_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m06_yellow_knocked_over_yes" name="m06_yellow_knocked_over" value="1" onclick="set_m06_yellow_knocked_over(1)">
+        <span id="m06_yellow_knocked_over_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m06_yellow_knocked_over_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m06_yellow_knocked_over" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m06_yellow_knocked_over -->
+
+<!-- m06_black_frame_down -->
+<tr id="m06_black_frame_down_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Black Frame Knocked Down - Mission will score ZERO:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m06_black_frame_down_no" name="m06_black_frame_down" value="0" onclick="set_m06_black_frame_down(0)" checked="checked">
+        <span id="m06_black_frame_down_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m06_black_frame_down_yes" name="m06_black_frame_down" value="1" onclick="set_m06_black_frame_down(1)">
+        <span id="m06_black_frame_down_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m06_black_frame_down_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m06_black_frame_down" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m06_black_frame_down -->
+
+<!-- m06_score -->
+<tr id="m06_score_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M06 Score:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m06_score" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m06_score -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M07 - UNLOAD CARGO SHIP - Unload Cargo Ship</b></td>
+</tr>
+<!-- m07_container_not_touching -->
+<tr id="m07_container_not_touching_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Container No Longer Touching Cargo Ship's East Deck:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m07_container_not_touching_no" name="m07_container_not_touching" value="0" onclick="set_m07_container_not_touching(0)" checked="checked">
+        <span id="m07_container_not_touching_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m07_container_not_touching_yes" name="m07_container_not_touching" value="1" onclick="set_m07_container_not_touching(1)">
+        <span id="m07_container_not_touching_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m07_container_not_touching_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m07_container_not_touching" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m07_container_not_touching -->
+
+<!-- m07_container_east -->
+<tr id="m07_container_east_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Container Completely East of Cargo Ship's East Deck:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m07_container_east_no" name="m07_container_east" value="0" onclick="set_m07_container_east(0)" checked="checked">
+        <span id="m07_container_east_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m07_container_east_yes" name="m07_container_east" value="1" onclick="set_m07_container_east(1)">
+        <span id="m07_container_east_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m07_container_east_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m07_container_east" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m07_container_east -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M08 - AIR DROP - Air Drop</b></td>
+</tr>
+<!-- m08_food_separated -->
+<tr id="m08_food_separated_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Food Package Separated from Your Helicopter:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m08_food_separated_no" name="m08_food_separated" value="0" onclick="set_m08_food_separated(0)" checked="checked">
+        <span id="m08_food_separated_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m08_food_separated_yes" name="m08_food_separated" value="1" onclick="set_m08_food_separated(1)">
+        <span id="m08_food_separated_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m08_food_separated_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m08_food_separated" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m08_food_separated -->
+
+<!-- m08_other_food_package -->
+<tr id="m08_other_food_package_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Food Package from Other Helicopter in your Cargo Connect Circle:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m08_other_food_package_no" name="m08_other_food_package" value="0" onclick="set_m08_other_food_package(0)" checked="checked">
+        <span id="m08_other_food_package_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m08_other_food_package_yes" name="m08_other_food_package" value="1" onclick="set_m08_other_food_package(1)">
+        <span id="m08_other_food_package_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m08_other_food_package_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m08_other_food_package" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m08_other_food_package -->
+
+<!-- m08_both_separated_package -->
+<tr id="m08_both_separated_package_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Both Team's Separated Their Food Package from Their Helicopters:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m08_both_separated_package_no" name="m08_both_separated_package" value="0" onclick="set_m08_both_separated_package(0)" checked="checked">
+        <span id="m08_both_separated_package_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m08_both_separated_package_yes" name="m08_both_separated_package" value="1" onclick="set_m08_both_separated_package(1)">
+        <span id="m08_both_separated_package_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m08_both_separated_package_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m08_both_separated_package" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m08_both_separated_package -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M09 - TRAIN TRACKS - Train Tracks</b></td>
+</tr>
+<!-- m09_track_down -->
+<tr id="m09_track_down_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Train Track Completely Down/West:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m09_track_down_no" name="m09_track_down" value="0" onclick="set_m09_track_down(0)" checked="checked">
+        <span id="m09_track_down_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m09_track_down_yes" name="m09_track_down" value="1" onclick="set_m09_track_down(1)">
+        <span id="m09_track_down_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m09_track_down_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m09_track_down" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m09_track_down -->
+
+<!-- m09_train_latched -->
+<tr id="m09_train_latched_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Train Latched at End of Tracks:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m09_train_latched_no" name="m09_train_latched" value="0" onclick="set_m09_train_latched(0)" checked="checked">
+        <span id="m09_train_latched_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m09_train_latched_yes" name="m09_train_latched" value="1" onclick="set_m09_train_latched(1)">
+        <span id="m09_train_latched_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m09_train_latched_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m09_train_latched" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m09_train_latched -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M10 - SORTING CENTER - Sorting Center</b></td>
+</tr>
+<!-- m10_orange_container_in_blue -->
+<tr id="m10_orange_container_in_blue_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Light Orange Container Only Container Completely in Blue Sorting Area Box:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m10_orange_container_in_blue_no" name="m10_orange_container_in_blue" value="0" onclick="set_m10_orange_container_in_blue(0)" checked="checked">
+        <span id="m10_orange_container_in_blue_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m10_orange_container_in_blue_yes" name="m10_orange_container_in_blue" value="1" onclick="set_m10_orange_container_in_blue(1)">
+        <span id="m10_orange_container_in_blue_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m10_orange_container_in_blue_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m10_orange_container_in_blue" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m10_orange_container_in_blue -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M11 - HOME DELIVERY</b></td>
+</tr>
+<!-- m11_package_delivered -->
+<tr id="m11_package_delivered_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Package on Doorstep Not Touching Any Equipment:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m11_package_delivered" value="no" id="m11_package_delivered_no" onclick='set_m11_package_delivered("no")' checked="checked">
+        <span id="m11_package_delivered_no_span">
+          No
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m11_package_delivered" value="partly" id="m11_package_delivered_partly" onclick='set_m11_package_delivered("partly")'>
+        <span id="m11_package_delivered_partly_span">
+          Partly
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m11_package_delivered" value="completely" id="m11_package_delivered_completely" onclick='set_m11_package_delivered("completely")'>
+        <span id="m11_package_delivered_completely_span">
+          Completely
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m11_package_delivered_radioValue" size="10" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m11_package_delivered" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m11_package_delivered -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M12 - LARGE DELIVERY</b></td>
+</tr>
+<!-- m12_turbine_blade -->
+<tr id="m12_turbine_blade_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Turbine Blade Touching Only Blue Holder:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m12_turbine_blade" value="no" id="m12_turbine_blade_no" onclick='set_m12_turbine_blade("no")' checked="checked">
+        <span id="m12_turbine_blade_no_span">
+          No
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m12_turbine_blade" value="mat" id="m12_turbine_blade_mat" onclick='set_m12_turbine_blade("mat")'>
+        <span id="m12_turbine_blade_mat_span">
+          And the Mat
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m12_turbine_blade" value="nothing" id="m12_turbine_blade_nothing" onclick='set_m12_turbine_blade("nothing")'>
+        <span id="m12_turbine_blade_nothing_span">
+          And Nothing Else
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m12_turbine_blade_radioValue" size="10" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m12_turbine_blade" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m12_turbine_blade -->
+
+<!-- m12_chicken_statue -->
+<tr id="m12_chicken_statue_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chicken Statue Upright with Base in its Circle:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m12_chicken_statue" value="no" id="m12_chicken_statue_no" onclick='set_m12_chicken_statue("no")' checked="checked">
+        <span id="m12_chicken_statue_no_span">
+          No
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m12_chicken_statue" value="partly" id="m12_chicken_statue_partly" onclick='set_m12_chicken_statue("partly")'>
+        <span id="m12_chicken_statue_partly_span">
+          Base Partly In
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m12_chicken_statue" value="completely" id="m12_chicken_statue_completely" onclick='set_m12_chicken_statue("completely")'>
+        <span id="m12_chicken_statue_completely_span">
+          Base Completely In
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m12_chicken_statue_radioValue" size="10" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m12_chicken_statue" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m12_chicken_statue -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M13 - PLATOONING TRUCKS</b></td>
+</tr>
+<!-- m13_latched_outside_home -->
+<tr id="m13_latched_outside_home_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Both Trucks Latched Together Completely Outside of Home:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m13_latched_outside_home_no" name="m13_latched_outside_home" value="0" onclick="set_m13_latched_outside_home(0)" checked="checked">
+        <span id="m13_latched_outside_home_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m13_latched_outside_home_yes" name="m13_latched_outside_home" value="1" onclick="set_m13_latched_outside_home(1)">
+        <span id="m13_latched_outside_home_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m13_latched_outside_home_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m13_latched_outside_home" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m13_latched_outside_home -->
+
+<!-- m13_latched_to_bridge -->
+<tr id="m13_latched_to_bridge_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A Truck Latched to the Bridge:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m13_latched_to_bridge_no" name="m13_latched_to_bridge" value="0" onclick="set_m13_latched_to_bridge(0)" checked="checked">
+        <span id="m13_latched_to_bridge_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m13_latched_to_bridge_yes" name="m13_latched_to_bridge" value="1" onclick="set_m13_latched_to_bridge(1)">
+        <span id="m13_latched_to_bridge_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m13_latched_to_bridge_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m13_latched_to_bridge" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m13_latched_to_bridge -->
+
+<!-- m13_bonus -->
+<tr id="m13_bonus_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Both Trucks Latched Outside Home AND A Truck Latched to Bridge:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m13_bonus" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m13_bonus -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M14 - BRIDGE</b></td>
+</tr>
+<!-- m14_bridge_lowered -->
+<tr id="m14_bridge_lowered_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# of Bridge Decks Lowered Resting on Center Support:
+  </td>
+  <td>
+<input class="range" type="range" min="0" max="2" id="m14_bridge_lowered_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m14_bridge_lowered" size="3" onchange="check_m14_bridge_lowered()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m14_bridge_lowered" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m14_bridge_lowered -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M15 - LOAD CARGO</b></td>
+</tr>
+<!-- m15_containers_platooning -->
+<tr id="m15_containers_platooning_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Containers On &amp; Touching Only Platooning Trucks Completely Outside Home:
+  </td>
+  <td>
+<input class="range" type="range" min="0" max="2" id="m15_containers_platooning_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m15_containers_platooning" size="3" onchange="check_m15_containers_platooning()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m15_containers_platooning" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m15_containers_platooning -->
+
+<!-- m15_containers_train -->
+<tr id="m15_containers_train_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Containers On &amp; Touching Only Train:
+  </td>
+  <td>
+<input class="range" type="range" min="0" max="2" id="m15_containers_train_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m15_containers_train" size="3" onchange="check_m15_containers_train()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m15_containers_train" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m15_containers_train -->
+
+<!-- m15_containers_deck -->
+<tr id="m15_containers_deck_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Containers On &amp; Touching Only Cargo Ship's West Deck:
+  </td>
+  <td>
+<input class="range" type="range" min="0" max="2" id="m15_containers_deck_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m15_containers_deck" size="3" onchange="check_m15_containers_deck()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m15_containers_deck" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m15_containers_deck -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M16 - CARGO CONNECT</b></td>
+</tr>
+<!-- m16_containers_partly_any_circle -->
+<tr id="m16_containers_partly_any_circle_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Containers PARTLY in ANY Circle:
+  </td>
+  <td>
+<input class="range" type="range" min="0" max="8" id="m16_containers_partly_any_circle_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="12.50%" y="0" width="2" height="100%"></rect>
+<rect x="25.00%" y="0" width="2" height="100%"></rect>
+<rect x="37.50%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="62.50%" y="0" width="2" height="100%"></rect>
+<rect x="75.00%" y="0" width="2" height="100%"></rect>
+<rect x="87.50%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m16_containers_partly_any_circle" size="3" onchange="check_m16_containers_partly_any_circle()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m16_containers_partly_any_circle" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m16_containers_partly_any_circle -->
+
+<!-- m16_containers_completely_any_circle -->
+<tr id="m16_containers_completely_any_circle_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Containers COMPLETELY in ANY Circle:
+  </td>
+  <td>
+<input class="range" type="range" min="0" max="8" id="m16_containers_completely_any_circle_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="12.50%" y="0" width="2" height="100%"></rect>
+<rect x="25.00%" y="0" width="2" height="100%"></rect>
+<rect x="37.50%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="62.50%" y="0" width="2" height="100%"></rect>
+<rect x="75.00%" y="0" width="2" height="100%"></rect>
+<rect x="87.50%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m16_containers_completely_any_circle" size="3" onchange="check_m16_containers_completely_any_circle()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m16_containers_completely_any_circle" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m16_containers_completely_any_circle -->
+
+<!-- m16_blue_container_blue_circle -->
+<tr id="m16_blue_container_blue_circle_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Blue Container (Not Hinged) Completely in Blue Circle:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m16_blue_container_blue_circle_no" name="m16_blue_container_blue_circle" value="0" onclick="set_m16_blue_container_blue_circle(0)" checked="checked">
+        <span id="m16_blue_container_blue_circle_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m16_blue_container_blue_circle_yes" name="m16_blue_container_blue_circle" value="1" onclick="set_m16_blue_container_blue_circle(1)">
+        <span id="m16_blue_container_blue_circle_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m16_blue_container_blue_circle_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m16_blue_container_blue_circle" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m16_blue_container_blue_circle -->
+
+<!-- m16_green_container_green_circle -->
+<tr id="m16_green_container_green_circle_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lime Green Container Completely in Green Circle:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m16_green_container_green_circle_no" name="m16_green_container_green_circle" value="0" onclick="set_m16_green_container_green_circle(0)" checked="checked">
+        <span id="m16_green_container_green_circle_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m16_green_container_green_circle_yes" name="m16_green_container_green_circle" value="1" onclick="set_m16_green_container_green_circle(1)">
+        <span id="m16_green_container_green_circle_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m16_green_container_green_circle_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m16_green_container_green_circle" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m16_green_container_green_circle -->
+
+<!-- m16_circle_container_completely_in -->
+<tr id="m16_circle_container_completely_in_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Circles with at Least One Container Completely In:
+  </td>
+  <td>
+<input class="range" type="range" min="0" max="6" id="m16_circle_container_completely_in_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="16.67%" y="0" width="2" height="100%"></rect>
+<rect x="33.33%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="66.67%" y="0" width="2" height="100%"></rect>
+<rect x="83.33%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m16_circle_container_completely_in" size="3" onchange="check_m16_circle_container_completely_in()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m16_circle_container_completely_in" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m16_circle_container_completely_in -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M17 - PRECISION TOKENS REMAINING ON FIELD</b></td>
+</tr>
+<!-- m17_precision_tokens -->
+<tr id="m17_precision_tokens_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Precision Tokens Remaining on Field:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m17_precision_tokens" value="zero" id="m17_precision_tokens_zero" onclick='set_m17_precision_tokens("zero")'>
+        <span id="m17_precision_tokens_zero_span">
+          Zero
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m17_precision_tokens" value="one" id="m17_precision_tokens_one" onclick='set_m17_precision_tokens("one")'>
+        <span id="m17_precision_tokens_one_span">
+          1
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m17_precision_tokens" value="two" id="m17_precision_tokens_two" onclick='set_m17_precision_tokens("two")'>
+        <span id="m17_precision_tokens_two_span">
+          2
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m17_precision_tokens" value="three" id="m17_precision_tokens_three" onclick='set_m17_precision_tokens("three")'>
+        <span id="m17_precision_tokens_three_span">
+          3
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m17_precision_tokens" value="four" id="m17_precision_tokens_four" onclick='set_m17_precision_tokens("four")'>
+        <span id="m17_precision_tokens_four_span">
+          4
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m17_precision_tokens" value="five" id="m17_precision_tokens_five" onclick='set_m17_precision_tokens("five")'>
+        <span id="m17_precision_tokens_five_span">
+          5
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m17_precision_tokens" value="six" id="m17_precision_tokens_six" onclick='set_m17_precision_tokens("six")' checked="checked">
+        <span id="m17_precision_tokens_six_span">
+          6
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m17_precision_tokens_radioValue" size="10" readonly="readonly" tabindex="-1" value="SIX" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m17_precision_tokens" size="3" readonly="readonly" tabindex="-1" value="50" align="right">
+  </td>
+</tr>
+<!-- end m17_precision_tokens -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>GRACIOUS PROFESSIONALISM DISPLAYED AT THE ROBOT GAME TABLE</b></td>
+</tr>
+<!-- gp_score -->
+<tr id="gp_score_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GP - Does not affect Robot Game Score:
+  </td>
+  <td>
+<input class="range" type="range" min="2" max="4" id="gp_score_slider" value="3">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="gp_score" size="3" onchange="check_gp_score()" value="3" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_gp_score" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end gp_score -->
+
+
+
+                <!-- Total Score -->
+                <tr>
+                  <td colspan="3"><font size="4"><u>Total
+                        Score:</u></font></td>
+                  <td class="score-cell" align="right"><input type="text" name="totalScore" size="3" readonly="readonly" tabindex="-1" value="50"></td>
+                </tr>
+                <!-- Score Verification -->
+    <tr>
+<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size="4" color="red">Team Agrees with the score entry:</font></td>
+      <td><label class="y-n-button">
+          <input type="radio" id="Verified_no" name="Verified" value="0" onclick="set_Verified(0)" checked="checked">
+        <span id="Verified_no_span">No</span>
+        </label><label class="y-n-button">
+          <input type="radio" id="Verified_yes" name="Verified" value="1" onclick="set_Verified(1)">
+        <span id="Verified_yes_span">Yes</span>
+        </label><table width="150" cellspacing="0" cellpadding="0" border="0"><tbody><tr align="center">
+        
+        
+      </tr></tbody></table></td>
+      <td colspan="2">&nbsp;</td>
+    </tr>
+
+              
+            
+            <!-- end check for bye -->
+
+            <tr>
+
+
+<td colspan="3">&nbsp;</td>
+<td><button type="button" id="reset_score">Reset Form</button></td>
+
+
+            
+            </tr>
+            
+          </tbody></table> <!-- end score entry table  -->
+
+        </td>
+      </tr>
+    </tbody></table>
+    <!-- end table to center everything -->
+  </form>
+  <!-- end score entry form -->
+
+    
+    
+    <div>Challenge revision: 15</div>
+<hr>
+<table style="border-spacing: 5px">
+  <tbody>
+  <tr><td>Software version: 16.0.1</td></tr>
+</tbody></table>
+
+
+<div style="display: none; position: absolute;" tabindex="-1" role="dialog" class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-dialog-buttons ui-draggable ui-resizable" aria-describedby="yesno-dialog" aria-labelledby="ui-id-1"><div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix ui-draggable-handle"><span id="ui-id-1" class="ui-dialog-title">&nbsp;</span><button type="button" class="ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close" title="Close"><span class="ui-button-icon ui-icon ui-icon-closethick"></span><span class="ui-button-icon-space"> </span>Close</button></div><div id="yesno-dialog" class="ui-dialog-content ui-widget-content">
+        <p id="yesno-dialog_text"></p>
+    </div><div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix"><div class="ui-dialog-buttonset"><button type="button" id="yesno-dialog_yes" class="ui-button ui-corner-all ui-widget">Yes</button><button type="button" id="yesno-dialog_no" class="ui-button ui-corner-all ui-widget">No</button></div></div><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-e" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-s" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-sw" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-ne" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90;"></div></div></body></html>
