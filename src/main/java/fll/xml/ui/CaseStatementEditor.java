@@ -15,6 +15,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.apache.batik.ext.swing.GridBagConstants;
+
 import fll.xml.CaseStatement;
 import fll.xml.GoalScope;
 import fll.xml.VariableScope;
@@ -47,7 +49,9 @@ public final class CaseStatementEditor extends JPanel implements Validatable {
 
     final JLabel ifLabel = new JLabel("If");
     gbc = new GridBagConstraints();
+    gbc.fill = GridBagConstants.BOTH;
     add(ifLabel, gbc);
+    ifLabel.setBorder(BorderFactory.createLineBorder(SwitchStatementEditor.IF_COLOR));
 
     ifLabel.setFont(ifThenFont);
 
@@ -62,7 +66,9 @@ public final class CaseStatementEditor extends JPanel implements Validatable {
     final JLabel thenLabel = new JLabel("Then value is");
     thenLabel.setFont(ifThenFont);
     gbc = new GridBagConstraints();
+    gbc.fill = GridBagConstants.BOTH;
     add(thenLabel, gbc);
+    thenLabel.setBorder(BorderFactory.createLineBorder(SwitchStatementEditor.THEN_COLOR));
 
     resultEditor = new CaseStatementResultEditor(stmt.getResult(), goalScope, variableScope);
     resultEditor.setBorder(BorderFactory.createLineBorder(SwitchStatementEditor.THEN_COLOR));
