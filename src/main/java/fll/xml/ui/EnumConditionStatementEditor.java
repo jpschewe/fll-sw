@@ -44,7 +44,7 @@ import fll.xml.InequalityComparison;
                                                                                                 InequalityComparison.NOT_EQUAL_TO });
     container.add(comparisonEditor);
     comparisonEditor.addActionListener(e -> {
-      stmt.setComparison(comparisonEditor.getItemAt(comparisonEditor.getSelectedIndex()));
+      stmt.setComparison(comparisonEditor.getSelectedItem());
     });
     comparisonEditor.setSelectedItem(stmt.getComparison());
 
