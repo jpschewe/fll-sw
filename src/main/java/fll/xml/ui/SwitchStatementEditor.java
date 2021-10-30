@@ -22,7 +22,6 @@ import javax.swing.JPanel;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import edu.umd.cs.findbugs.annotations.UnknownNullness;
 import fll.Utilities;
 import fll.util.GuiUtils;
 import fll.xml.CaseStatement;
