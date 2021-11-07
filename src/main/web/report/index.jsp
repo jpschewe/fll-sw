@@ -56,6 +56,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         each category by judging group. This is useful for checking the
         winners of each category.</a>
 
+    <a class='wide' href='SubjectiveByJudge' target="_blank">Subjective
+        scores by judge in a table per award group.</a>
+
     <a class="wide" href="PerformanceReport" target="_blank">Performance
         report. This displays the performance scores for each team
         (including head to head) and computes some statistics on the
