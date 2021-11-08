@@ -1,3 +1,4 @@
+* #966 - Remove edit score when entering performance scores for a single table 
 * #942 - improve the visibility of the left and right portions of a condition
 * #940 - make if/then/else obvious in the challenge description editor
 * #962 - Reword team acceptance of performance entries
