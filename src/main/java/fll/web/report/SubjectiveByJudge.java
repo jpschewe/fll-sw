@@ -11,6 +11,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,6 +24,7 @@ import javax.xml.transform.TransformerException;
 
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -35,6 +38,7 @@ import fll.scheduler.ScheduleWriter;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
+import fll.util.FP;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
@@ -51,7 +55,7 @@ import jakarta.servlet.http.HttpSession;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
- * Generate a report showing all subjective judge scores for each team by award
+ * Generate a report showing all subjective judge ranks for each team by award
  * group.
  */
 @WebServlet("/report/SubjectiveByJudge")
@@ -132,8 +136,11 @@ public class SubjectiveByJudge extends BaseFLLServlet {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
+    final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, tournament.getTournamentID());
+
     for (final String awardGroup : Queries.getAwardGroups(connection, tournament.getTournamentID())) {
-      final Element ele = generateAwardGroupReport(connection, document, challengeDescription, tournament, awardGroup);
+      final Element ele = generateAwardGroupReport(connection, document, challengeDescription, tournament, teams,
+                                                   awardGroup);
       documentBody.appendChild(ele);
       ele.setAttribute("page-break-after", "always");
     }
@@ -141,24 +148,12 @@ public class SubjectiveByJudge extends BaseFLLServlet {
     return document;
   }
 
-  private Element generateAwardGroupReport(final Connection connection,
-                                           final Document document,
-                                           final ChallengeDescription challengeDescription,
-                                           final Tournament tournament,
-                                           final String awardGroup)
+  /** collect list of judges per category for an award group */
+  private Map<SubjectiveScoreCategory, List<String>> getJudgesPerCategory(final Connection connection,
+                                                                          final ChallengeDescription challengeDescription,
+                                                                          final Tournament tournament,
+                                                                          final String awardGroup)
       throws SQLException {
-    final Element agReport = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
-
-    final Element agBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    agReport.appendChild(agBlock);
-    agBlock.appendChild(document.createTextNode(awardGroup));
-    agBlock.setAttribute("font-weight", "bold");
-
-    // TODO: this method is not a terribly efficient way to get this data from a
-    // database perspective. There are lots of round trips to the database. However
-    // given that most of the database should be in memory this is probably OK.
-
-    // collect list of judges per category
     final Map<SubjectiveScoreCategory, List<String>> judgesPerCategory = new LinkedHashMap<>();
     try (PreparedStatement getJudges = connection.prepareStatement("SELECT id as judge" //
         + " FROM judges" //
@@ -182,6 +177,107 @@ public class SubjectiveByJudge extends BaseFLLServlet {
       } // foreach category
     }
     LOGGER.debug("judgesPerCategory: {}", judgesPerCategory);
+
+    return judgesPerCategory;
+  }
+
+  /**
+   * Gather ranks for teams based on a set of judges for each subjective category
+   */
+  private Map<TournamentTeam, Map<SubjectiveScoreCategory, Map<String, Data>>> gatherRanks(final Connection connection,
+                                                                                           final Tournament tournament,
+                                                                                           final Map<Integer, TournamentTeam> teams,
+                                                                                           final Map<SubjectiveScoreCategory, List<String>> judgesPerCategory)
+      throws SQLException {
+    final Map<TournamentTeam, Map<SubjectiveScoreCategory, Map<String, Data>>> result = new HashMap<>();
+
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT category, team_number, judge, computed_total, no_show, standardized_score"
+            + " FROM subjective_computed_scores"
+            + " WHERE tournament = ? "
+            + " AND category = ?"
+            + " AND goal_group = ''"
+            + " AND judge = ?"//
+            + " ORDER BY computed_total DESC")) {
+      prep.setInt(1, tournament.getTournamentID());
+
+      for (Map.Entry<SubjectiveScoreCategory, List<String>> e : judgesPerCategory.entrySet()) {
+        final SubjectiveScoreCategory category = e.getKey();
+        prep.setString(2, category.getName());
+
+        for (final String judge : e.getValue()) {
+          prep.setString(3, judge);
+
+          int rank = 0;
+          double prevScore = Double.NaN;
+          try (ResultSet rs = prep.executeQuery()) {
+            while (rs.next()) {
+              final Data rankData = new Data();
+
+              final Integer teamNum = rs.getInt("team_number");
+              if (!teams.containsKey(teamNum)) {
+                throw new FLLInternalException("Inconsistent database cannot find team "
+                    + teamNum
+                    + " in the tournament teams");
+              }
+
+              final boolean noShow = rs.getBoolean("no_show");
+              if (!noShow) {
+                final double raw = rs.getDouble("computed_total");
+                if (!FP.equals(prevScore, raw, FinalComputedScores.TIE_TOLERANCE)) {
+                  rank = rank
+                      + 1;
+                }
+
+                rankData.rank = rank;
+                final double scaled = rs.getDouble("standardized_score");
+                rankData.rawScore = Utilities.getFormatForScoreType(category.getScoreType()).format(raw);
+                rankData.scaledScore = Utilities.getFloatingPointNumberFormat().format(scaled);
+
+                prevScore = raw;
+              } else {
+                rankData.rank = rank;
+                rankData.rawScore = "No Show";
+                rankData.scaledScore = "No Show";
+              }
+
+              final TournamentTeam team = teams.get(teamNum);
+
+              result.computeIfAbsent(team, k -> new HashMap<>()) //
+                    .computeIfAbsent(category, k -> new HashMap<>()) //
+                    .put(judge, rankData);
+
+            } // score exists for judge
+          }
+        } // foreach judge
+      } // foreach category
+    }
+
+    return result;
+  }
+
+  private Element generateAwardGroupReport(final Connection connection,
+                                           final Document document,
+                                           final ChallengeDescription challengeDescription,
+                                           final Tournament tournament,
+                                           final Map<Integer, TournamentTeam> teams,
+                                           final String awardGroup)
+      throws SQLException {
+    final Element agReport = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
+    final Element agBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    agReport.appendChild(agBlock);
+    agBlock.appendChild(document.createTextNode(awardGroup));
+    agBlock.setAttribute("font-weight", "bold");
+
+    // collect list of judges per category
+    final Map<SubjectiveScoreCategory, List<String>> judgesPerCategory = getJudgesPerCategory(connection,
+                                                                                              challengeDescription,
+                                                                                              tournament, awardGroup);
+
+    final Map<TournamentTeam, Map<SubjectiveScoreCategory, Map<String, Data>>> ranks = gatherRanks(connection,
+                                                                                                   tournament, teams,
+                                                                                                   judgesPerCategory);
 
     final Element table = FOPUtils.createBasicTable(document);
     agReport.appendChild(table);
@@ -221,68 +317,55 @@ public class SubjectiveByJudge extends BaseFLLServlet {
     final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
 
-    final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, tournament.getTournamentID());
-    try (
-        PreparedStatement getScores = connection.prepareStatement("SELECT category, team_number, judge, computed_total, no_show, standardized_score"
-            + " FROM subjective_computed_scores"
-            + " WHERE tournament = ? "
-            + " AND category = ?"
-            + " AND goal_group = ''"
-            + " AND team_number = ?"
-            + " AND judge = ?")) {
-      for (final TournamentTeam team : teams.values()) {
-        if (!awardGroup.equals(team.getAwardGroup())) {
-          // only output teams for the current award group
-          continue;
-        }
+    for (final TournamentTeam team : teams.values()) {
+      if (!awardGroup.equals(team.getAwardGroup())) {
+        // only output teams for the current award group
+        continue;
+      }
 
-        final Element teamRow = FOPUtils.createTableRow(document);
-        tableBody.appendChild(teamRow);
+      final Element teamRow = FOPUtils.createTableRow(document);
+      tableBody.appendChild(teamRow);
 
-        teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                                         String.valueOf(team.getTeamNumber())),
-                                                ScheduleWriter.STANDARD_BORDER_WIDTH));
-        teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                                         team.getTeamName()),
-                                                ScheduleWriter.STANDARD_BORDER_WIDTH));
+      teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                                       String.valueOf(team.getTeamNumber())),
+                                              ScheduleWriter.STANDARD_BORDER_WIDTH));
+      teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                                       team.getTeamName()),
+                                              ScheduleWriter.STANDARD_BORDER_WIDTH));
 
-        getScores.setInt(1, tournament.getTournamentID());
-        getScores.setInt(3, team.getTeamNumber());
+      for (Map.Entry<SubjectiveScoreCategory, List<String>> e : judgesPerCategory.entrySet()) {
+        final SubjectiveScoreCategory category = e.getKey();
 
-        for (Map.Entry<SubjectiveScoreCategory, List<String>> e : judgesPerCategory.entrySet()) {
-          final SubjectiveScoreCategory category = e.getKey();
-          getScores.setString(2, category.getName());
+        for (final String judge : e.getValue()) {
 
-          for (final String judge : e.getValue()) {
+          final @Nullable Data rankData = ranks.getOrDefault(team, Collections.emptyMap()) //
+                                               .getOrDefault(category, Collections.emptyMap())//
+                                               .get(judge);
 
-            getScores.setString(4, judge);
-
-            try (ResultSet rs = getScores.executeQuery()) {
-              final String text;
-              if (rs.next()) {
-                final boolean noShow = rs.getBoolean("no_show");
-                if (noShow) {
-                  text = "No Show";
-                } else {
-                  final double raw = rs.getDouble("computed_total");
-                  final double scaled = rs.getDouble("standardized_score");
-                  final String rawText = Utilities.getFormatForScoreType(category.getScoreType()).format(raw);
-                  final String scaledText = Utilities.getFloatingPointNumberFormat().format(scaled);
-                  text = String.format("%s / %s", rawText, scaledText);
-                }
-              } else {
-                text = String.valueOf(Utilities.NON_BREAKING_SPACE);
-              }
-              teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                                               text),
-                                                      ScheduleWriter.STANDARD_BORDER_WIDTH));
-            }
-          } // foreach judge
-        } // foreach category
-      } // foreach team
-    }
+          final String text;
+          if (null != rankData) {
+            text = String.format("%d - %s / %s", rankData.rank, rankData.rawScore, rankData.scaledScore);
+          } else {
+            text = String.valueOf(Utilities.NON_BREAKING_SPACE);
+          }
+          teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, text),
+                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
+        } // foreach judge
+      } // foreach category
+    } // foreach team
 
     return agReport;
   }
+
+  // CHECKSTYLE:OFF data class
+  private static final class Data {
+
+    int rank = -1;
+
+    String rawScore = "";
+
+    String scaledScore = "";
+  }
+  // CHECKSTYLE:ON
 
 }
