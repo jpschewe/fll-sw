@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><fll copyright="Changing wording in subjective" revision="15" schemaVersion="3" title="2021 Minnesota FIRST LEGO League - Cargo Connect" winner="HIGH">
+<?xml version="1.0" encoding="UTF-8"?><fll copyright="" revision="16" schemaVersion="3" title="2021 Minnesota FIRST LEGO League - Cargo Connect" winner="HIGH">
   <Performance minimumScore="0.00" weight="1.00">
     <goalGroup title="M00">
       <description>EQUIPMENT INSPECTION BONUS</description>
@@ -522,12 +522,12 @@
       </goal>
     </goalGroup>
   </subjectiveCategory>
-  <subjectiveCategory name="robot_design" title="Robot Design" weight="0.50">
+  <subjectiveCategory name="robot_design" title="Robot Design" weight="1.00">
     <scoreSheetInstructions>Teams should communicate to the judges their achievement in each of the following criteria. This rubric should be filled out during the Robot Design explanation. Judges are required to tick one box on each separate line to indicate the level the team has achieved. If the team exceeds, please make a short comment in the Exceeds box.</scoreSheetInstructions>
     <goalGroup title="Identify">
       <description>- Team had a clearly defined mission strategy and explored building and coding skills they needed.</description>
       <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="identify_one" required="false" scoreType="INTEGER" title="Identify1">
-        <description>Team had a clear mission strategy for the robot and attachments</description>
+        <description>Team had a clear mission strategy for the robot and attachment. Team had a clear mission strategy for the programs written.</description>
         <rubric>
           <range max="3" min="1" shortDescription="Unclear mission strategy" title="Beginning"/>
           <range max="6" min="4" shortDescription="Partially clear mission strategy" title="Developing"/>
@@ -536,7 +536,7 @@
         </rubric>
       </goal>
       <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="identify_two" required="false" scoreType="INTEGER" title="Identify2">
-        <description>Team members learned about robot building.</description>
+        <description>Team members learned about robot building. Team members learned about coding</description>
         <rubric>
           <range max="3" min="1" shortDescription="Limited evidence of building and coding skills in all team members" title="Beginning"/>
           <range max="6" min="4" shortDescription="Inconsistent evidence of building and coding skills in all team members" title="Developing"/>
@@ -548,7 +548,7 @@
     <goalGroup title="Design">
       <description>- Team produced innovative designs and a clear workplan, seeking guidance as needed</description>
       <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="design_1" required="false" scoreType="INTEGER" title="Design1">
-        <description>Team had a plan for building their robot</description>
+        <description>Team had a plan for building their robot. Team had a plan for writing their programs</description>
         <rubric>
           <range max="3" min="1" shortDescription="Minimal evidence of an effective plan" title="Beginning"/>
           <range max="6" min="4" shortDescription="Partial evidence of an effective plan" title="Developing"/>
@@ -557,7 +557,7 @@
         </rubric>
       </goal>
       <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="design_2" required="false" scoreType="INTEGER" title="Design2">
-        <description>Team explained the innovative features of their robot</description>
+        <description>Team explained the innovative features of their robot. Team explained the innovative features of their code</description>
         <rubric>
           <range max="3" min="1" shortDescription="Minimal explanation of robot and code's innovative features" title="Beginning"/>
           <range max="6" min="4" shortDescription="Partial explanation of robot and code's innovative features " title="Developing"/>
@@ -569,7 +569,7 @@
     <goalGroup title="Create">
       <description>- Team developed an effective robot and code solution matching their mission strategy.</description>
       <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="create_1" required="false" scoreType="INTEGER" title="Create1">
-        <description>Team explained their robot, attachments and sensors.</description>
+        <description>Team explained their robot, attachments and sensors. Team explained their programs, and use of sensors</description>
         <rubric>
           <range max="3" min="1" shortDescription="Limited explanation of their robot and its attachment and sensor functionality" title="Beginning"/>
           <range max="6" min="4" shortDescription="Simple explanation of their robot and its attachment and sensor functionality" title="Developing"/>
@@ -578,7 +578,7 @@
         </rubric>
       </goal>
       <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="create_2" required="false" scoreType="INTEGER" title="Create2">
-        <description>Team explained how their robot will complete the missions</description>
+        <description>Team explained how their robot will complete the missions. Team explained how their code makes their robot act.</description>
         <rubric>
           <range max="3" min="1" shortDescription="Unclear explanation of how code makes their robot act" title="Beginning"/>
           <range max="6" min="4" shortDescription="Partially clear explanation of how code makes their robot act" title="Developing"/>
@@ -590,7 +590,7 @@
     <goalGroup title="Iterate">
       <description>- Team repeatedly tested their robot and code to identify areas for improvement and incorporated the findings into their current solution.</description>
       <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="iterate_1" required="false" scoreType="INTEGER" title="Iterate1">
-        <description>Team explained how they tested their robot</description>
+        <description>Team explained how they tested their robot. Team explained how they tested their code</description>
         <rubric>
           <range max="3" min="1" shortDescription="Minimal evidence of testing their robot and code" title="Beginning"/>
           <range max="6" min="4" shortDescription="Partial evidence of testing their robot and code" title="Developing"/>
@@ -599,7 +599,7 @@
         </rubric>
       </goal>
       <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="iterate_2" required="false" scoreType="INTEGER" title="Iterate2">
-        <description>Team made improvements to their robot </description>
+        <description>Team made improvements to their robot. Team made improvements to their code.</description>
         <rubric>
           <range max="3" min="1" shortDescription="Minimal evidence their robot and code was improved" title="Beginning"/>
           <range max="6" min="4" shortDescription="Partial evidence their robot and code was improved" title="Developing"/>
@@ -611,7 +611,7 @@
     <goalGroup title="Communicate">
       <description>Team's explanation of the robot design process was effective and showed how all team members have been involved.</description>
       <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="communicate_1" required="false" scoreType="INTEGER" title="Communicate1">
-        <description>Team explained their robot design process</description>
+        <description>Team explained their robot design process and their program design process</description>
         <rubric>
           <range max="3" min="1" shortDescription="Unclear explanation of robot or code design process" title="Beginning"/>
           <range max="6" min="4" shortDescription="Partially clear explanation of robot or code design process" title="Developing"/>
@@ -620,119 +620,11 @@
         </rubric>
       </goal>
       <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="communicate_2" required="false" scoreType="INTEGER" title="Communicate2">
-        <description>All team members were involved with the robot design.</description>
+        <description>All team members were involved with the robot design and with the program design process.</description>
         <rubric>
           <range max="3" min="1" shortDescription="Minimal evidence that all team members were involved" title="Beginning"/>
           <range max="6" min="4" shortDescription="Partial evidence that all team members were involved" title="Developing"/>
           <range max="9" min="7" shortDescription="Clear evidence that all team members were involved" title="Accomplished"/>
-          <range max="12" min="10" shortDescription="" title="Exceeds"/>
-        </rubric>
-      </goal>
-    </goalGroup>
-  </subjectiveCategory>
-  <subjectiveCategory name="robot_programming" title="Programming" weight="0.50">
-    <scoreSheetInstructions>Teams should communicate to the judges their achievement in each of the following criteria. This rubric should be filled out during the Robot Design explanation. Judges are required to tick one box on each separate line to indicate the level the team has achieved. If the team exceeds, please make a short comment in the Exceeds box.</scoreSheetInstructions>
-    <goalGroup title="Identify">
-      <description>- Team had a clearly defined mission strategy and explored building and coding skills they needed.</description>
-      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="identify_one" required="false" scoreType="INTEGER" title="Identify1">
-        <description>Team had a clear mission strategy for the programs written</description>
-        <rubric>
-          <range max="3" min="1" shortDescription="Unclear mission strategy" title="Beginning"/>
-          <range max="6" min="4" shortDescription="Partially clear mission strategy" title="Developing"/>
-          <range max="9" min="7" shortDescription="Clear mission strategy" title="Accomplished"/>
-          <range max="12" min="10" shortDescription="" title="Exceeds"/>
-        </rubric>
-      </goal>
-      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="identify_two" required="false" scoreType="INTEGER" title="Identify2">
-        <description>Team members learned about coding</description>
-        <rubric>
-          <range max="3" min="1" shortDescription="Limited evidence of building and coding skills in all team members" title="Beginning"/>
-          <range max="6" min="4" shortDescription="Inconsistent evidence of building and coding skills in all team members" title="Developing"/>
-          <range max="9" min="7" shortDescription="Consistent evidence of building and coding skills in all team members" title="Accomplished"/>
-          <range max="12" min="10" shortDescription="" title="Exceeds"/>
-        </rubric>
-      </goal>
-    </goalGroup>
-    <goalGroup title="Design">
-      <description>- Team produced innovative designs and a clear workplan, seeking guidance as needed.</description>
-      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="design_1" required="false" scoreType="INTEGER" title="Design1">
-        <description>Team had a plan for writing their programs.</description>
-        <rubric>
-          <range max="3" min="1" shortDescription="Minimal evidence of an effective plan" title="Beginning"/>
-          <range max="6" min="4" shortDescription="Partial evidence of an effective plan" title="Developing"/>
-          <range max="9" min="7" shortDescription="Clear evidence of an effective plan" title="Accomplished"/>
-          <range max="12" min="10" shortDescription="" title="Exceeds"/>
-        </rubric>
-      </goal>
-      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="design_2" required="false" scoreType="INTEGER" title="Design2">
-        <description>Team explained the innovative features of their code</description>
-        <rubric>
-          <range max="3" min="1" shortDescription="Minimal explanation of robot and code's innovative features" title="Beginning"/>
-          <range max="6" min="4" shortDescription="Partial explanation of robot and code's innovative features " title="Developing"/>
-          <range max="9" min="7" shortDescription="Clear explanation of robot and code's innovative features" title="Accomplished"/>
-          <range max="12" min="10" shortDescription="" title="Exceeds"/>
-        </rubric>
-      </goal>
-    </goalGroup>
-    <goalGroup title="Create">
-      <description>- Team developed an effective robot and code solution matching their mission strategy.</description>
-      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="create_1" required="false" scoreType="INTEGER" title="Create1">
-        <description>Team explained their programs, and use of sensors</description>
-        <rubric>
-          <range max="3" min="1" shortDescription="Limited explanation of their robot and its attachment and sensor functionality" title="Beginning"/>
-          <range max="6" min="4" shortDescription="Simple explanation of their robot and its attachment and sensor functionality" title="Developing"/>
-          <range max="9" min="7" shortDescription="Detailed explanation of their robot and its attachment and sensor functionality" title="Accomplished"/>
-          <range max="12" min="10" shortDescription="" title="Exceeds"/>
-        </rubric>
-      </goal>
-      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="create_2" required="false" scoreType="INTEGER" title="Create2">
-        <description>Team explained how their code makes their robot act. </description>
-        <rubric>
-          <range max="3" min="1" shortDescription="Unclear explanation of how code makes their robot act" title="Beginning"/>
-          <range max="6" min="4" shortDescription="Partially clear explanation of how code makes their robot act" title="Developing"/>
-          <range max="9" min="7" shortDescription="Clear explanation of how code makes their robot act" title="Accomplished"/>
-          <range max="12" min="10" shortDescription="" title="Exceeds"/>
-        </rubric>
-      </goal>
-    </goalGroup>
-    <goalGroup title="Iterate">
-      <description>- Team repeatedly tested their robot and code to identify areas for improvement and incorporated the findings into their current solution.</description>
-      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="iterate_1" required="false" scoreType="INTEGER" title="Iterate1">
-        <description>Team explained how they tested their code</description>
-        <rubric>
-          <range max="3" min="1" shortDescription="Minimal evidence of testing their robot and code" title="Beginning"/>
-          <range max="6" min="4" shortDescription="Partial evidence of testing their robot and code" title="Developing"/>
-          <range max="9" min="7" shortDescription="Clear evidence of testing their robot and code" title="Accomplished"/>
-          <range max="12" min="10" shortDescription="" title="Exceeds"/>
-        </rubric>
-      </goal>
-      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="iterate_2" required="false" scoreType="INTEGER" title="Iterate2">
-        <description>Team made improvements to their code</description>
-        <rubric>
-          <range max="3" min="1" shortDescription="Minimal evidence their robot and code was improved" title="Beginning"/>
-          <range max="6" min="4" shortDescription="Partial evidence their robot and code was improved" title="Developing"/>
-          <range max="9" min="7" shortDescription="Clear evidence their robot and code was improved" title="Accomplished"/>
-          <range max="12" min="10" shortDescription="" title="Exceeds"/>
-        </rubric>
-      </goal>
-    </goalGroup>
-    <goalGroup title="Communicate">
-      <description>Team's explanation of the robot design process was effective and showed how all team members have been involved</description>
-      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="communicate_1" required="false" scoreType="INTEGER" title="Communicate1">
-        <description>Team clearly explained their program design process</description>
-        <rubric>
-          <range max="3" min="1" shortDescription="Unclear explanation of robot or code design process" title="Beginning"/>
-          <range max="6" min="4" shortDescription="Partially clear explanation of robot or code design process" title="Developing"/>
-          <range max="9" min="7" shortDescription="Clear explanation of robot or code design process" title="Accomplished"/>
-          <range max="12" min="10" shortDescription="" title="Exceeds"/>
-        </rubric>
-      </goal>
-      <goal initialValue="1.00" max="12.00" min="1.00" multiplier="1.00" name="communicate_2" required="false" scoreType="INTEGER" title="Communicate2">
-        <description>All team members were involved with the program design process.</description>
-        <rubric>
-          <range max="3" min="1" shortDescription="Minimal evidence that all team members were involved" title="Beginning"/>
-          <range max="6" min="4" shortDescription="Partial evidence that all team members were involved" title="Developing"/>
-          <range max="9" min="7" shortDescription="Clear evidence that all team members involved" title="Accomplished"/>
           <range max="12" min="10" shortDescription="" title="Exceeds"/>
         </rubric>
       </goal>
