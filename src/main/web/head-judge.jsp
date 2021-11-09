@@ -68,6 +68,11 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         target="_blank">Report of winners for the tournament. This
         can be published on the web or used for the awards ceremony.</a>
 
+    <a class="wide" target="_report"
+        href="<c:url value='/report/awards/AwardsScriptReport'/>" />Awards
+    Script PDF
+    </a>
+
 
     <h2>Finalist scheduling</h2>
     <p>This is used at tournaments where there is more than 1
