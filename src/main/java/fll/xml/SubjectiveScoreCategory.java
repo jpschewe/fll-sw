@@ -269,4 +269,11 @@ public class SubjectiveScoreCategory extends ScoreCategory implements AwardCateg
     return true;
   }
 
+  @Override
+  public String toString() {
+    return this.getClass().getSimpleName()
+        + " "
+        + this.getName();
+  }
+
 }

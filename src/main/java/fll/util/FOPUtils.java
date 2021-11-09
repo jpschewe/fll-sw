@@ -514,10 +514,11 @@ public final class FOPUtils {
    * 
    * @param element the element to set the border on
    * @param width width in points
+   * @return element
    */
-  public static void addTopBorder(final Element element,
-                                  final double width) {
-    addTopBorder(element, width, "black");
+  public static Element addTopBorder(final Element element,
+                                     final double width) {
+    return addTopBorder(element, width, "black");
   }
 
   /**
@@ -526,11 +527,12 @@ public final class FOPUtils {
    * @param element the element to set the border on
    * @param width width in points
    * @param color a valid color string
+   * @return element
    */
-  public static void addTopBorder(final Element element,
-                                  final double width,
-                                  final String color) {
-    addBorder(element, width, color, "top");
+  public static Element addTopBorder(final Element element,
+                                     final double width,
+                                     final String color) {
+    return addBorder(element, width, color, "top");
   }
 
   /**
@@ -538,10 +540,11 @@ public final class FOPUtils {
    * 
    * @param element the element to set the border on
    * @param width width in points
+   * @return element
    */
-  public static void addBottomBorder(final Element element,
-                                     final double width) {
-    addBottomBorder(element, width, "black");
+  public static Element addBottomBorder(final Element element,
+                                        final double width) {
+    return addBottomBorder(element, width, "black");
   }
 
   /**
@@ -550,11 +553,12 @@ public final class FOPUtils {
    * @param element the element to set the border on
    * @param width width in points
    * @param color a valid color string
+   * @return element
    */
-  public static void addBottomBorder(final Element element,
-                                     final double width,
-                                     final String color) {
-    addBorder(element, width, color, "bottom");
+  public static Element addBottomBorder(final Element element,
+                                        final double width,
+                                        final String color) {
+    return addBorder(element, width, color, "bottom");
   }
 
   /**
@@ -562,10 +566,11 @@ public final class FOPUtils {
    * 
    * @param element the element to set the border on
    * @param width width in points
+   * @return element
    */
-  public static void addLeftBorder(final Element element,
-                                   final double width) {
-    addLeftBorder(element, width, "black");
+  public static Element addLeftBorder(final Element element,
+                                      final double width) {
+    return addLeftBorder(element, width, "black");
   }
 
   /**
@@ -574,11 +579,12 @@ public final class FOPUtils {
    * @param element the element to set the border on
    * @param width width in points
    * @param color a valid color string
+   * @return element
    */
-  public static void addLeftBorder(final Element element,
-                                   final double width,
-                                   final String color) {
-    addBorder(element, width, color, "left");
+  public static Element addLeftBorder(final Element element,
+                                      final double width,
+                                      final String color) {
+    return addBorder(element, width, color, "left");
   }
 
   /**
@@ -586,10 +592,11 @@ public final class FOPUtils {
    * 
    * @param element the element to set the border on
    * @param width width in points
+   * @return element
    */
-  public static void addRightBorder(final Element element,
-                                    final double width) {
-    addRightBorder(element, width, "black");
+  public static Element addRightBorder(final Element element,
+                                       final double width) {
+    return addRightBorder(element, width, "black");
   }
 
   /**
@@ -598,18 +605,20 @@ public final class FOPUtils {
    * @param element the element to set the border on
    * @param width width in points
    * @param color a valid color string
+   * @return element
    */
-  public static void addRightBorder(final Element element,
-                                    final double width,
-                                    final String color) {
-    addBorder(element, width, color, "right");
+  public static Element addRightBorder(final Element element,
+                                       final double width,
+                                       final String color) {
+    return addBorder(element, width, color, "right");
   }
 
-  private static void addBorder(final Element element,
-                                final double width,
-                                final String color,
-                                final String side) {
+  private static Element addBorder(final Element element,
+                                   final double width,
+                                   final String color,
+                                   final String side) {
     element.setAttribute(String.format("border-%s", side), String.format("%fpt solid %s", width, color));
+    return element;
   }
 
   /**
@@ -621,10 +630,11 @@ public final class FOPUtils {
    * @see #addBottomBorder(Element, double)
    * @see #addLeftBorder(Element, double)
    * @see #addRightBorder(Element, double)
+   * @return element
    */
-  public static void addBorders(final Element element,
-                                final double width) {
-    addBorders(element, width, width, width, width);
+  public static Element addBorders(final Element element,
+                                   final double width) {
+    return addBorders(element, width, width, width, width);
   }
 
   /**
@@ -635,16 +645,18 @@ public final class FOPUtils {
    * @param bottomWidth {@link #addBottomBorder(Element, double)}
    * @param leftWidth {@link #addLeftBorder(Element, double)}
    * @param rightWidth {@link #addRightBorder(Element, double)}
+   * @return element
    */
-  public static void addBorders(final Element element,
-                                final double topWidth,
-                                final double bottomWidth,
-                                final double leftWidth,
-                                final double rightWidth) {
+  public static Element addBorders(final Element element,
+                                   final double topWidth,
+                                   final double bottomWidth,
+                                   final double leftWidth,
+                                   final double rightWidth) {
     addTopBorder(element, topWidth);
     addBottomBorder(element, bottomWidth);
     addLeftBorder(element, leftWidth);
     addRightBorder(element, rightWidth);
+    return element;
   }
 
   /**
