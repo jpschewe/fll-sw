@@ -171,7 +171,16 @@ public final class ImportDB {
       for (final TournamentLevel sourceLevel : TournamentLevel.getAllLevels(sourceConnection)) {
         final TournamentLevel destLevel = TournamentLevel.getByName(destConnection, sourceLevel.getName());
         importTournamentLevelData(sourceConnection, destConnection, sourceLevel.getId(), destLevel.getId());
+
+        // import awards script tournament level information
+        importAwardsScriptData(sourceConnection, destConnection, sourceLevel.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID,
+                               destLevel.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID);
       }
+
+      // import awards script season information
+      importAwardsScriptData(sourceConnection, destConnection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
+                             GenerateDB.INTERNAL_TOURNAMENT_ID, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
+                             GenerateDB.INTERNAL_TOURNAMENT_ID);
 
       final String sourceSelectedTournamentName = Tournament.getCurrentTournament(sourceConnection).getName();
       final Tournament destSelectedTournament = Tournament.findTournamentByName(destConnection,
@@ -1752,7 +1761,8 @@ public final class ImportDB {
     importSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importCategoryScheduleMapping(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
-    importAwardsScriptData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importAwardsScriptData(sourceConnection, destinationConnection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
+                           sourceTournamentID, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, destTournamentID);
   }
 
   private static void importSchedule(final Connection sourceConnection,
@@ -1817,34 +1827,45 @@ public final class ImportDB {
 
   private static void importAwardsScriptData(final Connection sourceConnection,
                                              final Connection destinationConnection,
+                                             final int sourceTournamentLevelID,
                                              final int sourceTournamentID,
+                                             final int destTournamentLevelID,
                                              final int destTournamentID)
       throws SQLException {
     LOGGER.debug("Importing awards script data");
-    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID,
-                            "awards_script_text", "section_name", "text");
+    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,
+                            destTournamentLevelID, destTournamentID, "awards_script_text", "section_name", "text");
 
-    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID,
-                            "awards_script_parameters", "param_name", "param_value");
-    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID,
-                            "awards_script_subjective_text", "category_name", "text");
-    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID,
-                            "awards_script_subjective_presenter", "category_name", "presenter");
-    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID,
-                            "awards_script_nonnumeric_text", "category_title", "text");
-    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID,
-                            "awards_script_nonnumeric_presenter", "category_title", "presenter");
-    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID,
-                            "awards_script_award_order", "award", "award_rank");
-    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID,
-                            "awards_script_sponsor_order", "sponsor", "sponsor_rank");
+    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,
+                            destTournamentLevelID, destTournamentID, "awards_script_parameters", "param_name",
+                            "param_value");
+    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,
+                            destTournamentLevelID, destTournamentID, "awards_script_subjective_text", "category_name",
+                            "text");
+    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,
+                            destTournamentLevelID, destTournamentID, "awards_script_subjective_presenter",
+                            "category_name", "presenter");
+    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,
+                            destTournamentLevelID, destTournamentID, "awards_script_nonnumeric_text", "category_title",
+                            "text");
+    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,
+                            destTournamentLevelID, destTournamentID, "awards_script_nonnumeric_presenter",
+                            "category_title", "presenter");
+    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,
+                            destTournamentLevelID, destTournamentID, "awards_script_award_order", "award",
+                            "award_rank");
+    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,
+                            destTournamentLevelID, destTournamentID, "awards_script_sponsor_order", "sponsor",
+                            "sponsor_rank");
 
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "table and columns are passed in")
   private static void importAwardsScriptTable(final Connection sourceConnection,
                                               final Connection destinationConnection,
+                                              final int sourceTournamentLevelID,
                                               final int sourceTournamentID,
+                                              final int destTournamentLevelID,
                                               final int destTournamentID,
                                               final String tableName,
                                               final String keyColumn,
@@ -1852,23 +1873,26 @@ public final class ImportDB {
       throws SQLException {
     LOGGER.debug("Importing awards script data");
     try (
-        PreparedStatement destPrep = destinationConnection.prepareStatement(String.format("DELETE FROM %s WHERE tournament_id = ?",
+        PreparedStatement destPrep = destinationConnection.prepareStatement(String.format("DELETE FROM %s WHERE tournament_id = ? and tournament_level_id = ?",
                                                                                           tableName))) {
       destPrep.setInt(1, destTournamentID);
+      destPrep.setInt(2, destTournamentLevelID);
       destPrep.executeUpdate();
     }
 
     try (
-        PreparedStatement sourcePrep = sourceConnection.prepareStatement(String.format("SELECT tournament_level_id, layer_rank, %s, %s",
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement(String.format("SELECT layer_rank, %s, %s",
                                                                                        keyColumn, rankColumn)
-            + String.format(" FROM %s WHERE tournament_id = ?", tableName));
+            + String.format(" FROM %s WHERE tournament_id = ? AND tournament_level_id = ?", tableName));
         PreparedStatement destPrep = destinationConnection.prepareStatement(String.format("INSERT INTO %s (tournament_id, tournament_level_id, layer_rank, %s, %s) ",
                                                                                           tableName, keyColumn,
                                                                                           rankColumn)
             + "VALUES (?, ?, ?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
+      sourcePrep.setInt(2, sourceTournamentLevelID);
       destPrep.setInt(1, destTournamentID);
-      copyData(sourcePrep, destPrep);
+      destPrep.setInt(2, destTournamentLevelID);
+      copyData(sourcePrep, 0, destPrep, 2, -1);
     }
   }
 
