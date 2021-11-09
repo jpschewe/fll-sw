@@ -1,3 +1,4 @@
+* #966 - Remove edit score when entering performance scores for a single table 
 * #964 - Add report of subjective scores by judge
 * #942 - improve the visibility of the left and right portions of a condition
 * #940 - make if/then/else obvious in the challenge description editor

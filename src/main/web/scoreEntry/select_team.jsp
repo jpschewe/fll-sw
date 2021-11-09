@@ -221,50 +221,55 @@ Entering scores for all tables. Teams are sorted in schedule order.
                                 </select>
                             </td>
                         </tr>
-                        <tr>
-                            <td>
-                                <table border='1'>
-                                    <tr>
-                                        <!-- check to edit -->
-                                        <td align='left' valign='bottom'>
-                                            <input type="checkbox"
-                                                name='EditFlag'
-                                                id='EditFlagLeft'
-                                                value="true"
-                                                onclick="editFlagBoxClicked()" />
-                                            <b>
-                                                <label
-                                                    for="EditFlagLeft">Correct
-                                                    or double-check this
-                                                    score</label>
-                                            </b>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <!-- pick run number -->
-                                        <td align='left'>
-                                            <b>
-                                                <span
-                                                    id='select_number_text'>Select
-                                                    Run Number for
-                                                    editing</span>
-                                            </b>
-                                            <select name='RunNumber'
-                                                disabled='disabled'>
-                                                <option value='0'>Last
-                                                    Run</option>
-                                                <c:forEach var="index"
-                                                    begin="1"
-                                                    end="${maxRunNumber}">
-                                                    <option
-                                                        value='${index }'>${index }</option>
-                                                </c:forEach>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
+                        <c:if test="${empty scoreEntrySelectedTable}">
+
+                            <tr>
+                                <td>
+                                    <table border='1'>
+                                        <tr>
+                                            <!-- check to edit -->
+                                            <td align='left'
+                                                valign='bottom'>
+                                                <input type="checkbox"
+                                                    name='EditFlag'
+                                                    id='EditFlagLeft'
+                                                    value="true"
+                                                    onclick="editFlagBoxClicked()" />
+                                                <b>
+                                                    <label
+                                                        for="EditFlagLeft">Correct
+                                                        or double-check
+                                                        this score</label>
+                                                </b>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <!-- pick run number -->
+                                            <td align='left'>
+                                                <b>
+                                                    <span
+                                                        id='select_number_text'>Select
+                                                        Run Number for
+                                                        editing</span>
+                                                </b>
+                                                <select name='RunNumber'
+                                                    disabled='disabled'>
+                                                    <option value='0'>Last
+                                                        Run</option>
+                                                    <c:forEach
+                                                        var="index"
+                                                        begin="1"
+                                                        end="${maxRunNumber}">
+                                                        <option
+                                                            value='${index }'>${index }</option>
+                                                    </c:forEach>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </c:if>
                         <tr>
                             <!-- submit button -->
                             <td align='left'>
