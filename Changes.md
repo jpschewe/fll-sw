@@ -1,3 +1,8 @@
+Release 16.1.1
+==============
+* 2021 Minnesota challenge description 
+
+
 Release 16.1.0
 ==============
 * Import awards script information into a new database

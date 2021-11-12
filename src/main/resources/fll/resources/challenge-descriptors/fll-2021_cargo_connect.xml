@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><fll copyright="" revision="16" schemaVersion="3" title="2021 Minnesota FIRST LEGO League - Cargo Connect" winner="HIGH">
+<?xml version="1.0" encoding="UTF-8"?><fll copyright="" revision="17" schemaVersion="3" title="2021 Minnesota FIRST LEGO League - Cargo Connect" winner="HIGH">
   <Performance minimumScore="0.00" weight="1.00">
     <goalGroup title="M00">
       <description>EQUIPMENT INSPECTION BONUS</description>
@@ -629,7 +629,11 @@
         </rubric>
       </goal>
     </goalGroup>
+    <nominates nonNumericCategoryTitle="MN Programming Award"/>
   </subjectiveCategory>
+  <nonNumericCategory perAwardGroup="true" title="MN Programming Award">
+    <description>The Minnesota Programming Award is presented to the team best demonstrating an in-depth understanding of sound programming principles, as observed during the Robot Design judging.</description>
+  </nonNumericCategory>
   <nonNumericCategory perAwardGroup="false" title="Engineering Excellence">
     <description>This award celebrates a team with an efficiently designed robot, an innovative project solution that effectively addresses the season challenge, and Core Values evident in all they do.</description>
   </nonNumericCategory>
