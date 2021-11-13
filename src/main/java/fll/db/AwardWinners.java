@@ -75,15 +75,17 @@ public final class AwardWinners {
    * @param tournamentId tournament to work with
    * @param name {@link AwardWinner#getName()}
    * @param teamNumber {@link AwardWinner#getTeamNumber()}
+   * @param awardGroup {@link AwardWinner#getAwardGroup()}
    * @return the winner object or null if not found
    * @throws SQLException on a database error
    */
   public static @Nullable AwardWinner getSubjectiveAwardWinner(final Connection connection,
                                                                final int tournamentId,
                                                                final String name,
+                                                               final String awardGroup,
                                                                final int teamNumber)
       throws SQLException {
-    return getAwardWinner(connection, tournamentId, name, teamNumber, "subjective_challenge_award");
+    return getAwardWinner(connection, tournamentId, name, awardGroup, teamNumber, "subjective_challenge_award");
   }
 
   /**
@@ -143,6 +145,7 @@ public final class AwardWinners {
    * @param connection database connection
    * @param tournamentId tournament to work with
    * @param name {@link AwardWinner#getName()}
+   * @param awardGroup {@link AwardWinner#getAwardGroup()}
    * @param teamNumber {@link AwardWinner#getTeamNumber()}
    * @return the winner object or null if not found
    * @throws SQLException on a database error
@@ -150,9 +153,10 @@ public final class AwardWinners {
   public static @Nullable AwardWinner getNonNumericAwardWinner(final Connection connection,
                                                                final int tournamentId,
                                                                final String name,
+                                                               final String awardGroup,
                                                                final int teamNumber)
       throws SQLException {
-    return getAwardWinner(connection, tournamentId, name, teamNumber, "subjective_extra_award");
+    return getAwardWinner(connection, tournamentId, name, awardGroup, teamNumber, "subjective_extra_award");
   }
 
   /**
@@ -199,24 +203,25 @@ public final class AwardWinners {
   private static @Nullable AwardWinner getAwardWinner(final Connection connection,
                                                       final int tournamentId,
                                                       final String name,
+                                                      final String awardGroup,
                                                       final int teamNumber,
                                                       final String tablename)
       throws SQLException {
-    try (PreparedStatement prep = connection.prepareStatement("SELECT description, award_group, place FROM "
+    try (PreparedStatement prep = connection.prepareStatement("SELECT description, place FROM "
         + tablename
         + " WHERE tournament_id = ?" //
         + " AND team_number = ?" //
         + " AND name = ?" //
-    )) {
+        + " AND award_group = ?")) {
       prep.setInt(1, tournamentId);
       prep.setInt(2, teamNumber);
       prep.setString(3, name);
+      prep.setString(4, awardGroup);
 
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
           final String description = rs.getString(1);
-          final String awardGroup = castNonNull(rs.getString(2));
-          final int place = rs.getInt(3);
+          final int place = rs.getInt(2);
 
           final AwardWinner winner = new AwardWinner(name, awardGroup, teamNumber, description, place);
           return winner;
@@ -339,7 +344,7 @@ public final class AwardWinners {
    * @param winner the winner to add
    * @throws SQLException on a database error
    */
-  public static void addNonNumerciOverallAwardWinner(final Connection connection,
+  public static void addNonNumericOverallAwardWinner(final Connection connection,
                                                      final int tournamentId,
                                                      final OverallAwardWinner winner)
       throws SQLException {

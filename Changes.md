@@ -1,3 +1,5 @@
+* fix missing output of Championship award in awards script
+
 Release 16.1.1
 ==============
 * 2021 Minnesota challenge description 

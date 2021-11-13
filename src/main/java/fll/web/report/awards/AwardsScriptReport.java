@@ -317,7 +317,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                                             organizedSubjectiveWinners, finalistSchedulesPerAwardGroup);
       } else if (category instanceof ChampionshipCategory) {
         categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, document, templateContext,
-                                                            awardGroupOrder, category, organizedSubjectiveWinners,
+                                                            awardGroupOrder, category,
+                                                            organizedNonNumericPerAwardGroupWinners,
                                                             finalistSchedulesPerAwardGroup);
       } else if (category instanceof HeadToHeadCategory) {
         if (TournamentParameters.getRunningHeadToHead(connection, tournament.getTournamentID())) {
