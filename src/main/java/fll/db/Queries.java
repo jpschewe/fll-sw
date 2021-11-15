@@ -791,7 +791,9 @@ public final class Queries {
     final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
 
     final int dbLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber);
-    final String division = Playoff.getPlayoffDivision(connection, currentTournament, teamNumber, runNumber);
+    final String division = runNumber > numSeedingRounds
+        ? Playoff.getPlayoffDivision(connection, currentTournament, teamNumber, runNumber)
+        : "not in playoffs";
 
     // Check if we need to update the PlayoffData table
     try (PreparedStatement prep = connection.prepareStatement("SELECT TeamNumber FROM Performance" //
