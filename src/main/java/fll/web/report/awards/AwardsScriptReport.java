@@ -17,10 +17,10 @@ import java.util.Formatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -467,18 +467,19 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                                                                                                                    awardGroup);
 
         // place -> {teams}
-        final SortedMap<Integer, List<Integer>> placesToTeams = new TreeMap<>();
+        final NavigableMap<Integer, List<Integer>> placesToTeams = new TreeMap<>();
         teamPerformanceRanks.entrySet().stream() //
                             .forEach(e -> {
                               placesToTeams.computeIfAbsent(e.getValue().getLeft(), k -> new LinkedList<>())
                                            .add(e.getKey());
                             });
 
-        final Stream<Map.Entry<@KeyFor("placesToTeams") Integer, List<Integer>>> winners = placesToTeams.entrySet()
-                                                                                                        .stream()
-                                                                                                        .limit(numAwards);
+        final LinkedList<Map.Entry<@KeyFor("placesToTeams") Integer, List<Integer>>> winners = placesToTeams.entrySet()
+                                                                                                            .stream()
+                                                                                                            .limit(numAwards)
+                                                                                                            .collect(Collectors.toCollection(LinkedList::new));
 
-        winners.forEach(e -> {
+        winners.descendingIterator().forEachRemaining(e -> {
           final @KeyFor("placesToTeams") Integer place = e.getKey();
           final List<Integer> teamsInPlace = e.getValue();
           if (teamsInPlace.isEmpty()) {
@@ -639,14 +640,14 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                     final Element container,
                                     final List<? extends OverallAwardWinner> winners) {
     // place -> {teams}
-    final SortedMap<Integer, List<OverallAwardWinner>> placesToWinners = new TreeMap<>();
+    final NavigableMap<Integer, List<OverallAwardWinner>> placesToWinners = new TreeMap<>();
     winners.stream() //
            .forEach(w -> {
              placesToWinners.computeIfAbsent(w.getPlace(), k -> new LinkedList<>()).add(w);
            });
 
-    placesToWinners.entrySet().forEach(e -> {
-      final @KeyFor("placesToWinners") Integer place = e.getKey();
+    placesToWinners.descendingMap().entrySet().forEach(e -> {
+      final @KeyFor("placesToWinners.descendingMap()") Integer place = e.getKey();
       final List<OverallAwardWinner> winnersInPlace = e.getValue();
       if (winnersInPlace.isEmpty()) {
         throw new FLLInternalException("No teams in place "
@@ -771,7 +772,6 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                     final Team team) {
     final Element teamContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     teamCell.appendChild(teamContainer);
-    teamContainer.setAttribute("space-before", BLOCK_SPACING);
 
     final Element teamNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     teamContainer.appendChild(teamNumberBlock);
@@ -793,17 +793,25 @@ public class AwardsScriptReport extends BaseFLLServlet {
   }
 
   private static String suffixForPlace(final int place) {
+    final int last2Digits = place
+        % 100;
     final int lastDigit = place
         % 10;
-    switch (lastDigit) {
-    case 1:
-      return "st";
-    case 2:
-      return "nd";
-    case 3:
-      return "rd";
-    default:
+    if (place >= 10
+        && last2Digits >= 10
+        && last2Digits <= 20) {
       return "th";
+    } else {
+      switch (lastDigit) {
+      case 1:
+        return "st";
+      case 2:
+        return "nd";
+      case 3:
+        return "rd";
+      default:
+        return "th";
+      }
     }
   }
 
