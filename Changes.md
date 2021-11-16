@@ -1,3 +1,4 @@
+* #981 - output description about team before team number in the awards script
 * fix missing output of Championship award in awards script
 * #978 - fix deleting of performance scores
 

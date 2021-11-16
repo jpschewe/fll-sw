@@ -43,6 +43,7 @@ import com.diffplug.common.base.Errors;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
+import fll.Utilities;
 import fll.db.AdvancingTeam;
 import fll.db.AwardWinner;
 import fll.db.AwardWinners;
@@ -521,15 +522,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
           final Element teamPlaceBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
           teamCell.appendChild(teamPlaceBlock);
-          final String teamPlaceFormat;
-          if (tie) {
-            teamPlaceFormat = "The teams tied for %d%s place with a score of %s are:";
-          } else {
-            teamPlaceFormat = "The %d%s place team with a score of %s is:";
-          }
-
-          teamPlaceBlock.appendChild(document.createTextNode(String.format(teamPlaceFormat, place,
-                                                                           suffixForPlace(place), formattedScore)));
+          teamPlaceBlock.appendChild(document.createTextNode(String.format("With a score of %s:", formattedScore)));
 
           teamsInPlace.stream().forEach(Errors.rethrow().wrap(teamNumber -> {
             final Team team = Team.getTeamFromDatabase(connection, teamNumber);
@@ -682,20 +675,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
       final Element teamCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
       row.appendChild(teamCell);
 
-      final Element teamPlaceBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-      teamCell.appendChild(teamPlaceBlock);
-      final String teamPlaceFormat;
-      if (tie) {
-        teamPlaceFormat = "The teams tied for %d%s place are:";
-      } else {
-        teamPlaceFormat = "The %d%s place team is:";
-      }
-      teamPlaceBlock.appendChild(document.createTextNode(String.format(teamPlaceFormat, place, suffixForPlace(place))));
-
       winnersInPlace.stream().forEach(Errors.rethrow().wrap(winner -> {
         final Team team = Team.getTeamFromDatabase(connection, winner.getTeamNumber());
-
-        addTeamToCell(document, teamCell, team);
 
         final @Nullable String description = winner.getDescription();
         if (null != description) {
@@ -703,6 +684,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
           teamCell.appendChild(descriptionBlock);
           descriptionBlock.appendChild(document.createTextNode(String.format("Description: %s", description)));
         }
+
+        addTeamToCell(document, teamCell, team);
       }));
 
     });
@@ -803,6 +786,10 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final String organization = team.getOrganization();
     teamOrganizationBlock.appendChild(document.createTextNode(String.format("Organization: %s",
                                                                             null == organization ? "" : organization)));
+
+    final Element blank = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    teamContainer.appendChild(blank);
+    blank.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE)));
   }
 
   private static String suffixForPlace(final int place) {
