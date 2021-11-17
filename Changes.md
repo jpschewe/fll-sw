@@ -1,3 +1,4 @@
+* #980 - Add performance reports to the main page for refs only
 * #976 - output "last" place first in the awards script
 * #981 - output description about team before team number in the awards script
 * fix missing output of Championship award in awards script
