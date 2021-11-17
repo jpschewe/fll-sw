@@ -38,6 +38,13 @@ categories["${cat.key}"] = "${cat.value}";
         judge. Keep in mind that this ID needs to be entered on the
         judging forms. There must be at least 1 judge for each category.</p>
 
+    <p>
+        Removing the ID of a judge will delete that judge. However it
+        will
+        <b>not</b>
+        delete that judge's scores.
+    </p>
+
     <div class='status-message'>${message}</div>
     <%-- clear out the message, so that we don't see it again --%>
     <c:remove var="message" />
