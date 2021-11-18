@@ -32,6 +32,10 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <h2>Main links</h2>
 
     <c:if test="${authentication.ref}">
+        <a class="wide"
+            href="<c:url value='/scoreEntry/scoreEntry.jsp?tablet=true&practice=true&showScores=false'/>">Practice
+            round score entry</a>
+
         <a class="wide" href="scoreEntry/choose-table.jsp">Score
             Entry - follow this link on the performance score entry
             computers.</a>
