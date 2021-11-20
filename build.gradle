@@ -341,6 +341,7 @@ def baseDistribution = copySpec {
         into "web/documentation/reports"
     }
     from("$buildDir/reports/spotbugs/") {
+    //from(spotbugsIntegrationTestHtmlReport.outputFile) {
         into "web/documentation/reports/spotbugs"
     }
     from("$buildDir/reports/checkstyle/") {
@@ -608,6 +609,7 @@ tasks.withType(SpotBugsTask) {
         }       
     }
     it.finalizedBy("${it.name}HtmlReport")
+    distributionDependencies.dependsOn("${it.name}HtmlReport")    
 }
 
 gitProperties {
