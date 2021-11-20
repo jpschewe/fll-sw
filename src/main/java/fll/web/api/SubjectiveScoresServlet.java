@@ -157,6 +157,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
       final Reader reader = new StringReader(debugWriter.toString());
 
+      // category -> judge -> team -> score
       final Map<String, Map<String, Map<Integer, SubjectiveScore>>> allScores = jsonMapper.readValue(reader,
                                                                                                      ScoresTypeInfo.INSTANCE);
       for (final Map.Entry<String, Map<String, Map<Integer, SubjectiveScore>>> catEntry : allScores.entrySet()) {
