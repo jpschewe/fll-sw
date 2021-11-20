@@ -15,15 +15,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Objects;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -38,6 +30,13 @@ import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * API access to judges.
@@ -130,15 +129,7 @@ public class JudgesServlet extends HttpServlet {
 
         for (final JudgeInformation judge : judges) {
           if (null != judge) {
-            JudgeInformation found = null;
-            for (final JudgeInformation cjudge : currentJudges) {
-              if (Objects.equals(cjudge, judge)) {
-                found = cjudge;
-                break;
-              }
-            }
-
-            if (null == found) {
+            if (!currentJudges.contains(judge)) {
               LOGGER.trace("Adding judge: {}", judge.getId());
 
               insertJudge.setString(1, judge.getId());
