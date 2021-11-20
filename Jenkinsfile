@@ -187,21 +187,6 @@ pipeline {
       } // steps           
     } // Linux Distribution stage
         
-    /*
-    stage('Publish documentation') {
-      steps {    
-          publishHTML (target: [
-            allowMissing: false,
-            alwaysLinkToLastBuild: false,
-            keepAll: false,
-            reportDir: 'build/gen-documentation',
-            reportFiles: 'index.html',
-            reportName: 'Documentation'
-          ])
-      }
-    }
-    */
-    
     stage('Gather results') {
         steps {
             timestamps {
@@ -216,7 +201,17 @@ pipeline {
                 
                 recordIssues tool: java(), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]  
 
-                recordIssues tool: javaDoc(), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]                                            
+                recordIssues tool: javaDoc(), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+                
+                publishHTML (target: [
+                    allowMissing: true,
+                    alwaysLinkToLastBuild: false,
+                    keepAll: true,
+                    reportDir: 'build/gen-documentation',
+                    reportFiles: 'index.html',
+                    reportName: 'Documentation'
+                ])
+                                                            
             }            
         }
     }
