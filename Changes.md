@@ -1,3 +1,4 @@
+* #988 - rename Championship to Champion's to match FIRST language
 * Keep paragraph breaks entered into awards script entry
 * Allow tournament levels to be renamed
 * fix error editing team data 

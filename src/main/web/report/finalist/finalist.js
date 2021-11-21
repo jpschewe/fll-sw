@@ -285,7 +285,7 @@
 
     // //////////////////////// PUBLIC INTERFACE /////////////////////////
     $.finalist = {
-        CHAMPIONSHIP_NAME: "Championship",
+        CHAMPIONSHIP_NAME: "Champion's",
 
         clearAllData: function() {
             _log("Clearing finalist data from local storage");

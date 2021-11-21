@@ -20,7 +20,7 @@ public final class ChampionshipCategory implements AwardCategory {
    * Display name for the pre-defined Championship award.
    * This must match the value of CHAMPIONSHIP_NAME in finalist.js.
    */
-  public static final String CHAMPIONSHIP_AWARD_TITLE = "Championship";
+  public static final String CHAMPIONSHIP_AWARD_TITLE = "Champion's";
 
   private ChampionshipCategory() {
   }

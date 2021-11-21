@@ -644,6 +644,11 @@ public final class ImportDB {
       upgrade31To32(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 33) {
+      upgrade32To33(connection);
+    }
+
     GenerateDB.setDefaultParameters(connection, true);
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -1183,6 +1188,54 @@ public final class ImportDB {
     GenerateDB.createAwardsScriptTables(connection, false);
 
     setDBVersion(connection, 32);
+  }
+
+  /**
+   * Rename championship category.
+   */
+  private static void upgrade32To33(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 32 to 33");
+
+    // not referencing global constants in case it changes again in the future
+    final String oldName = "Championship";
+    final String newName = "Champion's";
+
+    try (PreparedStatement prep = connection.prepareStatement("UPDATE SUBJECTIVE_EXTRA_AWARD" //
+        + " SET name = ? WHERE name = ?")) {
+      prep.setString(1, newName);
+      prep.setString(2, oldName);
+      prep.executeUpdate();
+    }
+
+    try (PreparedStatement prep = connection.prepareStatement("UPDATE AWARDS_SCRIPT_AWARD_ORDER" //
+        + " SET award = ? WHERE award = ?")) {
+      prep.setString(1, newName);
+      prep.setString(2, oldName);
+      prep.executeUpdate();
+    }
+
+    try (PreparedStatement prep = connection.prepareStatement("UPDATE FINALIST_CATEGORIES" //
+        + " SET category = ? WHERE category = ?")) {
+      prep.setString(1, newName);
+      prep.setString(2, oldName);
+      prep.executeUpdate();
+    }
+
+    try (PreparedStatement prep = connection.prepareStatement("UPDATE CATEGORIES_IGNORED" //
+        + " SET category_identifier = ? WHERE category_identifier = ?")) {
+      prep.setString(1, newName);
+      prep.setString(2, oldName);
+      prep.executeUpdate();
+    }
+
+    try (PreparedStatement prep = connection.prepareStatement("UPDATE FINALIST_SCHEDULE" //
+        + " SET category = ? WHERE category = ?")) {
+      prep.setString(1, newName);
+      prep.setString(2, oldName);
+      prep.executeUpdate();
+    }
+
+    setDBVersion(connection, 33);
   }
 
   /**
