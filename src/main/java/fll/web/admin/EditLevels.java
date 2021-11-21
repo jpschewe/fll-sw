@@ -108,13 +108,13 @@ public class EditLevels extends BaseFLLServlet {
 
           final TournamentLevel level;
           if (parameterName.startsWith(NEW_LEVEL_ID_PREFIX)) {
-            LOGGER.debug("Creating tournament '{}' from id '{}'", levelName, parameterName);
+            LOGGER.debug("Creating tournament level '{}' from id '{}'", levelName, parameterName);
 
             // create a new tournament level
             level = TournamentLevel.createTournamentLevel(connection, levelName);
           } else {
-            // lookup the tournament by id
-            LOGGER.debug("Looking up tournament '{}' from id '{}'", levelName, parameterName);
+            // lookup the tournament level by id
+            LOGGER.debug("Looking up tournament level '{}' from id '{}'", levelName, parameterName);
 
             try {
               final int levelId = Integer.parseInt(parameterName);
@@ -128,7 +128,7 @@ public class EditLevels extends BaseFLLServlet {
           }
 
           LOGGER.debug("Next level for '{}' is '{}'", parameterName, nextLevelWebId);
-          webIdToInfo.put(parameterName, new LevelInfo(level, nextLevelWebId));
+          webIdToInfo.put(parameterName, new LevelInfo(level, nextLevelWebId, levelName));
 
         } else {
           LOGGER.debug("'{}' is not the parameter of a tournament level", parameterName);
@@ -138,8 +138,9 @@ public class EditLevels extends BaseFLLServlet {
 
       // set next tournament levels
       for (final Map.Entry<String, LevelInfo> entry : webIdToInfo.entrySet()) {
-        final TournamentLevel level = entry.getValue().getLevel();
-        final String nextLevelWebId = entry.getValue().getNextWebId();
+        final LevelInfo info = entry.getValue();
+        final TournamentLevel level = info.getLevel();
+        final String nextLevelWebId = info.getNextWebId();
 
         if (!NONE_OPTION_VALUE.equals(nextLevelWebId)) {
           if (!webIdToInfo.containsKey(nextLevelWebId)) {
@@ -149,7 +150,7 @@ public class EditLevels extends BaseFLLServlet {
           }
 
           final TournamentLevel nextLevel = webIdToInfo.get(nextLevelWebId).getLevel();
-          TournamentLevel.updateTournamentLevel(connection, level.getId(), level.getName(), nextLevel);
+          TournamentLevel.updateTournamentLevel(connection, level.getId(), info.getNewName(), nextLevel);
         } else {
           LOGGER.debug("Not setting next tournament for '{}' as it is the none value '{}'", level.getName(),
                        nextLevelWebId);
@@ -173,9 +174,11 @@ public class EditLevels extends BaseFLLServlet {
 
   private static final class LevelInfo {
     LevelInfo(final TournamentLevel level,
-              final String nextWebId) {
+              final String nextWebId,
+              final String newName) {
       this.level = level;
       this.nextWebId = nextWebId;
+      this.newName = newName;
     }
 
     private final TournamentLevel level;
@@ -188,6 +191,12 @@ public class EditLevels extends BaseFLLServlet {
 
     public String getNextWebId() {
       return nextWebId;
+    }
+
+    private final String newName;
+
+    public String getNewName() {
+      return newName;
     }
   }
 
