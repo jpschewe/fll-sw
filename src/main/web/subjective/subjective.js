@@ -125,23 +125,23 @@
     }
 
     function _save() {
-        fllStorage.get(STORAGE_PREFIX, "_subjectiveCategories",
+        fllStorage.set(STORAGE_PREFIX, "_subjectiveCategories",
             _subjectiveCategories);
-        fllStorage.get(STORAGE_PREFIX, "_nonNumericCategories",
+        fllStorage.set(STORAGE_PREFIX, "_nonNumericCategories",
             _nonNumericCategories);
-        fllStorage.get(STORAGE_PREFIX, "_tournament", _tournament);
-        fllStorage.get(STORAGE_PREFIX, "_teams", _teams);
-        fllStorage.get(STORAGE_PREFIX, "_schedule", _schedule);
-        fllStorage.get(STORAGE_PREFIX, "_currentJudgingGroup",
+        fllStorage.set(STORAGE_PREFIX, "_tournament", _tournament);
+        fllStorage.set(STORAGE_PREFIX, "_teams", _teams);
+        fllStorage.set(STORAGE_PREFIX, "_schedule", _schedule);
+        fllStorage.set(STORAGE_PREFIX, "_currentJudgingGroup",
             _currentJudgingGroup);
-        fllStorage.get(STORAGE_PREFIX, "_currentCategory", _currentCategory);
-        fllStorage.get(STORAGE_PREFIX, "_judges", _judges);
-        fllStorage.get(STORAGE_PREFIX, "_currentJudge", _currentJudge);
-        fllStorage.get(STORAGE_PREFIX, "_allScores", _allScores);
-        fllStorage.get(STORAGE_PREFIX, "_teamTimeCache", _teamTimeCache);
-        fllStorage.get(STORAGE_PREFIX, "_currentTeam", _currentTeam);
-        fllStorage.get(STORAGE_PREFIX, "_scoreEntryBackPage", _scoreEntryBackPage);
-        fllStorage.get(STORAGE_PREFIX, "_categoryColumnMapping",
+        fllStorage.set(STORAGE_PREFIX, "_currentCategory", _currentCategory);
+        fllStorage.set(STORAGE_PREFIX, "_judges", _judges);
+        fllStorage.set(STORAGE_PREFIX, "_currentJudge", _currentJudge);
+        fllStorage.set(STORAGE_PREFIX, "_allScores", _allScores);
+        fllStorage.set(STORAGE_PREFIX, "_teamTimeCache", _teamTimeCache);
+        fllStorage.set(STORAGE_PREFIX, "_currentTeam", _currentTeam);
+        fllStorage.set(STORAGE_PREFIX, "_scoreEntryBackPage", _scoreEntryBackPage);
+        fllStorage.set(STORAGE_PREFIX, "_categoryColumnMapping",
             _categoryColumnMapping);
 
     }
