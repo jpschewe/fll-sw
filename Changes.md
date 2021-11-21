@@ -1,3 +1,5 @@
+* #974 - resolve implicit build dependency issues with spotbugs HTML reports and the distribution task
+
 Release 16.2.0
 ==============
 * #980 - Add performance reports to the main page for refs only
