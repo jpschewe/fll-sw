@@ -34,53 +34,44 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         generated. You will be returned to this page if there are no
         errors summarizing scores.</a>
 
-    <a class="wide" href="NonNumericNomineesReport" target="_blank">Report
-        showing the teams that have been nominated for non-numeric
-        awards</a>
+    <a class="wide" href="NonNumericNomineesReport" target="_blank">Optional
+        award nominations</a>
 
     <a class="wide" href="topScoreReportPerAwardGroup.jsp">Top
-        performance scores by award group. This creates a text report of
-        the top regular match play round scores by award group.</a>
+        performance - Award group </a>
 
-    <a class="wide" href="topScoreReportPerJudgingStation.jsp">Top
-        performance scores by judging station. This creates a text
-        report of the top regular match play round scores by judging
-        station.</a>
+    <a class="wide" href="topScoreReportPerJudgingStation.jsp"> Top
+        performance - Judging group </a>
 
-    <a class="wide" href='FinalComputedScores' target="_blank">Final
-        Computed Scores. This is the report that the head judge will
-        want to determine which teams advance to the next tournament.</a>
+    <a class="wide" href='FinalComputedScores' target="_blank">
+        Summarized numeric scores - by judging group aka "Final Computed
+        Scores"</a>
 
-    <a class="wide" href="CategoryScoresByScoreGroup" target="_blank">Categorized
-        Scores by Judging Group. This displays the scaled scores for
-        each category by judging group. This is useful for checking the
-        winners of each category.</a>
+    <a class="wide" href="CategoryScoresByScoreGroup" target="_blank">Award
+        category scores Categorized</a>
 
-    <a class='wide' href='SubjectiveByJudge' target="_blank">Subjective
-        ranks by judge in a table per award group.</a>
+    <a class='wide' href='SubjectiveByJudge' target="_blank">Summarized
+        numeric scores - by judges </a>
 
-    <a class="wide" href="PerformanceReport" target="_blank">Performance
-        report. This displays the performance scores for each team
-        (including head to head) and computes some statistics on the
-        scores.</a>
+    <a class="wide" href="PerformanceReport" target="_blank">
+        Performance scores - full tournament </a>
 
     <a class="wide" href="PerformanceScoreReport" target="_blank">Performance
-        Score Report. This displays the details of the performance runs
-        for each team.</a>
+        scores - by team </a>
 
     <a class="wide" href="PlayoffReport" target="_blank">Winners of
-        each head to head bracket. This is useful for the awards
-        ceremony.</a>
+        each head to head bracket</a>
 
-    <a class="wide" href="non-numeric-nominees.jsp" target="_blank">Enter
-        non-numeric nominees. This is used to enter the teams that are
-        up for consideration for the non-scored subjective categories.
-        This information can come from the subjective judging
-        application. The information entered here transfers over to the
-        finalist scheduling web application.</a>
+    <a class="wide" href="non-numeric-nominees.jsp" target="_blank">Entry:
+        Non-numeric nominations <br /> This is used to enter the teams
+        that are up for consideration for the non-scored subjective
+        categories. This information can come from the subjective
+        judging application. The information entered here transfers over
+        to the finalist scheduling web application.
+    </a>
 
-    <a class="wide" href="edit-award-winners.jsp" target="_blank">Enter
-        the winners of awards for use in the awards report</a>
+    <a class="wide" href="edit-award-winners.jsp" target="_blank">Entry:
+        Award winners </a>
 
     <a class="wide" href="edit-advancing-teams.jsp" target="_blank">Enter
         the teams advancing to the next level of tournament</a>
