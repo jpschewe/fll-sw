@@ -117,13 +117,11 @@ public final class GatherTeamData {
           final String judgingStation = Queries.getJudgingGroup(connection, teamNumber, tournament.getTournamentID());
           if (null == eventDivision
               || null == judgingStation) {
-            throw new FLLRuntimeException("Unable to find award group or judging station for team "
-                + teamNumber);
+            LOGGER.debug("Team {} is not in tournament {}", teamNumber, tournament.getName());
+          } else {
+            currentEventDivisions.put(tournament.getTournamentID(), eventDivision);
+            currentJudgingStations.put(tournament.getTournamentID(), judgingStation);
           }
-
-          currentEventDivisions.put(tournament.getTournamentID(), eventDivision);
-
-          currentJudgingStations.put(tournament.getTournamentID(), judgingStation);
         }
         page.setAttribute("currentEventDivisions", currentEventDivisions);
         page.setAttribute("currentJudgingStations", currentJudgingStations);

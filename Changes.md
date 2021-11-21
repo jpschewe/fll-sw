@@ -1,3 +1,4 @@
+* fix error editing team data 
 * #974 - resolve implicit build dependency issues with spotbugs HTML reports and the distribution task
 
 Release 16.2.0
