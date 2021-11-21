@@ -171,9 +171,7 @@ public class NonNumericNomineesReport extends BaseFLLServlet {
     table.appendChild(FOPUtils.createTableColumn(document, 1)); // team number
     table.appendChild(FOPUtils.createTableColumn(document, 1)); // team name
     table.appendChild(FOPUtils.createTableColumn(document, 1)); // organization
-    if (category.getPerAwardGroup()) {
-      table.appendChild(FOPUtils.createTableColumn(document, 1)); // award group
-    }
+    table.appendChild(FOPUtils.createTableColumn(document, 1)); // award group
 
     final Map<String, Collection<TournamentTeam>> groupedTeams = new HashMap<>();
     for (final Nominee nominee : NonNumericNominees.getNominees(connection, tournament.getTournamentID(),
@@ -200,10 +198,7 @@ public class NonNumericNomineesReport extends BaseFLLServlet {
           final String organization = team.getOrganization();
           row.appendChild(FOPUtils.createTableCell(document, null, null == organization ? "" : organization));
 
-          if (category.getPerAwardGroup()) {
-            row.appendChild(FOPUtils.createTableCell(document, null, team.getAwardGroup()));
-          }
-
+          row.appendChild(FOPUtils.createTableCell(document, null, team.getAwardGroup()));
         } // foreach team in award group
       } // foreach award group
     } else {
