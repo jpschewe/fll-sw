@@ -1,3 +1,4 @@
+* Keep paragraph breaks entered into awards script entry
 * Allow tournament levels to be renamed
 * fix error editing team data 
 * #974 - resolve implicit build dependency issues with spotbugs HTML reports and the distribution task

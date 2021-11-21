@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
@@ -960,16 +959,24 @@ public class AwardsScriptReport extends BaseFLLServlet {
       throws SQLException {
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
-    final Element mainBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    container.appendChild(mainBlock);
-
     final String rawText = AwardsScript.getSectionText(connection, tournament, section);
 
     try (StringWriter writer = new StringWriter()) {
       if (!Velocity.evaluate(templateContext, writer, section.name(), rawText)) {
         throw new FLLRuntimeException(String.format("Error evaluating template for section %s", section));
       }
-      mainBlock.appendChild(document.createTextNode(writer.toString()));
+      final String text = writer.toString();
+      for (final String paragraph : text.split("\n")) {
+        final String t;
+        if (paragraph.isEmpty()) {
+          t = String.valueOf(Utilities.NON_BREAKING_SPACE);
+        } else {
+          t = paragraph;
+        }
+        final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        container.appendChild(block);
+        block.appendChild(document.createTextNode(t));
+      }
     } catch (final IOException e) {
       throw new FLLInternalException("Should not get IO exception writing to a string", e);
     }
