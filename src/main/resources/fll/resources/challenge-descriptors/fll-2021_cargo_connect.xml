@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><fll copyright="" revision="17" schemaVersion="3" title="2021 Minnesota FIRST LEGO League - Cargo Connect" winner="HIGH">
+<?xml version="1.0" encoding="UTF-8"?><fll copyright="" revision="18" schemaVersion="3" title="2021 Minnesota FIRST LEGO League - Cargo Connect" winner="HIGH">
   <Performance minimumScore="0.00" weight="1.00">
     <goalGroup title="M00">
       <description>EQUIPMENT INSPECTION BONUS</description>
@@ -645,9 +645,6 @@
   </nonNumericCategory>
   <nonNumericCategory perAwardGroup="false" title="Motivate">
     <description>A team that embraces the culture of FIRST LEGO League through team building, team spirit, and displayed enthusiasm.</description>
-  </nonNumericCategory>
-  <nonNumericCategory perAwardGroup="false" title="Judges Award">
-    <description>This award is given at the Judges discretion to a team that deserves recognition but does not fit it another category.</description>
   </nonNumericCategory>
   <nonNumericCategory perAwardGroup="false" title="Innovation Project Model">
     <description>Referee Submitted Award for most Creative Innovation Project presented by team </description>
