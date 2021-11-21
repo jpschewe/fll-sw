@@ -83,7 +83,7 @@ public class NonNumericNomineesReport extends BaseFLLServlet {
 
       response.reset();
       response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=nonNumericNomineedsReport.pdf");
+      response.setHeader("Content-Disposition", "filename=nonNumericNomineesReport.pdf");
 
       FOPUtils.renderPdf(fopFactory, doc, response.getOutputStream());
     } catch (final SQLException e) {
