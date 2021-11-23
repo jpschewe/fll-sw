@@ -8,6 +8,7 @@ package fll.scheduler;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -438,7 +439,7 @@ public final class ScheduleWriter {
   }
 
   private static final class PerformanceEntryComparator
-      implements Comparator<Map.Entry<PerformanceTime, TeamScheduleInfo>> {
+      implements Comparator<Map.Entry<PerformanceTime, TeamScheduleInfo>>, Serializable {
 
     static final PerformanceEntryComparator INSTANCE = new PerformanceEntryComparator();
 
