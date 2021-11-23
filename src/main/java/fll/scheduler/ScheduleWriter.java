@@ -326,9 +326,6 @@ public final class ScheduleWriter {
       }
     }
 
-    // list of teams staying around to even up the teams
-    final List<TeamScheduleInfo> teamsMissingOpponents = new LinkedList<>();
-
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
     final Element rootElement = FOPUtils.createRoot(document);
@@ -351,8 +348,20 @@ public final class ScheduleWriter {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
+    final Element ele = createPerformanceScheduleTable(schedule, document, performanceTimes);
+    documentBody.appendChild(ele);
+
+    return document;
+  }
+
+  private static Element createPerformanceScheduleTable(final TournamentSchedule schedule,
+                                                        final Document document,
+                                                        final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes) {
+
+    final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
     final Element table = FOPUtils.createBasicTable(document);
-    documentBody.appendChild(table);
+    container.appendChild(table);
 
     table.appendChild(FOPUtils.createTableColumn(document, 2));
     table.appendChild(FOPUtils.createTableColumn(document, 2));
@@ -395,6 +404,9 @@ public final class ScheduleWriter {
 
     final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
+
+    // list of teams staying around to even up the teams
+    final List<TeamScheduleInfo> teamsMissingOpponents = new LinkedList<>();
 
     LocalTime prevTime = null;
     Element prevRow = null;
@@ -474,7 +486,7 @@ public final class ScheduleWriter {
     if (!teamsMissingOpponents.isEmpty()) {
       final String formatString = "Team %d does not have an opponent.";
       final Element stayingTable = FOPUtils.createBasicTable(document);
-      documentBody.appendChild(stayingTable);
+      container.appendChild(stayingTable);
 
       stayingTable.appendChild(FOPUtils.createTableColumn(document, 1));
 
@@ -499,7 +511,7 @@ public final class ScheduleWriter {
       FOPUtils.keepWithPreviousAlways(prevRow);
     }
 
-    return document;
+    return container;
   }
 
   /**
