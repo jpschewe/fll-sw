@@ -15,10 +15,13 @@ import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 
+import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Valve;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.core.StandardContext;
+import org.apache.catalina.session.FileStore;
+import org.apache.catalina.session.PersistentManager;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.valves.AccessLogValve;
 import org.apache.catalina.webresources.DirResourceSet;
@@ -128,11 +131,23 @@ public class TomcatLauncher {
         + tmpDir.toAbsolutePath().toString());
     tomcat.setBaseDir(tmpDir.toAbsolutePath().toString());
 
-    final StandardContext ctx = (StandardContext) tomcat.addWebapp("", webRoot.toAbsolutePath().toString());
+    final Context ctx = tomcat.addWebapp("", webRoot.toAbsolutePath().toString());
 
-    // delegate to parent classloader first. This allows the web application
-    // to use the application classpath.
-    ctx.setDelegate(true);
+    if (ctx instanceof StandardContext) {
+      final StandardContext sctx = (StandardContext) ctx;
+      // delegate to parent classloader first. This allows the web application
+      // to use the application classpath.
+      sctx.setDelegate(true);
+    } else {
+      LOGGER.warn("Not using StandardContext, unlable to set delegation of classloader. Some classes may not be properly found.");
+    }
+
+    // persist sessions to disk
+    final PersistentManager manager = new PersistentManager();
+    final FileStore store = new FileStore();
+    store.setDirectory(tmpDir.toString());
+    manager.setStore(store);
+    ctx.setManager(manager);
 
     final WebResourceRoot resources = new StandardRoot(ctx);
 
