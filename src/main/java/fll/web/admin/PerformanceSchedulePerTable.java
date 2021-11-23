@@ -30,11 +30,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * @see ScheduleWriter#outputPerformanceScheduleByTime(TournamentSchedule,
+ * @see ScheduleWriter#outputPerformanceSchedulePerTableByTime(TournamentSchedule,
  *      java.io.OutputStream)
  */
-@WebServlet("/admin/PerformanceSchedule")
-public class PerformanceSchedule extends BaseFLLServlet {
+@WebServlet("/admin/PerformanceSchedulePerTable")
+public class PerformanceSchedulePerTable extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -65,8 +65,8 @@ public class PerformanceSchedule extends BaseFLLServlet {
 
       response.reset();
       response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=performanceSchedule.pdf");
-      ScheduleWriter.outputPerformanceScheduleByTime(schedule, response.getOutputStream());
+      response.setHeader("Content-Disposition", "filename=performanceSchedulePerTable.pdf");
+      ScheduleWriter.outputPerformanceSchedulePerTableByTime(schedule, response.getOutputStream());
 
     } catch (final SQLException sqle) {
       LOGGER.error(sqle.getMessage(), sqle);

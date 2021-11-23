@@ -1,3 +1,4 @@
+* #987 - Add performance schedule for each table
 * Fix saving of subjective data to local storage 
 * Keep paragraph breaks entered into awards script entry
 * Allow tournament levels to be renamed

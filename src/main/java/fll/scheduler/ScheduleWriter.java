@@ -13,18 +13,23 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.xml.transform.TransformerException;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
 import org.w3c.dom.Document;
@@ -309,6 +314,26 @@ public final class ScheduleWriter {
   }
 
   /**
+   * Output the performance schedule per table, sorted by time.
+   *
+   * @param schedule the schedule to write
+   * @param pdfFos where to write the schedule
+   * @throws IOException error writing to the stream
+   */
+  public static void outputPerformanceSchedulePerTableByTime(final TournamentSchedule schedule,
+                                                             final OutputStream pdfFos)
+      throws IOException {
+    try {
+      final Document performanceDoc = createPerformanceSchedulePerTable(schedule);
+      final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
+
+      FOPUtils.renderPdf(fopFactory, performanceDoc, pdfFos);
+    } catch (FOPException | TransformerException e) {
+      throw new FLLInternalException("Error creating the performance schedule PDF", e);
+    }
+  }
+
+  /**
    * Standard border for table cells in points.
    */
   public static final double STANDARD_BORDER_WIDTH = 0.5;
@@ -318,8 +343,65 @@ public final class ScheduleWriter {
    */
   public static final double THICK_BORDER_WIDTH = 2;
 
+  private static Document createPerformanceSchedulePerTable(final TournamentSchedule schedule) {
+    final SortedSet<ImmutablePair<String, Integer>> tables = new TreeSet<>();
+
+    final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = new HashMap<>();
+    for (final TeamScheduleInfo si : schedule.getSchedule()) {
+      for (final PerformanceTime pt : si.getAllPerformances()) {
+        performanceTimes.put(pt, si);
+        final ImmutablePair<String, Integer> table = ImmutablePair.of(pt.getTable(), pt.getSide());
+        tables.add(table);
+      }
+    }
+
+    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
+
+    final Element rootElement = FOPUtils.createRoot(document);
+    document.appendChild(rootElement);
+
+    final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
+    rootElement.appendChild(layoutMasterSet);
+
+    final String pageMasterName = "simple";
+    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName);
+    layoutMasterSet.appendChild(pageMaster);
+
+    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
+    rootElement.appendChild(pageSequence);
+    pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
+
+    final Element footer = FOPUtils.createSimpleFooter(document);
+    pageSequence.appendChild(footer);
+
+    final Element documentBody = FOPUtils.createBody(document);
+    pageSequence.appendChild(documentBody);
+
+    tables.forEach(pair -> {
+      final String table = pair.getLeft();
+      final int side = pair.getRight();
+
+      final String headerText = String.format("Tournament: %s Performance - %s %d", schedule.getName(), table, side);
+
+      final Map<PerformanceTime, TeamScheduleInfo> tablePerformanceTimes = performanceTimes.entrySet().stream() //
+                                                                                           .filter(e -> e.getKey()
+                                                                                                         .getTable()
+                                                                                                         .equals(table)
+                                                                                               && e.getKey()
+                                                                                                   .getSide() == side) //
+                                                                                           .collect(Collectors.toMap(Map.Entry::getKey,
+                                                                                                                     Map.Entry::getValue));
+
+      final Element ele = createPerformanceScheduleTable(schedule, headerText, document, tablePerformanceTimes);
+      documentBody.appendChild(ele);
+      ele.setAttribute("page-break-after", "always");
+    });
+
+    return document;
+  }
+
   private static Document createPerformanceSchedule(final TournamentSchedule schedule) {
-    final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<>();
+    final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = new HashMap<>();
     for (final TeamScheduleInfo si : schedule.getSchedule()) {
       for (final PerformanceTime pt : si.getAllPerformances()) {
         performanceTimes.put(pt, si);
@@ -348,15 +430,29 @@ public final class ScheduleWriter {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    final Element ele = createPerformanceScheduleTable(schedule, document, performanceTimes);
+    final String headerText = String.format("Tournament: %s Performance", schedule.getName());
+    final Element ele = createPerformanceScheduleTable(schedule, headerText, document, performanceTimes);
     documentBody.appendChild(ele);
 
     return document;
   }
 
+  private static final class PerformanceEntryComparator
+      implements Comparator<Map.Entry<PerformanceTime, TeamScheduleInfo>> {
+
+    static final PerformanceEntryComparator INSTANCE = new PerformanceEntryComparator();
+
+    @Override
+    public int compare(final Map.Entry<PerformanceTime, TeamScheduleInfo> o1,
+                       final Map.Entry<PerformanceTime, TeamScheduleInfo> o2) {
+      return o1.getKey().compareTo(o2.getKey());
+    }
+  }
+
   private static Element createPerformanceScheduleTable(final TournamentSchedule schedule,
+                                                        final String headerText,
                                                         final Document document,
-                                                        final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes) {
+                                                        final Map<PerformanceTime, TeamScheduleInfo> performanceTimes) {
 
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
@@ -382,9 +478,7 @@ public final class ScheduleWriter {
     final Element headerRow1 = FOPUtils.createTableRow(document);
     header.appendChild(headerRow1);
 
-    final Element tournamentHeader = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                              String.format("Tournament: %s Performance",
-                                                                            schedule.getName()));
+    final Element tournamentHeader = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, headerText);
     headerRow1.appendChild(tournamentHeader);
     tournamentHeader.setAttribute("number-columns-spanned", String.valueOf(headerNames.length));
     FOPUtils.addTopBorder(tournamentHeader, STANDARD_BORDER_WIDTH);
@@ -410,7 +504,9 @@ public final class ScheduleWriter {
 
     LocalTime prevTime = null;
     Element prevRow = null;
-    for (final Map.Entry<PerformanceTime, TeamScheduleInfo> entry : performanceTimes.entrySet()) {
+    final List<Map.Entry<PerformanceTime, TeamScheduleInfo>> entries = new LinkedList<>(performanceTimes.entrySet());
+    Collections.sort(entries, PerformanceEntryComparator.INSTANCE);
+    for (final Map.Entry<PerformanceTime, TeamScheduleInfo> entry : entries) {
       final Element row = FOPUtils.createTableRow(document);
       tableBody.appendChild(row);
 
