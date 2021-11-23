@@ -5,6 +5,7 @@
 <%
 fll.web.MainIndex.populateContext(request, application, pageContext);
 fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
+fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 %>
 
 <html>
@@ -124,13 +125,6 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
             </form>
         </li>
 
-        <li>
-            <a target="_edit_parameters"
-                href="<c:url value='/admin/edit_tournament_parameters.jsp'/>">Edit
-                tournament parameters</a> - should not be needed for most
-            tournaments.
-        </li>
-
         <li>Test the printer by printing something useful. See
             Other Useful Tasks below.</li>
 
@@ -174,6 +168,22 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                 id='remote-control' href='remoteControl.jsp'>Control
                 the Remote display</a>. This is used to control what is
             displayed on the screens
+        </li>
+
+        <li>
+            <form
+                ACTION="<c:url value='/report/performanceRunReport.jsp' />"
+                METHOD='POST'>
+                Check that the right number of performance scores have
+                been entered
+                <select name='RunNumber'>
+                    <c:forEach var="index" begin="1"
+                        end="${maxRunNumber}">
+                        <option value='${index }'>${index }</option>
+                    </c:forEach>
+                </select>
+                <input type='submit' value='Show Scores for run' />
+            </form>
         </li>
 
         <li>
