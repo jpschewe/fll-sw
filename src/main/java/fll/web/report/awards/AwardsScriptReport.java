@@ -239,6 +239,10 @@ public class AwardsScriptReport extends BaseFLLServlet {
     return container;
   }
 
+  /**
+   * Get the award groups in order, this does not contain groups created for
+   * advancing teams.
+   */
   private List<String> getAwardGroupOrder(final Connection connection,
                                           final Tournament tournament)
       throws SQLException {
@@ -246,11 +250,16 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final List<String> sortedAwardGroups = AwardsReportSortedGroupsServlet.getAwardGroupsSorted(connection,
                                                                                                 tournament.getTournamentID());
 
-    // in case any of the award groups missing
+    // ensure all award groups are in the list
     final List<String> localSortedGroups = new LinkedList<>(sortedAwardGroups);
-    allAwardGroups.stream().filter(e -> !localSortedGroups.contains(e)).forEach(localSortedGroups::add);
+    allAwardGroups.stream() //
+                  .filter(e -> !localSortedGroups.contains(e))//
+                  .forEach(localSortedGroups::add);
 
-    return localSortedGroups;
+    // remove award groups not in the standard award groups
+    return localSortedGroups.stream() //
+                            .filter(allAwardGroups::contains) //
+                            .collect(Collectors.toList());
   }
 
   private void addAwards(final ChallengeDescription description,
