@@ -91,7 +91,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
         </c:forEach>
 
         <!-- championship -->
-        <h1>Championship</h1>
+        <h1>${championshipAwardName}</h1>
         <c:forEach items="${awardGroups}" var="awardGroup">
 
             <h2>${awardGroup}</h2>

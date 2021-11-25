@@ -1,3 +1,4 @@
+* #988 - rename Championship to Champion's to match FIRST language
 * #987 - Add performance schedule for each table
 * Fix saving of subjective data to local storage 
 * Keep paragraph breaks entered into awards script entry
