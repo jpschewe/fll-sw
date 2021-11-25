@@ -12,12 +12,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.Tournament;
@@ -30,7 +24,12 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
-import net.mtu.eggplant.util.sql.SQLFunctions;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Commit the changes made by editTeam.jsp.
@@ -82,9 +81,7 @@ public class CommitTeam extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
 
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
       // parse the numbers first so that we don't get a partial commit
       final int teamNumber = WebUtils.getIntRequestParameter(request, "teamNumber");
 
@@ -226,8 +223,6 @@ public class CommitTeam extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new FLLRuntimeException("There was an error talking to the database", e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }
