@@ -108,12 +108,9 @@ public class ProcessImportFinalist extends BaseFLLServlet {
                   sessionInfo.setImportFinalist(true);
                   sessionInfo.setImportPerformance(false);
                   sessionInfo.setImportSubjective(true);
-
-                  // insert into the import workflow after tournament verification
-                  final String redirect = String.format("%s/developer/importdb/FindMissingTeams",
-                                                        request.getContextPath());
-                  session.setAttribute(SessionAttributes.REDIRECT_URL, redirect);
                   session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
+
+                  session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckSubjectiveEmptyForJudgeImport");
                 }
               } else {
                 message.append("<p class='error'>");

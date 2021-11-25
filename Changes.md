@@ -1,3 +1,4 @@
+* #979 - add basic check to make sure subjective scores aren't overwritten when importing finalist data
 * #988 - rename Championship to Champion's to match FIRST language
 * #987 - Add performance schedule for each table
 * Fix saving of subjective data to local storage 

@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -28,13 +29,16 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.xml.ChallengeDescription;
+import fll.xml.SubjectiveScoreCategory;
 
 /**
- * Check that there isn't any performance data in the database. If there is,
- * make the user confirm before allowing the database to be imported.
+ * Check that there isn't any subjective data in the database. If there is, make
+ * the user confirm before allowing the database to be exported as performance
+ * data.
  */
-@WebServlet("/admin/CheckPerformanceEmpty")
-public class CheckPerformanceEmpty extends BaseFLLServlet {
+@WebServlet("/admin/CheckSubjectiveEmptyForPerformanceExport")
+public class CheckSubjectiveEmptyForPerformanceExport extends BaseFLLServlet {
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -49,28 +53,30 @@ public class CheckPerformanceEmpty extends BaseFLLServlet {
     }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final ChallengeDescription challenge = ApplicationAttributes.getChallengeDescription(application);
     try (Connection connection = datasource.getConnection()) {
       final int tournamentId = Queries.getCurrentTournament(connection);
 
-      if (hasScores(connection, tournamentId)) {
-        response.sendRedirect(response.encodeRedirectURL("confirm-import-with-performance-scores.jsp"));
-        return;
-      } else {
-        // insert into the import workflow after tournament verification
-        final String redirect = String.format("%s/developer/importdb/FindMissingTeams", request.getContextPath());
-        response.sendRedirect(response.encodeRedirectURL(redirect));
+      for (final SubjectiveScoreCategory category : challenge.getSubjectiveCategories()) {
+        if (categoryHasScores(connection, category, tournamentId)) {
+          response.sendRedirect(response.encodeRedirectURL("confirm-export-with-subjective-scores.jsp"));
+          return;
+        }
       }
-    } catch (
 
-    final SQLException e) {
+      response.sendRedirect(response.encodeRedirectURL("ExportPerformanceData"));
+    } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     }
   }
 
-  private boolean hasScores(final Connection connection,
-                            final int tournamentId)
+  @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "table name is dependent on category name")
+  private boolean categoryHasScores(final Connection connection,
+                                    final SubjectiveScoreCategory category,
+                                    final int tournamentId)
       throws SQLException {
-    try (PreparedStatement prep = connection.prepareStatement("SELECT COUNT(*) FROM Performance "
+    try (PreparedStatement prep = connection.prepareStatement("SELECT COUNT(*) FROM "
+        + category.getName()
         + " WHERE TOURNAMENT = ?")) {
       prep.setInt(1, tournamentId);
       try (ResultSet rs = prep.executeQuery()) {

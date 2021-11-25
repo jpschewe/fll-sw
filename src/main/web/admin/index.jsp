@@ -338,7 +338,8 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                     2 server actions
                     <ul>
                         <li>
-                            <a href="CheckSubjectiveEmpty">Export
+                            <a
+                                href="CheckSubjectiveEmptyForPerformanceExport">Export
                                 performance data for judges server</a> . If
                             doing finalist scheduling, the initial head
                             to head brackets need to be created before

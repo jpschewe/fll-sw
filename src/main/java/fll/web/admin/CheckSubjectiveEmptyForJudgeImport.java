@@ -34,10 +34,11 @@ import fll.xml.SubjectiveScoreCategory;
 
 /**
  * Check that there isn't any subjective data in the database. If there is, make
- * the user confirm before allowing the database to be exported.
+ * the user confirm before allowing the database to be imported and scores
+ * overwritten.
  */
-@WebServlet("/admin/CheckSubjectiveEmpty")
-public class CheckSubjectiveEmpty extends BaseFLLServlet {
+@WebServlet("/admin/CheckSubjectiveEmptyForJudgeImport")
+public class CheckSubjectiveEmptyForJudgeImport extends BaseFLLServlet {
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -58,12 +59,14 @@ public class CheckSubjectiveEmpty extends BaseFLLServlet {
 
       for (final SubjectiveScoreCategory category : challenge.getSubjectiveCategories()) {
         if (categoryHasScores(connection, category, tournamentId)) {
-          response.sendRedirect(response.encodeRedirectURL("confirm-export-with-subjective-scores.jsp"));
+          response.sendRedirect(response.encodeRedirectURL("confirm-import-with-subjective-scores.jsp"));
           return;
         }
       }
 
-      response.sendRedirect(response.encodeRedirectURL("ExportPerformanceData"));
+      // insert into the import workflow after tournament verification
+      final String redirect = String.format("%s/developer/importdb/FindMissingTeams", request.getContextPath());
+      response.sendRedirect(response.encodeRedirectURL(redirect));
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     }
