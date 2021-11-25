@@ -1,3 +1,4 @@
+* #938 - Require award group and judging group when a tournament is specified for imported teams
 * #988 - rename Championship to Champion's to match FIRST language
 * #987 - Add performance schedule for each table
 * Fix saving of subjective data to local storage 

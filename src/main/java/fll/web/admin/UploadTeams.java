@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -30,7 +31,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.TournamentLevel;
 import fll.Utilities;
-import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.util.CellFileReader;
 import fll.util.FLLRuntimeException;
@@ -286,8 +286,7 @@ public final class UploadTeams extends BaseFLLServlet {
                                     final JspWriter out)
       throws SQLException, IOException {
     final String teamNumberColumn = request.getParameter("TeamNumber");
-    if (null == teamNumberColumn
-        || "".equals(teamNumberColumn)) {
+    if (StringUtils.isBlank(teamNumberColumn)) {
       // Error, redirect back to teamColumnSelection.jsp with error message
       SessionAttributes.appendToMessage(session, "<p class='error'>You must specify a column for TeamNumber</p>");
       response.sendRedirect(response.encodeRedirectURL("teamColumnSelection.jsp"));
@@ -297,6 +296,22 @@ public final class UploadTeams extends BaseFLLServlet {
     final String tournamentColumn = request.getParameter("tournament");
     final String eventDivisionColumn = request.getParameter("event_division");
     final String judgingStationColumn = request.getParameter("judging_station");
+
+    if (!StringUtils.isBlank(tournamentColumn)
+        && StringUtils.isBlank(eventDivisionColumn)) {
+      SessionAttributes.appendToMessage(session,
+                                        "<p class='error'>You must specify a column for Award Group when specifying a Tournament column</p>");
+      response.sendRedirect(response.encodeRedirectURL("teamColumnSelection.jsp"));
+      return false;
+    }
+
+    if (!StringUtils.isBlank(tournamentColumn)
+        && StringUtils.isBlank(judgingStationColumn)) {
+      SessionAttributes.appendToMessage(session,
+                                        "<p class='error'>You must specify a column for Judging Station when specifying a Tournament column</p>");
+      response.sendRedirect(response.encodeRedirectURL("teamColumnSelection.jsp"));
+      return false;
+    }
 
     final StringBuilder message = new StringBuilder();
 
@@ -420,7 +435,12 @@ public final class UploadTeams extends BaseFLLServlet {
       } // for each row imported
     }
 
-    updateTournamentTeams(connection, teamNumberColumn, tournamentColumn, eventDivisionColumn, judgingStationColumn);
+    // if a tournament column is specified, put teams in tournaments
+    if (!StringUtils.isBlank(tournamentColumn)
+        && !StringUtils.isBlank(eventDivisionColumn)
+        && !StringUtils.isBlank(judgingStationColumn)) {
+      updateTournamentTeams(connection, teamNumberColumn, tournamentColumn, eventDivisionColumn, judgingStationColumn);
+    }
 
     return true;
   }
@@ -428,10 +448,10 @@ public final class UploadTeams extends BaseFLLServlet {
   /**
    * Check if there are any team numbers in AllTeams that are in Teams.
    *
-   * @param connection
-   * @param message
+   * @param connection database connection
+   * @param message where to put the message for the user
    * @return true if no problems, false otherwise (message will be updated)
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate name of teamNumberColumn")
   private static boolean verifyNoDuplicateTeamNumbers(final Connection connection,
@@ -479,113 +499,71 @@ public final class UploadTeams extends BaseFLLServlet {
    * @param tournamentColumn which column in AllTeams contains the
    *          tournament
    * @param eventDivisionColumn which column in AllTeams contains the event
-   *          division - may be null
+   *          division
    * @param judgingStationColumn which column in AllTeams contains the
-   *          judging station - may be null
-   * @throws SQLException
+   *          judging station
+   * @throws SQLException on a database error
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
                                 "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for AllTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
   private static void updateTournamentTeams(final Connection connection,
                                             final String teamNumberColumn,
-                                            final @Nullable String tournamentColumn,
-                                            final @Nullable String eventDivisionColumn,
-                                            final @Nullable String judgingStationColumn)
+                                            final String tournamentColumn,
+                                            final String eventDivisionColumn,
+                                            final String judgingStationColumn)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
+      final StringBuilder sql = new StringBuilder();
+      sql.append("SELECT ");
+      sql.append(teamNumberColumn);
+      sql.append(", "
+          + tournamentColumn);
 
-      final String eventDivisionSql;
-      if (null != eventDivisionColumn
-          && !eventDivisionColumn.isEmpty()) {
-        eventDivisionSql = eventDivisionColumn;
-      } else {
-        eventDivisionSql = "'"
-            + GenerateDB.DEFAULT_TEAM_DIVISION
-            + "'";
+      sql.append(", "
+          + eventDivisionColumn);
+      sql.append(", "
+          + judgingStationColumn);
+
+      sql.append(" FROM AllTeams");
+
+      try (ResultSet rs = stmt.executeQuery(sql.toString())) {
+
+        while (rs.next()) {
+          final int teamNumber = rs.getInt(1);
+          final String tournamentName = rs.getString(2);
+          if (null == tournamentName) {
+            LOGGER.debug("Team {} is missing tournament, skipping", teamNumber);
+            continue;
+          }
+
+          final String eventDivision = rs.getString(3);
+          if (null == eventDivision) {
+            LOGGER.debug("Team {} is missing award group, skipping", teamNumber);
+            continue;
+          }
+
+          final String judgingStation = rs.getString(4);
+          if (null == judgingStation) {
+            LOGGER.debug("Team {} is missing judging group, skipping", teamNumber);
+            continue;
+          }
+
+          final Tournament tournament;
+          if (!Tournament.doesTournamentExist(connection, tournamentName)) {
+            Tournament.createTournament(connection, tournamentName, tournamentName, null,
+                                        TournamentLevel.getByName(connection,
+                                                                  TournamentLevel.DEFAULT_TOURNAMENT_LEVEL_NAME));
+            tournament = Tournament.findTournamentByName(connection, tournamentName);
+          } else {
+            tournament = Tournament.findTournamentByName(connection, tournamentName);
+          }
+
+          Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
+                                      judgingStation);
+        } // foreach result
       }
+    } // stmt
 
-      final String judgingStationSql;
-      if (null != judgingStationColumn
-          && !judgingStationColumn.isEmpty()) {
-        judgingStationSql = judgingStationColumn;
-      } else {
-        judgingStationSql = "'"
-            + GenerateDB.DEFAULT_TEAM_DIVISION
-            + "'";
-      }
-
-      // if a tournament is specified for the new data, set it
-      if (null != tournamentColumn
-          && !tournamentColumn.isEmpty()) {
-
-        final StringBuilder sql = new StringBuilder();
-        sql.append("SELECT ");
-        sql.append(teamNumberColumn);
-        sql.append(", "
-            + tournamentColumn);
-
-        sql.append(", "
-            + eventDivisionSql);
-        sql.append(", "
-            + judgingStationSql);
-
-        sql.append(" FROM AllTeams");
-
-        try (ResultSet rs = stmt.executeQuery(sql.toString())) {
-
-          while (rs.next()) {
-            final int teamNumber = rs.getInt(1);
-            final String tournamentName = rs.getString(2);
-            if (null == tournamentName) {
-              LOGGER.debug("Team {} is missing tournament, skipping", teamNumber);
-              continue;
-            }
-
-            final String eventDivision = rs.getString(3);
-            if (null == eventDivision) {
-              LOGGER.debug("Team {} is missing award group, skipping", teamNumber);
-              continue;
-            }
-
-            final String judgingStation = rs.getString(4);
-            if (null == judgingStation) {
-              LOGGER.debug("Team {} is missing judging station, skipping", teamNumber);
-              continue;
-            }
-
-            final Tournament tournament;
-            if (!Tournament.doesTournamentExist(connection, tournamentName)) {
-              Tournament.createTournament(connection, tournamentName, tournamentName, null,
-                                          TournamentLevel.getByName(connection,
-                                                                    TournamentLevel.DEFAULT_TOURNAMENT_LEVEL_NAME));
-              tournament = Tournament.findTournamentByName(connection, tournamentName);
-            } else {
-              tournament = Tournament.findTournamentByName(connection, tournamentName);
-            }
-
-            Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
-                                        judgingStation);
-          } // foreach result
-        }
-      } else {
-        // put all new teams in the DUMMY tournament by default and make the
-        // event division and judging station be the default division
-        final Tournament dummyTournament = Tournament.findTournamentByName(connection,
-                                                                           GenerateDB.DUMMY_TOURNAMENT_NAME);
-        final int dummyTournamentID = dummyTournament.getTournamentID();
-        stmt.executeUpdate("INSERT INTO TournamentTeams " //
-            + " (Tournament, TeamNumber, event_division, judging_station)" // "
-            + " SELECT "
-            + dummyTournamentID
-            + ", Teams.TeamNumber, "
-            + eventDivisionSql
-            + ", "
-            + judgingStationSql //
-            + " FROM Teams, AllTeams" //
-            + "   WHERE Teams.TeamNumber = AllTeams."
-            + teamNumberColumn);
-      }
-    }
   }
 
   /**

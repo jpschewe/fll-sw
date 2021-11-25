@@ -21,7 +21,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import fll.Tournament;
 import fll.TournamentLevel;
 import fll.Utilities;
-import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.util.CellFileReader;
 import fll.util.FLLInternalException;
@@ -271,20 +270,19 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
             tournament = Tournament.findTournamentByName(connection, tournamentName);
           }
 
-          final String eventDivision;
           if (eventDivisionColumnIdx < 0
               || null == data[eventDivisionColumnIdx]) {
-            eventDivision = GenerateDB.DEFAULT_TEAM_DIVISION;
-          } else {
-            eventDivision = data[eventDivisionColumnIdx];
+            throw new FLLRuntimeException("Missing award group for team "
+                + teamNumber);
           }
-          final String judgingStation;
+          final String eventDivision = data[eventDivisionColumnIdx];
+
           if (judgingStationColumnIdx < 0
               || null == data[judgingStationColumnIdx]) {
-            judgingStation = GenerateDB.DEFAULT_TEAM_DIVISION;
-          } else {
-            judgingStation = data[judgingStationColumnIdx];
+            throw new FLLRuntimeException("Missing judging station for team "
+                + teamNumber);
           }
+          final String judgingStation = data[judgingStationColumnIdx];
 
           if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Adding team "

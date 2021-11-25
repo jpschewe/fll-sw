@@ -108,7 +108,7 @@
       </tr>
 
       <tr>
-        <td>Initial Tournament</td>
+        <td>Initial Tournament - if specified the Award Group and Judging Group <i>must</i> be specified.</td>
         <td>Text - 255 characters</td>
         <td><select name='tournament'>
             <option
