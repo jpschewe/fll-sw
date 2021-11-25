@@ -993,7 +993,19 @@ function enterNoShow() {
     $.mobile.navigate($.subjective.getScoreEntryBackPage());
 }
 
-$(document).on("pageinit", "#enter-score-page", function(event) {
+$(document).on("pageshow", "#enter-score-page", function(_) {
+    window.onbeforeunload = function() {
+        // most browsers won't show the custom message, but we can try
+        // returning anything other than undefined will cause the user to be prompted
+        return "Are you sure you want to leave?";
+    };
+})
+
+$(document).on("pagehide", "#enter-score-page", function(_) {
+    window.onbeforeunload = undefined;
+})
+
+$(document).on("pageinit", "#enter-score-page", function(_) {
     $("#enter-score_save-score").click(function() {
 
         var totalScore = parseInt($("#enter-score_total-score").text());
@@ -1270,9 +1282,3 @@ function displayTournamentName(displayElement) {
     }
     displayElement.text("Tournament: " + tournamentName);
 }
-
-window.onbeforeunload = function() {
-    // most browsers won't show the custom message, but we can try
-    // returning anything other than undefined will cause the user to be prompted
-    return "Are you sure you want to leave?";
-};
