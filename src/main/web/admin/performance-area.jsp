@@ -187,9 +187,10 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         </li>
 
         <li>
-            <a href="CheckSubjectiveEmpty">Export performance data
-                for judges server</a>. Save this file to the Red PERF Data
-            flash drive and deliver to the judges room.
+            <a href="CheckSubjectiveEmptyForPerformanceExport">Export
+                performance data for judges server</a>. Save this file to
+            the Red PERF Data flash drive and deliver to the judges
+            room.
             <ul>
                 <li>
                     At
