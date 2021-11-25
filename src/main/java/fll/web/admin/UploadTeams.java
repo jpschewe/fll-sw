@@ -47,7 +47,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.JspWriter;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Java code for uploading team data to the database. Called from
@@ -187,10 +186,7 @@ public final class UploadTeams extends BaseFLLServlet {
     createTable.append(")");
     insertPrepSQL.append(")");
 
-    PreparedStatement insertPrep = null;
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
       stmt.executeUpdate("DROP TABLE IF EXISTS AllTeams"); // make sure the
       // table doesn't yet
       // exist
@@ -200,12 +196,9 @@ public final class UploadTeams extends BaseFLLServlet {
       }
       stmt.executeUpdate(createTable.toString()); // create AllTeams
 
-      insertPrep = connection.prepareStatement(insertPrepSQL.toString());
-
-      insertLinesIntoAllTeams(reader, columnNamesSeen, insertPrep);
-    } finally {
-      SQLFunctions.close(insertPrep);
-      SQLFunctions.close(stmt);
+      try (PreparedStatement insertPrep = connection.prepareStatement(insertPrepSQL.toString())) {
+        insertLinesIntoAllTeams(reader, columnNamesSeen, insertPrep);
+      }
     }
 
     // save this for other pages to use
@@ -216,55 +209,51 @@ public final class UploadTeams extends BaseFLLServlet {
                                               final List<String> columnNamesSeen,
                                               final PreparedStatement insertPrep)
       throws IOException, SQLException {
-    try {
-      // loop over the rest of the rows and insert them into AllTeams
-      @Nullable
-      String @Nullable [] values;
-      while (null != (values = reader.readNext())) {
-        if (values.length > 0) { // skip empty lines
+    // loop over the rest of the rows and insert them into AllTeams
+    @Nullable
+    String @Nullable [] values;
+    while (null != (values = reader.readNext())) {
+      if (values.length > 0) { // skip empty lines
 
-          boolean allEmpty = true;
-          try {
-            int column = 1;
-            for (final String value : values) {
-              if (column <= columnNamesSeen.size()) {
-                if (null != value) {
-                  final String trimmed = value.trim();
-                  if (trimmed.length() > 0) {
-                    allEmpty = false;
-                  }
-                } else {
-                  insertPrep.setString(column, null);
+        boolean allEmpty = true;
+        try {
+          int column = 1;
+          for (final String value : values) {
+            if (column <= columnNamesSeen.size()) {
+              if (null != value) {
+                final String trimmed = value.trim();
+                if (trimmed.length() > 0) {
+                  allEmpty = false;
                 }
-                String finalValue = null;
-                if (null != value) {
-                  int v = 0;
-                  try {
-                    v = Integer.parseInt(value.trim());
-                    finalValue = String.valueOf(v);
-                  } catch (final NumberFormatException e) {
-                    finalValue = value.trim();
-                  }
-                }
-                insertPrep.setString(column, finalValue);
-                ++column;
+              } else {
+                insertPrep.setString(column, null);
               }
+              String finalValue = null;
+              if (null != value) {
+                int v = 0;
+                try {
+                  v = Integer.parseInt(value.trim());
+                  finalValue = String.valueOf(v);
+                } catch (final NumberFormatException e) {
+                  finalValue = value.trim();
+                }
+              }
+              insertPrep.setString(column, finalValue);
+              ++column;
             }
-            for (; column <= columnNamesSeen.size(); column++) {
-              insertPrep.setString(column, null);
-            }
-
-            if (!allEmpty) {
-              insertPrep.executeUpdate();
-            }
-          } catch (final SQLException e) {
-            throw new FLLRuntimeException("Error inserting row in to AllTeam: "
-                + Arrays.toString(values), e);
           }
+          for (; column <= columnNamesSeen.size(); column++) {
+            insertPrep.setString(column, null);
+          }
+
+          if (!allEmpty) {
+            insertPrep.executeUpdate();
+          }
+        } catch (final SQLException e) {
+          throw new FLLRuntimeException("Error inserting row in to AllTeam: "
+              + Arrays.toString(values), e);
         }
       }
-    } finally {
-      SQLFunctions.close(insertPrep);
     }
   }
 
@@ -311,61 +300,56 @@ public final class UploadTeams extends BaseFLLServlet {
 
     final StringBuilder message = new StringBuilder();
 
-    Statement stmt = null;
-    ResultSet rs = null;
-    PreparedStatement prep = null;
-    try {
-      final StringBuffer dbColumns = new StringBuffer();
-      final StringBuffer dataColumns = new StringBuffer();
-      final StringBuffer values = new StringBuffer();
+    final StringBuffer dbColumns = new StringBuffer();
+    final StringBuffer dataColumns = new StringBuffer();
+    final StringBuffer values = new StringBuffer();
 
-      // always have TeamNumber
-      dbColumns.append("TeamNumber");
-      dataColumns.append(teamNumberColumn);
-      values.append("?");
-      int numValues = 1;
+    // always have TeamNumber
+    dbColumns.append("TeamNumber");
+    dataColumns.append(teamNumberColumn);
+    values.append("?");
+    int numValues = 1;
 
-      final Enumeration<?> paramIter = request.getParameterNames();
-      while (paramIter.hasMoreElements()) {
-        final String parameter = (String) paramIter.nextElement();
-        if (null != parameter
-            && !"".equals(parameter)
-            && !"TeamNumber".equals(parameter)
-            && !"tournament".equals(parameter)
-            && !"event_division".equals(parameter)
-            && !"judging_station".equals(parameter)) {
-          final String value = request.getParameter(parameter);
-          if (null != value
-              && !"".equals(value)) {
-            dbColumns.append(", "
-                + parameter);
-            dataColumns.append(", "
-                + value);
-            values.append(",?");
-            numValues++;
-          }
+    final Enumeration<?> paramIter = request.getParameterNames();
+    while (paramIter.hasMoreElements()) {
+      final String parameter = (String) paramIter.nextElement();
+      if (null != parameter
+          && !"".equals(parameter)
+          && !"TeamNumber".equals(parameter)
+          && !"tournament".equals(parameter)
+          && !"event_division".equals(parameter)
+          && !"judging_station".equals(parameter)) {
+        final String value = request.getParameter(parameter);
+        if (null != value
+            && !"".equals(value)) {
+          dbColumns.append(", "
+              + parameter);
+          dataColumns.append(", "
+              + value);
+          values.append(",?");
+          numValues++;
         }
       }
+    }
 
-      if (!verifyNoDuplicateTeamNumbers(connection, message, teamNumberColumn)) {
-        SessionAttributes.appendToMessage(session, message.toString());
-        response.sendRedirect(response.encodeRedirectURL("teamColumnSelection.jsp"));
-        return false;
-      }
+    if (!verifyNoDuplicateTeamNumbers(connection, message, teamNumberColumn)) {
+      SessionAttributes.appendToMessage(session, message.toString());
+      response.sendRedirect(response.encodeRedirectURL("teamColumnSelection.jsp"));
+      return false;
+    }
 
-      // now copy the data over converting the team number to an integer
-      final String selectSQL = "SELECT "
-          + dataColumns.toString()
-          + " FROM AllTeams";
-      final String insertSQL = "INSERT INTO Teams ("
-          + dbColumns.toString()
-          + ") VALUES("
-          + values.toString()
-          + ")";
-      prep = connection.prepareStatement(insertSQL);
-
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery(selectSQL);
+    // now copy the data over converting the team number to an integer
+    final String selectSQL = "SELECT "
+        + dataColumns.toString()
+        + " FROM AllTeams";
+    final String insertSQL = "INSERT INTO Teams ("
+        + dbColumns.toString()
+        + ") VALUES("
+        + values.toString()
+        + ")";
+    try (PreparedStatement prep = connection.prepareStatement(insertSQL);
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(selectSQL)) {
       while (rs.next()) {
         // convert TeamNumber to an integer
         final String teamNumStr = rs.getString(1);
@@ -434,11 +418,6 @@ public final class UploadTeams extends BaseFLLServlet {
               + " into Teams table, probably have two teams with the same team number", sqle);
         }
       } // for each row imported
-
-    } finally {
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
 
     updateTournamentTeams(connection, teamNumberColumn, tournamentColumn, eventDivisionColumn, judgingStationColumn);
@@ -459,15 +438,12 @@ public final class UploadTeams extends BaseFLLServlet {
                                                       final StringBuilder message,
                                                       final String teamNumberColumn)
       throws SQLException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Teams.TeamNumber" //
-          + " FROM Teams, AllTeams" //
-          + " WHERE AllTeams."
-          + teamNumberColumn
-          + " = Teams.TeamNumber");
+    try (Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT Teams.TeamNumber" //
+            + " FROM Teams, AllTeams" //
+            + " WHERE AllTeams."
+            + teamNumberColumn
+            + " = Teams.TeamNumber")) {
 
       final StringBuilder teams = new StringBuilder();
       boolean first = true;
@@ -491,9 +467,6 @@ public final class UploadTeams extends BaseFLLServlet {
       } else {
         return true;
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
     }
   }
 
@@ -519,10 +492,7 @@ public final class UploadTeams extends BaseFLLServlet {
                                             final @Nullable String eventDivisionColumn,
                                             final @Nullable String judgingStationColumn)
       throws SQLException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
 
       final String eventDivisionSql;
       if (null != eventDivisionColumn
@@ -561,40 +531,41 @@ public final class UploadTeams extends BaseFLLServlet {
 
         sql.append(" FROM AllTeams");
 
-        rs = stmt.executeQuery(sql.toString());
+        try (ResultSet rs = stmt.executeQuery(sql.toString())) {
 
-        while (rs.next()) {
-          final int teamNumber = rs.getInt(1);
-          final String tournamentName = rs.getString(2);
-          if (null == tournamentName) {
-            LOGGER.debug("Team {} is missing tournament, skipping", teamNumber);
-            continue;
-          }
+          while (rs.next()) {
+            final int teamNumber = rs.getInt(1);
+            final String tournamentName = rs.getString(2);
+            if (null == tournamentName) {
+              LOGGER.debug("Team {} is missing tournament, skipping", teamNumber);
+              continue;
+            }
 
-          final String eventDivision = rs.getString(3);
-          if (null == eventDivision) {
-            LOGGER.debug("Team {} is missing award group, skipping", teamNumber);
-            continue;
-          }
+            final String eventDivision = rs.getString(3);
+            if (null == eventDivision) {
+              LOGGER.debug("Team {} is missing award group, skipping", teamNumber);
+              continue;
+            }
 
-          final String judgingStation = rs.getString(4);
-          if (null == judgingStation) {
-            LOGGER.debug("Team {} is missing judging station, skipping", teamNumber);
-            continue;
-          }
+            final String judgingStation = rs.getString(4);
+            if (null == judgingStation) {
+              LOGGER.debug("Team {} is missing judging station, skipping", teamNumber);
+              continue;
+            }
 
-          final Tournament tournament;
-          if (!Tournament.doesTournamentExist(connection, tournamentName)) {
-            Tournament.createTournament(connection, tournamentName, tournamentName, null,
-                                        TournamentLevel.getByName(connection,
-                                                                  TournamentLevel.DEFAULT_TOURNAMENT_LEVEL_NAME));
-            tournament = Tournament.findTournamentByName(connection, tournamentName);
-          } else {
-            tournament = Tournament.findTournamentByName(connection, tournamentName);
-          }
+            final Tournament tournament;
+            if (!Tournament.doesTournamentExist(connection, tournamentName)) {
+              Tournament.createTournament(connection, tournamentName, tournamentName, null,
+                                          TournamentLevel.getByName(connection,
+                                                                    TournamentLevel.DEFAULT_TOURNAMENT_LEVEL_NAME));
+              tournament = Tournament.findTournamentByName(connection, tournamentName);
+            } else {
+              tournament = Tournament.findTournamentByName(connection, tournamentName);
+            }
 
-          Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
-                                      judgingStation);
+            Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
+                                        judgingStation);
+          } // foreach result
         }
       } else {
         // put all new teams in the DUMMY tournament by default and make the
@@ -614,10 +585,6 @@ public final class UploadTeams extends BaseFLLServlet {
             + "   WHERE Teams.TeamNumber = AllTeams."
             + teamNumberColumn);
       }
-
-    } finally {
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(rs);
     }
   }
 
