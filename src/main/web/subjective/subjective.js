@@ -855,7 +855,12 @@
                                         }
                                     });
                             } else {
-                                location.href = "Auth";
+                                alert("Your device has been logged out. A new window will be opened to the login page. Once you have logged in, close that window and synchronize again.");
+
+                                // hide the spinning animation
+                                loadSuccess();
+
+                                window.open('../login.jsp', '_login');
                             }
                         });
             }, // server online
