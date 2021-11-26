@@ -1,3 +1,4 @@
+* #947 - Notify the user when the same team is listed as advancing twice
 * #984 - Add tournament name to the footer of the breakout schedules
 * #985 - Add nominated categories to the score summary page
 * #938 - Require award group and judging group when a tournament is specified for imported teams

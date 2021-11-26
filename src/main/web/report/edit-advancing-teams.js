@@ -338,6 +338,28 @@ function addAdvancingTeam(advancing, dataList, groupNameFunc, teamList, awardGro
     nameEle.readOnly = true;
     nameEle.disabled = true;
     teamEle.appendChild(nameEle);
+    var prevTeam = "";
+    numEle.addEventListener(
+        'change',
+        function() {
+            const newTeamNumber = numEle.value;
+
+            var duplicate = false;
+            _advancingTeamData.forEach(function(data) {
+                if (data.teamElement != numEle) {
+                    var compareTeamNumber = data.teamElement.value;
+                    if (compareTeamNumber == newTeamNumber) {
+                        duplicate = true;
+                    }
+                }
+            });
+            if (duplicate) {
+                alert("Team " + newTeamNumber + " is already listed as advancing");
+                numEle.value = prevTeam;
+            } else {
+                prevTeam = newTeamNumber;
+            }
+        });
 
     var orgEle = document.createElement("input");
     orgEle.readOnly = true;
