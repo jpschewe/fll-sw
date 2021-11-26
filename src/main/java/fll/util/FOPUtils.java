@@ -275,9 +275,9 @@ public final class FOPUtils {
     return createSimpleFooterInternal(document, additionalFooterText, pageSequenceId);
   }
 
-  public static Element createSimpleFooterInternal(final Document document,
-                                                   final @Nullable String additionalFooterText,
-                                                   final String pageSequenceId) {
+  private static Element createSimpleFooterInternal(final Document document,
+                                                    final @Nullable String additionalFooterText,
+                                                    final String pageSequenceId) {
 
     final Element staticContent = createXslFoElement(document, "static-content");
     staticContent.setAttribute("flow-name", "xsl-region-after");
