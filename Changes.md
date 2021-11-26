@@ -1,3 +1,4 @@
+* #985 - Add nominated categories to the score summary page
 * #938 - Require award group and judging group when a tournament is specified for imported teams
 * #983 - Limit award groups displayed in the awards script to "real" award groups
 * #979 - add basic check to make sure subjective scores aren't overwritten when importing finalist data

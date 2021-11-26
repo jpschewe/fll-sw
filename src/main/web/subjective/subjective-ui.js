@@ -1143,13 +1143,18 @@ function populateScoreSummary() {
             rankOffset = 1;
         }
 
+        var nominations = "";
+        var score = $.subjective.getScore(team.teamNumber);
+        if (score.nonNumericNominations.length > 0) {
+            nominations = " - " + score.nonNumericNominations.join(", ");
+        }
+
         var teamRow = $("<div class=\"ui-grid-b ui-responsive\"></div>");
 
         var teamBlock = $("<div class=\"ui-block-a team-info\">" + rank + " - #"
-            + team.teamNumber + "  - " + team.teamName + "</div>");
+            + team.teamNumber + "  - " + team.teamName + nominations + "</div>");
         teamRow.append(teamBlock);
 
-        var score = $.subjective.getScore(team.teamNumber);
         var scoreText;
         if (null == score) {
             scoreText = "";
