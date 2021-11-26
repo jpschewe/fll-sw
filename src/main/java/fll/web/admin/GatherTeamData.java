@@ -16,18 +16,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
-import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.jsp.PageContext;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
