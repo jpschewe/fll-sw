@@ -260,9 +260,34 @@ public final class FOPUtils {
    */
   public static Element createSimpleFooter(final Document document,
                                            final String pageSequenceId) {
+    return createSimpleFooterInternal(document, null, pageSequenceId);
+  }
+
+  /**
+   * @param document used to create elements
+   * @param additionalFooterText additional text to put in the footer
+   * @param pageSequenceId the id to reference for counting pages
+   * @return the footer element
+   */
+  public static Element createSimpleFooter(final Document document,
+                                           final String additionalFooterText,
+                                           final String pageSequenceId) {
+    return createSimpleFooterInternal(document, additionalFooterText, pageSequenceId);
+  }
+
+  public static Element createSimpleFooterInternal(final Document document,
+                                                   final @Nullable String additionalFooterText,
+                                                   final String pageSequenceId) {
+
     final Element staticContent = createXslFoElement(document, "static-content");
     staticContent.setAttribute("flow-name", "xsl-region-after");
     staticContent.setAttribute("font-size", "10pt");
+
+    if (null != additionalFooterText) {
+      final Element block = createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      staticContent.appendChild(block);
+      block.appendChild(document.createTextNode(additionalFooterText));
+    }
 
     final Element block = createXslFoElement(document, FOPUtils.BLOCK_TAG);
     block.setAttribute("text-align", "end");

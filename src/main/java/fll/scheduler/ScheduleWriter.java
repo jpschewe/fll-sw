@@ -372,7 +372,8 @@ public final class ScheduleWriter {
     rootElement.appendChild(pageSequence);
     pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
 
-    final Element footer = FOPUtils.createSimpleFooter(document);
+    final String footerText = String.format("Tournament: %s", schedule.getName());
+    final Element footer = FOPUtils.createSimpleFooter(document, footerText, FOPUtils.PAGE_SEQUENCE_NAME);
     pageSequence.appendChild(footer);
 
     final Element documentBody = FOPUtils.createBody(document);
@@ -425,13 +426,14 @@ public final class ScheduleWriter {
     rootElement.appendChild(pageSequence);
     pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
 
-    final Element footer = FOPUtils.createSimpleFooter(document);
+    final String headerText = String.format("Tournament: %s", schedule.getName());
+
+    final Element footer = FOPUtils.createSimpleFooter(document, headerText, FOPUtils.PAGE_SEQUENCE_NAME);
     pageSequence.appendChild(footer);
 
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    final String headerText = String.format("Tournament: %s Performance", schedule.getName());
     final Element ele = createPerformanceScheduleTable(schedule, headerText, document, performanceTimes);
     documentBody.appendChild(ele);
 
@@ -821,7 +823,8 @@ public final class ScheduleWriter {
     rootElement.appendChild(pageSequence);
     pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
 
-    final Element footer = FOPUtils.createSimpleFooter(document);
+    final String footerText = String.format("Tournament: %s", schedule.getName());
+    final Element footer = FOPUtils.createSimpleFooter(document, footerText, FOPUtils.PAGE_SEQUENCE_NAME);
     pageSequence.appendChild(footer);
 
     final Element documentBody = FOPUtils.createBody(document);
@@ -1005,7 +1008,8 @@ public final class ScheduleWriter {
     rootElement.appendChild(pageSequence);
     pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
 
-    final Element footer = FOPUtils.createSimpleFooter(document);
+    final String headerFooterText = String.format("Tournament: %s", schedule.getName());
+    final Element footer = FOPUtils.createSimpleFooter(document, headerFooterText, FOPUtils.PAGE_SEQUENCE_NAME);
     pageSequence.appendChild(footer);
 
     final Element documentBody = FOPUtils.createBody(document);
@@ -1028,8 +1032,7 @@ public final class ScheduleWriter {
     final Element headerRow1 = FOPUtils.createTableRow(document);
     header.appendChild(headerRow1);
 
-    final Element tournamentHeader = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                              String.format("Tournament: %s", schedule.getName()));
+    final Element tournamentHeader = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, headerFooterText);
     headerRow1.appendChild(tournamentHeader);
     tournamentHeader.setAttribute("number-columns-spanned", String.valueOf(headerNames.length));
     FOPUtils.addBorders(tournamentHeader, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
@@ -1174,7 +1177,8 @@ public final class ScheduleWriter {
     rootElement.appendChild(pageSequence);
     pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
 
-    final Element footer = FOPUtils.createSimpleFooter(document);
+    final String footerText = String.format("Tournament: %s", schedule.getName());
+    final Element footer = FOPUtils.createSimpleFooter(document, footerText, FOPUtils.PAGE_SEQUENCE_NAME);
     pageSequence.appendChild(footer);
 
     final Element documentBody = FOPUtils.createBody(document);
