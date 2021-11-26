@@ -261,8 +261,26 @@ function addAdvancingGroup(group, editable) {
                 alert("All groups must have non-empty names");
                 groupEle.value = oldValue;
             } else {
-                renameGroupToSort(oldValue, newName);
-                groupEle.data = newName;
+                // check that the group name isn't a duplicate
+                var duplicate = false;
+                Array.from(document.getElementById("award-group-order").children).forEach(function(le) {
+                    if ("LI" == le.tagName) {
+                        var inputEle = le.getElementsByTagName("span")[0];
+                        if (inputEle != groupEle) {
+                            if (newName == inputEle.textContent) {
+                                duplicate = true;
+                            }
+                        }
+                    }
+                });
+
+                if (duplicate) {
+                    alert("The group name ''" + newName + "' is already in use");
+                    groupEle.value = oldValue;
+                } else {
+                    renameGroupToSort(oldValue, newName);
+                    groupEle.data = newName;
+                }
             }
         };
     } else {
