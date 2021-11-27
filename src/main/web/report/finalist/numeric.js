@@ -100,7 +100,9 @@ const finalistNumericModule = {};
 
                 const scoreCol = $("<td></td>");
                 row.append(scoreCol);
-                scoreCol.text(score.toFixed(2));
+                if (score) {
+                    scoreCol.text(score.toFixed(2));
+                }
 
                 const numFinalistCol = $("<td id='" + getNumFinalistsId(team) + "'></td>");
                 row.append(numFinalistCol);
