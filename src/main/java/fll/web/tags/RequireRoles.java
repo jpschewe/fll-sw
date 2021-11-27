@@ -77,13 +77,15 @@ public class RequireRoles extends TagSupport {
       final Set<UserRole> requiredRoles = new HashSet<>();
       final String[] tokens = roles.split(",");
       for (final String token : tokens) {
-        try {
-          final UserRole role = UserRole.valueOf(token);
-          requiredRoles.add(role);
-        } catch (IllegalArgumentException | NullPointerException e) {
-          throw new JspException("Error parsing '"
-              + token
-              + "'", e);
+        if (null != token) {
+          try {
+            final UserRole role = UserRole.valueOf(token);
+            requiredRoles.add(role);
+          } catch (IllegalArgumentException e) {
+            throw new JspException("Error parsing '"
+                + token
+                + "'", e);
+          }
         }
       }
       return requiredRoles;
