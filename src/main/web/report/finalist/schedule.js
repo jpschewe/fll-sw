@@ -237,7 +237,7 @@ const finalistScheduleModule = {};
             scheduleParamsSuccess, scheduleParamsFail));
 
         const schedulesSuccess = function(_) {
-            _log("Schdules upload success")
+            _log("Schedules upload success")
         };
         const schedulesFail = function(result) {
             let message;
