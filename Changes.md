@@ -1,3 +1,6 @@
+* #992 - fix storing of finalist schedule
+* #991 - handle undefined score in finalist scheduling application
+
 Release 16.3.0
 ==============
 * #975 - Create offline download in subjective application for use when synchronize doesn't work 
