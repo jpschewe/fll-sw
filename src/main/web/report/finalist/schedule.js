@@ -474,7 +474,7 @@ const finalistScheduleModule = {};
         schedule = $.finalist.getSchedule(currentDivision);
         if (null == schedule || 0 == schedule.length) {
             schedule = $.finalist.scheduleFinalists(currentDivision);
-            $.finalist.setSchedule(schedule);
+            $.finalist.setSchedule(currentDivision, schedule);
             $.finalist.saveToLocalStorage();
         }
 
