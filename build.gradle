@@ -2,8 +2,6 @@
 
 import com.github.spotbugs.snom.SpotBugsTask
 
-import org.myire.munge.TransformTask
-
 import org.apache.tools.ant.filters.FixCrLfFilter;
 
 buildscript {
@@ -27,8 +25,7 @@ plugins {
     id "org.unbroken-dome.test-sets" version "4.0.0"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
-    id "com.github.spotbugs" version "4.7.6"
-    id "org.myire.munge" version "1.0" // transformer for spotbugs XML
+    id "com.github.spotbugs" version "4.8.0"
     id "de.aaschmid.cpd" version "3.3"
     id "edu.sc.seis.launch4j" version "2.5.1"
     id "com.gorylenko.gradle-git-properties" version "2.3.1"
@@ -137,7 +134,7 @@ ext {
     poi_version = "5.0.0"
     junit_version = "5.8.1"
     log4j_version = "2.14.1"
-    spotbugs_version = "4.4.1"
+    spotbugs_version = "4.5.0"
     checker_framework_version = "3.18.1"
 
     web_build_dir = new File(project.buildDir, "web")
@@ -593,24 +590,37 @@ spotbugs {
     excludeFilter = file("spotbugs-filters.xml")
 }
 
-tasks.withType(SpotBugsTask) {
-    def stylesheetName = "fancy-hist.xsl"
-
-    distributionDependencies.dependsOn("${it.name}")
-    
-    def xmlOutput = it.outputs.files.singleFile
-    def htmlOutput = file(xmlOutput.absolutePath.replaceFirst(/\.xml$/, ".html"))
-    
-    tasks.register("${it.name}HtmlReport", TransformTask) {
-        saxon {
-            source(xmlOutput)
-            template(resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, stylesheetName))
-            outputFile = htmlOutput
-        }       
+spotbugsMain {
+    reports {
+      html {
+        enabled = true
+      }
+      xml {
+        enabled = true
+      }
     }
-    it.finalizedBy("${it.name}HtmlReport")
-    distributionDependencies.dependsOn("${it.name}HtmlReport")    
 }
+spotbugsTest {
+    reports {
+      html {
+        enabled = true
+      }
+      xml {
+        enabled = true
+      }
+    }
+}
+spotbugsIntegrationTest {
+    reports {
+      html {
+        enabled = true
+      }
+      xml {
+        enabled = true
+      }
+    }
+}
+
 
 gitProperties {
     gitPropertiesResourceDir = file("${buildDir}/resources/main/fll/resources")

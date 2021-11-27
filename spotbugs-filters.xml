@@ -37,6 +37,11 @@
   <Match>
     <Bug pattern="EI_EXPOSE_REP2" />
   </Match>
+
+  <!-- This was introduced in SpotBugs 4.5.0 and isn't something I'm really worried about. The checker framework catches most of my concerns here. -->
+  <Match>
+    <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" />
+  </Match>
   
 </FindBugsFilter>
 
