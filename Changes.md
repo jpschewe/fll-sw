@@ -1,3 +1,5 @@
+Release 16.3.0
+==============
 * #975 - Create offline download in subjective application for use when synchronize doesn't work 
 * #949 - Notify the user of duplicate advancement group names
 * #947 - Notify the user when the same team is listed as advancing twice
