@@ -86,19 +86,16 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
       UploadProcessor.processUpload(request);
       final String uploadRedirect = (String) request.getAttribute(UploadSpreadsheet.UPLOAD_REDIRECT_KEY);
       if (null == uploadRedirect) {
-        throw new RuntimeException("Missing parameter '"
-            + UploadSpreadsheet.UPLOAD_REDIRECT_KEY
-            + "' params: "
-            + request.getParameterMap());
+        throw new MissingRequiredParameterException(UploadSpreadsheet.UPLOAD_REDIRECT_KEY);
       }
       session.setAttribute(UploadSpreadsheet.UPLOAD_REDIRECT_KEY, uploadRedirect);
       LOGGER.debug("Redirect: {}", uploadRedirect);
 
       final FileItem fileItem = (FileItem) request.getAttribute("file");
       if (null == fileItem) {
-        throw new FLLRuntimeException("Missing 'file' parameter");
+        throw new MissingRequiredParameterException("file");
       }
-      
+
       final String extension = Utilities.determineExtension(fileItem.getName());
       final File file = File.createTempFile("fll", extension);
       LOGGER.debug("Wrote data to: {}", file.getAbsolutePath());
