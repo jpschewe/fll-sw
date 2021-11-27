@@ -101,8 +101,6 @@ public class JudgesServlet extends HttpServlet {
 
     final ServletContext application = getServletContext();
 
-    int numNewJudges = 0;
-
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
@@ -120,39 +118,59 @@ public class JudgesServlet extends HttpServlet {
 
       final Collection<JudgeInformation> judges = jsonMapper.readValue(reader, JudgesTypeInformation.INSTANCE);
 
-      final Collection<JudgeInformation> currentJudges = JudgeInformation.getJudges(connection, currentTournament);
-      LOGGER.trace("Current judges: {}", currentJudges);
+      final int numNewJudges = processJudges(connection, currentTournament, judges);
 
-      try (
-          PreparedStatement insertJudge = connection.prepareStatement("INSERT INTO Judges (id, category, Tournament, station) VALUES (?, ?, ?, ?)")) {
-        insertJudge.setInt(3, currentTournament);
-
-        for (final JudgeInformation judge : judges) {
-          if (null != judge) {
-            if (!currentJudges.contains(judge)) {
-              LOGGER.trace("Adding judge: {}", judge.getId());
-
-              insertJudge.setString(1, judge.getId());
-              insertJudge.setString(2, judge.getCategory());
-              insertJudge.setString(4, judge.getGroup());
-              insertJudge.executeUpdate();
-              ++numNewJudges;
-            } // add judge
-          } // non-null judge
-        } // foreach judge sent
-
-        final UploadResult result = new UploadResult(true, "Successfully uploaded judges", numNewJudges);
-        response.reset();
-        jsonMapper.writeValue(writer, result);
-      } // prepared statement
+      final UploadResult result = new UploadResult(true, "Successfully uploaded judges", numNewJudges);
+      response.reset();
+      jsonMapper.writeValue(writer, result);
 
     } catch (final SQLException e) {
       LOGGER.error("Error uploading judges", e);
 
-      final UploadResult result = new UploadResult(false, e.getMessage(), numNewJudges);
+      final UploadResult result = new UploadResult(false, e.getMessage(), -1);
       jsonMapper.writeValue(writer, result);
     }
+  }
 
+  /**
+   * Process uploaded judges. Add judges to the database that haven't been seen
+   * yet.
+   * 
+   * @param connection database connection
+   * @param currentTournament id for the tournament the judges are for
+   * @param judges the judges
+   * @return the number of new judges seen
+   * @throws SQLException on a database error
+   */
+  public static int processJudges(final Connection connection,
+                                  final int currentTournament,
+                                  final Collection<JudgeInformation> judges)
+      throws SQLException {
+    int numNewJudges = 0;
+
+    final Collection<JudgeInformation> currentJudges = JudgeInformation.getJudges(connection, currentTournament);
+    LOGGER.trace("Current judges: {}", currentJudges);
+
+    try (
+        PreparedStatement insertJudge = connection.prepareStatement("INSERT INTO Judges (id, category, Tournament, station) VALUES (?, ?, ?, ?)")) {
+      insertJudge.setInt(3, currentTournament);
+
+      for (final JudgeInformation judge : judges) {
+        if (null != judge) {
+          if (!currentJudges.contains(judge)) {
+            LOGGER.trace("Adding judge: {}", judge.getId());
+
+            insertJudge.setString(1, judge.getId());
+            insertJudge.setString(2, judge.getCategory());
+            insertJudge.setString(4, judge.getGroup());
+            insertJudge.executeUpdate();
+            ++numNewJudges;
+          } // add judge
+        } // non-null judge
+      } // foreach judge sent
+    } // prepared statement
+
+    return numNewJudges;
   }
 
   /**

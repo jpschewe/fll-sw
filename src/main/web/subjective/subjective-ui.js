@@ -6,6 +6,19 @@
 
 "use strict";
 
+/**
+ * Create the JSON object to download and set it as the href. 
+ * This is meant to be called from the onclick handler of the anchor.
+ *
+ * @param anchor the anchor to set the href on 
+ */
+function setOfflineDownloadUrl(anchor) {
+    const offline = $.subjective.getOfflineDownloadObject()
+    const data = JSON.stringify(offline)
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    anchor.setAttribute("href", url);
+}
 
 function selectJudgingGroup(group) {
     $.subjective.setCurrentJudgingGroup(group);
@@ -15,8 +28,12 @@ function selectJudgingGroup(group) {
 $(document).on(
     "pageinit",
     "#choose-judging-group-page",
-    function(event) {
+    function(_) {
         $.subjective.log("choose judging group pageinit");
+
+        $("#choose-judging-group_offline").click(function() {
+            setOfflineDownloadUrl(document.getElementById("choose-judging-group_offline"));
+        });
 
         $("#choose-judging-group_upload-scores").click(
             function() {
@@ -109,7 +126,12 @@ $(document).on("pageshow", "#choose-category-page", function(event) {
 $(document).on(
     "pageinit",
     "#choose-category-page",
-    function(event) {
+    function(_) {
+
+        $("#choose-category_offline").click(function() {
+            setOfflineDownloadUrl(document.getElementById("choose-category_offline"));
+        });
+
         $("#choose-category_upload-scores").click(
             function() {
                 $.mobile.loading("show");
@@ -198,7 +220,11 @@ $(document).on("pageshow", "#choose-judge-page", function(event) {
 $(document).on(
     "pageinit",
     "#choose-judge-page",
-    function(event) {
+    function(_) {
+        $("#choose-judge_offline").click(function() {
+            setOfflineDownloadUrl(document.getElementById("choose-judge_offline"));
+        });
+
         $("#choose-judge_upload-scores").click(
             function() {
                 $.mobile.loading("show");
@@ -418,7 +444,11 @@ $(document).on("pageshow", "#teams-list-page", function(event) {
 $(document).on(
     "pageinit",
     "#teams-list-page",
-    function(event) {
+    function(_) {
+        $("#teams-list_offline").click(function() {
+            setOfflineDownloadUrl(document.getElementById("teams-list_offline"));
+        });
+
         $("#teams-list_upload-scores").click(
             function() {
                 $.mobile.loading("show");
@@ -1219,7 +1249,11 @@ $(document).on("pageshow", "#score-summary-page", function(event) {
 $(document).on(
     "pageinit",
     "#score-summary-page",
-    function(event) {
+    function(_) {
+        $("#score-summary_offline").click(function() {
+            setOfflineDownloadUrl(document.getElementById("score-summary_offline"));
+        });
+
         $("#score-summary_upload-scores").click(
             function() {
                 $.mobile.loading("show", {

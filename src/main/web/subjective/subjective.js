@@ -953,6 +953,19 @@
 
         },
 
+        /**
+         * Create a javascript object that contains the information needed for 
+         * an offline download that can be imported when the synchronize functionality
+         * isn't working.
+         * Note that the object returned has references to internal structures.
+         */
+        getOfflineDownloadObject: function() {
+            var toDownload = {};
+            toDownload['scores'] = _allScores;
+            toDownload['judges'] = _judges;
+            return toDownload;
+        },
+
 
     }; // end $.subjective definition 
 
