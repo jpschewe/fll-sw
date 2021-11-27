@@ -22,13 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -50,6 +43,13 @@ import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * API access to subjective scores.
@@ -123,7 +123,6 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
   }
 
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
   @Override
   protected final void doPost(final HttpServletRequest request,
                               final HttpServletResponse response)
@@ -136,7 +135,6 @@ public class SubjectiveScoresServlet extends HttpServlet {
       return;
     }
 
-    int numModified = 0;
     final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
     final ServletContext application = getServletContext();
@@ -160,159 +158,8 @@ public class SubjectiveScoresServlet extends HttpServlet {
       // category -> judge -> team -> score
       final Map<String, Map<String, Map<Integer, SubjectiveScore>>> allScores = jsonMapper.readValue(reader,
                                                                                                      ScoresTypeInfo.INSTANCE);
-      for (final Map.Entry<String, Map<String, Map<Integer, SubjectiveScore>>> catEntry : allScores.entrySet()) {
-        final String category = catEntry.getKey();
-        final SubjectiveScoreCategory categoryDescription = challengeDescription.getSubjectiveCategoryByName(category);
-        if (null == categoryDescription) {
-          throw new FLLRuntimeException("Category with name '"
-              + category
-              + "' is not known");
-        }
 
-        try (PreparedStatement deletePrep = connection.prepareStatement("DELETE FROM "
-            + category //
-            + " WHERE TeamNumber = ?" //
-            + " AND Tournament = ?" //
-            + " AND Judge = ?" //
-        );
-            PreparedStatement noShowPrep = connection.prepareStatement("INSERT INTO "
-                + category //
-                + "(TeamNumber, Tournament, Judge, NoShow) VALUES(?, ?, ?, ?)");
-
-            PreparedStatement insertPrep = createInsertStatement(connection, categoryDescription);) {
-          deletePrep.setInt(2, currentTournament.getTournamentID());
-
-          noShowPrep.setInt(2, currentTournament.getTournamentID());
-          noShowPrep.setBoolean(4, true);
-
-          final int columnIndexOfFirstGoal = 8;
-          insertPrep.setInt(2, currentTournament.getTournamentID());
-          insertPrep.setBoolean(4, false);
-
-          for (final Map.Entry<String, Map<Integer, SubjectiveScore>> judgeEntry : catEntry.getValue().entrySet()) {
-            final String judgeId = judgeEntry.getKey();
-            deletePrep.setString(3, judgeId);
-            noShowPrep.setString(3, judgeId);
-            insertPrep.setString(3, judgeId);
-
-            for (final Map.Entry<Integer, SubjectiveScore> teamEntry : judgeEntry.getValue().entrySet()) {
-              final int teamNumber = teamEntry.getKey();
-              final SubjectiveScore score = teamEntry.getValue();
-
-              if (score.getModified()) {
-                deletePrep.setInt(1, teamNumber);
-                noShowPrep.setInt(1, teamNumber);
-                insertPrep.setInt(1, teamNumber);
-                insertPrep.setString(5, score.getNote());
-                insertPrep.setString(6, score.getCommentGreatJob());
-                insertPrep.setString(7, score.getCommentThinkAbout());
-
-                ++numModified;
-                if (score.getDeleted()) {
-                  if (LOGGER.isTraceEnabled()) {
-                    LOGGER.trace("Deleting team: "
-                        + teamNumber
-                        + " judge: "
-                        + judgeId
-                        + " category: "
-                        + category);
-                  }
-
-                  deletePrep.executeUpdate();
-                } else if (score.getNoShow()) {
-                  if (LOGGER.isTraceEnabled()) {
-                    LOGGER.trace("NoShow team: "
-                        + teamNumber
-                        + " judge: "
-                        + judgeId
-                        + " category: "
-                        + category);
-                  }
-
-                  deletePrep.executeUpdate();
-                  noShowPrep.executeUpdate();
-                } else {
-                  if (LOGGER.isTraceEnabled()) {
-                    LOGGER.trace("scores for team: "
-                        + teamNumber
-                        + " judge: "
-                        + judgeId
-                        + " category: "
-                        + category);
-                  }
-
-                  int goalIndex = 0;
-                  final Map<String, Double> standardSubScores = score.getStandardSubScores();
-                  final Map<String, String> enumSubScores = score.getEnumSubScores();
-                  final Map<String, String> goalComments = score.getGoalComments();
-                  for (final AbstractGoal goalDescription : categoryDescription.getAllGoals()) {
-                    if (!goalDescription.isComputed()) {
-
-                      // goal score
-                      final String goalName = goalDescription.getName();
-                      if (goalDescription.isEnumerated()) {
-                        final String value = enumSubScores.get(goalName);
-                        if (null == value) {
-                          insertPrep.setNull(goalIndex
-                              + columnIndexOfFirstGoal, Types.VARCHAR);
-                        } else {
-                          insertPrep.setString(goalIndex
-                              + columnIndexOfFirstGoal, value.trim());
-                        }
-                      } else {
-                        final Double value = standardSubScores.get(goalName);
-                        if (null == value) {
-                          insertPrep.setNull(goalIndex
-                              + columnIndexOfFirstGoal, Types.DOUBLE);
-                        } else {
-                          insertPrep.setDouble(goalIndex
-                              + columnIndexOfFirstGoal, value);
-                        }
-                      }
-                      ++goalIndex;
-
-                      // goal comment
-                      final String goalComment = goalComments.get(goalName);
-                      if (null == goalComment) {
-                        insertPrep.setNull(goalIndex
-                            + columnIndexOfFirstGoal, Types.LONGVARCHAR);
-                      } else {
-                        insertPrep.setString(goalIndex
-                            + columnIndexOfFirstGoal, goalComment);
-                      }
-                      ++goalIndex;
-
-                    } // not computed
-
-                  } // end foreach goal
-
-                  deletePrep.executeUpdate();
-                  insertPrep.executeUpdate();
-                } // update score
-
-                final Set<String> nominations;
-                if (score.getDeleted()) {
-                  nominations = Collections.emptySet();
-                } else if (score.getNoShow()) {
-                  nominations = Collections.emptySet();
-                } else {
-                  nominations = score.getNonNumericNominations();
-                }
-                NonNumericNominees.storeNomineesByJudgeForTeam(connection, currentTournament, judgeId, teamNumber,
-                                                               nominations);
-
-              } // is modified
-            } // foreach team score
-          } // foreach judge
-
-        } // allocate statements
-
-      } // foreach category
-
-      removeNullSubjectiveRows(connection, currentTournament.getTournamentID(), challengeDescription);
-
-      final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament.getTournamentID());
-      tournament.recordSubjectiveModified(connection);
+      final int numModified = processScores(connection, challengeDescription, currentTournament, allScores);
 
       final UploadResult result = new UploadResult(true, "Successfully uploaded scores", numModified);
       response.reset();
@@ -323,12 +170,187 @@ public class SubjectiveScoresServlet extends HttpServlet {
     } catch (final SQLException sqle) {
       LOGGER.error("Error uploading scores", sqle);
 
-      final UploadResult result = new UploadResult(false, sqle.getMessage(), numModified);
+      final UploadResult result = new UploadResult(false, sqle.getMessage(), -1);
       response.reset();
       response.setContentType("application/json");
       final PrintWriter writer = response.getWriter();
       jsonMapper.writeValue(writer, result);
     }
+  }
+
+  /**
+   * Process uploaded scores.
+   * 
+   * @param connection database connection
+   * @param challengeDescription description for the tournament
+   * @param currentTournament the tournament to process scores for
+   * @param allScores the scores to process
+   * @return the number of modified scores
+   * @throws SQLException on a database error
+   */
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
+  public static int processScores(final Connection connection,
+                                  final ChallengeDescription challengeDescription,
+                                  final Tournament currentTournament,
+                                  final Map<String, Map<String, Map<Integer, SubjectiveScore>>> allScores)
+      throws SQLException {
+
+    int numModified = 0;
+    for (final Map.Entry<String, Map<String, Map<Integer, SubjectiveScore>>> catEntry : allScores.entrySet()) {
+      final String category = catEntry.getKey();
+      final SubjectiveScoreCategory categoryDescription = challengeDescription.getSubjectiveCategoryByName(category);
+      if (null == categoryDescription) {
+        throw new FLLRuntimeException("Category with name '"
+            + category
+            + "' is not known");
+      }
+
+      try (PreparedStatement deletePrep = connection.prepareStatement("DELETE FROM "
+          + category //
+          + " WHERE TeamNumber = ?" //
+          + " AND Tournament = ?" //
+          + " AND Judge = ?" //
+      );
+          PreparedStatement noShowPrep = connection.prepareStatement("INSERT INTO "
+              + category //
+              + "(TeamNumber, Tournament, Judge, NoShow) VALUES(?, ?, ?, ?)");
+
+          PreparedStatement insertPrep = createInsertStatement(connection, categoryDescription);) {
+        deletePrep.setInt(2, currentTournament.getTournamentID());
+
+        noShowPrep.setInt(2, currentTournament.getTournamentID());
+        noShowPrep.setBoolean(4, true);
+
+        final int columnIndexOfFirstGoal = 8;
+        insertPrep.setInt(2, currentTournament.getTournamentID());
+        insertPrep.setBoolean(4, false);
+
+        for (final Map.Entry<String, Map<Integer, SubjectiveScore>> judgeEntry : catEntry.getValue().entrySet()) {
+          final String judgeId = judgeEntry.getKey();
+          deletePrep.setString(3, judgeId);
+          noShowPrep.setString(3, judgeId);
+          insertPrep.setString(3, judgeId);
+
+          for (final Map.Entry<Integer, SubjectiveScore> teamEntry : judgeEntry.getValue().entrySet()) {
+            final int teamNumber = teamEntry.getKey();
+            final SubjectiveScore score = teamEntry.getValue();
+
+            if (score.getModified()) {
+              deletePrep.setInt(1, teamNumber);
+              noShowPrep.setInt(1, teamNumber);
+              insertPrep.setInt(1, teamNumber);
+              insertPrep.setString(5, score.getNote());
+              insertPrep.setString(6, score.getCommentGreatJob());
+              insertPrep.setString(7, score.getCommentThinkAbout());
+
+              ++numModified;
+              if (score.getDeleted()) {
+                if (LOGGER.isTraceEnabled()) {
+                  LOGGER.trace("Deleting team: "
+                      + teamNumber
+                      + " judge: "
+                      + judgeId
+                      + " category: "
+                      + category);
+                }
+
+                deletePrep.executeUpdate();
+              } else if (score.getNoShow()) {
+                if (LOGGER.isTraceEnabled()) {
+                  LOGGER.trace("NoShow team: "
+                      + teamNumber
+                      + " judge: "
+                      + judgeId
+                      + " category: "
+                      + category);
+                }
+
+                deletePrep.executeUpdate();
+                noShowPrep.executeUpdate();
+              } else {
+                if (LOGGER.isTraceEnabled()) {
+                  LOGGER.trace("scores for team: "
+                      + teamNumber
+                      + " judge: "
+                      + judgeId
+                      + " category: "
+                      + category);
+                }
+
+                int goalIndex = 0;
+                final Map<String, Double> standardSubScores = score.getStandardSubScores();
+                final Map<String, String> enumSubScores = score.getEnumSubScores();
+                final Map<String, String> goalComments = score.getGoalComments();
+                for (final AbstractGoal goalDescription : categoryDescription.getAllGoals()) {
+                  if (!goalDescription.isComputed()) {
+
+                    // goal score
+                    final String goalName = goalDescription.getName();
+                    if (goalDescription.isEnumerated()) {
+                      final String value = enumSubScores.get(goalName);
+                      if (null == value) {
+                        insertPrep.setNull(goalIndex
+                            + columnIndexOfFirstGoal, Types.VARCHAR);
+                      } else {
+                        insertPrep.setString(goalIndex
+                            + columnIndexOfFirstGoal, value.trim());
+                      }
+                    } else {
+                      final Double value = standardSubScores.get(goalName);
+                      if (null == value) {
+                        insertPrep.setNull(goalIndex
+                            + columnIndexOfFirstGoal, Types.DOUBLE);
+                      } else {
+                        insertPrep.setDouble(goalIndex
+                            + columnIndexOfFirstGoal, value);
+                      }
+                    }
+                    ++goalIndex;
+
+                    // goal comment
+                    final String goalComment = goalComments.get(goalName);
+                    if (null == goalComment) {
+                      insertPrep.setNull(goalIndex
+                          + columnIndexOfFirstGoal, Types.LONGVARCHAR);
+                    } else {
+                      insertPrep.setString(goalIndex
+                          + columnIndexOfFirstGoal, goalComment);
+                    }
+                    ++goalIndex;
+
+                  } // not computed
+
+                } // end foreach goal
+
+                deletePrep.executeUpdate();
+                insertPrep.executeUpdate();
+              } // update score
+
+              final Set<String> nominations;
+              if (score.getDeleted()) {
+                nominations = Collections.emptySet();
+              } else if (score.getNoShow()) {
+                nominations = Collections.emptySet();
+              } else {
+                nominations = score.getNonNumericNominations();
+              }
+              NonNumericNominees.storeNomineesByJudgeForTeam(connection, currentTournament, judgeId, teamNumber,
+                                                             nominations);
+
+            } // is modified
+          } // foreach team score
+        } // foreach judge
+
+      } // allocate statements
+
+    } // foreach category
+
+    removeNullSubjectiveRows(connection, currentTournament.getTournamentID(), challengeDescription);
+
+    final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament.getTournamentID());
+    tournament.recordSubjectiveModified(connection);
+
+    return numModified;
   }
 
   /**
@@ -389,8 +411,8 @@ public class SubjectiveScoresServlet extends HttpServlet {
    * Create the statement for inserting a score into category.
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
-  private PreparedStatement createInsertStatement(final Connection connection,
-                                                  final SubjectiveScoreCategory categoryDescription)
+  private static PreparedStatement createInsertStatement(final Connection connection,
+                                                         final SubjectiveScoreCategory categoryDescription)
       throws SQLException {
     final List<AbstractGoal> goalDescriptions = categoryDescription.getAllGoals();
 

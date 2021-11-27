@@ -1,4 +1,5 @@
-* #949 - Notify the user of duplicate advancement gruop names
+* #975 - Create offline download in subjective application for use when synchronize doesn't work 
+* #949 - Notify the user of duplicate advancement group names
 * #947 - Notify the user when the same team is listed as advancing twice
 * #984 - Add tournament name to the footer of the breakout schedules
 * #985 - Add nominated categories to the score summary page

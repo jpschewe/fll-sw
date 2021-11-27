@@ -232,6 +232,21 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         </li>
 
         <li>
+            Load an offline datafile from the subjective application.
+            Use this when synchronize isn't working.
+            <form name="subjective-offline"
+                action="<c:url value='/admin/SubjectiveOffline'/>"
+                method="POST" ENCTYPE="multipart/form-data">
+
+                <input type="file" size="32"
+                    name="subjectiveOfflineFile" />
+
+                <input id='subjectiveOfflineData' type="submit"
+                    value="Upload" />
+            </form>
+        </li>
+
+        <li>
             <a href="<c:url value='/admin/DownloadJudgesDatabase' />">Download
                 the final judges room database</a> and send it to the head
             computer person
