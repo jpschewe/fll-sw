@@ -237,7 +237,7 @@ const finalistScheduleModule = {};
             scheduleParamsSuccess, scheduleParamsFail));
 
         const schedulesSuccess = function(_) {
-            _log("Schdules upload success")
+            _log("Schedules upload success")
         };
         const schedulesFail = function(result) {
             let message;
@@ -474,7 +474,7 @@ const finalistScheduleModule = {};
         schedule = $.finalist.getSchedule(currentDivision);
         if (null == schedule || 0 == schedule.length) {
             schedule = $.finalist.scheduleFinalists(currentDivision);
-            $.finalist.setSchedule(schedule);
+            $.finalist.setSchedule(currentDivision, schedule);
             $.finalist.saveToLocalStorage();
         }
 
