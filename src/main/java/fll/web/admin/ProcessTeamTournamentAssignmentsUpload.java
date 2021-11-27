@@ -94,13 +94,6 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
       processFile(connection, message, file, sheetName, teamNumberColumnName, tournamentColumnName,
                   eventDivisionColumnName, judgingStationColumnName);
 
-      if (!file.delete()) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Error deleting file, will need to wait until exit. Filename: "
-              + file.getAbsolutePath());
-        }
-      }
-
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error saving team assignments into the database: "
           + sqle.getMessage()

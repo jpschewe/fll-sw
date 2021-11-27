@@ -40,7 +40,8 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
-   * Session key for the name of the file that was saved.
+   * Session key for the name of the file that was saved. Note that this file
+   * needs to be deleted once processing is complete.
    */
   public static final String SPREADSHEET_FILE_KEY = "spreadsheetFile";
 
@@ -98,6 +99,7 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
 
       final String extension = Utilities.determineExtension(fileItem.getName());
       final File file = File.createTempFile("fll", extension);
+      file.deleteOnExit();
       LOGGER.debug("Wrote data to: {}", file.getAbsolutePath());
 
       // the write call below will fail if the file already exists
