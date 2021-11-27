@@ -8,7 +8,6 @@ package fll.web.admin;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -107,7 +106,7 @@ public class SubjectiveOffline extends BaseFLLServlet {
     response.sendRedirect(response.encodeRedirectURL("/admin/performance-area.jsp"));
   }
 
-  private static final class OfflineData implements Serializable {
+  private static final class OfflineData {
     @SuppressWarnings("unused") // used by JSON parsing
     OfflineData(@JsonProperty("judges") Collection<JudgeInformation> judges,
                 @JsonProperty("scores") Map<String, Map<String, Map<Integer, SubjectiveScore>>> scores) {
