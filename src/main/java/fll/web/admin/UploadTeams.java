@@ -72,7 +72,8 @@ public final class UploadTeams extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
-    final String fileName = SessionAttributes.getNonNullAttribute(session, "spreadsheetFile", String.class);
+    final String fileName = SessionAttributes.getNonNullAttribute(session, UploadSpreadsheet.SPREADSHEET_FILE_KEY,
+                                                                  String.class);
 
     File file = null;
     try (Connection connection = datasource.getConnection()) {
