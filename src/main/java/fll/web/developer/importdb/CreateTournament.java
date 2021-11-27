@@ -55,7 +55,7 @@ public class CreateTournament extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
 
     // unset redirect url
-    session.setAttribute(SessionAttributes.REDIRECT_URL, null);
+    session.removeAttribute(SessionAttributes.REDIRECT_URL);
 
     try {
       final String answer = request.getParameter("submit_data");

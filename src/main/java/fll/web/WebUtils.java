@@ -385,7 +385,8 @@ public final class WebUtils {
    * or "/" if nothing is stored in the session.
    * 
    * @param response the response to redirect
-   * @param session the session to get the redirect from
+   * @param session the session to get the redirect from, this attribute is
+   *          cleared by the method
    * @throws IOException {@link HttpServletResponse#sendRedirect(String)}
    */
   public static void sendRedirect(final HttpServletResponse response,
@@ -398,6 +399,10 @@ public final class WebUtils {
     } else {
       whereTo = "/";
     }
+
+    // clear variable since it's been used
+    session.removeAttribute(SessionAttributes.REDIRECT_URL);
+
     response.sendRedirect(response.encodeRedirectURL(whereTo));
   }
 }

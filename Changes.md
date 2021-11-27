@@ -1,3 +1,4 @@
+* #886 - Clear redirect session variable once used
 * #992 - fix storing of finalist schedule
 * #991 - handle undefined score in finalist scheduling application
 
