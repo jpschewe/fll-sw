@@ -123,7 +123,6 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
   }
 
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
   @Override
   protected final void doPost(final HttpServletRequest request,
                               final HttpServletResponse response)
@@ -189,6 +188,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
    * @return the number of modified scores
    * @throws SQLException on a database error
    */
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
   public static int processScores(final Connection connection,
                                   final ChallengeDescription challengeDescription,
                                   final Tournament currentTournament,
