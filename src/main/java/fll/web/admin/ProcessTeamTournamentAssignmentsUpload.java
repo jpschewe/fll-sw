@@ -38,7 +38,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Assign teams to tournaments, creating tournaments if needed.
@@ -65,8 +64,8 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
                                                                      UploadTeamTournamentAssignments.ADVANCE_FILE_KEY,
                                                                      String.class);
     final File file = new File(advanceFile);
-    Connection connection = null;
-    try {
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
       if (!file.exists()
           || !file.canRead()) {
         throw new RuntimeException("Cannot read file: "
@@ -85,9 +84,6 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
 
       final String eventDivisionColumnName = WebUtils.getParameterOrNull(request, "event_division");
       final String judgingStationColumnName = WebUtils.getParameterOrNull(request, "judging_station");
-
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
 
       final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
 
@@ -118,7 +114,6 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
       if (!file.delete()) {
         file.deleteOnExit();
       }
-      SQLFunctions.close(connection);
 
       response.sendRedirect(response.encodeRedirectURL("index.jsp"));
     }
