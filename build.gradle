@@ -590,35 +590,15 @@ spotbugs {
     excludeFilter = file("spotbugs-filters.xml")
 }
 
-spotbugsMain {
-    reports {
-      html {
-        enabled = true
-      }
-      xml {
-        enabled = true
-      }
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
+  reports {
+    xml {
+      enabled = true
     }
-}
-spotbugsTest {
-    reports {
-      html {
-        enabled = true
-      }
-      xml {
-        enabled = true
-      }
+    html {
+      enabled = true
     }
-}
-spotbugsIntegrationTest {
-    reports {
-      html {
-        enabled = true
-      }
-      xml {
-        enabled = true
-      }
-    }
+  }
 }
 
 
