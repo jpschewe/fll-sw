@@ -250,11 +250,6 @@ public class FooterFilter implements Filter {
       formatter.format("    <li><a href='%s/judge-index.jsp'>Judge</a></li>%n", contextPath);
     }
 
-    if (auth.isJudge()) {
-      formatter.format("    <li><a href='%s/subjective/Auth' target='_subjective'>Subjective Judging</a></li>%n",
-                       contextPath);
-    }
-
     if (auth.isRef()) {
       formatter.format("    <li><a href='%s/ref-index.jsp'>Ref</a></li>%n", contextPath);
     }
