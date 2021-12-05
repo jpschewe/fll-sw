@@ -256,7 +256,7 @@ public class FooterFilter implements Filter {
     }
 
     if (auth.isRef()) {
-      formatter.format("    <li><a href='%s/scoreEntry/choose-table.jsp'>Score Entry</a></li>%n", contextPath);
+      formatter.format("    <li><a href='%s/ref-index.jsp'>Ref</a></li>%n", contextPath);
     }
 
     formatter.format("    <li class='dropdown'>%n");
