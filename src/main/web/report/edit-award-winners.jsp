@@ -34,6 +34,9 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
         <!-- subjective categories -->
         <c:forEach items="${challengeDescription.subjectiveCategories}"
             var="category">
+
+            <c:set var="perAwardGroup" value="true" />
+
             <h1>${category.title}</h1>
             <c:forEach items="${awardGroups}" var="awardGroup">
 
@@ -52,9 +55,10 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
         </c:forEach>
         <!-- end subjective categories -->
 
-        <c:forEach items="${nonNumericCategories}"
-            var="category">
+        <c:forEach items="${nonNumericCategories}" var="category">
             <h1>${category.title}</h1>
+
+            <c:set var="perAwardGroup" value="${category.perAwardGroup}" />
 
             <c:choose>
                 <c:when test="${category.perAwardGroup}">

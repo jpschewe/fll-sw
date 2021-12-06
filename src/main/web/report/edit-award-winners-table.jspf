@@ -11,8 +11,16 @@
         <col width="5%" />
         <col width="5%" />
         <col width="5%" />
-        <col width="20%" />
-        <col width="20%" />
+        <col width="10%" />
+        <c:choose>
+            <c:when test="${perAwardGroup}">
+                <col width="20%" />
+            </c:when>
+            <c:otherwise>
+                <col width="15%" />
+                <col width="5%" />
+            </c:otherwise>
+        </c:choose>
         <col width="45%" />
     </colgroup>
     <tr>
@@ -21,6 +29,9 @@
         <th>Number</th>
         <th>Name</th>
         <th>Organization</th>
+        <c:if test="${not perAwardGroup}">
+            <th>Award Group</th>
+        </c:if>
         <th>Description</th>
     </tr>
     <c:set var="prevPlace" value="0" />
@@ -69,6 +80,9 @@
             <td>${winner.teamNumber}</td>
             <td>${teams[winner.teamNumber].teamName}</td>
             <td>${teams[winner.teamNumber].organization}</td>
+            <c:if test="${not perAwardGroup}">
+                <td>${teams[winner.teamNumber].awardGroup}</td>
+            </c:if>
             <td>${winner.description}</td>
         </tr>
         <c:set var="prevPlace" value="${winner.place}" />

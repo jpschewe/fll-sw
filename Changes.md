@@ -1,3 +1,4 @@
+* #993 - Add award group to the edit award winners page for overall optional awards
 * #1001 - Change button text when selecting team for performance
 * Add page for the refs
 * #886 - Clear redirect session variable once used
