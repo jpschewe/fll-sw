@@ -275,7 +275,8 @@ Entering scores for all tables. Teams are sorted in schedule order.
                             <td align='left'>
                                 <!--<font face='arial' size='4'><b>Submit</b></font>-->
                                 <input class='dark_bg' type="submit"
-                                    value="Submit" id='enter_submit'>
+                                    value="Enter score"
+                                    id='enter_submit'>
                             </td>
                         </tr>
 

@@ -1,3 +1,4 @@
+* #1001 - Change button text when selecting team for performance
 * Add page for the refs
 * #886 - Clear redirect session variable once used
 * #992 - fix storing of finalist schedule
