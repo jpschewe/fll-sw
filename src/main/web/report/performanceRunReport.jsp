@@ -36,9 +36,10 @@
            <th>Team Name </th>
            <th>Organization </th>
            <th>Score</th>
+           <th>Last Edited</th>
           </tr>
           <sql:query var="result" dataSource="${datasource}">
-            SELECT Teams.TeamNumber,Teams.TeamName,Teams.Organization,Performance.ComputedTotal,Performance.NoShow
+            SELECT Teams.TeamNumber,Teams.TeamName,Teams.Organization,Performance.ComputedTotal,Performance.NoShow,Performance.TIMESTAMP
                      FROM Teams,Performance,TournamentTeams
                      WHERE Performance.RunNumber = <c:out value="${param.RunNumber}"/>
                        AND Teams.TeamNumber = Performance.TeamNumber
@@ -59,6 +60,7 @@
               <c:if test="${row.NoShow != True}">
                 <td><c:out value="${row.ComputedTotal}"/></td>
               </c:if>
+              <td><c:out value="${row.TIMESTAMP}"/></td>
             </tr>
           </c:forEach>
         </table>
