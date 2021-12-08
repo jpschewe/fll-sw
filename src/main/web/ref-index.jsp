@@ -84,5 +84,16 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <a class="wide" href="<c:url value='/report/unverifiedRuns.jsp' />">Unverified
         runs. Unverfied performance runs.</a>
 
+    <a class="wide" href="<c:url value='/admin/PerformanceSchedule' />"
+        target="_new">Performance Schedule</a>
+
+    <a class="wide"
+        href="<c:url value='/admin/PerformanceSchedulePerTable' />"
+        target="_new">Performance Schedule per table</a>
+
+    <a class="wide" href="<c:url value='/admin/PerformanceSheets' />"
+        target="_new">Performance sheets for regular match play</a>
+
+
 </body>
 </html>

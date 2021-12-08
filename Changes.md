@@ -1,3 +1,4 @@
+* #999 - Add performance schedules to ref page
 * #993 - Add award group to the edit award winners page for overall optional awards
 * #1001 - Change button text when selecting team for performance
 * Add page for the refs
