@@ -43,6 +43,8 @@ import fll.xml.SubjectiveScoreCategory;
 @WebServlet("/report/AddAwardWinner")
 public class AddAwardWinner extends BaseFLLServlet {
 
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
   /**
    * Setup variables for add-award-winner.jsp.
    * 
@@ -177,15 +179,27 @@ public class AddAwardWinner extends BaseFLLServlet {
 
         final AwardWinner winner = new AwardWinner(categoryTitle, awardGroup, teamNumber, description, place);
         if (edit) {
+          LOGGER.info("Updating team {} in category {} place {}", winner.getTeamNumber(), winner.getName(),
+                      winner.getPlace());
           AwardWinners.updateSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
+          SessionAttributes.appendToMessage(session,
+                                            String.format("<div class='success'>Modified team %d in award %s</div>",
+                                                          winner.getTeamNumber(), winner.getName()));
         } else {
           if (null != AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
                                                             awardGroup, teamNumber)) {
+            LOGGER.warn("Attempting duplicate add of team {} to category {} place {}", winner.getTeamNumber(),
+                        winner.getName(), winner.getPlace());
             SessionAttributes.appendToMessage(session,
                                               String.format("<div class='error'>Team %d is already receiving award %s, cannot add a second time.</div>",
                                                             teamNumber, categoryTitle));
           } else {
+            LOGGER.info("Added team {} to category {} place {}", winner.getTeamNumber(), winner.getName(),
+                        winner.getPlace());
             AwardWinners.addSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
+            SessionAttributes.appendToMessage(session,
+                                              String.format("<div class='success'>Added team %d to award %s</div>",
+                                                            winner.getTeamNumber(), winner.getName()));
           }
         }
       } else if (EditAwardWinners.NON_NUMERIC_AWARD_TYPE.equals(awardType)) {
@@ -202,29 +216,53 @@ public class AddAwardWinner extends BaseFLLServlet {
           }
           final AwardWinner winner = new AwardWinner(categoryTitle, awardGroup, teamNumber, description, place);
           if (edit) {
+            LOGGER.info("Updating team {} in category {} place {}", winner.getTeamNumber(), winner.getName(),
+                        winner.getPlace());
             AwardWinners.updateNonNumericAwardWinner(connection, tournament.getTournamentID(), winner);
+            SessionAttributes.appendToMessage(session,
+                                              String.format("<div class='success'>Modified team %d in award %s</div>",
+                                                            winner.getTeamNumber(), winner.getName()));
           } else {
             if (null != AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
                                                               awardGroup, teamNumber)) {
+              LOGGER.warn("Attempting duplicate add of team {} to category {} place {}", winner.getTeamNumber(),
+                          winner.getName(), winner.getPlace());
               SessionAttributes.appendToMessage(session,
                                                 String.format("<div class='error'>Team %d is already receiving award %s, cannot add a second time.</div>",
                                                               teamNumber, categoryTitle));
             } else {
+              LOGGER.info("Added team {} to category {} place {}", winner.getTeamNumber(), winner.getName(),
+                          winner.getPlace());
               AwardWinners.addNonNumericAwardWinner(connection, tournament.getTournamentID(), winner);
+              SessionAttributes.appendToMessage(session,
+                                                String.format("<div class='success'>Added team %d to award %s</div>",
+                                                              winner.getTeamNumber(), winner.getName()));
             }
           }
         } else {
           final OverallAwardWinner winner = new OverallAwardWinner(categoryTitle, teamNumber, description, place);
           if (edit) {
+            LOGGER.info("Updating team {} in category {} place {}", winner.getTeamNumber(), winner.getName(),
+                        winner.getPlace());
             AwardWinners.updateNonNumericOverallAwardWinner(connection, tournament.getTournamentID(), winner);
+            SessionAttributes.appendToMessage(session,
+                                              String.format("<div class='success'>Modified team %d in award %s</div>",
+                                                            winner.getTeamNumber(), winner.getName()));
           } else {
             if (null != AwardWinners.getNonNumericOverallAwardWinner(connection, tournament.getTournamentID(),
                                                                      categoryTitle, teamNumber)) {
+              LOGGER.warn("Attempting duplicate add of team {} to category {} place {}", winner.getTeamNumber(),
+                          winner.getName(), winner.getPlace());
               SessionAttributes.appendToMessage(session,
                                                 String.format("<div class='error'>Team %d is already receiving award %s, cannot add a second time.</div>",
                                                               teamNumber, categoryTitle));
             } else {
+              LOGGER.info("Added team {} to category {} place {}", winner.getTeamNumber(), winner.getName(),
+                          winner.getPlace());
               AwardWinners.addNonNumericOverallAwardWinner(connection, tournament.getTournamentID(), winner);
+              SessionAttributes.appendToMessage(session,
+                                                String.format("<div class='success'>Added team %d to award %s</div>",
+                                                              winner.getTeamNumber(), winner.getName()));
             }
           }
         }
@@ -236,15 +274,27 @@ public class AddAwardWinner extends BaseFLLServlet {
 
         final AwardWinner winner = new AwardWinner(categoryTitle, awardGroup, teamNumber, description, place);
         if (edit) {
+          LOGGER.info("Updating team {} in category {} place {}", winner.getTeamNumber(), winner.getName(),
+                      winner.getPlace());
           AwardWinners.updateNonNumericAwardWinner(connection, tournament.getTournamentID(), winner);
+          SessionAttributes.appendToMessage(session,
+                                            String.format("<div class='success'>Modified team %d in award %s</div>",
+                                                          winner.getTeamNumber(), winner.getName()));
         } else {
           if (null != AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
                                                             awardGroup, teamNumber)) {
+            LOGGER.warn("Attempting duplicate add of team {} to category {} place {}", winner.getTeamNumber(),
+                        winner.getName(), winner.getPlace());
             SessionAttributes.appendToMessage(session,
                                               String.format("<div class='error'>Team %d is already receiving award %s, cannot add a second time.</div>",
                                                             teamNumber, categoryTitle));
           } else {
+            LOGGER.info("Added team {} to category {} place {}", winner.getTeamNumber(), winner.getName(),
+                        winner.getPlace());
             AwardWinners.addNonNumericAwardWinner(connection, tournament.getTournamentID(), winner);
+            SessionAttributes.appendToMessage(session,
+                                              String.format("<div class='success'>Added team %d to award %s</div>",
+                                                            winner.getTeamNumber(), winner.getName()));
           }
         }
       } else {

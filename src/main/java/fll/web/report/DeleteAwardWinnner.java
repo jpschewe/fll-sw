@@ -40,6 +40,8 @@ import fll.xml.SubjectiveScoreCategory;
 @WebServlet("/report/DeleteAwardWinner")
 public class DeleteAwardWinnner extends BaseFLLServlet {
 
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -71,6 +73,10 @@ public class DeleteAwardWinnner extends BaseFLLServlet {
         }
 
         AwardWinners.deleteSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
+        LOGGER.info("Deleted team {} from {}", teamNumber, categoryTitle);
+        SessionAttributes.appendToMessage(session,
+                                          String.format("<div class='success'>Deleted team %d from award %s</div>",
+                                                        teamNumber, categoryTitle));
       } else if (EditAwardWinners.NON_NUMERIC_AWARD_TYPE.equals(awardType)) {
         final @Nullable NonNumericCategory category = challengeDescription.getNonNumericCategoryByTitle(categoryTitle);
         if (null == category) {
@@ -81,13 +87,25 @@ public class DeleteAwardWinnner extends BaseFLLServlet {
 
         if (category.getPerAwardGroup()) {
           AwardWinners.deleteNonNumericAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
+          LOGGER.info("Deleted team {} from {}", teamNumber, categoryTitle);
+          SessionAttributes.appendToMessage(session,
+                                            String.format("<div class='success'>Deleted team %d from award %s</div>",
+                                                          teamNumber, categoryTitle));
         } else {
           AwardWinners.deleteNonNumericOverallAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
                                                           teamNumber);
+          LOGGER.info("Deleted team {} from {}", teamNumber, categoryTitle);
+          SessionAttributes.appendToMessage(session,
+                                            String.format("<div class='success'>Deleted team %d from award %s</div>",
+                                                          teamNumber, categoryTitle));
         }
 
       } else if (EditAwardWinners.CHAMPIONSHIP_AWARD_TYPE.equals(awardType)) {
         AwardWinners.deleteNonNumericAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
+        LOGGER.info("Deleted team {} from {}", teamNumber, categoryTitle);
+        SessionAttributes.appendToMessage(session,
+                                          String.format("<div class='success'>Deleted team %d from award %s</div>",
+                                                        teamNumber, categoryTitle));
       } else {
         throw new FLLInternalException("Unknown award type: '"
             + awardType
