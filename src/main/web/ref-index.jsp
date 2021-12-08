@@ -10,7 +10,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
 <html>
 <head>
-<title>Judge Links</title>
+<title>Ref Links</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
