@@ -5,7 +5,7 @@
 <%
 fll.web.MainIndex.populateContext(request, application, pageContext);
 fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
-fll.web.report.ReportIndex.populateContext(application, session, pageContext);
+fll.web.JudgeIndex.populateContext(application, pageContext);
 %>
 
 <html>
@@ -13,15 +13,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 <title>Judge Links</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
-
-<script type="text/javascript">
-  function display(id) {
-    document.getElementById(id).style.display = "block";
-  }
-  function hide(id) {
-    document.getElementById(id).style.display = "none";
-  }
-</script>
 
 </head>
 
@@ -34,8 +25,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
     <p>
         The current tournament is
-        <b>${tournament.description} on ${tournament.dateString}
-            [${tournament.name}]</b>
+        <b>${currentTournament.description} on
+            ${currentTournament.dateString} [${currentTournament.name}]</b>
     </p>
 
     <h2>Server addresses</h2>
@@ -58,5 +49,28 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         target="_blank">Enter the winners of awards for use in the
         awards report</a>
 
+    <div class="wide">
+        <form method="POST"
+            action="<c:url value='/report/SubjectiveScoreRubrics'/>">
+            Generate the rubrics with scores for the specified category
+            and award group
+            <select name='categoryName'>
+                <c:forEach
+                    items="${challengeDescription.subjectiveCategories}"
+                    var="category">
+                    <option value='${category.name}'>${category.title}</option>
+                </c:forEach>
+            </select>
+
+            <select name='awardGroup'>
+                <c:forEach items="${awardGroups}" var="awardGroup">
+                    <option value='${awardGroup}'>${awardGroup}</option>
+                </c:forEach>
+            </select>
+
+            <input type='submit' value='Generate PDFs' />
+
+        </form>
+    </div>
 </body>
 </html>

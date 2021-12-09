@@ -13,16 +13,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 <title>Ref Links</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
-
-<script type="text/javascript">
-  function display(id) {
-    document.getElementById(id).style.display = "block";
-  }
-  function hide(id) {
-    document.getElementById(id).style.display = "none";
-  }
-</script>
-
 </head>
 
 <body>

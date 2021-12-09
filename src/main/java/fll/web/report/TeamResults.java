@@ -9,40 +9,27 @@ package fll.web.report;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
 
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
 import fll.SubjectiveScore;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
-import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
 import fll.documents.writers.SubjectivePdfWriter;
-import fll.scheduler.SubjectiveTime;
-import fll.scheduler.TeamScheduleInfo;
-import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
@@ -52,6 +39,12 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Creates a zip file with the results for the teams.
@@ -79,10 +72,6 @@ public class TeamResults extends BaseFLLServlet {
 
     try (Connection connection = datasource.getConnection()) {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
-      final TournamentSchedule schedule = new TournamentSchedule(connection, tournament.getTournamentID());
-
-      final Collection<CategoryColumnMapping> scheduleColumnMappings = CategoryColumnMapping.load(connection,
-                                                                                                  tournament.getTournamentID());
 
       final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, tournament.getTournamentID());
 
@@ -98,8 +87,7 @@ public class TeamResults extends BaseFLLServlet {
           final TournamentTeam team = entry.getValue();
           if (Team.NULL_TEAM_NUMBER == selectedTeamNumber
               || selectedTeamNumber == team.getTeamNumber()) {
-            final TeamScheduleInfo schedInfo = schedule.getSchedInfoForTeam(team.getTeamNumber());
-            writeTeamEntries(zipOut, description, connection, tournament, scheduleColumnMappings, team, schedInfo);
+            writeTeamEntries(zipOut, description, connection, tournament, team);
           }
         }
       }
@@ -113,49 +101,18 @@ public class TeamResults extends BaseFLLServlet {
                                 final ChallengeDescription description,
                                 final Connection connection,
                                 final Tournament tournament,
-                                final Collection<CategoryColumnMapping> scheduleColumnMappings,
-                                final TournamentTeam team,
-                                final @Nullable TeamScheduleInfo schedInfo)
+                                final TournamentTeam team)
       throws SQLException, IOException {
     final String directory = String.valueOf(team.getTeamNumber());
 
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
-      final Optional<CategoryColumnMapping> categoryMapping = scheduleColumnMappings.stream()
-                                                                                    .filter(m -> m.getCategoryName()
-                                                                                                  .equals(category.getName()))
-                                                                                    .findFirst();
-      final String scheduleColumn;
-      if (categoryMapping.isPresent()) {
-        scheduleColumn = categoryMapping.get().getScheduleColumn();
-      } else {
-        scheduleColumn = null;
-      }
-
       final Collection<SubjectiveScore> scores = SubjectiveScore.getScoresForTeam(connection, category, tournament,
                                                                                   team);
       final String filename = String.format("%s/%s.pdf", directory, category.getTitle());
 
       zipOut.putNextEntry(new ZipEntry(filename));
 
-      final LocalTime scheduledTime;
-      if (null == scheduleColumn) {
-        scheduledTime = null;
-      } else {
-        if (null == schedInfo) {
-          throw new FLLInternalException("Schedule and team data is inconsistent. Cannot find schedule information for "
-              + team.getTeamNumber());
-        }
-
-        final SubjectiveTime stime = schedInfo.getSubjectiveTimeByName(scheduleColumn);
-        if (null == stime) {
-          scheduledTime = null;
-        } else {
-          scheduledTime = stime.getTime();
-        }
-      }
-
-      SubjectivePdfWriter.createDocumentForScores(connection, tournament, zipOut, description, category,
-                                                  scores, scheduledTime);
+      SubjectivePdfWriter.createDocumentForScores(connection, tournament, zipOut, description, category, scores);
 
       zipOut.closeEntry();
     } // foreach subjective category

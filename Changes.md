@@ -1,3 +1,4 @@
+* #994 - Add the ability to get subjective score sheets by category and award group
 * #999 - Add performance schedules to ref page
 * #997 - Add timestamp to performance reports used by refs
 * #993 - Add award group to the edit award winners page for overall optional awards

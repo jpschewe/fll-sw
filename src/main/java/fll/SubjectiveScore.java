@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -26,6 +27,7 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.GenerateDB;
 import fll.db.NonNumericNominees;
+import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.xml.AbstractGoal;
 import fll.xml.Goal;
@@ -377,6 +379,52 @@ public class SubjectiveScore {
                                                                                          score.getTeamNumber());
     score.setNonNumericNominations(nominatedCategories);
     return score;
+  }
+
+  /**
+   * Get subjective scores for all teams in the specified award group and
+   * category.
+   * 
+   * @param connection database connection
+   * @param tournament
+   * @param category the category to get the scores for
+   * @param awardGroup the award group to get the scores for
+   * @return the subjective scores
+   * @throws SQLException on a database error
+   */
+  @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "Table name is determined by the category")
+  public static Collection<SubjectiveScore> getScoresForCategoryAndAwardGroup(final Connection connection,
+                                                                              final Tournament tournament,
+                                                                              final SubjectiveScoreCategory category,
+                                                                              final String awardGroup)
+      throws SQLException {
+    final Collection<SubjectiveScore> scores = new LinkedList<>();
+
+    final String teamNumbersStr = Queries.getTournamentTeams(connection, tournament.getTournamentID())//
+                                         .entrySet().stream() //
+                                         .map(Map.Entry::getValue) //
+                                         .filter(t -> t.getAwardGroup().equals(awardGroup)) //
+                                         .map(t -> String.valueOf(t.getTeamNumber())) //
+                                         .collect(Collectors.joining(", "));
+
+    try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
+        + category.getName()
+        + " WHERE Tournament = ? AND teamnumber IN ( "
+        + teamNumbersStr
+        + " )")) {
+      prep.setInt(1, tournament.getTournamentID());
+
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final SubjectiveScore score = fromResultSet(connection, category, tournament, rs);
+
+          scores.add(score);
+        } // foreach result
+
+      } // allocate result set
+    } // allocate prep
+
+    return scores;
   }
 
 }

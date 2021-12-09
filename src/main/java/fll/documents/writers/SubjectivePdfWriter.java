@@ -641,8 +641,6 @@ public class SubjectivePdfWriter {
    * @param description the challenge description
    * @param category the category to write
    * @param scores the team scores to populate the sheet with
-   * @param scheduledTime the time that the judging session was scheduled at, may
-   *          be null
    * @throws IOException if there is an error writing the document to
    *           {@code stream}
    * @throws SQLException if there is an error reading from the database
@@ -652,8 +650,7 @@ public class SubjectivePdfWriter {
                                              final OutputStream stream,
                                              final ChallengeDescription description,
                                              final SubjectiveScoreCategory category,
-                                             final Collection<SubjectiveScore> scores,
-                                             final @Nullable LocalTime scheduledTime)
+                                             final Collection<SubjectiveScore> scores)
       throws IOException, SQLException {
 
     final Pair<Integer, Double> parameters = determineParameters(description, tournament.getName(), category);
@@ -665,8 +662,7 @@ public class SubjectivePdfWriter {
     final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournament.getName(), category);
 
     try {
-      final Document document = writer.createDocumentForScores(connection, tournament, scores, scheduledTime,
-                                                               pointSize);
+      final Document document = writer.createDocumentForScores(connection, tournament, scores, pointSize);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
       FOPUtils.renderPdf(fopFactory, document, stream);
     } catch (FOPException | TransformerException e) {
@@ -679,7 +675,6 @@ public class SubjectivePdfWriter {
   private Document createDocumentForScores(final Connection connection,
                                            final Tournament tournament,
                                            final Collection<SubjectiveScore> scores,
-                                           final @Nullable LocalTime scheduledTime,
                                            final int pointSize)
       throws SQLException {
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
@@ -698,8 +693,8 @@ public class SubjectivePdfWriter {
                                                                                  score.getTeamNumber());
 
         final Element sheet = createSheet(document, team.getTeamNumber(), team.getTeamName(), team.getAwardGroup(),
-                                          scheduledTime, pointSize, Double.NaN /* ignored when there is a score */,
-                                          columnWidths, score);
+                                          null, pointSize, Double.NaN /* ignored when there is a score */, columnWidths,
+                                          score);
         documentBody.appendChild(sheet);
       }
     }
