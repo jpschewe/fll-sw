@@ -29,64 +29,60 @@ pageContext.setAttribute("divisions", Queries.getAwardGroups(connection));
         <c:out value="${param.RunNumber}" />
     </h1>
 
-    <c:if test="${empty param.RunNumber}">
-        <font color='red'>You must specify a run number!</font>
-    </c:if>
-    <c:if test="${not empty param.RunNumber}">
-        <c:forEach var="division" items="${divisions}">
-            <h2>
-                Award Group
-                <c:out value="${division}" />
-            </h2>
-            <table border='1'>
-                <tr>
-                    <th>Team Number</th>
-                    <th>Team Name</th>
-                    <th>Organization</th>
-                    <th>Score</th>
-                    <th>Last Edited</th>
-                </tr>
-                <sql:query var="result" dataSource="${datasource}">
+    <c:choose>
+        <c:when test="${empty param.RunNumber}">
+            <font color='red'>You must specify a run number!</font>
+        </c:when>
+        <c:otherwise>
+            <c:forEach var="division" items="${divisions}">
+                <h2>
+                    Award Group
+                    <c:out value="${division}" />
+                </h2>
+                <table border='1'>
+                    <tr>
+                        <th>Team Number</th>
+                        <th>Team Name</th>
+                        <th>Organization</th>
+                        <th>Score</th>
+                        <th>Last Edited</th>
+                    </tr>
+                    <sql:query var="result" dataSource="${datasource}">
             SELECT Teams.TeamNumber,Teams.TeamName,Teams.Organization,Performance.ComputedTotal,Performance.NoShow,Performance.TIMESTAMP
                      FROM Teams,Performance,TournamentTeams
                      WHERE Performance.RunNumber = <c:out
-                        value="${param.RunNumber}" />
+                            value="${param.RunNumber}" />
                        AND Teams.TeamNumber = Performance.TeamNumber
                        AND TournamentTeams.TeamNumber = Teams.TeamNumber
                        AND Performance.Tournament = <c:out
-                        value="${tournament}" />
+                            value="${tournament}" />
                        AND TournamentTeams.event_division  = '<c:out
-                        value="${division}" />'
+                            value="${division}" />'
                        AND TournamentTeams.Tournament = Performance.Tournament
                        ORDER BY ComputedTotal DESC
           </sql:query>
-                <c:forEach items="${result.rows}" var="row">
-                    <tr>
-                        <td>
-                            <c:out value="${row.TeamNumber}" />
-                        </td>
-                        <td>
-                            <c:out value="${row.TeamName}" />
-                        </td>
-                        <td>
-                            <c:out value="${row.Organization}" />
-                        </td>
-                        <c:if test="${row.NoShow == True}" var="test">
-                            <td>No Show</td>
-                        </c:if>
-                        <c:if test="${row.NoShow != True}">
+                    <c:forEach items="${result.rows}" var="row">
+                        <tr>
+                            <td>${row.TeamNumber}</td>
+                            <td>${row.TeamName}</td>
+                            <td>${row.Organization}</td>
                             <td>
-                                <c:out value="${row.ComputedTotal}" />
+                                <c:choose>
+                                    <c:when test="${row.NoShow == True}">
+                            No Show
+                            </c:when>
+                                    <c:otherwise>
+                                    ${row.ComputedTotal}
+                                </c:otherwise>
+                                </c:choose>
                             </td>
-                        </c:if>
-                        <td>
-                            <c:out value="${row.TIMESTAMP}" />
-                        </td>
-                    </tr>
-                </c:forEach>
-            </table>
-        </c:forEach>
-    </c:if>
+                            <td>${row.TIMESTAMP}</td>
+                        </tr>
+                    </c:forEach>
+                </table>
+            </c:forEach>
+        </c:otherwise>
+    </c:choose>
 
 
 </body>
