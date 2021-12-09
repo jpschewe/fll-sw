@@ -1,72 +1,93 @@
-<%@ include file="/WEB-INF/jspf/init.jspf" %>
+<%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.db.Queries" %>
+<%@ page import="fll.db.Queries"%>
 <%@ page import="fll.web.ApplicationAttributes"%>
-  
-<%@ page import="java.sql.Connection" %>
-<%@ page import="javax.sql.DataSource" %>
+
+<%@ page import="java.sql.Connection"%>
+<%@ page import="javax.sql.DataSource"%>
 
 <fll-sw:required-roles roles="REF,JUDGE" allowSetup="false" />
-  
+
 <%
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    final Connection connection = datasource.getConnection();
-    pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection));
-    pageContext.setAttribute("divisions", Queries.getAwardGroups(connection));
-  %>
+final DataSource datasource = ApplicationAttributes.getDataSource(application);
+final Connection connection = datasource.getConnection();
+pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection));
+pageContext.setAttribute("divisions", Queries.getAwardGroups(connection));
+%>
 
 <html>
-  <head>
-    <link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
-    <title>Performance Run <c:out value="${param.RunNumber}"/></title>
-  </head>
+<head>
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/style/fll-sw.css'/>" />
+<title>Performance Run
+    <c:out value="${param.RunNumber}" /></title>
+</head>
 
-  <body>
-    <h1>Performance Run <c:out value="${param.RunNumber}"/></h1>
+<body>
+    <h1>
+        Performance Run
+        <c:out value="${param.RunNumber}" />
+    </h1>
 
     <c:if test="${empty param.RunNumber}">
-      <font color='red'>You must specify a run number!</font>
+        <font color='red'>You must specify a run number!</font>
     </c:if>
     <c:if test="${not empty param.RunNumber}">
-      <c:forEach var="division" items="${divisions}">
-        <h2>Award Group <c:out value="${division}"/></h2>
-        <table border='1'>
-          <tr>
-           <th>Team Number </th>
-           <th>Team Name </th>
-           <th>Organization </th>
-           <th>Score</th>
-           <th>Last Edited</th>
-          </tr>
-          <sql:query var="result" dataSource="${datasource}">
+        <c:forEach var="division" items="${divisions}">
+            <h2>
+                Award Group
+                <c:out value="${division}" />
+            </h2>
+            <table border='1'>
+                <tr>
+                    <th>Team Number</th>
+                    <th>Team Name</th>
+                    <th>Organization</th>
+                    <th>Score</th>
+                    <th>Last Edited</th>
+                </tr>
+                <sql:query var="result" dataSource="${datasource}">
             SELECT Teams.TeamNumber,Teams.TeamName,Teams.Organization,Performance.ComputedTotal,Performance.NoShow,Performance.TIMESTAMP
                      FROM Teams,Performance,TournamentTeams
-                     WHERE Performance.RunNumber = <c:out value="${param.RunNumber}"/>
+                     WHERE Performance.RunNumber = <c:out
+                        value="${param.RunNumber}" />
                        AND Teams.TeamNumber = Performance.TeamNumber
                        AND TournamentTeams.TeamNumber = Teams.TeamNumber
-                       AND Performance.Tournament = <c:out value="${tournament}"/>
-                       AND TournamentTeams.event_division  = '<c:out value="${division}"/>'
+                       AND Performance.Tournament = <c:out
+                        value="${tournament}" />
+                       AND TournamentTeams.event_division  = '<c:out
+                        value="${division}" />'
                        AND TournamentTeams.Tournament = Performance.Tournament
                        ORDER BY ComputedTotal DESC
           </sql:query>
-          <c:forEach items="${result.rows}" var="row">
-            <tr>
-              <td><c:out value="${row.TeamNumber}"/></td>
-              <td><c:out value="${row.TeamName}"/></td>
-              <td><c:out value="${row.Organization}"/></td>
-              <c:if test="${row.NoShow == True}" var="test">
-                <td>No Show</td>
-              </c:if>
-              <c:if test="${row.NoShow != True}">
-                <td><c:out value="${row.ComputedTotal}"/></td>
-              </c:if>
-              <td><c:out value="${row.TIMESTAMP}"/></td>
-            </tr>
-          </c:forEach>
-        </table>
-      </c:forEach>
+                <c:forEach items="${result.rows}" var="row">
+                    <tr>
+                        <td>
+                            <c:out value="${row.TeamNumber}" />
+                        </td>
+                        <td>
+                            <c:out value="${row.TeamName}" />
+                        </td>
+                        <td>
+                            <c:out value="${row.Organization}" />
+                        </td>
+                        <c:if test="${row.NoShow == True}" var="test">
+                            <td>No Show</td>
+                        </c:if>
+                        <c:if test="${row.NoShow != True}">
+                            <td>
+                                <c:out value="${row.ComputedTotal}" />
+                            </td>
+                        </c:if>
+                        <td>
+                            <c:out value="${row.TIMESTAMP}" />
+                        </td>
+                    </tr>
+                </c:forEach>
+            </table>
+        </c:forEach>
     </c:if>
-      
 
-  </body>
+
+</body>
 </html>
