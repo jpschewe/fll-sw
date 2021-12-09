@@ -386,7 +386,7 @@ public class SubjectiveScore {
    * category.
    * 
    * @param connection database connection
-   * @param tournament
+   * @param tournament tournament to get the scores for
    * @param category the category to get the scores for
    * @param awardGroup the award group to get the scores for
    * @return the subjective scores
