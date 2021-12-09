@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalTime;
 import java.util.Arrays;
@@ -34,6 +35,8 @@ import org.w3c.dom.Element;
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.SubjectiveScore;
+import fll.Tournament;
+import fll.TournamentTeam;
 import fll.Utilities;
 import fll.scheduler.SubjectiveTime;
 import fll.scheduler.TeamScheduleInfo;
@@ -632,58 +635,50 @@ public class SubjectivePdfWriter {
    * Create the PDF document for the specified team and scores. It is assumed that
    * {@code score} is consistent with {@code sheetElement}.
    * 
+   * @param connection database connection
+   * @param tournament tournament
    * @param stream where to write the document
    * @param description the challenge description
-   * @param tournamentName tournament name to display on the sheets
    * @param category the category to write
    * @param scores the team scores to populate the sheet with
-   * @param teamNumber the team number
-   * @param teamName the team name
-   * @param awardGroup the award group the team is in
    * @param scheduledTime the time that the judging session was scheduled at, may
    *          be null
    * @throws IOException if there is an error writing the document to
    *           {@code stream}
    * @throws SQLException if there is an error reading from the database
    */
-  public static void createDocumentForScores(final OutputStream stream,
+  public static void createDocumentForScores(final Connection connection,
+                                             final Tournament tournament,
+                                             final OutputStream stream,
                                              final ChallengeDescription description,
-                                             final String tournamentName,
                                              final SubjectiveScoreCategory category,
                                              final Collection<SubjectiveScore> scores,
-                                             final int teamNumber,
-                                             final String teamName,
-                                             final String awardGroup,
                                              final @Nullable LocalTime scheduledTime)
       throws IOException, SQLException {
 
-    final Pair<Integer, Double> parameters = determineParameters(description, tournamentName, category);
+    final Pair<Integer, Double> parameters = determineParameters(description, tournament.getName(), category);
     final int pointSize = parameters.getLeft();
     final double commentHeight = parameters.getRight();
 
     LOGGER.debug("Point size: {} comment height: {}", pointSize, commentHeight);
 
-    final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, category);
+    final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournament.getName(), category);
 
     try {
-      final Document document = writer.createDocumentForScores(scores, teamNumber, teamName, awardGroup, scheduledTime,
+      final Document document = writer.createDocumentForScores(connection, tournament, scores, scheduledTime,
                                                                pointSize);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
       FOPUtils.renderPdf(fopFactory, document, stream);
     } catch (FOPException | TransformerException e) {
-      throw new FLLInternalException("Error creating the subjective schedule PDF. Team: "
-          + teamNumber
-          + " teamName: "
-          + teamName
+      throw new FLLInternalException("Error creating the subjective schedule PDF."
           + " category: "
           + category.getName(), e);
     }
   }
 
-  private Document createDocumentForScores(final Collection<SubjectiveScore> scores,
-                                           final int teamNumber,
-                                           final String teamName,
-                                           final String awardGroup,
+  private Document createDocumentForScores(final Connection connection,
+                                           final Tournament tournament,
+                                           final Collection<SubjectiveScore> scores,
                                            final @Nullable LocalTime scheduledTime,
                                            final int pointSize)
       throws SQLException {
@@ -695,14 +690,16 @@ public class SubjectivePdfWriter {
     if (scores.isEmpty()) {
       final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
       documentBody.appendChild(block);
-      block.appendChild(document.createTextNode("Team "
-          + teamName
-          + " does not have results for category "
+      block.appendChild(document.createTextNode("No scores for category "
           + scoreCategory.getTitle()));
     } else {
       for (final SubjectiveScore score : scores) {
-        final Element sheet = createSheet(document, teamNumber, teamName, awardGroup, scheduledTime, pointSize,
-                                          Double.NaN /* ignored when there is a score */, columnWidths, score);
+        final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, tournament,
+                                                                                 score.getTeamNumber());
+
+        final Element sheet = createSheet(document, team.getTeamNumber(), team.getTeamName(), team.getAwardGroup(),
+                                          scheduledTime, pointSize, Double.NaN /* ignored when there is a score */,
+                                          columnWidths, score);
         documentBody.appendChild(sheet);
       }
     }

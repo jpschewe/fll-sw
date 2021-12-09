@@ -154,9 +154,8 @@ public class TeamResults extends BaseFLLServlet {
         }
       }
 
-      SubjectivePdfWriter.createDocumentForScores(zipOut, description, tournament.getName(), category, scores,
-                                                  team.getTeamNumber(), team.getTeamName(), team.getAwardGroup(),
-                                                  scheduledTime);
+      SubjectivePdfWriter.createDocumentForScores(connection, tournament, zipOut, description, category,
+                                                  scores, scheduledTime);
 
       zipOut.closeEntry();
     } // foreach subjective category
