@@ -1,3 +1,5 @@
+Release 16.4.0
+==============
 * #994 - Add the ability to get subjective score sheets by category and award group
 * #999 - Add performance schedules to ref page
 * #997 - Add timestamp to performance reports used by refs
