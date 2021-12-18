@@ -36,6 +36,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.StoreColumnNames;
 import fll.web.UploadSpreadsheet;
 import fll.web.UserRole;
 import fll.web.WebUtils;
@@ -60,8 +61,11 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
       return;
     }
 
+    final int headerRowIndex = SessionAttributes.getNonNullAttribute(session, StoreColumnNames.HEADER_ROW_INDEX_KEY,
+                                                                     Integer.class);
+
     final StringBuilder message = new StringBuilder();
-    final String filename = SessionAttributes.getNonNullAttribute(session, UploadTeamInformation.FILENAME_KEY,
+    final String filename = SessionAttributes.getNonNullAttribute(session, UploadSpreadsheet.SPREADSHEET_FILE_KEY,
                                                                   String.class);
     final Path file = Paths.get(filename);
 
@@ -84,8 +88,12 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
 
       final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
 
-      processFile(connection, message, file, sheetName, teamNumberColumnName, teamNameColumnName,
-                  organizationColumnName);
+      final @Nullable String @Nullable [] headerRow = SessionAttributes.getAttribute(session,
+                                                                                     StoreColumnNames.HEADER_NAMES_KEY,
+                                                                                     String[].class);
+
+      processFile(connection, message, file, sheetName, headerRowIndex, headerRow, teamNumberColumnName,
+                  teamNameColumnName, organizationColumnName);
 
     } catch (final SQLException | IOException | ParseException | InvalidFormatException e) {
       message.append("<p class='error'>Error saving team information into the database: "
@@ -109,6 +117,8 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
                                   final StringBuilder message,
                                   final Path file,
                                   final @Nullable String sheetName,
+                                  final int headerRowIndex,
+                                  @Nullable String @Nullable [] columnNames,
                                   final String teamNumberColumnName,
                                   final String teamNameColumnName,
                                   final String organizationColumnName)
@@ -120,14 +130,9 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
     }
 
     final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
+    reader.skipRows(headerRowIndex
+        + 1);
 
-    // parse out the first non-blank line as the names of the columns
-    @Nullable
-    String @Nullable [] columnNames = reader.readNext();
-    while (null != columnNames
-        && columnNames.length < 1) {
-      columnNames = reader.readNext();
-    }
     if (null == columnNames) {
       LOGGER.warn("No data in file");
       return;

@@ -98,4 +98,16 @@ public abstract class CellFileReader implements Closeable {
     }
 
   }
+
+  /**
+   * @param skip number of rows to skip
+   * @throws IOException if there is an error reading the file
+   */
+  public void skipRows(final int skip) throws IOException {
+    int leftToSkip = skip;
+    while (leftToSkip > 0) {
+      readNext();
+      --leftToSkip;
+    }
+  }
 }

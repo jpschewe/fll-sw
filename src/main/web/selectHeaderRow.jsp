@@ -32,7 +32,7 @@ fll.web.SelectHeaderRow.populateContext(request, session, pageContext);
             <c:forEach items="${data}" var="row" varStatus="loopStatus">
                 <tr>
                     <td>
-                        <input type="radio" name="headerRow"
+                        <input type="radio" name="headerRowIndex"
                             value="${loopStatus.index}" />
                     </td>
 
