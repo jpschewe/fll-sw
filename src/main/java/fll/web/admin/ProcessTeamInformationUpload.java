@@ -104,7 +104,11 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
     } finally {
       SessionAttributes.appendToMessage(session, message.toString());
 
-      Files.delete(file);
+      try {
+        Files.delete(file);
+      } catch (final IOException e) {
+        LOGGER.debug("Error deleting spreadsheet temp file, will get deleted on JVM exit", e);
+      }
 
       response.sendRedirect(response.encodeRedirectURL("index.jsp"));
     }

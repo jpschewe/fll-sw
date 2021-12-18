@@ -110,6 +110,12 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving team assignments into the database", e);
     } finally {
+      try {
+        Files.delete(file);
+      } catch (final IOException e) {
+        LOGGER.debug("Error deleting spreadsheet temp file, will get deleted on JVM exit", e);
+      }
+
       SessionAttributes.appendToMessage(session, message.toString());
 
       response.sendRedirect(response.encodeRedirectURL("index.jsp"));
