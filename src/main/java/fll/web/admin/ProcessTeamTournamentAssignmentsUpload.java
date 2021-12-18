@@ -5,8 +5,10 @@
  */
 package fll.web.admin;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -60,14 +62,13 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
     }
 
     final StringBuilder message = new StringBuilder();
-    final String advanceFile = SessionAttributes.getNonNullAttribute(session,
-                                                                     UploadTeamTournamentAssignments.ADVANCE_FILE_KEY,
+    final String advanceFile = SessionAttributes.getNonNullAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY,
                                                                      String.class);
-    final File file = new File(advanceFile);
+    final Path file = Paths.get(advanceFile);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-      if (!file.exists()
-          || !file.canRead()) {
+      if (!Files.exists(file)
+          || !Files.isReadable(file)) {
         throw new RuntimeException("Cannot read file: "
             + advanceFile);
       }
@@ -111,10 +112,6 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
     } finally {
       SessionAttributes.appendToMessage(session, message.toString());
 
-      if (!file.delete()) {
-        file.deleteOnExit();
-      }
-
       response.sendRedirect(response.encodeRedirectURL("index.jsp"));
     }
   }
@@ -126,7 +123,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
    */
   private static void processFile(final Connection connection,
                                   final StringBuilder message,
-                                  final File file,
+                                  final Path file,
                                   final @Nullable String sheetName,
                                   final String teamNumberColumnName,
                                   final String tournamentColumnName,
@@ -135,8 +132,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
       throws SQLException, IOException, ParseException, InvalidFormatException {
 
     if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("File name: "
-          + file.getName());
+      LOGGER.trace("File name: {}", file);
     }
 
     final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);

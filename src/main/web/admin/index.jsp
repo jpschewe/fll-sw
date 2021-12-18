@@ -439,7 +439,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                 them to
                 <input type="file" size="32" name="file" />
                 <input type='hidden' name='uploadRedirect'
-                    value="<c:url value='/admin/UploadTeamTournamentAssignments'/>" />
+                    value="<c:url value='/admin/chooseAdvancementColumns.jsp'/>" />
                 <input type="submit" value="Upload" />
             </form>
         </li>

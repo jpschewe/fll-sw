@@ -40,8 +40,9 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
-   * Session key for the name of the file that was saved. Note that this file
-   * needs to be deleted once processing is complete.
+   * Session key for the name of the file that was saved. The file is marked for
+   * delete on exit, however it is helpful if the code processing the file deletes
+   * it once it is no longer needed.
    */
   public static final String SPREADSHEET_FILE_KEY = "spreadsheetFile";
 
