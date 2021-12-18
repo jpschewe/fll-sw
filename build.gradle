@@ -133,7 +133,7 @@ ext {
     tomcat_version = "10.0.12"
     poi_version = "5.0.0"
     junit_version = "5.8.1"
-    log4j_version = "2.16.0"
+    log4j_version = "2.17.0"
     spotbugs_version = "4.5.0"
     checker_framework_version = "3.20.0"
 
