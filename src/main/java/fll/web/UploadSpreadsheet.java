@@ -59,6 +59,8 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
     session.removeAttribute(UploadScheduleData.KEY);
     session.removeAttribute(ProcessSelectedSheet.SHEET_NAMES_KEY);
     session.removeAttribute(UploadSpreadsheet.SHEET_NAME_KEY);
+    session.removeAttribute(StoreColumnNames.HEADER_NAMES_KEY);
+    session.removeAttribute(StoreColumnNames.HEADER_ROW_INDEX_KEY);
   }
 
   /**
