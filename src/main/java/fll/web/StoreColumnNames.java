@@ -9,7 +9,13 @@ package fll.web;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -35,8 +41,9 @@ public class StoreColumnNames extends BaseFLLServlet {
   public static final String HEADER_ROW_INDEX_KEY = "headerRowIndex";
 
   /**
-   * Session variable that stores a possibly null {@link String} array of the
-   * headers.
+   * Session variable that stores a possibly empty {@link Collection} of
+   * {@link String} elements that are the headers. All null and empty headers are
+   * removed.
    */
   public static final String HEADER_NAMES_KEY = "spreadsheetHeaderNames";
 
@@ -60,7 +67,16 @@ public class StoreColumnNames extends BaseFLLServlet {
       reader.skipRows(headerRowIndex);
 
       final @Nullable String @Nullable [] headerRow = reader.readNext();
-      session.setAttribute(HEADER_NAMES_KEY, headerRow);
+      final Collection<String> headerNames;
+      if (null == headerRow) {
+        headerNames = Collections.emptyList();
+      } else {
+        headerNames = Arrays.asList(headerRow).stream() //
+                            .filter(StringUtils::isNotBlank) //
+                            .collect(Collectors.toList());
+      }
+
+      session.setAttribute(HEADER_NAMES_KEY, headerNames);
 
       final String uploadRedirect = SessionAttributes.getNonNullAttribute(session,
                                                                           UploadSpreadsheet.UPLOAD_REDIRECT_KEY,
