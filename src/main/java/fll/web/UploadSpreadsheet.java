@@ -122,10 +122,10 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
           nextPage = "promptForSheetName.jsp";
         } else {
           session.setAttribute(SHEET_NAME_KEY, sheetNames.get(0));
-          nextPage = uploadRedirect;
+          nextPage = "selectHeaderRow.jsp";
         }
       } else {
-        nextPage = uploadRedirect;
+        nextPage = "selectHeaderRow.jsp";
       }
 
     } catch (final FileUploadException e) {
