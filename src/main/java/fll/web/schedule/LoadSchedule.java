@@ -16,12 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -31,7 +25,6 @@ import fll.scheduler.SubjectiveStation;
 import fll.scheduler.TournamentSchedule;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CellFileReader;
-import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -39,6 +32,12 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Load the schedule.
@@ -66,9 +65,6 @@ public class LoadSchedule extends BaseFLLServlet {
     try {
       if (!uploadScheduleData.isSubjectiveStationsSet()) {
         final File scheduleFile = uploadScheduleData.getScheduleFile();
-        if (null == scheduleFile) {
-          throw new FLLInternalException("Schedule file is not set");
-        }
 
         final String sheetName = uploadScheduleData.getSelectedSheet();
 
@@ -101,9 +97,6 @@ public class LoadSchedule extends BaseFLLServlet {
                             final DataSource datasource) {
 
     final File scheduleFile = uploadScheduleData.getScheduleFile();
-    if (null == scheduleFile) {
-      throw new FLLInternalException("Schedule file is not set");
-    }
 
     final String sheetName = uploadScheduleData.getSelectedSheet();
     try (Connection connection = datasource.getConnection()) {

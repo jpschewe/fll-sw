@@ -30,25 +30,30 @@ import fll.scheduler.TournamentSchedule;
 public class UploadScheduleData implements Serializable {
 
   /**
+   * @param scheduleFile {@link #getScheduleFile()}
+   * @param headerRowIndex {@link #getHeaderRowIndex()}
+   * @param headerNames {@link #getHeaderNames()}
+   */
+  public UploadScheduleData(final File scheduleFile,
+                            final int headerRowIndex,
+                            final Collection<String> headerNames) {
+    this.scheduleFile = scheduleFile;
+    this.headerRowIndex = headerRowIndex;
+    this.headerNames = new LinkedList<>(headerNames);
+  }
+
+  /**
    * Name that instances are referenced as in the session.
    */
   public static final String KEY = "uploadScheduleData";
 
-  private @MonotonicNonNull File scheduleFile = null;
+  private final File scheduleFile;
 
   /**
-   * @return the file that was uploaded, will be null until set
+   * @return the file that was uploaded
    */
-  public @Nullable File getScheduleFile() {
+  public File getScheduleFile() {
     return scheduleFile;
-  }
-
-  /**
-   * @param v see {@link #getScheduleFile()}
-   */
-  @EnsuresNonNull("scheduleFile")
-  public void setScheduleFile(final File v) {
-    scheduleFile = v;
   }
 
   /**
@@ -242,5 +247,23 @@ public class UploadScheduleData implements Serializable {
   public void setOrganizationDifferences(final Collection<GatherTeamInformationChanges.TeamOrganizationDifference> v) {
     organizationDifferences.clear();
     organizationDifferences.addAll(v);
+  }
+
+  private final int headerRowIndex;
+
+  /**
+   * @return index of the header row in the spreadsheet
+   */
+  public int getHeaderRowIndex() {
+    return headerRowIndex;
+  }
+
+  private final LinkedList<String> headerNames;
+
+  /**
+   * @return names of columns in the header row of the spreadsheet
+   */
+  public List<String> getHeaderNames() {
+    return headerNames;
   }
 }
