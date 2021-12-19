@@ -1,3 +1,5 @@
+* Add number of practice rounds as a tournament parameter
+
 Release 16.4.0
 ==============
 * #994 - Add the ability to get subjective score sheets by category and award group

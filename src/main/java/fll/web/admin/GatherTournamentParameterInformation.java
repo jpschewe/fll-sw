@@ -46,6 +46,9 @@ public final class GatherTournamentParameterInformation {
       final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
       pageContext.setAttribute("numSeedingRounds", numSeedingRounds);
 
+      final int numPracticeRounds = TournamentParameters.getNumPracticeRounds(connection, tournament.getTournamentID());
+      pageContext.setAttribute("numPracticeRounds", numPracticeRounds);
+
       if (TournamentParameters.getRunningHeadToHead(connection, tournament.getTournamentID())) {
         pageContext.setAttribute("runningHeadToHeadChecked", "checked");
       } else {
@@ -57,7 +60,7 @@ public final class GatherTournamentParameterInformation {
           || !playoffBrackets.isEmpty();
       pageContext.setAttribute("runningHeadToHeadDisabled", runningHeadToHeadDisabled);
 
-      pageContext.setAttribute("numSeedingSoundsDisabled", maxPerformanceRoundEntered > 0);
+      pageContext.setAttribute("numSeedingRoundsDisabled", maxPerformanceRoundEntered > 0);
 
       pageContext.setAttribute("performanceAdvancementPercentage",
                                TournamentParameters.getPerformanceAdvancementPercentage(connection,

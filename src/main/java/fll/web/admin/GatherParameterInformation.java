@@ -45,7 +45,7 @@ public final class GatherParameterInformation {
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
       pageContext.setAttribute("tournaments", tournaments);
 
-      pageContext.setAttribute("numSeedingRounds_default", TournamentParameters.getDefaultNumSeedRounds(connection));
+      pageContext.setAttribute("numSeedingRounds_default", TournamentParameters.getDefaultNumSeedingRounds(connection));
       final Map<Integer, Integer> numSeedingRounds = new HashMap<>();
       for (final Tournament tournament : tournaments) {
         if (TournamentParameters.tournamentParameterValueExists(connection, tournament.getTournamentID(),

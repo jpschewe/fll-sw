@@ -666,6 +666,11 @@ public final class GenerateDB {
       if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.RUNNING_HEAD_2_HEAD)) {
         TournamentParameters.setDefaultRunningHeadToHead(connection, headToHead);
       }
+
+      if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.PRACTICE_ROUNDS)) {
+        TournamentParameters.setDefaultNumPracticeRounds(connection, TournamentParameters.PRACTICE_ROUNDS_DEFAULT);
+      }
+
     }
   }
 
