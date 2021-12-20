@@ -147,156 +147,157 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
       LOGGER.trace("File name: {}", file);
     }
 
-    final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
-    reader.skipRows(headerRowIndex);
+    try (CellFileReader reader = CellFileReader.createCellReader(file, sheetName)) {
+      reader.skipRows(headerRowIndex);
 
-    @Nullable
-    String @Nullable [] columnNames = reader.readNext();
-    if (null == columnNames) {
-      LOGGER.warn("No data in file");
-      return;
-    }
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("sheetName: "
-          + sheetName //
-          + " teamNumberColumnName: "
-          + teamNumberColumnName //
-          + " tournamentColumnName: "
-          + tournamentColumnName //
-          + " eventDivisionColumnName: "
-          + eventDivisionColumnName //
-          + " judgingStationColumnName: "
-          + judgingStationColumnName //
-      );
-      LOGGER.trace("Column names size: "
-          + columnNames.length //
-          + " names: "
-          + Arrays.asList(columnNames).toString() //
-          + " teamNumber column: "
-          + teamNumberColumnName);
-    }
-
-    int teamNumColumnIdx = -1;
-    int tournamentColumnIdx = -1;
-    int eventDivisionColumnIdx = -1;
-    int judgingStationColumnIdx = -1;
-    int index = 0;
-    while (index < columnNames.length
-        && (-1 == teamNumColumnIdx
-            || -1 == tournamentColumnIdx
-            || -1 == eventDivisionColumnIdx
-            || -1 == judgingStationColumnIdx)) {
-      if (-1 == teamNumColumnIdx
-          && teamNumberColumnName.equals(columnNames[index])) {
-        teamNumColumnIdx = index;
+      @Nullable
+      String @Nullable [] columnNames = reader.readNext();
+      if (null == columnNames) {
+        LOGGER.warn("No data in file");
+        return;
+      }
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("sheetName: "
+            + sheetName //
+            + " teamNumberColumnName: "
+            + teamNumberColumnName //
+            + " tournamentColumnName: "
+            + tournamentColumnName //
+            + " eventDivisionColumnName: "
+            + eventDivisionColumnName //
+            + " judgingStationColumnName: "
+            + judgingStationColumnName //
+        );
+        LOGGER.trace("Column names size: "
+            + columnNames.length //
+            + " names: "
+            + Arrays.asList(columnNames).toString() //
+            + " teamNumber column: "
+            + teamNumberColumnName);
       }
 
-      if (-1 == tournamentColumnIdx
-          && tournamentColumnName.equals(columnNames[index])) {
-        tournamentColumnIdx = index;
-      }
-      if (null != eventDivisionColumnName
-          && -1 == eventDivisionColumnIdx
-          && eventDivisionColumnName.equals(columnNames[index])) {
-        eventDivisionColumnIdx = index;
-      }
-      if (null != judgingStationColumnName
-          && -1 == judgingStationColumnIdx
-          && judgingStationColumnName.equals(columnNames[index])) {
-        judgingStationColumnIdx = index;
-      }
-
-      ++index;
-    }
-
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("teamNumIdx: "
-          + teamNumColumnIdx//
-          + " tournamentColumnIdex: "
-          + tournamentColumnIdx //
-          + " eventDivisionColumnIdex: "
-          + eventDivisionColumnIdx //
-          + " judgingStationColumnIdx: "
-          + judgingStationColumnIdx //
-      );
-
-    }
-
-    if (-1 == teamNumColumnIdx
-        || -1 == tournamentColumnIdx) {
-      throw new FLLInternalException("Cannot find index for team number column '"
-          + teamNumberColumnName
-          + "' or tournament '"
-          + tournamentColumnName
-          + "'");
-    }
-
-    int rowsProcessed = 0;
-    @Nullable
-    String @Nullable [] data = reader.readNext();
-    while (null != data) {
-      if (teamNumColumnIdx < data.length
-          && tournamentColumnIdx < data.length) {
-        final String teamNumStr = data[teamNumColumnIdx];
-        if (null != teamNumStr
-            && !"".equals(teamNumStr.trim())) {
-          final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumStr).intValue();
-
-          final String tournamentName = data[tournamentColumnIdx];
-          if (null == tournamentName) {
-            throw new FLLRuntimeException("Missing tournament name for team "
-                + teamNumber);
-          }
-
-          final Tournament tournament;
-          if (!Tournament.doesTournamentExist(connection, tournamentName)) {
-            // create the tournament
-            Tournament.createTournament(connection, tournamentName, tournamentName, null,
-                                        TournamentLevel.getByName(connection,
-                                                                  TournamentLevel.DEFAULT_TOURNAMENT_LEVEL_NAME));
-            tournament = Tournament.findTournamentByName(connection, tournamentName);
-            message.append("<p>Created tournament '"
-                + tournamentName
-                + "'</p>");
-          } else {
-            tournament = Tournament.findTournamentByName(connection, tournamentName);
-          }
-
-          if (eventDivisionColumnIdx < 0
-              || null == data[eventDivisionColumnIdx]) {
-            throw new FLLRuntimeException("Missing award group for team "
-                + teamNumber);
-          }
-          final String eventDivision = data[eventDivisionColumnIdx];
-
-          if (judgingStationColumnIdx < 0
-              || null == data[judgingStationColumnIdx]) {
-            throw new FLLRuntimeException("Missing judging station for team "
-                + teamNumber);
-          }
-          final String judgingStation = data[judgingStationColumnIdx];
-
-          if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Adding team "
-                + teamNumber
-                + " to tournament "
-                + tournament.getTournamentID());
-          }
-
-          if (!Queries.isTeamInTournament(connection, teamNumber, tournament.getTournamentID())) {
-            Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
-                                        judgingStation);
-          }
-          ++rowsProcessed;
+      int teamNumColumnIdx = -1;
+      int tournamentColumnIdx = -1;
+      int eventDivisionColumnIdx = -1;
+      int judgingStationColumnIdx = -1;
+      int index = 0;
+      while (index < columnNames.length
+          && (-1 == teamNumColumnIdx
+              || -1 == tournamentColumnIdx
+              || -1 == eventDivisionColumnIdx
+              || -1 == judgingStationColumnIdx)) {
+        if (-1 == teamNumColumnIdx
+            && teamNumberColumnName.equals(columnNames[index])) {
+          teamNumColumnIdx = index;
         }
+
+        if (-1 == tournamentColumnIdx
+            && tournamentColumnName.equals(columnNames[index])) {
+          tournamentColumnIdx = index;
+        }
+        if (null != eventDivisionColumnName
+            && -1 == eventDivisionColumnIdx
+            && eventDivisionColumnName.equals(columnNames[index])) {
+          eventDivisionColumnIdx = index;
+        }
+        if (null != judgingStationColumnName
+            && -1 == judgingStationColumnIdx
+            && judgingStationColumnName.equals(columnNames[index])) {
+          judgingStationColumnIdx = index;
+        }
+
+        ++index;
       }
 
-      data = reader.readNext();
-    }
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("teamNumIdx: "
+            + teamNumColumnIdx//
+            + " tournamentColumnIdex: "
+            + tournamentColumnIdx //
+            + " eventDivisionColumnIdex: "
+            + eventDivisionColumnIdx //
+            + " judgingStationColumnIdx: "
+            + judgingStationColumnIdx //
+        );
 
-    message.append("<p>Successfully processed "
-        + rowsProcessed
-        + " rows of data</p>");
+      }
+
+      if (-1 == teamNumColumnIdx
+          || -1 == tournamentColumnIdx) {
+        throw new FLLInternalException("Cannot find index for team number column '"
+            + teamNumberColumnName
+            + "' or tournament '"
+            + tournamentColumnName
+            + "'");
+      }
+
+      int rowsProcessed = 0;
+      @Nullable
+      String @Nullable [] data = reader.readNext();
+      while (null != data) {
+        if (teamNumColumnIdx < data.length
+            && tournamentColumnIdx < data.length) {
+          final String teamNumStr = data[teamNumColumnIdx];
+          if (null != teamNumStr
+              && !"".equals(teamNumStr.trim())) {
+            final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumStr).intValue();
+
+            final String tournamentName = data[tournamentColumnIdx];
+            if (null == tournamentName) {
+              throw new FLLRuntimeException("Missing tournament name for team "
+                  + teamNumber);
+            }
+
+            final Tournament tournament;
+            if (!Tournament.doesTournamentExist(connection, tournamentName)) {
+              // create the tournament
+              Tournament.createTournament(connection, tournamentName, tournamentName, null,
+                                          TournamentLevel.getByName(connection,
+                                                                    TournamentLevel.DEFAULT_TOURNAMENT_LEVEL_NAME));
+              tournament = Tournament.findTournamentByName(connection, tournamentName);
+              message.append("<p>Created tournament '"
+                  + tournamentName
+                  + "'</p>");
+            } else {
+              tournament = Tournament.findTournamentByName(connection, tournamentName);
+            }
+
+            if (eventDivisionColumnIdx < 0
+                || null == data[eventDivisionColumnIdx]) {
+              throw new FLLRuntimeException("Missing award group for team "
+                  + teamNumber);
+            }
+            final String eventDivision = data[eventDivisionColumnIdx];
+
+            if (judgingStationColumnIdx < 0
+                || null == data[judgingStationColumnIdx]) {
+              throw new FLLRuntimeException("Missing judging station for team "
+                  + teamNumber);
+            }
+            final String judgingStation = data[judgingStationColumnIdx];
+
+            if (LOGGER.isTraceEnabled()) {
+              LOGGER.trace("Adding team "
+                  + teamNumber
+                  + " to tournament "
+                  + tournament.getTournamentID());
+            }
+
+            if (!Queries.isTeamInTournament(connection, teamNumber, tournament.getTournamentID())) {
+              Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
+                                          judgingStation);
+            }
+            ++rowsProcessed;
+          }
+        }
+
+        data = reader.readNext();
+      }
+
+      message.append("<p>Successfully processed "
+          + rowsProcessed
+          + " rows of data</p>");
+    }
 
   }
 

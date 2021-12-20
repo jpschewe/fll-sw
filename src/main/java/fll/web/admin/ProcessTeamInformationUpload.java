@@ -129,98 +129,99 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
           + file.toString());
     }
 
-    final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
-    reader.skipRows(headerRowIndex);
+    try (CellFileReader reader = CellFileReader.createCellReader(file, sheetName)) {
+      reader.skipRows(headerRowIndex);
 
-    final @Nullable String @Nullable [] columnNames = reader.readNext();
+      final @Nullable String @Nullable [] columnNames = reader.readNext();
 
-    if (null == columnNames) {
-      LOGGER.warn("No data in file");
-      return;
-    }
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Column names size: "
-          + columnNames.length //
-          + " names: "
-          + Arrays.asList(columnNames).toString() //
-          + " teamNumber column: "
-          + teamNumberColumnName);
-    }
-
-    int teamNumColumnIdx = -1;
-    int teamNameColumnIdx = -1;
-    int organizationColumnIdx = -1;
-    int index = 0;
-    while (index < columnNames.length
-        && (-1 == teamNumColumnIdx
-            || -1 == teamNameColumnIdx
-            || -1 == organizationColumnIdx)) {
-      if (-1 == teamNumColumnIdx
-          && teamNumberColumnName.equals(columnNames[index])) {
-        teamNumColumnIdx = index;
+      if (null == columnNames) {
+        LOGGER.warn("No data in file");
+        return;
+      }
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Column names size: "
+            + columnNames.length //
+            + " names: "
+            + Arrays.asList(columnNames).toString() //
+            + " teamNumber column: "
+            + teamNumberColumnName);
       }
 
-      if (-1 == teamNameColumnIdx
-          && teamNameColumnName.equals(columnNames[index])) {
-        teamNameColumnIdx = index;
-      }
-
-      if (-1 == organizationColumnIdx
-          && organizationColumnName.equals(columnNames[index])) {
-        organizationColumnIdx = index;
-      }
-
-      ++index;
-    }
-
-    if (-1 == teamNumColumnIdx) {
-      throw new FLLInternalException("Cannot find index for team number column '"
-          + teamNumberColumnName
-          + "'");
-    }
-
-    int rowsProcessed = 0;
-    @Nullable
-    String @Nullable [] data = reader.readNext();
-    while (null != data) {
-      if (teamNumColumnIdx < data.length) {
-        final String teamNumStr = data[teamNumColumnIdx];
-        if (null != teamNumStr
-            && !"".equals(teamNumStr.trim())) {
-          final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumStr).intValue();
-
-          final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-
-          final String teamName;
-          if (teamNameColumnIdx < 0) {
-            teamName = team.getTeamName();
-          } else {
-            teamName = data[teamNameColumnIdx];
-            if (null == teamName) {
-              throw new FLLRuntimeException("Team name is missing for "
-                  + teamNumber);
-            }
-          }
-
-          final @Nullable String organization;
-          if (organizationColumnIdx < 0) {
-            organization = team.getOrganization();
-          } else {
-            organization = data[organizationColumnIdx];
-          }
-
-          Queries.updateTeam(connection, teamNumber, teamName, organization);
-
-          ++rowsProcessed;
+      int teamNumColumnIdx = -1;
+      int teamNameColumnIdx = -1;
+      int organizationColumnIdx = -1;
+      int index = 0;
+      while (index < columnNames.length
+          && (-1 == teamNumColumnIdx
+              || -1 == teamNameColumnIdx
+              || -1 == organizationColumnIdx)) {
+        if (-1 == teamNumColumnIdx
+            && teamNumberColumnName.equals(columnNames[index])) {
+          teamNumColumnIdx = index;
         }
+
+        if (-1 == teamNameColumnIdx
+            && teamNameColumnName.equals(columnNames[index])) {
+          teamNameColumnIdx = index;
+        }
+
+        if (-1 == organizationColumnIdx
+            && organizationColumnName.equals(columnNames[index])) {
+          organizationColumnIdx = index;
+        }
+
+        ++index;
       }
 
-      data = reader.readNext();
-    }
+      if (-1 == teamNumColumnIdx) {
+        throw new FLLInternalException("Cannot find index for team number column '"
+            + teamNumberColumnName
+            + "'");
+      }
 
-    message.append("<p>Successfully processed "
-        + rowsProcessed
-        + " rows of data</p>");
+      int rowsProcessed = 0;
+      @Nullable
+      String @Nullable [] data = reader.readNext();
+      while (null != data) {
+        if (teamNumColumnIdx < data.length) {
+          final String teamNumStr = data[teamNumColumnIdx];
+          if (null != teamNumStr
+              && !"".equals(teamNumStr.trim())) {
+            final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumStr).intValue();
+
+            final Team team = Team.getTeamFromDatabase(connection, teamNumber);
+
+            final String teamName;
+            if (teamNameColumnIdx < 0) {
+              teamName = team.getTeamName();
+            } else {
+              teamName = data[teamNameColumnIdx];
+              if (null == teamName) {
+                throw new FLLRuntimeException("Team name is missing for "
+                    + teamNumber);
+              }
+            }
+
+            final @Nullable String organization;
+            if (organizationColumnIdx < 0) {
+              organization = team.getOrganization();
+            } else {
+              organization = data[organizationColumnIdx];
+            }
+
+            Queries.updateTeam(connection, teamNumber, teamName, organization);
+
+            ++rowsProcessed;
+          }
+        }
+
+        data = reader.readNext();
+      }
+
+      message.append("<p>Successfully processed "
+          + rowsProcessed
+          + " rows of data</p>");
+    }
 
   }
 
