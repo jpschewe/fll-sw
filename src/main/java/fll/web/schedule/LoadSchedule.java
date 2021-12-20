@@ -72,7 +72,7 @@ public class LoadSchedule extends BaseFLLServlet {
           final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
           if (!columnInfo.getUnusedColumns().isEmpty()) {
             uploadScheduleData.setUnusedHeaders(columnInfo.getUnusedColumns());
-            WebUtils.sendRedirect(application, response, "/schedule/chooseSubjectiveHeaders.jsp");
+            WebUtils.sendRedirect(application, response, "/schedule/chooseHeaders.jsp");
             return;
           } else {
             uploadScheduleData.setSubjectiveStations(Collections.emptyList());

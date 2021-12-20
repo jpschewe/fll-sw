@@ -31,11 +31,11 @@ import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 
 /**
- * Processes results of chooseSubjectiveHeaders.jsp and redirects to
+ * Processes results of chooseHeaders.jsp and redirects to
  * {@link CheckViolations}.
  */
-@WebServlet("/schedule/ProcessSubjectiveHeaders")
-public class ProcessSubjectiveHeaders extends BaseFLLServlet {
+@WebServlet("/schedule/ProcessHeaders")
+public class ProcessHeaders extends BaseFLLServlet {
 
   @Override
   protected void processRequest(final HttpServletRequest request,
