@@ -88,12 +88,8 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
 
       final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
 
-      final @Nullable String @Nullable [] headerRow = SessionAttributes.getAttribute(session,
-                                                                                     StoreColumnNames.HEADER_NAMES_KEY,
-                                                                                     String[].class);
-
-      processFile(connection, message, file, sheetName, headerRowIndex, headerRow, teamNumberColumnName,
-                  teamNameColumnName, organizationColumnName);
+      processFile(connection, message, file, sheetName, headerRowIndex, teamNumberColumnName, teamNameColumnName,
+                  organizationColumnName);
 
     } catch (final SQLException | IOException | ParseException | InvalidFormatException e) {
       message.append("<p class='error'>Error saving team information into the database: "
@@ -122,7 +118,6 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
                                   final Path file,
                                   final @Nullable String sheetName,
                                   final int headerRowIndex,
-                                  @Nullable String @Nullable [] columnNames,
                                   final String teamNumberColumnName,
                                   final String teamNameColumnName,
                                   final String organizationColumnName)
@@ -134,8 +129,9 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
     }
 
     final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
-    reader.skipRows(headerRowIndex
-        + 1);
+    reader.skipRows(headerRowIndex);
+
+    final @Nullable String @Nullable [] columnNames = reader.readNext();
 
     if (null == columnNames) {
       LOGGER.warn("No data in file");

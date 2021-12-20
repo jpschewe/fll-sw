@@ -261,9 +261,10 @@ public class UploadScheduleData implements Serializable {
   private final LinkedList<String> headerNames;
 
   /**
-   * @return names of columns in the header row of the spreadsheet
+   * @return names of columns in the header row of the spreadsheet, null and empty
+   *         names have been filtered out
    */
-  public List<String> getHeaderNames() {
+  public Collection<String> getHeaderNames() {
     return headerNames;
   }
 }
