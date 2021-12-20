@@ -62,7 +62,8 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
     }
 
     final int headerRowIndex = SessionAttributes.getNonNullAttribute(session, StoreColumnNames.HEADER_ROW_INDEX_KEY,
-                                                                     Integer.class);
+                                                                     Integer.class)
+                                                .intValue();
 
     final StringBuilder message = new StringBuilder();
     final String filename = SessionAttributes.getNonNullAttribute(session, UploadSpreadsheet.SPREADSHEET_FILE_KEY,

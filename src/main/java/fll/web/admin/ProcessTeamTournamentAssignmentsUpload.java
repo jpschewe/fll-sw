@@ -31,6 +31,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.StoreColumnNames;
 import fll.web.UploadSpreadsheet;
 import fll.web.UserRole;
 import fll.web.WebUtils;
@@ -88,7 +89,11 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
 
       final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
 
-      processFile(connection, message, file, sheetName, teamNumberColumnName, tournamentColumnName,
+      final int headerRowIndex = SessionAttributes.getNonNullAttribute(session, StoreColumnNames.HEADER_ROW_INDEX_KEY,
+                                                                       Integer.class)
+                                                  .intValue();
+
+      processFile(connection, message, file, sheetName, headerRowIndex, teamNumberColumnName, tournamentColumnName,
                   eventDivisionColumnName, judgingStationColumnName);
 
     } catch (final SQLException sqle) {
@@ -131,6 +136,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
                                   final StringBuilder message,
                                   final Path file,
                                   final @Nullable String sheetName,
+                                  final int headerRowIndex,
                                   final String teamNumberColumnName,
                                   final String tournamentColumnName,
                                   final @Nullable String eventDivisionColumnName,
@@ -142,14 +148,10 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
     }
 
     final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
+    reader.skipRows(headerRowIndex);
 
-    // parse out the first non-blank line as the names of the columns
     @Nullable
     String @Nullable [] columnNames = reader.readNext();
-    while (null != columnNames
-        && columnNames.length < 1) {
-      columnNames = reader.readNext();
-    }
     if (null == columnNames) {
       LOGGER.warn("No data in file");
       return;
