@@ -28,6 +28,14 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
 <body>
     <h1>Choose Headers (Upload Schedule)</h1>
 
+    <p>
+        If the number of performance rounds or practice rounds does not
+        match what is expected, <a
+            href="<c:url value='/admin/edit_tournament_parameters.jsp'/>">edit
+            the tournament parameters</a> and then upload the schedule
+        again.
+    </p>
+
     <div class='status-message'>${message}</div>
     <%-- clear out the message, so that we don't see it again --%>
     <c:remove var="message" />
