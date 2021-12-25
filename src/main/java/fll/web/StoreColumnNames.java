@@ -62,18 +62,7 @@ public class StoreColumnNames extends BaseFLLServlet {
     final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
 
     try {
-      final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
-      reader.skipRows(headerRowIndex);
-
-      final @Nullable String @Nullable [] headerRow = reader.readNext();
-      final Collection<String> headerNames;
-      if (null == headerRow) {
-        headerNames = Collections.emptyList();
-      } else {
-        headerNames = Arrays.asList(headerRow).stream() //
-                            .filter(StringUtils::isNotBlank) //
-                            .collect(Collectors.toList());
-      }
+      final Collection<String> headerNames = extractHeaderNames(file, sheetName, headerRowIndex);
 
       session.setAttribute(HEADER_NAMES_KEY, headerNames);
 
@@ -85,6 +74,35 @@ public class StoreColumnNames extends BaseFLLServlet {
       throw new FLLRuntimeException("Error reading the spreadsheet", e);
     }
 
+  }
+
+  /**
+   * Get the names of the headers. Empty headers are removed.
+   * 
+   * @param file the file to read with {@link CellFileReader}
+   * @param sheetName the name of the sheet if loading a spreadsheet
+   * @param headerRowIndex the index of the header row
+   * @return the header names
+   * @throws InvalidFormatException if there is an error parsing the spreadsheet
+   * @throws IOException if there is an error reading the file
+   */
+  public static Collection<String> extractHeaderNames(final Path file,
+                                                      final @Nullable String sheetName,
+                                                      final int headerRowIndex)
+      throws InvalidFormatException, IOException {
+    final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
+    reader.skipRows(headerRowIndex);
+    final @Nullable String @Nullable [] headerRow = reader.readNext();
+
+    final Collection<String> headerNames;
+    if (null == headerRow) {
+      headerNames = Collections.emptyList();
+    } else {
+      headerNames = Arrays.asList(headerRow).stream() //
+                          .filter(StringUtils::isNotBlank) //
+                          .collect(Collectors.toList());
+    }
+    return headerNames;
   }
 
 }

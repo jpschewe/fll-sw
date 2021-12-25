@@ -52,50 +52,68 @@ public final class SelectHeaderRow {
       final int numRowsToLoad = WebUtils.getIntRequestParameter(request, "numRowsToLoad", DEFAULT_NUM_ROWS_TO_LOAD);
       pageContext.setAttribute("numRowsToLoad", numRowsToLoad);
 
-      int maxColumns = 0;
-      final List<@Nullable String @Nullable []> rows = new LinkedList<>();
-      while (reader.getLineNumber() < numRowsToLoad) {
-        final @Nullable String @Nullable [] row = reader.readNext();
-        if (row != null) {
-          maxColumns = Math.max(maxColumns, row.length);
-          rows.add(row);
-        } else {
-          // end of file
-          break;
-        }
-      }
+      final String[][] data = loadData(reader, numRowsToLoad, "&nbsp;");
 
-      // make the data square so that it's easy to process in the JSP
-      final String[][] data = new String[rows.size()][maxColumns];
-      int rowIndex = 0;
-      for (final @Nullable String @Nullable [] row : rows) {
-        final int fromIndex;
-        if (null == row) {
-          fromIndex = 0;
-        } else {
-          fromIndex = maxColumns
-              - (maxColumns
-                  - row.length);
-          for (int i = 0; i < row.length; ++i) {
-            if (null == row[i]) {
-              data[rowIndex][i] = "&nbsp;";
-            } else {
-              data[rowIndex][i] = row[i];
-            }
-          }
-        }
-        if (fromIndex < maxColumns) {
-          Arrays.fill(data[rowIndex], fromIndex, maxColumns, "&nbsp;");
-        }
-
-        ++rowIndex;
-      }
       pageContext.setAttribute("data", data);
-      pageContext.setAttribute("maxColumns", maxColumns);
-
+      pageContext.setAttribute("maxColumns", data.length > 0 ? data[0].length : 0);
     } catch (IOException | InvalidFormatException e) {
       throw new FLLRuntimeException("Error loading the data file", e);
     }
+  }
+
+  /**
+   * Load up to the specified number of rows from the reader.
+   * 
+   * @param reader where to load the data from
+   * @param numRowsToLoad the number of rows to load
+   * @param nullString the string to replace nulls with
+   * @return the data as a square array
+   * @throws IOException if there is a problem reading the data
+   */
+  public static String[][] loadData(final CellFileReader reader,
+                                    final int numRowsToLoad,
+                                    final String nullString)
+      throws IOException {
+    int maxColumns = 0;
+    final List<@Nullable String @Nullable []> rows = new LinkedList<>();
+    while (reader.getLineNumber() < numRowsToLoad) {
+      final @Nullable String @Nullable [] row = reader.readNext();
+      if (row != null) {
+        maxColumns = Math.max(maxColumns, row.length);
+        rows.add(row);
+      } else {
+        // end of file
+        break;
+      }
+    }
+
+    // make the data square so that it's easy to process in the JSP
+    final String[][] data = new String[rows.size()][maxColumns];
+    int rowIndex = 0;
+    for (final @Nullable String @Nullable [] row : rows) {
+      final int fromIndex;
+      if (null == row) {
+        fromIndex = 0;
+      } else {
+        fromIndex = maxColumns
+            - (maxColumns
+                - row.length);
+        for (int i = 0; i < row.length; ++i) {
+          if (null == row[i]) {
+            data[rowIndex][i] = nullString;
+          } else {
+            data[rowIndex][i] = row[i];
+          }
+        }
+      }
+      if (fromIndex < maxColumns) {
+        Arrays.fill(data[rowIndex], fromIndex, maxColumns, nullString);
+      }
+
+      ++rowIndex;
+    }
+
+    return data;
   }
 
 }

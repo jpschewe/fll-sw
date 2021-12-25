@@ -89,6 +89,7 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Utilities;
+import fll.db.TournamentParameters;
 import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CellFileReader;
@@ -98,6 +99,7 @@ import fll.util.FLLRuntimeException;
 import fll.util.FormatterUtils;
 import fll.util.GuiExceptionHandler;
 import fll.util.ProgressDialog;
+import fll.web.StoreColumnNames;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.ScoreCategory;
@@ -189,7 +191,11 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private final @NotOnlyInitialized ChooseChallengeDescriptor chooseChallengeDescriptor;
+  private @Nullable ChallengeDescription challengeDescription;
+
+  private final JLabel challengeDescriptionTitle;
+
+  private static final String NO_DESCRIPTION_LOADED = "No Challenge Description Loaded";
 
   private static final String BASE_TITLE = "FLL Scheduler";
 
@@ -200,13 +206,16 @@ public class SchedulerUI extends JFrame {
     super(BASE_TITLE);
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-    chooseChallengeDescriptor = new ChooseChallengeDescriptor(SchedulerUI.this);
+    challengeDescription = null;
 
     progressDialog = new ProgressDialog(SchedulerUI.this, "Please Wait");
     progressDialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
     final Container cpane = getContentPane();
     cpane.setLayout(new BorderLayout());
+
+    challengeDescriptionTitle = new JLabel();
+    cpane.add(challengeDescriptionTitle, BorderLayout.NORTH);
 
     mTabbedPane = new JTabbedPane();
     cpane.add(mTabbedPane, BorderLayout.CENTER);
@@ -283,6 +292,7 @@ public class SchedulerUI extends JFrame {
 
     final JMenu fileMenu = new JMenu("File");
     fileMenu.setMnemonic('f');
+    fileMenu.add(loadChallengeDescriptionAction);
     fileMenu.add(mPreferencesAction);
     fileMenu.add(mExitAction);
     menubar.add(fileMenu);
@@ -320,6 +330,8 @@ public class SchedulerUI extends JFrame {
     changeDuration.setValue(mSchedParams.getChangetimeMinutes());
     performanceChangeDuration.setValue(mSchedParams.getPerformanceChangetimeMinutes());
     performanceDuration.setValue(mSchedParams.getPerformanceMinutes());
+
+    setChallengeDescriptionTitle();
 
     pack();
   }
@@ -889,55 +901,57 @@ public class SchedulerUI extends JFrame {
         final int answer = JOptionPane.showConfirmDialog(SchedulerUI.this,
                                                          "Would you like to write out the score sheets as well?",
                                                          "Write Out Scoresheets?", JOptionPane.YES_NO_OPTION);
-        if (JOptionPane.YES_OPTION == answer) {
-          chooseChallengeDescriptor.setLocationRelativeTo(SchedulerUI.this);
-          chooseChallengeDescriptor.setVisible(true);
-          final URL descriptorLocation = chooseChallengeDescriptor.getSelectedDescription();
-          if (null != descriptorLocation) {
-            final Reader descriptorReader = new InputStreamReader(descriptorLocation.openStream(),
-                                                                  Utilities.DEFAULT_CHARSET);
+        if (JOptionPane.YES_OPTION != answer) {
+          return;
+        }
 
-            final String tournamentName = JOptionPane.showInputDialog(SchedulerUI.this,
-                                                                      "What is the name of the tournament to put on the score sheets?");
-            if (null != tournamentName) {
+        if (null == challengeDescription) {
+          promptForChallengeDescription();
+        }
+        final ChallengeDescription description = challengeDescription;
+        if (null == description) {
+          return;
+        }
 
-              final ChallengeDescription description = ChallengeParser.parse(descriptorReader);
+        final String tournamentName = JOptionPane.showInputDialog(SchedulerUI.this,
+                                                                  "What is the name of the tournament to put on the score sheets?");
+        if (null == tournamentName) {
+          return;
+        }
 
-              final File scoresheetFile = new File(directory, baseFilename
-                  + "-scoresheets.pdf");
-              try (FileOutputStream scoresheetFos = new FileOutputStream(scoresheetFile)) {
+        final File scoresheetFile = new File(directory, baseFilename
+            + "-scoresheets.pdf");
+        try (FileOutputStream scoresheetFos = new FileOutputStream(scoresheetFile)) {
 
-                getScheduleData().outputPerformanceSheets(tournamentName, scoresheetFos, description);
-              }
+          getScheduleData().outputPerformanceSheets(tournamentName, scoresheetFos, description);
+        }
 
-              final MapSubjectiveHeaders mapDialog = new MapSubjectiveHeaders(SchedulerUI.this, description,
-                                                                              getScheduleData());
-              mapDialog.setLocationRelativeTo(SchedulerUI.this);
-              mapDialog.setVisible(true);
-              if (!mapDialog.isCanceled()) {
-                final Map<ScoreCategory, String> categoryToSchedule = new HashMap<>();
-                final Map<ScoreCategory, @Nullable String> filenameSuffixes = new HashMap<>();
-                for (final SubjectiveScoreCategory scoreCategory : description.getSubjectiveCategories()) {
-                  final String scheduleColumn = mapDialog.getSubjectiveHeaderForCategory(scoreCategory);
-                  if (null == scheduleColumn) {
-                    throw new FLLInternalException("Did not find a schedule column for "
-                        + scoreCategory.getTitle());
-                  }
-                  categoryToSchedule.put(scoreCategory, scheduleColumn);
-                  filenameSuffixes.put(scoreCategory, mapDialog.getFilenameSuffixForCategory(scoreCategory));
-                }
+        final MapSubjectiveHeaders mapDialog = new MapSubjectiveHeaders(SchedulerUI.this, description,
+                                                                        getScheduleData());
+        mapDialog.setLocationRelativeTo(SchedulerUI.this);
+        mapDialog.setVisible(true);
+        if (mapDialog.isCanceled()) {
+          return;
+        }
 
-                getScheduleData().outputSubjectiveSheets(tournamentName, directory.getAbsolutePath(), baseFilename,
-                                                         description, categoryToSchedule, filenameSuffixes);
+        final Map<ScoreCategory, String> categoryToSchedule = new HashMap<>();
+        final Map<ScoreCategory, @Nullable String> filenameSuffixes = new HashMap<>();
+        for (final SubjectiveScoreCategory scoreCategory : description.getSubjectiveCategories()) {
+          final String scheduleColumn = mapDialog.getSubjectiveHeaderForCategory(scoreCategory);
+          if (null == scheduleColumn) {
+            throw new FLLInternalException("Did not find a schedule column for "
+                + scoreCategory.getTitle());
+          }
+          categoryToSchedule.put(scoreCategory, scheduleColumn);
+          filenameSuffixes.put(scoreCategory, mapDialog.getFilenameSuffixForCategory(scoreCategory));
+        }
 
-                JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
-                    + scoresheetFile.getAbsolutePath()
-                    + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
-              } // not
-                // canceled
-            } // tournament name
-          } // valid descriptor location
-        } // yes to write score sheets
+        getScheduleData().outputSubjectiveSheets(tournamentName, directory.getAbsolutePath(), baseFilename, description,
+                                                 categoryToSchedule, filenameSuffixes);
+
+        JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
+            + scoresheetFile.getAbsolutePath()
+            + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
       } catch (final IOException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error writing detailed schedules: %s", e.getMessage());
@@ -994,6 +1008,72 @@ public class SchedulerUI extends JFrame {
   }
 
   /**
+   * @return header row or -1 if canceled
+   */
+  private int findHeaderRowIndex(final File scheduleFile,
+                                 final @Nullable String sheetName) {
+    final SelectHeaderRowDialog dialog = new SelectHeaderRowDialog(this, scheduleFile, sheetName);
+    dialog.setLocationRelativeTo(this);
+    dialog.setVisible(true);
+    LOGGER.debug("findHeaderRow: Canceled? {} header row index {}", dialog.isCanceled(), dialog.getHeaderRowIndex());
+
+    if (dialog.isCanceled()) {
+      return -1;
+    } else {
+      return dialog.getHeaderRowIndex();
+    }
+  }
+
+  private int promptUserForInt(final String message,
+                               final int defaultValue) {
+    while (true) {
+      final @Nullable String str = JOptionPane.showInputDialog(this, message, defaultValue);
+      if (null == str) {
+        JOptionPane.showMessageDialog(this, "Please enter an integer", "Error", JOptionPane.ERROR_MESSAGE);
+      } else {
+        try {
+          final int value = Integer.parseInt(str);
+          return value;
+        } catch (final NumberFormatException e) {
+          JOptionPane.showMessageDialog(this, "Please enter an integer", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    }
+  }
+
+  private ColumnInformation promptForColumns(final File file,
+                                             final @Nullable String sheetName,
+                                             final int headerRowIndex,
+                                             final Collection<String> headerNames,
+                                             final ChallengeDescription description)
+      throws InvalidFormatException, IOException {
+
+    final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
+    reader.skipRows(headerRowIndex);
+    final @Nullable String @Nullable [] headerRow = reader.readNext();
+    if (null == headerRow) {
+      throw new FLLRuntimeException("No data in the file");
+    }
+
+    final int numPracticeRounds = promptUserForInt("Enter the number of practice rounds",
+                                                   TournamentParameters.PRACTICE_ROUNDS_DEFAULT);
+
+    final int numRegularMatchRounds = promptUserForInt("Enter the number of performance rounds",
+                                                       TournamentParameters.SEEDING_ROUNDS_DEFAULT);
+
+    final ChooseScheduleHeadersDialog dialog = new ChooseScheduleHeadersDialog(this, headerNames, numPracticeRounds,
+                                                                               numRegularMatchRounds, description);
+    dialog.setLocationRelativeTo(this);
+    dialog.setVisible(true);
+
+    final ColumnInformation columnInfo = dialog.createColumnInformation(headerRow);
+
+    dialog.dispose();
+
+    return columnInfo;
+  }
+
+  /**
    * Load the specified schedule file and select the schedule tab.
    *
    * @param selectedFile
@@ -1004,9 +1084,9 @@ public class SchedulerUI extends JFrame {
                                 final @Nullable List<SubjectiveStation> subjectiveStations) {
     try {
       final boolean csv = !ExcelCellReader.isExcelFile(selectedFile);
-      final String sheetName;
+      final @Nullable String sheetName;
       if (csv) {
-        sheetName = "ignored";
+        sheetName = null;
       } else {
         sheetName = promptForSheetName(selectedFile);
         if (null == sheetName) {
@@ -1014,6 +1094,26 @@ public class SchedulerUI extends JFrame {
         }
       }
 
+      final int headerRowIndex = findHeaderRowIndex(selectedFile, sheetName);
+      if (headerRowIndex < 0) {
+        return;
+      }
+
+      final Collection<String> headerNames = StoreColumnNames.extractHeaderNames(selectedFile.toPath(), sheetName,
+                                                                                 headerRowIndex);
+
+      if (null == challengeDescription) {
+        promptForChallengeDescription();
+      }
+      final ChallengeDescription description = challengeDescription;
+      if (null == description) {
+        return;
+      }
+
+      /* FIXME final ColumnInformation columnInfo = */promptForColumns(selectedFile, sheetName, headerRowIndex,
+                                                                       headerNames, description);
+
+      // FIXME columns to ColumnInformation
       final List<SubjectiveStation> newSubjectiveStations;
       if (null == subjectiveStations) {
         final ColumnInformation columnInfo = TournamentSchedule.findColumns(CellFileReader.createCellReader(selectedFile,
@@ -1419,8 +1519,8 @@ public class SchedulerUI extends JFrame {
    * @param columnInfo the column information
    * @return the list of subjective information the user choose
    */
-  public static List<SubjectiveStation> gatherSubjectiveStationInformation(final @Nullable Component parentComponent,
-                                                                           final ColumnInformation columnInfo) {
+  private static List<SubjectiveStation> gatherSubjectiveStationInformation(final @Nullable Component parentComponent,
+                                                                            final ColumnInformation columnInfo) {
     final List<String> unusedColumns = columnInfo.getUnusedColumns();
     final List<JCheckBox> checkboxes = new LinkedList<>();
     final List<JFormattedTextField> subjectiveDurations = new LinkedList<>();
@@ -1506,4 +1606,64 @@ public class SchedulerUI extends JFrame {
         - 1], gbc);
   }
 
+  /**
+   * Prompt the user for a challenge description and set
+   * {@code challengeDescription}. If {@code challengeDescription} is null after
+   * calling this method the user canceled or there was an error (and the user was
+   * notified of it).
+   */
+  private void promptForChallengeDescription() {
+    challengeDescription = null;
+
+    final ChooseChallengeDescriptor dialog = new ChooseChallengeDescriptor(this);
+    dialog.setLocationRelativeTo(this);
+    dialog.setVisible(true);
+    final URL descriptorLocation = dialog.getSelectedDescription();
+    if (null != descriptorLocation) {
+      try {
+        final Reader descriptorReader = new InputStreamReader(descriptorLocation.openStream(),
+                                                              Utilities.DEFAULT_CHARSET);
+        challengeDescription = ChallengeParser.parse(descriptorReader);
+      } catch (final IOException e) {
+        final Formatter errorFormatter = new Formatter();
+        errorFormatter.format("Loading the challenge description: %s", e.getMessage());
+        LOGGER.error(errorFormatter, e);
+        JOptionPane.showMessageDialog(this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
+      }
+    }
+
+    dialog.dispose();
+
+    setChallengeDescriptionTitle();
+  }
+
+  @RequiresNonNull({ "challengeDescriptionTitle" })
+  private void setChallengeDescriptionTitle(@UnknownInitialization(JFrame.class) SchedulerUI this) {
+    final String title;
+    if (null == challengeDescription) {
+      title = NO_DESCRIPTION_LOADED;
+    } else {
+      title = challengeDescription.getTitle();
+    }
+    challengeDescriptionTitle.setText(String.format("Challenge: %s", title));
+  }
+
+  private final Action loadChallengeDescriptionAction = new LoadChallengeDescriptionAction();
+
+  private final class LoadChallengeDescriptionAction extends AbstractAction {
+    LoadChallengeDescriptionAction() {
+      super("Load Challenge Description");
+      // putValue(SMALL_ICON,
+      // Utilities.getIcon("toolbarButtonGraphics/general/Preferences16.gif"));
+      // putValue(LARGE_ICON_KEY,
+      // Utilities.getIcon("toolbarButtonGraphics/general/Preferences24.gif"));
+      // putValue(SHORT_DESCRIPTION, "Set scheduling preferences");
+      // putValue(MNEMONIC_KEY, KeyEvent.VK_X);
+    }
+
+    @Override
+    public void actionPerformed(final ActionEvent ae) {
+      promptForChallengeDescription();
+    }
+  }
 }

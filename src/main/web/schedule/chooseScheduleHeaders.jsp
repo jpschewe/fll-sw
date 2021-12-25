@@ -41,7 +41,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
     <c:remove var="message" />
 
     <form name="choose_headers" id="choose_headers" method='POST'
-        action='ProcessHeaders'>
+        action='ProcessScheduleHeaders'>
 
         <p>Highlighted columns are required, all others are
             optional.</p>
@@ -69,6 +69,8 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
                 <td>Team Name</td>
                 <td>
                     <select name='teamName'>
+                        <option value='' selected>None</option>
+
                         <c:forEach items="${spreadsheetHeaderNames}"
                             var="fileHeader">
                             <option value="${fileHeader}">${fileHeader}</option>
@@ -81,6 +83,8 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
                 <td>Organization</td>
                 <td>
                     <select name='organization'>
+                        <option value='' selected>None</option>
+
                         <c:forEach items="${spreadsheetHeaderNames}"
                             var="fileHeader">
                             <option value="${fileHeader}">${fileHeader}</option>
@@ -93,6 +97,8 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
                 <td>Award Group</td>
                 <td>
                     <select name='awardGroup'>
+                        <option value='' selected>None</option>
+
                         <c:forEach items="${spreadsheetHeaderNames}"
                             var="fileHeader">
                             <option value="${fileHeader}">${fileHeader}</option>
@@ -105,6 +111,8 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
                 <td>Judging Group</td>
                 <td>
                     <select name='judgingGroup'>
+                        <option value='' selected>None</option>
+
                         <c:forEach items="${spreadsheetHeaderNames}"
                             var="fileHeader">
                             <option value="${fileHeader}">${fileHeader}</option>
@@ -190,7 +198,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
                 var="subcat">
                 <tr>
 
-                    <td>${subcat.title}</td>
+                    <td bgcolor='yellow'>${subcat.title}</td>
 
                     <td>
                         <select name='${subcat.name}:header'>
