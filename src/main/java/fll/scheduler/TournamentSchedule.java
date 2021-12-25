@@ -42,6 +42,7 @@ import java.util.TreeSet;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -222,8 +223,7 @@ public class TournamentSchedule implements Serializable {
    *           for a schedule
    */
   public static @Nullable LocalTime parseTime(final @Nullable String str) throws DateTimeParseException {
-    if (null == str
-        || str.trim().isEmpty()) {
+    if (StringUtils.isBlank(str)) {
       return null;
     }
 
@@ -342,6 +342,9 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
+   * Read the data in {@code reader} from the header row until the team number
+   * column is empty.
+   * 
    * @param name {@link #getName()}
    * @param reader where to read the schedule from
    * @param subjectiveHeaders the headers for the subjective columns
@@ -806,7 +809,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Parse the data of the schedule.
    *
-   * @throws IOException
+   * @throws IOException on an error reading the file
    * @throws ScheduleParseException if there is an error with the schedule
    */
   @RequiresNonNull("matches")
@@ -1269,28 +1272,27 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * @return the schedule info or null if the last line is read
+   * @return the schedule info or null to stop reading (end of file or empty team
+   *         number column)
    * @throws ScheduleParseException if there is an error with the schedule being
    *           read
+   * @throws IOException if there is an error reading the file
    */
   private @Nullable TeamScheduleInfo parseLine(@UnderInitialization(TournamentSchedule.class) TournamentSchedule this,
                                                final CellFileReader reader,
                                                final ColumnInformation ci)
-      throws IOException, ParseException, ScheduleParseException {
+      throws IOException, ScheduleParseException {
     final @Nullable String @Nullable [] line = reader.readNext();
     if (null == line) {
       return null;
     }
 
     try {
-
       if (ci.getTeamNumColumn() >= line.length) {
         return null;
       }
       final String teamNumberStr = line[ci.getTeamNumColumn()];
-      if (null == teamNumberStr
-          || teamNumberStr.length() < 1) {
-        // hit empty row
+      if (StringUtils.isBlank(teamNumberStr)) {
         return null;
       }
 
@@ -1304,11 +1306,11 @@ public class TournamentSchedule implements Serializable {
         final String station = entry.getValue();
         final int column = entry.getKey();
         final String str = line[column];
-        if (null == str
-            || str.isEmpty()) {
-          // If we got an empty string, then we must have hit the end
-          return null;
+        if (StringUtils.isBlank(str)) {
+          throw new ScheduleParseException(String.format("Line %d is missing a time for subjective station '%s'",
+                                                         reader.getLineNumber(), station));
         }
+
         // str is not null or empty, so parseTime cannot return null
         final LocalTime time = castNonNull(parseTime(str));
         ti.addSubjectiveTime(new SubjectiveTime(station, time));
@@ -1318,93 +1320,83 @@ public class TournamentSchedule implements Serializable {
 
       // parse regular match play rounds
       for (int perfIndex = 0; perfIndex < ci.getNumPerfs(); ++perfIndex) {
-        final String perf1Str = line[ci.getPerfColumn(perfIndex)];
-        if (null == perf1Str
-            || perf1Str.isEmpty()) {
-          // If we got an empty string, then we must have hit the end
-          return null;
+        final String perfStr = line[ci.getPerfColumn(perfIndex)];
+        if (StringUtils.isBlank(perfStr)) {
+          throw new ScheduleParseException(String.format("Line %d is missing a time for performance %d",
+                                                         reader.getLineNumber(), (perfIndex
+                                                             + 1)));
         }
 
         final String table = line[ci.getPerfTableColumn(perfIndex)];
-        if (null == table
-            || table.isEmpty()) {
-          // If we got an empty string, then we must have hit the end
-          return null;
+        if (StringUtils.isBlank(table)) {
+          throw new ScheduleParseException(String.format("Line %d is missing a table for performance %d",
+                                                         reader.getLineNumber(), (perfIndex
+                                                             + 1)));
         }
 
         final String[] tablePieces = table.split(" ");
         if (tablePieces.length != 2) {
-          throw new RuntimeException("Error parsing table information from: "
-              + table);
+          throw new ScheduleParseException(String.format("Error parsing performance table information from: '%s', expecting 2 strings separated by a space",
+                                                         table));
         }
-        final LocalTime perf1Time = castNonNull(parseTime(perf1Str));
+        // perfStr is not empty, so cannot be null
+        final LocalTime perfTime = castNonNull(parseTime(perfStr));
 
         final String tableName = tablePieces[0];
         final int tableSide = Utilities.getIntegerNumberFormat().parse(tablePieces[1]).intValue();
         final int roundNumber = perfIndex
             + 1;
-        final PerformanceTime performance = new PerformanceTime(perf1Time, tableName, tableSide, false);
+        final PerformanceTime performance = new PerformanceTime(perfTime, tableName, tableSide, false);
 
         ti.addPerformance(performance);
         if (performance.getSide() > 2
             || performance.getSide() < 1) {
-          final String message = "There are only two sides to the table, number must be 1 or 2. team: "
-              + ti.getTeamNumber()
-              + " round "
-              + roundNumber;
-          LOGGER.error(message);
-          throw new ScheduleParseException(message);
+          throw new ScheduleParseException(String.format("There are only two sides to the table, number must be 1 or 2. team: %d performance round: %d line: %d",
+                                                         ti.getTeamNumber(), roundNumber, reader.getLineNumber()));
         }
       }
 
       // parse practice rounds
       for (int perfIndex = 0; perfIndex < ci.getNumPracticePerfs(); ++perfIndex) {
-        final String perf1Str = line[ci.getPracticePerfColumn(perfIndex)];
-        if (null == perf1Str
-            || perf1Str.isEmpty()) {
-          // If we got an empty string, then we must have hit the end
-          return null;
+        final String perfStr = line[ci.getPracticePerfColumn(perfIndex)];
+        if (StringUtils.isBlank(perfStr)) {
+          throw new ScheduleParseException(String.format("Line %d is missing a time for practice %d",
+                                                         reader.getLineNumber(), (perfIndex
+                                                             + 1)));
         }
         final String table = line[ci.getPracticePerfTableColumn(perfIndex)];
-        if (null == table
-            || table.isEmpty()) {
-          // If we got an empty string, then we must have hit the end
-          return null;
+        if (StringUtils.isBlank(table)) {
+          throw new ScheduleParseException(String.format("Line %d is missing a table for practice %d",
+                                                         reader.getLineNumber(), (perfIndex
+                                                             + 1)));
         }
 
         final String[] tablePieces = table.split(" ");
         if (tablePieces.length != 2) {
-          throw new RuntimeException("Error parsing table information from: "
-              + table);
+          throw new ScheduleParseException(String.format("Error parsing practice table information from: '%s', expecting 2 strings separated by a space",
+                                                         table));
         }
-        final LocalTime perf1Time = parseTime(perf1Str);
-        if (null == perf1Time) {
-          return null;
-        }
+        // perfStr is not empty, so cannot be null
+        final LocalTime perfTime = castNonNull(parseTime(perfStr));
 
         final String tableName = tablePieces[0];
         final int tableSide = Utilities.getIntegerNumberFormat().parse(tablePieces[1]).intValue();
         final int roundNumber = perfIndex
             + 1;
-        final PerformanceTime performance = new PerformanceTime(perf1Time, tableName, tableSide, true);
+        final PerformanceTime performance = new PerformanceTime(perfTime, tableName, tableSide, true);
 
         ti.addPerformance(performance);
         if (performance.getSide() > 2
             || performance.getSide() < 1) {
-          final String message = "There are only two sides to the table, number must be 1 or 2. team: "
-              + ti.getTeamNumber()
-              + " practice round "
-              + roundNumber;
-          LOGGER.error(message);
-          throw new ScheduleParseException(message);
+          throw new ScheduleParseException(String.format("There are only two sides to the table, number must be 1 or 2. team: %d practice round: %d line: %d",
+                                                         ti.getTeamNumber(), roundNumber, reader.getLineNumber()));
         }
       }
 
       return ti;
     } catch (final ParseException | NumberFormatException pe) {
-      LOGGER.error("Error parsing line: "
-          + Arrays.toString(line), pe);
-      throw pe;
+      throw new ScheduleParseException(String.format("Error parsing line '%s': %s", Arrays.toString(line),
+                                                     pe.getMessage(), pe));
     }
   }
 
