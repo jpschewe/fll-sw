@@ -1288,24 +1288,21 @@ public class TournamentSchedule implements Serializable {
     }
 
     try {
-      if (ci.getTeamNumColumn() >= line.length) {
-        return null;
-      }
-      final String teamNumberStr = line[ci.getTeamNumColumn()];
+      final String teamNumberStr = ci.getTeamNum(line);
       if (StringUtils.isBlank(teamNumberStr)) {
         return null;
       }
 
       final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumberStr).intValue();
       final TeamScheduleInfo ti = new TeamScheduleInfo(teamNumber);
-      ti.setTeamName(line[ci.getTeamNameColumn()]);
-      ti.setOrganization(line[ci.getOrganizationColumn()]);
-      ti.setDivision(line[ci.getDivisionColumn()]);
+      ti.setTeamName(ci.getTeamName(line));
+      ti.setOrganization(ci.getOrganization(line));
+      ti.setDivision(ci.getAwardGroup(line));
 
       for (final Map.Entry<Integer, String> entry : ci.getSubjectiveColumnInfo().entrySet()) {
         final String station = entry.getValue();
         final int column = entry.getKey();
-        final String str = line[column];
+        final String str = ColumnInformation.getValue(line, column);
         if (StringUtils.isBlank(str)) {
           throw new ScheduleParseException(String.format("Line %d is missing a time for subjective station '%s'",
                                                          reader.getLineNumber(), station));
@@ -1316,18 +1313,18 @@ public class TournamentSchedule implements Serializable {
         ti.addSubjectiveTime(new SubjectiveTime(station, time));
       }
 
-      ti.setJudgingGroup(line[ci.getJudgeGroupColumn()]);
+      ti.setJudgingGroup(ci.getJudgingGroup(line));
 
       // parse regular match play rounds
       for (int perfIndex = 0; perfIndex < ci.getNumPerfs(); ++perfIndex) {
-        final String perfStr = line[ci.getPerfColumn(perfIndex)];
+        final String perfStr = ci.getPerf(line, perfIndex);
         if (StringUtils.isBlank(perfStr)) {
           throw new ScheduleParseException(String.format("Line %d is missing a time for performance %d",
                                                          reader.getLineNumber(), (perfIndex
                                                              + 1)));
         }
 
-        final String table = line[ci.getPerfTableColumn(perfIndex)];
+        final String table = ci.getPerfTable(line, perfIndex);
         if (StringUtils.isBlank(table)) {
           throw new ScheduleParseException(String.format("Line %d is missing a table for performance %d",
                                                          reader.getLineNumber(), (perfIndex
@@ -1358,13 +1355,13 @@ public class TournamentSchedule implements Serializable {
 
       // parse practice rounds
       for (int perfIndex = 0; perfIndex < ci.getNumPracticePerfs(); ++perfIndex) {
-        final String perfStr = line[ci.getPracticePerfColumn(perfIndex)];
+        final String perfStr = ci.getPractice(line, perfIndex);
         if (StringUtils.isBlank(perfStr)) {
           throw new ScheduleParseException(String.format("Line %d is missing a time for practice %d",
                                                          reader.getLineNumber(), (perfIndex
                                                              + 1)));
         }
-        final String table = line[ci.getPracticePerfTableColumn(perfIndex)];
+        final String table = ci.getPracticeTable(line, perfIndex);
         if (StringUtils.isBlank(table)) {
           throw new ScheduleParseException(String.format("Line %d is missing a table for practice %d",
                                                          reader.getLineNumber(), (perfIndex
@@ -1567,48 +1564,62 @@ public class TournamentSchedule implements Serializable {
 
     private final List<String> headerLine;
 
-    /**
-     * @return The columns that were parsed into the headers in the same order that
-     *         they appear in the schedule.
-     */
-    public List<String> getHeaderLine() {
-      return headerLine;
-    }
-
     private final int teamNumColumn;
 
     /**
-     * @return column that contains the team number
+     * Get the value of a column from the specified {@code line}.
+     * 
+     * @param line the line to read the data from
+     * @param columnIndex the column index to get the value for
+     * @return the value or {@code null} if the column index is out of range or the
+     *         line has a {@code null} at the specified index
      */
-    public int getTeamNumColumn() {
-      return teamNumColumn;
+    public static @Nullable String getValue(final @Nullable String[] line,
+                                            final int columnIndex) {
+      if (columnIndex < 0
+          || columnIndex > line.length) {
+        return null;
+      } else {
+        return line[columnIndex];
+      }
+    }
+
+    /**
+     * @param line the line to parse
+     * @return the team number column value, null if column cannot be found
+     */
+    public @Nullable String getTeamNum(final @Nullable String[] line) {
+      return getValue(line, teamNumColumn);
     }
 
     private final int organizationColumn;
 
     /**
-     * @return column that contains the organization
+     * @param line the line to parse
+     * @return the organization column value, null if column cannot be found
      */
-    public int getOrganizationColumn() {
-      return organizationColumn;
+    public @Nullable String getOrganization(final @Nullable String[] line) {
+      return getValue(line, organizationColumn);
     }
 
     private final int teamNameColumn;
 
     /**
-     * @return column that contains the team name
+     * @param line the line to parse
+     * @return the team name column value, null if column cannot be found
      */
-    public int getTeamNameColumn() {
-      return teamNameColumn;
+    public @Nullable String getTeamName(final @Nullable String[] line) {
+      return getValue(line, teamNameColumn);
     }
 
-    private final int divisionColumn;
+    private final int awardGroupColumn;
 
     /**
-     * @return column for division (award group)
+     * @param line the line to parse
+     * @return the award group column value, null if column cannot be found
      */
-    public int getDivisionColumn() {
-      return divisionColumn;
+    public @Nullable String getAwardGroup(final @Nullable String[] line) {
+      return getValue(line, awardGroupColumn);
     }
 
     private final Map<Integer, String> subjectiveColumns;
@@ -1623,10 +1634,11 @@ public class TournamentSchedule implements Serializable {
     private final int judgeGroupColumn;
 
     /**
-     * @return column for judge
+     * @param line the line to parse
+     * @return the judging group column value, null if column cannot be found
      */
-    public int getJudgeGroupColumn() {
-      return judgeGroupColumn;
+    public @Nullable String getJudgingGroup(final @Nullable String[] line) {
+      return getValue(line, judgeGroupColumn);
     }
 
     private final int[] perfColumn;
@@ -1639,21 +1651,27 @@ public class TournamentSchedule implements Serializable {
     }
 
     /**
-     * @param round the performance round to get the column for
-     * @return the column for the performance round time
+     * @param line the line to parse
+     * @param round the performance round to get the value for
+     * @return the performance column value, null if column cannot be found
      */
-    public int getPerfColumn(final int round) {
-      return perfColumn[round];
+    public @Nullable String getPerf(final @Nullable String[] line,
+                                    final int round) {
+      final int columnIndex = perfColumn[round];
+      return getValue(line, columnIndex);
     }
 
     private final int[] perfTableColumn;
 
     /**
-     * @param round the performance round to get the column for
-     * @return the column for the performance round table
+     * @param line the line to parse
+     * @param round the performance round to get the value for
+     * @return the performance table column value, null if column cannot be found
      */
-    public int getPerfTableColumn(final int round) {
-      return perfTableColumn[round];
+    public @Nullable String getPerfTable(final @Nullable String[] line,
+                                         final int round) {
+      final int columnIndex = perfTableColumn[round];
+      return getValue(line, columnIndex);
     }
 
     private final int[] practiceColumn;
@@ -1666,21 +1684,27 @@ public class TournamentSchedule implements Serializable {
     }
 
     /**
-     * @param round the practice round to get the column for
-     * @return the column for the practice round time
+     * @param line the line to parse
+     * @param round the practice round to get the value for
+     * @return the practice column value, null if column cannot be found
      */
-    public int getPracticePerfColumn(final int round) {
-      return practiceColumn[round];
+    public @Nullable String getPractice(final @Nullable String[] line,
+                                        final int round) {
+      final int columnIndex = practiceColumn[round];
+      return getValue(line, columnIndex);
     }
 
     private final int[] practiceTableColumn;
 
     /**
-     * @param round the practice round to get the column for
-     * @return the column for the practice round table
+     * @param line the line to parse
+     * @param round the practice round to get the value for
+     * @return the practice table column value, null if column cannot be found
      */
-    public int getPracticePerfTableColumn(final int round) {
-      return practiceTableColumn[round];
+    public @Nullable String getPracticeTable(final @Nullable String[] line,
+                                             final int round) {
+      final int columnIndex = practiceTableColumn[round];
+      return getValue(line, columnIndex);
     }
 
     /**
@@ -1712,7 +1736,7 @@ public class TournamentSchedule implements Serializable {
       this.teamNumColumn = teamNumColumn;
       this.organizationColumn = organizationColumn;
       this.teamNameColumn = teamNameColumn;
-      this.divisionColumn = divisionColumn;
+      this.awardGroupColumn = divisionColumn;
       this.subjectiveColumns = subjectiveColumns;
       this.judgeGroupColumn = judgeGroupColumn;
 
@@ -1733,7 +1757,7 @@ public class TournamentSchedule implements Serializable {
         if (column == this.teamNumColumn //
             || column == this.organizationColumn //
             || column == this.teamNameColumn //
-            || column == this.divisionColumn //
+            || column == this.awardGroupColumn //
             || column == this.judgeGroupColumn //
         ) {
           match = true;
