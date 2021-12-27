@@ -23,6 +23,7 @@ import fll.scheduler.SchedParams;
 import fll.scheduler.SubjectiveStation;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
+import fll.scheduler.TournamentSchedule.ColumnInformation;
 
 /**
  * Data used in the workflow of uploading a schedule.
@@ -116,22 +117,33 @@ public class UploadScheduleData implements Serializable {
     schedule = v;
   }
 
-  private final LinkedList<CategoryColumnMapping> categoryColumnMappings = new LinkedList<>();
+  private ColumnInformation columnInfo = ColumnInformation.NULL;
+
+  /**
+   * @return the information needed to read the schedule file into a schedule,
+   *         initially set to {@link ColumnInformation#NULL}.
+   */
+  public ColumnInformation getColumnInformation() {
+    return columnInfo;
+  }
+
+  /**
+   * @param v see {@link #getColumnInformation()}
+   */
+  public void setColumnInformation(final ColumnInformation v) {
+    columnInfo = v;
+  }
 
   /**
    * @return the mappings of categories to schedule columns, initially empty,
    *         unmodifiable collection
    */
   public Collection<CategoryColumnMapping> getCategoryColumnMappings() {
-    return Collections.unmodifiableCollection(categoryColumnMappings);
-  }
-
-  /**
-   * @param v see {@link #getCategoryColumnMappings()}
-   */
-  public void setCategoryColumnMappings(final Collection<CategoryColumnMapping> v) {
-    categoryColumnMappings.clear();
-    categoryColumnMappings.addAll(v);
+    if (null != columnInfo) {
+      return columnInfo.getSubjectiveColumnMappings();
+    } else {
+      return Collections.emptyList();
+    }
   }
 
   /**
@@ -158,24 +170,6 @@ public class UploadScheduleData implements Serializable {
   }
 
   private boolean subjectiveStationsSet = false;
-
-  private final LinkedList<String> unusedHeaders = new LinkedList<>();
-
-  /**
-   * @return the unused headers from the schedule, initially empty, unmodifiable
-   *         list
-   */
-  public List<String> getUnusedHeaders() {
-    return Collections.unmodifiableList(unusedHeaders);
-  }
-
-  /**
-   * @param v see {@link #getUnusedHeaders()}
-   */
-  public void setUnusedHeaders(final List<String> v) {
-    unusedHeaders.clear();
-    unusedHeaders.addAll(v);
-  }
 
   private SchedParams schedParams = new SchedParams();
 

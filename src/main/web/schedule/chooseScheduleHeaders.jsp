@@ -41,7 +41,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
     <c:remove var="message" />
 
     <form name="choose_headers" id="choose_headers" method='POST'
-        action='ProcessScheduleHeaders'>
+        action="<c:url value='/schedule/ChooseScheduleHeaders'/>">
 
         <p>Highlighted columns are required, all others are
             optional.</p>
@@ -140,7 +140,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
                     ${practiceLoopStatus.index} table</td>
                 <td>
                     <select
-                        name='practicefTable${practiceLoopStatus.index}'>
+                        name='practiceTable${practiceLoopStatus.index}'>
                         <c:forEach items="${spreadsheetHeaderNames}"
                             var="fileHeader">
                             <option value="${fileHeader}">${fileHeader}</option>
@@ -157,7 +157,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
                     <td bgcolor='yellow'>Performance
                         ${perfLoopStatus.index}</td>
                     <td>
-                        <select name='perf${prefLoopStatus.index}'>
+                        <select name='perf${perfLoopStatus.index}'>
                             <c:forEach items="${spreadsheetHeaderNames}"
                                 var="fileHeader">
                                 <option value="${fileHeader}">${fileHeader}</option>
@@ -184,8 +184,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
 
         <p>Match the column names from the schedule data file with
             the subjective categories that they contain the schedule
-            for. Also specify the number of minutes between judging
-            sessions for each category.</p>
+            for.</p>
 
         <table border='1'>
             <tr>
@@ -194,7 +193,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
                 <th>Duration (minutes)</th>
             </tr>
             <c:forEach
-                items="${challengeDescription.subjectiveCategories }"
+                items="${challengeDescription.subjectiveCategories}"
                 var="subcat">
                 <tr>
 
@@ -203,22 +202,13 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
                     <td>
                         <select name='${subcat.name}:header'>
 
-                            <c:forEach
-                                items="${uploadScheduleData.headerNames}"
-                                var="subjHeader" varStatus="loopStatus">
-                                <option value='${loopStatus.index}'>${subjHeader}</option>
+                            <c:forEach items="${spreadsheetHeaderNames}"
+                                var="subjHeader">
+                                <option value='${subjHeader}'>${subjHeader}</option>
                             </c:forEach>
                             <!-- foreach data file header -->
 
                         </select>
-                    </td>
-
-                    <td>
-                        <input type="text"
-                            name="${subcat.name}:duration"
-                            id="${subcat.name}:duration"
-                            value="${default_duration}"
-                            class="required digits" />
                     </td>
 
                 </tr>

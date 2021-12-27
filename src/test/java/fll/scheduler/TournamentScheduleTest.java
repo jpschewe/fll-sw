@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,10 +26,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.SuffixFileFilter;
-import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -38,6 +35,7 @@ import fll.TestUtils;
 import fll.Tournament;
 import fll.TournamentLevel;
 import fll.Utilities;
+import fll.db.CategoryColumnMapping;
 import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
@@ -52,10 +50,6 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 @ExtendWith(TestUtils.InitializeLogging.class)
 public class TournamentScheduleTest {
-
-  private static final String RESEARCH_HEADER = "Research";
-
-  private static final String TECHNICAL_HEADER = "Technical";
 
   /**
    * @throws SQLException test error
@@ -86,6 +80,34 @@ public class TournamentScheduleTest {
   }
 
   /**
+   * Column information for 16-16-test.xls.
+   */
+  private TournamentSchedule.ColumnInformation createColumnInformation1616Test(final int headerRowIndex,
+                                                                               final @Nullable String[] headerRow) {
+    final int numRounds = 3;
+    final String[] perfColumn = new String[numRounds];
+    final String[] perfTableColumn = new String[numRounds];
+    for (int round = 0; round < numRounds; ++round) {
+      perfColumn[round] = String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
+          + 1);
+      perfTableColumn[round] = String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
+          + 1);
+    }
+
+    final Collection<CategoryColumnMapping> subjectiveColumnMappings = new LinkedList<>();
+    subjectiveColumnMappings.add(new CategoryColumnMapping("teamwork", "Presentation"));
+    subjectiveColumnMappings.add(new CategoryColumnMapping("robustdesign", "Technical"));
+    subjectiveColumnMappings.add(new CategoryColumnMapping("programming", "Technical"));
+    subjectiveColumnMappings.add(new CategoryColumnMapping("research", "Presentation"));
+
+    return new TournamentSchedule.ColumnInformation(headerRowIndex, headerRow, TournamentSchedule.TEAM_NUMBER_HEADER,
+                                                    TournamentSchedule.ORGANIZATION_HEADER,
+                                                    TournamentSchedule.TEAM_NAME_HEADER, "Div",
+                                                    TournamentSchedule.JUDGE_GROUP_HEADER, subjectiveColumnMappings,
+                                                    perfColumn, perfTableColumn, new String[0], new String[0]);
+  }
+
+  /**
    * @throws SQLException test error
    * @throws IOException test error
    * @throws InvalidFormatException test error
@@ -99,14 +121,12 @@ public class TournamentScheduleTest {
 
     final String tournamentName = "ut_ts_test_ss1";
     final String url = "jdbc:hsqldb:mem:ut_ts_test_ss1";
-    Connection memConnection = null;
-    try {
-      final InputStream stream = TournamentScheduleTest.class.getResourceAsStream("/fll/db/data/challenge-test.xml");
-      assertNotNull(stream);
-      final ChallengeDescription description = ChallengeParser.parse(new InputStreamReader(stream,
-                                                                                           Utilities.DEFAULT_CHARSET));
+    final InputStream stream = TournamentScheduleTest.class.getResourceAsStream("/fll/db/data/challenge-test.xml");
+    assertNotNull(stream);
+    final ChallengeDescription description = ChallengeParser.parse(new InputStreamReader(stream,
+                                                                                         Utilities.DEFAULT_CHARSET));
 
-      memConnection = DriverManager.getConnection(url);
+    try (Connection memConnection = DriverManager.getConnection(url)) {
 
       GenerateDB.generateDB(description, memConnection);
 
@@ -141,28 +161,19 @@ public class TournamentScheduleTest {
 
       final String sheetName = sheetNames.get(0);
 
-      // determine the subjective columns
       scheduleStream = scheduleResource.openStream();
       final CellFileReader reader = new ExcelCellReader(scheduleStream, sheetName);
-      final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
+      final int headerRowIndex = 2;
+      reader.skipRows(headerRowIndex);
+      final @Nullable String @Nullable [] headerRow = reader.readNext();
+      assertNotNull(headerRow);
 
-      final Collection<String> possibleSubjectiveHeaders = new LinkedList<>();
-      possibleSubjectiveHeaders.add(TournamentScheduleTest.TECHNICAL_HEADER);
-      possibleSubjectiveHeaders.add(TournamentScheduleTest.RESEARCH_HEADER);
-      possibleSubjectiveHeaders.add("Presentation");
-
-      // prompt for which headers are subjective
-      final Collection<String> subjectiveHeaders = new LinkedList<>();
-      for (final String unused : columnInfo.getUnusedColumns()) {
-        if (possibleSubjectiveHeaders.contains(unused)) {
-          subjectiveHeaders.add(unused);
-        }
-      }
+      final ColumnInformation columnInfo = createColumnInformation1616Test(headerRowIndex, headerRow);
 
       scheduleStream = scheduleResource.openStream();
       final TournamentSchedule schedule = new TournamentSchedule("Test Tournament",
                                                                  new ExcelCellReader(scheduleStream, sheetName),
-                                                                 subjectiveHeaders);
+                                                                 columnInfo);
       scheduleStream.close();
 
       schedule.storeSchedule(memConnection, tournament.getTournamentID());
@@ -170,11 +181,35 @@ public class TournamentScheduleTest {
       final boolean existsAfter = TournamentSchedule.scheduleExistsInDatabase(memConnection,
                                                                               tournament.getTournamentID());
       assertTrue(existsAfter, "Schedule should exist now that it's been stored");
-
-    } finally {
-      SQLFunctions.close(memConnection);
-      memConnection = null;
     }
+  }
+
+  /**
+   * Column information for 12-hour-format.xls and 24-hour-format.xls.
+   */
+  private TournamentSchedule.ColumnInformation createColumnInformationTimeFormatTest(final int headerRowIndex,
+                                                                                     final @Nullable String[] headerRow) {
+    final int numRounds = 3;
+    final String[] perfColumn = new String[numRounds];
+    final String[] perfTableColumn = new String[numRounds];
+    for (int round = 0; round < numRounds; ++round) {
+      perfColumn[round] = String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
+          + 1);
+      perfTableColumn[round] = String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
+          + 1);
+    }
+
+    final Collection<CategoryColumnMapping> subjectiveColumnMappings = new LinkedList<>();
+    subjectiveColumnMappings.add(new CategoryColumnMapping("teamwork", "Core Values"));
+    subjectiveColumnMappings.add(new CategoryColumnMapping("robustdesign", "Design"));
+    subjectiveColumnMappings.add(new CategoryColumnMapping("programming", "Design"));
+    subjectiveColumnMappings.add(new CategoryColumnMapping("research", "Project"));
+
+    return new TournamentSchedule.ColumnInformation(headerRowIndex, headerRow, TournamentSchedule.TEAM_NUMBER_HEADER,
+                                                    TournamentSchedule.ORGANIZATION_HEADER,
+                                                    TournamentSchedule.TEAM_NAME_HEADER, "Div",
+                                                    TournamentSchedule.JUDGE_GROUP_HEADER, subjectiveColumnMappings,
+                                                    perfColumn, perfTableColumn, new String[0], new String[0]);
   }
 
   /**
@@ -190,44 +225,54 @@ public class TournamentScheduleTest {
   @Test
   public void testScheduleTimeFormat()
       throws InvalidFormatException, IOException, ParseException, ScheduleParseException {
-    final Collection<String> possibleSubjectiveHeaders = new LinkedList<>();
-    possibleSubjectiveHeaders.add("Core Values");
-    possibleSubjectiveHeaders.add("Design");
-    possibleSubjectiveHeaders.add("Project");
+
+    final int headerRowIndex = 2;
+    final String sheetName = "Sheet1";
 
     final URL schedule12Resource = TournamentScheduleTest.class.getResource("data/12-hour-format.xls");
     assertNotNull(schedule12Resource);
-    final TournamentSchedule schedule12 = loadSchedule(schedule12Resource, possibleSubjectiveHeaders);
 
     final URL schedule24Resource = TournamentScheduleTest.class.getResource("data/24-hour-format.xls");
     assertNotNull(schedule24Resource);
-    final TournamentSchedule schedule24 = loadSchedule(schedule12Resource, possibleSubjectiveHeaders);
 
-    // write out the schedules to CSV and then compare
-    final StringWriter output12 = new StringWriter();
-    schedule12.writeToCSV(output12);
-    final String str12 = output12.toString();
+    try (InputStream schedule12Stream = schedule12Resource.openStream();
+        CellFileReader reader12 = new ExcelCellReader(schedule12Stream, sheetName)) {
 
-    final StringWriter output24 = new StringWriter();
-    schedule24.writeToCSV(output24);
-    final String str24 = output24.toString();
+      reader12.skipRows(headerRowIndex);
+      final @Nullable String @Nullable [] headerRow12 = reader12.readNext();
+      assertNotNull(headerRow12);
 
-    assertEquals(str24, str12);
+      final ColumnInformation columnInfo12 = createColumnInformationTimeFormatTest(headerRowIndex, headerRow12);
+
+      final TournamentSchedule schedule12 = loadSchedule(schedule12Resource, columnInfo12);
+
+      try (InputStream schedule24Stream = schedule24Resource.openStream()) {
+        final CellFileReader reader = new ExcelCellReader(schedule24Stream, sheetName);
+
+        reader.skipRows(headerRowIndex);
+        final @Nullable String @Nullable [] headerRow24 = reader.readNext();
+        assertNotNull(headerRow24);
+
+        final ColumnInformation columnInfo24 = createColumnInformationTimeFormatTest(headerRowIndex, headerRow24);
+
+        final TournamentSchedule schedule24 = loadSchedule(schedule24Resource, columnInfo24);
+
+        // write out the schedules to CSV and then compare
+        final StringWriter output12 = new StringWriter();
+        schedule12.writeToCSV(output12);
+        final String str12 = output12.toString();
+
+        final StringWriter output24 = new StringWriter();
+        schedule24.writeToCSV(output24);
+        final String str24 = output24.toString();
+
+        assertEquals(str24, str12);
+      }
+    }
   }
 
-  /**
-   * Load a schedule.
-   *
-   * @param path Where to load from
-   * @param possibleSubjectiveHeaders the subjective entry headers to look for
-   * @return the loaded schedule
-   * @throws IOException
-   * @throws InvalidFormatException
-   * @throws ParseException
-   * @throws ScheduleParseException
-   */
   private TournamentSchedule loadSchedule(final URL path,
-                                          final Collection<String> possibleSubjectiveHeaders)
+                                          final TournamentSchedule.ColumnInformation columnInfo)
       throws IOException, InvalidFormatException, ParseException, ScheduleParseException {
     InputStream scheduleStream = path.openStream();
     final List<String> sheetNames = ExcelCellReader.getAllSheetNames(scheduleStream);
@@ -236,75 +281,13 @@ public class TournamentScheduleTest {
 
     final String sheetName = sheetNames.get(0);
 
-    // determine the subjective columns
-    scheduleStream = path.openStream();
-    final CellFileReader reader = new ExcelCellReader(scheduleStream, sheetName);
-    final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
-
-    // prompt for which headers are subjective
-    final Collection<String> subjectiveHeaders = new LinkedList<>();
-    for (final String unused : columnInfo.getUnusedColumns()) {
-      if (possibleSubjectiveHeaders.contains(unused)) {
-        subjectiveHeaders.add(unused);
-      }
-    }
-
     scheduleStream = path.openStream();
     final TournamentSchedule schedule = new TournamentSchedule("Test Tournament",
                                                                new ExcelCellReader(scheduleStream, sheetName),
-                                                               subjectiveHeaders);
+                                                               columnInfo);
     scheduleStream.close();
 
     return schedule;
-
-  }
-
-  /**
-   * Test loading all schedules in the repository.
-   * This depends on being able to find the schedules.
-   * The test assumes that it is executing from the base build directory or the
-   * root of the repository.
-   * All schedule files that end in '.xls' will be loaded.
-   *
-   * @throws ScheduleParseException test error
-   * @throws ParseException test error
-   * @throws IOException test error
-   * @throws InvalidFormatException test error
-   */
-  @Test
-  public void testLoadAllSchedules()
-      throws InvalidFormatException, IOException, ParseException, ScheduleParseException {
-    File baseScheduleDir = new File("../scheduling/blank-schedules");
-    if (!baseScheduleDir.exists()) {
-      baseScheduleDir = new File("scheduling/blank-schedules");
-    }
-    assertTrue(baseScheduleDir.exists(), "Can't find schedules in "
-        + baseScheduleDir.getAbsolutePath());
-
-    assertTrue(baseScheduleDir.isDirectory(), "Schedules path isn't a directory: "
-        + baseScheduleDir.getAbsolutePath());
-
-    final Collection<File> schedules = FileUtils.listFiles(baseScheduleDir, new SuffixFileFilter(".xls"),
-                                                           TrueFileFilter.INSTANCE);
-    assertTrue(!schedules.isEmpty(), "Didn't find any schedules");
-
-    final Collection<String> possibleSubjectiveHeaders = new LinkedList<>();
-    possibleSubjectiveHeaders.add("Core Values");
-    possibleSubjectiveHeaders.add("Design");
-    possibleSubjectiveHeaders.add("Project");
-
-    for (final File file : schedules) {
-      final URL resource = file.toURI().toURL();
-      final TournamentSchedule schedule = loadSchedule(resource, possibleSubjectiveHeaders);
-
-      // make sure there are some schedule entries
-      assertTrue(!schedule.getSchedule().isEmpty(), "No entries for schedule: "
-          + file.getName());
-      assertTrue(!schedule.getAwardGroups().isEmpty(), "No division for schedule: "
-          + file.getName());
-      assertTrue(!schedule.getJudgingGroups().isEmpty(), "No judging groups for schedule: "
-          + file.getName());
-    }
 
   }
 

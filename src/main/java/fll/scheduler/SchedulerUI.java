@@ -50,7 +50,6 @@ import java.util.stream.Collectors;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
-import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
@@ -81,6 +80,8 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
@@ -130,6 +131,8 @@ public class SchedulerUI extends JFrame {
 
   @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class isn't going to be serialized")
   private TournamentSchedule mScheduleData = new TournamentSchedule();
+
+  private @MonotonicNonNull ColumnInformation columnInfo = null;
 
   private SchedulerTableModel mScheduleModel = new SchedulerTableModel(mScheduleData);
 
@@ -778,11 +781,15 @@ public class SchedulerUI extends JFrame {
         final String sheetName = getCurrentSheetName();
         final String name = Utilities.extractBasename(selectedFile);
 
+        if (null == columnInfo) {
+          throw new IllegalStateException("Cannot reload a schedule without having specified the column information");
+        }
+
         final TournamentSchedule newData = new TournamentSchedule(name,
                                                                   CellFileReader.createCellReader(selectedFile,
                                                                                                   sheetName),
-                                                                  mScheduleData.getSubjectiveStations());
-        setScheduleData(newData);
+                                                                  columnInfo);
+        setScheduleData(newData, columnInfo);
       } catch (final IOException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error reloading file: %s", e.getMessage());
@@ -1066,7 +1073,7 @@ public class SchedulerUI extends JFrame {
     dialog.setLocationRelativeTo(this);
     dialog.setVisible(true);
 
-    final ColumnInformation columnInfo = dialog.createColumnInformation(headerRow);
+    final ColumnInformation columnInfo = dialog.createColumnInformation(headerRowIndex, headerRow);
 
     dialog.dispose();
 
@@ -1110,16 +1117,12 @@ public class SchedulerUI extends JFrame {
         return;
       }
 
-      /* FIXME final ColumnInformation columnInfo = */promptForColumns(selectedFile, sheetName, headerRowIndex,
-                                                                       headerNames, description);
+      final ColumnInformation columnInfo = promptForColumns(selectedFile, sheetName, headerRowIndex, headerNames,
+                                                            description);
 
-      // FIXME columns to ColumnInformation
       final List<SubjectiveStation> newSubjectiveStations;
       if (null == subjectiveStations) {
-        final ColumnInformation columnInfo = TournamentSchedule.findColumns(CellFileReader.createCellReader(selectedFile,
-                                                                                                            sheetName),
-                                                                            new LinkedList<String>());
-        newSubjectiveStations = gatherSubjectiveStationInformation(SchedulerUI.this, columnInfo);
+        newSubjectiveStations = specifySubjectivateStationDurations(SchedulerUI.this, columnInfo);
       } else {
         newSubjectiveStations = subjectiveStations;
       }
@@ -1136,10 +1139,10 @@ public class SchedulerUI extends JFrame {
       final TournamentSchedule schedule = new TournamentSchedule(name,
                                                                  CellFileReader.createCellReader(selectedFile,
                                                                                                  sheetName),
-                                                                 subjectiveHeaders);
+                                                                 columnInfo);
       mScheduleFile = selectedFile;
       mScheduleSheetName = sheetName;
-      setScheduleData(schedule);
+      setScheduleData(schedule, columnInfo);
 
       setTitle(BASE_TITLE
           + " - "
@@ -1303,12 +1306,15 @@ public class SchedulerUI extends JFrame {
     performanceDuration.setValue(mSchedParams.getPerformanceMinutes());
   }
 
-  private void setScheduleData(final TournamentSchedule sd) {
+  @EnsuresNonNull("this.columnInfo")
+  private void setScheduleData(final TournamentSchedule sd,
+                               final ColumnInformation columnInfo) {
     mScheduleTable.clearSelection();
 
     mScheduleData = sd;
     mScheduleModel = new SchedulerTableModel(mScheduleData);
     mScheduleTable.setModel(mScheduleModel);
+    this.columnInfo = columnInfo;
 
     checkSchedule();
   }
@@ -1513,58 +1519,44 @@ public class SchedulerUI extends JFrame {
   }
 
   /**
-   * Prompt the user for which columns represent subjective categories.
+   * Prompt the user for the duration of each judging station
    *
    * @param parentComponent the parent for the dialog
    * @param columnInfo the column information
    * @return the list of subjective information the user choose
    */
-  private static List<SubjectiveStation> gatherSubjectiveStationInformation(final @Nullable Component parentComponent,
-                                                                            final ColumnInformation columnInfo) {
-    final List<String> unusedColumns = columnInfo.getUnusedColumns();
-    final List<JCheckBox> checkboxes = new LinkedList<>();
-    final List<JFormattedTextField> subjectiveDurations = new LinkedList<>();
+  private static List<SubjectiveStation> specifySubjectivateStationDurations(final Component parentComponent,
+                                                                         final ColumnInformation columnInfo) {
     final Box optionPanel = Box.createVerticalBox();
 
-    optionPanel.add(new JLabel("Specify which columns in the data file are for subjective judging"));
+    optionPanel.add(new JLabel("Specify the durations for each judging station"));
 
     final JPanel grid = new JPanel(new GridLayout(0, 2));
     optionPanel.add(grid);
-    grid.add(new JLabel("Data file column"));
+    grid.add(new JLabel("Judging Station"));
     grid.add(new JLabel("Duration (minutes)"));
 
-    for (final String column : unusedColumns) {
-      if (null != column
-          && column.length() > 0) {
-        final JCheckBox checkbox = new JCheckBox(column);
-        checkboxes.add(checkbox);
-        final JFormattedTextField duration = new JFormattedTextField(Integer.valueOf(SchedParams.DEFAULT_SUBJECTIVE_MINUTES));
-        duration.setColumns(4);
-        subjectiveDurations.add(duration);
-        grid.add(checkbox);
-        grid.add(duration);
-      }
-    }
-    final List<SubjectiveStation> subjectiveHeaders;
-    if (!checkboxes.isEmpty()) {
-      JOptionPane.showMessageDialog(parentComponent, optionPanel, "Choose Subjective Columns",
-                                    JOptionPane.QUESTION_MESSAGE);
-      subjectiveHeaders = new LinkedList<>();
-      for (int i = 0; i < checkboxes.size(); ++i) {
-        final JCheckBox box = checkboxes.get(i);
-        final JFormattedTextField duration = subjectiveDurations.get(i);
-        if (box.isSelected()) {
-          subjectiveHeaders.add(new SubjectiveStation(box.getText(), ((Number) duration.getValue()).intValue()));
-        }
-      }
-    } else {
-      subjectiveHeaders = Collections.emptyList();
+    final Map<String, JFormattedTextField> fields = new HashMap<>();
+    for (final String judgingStation : columnInfo.getSubjectiveStationNames()) {
+      final JLabel label = new JLabel(judgingStation);
+      final JFormattedTextField duration = new JFormattedTextField(Integer.valueOf(SchedParams.DEFAULT_SUBJECTIVE_MINUTES));
+      duration.setColumns(4);
+      grid.add(label);
+      grid.add(duration);
+      fields.put(judgingStation, duration);
     }
 
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Subjective headers selected: "
-          + subjectiveHeaders);
-    }
+    JOptionPane.showMessageDialog(parentComponent, optionPanel, "Choose Subjective Durations",
+                                  JOptionPane.QUESTION_MESSAGE);
+
+    final List<SubjectiveStation> subjectiveHeaders = fields.entrySet().stream() //
+                                                            .map(e -> new SubjectiveStation(e.getKey(),
+                                                                                            ((Number) e.getValue()
+                                                                                                       .getValue()).intValue())) //
+                                                            .collect(Collectors.toList());
+
+    LOGGER.trace("Subjective durations: {}", subjectiveHeaders);
+
     return subjectiveHeaders;
   }
 

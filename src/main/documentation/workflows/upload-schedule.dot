@@ -12,7 +12,13 @@ CheckScheduleExists -> "promptForOverwrite.jsp" [label="if schedule exists"];
 CheckScheduleExists -> "scheduleConstraints.jsp";
 
 "scheduleConstraints.jsp" -> ProcessScheduleConstraints;
-ProcessScheduleConstraints -> LoadSchedule;
+ProcessScheduleConstraints -> "chooseScheduleHeaders.jsp";
+
+"chooseScheduleHeaders.jsp" -> ChooseScheduleHeaders;
+ChooseScheduleHeaders -> "specifySubjectiveStationDurations.jsp";
+
+"specifySubjectiveStationDurations.jsp" -> SpecifySubjectiveStationDurations;
+SpecifySubjectiveStationDurations -> LoadSchedule;
 
 LoadSchedule -> CheckMissingTeams;
 
@@ -28,6 +34,11 @@ CheckViolations -> "GatherTeamInformationChanges" [label="if no violations"];
 CheckViolations -> "displayHardViolations.jsp" [label="if hard violations found"];
 CheckViolations -> "displaySoftViolations.jsp" [label="if no hard violations"];
 
+"displayHardViolations.jsp" -> "admin_index.jsp";
+
+"displaySoftViolations.jsp" -> "GatherTeamInformationChanges" [label="if ok"];
+"displaySoftViolations.jsp" -> "admin_index.jsp" [label="if not ok"];
+
 "GatherTeamInformationChanges" -> "CommitSchedule" [label="if no changes"];
 "GatherTeamInformationChanges" -> "promptTeamInformationChanges.jsp";
 
@@ -36,13 +47,6 @@ CheckViolations -> "displaySoftViolations.jsp" [label="if no hard violations"];
 
 "CommitTeamInformationChanges" -> "CommitSchedule";
 
-LoadSchedule -> "chooseSubjectiveHeaders.jsp" [label="if subjective stations not specified and unused schedule columns"];
-"chooseSubjectiveHeaders.jsp" -> ProcessSubjectiveHeaders;
-ProcessSubjectiveHeaders -> LoadSchedule;
 
-"displayHardViolations.jsp" -> "admin_index.jsp";
-
-"displaySoftViolations.jsp" -> "GatherTeamInformationChanges" [label="if ok"];
-"displaySoftViolations.jsp" -> "admin_index.jsp" [label="if not ok"];
 
 }

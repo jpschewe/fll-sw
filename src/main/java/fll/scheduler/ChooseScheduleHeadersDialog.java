@@ -15,24 +15,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.db.CategoryColumnMapping;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 
 /**
- * Associate headers in the schedule file with the information needed to load the schedule.
+ * Associate headers in the schedule file with the information needed to load
+ * the schedule.
  */
 class ChooseScheduleHeadersDialog extends JDialog {
 
@@ -55,8 +57,6 @@ class ChooseScheduleHeadersDialog extends JDialog {
   private final List<JComboBox<String>> performanceRoundTables;
 
   private final Map<SubjectiveScoreCategory, JComboBox<String>> subjectiveCategories = new HashMap<>();
-
-  private final Map<SubjectiveScoreCategory, JFormattedTextField> subjectiveCategoryDurations = new HashMap<>();
 
   /**
    * @param owner the owner for the dialog
@@ -142,16 +142,9 @@ class ChooseScheduleHeadersDialog extends JDialog {
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
       panel.add(new JLabel(category.getTitle()));
 
-      final Box box = Box.createHorizontalBox();
-      panel.add(box);
       final JComboBox<String> columnSelect = new JComboBox<>(requiredHeaderNames);
-      box.add(columnSelect);
+      panel.add(columnSelect);
       subjectiveCategories.put(category, columnSelect);
-
-      final JFormattedTextField duration = new JFormattedTextField(Integer.valueOf(SchedParams.DEFAULT_SUBJECTIVE_MINUTES));
-      duration.setColumns(4);
-      box.add(duration);
-      subjectiveCategoryDurations.put(category, duration);
     }
 
     final Box buttonBox = Box.createHorizontalBox();
@@ -170,12 +163,36 @@ class ChooseScheduleHeadersDialog extends JDialog {
   }
 
   /**
+   * @param headerRowIndex index into the data file to get the header row
    * @param headerRow the header row from the schedule file
    * @return the column information for the schedule
    */
-  public ColumnInformation createColumnInformation(final @Nullable String[] headerRow) {
-    // FIXME
-    return null;
+  public ColumnInformation createColumnInformation(final int headerRowIndex,
+                                                   final @Nullable String[] headerRow) {
+    final Collection<CategoryColumnMapping> subjectiveColumnMappings = subjectiveCategories.entrySet().stream() //
+                                                                                           .map(e -> new CategoryColumnMapping(e.getKey()
+                                                                                                                                .getName(),
+                                                                                                                               e.getValue()
+                                                                                                                                .getItemAt(e.getValue()
+                                                                                                                                            .getSelectedIndex()))) //
+                                                                                           .collect(Collectors.toList());
+
+    final String[] perfColumn = performanceRounds.stream().map(c -> c.getItemAt(c.getSelectedIndex()))
+                                                 .collect(Collectors.toList()).toArray(new String[0]);
+    final String[] perfTableColumn = performanceRoundTables.stream().map(c -> c.getItemAt(c.getSelectedIndex()))
+                                                           .collect(Collectors.toList()).toArray(new String[0]);
+
+    final String[] practiceColumn = practiceRounds.stream().map(c -> c.getItemAt(c.getSelectedIndex()))
+                                                  .collect(Collectors.toList()).toArray(new String[0]);
+    final String[] practiceTableColumn = practiceRoundTables.stream().map(c -> c.getItemAt(c.getSelectedIndex()))
+                                                            .collect(Collectors.toList()).toArray(new String[0]);
+
+    return new ColumnInformation(headerRowIndex, headerRow, teamNumber.getItemAt(teamNumber.getSelectedIndex()),
+                                 organization.getItemAt(organization.getSelectedIndex()),
+                                 teamName.getItemAt(teamName.getSelectedIndex()),
+                                 awardGroup.getItemAt(awardGroup.getSelectedIndex()),
+                                 judgingGroup.getItemAt(judgingGroup.getSelectedIndex()), subjectiveColumnMappings,
+                                 perfColumn, perfTableColumn, practiceColumn, practiceTableColumn);
   }
 
 }
