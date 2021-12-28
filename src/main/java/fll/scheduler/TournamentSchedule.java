@@ -1643,13 +1643,13 @@ public class TournamentSchedule implements Serializable {
 
     /**
      * @param headerRowIndex {@link #getHeaderRowIndex()}
-     * @param headerLine {@link #getHeaderLine()}
-     * @param teamNumColumn {@link #getTeamNumColumn()}
-     * @param organizationColumn {@link #getOrganizationColumn()}
-     * @param teamNameColumn {@link #getTeamNameColumn()}
-     * @param awardGroupColumn {@link #getAwardGroupColumn()}
+     * @param headerLine the header line, used to match column names to indicies
+     * @param teamNumColumn {@link #getTeamNum(String[])}
+     * @param organizationColumn {@link #getOrganization(String[])}
+     * @param teamNameColumn {@link #getTeamName(String[])}
+     * @param awardGroupColumn {@link #getAwardGroup(String[])}
      * @param subjectiveColumnMappings {@link #getSubjectiveColumnMappings()}
-     * @param judgeGroupColumn {@link #getJudgeGroupColumn()}
+     * @param judgeGroupColumn {@link #getJudgingGroup(String[])}
      * @param perfColumn {@link #getPerf(String[], int)}
      * @param perfTableColumn {@link #getPerfTable(String[], int)}
      * @param practiceColumn {@link #getPractice(String[], int)}
