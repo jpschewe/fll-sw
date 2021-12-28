@@ -37,7 +37,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Formatter;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -1129,11 +1128,6 @@ public class SchedulerUI extends JFrame {
 
       mSchedParams.setSubjectiveStations(newSubjectiveStations);
 
-      final List<String> subjectiveHeaders = new LinkedList<>();
-      for (final SubjectiveStation station : newSubjectiveStations) {
-        subjectiveHeaders.add(station.getName());
-      }
-
       final String name = Utilities.extractBasename(selectedFile);
 
       final TournamentSchedule schedule = new TournamentSchedule(name,
@@ -1526,7 +1520,7 @@ public class SchedulerUI extends JFrame {
    * @return the list of subjective information the user choose
    */
   private static List<SubjectiveStation> specifySubjectivateStationDurations(final Component parentComponent,
-                                                                         final ColumnInformation columnInfo) {
+                                                                             final ColumnInformation columnInfo) {
     final Box optionPanel = Box.createVerticalBox();
 
     optionPanel.add(new JLabel("Specify the durations for each judging station"));

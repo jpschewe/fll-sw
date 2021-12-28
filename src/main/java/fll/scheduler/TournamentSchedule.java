@@ -1420,7 +1420,7 @@ public class TournamentSchedule implements Serializable {
    * Keep track of column information from a spreadsheet.
    * A -1 value for a column means that it was not found.
    */
-  public static final class ColumnInformation {
+  public static final class ColumnInformation implements Serializable {
 
     private final int teamNumColumn;
 

@@ -31,6 +31,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.TestUtils;
 import fll.Tournament;
 import fll.TournamentLevel;
@@ -82,6 +83,7 @@ public class TournamentScheduleTest {
   /**
    * Column information for 16-16-test.xls.
    */
+  @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
   private TournamentSchedule.ColumnInformation createColumnInformation1616Test(final int headerRowIndex,
                                                                                final @Nullable String[] headerRow) {
     final int numRounds = 3;
@@ -187,6 +189,7 @@ public class TournamentScheduleTest {
   /**
    * Column information for 12-hour-format.xls and 24-hour-format.xls.
    */
+  @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
   private TournamentSchedule.ColumnInformation createColumnInformationTimeFormatTest(final int headerRowIndex,
                                                                                      final @Nullable String[] headerRow) {
     final int numRounds = 3;
