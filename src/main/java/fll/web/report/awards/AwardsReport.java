@@ -48,6 +48,7 @@ import fll.db.AwardWinner;
 import fll.db.AwardWinners;
 import fll.db.CategoriesIgnored;
 import fll.db.OverallAwardWinner;
+import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
@@ -167,7 +168,9 @@ public class AwardsReport extends BaseFLLServlet {
 
     addPerformance(connection, document, documentBody, description, sortedAwardGroups);
 
-    addHeadToHead(connection, tournament, description, document, documentBody, sortedAwardGroups);
+    if (TournamentParameters.getRunningHeadToHead(connection, tournament)) {
+      addHeadToHead(connection, tournament, description, document, documentBody, sortedAwardGroups);
+    }
 
     addSubjectiveChallengeWinners(connection, description, document, documentBody, tournament, sortedAwardGroups);
     addSubjectiveExtraWinners(connection, description, document, documentBody, tournament, sortedAwardGroups, false);
