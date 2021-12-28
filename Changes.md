@@ -1,3 +1,5 @@
+* #1011 - Pause schedule checking while loading a new schedule file
+
 Release 16.4.0
 ==============
 * #994 - Add the ability to get subjective score sheets by category and award group

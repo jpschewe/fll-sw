@@ -1136,10 +1136,14 @@ public class SchedulerUI extends JFrame {
             && selectedFile.isFile()
             && selectedFile.canRead()) {
 
+          pauseCheckSchedule();
+
           // use default sched params until the user changes them
           setSchedParams(new SchedParams());
 
           loadScheduleFile(selectedFile, null);
+
+          resumeCheckSchedule();
         } else if (null != selectedFile) {
           JOptionPane.showMessageDialog(SchedulerUI.this,
                                         new Formatter().format("%s is not a file or is not readable",
@@ -1213,10 +1217,26 @@ public class SchedulerUI extends JFrame {
     checkSchedule();
   }
 
+  private boolean pauseCheckSchedule = false;
+
+  private void pauseCheckSchedule() {
+    pauseCheckSchedule = true;
+  }
+
+  private void resumeCheckSchedule() {
+    pauseCheckSchedule = false;
+    checkSchedule();
+  }
+
   /**
    * Verify the existing schedule and update the violations.
    */
   private void checkSchedule() {
+    if (pauseCheckSchedule) {
+      LOGGER.debug("Skipping schedule check during pause");
+      return;
+    }
+
     violationTable.clearSelection();
 
     // make sure sched params are updated based on the UI elements
