@@ -350,21 +350,59 @@ public class FullTournamentTest {
       selenium.findElement(By.id("upload-schedule")).click();
       assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
 
-      // accept default schedule constraints
-      assertTrue(selenium.getCurrentUrl().contains("scheduleConstraints"));
+      // select header row
+      seleniumWait.until(ExpectedConditions.urlContains("selectHeaderRow"));
+      selenium.findElement(By.id("headerRowIndex_0")).click();
       selenium.findElement(By.id("submit_data")).click();
 
-      // check that we're on the choose headers page and set the header
-      // mappings
-      seleniumWait.until(ExpectedConditions.urlContains("chooseSubjectiveHeaders"));
+      // accept default schedule constraints
+      seleniumWait.until(ExpectedConditions.urlContains("scheduleConstraints"));
+      selenium.findElement(By.id("submit_data")).click();
+
+      // map column names
+      seleniumWait.until(ExpectedConditions.urlContains("chooseScheduleHeaders"));
+
+      new Select(selenium.findElement(By.name("teamNumber"))).selectByVisibleText(TournamentSchedule.TEAM_NUMBER_HEADER);
+      new Select(selenium.findElement(By.name("teamName"))).selectByVisibleText(TournamentSchedule.TEAM_NAME_HEADER);
+      new Select(selenium.findElement(By.name("organization"))).selectByVisibleText(TournamentSchedule.ORGANIZATION_HEADER);
+      new Select(selenium.findElement(By.name("awardGroup"))).selectByVisibleText(TournamentSchedule.AWARD_GROUP_HEADER);
+      new Select(selenium.findElement(By.name("judgingGroup"))).selectByVisibleText(TournamentSchedule.JUDGE_GROUP_HEADER);
+
+      for (int i = 0; i < schedule.getNumberOfPracticeRounds(); ++i) {
+        final int round = i
+            + 1;
+        new Select(selenium.findElement(By.name(String.format("practice%d",
+                                                              round)))).selectByVisibleText(String.format(TournamentSchedule.PRACTICE_HEADER_FORMAT,
+                                                                                                          round));
+
+        new Select(selenium.findElement(By.name(String.format("practiceTable%d",
+                                                              round)))).selectByVisibleText(String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT,
+                                                                                                          round));
+      }
+
+      for (int i = 0; i < schedule.getNumberOfRegularMatchPlayRounds(); ++i) {
+        final int round = i
+            + 1;
+        new Select(selenium.findElement(By.name(String.format("perf%d",
+                                                              round)))).selectByVisibleText(String.format(TournamentSchedule.PERF_HEADER_FORMAT,
+                                                                                                          round));
+
+        new Select(selenium.findElement(By.name(String.format("perfTable%d",
+                                                              round)))).selectByVisibleText(String.format(TournamentSchedule.TABLE_HEADER_FORMAT,
+                                                                                                          round));
+      }
 
       final Collection<CategoryColumnMapping> mappings = CategoryColumnMapping.load(testDataConn,
                                                                                     sourceTournament.getTournamentID());
       for (final CategoryColumnMapping map : mappings) {
-        final Select select = new Select(selenium.findElement(By.name(map.getCategoryName()
-            + ":header")));
+        final Select select = new Select(selenium.findElement(By.name(String.format("%s:header",
+                                                                                    map.getCategoryName()))));
         select.selectByVisibleText(map.getScheduleColumn());
       }
+      selenium.findElement(By.id("submit_data")).click();
+
+      // use default columns
+      seleniumWait.until(ExpectedConditions.urlContains("specifySubjectiveStationDurations"));
       selenium.findElement(By.id("submit_data")).click();
 
       // the page has changed

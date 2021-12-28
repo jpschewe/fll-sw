@@ -33,7 +33,8 @@ fll.web.SelectHeaderRow.populateContext(request, session, pageContext);
                 <tr>
                     <td>
                         <input type="radio" name="headerRowIndex"
-                            value="${loopStatus.index}" />
+                            value="${loopStatus.index}"
+                            id="headerRowIndex_${loopStatus.index}" />
                     </td>
 
                     <c:forEach items="${row}" var="cell">
@@ -43,7 +44,7 @@ fll.web.SelectHeaderRow.populateContext(request, session, pageContext);
             </c:forEach>
         </table>
 
-        <input type="submit" value="Save header row" />
+        <input type="submit" id="submit_data" value="Save header row" />
     </form>
 
     <form action="selectHeaderRow.jsp" method="POST">
