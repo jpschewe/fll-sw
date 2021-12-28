@@ -1,3 +1,4 @@
+* #34 - Allow the user to specify which row in a spreadsheet is the header row and allow the user to specify all column mappings
 * Add number of practice rounds as a tournament parameter
 
 Release 16.4.0
