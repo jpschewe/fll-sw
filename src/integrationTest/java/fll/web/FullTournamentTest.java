@@ -625,10 +625,15 @@ public class FullTournamentTest {
     selenium.findElement(By.id("teams_file")).sendKeys(teamsFile.toAbsolutePath().toString());
 
     selenium.findElement(By.id("upload_teams")).click();
-    seleniumWait.until(ExpectedConditions.urlContains("teamColumnSelection"));
-    IntegrationTestUtils.assertNoException(selenium);
+
+    // select header row
+    seleniumWait.until(ExpectedConditions.urlContains("selectHeaderRow"));
+    selenium.findElement(By.id("headerRowIndex_0")).click();
+    selenium.findElement(By.id("submit_data")).click();
 
     // team column selection
+    seleniumWait.until(ExpectedConditions.urlContains("teamColumnSelection"));
+    IntegrationTestUtils.assertNoException(selenium);
     new Select(selenium.findElement(By.name("TeamNumber"))).selectByValue("team_number");
     new Select(selenium.findElement(By.name("TeamName"))).selectByValue("team_name");
     new Select(selenium.findElement(By.name("Organization"))).selectByValue("affiliation");
