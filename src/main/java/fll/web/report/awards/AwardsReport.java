@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -23,12 +24,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
 
@@ -48,6 +43,7 @@ import fll.db.AwardWinner;
 import fll.db.AwardWinners;
 import fll.db.CategoriesIgnored;
 import fll.db.OverallAwardWinner;
+import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
@@ -62,6 +58,12 @@ import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -167,7 +169,9 @@ public class AwardsReport extends BaseFLLServlet {
 
     addPerformance(connection, document, documentBody, description, sortedAwardGroups);
 
-    addHeadToHead(connection, tournament, description, document, documentBody, sortedAwardGroups);
+    if (TournamentParameters.getRunningHeadToHead(connection, tournament.getTournamentID())) {
+      addHeadToHead(connection, tournament, description, document, documentBody, sortedAwardGroups);
+    }
 
     addSubjectiveChallengeWinners(connection, description, document, documentBody, tournament, sortedAwardGroups);
     addSubjectiveExtraWinners(connection, description, document, documentBody, tournament, sortedAwardGroups, false);
@@ -557,21 +561,30 @@ public class AwardsReport extends BaseFLLServlet {
       if (scores.containsKey(group)) {
         final List<Top10.ScoreEntry> scoreList = scores.get(group);
 
-        final Optional<Top10.ScoreEntry> winner = scoreList.stream().findFirst();
-        if (winner.isPresent()) {
-          final Element row = FOPUtils.createTableRow(document);
-          tableBody.appendChild(row);
+        final Optional<Top10.ScoreEntry> firstWinner = scoreList.stream().findFirst();
+        if (firstWinner.isPresent()) {
+          final String topScore = firstWinner.get().getFormattedScore();
 
-          row.appendChild(FOPUtils.createTableCell(document, null, String.format("Winner %s:", group)));
+          final Collection<Top10.ScoreEntry> allWinners = scoreList.stream()
+                                                                   .filter(e -> e.getFormattedScore().equals(topScore))
+                                                                   .collect(Collectors.toList());
 
-          row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.get().getTeamNumber())));
+          for (Top10.ScoreEntry winner : allWinners) {
+            final Element row = FOPUtils.createTableRow(document);
+            tableBody.appendChild(row);
 
-          row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.get().getTeamName())));
+            row.appendChild(FOPUtils.createTableCell(document, null,
+                                                     String.format("%s %s:", (allWinners.size() > 1 ? "Tie" : "Winner"),
+                                                                   group)));
 
-          row.appendChild(FOPUtils.createTableCell(document, null, "With a score of:"));
+            row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.getTeamNumber())));
 
-          row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.get().getFormattedScore())));
+            row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.getTeamName())));
 
+            row.appendChild(FOPUtils.createTableCell(document, null, "With a score of:"));
+
+            row.appendChild(FOPUtils.createTableCell(document, null, topScore));
+          }
           haveScores = true;
         } // have a winner
       } // group has scores

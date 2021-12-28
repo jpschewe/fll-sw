@@ -76,9 +76,16 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <a class="wide" href="edit-advancing-teams.jsp" target="_blank">Enter
         the teams advancing to the next level of tournament</a>
 
+    <a class="wide" href="<c:url value='/report/awards/index.jsp'/>">Edit
+        awards report and rewards script properties.</a>
+
     <a class="wide" href="AwardsReport" target="_blank">Report of
-        winners for the tournament. This can be published on the web or
-        used for the awards ceremony.</a>
+        winners for the tournament. This can be published on the web.</a>
+
+    <a class="wide" target="_report"
+        href="<c:url value='/report/awards/AwardsScriptReport'/>" />Awards
+    Script PDF
+    </a>
 
     <a class="wide" href="TeamResults" target="_blank">Team Results.
         This is a zip file containing the results to return to the
@@ -99,8 +106,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         </form>
     </div>
 
-    <a class="wide" href="<c:url value='/report/awards/index.jsp'/>">Edit
-        awards report and rewards script properties.</a>
 
 
     <h2>Finalist scheduling</h2>
