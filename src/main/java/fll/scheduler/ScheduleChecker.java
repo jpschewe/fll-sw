@@ -315,8 +315,8 @@ public class ScheduleChecker {
                                                  performance.getTime(), message));
         } else if (prevRoundEnd.plus(perfChangetime).isAfter(roundStart)) {
           final String message = String.format("Team %d doesn't have enough time (%s) between performance %s and performance %s: %s - %s", //
-                                               ti.getTeamNumber(), ti.getRoundName(prevPerformance),
-                                               ti.getRoundName(performance), perfChangetime.toString(),
+                                               ti.getTeamNumber(), perfChangetime.toString(),
+                                               ti.getRoundName(prevPerformance), ti.getRoundName(performance),
                                                TournamentSchedule.formatTime(prevPerformance.getTime()),
                                                TournamentSchedule.formatTime(performance.getTime()));
           violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), null, null,
