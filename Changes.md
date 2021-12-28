@@ -1,3 +1,4 @@
+* #1002 - Display next round and schedule information when selecting teams for performance runs
 * #1008 - Report performance ties in the awards report
 * #1005 - Move merge database link to admin index
 * #1004 - Update title on the awards script

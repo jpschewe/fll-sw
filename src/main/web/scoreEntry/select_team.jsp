@@ -209,13 +209,12 @@ Entering scores for all tables. Teams are sorted in schedule order.
                                 <select size='20' id='select-teamnumber'
                                     name='TeamNumber'
                                     ondblclick='selectTeam.submit()'>
-                                    <c:forEach
-                                        items="${tournamentTeams }"
-                                        var="team">
+                                    <c:forEach items="${teamSelectData}"
+                                        var="teamData">
                                         <c:if
-                                            test="${not team.internal }">
+                                            test="${not teamData.team.internal}">
                                             <option
-                                                value="${team.teamNumber }">${team.teamNumber }&nbsp;&nbsp;&nbsp;[${team.trimmedTeamName }]</option>
+                                                value="${teamData.team.teamNumber }">${teamData.displayString}</option>
                                         </c:if>
                                     </c:forEach>
                                 </select>
