@@ -39,6 +39,7 @@ import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -89,6 +90,7 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Utilities;
+import fll.db.CategoryColumnMapping;
 import fll.db.TournamentParameters;
 import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
@@ -932,8 +934,11 @@ public class SchedulerUI extends JFrame {
           getScheduleData().outputPerformanceSheets(tournamentName, scoresheetFos, description);
         }
 
-        final MapSubjectiveHeaders mapDialog = new MapSubjectiveHeaders(SchedulerUI.this, description,
-                                                                        getScheduleData());
+        if (null == columnInfo) {
+          throw new IllegalStateException("No column information");
+        }
+        final Collection<CategoryColumnMapping> categoryMappings = columnInfo.getSubjectiveColumnMappings();
+        final MapSubjectiveHeaders mapDialog = new MapSubjectiveHeaders(SchedulerUI.this, description);
         mapDialog.setLocationRelativeTo(SchedulerUI.this);
         mapDialog.setVisible(true);
         if (mapDialog.isCanceled()) {
@@ -943,12 +948,15 @@ public class SchedulerUI extends JFrame {
         final Map<ScoreCategory, String> categoryToSchedule = new HashMap<>();
         final Map<ScoreCategory, @Nullable String> filenameSuffixes = new HashMap<>();
         for (final SubjectiveScoreCategory scoreCategory : description.getSubjectiveCategories()) {
-          final String scheduleColumn = mapDialog.getSubjectiveHeaderForCategory(scoreCategory);
-          if (null == scheduleColumn) {
+          final Optional<CategoryColumnMapping> scheduleColumn = categoryMappings.stream()
+                                                                                 .filter(mapping -> mapping.getCategoryName()
+                                                                                                           .equals(scoreCategory.getName()))
+                                                                                 .findFirst();
+          if (!scheduleColumn.isPresent()) {
             throw new FLLInternalException("Did not find a schedule column for "
                 + scoreCategory.getTitle());
           }
-          categoryToSchedule.put(scoreCategory, scheduleColumn);
+          categoryToSchedule.put(scoreCategory, scheduleColumn.get().getScheduleColumn());
           filenameSuffixes.put(scoreCategory, mapDialog.getFilenameSuffixForCategory(scoreCategory));
         }
 
