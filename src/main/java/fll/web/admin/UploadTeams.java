@@ -38,6 +38,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.StoreColumnNames;
 import fll.web.UploadSpreadsheet;
 import fll.web.UserRole;
 import jakarta.servlet.ServletContext;
@@ -132,10 +133,16 @@ public final class UploadTeams extends BaseFLLServlet {
       throws SQLException, IOException, InvalidFormatException {
     final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
 
+    final int headerRowIndex = SessionAttributes.getNonNullAttribute(session, StoreColumnNames.HEADER_ROW_INDEX_KEY,
+                                                                     Integer.class)
+                                                .intValue();
+    // skip forward to the header row
+    reader.skipRows(headerRowIndex);
+
     // stores <option value='columnName'>columnName</option> for each column
     final StringBuffer selectOptions = new StringBuffer();
 
-    // parse out the first line as the names of the columns
+    // parse out the header line as the names of the columns
     // final List<String> columnNames = splitLine(reader.readLine());
     final @Nullable String @Nullable [] columnNames = reader.readNext();
     if (null == columnNames) {
