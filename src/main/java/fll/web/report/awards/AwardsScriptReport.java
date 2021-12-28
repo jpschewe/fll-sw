@@ -904,7 +904,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
       titleBuilder.format(" %s", tournament.getLevel().getName());
     }
 
-    titleBuilder.format(" Awards Script");
+    titleBuilder.format(" Awards Ceremony");
     return titleBuilder.toString();
   }
 
