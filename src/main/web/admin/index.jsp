@@ -456,6 +456,17 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
             </form>
         </li>
 
+        <li>
+            <form id='import'
+                action="<c:url value='/developer/importdb/ImportDBDump'/>"
+                method='post' enctype='multipart/form-data'>
+
+                <p>Merge another database into the current database.</p>
+                <input type='file' size='32' name='dbdump' />
+                <input type='submit' name='importdb'
+                    value='Import Database' />
+            </form>
+        </li>
 
     </ul>
 

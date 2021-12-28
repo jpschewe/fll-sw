@@ -95,20 +95,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         </c:forEach>
     </c:if>
 
-    <c:if test="${authentication.admin}">
-        <h2>State computer lead</h2>
-        <p>The following links are most useful for the lead for the
-            state/region/partner</p>
-        <form id='import'
-            action="<c:url value='/developer/importdb/ImportDBDump'/>"
-            method='post' enctype='multipart/form-data'>
-
-            <p>Merge another database into the current database.</p>
-            <input type='file' size='32' name='dbdump' />
-            <input type='submit' name='importdb' value='Import Database' />
-        </form>
-    </c:if>
-
     <h2>Other useful pages</h2>
 
     <a class="wide" href='scoreboard/index.jsp'>Score board</a>
