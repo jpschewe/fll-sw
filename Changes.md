@@ -1,3 +1,7 @@
+* #1008 - Report performance ties in the awards report
+* #1005 - Move merge database link to admin index
+* #1004 - Update title on the awards script
+
 Release 16.4.0
 ==============
 * #994 - Add the ability to get subjective score sheets by category and award group
