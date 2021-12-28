@@ -1141,6 +1141,57 @@ public final class IntegrationTestUtils {
   }
 
   /**
+   * Set the number of regular match play rounds tournament parameter. Make sure
+   * that the
+   * current
+   * tournament is set before calling this method.
+   *
+   * @param selenium the web driver
+   * @param seleniumWait wait for elements
+   * @param numRounds the value to use
+   * @throws IOException see {@link #loadPage(WebDriver, WebDriverWait, String)}
+   */
+  public static void setNumRegularMatchPlayRounds(final WebDriver selenium,
+                                                  final WebDriverWait seleniumWait,
+                                                  final int numRounds)
+      throws IOException {
+    loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
+        + "admin/edit_tournament_parameters.jsp");
+
+    final WebElement element = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.name("seeding_rounds")));
+    element.sendKeys(String.valueOf(numRounds));
+
+    selenium.findElement(By.id("submit_data")).click();
+
+    assertNotNull(selenium.findElement(By.id("success")));
+  }
+
+  /**
+   * Set the number of practice rounds tournament parameter. Make sure that the
+   * current
+   * tournament is set before calling this method.
+   *
+   * @param selenium the web driver
+   * @param seleniumWait wait for elements
+   * @param numRounds the value to use
+   * @throws IOException see {@link #loadPage(WebDriver, WebDriverWait, String)}
+   */
+  public static void setNumPracticeRounds(final WebDriver selenium,
+                                          final WebDriverWait seleniumWait,
+                                          final int numRounds)
+      throws IOException {
+    loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
+        + "admin/edit_tournament_parameters.jsp");
+
+    final WebElement element = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.name("practice_rounds")));
+    element.sendKeys(String.valueOf(numRounds));
+
+    selenium.findElement(By.id("submit_data")).click();
+
+    assertNotNull(selenium.findElement(By.id("success")));
+  }
+
+  /**
    * Click the submit score button and the confirmation dialog.
    * An assertion violation occurs if the submit button is not enabled.
    *
