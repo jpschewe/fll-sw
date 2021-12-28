@@ -28,6 +28,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.CellFileReader;
 import fll.web.SelectHeaderRow;
+import net.mtu.eggplant.util.gui.TableUtils;
 
 /**
  * Dialog for the user to select the header row.
@@ -73,9 +74,11 @@ class SelectHeaderRowDialog extends JDialog {
 
     model = new Model();
     table = new JTable(model);
-    cpane.add(new JScrollPane(table), BorderLayout.CENTER);
+    final JScrollPane scroller = new JScrollPane(table);
+    cpane.add(scroller, BorderLayout.CENTER);
     table.setRowSelectionAllowed(true);
     table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
     final Box buttonBox = Box.createHorizontalBox();
     cpane.add(buttonBox, BorderLayout.SOUTH);
@@ -128,6 +131,8 @@ class SelectHeaderRowDialog extends JDialog {
       }
 
       model.setDataVector(data, columnIdentifiers);
+
+      TableUtils.setColumnMinWidths(table);
     } catch (InvalidFormatException | IOException e) {
       final String msg = String.format("Error reading file %s: %s", file.getAbsolutePath(), e.getMessage());
       LOGGER.error(msg, e);
