@@ -47,6 +47,7 @@ import com.opencsv.CSVWriter;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
+import fll.db.CategoryColumnMapping;
 import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.util.CellFileReader;
 import fll.util.CheckCanceled;
@@ -1120,14 +1121,10 @@ public class GreedySolver {
    * @return the number of warnings or -1 if there are hard violations
    */
   private int getNumWarnings(final File scheduleFile) {
-    final List<SubjectiveStation> subjectiveParams = this.solverParameters.getSubjectiveStations();
-    final Collection<String> subjectiveHeaders = subjectiveParams.stream().map(ss -> ss.getName())
-                                                                 .collect(Collectors.toList());
-
     try {
       final TournamentSchedule schedule = new TournamentSchedule(datafile.getName(),
                                                                  CellFileReader.createCellReader(scheduleFile, null),
-                                                                 subjectiveHeaders);
+                                                                 createColumnInformation());
       final ScheduleChecker checker = new ScheduleChecker(this.solverParameters, schedule);
       final List<ConstraintViolation> violations = checker.verifySchedule();
       for (final ConstraintViolation violation : violations) {
@@ -1496,6 +1493,52 @@ public class GreedySolver {
    */
   private int getNumTimeslots() {
     return numTimeslots;
+  }
+
+  private TournamentSchedule.ColumnInformation createColumnInformation() {
+    final int numRounds = solverParameters.getNumPerformanceRounds();
+    final String[] perfColumn = new String[numRounds];
+    final String[] perfTableColumn = new String[numRounds];
+    for (int round = 0; round < numRounds; ++round) {
+      perfColumn[round] = String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
+          + 1);
+      perfTableColumn[round] = String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
+          + 1);
+    }
+
+    // 12/27/2021 JPS - This assumes that the subjective category names match the
+    // columns. There is a good chance this isn't going to be true and something
+    // smarter should be done using a challenge description
+    final Collection<CategoryColumnMapping> subjectiveColumnMappings = solverParameters.getSubjectiveStations().stream() //
+                                                                                       .map(s -> new CategoryColumnMapping(s.getName(),
+                                                                                                                           s.getName())) //
+                                                                                       .collect(Collectors.toList());
+
+    return new TournamentSchedule.ColumnInformation(0, createHeaderRow(), TournamentSchedule.TEAM_NUMBER_HEADER,
+                                                    TournamentSchedule.ORGANIZATION_HEADER,
+                                                    TournamentSchedule.TEAM_NAME_HEADER, null,
+                                                    TournamentSchedule.JUDGE_GROUP_HEADER, subjectiveColumnMappings,
+                                                    perfColumn, perfTableColumn, new String[0], new String[0]);
+  }
+
+  private String[] createHeaderRow() {
+    final List<SubjectiveStation> subjectiveStations = solverParameters.getSubjectiveStations();
+
+    final List<String> line = new ArrayList<>();
+    line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
+    line.add(TournamentSchedule.TEAM_NAME_HEADER);
+    line.add(TournamentSchedule.ORGANIZATION_HEADER);
+    line.add(TournamentSchedule.JUDGE_GROUP_HEADER);
+    for (final SubjectiveStation station : subjectiveStations) {
+      line.add(station.getName());
+    }
+    for (int round = 0; round < solverParameters.getNumPerformanceRounds(); ++round) {
+      line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
+          + 1));
+      line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
+          + 1));
+    }
+    return line.toArray(new String[line.size()]);
   }
 
   private void outputSchedule(final File schedule) throws IOException {

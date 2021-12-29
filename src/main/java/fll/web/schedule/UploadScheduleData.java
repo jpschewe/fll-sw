@@ -23,6 +23,7 @@ import fll.scheduler.SchedParams;
 import fll.scheduler.SubjectiveStation;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
+import fll.scheduler.TournamentSchedule.ColumnInformation;
 
 /**
  * Data used in the workflow of uploading a schedule.
@@ -30,25 +31,30 @@ import fll.scheduler.TournamentSchedule;
 public class UploadScheduleData implements Serializable {
 
   /**
+   * @param scheduleFile {@link #getScheduleFile()}
+   * @param headerRowIndex {@link #getHeaderRowIndex()}
+   * @param headerNames {@link #getHeaderNames()}
+   */
+  public UploadScheduleData(final File scheduleFile,
+                            final int headerRowIndex,
+                            final Collection<String> headerNames) {
+    this.scheduleFile = scheduleFile;
+    this.headerRowIndex = headerRowIndex;
+    this.headerNames = new LinkedList<>(headerNames);
+  }
+
+  /**
    * Name that instances are referenced as in the session.
    */
   public static final String KEY = "uploadScheduleData";
 
-  private @MonotonicNonNull File scheduleFile = null;
+  private final File scheduleFile;
 
   /**
-   * @return the file that was uploaded, will be null until set
+   * @return the file that was uploaded
    */
-  public @Nullable File getScheduleFile() {
+  public File getScheduleFile() {
     return scheduleFile;
-  }
-
-  /**
-   * @param v see {@link #getScheduleFile()}
-   */
-  @EnsuresNonNull("scheduleFile")
-  public void setScheduleFile(final File v) {
-    scheduleFile = v;
   }
 
   /**
@@ -111,22 +117,33 @@ public class UploadScheduleData implements Serializable {
     schedule = v;
   }
 
-  private final LinkedList<CategoryColumnMapping> categoryColumnMappings = new LinkedList<>();
+  private ColumnInformation columnInfo = ColumnInformation.NULL;
+
+  /**
+   * @return the information needed to read the schedule file into a schedule,
+   *         initially set to {@link ColumnInformation#NULL}.
+   */
+  public ColumnInformation getColumnInformation() {
+    return columnInfo;
+  }
+
+  /**
+   * @param v see {@link #getColumnInformation()}
+   */
+  public void setColumnInformation(final ColumnInformation v) {
+    columnInfo = v;
+  }
 
   /**
    * @return the mappings of categories to schedule columns, initially empty,
    *         unmodifiable collection
    */
   public Collection<CategoryColumnMapping> getCategoryColumnMappings() {
-    return Collections.unmodifiableCollection(categoryColumnMappings);
-  }
-
-  /**
-   * @param v see {@link #getCategoryColumnMappings()}
-   */
-  public void setCategoryColumnMappings(final Collection<CategoryColumnMapping> v) {
-    categoryColumnMappings.clear();
-    categoryColumnMappings.addAll(v);
+    if (null != columnInfo) {
+      return columnInfo.getSubjectiveColumnMappings();
+    } else {
+      return Collections.emptyList();
+    }
   }
 
   /**
@@ -153,24 +170,6 @@ public class UploadScheduleData implements Serializable {
   }
 
   private boolean subjectiveStationsSet = false;
-
-  private final LinkedList<String> unusedHeaders = new LinkedList<>();
-
-  /**
-   * @return the unused headers from the schedule, initially empty, unmodifiable
-   *         list
-   */
-  public List<String> getUnusedHeaders() {
-    return Collections.unmodifiableList(unusedHeaders);
-  }
-
-  /**
-   * @param v see {@link #getUnusedHeaders()}
-   */
-  public void setUnusedHeaders(final List<String> v) {
-    unusedHeaders.clear();
-    unusedHeaders.addAll(v);
-  }
 
   private SchedParams schedParams = new SchedParams();
 
@@ -242,5 +241,24 @@ public class UploadScheduleData implements Serializable {
   public void setOrganizationDifferences(final Collection<GatherTeamInformationChanges.TeamOrganizationDifference> v) {
     organizationDifferences.clear();
     organizationDifferences.addAll(v);
+  }
+
+  private final int headerRowIndex;
+
+  /**
+   * @return index of the header row in the spreadsheet
+   */
+  public int getHeaderRowIndex() {
+    return headerRowIndex;
+  }
+
+  private final LinkedList<String> headerNames;
+
+  /**
+   * @return names of columns in the header row of the spreadsheet, null and empty
+   *         names have been filtered out
+   */
+  public Collection<String> getHeaderNames() {
+    return headerNames;
   }
 }

@@ -40,7 +40,9 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
-   * Session key for the name of the file that was saved.
+   * Session key for the name of the file that was saved. The file is marked for
+   * delete on exit, however it is helpful if the code processing the file deletes
+   * it once it is no longer needed.
    */
   public static final String SPREADSHEET_FILE_KEY = "spreadsheetFile";
 
@@ -57,6 +59,8 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
     session.removeAttribute(UploadScheduleData.KEY);
     session.removeAttribute(ProcessSelectedSheet.SHEET_NAMES_KEY);
     session.removeAttribute(UploadSpreadsheet.SHEET_NAME_KEY);
+    session.removeAttribute(StoreColumnNames.HEADER_NAMES_KEY);
+    session.removeAttribute(StoreColumnNames.HEADER_ROW_INDEX_KEY);
   }
 
   /**
@@ -86,21 +90,19 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
       UploadProcessor.processUpload(request);
       final String uploadRedirect = (String) request.getAttribute(UploadSpreadsheet.UPLOAD_REDIRECT_KEY);
       if (null == uploadRedirect) {
-        throw new RuntimeException("Missing parameter '"
-            + UploadSpreadsheet.UPLOAD_REDIRECT_KEY
-            + "' params: "
-            + request.getParameterMap());
+        throw new MissingRequiredParameterException(UploadSpreadsheet.UPLOAD_REDIRECT_KEY);
       }
       session.setAttribute(UploadSpreadsheet.UPLOAD_REDIRECT_KEY, uploadRedirect);
       LOGGER.debug("Redirect: {}", uploadRedirect);
 
       final FileItem fileItem = (FileItem) request.getAttribute("file");
       if (null == fileItem) {
-        throw new FLLRuntimeException("Missing 'file' parameter");
+        throw new MissingRequiredParameterException("file");
       }
-      
+
       final String extension = Utilities.determineExtension(fileItem.getName());
       final File file = File.createTempFile("fll", extension);
+      file.deleteOnExit();
       LOGGER.debug("Wrote data to: {}", file.getAbsolutePath());
 
       // the write call below will fail if the file already exists
@@ -123,10 +125,10 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
           nextPage = "promptForSheetName.jsp";
         } else {
           session.setAttribute(SHEET_NAME_KEY, sheetNames.get(0));
-          nextPage = uploadRedirect;
+          nextPage = "selectHeaderRow.jsp";
         }
       } else {
-        nextPage = uploadRedirect;
+        nextPage = "selectHeaderRow.jsp";
       }
 
     } catch (final FileUploadException e) {

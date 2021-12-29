@@ -8,7 +8,6 @@ package fll.scheduler;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,22 +20,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.Utilities;
-import fll.scheduler.TournamentSchedule.ColumnInformation;
-import fll.util.CellFileReader;
 import fll.util.CheckCanceled;
-import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 
@@ -47,8 +36,6 @@ import fll.util.FLLRuntimeException;
 public class TableOptimizer {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
-  private static final String SCHED_FILE_OPTION = "s";
 
   private final TournamentSchedule schedule;
 
@@ -439,111 +426,6 @@ public class TableOptimizer {
     }
 
     return retval;
-  }
-
-  private static Options buildOptions() {
-    final Options options = new Options();
-    final Option option = new Option(SCHED_FILE_OPTION, "schedfile", true, "<file> the schedule file ");
-    option.setRequired(true);
-    options.addOption(option);
-
-    return options;
-  }
-
-  private static void usage(final Options options) {
-    final HelpFormatter formatter = new HelpFormatter();
-    formatter.printHelp("TableOptimizer", options);
-  }
-
-  /**
-   * @param args ignored
-   */
-  public static void main(final String[] args) {
-    File schedfile = null;
-    final Options options = buildOptions();
-    try {
-      final CommandLineParser parser = new DefaultParser();
-      final CommandLine cmd = parser.parse(options, args);
-
-      schedfile = new File(cmd.getOptionValue(SCHED_FILE_OPTION));
-    } catch (final org.apache.commons.cli.ParseException pe) {
-      LOGGER.error(pe.getMessage());
-      usage(options);
-      System.exit(1);
-    }
-
-    try {
-      if (!schedfile.canRead()) {
-        LOGGER.fatal(schedfile.getAbsolutePath()
-            + " is not readable");
-        System.exit(4);
-      }
-
-      final String sheetName;
-      if (!ExcelCellReader.isExcelFile(schedfile)) {
-        sheetName = "ignored";
-      } else {
-        sheetName = SchedulerUI.promptForSheetName(schedfile);
-        if (null == sheetName) {
-          return;
-        }
-      }
-
-      final ColumnInformation columnInfo = TournamentSchedule.findColumns(CellFileReader.createCellReader(schedfile,
-                                                                                                          sheetName),
-                                                                          new LinkedList<String>());
-
-      final List<SubjectiveStation> subjectiveStations = SchedulerUI.gatherSubjectiveStationInformation(null,
-                                                                                                        columnInfo);
-
-      // not bothering to get the schedule params as we're just tweaking table
-      // assignments, which wont't be effected by the schedule params.
-      final SchedParams params = new SchedParams(subjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
-                                                 SchedParams.MINIMUM_CHANGETIME_MINUTES,
-                                                 SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES);
-      final List<String> subjectiveHeaders = new LinkedList<>();
-      for (final SubjectiveStation station : subjectiveStations) {
-        subjectiveHeaders.add(station.getName());
-      }
-
-      final String name = Utilities.extractBasename(schedfile);
-
-      final TournamentSchedule schedule = new TournamentSchedule(name,
-                                                                 CellFileReader.createCellReader(schedfile, sheetName),
-                                                                 subjectiveHeaders);
-
-      final File schedfileDirectory = schedfile.getAbsoluteFile().getParentFile();
-      if (null == schedfileDirectory) {
-        throw new FLLRuntimeException("No directory for '"
-            + schedfile.getAbsolutePath()
-            + "'");
-      }
-      final TableOptimizer optimizer = new TableOptimizer(params, schedule, schedfileDirectory);
-      final long start = System.currentTimeMillis();
-      optimizer.optimize(null);
-      final long stop = System.currentTimeMillis();
-      LOGGER.info("Optimization took: "
-          + (stop
-              - start)
-              / 1000.0
-          + " seconds");
-
-    } catch (final ParseException e) {
-      LOGGER.fatal(e, e);
-      System.exit(5);
-    } catch (final ScheduleParseException e) {
-      LOGGER.fatal(e, e);
-      System.exit(6);
-    } catch (final IOException e) {
-      LOGGER.fatal("Error reading file", e);
-      System.exit(4);
-    } catch (final RuntimeException e) {
-      LOGGER.fatal(e, e);
-      throw e;
-    } catch (final InvalidFormatException e) {
-      LOGGER.fatal(e, e);
-      System.exit(7);
-    }
   }
 
   /**

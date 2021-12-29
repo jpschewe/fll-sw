@@ -4,10 +4,14 @@ page -> UploadSpreadsheet [label="parameter uploadRedirect"];
 
 UploadSpreadsheet -> "promptForSheetName.jsp" [label="if multiple sheets"];
 
-UploadSpreadsheet -> uploadRedirect [label="if single sheet or CSV"];
+UploadSpreadsheet -> "selectHeaderRow.jsp" [label="if single sheet or CSV"];
 
 "promptForSheetName.jsp" -> ProcessSelectedSheet;
 
-ProcessSelectedSheet -> uploadRedirect;
+ProcessSelectedSheet -> "selectHeaderRow.jsp";
+
+"selectHeaderRow.jsp" -> StoreColumnNames;
+
+StoreColumnNames -> uploadRedirect;
 
 }

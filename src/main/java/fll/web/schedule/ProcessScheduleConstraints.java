@@ -57,7 +57,7 @@ public class ProcessScheduleConstraints extends BaseFLLServlet {
       final int performanceDuration = Integer.parseInt(performanceDurationStr);
       uploadScheduleData.getSchedParams().setPerformanceMinutes(performanceDuration);
 
-      WebUtils.sendRedirect(application, response, "LoadSchedule");
+      WebUtils.sendRedirect(application, response, "chooseScheduleHeaders.jsp");
 
     } finally {
       session.setAttribute(UploadScheduleData.KEY, uploadScheduleData);

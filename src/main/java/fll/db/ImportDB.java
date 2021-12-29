@@ -43,8 +43,6 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
@@ -78,7 +76,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public final class ImportDB {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ImportDB.class);
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private ImportDB() {
     // no instances
@@ -648,6 +646,14 @@ public final class ImportDB {
     if (dbVersion < 33) {
       upgrade32To33(connection);
     }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 34) {
+      upgrade33To34(connection);
+    }
+
+    // NOTE: when adding new tournament parameters they need to be explicitly set in
+    // importTournamentParameters
 
     GenerateDB.setDefaultParameters(connection, true);
 
@@ -1236,6 +1242,55 @@ public final class ImportDB {
     }
 
     setDBVersion(connection, 33);
+  }
+
+  /**
+   * Add tournament parameter for number of practice rounds.
+   */
+  private static void upgrade33To34(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 33 to 34");
+
+    try (
+        PreparedStatement findTournaments = connection.prepareStatement("SELECT tournament_id FROM tournaments WHERE tournament_id != ?");
+        PreparedStatement getNumPracticeRounds = connection.prepareStatement("SELECT MAX(num_practice_rounds) FROM (" //
+            + "SELECT COUNT(team_number) AS num_practice_rounds FROM" //
+            + " sched_perf_rounds WHERE tournament = ?" //
+            + " AND practice = TRUE" //
+            + " GROUP BY team_number)")) {
+
+      findTournaments.setInt(1, GenerateDB.INTERNAL_TOURNAMENT_ID);
+      try (ResultSet tournamentIds = findTournaments.executeQuery()) {
+        while (tournamentIds.next()) {
+          final int tournamentId = tournamentIds.getInt(1);
+          LOGGER.debug("Processing tournament {}", tournamentId);
+
+          getNumPracticeRounds.setInt(1, tournamentId);
+          try (ResultSet practiceRounds = getNumPracticeRounds.executeQuery()) {
+            final int numPracticeRounds;
+            if (practiceRounds.next()) {
+              final int num = practiceRounds.getInt(1);
+              if (practiceRounds.wasNull()) {
+                LOGGER.debug("practice rounds is null");
+                numPracticeRounds = 0;
+              } else {
+                LOGGER.debug("practice rounds is {}", num);
+                numPracticeRounds = num;
+              }
+            } else {
+              LOGGER.debug("no results from practice rounds");
+              numPracticeRounds = 0;
+            }
+
+            LOGGER.debug("Computed number of practice rounds: {}", numPracticeRounds);
+            TournamentParameters.setNumPracticeRounds(connection, tournamentId, numPracticeRounds);
+            LOGGER.debug("After setting practice rounds: {}",
+                         TournamentParameters.getNumPracticeRounds(connection, tournamentId));
+          } // practice rounds
+        } // foreach tournament
+      } // tournamentIds
+    } // prepared statement
+
+    setDBVersion(connection, 34);
   }
 
   /**
@@ -1885,7 +1940,8 @@ public final class ImportDB {
                                              final int destTournamentLevelID,
                                              final int destTournamentID)
       throws SQLException {
-    LOGGER.debug("Importing awards script data");
+    LOGGER.debug("Importing awards script data source level: {} source tournament: {} dest level: {} dest tournament: {}",
+                 sourceTournamentLevelID, sourceTournamentID, destTournamentLevelID, destTournamentID);
     importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,
                             destTournamentLevelID, destTournamentID, "awards_script_text", "section_name", "text");
 
@@ -2265,10 +2321,19 @@ public final class ImportDB {
 
     // use the "get" methods rather than generic SQL query to ensure that the
     // default value is picked up in case the default value has been changed
+
     final int seedingRounds = TournamentParameters.getNumSeedingRounds(sourceConnection, sourceTournamentID);
-    final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(sourceConnection, sourceTournamentID);
     TournamentParameters.setNumSeedingRounds(destinationConnection, destTournamentID, seedingRounds);
+
+    final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(sourceConnection, sourceTournamentID);
     TournamentParameters.setRunningHeadToHead(destinationConnection, destTournamentID, runningHeadToHead);
+
+    TournamentParameters.setPerformanceAdvancementPercentage(destinationConnection, destTournamentID,
+                                                             TournamentParameters.getPerformanceAdvancementPercentage(sourceConnection,
+                                                                                                                      sourceTournamentID));
+    TournamentParameters.setNumPracticeRounds(destinationConnection, destTournamentID,
+                                              TournamentParameters.getNumPracticeRounds(sourceConnection,
+                                                                                        sourceTournamentID));
   }
 
   private static void importJudges(final Connection sourceConnection,
