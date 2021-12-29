@@ -32,7 +32,8 @@ public final class SubjectiveStation implements Serializable {
   private final String name;
 
   /**
-   * @return Name of what is being judged.
+   * @return Name of what is being judged. This is also referred to as a judging
+   *         station.
    */
   public String getName() {
     return name;
@@ -62,7 +63,7 @@ public final class SubjectiveStation implements Serializable {
   }
 
   @Override
-  @EnsuresNonNullIf(expression="#1", result=true)
+  @EnsuresNonNullIf(expression = "#1", result = true)
   public boolean equals(final @Nullable Object o) {
     if (o == this) {
       return true;

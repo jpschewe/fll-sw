@@ -17,7 +17,6 @@ import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -36,8 +35,6 @@ import fll.xml.SubjectiveScoreCategory;
  */
 /* package */ class MapSubjectiveHeaders extends JDialog {
 
-  private final Map<ScoreCategory, JComboBox<String>> comboBoxes = new HashMap<>();
-
   private final Map<ScoreCategory, JTextField> filenameSuffixes = new HashMap<>();
 
   private boolean canceled = true;
@@ -50,33 +47,25 @@ import fll.xml.SubjectiveScoreCategory;
   }
 
   MapSubjectiveHeaders(final Frame owner,
-                       final ChallengeDescription description,
-                       final TournamentSchedule schedule) {
+                       final ChallengeDescription description) {
     super(owner, true);
 
     getContentPane().setLayout(new BorderLayout());
 
-    final JTextArea instructions = new JTextArea("Match the column names from the schedule data file with the subjective categories that they contain the schedule for. If you want a suffix on the filename, then fill in that column.");
+    final JTextArea instructions = new JTextArea("Specify the filename suffix for each category. Leave empty for no suffix.");
     instructions.setEditable(false);
     instructions.setWrapStyleWord(true);
     instructions.setLineWrap(true);
     getContentPane().add(instructions, BorderLayout.NORTH);
 
-    final JPanel grid = new JPanel(new GridLayout(0, 3));
+    final JPanel grid = new JPanel(new GridLayout(0, 2));
     getContentPane().add(grid, BorderLayout.CENTER);
 
     grid.add(new JLabel("Subjective Category"));
-    grid.add(new JLabel("Data file column name"));
     grid.add(new JLabel("Filename suffix for category"));
-
-    final String[] scheduleColumns = schedule.getSubjectiveStations().toArray(new String[0]);
 
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
       grid.add(new JLabel(category.getTitle()));
-
-      final JComboBox<String> comboBox = new JComboBox<>(scheduleColumns);
-      grid.add(comboBox);
-      comboBoxes.put(category, comboBox);
 
       final String defaultText = DEFAULT_CATEGORY_SUFFIXES.get(category.getName());
       final JTextField filenameSuffix = new JTextField(defaultText);
@@ -107,21 +96,6 @@ import fll.xml.SubjectiveScoreCategory;
 
     // setMinimumSize(getPreferredSize());
     pack();
-  }
-
-  /**
-   * Find schedule column for category.
-   * 
-   * @param category what to find
-   * @return null if not found
-   */
-  public @Nullable String getSubjectiveHeaderForCategory(final ScoreCategory category) {
-    final JComboBox<String> combo = comboBoxes.get(category);
-    if (null != combo) {
-      return (String) combo.getSelectedItem();
-    } else {
-      return null;
-    }
   }
 
   /**

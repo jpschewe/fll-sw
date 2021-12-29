@@ -78,9 +78,6 @@
         <td>TeamNumber</td>
         <td>Number</td>
         <td><select name='TeamNumber'>
-            <option
-              value=''
-              selected>None</option>
             <%=session.getAttribute("columnSelectOptions")%>
         </select></td>
       </tr>

@@ -39,9 +39,11 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -56,6 +58,7 @@ import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
+import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
 import fll.documents.writers.SubjectivePdfWriter;
 import fll.util.CellFileReader;
@@ -100,12 +103,6 @@ public class TournamentSchedule implements Serializable {
    * Table header text for organization.
    */
   public static final String ORGANIZATION_HEADER = "Organization";
-
-  /**
-   * Should use AWARD_GROUP_HEADER now, only kept for old schedules
-   */
-  @Deprecated
-  private static final String DIVISION_HEADER = "Div";
 
   /**
    * Table header for award group.
@@ -222,8 +219,7 @@ public class TournamentSchedule implements Serializable {
    *           for a schedule
    */
   public static @Nullable LocalTime parseTime(final @Nullable String str) throws DateTimeParseException {
-    if (null == str
-        || str.trim().isEmpty()) {
+    if (StringUtils.isBlank(str)) {
       return null;
     }
 
@@ -342,25 +338,27 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
+   * Read the data in {@code reader} from the header row until the team number
+   * column is empty.
+   * 
    * @param name {@link #getName()}
    * @param reader where to read the schedule from
-   * @param subjectiveHeaders the headers for the subjective columns
+   * @param columnInfo mapping of columns from the file to needed data
    * @throws IOException if there is an error reading the file
    * @throws ScheduleParseException if there is an error parsing the schedule
    * @throws ParseException if there is an error parsing the file
    */
   public TournamentSchedule(final String name,
                             final CellFileReader reader,
-                            final Collection<String> subjectiveHeaders)
+                            final ColumnInformation columnInfo)
       throws IOException, ParseException, ScheduleParseException {
     this.name = name;
-    final ColumnInformation columnInfo = findColumns(reader, subjectiveHeaders);
     numRegularMatchPlayRounds = columnInfo.getNumPerfs();
     numPracticeRounds = columnInfo.getNumPracticePerfs();
     parseData(reader, columnInfo);
     reader.close();
     this.subjectiveStations.clear();
-    this.subjectiveStations.addAll(subjectiveHeaders);
+    this.subjectiveStations.addAll(columnInfo.getSubjectiveStationNames());
   }
 
   /**
@@ -524,31 +522,6 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * Find the index of the columns. Reads lines until the headers are found or
-   * EOF is reached.
-   *
-   * @param reader where to read the columns from
-   * @param subjectiveHeaders the known subjective headers
-   * @return the column information
-   * @throws IOException if there is an error reading the data
-   * @throws RuntimeException if a header row cannot be found
-   */
-  public static ColumnInformation findColumns(final CellFileReader reader,
-                                              final Collection<String> subjectiveHeaders)
-      throws IOException {
-    while (true) {
-      final @Nullable String @Nullable [] line = reader.readNext();
-      if (null == line) {
-        throw new RuntimeException("Cannot find header line and reached EOF");
-      }
-
-      if (isHeaderLine(line)) {
-        return parseHeader(subjectiveHeaders, line);
-      }
-    }
-  }
-
-  /**
    * Figure out how many regular match play rounds exist in this header line. This
    * method also checks that the corresponding table header exists for each
    * round and that the round numbers are contiguous starting at 1.
@@ -693,120 +666,9 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * Get the column number or throw {@link MissingColumnException} if the column
-   * it
-   * not found.
-   */
-  private static int getColumnForHeader(final @Nullable String[] line,
-                                        final String header)
-      throws MissingColumnException {
-    final Integer column = columnForHeader(line, header);
-    if (null == column) {
-      throw new MissingColumnException("Unable to find header '"
-          + header
-          + "' in "
-          + Arrays.asList(line));
-    } else {
-      return column;
-    }
-  }
-
-  private static ColumnInformation parseHeader(final Collection<String> subjectiveHeaders,
-                                               final @Nullable String[] line) {
-    final int numPerfRounds = countNumRegularMatchPlayRounds(line);
-    final int numPracticeRounds = countNumPracticeRounds(line);
-
-    final int[] perfColumn = new int[numPerfRounds];
-    final int[] perfTableColumn = new int[numPerfRounds];
-
-    final int[] practiceColumn = new int[numPracticeRounds];
-    final int[] practiceTableColumn = new int[numPracticeRounds];
-
-    final int teamNumColumn = getColumnForHeader(line, TEAM_NUMBER_HEADER);
-    final int organizationColumn = getColumnForHeader(line, ORGANIZATION_HEADER);
-    final int teamNameColumn = getColumnForHeader(line, TEAM_NAME_HEADER);
-
-    int judgeGroupColumn = -1;
-    try {
-      judgeGroupColumn = getColumnForHeader(line, JUDGE_GROUP_HEADER);
-    } catch (final MissingColumnException e) {
-      judgeGroupColumn = -1;
-    }
-
-    int divisionColumn = -1;
-    try {
-      divisionColumn = getColumnForHeader(line, DIVISION_HEADER);
-    } catch (final MissingColumnException e) {
-      divisionColumn = -1;
-    }
-    if (-1 == divisionColumn) {
-      try {
-        divisionColumn = getColumnForHeader(line, AWARD_GROUP_HEADER);
-      } catch (final MissingColumnException e) {
-        divisionColumn = -1;
-      }
-    }
-
-    // Need one of judge group column or division column
-    if (-1 == judgeGroupColumn
-        && -1 == divisionColumn) {
-      throw new MissingColumnException("Must have judging station column or award group column");
-    } else if (-1 == judgeGroupColumn) {
-      judgeGroupColumn = divisionColumn;
-    } else if (-1 == divisionColumn) {
-      divisionColumn = judgeGroupColumn;
-    }
-
-    for (int round = 0; round < numPerfRounds; ++round) {
-      final String perfHeader = String.format(PERF_HEADER_FORMAT, (round
-          + 1));
-      final String perfTableHeader = String.format(TABLE_HEADER_FORMAT, (round
-          + 1));
-      perfColumn[round] = getColumnForHeader(line, perfHeader);
-      perfTableColumn[round] = getColumnForHeader(line, perfTableHeader);
-    }
-
-    if (1 == numPracticeRounds) {
-      // check for short version of headers first, then try long version
-      final Integer index = columnForHeader(line, BASE_PRACTICE_HEADER_SHORT);
-      if (null == index) {
-        practiceColumn[0] = getColumnForHeader(line, String.format(PRACTICE_HEADER_FORMAT, 1));
-      } else {
-        practiceColumn[0] = index.intValue();
-      }
-
-      final Integer indexTable = columnForHeader(line, PRACTICE_TABLE_HEADER_FORMAT_SHORT);
-      if (null == indexTable) {
-        practiceTableColumn[0] = getColumnForHeader(line, String.format(PRACTICE_TABLE_HEADER_FORMAT, 1));
-      } else {
-        practiceTableColumn[0] = indexTable.intValue();
-      }
-    } else {
-      for (int round = 0; round < numPracticeRounds; ++round) {
-        final String perfHeader = String.format(PRACTICE_HEADER_FORMAT, (round
-            + 1));
-        final String perfTableHeader = String.format(PRACTICE_TABLE_HEADER_FORMAT, (round
-            + 1));
-        practiceColumn[round] = getColumnForHeader(line, perfHeader);
-        practiceTableColumn[round] = getColumnForHeader(line, perfTableHeader);
-      }
-    }
-
-    final Map<Integer, String> subjectiveColumns = new HashMap<>();
-    for (final String header : subjectiveHeaders) {
-      final int column = getColumnForHeader(line, header);
-      subjectiveColumns.put(column, header);
-    }
-
-    return new ColumnInformation(line, teamNumColumn, organizationColumn, teamNameColumn, divisionColumn,
-                                 subjectiveColumns, judgeGroupColumn, perfColumn, perfTableColumn, practiceColumn,
-                                 practiceTableColumn);
-  }
-
-  /**
    * Parse the data of the schedule.
    *
-   * @throws IOException
+   * @throws IOException on an error reading the file
    * @throws ScheduleParseException if there is an error with the schedule
    */
   @RequiresNonNull("matches")
@@ -814,6 +676,8 @@ public class TournamentSchedule implements Serializable {
                          final CellFileReader reader,
                          final ColumnInformation ci)
       throws IOException, ParseException, ScheduleParseException {
+    reader.skipRows(ci.getHeaderRowIndex()
+        + 1);
     TeamScheduleInfo ti;
     while (null != (ti = parseLine(reader, ci))) {
       cacheTeamScheduleInformation(ti);
@@ -1269,142 +1133,127 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * @return the schedule info or null if the last line is read
+   * @return the schedule info or null to stop reading (end of file or empty team
+   *         number column)
    * @throws ScheduleParseException if there is an error with the schedule being
    *           read
+   * @throws IOException if there is an error reading the file
    */
   private @Nullable TeamScheduleInfo parseLine(@UnderInitialization(TournamentSchedule.class) TournamentSchedule this,
                                                final CellFileReader reader,
                                                final ColumnInformation ci)
-      throws IOException, ParseException, ScheduleParseException {
+      throws IOException, ScheduleParseException {
     final @Nullable String @Nullable [] line = reader.readNext();
     if (null == line) {
       return null;
     }
 
     try {
-
-      if (ci.getTeamNumColumn() >= line.length) {
-        return null;
-      }
-      final String teamNumberStr = line[ci.getTeamNumColumn()];
-      if (null == teamNumberStr
-          || teamNumberStr.length() < 1) {
-        // hit empty row
+      final String teamNumberStr = ci.getTeamNum(line);
+      if (StringUtils.isBlank(teamNumberStr)) {
         return null;
       }
 
       final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumberStr).intValue();
       final TeamScheduleInfo ti = new TeamScheduleInfo(teamNumber);
-      ti.setTeamName(line[ci.getTeamNameColumn()]);
-      ti.setOrganization(line[ci.getOrganizationColumn()]);
-      ti.setDivision(line[ci.getDivisionColumn()]);
+      ti.setTeamName(ci.getTeamName(line));
+      ti.setOrganization(ci.getOrganization(line));
+      ti.setDivision(ci.getAwardGroup(line));
 
-      for (final Map.Entry<Integer, String> entry : ci.getSubjectiveColumnInfo().entrySet()) {
-        final String station = entry.getValue();
-        final int column = entry.getKey();
-        final String str = line[column];
-        if (null == str
-            || str.isEmpty()) {
-          // If we got an empty string, then we must have hit the end
-          return null;
+      for (final CategoryColumnMapping mapping : ci.getSubjectiveColumnMappings()) {
+        final String station = mapping.getScheduleColumn();
+        final String str = ci.getSubjectiveTime(line, station);
+        if (StringUtils.isBlank(str)) {
+          throw new ScheduleParseException(String.format("Line %d is missing a time for subjective station '%s'",
+                                                         reader.getLineNumber(), station));
         }
+
         // str is not null or empty, so parseTime cannot return null
         final LocalTime time = castNonNull(parseTime(str));
         ti.addSubjectiveTime(new SubjectiveTime(station, time));
       }
 
-      ti.setJudgingGroup(line[ci.getJudgeGroupColumn()]);
+      ti.setJudgingGroup(ci.getJudgingGroup(line));
 
       // parse regular match play rounds
       for (int perfIndex = 0; perfIndex < ci.getNumPerfs(); ++perfIndex) {
-        final String perf1Str = line[ci.getPerfColumn(perfIndex)];
-        if (null == perf1Str
-            || perf1Str.isEmpty()) {
-          // If we got an empty string, then we must have hit the end
-          return null;
+        final String perfStr = ci.getPerf(line, perfIndex);
+        if (StringUtils.isBlank(perfStr)) {
+          throw new ScheduleParseException(String.format("Line %d is missing a time for performance %d",
+                                                         reader.getLineNumber(), (perfIndex
+                                                             + 1)));
         }
 
-        final String table = line[ci.getPerfTableColumn(perfIndex)];
-        if (null == table
-            || table.isEmpty()) {
-          // If we got an empty string, then we must have hit the end
-          return null;
+        final String table = ci.getPerfTable(line, perfIndex);
+        if (StringUtils.isBlank(table)) {
+          throw new ScheduleParseException(String.format("Line %d is missing a table for performance %d",
+                                                         reader.getLineNumber(), (perfIndex
+                                                             + 1)));
         }
 
         final String[] tablePieces = table.split(" ");
         if (tablePieces.length != 2) {
-          throw new RuntimeException("Error parsing table information from: "
-              + table);
+          throw new ScheduleParseException(String.format("Error parsing performance table information from: '%s', expecting 2 strings separated by a space",
+                                                         table));
         }
-        final LocalTime perf1Time = castNonNull(parseTime(perf1Str));
+        // perfStr is not empty, so cannot be null
+        final LocalTime perfTime = castNonNull(parseTime(perfStr));
 
         final String tableName = tablePieces[0];
         final int tableSide = Utilities.getIntegerNumberFormat().parse(tablePieces[1]).intValue();
         final int roundNumber = perfIndex
             + 1;
-        final PerformanceTime performance = new PerformanceTime(perf1Time, tableName, tableSide, false);
+        final PerformanceTime performance = new PerformanceTime(perfTime, tableName, tableSide, false);
 
         ti.addPerformance(performance);
         if (performance.getSide() > 2
             || performance.getSide() < 1) {
-          final String message = "There are only two sides to the table, number must be 1 or 2. team: "
-              + ti.getTeamNumber()
-              + " round "
-              + roundNumber;
-          LOGGER.error(message);
-          throw new ScheduleParseException(message);
+          throw new ScheduleParseException(String.format("There are only two sides to the table, number must be 1 or 2. team: %d performance round: %d line: %d",
+                                                         ti.getTeamNumber(), roundNumber, reader.getLineNumber()));
         }
       }
 
       // parse practice rounds
       for (int perfIndex = 0; perfIndex < ci.getNumPracticePerfs(); ++perfIndex) {
-        final String perf1Str = line[ci.getPracticePerfColumn(perfIndex)];
-        if (null == perf1Str
-            || perf1Str.isEmpty()) {
-          // If we got an empty string, then we must have hit the end
-          return null;
+        final String perfStr = ci.getPractice(line, perfIndex);
+        if (StringUtils.isBlank(perfStr)) {
+          throw new ScheduleParseException(String.format("Line %d is missing a time for practice %d",
+                                                         reader.getLineNumber(), (perfIndex
+                                                             + 1)));
         }
-        final String table = line[ci.getPracticePerfTableColumn(perfIndex)];
-        if (null == table
-            || table.isEmpty()) {
-          // If we got an empty string, then we must have hit the end
-          return null;
+        final String table = ci.getPracticeTable(line, perfIndex);
+        if (StringUtils.isBlank(table)) {
+          throw new ScheduleParseException(String.format("Line %d is missing a table for practice %d",
+                                                         reader.getLineNumber(), (perfIndex
+                                                             + 1)));
         }
 
         final String[] tablePieces = table.split(" ");
         if (tablePieces.length != 2) {
-          throw new RuntimeException("Error parsing table information from: "
-              + table);
+          throw new ScheduleParseException(String.format("Error parsing practice table information from: '%s', expecting 2 strings separated by a space",
+                                                         table));
         }
-        final LocalTime perf1Time = parseTime(perf1Str);
-        if (null == perf1Time) {
-          return null;
-        }
+        // perfStr is not empty, so cannot be null
+        final LocalTime perfTime = castNonNull(parseTime(perfStr));
 
         final String tableName = tablePieces[0];
         final int tableSide = Utilities.getIntegerNumberFormat().parse(tablePieces[1]).intValue();
         final int roundNumber = perfIndex
             + 1;
-        final PerformanceTime performance = new PerformanceTime(perf1Time, tableName, tableSide, true);
+        final PerformanceTime performance = new PerformanceTime(perfTime, tableName, tableSide, true);
 
         ti.addPerformance(performance);
         if (performance.getSide() > 2
             || performance.getSide() < 1) {
-          final String message = "There are only two sides to the table, number must be 1 or 2. team: "
-              + ti.getTeamNumber()
-              + " practice round "
-              + roundNumber;
-          LOGGER.error(message);
-          throw new ScheduleParseException(message);
+          throw new ScheduleParseException(String.format("There are only two sides to the table, number must be 1 or 2. team: %d practice round: %d line: %d",
+                                                         ti.getTeamNumber(), roundNumber, reader.getLineNumber()));
         }
       }
 
       return ti;
     } catch (final ParseException | NumberFormatException pe) {
-      LOGGER.error("Error parsing line: "
-          + Arrays.toString(line), pe);
-      throw pe;
+      throw new ScheduleParseException(String.format("Error parsing line '%s': %s", Arrays.toString(line),
+                                                     pe.getMessage(), pe));
     }
   }
 
@@ -1571,70 +1420,110 @@ public class TournamentSchedule implements Serializable {
    * Keep track of column information from a spreadsheet.
    * A -1 value for a column means that it was not found.
    */
-  public static final class ColumnInformation {
-
-    private final List<String> headerLine;
-
-    /**
-     * @return The columns that were parsed into the headers in the same order that
-     *         they appear in the schedule.
-     */
-    public List<String> getHeaderLine() {
-      return headerLine;
-    }
+  public static final class ColumnInformation implements Serializable {
 
     private final int teamNumColumn;
 
     /**
-     * @return column that contains the team number
+     * Get the value of a column from the specified {@code line}.
+     * 
+     * @param line the line to read the data from
+     * @param columnIndex the column index to get the value for
+     * @return the value or {@code null} if the column index is out of range or the
+     *         line has a {@code null} at the specified index
      */
-    public int getTeamNumColumn() {
-      return teamNumColumn;
+    private static @Nullable String getValue(final @Nullable String[] line,
+                                             final int columnIndex) {
+      if (columnIndex < 0
+          || columnIndex >= line.length) {
+        return null;
+      } else {
+        return line[columnIndex];
+      }
+    }
+
+    /**
+     * @param line the line to parse
+     * @return the team number column value, null if column cannot be found
+     */
+    public @Nullable String getTeamNum(final @Nullable String[] line) {
+      return getValue(line, teamNumColumn);
     }
 
     private final int organizationColumn;
 
     /**
-     * @return column that contains the organization
+     * @param line the line to parse
+     * @return the organization column value, null if column cannot be found
      */
-    public int getOrganizationColumn() {
-      return organizationColumn;
+    public @Nullable String getOrganization(final @Nullable String[] line) {
+      return getValue(line, organizationColumn);
     }
 
     private final int teamNameColumn;
 
     /**
-     * @return column that contains the team name
+     * @param line the line to parse
+     * @return the team name column value, null if column cannot be found
      */
-    public int getTeamNameColumn() {
-      return teamNameColumn;
+    public @Nullable String getTeamName(final @Nullable String[] line) {
+      return getValue(line, teamNameColumn);
     }
 
-    private final int divisionColumn;
+    private final int awardGroupColumn;
 
     /**
-     * @return column for division (award group)
+     * @param line the line to parse
+     * @return the award group column value, null if column cannot be found
      */
-    public int getDivisionColumn() {
-      return divisionColumn;
+    public @Nullable String getAwardGroup(final @Nullable String[] line) {
+      return getValue(line, awardGroupColumn);
     }
 
-    private final Map<Integer, String> subjectiveColumns;
+    private final Collection<CategoryColumnMapping> subjectiveColumnMappings;
+
+    private final Map<String, Integer> subjectiveColumnIndicies;
 
     /**
-     * @return key is column index, value is the subjective judging station
+     * @return associations between subjective score categories and schedule columns
      */
-    public Map<Integer, String> getSubjectiveColumnInfo() {
-      return subjectiveColumns;
+    public Collection<CategoryColumnMapping> getSubjectiveColumnMappings() {
+      return subjectiveColumnMappings;
+    }
+
+    /**
+     * @return the names of the columns in the data file that specify times for
+     *         subjective judging
+     */
+    public Collection<String> getSubjectiveStationNames() {
+      return subjectiveColumnMappings.stream() //
+                                     .map(CategoryColumnMapping::getScheduleColumn) //
+                                     .collect(Collectors.toSet());
+    }
+
+    /**
+     * @param line the line to parse
+     * @param judgingStation the judging station
+     * @return the time of the subjective judging station, null if not known
+     */
+    public @Nullable String getSubjectiveTime(final @Nullable String[] line,
+                                              final String judgingStation) {
+      if (subjectiveColumnIndicies.containsKey(judgingStation)) {
+        final int index = subjectiveColumnIndicies.get(judgingStation);
+        return getValue(line, index);
+      } else {
+        return null;
+      }
     }
 
     private final int judgeGroupColumn;
 
     /**
-     * @return column for judge
+     * @param line the line to parse
+     * @return the judging group column value, null if column cannot be found
      */
-    public int getJudgeGroupColumn() {
-      return judgeGroupColumn;
+    public @Nullable String getJudgingGroup(final @Nullable String[] line) {
+      return getValue(line, judgeGroupColumn);
     }
 
     private final int[] perfColumn;
@@ -1647,21 +1536,27 @@ public class TournamentSchedule implements Serializable {
     }
 
     /**
-     * @param round the performance round to get the column for
-     * @return the column for the performance round time
+     * @param line the line to parse
+     * @param round the performance round to get the value for
+     * @return the performance column value, null if column cannot be found
      */
-    public int getPerfColumn(final int round) {
-      return perfColumn[round];
+    public @Nullable String getPerf(final @Nullable String[] line,
+                                    final int round) {
+      final int columnIndex = perfColumn[round];
+      return getValue(line, columnIndex);
     }
 
     private final int[] perfTableColumn;
 
     /**
-     * @param round the performance round to get the column for
-     * @return the column for the performance round table
+     * @param line the line to parse
+     * @param round the performance round to get the value for
+     * @return the performance table column value, null if column cannot be found
      */
-    public int getPerfTableColumn(final int round) {
-      return perfTableColumn[round];
+    public @Nullable String getPerfTable(final @Nullable String[] line,
+                                         final int round) {
+      final int columnIndex = perfTableColumn[round];
+      return getValue(line, columnIndex);
     }
 
     private final int[] practiceColumn;
@@ -1674,120 +1569,150 @@ public class TournamentSchedule implements Serializable {
     }
 
     /**
-     * @param round the practice round to get the column for
-     * @return the column for the practice round time
+     * @param line the line to parse
+     * @param round the practice round to get the value for
+     * @return the practice column value, null if column cannot be found
      */
-    public int getPracticePerfColumn(final int round) {
-      return practiceColumn[round];
+    public @Nullable String getPractice(final @Nullable String[] line,
+                                        final int round) {
+      final int columnIndex = practiceColumn[round];
+      return getValue(line, columnIndex);
     }
 
     private final int[] practiceTableColumn;
 
     /**
-     * @param round the practice round to get the column for
-     * @return the column for the practice round table
+     * @param line the line to parse
+     * @param round the practice round to get the value for
+     * @return the practice table column value, null if column cannot be found
      */
-    public int getPracticePerfTableColumn(final int round) {
-      return practiceTableColumn[round];
+    public @Nullable String getPracticeTable(final @Nullable String[] line,
+                                             final int round) {
+      final int columnIndex = practiceTableColumn[round];
+      return getValue(line, columnIndex);
     }
 
     /**
-     * @param headerLine {@link #getHeaderLine()}
-     * @param teamNumColumn {@link #getTeamNumColumn()}
-     * @param organizationColumn {@link #getOrganizationColumn()}
-     * @param teamNameColumn {@link #getTeamNameColumn()}
-     * @param divisionColumn {@link #getDivisionColumn()}
-     * @param subjectiveColumns {@link #getSubjectiveColumnInfo()}
-     * @param judgeGroupColumn {@link #getJudgeGroupColumn()}
-     * @param perfColumn {@link #getPerfColumn(int)}
-     * @param perfTableColumn {@link #getPerfTableColumn(int)}
-     * @param practiceColumn {@link #getPracticePerfColumn(int)}
-     * @param practiceTableColumn {@link #getPracticePerfTableColumn(int)}
+     * @param headerLine the header line to check
+     * @param columnName the name of the column to find
+     * @return the column index for the specified name, -1 if no such column is
+     *         found
      */
-    @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
-    public ColumnInformation(final @Nullable String[] headerLine,
-                             final int teamNumColumn,
-                             final int organizationColumn,
-                             final int teamNameColumn,
-                             final int divisionColumn,
-                             final Map<Integer, String> subjectiveColumns,
-                             final int judgeGroupColumn,
-                             final int[] perfColumn,
-                             final int[] perfTableColumn,
-                             final int[] practiceColumn,
-                             final int[] practiceTableColumn) {
-      this.headerLine = Collections.unmodifiableList(Arrays.asList(headerLine));
-      this.teamNumColumn = teamNumColumn;
-      this.organizationColumn = organizationColumn;
-      this.teamNameColumn = teamNameColumn;
-      this.divisionColumn = divisionColumn;
-      this.subjectiveColumns = subjectiveColumns;
-      this.judgeGroupColumn = judgeGroupColumn;
+    private static int findColumnIndex(final @Nullable String[] headerLine,
+                                       final @Nullable String columnName) {
+      if (null == columnName) {
+        return -1;
+      }
 
-      this.perfColumn = new int[perfColumn.length];
-      System.arraycopy(perfColumn, 0, this.perfColumn, 0, perfColumn.length);
-      this.perfTableColumn = new int[perfTableColumn.length];
-      System.arraycopy(perfTableColumn, 0, this.perfTableColumn, 0, perfTableColumn.length);
-
-      this.practiceColumn = new int[practiceColumn.length];
-      System.arraycopy(practiceColumn, 0, this.practiceColumn, 0, practiceColumn.length);
-      this.practiceTableColumn = new int[practiceTableColumn.length];
-      System.arraycopy(practiceTableColumn, 0, this.practiceTableColumn, 0, practiceTableColumn.length);
-
-      // determine which columns aren't used
-      final List<String> unused = new LinkedList<>();
-      for (int column = 0; column < this.headerLine.size(); ++column) {
-        boolean match = false;
-        if (column == this.teamNumColumn //
-            || column == this.organizationColumn //
-            || column == this.teamNameColumn //
-            || column == this.divisionColumn //
-            || column == this.judgeGroupColumn //
-        ) {
-          match = true;
-        }
-
-        for (final int pc : this.practiceColumn) {
-          if (pc == column) {
-            match = true;
-          }
-        }
-        for (final int ptc : this.practiceTableColumn) {
-          if (ptc == column) {
-            match = true;
-          }
-        }
-
-        for (final int pc : this.perfColumn) {
-          if (pc == column) {
-            match = true;
-          }
-        }
-        for (final int ptc : this.perfTableColumn) {
-          if (ptc == column) {
-            match = true;
-          }
-        }
-
-        for (final int sc : this.subjectiveColumns.keySet()) {
-          if (sc == column) {
-            match = true;
-          }
-        }
-        if (!match) {
-          unused.add(this.headerLine.get(column));
+      for (int i = 0; i < headerLine.length; ++i) {
+        if (columnName.equals(headerLine[i])) {
+          return i;
         }
       }
-      this.unusedColumns = Collections.unmodifiableList(unused);
+      return -1;
     }
 
-    private final List<String> unusedColumns;
+    private final int headerRowIndex;
 
     /**
-     * @return the column names that were in the header line, but not used.
+     * @return the index into the data file where the header row can be found
      */
-    public List<String> getUnusedColumns() {
-      return unusedColumns;
+    public int getHeaderRowIndex() {
+      return headerRowIndex;
+    }
+
+    /**
+     * Empty object used in place of {@code null}.
+     */
+    public static final ColumnInformation NULL = new ColumnInformation();
+
+    private ColumnInformation() {
+      this.headerRowIndex = 0;
+      this.teamNumColumn = -1;
+      this.organizationColumn = -1;
+      this.teamNameColumn = -1;
+      this.awardGroupColumn = -1;
+      this.judgeGroupColumn = -1;
+      this.perfColumn = new int[0];
+      this.perfTableColumn = new int[0];
+      this.practiceColumn = new int[0];
+      this.practiceTableColumn = new int[0];
+      this.subjectiveColumnMappings = Collections.emptyList();
+      this.subjectiveColumnIndicies = Collections.emptyMap();
+    }
+
+    /**
+     * @param headerRowIndex {@link #getHeaderRowIndex()}
+     * @param headerLine the header line, used to match column names to indicies
+     * @param teamNumColumn {@link #getTeamNum(String[])}
+     * @param organizationColumn {@link #getOrganization(String[])}
+     * @param teamNameColumn {@link #getTeamName(String[])}
+     * @param awardGroupColumn {@link #getAwardGroup(String[])}
+     * @param subjectiveColumnMappings {@link #getSubjectiveColumnMappings()}
+     * @param judgeGroupColumn {@link #getJudgingGroup(String[])}
+     * @param perfColumn {@link #getPerf(String[], int)}
+     * @param perfTableColumn {@link #getPerfTable(String[], int)}
+     * @param practiceColumn {@link #getPractice(String[], int)}
+     * @param practiceTableColumn {@link #getPracticeTable(String[], int)}
+     * @throws IllegalArgumentException if {@code perfColumn} and
+     *           {@code perfTableColumn} are not the same length, or
+     *           {@code practiceColumn} and {@code practiceTableColumn} are not the
+     *           same length
+     */
+    @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
+    public ColumnInformation(final int headerRowIndex,
+                             final @Nullable String[] headerLine,
+                             final String teamNumColumn,
+                             final @Nullable String organizationColumn,
+                             final @Nullable String teamNameColumn,
+                             final @Nullable String awardGroupColumn,
+                             final @Nullable String judgeGroupColumn,
+                             final Collection<CategoryColumnMapping> subjectiveColumnMappings,
+                             final String[] perfColumn,
+                             final String[] perfTableColumn,
+                             final String[] practiceColumn,
+                             final String[] practiceTableColumn) {
+      if (perfColumn.length != perfTableColumn.length) {
+        throw new IllegalArgumentException(String.format("perfColumn (%d) must be the same length as perfTableColumn(%d)",
+                                                         perfColumn.length, perfTableColumn.length));
+      }
+      if (practiceColumn.length != practiceTableColumn.length) {
+        throw new IllegalArgumentException(String.format("practiceColumn (%d) must be the same length as practiceTableColumn(%d)",
+                                                         practiceColumn.length, practiceTableColumn.length));
+      }
+
+      this.headerRowIndex = headerRowIndex;
+      this.teamNumColumn = findColumnIndex(headerLine, teamNumColumn);
+      this.organizationColumn = findColumnIndex(headerLine, organizationColumn);
+      this.teamNameColumn = findColumnIndex(headerLine, teamNameColumn);
+      this.awardGroupColumn = findColumnIndex(headerLine, awardGroupColumn);
+      this.judgeGroupColumn = findColumnIndex(headerLine, judgeGroupColumn);
+
+      this.perfColumn = new int[perfColumn.length];
+      for (int i = 0; i < this.perfColumn.length; ++i) {
+        this.perfColumn[i] = findColumnIndex(headerLine, perfColumn[i]);
+      }
+      this.perfTableColumn = new int[perfTableColumn.length];
+      for (int i = 0; i < this.perfTableColumn.length; ++i) {
+        this.perfTableColumn[i] = findColumnIndex(headerLine, perfTableColumn[i]);
+      }
+
+      this.practiceColumn = new int[practiceColumn.length];
+      for (int i = 0; i < this.practiceColumn.length; ++i) {
+        this.practiceColumn[i] = findColumnIndex(headerLine, practiceColumn[i]);
+      }
+      this.practiceTableColumn = new int[practiceTableColumn.length];
+      for (int i = 0; i < this.practiceTableColumn.length; ++i) {
+        this.practiceTableColumn[i] = findColumnIndex(headerLine, practiceTableColumn[i]);
+      }
+
+      this.subjectiveColumnMappings = Collections.unmodifiableCollection(new LinkedList<>(subjectiveColumnMappings));
+      this.subjectiveColumnIndicies = new HashMap<>();
+      this.subjectiveColumnMappings.stream().forEach(mapping -> {
+        final String stationName = mapping.getScheduleColumn();
+        final int index = findColumnIndex(headerLine, stationName);
+        subjectiveColumnIndicies.put(stationName, index);
+      });
     }
   }
 

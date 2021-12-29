@@ -10,14 +10,9 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.db.Queries;
@@ -27,9 +22,16 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.StoreColumnNames;
 import fll.web.UploadSpreadsheet;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Check if a schedule exists for the current tournament.
@@ -57,11 +59,19 @@ public class CheckScheduleExists extends BaseFLLServlet {
 
     clearSesionVariables(session);
 
-    final UploadScheduleData uploadScheduleData = new UploadScheduleData();
+    final int headerRowIndex = SessionAttributes.getNonNullAttribute(session, StoreColumnNames.HEADER_ROW_INDEX_KEY,
+                                                                     Integer.class)
+                                                .intValue();
+    @SuppressWarnings("unchecked") // cannot store generics in session
+    final Collection<String> headerNames = SessionAttributes.getNonNullAttribute(session,
+                                                                                 StoreColumnNames.HEADER_NAMES_KEY,
+                                                                                 Collection.class);
 
     final String fileName = SessionAttributes.getNonNullAttribute(session, UploadSpreadsheet.SPREADSHEET_FILE_KEY,
                                                                   String.class);
-    uploadScheduleData.setScheduleFile(new File(fileName));
+
+    final UploadScheduleData uploadScheduleData = new UploadScheduleData(new File(fileName), headerRowIndex,
+                                                                         headerNames);
 
     final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
     if (null != sheetName) {

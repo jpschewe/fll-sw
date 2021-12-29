@@ -24,7 +24,8 @@ public final class ProcessSelectedSheet extends BaseFLLServlet {
 
   /**
    * Key in the session where <code>promptForSheetName.jsp</code> expects to
-   * find a {@link java.util.List} of {@link String} objects to present to the user for
+   * find a {@link java.util.List} of {@link String} objects to present to the
+   * user for
    * choosing the sheet name.
    */
   public static final String SHEET_NAMES_KEY = "sheetNames";
@@ -51,11 +52,8 @@ public final class ProcessSelectedSheet extends BaseFLLServlet {
     }
     session.setAttribute(UploadSpreadsheet.SHEET_NAME_KEY, sheetName);
 
-    final String uploadRedirect = SessionAttributes.getNonNullAttribute(session, UploadSpreadsheet.UPLOAD_REDIRECT_KEY,
-                                                                        String.class);
-
     session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL(uploadRedirect));
+    response.sendRedirect(response.encodeRedirectURL("selectHeaderRow.jsp"));
   }
 
 }

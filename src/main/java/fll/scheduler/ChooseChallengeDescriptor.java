@@ -7,7 +7,6 @@
 package fll.scheduler;
 
 import java.awt.Component;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -23,6 +22,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JTextArea;
@@ -54,8 +54,8 @@ public class ChooseChallengeDescriptor extends JDialog {
   /**
    * @param owner parent component
    */
-  public ChooseChallengeDescriptor(final @UnknownInitialization(Frame.class) Frame owner) {
-    super(owner, true);
+  public ChooseChallengeDescriptor(final @UnknownInitialization(JFrame.class) JFrame owner) {
+    super(owner, "Choose Challenge Description", true);
 
     getContentPane().setLayout(new GridBagLayout());
 

@@ -439,7 +439,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                 them to
                 <input type="file" size="32" name="file" />
                 <input type='hidden' name='uploadRedirect'
-                    value="<c:url value='/admin/UploadTeamTournamentAssignments'/>" />
+                    value="<c:url value='/admin/chooseAdvancementColumns.jsp'/>" />
                 <input type="submit" value="Upload" />
             </form>
         </li>
@@ -451,7 +451,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                 Upload CSV or Excel of updated information for teams
                 <input type="file" size="32" name="file" />
                 <input type='hidden' name='uploadRedirect'
-                    value="<c:url value='/admin/UploadTeamInformation'/>" />
+                    value="<c:url value='/admin/chooseTeamInformationColumns.jsp'/>" />
                 <input type="submit" value="Upload" />
             </form>
         </li>

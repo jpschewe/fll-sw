@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 33;
+  public static final int DATABASE_VERSION = 34;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -666,6 +666,11 @@ public final class GenerateDB {
       if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.RUNNING_HEAD_2_HEAD)) {
         TournamentParameters.setDefaultRunningHeadToHead(connection, headToHead);
       }
+
+      if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.PRACTICE_ROUNDS)) {
+        TournamentParameters.setDefaultNumPracticeRounds(connection, TournamentParameters.PRACTICE_ROUNDS_DEFAULT);
+      }
+
     }
   }
 

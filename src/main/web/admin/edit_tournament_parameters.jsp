@@ -55,9 +55,9 @@ GatherTournamentParameterInformation.populateContext(application, pageContext);
             <div>
                 <b>Number of Regular Match Play Rounds</b>
                 <c:choose>
-                    <c:when test="${numSeedingSoundsDisabled}">
-                        <i>This parameters cannot be changed once
-                            any performance scores have been entered.</i>
+                    <c:when test="${numSeedingRoundsDisabled}">
+                        <i>This parameter cannot be changed once any
+                            performance scores have been entered.</i>
                         <input type="text" name="seeding_rounds"
                             id="seeding_rounds"
                             value="${numSeedingRounds}"
@@ -80,6 +80,27 @@ GatherTournamentParameterInformation.populateContext(application, pageContext);
                         <input type="text" name="seeding_rounds"
                             id="seeding_rounds"
                             value="${numSeedingRounds}"
+                            class="required digits" />
+                    </c:otherwise>
+                </c:choose>
+            </div>
+
+            <!-- num practice rounds -->
+            <div>
+                <b>Number of Practice Rounds</b>
+                <c:choose>
+                    <c:when test="${numSeedingRoundsDisabled}">
+                        <i>This parameter cannot be changed once any
+                            performance scores have been entered.</i>
+                        <input type="text" name="practice_rounds"
+                            id="practice_rounds"
+                            value="${numPracticeRounds}"
+                            class="required digits" readonly />
+                    </c:when>
+                    <c:otherwise>
+                        <input type="text" name="practice_rounds"
+                            id="practice_rounds"
+                            value="${numPracticeRounds}"
                             class="required digits" />
                     </c:otherwise>
                 </c:choose>
