@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
@@ -201,6 +202,25 @@ public final class SelectTeam {
      */
     public TournamentTeam getTeam() {
       return team;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(this.nextPerformance, this.nextRunNumber);
+    }
+
+    @Override
+    public boolean equals(final @Nullable Object o) {
+      if (this == o) {
+        return true;
+      } else if (null == o) {
+        return false;
+      } else if (this.getClass().equals(o.getClass())) {
+        final SelectTeamData other = (SelectTeamData) o;
+        return 0 == this.compareTo(other);
+      } else {
+        return false;
+      }
     }
 
     @Override
