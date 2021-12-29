@@ -1159,6 +1159,7 @@ public final class IntegrationTestUtils {
         + "admin/edit_tournament_parameters.jsp");
 
     final WebElement element = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.name("seeding_rounds")));
+    element.clear();
     element.sendKeys(String.valueOf(numRounds));
 
     selenium.findElement(By.id("submit_data")).click();
@@ -1184,6 +1185,7 @@ public final class IntegrationTestUtils {
         + "admin/edit_tournament_parameters.jsp");
 
     final WebElement element = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.name("practice_rounds")));
+    element.clear();
     element.sendKeys(String.valueOf(numRounds));
 
     selenium.findElement(By.id("submit_data")).click();
