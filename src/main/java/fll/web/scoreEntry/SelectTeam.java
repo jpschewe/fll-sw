@@ -10,15 +10,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -32,6 +30,9 @@ import fll.scheduler.PerformanceTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Java code for scoreEntry/select_team.jsp.
@@ -70,31 +71,60 @@ public final class SelectTeam {
 
       final Tournament tournament = Tournament.getCurrentTournament(connection);
 
-      final List<TournamentTeam> tournamentTeams = new LinkedList<>(Queries.getTournamentTeams(connection,
-                                                                                               tournament.getTournamentID())
-                                                                           .values());
-
       final @Nullable String scoreEntrySelectedTable = (String) session.getAttribute("scoreEntrySelectedTable");
 
+      // get latest performance round for each team
+      final Map<Integer, Integer> maxRunNumbers = getMaxRunNumbers(connection, tournament);
+
+      final @Nullable TournamentSchedule schedule;
       if (TournamentSchedule.scheduleExistsInDatabase(connection, tournament.getTournamentID())) {
-        // sort teams based on the schedule
-
-        final TournamentSchedule schedule = new TournamentSchedule(connection, tournament.getTournamentID());
-
-        // get latest performance round for each team
-        final Map<Integer, Integer> maxRunNumbers = getMaxRunNumbers(connection, tournament);
-
-        final Comparator<TournamentTeam> comparator = new TeamSort(scoreEntrySelectedTable, schedule, maxRunNumbers);
-        tournamentTeams.sort(comparator);
+        schedule = new TournamentSchedule(connection, tournament.getTournamentID());
+      } else {
+        schedule = null;
       }
 
-      pageContext.setAttribute("tournamentTeams", tournamentTeams);
+      final List<SelectTeamData> teamSelectData = Queries.getTournamentTeams(connection, tournament.getTournamentID())
+                                                         .values().stream() //
+                                                         .map(team -> {
+                                                           final int nextRunNumber = maxRunNumbers.getOrDefault(team.getTeamNumber(),
+                                                                                                                0)
+                                                               + 1;
+                                                           final @Nullable PerformanceTime nextPerformance = getNextPerformance(schedule,
+                                                                                                                                team.getTeamNumber(),
+                                                                                                                                nextRunNumber);
+                                                           return new SelectTeamData(scoreEntrySelectedTable, team,
+                                                                                     nextPerformance, nextRunNumber);
+                                                         }) //
+                                                         .collect(Collectors.toList());
+      Collections.sort(teamSelectData);
+      pageContext.setAttribute("teamSelectData", teamSelectData);
 
     } catch (final SQLException e) {
       LOGGER.error(e.getMessage(), e);
       throw new RuntimeException(e.getMessage(), e);
     }
 
+  }
+
+  private static @Nullable PerformanceTime getNextPerformance(final @Nullable TournamentSchedule schedule,
+                                                              final int teamNumber,
+                                                              final int nextRunNumber) {
+    if (null == schedule) {
+      return null;
+    } else {
+      final @Nullable TeamScheduleInfo sched = schedule.getSchedInfoForTeam(teamNumber);
+      if (null == sched) {
+        return null;
+      } else {
+        // subtract 1 from the run number to get to a zero based index
+        final @Nullable PerformanceTime time = sched.enumerateRegularMatchPlayPerformances()//
+                                                    .filter(p -> p.getRight().longValue() == (nextRunNumber
+                                                        - 1))//
+                                                    .findFirst().map(Pair::getLeft).orElse(null);
+
+        return time;
+      }
+    }
   }
 
   /**
@@ -128,87 +158,101 @@ public final class SelectTeam {
     return maxRunNumbers;
   }
 
+  /**
+   * Data class for displaying team information on the web.
+   */
   @SuppressFBWarnings(value = "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", justification = "only used for sort, not stored")
-  private static final class TeamSort implements Comparator<TournamentTeam> {
-    private final Map<Integer, Integer> maxRunNumbers;
+  public static final class SelectTeamData implements Comparable<SelectTeamData> {
+
+    private final TournamentTeam team;
+
+    private final @Nullable PerformanceTime nextPerformance;
+
+    private final int nextRunNumber;
 
     private final @Nullable String scoreEntrySelectedTable;
 
-    private final @Nullable TournamentSchedule schedule;
-
-    TeamSort(final @Nullable String scoreEntrySelectedTable,
-             final @Nullable TournamentSchedule schedule,
-             final Map<Integer, Integer> maxRunNumbers) {
-      this.maxRunNumbers = maxRunNumbers;
-      this.schedule = schedule;
+    SelectTeamData(final @Nullable String scoreEntrySelectedTable,
+                   final TournamentTeam team,
+                   final @Nullable PerformanceTime nextPerformance,
+                   final int nextRunNumber) {
       this.scoreEntrySelectedTable = scoreEntrySelectedTable;
+      this.team = team;
+      this.nextPerformance = nextPerformance;
+      this.nextRunNumber = nextRunNumber;
+    }
+
+    /**
+     * @return what to display in the team selection box
+     */
+    public String getDisplayString() {
+      final String scheduleInfo;
+      if (null != nextPerformance) {
+        scheduleInfo = String.format(" @ %s - %s", TournamentSchedule.formatTime(nextPerformance.getTime()),
+                                     nextPerformance.getTableAndSide());
+      } else {
+        scheduleInfo = "";
+      }
+      return String.format("%d [%s] - %d%s", team.getTeamNumber(), team.getTrimmedTeamName(), nextRunNumber,
+                           scheduleInfo);
+    }
+
+    /**
+     * @return team
+     */
+    public TournamentTeam getTeam() {
+      return team;
     }
 
     @Override
-    public int compare(final TournamentTeam one,
-                       final TournamentTeam two) {
-      final int oneNextRun = maxRunNumbers.getOrDefault(one.getTeamNumber(), 0)
-          + 1;
-      final int twoNextRun = maxRunNumbers.getOrDefault(two.getTeamNumber(), 0)
-          + 1;
-
-      if (null == schedule) {
-        return Integer.compare(oneNextRun, twoNextRun);
-      } else {
-        final @Nullable TeamScheduleInfo oneSched = schedule.getSchedInfoForTeam(one.getTeamNumber());
-        final @Nullable TeamScheduleInfo twoSched = schedule.getSchedInfoForTeam(two.getTeamNumber());
-        if (null == oneSched
-            && null == twoSched) {
-          return Integer.compare(oneNextRun, twoNextRun);
-        } else if (null == oneSched) {
-          // one is after two
-          return 1;
-        } else if (null == twoSched) {
-          // one is before two
-          return -1;
-        } else {
-          // subtract 1 from the run number to get to a zero based index
-          final @Nullable PerformanceTime oneTime = oneSched.enumerateRegularMatchPlayPerformances()//
-                                                            .filter(p -> p.getRight().longValue() == oneNextRun
-                                                                - 1)//
-                                                            .findFirst().map(Pair::getLeft).orElse(null);
-
-          final @Nullable PerformanceTime twoTime = twoSched.enumerateRegularMatchPlayPerformances()//
-                                                            .filter(p -> p.getRight().longValue() == twoNextRun
-                                                                - 1)//
-                                                            .findFirst().map(Pair::getLeft).orElse(null);
-
-          if (null == oneTime
-              && null == twoTime) {
-            return Integer.compare(oneNextRun, twoNextRun);
-          } else if (null == oneTime) {
-            // one doesn't have anymore runs left, it is after two
-            return 1;
-          } else if (null == twoTime) {
-            // two doesn't have anymore runs left, it is after one
-            return -1;
-          } else {
-            final String oneTable = oneTime.getTableAndSide();
-            final String twoTable = twoTime.getTableAndSide();
-
-            if (oneTable.equals(scoreEntrySelectedTable)
-                && !twoTable.equals(scoreEntrySelectedTable)) {
-              // prefer selected table
-              return -1;
-            } else if (!oneTable.equals(scoreEntrySelectedTable)
-                && twoTable.equals(scoreEntrySelectedTable)) {
-              // prefer selected table
-              return 1;
-            } else if (oneTime.equals(twoTime)) {
-              return Integer.compare(one.getTeamNumber(), two.getTeamNumber());
-            } else {
-              return oneTime.compareTo(twoTime);
-            }
-          }
-        }
-      }
-
+    public int hashCode() {
+      return Objects.hash(this.nextPerformance, this.nextRunNumber);
     }
 
+    @Override
+    public boolean equals(final @Nullable Object o) {
+      if (this == o) {
+        return true;
+      } else if (null == o) {
+        return false;
+      } else if (this.getClass().equals(o.getClass())) {
+        final SelectTeamData other = (SelectTeamData) o;
+        return 0 == this.compareTo(other);
+      } else {
+        return false;
+      }
+    }
+
+    @Override
+    public int compareTo(final SelectTeamData other) {
+      if (null == this.nextPerformance
+          && null == other.nextPerformance) {
+        return Integer.compare(this.nextRunNumber, other.nextRunNumber);
+      } else if (null == this.nextPerformance) {
+        // this is after other
+        return 1;
+      } else if (null == other.nextPerformance) {
+        // this is before other
+        return -1;
+      } else {
+        final String oneTable = this.nextPerformance.getTableAndSide();
+        final String twoTable = other.nextPerformance.getTableAndSide();
+
+        if (oneTable.equals(scoreEntrySelectedTable)
+            && !twoTable.equals(scoreEntrySelectedTable)) {
+          // prefer selected table
+          return -1;
+        } else if (!oneTable.equals(scoreEntrySelectedTable)
+            && twoTable.equals(scoreEntrySelectedTable)) {
+          // prefer selected table
+          return 1;
+        } else if (this.nextPerformance.equals(other.nextPerformance)) {
+          return Integer.compare(this.team.getTeamNumber(), other.team.getTeamNumber());
+        } else {
+          return this.nextPerformance.compareTo(other.nextPerformance);
+        }
+      }
+    }
   }
+
 }

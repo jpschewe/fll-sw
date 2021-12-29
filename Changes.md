@@ -1,3 +1,4 @@
+* #1002 - Display next round and schedule information when selecting teams for performance runs
 * #34 - Allow the user to specify which row in a spreadsheet is the header row and allow the user to specify all column mappings
 * Add number of practice rounds as a tournament parameter
 * #1008 - Report performance ties in the awards report
