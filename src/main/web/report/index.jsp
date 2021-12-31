@@ -48,7 +48,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         Scores"</a>
 
     <a class="wide" href="CategoryScoresByScoreGroup" target="_blank">Award
-        category scores Categorized</a>
+        category scores - by category and judging group</a>
 
     <a class='wide' href='SubjectiveByJudge' target="_blank">Summarized
         numeric scores - by judges </a>
