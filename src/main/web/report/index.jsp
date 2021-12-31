@@ -53,6 +53,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <a class='wide' href='SubjectiveByJudge' target="_blank">Summarized
         numeric scores - by judges </a>
 
+    <a class='wide' href='ScaledSubjectiveByAwardGroup' target="_blank">Subjective
+        scaled scores by award group</a>
+
     <a class="wide" href="PerformanceReport" target="_blank">
         Performance scores - full tournament </a>
 
