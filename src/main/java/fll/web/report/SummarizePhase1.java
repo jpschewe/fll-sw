@@ -191,12 +191,24 @@ public final class SummarizePhase1 {
     return numExpected;
   }
 
+  /**
+   * Determine how many scores have been entered in a category by a judge at a
+   * judging station.
+   * 
+   * @param connection database connection
+   * @param judge the judge
+   * @param categoryName the name of the category
+   * @param station the judging station
+   * @param tournamentID the id of the tournament
+   * @return the number of scores entered
+   * @throws SQLException on a database error
+   */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate table name from category")
-  private static int getNumScoresEntered(final Connection connection,
-                                         final String judge,
-                                         final String categoryName,
-                                         final String station,
-                                         final int tournamentID)
+  public static int getNumScoresEntered(final Connection connection,
+                                        final String judge,
+                                        final String categoryName,
+                                        final String station,
+                                        final int tournamentID)
       throws SQLException {
     int numActual = -1;
     try (PreparedStatement getActual = connection.prepareStatement("SELECT COUNT(*)" //
