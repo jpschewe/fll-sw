@@ -248,7 +248,7 @@ dependencies {
   implementation(group: "org.checkerframework", name: "checker-util", version: project.checker_framework_version)
   checkerFramework(group: "org.checkerframework", name: "checker", version: project.checker_framework_version)
     
-  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.24")
+  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.25")
   
   // for templating reports
   implementation(group: "org.apache.velocity", name: "velocity-engine-core", version: "2.3")
