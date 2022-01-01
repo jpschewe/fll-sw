@@ -1,3 +1,4 @@
+* #998 - Scale the main scoreboard based on screen size
 * #1006 - Use the tournament name as the base name when writing out schedules
 * #1009 - Add report that shows scaled and raw scores for all teams in an award group
 * #1002 - Display next round and schedule information when selecting teams for performance runs

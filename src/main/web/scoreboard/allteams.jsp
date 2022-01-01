@@ -14,6 +14,8 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
 <link rel='stylesheet' type='text/css' href='../style/base.css' />
 <link rel='stylesheet' type='text/css' href='score_style.css' />
 
+<script type="text/javascript" src="set-font-size.js"></script>
+
 <style>
 TABLE.A {
     background-color: #000080

@@ -5,7 +5,6 @@
 <HTML>
 <head>
 <script type='text/javascript'>
-  var width = screen.width;
   if (screen.width < 1024) {
     //redirect to 800x600 scoreboard
     location.href = 'main_small.jsp';
