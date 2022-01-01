@@ -12,6 +12,7 @@ fll.web.scoreboard.Title.populateContext(application, session, pageContext);
 
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/base.css'/>" />
+<link rel='stylesheet' type='text/css' href='score_style.css' />
 
 </head>
 <body bgcolor='#008000'>
