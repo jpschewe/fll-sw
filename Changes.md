@@ -1,3 +1,4 @@
+* #1006 - Use the tournament name as the base name when writing out schedules
 * #1009 - Add report that shows scaled and raw scores for all teams in an award group
 * #1002 - Display next round and schedule information when selecting teams for performance runs
 * #34 - Allow the user to specify which row in a spreadsheet is the header row and allow the user to specify all column mappings
