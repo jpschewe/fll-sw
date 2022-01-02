@@ -205,7 +205,6 @@ dependencies {
   }
     
   implementation(group: "com.github.spotbugs", name: "spotbugs-annotations", version: project.spotbugs_version)
-  compileOnly(group: "net.jcip", name: "jcip-annotations", version: "1.0")
   compileOnly(group: "com.google.code.findbugs", name: "jsr305", version: "3.0.2")
     
   implementation(group: "com.fasterxml.jackson.core", name: "jackson-databind", version: project.jackson_version)
