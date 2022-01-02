@@ -25,16 +25,16 @@ plugins {
     id "org.unbroken-dome.test-sets" version "4.0.0"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
-    id "com.github.spotbugs" version "4.8.0"
+    id "com.github.spotbugs" version "5.0.3"
     id "de.aaschmid.cpd" version "3.3"
     id "edu.sc.seis.launch4j" version "2.5.1"
-    id "com.gorylenko.gradle-git-properties" version "2.3.1"
-    id "com.github.ben-manes.versions" version "0.39.0" // adds dependencyUpdates task
+    id "com.gorylenko.gradle-git-properties" version "2.3.2"
+    id "com.github.ben-manes.versions" version "0.40.0" // adds dependencyUpdates task
     id "de.undercouch.download" version "4.1.2" // file download
     id "checkstyle"
         
     // Checker Framework pluggable type-checking
-    id "org.checkerframework" version "0.6.4"
+    id "org.checkerframework" version "0.6.5"
     
     // code coverage
     id "jacoco"
@@ -78,7 +78,7 @@ eclipse {
 }
 
 dependencies {
-  jspc("org.apache.ant:ant:1.10.11")
+  jspc("org.apache.ant:ant:1.10.12")
 }
 
 testSets {
@@ -128,14 +128,14 @@ integrationTest {
 }
 
 ext {
-    jackson_version = "2.13.0"
+    jackson_version = "2.13.1"
     slf4j_version = "1.7.32"
-    tomcat_version = "10.0.12"
-    poi_version = "5.0.0"
-    junit_version = "5.8.1"
+    tomcat_version = "10.0.14"
+    poi_version = "5.1.0"
+    junit_version = "5.8.2"
     log4j_version = "2.17.1"
-    spotbugs_version = "4.5.0"
-    checker_framework_version = "3.20.0"
+    spotbugs_version = "4.5.2"
+    checker_framework_version = "3.21.0"
 
     web_build_dir = new File(project.buildDir, "web")
     documentation_build_dir = new File(project.buildDir, "gen-documentation")    
@@ -187,8 +187,8 @@ dependencies {
   implementation(group: "org.glassfish.web", name: "jakarta.servlet.jsp.jstl", version: "2.0.0")
 
   implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.12.0")
-  implementation(group: "commons-cli", name: "commons-cli", version: "1.4")
-  implementation(group: "org.hsqldb", name: "hsqldb", version: "2.6.0")
+  implementation(group: "commons-cli", name: "commons-cli", version: "1.5.0")
+  implementation(group: "org.hsqldb", name: "hsqldb", version: "2.6.1")
     
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-slf4j-impl", version: project.log4j_version)
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-jcl", version: project.log4j_version)
@@ -205,7 +205,6 @@ dependencies {
   }
     
   implementation(group: "com.github.spotbugs", name: "spotbugs-annotations", version: project.spotbugs_version)
-  compileOnly(group: "net.jcip", name: "jcip-annotations", version: "1.0")
   compileOnly(group: "com.google.code.findbugs", name: "jsr305", version: "3.0.2")
     
   implementation(group: "com.fasterxml.jackson.core", name: "jackson-databind", version: project.jackson_version)
@@ -215,9 +214,9 @@ dependencies {
 
   implementation(group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0")
             
-  implementation(group: "dnsjava", name: "dnsjava", version: "3.4.2")
+  implementation(group: "dnsjava", name: "dnsjava", version: "3.4.3")
        
-  implementation(group: "org.apache.tika", name: "tika-core", version: "2.1.0")
+  implementation(group: "org.apache.tika", name: "tika-core", version: "2.2.1")
     
   implementation(group: "com.diffplug.durian", name: "durian-core", version: "1.2.0")
         
@@ -248,7 +247,7 @@ dependencies {
   implementation(group: "org.checkerframework", name: "checker-util", version: project.checker_framework_version)
   checkerFramework(group: "org.checkerframework", name: "checker", version: project.checker_framework_version)
     
-  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.24")
+  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.25")
   
   // for templating reports
   implementation(group: "org.apache.velocity", name: "velocity-engine-core", version: "2.3")
@@ -263,7 +262,7 @@ dependencies {
   integrationTestImplementation(sourceSets.test.output)
         
   integrationTestImplementation(group: "org.easytesting", name: "fest-swing", version: "1.2.1")
-  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.53.0") {
+  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.56.0") {
       
     // xml APIs are part of the JDK
     exclude(group: "xml-apis", module: "xml-apis")
