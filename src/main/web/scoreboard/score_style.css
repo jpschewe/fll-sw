@@ -1,6 +1,7 @@
 body {
     font-family: 'Arial', 'Helvetica', 'sans-serif';
-    font-size: medium;
+    /*font-size: 1.5625vw;*/
+    /*transform: scale()*/
     font-weight: bold;
 }
 

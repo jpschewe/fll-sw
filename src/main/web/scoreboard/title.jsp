@@ -12,6 +12,10 @@ fll.web.scoreboard.Title.populateContext(application, session, pageContext);
 
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/base.css'/>" />
+<link rel='stylesheet' type='text/css' href='score_style.css' />
+
+<script type="text/javascript" src="set-font-size.js"></script>
+
 
 </head>
 <body bgcolor='#008000'>

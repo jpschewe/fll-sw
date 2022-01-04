@@ -77,6 +77,9 @@ public class Last8 extends BaseFLLServlet {
     formatter.format("<link rel='stylesheet' type='text/css' href='../style/fll-sw.css' />%n");
     formatter.format("<link rel='stylesheet' type='text/css' href='score_style.css' />%n");
     formatter.format("<meta http-equiv='refresh' content='30' />%n");
+
+    formatter.format("<script type=\"text/javascript\" src=\"set-font-size.js\"></script>%n");
+
     formatter.format("</head>%n");
 
     formatter.format("<body class='scoreboard'>%n");
