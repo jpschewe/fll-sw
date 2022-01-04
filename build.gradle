@@ -282,11 +282,11 @@ tasks.withType(Tar){
 
 javadoc {
     failOnError = false
-    options.addStringOption('Xmaxwarns', '10000')
+    options.addStringOption("Xmaxwarns", "10000")
 }
 
 compileJava {
-    options.compilerArgs << '-Xmaxwarns' << '10000'
+    options.compilerArgs << "-Xmaxwarns" << "10000"
 }
 
 tasks.register("distributionDependencies") {
