@@ -38,25 +38,25 @@ function addTournament(key, name, description, date, level) {
     dateCell.appendChild(keyElement);
     keyElement.setAttribute("type", "hidden");
     keyElement.setAttribute("name", KEY_PREFIX + rowIndex);
+    keyElement.setAttribute("id", KEY_PREFIX + rowIndex);
     keyElement.setAttribute("value", key);
 
     const dateElement = document.createElement("input");
     dateCell.appendChild(dateElement);
-    dateElement.setAttribute("type", "text");
-    dateElement.setAttribute("size", "8");
+    dateElement.setAttribute("type", "date");
     dateElement.setAttribute("name", DATE_PREFIX + rowIndex);
+    dateElement.setAttribute("id", DATE_PREFIX + rowIndex);
     if (date) {
         dateElement.value = date;
     }
-    $(dateElement).datepicker();
 
     const nameCell = document.createElement("td");
     row.appendChild(nameCell);
     const nameElement = document.createElement("input");
     nameCell.appendChild(nameElement);
     nameElement.setAttribute("type", "text");
-    nameElement.setAttribute("id", NAME_PREFIX + rowIndex);
     nameElement.setAttribute("name", NAME_PREFIX + rowIndex);
+    nameElement.setAttribute("id", NAME_PREFIX + rowIndex);
     nameElement.setAttribute("maxlength", "128");
     nameElement.setAttribute("size", "20");
     nameElement.value = name;
@@ -68,6 +68,7 @@ function addTournament(key, name, description, date, level) {
     descriptionCell.appendChild(descriptionElement);
     descriptionElement.setAttribute("type", "text");
     descriptionElement.setAttribute("name", DESCRIPTION_PREFIX + rowIndex);
+    descriptionElement.setAttribute("id", DESCRIPTION_PREFIX + rowIndex);
     descriptionElement.setAttribute("size", "64");
     if (description) {
         descriptionElement.value = description;
@@ -78,6 +79,7 @@ function addTournament(key, name, description, date, level) {
     const levelElement = document.createElement("select");
     levelCell.appendChild(levelElement);
     levelElement.setAttribute("name", LEVEL_PREFIX + rowIndex);
+    levelElement.setAttribute("id", LEVEL_PREFIX + rowIndex);
     populateLevelSelect(levelElement);
     if (level) {
         levelElement.value = level;
@@ -125,16 +127,5 @@ function checkTournamentNames() {
     }
 
     return true;
-}
-
-function setupDatepickers() {
-    const inputs = document.getElementsByTagName("input");
-    for (var i = 0; i < inputs.length; ++i) {
-        const input = inputs[i];
-        const name = input.getAttribute("name");
-        if (name && name.startsWith(DATE_PREFIX)) {
-            $(input).datepicker();
-        }
-    }
 }
 

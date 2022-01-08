@@ -107,14 +107,14 @@ public final class Tournaments extends BaseFLLServlet {
     }
   }
 
-  /** This matches the format used by the jquery UI datepicker. */
-  public static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.MONTH_OF_YEAR,
+  /** This matches the format used by the HTML date picker. */
+  public static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.YEAR, 4)
+                                                                                       .appendLiteral('-')
+                                                                                       .appendValue(ChronoField.MONTH_OF_YEAR,
                                                                                                     2)
-                                                                                       .appendLiteral('/')
+                                                                                       .appendLiteral('-')
                                                                                        .appendValue(ChronoField.DAY_OF_MONTH,
                                                                                                     2)
-                                                                                       .appendLiteral('/')
-                                                                                       .appendValue(ChronoField.YEAR, 4)
                                                                                        .toFormatter();
 
   @Override

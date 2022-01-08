@@ -15,15 +15,6 @@ fll.web.admin.Tournaments.populateContext(application, pageContext);
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-1.11.1.min.js' />"></script>
-
-<link rel="stylesheet" type="text/css"
-    href="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.css' />" />
-
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.js' />"></script>
-
 <script type='text/javascript' src="<c:url value='/js/fll-objects.js'/>"></script>
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js'/>"></script>
@@ -56,8 +47,6 @@ fll.web.admin.Tournaments.populateContext(application, pageContext);
       addNewTournament();
     });
 
-    setupDatepickers();
-    
     <c:forEach items="${tournamentsWithScores}" var="tournamentId">
     tournamentsWithScores.push("${tournamentId}");
     </c:forEach>
