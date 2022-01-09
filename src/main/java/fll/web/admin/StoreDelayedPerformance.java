@@ -9,20 +9,11 @@ package fll.web.admin;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import fll.Tournament;
@@ -33,6 +24,14 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Store data from /admin/delayed_performance.jsp.
@@ -98,10 +97,7 @@ public class StoreDelayedPerformance extends BaseFLLServlet {
   private static void createAndInsertPerformanceDelays(final HttpServletRequest request,
                                                        final Connection connection)
       throws SQLException {
-    final String numRowsStr = request.getParameter("numRows");
-    if (null == numRowsStr) {
-      throw new FLLInternalException("Missing 'numRows' parameter");
-    }
+    final String numRowsStr = WebUtils.getNonNullRequestParameter(request, "numRows");
 
     final int numRows = Integer.parseInt(numRowsStr);
 
@@ -112,21 +108,15 @@ public class StoreDelayedPerformance extends BaseFLLServlet {
     for (int row = 0; row < numRows; ++row) {
       final String runNumberStr = request.getParameter("runNumber"
           + row);
-      final String dateStr = request.getParameter("date"
-          + row);
-      final String timeStr = request.getParameter("time"
+      final String dateTimeStr = request.getParameter("datetime"
           + row);
 
       if (null != runNumberStr
-          && null != dateStr
-          && null != timeStr) {
+          && null != dateTimeStr) {
         final int runNumber = Integer.parseInt(runNumberStr);
 
-        final LocalDate date = LocalDate.parse(dateStr, Tournaments.DATE_FORMATTER);
+        final LocalDateTime delayUntil = LocalDateTime.parse(dateTimeStr, Tournaments.DATE_TIME_FORMATTER);
 
-        final LocalTime time = LocalTime.parse(timeStr, DelayedPerformance.TIME_FORMATTER);
-
-        final LocalDateTime delayUntil = LocalDateTime.of(date, time);
         final DelayedPerformance delay = new DelayedPerformance(runNumber, delayUntil);
         delays.add(delay);
       }

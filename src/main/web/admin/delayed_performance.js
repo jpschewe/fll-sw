@@ -7,74 +7,64 @@
 "use strict";
 
 function addRow() {
-  var numRows = parseInt($('#numRows').val());
+    const numRowsEle = document.getElementById("numRows");
+    const numRows = parseInt(numRowsEle.value);
 
-  var trElement = $("<tr></tr>");
+    const delayedPerformanceTable = document.getElementById("delayedPerformanceTable");
+    const tbody = delayedPerformanceTable.getElementsByTagName('tbody')[0];
+    const trElement = tbody.insertRow();
 
-  var td1Element = $("<td></td>");
-  var runNumberElement = $("<input type=\"text\" name=\"runNumber" + numRows
-      + "\" id=\"runNumber" + numRows + "\" class=\"required digits\" size=\"8\" />");
-  td1Element.append(runNumberElement);
-  trElement.append(td1Element);
+    const td1Element = trElement.insertCell();
+    const runNumberElement = document.createElement("input");
+    runNumberElement.setAttribute("type", "text");
+    runNumberElement.setAttribute("name", "runNumber" + numRows);
+    runNumberElement.setAttribute("id", "runNumber" + numRows);
+    runNumberElement.setAttribute("size", "8");
+    runNumberElement.classList.add("required");
+    runNumberElement.classList.add("digits");
+    td1Element.appendChild(runNumberElement);
 
-  var td2Element = $("<td></td>");
-  var dateElement = $("<input type=\"text\" name=\"date" + numRows
-      + "\" size=\"8\" class=\"required\" id=\"date" + numRows + "\" />");
-  dateElement.datepicker();
-  td2Element.append(dateElement);
-  trElement.append(td2Element);
+    const td2Element = trElement.insertCell();
+    const dateElement = document.createElement("input");
+    dateElement.setAttribute("type", "datetime-local");
+    dateElement.setAttribute("name", "datetime" + numRows);
+    dateElement.setAttribute("id", "datetime" + numRows);
+    dateElement.classList.add("required");
+    td2Element.appendChild(dateElement);
 
-  var td3Element = $("<td></td>");
-  var timeElement = $("<input type=\"text\" name=\"time" + numRows
-      + "\" class=\"required\" id=\"time" + numRows + "\" size=\"8\" />");
-  timeElement.timepicker();
-  td3Element.append(timeElement);
-  trElement.append(td3Element);
+    $('#delayedPerformanceTable tbody').append(trElement);
 
-  $('#delayedPerformanceTable tbody').append(trElement);
-
-  $('#numRows').val(numRows + 1);
-  
+    numRowsEle.value = numRows + 1;
 }
 
 function validateData() {
-  var numRows = parseInt($('#numRows').val());
+    const numRowsEle = document.getElementById("numRows");
+    const numRows = parseInt(numRowsEle.value);
 
-  var runNumbersSeen = [];
-  for (var idx = 0; idx < numRows; ++idx) {
-    var runNumberStr = $('#runNumber' + idx).val();
-    _log("Checking index: " + idx + " runNumber: " + runNumberStr
-        + " against: " + runNumbersSeen);
-    if (runNumberStr) {
-      var runNumber = parseInt(runNumberStr);
-      if (runNumbersSeen.includes(runNumber)) {
-        alert("Multiple instances of run number  " + runNumber);
-        return false;
-      }
-      runNumbersSeen.push(runNumber);
+    const runNumbersSeen = [];
+    for (let idx = 0; idx < numRows; ++idx) {
+        const runNumberStr = document.getElementById("runNumber" + idx).value;
+        _log("Checking index: " + idx + " runNumber: " + runNumberStr
+            + " against: " + runNumbersSeen);
+        if (runNumberStr) {
+            const runNumber = parseInt(runNumberStr);
+            if (runNumbersSeen.includes(runNumber)) {
+                alert("Multiple instances of run number  " + runNumber);
+                return false;
+            }
+            runNumbersSeen.push(runNumber);
+        }
     }
-  }
 
-  return true;
-}
-
-function setupDatepickers() {
-  var numRows = parseInt($('#numRows').val());
-  for (var idx = 0; idx < numRows; ++idx) {
-    $('#date' + idx).datepicker();
-    $('#time' + idx).timepicker();
-  }
+    return true;
 }
 
 $(document).ready(function() {
+    const addRowButton = document.getElementById("addRow");
+    addRowButton.addEventListener("click", function(e) {
+        addRow();
+        e.preventDefault();
+    });
 
-  $('#addRow').click(function(e) {
-    addRow();
-    e.preventDefault();
-  });
-
-  setupDatepickers();
-  
-  $("#delayed_performance").validate();
-
+    $("#delayed_performance").validate();
 }); // end ready function

@@ -72,23 +72,13 @@ public final class DelayedPerformance {
   }
 
   /**
-   * @return delay until formatted for use with jquery-ui date picker
-   * @see Tournaments#DATE_FORMATTER
+   * @return delay until formatted for use with HTML datetime-local input type
+   * @see Tournaments#DATE_TIME_FORMATTER
    * @see #getDelayUntil()
    */
   @JsonIgnore
-  public String getDelayUntilDateString() {
-    return delayUntil.toLocalDate().format(Tournaments.DATE_FORMATTER);
-  }
-
-  /**
-   * @return delay until formatted for use with jquery time picker
-   * @see #TIME_FORMATTER
-   * @see #getDelayUntil()
-   */
-  @JsonIgnore
-  public String getDelayUntilTimeString() {
-    return delayUntil.toLocalTime().format(TIME_FORMATTER);
+  public String getDelayUntilDateTimeString() {
+    return delayUntil.format(Tournaments.DATE_TIME_FORMATTER);
   }
 
   /**

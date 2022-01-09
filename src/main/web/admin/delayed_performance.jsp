@@ -11,28 +11,16 @@ fll.web.admin.StoreDelayedPerformance.populateContext(application, pageContext);
 <script type='text/javascript'
     src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 
-<script type='text/javascript'
-    src="<c:url value='/extlib/timepicker/jquery.timepicker.js'/>"></script>
-
 <script type="text/javascript"
     src="<c:url value='/extlib/jquery-validation/dist/jquery.validate.min.js'/>"></script>
 
 <script type="text/javascript" src="delayed_performance.js"></script>
-
-<link rel="stylesheet"
-    href="<c:url value='/extlib/timepicker/jquery.timepicker.css'/>" />
 
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js'/>"></script>
 
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>">
-
-<link rel="stylesheet" type="text/css"
-    href="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.css' />" />
-
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.js' />"></script>
 
 <title>Delayed Performance Display</title>
 </head>
@@ -50,8 +38,7 @@ fll.web.admin.StoreDelayedPerformance.populateContext(application, pageContext);
     <table border="1" id="delayedPerformanceTable">
         <tr>
             <th>Run Number</th>
-            <th>Date</th>
-            <th>Time</th>
+            <th>Date and time</th>
         </tr>
 
         <c:forEach items="${delays}" var="delay" varStatus="loopStatus">
@@ -64,18 +51,12 @@ fll.web.admin.StoreDelayedPerformance.populateContext(application, pageContext);
                         class="required digits" size="8" />
                 </td>
                 <td>
-                    <input type="text" name="date${loopStatus.index}"
-                        id="date${loopStatus.index}"
-                        value="${delay.delayUntilDateString}" size="8" />
+                    <input type="datetime-local"
+                        name="datetime${loopStatus.index}"
+                        id="datetime${loopStatus.index}"
+                        value="${delay.delayUntilDateTimeString}"
+                        class="required" />
                 </td>
-
-                <td>
-                    <input name="time${loopStatus.index}"
-                        id="time${loopStatus.index}" type="text"
-                        class="time"
-                        value="${delay.delayUntilTimeString }" size="8" />
-                </td>
-
             </tr>
         </c:forEach>
     </table>
