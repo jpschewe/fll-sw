@@ -14,11 +14,6 @@ GatherTournamentParameterInformation.populateContext(application, pageContext);
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-validation/dist/jquery.validate.min.js'/>"></script>
-
 <!-- functions to displaying and hiding help -->
 <script type="text/javascript">
   function display(id) {
@@ -27,10 +22,6 @@ GatherTournamentParameterInformation.populateContext(application, pageContext);
   function hide(id) {
     document.getElementById(id).style.display = "none";
   }
-
-  $(document).ready(function() {
-    $("#edit_tournament_parameters").validate();
-  });
 </script>
 
 </head>
@@ -58,10 +49,10 @@ GatherTournamentParameterInformation.populateContext(application, pageContext);
                     <c:when test="${numSeedingRoundsDisabled}">
                         <i>This parameter cannot be changed once any
                             performance scores have been entered.</i>
-                        <input type="text" name="seeding_rounds"
+                        <input type="number" name="seeding_rounds"
                             id="seeding_rounds"
                             value="${numSeedingRounds}"
-                            class="required digits" readonly />
+                            required readonly />
                     </c:when>
                     <c:otherwise>
                         <a
@@ -77,10 +68,10 @@ GatherTournamentParameterInformation.populateContext(application, pageContext);
                                 href='javascript:hide("SeedingRoundsHelp")'>[hide]</a>
                         </div>
 
-                        <input type="text" name="seeding_rounds"
+                        <input type="number" name="seeding_rounds"
                             id="seeding_rounds"
                             value="${numSeedingRounds}"
-                            class="required digits" />
+                            min="0" required />
                     </c:otherwise>
                 </c:choose>
             </div>
@@ -92,16 +83,16 @@ GatherTournamentParameterInformation.populateContext(application, pageContext);
                     <c:when test="${numSeedingRoundsDisabled}">
                         <i>This parameter cannot be changed once any
                             performance scores have been entered.</i>
-                        <input type="text" name="practice_rounds"
+                        <input type="number" name="practice_rounds"
                             id="practice_rounds"
                             value="${numPracticeRounds}"
-                            class="required digits" readonly />
+                            required readonly />
                     </c:when>
                     <c:otherwise>
-                        <input type="text" name="practice_rounds"
+                        <input type="number" name="practice_rounds"
                             id="practice_rounds"
                             value="${numPracticeRounds}"
-                            class="required digits" />
+                            min="0" required />
                     </c:otherwise>
                 </c:choose>
             </div>
@@ -151,11 +142,11 @@ GatherTournamentParameterInformation.populateContext(application, pageContext);
                         href='javascript:hide("PerformanceAdvancementPercentageHelp")'>[hide]</a>
                 </div>
 
-                <input type="text"
+                <input type="number"
                     name="performance_advancement_percentage"
                     id="performance_advancement_percentage"
                     value="${performanceAdvancementPercentage}"
-                    class="required digits" />
+                    min="1" required />
 
             </div>
 
