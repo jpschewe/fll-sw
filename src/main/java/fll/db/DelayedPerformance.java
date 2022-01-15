@@ -13,13 +13,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.temporal.ChronoField;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -32,16 +28,6 @@ import fll.web.admin.Tournaments;
  * Utilities for working with delaying the display of performance scores.
  */
 public final class DelayedPerformance {
-
-  /** This matches the format used by the jquery timepicker. */
-  public static final DateTimeFormatter TIME_FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.CLOCK_HOUR_OF_AMPM)
-                                                                                       .appendLiteral(':')
-                                                                                       .appendValue(ChronoField.MINUTE_OF_HOUR,
-                                                                                                    2)
-                                                                                       .appendText(ChronoField.AMPM_OF_DAY,
-                                                                                                   Map.of(0L, "am", 1L,
-                                                                                                          "pm"))
-                                                                                       .toFormatter();
 
   /**
    * @param runNumber {@link #getRunNumber()}
