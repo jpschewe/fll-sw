@@ -144,7 +144,7 @@ GatherTournamentParameterInformation.populateContext(application, pageContext);
                 <input type="number"
                     name="performance_advancement_percentage"
                     id="performance_advancement_percentage"
-                    value="${performanceAdvancementPercentage}" min="1"
+                    value="${performanceAdvancementPercentage}" min="0"
                     required />
 
             </div>
