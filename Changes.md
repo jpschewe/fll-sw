@@ -1,3 +1,4 @@
+* #1012 - Remove need for jQuery validation library
 * #958 - Replace jQuery datetime picker and time picker with standard input types
 * #998 - Scale the main scoreboard based on screen size
 * #1006 - Use the tournament name as the base name when writing out schedules
