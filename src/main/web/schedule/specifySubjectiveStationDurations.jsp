@@ -11,16 +11,6 @@ fll.web.schedule.SpecifySubjectiveStationDurations.populateContext(session, page
 <title>Specify Subjective Station Durations (Upload Schedule)</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
-
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-validation/dist/jquery.validate.min.js'/>"></script>
-
-<script type="text/javascript">
-  $(document).ready(function() {
-    $("#specify_durations").validate();
-  });
 </script>
 
 </head>
@@ -51,17 +41,15 @@ fll.web.schedule.SpecifySubjectiveStationDurations.populateContext(session, page
                     <td>${station}</td>
 
                     <td>
-                        <input type="text" name="${station}:duration"
+                        <input type="number" name="${station}:duration"
                             id="${station}:duration"
-                            value="${default_duration}"
-                            class="required digits" />
+                            value="${default_duration}" min="1" required />
                     </td>
             </c:forEach>
 
         </table>
 
-        <input type="submit" id='submit_data'
-            onsubmit="return validateForm()" value="Submit" />
+        <input type="submit" id='submit_data' value="Submit" />
     </form>
 
 </body>

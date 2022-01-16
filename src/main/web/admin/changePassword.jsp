@@ -7,33 +7,7 @@
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-validation/dist/jquery.validate.min.js'/>"></script>
-
-
-<script type="text/javascript">
-  $(document).ready(function() {
-
-    $("#change_password").validate({
-      rules : {
-        pass : "required",
-        pass_check : {
-          required : true,
-          equalTo : "#pass"
-        }
-      },
-      messages : {
-        pass_check : {
-          equalTo : "The password entries must match"
-        }
-      }
-
-    });
-  });
-</script>
+<script type="text/javascript" src="check_passwords_match.js"></script>
 
 </head>
 
@@ -48,21 +22,24 @@
             <p>Change password for ${authentication.username}.</p>
 
             <form method="POST" action="ChangePassword"
-                name="change_password" id="change_password">
+                name="change_password" id="change_password"
+                onsubmit="return CheckPasswordsModule.validatePasswordsMatch()">
                 <div>
                     Old password :
                     <input type="password" size="15" maxlength="64"
-                        name="old_password">
+                        name="old_password" required>
                 </div>
 
                 <div>
                     New password :
-                    <input type="password" size="15" name="pass">
+                    <input type="password" size="15" name="pass"
+                        id="pass" required>
                 </div>
 
                 <div>
                     Repeat new password :
-                    <input type="password" size="15" name="pass_check">
+                    <input type="password" size="15" name="pass_check"
+                        id="pass_check" required>
                 </div>
 
                 <input name="submit_change_password"

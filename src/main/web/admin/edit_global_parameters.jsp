@@ -29,11 +29,6 @@ GatherParameterInformation.populateContext(application, pageContext);
 }
 </style>
 
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-validation/dist/jquery.validate.min.js'/>"></script>
-
 <!-- functions to displaying and hiding help -->
 <script type="text/javascript">
   function display(id) {
@@ -42,10 +37,6 @@ GatherParameterInformation.populateContext(application, pageContext);
   function hide(id) {
     document.getElementById(id).style.display = "none";
   }
-
-  $(document).ready(function() {
-    $("#edit_global_parameters").validate();
-  });
 </script>
 
 </head>
@@ -90,10 +81,10 @@ GatherParameterInformation.populateContext(application, pageContext);
 
                     </th>
                     <td>
-                        <input type='text' value="${gStandardizedMean }"
+                        <input type='number'
+                            value="${gStandardizedMean }"
                             id='gStandardizedMean'
-                            name='gStandardizedMean'
-                            class='required number' />
+                            name='gStandardizedMean' step='any' required />
                     </td>
                 </tr>
 
@@ -110,11 +101,11 @@ GatherParameterInformation.populateContext(application, pageContext);
 
                     </th>
                     <td>
-                        <input type='text'
+                        <input type='number'
                             value="${gStandardizedSigma }"
                             id='gStandardizedSigma'
-                            name='gStandardizedSigma'
-                            class='required number' />
+                            name='gStandardizedSigma' step='any'
+                            required />
                     </td>
                 </tr>
 
@@ -132,10 +123,10 @@ GatherParameterInformation.populateContext(application, pageContext);
                         </div>
                     </th>
                     <td>
-                        <input type='text' value="${gDivisionFlipRate}"
+                        <input type='number'
+                            value="${gDivisionFlipRate}"
                             id='gDivisionFlipRate'
-                            name='gDivisionFlipRate'
-                            class='required digits' />
+                            name='gDivisionFlipRate' min='1' required />
                     </td>
                 </tr>
 
@@ -152,8 +143,7 @@ GatherParameterInformation.populateContext(application, pageContext);
                     <td>
                         <input type='text' value="${gAllTeamsMsPerRow }"
                             id='gAllTeamsMsPerRow'
-                            name='gAllTeamsMsPerRow'
-                            class='required digits' />
+                            name='gAllTeamsMsPerRow' min='1' required />
                     </td>
                 </tr>
 
@@ -170,11 +160,10 @@ GatherParameterInformation.populateContext(application, pageContext);
                     </th>
 
                     <td>
-                        <input type='text'
+                        <input type='number'
                             value="${gHeadToHeadMsPerRow }"
                             id='gHeadToHeadMsPerRow'
-                            name='gHeadToHeadMsPerRow'
-                            class='required digits' />
+                            name='gHeadToHeadMsPerRow' min='1' required />
                     </td>
                 </tr>
                 <tr>
@@ -211,9 +200,9 @@ GatherParameterInformation.populateContext(application, pageContext);
 
                     </th>
                     <td>
-                        <input type='text' value="${gMhubPort }"
-                            id='gMhubPort' name='gMhubPort'
-                            class='required digits' />
+                        <input type='nuimber' value="${gMhubPort }"
+                            id='gMhubPort' name='gMhubPort' min='0'
+                            required />
                     </td>
                 </tr>
 

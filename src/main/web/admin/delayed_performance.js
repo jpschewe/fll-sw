@@ -16,12 +16,12 @@ function addRow() {
 
     const td1Element = trElement.insertCell();
     const runNumberElement = document.createElement("input");
-    runNumberElement.setAttribute("type", "text");
+    runNumberElement.setAttribute("type", "number");
     runNumberElement.setAttribute("name", "runNumber" + numRows);
     runNumberElement.setAttribute("id", "runNumber" + numRows);
     runNumberElement.setAttribute("size", "8");
-    runNumberElement.classList.add("required");
-    runNumberElement.classList.add("digits");
+    runNumberElement.setAttribute("required", "true");
+    runNumberElement.setAttribute("min", "1");
     td1Element.appendChild(runNumberElement);
 
     const td2Element = trElement.insertCell();
@@ -29,10 +29,8 @@ function addRow() {
     dateElement.setAttribute("type", "datetime-local");
     dateElement.setAttribute("name", "datetime" + numRows);
     dateElement.setAttribute("id", "datetime" + numRows);
-    dateElement.classList.add("required");
+    dateElement.setAttribute("required", "true");
     td2Element.appendChild(dateElement);
-
-    $('#delayedPerformanceTable tbody').append(trElement);
 
     numRowsEle.value = numRows + 1;
 }
@@ -59,12 +57,9 @@ function validateData() {
     return true;
 }
 
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     const addRowButton = document.getElementById("addRow");
     addRowButton.addEventListener("click", function(e) {
         addRow();
-        e.preventDefault();
     });
-
-    $("#delayed_performance").validate();
 }); // end ready function

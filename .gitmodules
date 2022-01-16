@@ -1,6 +1,3 @@
-[submodule "src/main/web/extlib/jquery-validation"]
-	path = src/main/web/extlib/jquery-validation
-	url = https://github.com/jquery-validation/jquery-validation.git
 [submodule "src/main/web/extlib/jquery.scrollTo"]
 	path = src/main/web/extlib/jquery.scrollTo
 	url = https://github.com/flesler/jquery.scrollTo.git

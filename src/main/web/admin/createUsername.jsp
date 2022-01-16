@@ -13,40 +13,7 @@ fll.web.admin.CreateUser.populateContext(request, pageContext);
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-validation/dist/jquery.validate.min.js'/>"></script>
-
-<script type="text/javascript">
-  $(document).ready(function() {
-
-    jQuery.validator.addMethod("alphanumeric", function(value, element) {
-      return this.optional(element) || /^\w+$/i.test(value);
-    }, "Letters, numbers, and underscores only please");
-
-    $("#create_user").validate({
-      rules : {
-        pass : "required",
-        pass_check : {
-          required : true,
-          equalTo : "#pass"
-        },
-        user : {
-          required : true,
-          alphanumeric : true
-        }
-      },
-      messages : {
-        pass_check : {
-          equalTo : "The password entries must match"
-        }
-      }
-
-    });
-  });
-</script>
+<script type="text/javascript" src="check_passwords_match.js"></script>
 
 </head>
 
@@ -57,20 +24,23 @@ fll.web.admin.CreateUser.populateContext(request, pageContext);
     <c:remove var="message" />
 
     <form method="POST" action="CreateUser" name="create_user"
-        id="create_user">
+        id="create_user"
+        onsubmit="return CheckPasswordsModule.validatePasswordsMatch()">
         <div>
-            Username :
+            Username:
             <input type="text" size="15" maxlength="64" name="user"
-                id="user">
+                id="user" pattern="[a-zA-Z0-9_]+" required>
+            valid characters: letters, numbers and underscore
         </div>
         <div>
             Password :
-            <input type="password" size="15" name="pass" id="pass">
+            <input type="password" size="15" name="pass" id="pass"
+                required>
         </div>
         <div>
             Repeat Password :
             <input type="password" size="15" name="pass_check"
-                id="pass_check">
+                id="pass_check" required>
         </div>
 
         <div>Roles:</div>

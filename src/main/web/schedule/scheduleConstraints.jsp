@@ -7,18 +7,6 @@
 <title>Specify schedule constraints (Upload Schedule)</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
-
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-validation/dist/jquery.validate.min.js'/>"></script>
-
-<script type="text/javascript">
-  $(document).ready(function() {
-    $("#constraints").validate();
-  });
-</script>
-
 </head>
 
 <body>
@@ -36,9 +24,10 @@
 
         <div>
             Change time duration:
-            <input name="changeTimeDuration" id="changeTimeDuration"
+            <input type="number" name="changeTimeDuration"
+                id="changeTimeDuration"
                 value="${uploadScheduleData.schedParams.changetimeMinutes }"
-                class="required digits">
+                min="0" required>
             minutes
         </div>
 
@@ -47,7 +36,7 @@
             <input name="performanceChangeTimeDuration"
                 id="performanceChangeTimeDuration"
                 value="${uploadScheduleData.schedParams.performanceChangetimeMinutes }"
-                class="required number">
+                type="number" min="0" required>
             minutes
         </div>
 
@@ -55,7 +44,7 @@
             Performance duration:
             <input name="performanceDuration" id="performanceDuration"
                 value="${uploadScheduleData.schedParams.performanceMinutes }"
-                class="required number">
+                type="number" min="0" required>
             minutes
         </div>
 
