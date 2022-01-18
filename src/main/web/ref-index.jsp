@@ -36,6 +36,10 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         follow this link on the performance score entry computers.</a>
 
     <a class="wide"
+        href="<c:url value='/report/regular-match-play-runs.jsp' />">Regular
+        Match Play performance scores</a>
+
+    <a class="wide"
         href="<c:url value='/report/topScoreReportPerAwardGroup.jsp' />">Top
         performance scores by award group. This creates a text report of
         the top regular match play round scores by award group.</a>
