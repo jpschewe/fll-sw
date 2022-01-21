@@ -40,7 +40,7 @@ $(document)
                         $(this).dialog("close");
                     }
                 }]
-            })
+            });
 
             $("#submit_score")
                 .click(
