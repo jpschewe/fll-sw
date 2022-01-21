@@ -11,17 +11,16 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.RequestDispatcher;
+import javax.sql.DataSource;
+
+import fll.db.Authentication;
+import fll.util.FLLRuntimeException;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import javax.sql.DataSource;
-
-import fll.db.Authentication;
-import fll.util.FLLRuntimeException;
 
 /**
  * Handle login credentials and if incorrect redirect back to login page.
@@ -30,35 +29,6 @@ import fll.util.FLLRuntimeException;
 public class DoLogin extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
-  /**
-   * Store the form parameters to be used by a redirect. Also track the URL to
-   * redirect back to.
-   * 
-   * @param request the request
-   * @param session the session to store the parameters in
-   */
-  public static void storeParameters(final HttpServletRequest request,
-                                     final HttpSession session) {
-    final Object origUriObj = request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
-    final String origUri;
-    if (null != origUriObj) {
-      origUri = origUriObj.toString();
-    } else {
-      origUri = null;
-    }
-
-    FormParameterStorage.storeParameters(request, session);
-
-    session.setAttribute(SessionAttributes.REDIRECT_URL, origUri);
-
-    LOGGER.debug("Request is for {}", request.getRequestURI());
-    LOGGER.debug("forward.request_uri: {}", request.getAttribute("jakarta.servlet.forward.request_uri"));
-    LOGGER.debug("forward.context_path: {}", request.getAttribute("jakarta.servlet.forward.context_path"));
-    LOGGER.debug("forward.servlet_path: {}", request.getAttribute("jakarta.servlet.forward.servlet_path"));
-    LOGGER.debug("forward.path_info: {}", request.getAttribute("jakarta.servlet.forward.path_info"));
-    LOGGER.debug("forward.query_string: {}", request.getAttribute("jakarta.servlet.forward.query_string"));
-  }
 
   @Override
   protected void processRequest(final HttpServletRequest request,

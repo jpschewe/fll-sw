@@ -11,18 +11,20 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.jsp.JspException;
-import jakarta.servlet.jsp.tagext.TagSupport;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.util.FLLInternalException;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.TagSupport;
 
 /**
  * Tag support to specifying which roles are required to access a page.
@@ -51,15 +53,27 @@ public class RequireRoles extends TagSupport {
 
     validateState(requiredRoles);
 
-    try {
-      final boolean valid = authentication.requireRoles(request, response, session, requiredRoles, allowSetup);
-      if (!valid) {
-        return SKIP_PAGE;
-      } else {
-        return EVAL_PAGE;
+    if (response instanceof HttpServletResponse
+        && request instanceof HttpServletRequest) {
+      final HttpServletResponse httpResponse = (HttpServletResponse) response;
+      final HttpServletRequest httpRequest = (HttpServletRequest) request;
+
+      try {
+        final boolean valid = authentication.requireRoles(httpRequest, httpResponse, session, requiredRoles,
+                                                          allowSetup);
+        if (!valid) {
+          return SKIP_PAGE;
+        } else {
+          return EVAL_PAGE;
+        }
+      } catch (ServletException | IOException e) {
+        throw new JspException(e);
       }
-    } catch (ServletException | IOException e) {
-      throw new JspException(e);
+    } else {
+      throw new FLLInternalException("Request and response are not HTTP objects, cannot figure out what to do. request: "
+          + request.getClass()
+          + " response: "
+          + response.getClass());
     }
   }
 
