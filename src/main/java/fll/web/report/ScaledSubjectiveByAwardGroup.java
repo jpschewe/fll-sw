@@ -58,8 +58,6 @@ import net.mtu.eggplant.xml.XMLUtils;
 @WebServlet("/report/ScaledSubjectiveByAwardGroup")
 public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
 
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
   @Override
   protected void processRequest(HttpServletRequest request,
                                 HttpServletResponse response,
@@ -145,8 +143,8 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
               + category.getName());
         }
 
-        final Element ele = generateCategoryReport(connection, document, challengeDescription, tournament, teams,
-                                                   awardGroup, category, categoryTeamRanks);
+        final Element ele = generateCategoryReport(connection, document, tournament, teams, awardGroup, category,
+                                                   categoryTeamRanks);
         documentBody.appendChild(ele);
         ele.setAttribute("page-break-after", "always");
       }
@@ -157,7 +155,6 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
 
   private Element generateCategoryReport(final Connection connection,
                                          final Document document,
-                                         final ChallengeDescription challengeDescription,
                                          final Tournament tournament,
                                          final Map<Integer, TournamentTeam> teams,
                                          final String awardGroup,
