@@ -21,7 +21,7 @@ buildscript {
 plugins {
     id "java"
     id "distribution"
-    id "com.dorongold.task-tree" version "2.1.0"
+    id "com.dorongold.task-tree" version "2.1.0" // gradle <task> taskTree
     id "org.unbroken-dome.test-sets" version "4.0.0"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
