@@ -7,7 +7,7 @@ Documentation on the database schema, API, workflows, etc. for the [current rele
 
 # Getting started as a developer
 
-  1. Make sure you have Java 11 (or greater) installed
+  1. Make sure you have Java 17 (or greater) installed
   1. Get the source code from git
     * git clone git@github.com:jpschewe/fll-sw (read-only)
     * Or you can create a fork and then submit a pull request when you have changes to merge in
