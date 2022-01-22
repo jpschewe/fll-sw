@@ -57,10 +57,11 @@ public final class RegularMatchPlayRuns {
 
       final SortedMap<TournamentTeam, List<String>> data = new TreeMap<>(TournamentTeam.TEAM_NUMBER_COMPARATOR);
 
-      try (PreparedStatement prep = connection.prepareStatement("SELECT teamnumber, computedtotal FROM performance" //
-          + " WHERE tournament = ?" //
-          + "   AND runnumber <= ?" //
-          + " ORDER BY teamnumber ASC, runnumber ASC")) {
+      try (
+          PreparedStatement prep = connection.prepareStatement("SELECT teamnumber, computedtotal, noshow, bye FROM performance" //
+              + " WHERE tournament = ?" //
+              + "   AND runnumber <= ?" //
+              + " ORDER BY teamnumber ASC, runnumber ASC")) {
         prep.setInt(1, currentTournament.getTournamentID());
         prep.setInt(2, numRegularMatchPlayRounds);
 
@@ -69,11 +70,21 @@ public final class RegularMatchPlayRuns {
             final int teamNumber = rs.getInt(1);
             final double score = rs.getDouble(2);
             final boolean scoreIsNull = rs.wasNull();
+            final boolean noShow = rs.getBoolean(3);
+            final boolean bye = rs.getBoolean(4);
 
             final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, currentTournament,
                                                                                      teamNumber);
-            final String value = scoreIsNull ? "No Score"
-                : Utilities.getFormatForScoreType(performanceScoreType).format(score);
+            final String value;
+            if (noShow) {
+              value = "No Show";
+            } else if (bye) {
+              value = "Bye";
+            } else if (scoreIsNull) {
+              value = "No Score";
+            } else {
+              value = Utilities.getFormatForScoreType(performanceScoreType).format(score);
+            }
 
             data.computeIfAbsent(team, k -> new LinkedList<>()).add(value);
           }
