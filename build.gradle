@@ -185,6 +185,9 @@ dependencies {
   
   //missing TLD files implementation(group: "jakarta.servlet.jsp.jstl", name: "jakarta.servlet.jsp.jstl-api", version: "2.0.0")
   implementation(group: "org.glassfish.web", name: "jakarta.servlet.jsp.jstl", version: "2.0.0")
+  
+  // JSP tags for formatting java.time objects
+  implementation(group: "net.sargue", name: "java-time-jsptags", version: "2.0.0")
 
   implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.12.0")
   implementation(group: "commons-cli", name: "commons-cli", version: "1.5.0")
@@ -258,7 +261,7 @@ dependencies {
     
   testImplementation(group: "org.hamcrest", name: "hamcrest", version: "2.2")
     
-    // allow integration tests to reference code in the test directory
+  // allow integration tests to reference code in the test directory
   integrationTestImplementation(sourceSets.test.output)
         
   integrationTestImplementation(group: "org.easytesting", name: "fest-swing", version: "1.2.1")
