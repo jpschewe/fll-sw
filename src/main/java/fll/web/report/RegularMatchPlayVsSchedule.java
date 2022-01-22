@@ -28,6 +28,8 @@ import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.TournamentParameters;
 import fll.scheduler.PerformanceTime;
+import fll.scheduler.TeamScheduleInfo;
+import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
@@ -64,6 +66,23 @@ public final class RegularMatchPlayVsSchedule {
       final List<Data> data = new LinkedList<>();
 
       // use schedule to do initial populate
+      if (TournamentSchedule.scheduleExistsInDatabase(connection, currentTournament.getTournamentID())) {
+        final TournamentSchedule schedule = new TournamentSchedule(connection, currentTournament.getTournamentID());
+        for (final TeamScheduleInfo tsi : schedule.getSchedule()) {
+          final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, currentTournament,
+                                                                                   tsi.getTeamNumber());
+
+          int nextRunNumber = 1;
+          for (final PerformanceTime pt : tsi.getAllPerformances()) {
+            if (!pt.isPractice()) {
+              final Data d = new Data(team, nextRunNumber, pt);
+              data.add(d);
+
+              ++nextRunNumber;
+            }
+          }
+        }
+      }
 
       // update with tournament data
       try (
