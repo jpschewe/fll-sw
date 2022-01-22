@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -161,18 +160,18 @@ public final class AuthenticationContext implements Serializable {
    * Defaults {@code inSetup} to false.
    * 
    * @param request
-   *          {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
+   *          {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
    * @param response
-   *          {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
+   *          {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
    * @param session
-   *          {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
+   *          {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
    * @param requiredRoles
-   *          {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
-   * @return {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
+   *          {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
+   * @return {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
    * @throws ServletException
-   *           {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
+   *           {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
    * @throws IOException
-   *           {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
+   *           {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
    */
   public boolean requireRoles(final HttpServletRequest request,
                               final HttpServletResponse response,
