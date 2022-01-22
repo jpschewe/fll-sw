@@ -1,3 +1,4 @@
+* #966 - Add report of regular match play runs vs. the schedule for the refs
 * #1000 - Add report of regular match play runs for the refs
 * #1012 - Remove need for jQuery validation library
 * #958 - Replace jQuery datetime picker and time picker with standard input types
