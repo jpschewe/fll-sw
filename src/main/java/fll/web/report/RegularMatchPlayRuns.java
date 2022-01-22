@@ -19,6 +19,7 @@ import java.util.TreeMap;
 import javax.sql.DataSource;
 
 import fll.Tournament;
+import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
@@ -39,7 +40,8 @@ public final class RegularMatchPlayRuns {
   /**
    * @param application get application variables
    * @param page used to set variable "maxScoresPerTeam" and
-   *          "data" a sorted map of team numbers to a list of formatted scores
+   *          "data" a sorted map of {@link TournamentTeam} to a list of formatted
+   *          scores
    */
   public static void populateContext(final ServletContext application,
                                      final PageContext page) {
@@ -53,7 +55,7 @@ public final class RegularMatchPlayRuns {
       final int numRegularMatchPlayRounds = TournamentParameters.getNumSeedingRounds(connection,
                                                                                      currentTournament.getTournamentID());
 
-      final SortedMap<Integer, List<String>> data = new TreeMap<>();
+      final SortedMap<TournamentTeam, List<String>> data = new TreeMap<>(TournamentTeam.TEAM_NUMBER_COMPARATOR);
 
       try (PreparedStatement prep = connection.prepareStatement("SELECT teamnumber, computedtotal FROM performance" //
           + " WHERE tournament = ?" //
@@ -68,11 +70,12 @@ public final class RegularMatchPlayRuns {
             final double score = rs.getDouble(2);
             final boolean scoreIsNull = rs.wasNull();
 
-            final Integer key = Integer.valueOf(teamNumber);
+            final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, currentTournament,
+                                                                                     teamNumber);
             final String value = scoreIsNull ? "No Score"
                 : Utilities.getFormatForScoreType(performanceScoreType).format(score);
 
-            data.computeIfAbsent(key, k -> new LinkedList<>()).add(value);
+            data.computeIfAbsent(team, k -> new LinkedList<>()).add(value);
           }
         }
       }

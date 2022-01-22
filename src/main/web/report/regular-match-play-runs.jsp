@@ -40,6 +40,8 @@ table#perf-data th, table#perf-data td {
 
         <tr>
             <th>Team Number</th>
+            <th>Team Name</th>
+            <th>Organization</th>
 
             <c:forEach begin="1" end="${maxScoresPerTeam}"
                 varStatus="loopStatus">
@@ -50,7 +52,9 @@ table#perf-data th, table#perf-data td {
         <c:forEach items="${data}" var="entry">
             <tr>
 
-                <td>${entry.key}</td>
+                <td>${entry.key.teamNumber}</td>
+                <td>${entry.key.teamName}</td>
+                <td>${entry.key.organization}</td>
 
                 <c:forEach items="${entry.value}" var="score">
                     <td>${score}</td>
