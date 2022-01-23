@@ -25,16 +25,16 @@ plugins {
     id "org.unbroken-dome.test-sets" version "4.0.0"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
-    id "com.github.spotbugs" version "5.0.3"
+    id "com.github.spotbugs" version "5.0.5"
     id "de.aaschmid.cpd" version "3.3"
     id "edu.sc.seis.launch4j" version "2.5.1"
     id "com.gorylenko.gradle-git-properties" version "2.3.2"
-    id "com.github.ben-manes.versions" version "0.40.0" // adds dependencyUpdates task
+    id "com.github.ben-manes.versions" version "0.41.0" // adds dependencyUpdates task
     id "de.undercouch.download" version "4.1.2" // file download
     id "checkstyle"
         
     // Checker Framework pluggable type-checking
-    id "org.checkerframework" version "0.6.6"
+    id "org.checkerframework" version "0.6.7"
     
     // code coverage
     id "jacoco"
@@ -129,12 +129,12 @@ integrationTest {
 
 ext {
     jackson_version = "2.13.1"
-    slf4j_version = "1.7.32"
-    tomcat_version = "10.0.14"
-    poi_version = "5.1.0"
+    slf4j_version = "1.7.33"
+    tomcat_version = "10.0.16"
+    poi_version = "5.2.0"
     junit_version = "5.8.2"
     log4j_version = "2.17.1"
-    spotbugs_version = "4.5.2"
+    spotbugs_version = "4.5.3"
     checker_framework_version = "3.21.1"
 
     web_build_dir = new File(project.buildDir, "web")
@@ -235,7 +235,7 @@ dependencies {
     
   implementation(group: "com.google.guava", name: "guava", version: "31.0.1-jre")
     
-  implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.6") {
+  implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.7") {
     // only needed for BMP and TIFF formats
     exclude(group: "com.sun.media", module: "jai-codec")
     
