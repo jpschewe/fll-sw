@@ -1,3 +1,5 @@
+* Upgrade to JDK 17
+* #966 - Add report of regular match play runs vs. the schedule for the refs
 * #955 - Use redirect instead of forward for login redirection
 * #1000 - Add report of regular match play runs for the refs
 * #1012 - Remove need for jQuery validation library

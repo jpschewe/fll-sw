@@ -21,7 +21,7 @@ buildscript {
 plugins {
     id "java"
     id "distribution"
-    id "com.dorongold.task-tree" version "2.1.0"
+    id "com.dorongold.task-tree" version "2.1.0" // gradle <task> taskTree
     id "org.unbroken-dome.test-sets" version "4.0.0"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
@@ -150,14 +150,14 @@ ext {
     // java download urls
     java_download_base = project.buildDir.toPath().resolve("bundled-java")
     
-    java_windows_url = "https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_windows-x64_bin.zip"
-    java_windows_checksum = "cf39490fe042dba1b61d6e9a395095279a69e70086c8c8d5466d9926d80976d8"
+    java_windows_url = "https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_windows-x64_bin.zip"
+    java_windows_checksum = "b2208206bda47f2e0c971a39e057a5ec32c40b503d71e486790cb728d926b615"
     
-    java_mac_url = "https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_osx-x64_bin.tar.gz"
-    java_mac_checksum = "f365750d4be6111be8a62feda24e265d97536712bc51783162982b8ad96a70ee"
+    java_mac_url = "https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_macos-x64_bin.tar.gz"
+    java_mac_checksum = "b85c4aaf7b141825ad3a0ea34b965e45c15d5963677e9b27235aa05f65c6df06"
     
-    java_linux_url = "https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz"
-    java_linux_checksum = "99be79935354f5c0df1ad293620ea36d13f48ec3ea870c838f20c504c9668b57"
+    java_linux_url = "https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz"
+    java_linux_checksum = "0022753d0cceecacdd3a795dd4cea2bd7ffdf9dc06e22ffd1be98411742fbb44"
 }
 
 
@@ -166,7 +166,7 @@ group = "fll"
 java {
     // set version of Java that the source confirms to. 
     // The bytecode will be for this version of Java as well, unless targetCompatibility is specified.
-    sourceCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
 }
 
 configurations {
@@ -185,6 +185,9 @@ dependencies {
   
   //missing TLD files implementation(group: "jakarta.servlet.jsp.jstl", name: "jakarta.servlet.jsp.jstl-api", version: "2.0.0")
   implementation(group: "org.glassfish.web", name: "jakarta.servlet.jsp.jstl", version: "2.0.0")
+  
+  // JSP tags for formatting java.time objects
+  implementation(group: "net.sargue", name: "java-time-jsptags", version: "2.0.0")
 
   implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.12.0")
   implementation(group: "commons-cli", name: "commons-cli", version: "1.5.0")
@@ -258,7 +261,7 @@ dependencies {
     
   testImplementation(group: "org.hamcrest", name: "hamcrest", version: "2.2")
     
-    // allow integration tests to reference code in the test directory
+  // allow integration tests to reference code in the test directory
   integrationTestImplementation(sourceSets.test.output)
         
   integrationTestImplementation(group: "org.easytesting", name: "fest-swing", version: "1.2.1")
@@ -283,6 +286,9 @@ tasks.withType(Tar){
 javadoc {
     failOnError = false
     options.addStringOption("Xmaxwarns", "10000")
+    // turn off warnings about missing javadoc comments because javadoc complains about private variables on serializable classes. Let checkstyle catch these.
+    // Using addBooleanOption due to bug https://github.com/gradle/gradle/issues/2354
+    options.addBooleanOption("Xdoclint:all,-missing", true)
 }
 
 compileJava {
