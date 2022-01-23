@@ -256,22 +256,22 @@ public final class RegularMatchPlayVsSchedule {
     }
 
     private int compareLastEdited(final Data o) {
-      // if there is a mixturn of null and not-null, put the nulls first
+      // if there is a mixture of null and not-null, put the nulls first
       final LocalTime thisLastEdited = this.lastEdited;
       final LocalTime otherLastEdited = o.lastEdited;
 
-      if (null != thisLastEdited
-          && null == otherLastEdited) {
+      if (null == thisLastEdited) {
+        if (null != otherLastEdited) {
+          return 1;
+        } else {
+          // otherLastEdited is null
+          return 0;
+        }
+      } else if (null == otherLastEdited) {
+        // lastEdited not null
         return -1;
-      } else if (null == thisLastEdited
-          && null != otherLastEdited) {
-        return 1;
-      } else if (null == thisLastEdited
-          && null == otherLastEdited) {
-        return 0;
       } else {
-        // https://github.com/typetools/checker-framework/issues/5016
-        return castNonNull(thisLastEdited).compareTo(castNonNull(otherLastEdited));
+        return thisLastEdited.compareTo(otherLastEdited);
       }
     }
 
