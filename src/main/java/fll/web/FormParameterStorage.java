@@ -10,13 +10,13 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.google.common.base.Objects;
+
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Keep track of form parameters through a handle a redirect.
@@ -50,12 +50,12 @@ public final class FormParameterStorage implements Serializable {
   public static void storeParameters(final HttpServletRequest request,
                                      final HttpSession session) {
 
-    final Object origUriObj = request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
+    final Object forwardUriObj = request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
     final String origUri;
-    if (null != origUriObj) {
-      origUri = origUriObj.toString();
+    if (null != forwardUriObj) {
+      origUri = forwardUriObj.toString();
     } else {
-      origUri = null;
+      origUri = request.getRequestURI();
     }
 
     final Map<String, String[]> params = request.getParameterMap();
@@ -69,8 +69,11 @@ public final class FormParameterStorage implements Serializable {
       LOGGER.debug("Stored parameters: {}", params.keySet());
     }
 
-    LOGGER.debug("Request is for {}", request.getRequestURI());
+    session.setAttribute(SessionAttributes.REDIRECT_URL, origUri);
+
     LOGGER.debug("forward.request_uri: {}", request.getAttribute("jakarta.servlet.forward.request_uri"));
+    LOGGER.debug("URI: {}", request.getRequestURI());
+    LOGGER.debug("Stored URI: {}", origUri);
     LOGGER.debug("forward.context_path: {}", request.getAttribute("jakarta.servlet.forward.context_path"));
     LOGGER.debug("forward.servlet_path: {}", request.getAttribute("jakarta.servlet.forward.servlet_path"));
     LOGGER.debug("forward.path_info: {}", request.getAttribute("jakarta.servlet.forward.path_info"));
