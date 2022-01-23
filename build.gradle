@@ -283,6 +283,9 @@ tasks.withType(Tar){
 javadoc {
     failOnError = false
     options.addStringOption("Xmaxwarns", "10000")
+    // turn off warnings about missing javadoc comments because javadoc complains about private variables on serializable classes. Let checkstyle catch these.
+    // Using addBooleanOption due to bug https://github.com/gradle/gradle/issues/2354
+    options.addBooleanOption("Xdoclint:all,-missing", true)
 }
 
 compileJava {
