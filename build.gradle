@@ -25,11 +25,11 @@ plugins {
     id "org.unbroken-dome.test-sets" version "4.0.0"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
-    id "com.github.spotbugs" version "5.0.3"
+    id "com.github.spotbugs" version "5.0.5"
     id "de.aaschmid.cpd" version "3.3"
     id "edu.sc.seis.launch4j" version "2.5.1"
     id "com.gorylenko.gradle-git-properties" version "2.3.2"
-    id "com.github.ben-manes.versions" version "0.40.0" // adds dependencyUpdates task
+    id "com.github.ben-manes.versions" version "0.41.0" // adds dependencyUpdates task
     id "de.undercouch.download" version "4.1.2" // file download
     id "checkstyle"
         
@@ -134,7 +134,7 @@ ext {
     poi_version = "5.1.0"
     junit_version = "5.8.2"
     log4j_version = "2.17.1"
-    spotbugs_version = "4.5.2"
+    spotbugs_version = "4.5.3"
     checker_framework_version = "3.21.1"
 
     web_build_dir = new File(project.buildDir, "web")
