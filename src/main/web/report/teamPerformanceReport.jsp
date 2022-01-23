@@ -20,6 +20,21 @@ pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection))
 <title>Team
     <c:out value="${param.TeamNumber}" /> Performance Scores
 </title>
+
+<style>
+table#perf-data {
+    border-collapse: collapse;
+}
+
+table#perf-data, table#perf-data th, table#perf-data td {
+    border: 1px solid black;
+}
+
+table#perf-data th, table#perf-data td {
+    padding-right: 5px;
+    padding-left: 5px;
+}
+</style>
 </head>
 
 <body>
@@ -35,7 +50,7 @@ pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection))
           AND Performance.Tournament = <c:out value="${tournament}" />
         ORDER By RunNumber
     </sql:query>
-    <table border='1'>
+    <table id="perf-data">
         <tr>
             <th>Run Number</th>
             <th>Score</th>
@@ -54,7 +69,10 @@ pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection))
                     </c:otherwise>
                     </c:choose>
                 </td>
-                <td>${row.TIMESTAMP}</td>
+                <td class="right">
+                    <fmt:formatDate value="${row.TIMESTAMP}"
+                        pattern="h:mm" />
+                </td>
             </tr>
         </c:forEach>
     </table>

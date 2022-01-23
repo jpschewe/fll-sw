@@ -7,4 +7,6 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
+<%@ taglib prefix="javatime" uri="http://sargue.net/jsptags/time" %>
+
 <%@ taglib prefix="fll-sw" uri="http://eggplant.mtu.net/fll-sw"%>

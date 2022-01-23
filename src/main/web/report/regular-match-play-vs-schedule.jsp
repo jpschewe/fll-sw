@@ -60,7 +60,11 @@ table#perf-data th, table#perf-data td {
                 <td>${entry.roundNumber}</td>
                 <c:choose>
                     <c:when test="${not empty entry.performanceTime}">
-                        <td>${entry.performanceTime.time}</td>
+                        <td>
+                            <javatime:format
+                                value="${entry.performanceTime.time}"
+                                pattern="h:mm " />
+                        </td>
                         <td>${entry.performanceTime.tableAndSide}</td>
                     </c:when>
                     <c:otherwise>
@@ -71,7 +75,10 @@ table#perf-data th, table#perf-data td {
 
                 <c:choose>
                     <c:when test="${not empty entry.lastEdited}">
-                        <td>${entry.lastEdited}</td>
+                        <td>
+                            <javatime:format value="${entry.lastEdited}"
+                                pattern="h:mm " />
+                        </td>
                         <td>${entry.formattedScore}</td>
                     </c:when>
                     <c:otherwise>
