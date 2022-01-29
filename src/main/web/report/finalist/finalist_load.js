@@ -9,18 +9,18 @@ const finalistScheduleLoad = {}
 {
 
     function clearAndLoad() {
-        $.finalist.clearAllData();
+        finalist_module.clearAllData();
 
         // need to load the tournament again since everything was just cleared
-        $.finalist.loadTournament(function() {
+        finalist_module.loadTournament(function() {
             // success            
 
-            $.finalist.loadCategoriesAndScores(function() {
+            finalist_module.loadCategoriesAndScores(function() {
                 // success
-                $.finalist.loadNominieesAndSchedules(function() {
+                finalist_module.loadNominieesAndSchedules(function() {
                     // success
                     $("#wait-dialog").dialog("close");
-                    $.finalist.saveToLocalStorage();
+                    finalist_module.saveToLocalStorage();
                     location.href = "params.html";
                 }, function(msg) {
                     // error
@@ -41,10 +41,10 @@ const finalistScheduleLoad = {}
     }
 
     function refreshData() {
-        $.finalist.loadCategoriesAndScores(function() {
+        finalist_module.loadCategoriesAndScores(function() {
             // success
             $("#wait-dialog").dialog("close");
-            $.finalist.saveToLocalStorage();
+            finalist_module.saveToLocalStorage();
             location.href = "params.html";
         }, function(msg) {
             // error
@@ -74,13 +74,13 @@ const finalistScheduleLoad = {}
         $("#wait-dialog").dialog("open");
 
         // get current state before anything loads
-        $.finalist.loadFromLocalStorage();
-        const currentAllTeams = $.finalist.getAllTeams();
-        const currentTournament = $.finalist.getTournament();
+        finalist_module.loadFromLocalStorage();
+        const currentAllTeams = finalist_module.getAllTeams();
+        const currentTournament = finalist_module.getTournament();
 
-        $.finalist.loadTournament(function() {
+        finalist_module.loadTournament(function() {
             // success            
-            const loadingTournament = $.finalist.getTournament();
+            const loadingTournament = finalist_module.getTournament();
 
             if (null != currentAllTeams && currentAllTeams.length > 0) {
                 if (currentTournament != loadingTournament) {

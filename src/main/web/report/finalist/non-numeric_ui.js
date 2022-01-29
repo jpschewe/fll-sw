@@ -13,11 +13,11 @@ const nonNumericUi = {}
 {
     function handleDivisionChange() {
         const divIndex = $("#divisions").val();
-        const div = $.finalist.getDivisionByIndex(divIndex);
-        $.finalist.setCurrentDivision(div);
+        const div = finalist_module.getDivisionByIndex(divIndex);
+        finalist_module.setCurrentDivision(div);
         updateTeams();
         if (_useStorage) {
-            $.finalist.saveToLocalStorage();
+            finalist_module.saveToLocalStorage();
         }
     }
 
@@ -46,13 +46,13 @@ const nonNumericUi = {}
     nonNumericUi.initialize =
         function() {
             if (_useStorage) {
-                $.finalist.loadFromLocalStorage();
+                finalist_module.loadFromLocalStorage();
             }
 
             $("#divisions").empty();
-            $.each($.finalist.getDivisions(), function(i, division) {
+            $.each(finalist_module.getDivisions(), function(i, division) {
                 let selected = "";
-                if (division == $.finalist.getCurrentDivision()) {
+                if (division == finalist_module.getCurrentDivision()) {
                     selected = " selected ";
                 }
                 const divisionOption = $("<option value='" + i + "'" + selected + ">"
@@ -71,15 +71,15 @@ const nonNumericUi = {}
         $("#categories").empty();
         $("#overall-categories").empty();
 
-        $.each($.finalist.getNonNumericCategories(), function(_, category) {
+        $.each(finalist_module.getNonNumericCategories(), function(_, category) {
             addCategoryElement(category);
 
             let addedTeam = false;
             $.each(category.teams,
                 function(_, teamNum) {
-                    const team = $.finalist.lookupTeam(teamNum);
+                    const team = finalist_module.lookupTeam(teamNum);
                     if (category.overall
-                        || $.finalist.isTeamInDivision(team, $.finalist
+                        || finalist_module.isTeamInDivision(team, finalist_module
                             .getCurrentDivision())) {
                         addedTeam = true;
                         const teamIdx = addTeam(category);
@@ -106,13 +106,13 @@ const nonNumericUi = {}
                 + category.catId + "'/>");
             catEle.append(scheduledCheckbox);
             scheduledCheckbox.change(function() {
-                $.finalist.setCategoryScheduled(category, $(this).prop("checked"));
+                finalist_module.setCategoryScheduled(category, $(this).prop("checked"));
                 roomEle.prop("disabled", !(scheduledCheckbox.prop("checked")));
                 if (_useStorage) {
-                    $.finalist.saveToLocalStorage();
+                    finalist_module.saveToLocalStorage();
                 }
             });
-            scheduledCheckbox.attr("checked", $.finalist.isCategoryScheduled(category));
+            scheduledCheckbox.attr("checked", finalist_module.isCategoryScheduled(category));
         }
 
         catEle.append(category.name);
@@ -123,13 +123,13 @@ const nonNumericUi = {}
         catEle.append(roomEle);
         roomEle.change(function() {
             const roomNumber = roomEle.val();
-            $.finalist.setRoom(category, $.finalist.getCurrentDivision(), roomNumber);
+            finalist_module.setRoom(category, finalist_module.getCurrentDivision(), roomNumber);
             if (_useStorage) {
-                $.finalist.saveToLocalStorage();
+                finalist_module.saveToLocalStorage();
             }
         });
-        roomEle.val($.finalist.getRoom(category, $.finalist.getCurrentDivision()));
-        roomEle.prop("disabled", !$.finalist.isCategoryScheduled(category));
+        roomEle.val(finalist_module.getRoom(category, finalist_module.getCurrentDivision()));
+        roomEle.prop("disabled", !finalist_module.isCategoryScheduled(category));
 
         const teamList = $("<ul id='category_" + category.catId + "'></ul>");
         catEle.append(teamList);
@@ -174,7 +174,7 @@ const nonNumericUi = {}
         $("#" + teamOrgId(category.catId, teamIdx)).val(team.org);
         $("#" + teamJudgingStationId(category.catId, teamIdx)).val(team.judgingGroup);
 
-        const judges = $.finalist.getNominatingJudges(category, team.num);
+        const judges = finalist_module.getNominatingJudges(category, team.num);
         let judgesStr;
         if (!judges) {
             judgesStr = "";
@@ -204,26 +204,26 @@ const nonNumericUi = {}
             let teamNum = $(this).val();
             const prevTeam = $(this).data('oldVal');
             if ("" == teamNum) {
-                $.finalist.removeTeamFromCategory(category, prevTeam);
+                finalist_module.removeTeamFromCategory(category, prevTeam);
                 $("#" + teamNameId(category.catId, teamIdx)).val("");
                 $("#" + teamOrgId(category.catId, teamIdx)).val("");
                 $("#" + teamJudgingStationId(category.catId, teamIdx)).val("");
                 if (_useStorage) {
-                    $.finalist.saveToLocalStorage();
+                    finalist_module.saveToLocalStorage();
                 }
             } else if (teamNum != prevTeam) {
-                $.finalist.removeTeamFromCategory(category, prevTeam);
+                finalist_module.removeTeamFromCategory(category, prevTeam);
 
-                const team = $.finalist.lookupTeam(teamNum);
+                const team = finalist_module.lookupTeam(teamNum);
                 if (typeof (team) == 'undefined') {
                     alert("Team number " + teamNum + " does not exist");
                     $(this).val(prevTeam);
                     teamNum = prevTeam; // for the set of oldVal below
                 } else {
                     populateTeamInformation(category, teamIdx, team);
-                    $.finalist.addTeamToCategory(category, teamNum);
+                    finalist_module.addTeamToCategory(category, teamNum);
                     if (_useStorage) {
-                        $.finalist.saveToLocalStorage();
+                        finalist_module.saveToLocalStorage();
                     }
                 }
             }
@@ -253,17 +253,17 @@ const nonNumericUi = {}
             if ("" != teamNum) {
                 const reallyDelete = confirm("Are you sure you want to delete this team?");
                 if (reallyDelete) {
-                    $.finalist.removeTeamFromCategory(category, teamNum);
+                    finalist_module.removeTeamFromCategory(category, teamNum);
                     teamEle.remove();
                     if (_useStorage) {
-                        $.finalist.saveToLocalStorage();
+                        finalist_module.saveToLocalStorage();
                     }
                 }
             } else {
-                $.finalist.removeTeamFromCategory(category, teamNum);
+                finalist_module.removeTeamFromCategory(category, teamNum);
                 teamEle.remove();
                 if (_useStorage) {
-                    $.finalist.saveToLocalStorage();
+                    finalist_module.saveToLocalStorage();
                 }
             }
         });

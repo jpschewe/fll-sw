@@ -11,10 +11,10 @@ const finalistNumericModule = {};
 {
     function handleDivisionChange() {
         const divIndex = $("#divisions").val();
-        const div = $.finalist.getDivisionByIndex(divIndex);
-        $.finalist.setCurrentDivision(div);
+        const div = finalist_module.getDivisionByIndex(divIndex);
+        finalist_module.setCurrentDivision(div);
         updatePage();
-        $.finalist.saveToLocalStorage();
+        finalist_module.saveToLocalStorage();
     }
 
     function getNumFinalistsId(team) {
@@ -25,8 +25,8 @@ const finalistNumericModule = {};
         $.each(teams, function(_, team) {
             // initialize to 0
             let numFinalists = 0;
-            $.each($.finalist.getAllScheduledCategories(), function(_, category) {
-                if ($.finalist.isTeamInCategory(category, team.num)) {
+            $.each(finalist_module.getAllScheduledCategories(), function(_, category) {
+                if (finalist_module.isTeamInCategory(category, team.num)) {
                     numFinalists = numFinalists + 1;
                 }
             });
@@ -41,11 +41,11 @@ const finalistNumericModule = {};
 
         $.each(teams, function(_, team) {
             if (currentCategory.overall
-                || $.finalist.isTeamInDivision(team, currentDivision)) {
+                || finalist_module.isTeamInDivision(team, currentDivision)) {
                 const row = $("<tr></tr>");
                 $("#data").append(row);
 
-                const score = $.finalist.getCategoryScore(team, currentCategory);
+                const score = finalist_module.getCategoryScore(team, currentCategory);
                 const group = team.judgingGroup;
                 //  || (group == prevJudgingGroup && Math.abs(prevScore - score) < 1)
                 if (group != prevJudgingGroup) {
@@ -72,17 +72,17 @@ const finalistNumericModule = {};
                     const finalistDisplay = $("#" + getNumFinalistsId(team));
                     let numFinalists = parseInt(finalistDisplay.text(), 10);
                     if ($(this).prop("checked")) {
-                        $.finalist.addTeamToCategory(currentCategory, team.num);
+                        finalist_module.addTeamToCategory(currentCategory, team.num);
                         numFinalists = numFinalists + 1;
                     } else {
-                        $.finalist.removeTeamFromCategory(currentCategory, team.num);
+                        finalist_module.removeTeamFromCategory(currentCategory, team.num);
                         numFinalists = numFinalists - 1;
                     }
-                    $.finalist.saveToLocalStorage();
+                    finalist_module.saveToLocalStorage();
 
                     finalistDisplay.text(numFinalists);
                 });
-                if ($.finalist.isTeamInCategory(currentCategory, team.num)) {
+                if (finalist_module.isTeamInCategory(currentCategory, team.num)) {
                     finalistCheck.attr("checked", true);
                 }
 
@@ -111,8 +111,8 @@ const finalistNumericModule = {};
     }
 
     function updatePage() {
-        const categoryName = $.finalist.getCurrentCategoryName();
-        const currentCategory = $.finalist.getCategoryByName(categoryName);
+        const categoryName = finalist_module.getCurrentCategoryName();
+        const currentCategory = finalist_module.getCategoryByName(categoryName);
         if (null == currentCategory) {
             alert("Invalid category ID found: " + categoryId);
             return;
@@ -120,7 +120,7 @@ const finalistNumericModule = {};
 
         // note that this category has been visited so that it
         // doesn't get initialized again
-        $.finalist.setCategoryVisited(currentCategory, $.finalist
+        finalist_module.setCategoryVisited(currentCategory, finalist_module
             .getCurrentDivision());
 
         $("#data").empty();
@@ -128,19 +128,19 @@ const finalistNumericModule = {};
         const headerRow = $("<tr><th>Finalist?</th><th>Judging Group</th><th>Team #</th><th>Team Name</th><th>Score</th><th>Num Categories</th></tr>");
         $("#data").append(headerRow);
 
-        const teams = $.finalist.getAllTeams();
-        $.finalist.sortTeamsByCategory(teams, currentCategory);
+        const teams = finalist_module.getAllTeams();
+        finalist_module.sortTeamsByCategory(teams, currentCategory);
 
-        createTeamTable(teams, $.finalist.getCurrentDivision(), currentCategory);
+        createTeamTable(teams, finalist_module.getCurrentDivision(), currentCategory);
 
         initializeFinalistCounts(teams);
-        $.finalist.saveToLocalStorage();
+        finalist_module.saveToLocalStorage();
     }
 
     $(document)
         .ready(
             function() {
-                $.finalist.loadFromLocalStorage();
+                finalist_module.loadFromLocalStorage();
 
                 $("#previous")
                     .click(
@@ -149,10 +149,10 @@ const finalistNumericModule = {};
                             let foundCurrent = false;
                             $
                                 .each(
-                                    $.finalist.getNumericCategories(),
+                                    finalist_module.getNumericCategories(),
                                     function(_, category) {
-                                        if (category.name != $.finalist.CHAMPIONSHIP_NAME) {
-                                            if ($.finalist.getCurrentCategoryName() == category.name) {
+                                        if (category.name != finalist_module.CHAMPIONSHIP_NAME) {
+                                            if (finalist_module.getCurrentCategoryName() == category.name) {
                                                 foundCurrent = true;
                                             } // current category
                                             if (!foundCurrent) {
@@ -165,16 +165,16 @@ const finalistNumericModule = {};
                                 if (null == prev) {
                                     location.href = "non-numeric.html";
                                 } else {
-                                    $.finalist.setCurrentCategoryName(prev.name);
-                                    $.finalist.saveToLocalStorage();
+                                    finalist_module.setCurrentCategoryName(prev.name);
+                                    finalist_module.saveToLocalStorage();
                                     location.href = "numeric.html";
                                 }
                             } else {
-                                const championshipCategory = $.finalist
-                                    .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
-                                if ($.finalist.getCurrentCategoryName() == championshipCategory.name) {
-                                    $.finalist.setCurrentCategoryName(prev.name);
-                                    $.finalist.saveToLocalStorage();
+                                const championshipCategory = finalist_module
+                                    .getCategoryByName(finalist_module.CHAMPIONSHIP_NAME);
+                                if (finalist_module.getCurrentCategoryName() == championshipCategory.name) {
+                                    finalist_module.setCurrentCategoryName(prev.name);
+                                    finalist_module.saveToLocalStorage();
 
                                     location.href = "numeric.html";
                                 }
@@ -185,42 +185,42 @@ const finalistNumericModule = {};
                 $("#next")
                     .click(
                         function() {
-                            const championshipCategory = $.finalist
-                                .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
-                            if ($.finalist.getCurrentCategoryName() == championshipCategory.name) {
+                            const championshipCategory = finalist_module
+                                .getCategoryByName(finalist_module.CHAMPIONSHIP_NAME);
+                            if (finalist_module.getCurrentCategoryName() == championshipCategory.name) {
                                 location.href = "schedule.html";
                             } else {
                                 let foundCurrent = false;
                                 let next = null;
                                 $
                                     .each(
-                                        $.finalist.getNumericCategories(),
+                                        finalist_module.getNumericCategories(),
                                         function(_, category) {
-                                            if (category.name != $.finalist.CHAMPIONSHIP_NAME) {
+                                            if (category.name != finalist_module.CHAMPIONSHIP_NAME) {
                                                 if (foundCurrent && null == next) {
                                                     next = category;
-                                                } else if ($.finalist.getCurrentCategoryName() == category.name) {
+                                                } else if (finalist_module.getCurrentCategoryName() == category.name) {
                                                     foundCurrent = true;
                                                 }
                                             }
                                         });
                                 if (null == next) {
-                                    $.finalist
+                                    finalist_module
                                         .setCurrentCategoryName(championshipCategory.name);
-                                    $.finalist.saveToLocalStorage();
+                                    finalist_module.saveToLocalStorage();
 
                                     location.href = "numeric.html";
                                 } else {
-                                    $.finalist.setCurrentCategoryName(next.name);
-                                    $.finalist.saveToLocalStorage();
+                                    finalist_module.setCurrentCategoryName(next.name);
+                                    finalist_module.saveToLocalStorage();
 
                                     location.href = "numeric.html";
                                 }
                             }
                         });
 
-                const categoryName = $.finalist.getCurrentCategoryName();
-                const currentCategory = $.finalist.getCategoryByName(categoryName);
+                const categoryName = finalist_module.getCurrentCategoryName();
+                const currentCategory = finalist_module.getCategoryByName(categoryName);
                 if (null == currentCategory) {
                     alert("Invalid category ID found: " + categoryName);
                     return;
@@ -236,16 +236,16 @@ const finalistNumericModule = {};
 
                 $("#reselect").click(
                     function() {
-                        const teams = $.finalist.getAllTeams();
-                        const division = $.finalist.getCurrentDivision();
-                        const scoreGroups = $.finalist.getScoreGroups(teams, division);
+                        const teams = finalist_module.getAllTeams();
+                        const division = finalist_module.getCurrentDivision();
+                        const scoreGroups = finalist_module.getScoreGroups(teams, division);
 
-                        $.finalist.unsetCategoryVisited(currentCategory, division);
+                        finalist_module.unsetCategoryVisited(currentCategory, division);
 
-                        $.finalist.initializeTeamsInNumericCategory(division,
+                        finalist_module.initializeTeamsInNumericCategory(division,
                             currentCategory, teams, scoreGroups);
                         updatePage();
-                        $.finalist.saveToLocalStorage();
+                        finalist_module.saveToLocalStorage();
                     });
 
                 $("#category-name").text(currentCategory.name);
@@ -253,17 +253,17 @@ const finalistNumericModule = {};
                 const roomEle = $("#room");
                 roomEle.change(function() {
                     const roomNumber = roomEle.val();
-                    $.finalist.setRoom(currentCategory,
-                        $.finalist.getCurrentDivision(), roomNumber);
-                    $.finalist.saveToLocalStorage();
+                    finalist_module.setRoom(currentCategory,
+                        finalist_module.getCurrentDivision(), roomNumber);
+                    finalist_module.saveToLocalStorage();
                 });
-                roomEle.val($.finalist.getRoom(currentCategory, $.finalist
+                roomEle.val(finalist_module.getRoom(currentCategory, finalist_module
                     .getCurrentDivision()));
 
                 $("#divisions").empty();
-                $.each($.finalist.getDivisions(), function(i, division) {
+                $.each(finalist_module.getDivisions(), function(i, division) {
                     let selected = "";
-                    if (division == $.finalist.getCurrentDivision()) {
+                    if (division == finalist_module.getCurrentDivision()) {
                         selected = " selected ";
                     }
                     const divisionOption = $("<option value='" + i + "'" + selected + ">"
@@ -277,6 +277,6 @@ const finalistNumericModule = {};
 
                 updatePage();
 
-                $.finalist.displayNavbar();
+                finalist_module.displayNavbar();
             }); // end ready function
 } // scope

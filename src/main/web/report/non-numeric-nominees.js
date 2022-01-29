@@ -28,7 +28,7 @@ const nonNumericNominees = {}
 
             alert("Non-numeric nominees upload failure: " + message);
         }
-        waitList.push($.finalist.uploadNonNumericNominees(
+        waitList.push(finalist_module.uploadNonNumericNominees(
             nonNumericSuccess, nonNumericFail));
 
         $("#wait-dialog").dialog("open");
@@ -60,19 +60,19 @@ const nonNumericNominees = {}
             // Some things need to be loaded first
             const waitList1 = [];
 
-            const teamsPromise = $.finalist.loadTournamentTeams();
+            const teamsPromise = finalist_module.loadTournamentTeams();
             teamsPromise.fail(function() {
                 alert("Failure loading : teams");
             })
             waitList1.push(teamsPromise);
 
-            const nonNumericCategoriesPromise = $.finalist.loadNonNumericCategories();
+            const nonNumericCategoriesPromise = finalist_module.loadNonNumericCategories();
             nonNumericCategoriesPromise.fail(function() {
                 alert("Failure loading : non-numeric categories");
             });
             waitList1.push(nonNumericCategoriesPromise);
 
-            const awardgroupsPromise = $.finalist.loadAwardGroups();
+            const awardgroupsPromise = finalist_module.loadAwardGroups();
             awardgroupsPromise.fail(function() {
                 alert("Failure loading : award groups");
             });
@@ -83,7 +83,7 @@ const nonNumericNominees = {}
                 // everything else can be loaded in parallel
                 const waitList = [];
 
-                const nonNumericNomineesPromise = $.finalist.loadNonNumericNominees();
+                const nonNumericNomineesPromise = finalist_module.loadNonNumericNominees();
                 nonNumericNomineesPromise.fail(function() {
                     alert("Failure loading : non-numeric nominees");
                 })

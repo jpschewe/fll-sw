@@ -16,22 +16,22 @@ $(document).ready(
         $("#next").click(function() {
             // find the first numeric category
             let first = null;
-            $.each($.finalist.getNumericCategories(), function(_, category) {
-                if (category.name != $.finalist.CHAMPIONSHIP_NAME) {
+            $.each(finalist_module.getNumericCategories(), function(_, category) {
+                if (category.name != finalist_module.CHAMPIONSHIP_NAME) {
                     if (null == first) {
                         first = category;
                     }
                 }
             });
             if (null != first) {
-                $.finalist.setCurrentCategoryName(first.name);
-                $.finalist.saveToLocalStorage();
+                finalist_module.setCurrentCategoryName(first.name);
+                finalist_module.saveToLocalStorage();
                 location.href = "numeric.html";
             } else {
                 alert("Internal error, cannot find next category");
             }
         });
 
-        $.finalist.displayNavbar();
+        finalist_module.displayNavbar();
     }); // end ready function
 
