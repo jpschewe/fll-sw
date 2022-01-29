@@ -282,6 +282,26 @@ const finalist_module = {}
         }
     }
 
+
+    function _removeTeamFromCategory(category, teamNum) {
+        teamNum = parseInt(teamNum, 10);
+        var index = category.teams.indexOf(teamNum);
+        if (index != -1) {
+            if (category.overall) {
+                // clear all schedules
+                $.each(finalist_module.getDivisions(), function(_, division) {
+                    _schedules[division] = null;
+                });
+            } else {
+                // clear the schedule for the current division
+                _schedules[finalist_module.getCurrentDivision()] = null;
+            }
+
+            category.teams.splice(index, 1);
+            delete category.judges[teamNum];
+        }
+    }
+
     // //////////////////////// PUBLIC INTERFACE /////////////////////////
     finalist_module.CHAMPIONSHIP_NAME = "Champion's";
 
@@ -796,26 +816,7 @@ const finalist_module = {}
     };
 
     finalist_module.removeTeamFromCategory = function(category, teamNum) {
-        finalist_module._removeTeamFromCategory(category, teamNum);
-    };
-
-    finalist_module._removeTeamFromCategory = function(category, teamNum) {
-        teamNum = parseInt(teamNum, 10);
-        var index = category.teams.indexOf(teamNum);
-        if (index != -1) {
-            if (category.overall) {
-                // clear all schedules
-                $.each(finalist_module.getDivisions(), function(_, division) {
-                    _schedules[division] = null;
-                });
-            } else {
-                // clear the schedule for the current division
-                _schedules[finalist_module.getCurrentDivision()] = null;
-            }
-
-            category.teams.splice(index, 1);
-            delete category.judges[teamNum];
-        }
+        _removeTeamFromCategory(category, teamNum);
     };
 
     finalist_module.isTeamInCategory = function(category, teamNum) {
@@ -833,7 +834,7 @@ const finalist_module = {}
         });
 
         $.each(toRemove, function(_, teamNum) {
-            finalist_module._removeTeamFromCategory(category, teamNum);
+            _removeTeamFromCategory(category, teamNum);
         });
     };
 
