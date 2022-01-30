@@ -23,7 +23,9 @@ const fllStorage = {};
         } else if (value === null) {
             return null;
         } else if (typeof value === 'object') {
-            if (typeof JSJoda != undefined) {
+            if (value.dataType === 'Map') {
+                return new Map(value.value);
+            } else if (typeof JSJoda != undefined) {
                 switch (value.dataType) {
                     case 'LocalDate':
                         return JSJoda.LocalDate.parse(value.value);
@@ -44,7 +46,12 @@ const fllStorage = {};
 
     function _replacer(key, value) {
         const originalObject = this[key];
-        if (typeof JSJoda != undefined) {
+        if (originalObject instanceof Map) {
+            return {
+                dataType: 'Map',
+                value: Array.from(originalObject.entries()),
+            };
+        } else if (typeof JSJoda != undefined) {
             if (originalObject instanceof JSJoda.LocalDate) {
                 return {
                     dataType: 'LocalDate',
