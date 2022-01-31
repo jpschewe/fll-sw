@@ -6,6 +6,10 @@
 
 "use strict";
 
+// Developer note: ES6 Map objects are not used due to them not serializing to JSON in 
+// a way that is compatible with the Java Jackson library. Instead Objects are used
+// as maps.
+
 const finalist_module = {}
 
 {
@@ -127,11 +131,11 @@ const finalist_module = {}
      */
     function _check_duplicate_category(name) {
         let duplicate = false;
-        $.each(_categories, function(_, val) {
+        for (const [_, val] of Object.entries(_categories)) {
             if (val.name == name) {
                 duplicate = true;
             }
-        });
+        }
         return duplicate;
     }
 
@@ -167,7 +171,7 @@ const finalist_module = {}
      *          an award group
      */
     function Category(name, numeric, overall) {
-        var category_id;
+        let category_id;
         // find the next available id
         for (category_id = 0; category_id < Number.MAX_VALUE
             && _categories[category_id]; category_id = category_id + 1)
@@ -215,10 +219,10 @@ const finalist_module = {}
     function _addTimeToSchedule(currentDivision, offset) {
         const currentSchedule = _schedules[currentDivision];
         if (null != currentSchedule) {
-            $.each(currentSchedule, function(_, slot) {
+            for (const slot of currentSchedule) {
                 slot.time = slot.time.plus(offset);
                 slot.endTime = slot.endTime.plus(offset);
-            }); // foreach timeslot
+            } // foreach timeslot
         }
     }
 
@@ -232,20 +236,20 @@ const finalist_module = {}
      */
     function _addToScheduleSlotDurations(offset) {
 
-        $.each(_schedules, function(_, schedule) {
+        for (const [_, schedule] of Object.entries(_schedules)) {
             if (null != schedule) {
-                var addToStart = JSJoda.Duration.ofMinutes(0);
-                var addToEnd = offset;
+                let addToStart = JSJoda.Duration.ofMinutes(0);
+                let addToEnd = offset;
 
-                $.each(schedule, function(_, slot) {
+                for (const slot of schedule) {
                     slot.time = slot.time.plus(addToStart);
                     slot.endTime = slot.endTime.plus(addToEnd);
 
                     addToStart = addToEnd;
                     addToEnd = addToEnd.plus(offset);
-                }); // foreach timeslot
+                } // foreach timeslot
             }
-        }); // foreach schedule
+        } // foreach schedule
 
     }
 
@@ -289,9 +293,9 @@ const finalist_module = {}
         if (index != -1) {
             if (category.overall) {
                 // clear all schedules
-                $.each(finalist_module.getDivisions(), function(_, division) {
+                for (const division of finalist_module.getDivisions()) {
                     _schedules[division] = null;
-                });
+                }
             } else {
                 // clear the schedule for the current division
                 _schedules[finalist_module.getCurrentDivision()] = null;
@@ -367,7 +371,7 @@ const finalist_module = {}
      * exists it is not added.
      */
     finalist_module.addDivision = function(division) {
-        if (-1 == $.inArray(division, _divisions)) {
+        if (-1 == _divisions.indexOf(division)) {
             _divisions.push(division);
         }
     };
@@ -490,7 +494,7 @@ const finalist_module = {}
      *          a string
      */
     finalist_module.addTeamToDivision = function(team, division) {
-        if (-1 == $.inArray(division, team.divisions)) {
+        if (-1 == team.divisions.indexOf(division)) {
             team.divisions.push(division);
         }
     };
@@ -504,7 +508,7 @@ const finalist_module = {}
      *          a string
      */
     finalist_module.addTeamToPlayoffDivision = function(team, division) {
-        if (-1 == $.inArray(division, team.playoffDivisions)) {
+        if (-1 == team.playoffDivisions.indexOf(division)) {
             team.playoffDivisions.push(division);
         }
     };
@@ -521,7 +525,7 @@ const finalist_module = {}
     finalist_module.isTeamInDivision = function(team, division) {
         if (!team) {
             return false;
-        } else if (-1 == $.inArray(division, team.divisions)) {
+        } else if (-1 == team.divisions.indexOf(division)) {
             return false;
         } else {
             return true;
@@ -547,10 +551,10 @@ const finalist_module = {}
      * Get all teams.
      */
     finalist_module.getAllTeams = function() {
-        var teams = [];
-        $.each(_teams, function(_, val) {
-            teams.push(val);
-        });
+        const teams = [];
+        for (const [_, team] of Object.entries(_teams)) {
+            teams.push(team);
+        }
         return teams;
     };
 
@@ -560,13 +564,13 @@ const finalist_module = {}
      * @return map of score group to number of teams to auto select
      */
     finalist_module.getScoreGroups = function(teams, currentDivision) {
-        var scoreGroups = {};
-        $.each(teams, function(_, team) {
+        const scoreGroups = {};
+        for (const team of teams) {
             if (finalist_module.isTeamInDivision(team, currentDivision)) {
                 var group = team.judgingGroup;
                 scoreGroups[group] = finalist_module.getNumTeamsAutoSelected();
             }
-        });
+        }
         return scoreGroups;
     };
 
@@ -610,7 +614,7 @@ const finalist_module = {}
      */
     finalist_module.initializeTeamsInNumericCategory = function(currentDivision,
         currentCategory, teams, scoreGroups) {
-        var previouslyVisited = finalist_module.isCategoryVisited(currentCategory,
+        const previouslyVisited = finalist_module.isCategoryVisited(currentCategory,
             currentDivision);
         if (previouslyVisited) {
             // don't mess with existing values
@@ -618,10 +622,10 @@ const finalist_module = {}
         }
 
         finalist_module.clearTeamsInCategory(currentCategory, currentDivision);
-        var checkedEnoughTeams = false;
-        var prevScores = {};
+        let checkedEnoughTeams = false;
+        const prevScores = {};
         finalist_module.sortTeamsByCategory(teams, currentCategory);
-        $.each(teams, function(_, team) {
+        for (const team of teams) {
             if (currentCategory.overall
                 || finalist_module.isTeamInDivision(team, currentDivision)) {
                 if (!checkedEnoughTeams) {
@@ -638,18 +642,18 @@ const finalist_module = {}
                                 scoreGroups[group] = scoreGroups[group] - 1;
 
                                 checkedEnoughTeams = true;
-                                $.each(scoreGroups, function(_, value) {
+                                for (const value of scoreGroups) {
                                     if (value > 0) {
                                         checkedEnoughTeams = false;
                                     }
-                                });
+                                }
                             }
                         }
                         prevScores[group] = curScore;
                     }// valid curScore
                 } // checked enough teams
             } // if current division
-        }); // foreach team
+        } // foreach team
     };
 
     /**
@@ -670,7 +674,7 @@ const finalist_module = {}
                 + "'");
             return null;
         } else {
-            var newCategory = new Category(categoryName, numeric, overall);
+            const newCategory = new Category(categoryName, numeric, overall);
             return newCategory;
         }
     };
@@ -691,12 +695,12 @@ const finalist_module = {}
      * @returns {Array} sorted by name
      */
     finalist_module.getNonNumericCategories = function() {
-        var categories = [];
-        $.each(_categories, function(_, val) {
+        const categories = [];
+        for (const [_, val] of Object.entries(_categories)) {
             if (!val.numeric) {
                 categories.push(val);
             }
-        });
+        }
         categories.sort(function(a, b) {
             if (a.name == b.name) {
                 return 0;
@@ -715,12 +719,12 @@ const finalist_module = {}
      * @returns {Array} sorted by name
      */
     finalist_module.getNumericCategories = function() {
-        var categories = [];
-        $.each(_categories, function(_, val) {
+        const categories = [];
+        for (const [_, val] of Object.entries(_categories)) {
             if (val.numeric) {
                 categories.push(val);
             }
-        });
+        }
         categories.sort(function(a, b) {
             if (a.name == b.name) {
                 return 0;
@@ -739,10 +743,10 @@ const finalist_module = {}
      * @returns {Array} sorted by name
      */
     finalist_module.getAllCategories = function() {
-        var categories = [];
-        $.each(_categories, function(_, val) {
+        const categories = [];
+        for (const [_, val] of Object.entries(_categories)) {
             categories.push(val);
-        });
+        }
         categories.sort(function(a, b) {
             if (a.name == b.name) {
                 return 0;
@@ -762,11 +766,11 @@ const finalist_module = {}
      */
     finalist_module.getAllScheduledCategories = function() {
         const categories = [];
-        $.each(_categories, function(_, category) {
+        for (const [_, category] of Object.entries(_categories)) {
             if (finalist_module.isCategoryScheduled(category)) {
                 categories.push(category);
             }
-        });
+        }
 
         categories.sort(function(a, b) {
             if (a.name == b.name) {
@@ -789,11 +793,11 @@ const finalist_module = {}
      */
     finalist_module.getCategoryByName = function(toFind) {
         let category = null;
-        $.each(_categories, function(_, val) {
+        for (const [_, val] of Object.entries(_categories)) {
             if (val.name == toFind) {
                 category = val;
             }
-        });
+        }
         return category;
     };
 
@@ -803,9 +807,9 @@ const finalist_module = {}
         if (-1 == index) {
             if (category.overall) {
                 // clear schedule for all categories
-                $.each(finalist_module.getDivisions(), function(_, division) {
+                for (const division of finalist_module.getDivisions()) {
                     _schedules[division] = null;
-                });
+                }
             } else {
                 // clear the schedule for the current division
                 _schedules[finalist_module.getCurrentDivision()] = null;
@@ -825,17 +829,17 @@ const finalist_module = {}
     };
 
     finalist_module.clearTeamsInCategory = function(category, division) {
-        var toRemove = [];
-        $.each(category.teams, function(_, teamNum) {
-            var team = finalist_module.lookupTeam(teamNum);
+        const toRemove = [];
+        for (const teamNum of category.teams) {
+            const team = finalist_module.lookupTeam(teamNum);
             if (category.overall || finalist_module.isTeamInDivision(team, division)) {
                 toRemove.push(teamNum);
             }
-        });
+        }
 
-        $.each(toRemove, function(_, teamNum) {
+        for (const teamNum of toRemove) {
             _removeTeamFromCategory(category, teamNum);
-        });
+        }
     };
 
     finalist_module.addTeamToTimeslot = function(timeslot, categoryName, teamNum) {
@@ -854,12 +858,12 @@ const finalist_module = {}
     };
 
     finalist_module.isTeamInTimeslot = function(timeslot, teamNum) {
-        var found = false;
-        $.each(timeslot.categories, function(_, slotTeamNum) {
+        let found = false;
+        for (const slotTeamNum of timeslot.categories) {
             if (teamNum == slotTeamNum) {
                 found = true;
             }
-        });
+        }
         return found;
     };
 
@@ -880,13 +884,13 @@ const finalist_module = {}
     /**
      * @param division
      *          the division to work with
-     * @return map with key of team number and value is an array of scheduled
+     * @return map (object) with key of team number and value is an array of scheduled
      *         categories that the team is being judged in
      */
     finalist_module.getTeamToCategoryMap = function(division) {
         const finalistsCount = {};
-        $.each(finalist_module.getAllScheduledCategories(), function(_, category) {
-            $.each(category.teams, function(_, teamNum) {
+        for (const category of finalist_module.getAllScheduledCategories()) {
+            for (const teamNum of category.teams) {
                 const team = finalist_module.lookupTeam(teamNum);
                 if (category.overall || finalist_module.isTeamInDivision(team, division)) {
                     if (null == finalistsCount[teamNum]) {
@@ -894,8 +898,8 @@ const finalist_module = {}
                     }
                     finalistsCount[teamNum].push(category);
                 }
-            });
-        });
+            }
+        }
 
         return finalistsCount;
     };
@@ -917,9 +921,9 @@ const finalist_module = {}
         // should ensure the minimum amount of time to do the finalist
         // judging
         const sortedTeams = [];
-        $.each(finalistsCount, function(teamNum, _) {
+        for (const [teamNum, _] of Object.entries(finalistsCount)) {
             sortedTeams.push(teamNum);
-        });
+        }
         sortedTeams.sort(function(a, b) {
             const aCategories = finalistsCount[a];
             const bCategories = finalistsCount[b];
@@ -941,15 +945,14 @@ const finalist_module = {}
         const slotMinutes = finalist_module.getDuration(currentDivision);
         const slotDuration = JSJoda.Duration.ofMinutes(slotMinutes);
         finalist_module.log("Next timeslot starts at " + nextTime + " duration is " + slotDuration);
-        $.each(sortedTeams, function(_, teamNum) {
+        for (const teamNum of sortedTeams) {
             const team = finalist_module.lookupTeam(teamNum);
             const teamCategories = finalistsCount[teamNum];
-            $.each(teamCategories, function(_, category) {
-
+            for (const category of teamCategories) {
                 if (finalist_module.isCategoryScheduled(category)) {
 
                     let scheduled = false;
-                    $.each(schedule, function(_, slot) {
+                    for (const slot of schedule) {
                         if (!scheduled
                             && !finalist_module.isTimeslotBusy(slot, category.name)
                             && !finalist_module.isTeamInTimeslot(slot, teamNum)
@@ -957,7 +960,7 @@ const finalist_module = {}
                             finalist_module.addTeamToTimeslot(slot, category.name, teamNum);
                             scheduled = true;
                         }
-                    }); // foreach timeslot
+                    } // foreach timeslot
 
                     while (!scheduled) {
                         const newRow = new FinalistDBRow(nextTime, nextTime.plus(slotDuration));
@@ -973,8 +976,8 @@ const finalist_module = {}
 
                 } // category is scheduled
 
-            }); // foreach category
-        }); // foreach sorted team
+            } // foreach category
+        } // foreach sorted team
 
         return schedule;
     };
@@ -1015,13 +1018,13 @@ const finalist_module = {}
      * @returns true or false
      */
     finalist_module.hasPlayoffConflict = function(team, slot) {
-        var conflict = false;
-        $.each(team.playoffDivisions, function(_, bracketName) {
+        let conflict = false;
+        for (const bracketName of team.playoffDivisions) {
             const playoffSchedule = _playoffSchedules[bracketName];
             if (null != playoffSchedule && finalist_module.slotHasPlayoffConflict(playoffSchedule, slot)) {
                 conflict = true;
             }
-        });
+        }
         return conflict;
     };
 
@@ -1117,69 +1120,78 @@ const finalist_module = {}
     };
 
     finalist_module.displayNavbar = function() {
-        var element;
-        if (window.location.pathname.match(/\/params.html$/)) {
-            element = $("<span></span>");
-        } else {
-            element = $("<a href='params.html'></a>");
-        }
-        element.text("Parameters");
-        $("#navbar").append(element);
+        const navbar = document.getElementById("navbar");
 
-        $("#navbar").append($("<span> - </span>"));
+        let element;
+        if (window.location.pathname.match(/\/params.html$/)) {
+            element = document.createElement("span");
+        } else {
+            element = document.createElement("a");
+            element.setAttribute("href", "params.html");
+        }
+        element.innerText = "Parameters";
+        navbar.appendChild(element);
+
+        const spacer = document.createElement("span");
+        spacer.innerText = " - ";
+        navbar.appendChild(spacer.cloneNode(true));
 
         if (window.location.pathname.match(/\/non-numeric.html$/)) {
-            element = $("<span></span>");
+            element = document.createElement("span");
         } else {
-            element = $("<a href='non-numeric.html'></a>");
+            element = document.createElement("a");
+            element.setAttribute("href", "non-numeric.html");
         }
-        element.text("Non-numeric");
-        $("#navbar").append(element);
+        element.innerText = "Non-numeric";
+        navbar.appendChild(element);
 
-        $("#navbar").append($("<span> - </span>"));
+        navbar.appendChild(spacer.cloneNode(true));
 
-        $.each(finalist_module.getNumericCategories(), function(_, category) {
+        for (const category of finalist_module.getNumericCategories()) {
             if (category.name != finalist_module.CHAMPIONSHIP_NAME) {
                 if (window.location.pathname.match(/\/numeric.html$/)
                     && finalist_module.getCurrentCategoryName() == category.name) {
-                    element = $("<span></span>");
+                    element = document.createElement("span");
                 } else {
-                    element = $("<a href='numeric.html'></a>");
-                    element.click(function() {
+                    element = document.createElement("a");
+                    element.setAttribute("href", "numeric.html");
+                    element.addEventListener('click', function() {
                         finalist_module.setCurrentCategoryName(category.name);
                     });
                 }
-                element.text(category.name);
-                $("#navbar").append(element);
+                element.innerText = category.name;
+                navbar.appendChild(element);
 
-                $("#navbar").append($("<span> - </span>"));
+                navbar.appendChild(spacer.cloneNode(true));
             }
-        });
+        }
 
         // make sure that championship is last
-        var championshipCategory = finalist_module
+        const championshipCategory = finalist_module
             .getCategoryByName(finalist_module.CHAMPIONSHIP_NAME);
         if (window.location.pathname.match(/\/numeric.html$/)
             && finalist_module.getCurrentCategoryName() == championshipCategory.name) {
-            element = $("<span></span>");
+            element = document.createElement("span");
         } else {
-            element = $("<a href='numeric.html'></a>");
-            element.click(function() {
+            element = document.createElement("a");
+            element.setAttribute("href", "numeric.html");
+            element.addEventListener('click', function() {
                 finalist_module.setCurrentCategoryName(championshipCategory.name);
             });
         }
-        element.text(finalist_module.CHAMPIONSHIP_NAME);
-        $("#navbar").append(element);
+        element.innerText = finalist_module.CHAMPIONSHIP_NAME;
+        navbar.appendChild(element);
 
-        $("#navbar").append($("<span> - </span>"));
+        navbar.appendChild(spacer.cloneNode(true));
 
         if (window.location.pathname.match(/\/schedule.html$/)) {
-            element = $("<span></span>");
+            element = document.createElement("span");
         } else {
-            element = $("<a href='schedule.html'></a>");
+            element = document.createElement("a");
+            element.setAttribute("href", "schedule.html");
         }
-        element.text("Schedule");
-        $("#navbar").append(element);
+        element.innerText = "Schedule";
+        navbar.appendChild(element);
 
     };
 
@@ -1226,7 +1238,7 @@ const finalist_module = {}
       */
     finalist_module.loadNonNumericNominees = function() {
         return $.getJSON("../../api/NonNumericNominees", function(data) {
-            $.each(data, function(_, nonNumericNominee) {
+            for (const nonNumericNominee of data) {
                 let category = finalist_module.getCategoryByName(nonNumericNominee.categoryName);
                 if (null == category) {
                     // 8/22/2020 JPS - this isn't needed other than support for old databases where
@@ -1237,11 +1249,11 @@ const finalist_module = {}
                     // eventually throw new Error("Cannot find non-numeric category '" + nonNumericNominee.categoryName + "'");
                 }
 
-                $.each(nonNumericNominee.nominees, function(_, nominee) {
+                for (const nominee of nonNumericNominee.nominees) {
                     finalist_module.addTeamToCategory(category, nominee.teamNumber);
                     finalist_module.setNominatingJudges(category, nominee.teamNumber, nominee.judges);
-                }); // category scores
-            }); // categories
+                } // category scores
+            } // categories
         });
     };
 
@@ -1254,16 +1266,16 @@ const finalist_module = {}
      */
     finalist_module.uploadNonNumericNominees = function(successCallback, failCallback) {
         const allNonNumericNominees = [];
-        $.each(finalist_module.getNonNumericCategories(), function(_, category) {
+        for (const category of finalist_module.getNonNumericCategories()) {
             var categoryNominees = [];
-            $.each(category.teams, function(_, teamNumber) {
+            for (const teamNumber of category.teams) {
                 const judges = finalist_module.getNominatingJudges(category, teamNumber);
                 const nominee = new Nominee(teamNumber, judges);
                 categoryNominees.push(nominee);
-            }); // foreach team
+            } // foreach team
             const nominees = new NonNumericNominees(category.name, categoryNominees);
             allNonNumericNominees.push(nominees);
-        }); // foreach category
+        } // foreach category
 
         const dataToUpload = JSON.stringify(allNonNumericNominees);
         return $.ajax({
@@ -1291,10 +1303,10 @@ const finalist_module = {}
      */
     finalist_module.loadPlayoffSchedules = function() {
         return $.getJSON("../../api/PlayoffSchedules", function(data) {
-            $.each(data, function(bracketName, playoffSchedule) {
+            for (const [bracketName, playoffSchedule] of Object.entries(data)) {
                 _fixPlayoffSchedule(playoffSchedule);
                 _playoffSchedules[bracketName] = playoffSchedule;
-            });
+            }
         });
     };
 
@@ -1307,11 +1319,11 @@ const finalist_module = {}
      */
     finalist_module.uploadPlayoffSchedules = function(successCallback, failCallback) {
         const schedulesToUpload = {};
-        $.each(_playoffSchedules, function(bracketName, schedule) {
+        for (const [bracketName, schedule] of Object.entries(_playoffSchedules)) {
             if (null != schedule.startTime && null != schedule.endTime) {
                 schedulesToUpload[bracketName] = schedule;
             }
-        });
+        }
 
         const dataToUpload = JSON.stringify(schedulesToUpload);
         return $.ajax({
@@ -1339,10 +1351,10 @@ const finalist_module = {}
       */
     finalist_module.loadFinalistScheduleParameters = function() {
         return $.getJSON("../../api/FinalistScheduleParameters", function(data) {
-            $.each(data, function(awardGroup, parameters) {
+            for (const [awardGroup, parameters] of Object.entries(data)) {
                 _fixScheduleParameters(parameters);
                 _scheduleParameters[awardGroup] = parameters;
-            });
+            }
         });
     };
 
@@ -1355,11 +1367,11 @@ const finalist_module = {}
      */
     finalist_module.uploadScheduleParameters = function(successCallback, failCallback) {
         const paramsToUpload = {};
-        $.each(_scheduleParameters, function(awardGroup, params) {
+        for (const [awardGroup, params] of Object.entries(_scheduleParameters)) {
             if (null != params.startTime) {
                 paramsToUpload[awardGroup] = params;
             }
-        });
+        }
 
         const dataToUpload = JSON.stringify(paramsToUpload);
         return $.ajax({
@@ -1387,8 +1399,8 @@ const finalist_module = {}
      */
     finalist_module.loadFinalistSchedules = function() {
         return $.getJSON("../../api/FinalistSchedule", function(data) {
-            $.each(data, function(awardGroup, schedule) {
-                $.each(schedule.categories, function(_, finalistCategory) {
+            for (const [awardGroup, schedule] of Object.entries(data)) {
+                for (const finalistCategory of schedule.categories) {
                     const category = finalist_module.getCategoryByName(finalistCategory.categoryName);
                     if (null == category) {
                         alert("Unable to find category with name '" + finalistCategory.categoryName + "' referenced in the schedule categories'");
@@ -1398,12 +1410,12 @@ const finalist_module = {}
                         // if the category is in a schedule, then it's scheduled'
                         finalist_module.setCategoryScheduled(category, true);
                     }
-                });
+                }
 
-                $.each(schedule.schedule, function(_, scheduleRow) {
+                for (const scheduleRow of schedule.schedule) {
                     _fixFinalistDBRow(scheduleRow);
 
-                    $.each(scheduleRow.categories, function(categoryName, teamNumber) {
+                    for (const [categoryName, teamNumber] of Object.entries(scheduleRow.categories)) {
                         const category = finalist_module.getCategoryByName(categoryName);
                         if (null == category) {
                             alert("Unable to find category with name '" + categoryName + "' referenced in the schedule rows'");
@@ -1412,12 +1424,12 @@ const finalist_module = {}
                             // mark category visited so that the numeric nominees don't get reset'
                             finalist_module.setCategoryVisited(category, awardGroup);
                         }
-                    })
-                });
+                    }
+                }
 
                 // _schedules is the array of FinalistDBRow objects
                 _schedules[awardGroup] = schedule.schedule;
-            });
+            }
         });
     };
 
@@ -1430,19 +1442,19 @@ const finalist_module = {}
      */
     finalist_module.uploadSchedules = function(successCallback, failCallback) {
         const scheduleMap = {}
-        $.each(_schedules, function(awardGroup, scheduleRows) {
+        for (const [awardGroup, scheduleRows] of Object.entries(_schedules)) {
             if (null != awardGroup && null != scheduleRows) {
                 const categoryRows = [];
-                $.each(finalist_module.getAllScheduledCategories(), function(_, category) {
+                for (const category of finalist_module.getAllScheduledCategories()) {
                     const cat = new FinalistCategory(category.name, finalist_module.getRoom(category,
                         awardGroup));
                     categoryRows.push(cat);
-                }); // foreach category
+                } // foreach category
 
                 const finalistSchedule = new FinalistSchedule(categoryRows, scheduleRows);
                 scheduleMap[awardGroup] = finalistSchedule;
             }
-        })
+        }
 
         const dataToUpload = JSON.stringify(scheduleMap);
         return $.ajax({
@@ -1470,9 +1482,9 @@ const finalist_module = {}
       */
     finalist_module.loadAwardGroups = function() {
         return $.getJSON("../../api/AwardGroups", function(data) {
-            $.each(data, function(_, awardGroup) {
+            for (const awardGroup of data) {
                 finalist_module.addDivision(awardGroup);
-            });
+            }
         });
     };
 
@@ -1483,9 +1495,9 @@ const finalist_module = {}
       */
     finalist_module.loadPlayoffBrackets = function() {
         return $.getJSON("../../api/PlayoffBrackets", function(data) {
-            $.each(data, function(_, bracket) {
+            for (const bracket of data) {
                 finalist_module.addPlayoffDivision(bracket);
-            });
+            }
         });
     };
 
@@ -1497,12 +1509,12 @@ const finalist_module = {}
       */
     finalist_module.loadNumericCategories = function() {
         return $.getJSON("../../api/ChallengeDescription/SubjectiveCategories", function(subjectiveCategories) {
-            $.each(subjectiveCategories, function(_, categoryDescription) {
+            for (const categoryDescription of subjectiveCategories) {
                 const category = finalist_module.getCategoryByName(categoryDescription.title);
                 if (null == category) {
                     finalist_module.addCategory(categoryDescription.title, true, false);
                 }
-            });
+            }
 
             let championship = finalist_module
                 .getCategoryByName(finalist_module.CHAMPIONSHIP_NAME);
@@ -1522,12 +1534,12 @@ const finalist_module = {}
       */
     finalist_module.loadNonNumericCategories = function() {
         return $.getJSON("../../api/ChallengeDescription/NonNumericCategories", function(nonNumericCategories) {
-            $.each(nonNumericCategories, function(_, categoryDescription) {
+            for (const categoryDescription of nonNumericCategories) {
                 const category = finalist_module.getCategoryByName(categoryDescription.title);
                 if (null == category) {
                     finalist_module.addCategory(categoryDescription.title, false, !categoryDescription.perAwardGroup);
                 }
-            });
+            }
         });
     };
 
@@ -1538,13 +1550,13 @@ const finalist_module = {}
     */
     finalist_module.loadTournamentTeams = function() {
         return $.getJSON("../../api/TournamentTeams", function(data) {
-            $.each(data, function(_, tournamentTeam) {
+            for (const tournamentTeam of data) {
                 let team = finalist_module.lookupTeam(tournamentTeam.teamNumber);
                 if (null == team) {
                     team = finalist_module.addTeam(tournamentTeam.teamNumber, tournamentTeam.teamName, tournamentTeam.organization, tournamentTeam.judgingGroup);
                 }
                 finalist_module.addTeamToDivision(team, tournamentTeam.awardGroup);
-            }); // teams
+            } // teams
         });
     };
 
@@ -1555,15 +1567,15 @@ const finalist_module = {}
     */
     finalist_module.loadPlayoffBracketTeams = function() {
         return $.getJSON("../../api/PlayoffBracketTeams", function(data) {
-            $.each(data, function(playoffBracket, teams) {
-                $.each(teams, function(_, teamNumber) {
+            for (const [playoffBracket, teams] of Object.entries(data)) {
+                for (const teamNumber of teams) {
                     const team = finalist_module.lookupTeam(teamNumber);
                     if (null == team) {
                         alert("Cannot find team with number " + teamNumber + " that is specified in the playoff bracket " + playoffBracket);
                     }
                     finalist_module.addTeamToPlayoffDivision(team, playoffBracket);
-                }); // teams
-            }); // brackets
+                } // teams
+            } // brackets
         });
     };
 
@@ -1580,14 +1592,14 @@ const finalist_module = {}
                 throw new Error("Missing championship category");
             }
 
-            $.each(data, function(teamNumber, score) {
+            for (const [teamNumber, score] of Object.entries(data)) {
                 const team = finalist_module.lookupTeam(teamNumber);
                 if (null == team) {
                     throw new Error("Cannot find team with " + teamNumber + " found in overall scores");
                 }
 
                 finalist_module.setCategoryScore(team, championship, score);
-            }); // scores
+            } // scores
         });
     };
 
@@ -1598,21 +1610,21 @@ const finalist_module = {}
      */
     finalist_module.loadCategoryScores = function() {
         return $.getJSON("../../api/NumericCategoryScores", function(data) {
-            $.each(data, function(categoryName, categoryScores) {
+            for (const [categoryName, categoryScores] of Object.entries(data)) {
                 const category = finalist_module.getCategoryByName(categoryName);
                 if (null == category) {
                     throw new Error("Cannot find category '" + categoryName + "'");
                 }
 
-                $.each(categoryScores, function(teamNumber, score) {
+                for (const [teamNumber, score] of Object.entries(categoryScores)) {
                     const team = finalist_module.lookupTeam(teamNumber);
                     if (null == team) {
                         throw new Error("Cannot find team with " + teamNumber + " found in scores for category '" + categoryName + "'");
                     }
 
                     finalist_module.setCategoryScore(team, category, score);
-                }); // category scores
-            }); // categories
+                } // category scores
+            } // categories
         });
     };
 
