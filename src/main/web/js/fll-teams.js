@@ -4,6 +4,8 @@
 
 "use strict";
 
+// depends on fll-functions.js
+
 /*
  * Methods for dealing with teams and populating elements based on the team number
  */
