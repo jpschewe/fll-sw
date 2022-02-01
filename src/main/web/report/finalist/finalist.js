@@ -1237,7 +1237,7 @@ const finalist_module = {}
       * @return promise to execute
       */
     finalist_module.loadNonNumericNominees = function() {
-        return $.getJSON("../../api/NonNumericNominees", function(data) {
+        return fetch("../../api/NonNumericNominees").then(checkJsonResponse).then(function(data) {
             for (const nonNumericNominee of data) {
                 let category = finalist_module.getCategoryByName(nonNumericNominee.categoryName);
                 if (null == category) {
@@ -1278,20 +1278,17 @@ const finalist_module = {}
         } // foreach category
 
         const dataToUpload = JSON.stringify(allNonNumericNominees);
-        return $.ajax({
-            type: "POST",
-            dataType: "json",
-            contentType: "application/json",
-            url: "../../api/NonNumericNominees",
-            data: dataToUpload,
-            success: function(result) {
-                if (result.success) {
-                    successCallback(result);
-                } else {
-                    failCallback(result);
-                }
+        return fetch("../../api/NonNumericNominees", {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: dataToUpload
+        }).then(checkJsonResponse).then(function(result) {
+            if (result.success) {
+                successCallback(result);
+            } else {
+                failCallback(result);
             }
-        }).fail(function(result) {
+        }).catch(function(result) {
             failCallback(result);
         });
     };
@@ -1302,7 +1299,7 @@ const finalist_module = {}
      * @return promise to execute
      */
     finalist_module.loadPlayoffSchedules = function() {
-        return $.getJSON("../../api/PlayoffSchedules", function(data) {
+        return fetch("../../api/PlayoffSchedules").then(checkJsonResponse).then(function(data) {
             for (const [bracketName, playoffSchedule] of Object.entries(data)) {
                 _fixPlayoffSchedule(playoffSchedule);
                 _playoffSchedules[bracketName] = playoffSchedule;
@@ -1326,20 +1323,17 @@ const finalist_module = {}
         }
 
         const dataToUpload = JSON.stringify(schedulesToUpload);
-        return $.ajax({
-            type: "POST",
-            dataType: "json",
-            contentType: "application/json",
-            url: "../../api/PlayoffSchedules",
-            data: dataToUpload,
-            success: function(result) {
-                if (result.success) {
-                    successCallback(result);
-                } else {
-                    failCallback(result);
-                }
+        return fetch("../../api/PlayoffSchedules", {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: dataToUpload
+        }).then(checkJsonResponse).then(function(result) {
+            if (result.success) {
+                successCallback(result);
+            } else {
+                failCallback(result);
             }
-        }).fail(function(result) {
+        }).catch(function(result) {
             failCallback(result);
         });
     };
@@ -1350,7 +1344,7 @@ const finalist_module = {}
       * @return promise to execute
       */
     finalist_module.loadFinalistScheduleParameters = function() {
-        return $.getJSON("../../api/FinalistScheduleParameters", function(data) {
+        return fetch("../../api/FinalistScheduleParameters").then(checkJsonResponse).then(function(data) {
             for (const [awardGroup, parameters] of Object.entries(data)) {
                 _fixScheduleParameters(parameters);
                 _scheduleParameters[awardGroup] = parameters;
@@ -1374,20 +1368,17 @@ const finalist_module = {}
         }
 
         const dataToUpload = JSON.stringify(paramsToUpload);
-        return $.ajax({
-            type: "POST",
-            dataType: "json",
-            contentType: "application/json",
-            url: "../../api/FinalistScheduleParameters",
-            data: dataToUpload,
-            success: function(result) {
-                if (result.success) {
-                    successCallback(result);
-                } else {
-                    failCallback(result);
-                }
+        return fetch("../../api/FinalistScheduleParameters", {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: dataToUpload
+        }).then(checkJsonResponse).then(function(result) {
+            if (result.success) {
+                successCallback(result);
+            } else {
+                failCallback(result);
             }
-        }).fail(function(result) {
+        }).catch(function(result) {
             failCallback(result);
         });
     };
@@ -1398,7 +1389,7 @@ const finalist_module = {}
      * @return promise to execute
      */
     finalist_module.loadFinalistSchedules = function() {
-        return $.getJSON("../../api/FinalistSchedule", function(data) {
+        return fetch("../../api/FinalistSchedule").then(checkJsonResponse).then(function(data) {
             for (const [awardGroup, schedule] of Object.entries(data)) {
                 for (const finalistCategory of schedule.categories) {
                     const category = finalist_module.getCategoryByName(finalistCategory.categoryName);
@@ -1457,20 +1448,17 @@ const finalist_module = {}
         }
 
         const dataToUpload = JSON.stringify(scheduleMap);
-        return $.ajax({
-            type: "POST",
-            dataType: "json",
-            contentType: "application/json",
-            url: "../../api/FinalistSchedule",
-            data: dataToUpload,
-            success: function(result) {
-                if (result.success) {
-                    successCallback(result);
-                } else {
-                    failCallback(result);
-                }
+        return fetch("../../api/FinalistSchedule", {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: dataToUpload
+        }).then(checkJsonResponse).then(function(result) {
+            if (result.success) {
+                successCallback(result);
+            } else {
+                failCallback(result);
             }
-        }).fail(function(result) {
+        }).catch(function(result) {
             failCallback(result);
         });
     };
@@ -1481,7 +1469,7 @@ const finalist_module = {}
       * @return promise to execute
       */
     finalist_module.loadAwardGroups = function() {
-        return $.getJSON("../../api/AwardGroups", function(data) {
+        return fetch("../../api/AwardGroups").then(checkJsonResponse).then(function(data) {
             for (const awardGroup of data) {
                 finalist_module.addDivision(awardGroup);
             }
@@ -1494,7 +1482,7 @@ const finalist_module = {}
       * @return promise to execute
       */
     finalist_module.loadPlayoffBrackets = function() {
-        return $.getJSON("../../api/PlayoffBrackets", function(data) {
+        return fetch("../../api/PlayoffBrackets").then(checkJsonResponse).then(function(data) {
             for (const bracket of data) {
                 finalist_module.addPlayoffDivision(bracket);
             }
@@ -1508,7 +1496,7 @@ const finalist_module = {}
       * @return promise to execute
       */
     finalist_module.loadNumericCategories = function() {
-        return $.getJSON("../../api/ChallengeDescription/SubjectiveCategories", function(subjectiveCategories) {
+        return fetch("../../api/ChallengeDescription/SubjectiveCategories").then(checkJsonResponse).then(function(subjectiveCategories) {
             for (const categoryDescription of subjectiveCategories) {
                 const category = finalist_module.getCategoryByName(categoryDescription.title);
                 if (null == category) {
@@ -1533,7 +1521,7 @@ const finalist_module = {}
       * @return promise to execute
       */
     finalist_module.loadNonNumericCategories = function() {
-        return $.getJSON("../../api/ChallengeDescription/NonNumericCategories", function(nonNumericCategories) {
+        return fetch("../../api/ChallengeDescription/NonNumericCategories").then(checkJsonResponse).then(function(nonNumericCategories) {
             for (const categoryDescription of nonNumericCategories) {
                 const category = finalist_module.getCategoryByName(categoryDescription.title);
                 if (null == category) {
@@ -1549,7 +1537,7 @@ const finalist_module = {}
     * @return promise to execute
     */
     finalist_module.loadTournamentTeams = function() {
-        return $.getJSON("../../api/TournamentTeams", function(data) {
+        return fetch("../../api/TournamentTeams").then(checkJsonResponse).then(function(data) {
             for (const tournamentTeam of data) {
                 let team = finalist_module.lookupTeam(tournamentTeam.teamNumber);
                 if (null == team) {
@@ -1566,7 +1554,7 @@ const finalist_module = {}
     * @return promise to execute
     */
     finalist_module.loadPlayoffBracketTeams = function() {
-        return $.getJSON("../../api/PlayoffBracketTeams", function(data) {
+        return fetch("../../api/PlayoffBracketTeams").then(checkJsonResponse).then(function(data) {
             for (const [playoffBracket, teams] of Object.entries(data)) {
                 for (const teamNumber of teams) {
                     const team = finalist_module.lookupTeam(teamNumber);
@@ -1585,7 +1573,7 @@ const finalist_module = {}
      * @return promise to execute
      */
     finalist_module.loadOverallScores = function() {
-        return $.getJSON("../../api/OverallScores", function(data) {
+        return fetch("../../api/OverallScores").then(checkJsonResponse).then(function(data) {
             const championship = finalist_module
                 .getCategoryByName(finalist_module.CHAMPIONSHIP_NAME);
             if (null == championship) {
@@ -1609,7 +1597,7 @@ const finalist_module = {}
      * @return promise to execute
      */
     finalist_module.loadCategoryScores = function() {
-        return $.getJSON("../../api/NumericCategoryScores", function(data) {
+        return fetch("../../api/NumericCategoryScores").then(checkJsonResponse).then(function(data) {
             for (const [categoryName, categoryScores] of Object.entries(data)) {
                 const category = finalist_module.getCategoryByName(categoryName);
                 if (null == category) {
@@ -1632,7 +1620,7 @@ const finalist_module = {}
      * Load the current tournament name.
      */
     finalist_module.loadCurrentTournament = function() {
-        return $.getJSON("../../api/Tournaments/current", function(tournament) {
+        return fetch("../../api/Tournaments/current").then(checkJsonResponse).then(function(tournament) {
             finalist_module.setTournament(tournament.name);
         });
     };
@@ -1644,12 +1632,12 @@ const finalist_module = {}
         const waitList = [];
 
         const loadCurrentTournamentPromise = finalist_module.loadCurrentTournament();
-        loadCurrentTournamentPromise.fail(function() {
+        loadCurrentTournamentPromise.catch(function() {
             failCallback("Current tournament");
         })
         waitList.push(loadCurrentTournamentPromise);
 
-        $.when.apply($, waitList).done(function() {
+        Promise.all(waitList).then(function(_) {
             doneCallback();
         });
     };
@@ -1660,59 +1648,59 @@ const finalist_module = {}
         const waitList1 = [];
 
         const teamsPromise = finalist_module.loadTournamentTeams();
-        teamsPromise.fail(function() {
+        teamsPromise.catch(function() {
             failCallback("Teams");
-        })
+        });
         waitList1.push(teamsPromise);
 
         const numericCategoriesPromise = finalist_module.loadNumericCategories();
-        numericCategoriesPromise.fail(function() {
+        numericCategoriesPromise.catch(function() {
             failCallback("Numeric categories");
         });
         waitList1.push(numericCategoriesPromise);
 
         const nonNumericCategoriesPromise = finalist_module.loadNonNumericCategories();
-        nonNumericCategoriesPromise.fail(function() {
+        nonNumericCategoriesPromise.catch(function() {
             failCallback("Non-Numeric categories");
         });
         waitList1.push(nonNumericCategoriesPromise);
 
         const awardGroupsPromise = finalist_module.loadAwardGroups();
-        awardGroupsPromise.fail(function() {
+        awardGroupsPromise.catch(function() {
             failCallback("Award Groups");
         })
         waitList1.push(awardGroupsPromise);
 
         const playoffBracketsPromise = finalist_module.loadPlayoffBrackets();
-        playoffBracketsPromise.fail(function() {
+        playoffBracketsPromise.catch(function() {
             failCallback("Playoff Brackets");
         })
         waitList1.push(playoffBracketsPromise);
 
-        $.when.apply($, waitList1).done(function() {
 
+        Promise.all(waitList1).then(function(_) {
             // everything else can be loaded in parallel
             const waitList = [];
 
             const overallScoresPromise = finalist_module.loadOverallScores();
-            overallScoresPromise.fail(function() {
+            overallScoresPromise.catch(function() {
                 failCallback("Overall scores");
             })
             waitList.push(overallScoresPromise);
 
             const numericCategoryScoresPromise = finalist_module.loadCategoryScores();
-            numericCategoryScoresPromise.fail(function() {
+            numericCategoryScoresPromise.catch(function() {
                 failCallback("Numeric category scores");
             })
             waitList.push(numericCategoryScoresPromise);
 
             const playoffBracketTeamsPromise = finalist_module.loadPlayoffBracketTeams();
-            playoffBracketTeamsPromise.fail(function() {
+            playoffBracketTeamsPromise.catch(function() {
                 failCallback("Playoff bracket teams");
             })
             waitList.push(playoffBracketTeamsPromise);
 
-            $.when.apply($, waitList).done(function() {
+            Promise.all(waitList1).then(function(_) {
                 doneCallback();
             });
 
@@ -1729,30 +1717,30 @@ const finalist_module = {}
         const waitList = [];
 
         const playoffSchedulesPromise = finalist_module.loadPlayoffSchedules();
-        playoffSchedulesPromise.fail(function() {
+        playoffSchedulesPromise.catch(function() {
             failCallback("Playoff Schedules");
         })
         waitList.push(playoffSchedulesPromise);
 
         const finalistParamsPromise = finalist_module.loadFinalistScheduleParameters();
-        finalistParamsPromise.fail(function() {
+        finalistParamsPromise.catch(function() {
             failCallback("Finalist Schedule Parameters");
         })
         waitList.push(finalistParamsPromise);
 
         const finalistSchedulesPromise = finalist_module.loadFinalistSchedules();
-        finalistSchedulesPromise.fail(function() {
+        finalistSchedulesPromise.catch(function() {
             failCallback("Finalist Schedules");
         })
         waitList.push(finalistSchedulesPromise);
 
         const nonNumericNomineesPromise = finalist_module.loadNonNumericNominees();
-        nonNumericNomineesPromise.fail(function() {
+        nonNumericNomineesPromise.catch(function() {
             failCallback("Non-numeric nominees");
         })
         waitList.push(nonNumericNomineesPromise);
 
-        $.when.apply($, waitList).done(function() {
+        Promise.all(waitList).then(function(_) {
             doneCallback();
         });
     };
