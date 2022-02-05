@@ -549,6 +549,8 @@ const finalist_module = {}
 
     /**
      * Get all teams.
+     *
+     * @return Array of teams
      */
     finalist_module.getAllTeams = function() {
         const teams = [];
