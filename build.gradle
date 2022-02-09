@@ -48,7 +48,6 @@ ext.snapshotSuffix = "beta.<count>+g<sha><dirty>"
 apply plugin: "com.cinnober.gradle.semver-git"
 
 repositories {
-    mavenLocal()
     mavenCentral()
     maven {
       url "https://repo.mtu.net/releases"
