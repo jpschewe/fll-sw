@@ -268,9 +268,9 @@ const finalistScheduleModule = {};
         waitList.push(finalist_module.uploadNonNumericNominees(
             nonNumericSuccess, nonNumericFail));
 
-        $("#wait-dialog").dialog("open");
+        document.getElementById("wait-dialog").style.visibility = "visible";
         $.when.apply($, waitList).done(function() {
-            $("#wait-dialog").dialog("close");
+            document.getElementById("wait-dialog").style.visibility = "hidden";
         });
     }
 
@@ -532,13 +532,6 @@ const finalistScheduleModule = {};
                 function() {
                     uploadData();
                 });
-
-            $("#wait-dialog").dialog({
-                autoOpen: false,
-                modal: true,
-                dialogClass: "no-close",
-                closeOnEscape: false
-            });
 
             finalist_module.displayNavbar();
         });
