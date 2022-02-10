@@ -1004,7 +1004,8 @@ const finalist_module = {}
      */
     finalist_module.addSlotToSchedule = function(schedule) {
         const lastRow = schedule[schedule.length - 1];
-        const newRow = new FinalistDBRow(lastRow.endTime, lastRow.endTime.plus(finalist_module.getDuration(finalist_module.getCurrentDivision())));
+        const duration = JSJoda.Duration.ofMinutes(finalist_module.getDuration(finalist_module.getCurrentDivision()));
+        const newRow = new FinalistDBRow(lastRow.endTime, lastRow.endTime.plus(duration));
         schedule.push(newRow);
 
         return newRow;
