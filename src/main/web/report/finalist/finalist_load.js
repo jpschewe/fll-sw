@@ -23,7 +23,7 @@ const finalistScheduleLoad = {}
                     // success
                     waitDialog.style.visibility = "hidden";
                     finalist_module.saveToLocalStorage();
-                    location.href = "params.html";
+                    window.location.assign("params.html");
                 }, function(msg) {
                     // error
                     waitDialog.style.visibility = "hidden";
@@ -49,7 +49,7 @@ const finalistScheduleLoad = {}
             // success
             waitDialog.style.visibility = "hidden";
             finalist_module.saveToLocalStorage();
-            location.href = "params.html";
+            window.location.assign("params.html");
         }, function(msg) {
             // error
             waitDialog.style.visibility = "hidden";
