@@ -861,7 +861,7 @@ const finalist_module = {}
 
     finalist_module.isTeamInTimeslot = function(timeslot, teamNum) {
         let found = false;
-        for (const slotTeamNum of timeslot.categories) {
+        for (const [_, slotTeamNum] of Object.entries(timeslot.categories)) {
             if (teamNum == slotTeamNum) {
                 found = true;
             }
