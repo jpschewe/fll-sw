@@ -107,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
     divisions.forEach(function(division, i) {
         const divisionOption = document.createElement("option");
         divisionOption.setAttribute("value", i);
+        divisionOption.innerText = division;
         if (division == finalist_module.getCurrentDivision()) {
             divisionOption.setAttribute("selected", "true");
         }
