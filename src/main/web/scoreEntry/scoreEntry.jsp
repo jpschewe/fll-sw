@@ -97,11 +97,16 @@ function check_restrictions() {
   
 <%ScoreEntry.generateCheckRestrictionsBody(out, application);%>
 
+  const submitScoreButton = document.getElementById("submit_score")
   if(error_found) {
-    document.getElementById("submit_score").disabled = true;
+    if(submitScoreButton) {
+      submitScoreButton.disabled = true;
+    }
     document.getElementById("score-errors").style.visibility = "visible";
   } else {
-    document.getElementById("submit_score").disabled = false;
+    if(submitScoreButton) {
+      submitScoreButton.disabled = false;
+    }
     document.getElementById("score-errors").style.visibility = "hidden";
   }
 }
