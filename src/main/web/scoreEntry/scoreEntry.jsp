@@ -46,17 +46,10 @@ body {
     background-color: red;
 }
 </style>
-
-<script
-  type="text/javascript"
-  src="<c:url value='/extlib/jquery-1.11.1.min.js' />"></script>
-
-<link rel="stylesheet"
-    type="text/css"
-    href="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.css' />" />
-
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.js' />"></script>
+    
+<script type='text/javascript' src="<c:url value='/js/fll-functions.js'/>"></script>
+<script type='text/javascript' src="<c:url value='/js/fll-objects.js'/>"></script>
+    
 
 <c:if test="${not showScores}">
     <link rel="stylesheet" type="text/css" href="hide-score.css" />
@@ -100,16 +93,16 @@ function refresh() {
 
 function check_restrictions() {
   var error_found = false;
-  $("#score-errors").empty();
+  removeChildren(document.getElementById("score-errors"));
   
 <%ScoreEntry.generateCheckRestrictionsBody(out, application);%>
 
   if(error_found) {
-    $("#submit_score").attr('disabled', true);
-    $("#score-errors").show();
+    document.getElementById("submit_score").disabled = true;
+    document.getElementById("score-errors").style.visibility = "visible";
   } else {
-    $("#submit_score").attr('disabled', false);
-    $("#score-errors").hide();
+    document.getElementById("submit_score").disabled = false;
+    document.getElementById("score-errors").style.visibility = "hidden";
   }
 }
 
@@ -379,8 +372,12 @@ document.addEventListener('DOMContentLoaded', function() {
   </form>
   <!-- end score entry form -->
 
-    <div id="yesno-dialog">
-        <p id='yesno-dialog_text'></p>
+    <div class="dialog" id="yesno-dialog">
+        <div>
+            <p id='yesno-dialog_text'></p>
+            <button type='button' id='yesno-dialog_yes'>Yes</button>
+            <button type='button' id='yesno-dialog_no'>No</button>
+        </div>
     </div>
     
     <div>Challenge revision: ${challengeDescription.revision}</div>
