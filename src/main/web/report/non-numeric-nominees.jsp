@@ -13,14 +13,7 @@
 <title>Non-Numeric Nominees</title>
 
 <script type='text/javascript'
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-<script type='text/javascript'
     src="<c:url value='/extlib/js-joda/packages/core/dist/js-joda.min.js'/>"></script>
-
-<link rel="stylesheet" type="text/css"
-    href="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.css'/>" />
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.js'/>"></script>
 
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js'/>"></script>
@@ -63,7 +56,9 @@
 
     <button id="nominees_store">Store Nominees</button>
 
-    <div id="wait-dialog">
-        <p id='wait-dialog_text'>Loading data. Please wait...</p>
+    <div class="dialog" id="wait-dialog">
+        <div>
+            <p id='wait-dialog_text'>Loading data. Please wait...</p>
+        </div>
     </div>
 </html>

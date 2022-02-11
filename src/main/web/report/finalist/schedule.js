@@ -36,52 +36,62 @@ const finalistScheduleModule = {};
      * @return the cell or null if not found
      */
     function getCellForTimeAndCategory(searchTime, searchCatName) {
-        const searchTimeStr = $.finalist.timeToDisplayString(searchTime);
+        const searchTimeStr = finalist_module.timeToDisplayString(searchTime);
 
         let foundCell = null;
 
-        $.each(timeToCells, function(timeStr, categoryToCells) {
+        for (const [timeStr, categoryToCells] of Object.entries(timeToCells)) {
             if (searchTimeStr == timeStr) {
 
-                $.each(categoryToCells, function(catName, cell) {
+                for (const [catName, cell] of Object.entries(categoryToCells)) {
                     if (catName == searchCatName) {
                         foundCell = cell;
                     }
-                });
-
+                }
             }
-        });
+        }
 
         return foundCell;
     }
 
     function handleDivisionChange() {
-        const divIndex = $("#divisions").val();
-        const div = $.finalist.getDivisionByIndex(divIndex);
-        $.finalist.setCurrentDivision(div);
+        const divIndex = document.getElementById("divisions").value;
+        const div = finalist_module.getDivisionByIndex(divIndex);
+        finalist_module.setCurrentDivision(div);
         updatePage();
-        $.finalist.saveToLocalStorage();
+        finalist_module.saveToLocalStorage();
     }
 
     function updateHeader() {
-        const headerRow = $("#schedule_header");
-        headerRow.empty();
+        const headerRow = document.getElementById("schedule_header");
+        removeChildren(headerRow);
 
-        headerRow.append($("<div class='rTableHead'>Time Slot</div>"));
+        const timeSlotHeader = document.createElement("div");
+        headerRow.appendChild(timeSlotHeader);
+        timeSlotHeader.classList.add("rTableHead");
+        timeSlotHeader.innerText = "Time Slot";
 
-        headerRow.append($("<div class='rTableHead'>Head to Head</div>"));
+        const h2hHeader = document.createElement("div");
+        headerRow.appendChild(h2hHeader);
+        h2hHeader.classList.add("rTableHead");
+        h2hHeader.innerText = "Head to Head";
 
-        $.each($.finalist.getAllScheduledCategories(), function(_, category) {
-            const room = $.finalist.getRoom(category, $.finalist.getCurrentDivision());
-            let header;
-            if (room == undefined || "" == room) {
-                header = $("<div class='rTableHead'>" + category.name + "</div>");
-            } else {
-                header = $("<div class='rTableHead'>" + category.name + "<br/>Room: "
-                    + room + "</div>");
+        for (const category of finalist_module.getAllScheduledCategories()) {
+            const room = finalist_module.getRoom(category, finalist_module.getCurrentDivision());
+            const header = document.createElement("div");
+            headerRow.appendChild(header);
+            header.classList.add("rTableHead");
+
+            const categoryNameEle = document.createElement("div");
+            header.appendChild(categoryNameEle);
+            categoryNameEle.innerText = category.name;
+
+            if (room != undefined && "" != room) {
+                const roomEle = document.createElement("div");
+                categoryNameEle.appendChild(roomEle);
+                roomEle.innerText = "Room: " + room;
             }
-            headerRow.append(header);
-        });
+        }
     }
 
     /**
@@ -91,16 +101,17 @@ const finalistScheduleModule = {};
      *          a Team object
      * @param category
      *          a Category object
-     * @returns a jquery div object
+     * @returns an HTML div element for the team
      */
     function createTeamDiv(team, category) {
         const teamCategories = finalistsCount[team.num];
         const numCategories = teamCategories.length;
         const group = team.judgingGroup;
-        const teamDiv = $("<div draggable='true'>" + team.num + " - " + team.name
-            + " (" + group + ", " + numCategories + ")</div>");
+        const teamDiv = document.createElement("div");
+        teamDiv.setAttribute("draggable", "true");
+        teamDiv.innerText = team.num + " - " + team.name + " (" + group + ", " + numCategories + ")";
 
-        teamDiv.on('dragstart', function(e) {
+        teamDiv.addEventListener('dragstart', function(e) {
             let rawEvent;
             if (e.originalEvent) {
                 rawEvent = e.originalEvent;
@@ -109,7 +120,7 @@ const finalistScheduleModule = {};
             }
             // rawEvent.target is the source node.
 
-            $(teamDiv).css('opacity', '0.4');
+            teamDiv.style.opacity = 0.4;
 
             const dataTransfer = rawEvent.dataTransfer;
 
@@ -122,9 +133,10 @@ const finalistScheduleModule = {};
             // need something to transfer, otherwise the browser won't let us drag
             dataTransfer.setData('text/text', "true");
         });
-        teamDiv.on('dragend', function(_) {
+
+        teamDiv.addEventListener('dragend', function(_) {
             // rawEvent.target is the source node.
-            $(teamDiv).css('opacity', '1');
+            teamDiv.style.opacity = 1;
         });
 
         return teamDiv;
@@ -136,12 +148,13 @@ const finalistScheduleModule = {};
      *          Timeslot object
      * @param category
      *          Category object
-     * @returns jquery div object
+     * @returns HTML div element
      */
     function createTimeslotCell(slot, category) {
-        const cell = $("<div class='rTableCell'></div>");
+        const cell = document.createElement("div");
+        cell.classList.add("rTableCell");
 
-        cell.on('dragover', function(e) {
+        cell.addEventListener('dragover', function(e) {
             let rawEvent;
             if (e.originalEvent) {
                 rawEvent = e.originalEvent;
@@ -166,7 +179,7 @@ const finalistScheduleModule = {};
             }
         });
 
-        cell.on('drop', function(e) {
+        cell.addEventListener('drop', function(e) {
             let rawEvent;
             if (e.originalEvent) {
                 rawEvent = e.originalEvent;
@@ -180,15 +193,15 @@ const finalistScheduleModule = {};
                 rawEvent.stopPropagation(); // Stops some browsers from redirecting.
             }
 
-            if (cell.children().length > 0) {
+            if (cell.children.length > 0) {
                 // move current team to old parent
-                const oldTeamDiv = cell.children().first();
-                const draggingParent = draggingTeamDiv.parent();
-                draggingParent.append(oldTeamDiv);
+                const oldTeamDiv = cell.children.item(0);
+                const draggingParent = draggingTeamDiv.parentElement;
+                draggingParent.appendChild(oldTeamDiv);
             }
 
             // Add team to the current cell
-            cell.append(draggingTeamDiv);
+            cell.appendChild(draggingTeamDiv);
 
             // updates the schedule
             moveTeam(draggingTeam, draggingCategory, slot);
@@ -217,7 +230,7 @@ const finalistScheduleModule = {};
 
             alert("Playoff schedules upload failure: " + message);
         }
-        waitList.push($.finalist.uploadPlayoffSchedules(
+        waitList.push(finalist_module.uploadPlayoffSchedules(
             playoffSchedulesSuccess, playoffSchedulesFail));
 
         const scheduleParamsSuccess = function(_) {
@@ -233,7 +246,7 @@ const finalistScheduleModule = {};
 
             alert("Schedule parameters upload failure: " + message);
         }
-        waitList.push($.finalist.uploadScheduleParameters(
+        waitList.push(finalist_module.uploadScheduleParameters(
             scheduleParamsSuccess, scheduleParamsFail));
 
         const schedulesSuccess = function(_) {
@@ -249,7 +262,7 @@ const finalistScheduleModule = {};
 
             alert("Schedules upload failure: " + message);
         }
-        waitList.push($.finalist.uploadSchedules(
+        waitList.push(finalist_module.uploadSchedules(
             schedulesSuccess, schedulesFail));
 
         const nonNumericSuccess = function(_) {
@@ -265,12 +278,12 @@ const finalistScheduleModule = {};
 
             alert("Non-numeric nominees upload failure: " + message);
         }
-        waitList.push($.finalist.uploadNonNumericNominees(
+        waitList.push(finalist_module.uploadNonNumericNominees(
             nonNumericSuccess, nonNumericFail));
 
-        $("#wait-dialog").dialog("open");
-        $.when.apply($, waitList).done(function() {
-            $("#wait-dialog").dialog("close");
+        document.getElementById("wait-dialog").style.visibility = "visible";
+        Promise.all(waitList).then(function() {
+            document.getElementById("wait-dialog").style.visibility = "hidden";
         });
     }
 
@@ -291,13 +304,13 @@ const finalistScheduleModule = {};
         let srcSlot = null;
 
         // remove team from all slots with this category
-        $.each(schedule, function(_, slot) {
+        for (const slot of schedule) {
             let foundTeam = false;
-            $.each(slot.categories, function(categoryName, teamNumber) {
+            for (const [categoryName, teamNumber] of Object.entries(slot.categories)) {
                 if (categoryName == category.name && teamNumber == team.num) {
                     foundTeam = true;
                 }
-            }); // foreach category
+            } // foreach category
 
             if (slot.time.equals(newSlot.time)) {
                 destSlot = slot;
@@ -306,7 +319,7 @@ const finalistScheduleModule = {};
             if (foundTeam) {
                 srcSlot = slot;
             }
-        }); // foreach timeslot
+        } // foreach timeslot
 
         if (null == destSlot) {
             alert("Internal error, can't find destination slot in schedule");
@@ -320,15 +333,15 @@ const finalistScheduleModule = {};
 
         // remove warning from source cell as it may become empty
         const srcCell = getCellForTimeAndCategory(srcSlot.time, category.name);
-        srcCell.removeClass("overlap-schedule");
-        srcCell.removeClass("overlap-playoff");
+        srcCell.classList.remove("overlap-schedule");
+        srcCell.classList.remove("overlap-playoff");
 
         if (null == destSlot.categories[category.name]) {
             // no team in the destination, just delete this team from the old slot
             delete srcSlot.categories[category.name];
         } else {
             const oldTeamNumber = destSlot.categories[category.name];
-            const oldTeam = $.finalist.lookupTeam(oldTeamNumber);
+            const oldTeam = finalist_module.lookupTeam(oldTeamNumber);
 
             // clear the destination slot so that the warning check sees the correct
             // state for this team
@@ -343,8 +356,8 @@ const finalistScheduleModule = {};
             // check old position to clear warnings
             checkForTimeOverlap(destSlot, oldTeamNumber);
 
-            if ($.finalist.hasPlayoffConflict(oldTeam, srcSlot)) {
-                srcCell.addClass("overlap-playoff");
+            if (finalist_module.hasPlayoffConflict(oldTeam, srcSlot)) {
+                srcCell.classList.add("overlap-playoff");
             }
         }
 
@@ -360,8 +373,8 @@ const finalistScheduleModule = {};
         // need to check where the team was to clear the warning
         checkForTimeOverlap(srcSlot, team.num);
 
-        $.finalist.setSchedule($.finalist.getCurrentDivision(), schedule);
-        $.finalist.saveToLocalStorage();
+        finalist_module.setSchedule(finalist_module.getCurrentDivision(), schedule);
+        finalist_module.saveToLocalStorage();
     }
 
     /**
@@ -374,35 +387,35 @@ const finalistScheduleModule = {};
      *          the team number to check for
      */
     function checkForTimeOverlap(slot, teamNumber) {
-        const team = $.finalist.lookupTeam(teamNumber);
+        const team = finalist_module.lookupTeam(teamNumber);
 
         let numCategories = 0;
-        $.each(slot.categories, function(_, checkTeamNumber) {
+        for (const [_, checkTeamNumber] of Object.entries(slot.categories)) {
             if (checkTeamNumber == teamNumber) {
                 numCategories = numCategories + 1;
             }
-        });
+        }
 
-        const hasPlayoffConflict = $.finalist.hasPlayoffConflict(team, slot);
+        const hasPlayoffConflict = finalist_module.hasPlayoffConflict(team, slot);
 
-        $.each(slot.categories, function(name, checkTeamNumber) {
+        for (const [name, checkTeamNumber] of Object.entries(slot.categories)) {
             if (checkTeamNumber == teamNumber) {
                 const cell = getCellForTimeAndCategory(slot.time, name);
                 if (null != cell) {
                     if (numCategories > 1) {
-                        cell.addClass('overlap-schedule');
+                        cell.classList.add('overlap-schedule');
                         /*
                          * alert("Found " + teamNumber + " in multiple categories at the same
                          * time");
                          */
                     } else {
-                        cell.removeClass('overlap-schedule');
+                        cell.classList.remove('overlap-schedule');
                     }
 
                     if (hasPlayoffConflict) {
-                        cell.addClass('overlap-playoff');
+                        cell.classList.add('overlap-playoff');
                     } else {
-                        cell.removeClass('overlap-playoff');
+                        cell.classList.remove('overlap-playoff');
                     }
 
                 } // found cell
@@ -412,7 +425,7 @@ const finalistScheduleModule = {};
                     return;
                 }
             } // team number matches
-        });
+        }
 
     }
 
@@ -420,49 +433,55 @@ const finalistScheduleModule = {};
      * Add a row to the schedule table for the specified slot.
      */
     function addRowForSlot(slot) {
-        const row = $("<div class='rTableRow'></div>");
-        $("#schedule_body").append(row);
+        const row = document.createElement("div");
+        row.classList.add("rTableRow");
+        document.getElementById("schedule_body").appendChild(row);
 
-        row.append($("<div class='rTableCell'>"
-            + $.finalist.timeToDisplayString(slot.time) + "</div>"));
+        const timeCell = document.createElement("div");
+        row.appendChild(timeCell);
+        timeCell.classList.add("rTableCell");
+        timeCell.innerText = finalist_module.timeToDisplayString(slot.time);
 
-        const playoffCell = $("<div class='rTableCell'></div>");
-        row.append(playoffCell);
+        const playoffCell = document.createElement("div");
+        row.appendChild(playoffCell);
+        playoffCell.classList.add("rTableCell");
+        let text = "";
         let first = true;
-        $.each($.finalist.getPlayoffSchedules(), function(bracketName, playoffSchedule) {
-            if ($.finalist.slotHasPlayoffConflict(playoffSchedule, slot)) {
+        for (const [bracketName, playoffSchedule] of Object.entries(finalist_module.getPlayoffSchedules())) {
+            if (finalist_module.slotHasPlayoffConflict(playoffSchedule, slot)) {
                 if (first) {
                     first = false;
                 } else {
-                    playoffCell.append(",");
+                    text = text + ",";
                 }
-                playoffCell.append(bracketName);
+                text = text + bracketName;
             }
-        });
+        }
+        playoffCell.innerText = text;
 
         const categoriesToCells = {};
         const teamsInSlot = {};
-        $.each($.finalist.getAllScheduledCategories(), function(_, category) {
+        for (const category of finalist_module.getAllScheduledCategories()) {
             const cell = createTimeslotCell(slot, category);
-            row.append(cell);
+            row.appendChild(cell);
 
             categoriesToCells[category.name] = cell;
 
             const teamNum = slot.categories[category.name];
             if (teamNum != null) {
-                const team = $.finalist.lookupTeam(teamNum);
+                const team = finalist_module.lookupTeam(teamNum);
                 const teamDiv = createTeamDiv(team, category);
-                cell.append(teamDiv);
+                cell.appendChild(teamDiv);
                 teamsInSlot[teamNum] = true;
             }
-        }); // foreach category
+        } // foreach category
 
-        timeToCells[$.finalist.timeToDisplayString(slot.time)] = categoriesToCells;
+        timeToCells[finalist_module.timeToDisplayString(slot.time)] = categoriesToCells;
 
         // now check for overlaps in the loaded schedule
-        $.each(teamsInSlot, function(teamNum, _) {
+        for (const [teamNum, _] of Object.entries(teamsInSlot)) {
             checkForTimeOverlap(slot, teamNum);
-        });
+        }
     }
 
     function updatePage() {
@@ -470,76 +489,68 @@ const finalistScheduleModule = {};
         // output header
         updateHeader();
 
-        const currentDivision = $.finalist.getCurrentDivision()
-        schedule = $.finalist.getSchedule(currentDivision);
+        const currentDivision = finalist_module.getCurrentDivision()
+        schedule = finalist_module.getSchedule(currentDivision);
         if (null == schedule || 0 == schedule.length) {
-            schedule = $.finalist.scheduleFinalists(currentDivision);
-            $.finalist.setSchedule(currentDivision, schedule);
-            $.finalist.saveToLocalStorage();
+            schedule = finalist_module.scheduleFinalists(currentDivision);
+            finalist_module.setSchedule(currentDivision, schedule);
+            finalist_module.saveToLocalStorage();
         }
 
-        finalistsCount = $.finalist.getTeamToCategoryMap($.finalist
+        finalistsCount = finalist_module.getTeamToCategoryMap(finalist_module
             .getCurrentDivision());
 
-        $("#schedule_body").empty();
-        $.each(schedule, function(_, slot) {
+        removeChildren(document.getElementById("schedule_body"));
+        for (const slot of schedule) {
             addRowForSlot(slot);
-        }); // foreach timeslot
+        } // foreach timeslot
     }
 
-    $(document).ready(
-        function() {
-            $.finalist.loadFromLocalStorage();
+    document.addEventListener("DOMContentLoaded", function() {
+        finalist_module.loadFromLocalStorage();
 
-            $("#previous").click(
-                function() {
-                    const championshipCategory = $.finalist
-                        .getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
-                    $.finalist.setCurrentCategoryName(championshipCategory.name);
-                    $.finalist.saveToLocalStorage();
-                    location.href = "numeric.html";
-                });
-
-            $("#divisions").empty();
-            $.each($.finalist.getDivisions(), function(i, division) {
-                let selected = "";
-                if (division == $.finalist.getCurrentDivision()) {
-                    selected = " selected ";
-                }
-                const divisionOption = $("<option value='" + i + "'" + selected + ">"
-                    + division + "</option>");
-                $("#divisions").append(divisionOption);
-            }); // foreach division
-            $("#divisions").change(function() {
-                handleDivisionChange();
-            });
-
-            // force an update to generate the initial page
-            handleDivisionChange();
-
-            $('#regenerate_schedule').click(function() {
-                $.finalist.setSchedule($.finalist.getCurrentDivision(), null);
-                $.finalist.saveToLocalStorage();
-                updatePage();
-            });
-
-            $('#add_timeslot').click(function() {
-                const newSlot = $.finalist.addSlotToSchedule(schedule);
-                addRowForSlot(newSlot);
-            });
-
-            $("#upload").click(
-                function() {
-                    uploadData();
-                });
-
-            $("#wait-dialog").dialog({
-                autoOpen: false,
-                modal: true,
-                dialogClass: "no-close",
-                closeOnEscape: false
-            });
-
-            $.finalist.displayNavbar();
+        document.getElementById("previous").addEventListener("click", function() {
+            const championshipCategory = finalist_module
+                .getCategoryByName(finalist_module.CHAMPIONSHIP_NAME);
+            finalist_module.setCurrentCategoryName(championshipCategory.name);
+            finalist_module.saveToLocalStorage();
+            location.href = "numeric.html";
         });
+
+        const divisionsElement = document.getElementById("divisions");
+        removeChildren(divisionsElement);
+        finalist_module.getDivisions().forEach(function(division, i) {
+            const divisionOption = document.createElement("option");
+            divisionOption.setAttribute("value", i);
+            divisionOption.innerText = division;
+            if (division == finalist_module.getCurrentDivision()) {
+                divisionOption.selected = true;
+            }
+
+            divisionsElement.appendChild(divisionOption);
+        }); // foreach division
+        divisionsElement.addEventListener("change", function() {
+            handleDivisionChange();
+        });
+
+        // force an update to generate the initial page
+        handleDivisionChange();
+
+        document.getElementById('regenerate_schedule').addEventListener("click", function() {
+            finalist_module.setSchedule(finalist_module.getCurrentDivision(), null);
+            finalist_module.saveToLocalStorage();
+            updatePage();
+        });
+
+        document.getElementById('add_timeslot').addEventListener("click", function() {
+            const newSlot = finalist_module.addSlotToSchedule(schedule);
+            addRowForSlot(newSlot);
+        });
+
+        document.getElementById("upload").addEventListener("click", function() {
+            uploadData();
+        });
+
+        finalist_module.displayNavbar();
+    });
 }

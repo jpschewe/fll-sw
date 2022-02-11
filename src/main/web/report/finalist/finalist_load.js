@@ -9,93 +9,93 @@ const finalistScheduleLoad = {}
 {
 
     function clearAndLoad() {
-        $.finalist.clearAllData();
+        const waitDialog = document.getElementById("wait-dialog");
+
+        finalist_module.clearAllData();
 
         // need to load the tournament again since everything was just cleared
-        $.finalist.loadTournament(function() {
+        finalist_module.loadTournament(function() {
             // success            
 
-            $.finalist.loadCategoriesAndScores(function() {
+            finalist_module.loadCategoriesAndScores(function() {
                 // success
-                $.finalist.loadNominieesAndSchedules(function() {
+                finalist_module.loadNominieesAndSchedules(function() {
                     // success
-                    $("#wait-dialog").dialog("close");
-                    $.finalist.saveToLocalStorage();
-                    location.href = "params.html";
+                    waitDialog.style.visibility = "hidden";
+                    finalist_module.saveToLocalStorage();
+                    window.location.assign("params.html");
                 }, function(msg) {
                     // error
-                    $("#wait-dialog").dialog("close");
+                    waitDialog.style.visibility = "hidden";
                     alert("Failure loading nominees and schedules: " + msg);
                 });
             }, function(msg) {
                 // error
-                $("#wait-dialog").dialog("close");
+                waitDialog.style.visibility = "hidden";
                 alert("Failure loading categories and scores: " + msg);
             });
         }, function(msg) {
             // failure
-            $("#wait-dialog").dialog("close");
+            waitDialog.style.visibility = "hidden";
             alert("Failure loading current tournament: " + msg);
         });
 
     }
 
     function refreshData() {
-        $.finalist.loadCategoriesAndScores(function() {
+        const waitDialog = document.getElementById("wait-dialog");
+
+        finalist_module.loadCategoriesAndScores(function() {
             // success
-            $("#wait-dialog").dialog("close");
-            $.finalist.saveToLocalStorage();
-            location.href = "params.html";
+            waitDialog.style.visibility = "hidden";
+            finalist_module.saveToLocalStorage();
+            window.location.assign("params.html");
         }, function(msg) {
             // error
-            $("#wait-dialog").dialog("close");
+            waitDialog.style.visibility = "hidden";
             alert("Failure loading categories and scores: " + msg);
         });
     }
 
-    $(document).ready(function() {
-        $("#choose_clear").hide();
+    document.addEventListener('DOMContentLoaded', function() {
+        const waitDialog = document.getElementById("wait-dialog");
 
-        $("#clear").click(function() {
+        const chooseClear = document.getElementById("choose_clear");
+        chooseClear.style.visibility = "hidden";
+
+        document.getElementById("clear").addEventListener('click', function() {
             clearAndLoad();
         });
 
-        $("#keep").click(function() {
+        document.getElementById("keep").addEventListener('click', function() {
             refreshData();
         });
 
-        $("#wait-dialog").dialog({
-            autoOpen: false,
-            modal: true,
-            dialogClass: "no-close",
-            closeOnEscape: false
-        });
-
-        $("#wait-dialog").dialog("open");
+        waitDialog.style.visibility = "visible";
 
         // get current state before anything loads
-        $.finalist.loadFromLocalStorage();
-        const currentAllTeams = $.finalist.getAllTeams();
-        const currentTournament = $.finalist.getTournament();
+        finalist_module.loadFromLocalStorage();
+        const currentAllTeams = finalist_module.getAllTeams();
+        const currentTournament = finalist_module.getTournament();
 
-        $.finalist.loadTournament(function() {
+        finalist_module.loadTournament(function() {
             // success            
-            const loadingTournament = $.finalist.getTournament();
+            const loadingTournament = finalist_module.getTournament();
 
             if (null != currentAllTeams && currentAllTeams.length > 0) {
                 if (currentTournament != loadingTournament) {
                     _log("Clearing data for old tournament: " + currentTournament);
                     clearAndLoad();
                 } else {
-                    $("#wait-dialog").dialog("close");
-                    $("#choose_clear").show();
+                    waitDialog.style.visibility = "hidden";
+                    chooseClear.style.visibility = "visible";
                 }
             } else {
                 clearAndLoad();
             }
         }, function(msg) {
             // failure
-            $("#wait-dialog").dialog("close");
+            waitDialog.style.visibility = "hidden";
             alert("Failure loading current tournament: " + msg);
         });
 

@@ -40,15 +40,15 @@ const finalistParamsModule = {}
     finalistParamsModule.populateHeadToHeadTimes = function() {
         removeChildren(document.getElementById("head_head_times"));
 
-        const playoffSchedules = $.finalist.getPlayoffSchedules();
+        const playoffSchedules = finalist_module.getPlayoffSchedules();
         Object.keys(playoffSchedules).forEach(function(bracketName) {
             const playoffSchedule = playoffSchedules[bracketName];
             const startTimeElement = document.createElement("input");
             startTimeElement.setAttribute("type", "time");
             startTimeElement.addEventListener('change', function() {
                 const newLocalTime = finalistParamsModule.parseTime(this.value);
-                $.finalist.setPlayoffStartTime(bracketName, newLocalTime);
-                $.finalist.saveToLocalStorage();
+                finalist_module.setPlayoffStartTime(bracketName, newLocalTime);
+                finalist_module.saveToLocalStorage();
             });
             finalistParamsModule.setTimeField(startTimeElement, playoffSchedule.startTime);
 
@@ -57,8 +57,8 @@ const finalistParamsModule = {}
             endTimeElement.setAttribute("type", "time");
             endTimeElement.addEventListener('change', function() {
                 const newLocalTime = finalistParamsModule.parseTime(this.value);
-                $.finalist.setPlayoffEndTime(bracketName, newLocalTime);
-                $.finalist.saveToLocalStorage();
+                finalist_module.setPlayoffEndTime(bracketName, newLocalTime);
+                finalist_module.saveToLocalStorage();
             });
             finalistParamsModule.setTimeField(endTimeElement, playoffSchedule.endTime);
 
@@ -83,10 +83,10 @@ const finalistParamsModule = {}
     };
 
     finalistParamsModule.updateDivision = function() {
-        const startTime = $.finalist.getStartTime($.finalist.getCurrentDivision());
+        const startTime = finalist_module.getStartTime(finalist_module.getCurrentDivision());
         document.getElementById("startTime").value = startTime.format(TIME_FORMATTER);
 
-        const duration = $.finalist.getDuration($.finalist.getCurrentDivision());
+        const duration = finalist_module.getDuration(finalist_module.getCurrentDivision());
         finalistParamsModule.setDurationDisplay(duration);
     };
 
@@ -97,32 +97,33 @@ const finalistParamsModule = {}
 } // end scope for page
 
 document.addEventListener('DOMContentLoaded', function() {
-    $.finalist.loadFromLocalStorage();
+    finalist_module.loadFromLocalStorage();
 
     const divisionsElement = document.getElementById("divisions");
     removeChildren(divisionsElement)
 
-    const teams = $.finalist.getAllTeams();
-    const divisions = $.finalist.getDivisions();
+    const teams = finalist_module.getAllTeams();
+    const divisions = finalist_module.getDivisions();
     divisions.forEach(function(division, i) {
         const divisionOption = document.createElement("option");
         divisionOption.setAttribute("value", i);
-        if (division == $.finalist.getCurrentDivision()) {
+        divisionOption.innerText = division;
+        if (division == finalist_module.getCurrentDivision()) {
             divisionOption.setAttribute("selected", "true");
         }
         divisionsElement.appendChild(divisionOption);
 
         // initialize categories with the auto selected teams
-        const scoreGroups = $.finalist.getScoreGroups(teams, division);
-        const numericCategories = $.finalist.getNumericCategories();
+        const scoreGroups = finalist_module.getScoreGroups(teams, division);
+        const numericCategories = finalist_module.getNumericCategories();
         numericCategories.forEach(function(category, _) {
-            $.finalist.initializeTeamsInNumericCategory(division, category,
+            finalist_module.initializeTeamsInNumericCategory(division, category,
                 teams, scoreGroups);
-            $.finalist.saveToLocalStorage();
+            finalist_module.saveToLocalStorage();
         });// foreach numeric category
     }); // foreach division
 
-    $.finalist.setCurrentDivision($.finalist.getDivisionByIndex(divisionsElement.value));
+    finalist_module.setCurrentDivision(finalist_module.getDivisionByIndex(divisionsElement.value));
 
     // before change listeners to avoid loop
     finalistParamsModule.updateDivision();
@@ -130,32 +131,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById("startTime").addEventListener('change', function() {
         const newLocalTime = finalistParamsModule.parseTime(this.value);
-        $.finalist.setStartTime($.finalist.getCurrentDivision(), newLocalTime);
-        $.finalist.saveToLocalStorage();
+        finalist_module.setStartTime(finalist_module.getCurrentDivision(), newLocalTime);
+        finalist_module.saveToLocalStorage();
     });
 
     document.getElementById("duration").addEventListener('change', function() {
         const minutes = parseInt(this.value, 10);
         if (isNaN(minutes)) {
             alert("Duration must be an integer");
-            finalistParamsModule.setDurationDisplay($.finalist.getDuration($.finalist.getCurrentDivision()));
+            finalistParamsModule.setDurationDisplay(finalist_module.getDuration(finalist_module.getCurrentDivision()));
         } else if (minutes < 5) {
             alert("Duration must be at least 5 minutes");
-            finalistParamsModule.setDurationDisplay($.finalist.getDuration($.finalist.getCurrentDivision()));
+            finalistParamsModule.setDurationDisplay(finalist_module.getDuration(finalist_module.getCurrentDivision()));
         } else {
-            $.finalist.setDuration($.finalist.getCurrentDivision(), minutes);
+            finalist_module.setDuration(finalist_module.getCurrentDivision(), minutes);
         }
 
-        $.finalist.saveToLocalStorage();
+        finalist_module.saveToLocalStorage();
     });
 
     document.getElementById("divisions").addEventListener('change', function() {
         const divIndex = this.value;
-        const div = $.finalist.getDivisionByIndex(divIndex);
-        $.finalist.setCurrentDivision(div);
+        const div = finalist_module.getDivisionByIndex(divIndex);
+        finalist_module.setCurrentDivision(div);
         finalistParamsModule.updateDivision();
 
-        $.finalist.saveToLocalStorage();
+        finalist_module.saveToLocalStorage();
     });
 
     document.getElementById("next").addEventListener('click', function() {
@@ -164,8 +165,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     finalistParamsModule.populateHeadToHeadTimes();
 
-    $.finalist.saveToLocalStorage();
+    finalist_module.saveToLocalStorage();
 
-    $.finalist.displayNavbar();
+    finalist_module.displayNavbar();
 
 }); // end ready function

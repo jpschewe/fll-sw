@@ -12,12 +12,12 @@ const nonNumericUi = {}
 
 {
     function handleDivisionChange() {
-        const divIndex = $("#divisions").val();
-        const div = $.finalist.getDivisionByIndex(divIndex);
-        $.finalist.setCurrentDivision(div);
+        const divIndex = document.getElementById("divisions").value;
+        const div = finalist_module.getDivisionByIndex(divIndex);
+        finalist_module.setCurrentDivision(div);
         updateTeams();
         if (_useStorage) {
-            $.finalist.saveToLocalStorage();
+            finalist_module.saveToLocalStorage();
         }
     }
 
@@ -46,20 +46,24 @@ const nonNumericUi = {}
     nonNumericUi.initialize =
         function() {
             if (_useStorage) {
-                $.finalist.loadFromLocalStorage();
+                finalist_module.loadFromLocalStorage();
             }
 
-            $("#divisions").empty();
-            $.each($.finalist.getDivisions(), function(i, division) {
-                let selected = "";
-                if (division == $.finalist.getCurrentDivision()) {
-                    selected = " selected ";
+            const divisionsElement = document.getElementById("divisions");
+            removeChildren(divisionsElement);
+
+            finalist_module.getDivisions().forEach(function(division, i) {
+                const divisionOption = document.createElement("option");
+                divisionOption.setAttribute("value", i);
+                if (division == finalist_module.getCurrentDivision()) {
+                    divisionOption.setAttribute("selected", "true");
                 }
-                const divisionOption = $("<option value='" + i + "'" + selected + ">"
-                    + division + "</option>");
-                $("#divisions").append(divisionOption);
+                divisionOption.innerText = division;
+
+                divisionsElement.appendChild(divisionOption);
             }); // foreach division
-            $("#divisions").change(function() {
+
+            divisionsElement.addEventListener("change", () => {
                 handleDivisionChange();
             });
             handleDivisionChange();
@@ -68,76 +72,91 @@ const nonNumericUi = {}
         }; // end initialize function
 
     function updateTeams() {
-        $("#categories").empty();
-        $("#overall-categories").empty();
+        removeChildren(document.getElementById("categories"));
+        removeChildren(document.getElementById("overall-categories"));
 
-        $.each($.finalist.getNonNumericCategories(), function(_, category) {
+        for (const category of finalist_module.getNonNumericCategories()) {
             addCategoryElement(category);
 
             let addedTeam = false;
-            $.each(category.teams,
-                function(_, teamNum) {
-                    const team = $.finalist.lookupTeam(teamNum);
-                    if (category.overall
-                        || $.finalist.isTeamInDivision(team, $.finalist
-                            .getCurrentDivision())) {
-                        addedTeam = true;
-                        const teamIdx = addTeam(category);
-                        populateTeamInformation(category, teamIdx, team);
-                    }
+            for (const teamNum of category.teams) {
+                const team = finalist_module.lookupTeam(teamNum);
+                if (category.overall
+                    || finalist_module.isTeamInDivision(team, finalist_module
+                        .getCurrentDivision())) {
+                    addedTeam = true;
+                    const teamIdx = addTeam(category);
+                    populateTeamInformation(category, teamIdx, team);
+                }
 
-                });
+            }
             if (!addedTeam) {
                 addTeam(category);
             }
-        });
+        }
     }
 
     function addCategoryElement(category) {
-        const catEle = $("<li></li>");
+        const catEle = document.createElement("li");
         if (category.overall) {
-            $("#overall-categories").append(catEle);
+            document.getElementById("overall-categories").appendChild(catEle);
         } else {
-            $("#categories").append(catEle);
+            document.getElementById("categories").appendChild(catEle);
         }
 
         if (_useScheduledFlag) {
-            const scheduledCheckbox = $("<input type='checkbox' id='scheduled_"
-                + category.catId + "'/>");
-            catEle.append(scheduledCheckbox);
-            scheduledCheckbox.change(function() {
-                $.finalist.setCategoryScheduled(category, $(this).prop("checked"));
-                roomEle.prop("disabled", !(scheduledCheckbox.prop("checked")));
+            const scheduledCheckbox = document.createElement("input");
+            scheduledCheckbox.setAttribute("type", "checkbox");
+            scheduledCheckbox.setAttribute("id", "scheduled_" + category.catId);
+
+            catEle.appendChild(scheduledCheckbox);
+            scheduledCheckbox.addEventListener("change", () => {
+                finalist_module.setCategoryScheduled(category, scheduledCheckbox.checked);
+                roomEle.disabled = !scheduledCheckbox.checked;
                 if (_useStorage) {
-                    $.finalist.saveToLocalStorage();
+                    finalist_module.saveToLocalStorage();
                 }
             });
-            scheduledCheckbox.attr("checked", $.finalist.isCategoryScheduled(category));
+
+            scheduledCheckbox.checked = finalist_module.isCategoryScheduled(category);
         }
 
-        catEle.append(category.name);
-        catEle.append(" - ")
+        const categoryLabel = document.createElement("span");
+        catEle.appendChild(categoryLabel);
+        categoryLabel.innerText = category.name + " - ";
 
-        catEle.append("Room number: ");
-        const roomEle = $("<input type='text' id='room_" + category.catId + "'/>");
-        catEle.append(roomEle);
-        roomEle.change(function() {
-            const roomNumber = roomEle.val();
-            $.finalist.setRoom(category, $.finalist.getCurrentDivision(), roomNumber);
+        const roomInputId = "room_" + category.catId;
+        const roomLabel = document.createElement("label");
+        catEle.appendChild(roomLabel);
+        roomLabel.setAttribute("for", roomInputId);
+        roomLabel.innerText = "Room Number: ";
+
+        const roomEle = document.createElement("input");
+        catEle.appendChild(roomEle);
+        roomEle.setAttribute("id", roomInputId);
+        roomEle.setAttribute("type", "text");
+
+        roomEle.addEventListener("change", () => {
+            const roomNumber = roomEle.value;
+            finalist_module.setRoom(category, finalist_module.getCurrentDivision(), roomNumber);
             if (_useStorage) {
-                $.finalist.saveToLocalStorage();
+                finalist_module.saveToLocalStorage();
             }
         });
-        roomEle.val($.finalist.getRoom(category, $.finalist.getCurrentDivision()));
-        roomEle.prop("disabled", !$.finalist.isCategoryScheduled(category));
+        roomEle.value = finalist_module.getRoom(category, finalist_module.getCurrentDivision());
+        roomEle.disabled = !finalist_module.isCategoryScheduled(category);
 
-        const teamList = $("<ul id='category_" + category.catId + "'></ul>");
-        catEle.append(teamList);
+        const teamList = document.createElement("ul");
+        catEle.appendChild(teamList);
+        teamList.setAttribute("id", "category_" + category.catId);
 
-        const addButton = $("<button id='add-team_" + category.catId
-            + "'>Add Team</button>");
-        catEle.append(addButton);
-        addButton.click(function() {
+        const addButton = document.createElement("button");
+        catEle.appendChild(addButton);
+        addButton.setAttribute("id", "add-team_" + category.catId);
+        addButton.setAttribute("type", "button");
+        addButton.innerText = "Add Team";
+
+        addButton.addEventListener("click", () => {
             addTeam(category);
         });
 
@@ -168,20 +187,27 @@ const nonNumericUi = {}
     }
 
     function populateTeamInformation(category, teamIdx, team) {
-        $("#" + teamNumId(category.catId, teamIdx)).val(team.num);
-        $("#" + teamNumId(category.catId, teamIdx)).data('oldVal', team.num);
-        $("#" + teamNameId(category.catId, teamIdx)).val(team.name);
-        $("#" + teamOrgId(category.catId, teamIdx)).val(team.org);
-        $("#" + teamJudgingStationId(category.catId, teamIdx)).val(team.judgingGroup);
+        const teamNumElement = document.getElementById(teamNumId(category.catId, teamIdx));
+        teamNumElement.value = team.num;
+        teamNumElement.setAttribute("data-oldVal", team.num);
 
-        const judges = $.finalist.getNominatingJudges(category, team.num);
+        const teamNameElement = document.getElementById(teamNameId(category.catId, teamIdx));
+        teamNameElement.value = team.name;
+
+        const teamOrgElement = document.getElementById(teamOrgId(category.catId, teamIdx));
+        teamOrgElement.value = team.org;
+
+        const teamJudgingStationElement = document.getElementById(teamJudgingStationId(category.catId, teamIdx));
+        teamJudgingStationElement.value = team.judgingGroup;
+
+        const judges = finalist_module.getNominatingJudges(category, team.num);
         let judgesStr;
         if (!judges) {
             judgesStr = "";
         } else {
             judgesStr = judges.filter(x => x).join(", ");
         }
-        $("#" + teamJudgesId(category.catId, teamIdx)).val(judgesStr);
+        document.getElementById(teamJudgesId(category.catId, teamIdx)).value = judgesStr;
     }
 
     /**
@@ -191,79 +217,93 @@ const nonNumericUi = {}
      *         later
      */
     function addTeam(category) {
-        const catEle = $("#category_" + category.catId);
-        const teamIdx = catEle.children().size() + 1;
+        const catEle = document.getElementById("category_" + category.catId);
+        const teamIdx = catEle.children.length + 1;
 
-        const teamEle = $("<li></li>");
-        catEle.append(teamEle);
+        const teamEle = document.createElement("li");
+        catEle.appendChild(teamEle);
 
-        const numEle = $("<input type='text' id='" + teamNumId(category.catId, teamIdx)
-            + "'/>");
-        teamEle.append(numEle);
-        numEle.change(function() {
-            let teamNum = $(this).val();
-            const prevTeam = $(this).data('oldVal');
+        const numEle = document.createElement("input");
+        teamEle.appendChild(numEle);
+        numEle.setAttribute("type", "text");
+        numEle.setAttribute("id", teamNumId(category.catId, teamIdx));
+
+        numEle.addEventListener("change", () => {
+            let teamNum = numEle.value;
+            const prevTeam = numEle.getAttribute("data-oldVal");
             if ("" == teamNum) {
-                $.finalist.removeTeamFromCategory(category, prevTeam);
-                $("#" + teamNameId(category.catId, teamIdx)).val("");
-                $("#" + teamOrgId(category.catId, teamIdx)).val("");
-                $("#" + teamJudgingStationId(category.catId, teamIdx)).val("");
+                finalist_module.removeTeamFromCategory(category, prevTeam);
+                document.getElementById(teamNameId(category.catId, teamIdx)).value = "";
+                document.getElementById(teamOrgId(category.catId, teamIdx)).value = "";
+                document.getElementById(teamJudgingStationId(category.catId, teamIdx)).value = "";
                 if (_useStorage) {
-                    $.finalist.saveToLocalStorage();
+                    finalist_module.saveToLocalStorage();
                 }
             } else if (teamNum != prevTeam) {
-                $.finalist.removeTeamFromCategory(category, prevTeam);
+                finalist_module.removeTeamFromCategory(category, prevTeam);
 
-                const team = $.finalist.lookupTeam(teamNum);
+                const team = finalist_module.lookupTeam(teamNum);
                 if (typeof (team) == 'undefined') {
                     alert("Team number " + teamNum + " does not exist");
-                    $(this).val(prevTeam);
+                    numEle.value = prevTeam;
                     teamNum = prevTeam; // for the set of oldVal below
                 } else {
                     populateTeamInformation(category, teamIdx, team);
-                    $.finalist.addTeamToCategory(category, teamNum);
+                    finalist_module.addTeamToCategory(category, teamNum);
                     if (_useStorage) {
-                        $.finalist.saveToLocalStorage();
+                        finalist_module.saveToLocalStorage();
                     }
                 }
             }
-            $(this).data('oldVal', teamNum);
+            numEle.setAttribute("data-oldVal", teamNum);
         });
 
-        const nameEle = $("<input id='" + teamNameId(category.catId, teamIdx)
-            + "' readonly disabled/>");
-        teamEle.append(nameEle);
-        const orgEle = $("<input id='" + teamOrgId(category.catId, teamIdx)
-            + "' readonly disabled/>");
-        teamEle.append(orgEle);
+        const nameEle = document.createElement("input");
+        teamEle.appendChild(nameEle);
+        nameEle.setAttribute("id", teamNameId(category.catId, teamIdx));
+        nameEle.readonly = true;
+        nameEle.disabled = true;
 
-        const judgingStationEle = $("<input id='"
-            + teamJudgingStationId(category.catId, teamIdx) + "' readonly disabled/>");
-        teamEle.append(judgingStationEle);
+        const orgEle = document.createElement("input");
+        teamEle.appendChild(orgEle);
+        orgEle.setAttribute("id", teamOrgId(category.catId, teamIdx));
+        orgEle.readonly = true;
+        orgEle.disabled = true;
 
-        const judgesEle = $("<input id='"
-            + teamJudgesId(category.catId, teamIdx) + "' readonly disabled/>");
-        teamEle.append(judgesEle);
+        const judgingStationEle = document.createElement("input");
+        teamEle.appendChild(judgingStationEle);
+        judgingStationEle.setAttribute("id", teamJudgingStationId(category.catId, teamIdx));
+        judgingStationEle.readonly = true;
+        judgingStationEle.disabled = true;
 
-        const deleteButton = $("<button id='" + teamDeleteId(category.catId, teamIdx)
-            + "'>Delete</button>");
-        teamEle.append(deleteButton);
-        deleteButton.click(function() {
-            const teamNum = numEle.val();
+        const judgesEle = document.createElement("input");
+        teamEle.appendChild(judgesEle);
+        judgesEle.setAttribute("id", teamJudgesId(category.catId, teamIdx));
+        judgesEle.readonly = true;
+        judgesEle.disabled = true;
+
+        const deleteButton = document.createElement("button");
+        teamEle.appendChild(deleteButton);
+        deleteButton.setAttribute("type", "button");
+        deleteButton.setAttribute("id", teamDeleteId(category.catId, teamIdx));
+        deleteButton.innerText = "Delete";
+
+        deleteButton.addEventListener("click", () => {
+            const teamNum = numEle.value;
             if ("" != teamNum) {
                 const reallyDelete = confirm("Are you sure you want to delete this team?");
                 if (reallyDelete) {
-                    $.finalist.removeTeamFromCategory(category, teamNum);
-                    teamEle.remove();
+                    finalist_module.removeTeamFromCategory(category, teamNum);
+                    catEle.removeChild(teamEle);
                     if (_useStorage) {
-                        $.finalist.saveToLocalStorage();
+                        finalist_module.saveToLocalStorage();
                     }
                 }
             } else {
-                $.finalist.removeTeamFromCategory(category, teamNum);
-                teamEle.remove();
+                finalist_module.removeTeamFromCategory(category, teamNum);
+                catEle.removeChild(teamEle);
                 if (_useStorage) {
-                    $.finalist.saveToLocalStorage();
+                    finalist_module.saveToLocalStorage();
                 }
             }
         });

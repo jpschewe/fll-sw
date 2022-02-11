@@ -11,7 +11,7 @@ const nonNumericNominees = {}
 {
 
     function uploadData() {
-        $("#wait-dialog_text").text("Saving data. Please wait...");
+        document.getElementById("wait-dialog_text").innerText = "Saving data. Please wait...";
 
         const waitList = [];
 
@@ -28,75 +28,67 @@ const nonNumericNominees = {}
 
             alert("Non-numeric nominees upload failure: " + message);
         }
-        waitList.push($.finalist.uploadNonNumericNominees(
+        waitList.push(finalist_module.uploadNonNumericNominees(
             nonNumericSuccess, nonNumericFail));
 
-        $("#wait-dialog").dialog("open");
-        $.when.apply($, waitList).done(function() {
-            $("#wait-dialog").dialog("close");
+        document.getElementById("wait-dialog").style.visibility = "visible";
+        Promise.all(waitList).then(function(_) {
+            document.getElementById("wait-dialog").style.visibility = "hidden";
         });
     }
 
 
-    $(document).ready(
-        function() {
-            nonNumericUi.setUseStorage(false);
-            nonNumericUi.setUseScheduledFlag(false);
+    document.addEventListener("DOMContentLoaded", function() {
+        nonNumericUi.setUseStorage(false);
+        nonNumericUi.setUseScheduledFlag(false);
 
-            $("#wait-dialog").dialog({
-                autoOpen: false,
-                modal: true,
-                dialogClass: "no-close",
-                closeOnEscape: false
-            });
+        const waitDialog = document.getElementById("wait-dialog");
+        document.getElementById("wait-dialog_text").innerText = "Loading data. Please wait...";
+        waitDialog.style.visibility = "visible";
 
-            $("#wait-dialog_text").text("Loading data. Please wait...");
-            $("#wait-dialog").dialog("open");
+        document.getElementById("nominees_store").addEventListener("click", function() {
+            uploadData();
+        });
 
-            $("#nominees_store").click(function() {
-                uploadData();
-            });
+        // Some things need to be loaded first
+        const waitList1 = [];
 
-            // Some things need to be loaded first
-            const waitList1 = [];
+        const teamsPromise = finalist_module.loadTournamentTeams();
+        teamsPromise.catch(function() {
+            alert("Failure loading : teams");
+        })
+        waitList1.push(teamsPromise);
 
-            const teamsPromise = $.finalist.loadTournamentTeams();
-            teamsPromise.fail(function() {
-                alert("Failure loading : teams");
+        const nonNumericCategoriesPromise = finalist_module.loadNonNumericCategories();
+        nonNumericCategoriesPromise.catch(function() {
+            alert("Failure loading : non-numeric categories");
+        });
+        waitList1.push(nonNumericCategoriesPromise);
+
+        const awardgroupsPromise = finalist_module.loadAwardGroups();
+        awardgroupsPromise.catch(function() {
+            alert("Failure loading : award groups");
+        });
+        waitList1.push(awardgroupsPromise);
+
+        Promise.all(waitList1).then(function() {
+
+            // everything else can be loaded in parallel
+            const waitList = [];
+
+            const nonNumericNomineesPromise = finalist_module.loadNonNumericNominees();
+            nonNumericNomineesPromise.catch(function() {
+                alert("Failure loading : non-numeric nominees");
             })
-            waitList1.push(teamsPromise);
+            waitList.push(nonNumericNomineesPromise);
 
-            const nonNumericCategoriesPromise = $.finalist.loadNonNumericCategories();
-            nonNumericCategoriesPromise.fail(function() {
-                alert("Failure loading : non-numeric categories");
+            Promise.all(waitList).then(function() {
+                waitDialog.style.visibility = "hidden";
+
+                nonNumericUi.initialize();
             });
-            waitList1.push(nonNumericCategoriesPromise);
+        });
 
-            const awardgroupsPromise = $.finalist.loadAwardGroups();
-            awardgroupsPromise.fail(function() {
-                alert("Failure loading : award groups");
-            });
-            waitList1.push(awardgroupsPromise);
-
-            $.when.apply($, waitList1).done(function() {
-
-                // everything else can be loaded in parallel
-                const waitList = [];
-
-                const nonNumericNomineesPromise = $.finalist.loadNonNumericNominees();
-                nonNumericNomineesPromise.fail(function() {
-                    alert("Failure loading : non-numeric nominees");
-                })
-                waitList.push(nonNumericNomineesPromise);
-
-                $.when.apply($, waitList).done(function() {
-                    $("#wait-dialog").dialog("close");
-
-                    nonNumericUi.initialize();
-                });
-
-            });
-
-        }); // ready
+    }); // ready
 
 } // local scope

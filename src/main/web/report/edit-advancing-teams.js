@@ -98,11 +98,8 @@ function storeAdvancingTeams() {
                 },
                 body: JSON.stringify(advancing)
             }
-        ).then(function(response) {
-            if (!response.ok) {
-                throw "Error sending group advancing teams: " + response.message;
-            }
-        });
+        ).then(checkJsonResponse)
+            .catch(error => { throw new Error("Error sending group advancing teams: " + error) });
 
     } else {
         return new Promise(function() {
@@ -545,10 +542,6 @@ function storeSortedGroups() {
             },
             body: JSON.stringify(groups)
         }
-    ).then(function(response) {
-        if (!response.ok) {
-            throw "Error sending group sort information: " + response.message;
-        }
-    });
-
+    ).then(checkJsonResponse)
+        .catch(error => { throw new Error("Error sending group sort information: " + error) });
 }
