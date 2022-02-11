@@ -1,3 +1,4 @@
+* #1014 - Remove dependency on jquery-ui
 * Upgrade to JDK 17
 * #966 - Add report of regular match play runs vs. the schedule for the refs
 * #955 - Use redirect instead of forward for login redirection
