@@ -171,6 +171,10 @@ Entering scores for all tables. Teams are sorted in schedule order.
             round score entry</a>
     </div>
 
+    <c:if test="${empty scoreEntrySelectedTable}">
+        <p>Use the browser search, ctrl-f, to find teams by name,
+            number or organization</p>
+    </c:if>
 
     <table id='container'>
         <!-- outer table -->
