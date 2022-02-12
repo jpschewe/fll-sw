@@ -258,45 +258,53 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
         reportData.add(d);
       }
 
-      Collections.sort(reportData);
+      if (reportData.isEmpty()) {
+        final Element row = FOPUtils.createTableRow(document);
+        tableBody.appendChild(row);
+        final Element cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "No data");
+        row.appendChild(cell);
+        cell.setAttribute("number-columns-spanned", "7");
+      } else {
+        Collections.sort(reportData);
 
-      for (final Data data : reportData) {
-        if (!awardGroup.equals(data.team.getAwardGroup())) {
-          // only output teams for the current award group
-          continue;
-        }
+        for (final Data data : reportData) {
+          if (!awardGroup.equals(data.team.getAwardGroup())) {
+            // only output teams for the current award group
+            continue;
+          }
 
-        final Element teamRow = FOPUtils.createTableRow(document);
-        tableBody.appendChild(teamRow);
+          final Element teamRow = FOPUtils.createTableRow(document);
+          tableBody.appendChild(teamRow);
 
-        teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                                         String.valueOf(data.team.getTeamNumber())),
-                                                ScheduleWriter.STANDARD_BORDER_WIDTH));
-        teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                                         data.team.getTeamName()),
-                                                ScheduleWriter.STANDARD_BORDER_WIDTH));
+          teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                                           String.valueOf(data.team.getTeamNumber())),
+                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
+          teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                                           data.team.getTeamName()),
+                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
 
-        final @Nullable String organization = data.team.getOrganization();
-        teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                                         null == organization ? "" : organization),
-                                                ScheduleWriter.STANDARD_BORDER_WIDTH));
-        teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                                         data.team.getJudgingGroup()),
-                                                ScheduleWriter.STANDARD_BORDER_WIDTH));
+          final @Nullable String organization = data.team.getOrganization();
+          teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                                           null == organization ? "" : organization),
+                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
+          teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                                           data.team.getJudgingGroup()),
+                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
 
-        teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                                         String.valueOf(data.rank)),
-                                                ScheduleWriter.STANDARD_BORDER_WIDTH));
+          teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                                           String.valueOf(data.rank)),
+                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
 
-        teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                                         Utilities.getFloatingPointNumberFormat()
-                                                                                  .format(data.scaledScore)),
-                                                ScheduleWriter.STANDARD_BORDER_WIDTH));
+          teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                                           Utilities.getFloatingPointNumberFormat()
+                                                                                    .format(data.scaledScore)),
+                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
 
-        teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                                         data.rawScore),
-                                                ScheduleWriter.STANDARD_BORDER_WIDTH));
-      } // foreach team
+          teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                                           data.rawScore),
+                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
+        } // foreach team
+      }
 
       return agReport;
     }
