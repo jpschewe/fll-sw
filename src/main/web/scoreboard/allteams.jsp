@@ -14,6 +14,8 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
 <link rel='stylesheet' type='text/css' href='../style/base.css' />
 <link rel='stylesheet' type='text/css' href='score_style.css' />
 
+<script type="text/javascript"
+    src='<c:url value="/js/fll-functions.js"/>'></script>
 <script type="text/javascript" src="set-font-size.js"></script>
 
 <style>
@@ -26,21 +28,24 @@ TABLE.B {
 }
 </style>
 
-<script type='text/javascript'
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery.scrollTo/jquery.scrollTo.min.js'/>"></script>
-
-
-
 <script type="text/javascript">
   function reload() {
-    $.scrollTo($("#top"));
+    window.scrollTo(0, 0);
     location.reload(true);
   }
-  function bottomReload() {
-    // show the last scores for a bit and then reload
-    setTimeout(reload, 3000);
+
+  function scrollDown() {
+    if (!elementIsVisible(document.getElementById("bottom"))) {
+      window.scrollBy({
+        left : 0,
+        top : scrollRate,
+        behavior : 'smooth'
+      });
+      requestAnimationFrame(scrollDown);
+    } else {
+      // show the last scores for a bit and then reload
+      setTimeout(reload, 3000);
+    }
   }
 </script>
 
@@ -48,27 +53,21 @@ TABLE.B {
     <c:choose>
         <c:when test="${fn:length(teamsWithScores) gt 0}">
             <script type="text/javascript">
-                          var scrollDuration = parseInt("${scrollDuration}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
+                          const scrollRate = parseInt("${scrollRate}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
 
-                          function scrollToBottom() {
-                            $.scrollTo($("#bottom"), {
-                              duration : scrollDuration,
-                              easing : 'linear',
-                              onAfter : bottomReload,
-                            });
-                          }
-
-                          $(document).ready(function() {
-                            scrollToBottom();
-                          });
+                          document.addEventListener("DOMContentLoaded",
+                              function() {
+                                requestAnimationFrame(scrollDown);
+                              });
                         </script>
         </c:when>
         <c:otherwise>
             <script type="text/javascript">
-                          $(document).ready(function() {
-                            // reload every 5 seconds
-                            window.setInterval('reload()', 5000);
-                          });
+                          document.addEventListener("DOMContentLoaded",
+                              function() {
+                                // reload after 5 seconds
+                                setTimeout(reload, 5000);
+                              });
                         </script>
         </c:otherwise>
     </c:choose>
@@ -78,8 +77,6 @@ TABLE.B {
 </head>
 
 <body class='scoreboard'>
-    <span id="top">&nbsp;</span>
-
     <br />
     <br />
     <br />

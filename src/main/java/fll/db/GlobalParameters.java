@@ -425,25 +425,25 @@ public final class GlobalParameters {
   }
 
   /**
-   * Parameter name for {@link #getAllTeamsMsPerRow(Connection)}.
+   * Parameter name for {@link #getAllTeamScrollRate(Connection)}.
    */
   public static final String ALL_TEAMS_MS_PER_ROW = "AllTeamsMsPerRow";
 
   /**
    * Default value for {@link #ALL_TEAMS_MS_PER_ROW}.
    */
-  public static final int ALL_TEAMS_MS_PER_ROW_DEFAULT = 1000;
+  public static final int ALL_TEAMS_MS_PER_ROW_DEFAULT = 10;
 
   /**
    * Some control over the scroll rate of the all teams part of the score board.
-   * The value is nominally the number of milliseconds to display each row of the
-   * display for.
+   * The value is the number of pixels to scroll per screen refresh.
    *
    * @param connection the database connection
    * @return the nominal scroll rate
    * @throws SQLException if there is a problem talking to the database
+   * @see #ALL_TEAMS_MS_PER_ROW_DEFAULT
    */
-  public static int getAllTeamsMsPerRow(final Connection connection) throws SQLException {
+  public static int getAllTeamScrollRate(final Connection connection) throws SQLException {
     if (!globalParameterExists(connection, ALL_TEAMS_MS_PER_ROW)) {
       return ALL_TEAMS_MS_PER_ROW_DEFAULT;
     } else {
@@ -452,14 +452,14 @@ public final class GlobalParameters {
   }
 
   /**
-   * See {@link #getAllTeamsMsPerRow(Connection)}.
+   * See {@link #getAllTeamScrollRate(Connection)}.
    *
    * @param connection the database connection
    * @param value the new value
    * @throws SQLException if there is a problem talking to the database
    */
-  public static void setAllTeamsMsPerRow(final Connection connection,
-                                         final int value)
+  public static void setAllTeamsScrollRate(final Connection connection,
+                                           final int value)
       throws SQLException {
     setIntGlobalParameter(connection, ALL_TEAMS_MS_PER_ROW, value);
   }
