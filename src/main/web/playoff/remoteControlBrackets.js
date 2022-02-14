@@ -37,23 +37,32 @@ function parseTeamName(teamName) {
     }
 }
 
-function getTeamNameString(teamNumber, teamName) {
-    var text = "";
+function setTeamName(leaf, teamNumber, teamName) {
     if (teamNumber >= 0) {
-        text += "<span class=\"TeamNumber\">#" + teamNumber + "</span> "
+        const teamNumberEle = document.createElement("span");
+        leaf.appendChild(teamNumberEle)
+        teamNumberEle.classList.add("TeamNumber");
+        leaf.innerText = "#" + teamNumber;
     }
-    text += "<span class=\"TeamName\">" + parseTeamName(teamName) + "</span>";
-    return text;
+
+    const teamNameEle = document.createElement("span");
+    leaf.appendChild(teamNameEle)
+    teamNameEle.classList.add("TeamName");
+    leaf.innerText = parseTeamName(teamName);
 }
 
-function getTeamNameAndScoreString(teamNumber, teamName, scoreData) {
-    return "<span class=\"TeamNumber\">#" + teamNumber
-        + "</span> <span class=\"TeamName\">" + parseTeamName(teamName)
-        + "</span><span class=\"TeamScore\"> Score: " + scoreData + "</span>";
+function setTeamNameAndScore(leaf, teamNumber, teamName, scoreData) {
+    setTeamName(leaf, teamNumber, teamName);
+
+    const scoreEle = document.createElement("span");
+    leaf.appendChild(scoreEle);
+    scoreEle.classList.add("TeamScore");
+    scoreEle.innerText = "Score: " + scoreData;
 }
 
 function populateLeaf(leafId, bracketUpdate) {
-    var text = "";
+    const leaf = document.getElementById(leafId);
+    removeChildren(leaf);
 
     // Some of these if/else statements can be collapsed, however I've broken them
     // out to make it clear what each case is.
@@ -63,46 +72,29 @@ function populateLeaf(leafId, bracketUpdate) {
 
         if (bracketUpdate.teamNumber < 0) {
             // tie or bye
-            text = getTeamNameString(bracketUpdate.teamNumber, bracketUpdate.teamName);
+            setTeamName(leaf, bracketUpdate.teamNumber, bracketUpdate.teamName);
         } else if (bracketUpdate.playoffRound >= bracketUpdate.maxPlayoffRound) {
-
             // finals, don't display the finals
-            text = "";
-
         } else if (!bracketUpdate.verified) {
-
             // score isn't verified, only show the team name
-            text = getTeamNameString(bracketUpdate.teamNumber, bracketUpdate.teamName);
-
+            setTeamName(leaf, bracketUpdate.teamNumber, bracketUpdate.teamName);
         } else if (null == bracketUpdate.score || "" == bracketUpdate.score) {
-
             // no score, only show the team name
-            text = getTeamNameString(bracketUpdate.teamNumber, bracketUpdate.teamName);
-
+            setTeamName(leaf, bracketUpdate.teamNumber, bracketUpdate.teamName);
         } else if (bracketUpdate.playoffRound == bracketUpdate.maxPlayoffRound - 1) {
-
             // scores from the last head to head round can't be displayed, because
             // then the winner would be known, only show team name
-            text = getTeamNameString(bracketUpdate.teamNumber, bracketUpdate.teamName);
-
+            setTeamNameString(leaf, bracketUpdate.teamNumber, bracketUpdate.teamName);
         } else if (bracketUpdate.noShow) {
-
             // no show, explicitly set score text
-            text = getTeamNameAndScoreString(bracketUpdate.teamNumber,
+            setTeamNameAndScoreString(leaf, bracketUpdate.teamNumber,
                 bracketUpdate.teamName, "No Show");
-
         } else {
-
             // verified score
-            text = getTeamNameAndScoreString(bracketUpdate.teamNumber,
+            setTeamNameAndScoreString(leaf, bracketUpdate.teamNumber,
                 bracketUpdate.teamName, bracketUpdate.score);
-
         }
-    } else {
-        console.log("No team number, clearing leaf: " + leafId);
     }
-
-    document.getElementById(leafId).innerHtml = text;
 }
 
 function placeTableLabel(lid, table) {
