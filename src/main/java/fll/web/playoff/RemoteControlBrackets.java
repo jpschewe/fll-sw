@@ -91,7 +91,7 @@ public final class RemoteControlBrackets {
       pageContext.setAttribute("allBracketDataJson", allBracketDataJson);
 
       // used for scroll control
-      final int msPerRow = GlobalParameters.getHeadToHeadMsPerRow(connection);
+      final int msPerRow = GlobalParameters.getHeadToHeadScrollRate(connection);
       final int scrollDuration = numRows
           * msPerRow;
 

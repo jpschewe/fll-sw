@@ -427,12 +427,12 @@ public final class GlobalParameters {
   /**
    * Parameter name for {@link #getAllTeamScrollRate(Connection)}.
    */
-  public static final String ALL_TEAMS_MS_PER_ROW = "AllTeamsMsPerRow";
+  public static final String ALL_TEAMS_SCROLL_RATE = "AllTeamsScrollRate";
 
   /**
-   * Default value for {@link #ALL_TEAMS_MS_PER_ROW}.
+   * Default value for {@link #ALL_TEAMS_SCROLL_RATE}.
    */
-  public static final int ALL_TEAMS_MS_PER_ROW_DEFAULT = 10;
+  public static final int ALL_TEAMS_SCROLL_RATE_DEFAULT = 10;
 
   /**
    * Some control over the scroll rate of the all teams part of the score board.
@@ -441,13 +441,13 @@ public final class GlobalParameters {
    * @param connection the database connection
    * @return the nominal scroll rate
    * @throws SQLException if there is a problem talking to the database
-   * @see #ALL_TEAMS_MS_PER_ROW_DEFAULT
+   * @see #ALL_TEAMS_SCROLL_RATE_DEFAULT
    */
   public static int getAllTeamScrollRate(final Connection connection) throws SQLException {
-    if (!globalParameterExists(connection, ALL_TEAMS_MS_PER_ROW)) {
-      return ALL_TEAMS_MS_PER_ROW_DEFAULT;
+    if (!globalParameterExists(connection, ALL_TEAMS_SCROLL_RATE)) {
+      return ALL_TEAMS_SCROLL_RATE_DEFAULT;
     } else {
-      return getIntGlobalParameter(connection, ALL_TEAMS_MS_PER_ROW);
+      return getIntGlobalParameter(connection, ALL_TEAMS_SCROLL_RATE);
     }
   }
 
@@ -461,47 +461,47 @@ public final class GlobalParameters {
   public static void setAllTeamsScrollRate(final Connection connection,
                                            final int value)
       throws SQLException {
-    setIntGlobalParameter(connection, ALL_TEAMS_MS_PER_ROW, value);
+    setIntGlobalParameter(connection, ALL_TEAMS_SCROLL_RATE, value);
   }
 
   /**
-   * Parameter name for {@link #getHeadToHeadMsPerRow(Connection)}.
+   * Parameter name for {@link #getHeadToHeadScrollRate(Connection)}.
    */
-  public static final String HEAD_TO_HEAD_MS_PER_ROW = "HeadToHeadMsPerRow";
+  public static final String HEAD_TO_HEAD_SCROLL_RATE = "HeadToHeadScrollRate";
 
   /**
-   * Default value for {@link #HEAD_TO_HEAD_MS_PER_ROW}.
+   * Default value for {@link #HEAD_TO_HEAD_SCROLL_RATE}.
    */
-  public static final int HEAD_TO_HEAD_MS_PER_ROW_DEFAULT = 1000;
+  public static final int HEAD_TO_HEAD_SCROLL_RATE_DEFAULT = 10;
 
   /**
    * Some control over the scroll rate of the head to head brackets.
-   * The value is nominally the number of milliseconds to display each row of the
-   * display for.
+   * The value is the number of pixels to scroll per screen refresh.
    *
    * @param connection the database connection
    * @return the nominal scroll rate
    * @throws SQLException if there is a problem talking to the database
+   * @see #HEAD_TO_HEAD_SCROLL_RATE_DEFAULT
    */
-  public static int getHeadToHeadMsPerRow(final Connection connection) throws SQLException {
-    if (!globalParameterExists(connection, HEAD_TO_HEAD_MS_PER_ROW)) {
-      return HEAD_TO_HEAD_MS_PER_ROW_DEFAULT;
+  public static int getHeadToHeadScrollRate(final Connection connection) throws SQLException {
+    if (!globalParameterExists(connection, HEAD_TO_HEAD_SCROLL_RATE)) {
+      return HEAD_TO_HEAD_SCROLL_RATE_DEFAULT;
     } else {
-      return getIntGlobalParameter(connection, HEAD_TO_HEAD_MS_PER_ROW);
+      return getIntGlobalParameter(connection, HEAD_TO_HEAD_SCROLL_RATE);
     }
   }
 
   /**
-   * See {@link #getHeadToHeadMsPerRow(Connection)}.
+   * See {@link #getHeadToHeadScrollRate(Connection)}.
    *
    * @param connection the database connection
    * @param value the new value
    * @throws SQLException if there is a problem talking to the database
    */
-  public static void setHeadToHeadMsPerRow(final Connection connection,
-                                           final int value)
+  public static void setHeadToHeadScrollRate(final Connection connection,
+                                             final int value)
       throws SQLException {
-    setIntGlobalParameter(connection, HEAD_TO_HEAD_MS_PER_ROW, value);
+    setIntGlobalParameter(connection, HEAD_TO_HEAD_SCROLL_RATE, value);
   }
 
 }

@@ -66,7 +66,7 @@ public class StoreGlobalParameters extends BaseFLLServlet {
 
       GlobalParameters.setAllTeamsScrollRate(connection, WebUtils.getIntRequestParameter(request, "gAllTeamsScrollRate"));
 
-      GlobalParameters.setHeadToHeadMsPerRow(connection,
+      GlobalParameters.setHeadToHeadScrollRate(connection,
                                              WebUtils.getIntRequestParameter(request, "gHeadToHeadMsPerRow"));
 
       final String mhubHostname = request.getParameter("gMhubHostname");

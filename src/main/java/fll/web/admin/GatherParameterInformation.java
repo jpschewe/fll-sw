@@ -81,7 +81,7 @@ public final class GatherParameterInformation {
                                GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
 
       pageContext.setAttribute("gAllTeamsScrollRate", GlobalParameters.getAllTeamScrollRate(connection));
-      pageContext.setAttribute("gHeadToHeadMsPerRow", GlobalParameters.getHeadToHeadMsPerRow(connection));
+      pageContext.setAttribute("gHeadToHeadMsPerRow", GlobalParameters.getHeadToHeadScrollRate(connection));
 
       pageContext.setAttribute("gMhubHostname", MhubParameters.getHostname(connection));
       pageContext.setAttribute("gMhubPort", MhubParameters.getPort(connection));
