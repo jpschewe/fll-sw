@@ -84,14 +84,14 @@ function populateLeaf(leafId, bracketUpdate) {
         } else if (bracketUpdate.playoffRound == bracketUpdate.maxPlayoffRound - 1) {
             // scores from the last head to head round can't be displayed, because
             // then the winner would be known, only show team name
-            setTeamNameString(leaf, bracketUpdate.teamNumber, bracketUpdate.teamName);
+            setTeamName(leaf, bracketUpdate.teamNumber, bracketUpdate.teamName);
         } else if (bracketUpdate.noShow) {
             // no show, explicitly set score text
-            setTeamNameAndScoreString(leaf, bracketUpdate.teamNumber,
+            setTeamNameAndScore(leaf, bracketUpdate.teamNumber,
                 bracketUpdate.teamName, "No Show");
         } else {
             // verified score
-            setTeamNameAndScoreString(leaf, bracketUpdate.teamNumber,
+            setTeamNameAndScore(leaf, bracketUpdate.teamNumber,
                 bracketUpdate.teamName, bracketUpdate.score);
         }
     }
