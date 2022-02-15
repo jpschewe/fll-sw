@@ -492,11 +492,11 @@ public final class ScoreEntry {
 
     if (!editFlag
         && !tabletEntry) {
-      formatter.format("  if (newValue == 1) {");
-      formatter.format("    $('#verification-warning').show();");
-      formatter.format("  } else if (newValue == 0) {");
-      formatter.format("    $('#verification-warning').hide();");
-      formatter.format("  }");
+      formatter.format("  if (newValue == 1) {%n");
+      formatter.format("    document.getElementById('verification-warning').style.visibility = 'visible';%n");
+      formatter.format("  } else if (newValue == 0) {%n");
+      formatter.format("    document.getElementById('verification-warning').style.visibility = 'hidden';%n");
+      formatter.format("  }%n");
     }
 
     formatter.format("  refresh();%n");
@@ -664,7 +664,10 @@ public final class ScoreEntry {
       formatter.format("  if(%s > %f || %s < %f) {%n", restrictValStr, upperBound, restrictValStr, lowerBound);
 
       // add error text to score-errors div
-      formatter.format("    $('#score-errors').append('<div>%s</div>');%n", message);
+      final String errorDiv = String.format("restriction_%d_error", restrictIdx);
+      formatter.format("    const %s = document.createElement(\"div\");%n", errorDiv);
+      formatter.format("    document.getElementById('score-errors').appendChild(%s);%n", errorDiv);
+      formatter.format("    %s.innerText = \"%s\";%n", errorDiv, message);
       formatter.format("    error_found = true;%n");
 
       for (final GoalRef ref : restrictEle.getReferencedGoals()) {

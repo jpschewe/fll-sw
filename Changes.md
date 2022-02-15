@@ -1,3 +1,4 @@
+* #1013 - Repalce jquery.scrollto
 * #1014 - Remove dependency on jquery-ui
 * Upgrade to JDK 17
 * #966 - Add report of regular match play runs vs. the schedule for the refs

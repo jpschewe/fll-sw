@@ -133,17 +133,17 @@ GatherParameterInformation.populateContext(application, pageContext);
                 <tr>
                     <th>
                         All teams scroll rate control. <a
-                            href='javascript:display("gAllTeamsMsPerRowHelp")'>[help]</a>
-                        <div id='gAllTeamsMsPerRowHelp' class='help'
+                            href='javascript:display("gAllTeamsScrollRateHelp")'>[help]</a>
+                        <div id='gAllTeamsScrollRateHelp' class='help'
                             style='display: none'>The value is
-                            nominally the number of milliseconds to
-                            display each row of the page.</div>
+                            number of pixels to scroll per screen
+                            refresh.</div>
                     </th>
 
                     <td>
-                        <input type='text' value="${gAllTeamsMsPerRow }"
-                            id='gAllTeamsMsPerRow'
-                            name='gAllTeamsMsPerRow' min='1' required />
+                        <input type='text' value="${gAllTeamsScrollRate }"
+                            id='gAllTeamsScrollRate'
+                            name='gAllTeamsScrollRate' min='1' required />
                     </td>
                 </tr>
 
@@ -153,10 +153,10 @@ GatherParameterInformation.populateContext(application, pageContext);
                             href='javascript:display("gHeadToHeadMsPerRowHelp")'>[help]</a>
                         <div id='gHeadToHeadMsPerRowHelp' class='help'
                             style='display: none'>The value is
-                            nominally the number of milliseconds to
-                            display each row of the page. The remote
-                            control brackets page needs to be refreshed
-                            for this parameter to take effect.</div>
+                            number of pixels to scroll per screen
+                            refresh. The remote control brackets page
+                            needs to be refreshed for this parameter to
+                            take effect.</div>
                     </th>
 
                     <td>

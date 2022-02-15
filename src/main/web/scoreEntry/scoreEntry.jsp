@@ -55,17 +55,11 @@ body {
     <link rel="stylesheet" type="text/css" href="hide-score.css" />
 </c:if>
 
-<script
-  type='text/javascript'
-  src='scoreEntry.js'></script>
-
 <script type="text/javascript">
 var EditFlag = false;
 <c:if test="${EditFlag}">
 EditFlag = true;
 </c:if>
-
-    <c:if test="${not isBye}">
 
 function init() {
   <%ScoreEntry.generateInit(out, application, pageContext);%>
@@ -113,10 +107,7 @@ function check_restrictions() {
 
 <%ScoreEntry.generateIsConsistent(out, application);%>
 
-
 <%ScoreEntry.generateIncrementMethods(out, application, request, session, pageContext);%>
-
-</c:if> <!-- end check for bye -->
 
 document.addEventListener('DOMContentLoaded', function() {
   const resetButton = document.getElementById("reset_score");
@@ -126,6 +117,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
+
+
+<script
+  type='text/javascript'
+  src='scoreEntry.js'></script>
 
 </head>
 

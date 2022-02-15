@@ -53,14 +53,13 @@ SPAN.TIE {
     padding-right: 5%;
 }
 </style>
+
 <script type="text/javascript"
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery.scrollTo/jquery.scrollTo.min.js'/>"></script>
+    src="<c:url value='/js/fll-functions.js'/>"></script>
 
 <script type="text/javascript">
   var allBracketData = ${allBracketDataJson};
-  var scrollDuration = parseInt("${scrollDuration}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
+  var scrollRate = parseInt("${scrollRate}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
   var maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
 </script>
 
@@ -69,25 +68,23 @@ SPAN.TIE {
 <script type='text/javascript' src='remoteControlBrackets.js'></script>
 
 <script type="text/javascript">
-  function scrollToBottom() {
-    $.scrollTo($("#bottom"), {
-      duration : scrollDuration,
-      easing : 'linear',
-      onAfter : scrollToTop,
-    });
+let scrollingDown = true;
+
+function doScroll() {
+  if(scrollingDown && elementIsVisible(document.getElementById("bottom"))) {
+      scrollingDown = false;
+  } else if(!scrollingDown && elementIsVisible(document.getElementById("top"))) {
+      scrollingDown = true;
   }
 
-  function scrollToTop() {
-    $.scrollTo($("#top"), {
-      duration : scrollDuration,
-      easing : 'linear',
-      onAfter : scrollToBottom,
-    });
-  }
+  const scrollAmount = scrollingDown ? scrollRate : -1 * scrollRate;
+  window.scrollBy({left: 0, top: scrollAmount, behavior: 'smooth'});
+  requestAnimationFrame(doScroll);
+}
 
-  $(document).ready(function() {
+  document.addEventListener("DOMContentLoaded", function() {
     <c:if test="${empty param.scroll}">
-    scrollToBottom();
+    requestAnimationFrame(doScroll);
     </c:if>
     colorTableLabels();
   });

@@ -69,12 +69,8 @@ public final class FinalistTeams {
 
       pageContext.setAttribute("teams", teams);
 
-      // used for scroll control
-      final int msPerRow = GlobalParameters.getHeadToHeadMsPerRow(connection);
-      final int scrollDuration = teams.size()
-          * msPerRow;
-
-      pageContext.setAttribute("scrollDuration", scrollDuration);
+      final int scrollRate = GlobalParameters.getHeadToHeadScrollRate(connection);
+      pageContext.setAttribute("scrollRate", scrollRate);
 
     } catch (final SQLException e) {
       LOGGER.error(e, e);
