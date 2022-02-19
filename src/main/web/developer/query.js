@@ -6,55 +6,60 @@
 
 "use strict";
 
-$(document).ready(function() {
-    $("#query_form").submit(function(event) {
-        event.preventDefault(); //prevent default action 
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("execute_query").addEventListener("click", function() {
         executeQuery();
     });
 }); // end ready function
 
 function executeQuery() {
-    var queryString = $.trim($("#query").val());
+    const queryString = document.getElementById("query").value.trim();
     if (queryString.length < 1) {
         alert("Query is empty");
         return;
     }
 
-    $("#query_result").empty();
-    $("#query_result").append($("<tr><td>Processing Query</td></tr>"));
+    const queryResultTable = document.getElementById("query_result");
+    removeChildren(queryResultTable);
+    queryResultTable.insertRow().insertCell().innerText = "Processing Query";
 
-    $.ajax({
-        type: "POST",
-        url: 'QueryHandler',
-        data: $("#query_form").serialize(),
-        success: function(data) {
-            populateQueryResult(data);
-        }
+    const formData = new FormData();
+    formData.append("query", queryString);
+
+    fetch("QueryHandler", {
+        method: "POST",
+        body: new URLSearchParams(formData),
+    }).then(response => {
+        return response.json();
+    }).then(data => {
+        populateQueryResult(data);
+    }).catch(err => {
+        alert("Error executing query: " + err);
     });
-
 }
 
 function populateQueryResult(data) {
-    var queryResult = $("#query_result");
-    queryResult.empty();
+    const queryResultTable = document.getElementById("query_result");
+    removeChildren(queryResultTable);
     if (data.error) {
-        queryResult.append($("<tr class='error'><td>Query error</td><td>"
-            + data.error + "</td></tr>"));
+        const cell = queryResultTable.insertRow().insertCell();
+        cell.innerText = "Processing Query";
+        cell.classList.add("error");
         return;
     }
 
-    var headerRow = $("<tr></tr>");
-    $.each(data.columnNames, function(columnIndex, name) {
-        headerRow.append($("<th>" + name + "</td>"));
-    });
-    queryResult.append(headerRow);
+    const headerRow = queryResultTable.insertRow();
+    for (const name of data.columnNames) {
+        const header = document.createElement("th");
+        headerRow.appendChild(header);
+        header.innerText = name;
+    }
 
-    $.each(data.data, function(rowIndex, rowData) {
-        var row = $("<tr></tr>");
-        $.each(data.columnNames, function(columnIndex, name) {
-            var value = rowData[name];
-            row.append($("<td>" + value + "</td>"));
-        });
-        queryResult.append(row);
-    });
+    for (const rowData of data.data) {
+        const row = queryResultTable.insertRow();
+        for (const name of data.columnNames) {
+            const cell = row.insertCell();
+            cell.innerText = rowData[name];
+        }
+    }
 }
