@@ -15,11 +15,11 @@
  * @returns
  */
 function displayPrefix(displayName) {
-  if ("Default" == displayName) {
-    return "";
-  } else {
-    return displayName + "_";
-  }
+    if ("Default" == displayName) {
+        return "";
+    } else {
+        return displayName + "_";
+    }
 }
 
 /**
@@ -29,9 +29,10 @@ function displayPrefix(displayName) {
  * @returns an integer number of brackets
  */
 function getNumBracketsForDisplay(displayName) {
-  var lDisplayPrefix = displayPrefix(displayName);
-  var numBrackets = parseInt($("#" + lDisplayPrefix + "numBrackets").val());
-  return numBrackets;
+    const lDisplayPrefix = displayPrefix(displayName);
+    const numBracketsEle = document.getElementById(lDisplayPrefix + "numBrackets");
+    const numBrackets = parseInt(numBracketsEle.value);
+    return numBrackets;
 }
 
 /**
@@ -41,20 +42,22 @@ function getNumBracketsForDisplay(displayName) {
  * @param numBrackets the number of brackets
  */
 function setNumBracketsForDisplay(displayName, numBrackets) {
-  var lDisplayPrefix = displayPrefix(displayName);
-  $("#" + lDisplayPrefix + "numBrackets").val(numBrackets);
+    const lDisplayPrefix = displayPrefix(displayName);
+    const numBracketsEle = document.getElementById(lDisplayPrefix + "numBrackets");
+    numBracketsEle.value = numBrackets;
 }
 
 function updateButtonStates() {
-  $.each(displayNames, function(index, displayName) {
-    var remove_button_id = displayPrefix(displayName) + "remove_bracket";
-    var nBrackets = getNumBracketsForDisplay(displayName);
-    if (nBrackets < 2) {
-      $("#" + remove_button_id).prop('disabled', true);
-    } else {
-      $("#" + remove_button_id).prop('disabled', false);
+    for (const displayName of displayNames) {
+        const remove_button_id = displayPrefix(displayName) + "remove_bracket";
+        const nBrackets = getNumBracketsForDisplay(displayName);
+        const removeButton = document.getElementById(remove_button_id);
+        if (nBrackets < 2) {
+            removeButton.disabled = true;
+        } else {
+            removeButton.disabled = false;
+        }
     }
-  });
 }
 
 /**
@@ -63,38 +66,52 @@ function updateButtonStates() {
  * @param displayName the name of the display
  */
 function addBracket(displayName) {
-  var lDisplayPrefix = displayPrefix(displayName);
-  var bracketIndex = getNumBracketsForDisplay(displayName);
-  var div = $("<div id='" + lDisplayPrefix + "bracket_" + bracketIndex
-      + "'></div>");
-  $("#" + lDisplayPrefix + "bracket_selection").append(div);
+    const lDisplayPrefix = displayPrefix(displayName);
+    const bracketIndex = getNumBracketsForDisplay(displayName);
+    const topDiv = document.createElement("div");
+    document.getElementById(lDisplayPrefix + "bracket_selection").appendChild(topDiv);
+    topDiv.setAttribute("id", lDisplayPrefix + "bracket_" + bracketIndex);
 
-  var bracketSelect = $("<select name='" + lDisplayPrefix
-      + "playoffDivision_" + bracketIndex + "'></select>");
-  $.each(divisions,
-      function(index, division) {
-        var option = $("<option value='" + division + "'>" + division
-            + "</option>");
-        bracketSelect.append(option);
-      });
-  div.append("Bracket: ");
-  div.append(bracketSelect);
-  div.append("<br/>");
+    const bracketDiv = document.createElement("div");
+    topDiv.appendChild(bracketDiv);
 
-  var roundSelect = $("<select name='" + lDisplayPrefix
-      + "playoffRoundNumber_" + bracketIndex + "'></select>");
-  var round;
-  for (round = 1; round <= numPlayoffRounds; ++round) {
-    var option = $("<option value='" + round + "'>" + round + "</option>");
-    roundSelect.append(option);
-  }
-  div.append("Round: ");
-  div.append(roundSelect);
+    const bracketLabel = document.createElement("span");
+    bracketDiv.appendChild(bracketLabel);
+    bracketLabel.innerText = "Bracket: ";
 
-  div.append($("<hr/>"));
+    const bracketSelect = document.createElement("select");
+    bracketDiv.appendChild(bracketSelect);
+    bracketSelect.setAttribute("name", lDisplayPrefix
+        + "playoffDivision_" + bracketIndex);
+    for (const division of divisions) {
+        const option = document.createElement("option");
+        bracketSelect.appendChild(option);
+        option.setAttribute("value", division);
+        option.innerText = division;
+    }
 
-  setNumBracketsForDisplay(displayName, bracketIndex+1);
-  updateButtonStates();
+    const roundDiv = document.createElement("div");
+    topDiv.appendChild(roundDiv);
+
+    const roundLabel = document.createElement("span");
+    roundDiv.appendChild(roundLabel);
+    roundLabel.innerText = "Round: ";
+
+    const roundSelect = document.createElement("select");
+    roundDiv.appendChild(roundSelect);
+    roundSelect.setAttribute("name", lDisplayPrefix + "playoffRoundNumber_" + bracketIndex);
+    let round;
+    for (round = 1; round <= numPlayoffRounds; ++round) {
+        const option = document.createElement("option");
+        roundSelect.appendChild(option);
+        option.setAttribute("value", round);
+        option.innerText = round;
+    }
+
+    topDiv.appendChild(document.createElement("hr"));
+
+    setNumBracketsForDisplay(displayName, bracketIndex + 1);
+    updateButtonStates();
 }
 
 /**
@@ -103,29 +120,27 @@ function addBracket(displayName) {
  * @param displayName the name of the display
  */
 function removeBracket(displayName) {
-  var nBrackets = getNumBracketsForDisplay(displayName);
-  var lastBracketIndex = nBrackets - 1;
-  var lDisplayPrefix = displayPrefix(displayName);
-  var div = $("#" + lDisplayPrefix + "bracket_" + lastBracketIndex);
+    const nBrackets = getNumBracketsForDisplay(displayName);
+    const lastBracketIndex = nBrackets - 1;
+    const lDisplayPrefix = displayPrefix(displayName);
+    const div = document.getElementById(lDisplayPrefix + "bracket_" + lastBracketIndex);
+    div.parentNode.removeChild(div);
 
-  div.remove();
-
-  setNumBracketsForDisplay(displayName, lastBracketIndex);
-  updateButtonStates();
+    setNumBracketsForDisplay(displayName, lastBracketIndex);
+    updateButtonStates();
 }
 
-$(document).ready(function() {
-  updateButtonStates();
+document.addEventListener("DOMContentLoaded", function() {
+    updateButtonStates();
 
-  $.each(displayNames, function(index, displayName) {
-    var prefix = displayPrefix(displayName);
-    $("#" + prefix + "add_bracket").click(function() {
-      addBracket(displayName);
-    });
+    for (const displayName of displayNames) {
+        const prefix = displayPrefix(displayName);
+        document.getElementById(prefix + "add_bracket").addEventListener("click", function() {
+            addBracket(displayName);
+        });
 
-    $("#" + prefix + "remove_bracket").click(function() {
-      removeBracket(displayName);
-    });
-
-  });
+        document.getElementById(prefix + "remove_bracket").addEventListener("click", function() {
+            removeBracket(displayName);
+        });
+    }
 });
