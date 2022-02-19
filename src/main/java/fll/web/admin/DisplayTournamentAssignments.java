@@ -51,7 +51,11 @@ public class DisplayTournamentAssignments extends BaseFLLServlet {
     response.setContentType("text/html");
 
     final Formatter formatter = new Formatter(response.getWriter());
-    formatter.format("<html><body>");
+    formatter.format("<!DOCTYPE HTML>%n");
+    formatter.format("<html>%n");
+    formatter.format("<head><link rel=\"stylesheet\" type=\"text/css\" href=\"../style/fll-sw.css\" /></head>%n");
+
+    formatter.format("<body>%n");
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection();
@@ -65,10 +69,10 @@ public class DisplayTournamentAssignments extends BaseFLLServlet {
             + " ORDER BY Teams.TeamNumber" //
         )) {
       for (final Tournament tournament : Tournament.getTournaments(connection)) {
-        formatter.format("<h1>%s</h1>", tournament.getDescription());
+        formatter.format("<h1>%s</h1>%n", tournament.getDescription());
 
-        formatter.format("<table border='1'>");
-        formatter.format("<tr><th>Number</th><th>Name</th><th>Award Group</th><th>Judging Group</th></tr>");
+        formatter.format("<table border='1'>%n");
+        formatter.format("<tr><th>Number</th><th>Name</th><th>Award Group</th><th>Judging Group</th></tr>%n");
         prep.setInt(1, tournament.getTournamentID());
         try (ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
@@ -85,13 +89,13 @@ public class DisplayTournamentAssignments extends BaseFLLServlet {
             final String judgingGroup = rs.getString(4);
             formatter.format("<td>%s</td>", judgingGroup);
 
-            formatter.format("</tr>");
+            formatter.format("</tr>%n");
           }
         }
-        formatter.format("</table>");
+        formatter.format("</table>%n");
       }
 
-      formatter.format("</body></html>");
+      formatter.format("</body></html>%n");
     } catch (final SQLException e) {
       throw new FLLRuntimeException(e);
     }
