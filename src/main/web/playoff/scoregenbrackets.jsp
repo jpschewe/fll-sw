@@ -12,9 +12,6 @@
 
 <fll-sw:required-roles roles="ADMIN,REF" allowSetup="false" />
 
-<script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
-
-
 <%
 fll.web.playoff.ScoregenBrackets.populateContext(application, request, pageContext);
 %>
@@ -89,7 +86,7 @@ FONT.TIE {
     </c:forEach>
   }
 
-  $(document).ready(function() {
+  document.addDocumentListener("DOMContentLoaded", function() {
     <%-- must be on 1 line --%>
     ${bracketInfo.tableSyncFunctionsOutput}
   });
