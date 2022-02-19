@@ -11,9 +11,6 @@ fll.web.playoff.BracketParameters.populateContext(application, session, pageCont
 <head>
 <title>Bracket Parameters</title>
 
-<script type='text/javascript'
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 </head>
@@ -22,7 +19,7 @@ fll.web.playoff.BracketParameters.populateContext(application, session, pageCont
   function sanityCheck() {
 
     <c:if test="${not empty tableInfo}">
-    var selectedTables = $("input[name='tables']:checked");
+    const selectedTables = document.queryQuerySelectorAll("input[name='tables']:checked");
     if (selectedTables.length == 0) {
       alert('You must select at least 1 pair of tables to run the bracket on.');
       return false;
