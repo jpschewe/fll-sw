@@ -15,9 +15,6 @@ html {
     margin-right: 5px;
 }
 </style>
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-<!-- js to reload a frame from http://stackoverflow.com/a/4249946/506326 -->
 </head>
 <frameset rows="25,*,65" border='1' framespacing='0'>
     <frame name='title' id='title' src='title.jsp' marginheight='0'
