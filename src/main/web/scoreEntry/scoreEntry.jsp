@@ -46,33 +46,20 @@ body {
     background-color: red;
 }
 </style>
-
-<script
-  type="text/javascript"
-  src="<c:url value='/extlib/jquery-1.11.1.min.js' />"></script>
-
-<link rel="stylesheet"
-    type="text/css"
-    href="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.css' />" />
-
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.js' />"></script>
+    
+<script type='text/javascript' src="<c:url value='/js/fll-functions.js'/>"></script>
+<script type='text/javascript' src="<c:url value='/js/fll-objects.js'/>"></script>
+    
 
 <c:if test="${not showScores}">
     <link rel="stylesheet" type="text/css" href="hide-score.css" />
 </c:if>
-
-<script
-  type='text/javascript'
-  src='scoreEntry.js'></script>
 
 <script type="text/javascript">
 var EditFlag = false;
 <c:if test="${EditFlag}">
 EditFlag = true;
 </c:if>
-
-    <c:if test="${not isBye}">
 
 function init() {
   <%ScoreEntry.generateInit(out, application, pageContext);%>
@@ -100,25 +87,27 @@ function refresh() {
 
 function check_restrictions() {
   var error_found = false;
-  $("#score-errors").empty();
+  removeChildren(document.getElementById("score-errors"));
   
 <%ScoreEntry.generateCheckRestrictionsBody(out, application);%>
 
+  const submitScoreButton = document.getElementById("submit_score")
   if(error_found) {
-    $("#submit_score").attr('disabled', true);
-    $("#score-errors").show();
+    if(submitScoreButton) {
+      submitScoreButton.disabled = true;
+    }
+    document.getElementById("score-errors").style.visibility = "visible";
   } else {
-    $("#submit_score").attr('disabled', false);
-    $("#score-errors").hide();
+    if(submitScoreButton) {
+      submitScoreButton.disabled = false;
+    }
+    document.getElementById("score-errors").style.visibility = "hidden";
   }
 }
 
 <%ScoreEntry.generateIsConsistent(out, application);%>
 
-
 <%ScoreEntry.generateIncrementMethods(out, application, request, session, pageContext);%>
-
-</c:if> <!-- end check for bye -->
 
 document.addEventListener('DOMContentLoaded', function() {
   const resetButton = document.getElementById("reset_score");
@@ -128,6 +117,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
+
+
+<script
+  type='text/javascript'
+  src='scoreEntry.js'></script>
 
 </head>
 
@@ -379,8 +373,12 @@ document.addEventListener('DOMContentLoaded', function() {
   </form>
   <!-- end score entry form -->
 
-    <div id="yesno-dialog">
-        <p id='yesno-dialog_text'></p>
+    <div class="dialog" id="yesno-dialog">
+        <div>
+            <p id='yesno-dialog_text'></p>
+            <button type='button' id='yesno-dialog_yes'>Yes</button>
+            <button type='button' id='yesno-dialog_no'>No</button>
+        </div>
     </div>
     
     <div>Challenge revision: ${challengeDescription.revision}</div>

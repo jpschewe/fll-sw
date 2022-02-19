@@ -13,9 +13,6 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,10 +21,12 @@ import fll.Team;
 import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.util.FLLInternalException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 import fll.web.playoff.BracketData.TopRightCornerStyle;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Data for remoteControlBrackets.jsp.
@@ -60,7 +59,6 @@ public final class RemoteControlBrackets {
 
       final List<BracketData> allBracketData = new LinkedList<>();
 
-      int numRows = 0;
       for (final DisplayInfo.H2HBracketDisplay h2hBracket : displayInfo.getBrackets()) {
         final BracketData bracketData = new BracketData(connection, h2hBracket.getBracket(), h2hBracket.getFirstRound(),
                                                         h2hBracket.getFirstRound()
@@ -69,8 +67,6 @@ public final class RemoteControlBrackets {
 
         bracketData.addBracketLabels(h2hBracket.getFirstRound());
         bracketData.addStaticTableLabels(connection);
-
-        numRows += bracketData.getNumRows();
 
         bracketData.generateBracketOutput(connection, TopRightCornerStyle.MEET_TOP_OF_CELL);
 
@@ -90,12 +86,8 @@ public final class RemoteControlBrackets {
       final String allBracketDataJson = writer.toString();
       pageContext.setAttribute("allBracketDataJson", allBracketDataJson);
 
-      // used for scroll control
-      final int msPerRow = GlobalParameters.getHeadToHeadMsPerRow(connection);
-      final int scrollDuration = numRows
-          * msPerRow;
-
-      pageContext.setAttribute("scrollDuration", scrollDuration);
+      final int scrollRate = GlobalParameters.getHeadToHeadScrollRate(connection);
+      pageContext.setAttribute("scrollRate", scrollRate);
     } catch (final SQLException sqle) {
       LOGGER.error("Error talking to the database", sqle);
       throw new RuntimeException("Error talking to the database", sqle);

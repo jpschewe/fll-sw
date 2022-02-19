@@ -123,21 +123,13 @@ public final class AllTeams {
       final List<String> sponsorLogos = getSponsorLogos(application);
 
       // estimate how many rows there are
-      final int msPerRow = GlobalParameters.getAllTeamsMsPerRow(connection);
-      final int scrollDuration = msPerRow // ms per row
-          * (1
-              * teamsWithScores.size() // award group, organization, team
-                                       // name, hr, scores header
-              + numScores // one row for each score
-              + (teamsWithScores.size()
-                  / TEAMS_BETWEEN_LOGOS)// one row for each sponsor logo
-          );
+      final int scrollRate = GlobalParameters.getAllTeamScrollRate(connection);
 
       pageContext.setAttribute("sponsorLogos", sponsorLogos);
       pageContext.setAttribute("teamsBetweenLogos", Integer.valueOf(TEAMS_BETWEEN_LOGOS));
       pageContext.setAttribute("teamsWithScores", teamsWithScores);
       pageContext.setAttribute("scores", scores);
-      pageContext.setAttribute("scrollDuration", Integer.valueOf(scrollDuration));
+      pageContext.setAttribute("scrollRate", Integer.valueOf(scrollRate));
       pageContext.setAttribute("teamHeaderColor", teamHeaderColor);
 
     } catch (final SQLException sqle) {

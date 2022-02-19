@@ -14,37 +14,39 @@ fll.web.report.finalist.FinalistTeams.populateContext(application, pageContext);
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/base.css'/>" />
 
-<link rel='stylesheet' type='text/css' href='../../style/base.css' />
 <link rel='stylesheet' type='text/css'
-    href='../../scoreboard/score_style.css' />
+    href='<c:url value="/scoreboard/score_style.css"/>' />
 
 
 <script type='text/javascript'
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery.scrollTo/jquery.scrollTo.min.js'/>"></script>
+    src="<c:url value='/js/fll-functions.js'/>"></script>
 
 <script type="text/javascript">
-  var scrollDuration = parseInt("${scrollDuration}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
+  const scrollRate = parseInt("${scrollRate}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
 
-  function bottomReload() {
-    console.log("In bottomReload");
-    $.scrollTo($("#top"));
+  function reload() {
+    window.scrollTo(0, 0);
     location.reload(true);
   }
 
-  function scrollToBottom() {
-    $.scrollTo($("#bottom"), {
-      duration : scrollDuration,
-      easing : 'linear',
-      onAfter : bottomReload,
-    });
+  function scrollDown() {
+    if (!elementIsVisible(document.getElementById("bottom"))) {
+      window.scrollBy({
+        left : 0,
+        top : scrollRate,
+        behavior : 'smooth'
+      });
+      requestAnimationFrame(scrollDown);
+    } else {
+      // show the last scores for a bit and then reload
+      setTimeout(reload, 3000);
+    }
   }
 
-  $(document).ready(function() {
+  document.addEventListener("DOMContentLoaded", function() {
     <c:if test="${param.finalistTeamsScroll}">
     console.log("Starting scroll");
-    scrollToBottom();
+    requestAnimationFrame(scrollDown);
     </c:if>
   });
 </script>
@@ -52,10 +54,6 @@ fll.web.report.finalist.FinalistTeams.populateContext(application, pageContext);
 </head>
 
 <body class='scoreboard'>
-    <div id="top">
-        &nbsp;
-    </div>
-
     <div class='status-message'>${message}</div>
     <%-- clear out the message, so that we don't see it again --%>
     <c:remove var="message" />
@@ -82,8 +80,6 @@ fll.web.report.finalist.FinalistTeams.populateContext(application, pageContext);
 
     </table>
 
-    <div id="bottom">
-        &nbsp;
-    </div>
+    <div id="bottom">&nbsp;</div>
 </body>
 </html>

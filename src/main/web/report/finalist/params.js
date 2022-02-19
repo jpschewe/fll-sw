@@ -6,177 +6,167 @@
 
 "use strict";
 
-const finalistParamsModule = {
-    initTimePicker: function(field, scrollDefault) {
-        field.timepicker({
-            step: 5,
-            minTime: '8:00am',
-            maxTime: '10:00pm',
-            scrollDefault: scrollDefault
-        });
-    },
+const finalistParamsModule = {}
 
-    setTimeField: function(field, value) {
-        if (value == undefined || value == null) {
-            field.timepicker('setTime', null);
+{
+    const TIME_FORMATTER = JSJoda.DateTimeFormatter.ofPattern("HH:mm");
+
+    /**
+     * @param newDateStr string value to parse as a time
+     * @return JSJoda.LocalTime or null
+     */
+    finalistParamsModule.parseTime = function(newDateStr) {
+        if (null == newDateStr || undefined == newDateStr || "" == newDateStr) {
+            return null;
         } else {
-            const newDate = JSJoda.convert(value.atDate(JSJoda.LocalDate.now())).toDate();
-            field.timepicker('setTime', newDate);
+            const newLocalTime = JSJoda.LocalTime.parse(newDateStr);
+            return newLocalTime;
         }
-    },
+    };
 
-    populateHeadToHeadTimes: function() {
-        $("#head_head_times").empty();
+    /**
+     * @param field HTML Element
+     * @param value JSJoda.LocalTime
+     */
+    finalistParamsModule.setTimeField = function(field, value) {
+        if (value == undefined || value == null) {
+            field.value = "";
+        } else {
+            const formatted = value.format(TIME_FORMATTER);
+            field.value = formatted;
+        }
+    };
 
-        const defaultTime = new Date();
+    finalistParamsModule.populateHeadToHeadTimes = function() {
+        removeChildren(document.getElementById("head_head_times"));
 
-        $
-            .each(
-                $.finalist.getPlayoffSchedules(),
-                function(bracketName, playoffSchedule) {
-                    const startTimeElement = $("<input type='text' size='8'/>");
-                    finalistParamsModule.initTimePicker(startTimeElement, defaultTime);
-
-                    startTimeElement.on('changeTime', function() {
-                        const newDate = startTimeElement.timepicker('getTime');
-                        if (null == newDate) {
-                            $.finalist.setPlayoffStartTime(bracketName, null);
-                        } else {
-                            const newLocalTime = JSJoda.LocalTime.of(newDate.getHours(), newDate.getMinutes());
-                            $.finalist.setPlayoffStartTime(bracketName, newLocalTime);
-                        }
-                        $.finalist.saveToLocalStorage();
-                    });
-
-                    finalistParamsModule.setTimeField(startTimeElement, playoffSchedule.startTime);
+        const playoffSchedules = finalist_module.getPlayoffSchedules();
+        Object.keys(playoffSchedules).forEach(function(bracketName) {
+            const playoffSchedule = playoffSchedules[bracketName];
+            const startTimeElement = document.createElement("input");
+            startTimeElement.setAttribute("type", "time");
+            startTimeElement.addEventListener('change', function() {
+                const newLocalTime = finalistParamsModule.parseTime(this.value);
+                finalist_module.setPlayoffStartTime(bracketName, newLocalTime);
+                finalist_module.saveToLocalStorage();
+            });
+            finalistParamsModule.setTimeField(startTimeElement, playoffSchedule.startTime);
 
 
-                    const endTimeElement = $("<input type='text' size='8' />");
-                    finalistParamsModule.initTimePicker(endTimeElement, defaultTime);
+            const endTimeElement = document.createElement("input");
+            endTimeElement.setAttribute("type", "time");
+            endTimeElement.addEventListener('change', function() {
+                const newLocalTime = finalistParamsModule.parseTime(this.value);
+                finalist_module.setPlayoffEndTime(bracketName, newLocalTime);
+                finalist_module.saveToLocalStorage();
+            });
+            finalistParamsModule.setTimeField(endTimeElement, playoffSchedule.endTime);
 
-                    endTimeElement.on('changeTime', function() {
-                        const newDate = endTimeElement.timepicker('getTime');
-                        if (null == newDate) {
-                            $.finalist.setPlayoffEndTime(bracketName, null);
-                        } else {
-                            const newLocalTime = JSJoda.LocalTime.of(newDate.getHours(), newDate.getMinutes());
-                            $.finalist.setPlayoffEndTime(bracketName, newLocalTime);
-                        }
-                        $.finalist.saveToLocalStorage();
-                    });
+            const paragraph = document.createElement("p");
+            const h2hTimesLabel = document.createElement("b");
+            paragraph.appendChild(h2hTimesLabel);
+            h2hTimesLabel.appendChild(document.createTextNode("Head to Head bracket " + bracketName
+                + " times"));
+            paragraph.appendChild(document.createElement("br"));
 
-                    finalistParamsModule.setTimeField(endTimeElement, playoffSchedule.endTime);
+            paragraph.appendChild(document.createTextNode("Start: "));
+            paragraph.appendChild(startTimeElement);
+            paragraph.appendChild(document.createElement("br"));
 
-                    const paragraph = $("<p></p>");
-                    paragraph.append("<b>Head to Head bracket " + bracketName
-                        + " times</b><br/>");
-                    paragraph.append("Start: ");
-                    paragraph.append(startTimeElement);
-                    paragraph.append("<br/>");
+            paragraph.appendChild(document.createTextNode("End: "));
+            paragraph.appendChild(endTimeElement);
+            paragraph.appendChild(document.createElement("br"));
 
-                    paragraph.append("End: ");
-                    paragraph.append(endTimeElement);
-                    paragraph.append("<br/>");
-                    $("#head_head_times").append(paragraph);
+            document.getElementById("head_head_times").appendChild(paragraph);
+        });
 
-                });
+    };
 
-    },
+    finalistParamsModule.updateDivision = function() {
+        const startTime = finalist_module.getStartTime(finalist_module.getCurrentDivision());
+        document.getElementById("startTime").value = startTime.format(TIME_FORMATTER);
 
-    updateDivision: function() {
-        const startTime = $.finalist.getStartTime($.finalist.getCurrentDivision());
-        const startTimeDate = JSJoda.convert(startTime.atDate(JSJoda.LocalDate.now())).toDate();
-        $("#startTime").timepicker('setTime', startTimeDate);
-
-        const duration = $.finalist.getDuration($.finalist.getCurrentDivision());
+        const duration = finalist_module.getDuration(finalist_module.getCurrentDivision());
         finalistParamsModule.setDurationDisplay(duration);
-    },
+    };
 
-    setDurationDisplay: function(duration) {
-        $("#duration").val(duration);
-    }
+    finalistParamsModule.setDurationDisplay = function(duration) {
+        document.getElementById("duration").value = duration;
+    };
 
 } // end scope for page
 
-$(document).ready(
-    function() {
-        $.finalist.loadFromLocalStorage();
+document.addEventListener('DOMContentLoaded', function() {
+    finalist_module.loadFromLocalStorage();
 
-        $("#divisions").empty();
+    const divisionsElement = document.getElementById("divisions");
+    removeChildren(divisionsElement)
 
-        const teams = $.finalist.getAllTeams();
-        $.each($.finalist.getDivisions(), function(i, division) {
-            let selected = "";
-            if (division == $.finalist.getCurrentDivision()) {
-                selected = " selected ";
-            }
-            const divisionOption = $("<option value='" + i + "'" + selected + ">"
-                + division + "</option>");
-            $("#divisions").append(divisionOption);
+    const teams = finalist_module.getAllTeams();
+    const divisions = finalist_module.getDivisions();
+    divisions.forEach(function(division, i) {
+        const divisionOption = document.createElement("option");
+        divisionOption.setAttribute("value", i);
+        divisionOption.innerText = division;
+        if (division == finalist_module.getCurrentDivision()) {
+            divisionOption.setAttribute("selected", "true");
+        }
+        divisionsElement.appendChild(divisionOption);
 
-            // initialize categories with the auto selected teams
-            const scoreGroups = $.finalist.getScoreGroups(teams, division);
+        // initialize categories with the auto selected teams
+        const scoreGroups = finalist_module.getScoreGroups(teams, division);
+        const numericCategories = finalist_module.getNumericCategories();
+        numericCategories.forEach(function(category, _) {
+            finalist_module.initializeTeamsInNumericCategory(division, category,
+                teams, scoreGroups);
+            finalist_module.saveToLocalStorage();
+        });// foreach numeric category
+    }); // foreach division
 
-            $.each($.finalist.getNumericCategories(), function(i, category) {
-                $.finalist.initializeTeamsInNumericCategory(division, category,
-                    teams, scoreGroups);
-                $.finalist.saveToLocalStorage();
-            });// foreach numeric category
-        }); // foreach division
+    finalist_module.setCurrentDivision(finalist_module.getDivisionByIndex(divisionsElement.value));
 
-        $.finalist.setCurrentDivision($.finalist.getDivisionByIndex($(
-            "#divisions").val()));
+    // before change listeners to avoid loop
+    finalistParamsModule.updateDivision();
 
-        $("#startTime").timepicker({
-            step: 5,
-            minTime: '8:00am',
-            maxTime: '10:00pm',
-        });
 
-        // before change listeners to avoid loop
+    document.getElementById("startTime").addEventListener('change', function() {
+        const newLocalTime = finalistParamsModule.parseTime(this.value);
+        finalist_module.setStartTime(finalist_module.getCurrentDivision(), newLocalTime);
+        finalist_module.saveToLocalStorage();
+    });
+
+    document.getElementById("duration").addEventListener('change', function() {
+        const minutes = parseInt(this.value, 10);
+        if (isNaN(minutes)) {
+            alert("Duration must be an integer");
+            finalistParamsModule.setDurationDisplay(finalist_module.getDuration(finalist_module.getCurrentDivision()));
+        } else if (minutes < 5) {
+            alert("Duration must be at least 5 minutes");
+            finalistParamsModule.setDurationDisplay(finalist_module.getDuration(finalist_module.getCurrentDivision()));
+        } else {
+            finalist_module.setDuration(finalist_module.getCurrentDivision(), minutes);
+        }
+
+        finalist_module.saveToLocalStorage();
+    });
+
+    document.getElementById("divisions").addEventListener('change', function() {
+        const divIndex = this.value;
+        const div = finalist_module.getDivisionByIndex(divIndex);
+        finalist_module.setCurrentDivision(div);
         finalistParamsModule.updateDivision();
 
+        finalist_module.saveToLocalStorage();
+    });
 
-        $("#startTime").on('changeTime', function() {
-            const newDate = $('#startTime').timepicker('getTime');
-            const newLocalTime = JSJoda.LocalTime.of(newDate.getHours(), newDate.getMinutes());
-            $.finalist.setStartTime($.finalist.getCurrentDivision(), newLocalTime);
+    document.getElementById("next").addEventListener('click', function() {
+        location.href = "non-numeric.html";
+    });
 
-            $.finalist.saveToLocalStorage();
-        });
+    finalistParamsModule.populateHeadToHeadTimes();
 
-        $("#duration").change(function() {
-            const minutes = parseInt($(this).val(), 10);
-            if (isNaN(minutes)) {
-                alert("Duration must be an integer");
-                finalistParamsModule.setDurationDisplay($.finalist.getDuration($.finalist.getCurrentDivision()));
-            } else if (minutes < 5) {
-                alert("Duration must be at least 5 minutes");
-                finalistParamsModule.setDurationDisplay($.finalist.getDuration($.finalist.getCurrentDivision()));
-            } else {
-                $.finalist.setDuration($.finalist.getCurrentDivision(), minutes);
-            }
+    finalist_module.saveToLocalStorage();
 
-            $.finalist.saveToLocalStorage();
-        });
+    finalist_module.displayNavbar();
 
-        $("#divisions").change(function() {
-            const divIndex = $(this).val();
-            const div = $.finalist.getDivisionByIndex(divIndex);
-            $.finalist.setCurrentDivision(div);
-            finalistParamsModule.updateDivision();
-
-            $.finalist.saveToLocalStorage();
-        });
-
-        $("#next").click(function() {
-            location.href = "non-numeric.html";
-        });
-
-        finalistParamsModule.populateHeadToHeadTimes();
-
-        $.finalist.saveToLocalStorage();
-
-        $.finalist.displayNavbar();
-
-    }); // end ready function
+}); // end ready function

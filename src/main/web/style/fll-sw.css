@@ -1,7 +1,7 @@
 @import url("base.css");
 @import url("navbar.css");
 
-BODY {
+body {
     background: #FFFCFF;
     /*margin-top: 4;*/
     font-family: sans-serif;

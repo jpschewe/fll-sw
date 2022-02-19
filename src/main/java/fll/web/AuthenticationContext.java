@@ -13,12 +13,14 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Authentication information for a web session.
@@ -158,21 +160,21 @@ public final class AuthenticationContext implements Serializable {
    * Defaults {@code inSetup} to false.
    * 
    * @param request
-   *          {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
+   *          {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
    * @param response
-   *          {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
+   *          {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
    * @param session
-   *          {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
+   *          {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
    * @param requiredRoles
-   *          {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
-   * @return {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
+   *          {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
+   * @return {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
    * @throws ServletException
-   *           {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
+   *           {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
    * @throws IOException
-   *           {@link #requireRoles(ServletRequest, ServletResponse, HttpSession, Set, boolean)}
+   *           {@link #requireRoles(HttpServletRequest, HttpServletResponse, HttpSession, Set, boolean)}
    */
-  public boolean requireRoles(final ServletRequest request,
-                              final ServletResponse response,
+  public boolean requireRoles(final HttpServletRequest request,
+                              final HttpServletResponse response,
                               final HttpSession session,
                               final Set<UserRole> requiredRoles)
       throws ServletException, IOException {
@@ -189,12 +191,12 @@ public final class AuthenticationContext implements Serializable {
    * @param requiredRoles the roles that are required
    * @param allowSetup true if being in setup allows bypass of roles
    * @return true if the roles are met, false if the roles are not met and the
-   *         page is forwarded to login
+   *         page is redirected to login
    * @throws ServletException on an error forwarding to login
    * @throws IOException on an error forwarding to login
    */
-  public boolean requireRoles(final ServletRequest request,
-                              final ServletResponse response,
+  public boolean requireRoles(final HttpServletRequest request,
+                              final HttpServletResponse response,
                               final HttpSession session,
                               final Set<UserRole> requiredRoles,
                               final boolean allowSetup)
@@ -222,7 +224,9 @@ public final class AuthenticationContext implements Serializable {
                                               + requiredRoles.stream().map(Object::toString)
                                                              .collect(Collectors.joining(", "))
                                               + "</p>");
-        request.getRequestDispatcher("/login.jsp").forward(request, response);
+
+        FormParameterStorage.storeParameters(request, session);
+        response.sendRedirect(response.encodeRedirectURL("/login.jsp"));
         return false;
       } else {
         return true;
@@ -230,4 +234,5 @@ public final class AuthenticationContext implements Serializable {
     }
 
   }
+
 }

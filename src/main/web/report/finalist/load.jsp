@@ -3,7 +3,7 @@
 <fll-sw:required-roles roles="HEAD_JUDGE" allowSetup="false" />
 
 <%
-	if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(response, application, session,
+if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(response, application, session,
 		"/report/finalist/load.jsp")) {
 	return;
 }
@@ -19,12 +19,6 @@
 
 <script type='text/javascript'
     src='../../extlib/js-joda/packages/core/dist/js-joda.min.js'></script>
-
-<link rel="stylesheet" type="text/css"
-    href='../../extlib/jquery-ui-1.12.1/jquery-ui.min.css' />
-
-<script type="text/javascript"
-    src='../../extlib/jquery-ui-1.12.1/jquery-ui.min.js'></script>
 
 <script type='text/javascript' src='../../js/fll-functions.js'></script>
 <script type='text/javascript' src='../../js/fll-objects.js'></script>
@@ -55,14 +49,18 @@
         </div>
 
         <div>
-            <button id='keep'>No, just refresh the list of teams and their scores</button>
+            <button id='keep'>No, just refresh the list of
+                teams and their scores</button>
             Choose this if you have made changes to finalists and have
             not saved this information to the database.
         </div>
     </div>
 
-    <div id="wait-dialog">
-        <p id='wait-dialog_text'>Loading data. Please wait...</p>
+    <div class="dialog" id="wait-dialog">
+        <div>
+            <div id='wait-dialog_text'>Loading data. Please
+                wait...</div>
+        </div>
     </div>
 
 

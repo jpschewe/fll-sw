@@ -107,14 +107,31 @@ public final class Tournaments extends BaseFLLServlet {
     }
   }
 
-  /** This matches the format used by the jquery UI datepicker. */
-  public static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.MONTH_OF_YEAR,
+  /** This matches the format used by the HTML datetime-local input type. */
+  public static final DateTimeFormatter DATE_TIME_FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.YEAR,
+                                                                                                         4)
+                                                                                            .appendLiteral('-')
+                                                                                            .appendValue(ChronoField.MONTH_OF_YEAR,
+                                                                                                         2)
+                                                                                            .appendLiteral('-')
+                                                                                            .appendValue(ChronoField.DAY_OF_MONTH,
+                                                                                                         2)
+                                                                                            .appendLiteral('T')
+                                                                                            .appendValue(ChronoField.HOUR_OF_DAY,
+                                                                                                         2)
+                                                                                            .appendLiteral(':')
+                                                                                            .appendValue(ChronoField.MINUTE_OF_HOUR,
+                                                                                                         2)
+                                                                                            .toFormatter();
+
+  /** This matches the format used by the HTML date input type. */
+  public static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.YEAR, 4)
+                                                                                       .appendLiteral('-')
+                                                                                       .appendValue(ChronoField.MONTH_OF_YEAR,
                                                                                                     2)
-                                                                                       .appendLiteral('/')
+                                                                                       .appendLiteral('-')
                                                                                        .appendValue(ChronoField.DAY_OF_MONTH,
                                                                                                     2)
-                                                                                       .appendLiteral('/')
-                                                                                       .appendValue(ChronoField.YEAR, 4)
                                                                                        .toFormatter();
 
   @Override

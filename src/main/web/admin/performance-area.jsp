@@ -164,11 +164,27 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         </li>
 
         <li>
-            On the server click on <a target="_remote_control"
-                id='remote-control' href='remoteControl.jsp'>Control
-                the Remote display</a>. This is used to control what is
-            displayed on the screens
+            <a target="_remote_control" id='remote-control'
+                href='remoteControl.jsp'>Remote Control of the
+                display</a>. This is used to control what is displayed on
+            the screens
         </li>
+
+        <li>
+            <a target="_scoreEntry"
+                href="<c:url value='/scoreEntry/choose-table.jsp' />">Performance
+                score entry</a>. Choose all tables when prompted.
+        </li>
+
+        <li>
+            <a target="_unverified"
+                href="<c:url value='/report/unverifiedRuns.jsp'/>">Check
+                performance runs that have not been verified</a>
+        </li>
+
+        <li>If a team does not show up for the tournament mark them
+            as a "No Show" for all events. This includes all performance
+            rounds and subjective judging.</li>
 
         <li>
             <form

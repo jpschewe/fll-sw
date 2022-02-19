@@ -105,7 +105,7 @@ public final class Tournament implements Serializable {
   }
 
   /**
-   * @return {@link #getDate()} formatted for jQuery UI
+   * @return {@link #getDate()} formatted for HTML date input type
    * @see Tournaments#DATE_FORMATTER
    */
   @JsonIgnore

@@ -135,6 +135,8 @@ public class SchedulerUI extends JFrame {
 
   private @MonotonicNonNull ColumnInformation columnInfo = null;
 
+  private String tournamentName = "unnamed";
+
   private SchedulerTableModel mScheduleModel = new SchedulerTableModel(mScheduleData);
 
   private ViolationTableModel mViolationsModel = new ViolationTableModel(Collections.emptyList());
@@ -780,13 +782,12 @@ public class SchedulerUI extends JFrame {
       try {
         final File selectedFile = getScheduleFile();
         final String sheetName = getCurrentSheetName();
-        final String name = Utilities.extractBasename(selectedFile);
 
         if (null == columnInfo) {
           throw new IllegalStateException("Cannot reload a schedule without having specified the column information");
         }
 
-        final TournamentSchedule newData = new TournamentSchedule(name,
+        final TournamentSchedule newData = new TournamentSchedule(tournamentName,
                                                                   CellFileReader.createCellReader(selectedFile,
                                                                                                   sheetName),
                                                                   columnInfo);
@@ -897,7 +898,7 @@ public class SchedulerUI extends JFrame {
           return;
         }
 
-        final String baseFilename = Utilities.extractBasename(getScheduleFile());
+        final String baseFilename = tournamentName;
         LOGGER.info("Writing detailed schedules to "
             + directory.getAbsolutePath());
 
@@ -918,12 +919,6 @@ public class SchedulerUI extends JFrame {
         }
         final ChallengeDescription description = challengeDescription;
         if (null == description) {
-          return;
-        }
-
-        final String tournamentName = JOptionPane.showInputDialog(SchedulerUI.this,
-                                                                  "What is the name of the tournament to put on the score sheets?");
-        if (null == tournamentName) {
           return;
         }
 
@@ -1136,9 +1131,13 @@ public class SchedulerUI extends JFrame {
 
       mSchedParams.setSubjectiveStations(newSubjectiveStations);
 
-      final String name = Utilities.extractBasename(selectedFile);
+      tournamentName = JOptionPane.showInputDialog(SchedulerUI.this,
+                                                   "What is the name of the tournament to put on the score sheets?");
+      if (null == tournamentName) {
+        return;
+      }
 
-      final TournamentSchedule schedule = new TournamentSchedule(name,
+      final TournamentSchedule schedule = new TournamentSchedule(tournamentName,
                                                                  CellFileReader.createCellReader(selectedFile,
                                                                                                  sheetName),
                                                                  columnInfo);

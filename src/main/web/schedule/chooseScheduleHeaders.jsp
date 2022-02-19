@@ -11,18 +11,6 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
 <title>Choose Headers (Upload Schedule)</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
-
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-validation/dist/jquery.validate.min.js'/>"></script>
-
-<script type="text/javascript">
-  $(document).ready(function() {
-    $("#choose_headers").validate();
-  });
-</script>
-
 </head>
 
 <body>
@@ -190,7 +178,6 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
             <tr>
                 <th>Subjective Category</th>
                 <th>Data file column name</th>
-                <th>Duration (minutes)</th>
             </tr>
             <c:forEach
                 items="${challengeDescription.subjectiveCategories}"
@@ -219,8 +206,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
 
         </table>
 
-        <input type="submit" id='submit_data'
-            onsubmit="return validateForm()" value="Submit" />
+        <input type="submit" id='submit_data' value="Submit" />
     </form>
 
 </body>

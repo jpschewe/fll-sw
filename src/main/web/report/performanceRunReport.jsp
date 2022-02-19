@@ -21,6 +21,22 @@ pageContext.setAttribute("divisions", Queries.getAwardGroups(connection));
     href="<c:url value='/style/fll-sw.css'/>" />
 <title>Performance Run
     <c:out value="${param.RunNumber}" /></title>
+
+<style>
+table#perf-data {
+    border-collapse: collapse;
+}
+
+table#perf-data, table#perf-data th, table#perf-data td {
+    border: 1px solid black;
+}
+
+table#perf-data th, table#perf-data td {
+    padding-right: 5px;
+    padding-left: 5px;
+}
+</style>
+
 </head>
 
 <body>
@@ -39,7 +55,7 @@ pageContext.setAttribute("divisions", Queries.getAwardGroups(connection));
                     Award Group
                     <c:out value="${division}" />
                 </h2>
-                <table border='1'>
+                <table id="perf-data">
                     <tr>
                         <th>Team Number</th>
                         <th>Team Name</th>
@@ -76,7 +92,10 @@ pageContext.setAttribute("divisions", Queries.getAwardGroups(connection));
                                 </c:otherwise>
                                 </c:choose>
                             </td>
-                            <td>${row.TIMESTAMP}</td>
+                            <td class="right">
+                                <fmt:formatDate value="${row.TIMESTAMP}"
+                                    pattern="h:mm" />
+                            </td>
                         </tr>
                     </c:forEach>
                 </table>

@@ -1,4 +1,17 @@
 * #1011 - Pause schedule checking while loading a new schedule file
+* #964 - Rework SubjectiveByJudge to be broken down by Judging Group rather than by Award Group
+* #1013 - Repalce jquery.scrollto
+* #1014 - Remove dependency on jquery-ui
+* Upgrade to JDK 17
+* #966 - Add report of regular match play runs vs. the schedule for the refs
+* #955 - Use redirect instead of forward for login redirection
+* #1000 - Add report of regular match play runs for the refs
+* #1012 - Remove need for jQuery validation library
+* #958 - Replace jQuery datetime picker and time picker with standard input types
+* #998 - Scale the main scoreboard based on screen size
+* #1006 - Use the tournament name as the base name when writing out schedules
+* #1009 - Add report that shows scaled and raw scores for all teams in an award group
+* #1002 - Display next round and schedule information when selecting teams for performance runs
 * #34 - Allow the user to specify which row in a spreadsheet is the header row and allow the user to specify all column mappings
 * Add number of practice rounds as a tournament parameter
 * #1008 - Report performance ties in the awards report
