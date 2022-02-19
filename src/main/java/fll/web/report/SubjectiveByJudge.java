@@ -18,7 +18,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
@@ -31,7 +30,6 @@ import org.w3c.dom.Element;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
@@ -140,9 +138,9 @@ public class SubjectiveByJudge extends BaseFLLServlet {
 
     final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, tournament.getTournamentID());
 
-    for (final String awardGroup : Queries.getAwardGroups(connection, tournament.getTournamentID())) {
+    for (final String judgingGroup : Queries.getJudgingStations(connection, tournament.getTournamentID())) {
       final Element ele = generateAwardGroupReport(connection, document, challengeDescription, tournament, teams,
-                                                   awardGroup);
+                                                   judgingGroup);
       documentBody.appendChild(ele);
       ele.setAttribute("page-break-after", "always");
     }
@@ -150,40 +148,22 @@ public class SubjectiveByJudge extends BaseFLLServlet {
     return document;
   }
 
-  /** collect list of judges per category for an award group */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Judging stations is a list to search in")
+  /** collect list of judges per category for a judging group */
   private Map<SubjectiveScoreCategory, List<String>> getJudgesPerCategory(final Connection connection,
                                                                           final ChallengeDescription challengeDescription,
                                                                           final Tournament tournament,
-                                                                          final String awardGroup)
+                                                                          final String judgingGroup)
       throws SQLException {
-
-    final List<String> judgingStationsInAwardGroup = new LinkedList<>();
-    try (PreparedStatement prep = connection.prepareStatement("SELECT DISTINCT judging_station" //
-        + " FROM TournamentTeams" //
-        + " WHERE tournament = ?" //
-        + "    AND event_division = ?")) {
-      prep.setInt(1, tournament.getTournamentID());
-      prep.setString(2, awardGroup);
-      try (ResultSet rs = prep.executeQuery()) {
-        while (rs.next()) {
-          judgingStationsInAwardGroup.add(String.format("'%s'", castNonNull(rs.getString(1))));
-        }
-      }
-    }
-    final String judgingStationsList = String.format("( %s )",
-                                                     judgingStationsInAwardGroup.stream()
-                                                                                .collect(Collectors.joining(", ")));
 
     final Map<SubjectiveScoreCategory, List<String>> judgesPerCategory = new LinkedHashMap<>();
     try (PreparedStatement getJudges = connection.prepareStatement("SELECT id as judge, station" //
         + " FROM judges" //
         + " WHERE tournament = ?" //
         + " AND category = ?" //
-        + " AND station IN "
-        + judgingStationsList //
+        + " AND station = ? " //
         + " ORDER BY judge ASC")) {
       getJudges.setInt(1, tournament.getTournamentID());
+      getJudges.setString(3, judgingGroup);
 
       for (final SubjectiveScoreCategory category : challengeDescription.getSubjectiveCategories()) {
         getJudges.setString(2, category.getName());
@@ -288,19 +268,19 @@ public class SubjectiveByJudge extends BaseFLLServlet {
                                            final ChallengeDescription challengeDescription,
                                            final Tournament tournament,
                                            final Map<Integer, TournamentTeam> teams,
-                                           final String awardGroup)
+                                           final String judgingGroup)
       throws SQLException {
     final Element agReport = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
     final Element agBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     agReport.appendChild(agBlock);
-    agBlock.appendChild(document.createTextNode(awardGroup));
+    agBlock.appendChild(document.createTextNode(judgingGroup));
     agBlock.setAttribute("font-weight", "bold");
 
     // collect list of judges per category
     final Map<SubjectiveScoreCategory, List<String>> judgesPerCategory = getJudgesPerCategory(connection,
                                                                                               challengeDescription,
-                                                                                              tournament, awardGroup);
+                                                                                              tournament, judgingGroup);
 
     final Map<TournamentTeam, Map<SubjectiveScoreCategory, Map<String, Data>>> ranks = gatherRanks(connection,
                                                                                                    tournament, teams,
@@ -345,8 +325,8 @@ public class SubjectiveByJudge extends BaseFLLServlet {
     table.appendChild(tableBody);
 
     for (final TournamentTeam team : teams.values()) {
-      if (!awardGroup.equals(team.getAwardGroup())) {
-        // only output teams for the current award group
+      if (!judgingGroup.equals(team.getJudgingGroup())) {
+        // only output teams for the current judging group
         continue;
       }
 
