@@ -86,7 +86,7 @@ FONT.TIE {
     </c:forEach>
   }
 
-  document.addDocumentListener("DOMContentLoaded", function() {
+  document.addEventListener("DOMContentLoaded", function() {
     <%-- must be on 1 line --%>
     ${bracketInfo.tableSyncFunctionsOutput}
   });
