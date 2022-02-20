@@ -904,9 +904,9 @@ public class BracketData extends BracketInfo {
 
             final int match = myD.getMatchNum();
 
-            sb.append(String.format("$(\"#tableA%d\").change(function() { matchTables($(\"#tableA%d\"), $(\"#tableB%d\")); });%n",
+            sb.append(String.format("document.getElementById(\"tableA%d\").addEventListener(\"change\", function() { matchTables(document.getElementById(\"tableA%d\"), document.getElementById(\"tableB%d\")); });%n",
                                     match, match, match));
-            sb.append(String.format("$(\"#tableB%d\").change(function() { matchTables($(\"#tableB%d\"), $(\"#tableA%d\")); });%n",
+            sb.append(String.format("document.getElementById(\"tableB%d\").addEventListener(\"change\", function() { matchTables(document.getElementById(\"tableB%d\"), document.getElementById(\"tableA%d\")); });%n",
                                     match, match, match));
           } // 2 valid teams
         } // ScoreSheet bracket cell
