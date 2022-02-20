@@ -71,14 +71,14 @@ FONT.TIE {
 
     <c:forEach items="${tableInfo}" var="info">
 
-    if (selectChanged.val() == "${info.sideA}") {
-      if (selectMatch.val() != "${info.sideB}") {
-        selectMatch.val("${info.sideB}");
+    if (selectChanged.value == "${info.sideA}") {
+      if (selectMatch.value != "${info.sideB}") {
+        selectMatch.value = "${info.sideB}";
       }
       return;
-    } else if (selectChanged.val() == "${info.sideB}") {
-      if (selectMatch.val() != "${info.sideA}") {
-        selectMatch.val("${info.sideA}");
+    } else if (selectChanged.value == "${info.sideB}") {
+      if (selectMatch.value != "${info.sideA}") {
+        selectMatch.value = "${info.sideA}";
       }
       return;
     }
