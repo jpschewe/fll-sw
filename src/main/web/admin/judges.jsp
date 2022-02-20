@@ -9,7 +9,8 @@
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
-<script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
+<script type='text/javascript'
+    src="<c:url value='/js/fll-functions.js'/>"></script>
 
 <script type='text/javascript'>
 var maxIndex = ${fn:length(JUDGES)};
@@ -119,7 +120,7 @@ categories["${cat.key}"] = "${cat.value}";
 
         <input type='text' name='num_rows' id='num_rows' value='1'
             size='10' />
-        <button id='add_rows'>Add Rows</button>
+        <button type='button' id='add_rows'>Add Rows</button>
         <br />
         <input type='submit' id='finished' name='finished'
             value='Finished' />

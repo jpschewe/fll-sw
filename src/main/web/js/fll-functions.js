@@ -116,3 +116,10 @@ function elementIsVisible(element) {
         bounding.right <= (window.innerWidth || document.documentElement.clientWidth) &&
         bounding.bottom <= (window.innerHeight || document.documentElement.clientHeight);
 }
+
+/**
+ * @return true if val is a number 
+ */
+function isNumeric(val) {
+    return Number(parseFloat(val)) === val;
+}
