@@ -7,7 +7,7 @@
 "use strict";
 
 function checkSomethingToPrint() {
-    var somethingToPrint = false;
+    let somethingToPrint = false;
     for (const checkbox of document.querySelectorAll('input[type=checkbox]')) {
         if (checkbox.checked) {
             somethingToPrint = true;
