@@ -19,7 +19,7 @@ fll.web.playoff.BracketParameters.populateContext(application, session, pageCont
   function sanityCheck() {
 
     <c:if test="${not empty tableInfo}">
-    const selectedTables = document.queryQuerySelectorAll("input[name='tables']:checked");
+    const selectedTables = document.querySelectorAll("input[name='tables']:checked");
     if (selectedTables.length == 0) {
       alert('You must select at least 1 pair of tables to run the bracket on.');
       return false;
