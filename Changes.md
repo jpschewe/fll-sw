@@ -1,3 +1,5 @@
+Release 16.5.0
+==============
 * #964 - Rework SubjectiveByJudge to be broken down by Judging Group rather than by Award Group
 * #1013 - Repalce jquery.scrollto
 * #1014 - Remove dependency on jquery-ui
