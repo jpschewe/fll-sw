@@ -8,7 +8,8 @@
 
 function checkSomethingToPrint() {
     let somethingToPrint = false;
-    for (const checkbox of document.querySelectorAll('input[type=checkbox]')) {
+    // htmlunit doesn't handle const in a for loop, so skip it here - https://github.com/HtmlUnit/htmlunit/issues/449
+    for (checkbox of document.querySelectorAll('input[type=checkbox]')) {
         if (checkbox.checked) {
             somethingToPrint = true;
         }
