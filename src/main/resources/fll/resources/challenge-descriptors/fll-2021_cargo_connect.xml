@@ -652,5 +652,6 @@
   <nonNumericCategory perAwardGroup="true" title="Creative Presentation">
   </nonNumericCategory>
   <nonNumericCategory perAwardGroup="false" title="Judges Award">
+    <description>This award is given at the Judges discretion to a team that deserves recognition but does not fit it another category.</description>
   </nonNumericCategory>
 </fll>
