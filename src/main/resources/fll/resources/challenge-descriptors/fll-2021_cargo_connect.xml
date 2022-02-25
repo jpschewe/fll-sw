@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><fll copyright="" revision="19" schemaVersion="3" title="2021 Minnesota FIRST LEGO League - Cargo Connect" winner="HIGH">
+<?xml version="1.0" encoding="UTF-8"?><fll copyright="" revision="20" schemaVersion="3" title="2021 Minnesota FIRST LEGO League - Cargo Connect" winner="HIGH">
   <Performance minimumScore="0.00" weight="1.00">
     <goalGroup title="M00">
       <description>EQUIPMENT INSPECTION BONUS</description>
@@ -650,6 +650,7 @@
     <description>Referee Submitted Award for most Creative Innovation Project presented by team </description>
   </nonNumericCategory>
   <nonNumericCategory perAwardGroup="true" title="Creative Presentation">
-    <description>Creative Presentation</description>
+  </nonNumericCategory>
+  <nonNumericCategory perAwardGroup="false" title="Judges Award">
   </nonNumericCategory>
 </fll>
