@@ -1,3 +1,5 @@
+* Rework scrolling to be compatible across Chrome and Firefox
+
 Release 16.5.0
 ==============
 * #964 - Rework SubjectiveByJudge to be broken down by Judging Group rather than by Award Group

@@ -68,17 +68,25 @@ SPAN.TIE {
 <script type='text/javascript' src='remoteControlBrackets.js'></script>
 
 <script type="text/javascript">
+let prevScrollTimestamp = 0;
+const secondsBetweenScrolls = parseFloat("${scrollRate}");
+const pixelsToScroll = 1;
 let scrollingDown = true;
 
-function doScroll() {
-  if(scrollingDown && elementIsVisible(document.getElementById("bottom"))) {
-      scrollingDown = false;
-  } else if(!scrollingDown && elementIsVisible(document.getElementById("top"))) {
-      scrollingDown = true;
+function doScroll(timestamp) {
+  const diff = timestamp - prevScrollTimestamp;
+  if (diff >= secondsBetweenScrolls) {
+      if(scrollingDown && elementIsVisible(document.getElementById("bottom"))) {
+          scrollingDown = false;
+      } else if(!scrollingDown && elementIsVisible(document.getElementById("top"))) {
+          scrollingDown = true;
+      }
+
+      const scrollAmount = scrollingDown ? pixelsToScroll : -1 * pixelsToScroll;
+      window.scrollBy(0, scrollAmount);
+      prevScrollTimestamp = timestamp;
   }
 
-  const scrollAmount = scrollingDown ? scrollRate : -1 * scrollRate;
-  window.scrollBy({left: 0, top: scrollAmount, behavior: 'smooth'});
   requestAnimationFrame(doScroll);
 }
 
