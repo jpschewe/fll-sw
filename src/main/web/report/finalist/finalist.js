@@ -644,7 +644,7 @@ const finalist_module = {}
                                 scoreGroups[group] = scoreGroups[group] - 1;
 
                                 checkedEnoughTeams = true;
-                                for (const value of scoreGroups) {
+                                for (const [g, value] of Object.entries(scoreGroups)) {
                                     if (value > 0) {
                                         checkedEnoughTeams = false;
                                     }
