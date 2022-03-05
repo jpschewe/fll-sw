@@ -14,10 +14,6 @@
 
 <title>Display</title>
 
-<script
-  type="text/javascript"
-  src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-
 <script type='text/javascript' src="<c:url value='/js/fll-functions.js' />"></script>
 
 <script type='text/javascript'>
@@ -71,9 +67,11 @@
   };
 
   function update() {
-    $.getJSON("<c:url value='/ajax/DisplayQuery'/>", function(data) {
+    fetch("<c:url value='/ajax/DisplayQuery'/>").then(response => {
+      return response.json();
+    }).then(data => {
       pollSuccess(data.displayURL);
-    }).fail(function(data) {
+    }).catch(_ => {
       pollFailure();
     });
   }
@@ -81,7 +79,7 @@
   function onLoad() {
     openSocket();
   }
-  $(document).ready(onLoad);
+  document.addEventListener("DOMContentLoaded", onLoad);
 </script>
 
 <script type="text/javascript">

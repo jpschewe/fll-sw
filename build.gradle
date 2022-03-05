@@ -29,7 +29,7 @@ plugins {
     id "de.aaschmid.cpd" version "3.3"
     id "edu.sc.seis.launch4j" version "2.5.1"
     id "com.gorylenko.gradle-git-properties" version "2.3.2"
-    id "com.github.ben-manes.versions" version "0.41.0" // adds dependencyUpdates task
+    id "com.github.ben-manes.versions" version "0.42.0" // adds dependencyUpdates task
     id "de.undercouch.download" version "4.1.2" // file download
     id "checkstyle"
         
@@ -264,7 +264,7 @@ dependencies {
   integrationTestImplementation(sourceSets.test.output)
         
   integrationTestImplementation(group: "org.easytesting", name: "fest-swing", version: "1.2.1")
-  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.56.0") {
+  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.58.0") {
       
     // xml APIs are part of the JDK
     exclude(group: "xml-apis", module: "xml-apis")

@@ -6,68 +6,68 @@
 
 "use strict";
 
-$(document).ready(function() {
+document.addEventListener("DOMContentLoaded", function() {
 
-  $("#total_num_rows").val(maxIndex);
+    document.getElementById("total_num_rows").value = maxIndex;
 
-  $("#add_rows").click(function() {
-    var numRowsStr = $("#num_rows").val();
-    var numRows = 1;
-    if ($.isNumeric(numRowsStr)) {
-      numRows = parseInt($("#num_rows").val());
+    document.getElementById("add_rows").addEventListener("click", function() {
+        const numRowsStr = document.getElementById("num_rows").value;
+        let numRows = 1;
+        if (isNumeric(numRowsStr)) {
+            numRows = parseInt(numRowsStr);
+        }
+
+        addRows(numRows);
+    });
+
+    const numCategories = Object.entries(categories).length;
+
+    const missingRows = (judging_stations.length * numCategories) - maxIndex;
+    if (missingRows > 0) {
+        addRows(missingRows);
     }
-
-    addRows(numRows);
-
-    // keep form from submitting
-    return false;
-  });
-
-  var numCategories = 0;
-  $.each(categories, function(catId, catName) {
-    numCategories = numCategories + 1;
-  });
-
-  var missingRows = (judging_stations.length * numCategories) - maxIndex;
-  if (missingRows > 0) {
-    addRows(missingRows);
-  }
 
 }); // end ready function
 
 function addRows(numRows) {
-  var rowIndex;
-  for (rowIndex = 0; rowIndex < numRows; ++rowIndex) {
-    var judgeIdx = maxIndex + 1;
-    maxIndex = judgeIdx;
-    $("#total_num_rows").val(maxIndex);
+    const table = document.getElementById("data");
 
-    var row = $("<tr></tr>");
-    $("#data").append(row);
+    let rowIndex;
+    for (rowIndex = 0; rowIndex < numRows; ++rowIndex) {
+        const judgeIdx = maxIndex + 1;
+        maxIndex = judgeIdx;
+        document.getElementById("total_num_rows").value = maxIndex;
 
-    var idCol = $("<td></td>");
-    row.append(idCol);
-    var id = $("<input type='text' name='id" + judgeIdx + "'>");
-    idCol.append(id);
+        const row = table.insertRow();
 
-    var categoryCol = $("<td></td>");
-    row.append(categoryCol);
-    var category = $("<select name='cat" + judgeIdx + "'></select>");
-    categoryCol.append(category);
-    $.each(categories, function(catId, catName) {
-      var option = $("<option value='" + catId + "'>" + catName + "</option>");
-      category.append(option);
-    });
+        const idCol = row.insertCell();
+        const id = document.createElement("input");
+        idCol.appendChild(id);
+        id.setAttribute("type", "text");
+        id.setAttribute("name", "id" + judgeIdx);
 
-    var stationCol = $("<td></td>");
-    row.append(stationCol);
-    var station = $("<select name='station" + judgeIdx + "'></select>");
-    stationCol.append(station);
-    $.each(judging_stations, function(i, stationName) {
-      var option = $("<option value='" + stationName + "'>" + stationName
-          + "</option>");
-      station.append(option);
-    });
+        const categoryCol = row.insertCell();
+        const category = document.createElement("select");
+        categoryCol.appendChild(category);
+        category.setAttribute("name", "cat" + judgeIdx);
 
-  }
+        for (const [catId, catName] of Object.entries(categories)) {
+            const option = document.createElement("option");
+            category.appendChild(option);
+            option.setAttribute("value", catId);
+            option.innerText = catName;
+        }
+
+        const stationCol = row.insertCell();
+        const station = document.createElement("select");
+        stationCol.appendChild(station);
+        station.setAttribute("name", "station" + judgeIdx);
+        for (const stationName of judging_stations) {
+            const option = document.createElement("option");
+            station.appendChild(option);
+            option.setAttribute("value", stationName);
+            option.innerText = stationName;
+        }
+
+    }
 }

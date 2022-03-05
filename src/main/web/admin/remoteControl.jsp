@@ -13,19 +13,6 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
-<script type="text/javascript"
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-
-<script type="text/javascript">
-  "use-strict";
-  function display(id) {
-    document.getElementById(id).style.display = "block";
-  }
-  function hide(id) {
-    document.getElementById(id).style.display = "none";
-  }
-</script>
-
 <script type="text/javascript">
   "use-strict";
   var numPlayoffRounds = parseInt("${numPlayoffRounds}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree

@@ -9,16 +9,14 @@
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
-<script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
-
 <script type='text/javascript'>
-  $(document).ready(function() {
+  document.addEventListener("DOMContentLoaded", function() {
 
-    $("#commit").click(function() {
+    document.getElementById("commit").addEventListener("click", function() {
       location.href = 'CommitJudges';
     });
 
-    $("#cancel").click(function() {
+    document.getElementById("cancel").addEventListener("click", function() {
       location.href = 'index.jsp';
     });
 

@@ -104,13 +104,10 @@ After running the ant target doc.database-diagram the database diagram can be fo
 Please follow the coding standards put forward at
 http://mtu.net/~jpschewe/java/CodingStandards.html
 
-Before checking in any code, please run the ant target "before-checkin" to
-ensure your code is correct.
-
 
 # References to Documentation
 
-  * [Java](https://docs.oracle.com/en/java/javase/11/docs/api/index.html)
+  * [Java](https://docs.oracle.com/en/java/javase/17/docs/api/index.html)
   * [Tomcat API - 10](http://tomcat.apache.org/tomcat-10.0-doc/api/index.html)
   * [EL - 4.0](http://docs.oracle.com/javaee/7/api/javax/el/package-summary.html)
   * [Servlet - 5.0](http://docs.oracle.com/javaee/7/api/javax/servlet/package-summary.html)

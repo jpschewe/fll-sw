@@ -12,18 +12,15 @@ fll.web.playoff.CreatePlayoffDivision.populateContext(application, pageContext);
     href="<c:url value='/style/fll-sw.css'/>" />
 <title>Create Playoff Bracket</title>
 
-
-<script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
-
 <script type='text/javascript'>
   var numSelected = 0;
 
-  $(document).ready(function() {
+  document.addEventListener("DOMContentLoaded", function() {
     <c:forEach items="${judgingStations }" var="station" varStatus="idx">
-    $("#station_select_${idx.count }").change(function() {
+    document.getElementById("station_select_${idx.count }").addEventListener("change", function() {
       <c:forEach items="${playoff_data.tournamentTeamsValues }" var="team">
       <c:if test="${team.judgingGroup == station}">
-      $("#select_${team.teamNumber}").prop("checked", $(this).is(":checked"));
+      document.getElementById("select_${team.teamNumber}").checked = this.checked;
       </c:if>
       </c:forEach>
       updateTeamsSelected();
@@ -31,26 +28,24 @@ fll.web.playoff.CreatePlayoffDivision.populateContext(application, pageContext);
     </c:forEach>
 
     <c:forEach items="${awardGroups }" var="awardGroup" varStatus="idx">
-    $("#award_group_select_${idx.count }").change(function() {
+    document.getElementById("award_group_select_${idx.count }").addEventListener("change", function() {
       <c:forEach items="${playoff_data.tournamentTeamsValues }" var="team">
       <c:if test="${team.awardGroup == awardGroup}">
-      $("#select_${team.teamNumber}").prop("checked", $(this).is(":checked"));
+      document.getElementById("select_${team.teamNumber}").checked = this.checked;
       </c:if>
       </c:forEach>
       updateTeamsSelected();
     });
     </c:forEach>
 
-    <c:forEach
-    items="${playoff_data.tournamentTeamsValues }"
-    var="team">
-    $("#select_${team.teamNumber }").change(function() {
-      if ($(this).is(":checked")) {
+    <c:forEach items="${playoff_data.tournamentTeamsValues }" var="team">
+    document.getElementById("select_${team.teamNumber }").addEventListener("change", function() {
+      if (this.checked) {
         numSelected = numSelected + 1;
       } else {
         numSelected = numSelected - 1;
       }
-      $("#numTeams").text(numSelected);
+      document.getElementById("numTeams").innerText = numSelected;
     });
     </c:forEach>
   });
@@ -59,11 +54,11 @@ fll.web.playoff.CreatePlayoffDivision.populateContext(application, pageContext);
   function updateTeamsSelected() {
     numSelected = 0;
     <c:forEach items="${playoff_data.tournamentTeamsValues }" var="team">
-    if ($("#select_${team.teamNumber }").is(":checked")) {
+    if (document.getElementById("select_${team.teamNumber }").checked) {
       numSelected = numSelected + 1;
     }
     </c:forEach>
-    $("#numTeams").text(numSelected);
+    document.getElementById("numTeams").innerText = numSelected;
   }
 </script>
 
