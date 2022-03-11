@@ -1,4 +1,4 @@
-"use-script";
+"use strict";
 
 /**
  * Log the console if it's available.
