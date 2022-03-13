@@ -1311,13 +1311,158 @@ $(document).on(
             });
     });
 
-function displayTournamentName(displayElement) {
-    var tournament = $.subjective.getTournament();
-    var tournamentName;
+function displayTournamentName() {
+    const tournament = $.subjective.getTournament();
+    let tournamentName;
     if (null == tournament) {
         tournamentName = "None";
     } else {
         tournamentName = tournament.name;
     }
-    displayElement.text("Tournament: " + tournamentName);
+    document.getElementById("header-main_tournament-name").innerText = tournamentName;
 }
+
+function updateHeaderPadding(header) {
+    const content = document.getElementById("content");
+    content.style.paddingTop = computeHeight(header);
+}
+
+function updateFooterPadding(footer) {
+    const content = document.getElementById("content");
+    content.style.paddingBottom = computeHeight(footer);
+}
+
+function hideAll() {
+    document.querySelectorAll(".fll-sw-ui-footer,.fll-sw-ui-header,.fll-sw-ui-content").forEach(function(el) {
+        el.classList.add('fll-sw-ui-inactive');
+    });
+}
+
+/**
+ * Use the anchor portion of the current location to determine which page to display.
+ */
+function navigateToPage() {
+    // always close the panel
+    const sidePanel = document.getElementById("side-panel");
+    sidePanel.classList.remove('open');
+
+    const pageName = window.location.hash.substring(1)
+    console.log("Navigating to page '" + pageName + "'");
+
+    switch (pageName) {
+        case "choose-judging-group":
+            displayPageChooseJudgingGroup();
+            break;
+        case "choose-category":
+            displayPageChooseCategory();
+            break;
+        case "choose-judge":
+            displayPageChooseJudge();
+            break;
+        case "score-summary":
+            displayPageScoreSummary();
+            break;
+        case "enter-scores":
+            displayPageEnterScores();
+            break;
+        case "team-score":
+            displayPageTeamScore();
+            break;
+        default:
+            console.log("Unknown page name '" + pageName + "'");
+        case "top":
+            displayPageTop();
+            break;
+    }
+}
+
+function displayPage(header, content, footer) {
+    hideAll();
+
+    header.classList.remove('fll-sw-ui-inactive');
+    content.classList.remove('fll-sw-ui-inactive');
+    footer.classList.remove('fll-sw-ui-inactive');
+
+    content.style.paddingTop = computeHeight(header) + "px";
+    content.style.paddingBottom = computeHeight(footer) + "px";
+}
+
+function displayPageTop() {
+    document.getElementById("header-main_title").innerText = "Load subjective data";
+
+    displayPage(document.getElementById("header-main"), document.getElementById("content-top"), document.getElementById("footer-main"));
+
+    document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judging-group").classList.add('fll-sw-ui-inactive');
+    document.getElementById("header-main_category").classList.add('fll-sw-ui-inactive');
+    document.getElementById("header-main_judge").classList.add('fll-sw-ui-inactive');
+
+    document.getElementById("side-panel_top").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judging-group").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-category").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judge").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_score-summary").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
+
+    removeChildren(document.getElementById("index-page_messages"));
+    $.subjective.checkServerStatus(serverLoadPage, promptForJudgingGroup);
+}
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const openButton = document.getElementById("side-panel_open");
+    const sidePanel = document.getElementById("side-panel");
+
+    // handlers for buttons and links that don't navigate to another page
+    openButton.addEventListener('click', () => {
+        sidePanel.classList.add('open');
+    });
+
+    document.getElementById("side-panel_close").addEventListener('click', () => {
+        sidePanel.classList.remove('open');
+    });
+
+    document.getElementById("side-panel_synchronize").addEventListener('click', () => {
+        sidePanel.classList.remove('open');
+        alert("Doing synchronization");
+    });
+
+    document.getElementById("side-panel_offline-download").addEventListener('click', () => {
+        sidePanel.classList.remove('open');
+        alert("Dowing Offline Download");
+    });
+
+    document.getElementById("team-score_save").addEventListener('click', () => {
+        console.log("Saving score");
+        window.location = "#enter-scores";
+    });
+    document.getElementById("team-score_cancel").addEventListener('click', () => {
+        console.log("Canceling score entry");
+        window.location = "#enter-scores";
+    });
+    document.getElementById("team-score_delete").addEventListener('click', () => {
+        console.log("Deleting score");
+        window.location = "#enter-scores";
+    });
+    document.getElementById("team-score_no-show").addEventListener('click', () => {
+        console.log("Mark no show");
+        window.location = "#enter-scores";
+    });
+
+    // handlers for links that need additional logic
+    //FIXME: add listener when creating elements, do the same for other choose pages
+    document.getElementById("enter-scores_team-1").addEventListener('click', () => {
+        console.log("Store information about what team to score");
+    });
+
+
+    // navigate to pages when the anchor changes
+    window.addEventListener('hashchange', navigateToPage);
+});
+
+window.addEventListener('load', () => {
+    // initial state
+    navigateToPage();
+});

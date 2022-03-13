@@ -38,10 +38,6 @@ table.score-entry {
     border-collapse: collapse;
 }
 
-.center {
-    text-align: center;
-}
-
 .score-slider-cell input {
     display: none;
 }
@@ -95,4 +91,18 @@ span.sliderTickMark {
 
 .ui-footer button.score-entry-button {
     width: 95%;
+}
+
+body {
+    color: #333;
+    text-shadow: 0 1px 0 #f3f3f3;
+    font-weight: 700;
+    background-color: #f9f9f9;
+}
+
+#side-panel_close {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
 }

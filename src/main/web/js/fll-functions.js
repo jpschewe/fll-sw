@@ -123,3 +123,14 @@ function elementIsVisible(element) {
 function isNumeric(val) {
     return Number(parseFloat(val)) === val;
 }
+
+/**
+ * Compute the height of an element including the margins.
+ */
+function computeHeight(element) {
+    const styles = window.getComputedStyle(element);
+    const margin = parseFloat(styles['marginTop']) + parseFloat(styles['marginBottom']);
+    const height = element.offsetHeight + margin;
+    return height;
+}
+

@@ -7,13 +7,14 @@
 "use strict";
 
 function loadData() {
-    $.mobile.loading("show");
+    const waitDialog = document.getElementById("wait-dialog");
+    waitDialog.style.visibility = "visible";
 
     $.subjective.loadFromServer(
         function() {
             const subjectiveCategories = $.subjective.getSubjectiveCategories();
 
-            $.mobile.loading("hide");
+            waitDialog.style.visibility = "hidden";
             $("#index-page_choose_clear").hide();
 
             if (0 == subjectiveCategories.length) {
@@ -26,10 +27,12 @@ function loadData() {
             $("#index-page_messages").append(
                 "Current tournament is " + $.subjective.getTournament().name
                 + "<br/>");
-
+                
+            displayTournamentName();
+            
             promptForJudgingGroup();
         }, function(message) {
-            $.mobile.loading("hide");
+            waitDialog.style.visibility = "hidden";
 
             alert("Error getting data from server: " + message);
         });
@@ -44,7 +47,8 @@ function checkStoredData() {
 }
 
 function promptForJudgingGroup() {
-    $.mobile.navigate("#choose-judging-group-page");
+    //FIXME: debug window.location = "#choose-judging-group";
+    alert("Should goto choose judging group, but disabled for testing")
 }
 
 function promptForReload() {
@@ -53,7 +57,7 @@ function promptForReload() {
 
 function reloadData() {
     if ($.subjective.checkForModifiedScores()) {
-        var answer = confirm("You have modified scores, this will remove them. Are you sure?")
+        const answer = confirm("You have modified scores, this will remove them. Are you sure?")
         if (!answer) {
             return;
         }
@@ -63,10 +67,11 @@ function reloadData() {
 }
 
 function checkTournament() {
-    $.mobile.loading("show");
+    const waitDialog = document.getElementById("wait-dialog");
+    waitDialog.style.visibility = "visible";
 
     $.subjective.getServerTournament(function(serverTournament) {
-        $.mobile.loading("hide");
+        waitDialog.style.visibility = "hidden";
 
         const storedTournament = $.subjective.getTournament();
         if (null == storedTournament) {
@@ -108,17 +113,3 @@ function serverLoadPage() {
     });
 
 }
-
-$(document).on("pagebeforeshow", "#index-page", function() {
-    $.subjective.log("before page show index-page");
-
-    $("#index-page_messages").empty();
-
-    displayTournamentName($("#index-page_tournament"));
-});
-
-$(document).on("pageshow", "#index-page", function(event) {
-    $.subjective.log("pageshow index-page");
-
-    $.subjective.checkServerStatus(serverLoadPage, promptForJudgingGroup);
-});

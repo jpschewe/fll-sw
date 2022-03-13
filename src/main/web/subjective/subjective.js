@@ -901,8 +901,6 @@
          * @param offlineCallback function to execute if the server is not reachable 
          */
         checkServerStatus: function(onlineCallback, offlineCallback) {
-            $.mobile.loading("show");
-
             $.subjective.log("Checking server status");
             const FETCH_TIMEOUT = 1000; // milliseconds            
             let didTimeOut = false;
