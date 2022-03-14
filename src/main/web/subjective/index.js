@@ -27,9 +27,9 @@ function loadData() {
             $("#index-page_messages").append(
                 "Current tournament is " + $.subjective.getTournament().name
                 + "<br/>");
-                
+
             displayTournamentName();
-            
+
             promptForJudgingGroup();
         }, function(message) {
             waitDialog.style.visibility = "hidden";
@@ -47,8 +47,7 @@ function checkStoredData() {
 }
 
 function promptForJudgingGroup() {
-    //FIXME: debug window.location = "#choose-judging-group";
-    alert("Should goto choose judging group, but disabled for testing")
+    window.location = "#choose-judging-group";
 }
 
 function promptForReload() {

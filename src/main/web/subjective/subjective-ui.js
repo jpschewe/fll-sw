@@ -20,99 +20,28 @@ function setOfflineDownloadUrl(anchor) {
     anchor.setAttribute("href", url);
 }
 
-function selectJudgingGroup(group) {
-    $.subjective.setCurrentJudgingGroup(group);
-    $.mobile.navigate("#choose-category-page");
-}
-
-$(document).on(
-    "pageinit",
-    "#choose-judging-group-page",
-    function(_) {
-        $.subjective.log("choose judging group pageinit");
-
-        $("#choose-judging-group_offline").click(function() {
-            setOfflineDownloadUrl(document.getElementById("choose-judging-group_offline"));
-        });
-
-        $("#choose-judging-group_upload-scores").click(
-            function() {
-                $.mobile.loading("show");
-
-                $.subjective.uploadData(function(result) {
-                    // scoresSuccess
-                    alert("Uploaded " + result.numModified + " scores. message: "
-                        + result.message);
-                }, //
-                    function(result) {
-                        // scoresFail
-
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload scores: " + message);
-                    }, //
-                    function(result) {
-                        // judgesSuccess
-                        $.subjective.log("Judges modified: " + result.numModifiedJudges
-                            + " new: " + result.numNewJudges);
-                    }
-
-                    ,//
-                    function(result) {
-                        // judgesFail
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload judges: " + message);
-                    }, //
-                    function() {
-                        // loadSuccess
-                        populateChooseJudgingGroup();
-                        $.mobile.loading("hide");
-                    }, //
-                    function(message) {
-                        // loadFail
-                        populateChooseJudgingGroup();
-
-                        $.mobile.loading("hide");
-
-                        alert("Failed to load scores from server: " + message);
-                    });
-            });
-    });
-
 function populateChooseJudgingGroup() {
     $.subjective.log("choose judging group populate");
 
-    displayTournamentName($("#choose-judging-group_tournament"));
+    displayTournamentName();
 
-    $("#choose-judging-group_judging-groups").empty();
+    const judgingGroupsContainer = document.getElementById("choose-judging-group_judging-groups");
+    removeChildren(judgingGroupsContainer);
 
-    var judgingGroups = $.subjective.getJudgingGroups();
-    $.each(judgingGroups, function(i, group) {
-        var button = $("<button class='ui-btn ui-corner-all'>" + group
-            + "</button>");
-        $("#choose-judging-group_judging-groups").append(button);
-        button.click(function() {
-            selectJudgingGroup(group);
+    const judgingGroups = $.subjective.getJudgingGroups();
+    for (const group of judgingGroups) {
+        const button = document.createElement("a");
+        judgingGroupsContainer.appendChild(button);
+        button.classList.add("wide");
+        button.classList.add("center");
+        button.innerText = group;
+        button.addEventListener('click', function() {
+            $.subjective.setCurrentJudgingGroup(group);
+            document.getElementById("header-main_judging-group-name").innerText = group;
+            window.location = "#choose-category";
         });
-
-    });
-
-    $("#choose-judging-group-page").trigger("create");
+    }
 }
-
-$(document).on("pagebeforeshow", "#choose-judging-group-page",
-    populateChooseJudgingGroup);
 
 function selectCategory(category) {
     $.subjective.setCurrentCategory(category);
@@ -122,71 +51,6 @@ function selectCategory(category) {
 $(document).on("pageshow", "#choose-category-page", function(event) {
     $.mobile.loading("hide");
 });
-
-$(document).on(
-    "pageinit",
-    "#choose-category-page",
-    function(_) {
-
-        $("#choose-category_offline").click(function() {
-            setOfflineDownloadUrl(document.getElementById("choose-category_offline"));
-        });
-
-        $("#choose-category_upload-scores").click(
-            function() {
-                $.mobile.loading("show");
-
-                $.subjective.uploadData(function(result) {
-                    // scoresSuccess
-                    alert("Uploaded " + result.numModified + " scores. message: "
-                        + result.message);
-                }, //
-                    function(result) {
-                        // scoresFail
-
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload scores: " + message);
-                    }, //
-                    function(result) {
-                        // judgesSuccess
-                        $.subjective.log("Judges modified: " + result.numModifiedJudges
-                            + " new: " + result.numNewJudges);
-                    }
-
-                    ,//
-                    function(result) {
-                        // judgesFail
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload judges: " + message);
-                    }, //
-                    function() {
-                        // loadSuccess
-                        populateChooseCategory();
-
-                        $.mobile.loading("hide");
-                    }, //
-                    function(message) {
-                        // loadFail
-                        populateChooseCategory();
-
-                        $.mobile.loading("hide");
-
-                        alert("Failed to load scores from server: " + message);
-                    });
-            });
-    });
 
 function populateChooseCategory() {
     $("#choose-category_categories").empty();
@@ -216,71 +80,6 @@ $(document).on("pagebeforeshow", "#choose-category-page",
 $(document).on("pageshow", "#choose-judge-page", function(event) {
     $.mobile.loading("hide");
 });
-
-$(document).on(
-    "pageinit",
-    "#choose-judge-page",
-    function(_) {
-        $("#choose-judge_offline").click(function() {
-            setOfflineDownloadUrl(document.getElementById("choose-judge_offline"));
-        });
-
-        $("#choose-judge_upload-scores").click(
-            function() {
-                $.mobile.loading("show");
-
-                $.subjective.uploadData(function(result) {
-                    // scoresSuccess
-
-                    alert("Uploaded " + result.numModified + " scores. message: "
-                        + result.message);
-                }, //
-                    function(result) {
-                        // scoresFail
-
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload scores: " + message);
-                    }, //
-                    function(result) {
-                        // judgesSuccess
-                        $.subjective.log("Judges modified: " + result.numModifiedJudges
-                            + " new: " + result.numNewJudges);
-                    }
-
-                    ,//
-                    function(result) {
-                        // judgesFail
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload judges: " + message);
-                    }, //
-                    function() {
-                        // loadSuccess
-                        populateChooseJudge();
-
-                        $.mobile.loading("hide");
-                    }, //
-                    function(message) {
-                        // loadFail
-                        populateChooseJudge();
-
-                        $.mobile.loading("hide");
-
-                        alert("Failed to load scores from server: " + message);
-                    });
-            });
-    });
 
 function populateChooseJudge() {
     displayTournamentName($("#choose-judge_tournament"));
@@ -440,69 +239,6 @@ $(document).on("pagebeforeshow", "#teams-list-page", function(event) {
 $(document).on("pageshow", "#teams-list-page", function(event) {
     $.mobile.loading("hide");
 });
-
-$(document).on(
-    "pageinit",
-    "#teams-list-page",
-    function(_) {
-        $("#teams-list_offline").click(function() {
-            setOfflineDownloadUrl(document.getElementById("teams-list_offline"));
-        });
-
-        $("#teams-list_upload-scores").click(
-            function() {
-                $.mobile.loading("show");
-
-                $.subjective.uploadData(function(result) {
-                    // scoresSuccess
-                    populateTeams();
-
-                    alert("Uploaded " + result.numModified + " scores. message: "
-                        + result.message);
-                }, //
-                    function(result) {
-                        // scoresFail
-                        populateTeams();
-
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload scores: " + message);
-                    }, //
-                    function(result) {
-                        // judgesSuccess
-                        $.subjective.log("Judges modified: " + result.numModifiedJudges
-                            + " new: " + result.numNewJudges);
-                    }
-
-                    ,//
-                    function(result) {
-                        // judgesFail
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload judges: " + message);
-                    }, //
-                    function() {
-                        // loadSuccess
-                        $.mobile.loading("hide");
-                    }, //
-                    function(message) {
-                        // loadFail
-                        $.mobile.loading("hide");
-
-                        alert("Failed to load scores from server: " + message);
-                    });
-            });
-    });
 
 function createNewScore() {
     const score = new Object();
@@ -1246,71 +982,6 @@ $(document).on("pageshow", "#score-summary-page", function(event) {
     $.mobile.loading("hide");
 });
 
-$(document).on(
-    "pageinit",
-    "#score-summary-page",
-    function(_) {
-        $("#score-summary_offline").click(function() {
-            setOfflineDownloadUrl(document.getElementById("score-summary_offline"));
-        });
-
-        $("#score-summary_upload-scores").click(
-            function() {
-                $.mobile.loading("show", {
-                    text: "Uploading Scores..."
-                });
-
-                $.subjective.uploadData(function(result) {
-                    // scoresSuccess
-                    populateScoreSummary();
-
-                    alert("Uploaded " + result.numModified + " scores. message: "
-                        + result.message);
-                }, //
-                    function(result) {
-                        // scoresFail
-                        populateScoreSummary();
-
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload scores: " + message);
-                    }, //
-                    function(result) {
-                        // judgesSuccess
-                        $.subjective.log("Judges modified: " + result.numModifiedJudges
-                            + " new: " + result.numNewJudges);
-                    }
-
-                    ,//
-                    function(result) {
-                        // judgesFail
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload judges: " + message);
-                    }, //
-                    function() {
-                        // loadSuccess
-                        $.mobile.loading("hide");
-                    }, //
-                    function(message) {
-                        // loadFail
-                        $.mobile.loading("hide");
-
-                        alert("Failed to load scores from server: " + message);
-                    });
-            });
-    });
-
 function displayTournamentName() {
     const tournament = $.subjective.getTournament();
     let tournamentName;
@@ -1408,6 +1079,93 @@ function displayPageTop() {
     $.subjective.checkServerStatus(serverLoadPage, promptForJudgingGroup);
 }
 
+function displayPageChooseJudgingGroup() {
+    document.getElementById("header-main_title").innerText = "Choose judging group";
+
+    displayPage(document.getElementById("header-main"), document.getElementById("content-choose-judging-group"), document.getElementById("footer-main"));
+
+    document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judging-group").classList.add('fll-sw-ui-inactive');
+    document.getElementById("header-main_category").classList.add('fll-sw-ui-inactive');
+    document.getElementById("header-main_judge").classList.add('fll-sw-ui-inactive');
+
+    document.getElementById("side-panel_top").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judging-group").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-category").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judge").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_score-summary").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
+
+    populateChooseJudgingGroup();
+}
+
+function displayPageChooseCategory() {
+    displayPage(document.getElementById("header-main"), document.getElementById("content-choose-category"), document.getElementById("footer-main"));
+
+    document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judging-group").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_category").classList.add('fll-sw-ui-inactive');
+    document.getElementById("header-main_judge").classList.add('fll-sw-ui-inactive');
+
+    document.getElementById("side-panel_top").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judging-group").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-category").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judge").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_score-summary").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
+}
+
+function displayPageChooseJudge() {
+    displayPage(document.getElementById("header-main"), document.getElementById("content-choose-judge"), document.getElementById("footer-main"));
+
+    document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judging-group").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_category").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judge").classList.add('fll-sw-ui-inactive');
+
+    document.getElementById("side-panel_top").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judging-group").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-category").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judge").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_score-summary").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
+}
+
+function displayPageScoreSummary() {
+    displayPage(document.getElementById("header-main"), document.getElementById("content-score-summary"), document.getElementById("footer-main"));
+
+    document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judging-group").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_category").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judge").classList.remove('fll-sw-ui-inactive');
+
+    document.getElementById("side-panel_top").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judging-group").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-category").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judge").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_score-summary").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_enter-scores").parentNode.classList.remove('fll-sw-ui-inactive');
+}
+
+function displayPageEnterScores() {
+    displayPage(document.getElementById("header-main"), document.getElementById("content-enter-scores"), document.getElementById("footer-main"));
+
+    document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judging-group").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_category").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judge").classList.remove('fll-sw-ui-inactive');
+
+    document.getElementById("side-panel_top").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judging-group").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-category").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judge").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_score-summary").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
+}
+
+function displayPageTeamScore() {
+    displayPage(document.getElementById("header-team-score"), document.getElementById("content-team-score"), document.getElementById("footer-team-score"));
+}
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1426,13 +1184,66 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("side-panel_synchronize").addEventListener('click', () => {
         sidePanel.classList.remove('open');
-        alert("Doing synchronization");
+
+        const waitDialog = document.getElementById("wait-dialog");
+        waitDialog.style.visibility = "visible";
+
+        $.subjective.uploadData(function(result) {
+            // scoresSuccess
+            alert("Uploaded " + result.numModified + " scores. message: "
+                + result.message);
+        }, //
+            function(result) {
+                // scoresFail
+
+                let message;
+                if (null == result) {
+                    message = "Unknown server error";
+                } else {
+                    message = result.message;
+                }
+
+                alert("Failed to upload scores: " + message);
+            }, //
+            function(result) {
+                // judgesSuccess
+                $.subjective.log("Judges modified: " + result.numModifiedJudges
+                    + " new: " + result.numNewJudges);
+            }
+
+            ,//
+            function(result) {
+                // judgesFail
+                let message;
+                if (null == result) {
+                    message = "Unknown server error";
+                } else {
+                    message = result.message;
+                }
+
+                alert("Failed to upload judges: " + message);
+            }, //
+            function() {
+                // loadSuccess
+                populateChooseJudgingGroup();
+                waitDialog.style.visibility = "hidden";
+            }, //
+            function(message) {
+                // loadFail
+                populateChooseJudgingGroup();
+
+                waitDialog.style.visibility = "hidden";
+
+                alert("Failed to load scores from server: " + message);
+            });
     });
 
     document.getElementById("side-panel_offline-download").addEventListener('click', () => {
         sidePanel.classList.remove('open');
-        alert("Dowing Offline Download");
+        // FIXME: need to set this at the top of every page load?
+        setOfflineDownloadUrl(document.getElementById("side-panel_offline-download"));
     });
+
 
     document.getElementById("team-score_save").addEventListener('click', () => {
         console.log("Saving score");
