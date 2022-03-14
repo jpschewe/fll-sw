@@ -28,7 +28,7 @@ function loadData() {
                 "Current tournament is " + $.subjective.getTournament().name
                 + "<br/>");
 
-            displayTournamentName();
+            updateMainHeader();
 
             promptForJudgingGroup();
         }, function(message) {

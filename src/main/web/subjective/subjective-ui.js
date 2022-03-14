@@ -23,8 +23,6 @@ function setOfflineDownloadUrl(anchor) {
 function populateChooseJudgingGroup() {
     $.subjective.log("choose judging group populate");
 
-    displayTournamentName();
-
     const judgingGroupsContainer = document.getElementById("choose-judging-group_judging-groups");
     removeChildren(judgingGroupsContainer);
 
@@ -37,45 +35,30 @@ function populateChooseJudgingGroup() {
         button.innerText = group;
         button.addEventListener('click', function() {
             $.subjective.setCurrentJudgingGroup(group);
-            document.getElementById("header-main_judging-group-name").innerText = group;
+            updateMainHeader();
             window.location = "#choose-category";
         });
     }
 }
 
-function selectCategory(category) {
-    $.subjective.setCurrentCategory(category);
-    $.mobile.navigate("#choose-judge-page");
-}
-
-$(document).on("pageshow", "#choose-category-page", function(event) {
-    $.mobile.loading("hide");
-});
-
 function populateChooseCategory() {
-    $("#choose-category_categories").empty();
+    const container = document.getElementById("choose-category_categories");
+    removeChildren(container);
 
-    displayTournamentName($("#choose-category_tournament"));
-
-    var categories = $.subjective.getSubjectiveCategories();
-    $.each(categories, function(i, category) {
-        var button = $("<button class='ui-btn ui-corner-all'>" + category.title
-            + "</button>");
-        $("#choose-category_categories").append(button);
-        button.click(function() {
-            selectCategory(category);
+    const categories = $.subjective.getSubjectiveCategories();
+    for (const category of categories) {
+        const button = document.createElement("a");
+        container.appendChild(button);
+        button.classList.add("wide");
+        button.classList.add("center");
+        button.innerText = category.title;
+        button.addEventListener('click', function() {
+            $.subjective.setCurrentCategory(category);
+            updateMainHeader();
+            window.location = "#choose-judge";
         });
-        button.trigger("updateLayout");
-    });
-
-    var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
-    $("#choose-category_judging-group").text(currentJudgingGroup);
-
-    $("#choose-category-page").trigger("create");
+    }
 }
-
-$(document).on("pagebeforeshow", "#choose-category-page",
-    populateChooseCategory);
 
 $(document).on("pageshow", "#choose-judge-page", function(event) {
     $.mobile.loading("hide");
@@ -982,7 +965,7 @@ $(document).on("pageshow", "#score-summary-page", function(event) {
     $.mobile.loading("hide");
 });
 
-function displayTournamentName() {
+function updateMainHeader() {
     const tournament = $.subjective.getTournament();
     let tournamentName;
     if (null == tournament) {
@@ -991,6 +974,18 @@ function displayTournamentName() {
         tournamentName = tournament.name;
     }
     document.getElementById("header-main_tournament-name").innerText = tournamentName;
+
+    document.getElementById("header-main_judging-group-name").innerText = $.subjective.getCurrentJudgingGroup();
+
+    const category = $.subjective.getCurrentCategory();
+    let categoryTitle;
+    if (null == category) {
+        categoryTitle = "None";
+    } else {
+        categoryTitle = category.title;
+    }
+    document.getElementById("header-main_category-name").innerText = categoryTitle;
+
 }
 
 function updateHeaderPadding(header) {
@@ -1077,6 +1072,7 @@ function displayPageTop() {
 
     removeChildren(document.getElementById("index-page_messages"));
     $.subjective.checkServerStatus(serverLoadPage, promptForJudgingGroup);
+    updateMainHeader();
 }
 
 function displayPageChooseJudgingGroup() {
@@ -1097,9 +1093,12 @@ function displayPageChooseJudgingGroup() {
     document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
 
     populateChooseJudgingGroup();
+    updateMainHeader();
 }
 
 function displayPageChooseCategory() {
+    document.getElementById("header-main_title").innerText = "Choose category";
+
     displayPage(document.getElementById("header-main"), document.getElementById("content-choose-category"), document.getElementById("footer-main"));
 
     document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
@@ -1113,6 +1112,9 @@ function displayPageChooseCategory() {
     document.getElementById("side-panel_choose-judge").parentNode.classList.add('fll-sw-ui-inactive');
     document.getElementById("side-panel_score-summary").parentNode.classList.add('fll-sw-ui-inactive');
     document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
+
+    populateChooseCategory();
+    updateMainHeader();
 }
 
 function displayPageChooseJudge() {
@@ -1129,6 +1131,8 @@ function displayPageChooseJudge() {
     document.getElementById("side-panel_choose-judge").parentNode.classList.add('fll-sw-ui-inactive');
     document.getElementById("side-panel_score-summary").parentNode.classList.add('fll-sw-ui-inactive');
     document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
+
+    updateMainHeader();
 }
 
 function displayPageScoreSummary() {
@@ -1275,5 +1279,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 window.addEventListener('load', () => {
     // initial state
+    updateMainHeader();
     navigateToPage();
 });

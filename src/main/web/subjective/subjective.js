@@ -338,7 +338,7 @@
          * @return list of subjective categories
          */
         getSubjectiveCategories: function() {
-            var retval = [];
+            const retval = [];
             $.each(_subjectiveCategories, function(i, val) {
                 retval.push(val);
             });
