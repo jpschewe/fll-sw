@@ -99,7 +99,7 @@
     display: none;
 }
 
-a.wide, div.wide {
+.wide {
     display: block;
     text-decoration: none;
     padding: 10px;
@@ -107,12 +107,16 @@ a.wide, div.wide {
     border: 1px solid #ddd;
 }
 
-a.wide:hover {
+a.wide:hover, div.wide:hover, label.wide:hover {
     background-color: #ddd;
 }
 
 a.wide:visited, a.wide:link {
     color: inherit;
+}
+
+.full-width {
+    width: 100%;
 }
 
 li.no-marker {

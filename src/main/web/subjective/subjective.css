@@ -106,3 +106,7 @@ body {
     right: 0;
     position: absolute;
 }
+
+button, input {
+    font-weight: inherit;
+}

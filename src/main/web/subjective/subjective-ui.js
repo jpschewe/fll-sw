@@ -60,84 +60,85 @@ function populateChooseCategory() {
     }
 }
 
-$(document).on("pageshow", "#choose-judge-page", function(event) {
-    $.mobile.loading("hide");
-});
-
 function populateChooseJudge() {
-    displayTournamentName($("#choose-judge_tournament"));
+    document.getElementById("choose-judge_new-judge-name").classList.add('fll-sw-ui-inactive');
 
-    $("#choose-judge_judges").empty();
-    $("#choose-judge_judges")
-        .append(
-            "<input type='radio' name='judge' value='new-judge' id='choose-judge_new-judge'>");
-    $("#choose-judge_judges").append(
-        "<label for='choose-judge_new-judge'>New Judge</label>");
+    const container = document.getElementById("choose-judge_judges")
+    removeChildren(container);
 
-    var currentJudge = $.subjective.getCurrentJudge();
-    var currentJudgeValid = false;
-    var seenJudges = [];
-    var judges = $.subjective.getPossibleJudges();
-    $.each(judges, function(index, judge) {
+    const newJudgeLabel = document.createElement("label");
+    container.appendChild(newJudgeLabel);
+    newJudgeLabel.classList.add("wide");
+
+    const newJudgeOption = document.createElement("input");
+    newJudgeLabel.appendChild(newJudgeOption);
+    newJudgeOption.setAttribute("type", "radio");
+    newJudgeOption.setAttribute("name", "judge");
+    newJudgeOption.setAttribute("value", "new-judge");
+    newJudgeOption.setAttribute("id", "choose-judge_new-judge");
+
+    const newJudgeLabelSpan = document.createElement("span");
+    newJudgeLabel.appendChild(newJudgeLabelSpan);
+    newJudgeLabelSpan.innerText = "New Judge";
+
+    newJudgeOption.addEventListener('change', function() {
+        if (newJudgeOption.checked) {
+            document.getElementById("choose-judge_new-judge-name").classList.remove('fll-sw-ui-inactive');
+        }
+    });
+
+
+    let currentJudge = $.subjective.getCurrentJudge();
+    let currentJudgeValid = false;
+    const seenJudges = [];
+    const judges = $.subjective.getPossibleJudges();
+    for (const judge of judges) {
         if (!seenJudges.includes(judge.id)) {
             seenJudges.push(judge.id);
 
+            const judgeLabel = document.createElement("label");
+            container.appendChild(judgeLabel);
+            judgeLabel.classList.add("wide");
+
+            const judgeInput = document.createElement("input");
+            judgeLabel.appendChild(judgeInput);
+            judgeInput.setAttribute("type", "radio");
+            judgeInput.setAttribute("name", "judge");
+            judgeInput.setAttribute("value", judge.id);
+
+            const judgeSpan = document.createElement("span");
+            judgeLabel.appendChild(judgeSpan);
+            judgeSpan.innerText = judge.id;
+
             if (null != currentJudge && currentJudge.id == judge.id) {
                 currentJudgeValid = true;
+                judgeInput.checked = true;
             }
-            $("#choose-judge_judges").append(
-                "<input type='radio' name='judge' id='choose-judge_" + index
-                + "' value='" + judge.id + "'>");
-            $("#choose-judge_judges").append(
-                "<label for='choose-judge_" + index + "'>" + judge.id + "</label>");
+
+
+            judgeInput.addEventListener('change', function() {
+                if (judgeInput.checked) {
+                    document.getElementById("choose-judge_new-judge-name").classList.add('fll-sw-ui-inactive');
+                }
+            });
         }
-    });
+    }
     if (!currentJudgeValid) {
-        currentJudge = null;
+        document.getElementById("choose-judge_new-judge-name").classList.remove('fll-sw-ui-inactive');
+        newJudgeOption.checked = true;
     }
-
-    var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
-    $("#choose-judge_judging-group").text(currentJudgingGroup);
-
-    var currentCategory = $.subjective.getCurrentCategory();
-    $("#choose-judge_category").text(currentCategory.title);
-
-    if (null != currentJudge) {
-        $("input:radio[value=\"" + currentJudge.id + "\"]").prop('checked', true);
-    } else {
-        $("input:radio[value='new-judge']").prop('checked', true);
-        $("#choose-judge_new-judge-info").show();
-    }
-
-    $("input[name=judge]:radio").change(function() {
-        var judgeID = $("input:radio[name='judge']:checked").val();
-        if ('new-judge' == judgeID) {
-            $("#choose-judge_new-judge-info").show();
-        } else {
-            $("#choose-judge_new-judge-info").hide();
-        }
-    });
-
-    $("#choose-judge-page").trigger("create");
 }
 
-$(document).on("pagebeforeshow", "#choose-judge-page", function(event) {
-    $("#choose-judge_new-judge-info").hide();
-    populateChooseJudge();
-});
-
-$(document).on("pageinit", "#choose-judge-page", function(event) {
-
-    $("#choose-judge_judge-submit").click(function() {
-        setJudge();
-    });
-
-});
-
 function setJudge() {
-    var judgeID = $("input:radio[name='judge']:checked").val();
+    let judgeID = null;
+    for (const radio of document.querySelectorAll('input[name="judge"]')) {
+        if (radio.checked) {
+            judgeID = radio.value;
+        }
+    }
+
     if ('new-judge' == judgeID) {
-        judgeID = $("#choose-judge_new-judge-name").val();
+        judgeID = document.getElementById("choose-judge_new-judge-name").value;
         if (null == judgeID || "" == judgeID.trim()) {
             alert("You must enter a name");
             return;
@@ -149,7 +150,7 @@ function setJudge() {
 
     $.subjective.setCurrentJudge(judgeID);
 
-    $.mobile.navigate("#teams-list-page");
+    location.href = '#teams-list';
 }
 
 function selectTeam(team) {
@@ -1034,6 +1035,9 @@ function navigateToPage() {
         case "team-score":
             displayPageTeamScore();
             break;
+        case "teams-list":
+            displayPageTeamsList();
+            break;
         default:
             console.log("Unknown page name '" + pageName + "'");
         case "top":
@@ -1118,6 +1122,8 @@ function displayPageChooseCategory() {
 }
 
 function displayPageChooseJudge() {
+    document.getElementById("header-main_title").innerText = "Choose judge";
+
     displayPage(document.getElementById("header-main"), document.getElementById("content-choose-judge"), document.getElementById("footer-main"));
 
     document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
@@ -1132,6 +1138,7 @@ function displayPageChooseJudge() {
     document.getElementById("side-panel_score-summary").parentNode.classList.add('fll-sw-ui-inactive');
     document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
 
+    populateChooseJudge();
     updateMainHeader();
 }
 
@@ -1265,6 +1272,12 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Mark no show");
         window.location = "#enter-scores";
     });
+
+
+    document.getElementById("choose-judge_submit").addEventListener('click', function() {
+        setJudge();
+    });
+
 
     // handlers for links that need additional logic
     //FIXME: add listener when creating elements, do the same for other choose pages
