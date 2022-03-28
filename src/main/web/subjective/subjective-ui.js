@@ -970,7 +970,7 @@ function updateMainHeader() {
     const tournament = $.subjective.getTournament();
     let tournamentName;
     if (null == tournament) {
-        tournamentName = "None";
+        tournamentName = "No Tournament";
     } else {
         tournamentName = tournament.name;
     }
@@ -981,12 +981,20 @@ function updateMainHeader() {
     const category = $.subjective.getCurrentCategory();
     let categoryTitle;
     if (null == category) {
-        categoryTitle = "None";
+        categoryTitle = "No Category";
     } else {
         categoryTitle = category.title;
     }
     document.getElementById("header-main_category-name").innerText = categoryTitle;
 
+    const judge = $.subjective.getCurrentJudge();
+    let judgeName;
+    if (null == judge) {
+        judgeName = "No Judge";
+    } else {
+        judgeName = judge.id;
+    }
+    document.getElementById("header-main_judge-name").innerText = judgeName;
 }
 
 function updateHeaderPadding(header) {
@@ -1136,6 +1144,27 @@ function displayPageChooseJudge() {
     document.getElementById("side-panel_choose-category").parentNode.classList.remove('fll-sw-ui-inactive');
     document.getElementById("side-panel_choose-judge").parentNode.classList.add('fll-sw-ui-inactive');
     document.getElementById("side-panel_score-summary").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
+
+    populateChooseJudge();
+    updateMainHeader();
+}
+
+function displayPageTeamsList() {
+    document.getElementById("header-main_title").innerText = "Select team to score";
+
+    displayPage(document.getElementById("header-main"), document.getElementById("content-teams-list"), document.getElementById("footer-main"));
+
+    document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judging-group").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_category").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judge").classList.remove('fll-sw-ui-inactive');
+
+    document.getElementById("side-panel_top").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judging-group").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-category").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judge").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_score-summary").parentNode.classList.remove('fll-sw-ui-inactive');
     document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
 
     populateChooseJudge();
