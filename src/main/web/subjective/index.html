@@ -144,8 +144,7 @@
     </div>
 
     <div id="content-teams-list" class="fll-sw-ui-content">
-        <a class='wide center' id='enter-scores_team-1'
-            href='#team-score'>Team 1</a>
+        <div id='teams-list_teams'></div>
     </div>
 
     <div id="content-score-summary" class="fll-sw-ui-content">
@@ -156,19 +155,20 @@
     </div>
 
 
-    <div class='fll-sw-ui-header' id='header-team-score'>
+    <div class='fll-sw-ui-header' id='header-enter-score'>
         <div>Team Score entry header</div>
     </div>
 
-    <div id='content-team-score' class='fll-sw-ui-content'>Score
+    <div id='content-enter-score' class='fll-sw-ui-content'>Score
         entry here...</div>
 
-    <div class='fll-sw-ui-footer' id="footer-team-score">
-        <button id='team-score_save' type='button'>Save Changes</button>
-        <button id='team-score_cancel' type='button'>Cancel
+    <div class='fll-sw-ui-footer' id="footer-enter-score">
+        <button id='enter-score_save' type='button'>Save
             Changes</button>
-        <button id='team-score_delete' type='button'>Delete</button>
-        <button id='team-score_no-show' type='button'>No Show</button>
+        <button id='enter-score_cancel' type='button'>Cancel
+            Changes</button>
+        <button id='enter-score_delete' type='button'>Delete</button>
+        <button id='enter-score_no-show' type='button'>No Show</button>
     </div>
 
 
@@ -378,10 +378,7 @@
             </div>
             <!-- /header -->
 
-            <div class="ui-content" role="main">
-                <div id='teams-list_teams'></div>
-
-            </div>
+            <div class="ui-content" role="main"></div>
             <!-- /content -->
 
             <div data-role="footer" data-position="fixed">

@@ -157,72 +157,70 @@ function selectTeam(team) {
     $.subjective.setCurrentTeam(team);
 
     $.subjective.setScoreEntryBackPage("#teams-list-page");
-    $.mobile.navigate("#enter-score-page");
+    window.location = "#enter-score";
 }
 
 function populateTeams() {
-    $("#teams-list_teams").empty();
+    const teamsList = document.getElementById("teams-list_teams");
+    removeChildren(teamsList);
+
     const timeFormatter = JSJoda.DateTimeFormatter.ofPattern("HH:mm");
     const teams = $.subjective.getCurrentTeams();
-    $.each(teams, function(i, team) {
-        var time = $.subjective.getScheduledTime(team.teamNumber);
-        var timeStr = null;
+    for (const team of teams) {
+        const time = $.subjective.getScheduledTime(team.teamNumber);
+        let timeStr = null;
         if (null != time) {
             timeStr = time.format(timeFormatter);
         }
 
-        var scoreStr;
-        var score = $.subjective.getScore(team.teamNumber);
-        if (!$.subjective.isScoreCompleted(score)) {
-            scoreStr = "";
-        } else if (score.noShow) {
-            scoreStr = "<span class='no-show'>No Show</span> - ";
-        } else {
-            var computedScore = $.subjective.computeScore(score);
-            scoreStr = "<span class='score'>Score: " + computedScore + "</span> - ";
+        const button = document.createElement("a");
+        teamsList.appendChild(button);
+        button.classList.add("wide");
+
+        if (null != timeStr) {
+            const span = document.createElement("span");
+            button.appendChild(span);
+            span.innerText = timeStr + " - ";
         }
 
-        var label = "";
-        if (null != timeStr) {
-            label = label + timeStr + " - ";
+        const score = $.subjective.getScore(team.teamNumber);
+        if (!$.subjective.isScoreCompleted(score)) {
+            // nothing
+        } else if (score.noShow) {
+            const span = document.createElement("span");
+            button.appendChild(span);
+            span.innerText = "No Show";
+            span.classList.add("no-show");
+
+            const spacerSpan = document.createElement("span");
+            button.appendChild(spacerSpan);
+            spacerSpan.innerText = " - ";
+        } else {
+            const computedScore = $.subjective.computeScore(score);
+            const span = document.createElement("span");
+            button.appendChild(span);
+            span.innerText = "Score: " + computedScore;
+            span.classList.add("score");
+
+            const spacerSpan = document.createElement("span");
+            button.appendChild(spacerSpan);
+            spacerSpan.innerText = " - ";
         }
-        label = label + scoreStr;
-        label = label + team.teamNumber;
-        label = label + " - " + team.teamName;
+
+        let teamInformation = team.teamNumber + " - " + team.teamName;
         if (null != team.organization) {
-            label = label + " - " + team.organization;
+            teamInformation = teamInformation + " - " + team.organization;
         }
-        var button = $("<button class='ui-btn ui-corner-all text-left'>" //
-            + label //
-            + "</button>");
-        $("#teams-list_teams").append(button);
-        button.click(function() {
+        const teamInformationSpan = document.createElement("span");
+        button.appendChild(teamInformationSpan);
+        teamInformationSpan.innerText = teamInformation;
+
+        button.addEventListener('click', function() {
             selectTeam(team);
         });
 
-    });
-
-    $("#teams-list-page").trigger("create");
+    }
 }
-
-$(document).on("pagebeforeshow", "#teams-list-page", function(event) {
-    var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
-    $("#teams-list_judging-group").text(currentJudgingGroup);
-
-    var currentCategory = $.subjective.getCurrentCategory();
-    $("#teams-list_category").text(currentCategory.title);
-
-    var currentJudge = $.subjective.getCurrentJudge();
-    $("#teams-list_judge").text(currentJudge.id);
-
-    displayTournamentName($("#teams-list_tournament"));
-
-    populateTeams();
-});
-
-$(document).on("pageshow", "#teams-list-page", function(event) {
-    $.mobile.loading("hide");
-});
 
 function createNewScore() {
     const score = new Object();
@@ -1037,11 +1035,8 @@ function navigateToPage() {
         case "score-summary":
             displayPageScoreSummary();
             break;
-        case "enter-scores":
-            displayPageEnterScores();
-            break;
-        case "team-score":
-            displayPageTeamScore();
+        case "enter-score":
+            displayPageEnterScore();
             break;
         case "teams-list":
             displayPageTeamsList();
@@ -1167,7 +1162,8 @@ function displayPageTeamsList() {
     document.getElementById("side-panel_score-summary").parentNode.classList.remove('fll-sw-ui-inactive');
     document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
 
-    populateChooseJudge();
+    populateTeams();
+
     updateMainHeader();
 }
 
@@ -1187,24 +1183,8 @@ function displayPageScoreSummary() {
     document.getElementById("side-panel_enter-scores").parentNode.classList.remove('fll-sw-ui-inactive');
 }
 
-function displayPageEnterScores() {
-    displayPage(document.getElementById("header-main"), document.getElementById("content-enter-scores"), document.getElementById("footer-main"));
-
-    document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
-    document.getElementById("header-main_judging-group").classList.remove('fll-sw-ui-inactive');
-    document.getElementById("header-main_category").classList.remove('fll-sw-ui-inactive');
-    document.getElementById("header-main_judge").classList.remove('fll-sw-ui-inactive');
-
-    document.getElementById("side-panel_top").parentNode.classList.remove('fll-sw-ui-inactive');
-    document.getElementById("side-panel_choose-judging-group").parentNode.classList.remove('fll-sw-ui-inactive');
-    document.getElementById("side-panel_choose-category").parentNode.classList.remove('fll-sw-ui-inactive');
-    document.getElementById("side-panel_choose-judge").parentNode.classList.remove('fll-sw-ui-inactive');
-    document.getElementById("side-panel_score-summary").parentNode.classList.remove('fll-sw-ui-inactive');
-    document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
-}
-
-function displayPageTeamScore() {
-    displayPage(document.getElementById("header-team-score"), document.getElementById("content-team-score"), document.getElementById("footer-team-score"));
+function displayPageEnterScore() {
+    displayPage(document.getElementById("header-enter-score"), document.getElementById("content-enter-score"), document.getElementById("footer-enter-score"));
 }
 
 
@@ -1285,35 +1265,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    document.getElementById("team-score_save").addEventListener('click', () => {
+    document.getElementById("enter-score_save").addEventListener('click', () => {
         console.log("Saving score");
-        window.location = "#enter-scores";
+        window.location = "#teams-list";
     });
-    document.getElementById("team-score_cancel").addEventListener('click', () => {
+    document.getElementById("enter-score_cancel").addEventListener('click', () => {
         console.log("Canceling score entry");
-        window.location = "#enter-scores";
+        window.location = "#teams-list";
     });
-    document.getElementById("team-score_delete").addEventListener('click', () => {
+    document.getElementById("enter-score_delete").addEventListener('click', () => {
         console.log("Deleting score");
-        window.location = "#enter-scores";
+        window.location = "#teams-list";
     });
-    document.getElementById("team-score_no-show").addEventListener('click', () => {
+    document.getElementById("enter-score_no-show").addEventListener('click', () => {
         console.log("Mark no show");
-        window.location = "#enter-scores";
+        window.location = "#teams-list";
     });
-
 
     document.getElementById("choose-judge_submit").addEventListener('click', function() {
         setJudge();
     });
-
-
-    // handlers for links that need additional logic
-    //FIXME: add listener when creating elements, do the same for other choose pages
-    document.getElementById("enter-scores_team-1").addEventListener('click', () => {
-        console.log("Store information about what team to score");
-    });
-
 
     // navigate to pages when the anchor changes
     window.addEventListener('hashchange', navigateToPage);
