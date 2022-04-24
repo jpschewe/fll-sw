@@ -156,7 +156,7 @@ function setJudge() {
 function selectTeam(team) {
     $.subjective.setCurrentTeam(team);
 
-    $.subjective.setScoreEntryBackPage("#teams-list-page");
+    $.subjective.setScoreEntryBackPage("#teams-list");
     window.location = "#enter-score";
 }
 
@@ -724,7 +724,7 @@ function saveScore() {
             }
         });
 
-    $.mobile.navigate($.subjective.getScoreEntryBackPage());
+    window.location = $.subjective.getScoreEntryBackPage();
 }
 
 function enterNoShow() {
@@ -738,7 +738,7 @@ function enterNoShow() {
     score.deleted = false;
     $.subjective.saveScore(score);
 
-    $.mobile.navigate($.subjective.getScoreEntryBackPage());
+    window.location = $.subjective.getScoreEntryBackPage();
 }
 
 $(document).on("pageshow", "#enter-score-page", function(_) {
@@ -765,7 +765,7 @@ $(document).on("pageinit", "#enter-score-page", function(_) {
     });
 
     $("#enter-score_cancel-score").click(function() {
-        $.mobile.navigate($.subjective.getScoreEntryBackPage());
+        window.location = $.subjective.getScoreEntryBackPage();
     });
 
     $("#enter-score_delete-score").click(function() {
@@ -780,7 +780,7 @@ $(document).on("pageinit", "#enter-score-page", function(_) {
             score.deleted = true;
             $.subjective.saveScore(score);
 
-            $.mobile.navigate($.subjective.getScoreEntryBackPage());
+            window.location = $.subjective.getScoreEntryBackPage();
         }
     });
 
@@ -836,21 +836,22 @@ function getScoreRange(goal) {
 }
 
 function populateScoreSummary() {
-    $("#score-summary_content").empty();
+    const scoreSummaryContent = document.getElementById("score-summary_content");
+    removeChildren(scoreSummaryContent);
 
-    var teamScores = {};
-    var teamsWithScores = [];
+    const teamScores = {};
+    const teamsWithScores = [];
 
-    var teams = $.subjective.getCurrentTeams();
-    $.each(teams, function(i, team) {
-        var score = $.subjective.getScore(team.teamNumber);
+    const teams = $.subjective.getCurrentTeams();
+    for (const team of teams) {
+        const score = $.subjective.getScore(team.teamNumber);
         if ($.subjective.isScoreCompleted(score)) {
             teamsWithScores.push(team);
 
-            var computedScore = $.subjective.computeScore(score);
+            const computedScore = $.subjective.computeScore(score);
             teamScores[team.teamNumber] = computedScore;
         }
-    });
+    }
 
     teamsWithScores.sort(function(a, b) {
         var scoreA = teamScores[a.teamNumber];
@@ -858,29 +859,54 @@ function populateScoreSummary() {
         return scoreA < scoreB ? 1 : scoreA > scoreB ? -1 : 0;
     });
 
-    var rank = 0;
-    var rankOffset = 1;
-    $.each(teamsWithScores, function(i, team) {
-        var computedScore = teamScores[team.teamNumber];
+    let rank = 0;
+    let rankOffset = 1;
+    for (let i = 0; i < teamsWithScores.length; ++i) {
+        const team = teamsWithScores[i];
+        const computedScore = teamScores[team.teamNumber];
+        const score = $.subjective.getScore(team.teamNumber);
 
-        var prevScore = null;
+        let prevScore = null;
         if (i > 0) {
-            var prevTeam = teamsWithScores[i - 1];
+            const prevTeam = teamsWithScores[i - 1];
             prevScore = teamScores[prevTeam.teamNumber];
         }
 
-        var nextScore = null;
+        let nextScore = null;
         if (i + 1 < teamsWithScores.length) {
-            var nextTeam = teamsWithScores[i + 1];
+            const nextTeam = teamsWithScores[i + 1];
             nextScore = teamScores[nextTeam.teamNumber];
         }
 
+        const teamRow = document.createElement("div");
+        scoreSummaryContent.appendChild(teamRow);
+
+        const teamBlock = document.createElement("span");
+        teamRow.appendChild(teamBlock);
+
+        const rightBlock = document.createElement("span");
+        teamRow.appendChild(rightBlock);
+        rightBlock.classList.add("right-align");
+
+        const scoreBlock = document.createElement("span");
+        rightBlock.appendChild(scoreBlock);
+        let scoreText;
+        if (null == score) {
+            scoreText = "";
+        } else if (score.noShow) {
+            scoreText = "No Show";
+        } else {
+            scoreText = computedScore;
+        }
+        scoreBlock.innerText = scoreText;
+        scoreBlock.classList.add("score");
+        scoreBlock.classList.add("score-summary-right-elements");
+
         // determine tie for highlighting
-        var tieClass = "";
         if (prevScore == computedScore) {
-            tieClass = "tie";
+            scoreBlock.classList.add("tie");
         } else if (nextScore == computedScore) {
-            tieClass = "tie";
+            scoreBlock.classList.add("tie");
         }
 
         // determine rank
@@ -891,74 +917,38 @@ function populateScoreSummary() {
             rankOffset = 1;
         }
 
-        var nominations = "";
-        var score = $.subjective.getScore(team.teamNumber);
+        let nominations = "";
         if (score.nonNumericNominations.length > 0) {
             nominations = " - " + score.nonNumericNominations.join(", ");
         }
 
-        var teamRow = $("<div class=\"ui-grid-b ui-responsive\"></div>");
+        teamBlock.innerText = rank + " - #" + team.teamNumber + "  - " + team.teamName + nominations;
 
-        var teamBlock = $("<div class=\"ui-block-a team-info\">" + rank + " - #"
-            + team.teamNumber + "  - " + team.teamName + nominations + "</div>");
-        teamRow.append(teamBlock);
+        const editButton = document.createElement("button");
+        rightBlock.appendChild(editButton);
+        editButton.innerText = "Edit";
+        editButton.classList.add("score-summary-right-elements");
 
-        var scoreText;
-        if (null == score) {
-            scoreText = "";
-        } else if (score.noShow) {
-            scoreText = "No Show";
-        } else {
-            scoreText = computedScore;
-        }
-
-        var scoreBlock = $("<div class=\"ui-block-b score " + tieClass + "\">"
-            + scoreText + "</div>");
-        teamRow.append(scoreBlock);
-
-        var editBlock = $("<div class=\"ui-block-c edit\"></div>");
-        var editButton = $("<button class=\"ui-btn ui-mini\">Edit</button>");
-        editBlock.append(editButton);
-        teamRow.append(editBlock);
-        editButton.click(function() {
+        editButton.addEventListener("click", function() {
             $.subjective.setCurrentTeam(team);
 
-            $.subjective.setScoreEntryBackPage("#score-summary-page");
+            $.subjective.setScoreEntryBackPage("#score-summary");
             $.mobile.navigate("#enter-score-page");
         });
 
-        $("#score-summary_content").append(teamRow);
 
-        var score = $.subjective.getScore(team.teamNumber);
-        var noteRow;
+        const noteRow = document.createElement("div");
         if (null != score.note) {
-            noteRow = $("<div>" + score.note + "</div>");
+            noteRow.innerText = score.note;
         } else {
-            noteRow = $("<div>No notes</div>");
+            noteRow.innerText = "No notes";
         }
-        $("#score-summary_content").append(noteRow);
-        $("#score-summary_content").append($("<hr/>"));
+        scoreSummaryContent.appendChild(noteRow);
+        scoreSummaryContent.appendChild(document.createElement("hr"));
 
         prevScore = computedScore;
-    });
-
-    $("#score-summary-page").trigger("create");
+    }
 }
-
-$(document).on("pagebeforeshow", "#score-summary-page", function(event) {
-    displayTournamentName($("#score-summary_tournament"));
-
-    var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
-    $("#score-summary_judging-group").text(currentJudgingGroup);
-
-    var currentCategory = $.subjective.getCurrentCategory();
-    $("#score-summary_category").text(currentCategory.title);
-
-    var currentJudge = $.subjective.getCurrentJudge();
-    $("#score-summary_judge").text(currentJudge.id);
-
-    populateScoreSummary();
-});
 
 $(document).on("pageshow", "#score-summary-page", function(event) {
     $.mobile.loading("hide");
@@ -1181,6 +1171,10 @@ function displayPageScoreSummary() {
     document.getElementById("side-panel_choose-judge").parentNode.classList.remove('fll-sw-ui-inactive');
     document.getElementById("side-panel_score-summary").parentNode.classList.add('fll-sw-ui-inactive');
     document.getElementById("side-panel_enter-scores").parentNode.classList.remove('fll-sw-ui-inactive');
+
+    populateScoreSummary();
+
+    updateMainHeader();
 }
 
 function displayPageEnterScore() {

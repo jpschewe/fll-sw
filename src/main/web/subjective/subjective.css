@@ -110,3 +110,12 @@ body {
 button, input {
     font-weight: inherit;
 }
+
+.score-summary-right-elements {
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-top: 0.7em;
+    padding-bottom: 0.7em;
+    margin-right: 1em;
+    margin-left: 1em;
+}

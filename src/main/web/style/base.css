@@ -143,3 +143,6 @@ li.no-marker {
     text-align: center;
 }
 /* end dialog styling */
+.right-align {
+    float: right;
+}
