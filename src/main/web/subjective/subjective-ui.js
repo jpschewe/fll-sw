@@ -933,7 +933,7 @@ function populateScoreSummary() {
             $.subjective.setCurrentTeam(team);
 
             $.subjective.setScoreEntryBackPage("#score-summary");
-            $.mobile.navigate("#enter-score-page");
+            window.location = "#enter-score";
         });
 
 
@@ -1261,19 +1261,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("enter-score_save").addEventListener('click', () => {
         console.log("Saving score");
-        window.location = "#teams-list";
+        window.location = $.subjective.getScoreEntryBackPage();
     });
     document.getElementById("enter-score_cancel").addEventListener('click', () => {
         console.log("Canceling score entry");
-        window.location = "#teams-list";
+        window.location = $.subjective.getScoreEntryBackPage();
     });
     document.getElementById("enter-score_delete").addEventListener('click', () => {
         console.log("Deleting score");
-        window.location = "#teams-list";
+        window.location = $.subjective.getScoreEntryBackPage();
     });
     document.getElementById("enter-score_no-show").addEventListener('click', () => {
         console.log("Mark no show");
-        window.location = "#teams-list";
+        window.location = $.subjective.getScoreEntryBackPage();
     });
 
     document.getElementById("choose-judge_submit").addEventListener('click', function() {
