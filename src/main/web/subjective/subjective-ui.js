@@ -427,7 +427,7 @@ function addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore) {
     slider.setAttribute("max", goal.max);
     slider.value = initValue;
 
-    sliderContainer.appendChild(slider);
+    cell.appendChild(slider);
 
     row.appendChild(cell);
 
@@ -437,25 +437,27 @@ function addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore) {
 }
 
 function setSliderTicks(goal) {
-    var sliderId = getScoreItemName(goal);
+    const sliderId = getScoreItemName(goal);
 
-    var $slider = $("#" + sliderId);
-    var $track = $("#" + sliderId + "-container .ui-slider-track");
+    const slider = document.getElementById(sliderId);
+    const sliderContainer = document.getElementById(sliderId + "-container");
 
-    var max = goal.max;
-    var min = goal.min;
-    var spacing = 100 / (max - min);
+    const max = goal.max;
+    const min = goal.min;
+    const offsetPercent = 1; // handle space at the start of the range
+    const spacing = (100 - offsetPercent - offsetPercent) / (max - min);
 
     /*
      * $.subjective.log("Creating slider ticks for " + goal.name + " min: " + min + "
      * max: " + max + " spacing: " + spacing);
      */
 
-    $slider.find('.sliderTickMark').remove();
-    for (var i = 0; i <= max - min; i++) {
-        var $tick = $('<span class="sliderTickMark">&nbsp;</span>');
-        $tick.css('left', (spacing * i) + '%');
-        $track.prepend($tick);
+    for (let i = 0; i <= max - min; i++) {
+        const tick = document.createElement("span");
+        tick.classList.add("sliderTickMark");
+        //tick.innerHtml = "&nbsp;";
+        tick.style.left = ((spacing * i) + offsetPercent) + '%';
+        sliderContainer.appendChild(tick);
     }
 
 }
@@ -474,21 +476,13 @@ function highlightRubric(goal, ranges, value) {
 }
 
 function addEventsToSlider(goal, ranges) {
-
-    var ranges = goal.rubric;
-    ranges.sort(rangeSort);
-
-    var sliderId = getScoreItemName(goal);
-    var $slider = $("#" + sliderId);
-
-    $slider.slider({
-        highlight: true
-    });
+    const sliderId = getScoreItemName(goal);
+    const slider = document.getElementById(sliderId);
 
     setSliderTicks(goal);
 
-    $slider.on("change", function() {
-        var value = $slider.val();
+    slider.addEventListener('change', function() {
+        const value = slider.value;
         highlightRubric(goal, ranges, value);
 
         recomputeTotal();
@@ -524,6 +518,9 @@ function createScoreRows(table, totalColumns, score, goal) {
     row.appendChild(cell);
     cell.setAttribute("colspan", totalColumns);
     cell.innerHtml = "&nbsp;";
+
+    addEventsToSlider(goal, ranges);
+
 }
 
 /**
@@ -1121,29 +1118,6 @@ function displayPageEnterScore() {
         $.each($.subjective.getCurrentCategory().allGoals, function(index,
             goal) {
             addEventsToSlider(goal);
-    
-            if (null != score) {
-                var openCommentButton = $("#enter-score-comment-"
-                    + goal.name
-                    + "-button");
-    
-                var comment;
-                if (score.goalComments) {
-                    comment = score.goalComments[goal.name];
-                } else {
-                    comment = "";
-                }
-                if (!isBlank(comment)) {
-                    openCommentButton.addClass("comment-entered");
-                } else {
-                    openCommentButton.removeClass("comment-entered");
-                }
-    
-                $("#enter-score-comment-" + goal.name + "-text").val(
-                    comment);
-            } else {
-                $("#enter-score-comment-" + goal.name + "-text").val("");
-            }
     
         });
     */
