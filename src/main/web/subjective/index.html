@@ -157,11 +157,107 @@
 
 
     <div class='fll-sw-ui-header' id='header-enter-score'>
-        <div>Team Score entry header</div>
+        <div>
+            <span>
+                Team #:
+                <span id="enter-score_team-number"></span>
+            </span>
+
+            <span>
+                Team Name:
+                <span id="enter-score_team-name"></span>
+            </span>
+        </div>
+
+        <div>
+            <span>
+                <button type='button' id="enter-score-note-button">
+                    Edit Note</button>
+            </span>
+
+            <span>
+                Score:
+                <span id="enter-score_total-score">0</span>
+            </span>
+        </div>
+
+        <table id='enter-score_score-table_header' class='score-entry'>
+        </table>
+
     </div>
 
-    <div id='content-enter-score' class='fll-sw-ui-content'>Score
-        entry here...</div>
+    <div id='content-enter-score' class='fll-sw-ui-content'>
+
+        <table id='enter-score_score-table' class="score-entry">
+        </table>
+
+        <!-- comment grid -->
+        <div>
+            <button type='button'
+                id="enter-score-comment-great-job-button" class="center">
+                Great Job...</button>
+
+            <button type='button'
+                id="enter-score-comment-think-about-button"
+                class="center">Think About...</button>
+        </div>
+        <!-- end comment grid -->
+
+        <div id='enter-score_nominates'></div>
+
+    </div>
+
+    <!--  enter score dialogs -->
+
+    <div id="enter-score-goal-comments"></div>
+
+    <div class='dialog' id="enter-score-note">
+        <div class='comment-dialog'>
+            <textarea class='comment-text' id="enter-score-note-text"
+                rows="20" cols="60"></textarea>
+
+            <button type='button' id="enter-score-note-close">
+                Close</button>
+        </div>
+    </div>
+
+    <div class='dialog' id='enter-score-comment-great-job'>
+        <div class='comment-dialog'>
+            <div>Great Job...</div>
+            <textarea class='comment-text'
+                id="enter-score-comment-great-job-text" rows="20"
+                cols="60"></textarea>
+
+            <button type='button'
+                id="enter-score-comment-great-job-close">Close</button>
+        </div>
+    </div>
+
+    <div class='dialog' id="enter-score-comment-think-about">
+        <div class='comment-dialog'>
+            <div>Think About...</div>
+            <textarea class='comment-text'
+                id="enter-score-comment-think-about-text" rows="20"
+                cols="60"></textarea>
+
+            <button type='button'
+                id="enter-score-comment-think-about-close">
+                Close</button>
+        </div>
+    </div>
+
+    <div class='dialog' id="enter-score_confirm-zero">
+        <div>
+            <p>Are you sure this is a zero score or is this a No
+                Show?</p>
+            <button type='button' id="enter-score_confirm-zero_yes">Zero
+                Score</button>
+            <button type='button' id="enter-score_confirm-zero_no-show">
+                No Show</button>
+        </div>
+    </div>
+
+    <!--  end enter score dialogs -->
 
     <div class='fll-sw-ui-footer' id="footer-enter-score">
         <button id='enter-score_save' type='button'>Save
@@ -428,223 +524,7 @@
         </div>
         <!-- /page teams-list -->
 
-        <div data-role="page" id='enter-score-page'>
 
-            <div data-role="header" data-position="fixed">
-
-                <div class="ui-grid-a">
-
-                    <div class="ui-block-a">
-                        Team #:
-                        <span id="enter-score_team-number"></span>
-                    </div>
-
-                    <div class="ui-block-b">
-                        Team Name:
-                        <span id="enter-score_team-name"></span>
-                    </div>
-
-                    <div class="ui-block-a">
-                        <a id="enter-score-note-button"
-                            href="#enter-score-note" data-rel="popup"
-                            data-position-to="window"
-                            class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-a">Edit
-                            Note</a>
-                    </div>
-
-                    <div class="ui-block-b">
-                        Score:
-                        <span id="enter-score_total-score">0</span>
-                    </div>
-
-                    <table id='enter-score_score-table_header'
-                        class='score-entry'>
-                    </table>
-
-                </div>
-                <!-- end grid -->
-
-            </div>
-            <!-- /header -->
-
-            <div class="ui-content" role="main">
-
-                <table id='enter-score_score-table' class="score-entry">
-                </table>
-
-                <!-- comment grid -->
-                <div class="ui-grid-a">
-                    <div class="ui-block-a center">
-                        <a id="enter-score-comment-great-job-button"
-                            href="#enter-score-comment-great-job"
-                            data-rel="popup" data-position-to="window"
-                            class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-a comment-button">
-                            Great Job...</a>
-                    </div>
-
-                    <div class="ui-block-b center">
-                        <a id="enter-score-comment-think-about-button"
-                            href="#enter-score-comment-think-about"
-                            data-rel="popup" data-position-to="window"
-                            class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-a">
-                            Think About...</a>
-                    </div>
-                </div>
-                <!-- end comment grid -->
-
-                <div id='enter-score_nominates'></div>
-
-            </div>
-            <!-- /content -->
-
-            <div data-role="footer" data-position="fixed">
-
-                <div class="ui-grid-c ui-responsive">
-
-                    <div class="ui-block-a">
-                        <button id='enter-score_save-score'
-                            class='score-entry-button'>Save
-                            Changes</button>
-                    </div>
-
-                    <div class="ui-block-b">
-                        <button id='enter-score_cancel-score'
-                            class='score-entry-button'>Cancel
-                            Changes</button>
-                    </div>
-
-                    <div class="ui-block-c">
-                        <button id='enter-score_delete-score'
-                            class='score-entry-button'>Delete</button>
-                    </div>
-
-                    <div class="ui-block-d">
-                        <button id='enter-score_noshow-score'
-                            class='score-entry-button'>No Show</button>
-                    </div>
-
-                </div>
-
-            </div>
-            <!-- /footer -->
-
-
-            <div id="enter-score-goal-comments"></div>
-
-            <div id="enter-score-note" class="ui-content"
-                data-role="popup" data-dismissible="false">
-                <textarea id="enter-score-note-text" rows="20" cols="60"></textarea>
-
-                <a href="#" data-rel="back" id="enter-score-note-close"
-                    class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b">Close</a>
-            </div>
-
-            <div id="enter-score-comment-great-job" class="ui-content"
-                data-role="popup" data-dismissible="false">
-                <div>Great Job...</div>
-                <textarea id="enter-score-comment-great-job-text"
-                    rows="20" cols="60"></textarea>
-
-                <a href="#" data-rel="back"
-                    id="enter-score-comment-great-job-close"
-                    class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b">Close</a>
-            </div>
-
-            <div id="enter-score-comment-think-about" class="ui-content"
-                data-role="popup" data-dismissible="false">
-                <div>Think About...</div>
-                <textarea id="enter-score-comment-think-about-text"
-                    rows="20" cols="60"></textarea>
-
-                <a href="#" data-rel="back"
-                    id="enter-score-comment-think-about-close"
-                    class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b">Close</a>
-            </div>
-
-            <div id="enter-score_confirm-zero" class="ui-content"
-                data-role="popup">
-                <p>Are you sure this is a zero score or is this a No
-                    Show?</p>
-                <a href="#" data-rel="back"
-                    id="enter-score_confirm-zero_yes"
-                    class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b">Zero
-                    Score</a> <a href="#" data-rel="back"
-                    id="enter-score_confirm-zero_no-show"
-                    class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b">No
-                    Show</a>
-
-            </div>
-
-
-        </div>
-        <!-- end enter-score-page -->
-
-        <div data-role="page" id="score-summary-page">
-
-            <div data-role="header">
-                <h1>Score Summary</h1>
-
-                <span id='score-summary_tournament'> </span>
-                -
-                <span id='score-summary_judging-group'></span>
-                -
-                <span id='score-summary_category'></span>
-                -
-                <span id='score-summary_judge'></span>
-            </div>
-
-
-            <div class="ui-content" role="main">
-                <div id='score-summary_content'></div>
-            </div>
-
-
-            <div data-role="footer" data-position="fixed">
-                <a href="#score-summary_nav-panel"
-                    class="ui-btn ui-corner-all ui-shadow ui-btn-icon-notext ui-icon-gear ui-mini"></a>
-
-            </div>
-
-            <!-- side panel -->
-            <div data-role="panel" id="score-summary_nav-panel"
-                data-display="overlay">
-                <ul data-role="listview">
-                    <li data-icon="delete">
-                        <a href="#" data-rel="close">Close</a>
-                    </li>
-                    <li>
-                        <a href="#index-page">Top</a>
-                    </li>
-                    <li>
-                        <a href="#choose-judging-group-page">Choose
-                            Judging Group</a>
-                    </li>
-                    <li>
-                        <a href="#choose-category-page">Choose
-                            Category</a>
-                    </li>
-                    <li>
-                        <a href="#choose-judge-page">Choose Judge</a>
-                    </li>
-                    <li>
-                        <a href="#teams-list-page">Enter Scores</a>
-                    </li>
-                </ul>
-                <br />
-                <br />
-                <button class="ui-btn ui-corner-all ui-shadow"
-                    id="score-summary_upload-scores">Synchronize</button>
-
-                <a id="score-summary_offline" download="offline.json">Offline
-                    Download</a>
-
-                <br />
-                <br />
-            </div>
-            <!-- end side panel -->
-
-        </div>
-        <!--  end score-summary-page -->
     </div>
 
 </body>

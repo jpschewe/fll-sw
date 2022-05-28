@@ -19,7 +19,7 @@
 
 .fll-sw-ui-content {
     /* use javascript to set the padding to match the height of the header and footer */
-    position: absolute;
+    /* position: absolute; uncommenting this disables the scrolling of the content */    
     background-color: #f9f9f9;
     width: 100%;
     height: 100%;

@@ -59,8 +59,18 @@ table.score-entry .selected-range {
     background-color: LawnGreen;
 }
 
-#enter-score-page .comment-entered {
+.comment-entered {
     background-color: LawnGreen;
+}
+
+.comment-text {
+    width: 100%;
+    height: 90%;
+    margin-bottom: 10px;
+}
+
+.dialog>div.comment-dialog {
+    width: 50%;
 }
 
 .hidden {
