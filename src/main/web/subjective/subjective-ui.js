@@ -239,6 +239,10 @@ function createNewScore() {
     return score;
 }
 
+function getGoalTextId(goal) {
+    return "enter-score-comment-" + goal.name + "-text";
+}
+
 /**
  * Save the state of the current page's goals to the specified score object. If
  * null, do nothing.
@@ -255,10 +259,10 @@ function saveToScoreObject(score) {
             const subscore = Number(document.getElementById(getScoreItemName(goal)).value);
             score.standardSubScores[goal.name] = subscore;
 
-            const goalComment = document.getElementById("enter-score-comment-" + goal.name + "-text").value;
             if (null == score.goalComments) {
                 score.goalComments = {};
             }
+            const goalComment = document.getElementById(getGoalTextId(goal)).value;
             score.goalComments[goal.name] = goalComment;
         }
     }
@@ -320,7 +324,7 @@ function getRubricCellId(goal, rangeIndex) {
     return goal.name + "_" + rangeIndex;
 }
 
-function addRubricToScoreEntry(table, goal, ranges) {
+function addRubricToScoreEntry(table, goal, goalComment, ranges) {
 
     const row = document.createElement("tr");
 
@@ -353,10 +357,14 @@ function addRubricToScoreEntry(table, goal, ranges) {
 
             const textarea = document.createElement("textarea");
             popupContent.appendChild(textarea);
-            textarea.id = "enter-score-comment-" + goal.name + "-text";
+            textarea.id = getGoalTextId(goal);
             textarea.classList.add('comment-text');
             textarea.setAttribute("rows", "20");
             textarea.setAttribute("cols", "60");
+            if (!isBlank(goalComment)) {
+                textarea.value = goalComment;
+                commentButton.classList.add("comment-entered");
+            }
 
             const closeButton = document.createElement("button");
             popupContent.appendChild(closeButton);
@@ -487,15 +495,27 @@ function addEventsToSlider(goal, ranges) {
     });
 }
 
-function createScoreRows(table, totalColumns, goal, subscore) {
+function createScoreRows(table, totalColumns, score, goal) {
+    let goalScore = null;
+    if ($.subjective.isScoreCompleted(score)) {
+        goalScore = score.standardSubScores[goal.name];
+    }
+
+    let goalComment;
+    if (score.goalComments) {
+        goalComment = score.goalComments[goal.name];
+    } else {
+        goalComment = "";
+    }
+
     addGoalHeaderToScoreEntry(table, totalColumns, goal);
 
     const ranges = goal.rubric;
     ranges.sort(rangeSort);
 
-    addRubricToScoreEntry(table, goal, ranges);
+    addRubricToScoreEntry(table, goal, goalComment, ranges);
 
-    addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore);
+    addSliderToScoreEntry(table, goal, totalColumns, ranges, goalScore);
 
     const row = document.createElement("tr");
     table.appendChild(row);
@@ -562,11 +582,7 @@ function createGoalGroupRows(table, totalColumns, score, goalGroup) {
         if (goal.enumerated) {
             alert("Enumerated goals not supported: " + goal.name);
         } else {
-            let goalScore = null;
-            if ($.subjective.isScoreCompleted(score)) {
-                goalScore = score.standardSubScores[goal.name];
-            }
-            createScoreRows(table, totalColumns, goal, goalScore);
+            createScoreRows(table, totalColumns, score, goal);
         }
     }
 
@@ -1054,12 +1070,7 @@ function displayPageEnterScore() {
             if (ge.enumerated) {
                 alert("Enumerated goals not supported: " + goal.name);
             } else {
-                let goalScore = null;
-                if ($.subjective.isScoreCompleted(score)) {
-                    goalScore = score.standardSubScores[goal.name];
-                }
-
-                createScoreRows(table, totalColumns, ge, goalScore);
+                createScoreRows(table, totalColumns, score, ge);
             }
         }
     }
@@ -1105,7 +1116,6 @@ function displayPageEnterScore() {
         recomputeTotal();
     
     //FIXME: add content here from appropriate on function
-        $("#enter-score-page").trigger("create");
     
         // events need to be added after the page create
         $.each($.subjective.getCurrentCategory().allGoals, function(index,
