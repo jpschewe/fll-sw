@@ -248,20 +248,20 @@ function saveToScoreObject(score) {
         return;
     }
 
-    $.each($.subjective.getCurrentCategory().allGoals, function(index, goal) {
+    for (const goal of $.subjective.getCurrentCategory().allGoals) {
         if (goal.enumerated) {
             alert("Enumerated goals not supported: " + goal.name);
         } else {
-            var subscore = Number($("#" + getScoreItemName(goal)).val());
+            const subscore = Number(document.getElementById(getScoreItemName(goal)).value);
             score.standardSubScores[goal.name] = subscore;
 
-            var goalComment = $("#enter-score-comment-" + goal.name + "-text").val();
+            const goalComment = document.getElementById("enter-score-comment-" + goal.name + "-text").value;
             if (null == score.goalComments) {
                 score.goalComments = {};
             }
             score.goalComments[goal.name] = goalComment;
         }
-    });
+    }
 }
 
 /**
@@ -276,16 +276,16 @@ function getScoreItemName(goal) {
 
 function recomputeTotal() {
     let total = 0;
-    $.each($.subjective.getCurrentCategory().allGoals, function(index, goal) {
+    for (const goal of $.subjective.getCurrentCategory().allGoals) {
         if (goal.enumerated) {
             alert("Enumerated goals not supported: " + goal.name);
         } else {
-            const subscore = Number($("#" + getScoreItemName(goal)).val());
+            const subscore = Number(document.getElementById(getScoreItemName(goal)).value);
             const multiplier = Number(goal.multiplier);
             total = total + subscore * multiplier;
         }
-    });
-    $("#enter-score_total-score").text(total);
+    }
+    document.getElementById("enter-score_total-score").innerText = total;
 }
 
 function addGoalHeaderToScoreEntry(table, totalColumns, goal) {
@@ -593,6 +593,9 @@ function updateThinkAboutButtonBackground() {
 }
 
 
+/**
+ * Save the score to storage and go back the to the score entry back page.
+ */
 function saveScore() {
     var currentTeam = $.subjective.getCurrentTeam();
     var score = $.subjective.getScore(currentTeam.teamNumber);
@@ -628,6 +631,9 @@ function saveScore() {
     window.location = $.subjective.getScoreEntryBackPage();
 }
 
+/**
+ * Save a no show and go back to the score entry back page.
+ */
 function enterNoShow() {
     var currentTeam = $.subjective.getCurrentTeam();
     var score = $.subjective.getScore(currentTeam.teamNumber);
@@ -1223,7 +1229,6 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("enter-score_confirm-zero").style.visibility = 'visible';
         } else {
             saveScore();
-            window.location = $.subjective.getScoreEntryBackPage();
         }
     });
     document.getElementById("enter-score_cancel").addEventListener('click', () => {
@@ -1255,18 +1260,14 @@ document.addEventListener("DOMContentLoaded", () => {
         //FIXME need confirm dialog
 
         enterNoShow();
-
-        window.location = $.subjective.getScoreEntryBackPage();
     });
     document.getElementById("enter-score_confirm-zero_yes").addEventListener('click', function() {
         document.getElementById("enter-score_confirm-zero").style.visibility = 'hidden';
         saveScore();
-        window.location = $.subjective.getScoreEntryBackPage();
     });
     document.getElementById("enter-score_confirm-zero_no-show").addEventListener('click', function() {
         document.getElementById("enter-score_confirm-zero").style.visibility = 'hidden';
         enterNoShow();
-        window.location = $.subjective.getScoreEntryBackPage();
     });
 
     document.getElementById("enter-score-comment-great-job-close").addEventListener('click', function() {
