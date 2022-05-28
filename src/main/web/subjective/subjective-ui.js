@@ -1223,9 +1223,8 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("enter-score_confirm-zero").style.visibility = 'visible';
         } else {
             saveScore();
+            window.location = $.subjective.getScoreEntryBackPage();
         }
-
-        window.location = $.subjective.getScoreEntryBackPage();
     });
     document.getElementById("enter-score_cancel").addEventListener('click', () => {
         console.log("Canceling score entry");
@@ -1261,13 +1260,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     document.getElementById("enter-score_confirm-zero_yes").addEventListener('click', function() {
         document.getElementById("enter-score_confirm-zero").style.visibility = 'hidden';
-        //FIXME need to wait until close to save the score
         saveScore();
+        window.location = $.subjective.getScoreEntryBackPage();
     });
     document.getElementById("enter-score_confirm-zero_no-show").addEventListener('click', function() {
         document.getElementById("enter-score_confirm-zero").style.visibility = 'hidden';
-        //FIXME need to wait until close to save the score
         enterNoShow();
+        window.location = $.subjective.getScoreEntryBackPage();
     });
 
     document.getElementById("enter-score-comment-great-job-close").addEventListener('click', function() {
