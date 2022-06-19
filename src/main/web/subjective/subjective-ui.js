@@ -790,7 +790,7 @@ function populateScoreSummary() {
 
 
         const noteRow = document.createElement("div");
-        if (null != score.note) {
+        if (score.note) {
             noteRow.innerText = score.note;
         } else {
             noteRow.innerText = "No notes";
