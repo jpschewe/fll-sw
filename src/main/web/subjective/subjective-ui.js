@@ -1110,7 +1110,6 @@ function displayPageEnterScore() {
         });
     
         // read the intial value
-        recomputeTotal();
     
     //FIXME: add content here from appropriate on function
     
@@ -1124,6 +1123,8 @@ function displayPageEnterScore() {
 
     updateGreatJobButtonBackground();
     updateThinkAboutButtonBackground();
+
+    recomputeTotal();
 
 }
 
