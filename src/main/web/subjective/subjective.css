@@ -1,3 +1,9 @@
+body {
+    color: #333;
+    text-shadow: 0 1px 0 #f3f3f3;
+    background-color: #f9f9f9;
+}
+
 .ui-grid-b>.ui-block-a.team-info {
     width: 70%;
 }
@@ -117,13 +123,6 @@ span.sliderTickMark {
     width: 95%;
 }
 
-body {
-    color: #333;
-    text-shadow: 0 1px 0 #f3f3f3;
-    font-weight: 700;
-    background-color: #f9f9f9;
-}
-
 #side-panel_close {
     bottom: 0;
     left: 0;
@@ -142,4 +141,20 @@ button, input {
     padding-bottom: 0.7em;
     margin-right: 1em;
     margin-left: 1em;
+}
+
+.nominate-label {
+    font-weight: 700;
+    display: inline-block;
+    width: 30%;
+    padding-left: 0.5em;
+    padding-bottom: 1em;
+    padding-top: 1em;
+    vertical-align: middle;
+    background-color: #ededed;
+}
+
+.nominate-description {
+    display: inline-block;
+    width: 65%;
 }

@@ -630,16 +630,12 @@ function saveScore() {
 
     // save non-numeric nominations
     score.nonNumericNominations = [];
-    //FIXME jquery
-    $.each($.subjective.getCurrentCategory().nominates,
-        function(index, nominate) {
-            $("#enter-score_nominates").show();
-
-            var checkbox = $("#enter-score_nominate_" + index);
-            if (checkbox.prop("checked")) {
-                score.nonNumericNominations.push(nominate.nonNumericCategoryTitle);
-            }
-        });
+    $.subjective.getCurrentCategory().nominates.forEach(function(nominate, index, _) {
+        const checkbox = document.getElementById("enter-score_nominate_" + index);
+        if (checkbox.checked) {
+            score.nonNumericNominations.push(nominate.nonNumericCategoryTitle);
+        }
+    });
 
     window.location = $.subjective.getScoreEntryBackPage();
 }
@@ -1072,44 +1068,43 @@ function displayPageEnterScore() {
         }
     }
 
+    // add the non-numeric categories that teams can be nominated for
+    const nominatesContainer = document.getElementById("enter-score_nominates");
+    removeChildren(nominatesContainer);
+    $.subjective.getCurrentCategory().nominates.forEach(function(nominate, index, _) {
+        const nominateRow = document.createElement("div");
+        nominatesContainer.appendChild(nominateRow);
+
+        const nominateCheckLabel = document.createElement("label");
+        nominateRow.appendChild(nominateCheckLabel);
+        nominateCheckLabel.classList.add("nominate-label");
+
+        const checkbox = document.createElement("input");
+        nominateCheckLabel.appendChild(checkbox);
+        checkbox.setAttribute("type", "checkbox");
+        checkbox.id = "enter-score_nominate_" + index;
+
+        const nominateCheckText = document.createElement("span");
+        nominateCheckLabel.appendChild(nominateCheckText);
+        nominateCheckText.innerText = nominate.nonNumericCategoryTitle;
+
+        if (null != score
+            && score.nonNumericNominations
+                .includes(nominate.nonNumericCategoryTitle)) {
+            checkbox.checked = true;
+        }
+
+        const nominateDescription = document.createElement("span");
+        nominateRow.appendChild(nominateDescription);        
+        nominateDescription.classList.add("nominate-description");
+        const nonNumericCategory = $.subjective.getNonNumericCategory(nominate.nonNumericCategoryTitle);
+        if (nonNumericCategory) {
+            nominateDescription.innerText = nonNumericCategory.description;
+        }
+    });
+
     //FIXME
     /*
-    
-        // add the non-numeric categories that teams can be nominated for
-        $("#enter-score_nominates").empty();
-        $("#enter-score_nominates").hide();
-        $.each($.subjective.getCurrentCategory().nominates, function(index,
-            nominate) {
-            $("#enter-score_nominates").show();
-    
-            var grid = $("<div class=\"ui-grid-a split_30_70\"></div>");
-            $("#enter-score_nominates").append(grid);
-    
-            var blockA = $("<div class=\"ui-block-a\">");
-            grid.append(blockA);
-    
-            var label = $("<label>" + nominate.nonNumericCategoryTitle
-                + "</label>");
-            blockA.append(label);
-            var checkbox = $("<input type='checkbox' id='enter-score_nominate_"
-                + index + "' />");
-            if (null != score
-                && score.nonNumericNominations
-                    .includes(nominate.nonNumericCategoryTitle)) {
-                checkbox.prop("checked", true);
-            }
-            label.append(checkbox);
-    
-            var blockB = $("<div class=\"ui-block-b\">");
-            grid.append(blockB);
-    
-            var nonNumericCategory = $.subjective.getNonNumericCategory(nominate.nonNumericCategoryTitle);
-            if (nonNumericCategory) {
-                blockB.text(nonNumericCategory.description);
-            }
-        });
-    
-        // read the intial value
     
     //FIXME: add content here from appropriate on function
     
