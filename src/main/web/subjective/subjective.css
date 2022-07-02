@@ -137,6 +137,7 @@ span.sliderTickMark {
 
 .navigation-button {
     font-weight: bold;
+    cursor: pointer;
 }
 
 button, input {
@@ -161,6 +162,7 @@ button, input {
     padding-top: 1em;
     vertical-align: middle;
     background-color: #ededed;
+    cursor: pointer;
 }
 
 .nominate-description {
