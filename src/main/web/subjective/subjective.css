@@ -131,6 +131,18 @@ span.sliderTickMark {
     position: absolute;
 }
 
+#side-panel_open {
+    background-image: url("/images/Settings-Button.svg");
+}
+
+.fll-sw-ui-panel {
+    font-weight: bold;
+}
+
+.navigation-button {
+    font-weight: bold;
+}
+
 button, input {
     font-weight: inherit;
 }
@@ -145,7 +157,7 @@ button, input {
 }
 
 .nominate-label {
-    font-weight: 700;
+    font-weight: bold;
     display: inline-block;
     width: 30%;
     padding-left: 0.5em;
@@ -161,9 +173,5 @@ button, input {
 }
 
 .fll-sw-ui-header {
-    font-weight: 700;
-}
-
-#side-panel_open {
-    background-image: url("/images/Settings-Button.svg");
+    font-weight: bold;
 }
