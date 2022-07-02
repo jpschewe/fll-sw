@@ -308,6 +308,7 @@ function addGoalHeaderToScoreEntry(table, totalColumns, goal) {
     goalDescRow.appendChild(goalTitle);
     goalTitle.innerText = goal.title;
     goalTitle.style.width = "25%";
+    goalTitle.classList.add("goal-title");
 
     const spacer = document.createElement("td");
     goalDescRow.appendChild(spacer);
@@ -578,6 +579,7 @@ function createGoalGroupRows(table, totalColumns, score, goalGroup) {
     const barCell = document.createElement("td");
     barRow.appendChild(barCell);
     barCell.setAttribute("colspan", totalColumns);
+    barCell.classList.add("goal-group-title");
     barCell.innerText = groupText;
 
     for (const goal of goalGroup.goals) {
