@@ -59,6 +59,7 @@ table.score-entry {
 
 .score-slider-cell div {
     /*z-index: -10*/
+    
 }
 
 .score-slider-cell .ui-slider-track {
@@ -157,4 +158,8 @@ button, input {
 .nominate-description {
     display: inline-block;
     width: 65%;
+}
+
+.fll-sw-ui-header {
+    font-weight: 700;
 }
