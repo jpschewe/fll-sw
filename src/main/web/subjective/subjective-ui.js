@@ -503,7 +503,7 @@ function createScoreRows(table, totalColumns, score, goal) {
     }
 
     let goalComment;
-    if (score.goalComments) {
+    if (score && score.goalComments) {
         goalComment = score.goalComments[goal.name];
     } else {
         goalComment = "";
