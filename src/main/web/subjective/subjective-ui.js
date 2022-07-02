@@ -32,7 +32,7 @@ function populateChooseJudgingGroup() {
         judgingGroupsContainer.appendChild(button);
         button.classList.add("wide");
         button.classList.add("center");
-        button.classList.add("navigation-button");
+        button.classList.add("fll-sw-button");
         button.innerText = group;
         button.addEventListener('click', function() {
             $.subjective.setCurrentJudgingGroup(group);
@@ -52,7 +52,7 @@ function populateChooseCategory() {
         container.appendChild(button);
         button.classList.add("wide");
         button.classList.add("center");
-        button.classList.add("navigation-button");
+        button.classList.add("fll-sw-button");
         button.innerText = category.title;
         button.addEventListener('click', function() {
             $.subjective.setCurrentCategory(category);
@@ -71,7 +71,7 @@ function populateChooseJudge() {
     const newJudgeLabel = document.createElement("label");
     container.appendChild(newJudgeLabel);
     newJudgeLabel.classList.add("wide");
-    newJudgeLabel.classList.add("navigation-button");
+    newJudgeLabel.classList.add("fll-sw-button");
 
     const newJudgeOption = document.createElement("input");
     newJudgeLabel.appendChild(newJudgeOption);
@@ -102,7 +102,7 @@ function populateChooseJudge() {
             const judgeLabel = document.createElement("label");
             container.appendChild(judgeLabel);
             judgeLabel.classList.add("wide");
-            judgeLabel.classList.add("navigation-button");
+            judgeLabel.classList.add("fll-sw-button");
 
             const judgeInput = document.createElement("input");
             judgeLabel.appendChild(judgeInput);
@@ -180,7 +180,7 @@ function populateTeams() {
         const button = document.createElement("a");
         teamsList.appendChild(button);
         button.classList.add("wide");
-        button.classList.add("navigation-button");
+        button.classList.add("fll-sw-button");
 
         if (null != timeStr) {
             const span = document.createElement("span");
@@ -352,6 +352,7 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges) {
             cell.appendChild(commentButton);
             commentButton.id = "enter-score-comment-" + goal.name + "-button'";
             commentButton.innerText = "Comment";
+            commentButton.classList.add("fll-sw-button");
 
             const popup = document.createElement("div");
             popup.classList.add("dialog");

@@ -135,9 +135,10 @@ span.sliderTickMark {
     background-image: url("/images/Settings-Button.svg");
 }
 
-.navigation-button {
+.fll-sw-button {
     font-weight: bold;
     cursor: pointer;
+    padding: 10px;
 }
 
 button, input {
