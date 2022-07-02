@@ -4,19 +4,6 @@ body {
     background-color: #f9f9f9;
 }
 
-.ui-grid-b>.ui-block-a.team-info {
-    width: 70%;
-}
-
-.ui-grid-b>.ui-block-b.score {
-    width: 10%;
-    text-align: center;
-}
-
-.ui-grid-b>.ui-block-c.edit {
-    width: 20%;
-}
-
 .tie {
     background-color: red;
     color: white;
@@ -57,24 +44,6 @@ table.score-entry {
     right: 0%;
 }
 
-.score-slider-cell div {
-    /*z-index: -10*/
-    
-}
-
-.score-slider-cell .ui-slider-track {
-    margin-left: 0px;
-    margin-right: 0px;
-}
-
-.score-slider-cell .ui-slider-handle {
-    background-color: black;
-}
-
-.score-slider-cell .ui-slider-handle:hover {
-    background-color: black;
-}
-
 table.score-entry .selected-range {
     background-color: LawnGreen;
 }
@@ -110,18 +79,6 @@ span.sliderTickMark {
     width: 15px;
     height: 15px;
     border: solid 2px black;
-}
-
-.split_30_70 .ui-block-a {
-    width: 30%;
-}
-
-.split_30_70 .ui-block-b {
-    width: 70%;
-}
-
-.ui-footer button.score-entry-button {
-    width: 95%;
 }
 
 #side-panel_close {

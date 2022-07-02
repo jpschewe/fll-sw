@@ -1111,19 +1111,6 @@ function displayPageEnterScore() {
         }
     });
 
-    //FIXME
-    /*
-    
-    //FIXME: add content here from appropriate on function
-    
-        // events need to be added after the page create
-        $.each($.subjective.getCurrentCategory().allGoals, function(index,
-            goal) {
-            addEventsToSlider(goal);
-    
-        });
-    */
-
     updateGreatJobButtonBackground();
     updateThinkAboutButtonBackground();
 
