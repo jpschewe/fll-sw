@@ -163,3 +163,7 @@ button, input {
 .fll-sw-ui-header {
     font-weight: 700;
 }
+
+#side-panel_open {
+    background-image: url("/images/Settings-Button.svg");
+}
