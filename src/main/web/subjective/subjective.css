@@ -183,3 +183,23 @@ button, input {
 .goal-title {
     font-weight: bold;
 }
+
+.fll-sw-ui-footer button {
+    margin: 10px;
+}
+
+/* buttons at the bottom of the score entry page */
+#footer-enter-score button {
+    /* assumes only 4 buttons with margins */
+    width: 20%;
+}
+
+#enter-score-comment-great-job-button {
+    width: 45%;
+    margin-right: 20px;
+}
+
+#enter-score-comment-think-about-button {
+    width: 45%;
+    margin-left: 20px;
+}
