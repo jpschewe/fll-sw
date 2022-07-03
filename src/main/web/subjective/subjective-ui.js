@@ -1120,7 +1120,6 @@ function displayPageEnterScore() {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-
     const openButton = document.getElementById("side-panel_open");
     const sidePanel = document.getElementById("side-panel");
 
@@ -1206,36 +1205,49 @@ document.addEventListener("DOMContentLoaded", () => {
             saveScore();
         }
     });
+
     document.getElementById("enter-score_cancel").addEventListener('click', () => {
         console.log("Canceling score entry");
         window.location = $.subjective.getScoreEntryBackPage();
     });
+
     document.getElementById("enter-score_delete").addEventListener('click', () => {
         console.log("Deleting score");
 
-        //FIXME need confirm dialog
-
-        if (confirm("Are you sure you want to delete a score?")) {
-            const currentTeam = $.subjective.getCurrentTeam();
-            let score = $.subjective.getScore(currentTeam.teamNumber);
-            if (null == score) {
-                score = createNewScore();
-            }
-            score.modified = true;
-            score.noShow = false;
-            score.deleted = true;
-            $.subjective.saveScore(score);
-
-            window.location = $.subjective.getScoreEntryBackPage();
-        }
+        document.getElementById("confirm-delete-dialog").style.visibility = "visible";
     });
+    document.getElementById("confirm-delete-dialog_yes").addEventListener("click", () => {
+        document.getElementById("confirm-delete-dialog").style.visibility = "hidden";
+
+        const currentTeam = $.subjective.getCurrentTeam();
+        let score = $.subjective.getScore(currentTeam.teamNumber);
+        if (null == score) {
+            score = createNewScore();
+        }
+        score.modified = true;
+        score.noShow = false;
+        score.deleted = true;
+        $.subjective.saveScore(score);
+
+        window.location = $.subjective.getScoreEntryBackPage();
+    });
+    document.getElementById("confirm-delete-dialog_no").addEventListener("click", () => {
+        document.getElementById("confirm-delete-dialog").style.visibility = "hidden";
+    });
+
     document.getElementById("enter-score_no-show").addEventListener('click', () => {
         console.log("Mark no show");
-
-        //FIXME need confirm dialog
-
+        document.getElementById("confirm-noshow-dialog").style.visibility = "visible";
+    });
+    document.getElementById("confirm-noshow-dialog_yes").addEventListener("click", () => {
+        document.getElementById("confirm-noshow-dialog").style.visibility = "hidden";
         enterNoShow();
     });
+    document.getElementById("confirm-noshow-dialog_no").addEventListener("click", () => {
+        document.getElementById("confirm-noshow-dialog").style.visibility = "hidden";
+    });
+
+
     document.getElementById("enter-score_confirm-zero_yes").addEventListener('click', function() {
         document.getElementById("enter-score_confirm-zero").style.visibility = 'hidden';
         saveScore();
