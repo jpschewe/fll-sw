@@ -15,18 +15,21 @@ function loadData() {
             const subjectiveCategories = subjective_module.getSubjectiveCategories();
 
             waitDialog.style.visibility = "hidden";
-            $("#index-page_choose_clear").hide();
+            document.getElementById("index-page_choose_clear").style.visibility = "hidden";
 
+            const messages = document.getElementById("index-page_messages");
             if (0 == subjectiveCategories.length) {
                 alert("No subjective data loaded from server");
             } else {
-                $("#index-page_messages").append(
-                    "Loaded " + subjectiveCategories.length
-                    + " categories from the server<br/>");
+                const message = document.createElement("div");
+                messages.appendChild(message);
+                message.innerText = "Loaded " + subjectiveCategories.length
+                    + " categories from the server";
             }
-            $("#index-page_messages").append(
-                "Current tournament is " + subjective_module.getTournament().name
-                + "<br/>");
+
+            const tournamentMessage = document.createElement("div");
+            messages.appendChild(tournamentMessage);
+            messages.innerText = "Current tournament is " + subjective_module.getTournament().name;
 
             updateMainHeader();
 
@@ -51,7 +54,7 @@ function promptForJudgingGroup() {
 }
 
 function promptForReload() {
-    $("#index-page_choose_clear").show();
+    document.getElementById("index-page_choose_clear").style.visibility = "visible";
 }
 
 function reloadData() {
@@ -90,18 +93,19 @@ function checkTournament() {
 }
 
 function serverLoadPage() {
-    $("#index-page_choose_clear").hide();
+    const chooseClear = document.getElementById("index-page_choose_clear");
+    chooseClear.style.visibility = 'hidden';
 
-    $.getJSON("CheckAuth", function(data) {
+    fetch("CheckAuth").then(checkJsonResponse).then(function(data) {
         subjective_module.log("data: " + JSON.stringify(data));
 
         if (data.authenticated) {
-            $("#index-page_clear").click(function() {
-                $("#index-page_choose_clear").hide();
+            document.getElementById("index-page_clear").addEventListener('click', function() {
+                chooseClear.style.visibility = 'hidden';
                 reloadData();
             });
-            $("#index-page_keep").click(function() {
-                $("#index-page_choose_clear").hide();
+            document.getElementById("index-page_keep").addEventListener('click', function() {
+                chooseClear.style.visibility = 'hidden';
                 promptForJudgingGroup();
             });
 
