@@ -1190,7 +1190,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("side-panel_offline-download").addEventListener('click', () => {
         sidePanel.classList.remove('open');
-        // FIXME: need to set this at the top of every page load?
         setOfflineDownloadUrl(document.getElementById("side-panel_offline-download"));
     });
 
