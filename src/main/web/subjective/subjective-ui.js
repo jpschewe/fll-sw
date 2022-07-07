@@ -13,7 +13,7 @@
  * @param anchor the anchor to set the href on 
  */
 function setOfflineDownloadUrl(anchor) {
-    const offline = $.subjective.getOfflineDownloadObject()
+    const offline = subjective_module.getOfflineDownloadObject()
     const data = JSON.stringify(offline)
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -22,12 +22,12 @@ function setOfflineDownloadUrl(anchor) {
 }
 
 function populateChooseJudgingGroup() {
-    $.subjective.log("choose judging group populate");
+    subjective_module.log("choose judging group populate");
 
     const judgingGroupsContainer = document.getElementById("choose-judging-group_judging-groups");
     removeChildren(judgingGroupsContainer);
 
-    const judgingGroups = $.subjective.getJudgingGroups();
+    const judgingGroups = subjective_module.getJudgingGroups();
     for (const group of judgingGroups) {
         const button = document.createElement("a");
         judgingGroupsContainer.appendChild(button);
@@ -36,7 +36,7 @@ function populateChooseJudgingGroup() {
         button.classList.add("fll-sw-button");
         button.innerText = group;
         button.addEventListener('click', function() {
-            $.subjective.setCurrentJudgingGroup(group);
+            subjective_module.setCurrentJudgingGroup(group);
             updateMainHeader();
             window.location = "#choose-category";
         });
@@ -47,7 +47,7 @@ function populateChooseCategory() {
     const container = document.getElementById("choose-category_categories");
     removeChildren(container);
 
-    const categories = $.subjective.getSubjectiveCategories();
+    const categories = subjective_module.getSubjectiveCategories();
     for (const category of categories) {
         const button = document.createElement("a");
         container.appendChild(button);
@@ -56,7 +56,7 @@ function populateChooseCategory() {
         button.classList.add("fll-sw-button");
         button.innerText = category.title;
         button.addEventListener('click', function() {
-            $.subjective.setCurrentCategory(category);
+            subjective_module.setCurrentCategory(category);
             updateMainHeader();
             window.location = "#choose-judge";
         });
@@ -92,10 +92,10 @@ function populateChooseJudge() {
     });
 
 
-    let currentJudge = $.subjective.getCurrentJudge();
+    let currentJudge = subjective_module.getCurrentJudge();
     let currentJudgeValid = false;
     const seenJudges = [];
-    const judges = $.subjective.getPossibleJudges();
+    const judges = subjective_module.getPossibleJudges();
     for (const judge of judges) {
         if (!seenJudges.includes(judge.id)) {
             seenJudges.push(judge.id);
@@ -150,18 +150,18 @@ function setJudge() {
         }
         judgeID = judgeID.trim().toUpperCase();
 
-        $.subjective.addJudge(judgeID);
+        subjective_module.addJudge(judgeID);
     }
 
-    $.subjective.setCurrentJudge(judgeID);
+    subjective_module.setCurrentJudge(judgeID);
 
     location.href = '#teams-list';
 }
 
 function selectTeam(team) {
-    $.subjective.setCurrentTeam(team);
+    subjective_module.setCurrentTeam(team);
 
-    $.subjective.setScoreEntryBackPage("#teams-list");
+    subjective_module.setScoreEntryBackPage("#teams-list");
     window.location = "#enter-score";
 }
 
@@ -170,9 +170,9 @@ function populateTeams() {
     removeChildren(teamsList);
 
     const timeFormatter = JSJoda.DateTimeFormatter.ofPattern("HH:mm");
-    const teams = $.subjective.getCurrentTeams();
+    const teams = subjective_module.getCurrentTeams();
     for (const team of teams) {
-        const time = $.subjective.getScheduledTime(team.teamNumber);
+        const time = subjective_module.getScheduledTime(team.teamNumber);
         let timeStr = null;
         if (null != time) {
             timeStr = time.format(timeFormatter);
@@ -189,8 +189,8 @@ function populateTeams() {
             span.innerText = timeStr + " - ";
         }
 
-        const score = $.subjective.getScore(team.teamNumber);
-        if (!$.subjective.isScoreCompleted(score)) {
+        const score = subjective_module.getScore(team.teamNumber);
+        if (!subjective_module.isScoreCompleted(score)) {
             // nothing
         } else if (score.noShow) {
             const span = document.createElement("span");
@@ -202,7 +202,7 @@ function populateTeams() {
             button.appendChild(spacerSpan);
             spacerSpan.innerText = " - ";
         } else {
-            const computedScore = $.subjective.computeScore(score);
+            const computedScore = subjective_module.computeScore(score);
             const span = document.createElement("span");
             button.appendChild(span);
             span.innerText = "Score: " + computedScore;
@@ -235,8 +235,8 @@ function createNewScore() {
     score.noShow = false;
     score.standardSubScores = {};
     score.enumSubScores = {};
-    score.judge = $.subjective.getCurrentJudge().id;
-    score.teamNumber = $.subjective.getCurrentTeam().teamNumber;
+    score.judge = subjective_module.getCurrentJudge().id;
+    score.teamNumber = subjective_module.getCurrentTeam().teamNumber;
     score.note = null;
     score.goalComments = {};
     score.commentThinkAbout = null;
@@ -258,7 +258,7 @@ function saveToScoreObject(score) {
         return;
     }
 
-    for (const goal of $.subjective.getCurrentCategory().allGoals) {
+    for (const goal of subjective_module.getCurrentCategory().allGoals) {
         if (goal.enumerated) {
             alert("Enumerated goals not supported: " + goal.name);
         } else {
@@ -286,7 +286,7 @@ function getScoreItemName(goal) {
 
 function recomputeTotal() {
     let total = 0;
-    for (const goal of $.subjective.getCurrentCategory().allGoals) {
+    for (const goal of subjective_module.getCurrentCategory().allGoals) {
         if (goal.enumerated) {
             alert("Enumerated goals not supported: " + goal.name);
         } else {
@@ -456,7 +456,7 @@ function setSliderTicks(goal) {
     const spacing = (100 - offsetPercent - offsetPercent) / (max - min);
 
     /*
-     * $.subjective.log("Creating slider ticks for " + goal.name + " min: " + min + "
+     * subjective_module.log("Creating slider ticks for " + goal.name + " min: " + min + "
      * max: " + max + " spacing: " + spacing);
      */
 
@@ -499,7 +499,7 @@ function addEventsToSlider(goal, ranges) {
 
 function createScoreRows(table, totalColumns, score, goal) {
     let goalScore = null;
-    if ($.subjective.isScoreCompleted(score)) {
+    if (subjective_module.isScoreCompleted(score)) {
         goalScore = score.standardSubScores[goal.name];
     }
 
@@ -540,7 +540,7 @@ function createScoreRows(table, totalColumns, score, goal) {
  * @returns total number of columns to represent all scores in the rubric ranges
  */
 function populateEnterScoreRubricTitles(table, hidden) {
-    const firstGoal = $.subjective.getCurrentCategory().allGoals[0];
+    const firstGoal = subjective_module.getCurrentCategory().allGoals[0];
 
     const ranges = firstGoal.rubric;
     ranges.sort(rangeSort);
@@ -619,8 +619,8 @@ function updateThinkAboutButtonBackground() {
  * Save the score to storage and go back the to the score entry back page.
  */
 function saveScore() {
-    var currentTeam = $.subjective.getCurrentTeam();
-    var score = $.subjective.getScore(currentTeam.teamNumber);
+    var currentTeam = subjective_module.getCurrentTeam();
+    var score = subjective_module.getScore(currentTeam.teamNumber);
     if (null == score) {
         score = createNewScore();
     }
@@ -629,41 +629,41 @@ function saveScore() {
     score.noShow = false;
 
     score.note = document.getElementById("enter-score-note-text").value;
-    $.subjective.log("note text: " + score.note);
+    subjective_module.log("note text: " + score.note);
     score.commentGreatJob = document.getElementById("enter-score-comment-great-job-text").value;
     score.commentThinkAbout = document.getElementById("enter-score-comment-think-about-text").value;
 
     saveToScoreObject(score);
 
-    $.subjective.saveScore(score);
+    subjective_module.saveScore(score);
 
     // save non-numeric nominations
     score.nonNumericNominations = [];
-    $.subjective.getCurrentCategory().nominates.forEach(function(nominate, index, _) {
+    subjective_module.getCurrentCategory().nominates.forEach(function(nominate, index, _) {
         const checkbox = document.getElementById("enter-score_nominate_" + index);
         if (checkbox.checked) {
             score.nonNumericNominations.push(nominate.nonNumericCategoryTitle);
         }
     });
 
-    window.location = $.subjective.getScoreEntryBackPage();
+    window.location = subjective_module.getScoreEntryBackPage();
 }
 
 /**
  * Save a no show and go back to the score entry back page.
  */
 function enterNoShow() {
-    var currentTeam = $.subjective.getCurrentTeam();
-    var score = $.subjective.getScore(currentTeam.teamNumber);
+    var currentTeam = subjective_module.getCurrentTeam();
+    var score = subjective_module.getScore(currentTeam.teamNumber);
     if (null == score) {
         score = createNewScore();
     }
     score.modified = true;
     score.noShow = true;
     score.deleted = false;
-    $.subjective.saveScore(score);
+    subjective_module.saveScore(score);
 
-    window.location = $.subjective.getScoreEntryBackPage();
+    window.location = subjective_module.getScoreEntryBackPage();
 }
 
 function installWarnOnReload() {
@@ -699,13 +699,13 @@ function populateScoreSummary() {
     const teamScores = {};
     const teamsWithScores = [];
 
-    const teams = $.subjective.getCurrentTeams();
+    const teams = subjective_module.getCurrentTeams();
     for (const team of teams) {
-        const score = $.subjective.getScore(team.teamNumber);
-        if ($.subjective.isScoreCompleted(score)) {
+        const score = subjective_module.getScore(team.teamNumber);
+        if (subjective_module.isScoreCompleted(score)) {
             teamsWithScores.push(team);
 
-            const computedScore = $.subjective.computeScore(score);
+            const computedScore = subjective_module.computeScore(score);
             teamScores[team.teamNumber] = computedScore;
         }
     }
@@ -721,7 +721,7 @@ function populateScoreSummary() {
     for (let i = 0; i < teamsWithScores.length; ++i) {
         const team = teamsWithScores[i];
         const computedScore = teamScores[team.teamNumber];
-        const score = $.subjective.getScore(team.teamNumber);
+        const score = subjective_module.getScore(team.teamNumber);
 
         let prevScore = null;
         if (i > 0) {
@@ -787,9 +787,9 @@ function populateScoreSummary() {
         editButton.classList.add("score-summary-right-elements");
 
         editButton.addEventListener("click", function() {
-            $.subjective.setCurrentTeam(team);
+            subjective_module.setCurrentTeam(team);
 
-            $.subjective.setScoreEntryBackPage("#score-summary");
+            subjective_module.setScoreEntryBackPage("#score-summary");
             window.location = "#enter-score";
         });
 
@@ -808,7 +808,7 @@ function populateScoreSummary() {
 }
 
 function updateMainHeader() {
-    const tournament = $.subjective.getTournament();
+    const tournament = subjective_module.getTournament();
     let tournamentName;
     if (null == tournament) {
         tournamentName = "No Tournament";
@@ -817,9 +817,9 @@ function updateMainHeader() {
     }
     document.getElementById("header-main_tournament-name").innerText = tournamentName;
 
-    document.getElementById("header-main_judging-group-name").innerText = $.subjective.getCurrentJudgingGroup();
+    document.getElementById("header-main_judging-group-name").innerText = subjective_module.getCurrentJudgingGroup();
 
-    const category = $.subjective.getCurrentCategory();
+    const category = subjective_module.getCurrentCategory();
     let categoryTitle;
     if (null == category) {
         categoryTitle = "No Category";
@@ -828,7 +828,7 @@ function updateMainHeader() {
     }
     document.getElementById("header-main_category-name").innerText = categoryTitle;
 
-    const judge = $.subjective.getCurrentJudge();
+    const judge = subjective_module.getCurrentJudge();
     let judgeName;
     if (null == judge) {
         judgeName = "No Judge";
@@ -922,7 +922,7 @@ function displayPageTop() {
     document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
 
     removeChildren(document.getElementById("index-page_messages"));
-    $.subjective.checkServerStatus(serverLoadPage, promptForJudgingGroup);
+    subjective_module.checkServerStatus(serverLoadPage, promptForJudgingGroup);
     updateMainHeader();
 }
 
@@ -1035,11 +1035,11 @@ function displayPageEnterScore() {
     installWarnOnReload();
 
     // populate the header before displaying the page to ensure that the header height is properly computed
-    const currentTeam = $.subjective.getCurrentTeam();
+    const currentTeam = subjective_module.getCurrentTeam();
     document.getElementById("enter-score_team-number").innerText = currentTeam.teamNumber;
     document.getElementById("enter-score_team-name").innerText = currentTeam.teamName;
 
-    const score = $.subjective.getScore(currentTeam.teamNumber);
+    const score = subjective_module.getScore(currentTeam.teamNumber);
     if (null != score) {
         document.getElementById("enter-score-note-text").value = score.note;
         document.getElementById("enter-score-comment-great-job-text").value = score.commentGreatJob;
@@ -1065,7 +1065,7 @@ function displayPageEnterScore() {
 
     const totalColumns = populateEnterScoreRubricTitles(table, true);
 
-    for (const ge of $.subjective.getCurrentCategory().goalElements) {
+    for (const ge of subjective_module.getCurrentCategory().goalElements) {
         if (ge.goalGroup) {
             createGoalGroupRows(table, totalColumns, score, ge)
         } else if (ge.goal) {
@@ -1080,7 +1080,7 @@ function displayPageEnterScore() {
     // add the non-numeric categories that teams can be nominated for
     const nominatesContainer = document.getElementById("enter-score_nominates");
     removeChildren(nominatesContainer);
-    $.subjective.getCurrentCategory().nominates.forEach(function(nominate, index, _) {
+    subjective_module.getCurrentCategory().nominates.forEach(function(nominate, index, _) {
         const nominateRow = document.createElement("div");
         nominatesContainer.appendChild(nominateRow);
 
@@ -1106,7 +1106,7 @@ function displayPageEnterScore() {
         const nominateDescription = document.createElement("span");
         nominateRow.appendChild(nominateDescription);
         nominateDescription.classList.add("nominate-description");
-        const nonNumericCategory = $.subjective.getNonNumericCategory(nominate.nonNumericCategoryTitle);
+        const nonNumericCategory = subjective_module.getNonNumericCategory(nominate.nonNumericCategoryTitle);
         if (nonNumericCategory) {
             nominateDescription.innerText = nonNumericCategory.description;
         }
@@ -1139,7 +1139,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const waitDialog = document.getElementById("wait-dialog");
         waitDialog.style.visibility = "visible";
 
-        $.subjective.uploadData(function(result) {
+        subjective_module.uploadData(function(result) {
             // scoresSuccess
             alert("Uploaded " + result.numModified + " scores. message: "
                 + result.message);
@@ -1158,7 +1158,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }, //
             function(result) {
                 // judgesSuccess
-                $.subjective.log("Judges modified: " + result.numModifiedJudges
+                subjective_module.log("Judges modified: " + result.numModifiedJudges
                     + " new: " + result.numNewJudges);
             }
 
@@ -1208,7 +1208,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("enter-score_cancel").addEventListener('click', () => {
         console.log("Canceling score entry");
-        window.location = $.subjective.getScoreEntryBackPage();
+        window.location = subjective_module.getScoreEntryBackPage();
     });
 
     document.getElementById("enter-score_delete").addEventListener('click', () => {
@@ -1219,17 +1219,17 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("confirm-delete-dialog_yes").addEventListener("click", () => {
         document.getElementById("confirm-delete-dialog").style.visibility = "hidden";
 
-        const currentTeam = $.subjective.getCurrentTeam();
-        let score = $.subjective.getScore(currentTeam.teamNumber);
+        const currentTeam = subjective_module.getCurrentTeam();
+        let score = subjective_module.getScore(currentTeam.teamNumber);
         if (null == score) {
             score = createNewScore();
         }
         score.modified = true;
         score.noShow = false;
         score.deleted = true;
-        $.subjective.saveScore(score);
+        subjective_module.saveScore(score);
 
-        window.location = $.subjective.getScoreEntryBackPage();
+        window.location = subjective_module.getScoreEntryBackPage();
     });
     document.getElementById("confirm-delete-dialog_no").addEventListener("click", () => {
         document.getElementById("confirm-delete-dialog").style.visibility = "hidden";

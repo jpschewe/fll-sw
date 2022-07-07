@@ -6,10 +6,9 @@
 
 "use strict";
 
-(function($) {
-    if (typeof $ != 'function') {
-        throw new Error("jQuery needs to be loaded!");
-    }
+const subjective_module = {}
+
+{
     if (typeof fllStorage != 'object') {
         throw new Error("fllStorage needs to be loaded!");
     }
@@ -18,20 +17,20 @@
 
     // //////////////////////// PRIVATE INTERFACE ////////////////////////
 
-    var _subjectiveCategories; // category.name -> category
-    var _nonNumericCategories; // category.title -> category
-    var _tournament;
-    var _teams;
-    var _schedule;
-    var _currentJudgingGroup;
-    var _currentCategory;
-    var _judges;
-    var _currentJudge;
-    var _allScores;
-    var _teamTimeCache;
-    var _currentTeam;
-    var _scoreEntryBackPage;
-    var _categoryColumnMapping;
+    let _subjectiveCategories; // category.name -> category
+    let _nonNumericCategories; // category.title -> category
+    let _tournament;
+    let _teams;
+    let _schedule;
+    let _currentJudgingGroup;
+    let _currentCategory;
+    let _judges;
+    let _currentJudge;
+    let _allScores;
+    let _teamTimeCache;
+    let _currentTeam;
+    let _scoreEntryBackPage;
+    let _categoryColumnMapping;
 
     function _init_variables() {
         _subjectiveCategories = {};
@@ -53,12 +52,12 @@
     function _loadFromDisk() {
         _init_variables();
 
-        var value = fllStorage.get(STORAGE_PREFIX, "_subjectiveCategories");
+        let value = fllStorage.get(STORAGE_PREFIX, "_subjectiveCategories");
         if (null != value) {
             _subjectiveCategories = value;
         }
 
-        var value = fllStorage.get(STORAGE_PREFIX, "_nonNumericCategories");
+        value = fllStorage.get(STORAGE_PREFIX, "_nonNumericCategories");
         if (null != value) {
             _nonNumericCategories = value;
         }
@@ -162,7 +161,7 @@
     function _loadTournament() {
         _tournament = null;
 
-        return $.getJSON("../api/Tournaments/current", function(tournament) {
+        return fetch("../api/Tournaments/current").then(checkJsonResponse).then(function(tournament) {
             _tournament = tournament;
         });
     }
@@ -170,7 +169,7 @@
     function _loadSchedule() {
         _schedule = null;
 
-        return $.getJSON("../api/Schedule", function(data) {
+        return fetch("../api/Schedule").then(checkJsonResponse).then(function(data) {
             if (null != data && data != "") {
                 _schedule = data;
             }
@@ -180,27 +179,27 @@
     function _loadJudges() {
         _judges = [];
 
-        return $.getJSON("../api/Judges", function(data) {
-            $.each(data, function(i, judge) {
+        return fetch("../api/Judges").then(checkJsonResponse).then(function(data) {
+            for (const judge of data) {
                 _judges.push(judge);
-            });
+            }
         });
     }
 
     function _loadTeams() {
         _teams = {};
 
-        return $.getJSON("../api/TournamentTeams", function(teams) {
-            $.each(teams, function(i, team) {
+        return fetch("../api/TournamentTeams").then(checkJsonResponse).then(function(teams) {
+            for (const team of teams) {
                 _teams[team.teamNumber] = team;
-            });
+            }
         });
     }
 
     function _loadAllScores() {
         _allScores = {};
 
-        return $.getJSON("../api/SubjectiveScores", function(data) {
+        return fetch("../api/SubjectiveScores").then(checkJsonResponse).then(function(data) {
             _allScores = data;
         });
     }
@@ -213,29 +212,28 @@
     function _loadSubjectiveCategories() {
         _subjectiveCategories = {};
 
-        return $.getJSON("../api/ChallengeDescription/SubjectiveCategories",
-            function(subjectiveCategories) {
-                $.each(subjectiveCategories, function(i, scoreCategory) {
-                    _subjectiveCategories[scoreCategory.name] = scoreCategory;
-                });
-            });
+        return fetch("../api/ChallengeDescription/SubjectiveCategories").then(checkJsonResponse).then(function(subjectiveCategories) {
+            for (const scoreCategory of subjectiveCategories) {
+                _subjectiveCategories[scoreCategory.name] = scoreCategory;
+            }
+        });
     }
 
     function loadNonNumericCategories() {
         _nonNumericCategories = {};
 
-        return $.getJSON("/api/ChallengeDescription/NonNumericCategories", function(
+        return fetch("/api/ChallengeDescription/NonNumericCategories").then(checkJsonResponse).then(function(
             categories) {
-            $.each(categories, function(i, category) {
+            for (const category of categories) {
                 _nonNumericCategories[category.title] = category;
-            });
+            }
         });
     }
 
 
     function _loadCategoryColumnMapping() {
         _categoryColumnMapping = {};
-        return $.getJSON("../api/CategoryScheduleMapping", function(data) {
+        return fetch("../api/CategoryScheduleMapping").then(checkJsonResponse).then(function(data) {
             _categoryColumnMapping = data;
         });
     }
@@ -250,15 +248,13 @@
     }
 
     // //////////////////////// PUBLIC INTERFACE /////////////////////////
-    $.subjective = {
-
-        /**
-         * Clear all data from local storage.
-         */
-        clearAllData: function() {
-            _clear_local_storage();
-            _init_variables();
-        },
+    /**
+     * Clear all data from local storage.
+     */
+    subjective_module.clearAllData = function() {
+        _clear_local_storage();
+        _init_variables();
+    },
 
         /**
          * Load all data from server.
@@ -271,64 +267,64 @@
          *          if true, clear all variables, false to just load data from
          *          server
          */
-        loadFromServer: function(doneCallback, failCallback, clearVariables) {
+        subjective_module.loadFromServer = function(doneCallback, failCallback, clearVariables) {
             if (clearVariables) {
                 _init_variables();
             }
 
             _log("Loading from server");
 
-            var waitList = []
+            let waitList = []
 
-            var subjectiveCategoriesPromise = _loadSubjectiveCategories();
-            subjectiveCategoriesPromise.fail(function() {
+            const subjectiveCategoriesPromise = _loadSubjectiveCategories();
+            subjectiveCategoriesPromise.catch(function() {
                 failCallback("Subjective Categories");
             });
             waitList.push(subjectiveCategoriesPromise);
 
-            var nonNumericCategoriesPromise = loadNonNumericCategories();
-            nonNumericCategoriesPromise.fail(function() {
+            const nonNumericCategoriesPromise = loadNonNumericCategories();
+            nonNumericCategoriesPromise.catch(function() {
                 failCallback("NonNumeric Categories");
             });
             waitList.push(nonNumericCategoriesPromise);
 
-            var tournamentPromise = _loadTournament();
-            tournamentPromise.fail(function() {
+            const tournamentPromise = _loadTournament();
+            tournamentPromise.catch(function() {
                 failCallback("Tournament");
             });
             waitList.push(tournamentPromise);
 
-            var teamsPromise = _loadTeams();
-            teamsPromise.fail(function() {
+            const teamsPromise = _loadTeams();
+            teamsPromise.catch(function() {
                 failCallback("Teams");
             });
             waitList.push(teamsPromise);
 
-            var schedulePromise = _loadSchedule();
-            schedulePromise.fail(function() {
+            const schedulePromise = _loadSchedule();
+            schedulePromise.catch(function() {
                 failCallback("Schedule");
             });
             waitList.push(schedulePromise);
 
-            var judgesPromise = _loadJudges();
-            judgesPromise.fail(function() {
+            const judgesPromise = _loadJudges();
+            judgesPromise.catch(function() {
                 failCallback("Judges Categories");
             });
             waitList.push(judgesPromise);
 
-            var allScoresPromise = _loadAllScores();
-            allScoresPromise.fail(function() {
+            const allScoresPromise = _loadAllScores();
+            allScoresPromise.catch(function() {
                 failCallback("All Scores");
             });
             waitList.push(allScoresPromise);
 
-            var categoryMappingPromise = _loadCategoryColumnMapping();
-            categoryMappingPromise.fail(function() {
+            const categoryMappingPromise = _loadCategoryColumnMapping();
+            categoryMappingPromise.catch(function() {
                 failCallback("Category Mapping");
             });
             waitList.push(categoryMappingPromise);
 
-            $.when.apply($, waitList).done(function() {
+            Promise.all(waitList).then(function() {
                 _save();
                 doneCallback();
             });
@@ -337,11 +333,11 @@
         /**
          * @return list of subjective categories
          */
-        getSubjectiveCategories: function() {
+        subjective_module.getSubjectiveCategories = function() {
             const retval = [];
-            $.each(_subjectiveCategories, function(i, val) {
-                retval.push(val);
-            });
+            for (const [_, category] of Object.entries(_subjectiveCategories)) {
+                retval.push(category);
+            }
             return retval;
         },
 
@@ -349,36 +345,36 @@
          * @param title the title of the category to find
          * @return category with the specified title
          */
-        getNonNumericCategory: function(title) {
+        subjective_module.getNonNumericCategory = function(title) {
             return _nonNumericCategories[title];
         },
 
         /**
          * @return list of teams
          */
-        getTeams: function() {
-            var retval = [];
-            $.each(_teams, function(i, val) {
+        subjective_module.getTeams = function() {
+            let retval = [];
+            for (const [_, val] of Object.entries(_teams)) {
                 retval.push(val);
-            });
+            }
             return retval;
         },
 
         /**
          * Find a team by number.
          */
-        lookupTeam: function(teamNum) {
+        subjective_module.lookupTeam = function(teamNum) {
             return _teams[teamNum];
         },
 
-        log: function(str) {
+        subjective_module.log = function(str) {
             _log(str);
         },
 
         /**
          * @return current stored tournament
          */
-        getTournament: function() {
+        subjective_module.getTournament = function() {
             return _tournament;
         },
 
@@ -390,10 +386,10 @@
          * @param failCallback
          *          called with no arguments
          */
-        getServerTournament: function(doneCallback, failCallback) {
-            return $.getJSON("../api/Tournaments/current", function(tournament) {
+        subjective_module.getServerTournament = function(doneCallback, failCallback) {
+            return fetch("../api/Tournaments/current").then(checkJsonResponse).then(function(tournament) {
                 doneCallback(tournament);
-            }).fail(function() {
+            }).catch(function() {
                 failCallback();
             });
         },
@@ -401,7 +397,7 @@
         /**
          * @return true if stored data exists
          */
-        storedDataExists: function() {
+        subjective_module.storedDataExists = function() {
             if (null == _subjectiveCategories) {
                 return false;
             } else if (_subjectiveCategories.length == 0) {
@@ -414,24 +410,24 @@
         /**
          * @return list of judging groups
          */
-        getJudgingGroups: function() {
-            var retval = [];
-            $.each(_teams, function(index, team) {
-                if (-1 == $.inArray(team.judgingGroup, retval)) {
+        subjective_module.getJudgingGroups = function() {
+            let retval = [];
+            for (const [_, team] of Object.entries(_teams)) {
+                if (-1 == retval.indexOf(team.judgingGroup)) {
                     retval.push(team.judgingGroup);
                 }
-            });
+            }
             return retval;
         },
 
         /**
          * @return current judging group, may be null
          */
-        getCurrentJudgingGroup: function() {
+        subjective_module.getCurrentJudgingGroup = function() {
             return _currentJudgingGroup;
         },
 
-        setCurrentJudgingGroup: function(v) {
+        subjective_module.setCurrentJudgingGroup = function(v) {
             _currentJudgingGroup = v;
             _save();
         },
@@ -439,11 +435,11 @@
         /**
          * @return current category, may be null
          */
-        getCurrentCategory: function() {
+        subjective_module.getCurrentCategory = function() {
             return _currentCategory;
         },
 
-        setCurrentCategory: function(v) {
+        subjective_module.setCurrentCategory = function(v) {
             _currentCategory = v;
 
             _teamTimeCache = {};
@@ -454,32 +450,31 @@
         /**
          * The judges that are judging at current station and current category.
          */
-        getPossibleJudges: function() {
+        subjective_module.getPossibleJudges = function() {
             const retval = [];
             if (null == _judges) {
                 return retval;
             } else {
-                $.each(_judges, function(index, judge) {
+                for (const judge of _judges) {
                     if (judge.group == _currentJudgingGroup
                         && judge.category == _currentCategory.name) {
                         retval.push(judge);
                     }
-                });
+                }
                 return retval;
             }
         },
 
-        setCurrentJudge: function(judgeId) {
+        subjective_module.setCurrentJudge = function(judgeId) {
             var foundJudge = null;
             if (null != _judges) {
-                $.each(_judges,
-                    function(index, judge) {
-                        if (judge.group == _currentJudgingGroup
-                            && judge.category == _currentCategory.name
-                            && judge.id == judgeId) {
-                            foundJudge = judge;
-                        }
-                    });
+                for (const judge of _judges) {
+                    if (judge.group == _currentJudgingGroup
+                        && judge.category == _currentCategory.name
+                        && judge.id == judgeId) {
+                        foundJudge = judge;
+                    }
+                }
             }
             if (null == foundJudge) {
                 foundJudge = new Object();
@@ -493,21 +488,20 @@
             _save();
         },
 
-        getCurrentJudge: function() {
+        subjective_module.getCurrentJudge = function() {
             return _currentJudge;
         },
 
-        addJudge: function(judgeID) {
+        subjective_module.addJudge = function(judgeID) {
             var foundJudge = null;
             if (null != _judges) {
-                $.each(_judges,
-                    function(index, judge) {
-                        if (judge.group == _currentJudgingGroup
-                            && judge.category == _currentCategory.name
-                            && judge.id == judgeID) {
-                            foundJudge = judge;
-                        }
-                    });
+                for (const judge of _judges) {
+                    if (judge.group == _currentJudgingGroup
+                        && judge.category == _currentCategory.name
+                        && judge.id == judgeID) {
+                        foundJudge = judge;
+                    }
+                }
             }
             if (null == foundJudge) {
                 var judge = new Object();
@@ -522,7 +516,7 @@
         /**
          * @return false if the score is null or score.deleted is true
          */
-        isScoreCompleted: function(score) {
+        subjective_module.isScoreCompleted = function(score) {
             if (null == score) {
                 return false;
             } else if (score.deleted) {
@@ -537,26 +531,26 @@
          * 
          * @return list of teams sorted by completed, then scheduled time
          */
-        getCurrentTeams: function() {
-            var retval = [];
-            $.each(_teams, function(index, team) {
+        subjective_module.getCurrentTeams = function() {
+            let retval = [];
+            for (const [_, team] of Object.entries(_teams)) {
                 if (team.judgingGroup == _currentJudgingGroup) {
                     retval.push(team);
                 }
-            });
+            }
 
             retval.sort(function(a, b) {
-                var scoreA = $.subjective.getScore(a.teamNumber);
-                var scoreB = $.subjective.getScore(b.teamNumber);
-                if (!$.subjective.isScoreCompleted(scoreA)
-                    && $.subjective.isScoreCompleted(scoreB)) {
+                const scoreA = subjective_module.getScore(a.teamNumber);
+                const scoreB = subjective_module.getScore(b.teamNumber);
+                if (!subjective_module.isScoreCompleted(scoreA)
+                    && subjective_module.isScoreCompleted(scoreB)) {
                     return -1;
-                } else if ($.subjective.isScoreCompleted(scoreA)
-                    && !$.subjective.isScoreCompleted(scoreB)) {
+                } else if (subjective_module.isScoreCompleted(scoreA)
+                    && !subjective_module.isScoreCompleted(scoreB)) {
                     return 1;
                 } else {
-                    var timeA = $.subjective.getScheduledTime(a.teamNumber);
-                    var timeB = $.subjective.getScheduledTime(b.teamNumber);
+                    const timeA = subjective_module.getScheduledTime(a.teamNumber);
+                    const timeB = subjective_module.getScheduledTime(b.teamNumber);
                     if (null == timeA && null == timeB) {
                         return 0;
                     } else if (null == timeA) {
@@ -578,16 +572,16 @@
          *          the team number
          * @return the object or null if not found
          */
-        getSchedInfoForTeam: function(teamNumber) {
+        subjective_module.getSchedInfoForTeam = function(teamNumber) {
             if (null == _schedule) {
                 return null;
             } else {
                 var schedInfo = null;
-                $.each(_schedule.schedule, function(index, value) {
+                for (const value of _schedule.schedule) {
                     if (value.teamNumber == teamNumber) {
                         schedInfo = value;
                     }
-                });
+                }
                 return schedInfo;
             }
         },
@@ -599,7 +593,7 @@
          *          number of the team to find
          * @return the score object or null if not yet scored
          */
-        getScore: function(teamNumber) {
+        subjective_module.getScore = function(teamNumber) {
             var categoryScores = _allScores[_currentCategory.name];
             if (null == categoryScores) {
                 return null;
@@ -613,12 +607,12 @@
             return judgeScores[teamNumber];
         },
 
-        saveScore: function(score) {
+        subjective_module.saveScore = function(score) {
             if (score.deleted && !score.scoreOnServer) {
                 // don't bother saving scores not on the server that are deleted
                 // This should keep one judge from deleting another judge's
                 // scores
-                $.subjective.log("Ignoring deleted score not on the server");
+                subjective_module.log("Ignoring deleted score not on the server");
                 return;
             }
 
@@ -645,21 +639,21 @@
          *          a score object from getScore
          * @return a number
          */
-        computeScore: function(score) {
-            var retval = 0;
+        subjective_module.computeScore = function(score) {
+            let retval = 0;
 
             if (!score.deleted && !score.noShow) {
-                $.each(_currentCategory.allGoals, function(index, goal) {
+                for (const goal of _currentCategory.allGoals) {
                     if (goal.enumerated) {
                         alert("Enumerated goals are not yet supported");
                     } else {
-                        var rawScore = Number(score.standardSubScores[goal.name]);
-                        var multiplier = Number(goal.multiplier);
-                        var subscore = rawScore * multiplier;
+                        const rawScore = Number(score.standardSubScores[goal.name]);
+                        const multiplier = Number(goal.multiplier);
+                        const subscore = rawScore * multiplier;
 
                         retval = retval + subscore;
                     }
-                });
+                }
             }
 
             return retval;
@@ -668,14 +662,14 @@
         /**
          * Get the schedule column for the specified category name.
          */
-        getScheduleColumnForCategory: function(categoryName) {
-            var column = null;
+        subjective_module.getScheduleColumnForCategory = function(categoryName) {
+            let column = null;
 
-            $.each(_categoryColumnMapping, function(index, mapping) {
+            for (const mapping of _categoryColumnMapping) {
                 if (mapping.categoryName == categoryName) {
                     column = mapping.scheduleColumn;
                 }
-            });
+            }
 
             return column;
         },
@@ -688,26 +682,26 @@
          *          number of the team to find
          * @return LocalTime or null if there is no schedule information for the team
          */
-        getScheduledTime: function(teamNumber) {
+        subjective_module.getScheduledTime = function(teamNumber) {
             const cachedDate = _teamTimeCache[teamNumber];
             if (null != cachedDate) {
                 return cachedDate;
             }
 
-            var retval;
-            var schedInfo = $.subjective.getSchedInfoForTeam(teamNumber);
+            let retval;
+            const schedInfo = subjective_module.getSchedInfoForTeam(teamNumber);
             if (null == schedInfo) {
                 _log("No schedinfo for " + teamNumber);
                 retval = null;
             } else {
-                var time = null;
-                var column = $.subjective
+                let time = null;
+                const column = subjective_module
                     .getScheduleColumnForCategory(_currentCategory.name);
-                $.each(schedInfo.subjectiveTimes, function(index, value) {
+                for (const value of schedInfo.subjectiveTimes) {
                     if (value.name == column) {
                         time = value.time;
                     }
-                });
+                }
                 if (null == time) {
                     _log("No time found for " + teamNumber);
                     retval = JSJoda.LocalTime.of();
@@ -723,13 +717,13 @@
             return retval;
         },
 
-        setCurrentTeam: function(team) {
+        subjective_module.setCurrentTeam = function(team) {
             _currentTeam = team;
 
             _save();
         },
 
-        getCurrentTeam: function() {
+        subjective_module.getCurrentTeam = function() {
             return _currentTeam;
         },
 
@@ -744,22 +738,19 @@
          *          failure, may be null
          * @return the promise from the AJAX function
          */
-        uploadScores: function(doneCallback, failCallback) {
-            var dataToUpload = JSON.stringify(_allScores);
-            return $.ajax({
-                type: "POST",
-                dataType: "json",
-                contentType: "application/json",
-                url: "../api/SubjectiveScores",
-                data: dataToUpload,
-                success: function(result) {
-                    if (result.success) {
-                        doneCallback(result);
-                    } else {
-                        failCallback(result);
-                    }
+        subjective_module.uploadScores = function(doneCallback, failCallback) {
+            const dataToUpload = JSON.stringify(_allScores);
+            return fetch("../api/SubjectiveScores", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: dataToUpload
+            }).then(checkJsonResponse).then(function(result) {
+                if (result.success) {
+                    doneCallback(result);
+                } else {
+                    failCallback(result);
                 }
-            }).fail(function(result) {
+            }).catch(function(result) {
                 failCallback(result);
             });
         },
@@ -774,23 +765,20 @@
          *          be null
          * @return the promise from the AJAX function
          */
-        uploadJudges: function(doneCallback, failCallback) {
-            var dataToUpload = JSON.stringify(_judges);
-            return $.ajax({
-                type: "POST",
-                dataType: "json",
-                contentType: "application/json",
-                url: "../api/Judges",
-                data: dataToUpload,
-                success: function(result) {
-                    $.subjective.log("uploading judges success");
-                    if (result.success) {
-                        doneCallback(result);
-                    } else {
-                        failCallback(result);
-                    }
+        subjective_module.uploadJudges = function(doneCallback, failCallback) {
+            const dataToUpload = JSON.stringify(_judges);
+            return fetch("../api/Judges", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: dataToUpload
+            }).then(checkJsonResponse).then(function(result) {
+                subjective_module.log("uploading judges success");
+                if (result.success) {
+                    doneCallback(result);
+                } else {
+                    failCallback(result);
                 }
-            }).fail(function(result) {
+            }).catch(function(result) {
                 failCallback(result);
             });
         },
@@ -817,52 +805,49 @@
          *          called after all uploads and failed load of data (string
          *          message)
          */
-        uploadData: function(scoresSuccess, scoresFail, judgesSuccess, judgesFail,
+        subjective_module.uploadData = function(scoresSuccess, scoresFail, judgesSuccess, judgesFail,
             loadSuccess, loadFail) {
 
-            $.subjective.checkServerStatus(function() {
-                $
-                    .getJSON(
-                        "CheckAuth",
-                        function(data) {
-                            if (data.authenticated) {
-                                $.subjective
-                                    .getServerTournament(function(serverTournament) {
-                                        var storedTournament = $.subjective.getTournament();
-                                        if (null == storedTournament) {
-                                            loadFail("Internal error, no saved tournament");
-                                        } else if (storedTournament.name != serverTournament.name
-                                            || storedTournament.tournamentID != serverTournament.tournamentID) {
-                                            loadFail("Tournament mismatch local: "
-                                                + storedTournament.name + "("
-                                                + storedTournament.tournamentID + ")"
-                                                + " server: " + serverTournament.name + "("
-                                                + serverTournament.tournamentID + ")");
-                                        } else {
-                                            var waitList = []
-                                            waitList.push($.subjective.uploadScores(
-                                                scoresSuccess, scoresFail));
-                                            waitList.push($.subjective.uploadJudges(
-                                                judgesSuccess, judgesFail));
+            subjective_module.checkServerStatus(function() {
+                fetch("CheckAuth").then(checkJsonResponse).then(function(data) {
+                    if (data.authenticated) {
+                        subjective_module
+                            .getServerTournament(function(serverTournament) {
+                                const storedTournament = subjective_module.getTournament();
+                                if (null == storedTournament) {
+                                    loadFail("Internal error, no saved tournament");
+                                } else if (storedTournament.name != serverTournament.name
+                                    || storedTournament.tournamentID != serverTournament.tournamentID) {
+                                    loadFail("Tournament mismatch local: "
+                                        + storedTournament.name + "("
+                                        + storedTournament.tournamentID + ")"
+                                        + " server: " + serverTournament.name + "("
+                                        + serverTournament.tournamentID + ")");
+                                } else {
+                                    const waitList = []
+                                    waitList.push(subjective_module.uploadScores(
+                                        scoresSuccess, scoresFail));
+                                    waitList.push(subjective_module.uploadJudges(
+                                        judgesSuccess, judgesFail));
 
-                                            $.when.apply($, waitList).done(function() {
-                                                $.subjective.loadFromServer(function() {
-                                                    loadSuccess();
-                                                }, function() {
-                                                    loadFail("Error getting updated scores");
-                                                }, false);
-                                            });
-                                        }
+                                    Promise.all(waitList).then(function() {
+                                        subjective_module.loadFromServer(function() {
+                                            loadSuccess();
+                                        }, function() {
+                                            loadFail("Error getting updated scores");
+                                        }, false);
                                     });
-                            } else {
-                                alert("Your device has been logged out. A new window will be opened to the login page. Once you have logged in, close that window and synchronize again.");
+                                }
+                            });
+                    } else {
+                        alert("Your device has been logged out. A new window will be opened to the login page. Once you have logged in, close that window and synchronize again.");
 
-                                // hide the spinning animation
-                                loadSuccess();
+                        // hide the spinning animation
+                        loadSuccess();
 
-                                window.open('../login.jsp', '_login');
-                            }
-                        });
+                        window.open('../login.jsp', '_login');
+                    }
+                });
             }, // server online
                 function() {
                     loadFail("Server is offline, please connect to the network before synchronizing");
@@ -872,25 +857,25 @@
         /**
          * @return true if there are modified scores in the list
          */
-        checkForModifiedScores: function() {
-            var modified = false;
-            $.each(_allScores, function(category, categoryScores) {
-                $.each(categoryScores, function(judge, judgeScores) {
-                    $.each(judgeScores, function(teamNumber, score) {
+        subjective_module.checkForModifiedScores = function() {
+            let modified = false;
+            for (const [_, categoryScores] of Object.entries(_allScores)) {
+                for (const [_, judgeScores] of Object.entries(categoryScores)) {
+                    for (const [_, score] of Object.entries(judgeScores)) {
                         if (score.modified) {
                             modified = true;
                         }
-                    });
-                });
-            });
+                    }
+                }
+            }
             return modified;
         },
 
-        setScoreEntryBackPage: function(page) {
+        subjective_module.setScoreEntryBackPage = function(page) {
             _scoreEntryBackPage = page;
             _save();
         },
-        getScoreEntryBackPage: function() {
+        subjective_module.getScoreEntryBackPage = function() {
             return _scoreEntryBackPage;
         },
 
@@ -900,8 +885,8 @@
          * @param onlineCallback function to execute if the server is reachable
          * @param offlineCallback function to execute if the server is not reachable 
          */
-        checkServerStatus: function(onlineCallback, offlineCallback) {
-            $.subjective.log("Checking server status");
+        subjective_module.checkServerStatus = function(onlineCallback, offlineCallback) {
+            subjective_module.log("Checking server status");
             const FETCH_TIMEOUT = 1000; // milliseconds            
             let didTimeOut = false;
 
@@ -942,8 +927,7 @@
                     // Request success and no timeout
                     console.log("server online");
                     onlineCallback();
-                })
-                .catch(function(err) {
+                }).catch(function(err) {
                     // Error: response error, request timeout or runtime error
                     console.log("server offline: ", err);
                     offlineCallback();
@@ -957,7 +941,7 @@
          * isn't working.
          * Note that the object returned has references to internal structures.
          */
-        getOfflineDownloadObject: function() {
+        subjective_module.getOfflineDownloadObject = function() {
             var toDownload = {};
             toDownload['scores'] = _allScores;
             toDownload['judges'] = _judges;
@@ -965,8 +949,7 @@
         },
 
 
-    }; // end $.subjective definition 
 
-    // ///// Load data //////////
-    _loadFromDisk();
-})(window.jQuery || window.$);
+        // ///// Load data //////////
+        _loadFromDisk();
+}

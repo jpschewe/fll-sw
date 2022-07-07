@@ -10,9 +10,9 @@ function loadData() {
     const waitDialog = document.getElementById("wait-dialog");
     waitDialog.style.visibility = "visible";
 
-    $.subjective.loadFromServer(
+    subjective_module.loadFromServer(
         function() {
-            const subjectiveCategories = $.subjective.getSubjectiveCategories();
+            const subjectiveCategories = subjective_module.getSubjectiveCategories();
 
             waitDialog.style.visibility = "hidden";
             $("#index-page_choose_clear").hide();
@@ -25,7 +25,7 @@ function loadData() {
                     + " categories from the server<br/>");
             }
             $("#index-page_messages").append(
-                "Current tournament is " + $.subjective.getTournament().name
+                "Current tournament is " + subjective_module.getTournament().name
                 + "<br/>");
 
             updateMainHeader();
@@ -39,7 +39,7 @@ function loadData() {
 }
 
 function checkStoredData() {
-    if ($.subjective.storedDataExists()) {
+    if (subjective_module.storedDataExists()) {
         checkTournament();
     } else {
         loadData();
@@ -55,13 +55,13 @@ function promptForReload() {
 }
 
 function reloadData() {
-    if ($.subjective.checkForModifiedScores()) {
+    if (subjective_module.checkForModifiedScores()) {
         const answer = confirm("You have modified scores, this will remove them. Are you sure?")
         if (!answer) {
             return;
         }
     }
-    $.subjective.clearAllData();
+    subjective_module.clearAllData();
     loadData();
 }
 
@@ -69,16 +69,16 @@ function checkTournament() {
     const waitDialog = document.getElementById("wait-dialog");
     waitDialog.style.visibility = "visible";
 
-    $.subjective.getServerTournament(function(serverTournament) {
+    subjective_module.getServerTournament(function(serverTournament) {
         waitDialog.style.visibility = "hidden";
 
-        const storedTournament = $.subjective.getTournament();
+        const storedTournament = subjective_module.getTournament();
         if (null == storedTournament) {
             reloadData();
         } else if (storedTournament.name != serverTournament.name
             || storedTournament.tournamentID != serverTournament.tournamentID) {
             reloadData();
-        } else if (!$.subjective.checkForModifiedScores()) {
+        } else if (!subjective_module.checkForModifiedScores()) {
             // nothing is modified, just reload
             reloadData();
         } else {
@@ -93,7 +93,7 @@ function serverLoadPage() {
     $("#index-page_choose_clear").hide();
 
     $.getJSON("CheckAuth", function(data) {
-        $.subjective.log("data: " + JSON.stringify(data));
+        subjective_module.log("data: " + JSON.stringify(data));
 
         if (data.authenticated) {
             $("#index-page_clear").click(function() {
