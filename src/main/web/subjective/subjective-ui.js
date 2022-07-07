@@ -18,6 +18,7 @@ function setOfflineDownloadUrl(anchor) {
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     anchor.setAttribute("href", url);
+    anchor.setAttribute("download", "subjective-data.json");
 }
 
 function populateChooseJudgingGroup() {
