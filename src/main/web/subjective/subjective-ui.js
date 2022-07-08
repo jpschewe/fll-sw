@@ -452,7 +452,6 @@ function addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore) {
 function setSliderTicks(goal) {
     const sliderId = getScoreItemName(goal);
 
-    const slider = document.getElementById(sliderId);
     const sliderContainer = document.getElementById(sliderId + "-container");
 
     const max = goal.max;
