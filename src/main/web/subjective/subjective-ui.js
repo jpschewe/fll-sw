@@ -456,7 +456,7 @@ function setSliderTicks(goal) {
 
     const max = goal.max;
     const min = goal.min;
-    const offsetPercent = 1; // handle space at the start of the range
+    const offsetPercent = 0.5; // handle space at the start of the range
     const spacing = (100 - offsetPercent - offsetPercent) / (max - min);
 
     /*
