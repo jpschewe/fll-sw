@@ -645,7 +645,8 @@ const subjective_module = {}
             if (!score.deleted && !score.noShow) {
                 for (const goal of _currentCategory.allGoals) {
                     if (goal.enumerated) {
-                        alert("Enumerated goals are not yet supported");
+                        document.getElementById('alert-dialog_text').innerText = "Enumerated goals are not yet supported";
+                        document.getElementById('alert-dialog').style.visibility = 'visible';
                     } else {
                         const rawScore = Number(score.standardSubScores[goal.name]);
                         const multiplier = Number(goal.multiplier);
@@ -840,12 +841,14 @@ const subjective_module = {}
                                 }
                             });
                     } else {
-                        alert("Your device has been logged out. A new window will be opened to the login page. Once you have logged in, close that window and synchronize again.");
+                        alertCallback = function() {
+                            // hide the spinning animation
+                            loadSuccess();
 
-                        // hide the spinning animation
-                        loadSuccess();
-
-                        window.open('../login.jsp', '_login');
+                            window.open('../login.jsp', '_login');
+                        }
+                        document.getElementById("alert-dialog_text").innerText = "Your device has been logged out. A new window will be opened to the login page. Once you have logged in, close that window and synchronize again.";
+                        document.getElementById("alert-dialog").style.visibility = 'visible';
                     }
                 });
             }, // server online

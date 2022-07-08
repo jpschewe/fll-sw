@@ -19,7 +19,8 @@ function loadData() {
 
             const messages = document.getElementById("index-page_messages");
             if (0 == subjectiveCategories.length) {
-                alert("No subjective data loaded from server");
+                document.getElementById('alert-dialog_text').innerText = "No subjective data loaded from server";
+                document.getElementById('alert-dialog').style.visibility = 'visible';
             } else {
                 const message = document.createElement("div");
                 messages.appendChild(message);
@@ -37,7 +38,8 @@ function loadData() {
         }, function(message) {
             waitDialog.style.visibility = "hidden";
 
-            alert("Error getting data from server: " + message);
+            document.getElementById('alert-dialog_text').innerText = "Error getting data from server: " + message;
+            document.getElementById('alert-dialog').style.visibility = 'visible';
         });
 }
 
@@ -59,11 +61,15 @@ function promptForReload() {
 
 function reloadData() {
     if (subjective_module.checkForModifiedScores()) {
-        const answer = confirm("You have modified scores, this will remove them. Are you sure?")
-        if (!answer) {
-            return;
-        }
+        document.getElementById("confirm-modified-scores-dialog").style.visibility = 'visible';
+    } else {
+        reloadDataConfirmed();
     }
+}
+
+function reloadDataConfirmed() {
+    document.getElementById("index-page_choose_clear").style.visibility = 'hidden';
+
     subjective_module.clearAllData();
     loadData();
 }
@@ -88,7 +94,8 @@ function checkTournament() {
             promptForReload();
         }
     }, function() {
-        alert("Error getting data from server");
+        document.getElementById('alert-dialog_text').innerText = "Error getting data from server";
+        document.getElementById('alert-dialog').style.visibility = 'visible';
     });
 }
 
@@ -101,7 +108,6 @@ function serverLoadPage() {
 
         if (data.authenticated) {
             document.getElementById("index-page_clear").addEventListener('click', function() {
-                chooseClear.style.visibility = 'hidden';
                 reloadData();
             });
             document.getElementById("index-page_keep").addEventListener('click', function() {

@@ -6,6 +6,8 @@
 
 "use strict";
 
+let alertCallback = null;
+
 /**
  * Create the JSON object to download and set it as the href. 
  * This is meant to be called from the onclick handler of the anchor.
@@ -145,7 +147,8 @@ function setJudge() {
     if ('new-judge' == judgeID) {
         judgeID = document.getElementById("choose-judge_new-judge-name").value;
         if (null == judgeID || "" == judgeID.trim()) {
-            alert("You must enter a name");
+            document.getElementById('alert-dialog_text').innerText = "You must enter a name";
+            document.getElementById('alert-dialog').style.visibility = 'visible';
             return;
         }
         judgeID = judgeID.trim().toUpperCase();
@@ -260,7 +263,8 @@ function saveToScoreObject(score) {
 
     for (const goal of subjective_module.getCurrentCategory().allGoals) {
         if (goal.enumerated) {
-            alert("Enumerated goals not supported: " + goal.name);
+            document.getElementById('alert-dialog_text').innerText = "Enumerated goals not supported: " + goal.name;
+            document.getElementById('alert-dialog').style.visibility = 'visible';
         } else {
             const subscore = Number(document.getElementById(getScoreItemName(goal)).value);
             score.standardSubScores[goal.name] = subscore;
@@ -288,7 +292,8 @@ function recomputeTotal() {
     let total = 0;
     for (const goal of subjective_module.getCurrentCategory().allGoals) {
         if (goal.enumerated) {
-            alert("Enumerated goals not supported: " + goal.name);
+            document.getElementById('alert-dialog_text').innerText = "Enumerated goals not supported: " + goal.name;
+            document.getElementById('alert-dialog').style.visibility = 'visible';
         } else {
             const subscore = Number(document.getElementById(getScoreItemName(goal)).value);
             const multiplier = Number(goal.multiplier);
@@ -586,7 +591,8 @@ function createGoalGroupRows(table, totalColumns, score, goalGroup) {
 
     for (const goal of goalGroup.goals) {
         if (goal.enumerated) {
-            alert("Enumerated goals not supported: " + goal.name);
+            document.getElementById('alert-dialog_text').innerText = "Enumerated goals not supported: " + goal.name;
+            document.getElementById('alert-dialog').style.visibility = 'visible';
         } else {
             createScoreRows(table, totalColumns, score, goal);
         }
@@ -1070,7 +1076,8 @@ function displayPageEnterScore() {
             createGoalGroupRows(table, totalColumns, score, ge)
         } else if (ge.goal) {
             if (ge.enumerated) {
-                alert("Enumerated goals not supported: " + goal.name);
+                document.getElementById('alert-dialog_text').innerText = "Enumerated goals not supported: " + goal.name;
+                document.getElementById('alert-dialog').style.visibility = 'visible';
             } else {
                 createScoreRows(table, totalColumns, score, ge);
             }
@@ -1141,8 +1148,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         subjective_module.uploadData(function(result) {
             // scoresSuccess
-            alert("Uploaded " + result.numModified + " scores. message: "
-                + result.message);
+            document.getElementById('alert-dialog_text').innerText = "Uploaded " + result.numModified + " scores. message: "
+                + result.message;
+            document.getElementById('alert-dialog').style.visibility = 'visible';
         }, //
             function(result) {
                 // scoresFail
@@ -1154,7 +1162,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     message = result.message;
                 }
 
-                alert("Failed to upload scores: " + message);
+                document.getElementById('alert-dialog_text').innerText = "Failed to upload scores: " + message;
+                document.getElementById('alert-dialog').style.visibility = 'visible';
             }, //
             function(result) {
                 // judgesSuccess
@@ -1172,7 +1181,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     message = result.message;
                 }
 
-                alert("Failed to upload judges: " + message);
+                document.getElementById('alert-dialog_text').innerText = "Failed to upload judges: " + message
+                document.getElementById('alert-dialog').style.visibility = 'visible';
             }, //
             function() {
                 // loadSuccess
@@ -1185,7 +1195,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 waitDialog.style.visibility = "hidden";
 
-                alert("Failed to load scores from server: " + message);
+                document.getElementById('alert-dialog_text').innerText = "Failed to load scores from server: " + message
+                document.getElementById('alert-dialog').style.visibility = 'visible';
             });
     });
 
@@ -1285,6 +1296,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("choose-judge_submit").addEventListener('click', function() {
         setJudge();
+    });
+
+    document.getElementById("alert-dialog_close").addEventListener('click', function() {
+        document.getElementById('alert-dialog').style.visibility = 'hidden';
+        if (null != alertCallback) {
+            alertCallback();
+        }
+        alertCallback = null;
+    });
+
+    document.getElementById("confirm-modified-scores-dialog_yes").addEventListener('click', function() {
+        document.getElementById('confirm-modified-scores-dialog').style.visibility = 'hidden';
+        reloadDataConfirmed();
+    });
+    document.getElementById("confirm-modified-scores-dialog_no").addEventListener('click', function() {
+        document.getElementById('confirm-modified-scores-dialog').style.visibility = 'hidden';
     });
 
     // navigate to pages when the anchor changes
