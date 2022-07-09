@@ -12,9 +12,6 @@
 
 <fll-sw:required-roles roles="ADMIN,REF" allowSetup="false" />
 
-<script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
-
-
 <%
 fll.web.playoff.ScoregenBrackets.populateContext(application, request, pageContext);
 %>
@@ -74,14 +71,14 @@ FONT.TIE {
 
     <c:forEach items="${tableInfo}" var="info">
 
-    if (selectChanged.val() == "${info.sideA}") {
-      if (selectMatch.val() != "${info.sideB}") {
-        selectMatch.val("${info.sideB}");
+    if (selectChanged.value == "${info.sideA}") {
+      if (selectMatch.value != "${info.sideB}") {
+        selectMatch.value = "${info.sideB}";
       }
       return;
-    } else if (selectChanged.val() == "${info.sideB}") {
-      if (selectMatch.val() != "${info.sideA}") {
-        selectMatch.val("${info.sideA}");
+    } else if (selectChanged.value == "${info.sideB}") {
+      if (selectMatch.value != "${info.sideA}") {
+        selectMatch.value = "${info.sideA}";
       }
       return;
     }
@@ -89,7 +86,7 @@ FONT.TIE {
     </c:forEach>
   }
 
-  $(document).ready(function() {
+  document.addEventListener("DOMContentLoaded", function() {
     <%-- must be on 1 line --%>
     ${bracketInfo.tableSyncFunctionsOutput}
   });

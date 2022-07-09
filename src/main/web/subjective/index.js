@@ -7,36 +7,44 @@
 "use strict";
 
 function loadData() {
-    $.mobile.loading("show");
+    const waitDialog = document.getElementById("wait-dialog");
+    waitDialog.style.visibility = "visible";
 
-    $.subjective.loadFromServer(
+    subjective_module.loadFromServer(
         function() {
-            const subjectiveCategories = $.subjective.getSubjectiveCategories();
+            const subjectiveCategories = subjective_module.getSubjectiveCategories();
 
-            $.mobile.loading("hide");
-            $("#index-page_choose_clear").hide();
+            waitDialog.style.visibility = "hidden";
+            document.getElementById("index-page_choose_clear").style.visibility = "hidden";
 
+            const messages = document.getElementById("index-page_messages");
             if (0 == subjectiveCategories.length) {
-                alert("No subjective data loaded from server");
+                document.getElementById('alert-dialog_text').innerText = "No subjective data loaded from server";
+                document.getElementById('alert-dialog').style.visibility = 'visible';
             } else {
-                $("#index-page_messages").append(
-                    "Loaded " + subjectiveCategories.length
-                    + " categories from the server<br/>");
+                const message = document.createElement("div");
+                messages.appendChild(message);
+                message.innerText = "Loaded " + subjectiveCategories.length
+                    + " categories from the server";
             }
-            $("#index-page_messages").append(
-                "Current tournament is " + $.subjective.getTournament().name
-                + "<br/>");
+
+            const tournamentMessage = document.createElement("div");
+            messages.appendChild(tournamentMessage);
+            messages.innerText = "Current tournament is " + subjective_module.getTournament().name;
+
+            updateMainHeader();
 
             promptForJudgingGroup();
         }, function(message) {
-            $.mobile.loading("hide");
+            waitDialog.style.visibility = "hidden";
 
-            alert("Error getting data from server: " + message);
+            document.getElementById('alert-dialog_text').innerText = "Error getting data from server: " + message;
+            document.getElementById('alert-dialog').style.visibility = 'visible';
         });
 }
 
 function checkStoredData() {
-    if ($.subjective.storedDataExists()) {
+    if (subjective_module.storedDataExists()) {
         checkTournament();
     } else {
         loadData();
@@ -44,60 +52,66 @@ function checkStoredData() {
 }
 
 function promptForJudgingGroup() {
-    $.mobile.navigate("#choose-judging-group-page");
+    window.location = "#choose-judging-group";
 }
 
 function promptForReload() {
-    $("#index-page_choose_clear").show();
+    document.getElementById("index-page_choose_clear").style.visibility = "visible";
 }
 
 function reloadData() {
-    if ($.subjective.checkForModifiedScores()) {
-        var answer = confirm("You have modified scores, this will remove them. Are you sure?")
-        if (!answer) {
-            return;
-        }
+    if (subjective_module.checkForModifiedScores()) {
+        document.getElementById("confirm-modified-scores-dialog").style.visibility = 'visible';
+    } else {
+        reloadDataConfirmed();
     }
-    $.subjective.clearAllData();
+}
+
+function reloadDataConfirmed() {
+    document.getElementById("index-page_choose_clear").style.visibility = 'hidden';
+
+    subjective_module.clearAllData();
     loadData();
 }
 
 function checkTournament() {
-    $.mobile.loading("show");
+    const waitDialog = document.getElementById("wait-dialog");
+    waitDialog.style.visibility = "visible";
 
-    $.subjective.getServerTournament(function(serverTournament) {
-        $.mobile.loading("hide");
+    subjective_module.getServerTournament(function(serverTournament) {
+        waitDialog.style.visibility = "hidden";
 
-        const storedTournament = $.subjective.getTournament();
+        const storedTournament = subjective_module.getTournament();
         if (null == storedTournament) {
             reloadData();
         } else if (storedTournament.name != serverTournament.name
             || storedTournament.tournamentID != serverTournament.tournamentID) {
             reloadData();
-        } else if (!$.subjective.checkForModifiedScores()) {
+        } else if (!subjective_module.checkForModifiedScores()) {
             // nothing is modified, just reload
             reloadData();
         } else {
             promptForReload();
         }
     }, function() {
-        alert("Error getting data from server");
+        document.getElementById('alert-dialog_text').innerText = "Error getting data from server";
+        document.getElementById('alert-dialog').style.visibility = 'visible';
     });
 }
 
 function serverLoadPage() {
-    $("#index-page_choose_clear").hide();
+    const chooseClear = document.getElementById("index-page_choose_clear");
+    chooseClear.style.visibility = 'hidden';
 
-    $.getJSON("CheckAuth", function(data) {
-        $.subjective.log("data: " + JSON.stringify(data));
+    fetch("CheckAuth").then(checkJsonResponse).then(function(data) {
+        subjective_module.log("data: " + JSON.stringify(data));
 
         if (data.authenticated) {
-            $("#index-page_clear").click(function() {
-                $("#index-page_choose_clear").hide();
+            document.getElementById("index-page_clear").addEventListener('click', function() {
                 reloadData();
             });
-            $("#index-page_keep").click(function() {
-                $("#index-page_choose_clear").hide();
+            document.getElementById("index-page_keep").addEventListener('click', function() {
+                chooseClear.style.visibility = 'hidden';
                 promptForJudgingGroup();
             });
 
@@ -108,17 +122,3 @@ function serverLoadPage() {
     });
 
 }
-
-$(document).on("pagebeforeshow", "#index-page", function() {
-    $.subjective.log("before page show index-page");
-
-    $("#index-page_messages").empty();
-
-    displayTournamentName($("#index-page_tournament"));
-});
-
-$(document).on("pageshow", "#index-page", function(event) {
-    $.subjective.log("pageshow index-page");
-
-    $.subjective.checkServerStatus(serverLoadPage, promptForJudgingGroup);
-});

@@ -69,7 +69,7 @@ public final class FinalistTeams {
 
       pageContext.setAttribute("teams", teams);
 
-      final int scrollRate = GlobalParameters.getHeadToHeadScrollRate(connection);
+      final double scrollRate = GlobalParameters.getHeadToHeadScrollRate(connection);
       pageContext.setAttribute("scrollRate", scrollRate);
 
     } catch (final SQLException e) {

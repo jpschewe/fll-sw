@@ -14,10 +14,6 @@
   type="text/css"
   href="<c:url value='/style/fll-sw.css'/>" />
 
-<script
-  type='text/javascript'
-  src='../extlib/jquery-1.11.1.min.js'></script>
-
 <script type='text/javascript'>
 
 /**
@@ -27,32 +23,32 @@
  * @param value the value to check against the select
  */
 function valueExistsInSelect(select, value) {
-  var exists = false;
-  $(select.selector + " option").each(function(){
-      if (this.value == value) {
+  let exists = false;
+  for(option of select.options) {
+      if (option.value == value) {
           exists = true;
-          return false;
+          break;
       }
-  });
+  }
   return exists;
 }
 
-$(document).ready(function() {
+document.addEventListener("DOMContentLoaded", function() {
 
 <c:forEach items="${tournaments}" var="tournament">
 
 <c:choose>
 <c:when test="${playoffsInitialized[tournament.tournamentID]}">
-$("#tournament_${tournament.tournamentID}").prop("disabled", true);
-$("#event_division_${tournament.tournamentID }").prop("disabled", true);
-$("#judging_station_${tournament.tournamentID }").prop("disabled", true);
+document.getElementById("tournament_${tournament.tournamentID}").disabled = true;
+document.getElementById("event_division_${tournament.tournamentID }").disabled = true;
+document.getElementById("judging_station_${tournament.tournamentID }").disabled = true;
 
 <c:choose>
 <c:when test="${teamInTournament[tournament.tournamentID]}">
-$("#tournament_${tournament.tournamentID}").prop("checked", true);
+document.getElementById("tournament_${tournament.tournamentID}").checked = true;
 </c:when>
 <c:otherwise>
-$("#tournament_${tournament.tournamentID}").prop("checked", false);
+document.getElementById("tournament_${tournament.tournamentID}").checked = false;
 </c:otherwise>
 </c:choose>
 
@@ -63,32 +59,32 @@ $("#tournament_${tournament.tournamentID}").prop("checked", false);
 // initialize tournament checkbox
 <c:choose>
 <c:when test="${teamInTournament[tournament.tournamentID]}">
-$("#tournament_${tournament.tournamentID}").prop("checked", true);
-$("#event_division_${tournament.tournamentID }").prop("disabled", false);
-$("#judging_station_${tournament.tournamentID }").prop("disabled", false);    
+document.getElementById("tournament_${tournament.tournamentID}").checked = true;
+document.getElementById("event_division_${tournament.tournamentID }").disabled = false;
+document.getElementById("judging_station_${tournament.tournamentID }").disabled = false;    
 </c:when>
 <c:otherwise>
-$("#tournament_${tournament.tournamentID}").prop("checked", false);
-$("#event_division_${tournament.tournamentID }").prop("disabled", true);
-$("#judging_station_${tournament.tournamentID }").prop("disabled", true);    
+document.getElementById("tournament_${tournament.tournamentID}").checked = false;
+document.getElementById("event_division_${tournament.tournamentID }").disabled = true;
+document.getElementById("judging_station_${tournament.tournamentID }").disabled = true;    
 </c:otherwise>
 </c:choose>
 
 
-$("#tournament_${tournament.tournamentID}").change(function() {
-  if($("#tournament_${tournament.tournamentID}").prop("checked") == true) {
-    $("#event_division_${tournament.tournamentID }").prop("disabled", false);
-    $("#judging_station_${tournament.tournamentID }").prop("disabled", false);    
+document.getElementById("tournament_${tournament.tournamentID}").addEventListener("change", function() {
+  if(document.getElementById("tournament_${tournament.tournamentID}").checked) {
+    document.getElementById("event_division_${tournament.tournamentID }").disabled = false;
+    document.getElementById("judging_station_${tournament.tournamentID }").disabled = false;    
   } else {
     <c:if test="${teamInTournament[tournament.tournamentID]}">
-    var confirmed = confirm("Are you sure you want to remove team ${teamNumber} from ${tournament.name}?"
+    const confirmed = confirm("Are you sure you want to remove team ${teamNumber} from ${tournament.name}?"
         + " Any data associated with that team and this tournament (${tournament.name}) will be removed from the database, including any scores that have been entered."
         + " You also need to download the files for subjective score entry again."
         + " It is not advisable to do this while the tournament that the team is in is running.");
     if (confirmed == true) {
       </c:if>
-      $("#event_division_${tournament.tournamentID }").prop("disabled", true);
-      $("#judging_station_${tournament.tournamentID }").prop("disabled", true);    
+      document.getElementById("event_division_${tournament.tournamentID }").disabled = true;
+      document.getElementById("judging_station_${tournament.tournamentID }").disabled = true;    
       <c:if test="${teamInTournament[tournament.tournamentID]}">
     } else {
       this.checked = true;
@@ -97,19 +93,19 @@ $("#tournament_${tournament.tournamentID}").change(function() {
   }
 });
 
-$("#event_division_${tournament.tournamentID}").change(function() {
-  var thisSelect = $("#event_division_${tournament.tournamentID}");
-  var otherSelect = $("#judging_station_${tournament.tournamentID}");
-  if(valueExistsInSelect(otherSelect, thisSelect.val())) {
-    otherSelect.val(thisSelect.val());
+document.getElementById("event_division_${tournament.tournamentID}").addEventListener("change", function() {
+  const thisSelect = document.getElementById("event_division_${tournament.tournamentID}");
+  const otherSelect = document.getElementById("judging_station_${tournament.tournamentID}");
+  if(valueExistsInSelect(otherSelect, thisSelect.value)) {
+    otherSelect.value = thisSelect.value;
   }  
 });
 
-$("#judging_station_${tournament.tournamentID}").change(function() {
-  var thisSelect = $("#judging_station_${tournament.tournamentID}");
-  var otherSelect = $("#event_division_${tournament.tournamentID}");
-  if(valueExistsInSelect(otherSelect, thisSelect.val())) {
-    otherSelect.val(thisSelect.val());
+document.getElementById("judging_station_${tournament.tournamentID}").addEventListener("change", function() {
+  const thisSelect = document.getElementById("judging_station_${tournament.tournamentID}");
+  const otherSelect = document.getElementById("event_division_${tournament.tournamentID}");
+  if(valueExistsInSelect(otherSelect, thisSelect.value)) {
+    otherSelect.value = thisSelect.value;
   }  
 });
 

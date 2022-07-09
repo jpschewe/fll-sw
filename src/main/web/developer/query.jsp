@@ -9,7 +9,7 @@
 <title>Developer Database Commands</title>
 
 <script type='text/javascript'
-    src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+    src="<c:url value='/js/fll-functions.js'/>"></script>
 
 <script type='text/javascript' src='query.js'></script>
 
@@ -44,13 +44,14 @@
             </p>
         </c:if>
 
-        <form method='POST' action='QueryHandler' id='query_form'>
+        <div>
             Enter query
             <!--  must be on single line -->
             <textarea id='query' name='query' rows='5' cols='60'></textarea>
             <br />
-            <button id='execute_query'>Execute Query</button>
-        </form>
+            <button type='button' id='execute_query'>Execute
+                Query</button>
+        </div>
         <table id='query_result'>
         </table>
 

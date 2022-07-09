@@ -86,7 +86,7 @@ public final class RemoteControlBrackets {
       final String allBracketDataJson = writer.toString();
       pageContext.setAttribute("allBracketDataJson", allBracketDataJson);
 
-      final int scrollRate = GlobalParameters.getHeadToHeadScrollRate(connection);
+      final double scrollRate = GlobalParameters.getHeadToHeadScrollRate(connection);
       pageContext.setAttribute("scrollRate", scrollRate);
     } catch (final SQLException sqle) {
       LOGGER.error("Error talking to the database", sqle);

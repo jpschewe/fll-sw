@@ -136,14 +136,15 @@ GatherParameterInformation.populateContext(application, pageContext);
                             href='javascript:display("gAllTeamsScrollRateHelp")'>[help]</a>
                         <div id='gAllTeamsScrollRateHelp' class='help'
                             style='display: none'>The value is
-                            number of pixels to scroll per screen
-                            refresh.</div>
+                            number of seconds between calls to scroll 1
+                            pixel.</div>
                     </th>
 
                     <td>
-                        <input type='text' value="${gAllTeamsScrollRate }"
+                        <input type='number'
+                            value="${gAllTeamsScrollRate }"
                             id='gAllTeamsScrollRate'
-                            name='gAllTeamsScrollRate' min='1' required />
+                            name='gAllTeamsScrollRate' min='0.1' required />
                     </td>
                 </tr>
 
@@ -153,8 +154,8 @@ GatherParameterInformation.populateContext(application, pageContext);
                             href='javascript:display("gHeadToHeadMsPerRowHelp")'>[help]</a>
                         <div id='gHeadToHeadMsPerRowHelp' class='help'
                             style='display: none'>The value is
-                            number of pixels to scroll per screen
-                            refresh. The remote control brackets page
+                            number of seconds between calls to scroll 1
+                            pixel. The remote control brackets page
                             needs to be refreshed for this parameter to
                             take effect.</div>
                     </th>
@@ -163,7 +164,7 @@ GatherParameterInformation.populateContext(application, pageContext);
                         <input type='number'
                             value="${gHeadToHeadMsPerRow }"
                             id='gHeadToHeadMsPerRow'
-                            name='gHeadToHeadMsPerRow' min='1' required />
+                            name='gHeadToHeadMsPerRow' min='0.1' required />
                     </td>
                 </tr>
                 <tr>

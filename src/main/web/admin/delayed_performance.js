@@ -11,8 +11,7 @@ function addRow() {
     const numRows = parseInt(numRowsEle.value);
 
     const delayedPerformanceTable = document.getElementById("delayedPerformanceTable");
-    const tbody = delayedPerformanceTable.getElementsByTagName('tbody')[0];
-    const trElement = tbody.insertRow();
+    const trElement = delayedPerformanceTable.insertRow();
 
     const td1Element = trElement.insertCell();
     const runNumberElement = document.createElement("input");

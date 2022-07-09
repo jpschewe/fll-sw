@@ -22,20 +22,22 @@ fll.web.report.finalist.FinalistTeams.populateContext(application, pageContext);
     src="<c:url value='/js/fll-functions.js'/>"></script>
 
 <script type="text/javascript">
-  const scrollRate = parseInt("${scrollRate}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
+  let prevScrollTimestamp = 0;
+  const secondsBetweenScrolls = parseFloat("${scrollRate}");
+  const pixelsToScroll = 1;
 
   function reload() {
     window.scrollTo(0, 0);
     location.reload(true);
   }
 
-  function scrollDown() {
+  function scrollDown(timestamp) {
     if (!elementIsVisible(document.getElementById("bottom"))) {
-      window.scrollBy({
-        left : 0,
-        top : scrollRate,
-        behavior : 'smooth'
-      });
+      const diff = timestamp - prevScrollTimestamp;
+      if (diff >= secondsBetweenScrolls) {
+        window.scrollBy(0, pixelsToScroll);
+        prevScrollTimestamp = timestamp;
+      }
       requestAnimationFrame(scrollDown);
     } else {
       // show the last scores for a bit and then reload

@@ -6,6 +6,8 @@
 
 "use strict";
 
+let alertCallback = null;
+
 /**
  * Create the JSON object to download and set it as the href. 
  * This is meant to be called from the onclick handler of the anchor.
@@ -13,496 +15,221 @@
  * @param anchor the anchor to set the href on 
  */
 function setOfflineDownloadUrl(anchor) {
-    const offline = $.subjective.getOfflineDownloadObject()
+    const offline = subjective_module.getOfflineDownloadObject()
     const data = JSON.stringify(offline)
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     anchor.setAttribute("href", url);
+    anchor.setAttribute("download", "subjective-data.json");
 }
-
-function selectJudgingGroup(group) {
-    $.subjective.setCurrentJudgingGroup(group);
-    $.mobile.navigate("#choose-category-page");
-}
-
-$(document).on(
-    "pageinit",
-    "#choose-judging-group-page",
-    function(_) {
-        $.subjective.log("choose judging group pageinit");
-
-        $("#choose-judging-group_offline").click(function() {
-            setOfflineDownloadUrl(document.getElementById("choose-judging-group_offline"));
-        });
-
-        $("#choose-judging-group_upload-scores").click(
-            function() {
-                $.mobile.loading("show");
-
-                $.subjective.uploadData(function(result) {
-                    // scoresSuccess
-                    alert("Uploaded " + result.numModified + " scores. message: "
-                        + result.message);
-                }, //
-                    function(result) {
-                        // scoresFail
-
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload scores: " + message);
-                    }, //
-                    function(result) {
-                        // judgesSuccess
-                        $.subjective.log("Judges modified: " + result.numModifiedJudges
-                            + " new: " + result.numNewJudges);
-                    }
-
-                    ,//
-                    function(result) {
-                        // judgesFail
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload judges: " + message);
-                    }, //
-                    function() {
-                        // loadSuccess
-                        populateChooseJudgingGroup();
-                        $.mobile.loading("hide");
-                    }, //
-                    function(message) {
-                        // loadFail
-                        populateChooseJudgingGroup();
-
-                        $.mobile.loading("hide");
-
-                        alert("Failed to load scores from server: " + message);
-                    });
-            });
-    });
 
 function populateChooseJudgingGroup() {
-    $.subjective.log("choose judging group populate");
+    subjective_module.log("choose judging group populate");
 
-    displayTournamentName($("#choose-judging-group_tournament"));
+    const judgingGroupsContainer = document.getElementById("choose-judging-group_judging-groups");
+    removeChildren(judgingGroupsContainer);
 
-    $("#choose-judging-group_judging-groups").empty();
-
-    var judgingGroups = $.subjective.getJudgingGroups();
-    $.each(judgingGroups, function(i, group) {
-        var button = $("<button class='ui-btn ui-corner-all'>" + group
-            + "</button>");
-        $("#choose-judging-group_judging-groups").append(button);
-        button.click(function() {
-            selectJudgingGroup(group);
+    const judgingGroups = subjective_module.getJudgingGroups();
+    for (const group of judgingGroups) {
+        const button = document.createElement("a");
+        judgingGroupsContainer.appendChild(button);
+        button.classList.add("wide");
+        button.classList.add("center");
+        button.classList.add("fll-sw-button");
+        button.innerText = group;
+        button.addEventListener('click', function() {
+            subjective_module.setCurrentJudgingGroup(group);
+            updateMainHeader();
+            window.location = "#choose-category";
         });
-
-    });
-
-    $("#choose-judging-group-page").trigger("create");
+    }
 }
-
-$(document).on("pagebeforeshow", "#choose-judging-group-page",
-    populateChooseJudgingGroup);
-
-function selectCategory(category) {
-    $.subjective.setCurrentCategory(category);
-    $.mobile.navigate("#choose-judge-page");
-}
-
-$(document).on("pageshow", "#choose-category-page", function(event) {
-    $.mobile.loading("hide");
-});
-
-$(document).on(
-    "pageinit",
-    "#choose-category-page",
-    function(_) {
-
-        $("#choose-category_offline").click(function() {
-            setOfflineDownloadUrl(document.getElementById("choose-category_offline"));
-        });
-
-        $("#choose-category_upload-scores").click(
-            function() {
-                $.mobile.loading("show");
-
-                $.subjective.uploadData(function(result) {
-                    // scoresSuccess
-                    alert("Uploaded " + result.numModified + " scores. message: "
-                        + result.message);
-                }, //
-                    function(result) {
-                        // scoresFail
-
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload scores: " + message);
-                    }, //
-                    function(result) {
-                        // judgesSuccess
-                        $.subjective.log("Judges modified: " + result.numModifiedJudges
-                            + " new: " + result.numNewJudges);
-                    }
-
-                    ,//
-                    function(result) {
-                        // judgesFail
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload judges: " + message);
-                    }, //
-                    function() {
-                        // loadSuccess
-                        populateChooseCategory();
-
-                        $.mobile.loading("hide");
-                    }, //
-                    function(message) {
-                        // loadFail
-                        populateChooseCategory();
-
-                        $.mobile.loading("hide");
-
-                        alert("Failed to load scores from server: " + message);
-                    });
-            });
-    });
 
 function populateChooseCategory() {
-    $("#choose-category_categories").empty();
+    const container = document.getElementById("choose-category_categories");
+    removeChildren(container);
 
-    displayTournamentName($("#choose-category_tournament"));
-
-    var categories = $.subjective.getSubjectiveCategories();
-    $.each(categories, function(i, category) {
-        var button = $("<button class='ui-btn ui-corner-all'>" + category.title
-            + "</button>");
-        $("#choose-category_categories").append(button);
-        button.click(function() {
-            selectCategory(category);
+    const categories = subjective_module.getSubjectiveCategories();
+    for (const category of categories) {
+        const button = document.createElement("a");
+        container.appendChild(button);
+        button.classList.add("wide");
+        button.classList.add("center");
+        button.classList.add("fll-sw-button");
+        button.innerText = category.title;
+        button.addEventListener('click', function() {
+            subjective_module.setCurrentCategory(category);
+            updateMainHeader();
+            window.location = "#choose-judge";
         });
-        button.trigger("updateLayout");
-    });
-
-    var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
-    $("#choose-category_judging-group").text(currentJudgingGroup);
-
-    $("#choose-category-page").trigger("create");
+    }
 }
 
-$(document).on("pagebeforeshow", "#choose-category-page",
-    populateChooseCategory);
+function populateChooseJudge() {
+    document.getElementById("choose-judge_new-judge-name").classList.add('fll-sw-ui-inactive');
 
-$(document).on("pageshow", "#choose-judge-page", function(event) {
-    $.mobile.loading("hide");
-});
+    const container = document.getElementById("choose-judge_judges")
+    removeChildren(container);
 
-$(document).on(
-    "pageinit",
-    "#choose-judge-page",
-    function(_) {
-        $("#choose-judge_offline").click(function() {
-            setOfflineDownloadUrl(document.getElementById("choose-judge_offline"));
-        });
+    const newJudgeLabel = document.createElement("label");
+    container.appendChild(newJudgeLabel);
+    newJudgeLabel.classList.add("wide");
+    newJudgeLabel.classList.add("fll-sw-button");
 
-        $("#choose-judge_upload-scores").click(
-            function() {
-                $.mobile.loading("show");
+    const newJudgeOption = document.createElement("input");
+    newJudgeLabel.appendChild(newJudgeOption);
+    newJudgeOption.setAttribute("type", "radio");
+    newJudgeOption.setAttribute("name", "judge");
+    newJudgeOption.setAttribute("value", "new-judge");
+    newJudgeOption.setAttribute("id", "choose-judge_new-judge");
 
-                $.subjective.uploadData(function(result) {
-                    // scoresSuccess
+    const newJudgeLabelSpan = document.createElement("span");
+    newJudgeLabel.appendChild(newJudgeLabelSpan);
+    newJudgeLabelSpan.innerText = "New Judge";
 
-                    alert("Uploaded " + result.numModified + " scores. message: "
-                        + result.message);
-                }, //
-                    function(result) {
-                        // scoresFail
-
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload scores: " + message);
-                    }, //
-                    function(result) {
-                        // judgesSuccess
-                        $.subjective.log("Judges modified: " + result.numModifiedJudges
-                            + " new: " + result.numNewJudges);
-                    }
-
-                    ,//
-                    function(result) {
-                        // judgesFail
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload judges: " + message);
-                    }, //
-                    function() {
-                        // loadSuccess
-                        populateChooseJudge();
-
-                        $.mobile.loading("hide");
-                    }, //
-                    function(message) {
-                        // loadFail
-                        populateChooseJudge();
-
-                        $.mobile.loading("hide");
-
-                        alert("Failed to load scores from server: " + message);
-                    });
-            });
+    newJudgeOption.addEventListener('change', function() {
+        if (newJudgeOption.checked) {
+            document.getElementById("choose-judge_new-judge-name").classList.remove('fll-sw-ui-inactive');
+        }
     });
 
-function populateChooseJudge() {
-    displayTournamentName($("#choose-judge_tournament"));
 
-    $("#choose-judge_judges").empty();
-    $("#choose-judge_judges")
-        .append(
-            "<input type='radio' name='judge' value='new-judge' id='choose-judge_new-judge'>");
-    $("#choose-judge_judges").append(
-        "<label for='choose-judge_new-judge'>New Judge</label>");
-
-    var currentJudge = $.subjective.getCurrentJudge();
-    var currentJudgeValid = false;
-    var seenJudges = [];
-    var judges = $.subjective.getPossibleJudges();
-    $.each(judges, function(index, judge) {
+    let currentJudge = subjective_module.getCurrentJudge();
+    let currentJudgeValid = false;
+    const seenJudges = [];
+    const judges = subjective_module.getPossibleJudges();
+    for (const judge of judges) {
         if (!seenJudges.includes(judge.id)) {
             seenJudges.push(judge.id);
 
+            const judgeLabel = document.createElement("label");
+            container.appendChild(judgeLabel);
+            judgeLabel.classList.add("wide");
+            judgeLabel.classList.add("fll-sw-button");
+
+            const judgeInput = document.createElement("input");
+            judgeLabel.appendChild(judgeInput);
+            judgeInput.setAttribute("type", "radio");
+            judgeInput.setAttribute("name", "judge");
+            judgeInput.setAttribute("value", judge.id);
+
+            const judgeSpan = document.createElement("span");
+            judgeLabel.appendChild(judgeSpan);
+            judgeSpan.innerText = judge.id;
+
             if (null != currentJudge && currentJudge.id == judge.id) {
                 currentJudgeValid = true;
+                judgeInput.checked = true;
             }
-            $("#choose-judge_judges").append(
-                "<input type='radio' name='judge' id='choose-judge_" + index
-                + "' value='" + judge.id + "'>");
-            $("#choose-judge_judges").append(
-                "<label for='choose-judge_" + index + "'>" + judge.id + "</label>");
+
+
+            judgeInput.addEventListener('change', function() {
+                if (judgeInput.checked) {
+                    document.getElementById("choose-judge_new-judge-name").classList.add('fll-sw-ui-inactive');
+                }
+            });
         }
-    });
+    }
     if (!currentJudgeValid) {
-        currentJudge = null;
+        document.getElementById("choose-judge_new-judge-name").classList.remove('fll-sw-ui-inactive');
+        newJudgeOption.checked = true;
     }
-
-    var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
-    $("#choose-judge_judging-group").text(currentJudgingGroup);
-
-    var currentCategory = $.subjective.getCurrentCategory();
-    $("#choose-judge_category").text(currentCategory.title);
-
-    if (null != currentJudge) {
-        $("input:radio[value=\"" + currentJudge.id + "\"]").prop('checked', true);
-    } else {
-        $("input:radio[value='new-judge']").prop('checked', true);
-        $("#choose-judge_new-judge-info").show();
-    }
-
-    $("input[name=judge]:radio").change(function() {
-        var judgeID = $("input:radio[name='judge']:checked").val();
-        if ('new-judge' == judgeID) {
-            $("#choose-judge_new-judge-info").show();
-        } else {
-            $("#choose-judge_new-judge-info").hide();
-        }
-    });
-
-    $("#choose-judge-page").trigger("create");
 }
 
-$(document).on("pagebeforeshow", "#choose-judge-page", function(event) {
-    $("#choose-judge_new-judge-info").hide();
-    populateChooseJudge();
-});
-
-$(document).on("pageinit", "#choose-judge-page", function(event) {
-
-    $("#choose-judge_judge-submit").click(function() {
-        setJudge();
-    });
-
-});
-
 function setJudge() {
-    var judgeID = $("input:radio[name='judge']:checked").val();
+    let judgeID = null;
+    for (const radio of document.querySelectorAll('input[name="judge"]')) {
+        if (radio.checked) {
+            judgeID = radio.value;
+        }
+    }
+
     if ('new-judge' == judgeID) {
-        judgeID = $("#choose-judge_new-judge-name").val();
+        judgeID = document.getElementById("choose-judge_new-judge-name").value;
         if (null == judgeID || "" == judgeID.trim()) {
-            alert("You must enter a name");
+            document.getElementById('alert-dialog_text').innerText = "You must enter a name";
+            document.getElementById('alert-dialog').style.visibility = 'visible';
             return;
         }
         judgeID = judgeID.trim().toUpperCase();
 
-        $.subjective.addJudge(judgeID);
+        subjective_module.addJudge(judgeID);
     }
 
-    $.subjective.setCurrentJudge(judgeID);
+    subjective_module.setCurrentJudge(judgeID);
 
-    $.mobile.navigate("#teams-list-page");
+    location.href = '#teams-list';
 }
 
 function selectTeam(team) {
-    $.subjective.setCurrentTeam(team);
+    subjective_module.setCurrentTeam(team);
 
-    $.subjective.setScoreEntryBackPage("#teams-list-page");
-    $.mobile.navigate("#enter-score-page");
+    subjective_module.setScoreEntryBackPage("#teams-list");
+    window.location = "#enter-score";
 }
 
 function populateTeams() {
-    $("#teams-list_teams").empty();
+    const teamsList = document.getElementById("teams-list_teams");
+    removeChildren(teamsList);
+
     const timeFormatter = JSJoda.DateTimeFormatter.ofPattern("HH:mm");
-    const teams = $.subjective.getCurrentTeams();
-    $.each(teams, function(i, team) {
-        var time = $.subjective.getScheduledTime(team.teamNumber);
-        var timeStr = null;
+    const teams = subjective_module.getCurrentTeams();
+    for (const team of teams) {
+        const time = subjective_module.getScheduledTime(team.teamNumber);
+        let timeStr = null;
         if (null != time) {
             timeStr = time.format(timeFormatter);
         }
 
-        var scoreStr;
-        var score = $.subjective.getScore(team.teamNumber);
-        if (!$.subjective.isScoreCompleted(score)) {
-            scoreStr = "";
-        } else if (score.noShow) {
-            scoreStr = "<span class='no-show'>No Show</span> - ";
-        } else {
-            var computedScore = $.subjective.computeScore(score);
-            scoreStr = "<span class='score'>Score: " + computedScore + "</span> - ";
+        const button = document.createElement("a");
+        teamsList.appendChild(button);
+        button.classList.add("wide");
+        button.classList.add("fll-sw-button");
+
+        if (null != timeStr) {
+            const span = document.createElement("span");
+            button.appendChild(span);
+            span.innerText = timeStr + " - ";
         }
 
-        var label = "";
-        if (null != timeStr) {
-            label = label + timeStr + " - ";
+        const score = subjective_module.getScore(team.teamNumber);
+        if (!subjective_module.isScoreCompleted(score)) {
+            // nothing
+        } else if (score.noShow) {
+            const span = document.createElement("span");
+            button.appendChild(span);
+            span.innerText = "No Show";
+            span.classList.add("no-show");
+
+            const spacerSpan = document.createElement("span");
+            button.appendChild(spacerSpan);
+            spacerSpan.innerText = " - ";
+        } else {
+            const computedScore = subjective_module.computeScore(score);
+            const span = document.createElement("span");
+            button.appendChild(span);
+            span.innerText = "Score: " + computedScore;
+            span.classList.add("score");
+
+            const spacerSpan = document.createElement("span");
+            button.appendChild(spacerSpan);
+            spacerSpan.innerText = " - ";
         }
-        label = label + scoreStr;
-        label = label + team.teamNumber;
-        label = label + " - " + team.teamName;
+
+        let teamInformation = team.teamNumber + " - " + team.teamName;
         if (null != team.organization) {
-            label = label + " - " + team.organization;
+            teamInformation = teamInformation + " - " + team.organization;
         }
-        var button = $("<button class='ui-btn ui-corner-all text-left'>" //
-            + label //
-            + "</button>");
-        $("#teams-list_teams").append(button);
-        button.click(function() {
+        const teamInformationSpan = document.createElement("span");
+        button.appendChild(teamInformationSpan);
+        teamInformationSpan.innerText = teamInformation;
+
+        button.addEventListener('click', function() {
             selectTeam(team);
         });
 
-    });
-
-    $("#teams-list-page").trigger("create");
+    }
 }
-
-$(document).on("pagebeforeshow", "#teams-list-page", function(event) {
-    var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
-    $("#teams-list_judging-group").text(currentJudgingGroup);
-
-    var currentCategory = $.subjective.getCurrentCategory();
-    $("#teams-list_category").text(currentCategory.title);
-
-    var currentJudge = $.subjective.getCurrentJudge();
-    $("#teams-list_judge").text(currentJudge.id);
-
-    displayTournamentName($("#teams-list_tournament"));
-
-    populateTeams();
-});
-
-$(document).on("pageshow", "#teams-list-page", function(event) {
-    $.mobile.loading("hide");
-});
-
-$(document).on(
-    "pageinit",
-    "#teams-list-page",
-    function(_) {
-        $("#teams-list_offline").click(function() {
-            setOfflineDownloadUrl(document.getElementById("teams-list_offline"));
-        });
-
-        $("#teams-list_upload-scores").click(
-            function() {
-                $.mobile.loading("show");
-
-                $.subjective.uploadData(function(result) {
-                    // scoresSuccess
-                    populateTeams();
-
-                    alert("Uploaded " + result.numModified + " scores. message: "
-                        + result.message);
-                }, //
-                    function(result) {
-                        // scoresFail
-                        populateTeams();
-
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload scores: " + message);
-                    }, //
-                    function(result) {
-                        // judgesSuccess
-                        $.subjective.log("Judges modified: " + result.numModifiedJudges
-                            + " new: " + result.numNewJudges);
-                    }
-
-                    ,//
-                    function(result) {
-                        // judgesFail
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload judges: " + message);
-                    }, //
-                    function() {
-                        // loadSuccess
-                        $.mobile.loading("hide");
-                    }, //
-                    function(message) {
-                        // loadFail
-                        $.mobile.loading("hide");
-
-                        alert("Failed to load scores from server: " + message);
-                    });
-            });
-    });
 
 function createNewScore() {
     const score = new Object();
@@ -511,14 +238,18 @@ function createNewScore() {
     score.noShow = false;
     score.standardSubScores = {};
     score.enumSubScores = {};
-    score.judge = $.subjective.getCurrentJudge().id;
-    score.teamNumber = $.subjective.getCurrentTeam().teamNumber;
+    score.judge = subjective_module.getCurrentJudge().id;
+    score.teamNumber = subjective_module.getCurrentTeam().teamNumber;
     score.note = null;
     score.goalComments = {};
     score.commentThinkAbout = null;
     score.commentGreatJob = null;
 
     return score;
+}
+
+function getGoalTextId(goal) {
+    return "enter-score-comment-" + goal.name + "-text";
 }
 
 /**
@@ -530,20 +261,21 @@ function saveToScoreObject(score) {
         return;
     }
 
-    $.each($.subjective.getCurrentCategory().allGoals, function(index, goal) {
+    for (const goal of subjective_module.getCurrentCategory().allGoals) {
         if (goal.enumerated) {
-            alert("Enumerated goals not supported: " + goal.name);
+            document.getElementById('alert-dialog_text').innerText = "Enumerated goals not supported: " + goal.name;
+            document.getElementById('alert-dialog').style.visibility = 'visible';
         } else {
-            var subscore = Number($("#" + getScoreItemName(goal)).val());
+            const subscore = Number(document.getElementById(getScoreItemName(goal)).value);
             score.standardSubScores[goal.name] = subscore;
 
-            var goalComment = $("#enter-score-comment-" + goal.name + "-text").val();
             if (null == score.goalComments) {
                 score.goalComments = {};
             }
+            const goalComment = document.getElementById(getGoalTextId(goal)).value;
             score.goalComments[goal.name] = goalComment;
         }
-    });
+    }
 }
 
 /**
@@ -557,216 +289,250 @@ function getScoreItemName(goal) {
 }
 
 function recomputeTotal() {
-    var currentTeam = $.subjective.getCurrentTeam();
-    var score = $.subjective.getScore(currentTeam.teamNumber);
-
-    var total = 0;
-    $.each($.subjective.getCurrentCategory().allGoals, function(index, goal) {
+    let total = 0;
+    for (const goal of subjective_module.getCurrentCategory().allGoals) {
         if (goal.enumerated) {
-            alert("Enumerated goals not supported: " + goal.name);
+            document.getElementById('alert-dialog_text').innerText = "Enumerated goals not supported: " + goal.name;
+            document.getElementById('alert-dialog').style.visibility = 'visible';
         } else {
-            var subscore = Number($("#" + getScoreItemName(goal)).val());
-            var multiplier = Number(goal.multiplier);
+            const subscore = Number(document.getElementById(getScoreItemName(goal)).value);
+            const multiplier = Number(goal.multiplier);
             total = total + subscore * multiplier;
         }
-    });
-    $("#enter-score_total-score").text(total);
+    }
+    document.getElementById("enter-score_total-score").innerText = total;
 }
 
 function addGoalHeaderToScoreEntry(table, totalColumns, goal) {
-    var goalDescriptionRow = $("<tr></tr>");
-    var goalDescriptionCell = $("<td colspan='" + totalColumns + "'></td>");
-    var goalDescTable = $("<table></table>");
-    var goalDescRow = $("<tr></tr>");
-    goalDescRow.append($("<th width='25%'>" + goal.title + "</th>"));
-    goalDescRow.append($("<td width='5%'>&nbsp;</td>"));
-    goalDescRow.append($("<td width='70%'>" + goal.description + "</td>"));
-    goalDescTable.append(goalDescRow);
-    goalDescriptionCell.append(goalDescTable);
-    goalDescriptionRow.append(goalDescriptionCell);
-    table.append(goalDescriptionRow);
+    const goalDescriptionRow = document.createElement("tr");
+    const goalDescriptionCell = document.createElement("td");
+    goalDescriptionCell.setAttribute("colspan", totalColumns);
+    const goalDescTable = document.createElement("table");
+    const goalDescRow = document.createElement("tr");
+
+    const goalTitle = document.createElement("td");
+    goalDescRow.appendChild(goalTitle);
+    goalTitle.innerText = goal.title;
+    goalTitle.style.width = "25%";
+    goalTitle.classList.add("goal-title");
+
+    const spacer = document.createElement("td");
+    goalDescRow.appendChild(spacer);
+    spacer.innerHtml = "&nbsp;";
+    spacer.style.width = "5%";
+
+    const goalDescription = document.createElement("td");
+    goalDescRow.appendChild(goalDescription);
+    goalDescription.innerText = goal.description;
+    goalDescription.style.width = "70%";
+
+    goalDescTable.appendChild(goalDescRow);
+    goalDescriptionCell.appendChild(goalDescTable);
+    goalDescriptionRow.appendChild(goalDescriptionCell);
+    table.appendChild(goalDescriptionRow);
 }
 
 function getRubricCellId(goal, rangeIndex) {
     return goal.name + "_" + rangeIndex;
 }
 
-function addRubricToScoreEntry(table, goal, ranges) {
+function addRubricToScoreEntry(table, goal, goalComment, ranges) {
 
-    var row = $("<tr></tr>");
+    const row = document.createElement("tr");
 
-    $
-        .each(
-            ranges,
-            function(index, range) {
-                var borderClass;
-                var commentButton;
-                if (index >= ranges.length - 1) {
-                    // skip the right border on the last cell
-                    borderClass = "";
+    for (let index = 0; index < ranges.length; ++index) {
+        const range = ranges[index];
 
-                    commentButton = "<a id='enter-score-comment-"
-                        + goal.name
-                        + "-button'"
-                        + " href='#enter-score-comment-"
-                        + goal.name
-                        + "'"
-                        + " data-rel='popup' data-position-to='window'" // 
-                        + " class='ui-btn ui-mini ui-corner-all ui-shadow ui-btn-inline'>Comment</a>";
+        const numColumns = range.max - range.min + 1;
+        const cell = document.createElement("td");
+        row.appendChild(cell);
+        cell.setAttribute("colspan", numColumns);
+        cell.classList.add("center");
+        cell.id = getRubricCellId(goal, index);
+        const cellText = document.createElement("span");
+        cell.appendChild(cellText);
+        cellText.innerText = range.shortDescription;
 
-                    var popup = $("<div id='enter-score-comment-"
-                        + goal.name
-                        + "'"
-                        + " class='ui-content' data-role='popup' data-dismissible='false'>"
-                        + " </div>");
+        if (index >= ranges.length - 1) {
+            const commentButton = document.createElement("button");
+            cell.appendChild(commentButton);
+            commentButton.id = "enter-score-comment-" + goal.name + "-button'";
+            commentButton.innerText = "Comment";
+            commentButton.classList.add("fll-sw-button");
 
-                    var textarea = $("<textarea id='enter-score-comment-" + goal.name
-                        + "-text'" + " rows='20' cols='60'></textarea>");
-                    popup.append(textarea);
+            const popup = document.createElement("div");
+            popup.classList.add("dialog");
+            popup.id = "enter-score-comment-" + goal.name;
 
-                    var link = $(" <a href='#' data-rel='back' id='enter-score-"
-                        + goal.name
-                        + "-close'"
-                        + " class='ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b'>Close</a>");
-                    popup.append(link);
+            const popupContent = document.createElement("div");
+            popup.appendChild(popupContent);
+            popupContent.classList.add('comment-dialog')
 
-                    $("#enter-score-goal-comments").append(popup);
+            const textarea = document.createElement("textarea");
+            popupContent.appendChild(textarea);
+            textarea.id = getGoalTextId(goal);
+            textarea.classList.add('comment-text');
+            textarea.setAttribute("rows", "20");
+            textarea.setAttribute("cols", "60");
+            if (!isBlank(goalComment)) {
+                textarea.value = goalComment;
+                commentButton.classList.add("comment-entered");
+            }
 
-                    $("#enter-score-" + goal.name + "-close")
-                        .click(function() {
-                            var comment = $("#enter-score-comment-" + goal.name + "-text").val();
-                            var openCommentButton = $("#enter-score-comment-"
-                                + goal.name
-                                + "-button");
-                            if (!isBlank(comment)) {
-                                openCommentButton.addClass("comment-entered");
-                            } else {
-                                openCommentButton.removeClass("comment-entered");
-                            }
-                        });
+            const closeButton = document.createElement("button");
+            popupContent.appendChild(closeButton);
+            closeButton.setAttribute("type", "button");
+            closeButton.id = "enter-score-comment-" + goal.name + "-close";
+            closeButton.innerText = 'Close';
 
-                    $("#enter-score-comment-" + goal.name).popup({
-                        afteropen: function(event, ui) {
-                            $("#enter-score-comment-" + goal.name + "-text").focus();
-                        }
-                    });
+            document.getElementById("enter-score-goal-comments").appendChild(popup);
 
+            closeButton.addEventListener("click", function() {
+                popup.style.visibility = "hidden";
+
+                const comment = textarea.value;
+                if (!isBlank(comment)) {
+                    commentButton.classList.add("comment-entered");
                 } else {
-                    borderClass = "border-right";
-                    commentButton = "";
+                    commentButton.classList.remove("comment-entered");
                 }
-
-                var numColumns = range.max - range.min + 1;
-                var cell = $("<td colspan='" + numColumns + "' class='"
-                    + borderClass + " center' id='" + getRubricCellId(goal, index)
-                    + "'>" + range.shortDescription + commentButton + "</td>");
-                row.append(cell);
             });
 
-    table.append(row);
+            commentButton.addEventListener("click", function() {
+                popup.style.visibility = "visible";
+                textarea.focus();
+            });
+
+        } else {
+            cell.classList.add("border-right");
+        }
+
+    }
+
+    table.appendChild(row);
 
 }
 
 function addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore) {
-    var initValue;
+    let initValue;
     if (null == subscore) {
         initValue = goal.initialValue;
     } else {
         initValue = subscore;
     }
 
-    var row = $("<tr></tr>");
-    var cell = $("<td class='score-slider-cell' colspan='" + totalColumns
-        + "'></td>");
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.setAttribute("colspan", totalColumns);
+    cell.classList.add("score-slider-cell");
 
-    var sliderId = getScoreItemName(goal);
+    const sliderId = getScoreItemName(goal);
 
-    var $sliderContainer = $("<div id='" + sliderId + "-container'></div>");
-    cell.append($sliderContainer);
+    const sliderContainer = document.createElement("div");
+    sliderContainer.id = sliderId + "-container";
+    cell.appendChild(sliderContainer);
 
-    var $slider = $("<input type='range' class='ui-hidden-accessible' name='"
-        + sliderId + "' id='" + sliderId + "' min='" + goal.min + "' max='"
-        + goal.max + "' value='" + initValue + "'></input>");
+    const slider = document.createElement("input");
+    slider.setAttribute("type", "range");
+    slider.name = sliderId;
+    slider.id = sliderId;
+    slider.setAttribute("min", goal.min);
+    slider.setAttribute("max", goal.max);
+    slider.value = initValue;
 
-    $sliderContainer.append($slider);
+    cell.appendChild(slider);
 
-    row.append(cell);
+    row.appendChild(cell);
 
-    table.append(row);
+    table.appendChild(row);
 
     highlightRubric(goal, ranges, initValue);
 }
 
 function setSliderTicks(goal) {
-    var sliderId = getScoreItemName(goal);
+    const sliderId = getScoreItemName(goal);
 
-    var $slider = $("#" + sliderId);
-    var $track = $("#" + sliderId + "-container .ui-slider-track");
+    const sliderContainer = document.getElementById(sliderId + "-container");
 
-    var max = goal.max;
-    var min = goal.min;
-    var spacing = 100 / (max - min);
+    const max = goal.max;
+    const min = goal.min;
+    const offsetPercent = 0.5; // handle space at the start of the range
+    const spacing = (100 - offsetPercent - offsetPercent) / (max - min);
 
     /*
-     * $.subjective.log("Creating slider ticks for " + goal.name + " min: " + min + "
+     * subjective_module.log("Creating slider ticks for " + goal.name + " min: " + min + "
      * max: " + max + " spacing: " + spacing);
      */
 
-    $slider.find('.sliderTickMark').remove();
-    for (var i = 0; i <= max - min; i++) {
-        var $tick = $('<span class="sliderTickMark">&nbsp;</span>');
-        $tick.css('left', (spacing * i) + '%');
-        $track.prepend($tick);
+    for (let i = 0; i <= max - min; i++) {
+        const tick = document.createElement("span");
+        tick.classList.add("sliderTickMark");
+        //tick.innerHtml = "&nbsp;";
+        tick.style.left = ((spacing * i) + offsetPercent) + '%';
+        sliderContainer.appendChild(tick);
     }
 
 }
 
 function highlightRubric(goal, ranges, value) {
+    for (let index = 0; index < ranges.length; ++index) {
+        const range = ranges[index];
 
-    $.each(ranges, function(index, range) {
-        var rangeCell = $("#" + getRubricCellId(goal, index));
+        const rangeCell = document.getElementById(getRubricCellId(goal, index));
         if (range.min <= value && value <= range.max) {
-            rangeCell.addClass("selected-range");
+            rangeCell.classList.add("selected-range");
         } else {
-            rangeCell.removeClass("selected-range");
+            rangeCell.classList.remove("selected-range");
         }
-    });
-
+    }
 }
 
 function addEventsToSlider(goal, ranges) {
-
-    var ranges = goal.rubric;
-    ranges.sort(rangeSort);
-
-    var sliderId = getScoreItemName(goal);
-    var $slider = $("#" + sliderId);
-
-    $slider.slider({
-        highlight: true
-    });
+    const sliderId = getScoreItemName(goal);
+    const slider = document.getElementById(sliderId);
 
     setSliderTicks(goal);
 
-    $slider.on("change", function() {
-        var value = $slider.val();
+    slider.addEventListener('change', function() {
+        const value = slider.value;
         highlightRubric(goal, ranges, value);
 
         recomputeTotal();
     });
 }
 
-function createScoreRows(table, totalColumns, goal, subscore) {
+function createScoreRows(table, totalColumns, score, goal) {
+    let goalScore = null;
+    if (subjective_module.isScoreCompleted(score)) {
+        goalScore = score.standardSubScores[goal.name];
+    }
+
+    let goalComment;
+    if (score && score.goalComments) {
+        goalComment = score.goalComments[goal.name];
+    } else {
+        goalComment = "";
+    }
+
     addGoalHeaderToScoreEntry(table, totalColumns, goal);
 
-    var ranges = goal.rubric;
+    const ranges = goal.rubric;
     ranges.sort(rangeSort);
 
-    addRubricToScoreEntry(table, goal, ranges);
+    addRubricToScoreEntry(table, goal, goalComment, ranges);
 
-    addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore);
+    addSliderToScoreEntry(table, goal, totalColumns, ranges, goalScore);
 
-    table.append($("<tr><td colspan='" + totalColumns + "'>&nbsp;</td></tr>"));
+    const row = document.createElement("tr");
+    table.appendChild(row);
+
+    const cell = document.createElement("td");
+    row.appendChild(cell);
+    cell.setAttribute("colspan", totalColumns);
+    cell.innerHtml = "&nbsp;";
+
+    addEventsToSlider(goal, ranges);
+
 }
 
 /**
@@ -778,27 +544,29 @@ function createScoreRows(table, totalColumns, goal, subscore) {
  * @returns total number of columns to represent all scores in the rubric ranges
  */
 function populateEnterScoreRubricTitles(table, hidden) {
-    var firstGoal = $.subjective.getCurrentCategory().allGoals[0];
+    const firstGoal = subjective_module.getCurrentCategory().allGoals[0];
 
-    var ranges = firstGoal.rubric;
+    const ranges = firstGoal.rubric;
     ranges.sort(rangeSort);
 
-    var totalColumns = 0;
+    let totalColumns = 0;
 
-    var row = $("<tr></tr>");
+    const row = document.createElement("tr");
     if (hidden) {
-        row.addClass('hidden');
+        row.classList.add('hidden');
     }
 
-    $.each(ranges, function(index, range) {
-        var numColumns = range.max - range.min + 1;
-        var cell = $("<th colspan='" + numColumns + "'>" + range.title + "</th>");
-        row.append(cell);
+    for (const range of ranges) {
+        const numColumns = range.max - range.min + 1;
+        const cell = document.createElement("th");
+        cell.setAttribute("colspan", numColumns);
+        cell.innerText = range.title;
+        row.appendChild(cell);
 
         totalColumns += numColumns;
-    });
+    }
 
-    table.append(row);
+    table.appendChild(row);
 
     return totalColumns;
 }
@@ -807,177 +575,57 @@ function populateEnterScoreRubricTitles(table, hidden) {
  * Create rows for a goal group and it's goals.
  */
 function createGoalGroupRows(table, totalColumns, score, goalGroup) {
-    var groupText = goalGroup.title;
+    let groupText = goalGroup.title;
     if (goalGroup.description) {
         groupText = groupText + " - " + goalGroup.description;
     }
 
-    var bar = $("<tr><td colspan='" + totalColumns + "' class='ui-bar-a'>"
-        + groupText + "</td></tr>");
-    table.append(bar);
+    const barRow = document.createElement("tr");
+    table.appendChild(barRow);
+    const barCell = document.createElement("td");
+    barRow.appendChild(barCell);
+    barCell.setAttribute("colspan", totalColumns);
+    barCell.classList.add("goal-group-title");
+    barCell.innerText = groupText;
 
-    $.each(goalGroup.goals, function(index, goal) {
+    for (const goal of goalGroup.goals) {
         if (goal.enumerated) {
-            alert("Enumerated goals not supported: " + goal.name);
+            document.getElementById('alert-dialog_text').innerText = "Enumerated goals not supported: " + goal.name;
+            document.getElementById('alert-dialog').style.visibility = 'visible';
         } else {
-            var goalScore = null;
-            if ($.subjective.isScoreCompleted(score)) {
-                goalScore = score.standardSubScores[goal.name];
-            }
-            createScoreRows(table, totalColumns, goal, goalScore);
+            createScoreRows(table, totalColumns, score, goal);
         }
-    });
+    }
 
 }
 
 function updateGreatJobButtonBackground() {
-    var greatJobButton = $("#enter-score-comment-great-job-button");
-    var comment = $("#enter-score-comment-great-job-text").val();
+    const greatJobButton = document.getElementById("enter-score-comment-great-job-button");
+    const comment = document.getElementById("enter-score-comment-great-job-text").value;
     if (!isBlank(comment)) {
-        greatJobButton.addClass("comment-entered");
+        greatJobButton.classList.add("comment-entered");
     } else {
-        greatJobButton.removeClass("comment-entered");
+        greatJobButton.classList.remove("comment-entered");
     }
 }
 
 function updateThinkAboutButtonBackground() {
-    var button = $("#enter-score-comment-think-about-button");
-    var comment = $("#enter-score-comment-think-about-text").val();
+    const button = document.getElementById("enter-score-comment-think-about-button");
+    const comment = document.getElementById("enter-score-comment-think-about-text").value;
     if (!isBlank(comment)) {
-        button.addClass("comment-entered");
+        button.classList.add("comment-entered");
     } else {
-        button.removeClass("comment-entered");
+        button.classList.remove("comment-entered");
     }
 }
 
-$(document)
-    .on(
-        "pagebeforeshow",
-        "#enter-score-page",
-        function(event) {
 
-            var currentTeam = $.subjective.getCurrentTeam();
-            $("#enter-score_team-number").text(currentTeam.teamNumber);
-            $("#enter-score_team-name").text(currentTeam.teamName);
-
-            var score = $.subjective.getScore(currentTeam.teamNumber);
-            if (null != score) {
-                $("#enter-score-note-text").val(score.note);
-                $("#enter-score-comment-great-job-text").val(score.commentGreatJob);
-                $("#enter-score-comment-think-about-text").val(
-                    score.commentThinkAbout);
-            } else {
-                $("#enter-score-note-text").val("");
-                $("#enter-score-comment-great-job-text").val("");
-                $("#enter-score-comment-think-about-text").val("");
-            }
-            updateGreatJobButtonBackground();
-            updateThinkAboutButtonBackground();
-
-            var table = $("#enter-score_score-table");
-            table.empty();
-
-            $("#enter-score-goal-comments").empty();
-
-            var totalColumns = populateEnterScoreRubricTitles(table, true);
-
-            // put rubric titles in the top header
-            var headerTable = $("#enter-score_score-table_header");
-            headerTable.empty();
-            populateEnterScoreRubricTitles(headerTable, false)
-
-            $.each($.subjective.getCurrentCategory().goalElements, function(
-                index, ge) {
-                if (ge.goalGroup) {
-                    createGoalGroupRows(table, totalColumns, score, ge)
-                } else if (ge.goal) {
-                    if (ge.enumerated) {
-                        alert("Enumerated goals not supported: " + goal.name);
-                    } else {
-                        var goalScore = null;
-                        if ($.subjective.isScoreCompleted(score)) {
-                            goalScore = score.standardSubScores[goal.name];
-                        }
-
-                        createScoreRows(table, totalColumns, ge, goalScore);
-                    }
-                }
-            });
-
-            // add the non-numeric categories that teams can be nominated for
-            $("#enter-score_nominates").empty();
-            $("#enter-score_nominates").hide();
-            $.each($.subjective.getCurrentCategory().nominates, function(index,
-                nominate) {
-                $("#enter-score_nominates").show();
-
-                var grid = $("<div class=\"ui-grid-a split_30_70\"></div>");
-                $("#enter-score_nominates").append(grid);
-
-                var blockA = $("<div class=\"ui-block-a\">");
-                grid.append(blockA);
-
-                var label = $("<label>" + nominate.nonNumericCategoryTitle
-                    + "</label>");
-                blockA.append(label);
-                var checkbox = $("<input type='checkbox' id='enter-score_nominate_"
-                    + index + "' />");
-                if (null != score
-                    && score.nonNumericNominations
-                        .includes(nominate.nonNumericCategoryTitle)) {
-                    checkbox.prop("checked", true);
-                }
-                label.append(checkbox);
-
-                var blockB = $("<div class=\"ui-block-b\">");
-                grid.append(blockB);
-
-                var nonNumericCategory = $.subjective.getNonNumericCategory(nominate.nonNumericCategoryTitle);
-                if (nonNumericCategory) {
-                    blockB.text(nonNumericCategory.description);
-                }
-            });
-
-            // read the intial value
-            recomputeTotal();
-
-            $("#enter-score-page").trigger("create");
-
-            // events need to be added after the page create
-            $.each($.subjective.getCurrentCategory().allGoals, function(index,
-                goal) {
-                addEventsToSlider(goal);
-
-                if (null != score) {
-                    var openCommentButton = $("#enter-score-comment-"
-                        + goal.name
-                        + "-button");
-
-                    var comment;
-                    if (score.goalComments) {
-                        comment = score.goalComments[goal.name];
-                    } else {
-                        comment = "";
-                    }
-                    if (!isBlank(comment)) {
-                        openCommentButton.addClass("comment-entered");
-                    } else {
-                        openCommentButton.removeClass("comment-entered");
-                    }
-
-                    $("#enter-score-comment-" + goal.name + "-text").val(
-                        comment);
-                } else {
-                    $("#enter-score-comment-" + goal.name + "-text").val("");
-                }
-
-            });
-
-        });
-
+/**
+ * Save the score to storage and go back the to the score entry back page.
+ */
 function saveScore() {
-    var currentTeam = $.subjective.getCurrentTeam();
-    var score = $.subjective.getScore(currentTeam.teamNumber);
+    var currentTeam = subjective_module.getCurrentTeam();
+    var score = subjective_module.getScore(currentTeam.teamNumber);
     if (null == score) {
         score = createNewScore();
     }
@@ -985,123 +633,55 @@ function saveScore() {
     score.deleted = false;
     score.noShow = false;
 
-    score.note = $("#enter-score-note-text").val();
-    $.subjective.log("note text: " + score.note);
-    score.commentGreatJob = $("#enter-score-comment-great-job-text").val();
-    score.commentThinkAbout = $("#enter-score-comment-think-about-text").val();
+    score.note = document.getElementById("enter-score-note-text").value;
+    subjective_module.log("note text: " + score.note);
+    score.commentGreatJob = document.getElementById("enter-score-comment-great-job-text").value;
+    score.commentThinkAbout = document.getElementById("enter-score-comment-think-about-text").value;
 
     saveToScoreObject(score);
 
-    $.subjective.saveScore(score);
+    subjective_module.saveScore(score);
 
     // save non-numeric nominations
     score.nonNumericNominations = [];
-    $.each($.subjective.getCurrentCategory().nominates,
-        function(index, nominate) {
-            $("#enter-score_nominates").show();
+    subjective_module.getCurrentCategory().nominates.forEach(function(nominate, index, _) {
+        const checkbox = document.getElementById("enter-score_nominate_" + index);
+        if (checkbox.checked) {
+            score.nonNumericNominations.push(nominate.nonNumericCategoryTitle);
+        }
+    });
 
-            var checkbox = $("#enter-score_nominate_" + index);
-            if (checkbox.prop("checked")) {
-                score.nonNumericNominations.push(nominate.nonNumericCategoryTitle);
-            }
-        });
-
-    $.mobile.navigate($.subjective.getScoreEntryBackPage());
+    window.location = subjective_module.getScoreEntryBackPage();
 }
 
+/**
+ * Save a no show and go back to the score entry back page.
+ */
 function enterNoShow() {
-    var currentTeam = $.subjective.getCurrentTeam();
-    var score = $.subjective.getScore(currentTeam.teamNumber);
+    var currentTeam = subjective_module.getCurrentTeam();
+    var score = subjective_module.getScore(currentTeam.teamNumber);
     if (null == score) {
         score = createNewScore();
     }
     score.modified = true;
     score.noShow = true;
     score.deleted = false;
-    $.subjective.saveScore(score);
+    subjective_module.saveScore(score);
 
-    $.mobile.navigate($.subjective.getScoreEntryBackPage());
+    window.location = subjective_module.getScoreEntryBackPage();
 }
 
-$(document).on("pageshow", "#enter-score-page", function(_) {
+function installWarnOnReload() {
     window.onbeforeunload = function() {
         // most browsers won't show the custom message, but we can try
         // returning anything other than undefined will cause the user to be prompted
         return "Are you sure you want to leave?";
     };
-})
+}
 
-$(document).on("pagehide", "#enter-score-page", function(_) {
+function uninstallWarnOnReload() {
     window.onbeforeunload = undefined;
-})
-
-$(document).on("pageinit", "#enter-score-page", function(_) {
-    $("#enter-score_save-score").click(function() {
-
-        var totalScore = parseInt($("#enter-score_total-score").text());
-        if (totalScore == 0) {
-            $("#enter-score_confirm-zero").popup("open");
-        } else {
-            saveScore();
-        }
-    });
-
-    $("#enter-score_cancel-score").click(function() {
-        $.mobile.navigate($.subjective.getScoreEntryBackPage());
-    });
-
-    $("#enter-score_delete-score").click(function() {
-        if (confirm("Are you sure you want to delete a score?")) {
-            var currentTeam = $.subjective.getCurrentTeam();
-            var score = $.subjective.getScore(currentTeam.teamNumber);
-            if (null == score) {
-                score = createNewScore();
-            }
-            score.modified = true;
-            score.noShow = false;
-            score.deleted = true;
-            $.subjective.saveScore(score);
-
-            $.mobile.navigate($.subjective.getScoreEntryBackPage());
-        }
-    });
-
-    $("#enter-score_noshow-score").click(function() {
-        enterNoShow();
-    });
-
-    $("#enter-score_confirm-zero_yes").click(function() {
-        saveScore();
-    });
-
-    $("#enter-score_confirm-zero_no-show").click(function() {
-        enterNoShow();
-    });
-
-    $("#enter-score-comment-great-job-close").click(
-        updateGreatJobButtonBackground);
-    $("#enter-score-comment-think-about-close").click(
-        updateThinkAboutButtonBackground);
-
-    $("#enter-score-comment-great-job").popup({
-        afteropen: function(event, ui) {
-            $("#enter-score-comment-great-job-text").focus();
-        }
-    });
-
-    $("#enter-score-comment-think-about").popup({
-        afteropen: function(event, ui) {
-            $("#enter-score-comment-think-about-text").focus();
-        }
-    });
-
-    $("#enter-score-note").popup({
-        afteropen: function(event, ui) {
-            $("#enter-score-note-text").focus();
-        }
-    });
-
-});
+}
 
 function rangeSort(a, b) {
     if (a.min < b.min) {
@@ -1118,21 +698,22 @@ function getScoreRange(goal) {
 }
 
 function populateScoreSummary() {
-    $("#score-summary_content").empty();
+    const scoreSummaryContent = document.getElementById("score-summary_content");
+    removeChildren(scoreSummaryContent);
 
-    var teamScores = {};
-    var teamsWithScores = [];
+    const teamScores = {};
+    const teamsWithScores = [];
 
-    var teams = $.subjective.getCurrentTeams();
-    $.each(teams, function(i, team) {
-        var score = $.subjective.getScore(team.teamNumber);
-        if ($.subjective.isScoreCompleted(score)) {
+    const teams = subjective_module.getCurrentTeams();
+    for (const team of teams) {
+        const score = subjective_module.getScore(team.teamNumber);
+        if (subjective_module.isScoreCompleted(score)) {
             teamsWithScores.push(team);
 
-            var computedScore = $.subjective.computeScore(score);
+            const computedScore = subjective_module.computeScore(score);
             teamScores[team.teamNumber] = computedScore;
         }
-    });
+    }
 
     teamsWithScores.sort(function(a, b) {
         var scoreA = teamScores[a.teamNumber];
@@ -1140,29 +721,54 @@ function populateScoreSummary() {
         return scoreA < scoreB ? 1 : scoreA > scoreB ? -1 : 0;
     });
 
-    var rank = 0;
-    var rankOffset = 1;
-    $.each(teamsWithScores, function(i, team) {
-        var computedScore = teamScores[team.teamNumber];
+    let rank = 0;
+    let rankOffset = 1;
+    for (let i = 0; i < teamsWithScores.length; ++i) {
+        const team = teamsWithScores[i];
+        const computedScore = teamScores[team.teamNumber];
+        const score = subjective_module.getScore(team.teamNumber);
 
-        var prevScore = null;
+        let prevScore = null;
         if (i > 0) {
-            var prevTeam = teamsWithScores[i - 1];
+            const prevTeam = teamsWithScores[i - 1];
             prevScore = teamScores[prevTeam.teamNumber];
         }
 
-        var nextScore = null;
+        let nextScore = null;
         if (i + 1 < teamsWithScores.length) {
-            var nextTeam = teamsWithScores[i + 1];
+            const nextTeam = teamsWithScores[i + 1];
             nextScore = teamScores[nextTeam.teamNumber];
         }
 
+        const teamRow = document.createElement("div");
+        scoreSummaryContent.appendChild(teamRow);
+
+        const teamBlock = document.createElement("span");
+        teamRow.appendChild(teamBlock);
+
+        const rightBlock = document.createElement("span");
+        teamRow.appendChild(rightBlock);
+        rightBlock.classList.add("right-align");
+
+        const scoreBlock = document.createElement("span");
+        rightBlock.appendChild(scoreBlock);
+        let scoreText;
+        if (null == score) {
+            scoreText = "";
+        } else if (score.noShow) {
+            scoreText = "No Show";
+        } else {
+            scoreText = computedScore;
+        }
+        scoreBlock.innerText = scoreText;
+        scoreBlock.classList.add("score");
+        scoreBlock.classList.add("score-summary-right-elements");
+
         // determine tie for highlighting
-        var tieClass = "";
         if (prevScore == computedScore) {
-            tieClass = "tie";
+            scoreBlock.classList.add("tie");
         } else if (nextScore == computedScore) {
-            tieClass = "tie";
+            scoreBlock.classList.add("tie");
         }
 
         // determine rank
@@ -1173,151 +779,546 @@ function populateScoreSummary() {
             rankOffset = 1;
         }
 
-        var nominations = "";
-        var score = $.subjective.getScore(team.teamNumber);
+        let nominations = "";
         if (score.nonNumericNominations.length > 0) {
             nominations = " - " + score.nonNumericNominations.join(", ");
         }
 
-        var teamRow = $("<div class=\"ui-grid-b ui-responsive\"></div>");
+        teamBlock.innerText = rank + " - #" + team.teamNumber + "  - " + team.teamName + nominations;
 
-        var teamBlock = $("<div class=\"ui-block-a team-info\">" + rank + " - #"
-            + team.teamNumber + "  - " + team.teamName + nominations + "</div>");
-        teamRow.append(teamBlock);
+        const editButton = document.createElement("button");
+        rightBlock.appendChild(editButton);
+        editButton.innerText = "Edit";
+        editButton.classList.add("score-summary-right-elements");
 
-        var scoreText;
-        if (null == score) {
-            scoreText = "";
-        } else if (score.noShow) {
-            scoreText = "No Show";
-        } else {
-            scoreText = computedScore;
-        }
+        editButton.addEventListener("click", function() {
+            subjective_module.setCurrentTeam(team);
 
-        var scoreBlock = $("<div class=\"ui-block-b score " + tieClass + "\">"
-            + scoreText + "</div>");
-        teamRow.append(scoreBlock);
-
-        var editBlock = $("<div class=\"ui-block-c edit\"></div>");
-        var editButton = $("<button class=\"ui-btn ui-mini\">Edit</button>");
-        editBlock.append(editButton);
-        teamRow.append(editBlock);
-        editButton.click(function() {
-            $.subjective.setCurrentTeam(team);
-
-            $.subjective.setScoreEntryBackPage("#score-summary-page");
-            $.mobile.navigate("#enter-score-page");
+            subjective_module.setScoreEntryBackPage("#score-summary");
+            window.location = "#enter-score";
         });
 
-        $("#score-summary_content").append(teamRow);
 
-        var score = $.subjective.getScore(team.teamNumber);
-        var noteRow;
-        if (null != score.note) {
-            noteRow = $("<div>" + score.note + "</div>");
+        const noteRow = document.createElement("div");
+        if (score.note) {
+            noteRow.innerText = score.note;
         } else {
-            noteRow = $("<div>No notes</div>");
+            noteRow.innerText = "No notes";
         }
-        $("#score-summary_content").append(noteRow);
-        $("#score-summary_content").append($("<hr/>"));
+        scoreSummaryContent.appendChild(noteRow);
+        scoreSummaryContent.appendChild(document.createElement("hr"));
 
         prevScore = computedScore;
-    });
-
-    $("#score-summary-page").trigger("create");
+    }
 }
 
-$(document).on("pagebeforeshow", "#score-summary-page", function(event) {
-    displayTournamentName($("#score-summary_tournament"));
-
-    var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
-    $("#score-summary_judging-group").text(currentJudgingGroup);
-
-    var currentCategory = $.subjective.getCurrentCategory();
-    $("#score-summary_category").text(currentCategory.title);
-
-    var currentJudge = $.subjective.getCurrentJudge();
-    $("#score-summary_judge").text(currentJudge.id);
-
-    populateScoreSummary();
-});
-
-$(document).on("pageshow", "#score-summary-page", function(event) {
-    $.mobile.loading("hide");
-});
-
-$(document).on(
-    "pageinit",
-    "#score-summary-page",
-    function(_) {
-        $("#score-summary_offline").click(function() {
-            setOfflineDownloadUrl(document.getElementById("score-summary_offline"));
-        });
-
-        $("#score-summary_upload-scores").click(
-            function() {
-                $.mobile.loading("show", {
-                    text: "Uploading Scores..."
-                });
-
-                $.subjective.uploadData(function(result) {
-                    // scoresSuccess
-                    populateScoreSummary();
-
-                    alert("Uploaded " + result.numModified + " scores. message: "
-                        + result.message);
-                }, //
-                    function(result) {
-                        // scoresFail
-                        populateScoreSummary();
-
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload scores: " + message);
-                    }, //
-                    function(result) {
-                        // judgesSuccess
-                        $.subjective.log("Judges modified: " + result.numModifiedJudges
-                            + " new: " + result.numNewJudges);
-                    }
-
-                    ,//
-                    function(result) {
-                        // judgesFail
-                        var message;
-                        if (null == result) {
-                            message = "Unknown server error";
-                        } else {
-                            message = result.message;
-                        }
-
-                        alert("Failed to upload judges: " + message);
-                    }, //
-                    function() {
-                        // loadSuccess
-                        $.mobile.loading("hide");
-                    }, //
-                    function(message) {
-                        // loadFail
-                        $.mobile.loading("hide");
-
-                        alert("Failed to load scores from server: " + message);
-                    });
-            });
-    });
-
-function displayTournamentName(displayElement) {
-    var tournament = $.subjective.getTournament();
-    var tournamentName;
+function updateMainHeader() {
+    const tournament = subjective_module.getTournament();
+    let tournamentName;
     if (null == tournament) {
-        tournamentName = "None";
+        tournamentName = "No Tournament";
     } else {
         tournamentName = tournament.name;
     }
-    displayElement.text("Tournament: " + tournamentName);
+    document.getElementById("header-main_tournament-name").innerText = tournamentName;
+
+    document.getElementById("header-main_judging-group-name").innerText = subjective_module.getCurrentJudgingGroup();
+
+    const category = subjective_module.getCurrentCategory();
+    let categoryTitle;
+    if (null == category) {
+        categoryTitle = "No Category";
+    } else {
+        categoryTitle = category.title;
+    }
+    document.getElementById("header-main_category-name").innerText = categoryTitle;
+
+    const judge = subjective_module.getCurrentJudge();
+    let judgeName;
+    if (null == judge) {
+        judgeName = "No Judge";
+    } else {
+        judgeName = judge.id;
+    }
+    document.getElementById("header-main_judge-name").innerText = judgeName;
 }
+
+function updateHeaderPadding(header) {
+    const content = document.getElementById("content");
+    content.style.paddingTop = computeHeight(header);
+}
+
+function updateFooterPadding(footer) {
+    const content = document.getElementById("content");
+    content.style.paddingBottom = computeHeight(footer);
+}
+
+function hideAll() {
+    document.querySelectorAll(".fll-sw-ui-footer,.fll-sw-ui-header,.fll-sw-ui-content").forEach(function(el) {
+        el.classList.add('fll-sw-ui-inactive');
+    });
+}
+
+/**
+ * Use the anchor portion of the current location to determine which page to display.
+ */
+function navigateToPage() {
+    // always close the panel
+    const sidePanel = document.getElementById("side-panel");
+    sidePanel.classList.remove('open');
+
+    const pageName = window.location.hash.substring(1)
+    console.log("Navigating to page '" + pageName + "'");
+
+    switch (pageName) {
+        case "choose-judging-group":
+            displayPageChooseJudgingGroup();
+            break;
+        case "choose-category":
+            displayPageChooseCategory();
+            break;
+        case "choose-judge":
+            displayPageChooseJudge();
+            break;
+        case "score-summary":
+            displayPageScoreSummary();
+            break;
+        case "enter-score":
+            displayPageEnterScore();
+            break;
+        case "teams-list":
+            displayPageTeamsList();
+            break;
+        default:
+            console.log("Unknown page name '" + pageName + "'");
+        case "top":
+            displayPageTop();
+            break;
+    }
+}
+
+function displayPage(header, content, footer) {
+    uninstallWarnOnReload();
+    hideAll();
+
+    header.classList.remove('fll-sw-ui-inactive');
+    content.classList.remove('fll-sw-ui-inactive');
+    footer.classList.remove('fll-sw-ui-inactive');
+
+    content.style.paddingTop = computeHeight(header) + "px";
+    content.style.paddingBottom = computeHeight(footer) + "px";
+}
+
+function displayPageTop() {
+    document.getElementById("header-main_title").innerText = "Load subjective data";
+
+    displayPage(document.getElementById("header-main"), document.getElementById("content-top"), document.getElementById("footer-main"));
+
+    document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judging-group").classList.add('fll-sw-ui-inactive');
+    document.getElementById("header-main_category").classList.add('fll-sw-ui-inactive');
+    document.getElementById("header-main_judge").classList.add('fll-sw-ui-inactive');
+
+    document.getElementById("side-panel_top").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judging-group").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-category").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judge").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_score-summary").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
+
+    removeChildren(document.getElementById("index-page_messages"));
+    subjective_module.checkServerStatus(serverLoadPage, promptForJudgingGroup);
+    updateMainHeader();
+}
+
+function displayPageChooseJudgingGroup() {
+    document.getElementById("header-main_title").innerText = "Choose judging group";
+
+    displayPage(document.getElementById("header-main"), document.getElementById("content-choose-judging-group"), document.getElementById("footer-main"));
+
+    document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judging-group").classList.add('fll-sw-ui-inactive');
+    document.getElementById("header-main_category").classList.add('fll-sw-ui-inactive');
+    document.getElementById("header-main_judge").classList.add('fll-sw-ui-inactive');
+
+    document.getElementById("side-panel_top").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judging-group").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-category").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judge").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_score-summary").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
+
+    populateChooseJudgingGroup();
+    updateMainHeader();
+}
+
+function displayPageChooseCategory() {
+    document.getElementById("header-main_title").innerText = "Choose category";
+
+    displayPage(document.getElementById("header-main"), document.getElementById("content-choose-category"), document.getElementById("footer-main"));
+
+    document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judging-group").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_category").classList.add('fll-sw-ui-inactive');
+    document.getElementById("header-main_judge").classList.add('fll-sw-ui-inactive');
+
+    document.getElementById("side-panel_top").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judging-group").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-category").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judge").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_score-summary").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
+
+    populateChooseCategory();
+    updateMainHeader();
+}
+
+function displayPageChooseJudge() {
+    document.getElementById("header-main_title").innerText = "Choose judge";
+
+    displayPage(document.getElementById("header-main"), document.getElementById("content-choose-judge"), document.getElementById("footer-main"));
+
+    document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judging-group").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_category").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judge").classList.add('fll-sw-ui-inactive');
+
+    document.getElementById("side-panel_top").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judging-group").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-category").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judge").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_score-summary").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
+
+    populateChooseJudge();
+    updateMainHeader();
+}
+
+function displayPageTeamsList() {
+    document.getElementById("header-main_title").innerText = "Select team to score";
+
+    displayPage(document.getElementById("header-main"), document.getElementById("content-teams-list"), document.getElementById("footer-main"));
+
+    document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judging-group").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_category").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judge").classList.remove('fll-sw-ui-inactive');
+
+    document.getElementById("side-panel_top").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judging-group").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-category").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judge").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_score-summary").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
+
+    populateTeams();
+
+    updateMainHeader();
+}
+
+function displayPageScoreSummary() {
+    displayPage(document.getElementById("header-main"), document.getElementById("content-score-summary"), document.getElementById("footer-main"));
+
+    document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judging-group").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_category").classList.remove('fll-sw-ui-inactive');
+    document.getElementById("header-main_judge").classList.remove('fll-sw-ui-inactive');
+
+    document.getElementById("side-panel_top").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judging-group").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-category").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_choose-judge").parentNode.classList.remove('fll-sw-ui-inactive');
+    document.getElementById("side-panel_score-summary").parentNode.classList.add('fll-sw-ui-inactive');
+    document.getElementById("side-panel_enter-scores").parentNode.classList.remove('fll-sw-ui-inactive');
+
+    populateScoreSummary();
+
+    updateMainHeader();
+}
+
+function displayPageEnterScore() {
+    installWarnOnReload();
+
+    // populate the header before displaying the page to ensure that the header height is properly computed
+    const currentTeam = subjective_module.getCurrentTeam();
+    document.getElementById("enter-score_team-number").innerText = currentTeam.teamNumber;
+    document.getElementById("enter-score_team-name").innerText = currentTeam.teamName;
+
+    const score = subjective_module.getScore(currentTeam.teamNumber);
+    if (null != score) {
+        document.getElementById("enter-score-note-text").value = score.note;
+        document.getElementById("enter-score-comment-great-job-text").value = score.commentGreatJob;
+        document.getElementById("enter-score-comment-think-about-text").value =
+            score.commentThinkAbout;
+    } else {
+        document.getElementById("enter-score-note-text").value = "";
+        document.getElementById("enter-score-comment-great-job-text").value = "";
+        document.getElementById("enter-score-comment-think-about-text").value = "";
+    }
+
+    // put rubric titles in the top header
+    const headerTable = document.getElementById("enter-score_score-table_header");
+    removeChildren(headerTable);
+    populateEnterScoreRubricTitles(headerTable, false)
+
+    displayPage(document.getElementById("header-enter-score"), document.getElementById("content-enter-score"), document.getElementById("footer-enter-score"));
+
+    removeChildren(document.getElementById("enter-score-goal-comments"));
+
+    const table = document.getElementById("enter-score_score-table");
+    removeChildren(table);
+
+    const totalColumns = populateEnterScoreRubricTitles(table, true);
+
+    for (const ge of subjective_module.getCurrentCategory().goalElements) {
+        if (ge.goalGroup) {
+            createGoalGroupRows(table, totalColumns, score, ge)
+        } else if (ge.goal) {
+            if (ge.enumerated) {
+                document.getElementById('alert-dialog_text').innerText = "Enumerated goals not supported: " + goal.name;
+                document.getElementById('alert-dialog').style.visibility = 'visible';
+            } else {
+                createScoreRows(table, totalColumns, score, ge);
+            }
+        }
+    }
+
+    // add the non-numeric categories that teams can be nominated for
+    const nominatesContainer = document.getElementById("enter-score_nominates");
+    removeChildren(nominatesContainer);
+    subjective_module.getCurrentCategory().nominates.forEach(function(nominate, index, _) {
+        const nominateRow = document.createElement("div");
+        nominatesContainer.appendChild(nominateRow);
+
+        const nominateCheckLabel = document.createElement("label");
+        nominateRow.appendChild(nominateCheckLabel);
+        nominateCheckLabel.classList.add("nominate-label");
+
+        const checkbox = document.createElement("input");
+        nominateCheckLabel.appendChild(checkbox);
+        checkbox.setAttribute("type", "checkbox");
+        checkbox.id = "enter-score_nominate_" + index;
+
+        const nominateCheckText = document.createElement("span");
+        nominateCheckLabel.appendChild(nominateCheckText);
+        nominateCheckText.innerText = nominate.nonNumericCategoryTitle;
+
+        if (null != score
+            && score.nonNumericNominations
+                .includes(nominate.nonNumericCategoryTitle)) {
+            checkbox.checked = true;
+        }
+
+        const nominateDescription = document.createElement("span");
+        nominateRow.appendChild(nominateDescription);
+        nominateDescription.classList.add("nominate-description");
+        const nonNumericCategory = subjective_module.getNonNumericCategory(nominate.nonNumericCategoryTitle);
+        if (nonNumericCategory) {
+            nominateDescription.innerText = nonNumericCategory.description;
+        }
+    });
+
+    updateGreatJobButtonBackground();
+    updateThinkAboutButtonBackground();
+
+    recomputeTotal();
+
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const openButton = document.getElementById("side-panel_open");
+    const sidePanel = document.getElementById("side-panel");
+
+    // handlers for buttons and links that don't navigate to another page
+    openButton.addEventListener('click', () => {
+        sidePanel.classList.add('open');
+    });
+
+    document.getElementById("side-panel_close").addEventListener('click', () => {
+        sidePanel.classList.remove('open');
+    });
+
+    document.getElementById("side-panel_synchronize").addEventListener('click', () => {
+        sidePanel.classList.remove('open');
+
+        const waitDialog = document.getElementById("wait-dialog");
+        waitDialog.style.visibility = "visible";
+
+        subjective_module.uploadData(function(result) {
+            // scoresSuccess
+            document.getElementById('alert-dialog_text').innerText = "Uploaded " + result.numModified + " scores. message: "
+                + result.message;
+            document.getElementById('alert-dialog').style.visibility = 'visible';
+        }, //
+            function(result) {
+                // scoresFail
+
+                let message;
+                if (null == result) {
+                    message = "Unknown server error";
+                } else {
+                    message = result.message;
+                }
+
+                document.getElementById('alert-dialog_text').innerText = "Failed to upload scores: " + message;
+                document.getElementById('alert-dialog').style.visibility = 'visible';
+            }, //
+            function(result) {
+                // judgesSuccess
+                subjective_module.log("Judges modified: " + result.numModifiedJudges
+                    + " new: " + result.numNewJudges);
+            }
+
+            ,//
+            function(result) {
+                // judgesFail
+                let message;
+                if (null == result) {
+                    message = "Unknown server error";
+                } else {
+                    message = result.message;
+                }
+
+                document.getElementById('alert-dialog_text').innerText = "Failed to upload judges: " + message
+                document.getElementById('alert-dialog').style.visibility = 'visible';
+            }, //
+            function() {
+                // loadSuccess
+                populateChooseJudgingGroup();
+                waitDialog.style.visibility = "hidden";
+            }, //
+            function(message) {
+                // loadFail
+                populateChooseJudgingGroup();
+
+                waitDialog.style.visibility = "hidden";
+
+                document.getElementById('alert-dialog_text').innerText = "Failed to load scores from server: " + message
+                document.getElementById('alert-dialog').style.visibility = 'visible';
+            });
+    });
+
+    document.getElementById("side-panel_offline-download").addEventListener('click', () => {
+        sidePanel.classList.remove('open');
+        setOfflineDownloadUrl(document.getElementById("side-panel_offline-download"));
+    });
+
+
+    document.getElementById("enter-score_save").addEventListener('click', () => {
+        console.log("Saving score");
+
+        const totalScore = parseInt(document.getElementById("enter-score_total-score").innerText);
+        if (totalScore == 0) {
+            document.getElementById("enter-score_confirm-zero").style.visibility = 'visible';
+        } else {
+            saveScore();
+        }
+    });
+
+    document.getElementById("enter-score_cancel").addEventListener('click', () => {
+        console.log("Canceling score entry");
+        window.location = subjective_module.getScoreEntryBackPage();
+    });
+
+    document.getElementById("enter-score_delete").addEventListener('click', () => {
+        console.log("Deleting score");
+
+        document.getElementById("confirm-delete-dialog").style.visibility = "visible";
+    });
+    document.getElementById("confirm-delete-dialog_yes").addEventListener("click", () => {
+        document.getElementById("confirm-delete-dialog").style.visibility = "hidden";
+
+        const currentTeam = subjective_module.getCurrentTeam();
+        let score = subjective_module.getScore(currentTeam.teamNumber);
+        if (null == score) {
+            score = createNewScore();
+        }
+        score.modified = true;
+        score.noShow = false;
+        score.deleted = true;
+        subjective_module.saveScore(score);
+
+        window.location = subjective_module.getScoreEntryBackPage();
+    });
+    document.getElementById("confirm-delete-dialog_no").addEventListener("click", () => {
+        document.getElementById("confirm-delete-dialog").style.visibility = "hidden";
+    });
+
+    document.getElementById("enter-score_no-show").addEventListener('click', () => {
+        console.log("Mark no show");
+        document.getElementById("confirm-noshow-dialog").style.visibility = "visible";
+    });
+    document.getElementById("confirm-noshow-dialog_yes").addEventListener("click", () => {
+        document.getElementById("confirm-noshow-dialog").style.visibility = "hidden";
+        enterNoShow();
+    });
+    document.getElementById("confirm-noshow-dialog_no").addEventListener("click", () => {
+        document.getElementById("confirm-noshow-dialog").style.visibility = "hidden";
+    });
+
+
+    document.getElementById("enter-score_confirm-zero_yes").addEventListener('click', function() {
+        document.getElementById("enter-score_confirm-zero").style.visibility = 'hidden';
+        saveScore();
+    });
+    document.getElementById("enter-score_confirm-zero_no-show").addEventListener('click', function() {
+        document.getElementById("enter-score_confirm-zero").style.visibility = 'hidden';
+        enterNoShow();
+    });
+
+    document.getElementById("enter-score-comment-great-job-close").addEventListener('click', function() {
+        document.getElementById("enter-score-comment-great-job").style.visibility = 'hidden';
+        updateGreatJobButtonBackground();
+    });
+    document.getElementById("enter-score-comment-think-about-close").addEventListener('click', function() {
+        document.getElementById("enter-score-comment-think-about").style.visibility = 'hidden';
+        updateThinkAboutButtonBackground();
+    });
+
+    document.getElementById("enter-score-comment-great-job-button").addEventListener('click', function() {
+        document.getElementById("enter-score-comment-great-job").style.visibility = 'visible';
+        document.getElementById("enter-score-comment-great-job-text").focus();
+    });
+
+    document.getElementById("enter-score-comment-think-about-button").addEventListener('click', function() {
+        document.getElementById("enter-score-comment-think-about").style.visibility = 'visible';
+        document.getElementById("enter-score-comment-think-about-text").focus();
+    });
+    document.getElementById("enter-score-note-button").addEventListener('click', function() {
+        document.getElementById("enter-score-note").style.visibility = 'visible';
+        document.getElementById("enter-score-note-text").focus();
+    });
+    document.getElementById("enter-score-note-close").addEventListener('click', function() {
+        document.getElementById("enter-score-note").style.visibility = 'hidden';
+    });
+
+    document.getElementById("choose-judge_submit").addEventListener('click', function() {
+        setJudge();
+    });
+
+    document.getElementById("alert-dialog_close").addEventListener('click', function() {
+        document.getElementById('alert-dialog').style.visibility = 'hidden';
+        if (null != alertCallback) {
+            alertCallback();
+        }
+        alertCallback = null;
+    });
+
+    document.getElementById("confirm-modified-scores-dialog_yes").addEventListener('click', function() {
+        document.getElementById('confirm-modified-scores-dialog').style.visibility = 'hidden';
+        reloadDataConfirmed();
+    });
+    document.getElementById("confirm-modified-scores-dialog_no").addEventListener('click', function() {
+        document.getElementById('confirm-modified-scores-dialog').style.visibility = 'hidden';
+    });
+
+    // navigate to pages when the anchor changes
+    window.addEventListener('hashchange', navigateToPage);
+});
+
+window.addEventListener('load', () => {
+    // initial state
+    updateMainHeader();
+    navigateToPage();
+});

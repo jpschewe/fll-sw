@@ -7,17 +7,18 @@
 "use strict";
 
 function checkSomethingToPrint() {
-  var somethingToPrint = false;
-  $('input[type=checkbox]').each(function() {
-    if (this.checked) {
-      somethingToPrint = true;
+    let somethingToPrint = false;
+    // htmlunit doesn't handle const in a for loop, so skip it here - https://github.com/HtmlUnit/htmlunit/issues/449
+    for (checkbox of document.querySelectorAll('input[type=checkbox]')) {
+        if (checkbox.checked) {
+            somethingToPrint = true;
+        }
     }
-  });
 
-  if (somethingToPrint) {
-    return true;
-  } else {
-    alert("There is nothing to print.");
-    return false;
-  }
+    if (somethingToPrint) {
+        return true;
+    } else {
+        alert("There is nothing to print.");
+        return false;
+    }
 }

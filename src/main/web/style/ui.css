@@ -1,0 +1,49 @@
+.fll-sw-ui-header {
+    top: 0;
+}
+
+.fll-sw-ui-footer {
+    bottom: 0;
+}
+
+.fll-sw-ui-footer, .fll-sw-ui-header {
+    text-shadow: 0 1px 0 #eee;
+    width: 100%;
+    position: fixed;
+    background: #333;
+    z-index: 1000;
+    background-color: #e9e9e9;
+    border-color: #ddd;
+    left: 0;
+}
+
+.fll-sw-ui-content {
+    /* use javascript to set the padding to match the height of the header and footer */
+    /* position: absolute; uncommenting this disables the scrolling of the content */    
+    background-color: #f9f9f9;
+    width: 100%;
+    height: 100%;
+    left: 0;
+}
+
+/* used to make elements invisible */
+.fll-sw-ui-inactive {
+    display: none;
+}
+
+.fll-sw-ui-panel {
+    position: fixed;
+    left: -30%;
+    top: 0;
+    height: 100vh;
+    width: 30%;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+    z-index: 10000; /* stay on top */
+    transition: 0.5s all ease;
+}
+
+/* open the panel, use changing the left edge so that the transition is seen  */
+.fll-sw-ui-panel.open {
+    left: 0%;
+}

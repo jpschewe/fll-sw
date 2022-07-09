@@ -1,4 +1,9 @@
+* #1016 - rewrite subjective application without jquery-mobile, remove jquery
+* Rework scrolling to be compatible across Chrome and Firefox
 * #1011 - Pause schedule checking while loading a new schedule file
+
+Release 16.5.0
+==============
 * #964 - Rework SubjectiveByJudge to be broken down by Judging Group rather than by Award Group
 * #1013 - Repalce jquery.scrollto
 * #1014 - Remove dependency on jquery-ui

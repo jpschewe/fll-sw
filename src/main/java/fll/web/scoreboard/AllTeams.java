@@ -59,7 +59,6 @@ public final class AllTeams {
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     final boolean floatingPointScores = challengeDescription.getPerformance().getScoreType() == ScoreType.FLOAT;
 
-    int numScores = 0;
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection();
         PreparedStatement prep = connection.prepareStatement("SELECT " //
@@ -107,8 +106,6 @@ public final class AllTeams {
               final ComputedPerformanceScore score = new ComputedPerformanceScore(floatingPointScores, rs.getInt(1),
                                                                                   rs.getBoolean(2), rs.getDouble(3));
               teamScores.add(score);
-
-              ++numScores;
             }
           }
 
@@ -122,14 +119,13 @@ public final class AllTeams {
 
       final List<String> sponsorLogos = getSponsorLogos(application);
 
-      // estimate how many rows there are
-      final int scrollRate = GlobalParameters.getAllTeamScrollRate(connection);
+      final double scrollRate = GlobalParameters.getAllTeamScrollRate(connection);
 
       pageContext.setAttribute("sponsorLogos", sponsorLogos);
       pageContext.setAttribute("teamsBetweenLogos", Integer.valueOf(TEAMS_BETWEEN_LOGOS));
       pageContext.setAttribute("teamsWithScores", teamsWithScores);
       pageContext.setAttribute("scores", scores);
-      pageContext.setAttribute("scrollRate", Integer.valueOf(scrollRate));
+      pageContext.setAttribute("scrollRate", Double.valueOf(scrollRate));
       pageContext.setAttribute("teamHeaderColor", teamHeaderColor);
 
     } catch (final SQLException sqle) {
