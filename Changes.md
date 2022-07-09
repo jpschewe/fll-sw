@@ -1,3 +1,4 @@
+* #1016 - rewrite subjective application without jquery-mobile, remove jquery
 * Rework scrolling to be compatible across Chrome and Firefox
 
 Release 16.5.0
