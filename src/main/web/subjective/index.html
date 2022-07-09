@@ -9,12 +9,6 @@
 <meta charset="utf-8" />
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet"
-    href="../extlib/jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.css" />
-
-<script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
-<script type='text/javascript'
-    src='../extlib/jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js'></script>
 
 <script type='text/javascript' src='../js/fll-functions.js'></script>
 <script type='text/javascript' src='../js/fll-storage.js'></script>
@@ -27,509 +21,306 @@
 
 <script type='text/javascript' src='subjective-ui.js'></script>
 
+<link rel="stylesheet" href="../style/fll-sw.css" />
 <link rel="stylesheet" href="subjective.css" />
 
 </head>
 
 <body>
-    <div data-role="page" id='index-page'>
 
-        <div data-role="header">
-            <h1>Load subjective data</h1>
-
-            <span id='index-page_tournament'></span>
+    <div class="dialog" id="wait-dialog">
+        <div>
+            <div id='wait-dialog_text'>Loading data. Please
+                wait...</div>
         </div>
-        <!-- /header -->
-
-        <div class="ui-content" role="main">
-
-            <p id='index-page_messages'></p>
-
-            <div id='index-page_choose_clear'>
-                You have modified scores on this device. If you clear
-                the data, you will loose these scores. Would you like to
-                clear the existing data and load from scratch?
-                <button id='index-page_clear'>Clear the data</button>
-                <button id='index-page_keep'>Enter more scores</button>
-            </div>
-
-        </div>
-        <!-- /content -->
-
-        <div data-role="footer" data-position="fixed"></div>
-        <!-- /footer -->
-
     </div>
-    <!-- /page -->
 
-
-    <div data-role="page" id='choose-judging-group-page'>
-
-        <div data-role="header">
-            <h1>Choose judging group</h1>
-            <span id='choose-judging-group_tournament'></span>
-
+    <div id="side-panel" class='fll-sw-ui-panel'>
+        <h2>Side panel header</h2>
+        <div>
+            <a class='wide fll-sw-button' id='side-panel_top'
+                href='#top'>Top</a>
         </div>
-        <!-- /header -->
-
-        <div class="ui-content" role="main">
-            <div id='choose-judging-group_judging-groups'></div>
-
-            <div>Do not use the browser forward and back buttons
-                unless instructed to do so. Do not reload the page when
-                offline. Attempting to reload the page will prompt you
-                that you may loose data.</div>
+        <div>
+            <a class='wide fll-sw-button'
+                id='side-panel_choose-judging-group'
+                href='#choose-judging-group'>Choose Judging Group</a>
         </div>
-        <!-- /content -->
-
-        <div data-role="footer" data-position="fixed">
-            <a href="#choose-judging-group_nav-panel"
-                class="ui-btn ui-corner-all ui-shadow ui-btn-icon-notext ui-icon-gear ui-mini"></a>
+        <div>
+            <a class='wide fll-sw-button'
+                id='side-panel_choose-category' href='#choose-category'>Choose
+                Category</a>
         </div>
-        <!-- /footer -->
-
-        <!-- side panel -->
-        <div data-role="panel" id="choose-judging-group_nav-panel"
-            data-display="overlay">
-            <ul data-role="listview">
-                <li data-icon="delete">
-                    <a href="#" data-rel="close">Close</a>
-                </li>
-                <li>
-                    <a href="#index-page">Top</a>
-                </li>
-            </ul>
-            <br />
-            <br />
-            <button class="ui-btn ui-corner-all ui-shadow"
-                id="choose-judging-group_upload-scores">Synchronize</button>
-
-            <a id="choose-judging-group_offline" download="offline.json">Offline
-                Download</a>
-
-            <br />
-            <br />
+        <div>
+            <a class='wide fll-sw-button' id='side-panel_choose-judge'
+                href='#choose-judge'>Choose Judge</a>
         </div>
-        <!-- end side panel -->
-
+        <div>
+            <a class='wide fll-sw-button' id='side-panel_score-summary'
+                href='#score-summary'>Score Summary</a>
+        </div>
+        <div>
+            <a class='wide fll-sw-button' id='side-panel_enter-scores'
+                href='#teams-list'>Enter Scores</a>
+        </div>
+        <div>
+            <a class='wide fll-sw-button' id='side-panel_synchronize'>Synchronize</a>
+        </div>
+        <div>
+            <a class='wide fll-sw-button'
+                id='side-panel_offline-download'>Offline Download</a>
+        </div>
+        <div>
+            <a class='wide fll-sw-button' id='side-panel_close'>Close</a>
+        </div>
     </div>
-    <!-- /page choose-judging-group -->
 
-
-    <div data-role="page" id='choose-category-page'>
-
-        <div data-role="header">
-            <h1>Choose category</h1>
-
-            <div>
-                <span id='choose-category_tournament'></span>
+    <div class='fll-sw-ui-header' id='header-main'>
+        <div class='center'>
+            <span id='header-main_title'></span>
+        </div>
+        <div>
+            <span id='header-main_tournament'>
+                Tournament:
+                <span id='header-main_tournament-name'></span>
+            </span>
+            <span id='header-main_judging-group'>
                 -
-                <span id='choose-category_judging-group'></span>
-            </div>
-
+                <span id='header-main_judging-group-name'></span>
+            </span>
+            <span id='header-main_category'>
+                -
+                <span id='header-main_category-name'></span>
+            </span>
+            <span id='header-main_judge'>
+                -
+                <span id='header-main_judge-name'></span>
+            </span>
         </div>
-        <!-- /header -->
+    </div>
 
-        <div class="ui-content" role="main">
-            <div id='choose-category_categories'></div>
+    <div class='fll-sw-ui-footer' id="footer-main">
+        <button id='side-panel_open' type='button'>
+            <svg width="30" height="30" viewBox="0 0 16 16"
+                version="1.1" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                xml:space="preserve"
+                style="fill-rule: evenodd; clip-rule: evenodd; stroke-linejoin: round; stroke-miterlimit: 1.41421;">
+    <g id="Ebene1">
+        <g transform="matrix(6.08836,0,0,6.08757,-1388.06,-794.792)">
+            <circle cx="293.685" cy="196.267" r="65.165"
+                    style="fill:rgb(185,185,185);" />
+        </g>
+        <g transform="matrix(1.29538,0,0,1.29538,117.749,32.3418)">
+            <path
+                    d="M235.111,21.335C223.643,20.582 212.138,20.582 200.67,21.335L177.401,80.201C168.505,81.97 159.734,84.321 151.145,87.237L101.56,47.891C91.252,52.973 81.289,58.726 71.733,65.112L81.015,127.726C74.195,133.706 67.775,140.127 61.794,146.947L-0.82,137.665C-7.206,147.221 -12.958,157.184 -18.041,167.492L21.305,217.077C18.389,225.666 16.039,234.437 14.27,243.333L-44.597,266.602C-45.35,278.07 -45.35,289.575 -44.597,301.043L14.27,324.312C16.039,333.209 18.389,341.979 21.305,350.568L-18.041,400.153C-12.958,410.461 -7.206,420.425 -0.82,429.98L61.794,420.698C67.775,427.518 74.195,433.939 81.015,439.919L71.733,502.534C81.289,508.919 91.252,514.672 101.56,519.754L151.145,480.409C159.734,483.325 168.505,485.675 177.401,487.444L200.67,546.311C212.138,547.063 223.643,547.063 235.111,546.311L258.38,487.444C267.277,485.675 276.047,483.325 284.636,480.409L334.221,519.754C344.529,514.672 354.493,508.919 364.048,502.534L354.766,439.919C361.586,433.939 368.007,427.518 373.987,420.698L436.602,429.98C442.987,420.425 448.74,410.461 453.822,400.153L414.477,350.568C417.393,341.979 419.743,333.209 421.512,324.312L480.379,301.043C481.131,289.575 481.131,278.07 480.379,266.602L421.512,243.333C419.743,234.437 417.393,225.666 414.477,217.077L453.822,167.492C448.74,157.184 442.987,147.221 436.602,137.665L373.987,146.947C368.007,140.127 361.586,133.706 354.766,127.726L364.048,65.112C354.493,58.726 344.529,52.973 334.221,47.891L284.636,87.237C276.047,84.321 267.277,81.97 258.38,80.201L235.111,21.335ZM217.891,161.899C285.182,161.899 339.815,216.531 339.815,283.823C339.815,351.114 285.182,405.747 217.891,405.747C150.599,405.747 95.967,351.114 95.967,283.823C95.967,216.531 150.599,161.899 217.891,161.899Z"
+                    style="fill:white;" />
+        </g>
+    </g>
+</svg>
+        </button>
+    </div>
 
+
+    <div id="content-top" class="fll-sw-ui-content">
+        <p id='index-page_messages'></p>
+
+        <div id='index-page_choose_clear'>
+            You have modified scores on this device. If you clear the
+            data, you will loose these scores. Would you like to clear
+            the existing data and load from scratch?
+            <button id='index-page_clear' class='fll-sw-button'>Clear
+                the data</button>
+            <button id='index-page_keep' class='fll-sw-button'>Enter
+                more scores</button>
         </div>
-        <!-- /content -->
+    </div>
+    <!-- end top page -->
 
-        <div data-role="footer" data-position="fixed">
-            <a href="#choose-category_nav-panel"
-                class="ui-btn ui-corner-all ui-shadow ui-btn-icon-notext ui-icon-gear ui-mini"></a>
+    <div id="content-choose-judging-group" class="fll-sw-ui-content">
 
+        <div id='choose-judging-group_judging-groups'></div>
+
+        <div>Do not use the browser forward and back buttons
+            unless instructed to do so. Do not reload the page when
+            offline. Attempting to reload the page will prompt you that
+            you may loose data.</div>
+    </div>
+
+    <div id="content-choose-category" class="fll-sw-ui-content">
+        <div id='choose-category_categories'></div>
+    </div>
+
+    <div id="content-choose-judge" class="fll-sw-ui-content">
+        <div>Are you one of the known judges? If not, select 'New
+            Judge' and enter your information.</div>
+
+        <div id='choose-judge_judges'></div>
+        <input class="full-width" type='text'
+            id='choose-judge_new-judge-name'
+            placeholder='Enter your name'></input>
+
+        <button class="wide full-width fll-sw-button" type='button'
+            id='choose-judge_submit'>Submit</button>
+    </div>
+
+    <div id="content-teams-list" class="fll-sw-ui-content">
+        <div id='teams-list_teams'></div>
+    </div>
+
+    <div id="content-score-summary" class="fll-sw-ui-content">
+        <div id='score-summary_content'></div>
+    </div>
+
+    <div class='fll-sw-ui-header' id='header-enter-score'>
+        <div>
+            <span>
+                Team #:
+                <span id="enter-score_team-number"></span>
+            </span>
+
+            <span>
+                Team Name:
+                <span id="enter-score_team-name"></span>
+            </span>
         </div>
-        <!-- /footer -->
 
-        <!-- side panel -->
-        <div data-role="panel" id="choose-category_nav-panel"
-            data-display="overlay">
-            <ul data-role="listview">
-                <li data-icon="delete">
-                    <a href="#" data-rel="close">Close</a>
-                </li>
-                <li>
-                    <a href="#index-page">Top</a>
-                </li>
-                <li>
-                    <a href="#choose-judging-group-page">Choose
-                        Judging Group</a>
-                </li>
-            </ul>
-            <br />
-            <br />
-            <button class="ui-btn ui-corner-all ui-shadow"
-                id="choose-category_upload-scores">Synchronize</button>
+        <div>
+            <span>
+                <button type='button' id="enter-score-note-button"
+                    class='fll-sw-button'>Edit Note</button>
+            </span>
 
-            <a id="choose-category_offline" download="offline.json">Offline
-                Download</a>
-
-            <br />
-            <br />
+            <span>
+                Score:
+                <span id="enter-score_total-score">0</span>
+            </span>
         </div>
-        <!-- end side panel -->
+
+        <table id='enter-score_score-table_header' class='score-entry'>
+        </table>
 
     </div>
-    <!-- /page choose-category -->
 
-    <div data-role="page" id='choose-judge-page'>
+    <div id='content-enter-score' class='fll-sw-ui-content'>
 
-        <div data-role="header">
-            <h1>Choose judge</h1>
+        <table id='enter-score_score-table' class="score-entry">
+        </table>
 
-            <span id='choose-judge_tournament'></span>
-            -
-            <span id='choose-judge_judging-group'></span>
-            -
-            <span id='choose-judge_category'></span>
+        <!-- comment grid -->
+        <div>
+            <button type='button'
+                id="enter-score-comment-great-job-button"
+                class="center fll-sw-button">Great Job...</button>
 
+            <button type='button'
+                id="enter-score-comment-think-about-button"
+                class="center fll-sw-button">Think About...</button>
         </div>
-        <!-- /header -->
+        <!-- end comment grid -->
 
-        <div class="ui-content" role="main">
-            <p>Are you one of the known judges? If not, select 'New
-                Judge' and enter your information.</p>
-
-            <div class="ui-field-contain">
-                <fieldset id='choose-judge_judges'
-                    data-role="controlgroup"></fieldset>
-            </div>
-
-            <p id='choose-judge_new-judge-info'>
-                <input type='text' id='choose-judge_new-judge-name'
-                    data-clear-btn='true' placeholder='Enter your name' />
-                <br />
-            </p>
-
-            <button class='ui-btn ui-corner-all'
-                id='choose-judge_judge-submit'>Submit</button>
-
-        </div>
-        <!-- /content -->
-
-        <div data-role="footer" data-position="fixed">
-            <a href="#choose-judge_nav-panel"
-                class="ui-btn ui-corner-all ui-shadow ui-btn-icon-notext ui-icon-gear ui-mini"></a>
-        </div>
-        <!-- /footer -->
-
-        <!-- side panel -->
-        <div data-role="panel" id="choose-judge_nav-panel"
-            data-display="overlay">
-            <ul data-role="listview">
-                <li data-icon="delete">
-                    <a href="#" data-rel="close">Close</a>
-                </li>
-                <li>
-                    <a href="#index-page">Top</a>
-                </li>
-                <li>
-                    <a href="#choose-judging-group-page">Choose
-                        Judging Group</a>
-                </li>
-                <li>
-                    <a href="#choose-category-page">Choose Category</a>
-                </li>
-            </ul>
-            <br />
-            <br />
-            <button class="ui-btn ui-corner-all ui-shadow"
-                id="choose-judge_upload-scores">Synchronize</button>
-
-            <a id="choose-judge_offline" download="offline.json">Offline
-                Download</a>
-
-            <br />
-            <br />
-        </div>
-        <!-- end side panel -->
+        <div id='enter-score_nominates'></div>
 
     </div>
-    <!-- /page choose-judge -->
 
-    <div data-role="page" id='teams-list-page'>
+    <!--  enter score dialogs -->
 
-        <div data-role="header">
-            <h1>Select team to score</h1>
+    <div id="enter-score-goal-comments"></div>
 
-            <span id='teams-list_tournament'></span>
-            -
-            <span id='teams-list_judging-group'></span>
-            -
-            <span id='teams-list_category'></span>
-            -
-            <span id='teams-list_judge'></span>
-
-        </div>
-        <!-- /header -->
-
-        <div class="ui-content" role="main">
-            <div id='teams-list_teams'></div>
-
-        </div>
-        <!-- /content -->
-
-        <div data-role="footer" data-position="fixed">
-            <a href="#teams-list_nav-panel"
-                class="ui-btn ui-corner-all ui-shadow ui-btn-icon-notext ui-icon-gear ui-mini"></a>
-        </div>
-        <!-- /footer -->
-
-        <!-- side panel -->
-        <div data-role="panel" id="teams-list_nav-panel"
-            data-display="overlay">
-            <ul data-role="listview">
-                <li data-icon="delete">
-                    <a href="#" data-rel="close">Close</a>
-                </li>
-                <li>
-                    <a href="#index-page">Top</a>
-                </li>
-                <li>
-                    <a href="#choose-judging-group-page">Choose
-                        Judging Group</a>
-                </li>
-                <li>
-                    <a href="#choose-category-page">Choose Category</a>
-                </li>
-                <li>
-                    <a href="#choose-judge-page">Choose Judge</a>
-                </li>
-                <li>
-                    <a href="#score-summary-page">Score Summary</a>
-            </ul>
-            <br />
-            <br />
-            <button class="ui-btn ui-corner-all ui-shadow"
-                id="teams-list_upload-scores">Synchronize</button>
-
-            <a id="teams-list_offline" download="offline.json">Offline
-                Download</a>
-
-            <br />
-            <br />
-        </div>
-        <!-- end side panel -->
-
-    </div>
-    <!-- /page teams-list -->
-
-    <div data-role="page" id='enter-score-page'>
-
-        <div data-role="header" data-position="fixed">
-
-            <div class="ui-grid-a">
-
-                <div class="ui-block-a">
-                    Team #:
-                    <span id="enter-score_team-number"></span>
-                </div>
-
-                <div class="ui-block-b">
-                    Team Name:
-                    <span id="enter-score_team-name"></span>
-                </div>
-
-                <div class="ui-block-a">
-                    <a id="enter-score-note-button"
-                        href="#enter-score-note" data-rel="popup"
-                        data-position-to="window"
-                        class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-a">Edit
-                        Note</a>
-                </div>
-
-                <div class="ui-block-b">
-                    Score:
-                    <span id="enter-score_total-score">0</span>
-                </div>
-
-                <table id='enter-score_score-table_header'
-                    class='score-entry'>
-                </table>
-
-            </div>
-            <!-- end grid -->
-
-        </div>
-        <!-- /header -->
-
-        <div class="ui-content" role="main">
-
-            <table id='enter-score_score-table' class="score-entry">
-            </table>
-
-            <!-- comment grid -->
-            <div class="ui-grid-a">
-                <div class="ui-block-a center">
-                    <a id="enter-score-comment-great-job-button"
-                        href="#enter-score-comment-great-job"
-                        data-rel="popup" data-position-to="window"
-                        class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-a comment-button">
-                        Great Job...</a>
-                </div>
-
-                <div class="ui-block-b center">
-                    <a id="enter-score-comment-think-about-button"
-                        href="#enter-score-comment-think-about"
-                        data-rel="popup" data-position-to="window"
-                        class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-a">
-                        Think About...</a>
-                </div>
-            </div>
-            <!-- end comment grid -->
-
-            <div id='enter-score_nominates'></div>
-
-        </div>
-        <!-- /content -->
-
-        <div data-role="footer" data-position="fixed">
-
-            <div class="ui-grid-c ui-responsive">
-
-                <div class="ui-block-a">
-                    <button id='enter-score_save-score'
-                        class='score-entry-button'>Save Changes</button>
-                </div>
-
-                <div class="ui-block-b">
-                    <button id='enter-score_cancel-score'
-                        class='score-entry-button'>Cancel
-                        Changes</button>
-                </div>
-
-                <div class="ui-block-c">
-                    <button id='enter-score_delete-score'
-                        class='score-entry-button'>Delete</button>
-                </div>
-
-                <div class="ui-block-d">
-                    <button id='enter-score_noshow-score'
-                        class='score-entry-button'>No Show</button>
-                </div>
-
-            </div>
-
-        </div>
-        <!-- /footer -->
-
-
-        <div id="enter-score-goal-comments"></div>
-
-        <div id="enter-score-note" class="ui-content" data-role="popup"
-            data-dismissible="false">
-            <textarea id="enter-score-note-text" rows="20" cols="60"></textarea>
-
-            <a href="#" data-rel="back" id="enter-score-note-close"
-                class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b">Close</a>
-        </div>
-
-        <div id="enter-score-comment-great-job" class="ui-content"
-            data-role="popup" data-dismissible="false">
-            <div>Great Job...</div>
-            <textarea id="enter-score-comment-great-job-text" rows="20"
-                cols="60"></textarea>
-
-            <a href="#" data-rel="back"
-                id="enter-score-comment-great-job-close"
-                class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b">Close</a>
-        </div>
-
-        <div id="enter-score-comment-think-about" class="ui-content"
-            data-role="popup" data-dismissible="false">
-            <div>Think About...</div>
-            <textarea id="enter-score-comment-think-about-text"
+    <div class='dialog' id="enter-score-note">
+        <div class='comment-dialog'>
+            <textarea class='comment-text' id="enter-score-note-text"
                 rows="20" cols="60"></textarea>
 
-            <a href="#" data-rel="back"
-                id="enter-score-comment-think-about-close"
-                class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b">Close</a>
+            <button type='button' id="enter-score-note-close">
+                Close</button>
         </div>
+    </div>
 
-        <div id="enter-score_confirm-zero" class="ui-content"
-            data-role="popup">
+    <div class='dialog' id='enter-score-comment-great-job'>
+        <div class='comment-dialog'>
+            <div>Great Job...</div>
+            <textarea class='comment-text'
+                id="enter-score-comment-great-job-text" rows="20"
+                cols="60"></textarea>
+
+            <button type='button'
+                id="enter-score-comment-great-job-close">Close</button>
+        </div>
+    </div>
+
+    <div class='dialog' id="enter-score-comment-think-about">
+        <div class='comment-dialog'>
+            <div>Think About...</div>
+            <textarea class='comment-text'
+                id="enter-score-comment-think-about-text" rows="20"
+                cols="60"></textarea>
+
+            <button type='button'
+                id="enter-score-comment-think-about-close">
+                Close</button>
+        </div>
+    </div>
+
+    <div class='dialog' id="enter-score_confirm-zero">
+        <div>
             <p>Are you sure this is a zero score or is this a No
                 Show?</p>
-            <a href="#" data-rel="back"
-                id="enter-score_confirm-zero_yes"
-                class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b">Zero
-                Score</a> <a href="#" data-rel="back"
-                id="enter-score_confirm-zero_no-show"
-                class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b">No
-                Show</a>
-
+            <button type='button' id="enter-score_confirm-zero_yes">Zero
+                Score</button>
+            <button type='button' id="enter-score_confirm-zero_no-show">
+                No Show</button>
         </div>
-
-
     </div>
-    <!-- end enter-score-page -->
 
-    <div data-role="page" id="score-summary-page">
+    <!--  end enter score dialogs -->
 
-        <div data-role="header">
-            <h1>Score Summary</h1>
-
-            <span id='score-summary_tournament'> </span>
-            -
-            <span id='score-summary_judging-group'></span>
-            -
-            <span id='score-summary_category'></span>
-            -
-            <span id='score-summary_judge'></span>
-        </div>
-
-
-        <div class="ui-content" role="main">
-            <div id='score-summary_content'></div>
-        </div>
-
-
-        <div data-role="footer" data-position="fixed">
-            <a href="#score-summary_nav-panel"
-                class="ui-btn ui-corner-all ui-shadow ui-btn-icon-notext ui-icon-gear ui-mini"></a>
-
-        </div>
-
-        <!-- side panel -->
-        <div data-role="panel" id="score-summary_nav-panel"
-            data-display="overlay">
-            <ul data-role="listview">
-                <li data-icon="delete">
-                    <a href="#" data-rel="close">Close</a>
-                </li>
-                <li>
-                    <a href="#index-page">Top</a>
-                </li>
-                <li>
-                    <a href="#choose-judging-group-page">Choose
-                        Judging Group</a>
-                </li>
-                <li>
-                    <a href="#choose-category-page">Choose Category</a>
-                </li>
-                <li>
-                    <a href="#choose-judge-page">Choose Judge</a>
-                </li>
-                <li>
-                    <a href="#teams-list-page">Enter Scores</a>
-                </li>
-            </ul>
-            <br />
-            <br />
-            <button class="ui-btn ui-corner-all ui-shadow"
-                id="score-summary_upload-scores">Synchronize</button>
-
-            <a id="score-summary_offline" download="offline.json">Offline
-                Download</a>
-
-            <br />
-            <br />
-        </div>
-        <!-- end side panel -->
-
+    <div class='fll-sw-ui-footer' id="footer-enter-score">
+        <button id='enter-score_save' type='button'
+            class='fll-sw-button'>Save Changes</button>
+        <button id='enter-score_cancel' type='button'
+            class='fll-sw-button'>Cancel Changes</button>
+        <button id='enter-score_delete' type='button'
+            class='fll-sw-button'>Delete</button>
+        <button id='enter-score_no-show' type='button'
+            class='fll-sw-button'>No Show</button>
     </div>
-    <!--  end score-summary-page -->
+
+    <div class="dialog" id="confirm-delete-dialog">
+        <div>
+            <p id='confirm-delete-dialog_text'>Are you sure you want
+                to delete the score?</p>
+            <button type='button' id='confirm-delete-dialog_yes'>Yes</button>
+            <button type='button' id='confirm-delete-dialog_no'>No</button>
+        </div>
+    </div>
+
+    <div class="dialog" id="confirm-noshow-dialog">
+        <div>
+            <p id='confirm-noshow-dialog_text'>Are you sure you want
+                to enter a no show?</p>
+            <button type='button' id='confirm-noshow-dialog_yes'>Yes</button>
+            <button type='button' id='confirm-noshow-dialog_no'>No</button>
+        </div>
+    </div>
+
+    <div class="dialog" id="confirm-modified-scores-dialog">
+        <div>
+            <p id='confirm-modified-scores-dialog_text'>You have
+                modified scores, this will remove them. Are you sure you
+                want to lose them and load from the server?</p>
+            <button type='button'
+                id='confirm-modified-scores-dialog_yes'>Yes</button>
+            <button type='button' id='confirm-modified-scores-dialog_no'>No</button>
+        </div>
+    </div>
+
+    <div class="dialog" id="alert-dialog">
+        <div>
+            <p id='alert-dialog_text'></p>
+            <button type='button' id='alert-dialog_close'>Ok</button>
+        </div>
+    </div>
+
 </body>
 </html>

@@ -99,20 +99,24 @@
     display: none;
 }
 
-a.wide, div.wide {
+.wide {
     display: block;
     text-decoration: none;
     padding: 10px;
-    margin-bottom: 1px;
+    margin: 4px;
     border: 1px solid #ddd;
 }
 
-a.wide:hover {
+a.wide:hover, div.wide:hover, label.wide:hover {
     background-color: #ddd;
 }
 
 a.wide:visited, a.wide:link {
     color: inherit;
+}
+
+.full-width {
+    width: 100%;
 }
 
 li.no-marker {
@@ -139,3 +143,7 @@ li.no-marker {
     text-align: center;
 }
 /* end dialog styling */
+
+.right-align {
+    float: right;
+}
