@@ -67,6 +67,8 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
 
   private final JFormattedTextField mRevisionEditor;
 
+  private final JFormattedTextField mRevisionCommentEditor;
+
   private final JFormattedTextField mCopyrightEditor;
 
   private final JComboBox<WinnerType> mWinnerEditor;
@@ -183,6 +185,29 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     mRevisionEditor.setColumns(SHORT_TEXT_WIDTH);
     mRevisionEditor.setMaximumSize(mRevisionEditor.getPreferredSize());
     mRevisionEditor.setValue(mDescription.getRevision());
+
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    challengePanel.add(new JLabel("Revision Comment: "), gbc);
+
+    mRevisionCommentEditor = FormatterUtils.createStringField();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    challengePanel.add(mRevisionCommentEditor, gbc);
+
+    mRevisionCommentEditor.addPropertyChangeListener("value", e -> {
+      if (null != mDescription) {
+        mDescription.setRevisionComment(mRevisionCommentEditor.getText());
+      }
+    });
+
+    mRevisionCommentEditor.setColumns(LONG_TEXT_WIDTH);
+    mRevisionCommentEditor.setMaximumSize(mRevisionCommentEditor.getPreferredSize());
+    mRevisionCommentEditor.setValue(mDescription.getRevisionComment());
 
     gbc = new GridBagConstraints();
     gbc.weightx = 0;

@@ -27,6 +27,15 @@
                 use="required" />
 
             <xsd:attribute name="revision"
+                type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>The version of the description.
+                        Displayed on score sheets when specified.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+
+            <xsd:attribute name="revisionComment"
                 type="xsd:string" use="optional" />
 
             <xsd:attribute name="copyright"

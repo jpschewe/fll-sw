@@ -34,6 +34,11 @@ public class ChallengeDescription implements Serializable {
   public static final String REVISION_ATTRIBUTE = "revision";
 
   /**
+   * XML attribute for {@link #getRevisionComment()}.
+   */
+  public static final String REVISION_COMMENT_ATTRIBUTE = "revisionComment";
+
+  /**
    * XML attribute for {@link #getCopyright()}.
    */
   public static final String COPYRIGHT_ATTRIBUTE = "copyright";
@@ -52,6 +57,7 @@ public class ChallengeDescription implements Serializable {
   public ChallengeDescription(final Element ele) {
     mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
     mRevision = ele.getAttribute(REVISION_ATTRIBUTE);
+    mRevisionComment = ele.getAttribute(REVISION_COMMENT_ATTRIBUTE);
     mWinner = ChallengeParser.getWinnerCriteria(ele);
 
     if (ele.hasAttribute(COPYRIGHT_ATTRIBUTE)) {
@@ -90,6 +96,7 @@ public class ChallengeDescription implements Serializable {
   public ChallengeDescription(final String title) {
     mTitle = title;
     mRevision = "";
+    mRevisionComment = "";
     mWinner = WinnerType.HIGH;
     mCopyright = null;
     mPerformance = new PerformanceScoreCategory();
@@ -136,6 +143,14 @@ public class ChallengeDescription implements Serializable {
   private String mRevision;
 
   /**
+   * @param v see {@link #setRevision(String)}
+   */
+  public void setRevision(final String v) {
+    Objects.requireNonNull(v);
+    mRevision = v;
+  }
+
+  /**
    * This is used to keep track of changes, it can be an empty string, but not
    * null.
    *
@@ -145,12 +160,24 @@ public class ChallengeDescription implements Serializable {
     return mRevision;
   }
 
+  private String mRevisionComment;
+
   /**
-   * @param v see {@link #setRevision(String)}
+   * @param v see {@link #setRevisionComment(String)}
    */
-  public void setRevision(final String v) {
+  public void setRevisionComment(final String v) {
     Objects.requireNonNull(v);
-    mRevision = v;
+    mRevisionComment = v;
+  }
+
+  /**
+   * Note for the {@link #getRevision()}, it can be an empty string, but not
+   * null.
+   *
+   * @return the revision comment of the description
+   */
+  public String getRevisionComment() {
+    return mRevisionComment;
   }
 
   private WinnerType mWinner;
@@ -343,6 +370,7 @@ public class ChallengeDescription implements Serializable {
 
     fll.setAttribute(TITLE_ATTRIBUTE, mTitle);
     fll.setAttribute(REVISION_ATTRIBUTE, mRevision);
+    fll.setAttribute(REVISION_COMMENT_ATTRIBUTE, mRevisionComment);
     fll.setAttribute(ChallengeParser.WINNER_ATTRIBUTE, mWinner.toString());
     fll.setAttribute(SCHEMA_VERSION_ATTRIBUTE, String.valueOf(ChallengeParser.CURRENT_SCHEMA_VERSION));
 
