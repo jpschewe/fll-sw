@@ -1,3 +1,4 @@
+* #1017 - add revision comment field to challenge description
 * #1016 - rewrite subjective application without jquery-mobile, remove jquery
 * Rework scrolling to be compatible across Chrome and Firefox
 
