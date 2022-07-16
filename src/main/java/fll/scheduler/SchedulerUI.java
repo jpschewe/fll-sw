@@ -1019,10 +1019,11 @@ public class SchedulerUI extends JFrame {
   /**
    * @return header row or -1 if canceled
    */
-  private int findHeaderRowIndex(final File scheduleFile,
-                                 final @Nullable String sheetName) {
-    final SelectHeaderRowDialog dialog = new SelectHeaderRowDialog(this, scheduleFile, sheetName);
-    dialog.setLocationRelativeTo(this);
+  private static int findHeaderRowIndex(final JFrame owner,
+                                        final File scheduleFile,
+                                        final @Nullable String sheetName) {
+    final SelectHeaderRowDialog dialog = new SelectHeaderRowDialog(owner, scheduleFile, sheetName);
+    dialog.setLocationRelativeTo(owner);
     dialog.setVisible(true);
     LOGGER.debug("findHeaderRow: Canceled? {} header row index {}", dialog.isCanceled(), dialog.getHeaderRowIndex());
 
@@ -1033,28 +1034,30 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private int promptUserForInt(final String message,
-                               final int defaultValue) {
+  private static int promptUserForInt(final JFrame owner,
+                                      final String message,
+                                      final int defaultValue) {
     while (true) {
-      final @Nullable String str = JOptionPane.showInputDialog(this, message, defaultValue);
+      final @Nullable String str = JOptionPane.showInputDialog(owner, message, defaultValue);
       if (null == str) {
-        JOptionPane.showMessageDialog(this, "Please enter an integer", "Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(owner, "Please enter an integer", "Error", JOptionPane.ERROR_MESSAGE);
       } else {
         try {
           final int value = Integer.parseInt(str);
           return value;
         } catch (final NumberFormatException e) {
-          JOptionPane.showMessageDialog(this, "Please enter an integer", "Error", JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(owner, "Please enter an integer", "Error", JOptionPane.ERROR_MESSAGE);
         }
       }
     }
   }
 
-  private ColumnInformation promptForColumns(final File file,
-                                             final @Nullable String sheetName,
-                                             final int headerRowIndex,
-                                             final Collection<String> headerNames,
-                                             final ChallengeDescription description)
+  private static ColumnInformation promptForColumns(final JFrame owner,
+                                                    final File file,
+                                                    final @Nullable String sheetName,
+                                                    final int headerRowIndex,
+                                                    final Collection<String> headerNames,
+                                                    final ChallengeDescription description)
       throws InvalidFormatException, IOException {
 
     final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
@@ -1064,15 +1067,15 @@ public class SchedulerUI extends JFrame {
       throw new FLLRuntimeException("No data in the file");
     }
 
-    final int numPracticeRounds = promptUserForInt("Enter the number of practice rounds",
+    final int numPracticeRounds = promptUserForInt(owner, "Enter the number of practice rounds",
                                                    TournamentParameters.PRACTICE_ROUNDS_DEFAULT);
 
-    final int numRegularMatchRounds = promptUserForInt("Enter the number of performance rounds",
+    final int numRegularMatchRounds = promptUserForInt(owner, "Enter the number of performance rounds",
                                                        TournamentParameters.SEEDING_ROUNDS_DEFAULT);
 
-    final ChooseScheduleHeadersDialog dialog = new ChooseScheduleHeadersDialog(this, headerNames, numPracticeRounds,
+    final ChooseScheduleHeadersDialog dialog = new ChooseScheduleHeadersDialog(owner, headerNames, numPracticeRounds,
                                                                                numRegularMatchRounds, description);
-    dialog.setLocationRelativeTo(this);
+    dialog.setLocationRelativeTo(owner);
     dialog.setVisible(true);
 
     final ColumnInformation columnInfo = dialog.createColumnInformation(headerRowIndex, headerRow);
@@ -1097,13 +1100,13 @@ public class SchedulerUI extends JFrame {
       if (csv) {
         sheetName = null;
       } else {
-        sheetName = promptForSheetName(selectedFile);
+        sheetName = promptForSheetName(this, selectedFile);
         if (null == sheetName) {
           return;
         }
       }
 
-      final int headerRowIndex = findHeaderRowIndex(selectedFile, sheetName);
+      final int headerRowIndex = findHeaderRowIndex(this, selectedFile, sheetName);
       if (headerRowIndex < 0) {
         return;
       }
@@ -1119,7 +1122,7 @@ public class SchedulerUI extends JFrame {
         return;
       }
 
-      final ColumnInformation columnInfo = promptForColumns(selectedFile, sheetName, headerRowIndex, headerNames,
+      final ColumnInformation columnInfo = promptForColumns(this, selectedFile, sheetName, headerRowIndex, headerNames,
                                                             description);
 
       final List<SubjectiveStation> newSubjectiveStations;
@@ -1132,7 +1135,7 @@ public class SchedulerUI extends JFrame {
       mSchedParams.setSubjectiveStations(newSubjectiveStations);
 
       final String chosenTournamentName = JOptionPane.showInputDialog(SchedulerUI.this,
-                                                   "What is the name of the tournament to put on the score sheets?");
+                                                                      "What is the name of the tournament to put on the score sheets?");
       if (null == chosenTournamentName) {
         tournamentName = "No_Name";
       } else {
@@ -1246,6 +1249,7 @@ public class SchedulerUI extends JFrame {
 
           // use default sched params until the user changes them
           setSchedParams(new SchedParams());
+          setScheduleData(new TournamentSchedule(), ColumnInformation.NULL);
 
           loadScheduleFile(selectedFile, null);
 
@@ -1263,19 +1267,21 @@ public class SchedulerUI extends JFrame {
   /**
    * If there is more than 1 sheet, prompt, otherwise just use the sheet.
    *
+   * @param owner the owning frame for modal dialogs
    * @param selectedFile the file to read
    * @return the sheet name or null if the user canceled
    * @throws IOException if there is an error reading the file
    * @throws InvalidFormatException if there is an error decoding the file
    */
-  public static @Nullable String promptForSheetName(final File selectedFile)
+  private static @Nullable String promptForSheetName(final JFrame owner,
+                                                     final File selectedFile)
       throws InvalidFormatException, IOException {
     final List<String> sheetNames = ExcelCellReader.getAllSheetNames(selectedFile);
     if (sheetNames.size() == 1) {
       return sheetNames.get(0);
     } else {
       final String[] options = sheetNames.toArray(new String[sheetNames.size()]);
-      final int choosenOption = JOptionPane.showOptionDialog(null, "Choose which sheet to work with", "Choose Sheet",
+      final int choosenOption = JOptionPane.showOptionDialog(owner, "Choose which sheet to work with", "Choose Sheet",
                                                              JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
                                                              null, options, options[0]);
       if (JOptionPane.CLOSED_OPTION == choosenOption) {
