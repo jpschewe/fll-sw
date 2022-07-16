@@ -86,7 +86,7 @@ const finalistScheduleModule = {};
             header.appendChild(categoryNameEle);
             categoryNameEle.innerText = category.name;
 
-            if (room != undefined && "" != room) {
+            if (null != room && "" != room) {
                 const roomEle = document.createElement("div");
                 categoryNameEle.appendChild(roomEle);
                 roomEle.innerText = "Room: " + room;

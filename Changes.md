@@ -1,3 +1,4 @@
+* #1027 - Properly handle no assigned room in the final scheduling app
 * #1037 - Ensure that no shows are treated as low scores in the finalist scheduling app
 * #1025 - Fix finalist navigation via header links
 * #1026 - invalidate finalist schedule when the user changes which non-numeric categories are to be scheduled

@@ -143,7 +143,12 @@ const nonNumericUi = {}
                 finalist_module.saveToLocalStorage();
             }
         });
-        roomEle.value = finalist_module.getRoom(category, finalist_module.getCurrentDivision());
+        const room = finalist_module.getRoom(category, finalist_module.getCurrentDivision());
+        if(room) {
+            roomEle.value = room;
+        } else {
+            roomEle.value = "";
+        }
         roomEle.disabled = !finalist_module.isCategoryScheduled(category);
 
         const teamList = document.createElement("ul");

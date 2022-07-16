@@ -275,8 +275,13 @@ const finalistNumericModule = {};
                 finalist_module.getCurrentDivision(), roomNumber);
             finalist_module.saveToLocalStorage();
         });
-        roomEle.value = finalist_module.getRoom(currentCategory, finalist_module
-            .getCurrentDivision());
+        const room = finalist_module.getRoom(currentCategory, finalist_module.getCurrentDivision());
+        if (room) {
+            roomEle.value = room;
+        } else {
+            roomEle.value = "";
+        }
+
 
         const divisionsElement = document.getElementById("divisions");
         removeChildren(divisionsElement);
