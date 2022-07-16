@@ -491,7 +491,8 @@ public class ScheduleChecker {
     if (null == station) {
       throw new IllegalArgumentException("'"
           + name
-          + "' is not a valid station");
+          + "' is not a valid station. Valid stations: "
+          + params.getSubjectiveStations());
     }
     return station.getDuration();
   }
