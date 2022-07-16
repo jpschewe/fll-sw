@@ -1131,10 +1131,12 @@ public class SchedulerUI extends JFrame {
 
       mSchedParams.setSubjectiveStations(newSubjectiveStations);
 
-      tournamentName = JOptionPane.showInputDialog(SchedulerUI.this,
+      final String chosenTournamentName = JOptionPane.showInputDialog(SchedulerUI.this,
                                                    "What is the name of the tournament to put on the score sheets?");
-      if (null == tournamentName) {
-        return;
+      if (null == chosenTournamentName) {
+        tournamentName = "No_Name";
+      } else {
+        tournamentName = chosenTournamentName;
       }
 
       final TournamentSchedule schedule = new TournamentSchedule(tournamentName,
