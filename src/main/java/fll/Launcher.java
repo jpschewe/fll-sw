@@ -803,18 +803,18 @@ public class Launcher extends JFrame {
 
   private void startWebserver(@UnknownInitialization(Launcher.class) Launcher this,
                               final boolean loadFrontPage) {
+    if (SystemUtils.IS_OS_WINDOWS
+        && !firewallNotificationDisplayed) {
+      JOptionPane.showMessageDialog(Launcher.this,
+                                    "If Windows prompts you about the firewall, check both private and public networks and then click Allow access",
+                                    "Firewall Information", JOptionPane.INFORMATION_MESSAGE);
+      firewallNotificationDisplayed = true;
+    }
+
     if (null == webserverLauncher) {
       webserverLauncher = new TomcatLauncher(port);
     }
     try {
-      if (SystemUtils.IS_OS_WINDOWS
-          && !firewallNotificationDisplayed) {
-        JOptionPane.showMessageDialog(Launcher.this,
-                                      "If Windows prompts you about the firewall, check both private and public networks and then click Allow access",
-                                      "Firewall Information", JOptionPane.INFORMATION_MESSAGE);
-        firewallNotificationDisplayed = true;
-      }
-
       webserverLauncher.start();
 
       if (loadFrontPage) {
