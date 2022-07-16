@@ -89,7 +89,6 @@ span.sliderTickMark {
 }
 
 #side-panel_open {
-    background-image: url("/images/Settings-Button.svg");
     background-repeat: no-repeat;
     background-position: center center;
 }
