@@ -1417,7 +1417,7 @@ const finalist_module = {}
                     } else {
                         finalist_module.setRoom(category, awardGroup, finalistCategory.room);
 
-                        // if the category is in a schedule, then it's scheduled'
+                        // if the category is in a schedule, then it's scheduled
                         finalist_module.setCategoryScheduled(category, true);
                     }
                 }
@@ -1519,7 +1519,9 @@ const finalist_module = {}
             for (const categoryDescription of subjectiveCategories) {
                 const category = finalist_module.getCategoryByName(categoryDescription.title);
                 if (null == category) {
-                    finalist_module.addCategory(categoryDescription.title, true, false);
+                    const newCategory = finalist_module.addCategory(categoryDescription.title, true, false);
+                    // all subjective categories are scheduled
+                    finalist_module.setCategoryScheduled(newCategory, true);
                 }
             }
 
