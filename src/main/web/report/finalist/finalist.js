@@ -602,6 +602,12 @@ const finalist_module = {}
             const bScore = finalist_module.getCategoryScore(b, currentCategory);
             if (aScore == bScore) {
                 return 0;
+            } else if (null == aScore) {
+                // no score is lowest
+                return 1;
+            } else if (null == bScore) {
+                // no score is lowest
+                return -1;
             } else if (aScore < bScore) {
                 return 1;
             } else {
