@@ -1212,6 +1212,9 @@ const finalist_module = {}
      */
     finalist_module.setCategoryScheduled = function(category, isScheduled) {
         category.scheduled = isScheduled;
+
+        // invalidate the schedule
+        finalist_module.setSchedule(finalist_module.getCurrentDivision(), null);
     };
 
     /**
