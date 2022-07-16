@@ -60,6 +60,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.apache.commons.lang3.SystemUtils;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -798,8 +799,18 @@ public class Launcher extends JFrame {
 
   private @Nullable TomcatLauncher webserverLauncher = null;
 
+  private boolean firewallNotificationDisplayed = false;
+
   private void startWebserver(@UnknownInitialization(Launcher.class) Launcher this,
                               final boolean loadFrontPage) {
+    if (SystemUtils.IS_OS_WINDOWS
+        && !firewallNotificationDisplayed) {
+      JOptionPane.showMessageDialog(Launcher.this,
+                                    "If Windows prompts you about the firewall, check both private and public networks and then click Allow access",
+                                    "Firewall Information", JOptionPane.INFORMATION_MESSAGE);
+      firewallNotificationDisplayed = true;
+    }
+
     if (null == webserverLauncher) {
       webserverLauncher = new TomcatLauncher(port);
     }
@@ -811,7 +822,7 @@ public class Launcher extends JFrame {
       }
     } catch (final LifecycleException e) {
       LOGGER.fatal("Unexpected error starting webserver", e);
-      JOptionPane.showMessageDialog(null, "Unexpected error starting webserver: "
+      JOptionPane.showMessageDialog(Launcher.this, "Unexpected error starting webserver: "
           + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
   }
