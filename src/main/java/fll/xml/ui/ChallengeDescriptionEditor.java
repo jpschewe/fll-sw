@@ -185,6 +185,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     mRevisionEditor.setColumns(SHORT_TEXT_WIDTH);
     mRevisionEditor.setMaximumSize(mRevisionEditor.getPreferredSize());
     mRevisionEditor.setValue(mDescription.getRevision());
+    mRevisionEditor.setToolTipText("Version of the challenge description - displayed on the score sheets");
 
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
@@ -208,6 +209,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     mRevisionCommentEditor.setColumns(LONG_TEXT_WIDTH);
     mRevisionCommentEditor.setMaximumSize(mRevisionCommentEditor.getPreferredSize());
     mRevisionCommentEditor.setValue(mDescription.getRevisionComment());
+    mRevisionCommentEditor.setToolTipText("Description of this revision of the challenge description");
 
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
