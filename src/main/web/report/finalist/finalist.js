@@ -10,6 +10,11 @@
 // a way that is compatible with the Java Jackson library. Instead Objects are used
 // as maps.
 
+// Note that the modification functions do not save to local storage. It is up to the calling
+// code to save to local storage. This is to support use cases where local storage is not used.
+// See non-numeric_ui.js for this use case.
+
+
 const finalist_module = {}
 
 {
@@ -328,9 +333,9 @@ const finalist_module = {}
      * recomputed.
      */
     finalist_module.unsetCategoryVisited = function(category, division) {
-        var visited = _categoriesVisited[division];
+        const visited = _categoriesVisited[division];
         if (null != visited) {
-            var index = visited.indexOf(category.catId);
+            const index = visited.indexOf(category.catId);
             if (index >= 0) {
                 visited.splice(index, 1);
                 _categoriesVisited[division] = visited;
@@ -339,7 +344,7 @@ const finalist_module = {}
     };
 
     finalist_module.setCategoryVisited = function(category, division) {
-        var visited = _categoriesVisited[division];
+        let visited = _categoriesVisited[division];
         if (null == visited) {
             visited = [];
             _categoriesVisited[division] = visited;
@@ -569,7 +574,7 @@ const finalist_module = {}
         const scoreGroups = {};
         for (const team of teams) {
             if (finalist_module.isTeamInDivision(team, currentDivision)) {
-                var group = team.judgingGroup;
+                const group = team.judgingGroup;
                 scoreGroups[group] = finalist_module.getNumTeamsAutoSelected();
             }
         }
@@ -1160,6 +1165,7 @@ const finalist_module = {}
                     element.setAttribute("href", "numeric.html");
                     element.addEventListener('click', function() {
                         finalist_module.setCurrentCategoryName(category.name);
+                        finalist_module.saveToLocalStorage();
                     });
                 }
                 element.innerText = category.name;
@@ -1180,6 +1186,7 @@ const finalist_module = {}
             element.setAttribute("href", "numeric.html");
             element.addEventListener('click', function() {
                 finalist_module.setCurrentCategoryName(championshipCategory.name);
+                finalist_module.saveToLocalStorage();
             });
         }
         element.innerText = finalist_module.CHAMPIONSHIP_NAME;

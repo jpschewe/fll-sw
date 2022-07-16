@@ -241,6 +241,9 @@ const nonNumericUi = {}
                 }
             } else if (teamNum != prevTeam) {
                 finalist_module.removeTeamFromCategory(category, prevTeam);
+                if (_useStorage) {
+                    finalist_module.saveToLocalStorage();
+                }
 
                 const team = finalist_module.lookupTeam(teamNum);
                 if (typeof (team) == 'undefined') {

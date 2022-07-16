@@ -544,6 +544,7 @@ const finalistScheduleModule = {};
 
         document.getElementById('add_timeslot').addEventListener("click", function() {
             const newSlot = finalist_module.addSlotToSchedule(schedule);
+            finalist_module.saveToLocalStorage();
             addRowForSlot(newSlot);
         });
 

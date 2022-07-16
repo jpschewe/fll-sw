@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }); // foreach division
 
     finalist_module.setCurrentDivision(finalist_module.getDivisionByIndex(divisionsElement.value));
+    finalist_module.saveToLocalStorage();
 
     // before change listeners to avoid loop
     finalistParamsModule.updateDivision();

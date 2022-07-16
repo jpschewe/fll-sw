@@ -1,3 +1,4 @@
+* #1025 - Fix finalist navigation via header links
 * #1026 - invalidate finalist schedule when the user changes which non-numeric categories are to be scheduled
 * #1017 - add revision comment field to challenge description
 * #1016 - rewrite subjective application without jquery-mobile, remove jquery
