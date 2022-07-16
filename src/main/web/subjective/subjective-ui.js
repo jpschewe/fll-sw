@@ -780,7 +780,7 @@ function populateScoreSummary() {
         }
 
         let nominations = "";
-        if (score.nonNumericNominations.length > 0) {
+        if (score && score.nonNumericNominations && score.nonNumericNominations.length > 0) {
             nominations = " - " + score.nonNumericNominations.join(", ");
         }
 
@@ -800,7 +800,7 @@ function populateScoreSummary() {
 
 
         const noteRow = document.createElement("div");
-        if (score.note) {
+        if (score && score.note) {
             noteRow.innerText = score.note;
         } else {
             noteRow.innerText = "No notes";
