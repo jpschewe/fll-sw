@@ -143,7 +143,12 @@ const nonNumericUi = {}
                 finalist_module.saveToLocalStorage();
             }
         });
-        roomEle.value = finalist_module.getRoom(category, finalist_module.getCurrentDivision());
+        const room = finalist_module.getRoom(category, finalist_module.getCurrentDivision());
+        if(room) {
+            roomEle.value = room;
+        } else {
+            roomEle.value = "";
+        }
         roomEle.disabled = !finalist_module.isCategoryScheduled(category);
 
         const teamList = document.createElement("ul");
@@ -241,6 +246,9 @@ const nonNumericUi = {}
                 }
             } else if (teamNum != prevTeam) {
                 finalist_module.removeTeamFromCategory(category, prevTeam);
+                if (_useStorage) {
+                    finalist_module.saveToLocalStorage();
+                }
 
                 const team = finalist_module.lookupTeam(teamNum);
                 if (typeof (team) == 'undefined') {
