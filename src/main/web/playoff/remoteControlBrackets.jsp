@@ -30,6 +30,7 @@ TD.Bridge {
 
 SPAN.TeamNumber {
     color: #ff8080;
+    padding-right: 5px;
 }
 
 SPAN.TeamName {
