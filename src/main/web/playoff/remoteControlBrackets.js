@@ -42,13 +42,13 @@ function setTeamName(leaf, teamNumber, teamName) {
         const teamNumberEle = document.createElement("span");
         leaf.appendChild(teamNumberEle)
         teamNumberEle.classList.add("TeamNumber");
-        leaf.innerText = "#" + teamNumber;
+        teamNumberEle.innerText = "#" + teamNumber;
     }
 
     const teamNameEle = document.createElement("span");
     leaf.appendChild(teamNameEle)
     teamNameEle.classList.add("TeamName");
-    leaf.innerText = parseTeamName(teamName);
+    teamNameEle.innerText = parseTeamName(teamName);
 }
 
 function setTeamNameAndScore(leaf, teamNumber, teamName, scoreData) {
