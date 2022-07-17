@@ -1,3 +1,4 @@
+* #1029 - Fix missing team numbers on head to head brackets 
 * #1028 - Ensure that all subjective categories are in the finalist schedule
 * #1027 - Properly handle no assigned room in the final scheduling app
 * #1037 - Ensure that no shows are treated as low scores in the finalist scheduling app
