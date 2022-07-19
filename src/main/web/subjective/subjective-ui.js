@@ -997,7 +997,7 @@ function displayPageChooseJudge() {
 function displayPageTeamsList() {
     document.getElementById("header-main_title").innerText = "Select team to score";
 
-    displayPage(document.getElementById("header-main"), document.getElementById("content-teams-list"), document.getElementById("footer-main"));
+    displayPage(document.getElementById("header-main"), document.getElementById("content-teams-list"), document.getElementById("footer-entry"));
 
     document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
     document.getElementById("header-main_judging-group").classList.remove('fll-sw-ui-inactive');
@@ -1017,7 +1017,7 @@ function displayPageTeamsList() {
 }
 
 function displayPageScoreSummary() {
-    displayPage(document.getElementById("header-main"), document.getElementById("content-score-summary"), document.getElementById("footer-main"));
+    displayPage(document.getElementById("header-main"), document.getElementById("content-score-summary"), document.getElementById("footer-summary"));
 
     document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
     document.getElementById("header-main_judging-group").classList.remove('fll-sw-ui-inactive');
@@ -1127,13 +1127,16 @@ function displayPageEnterScore() {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-    const openButton = document.getElementById("side-panel_open");
     const sidePanel = document.getElementById("side-panel");
 
     // handlers for buttons and links that don't navigate to another page
-    openButton.addEventListener('click', () => {
-        sidePanel.classList.add('open');
-    });
+
+    document.querySelectorAll('.side-panel_open')
+        .forEach(element => {
+            element.addEventListener('click', () => {
+                sidePanel.classList.add('open');
+            });
+        })
 
     document.getElementById("side-panel_close").addEventListener('click', () => {
         sidePanel.classList.remove('open');
