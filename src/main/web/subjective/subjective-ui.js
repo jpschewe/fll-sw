@@ -383,7 +383,7 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges) {
             popupContent.appendChild(closeButton);
             closeButton.setAttribute("type", "button");
             closeButton.id = "enter-score-comment-" + goal.name + "-close";
-            closeButton.innerText = 'Save';
+            closeButton.innerText = 'Done';
 
             document.getElementById("enter-score-goal-comments").appendChild(popup);
 
