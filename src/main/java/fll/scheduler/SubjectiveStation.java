@@ -81,4 +81,15 @@ public final class SubjectiveStation implements Serializable {
   public int hashCode() {
     return getName().hashCode();
   }
+
+  @Override
+  public String toString() {
+    return "["
+        + getClass().getSimpleName()
+        + " name: "
+        + getName()
+        + " duration: "
+        + getDurationMinutes()
+        + "]";
+  }
 }
