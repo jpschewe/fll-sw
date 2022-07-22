@@ -89,7 +89,6 @@ span.sliderTickMark {
 }
 
 #side-panel_open {
-    background-image: url("/images/Settings-Button.svg");
     background-repeat: no-repeat;
     background-position: center center;
 }
@@ -98,6 +97,23 @@ span.sliderTickMark {
     font-weight: bold;
     cursor: pointer;
     padding: 10px;
+    text-decoration: none;
+    margin: 4px;
+    border: 1px solid #ddd;
+}
+
+.fll-sw-footer-button {
+    position: absolute;
+    top: 8%;
+}
+
+a.fll-sw-button:hover, div.fll-sw-button:hover, label.fll-sw-button:hover
+    {
+    background-color: #ddd;
+}
+
+a.fll-sw-button:visited, a.fll-sw-button:link {
+    color: inherit;
 }
 
 button, input {
