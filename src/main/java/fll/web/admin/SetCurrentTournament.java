@@ -18,6 +18,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.db.Queries;
@@ -80,8 +82,8 @@ public class SetCurrentTournament extends BaseFLLServlet {
 
     session.setAttribute("message", message.toString());
 
-    final String referrer = request.getHeader("referer");
-    response.sendRedirect(response.encodeRedirectURL(referrer == null ? "index.jsp" : referrer));
+    final String referrer = request.getHeader("Referer");
+    response.sendRedirect(response.encodeRedirectURL(StringUtils.isEmpty(referrer) ? "index.jsp" : referrer));
 
   }
 }

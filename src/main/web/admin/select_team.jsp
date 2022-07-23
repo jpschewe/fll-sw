@@ -13,6 +13,10 @@
 <%@ page import="fll.web.ApplicationAttributes" %>
 <%@ page import="javax.sql.DataSource" %>
 
+<c:set var="edit_team_referrer" scope="session">
+<%=request.getHeader("Referer")%>
+</c:set>
+
 <%
 final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();

@@ -41,7 +41,7 @@ public final class MainIndex {
   public static void populateContext(final HttpServletRequest request,
                                      final ServletContext application,
                                      final PageContext pageContext) {
-    LOGGER.debug("Visiting index from {}", request.getHeader("referer"));
+    LOGGER.debug("Visiting index from {}", request.getHeader("Referer"));
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
