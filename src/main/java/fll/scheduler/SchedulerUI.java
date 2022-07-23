@@ -902,7 +902,40 @@ public class SchedulerUI extends JFrame {
         LOGGER.info("Writing detailed schedules to "
             + directory.getAbsolutePath());
 
-        getScheduleData().outputDetailedSchedules(getSchedParams(), directory, baseFilename);
+        final SwingWorker<Boolean, Void> detailedSchedulesTask = new SwingWorker<Boolean, Void>() {
+          @Override
+          protected Boolean doInBackground() {
+            try {
+              getScheduleData().outputDetailedSchedules(getSchedParams(), directory, baseFilename);
+              return true;
+            } catch (final IOException e) {
+              final Formatter errorFormatter = new Formatter();
+              errorFormatter.format("Error writing detailed schedules: %s", e.getMessage());
+              LOGGER.error(errorFormatter, e);
+              JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
+              return false;
+            }
+          }
+
+          @Override
+          protected void done() {
+            progressDialog.setVisible(false);
+          }
+        };
+        // make sure the task doesn't start until the window is up
+        progressDialog.addComponentListener(new ComponentAdapter() {
+          @Override
+          public void componentShown(final ComponentEvent e) {
+            progressDialog.removeComponentListener(this);
+            detailedSchedulesTask.execute();
+          }
+        });
+        progressDialog.setVisible(true);
+        if (!detailedSchedulesTask.get()) {
+          // an error occurred
+          return;
+        }
+
         JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedule written '"
             + directory.getAbsolutePath()
             + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
@@ -967,7 +1000,7 @@ public class SchedulerUI extends JFrame {
         LOGGER.error(errorFormatter, e);
         JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
         return;
-      } catch (final SQLException e) {
+      } catch (SQLException | InterruptedException | ExecutionException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Unexpected Error writing detailed schedules: %s", e.getMessage());
         LOGGER.error(errorFormatter, e);
