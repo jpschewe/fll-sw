@@ -1,3 +1,4 @@
+* #1036 - display progress dialog while writing outputs from the scheduler UI
 * #793 - Return to original page after editing team data
 * #1029 - Fix missing team numbers on head to head brackets 
 * #1028 - Ensure that all subjective categories are in the finalist schedule
