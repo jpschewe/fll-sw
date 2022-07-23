@@ -129,7 +129,7 @@ integrationTest {
 ext {
     jackson_version = "2.13.3"
     slf4j_version = "1.7.36"
-    tomcat_version = "10.0.17"
+    tomcat_version = "10.0.22"
     poi_version = "5.2.2"
     junit_version = "5.8.2"
     log4j_version = "2.18.0"
