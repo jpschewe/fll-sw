@@ -78,7 +78,7 @@ public class InitFilter implements Filter {
       checkAuthenticationValid(application, session);
 
       LOGGER.trace("Loading {} message: {} referer: {} session: {} auth: {}", path,
-                   SessionAttributes.getMessage(session), httpRequest.getHeader("referer"), session.getId(),
+                   SessionAttributes.getMessage(session), httpRequest.getHeader("Referer"), session.getId(),
                    SessionAttributes.getAuthentication(session));
 
       final boolean needsInit = needsInit(httpRequest.getContextPath(), path);

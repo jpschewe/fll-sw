@@ -26,6 +26,8 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
+
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -71,8 +73,8 @@ public final class SummarizePhase1 {
                                      final HttpSession session,
                                      final PageContext pageContext) {
     // clear the redirect if sent here directly from index.jsp
-    final String referrer = request.getHeader("referer");
-    if (null == referrer
+    final String referrer = request.getHeader("Referer");
+    if (StringUtils.isEmpty(referrer)
         || referrer.endsWith("index.jsp")) {
       session.removeAttribute(PromptSummarizeScores.SUMMARY_REDIRECT_KEY);
     }
