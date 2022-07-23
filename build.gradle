@@ -130,7 +130,7 @@ ext {
     jackson_version = "2.13.3"
     slf4j_version = "1.7.36"
     tomcat_version = "10.0.17"
-    poi_version = "5.2.1"
+    poi_version = "5.2.2"
     junit_version = "5.8.2"
     log4j_version = "2.18.0"
     spotbugs_version = "4.7.1"
@@ -218,7 +218,7 @@ dependencies {
             
   implementation(group: "dnsjava", name: "dnsjava", version: "3.5.1")
        
-  implementation(group: "org.apache.tika", name: "tika-core", version: "2.3.0")
+  implementation(group: "org.apache.tika", name: "tika-core", version: "2.4.1")
     
   implementation(group: "com.diffplug.durian", name: "durian-core", version: "1.2.0")
         
@@ -249,7 +249,7 @@ dependencies {
   implementation(group: "org.checkerframework", name: "checker-util", version: project.checker_framework_version)
   checkerFramework(group: "org.checkerframework", name: "checker", version: project.checker_framework_version)
     
-  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.25")
+  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.26")
   
   // for templating reports
   implementation(group: "org.apache.velocity", name: "velocity-engine-core", version: "2.3")
