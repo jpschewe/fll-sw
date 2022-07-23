@@ -132,7 +132,7 @@ ext {
     tomcat_version = "10.0.17"
     poi_version = "5.2.1"
     junit_version = "5.8.2"
-    log4j_version = "2.17.2"
+    log4j_version = "2.18.0"
     spotbugs_version = "4.7.1"
     checker_framework_version = "3.23.0"
 
@@ -264,7 +264,7 @@ dependencies {
   integrationTestImplementation(sourceSets.test.output)
         
   integrationTestImplementation(group: "org.easytesting", name: "fest-swing", version: "1.2.1")
-  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.59.0") {
+  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.63.0") {
       
     // xml APIs are part of the JDK
     exclude(group: "xml-apis", module: "xml-apis")
