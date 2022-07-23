@@ -16,7 +16,7 @@
       <property name="id" value="checkstyle:suppresswarnings"/>
     </module>
     <module name="JavadocMethod">
-      <property name="scope" value="protected"/>
+      <property name="accessModifiers" value="public"/>
       <property name="id" value="checkstyle:javadocmethod"/>
     </module>
     <module name="JavadocType">

@@ -34,6 +34,7 @@ import org.w3c.dom.Element;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.SubjectiveScore;
 import fll.Tournament;
 import fll.TournamentTeam;
@@ -521,6 +522,7 @@ public class SubjectivePdfWriter {
    * @param tournamentName displayed on the sheets
    * @return point size to use and the number of rows for the comment sheet
    */
+  @SuppressFBWarnings(value = "FL_FLOATS_AS_LOOP_COUNTERS", justification = "comment height is a floating point number, precision is ok")
   private static Pair<Integer, Double> determineParameters(final ChallengeDescription description,
                                                            final String tournamentName,
                                                            final SubjectiveScoreCategory category) {
