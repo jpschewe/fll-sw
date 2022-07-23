@@ -936,10 +936,6 @@ public class SchedulerUI extends JFrame {
           return;
         }
 
-        JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedule written '"
-            + directory.getAbsolutePath()
-            + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
-
         final int answer = JOptionPane.showConfirmDialog(SchedulerUI.this,
                                                          "Would you like to write out the score sheets as well?",
                                                          "Write Out Scoresheets?", JOptionPane.YES_NO_OPTION);
@@ -955,11 +951,41 @@ public class SchedulerUI extends JFrame {
           return;
         }
 
-        final File scoresheetFile = new File(directory, baseFilename
-            + "-scoresheets.pdf");
-        try (FileOutputStream scoresheetFos = new FileOutputStream(scoresheetFile)) {
+        final SwingWorker<Boolean, Void> performanceSheetsTask = new SwingWorker<Boolean, Void>() {
+          @Override
+          protected Boolean doInBackground() {
+            final File scoresheetFile = new File(directory, baseFilename
+                + "-scoresheets.pdf");
+            try (FileOutputStream scoresheetFos = new FileOutputStream(scoresheetFile)) {
 
-          getScheduleData().outputPerformanceSheets(tournamentName, scoresheetFos, description);
+              getScheduleData().outputPerformanceSheets(tournamentName, scoresheetFos, description);
+              return true;
+            } catch (IOException | SQLException e) {
+              final Formatter errorFormatter = new Formatter();
+              errorFormatter.format("Error writing performance sheets: %s", e.getMessage());
+              LOGGER.error(errorFormatter, e);
+              JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
+              return false;
+            }
+          }
+
+          @Override
+          protected void done() {
+            progressDialog.setVisible(false);
+          }
+        };
+        // make sure the task doesn't start until the window is up
+        progressDialog.addComponentListener(new ComponentAdapter() {
+          @Override
+          public void componentShown(final ComponentEvent e) {
+            progressDialog.removeComponentListener(this);
+            performanceSheetsTask.execute();
+          }
+        });
+        progressDialog.setVisible(true);
+        if (!performanceSheetsTask.get()) {
+          // an error occurred
+          return;
         }
 
         if (null == columnInfo) {
@@ -988,21 +1014,48 @@ public class SchedulerUI extends JFrame {
           filenameSuffixes.put(scoreCategory, mapDialog.getFilenameSuffixForCategory(scoreCategory));
         }
 
-        getScheduleData().outputSubjectiveSheets(tournamentName, directory.getAbsolutePath(), baseFilename, description,
-                                                 categoryToSchedule, filenameSuffixes);
+        final SwingWorker<Boolean, Void> subjectiveSheetsTask = new SwingWorker<Boolean, Void>() {
+          @Override
+          protected Boolean doInBackground() {
+            try {
+              getScheduleData().outputSubjectiveSheets(tournamentName, directory.getAbsolutePath(), baseFilename,
+                                                       description, categoryToSchedule, filenameSuffixes);
+              return true;
+            } catch (final IOException e) {
+              final Formatter errorFormatter = new Formatter();
+              errorFormatter.format("Error writing subjective sheets: %s", e.getMessage());
+              LOGGER.error(errorFormatter, e);
+              JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
+              return false;
+            }
+          }
 
-        JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
-            + scoresheetFile.getAbsolutePath()
-            + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
-      } catch (final IOException e) {
+          @Override
+          protected void done() {
+            progressDialog.setVisible(false);
+          }
+        };
+        // make sure the task doesn't start until the window is up
+        progressDialog.addComponentListener(new ComponentAdapter() {
+          @Override
+          public void componentShown(final ComponentEvent e) {
+            progressDialog.removeComponentListener(this);
+            subjectiveSheetsTask.execute();
+          }
+        });
+        progressDialog.setVisible(true);
+        if (!subjectiveSheetsTask.get()) {
+          // an error occurred
+          return;
+        }
+
+        JOptionPane.showMessageDialog(SchedulerUI.this, "See '"
+            + directory.getAbsolutePath()
+            + "' for all outputs", "Information", JOptionPane.INFORMATION_MESSAGE);
+
+      } catch (InterruptedException | ExecutionException e) {
         final Formatter errorFormatter = new Formatter();
-        errorFormatter.format("Error writing detailed schedules: %s", e.getMessage());
-        LOGGER.error(errorFormatter, e);
-        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
-        return;
-      } catch (SQLException | InterruptedException | ExecutionException e) {
-        final Formatter errorFormatter = new Formatter();
-        errorFormatter.format("Unexpected Error writing detailed schedules: %s", e.getMessage());
+        errorFormatter.format("Unexpected error generating output: %s", e.getMessage());
         LOGGER.error(errorFormatter, e);
         JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
         return;
