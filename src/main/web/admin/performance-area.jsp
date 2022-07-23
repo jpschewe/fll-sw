@@ -343,8 +343,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         </li>
 
         <li>
-            <a target="_edit_teams"
-                href="<c:url value='/admin/select_team.jsp' />">Edit
+            <a href="<c:url value='/admin/select_team.jsp' />">Edit
                 team data</a> - this is where to go for team name and
             organization changes
         </li>

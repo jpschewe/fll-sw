@@ -14,6 +14,8 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
+
 import fll.Tournament;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
@@ -82,144 +84,140 @@ public class CommitTeam extends BaseFLLServlet {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
 
     try (Connection connection = datasource.getConnection()) {
-      // parse the numbers first so that we don't get a partial commit
-      final int teamNumber = WebUtils.getIntRequestParameter(request, "teamNumber");
+      if (!StringUtils.isEmpty(request.getParameter("commit"))) {
+        // parse the numbers first so that we don't get a partial commit
+        final int teamNumber = WebUtils.getIntRequestParameter(request, "teamNumber");
 
-      String redirect = null;
-      if (null != request.getParameter("delete")) {
-        if (LOGGER.isInfoEnabled()) {
-          LOGGER.info("Deleting "
-              + teamNumber);
-        }
-        Queries.deleteTeam(teamNumber, challengeDescription, connection);
-        message.append("<p id='success'>Successfully deleted team "
-            + teamNumber
-            + "</p>");
-
-        redirect = "index.jsp";
-      } else {
-        final String teamName = WebUtils.getNonNullRequestParameter(request, "teamName");
-        final String organization = request.getParameter("organization");
-
-        if (Boolean.valueOf(request.getParameter("addTeam"))) {
+        if (null != request.getParameter("delete")) {
           if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Adding "
+            LOGGER.info("Deleting "
                 + teamNumber);
           }
-
-          // came from the index, send back to the index
-          redirect = "index.jsp";
-
-          final String otherTeam = Queries.addTeam(connection, teamNumber, teamName, organization);
-          if (null != otherTeam) {
-            message.append("<p class='error'>Error, team number "
-                + teamNumber
-                + " is already assigned.</p>");
-            LOGGER.error("TeamNumber "
-                + teamNumber
-                + " is already assigned");
-          } else {
-            message.append("<p id='success'>Successfully added team "
-                + teamNumber
-                + "</p>");
-          }
-        } else {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Updating information for team: "
-                + teamNumber);
-          }
-
-          redirect = "index.jsp";
-
-          Queries.updateTeam(connection, teamNumber, teamName, organization);
-          message.append("<p id='success'>Successfully updated a team "
+          Queries.deleteTeam(teamNumber, challengeDescription, connection);
+          message.append("<p id='success'>Successfully deleted team "
               + teamNumber
-              + "'s info</p>");
-        }
+              + "</p>");
+        } else {
+          final String teamName = WebUtils.getNonNullRequestParameter(request, "teamName");
+          final String organization = request.getParameter("organization");
 
-        // assign tournaments
-        final List<Tournament> allTournaments = Tournament.getTournaments(connection);
-        final Collection<Integer> previouslyAssignedTournaments = Queries.getAllTournamentsForTeam(connection,
-                                                                                                   teamNumber);
-
-        for (final Tournament tournament : allTournaments) {
-
-          // can't change tournaments where the playoffs have been initialized
-          if (!Queries.isPlayoffDataInitialized(connection, tournament.getTournamentID())) {
-
-            if (LOGGER.isDebugEnabled()) {
-              LOGGER.debug("Checking if "
-                  + teamNumber
-                  + " should be assigned to tournament "
-                  + tournament.getName());
+          if (Boolean.valueOf(request.getParameter("addTeam"))) {
+            if (LOGGER.isInfoEnabled()) {
+              LOGGER.info("Adding "
+                  + teamNumber);
             }
 
-            if (Boolean.valueOf(request.getParameter("tournament_"
-                + tournament.getTournamentID()))) {
+            final String otherTeam = Queries.addTeam(connection, teamNumber, teamName, organization);
+            if (null != otherTeam) {
+              message.append("<p class='error'>Error, team number "
+                  + teamNumber
+                  + " is already assigned.</p>");
+              LOGGER.error("TeamNumber "
+                  + teamNumber
+                  + " is already assigned");
+            } else {
+              message.append("<p id='success'>Successfully added team "
+                  + teamNumber
+                  + "</p>");
+            }
+          } else {
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("Updating information for team: "
+                  + teamNumber);
+            }
+
+            Queries.updateTeam(connection, teamNumber, teamName, organization);
+            message.append("<p id='success'>Successfully updated team "
+                + teamNumber
+                + "'s info</p>");
+          }
+
+          // assign tournaments
+          final List<Tournament> allTournaments = Tournament.getTournaments(connection);
+          final Collection<Integer> previouslyAssignedTournaments = Queries.getAllTournamentsForTeam(connection,
+                                                                                                     teamNumber);
+
+          for (final Tournament tournament : allTournaments) {
+
+            // can't change tournaments where the playoffs have been initialized
+            if (!Queries.isPlayoffDataInitialized(connection, tournament.getTournamentID())) {
 
               if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Team "
+                LOGGER.debug("Checking if "
                     + teamNumber
-                    + " has checked tournament "
+                    + " should be assigned to tournament "
                     + tournament.getName());
               }
 
-              final String eventDivision = WebUtils.getNonNullRequestParameter(request, "event_division_"
-                  + tournament.getTournamentID());
-              final String judgingGroup = WebUtils.getNonNullRequestParameter(request, "judging_station_"
-                  + tournament.getTournamentID());
+              if (Boolean.valueOf(request.getParameter("tournament_"
+                  + tournament.getTournamentID()))) {
 
-              if (!previouslyAssignedTournaments.contains(tournament.getTournamentID())) {
                 if (LOGGER.isDebugEnabled()) {
-                  LOGGER.debug("Adding team "
+                  LOGGER.debug("Team "
                       + teamNumber
-                      + " to tournament "
+                      + " has checked tournament "
                       + tournament.getName());
                 }
 
-                // add to tournament
-                Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
-                                            judgingGroup);
-              } else {
-                // just update the division and judging station information
+                final String eventDivision = WebUtils.getNonNullRequestParameter(request, "event_division_"
+                    + tournament.getTournamentID());
+                final String judgingGroup = WebUtils.getNonNullRequestParameter(request, "judging_station_"
+                    + tournament.getTournamentID());
 
-                final String prevEventDivision = Queries.getEventDivision(connection, teamNumber,
+                if (!previouslyAssignedTournaments.contains(tournament.getTournamentID())) {
+                  if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Adding team "
+                        + teamNumber
+                        + " to tournament "
+                        + tournament.getName());
+                  }
+
+                  // add to tournament
+                  Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
+                                              judgingGroup);
+                } else {
+                  // just update the division and judging station information
+
+                  final String prevEventDivision = Queries.getEventDivision(connection, teamNumber,
+                                                                            tournament.getTournamentID());
+                  if (null == prevEventDivision) {
+                    throw new FLLRuntimeException("Unable to find award group for team "
+                        + teamNumber);
+                  }
+                  if (!eventDivision.equals(prevEventDivision)) {
+                    Queries.updateTeamEventDivision(connection, teamNumber, tournament.getTournamentID(),
+                                                    eventDivision);
+                  }
+
+                  final String prevJudgingGroup = Queries.getJudgingGroup(connection, teamNumber,
                                                                           tournament.getTournamentID());
-                if (null == prevEventDivision) {
-                  throw new FLLRuntimeException("Unable to find award group for team "
-                      + teamNumber);
-                }
-                if (!eventDivision.equals(prevEventDivision)) {
-                  Queries.updateTeamEventDivision(connection, teamNumber, tournament.getTournamentID(), eventDivision);
+                  if (null == prevJudgingGroup) {
+                    throw new FLLRuntimeException("Unable to find judging group for team "
+                        + teamNumber);
+                  }
+                  if (!judgingGroup.equals(prevJudgingGroup)) {
+                    Queries.updateTeamJudgingGroups(connection, teamNumber, tournament.getTournamentID(), judgingGroup);
+                  }
                 }
 
-                final String prevJudgingGroup = Queries.getJudgingGroup(connection, teamNumber,
-                                                                        tournament.getTournamentID());
-                if (null == prevJudgingGroup) {
-                  throw new FLLRuntimeException("Unable to find judging group for team "
-                      + teamNumber);
-                }
-                if (!judgingGroup.equals(prevJudgingGroup)) {
-                  Queries.updateTeamJudgingGroups(connection, teamNumber, tournament.getTournamentID(), judgingGroup);
-                }
+              } else if (previouslyAssignedTournaments.contains(tournament.getTournamentID())) {
+                // team was removed from tournament
+                Queries.deleteTeamFromTournament(connection, description, teamNumber, tournament.getTournamentID());
               }
 
-            } else if (previouslyAssignedTournaments.contains(tournament.getTournamentID())) {
-              // team was removed from tournament
-              Queries.deleteTeamFromTournament(connection, description, teamNumber, tournament.getTournamentID());
-            }
+            } // playoffs not initialized
+          } // foreach tournament
 
-          } // playoffs not initialized
-        } // foreach tournament
-
-      } // not deleting team
+        } // not deleting team
+      } // if committing data
 
       if (message.length() > 0) {
         SessionAttributes.appendToMessage(session, message.toString());
       }
 
-      response.sendRedirect(response.encodeRedirectURL(redirect));
-
+      final String referrer = SessionAttributes.getAttribute(session, "edit_team_referrer", String.class);
+      session.removeAttribute("edit_team_referrer");
+      response.sendRedirect(response.encodeRedirectURL(StringUtils.isEmpty(referrer) ? "index.jsp" : referrer));
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new FLLRuntimeException("There was an error talking to the database", e);
