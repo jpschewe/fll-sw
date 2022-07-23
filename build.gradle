@@ -27,10 +27,10 @@ plugins {
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
     id "com.github.spotbugs" version "5.0.5"
     id "de.aaschmid.cpd" version "3.3"
-    id "edu.sc.seis.launch4j" version "2.5.2"
-    id "com.gorylenko.gradle-git-properties" version "2.4.0"
+    id "edu.sc.seis.launch4j" version "2.5.3"
+    id "com.gorylenko.gradle-git-properties" version "2.4.1"
     id "com.github.ben-manes.versions" version "0.42.0" // adds dependencyUpdates task
-    id "de.undercouch.download" version "5.0.2" // file download
+    id "de.undercouch.download" version "5.1.0" // file download
     id "checkstyle"
         
     // Checker Framework pluggable type-checking
@@ -127,7 +127,7 @@ integrationTest {
 }
 
 ext {
-    jackson_version = "2.13.2"
+    jackson_version = "2.13.3"
     slf4j_version = "1.7.36"
     tomcat_version = "10.0.17"
     poi_version = "5.2.1"
