@@ -10,6 +10,9 @@ public class StringUtils {
   @EnsuresNonNullIf(expression="#1", result=false)
   public static boolean isBlank(final @Nullable CharSequence cs);
 
+  @EnsuresNonNullIf(expression="#1", result=false)
+  public static boolean isEmpty(final @Nullable CharSequence cs);
+  
   public static int length(final @Nullable CharSequence cs);
 
   public static boolean isNotBlank(final @Nullable CharSequence cs);
