@@ -1260,6 +1260,14 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("confirm-noshow-dialog").style.visibility = "hidden";
     });
 
+    document.getElementById("enter-score_toggle-review-mode").addEventListener('click', () => {
+        const glassPane = document.getElementById("enter-score_glasspane");
+        if (glassPane.style.zIndex > 0) {
+            glassPane.style.zIndex = -1;
+        } else {
+            glassPane.style.zIndex = 10;
+        }
+    });
 
     document.getElementById("enter-score_confirm-zero_yes").addEventListener('click', function() {
         document.getElementById("enter-score_confirm-zero").style.visibility = 'hidden';
