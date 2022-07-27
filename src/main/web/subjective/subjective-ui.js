@@ -1037,8 +1037,6 @@ function displayPageScoreSummary() {
 }
 
 function displayPageEnterScore() {
-    installWarnOnReload();
-
     // populate the header before displaying the page to ensure that the header height is properly computed
     const currentTeam = subjective_module.getCurrentTeam();
     document.getElementById("enter-score_team-number").innerText = currentTeam.teamNumber;
@@ -1123,6 +1121,8 @@ function displayPageEnterScore() {
 
     recomputeTotal();
 
+    // needs to be after displayPage as that uninstalls the warning
+    installWarnOnReload();
 }
 
 
