@@ -53,7 +53,7 @@ if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(response, applica
         </div>
     </div>
 
-    <div class="dialog" id="wait-dialog">
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="wait-dialog">
         <div>
             <div id='wait-dialog_text'>Loading data. Please
                 wait...</div>

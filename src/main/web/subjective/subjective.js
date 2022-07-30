@@ -646,7 +646,7 @@ const subjective_module = {}
                 for (const goal of _currentCategory.allGoals) {
                     if (goal.enumerated) {
                         document.getElementById('alert-dialog_text').innerText = "Enumerated goals are not yet supported";
-                        document.getElementById('alert-dialog').style.visibility = 'visible';
+                        document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
                     } else {
                         const rawScore = Number(score.standardSubScores[goal.name]);
                         const multiplier = Number(goal.multiplier);
@@ -848,7 +848,7 @@ const subjective_module = {}
                             window.open('../login.jsp', '_login');
                         }
                         document.getElementById("alert-dialog_text").innerText = "Your device has been logged out. A new window will be opened to the login page. Once you have logged in, close that window and synchronize again.";
-                        document.getElementById("alert-dialog").style.visibility = 'visible';
+                        document.getElementById("alert-dialog").classList.remove("fll-sw-ui-inactive");
                     }
                 });
             }, // server online
