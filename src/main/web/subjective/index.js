@@ -8,19 +8,19 @@
 
 function loadData() {
     const waitDialog = document.getElementById("wait-dialog");
-    waitDialog.style.visibility = "visible";
+    waitDialog.classList.remove("fll-sw-ui-inactive");
 
     subjective_module.loadFromServer(
         function() {
             const subjectiveCategories = subjective_module.getSubjectiveCategories();
 
-            waitDialog.style.visibility = "hidden";
-            document.getElementById("index-page_choose_clear").style.visibility = "hidden";
+            waitDialog.classList.add("fll-sw-ui-inactive");
+            document.getElementById("index-page_choose_clear").classList.add("fll-sw-ui-inactive");
 
             const messages = document.getElementById("index-page_messages");
             if (0 == subjectiveCategories.length) {
                 document.getElementById('alert-dialog_text').innerText = "No subjective data loaded from server";
-                document.getElementById('alert-dialog').style.visibility = 'visible';
+                document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
             } else {
                 const message = document.createElement("div");
                 messages.appendChild(message);
@@ -36,10 +36,10 @@ function loadData() {
 
             promptForJudgingGroup();
         }, function(message) {
-            waitDialog.style.visibility = "hidden";
+            waitDialog.classList.add("fll-sw-ui-inactive");
 
             document.getElementById('alert-dialog_text').innerText = "Error getting data from server: " + message;
-            document.getElementById('alert-dialog').style.visibility = 'visible';
+            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
         });
 }
 
@@ -56,19 +56,19 @@ function promptForJudgingGroup() {
 }
 
 function promptForReload() {
-    document.getElementById("index-page_choose_clear").style.visibility = "visible";
+    document.getElementById("index-page_choose_clear").classList.remove("fll-sw-ui-inactive");
 }
 
 function reloadData() {
     if (subjective_module.checkForModifiedScores()) {
-        document.getElementById("confirm-modified-scores-dialog").style.visibility = 'visible';
+        document.getElementById("confirm-modified-scores-dialog").classList.remove("fll-sw-ui-inactive");
     } else {
         reloadDataConfirmed();
     }
 }
 
 function reloadDataConfirmed() {
-    document.getElementById("index-page_choose_clear").style.visibility = 'hidden';
+    document.getElementById("index-page_choose_clear").classList.add("fll-sw-ui-inactive");
 
     subjective_module.clearAllData();
     loadData();
@@ -76,10 +76,10 @@ function reloadDataConfirmed() {
 
 function checkTournament() {
     const waitDialog = document.getElementById("wait-dialog");
-    waitDialog.style.visibility = "visible";
+    waitDialog.classList.remove("fll-sw-ui-inactive");
 
     subjective_module.getServerTournament(function(serverTournament) {
-        waitDialog.style.visibility = "hidden";
+        waitDialog.classList.add("fll-sw-ui-inactive");
 
         const storedTournament = subjective_module.getTournament();
         if (null == storedTournament) {
@@ -95,13 +95,13 @@ function checkTournament() {
         }
     }, function() {
         document.getElementById('alert-dialog_text').innerText = "Error getting data from server";
-        document.getElementById('alert-dialog').style.visibility = 'visible';
+        document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
     });
 }
 
 function serverLoadPage() {
     const chooseClear = document.getElementById("index-page_choose_clear");
-    chooseClear.style.visibility = 'hidden';
+    chooseClear.classList.add("fll-sw-ui-inactive");
 
     fetch("CheckAuth").then(checkJsonResponse).then(function(data) {
         subjective_module.log("data: " + JSON.stringify(data));
@@ -111,7 +111,7 @@ function serverLoadPage() {
                 reloadData();
             });
             document.getElementById("index-page_keep").addEventListener('click', function() {
-                chooseClear.style.visibility = 'hidden';
+                chooseClear.classList.add("fll-sw-ui-inactive");
                 promptForJudgingGroup();
             });
 

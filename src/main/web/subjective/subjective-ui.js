@@ -148,7 +148,7 @@ function setJudge() {
         judgeID = document.getElementById("choose-judge_new-judge-name").value;
         if (null == judgeID || "" == judgeID.trim()) {
             document.getElementById('alert-dialog_text').innerText = "You must enter a name";
-            document.getElementById('alert-dialog').style.visibility = 'visible';
+            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
             return;
         }
         judgeID = judgeID.trim().toUpperCase();
@@ -264,7 +264,7 @@ function saveToScoreObject(score) {
     for (const goal of subjective_module.getCurrentCategory().allGoals) {
         if (goal.enumerated) {
             document.getElementById('alert-dialog_text').innerText = "Enumerated goals not supported: " + goal.name;
-            document.getElementById('alert-dialog').style.visibility = 'visible';
+            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
         } else {
             const subscore = Number(document.getElementById(getScoreItemName(goal)).value);
             score.standardSubScores[goal.name] = subscore;
@@ -293,7 +293,7 @@ function recomputeTotal() {
     for (const goal of subjective_module.getCurrentCategory().allGoals) {
         if (goal.enumerated) {
             document.getElementById('alert-dialog_text').innerText = "Enumerated goals not supported: " + goal.name;
-            document.getElementById('alert-dialog').style.visibility = 'visible';
+            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
         } else {
             const subscore = Number(document.getElementById(getScoreItemName(goal)).value);
             const multiplier = Number(goal.multiplier);
@@ -361,7 +361,8 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges) {
             commentButton.classList.add("fll-sw-button");
 
             const popup = document.createElement("div");
-            popup.classList.add("dialog");
+            popup.classList.add("fll-sw-ui-dialog");
+            popup.classList.add("fll-sw-ui-inactive");
             popup.id = "enter-score-comment-" + goal.name;
 
             const popupContent = document.createElement("div");
@@ -388,7 +389,7 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges) {
             document.getElementById("enter-score-goal-comments").appendChild(popup);
 
             closeButton.addEventListener("click", function() {
-                popup.style.visibility = "hidden";
+                popup.classList.add("fll-sw-ui-inactive");
 
                 const comment = textarea.value;
                 if (!isBlank(comment)) {
@@ -399,7 +400,7 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges) {
             });
 
             commentButton.addEventListener("click", function() {
-                popup.style.visibility = "visible";
+                popup.classList.remove("fll-sw-ui-inactive");
                 textarea.focus();
             });
 
@@ -591,7 +592,7 @@ function createGoalGroupRows(table, totalColumns, score, goalGroup) {
     for (const goal of goalGroup.goals) {
         if (goal.enumerated) {
             document.getElementById('alert-dialog_text').innerText = "Enumerated goals not supported: " + goal.name;
-            document.getElementById('alert-dialog').style.visibility = 'visible';
+            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
         } else {
             createScoreRows(table, totalColumns, score, goal);
         }
@@ -1076,7 +1077,7 @@ function displayPageEnterScore() {
         } else if (ge.goal) {
             if (ge.enumerated) {
                 document.getElementById('alert-dialog_text').innerText = "Enumerated goals not supported: " + goal.name;
-                document.getElementById('alert-dialog').style.visibility = 'visible';
+                document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
             } else {
                 createScoreRows(table, totalColumns, score, ge);
             }
@@ -1146,13 +1147,13 @@ document.addEventListener("DOMContentLoaded", () => {
         sidePanel.classList.remove('open');
 
         const waitDialog = document.getElementById("wait-dialog");
-        waitDialog.style.visibility = "visible";
+        waitDialog.classList.remove("fll-sw-ui-inactive");
 
         subjective_module.uploadData(function(result) {
             // scoresSuccess
             document.getElementById('alert-dialog_text').innerText = "Uploaded " + result.numModified + " scores. message: "
                 + result.message;
-            document.getElementById('alert-dialog').style.visibility = 'visible';
+            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
         }, //
             function(result) {
                 // scoresFail
@@ -1165,7 +1166,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 document.getElementById('alert-dialog_text').innerText = "Failed to upload scores: " + message;
-                document.getElementById('alert-dialog').style.visibility = 'visible';
+                document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
             }, //
             function(result) {
                 // judgesSuccess
@@ -1184,21 +1185,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 document.getElementById('alert-dialog_text').innerText = "Failed to upload judges: " + message
-                document.getElementById('alert-dialog').style.visibility = 'visible';
+                document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
             }, //
             function() {
                 // loadSuccess
                 populateChooseJudgingGroup();
-                waitDialog.style.visibility = "hidden";
+                waitDialog.classList.add("fll-sw-ui-inactive");
             }, //
             function(message) {
                 // loadFail
                 populateChooseJudgingGroup();
 
-                waitDialog.style.visibility = "hidden";
+                waitDialog.classList.add("fll-sw-ui-inactive");
 
                 document.getElementById('alert-dialog_text').innerText = "Failed to load scores from server: " + message
-                document.getElementById('alert-dialog').style.visibility = 'visible';
+                document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
             });
     });
 
@@ -1213,7 +1214,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const totalScore = parseInt(document.getElementById("enter-score_total-score").innerText);
         if (totalScore == 0) {
-            document.getElementById("enter-score_confirm-zero").style.visibility = 'visible';
+            document.getElementById("enter-score_confirm-zero").classList.remove("fll-sw-ui-inactive");
         } else {
             saveScore();
         }
@@ -1227,10 +1228,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("enter-score_delete").addEventListener('click', () => {
         console.log("Deleting score");
 
-        document.getElementById("confirm-delete-dialog").style.visibility = "visible";
+        document.getElementById("confirm-delete-dialog").classList.remove("fll-sw-ui-inactive");
     });
     document.getElementById("confirm-delete-dialog_yes").addEventListener("click", () => {
-        document.getElementById("confirm-delete-dialog").style.visibility = "hidden";
+        document.getElementById("confirm-delete-dialog").classList.add("fll-sw-ui-inactive");
 
         const currentTeam = subjective_module.getCurrentTeam();
         let score = subjective_module.getScore(currentTeam.teamNumber);
@@ -1245,55 +1246,55 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location = subjective_module.getScoreEntryBackPage();
     });
     document.getElementById("confirm-delete-dialog_no").addEventListener("click", () => {
-        document.getElementById("confirm-delete-dialog").style.visibility = "hidden";
+        document.getElementById("confirm-delete-dialog").classList.add("fll-sw-ui-inactive");
     });
 
     document.getElementById("enter-score_no-show").addEventListener('click', () => {
         console.log("Mark no show");
-        document.getElementById("confirm-noshow-dialog").style.visibility = "visible";
+        document.getElementById("confirm-noshow-dialog").classList.remove("fll-sw-ui-inactive");
     });
     document.getElementById("confirm-noshow-dialog_yes").addEventListener("click", () => {
-        document.getElementById("confirm-noshow-dialog").style.visibility = "hidden";
+        document.getElementById("confirm-noshow-dialog").classList.add("fll-sw-ui-inactive");
         enterNoShow();
     });
     document.getElementById("confirm-noshow-dialog_no").addEventListener("click", () => {
-        document.getElementById("confirm-noshow-dialog").style.visibility = "hidden";
+        document.getElementById("confirm-noshow-dialog").classList.add("fll-sw-ui-inactive");
     });
 
 
     document.getElementById("enter-score_confirm-zero_yes").addEventListener('click', function() {
-        document.getElementById("enter-score_confirm-zero").style.visibility = 'hidden';
+        document.getElementById("enter-score_confirm-zero").classList.add("fll-sw-ui-inactive");
         saveScore();
     });
     document.getElementById("enter-score_confirm-zero_no-show").addEventListener('click', function() {
-        document.getElementById("enter-score_confirm-zero").style.visibility = 'hidden';
+        document.getElementById("enter-score_confirm-zero").classList.add("fll-sw-ui-inactive");
         enterNoShow();
     });
 
     document.getElementById("enter-score-comment-great-job-close").addEventListener('click', function() {
-        document.getElementById("enter-score-comment-great-job").style.visibility = 'hidden';
+        document.getElementById("enter-score-comment-great-job").classList.add("fll-sw-ui-inactive");
         updateGreatJobButtonBackground();
     });
     document.getElementById("enter-score-comment-think-about-close").addEventListener('click', function() {
-        document.getElementById("enter-score-comment-think-about").style.visibility = 'hidden';
+        document.getElementById("enter-score-comment-think-about").classList.add("fll-sw-ui-inactive");
         updateThinkAboutButtonBackground();
     });
 
     document.getElementById("enter-score-comment-great-job-button").addEventListener('click', function() {
-        document.getElementById("enter-score-comment-great-job").style.visibility = 'visible';
+        document.getElementById("enter-score-comment-great-job").classList.remove("fll-sw-ui-inactive");
         document.getElementById("enter-score-comment-great-job-text").focus();
     });
 
     document.getElementById("enter-score-comment-think-about-button").addEventListener('click', function() {
-        document.getElementById("enter-score-comment-think-about").style.visibility = 'visible';
+        document.getElementById("enter-score-comment-think-about").classList.remove("fll-sw-ui-inactive");
         document.getElementById("enter-score-comment-think-about-text").focus();
     });
     document.getElementById("enter-score-note-button").addEventListener('click', function() {
-        document.getElementById("enter-score-note").style.visibility = 'visible';
+        document.getElementById("enter-score-note").classList.remove("fll-sw-ui-inactive");
         document.getElementById("enter-score-note-text").focus();
     });
     document.getElementById("enter-score-note-close").addEventListener('click', function() {
-        document.getElementById("enter-score-note").style.visibility = 'hidden';
+        document.getElementById("enter-score-note").classList.add("fll-sw-ui-inactive");
     });
 
     document.getElementById("choose-judge_submit").addEventListener('click', function() {
@@ -1301,7 +1302,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.getElementById("alert-dialog_close").addEventListener('click', function() {
-        document.getElementById('alert-dialog').style.visibility = 'hidden';
+        document.getElementById('alert-dialog').classList.add("fll-sw-ui-inactive");
         if (null != alertCallback) {
             alertCallback();
         }
@@ -1309,11 +1310,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.getElementById("confirm-modified-scores-dialog_yes").addEventListener('click', function() {
-        document.getElementById('confirm-modified-scores-dialog').style.visibility = 'hidden';
+        document.getElementById('confirm-modified-scores-dialog').classList.add("fll-sw-ui-inactive");
         reloadDataConfirmed();
     });
     document.getElementById("confirm-modified-scores-dialog_no").addEventListener('click', function() {
-        document.getElementById('confirm-modified-scores-dialog').style.visibility = 'hidden';
+        document.getElementById('confirm-modified-scores-dialog').classList.add("fll-sw-ui-inactive");
     });
 
     // navigate to pages when the anchor changes

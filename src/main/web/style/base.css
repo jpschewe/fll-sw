@@ -123,27 +123,6 @@ li.no-marker {
     list-style-type: none;
 }
 
-/* dialog styling */
-.dialog {
-    visibility: hidden;
-    position: fixed;
-    left: 0px;
-    top: 0px;
-    width: 100%;
-    height: 100%;
-    z-index: 1000;
-}
-
-.dialog>div {
-    width: 300px;
-    margin: 100px auto;
-    background-color: #fff;
-    border: 1px solid #000;
-    padding: 15px;
-    text-align: center;
-}
-/* end dialog styling */
-
 .right-align {
     float: right;
 }
