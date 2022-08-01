@@ -14,6 +14,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
+<script type='text/javascript'
+    src="<c:url value='/js/fll-functions.js'/>"></script>
+
 </head>
 
 <body>
@@ -47,7 +50,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
     <h2>Tournament steps</h2>
     <a class="wide" target="_subjective"
-        href="<c:url value='/subjective/Auth' />">Enter subjective
+        href="<c:url value='/subjective/Auth'/>"
+        onclick="return openMinimalBrowser(this)">Enter subjective
         scores. This is done through the subjective web application</a>
 
     <a class="wide" target="_report"

@@ -134,3 +134,15 @@ function computeHeight(element) {
     return height;
 }
 
+/**
+ * Open the link in a new window without any browser buttons. Will fall back to standard link
+ * opening if the popup is blocked.
+ * 
+ * @param link an anchor DOM object
+ */
+function openMinimalBrowser(link) {
+    const w = window.open(link.href,
+        link.target || "_blank",
+        'menubar=no,toolbar=no,location=no,directories=no,status=no,scrollbars=no,resizable=no,dependent,left=0,top=0');
+    return w ? false : true; // allow the link to work if popup is blocked
+}
