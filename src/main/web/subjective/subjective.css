@@ -183,8 +183,13 @@ button, input {
     margin-left: 20px;
 }
 
-div.glasspane {
-    position: fixed;
+#enter-score_container {
+    display: grid;
+}
+
+#enter-score_glasspane {
+    grid-column: 1;
+    grid-row: 1;
     height: 100%;
     width: 100%;
     margin: 0px;
@@ -193,4 +198,9 @@ div.glasspane {
     left: 0px;
     background: rgba(0, 0, 0, 0.25);
     z-index: -1;
+}
+
+#enter-score_main {
+    grid-column: 1;
+    grid-row: 1;
 }

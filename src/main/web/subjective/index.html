@@ -206,25 +206,31 @@
 
     <div id='content-enter-score' class='fll-sw-ui-content'>
 
-        <table id='enter-score_score-table' class="score-entry">
-        </table>
+        <div id='enter-score_container'>
+            <div id='enter-score_glasspane'></div>
 
-        <!-- comment grid -->
-        <div>
-            <button type='button'
-                id="enter-score-comment-great-job-button"
-                class="center fll-sw-button">Great Job...</button>
+            <div id='enter-score_main'>
+                <table id='enter-score_score-table' class="score-entry">
+                </table>
 
-            <button type='button'
-                id="enter-score-comment-think-about-button"
-                class="center fll-sw-button">Think About...</button>
+                <!-- comment grid -->
+                <div>
+                    <button type='button'
+                        id="enter-score-comment-great-job-button"
+                        class="center fll-sw-button">Great
+                        Job...</button>
+
+                    <button type='button'
+                        id="enter-score-comment-think-about-button"
+                        class="center fll-sw-button">Think
+                        About...</button>
+                </div>
+                <!-- end comment grid -->
+
+                <div id='enter-score_nominates'></div>
+            </div>
         </div>
-        <!-- end comment grid -->
-
-        <div id='enter-score_nominates'></div>
-
-        <div id='enter-score_glasspane' class='glasspane'></div>
-
+        
     </div>
 
     <!--  enter score dialogs -->
