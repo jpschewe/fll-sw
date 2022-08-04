@@ -100,28 +100,33 @@
     </div>
 
     <div class='fll-sw-ui-footer' id="footer-main">
-        <button class='side-panel_open' type='button'>
-            <img src='/images/settings-button.png' />
-        </button>
+        <div class='buttonbox'>
+            <button class='side-panel_open' type='button'>
+                <img src='/images/settings-button.png' />
+            </button>
+        </div>
     </div>
 
 
     <div class='fll-sw-ui-footer' id="footer-entry">
-        <button class='side-panel_open' type='button'>
-            <img src='/images/settings-button.png' />
-        </button>
+        <div class='buttonbox'>
+            <button class='side-panel_open' type='button'>
+                <img src='/images/settings-button.png' />
+            </button>
 
-        <a class='fll-sw-button fll-sw-footer-button'
-            href='#score-summary'>Score Summary</a>
+            <a class='fll-sw-button' href='#score-summary'>Score
+                Summary</a>
+        </div>
     </div>
 
     <div class='fll-sw-ui-footer' id="footer-summary">
-        <button class='side-panel_open' type='button'>
-            <img src='/images/settings-button.png' />
-        </button>
+        <div class='buttonbox'>
+            <button class='side-panel_open' type='button'>
+                <img src='/images/settings-button.png' />
+            </button>
 
-        <a class='fll-sw-button fll-sw-footer-button' href='#teams-list'>Enter
-            Scores</a>
+            <a class='fll-sw-button' href='#teams-list'>Enter Scores</a>
+        </div>
     </div>
 
     <div id="content-top" class="fll-sw-ui-content">
@@ -131,10 +136,12 @@
             You have modified scores on this device. If you clear the
             data, you will loose these scores. Would you like to clear
             the existing data and load from scratch?
-            <button id='index-page_clear' class='fll-sw-button'>Clear
-                the data</button>
-            <button id='index-page_keep' class='fll-sw-button'>Enter
-                more scores</button>
+            <div class='buttonbox-fill'>
+                <button id='index-page_clear' class='fll-sw-button'>Clear
+                    the data</button>
+                <button id='index-page_keep' class='fll-sw-button'>Enter
+                    more scores</button>
+            </div>
         </div>
     </div>
     <!-- end top page -->
@@ -161,9 +168,10 @@
         <input class="full-width" type='text'
             id='choose-judge_new-judge-name'
             placeholder='Enter your name'></input>
-
-        <button class="wide full-width fll-sw-button" type='button'
-            id='choose-judge_submit'>Submit</button>
+        <div class='buttonbox-fill'>
+            <button class="wide fll-sw-button" type='button'
+                id='choose-judge_submit'>Submit</button>
+        </div>
     </div>
 
     <div id="content-teams-list" class="fll-sw-ui-content">
@@ -230,7 +238,7 @@
                 <div id='enter-score_nominates'></div>
             </div>
         </div>
-        
+
     </div>
 
     <!--  enter score dialogs -->
@@ -290,16 +298,18 @@
     <!--  end enter score dialogs -->
 
     <div class='fll-sw-ui-footer' id="footer-enter-score">
-        <button id='enter-score_save' type='button'
-            class='fll-sw-button'>Save Changes</button>
-        <button id='enter-score_cancel' type='button'
-            class='fll-sw-button'>Cancel Changes</button>
-        <button id='enter-score_delete' type='button'
-            class='fll-sw-button'>Delete</button>
-        <button id='enter-score_no-show' type='button'
-            class='fll-sw-button'>No Show</button>
-        <button id='enter-score_toggle-review-mode' type='button'
-            class='fll-sw-button'>Review Toggle</button>
+        <div class='buttonbox-fill'>
+            <button id='enter-score_save' type='button'
+                class='fll-sw-button'>Save Changes</button>
+            <button id='enter-score_cancel' type='button'
+                class='fll-sw-button'>Cancel Changes</button>
+            <button id='enter-score_delete' type='button'
+                class='fll-sw-button'>Delete</button>
+            <button id='enter-score_no-show' type='button'
+                class='fll-sw-button'>No Show</button>
+            <button id='enter-score_toggle-review-mode' type='button'
+                class='fll-sw-button'>Review Toggle</button>
+        </div>
     </div>
 
     <div class="fll-sw-ui-dialog fll-sw-ui-inactive"

@@ -102,11 +102,6 @@ span.sliderTickMark {
     border: 1px solid #ddd;
 }
 
-.fll-sw-footer-button {
-    position: absolute;
-    top: 8%;
-}
-
 a.fll-sw-button:hover, div.fll-sw-button:hover, label.fll-sw-button:hover
     {
     background-color: #ddd;
@@ -163,12 +158,6 @@ button, input {
     margin: 10px;
 }
 
-/* buttons at the bottom of the score entry page */
-#footer-enter-score button {
-    /* assumes 5 buttons with margins */
-    width: 15%;
-}
-
 #enter-score_toggle-review-mode {
     float: right;
 }
@@ -203,4 +192,18 @@ button, input {
 #enter-score_main {
     grid-column: 1;
     grid-row: 1;
+}
+
+.buttonbox {
+    display: flex;
+    align-items: center;
+}
+
+.buttonbox-fill {
+    display: flex;
+    align-items: center;
+}
+
+.buttonbox-fill>* {
+    flex-grow: 1;
 }

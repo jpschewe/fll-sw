@@ -117,6 +117,7 @@ a.wide:visited, a.wide:link {
 
 .full-width {
     width: 100%;
+    box-sizing: border-box;
 }
 
 li.no-marker {
