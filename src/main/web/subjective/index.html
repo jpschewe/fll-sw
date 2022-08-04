@@ -28,13 +28,6 @@
 
 <body>
 
-    <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="wait-dialog">
-        <div>
-            <div id='wait-dialog_text'>Loading data. Please
-                wait...</div>
-        </div>
-    </div>
-
     <div id="side-panel" class='fll-sw-ui-panel'>
         <h2>Side panel header</h2>
         <div>
@@ -75,6 +68,7 @@
         </div>
     </div>
 
+    <!--  headers -->
     <div class='fll-sw-ui-header' id='header-main'>
         <div class='center'>
             <span id='header-main_title'></span>
@@ -99,35 +93,8 @@
         </div>
     </div>
 
-    <div class='fll-sw-ui-footer' id="footer-main">
-        <div class='buttonbox'>
-            <button class='side-panel_open' type='button'>
-                <img src='/images/settings-button.png' />
-            </button>
-        </div>
-    </div>
+    <!--  end headers -->
 
-
-    <div class='fll-sw-ui-footer' id="footer-entry">
-        <div class='buttonbox'>
-            <button class='side-panel_open' type='button'>
-                <img src='/images/settings-button.png' />
-            </button>
-
-            <a class='fll-sw-button' href='#score-summary'>Score
-                Summary</a>
-        </div>
-    </div>
-
-    <div class='fll-sw-ui-footer' id="footer-summary">
-        <div class='buttonbox'>
-            <button class='side-panel_open' type='button'>
-                <img src='/images/settings-button.png' />
-            </button>
-
-            <a class='fll-sw-button' href='#teams-list'>Enter Scores</a>
-        </div>
-    </div>
 
     <div id="content-top" class="fll-sw-ui-content">
         <p id='index-page_messages'></p>
@@ -241,8 +208,106 @@
 
     </div>
 
+
+    <!-- footers -->
+    <div class='fll-sw-ui-footer' id="footer-main">
+        <div class='buttonbox'>
+            <button class='side-panel_open' type='button'>
+                <img src='/images/settings-button.png' />
+            </button>
+        </div>
+    </div>
+
+
+    <div class='fll-sw-ui-footer' id="footer-entry">
+        <div class='buttonbox'>
+            <button class='side-panel_open' type='button'>
+                <img src='/images/settings-button.png' />
+            </button>
+
+            <a class='fll-sw-button' href='#score-summary'>Score
+                Summary</a>
+        </div>
+    </div>
+
+    <div class='fll-sw-ui-footer' id="footer-summary">
+        <div class='buttonbox'>
+            <button class='side-panel_open' type='button'>
+                <img src='/images/settings-button.png' />
+            </button>
+
+            <a class='fll-sw-button' href='#teams-list'>Enter Scores</a>
+        </div>
+    </div>
+
+    <div class='fll-sw-ui-footer' id="footer-enter-score">
+        <div class='buttonbox-fill'>
+            <button id='enter-score_save' type='button'
+                class='fll-sw-button'>Save Changes</button>
+            <button id='enter-score_cancel' type='button'
+                class='fll-sw-button'>Cancel Changes</button>
+            <button id='enter-score_delete' type='button'
+                class='fll-sw-button'>Delete</button>
+            <button id='enter-score_no-show' type='button'
+                class='fll-sw-button'>No Show</button>
+            <button id='enter-score_toggle-review-mode' type='button'
+                class='fll-sw-button'>Review Toggle</button>
+        </div>
+    </div>
+    <!--  end footers -->
+
+    <!--  dialogs -->
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="wait-dialog">
+        <div>
+            <div id='wait-dialog_text'>Loading data. Please
+                wait...</div>
+        </div>
+    </div>
+
+
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive"
+        id="confirm-delete-dialog">
+        <div>
+            <p id='confirm-delete-dialog_text'>Are you sure you want
+                to delete the score?</p>
+            <button type='button' id='confirm-delete-dialog_yes'>Yes</button>
+            <button type='button' id='confirm-delete-dialog_no'>No</button>
+        </div>
+    </div>
+
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive"
+        id="confirm-noshow-dialog">
+        <div>
+            <p id='confirm-noshow-dialog_text'>Are you sure you want
+                to enter a no show?</p>
+            <button type='button' id='confirm-noshow-dialog_yes'>Yes</button>
+            <button type='button' id='confirm-noshow-dialog_no'>No</button>
+        </div>
+    </div>
+
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive"
+        id="confirm-modified-scores-dialog">
+        <div>
+            <p id='confirm-modified-scores-dialog_text'>You have
+                modified scores, this will remove them. Are you sure you
+                want to lose them and load from the server?</p>
+            <button type='button'
+                id='confirm-modified-scores-dialog_yes'>Yes</button>
+            <button type='button' id='confirm-modified-scores-dialog_no'>No</button>
+        </div>
+    </div>
+
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="alert-dialog">
+        <div>
+            <p id='alert-dialog_text'></p>
+            <button type='button' id='alert-dialog_close'>Ok</button>
+        </div>
+    </div>
+
+
     <!--  enter score dialogs -->
 
+    <!--  container for goal comment dialogs -->
     <div id="enter-score-goal-comments"></div>
 
     <div class='fll-sw-ui-dialog fll-sw-ui-inactive'
@@ -297,59 +362,6 @@
 
     <!--  end enter score dialogs -->
 
-    <div class='fll-sw-ui-footer' id="footer-enter-score">
-        <div class='buttonbox-fill'>
-            <button id='enter-score_save' type='button'
-                class='fll-sw-button'>Save Changes</button>
-            <button id='enter-score_cancel' type='button'
-                class='fll-sw-button'>Cancel Changes</button>
-            <button id='enter-score_delete' type='button'
-                class='fll-sw-button'>Delete</button>
-            <button id='enter-score_no-show' type='button'
-                class='fll-sw-button'>No Show</button>
-            <button id='enter-score_toggle-review-mode' type='button'
-                class='fll-sw-button'>Review Toggle</button>
-        </div>
-    </div>
-
-    <div class="fll-sw-ui-dialog fll-sw-ui-inactive"
-        id="confirm-delete-dialog">
-        <div>
-            <p id='confirm-delete-dialog_text'>Are you sure you want
-                to delete the score?</p>
-            <button type='button' id='confirm-delete-dialog_yes'>Yes</button>
-            <button type='button' id='confirm-delete-dialog_no'>No</button>
-        </div>
-    </div>
-
-    <div class="fll-sw-ui-dialog fll-sw-ui-inactive"
-        id="confirm-noshow-dialog">
-        <div>
-            <p id='confirm-noshow-dialog_text'>Are you sure you want
-                to enter a no show?</p>
-            <button type='button' id='confirm-noshow-dialog_yes'>Yes</button>
-            <button type='button' id='confirm-noshow-dialog_no'>No</button>
-        </div>
-    </div>
-
-    <div class="fll-sw-ui-dialog fll-sw-ui-inactive"
-        id="confirm-modified-scores-dialog">
-        <div>
-            <p id='confirm-modified-scores-dialog_text'>You have
-                modified scores, this will remove them. Are you sure you
-                want to lose them and load from the server?</p>
-            <button type='button'
-                id='confirm-modified-scores-dialog_yes'>Yes</button>
-            <button type='button' id='confirm-modified-scores-dialog_no'>No</button>
-        </div>
-    </div>
-
-    <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="alert-dialog">
-        <div>
-            <p id='alert-dialog_text'></p>
-            <button type='button' id='alert-dialog_close'>Ok</button>
-        </div>
-    </div>
-
+    <!--  end dialogs -->
 </body>
 </html>
