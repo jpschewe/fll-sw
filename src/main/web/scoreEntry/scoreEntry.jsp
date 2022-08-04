@@ -139,6 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
     method="POST"
     name="scoreEntry"
     id="scoreEntry"
+     class="fll-sw-ui-body"
     >
     <input
       type='hidden'
@@ -168,6 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
       value='${team.teamNumber}'
       readonly>
 
+<header>
           <!-- top info bar (team name etc) -->
           <table
             id='top_info'
@@ -238,8 +240,9 @@ document.addEventListener('DOMContentLoaded', function() {
             </c:if>
 
           </table> <!--  end info bar -->
+</header>
 
-
+<main>
       <!-- score entry -->
           <table
             class='score-entry'>
@@ -346,9 +349,15 @@ document.addEventListener('DOMContentLoaded', function() {
             </tr>
             
           </table> <!-- end score entry table  -->
+</main>
+
+    <footer>
+    <div>Challenge revision: ${challengeDescription.revision}</div>
+</footer>
 
   </form>
   <!-- end score entry form -->
+
 
     <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="yesno-dialog">
         <div>
@@ -358,7 +367,5 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
     
-    <div>Challenge revision: ${challengeDescription.revision}</div>
-
 </body>
 </html>
