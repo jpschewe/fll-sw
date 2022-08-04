@@ -142,7 +142,7 @@ button, input {
     width: 65%;
 }
 
-.fll-sw-ui-header {
+header {
     font-weight: bold;
 }
 
@@ -155,7 +155,7 @@ button, input {
     font-weight: bold;
 }
 
-.fll-sw-ui-footer button {
+footer button {
     margin: 10px;
 }
 
