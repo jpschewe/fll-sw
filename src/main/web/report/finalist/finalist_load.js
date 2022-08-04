@@ -21,22 +21,22 @@ const finalistScheduleLoad = {}
                 // success
                 finalist_module.loadNominieesAndSchedules(function() {
                     // success
-                    waitDialog.style.visibility = "hidden";
+                    waitDialog.classList.add("fll-sw-ui-inactive");
                     finalist_module.saveToLocalStorage();
                     window.location.assign("params.html");
                 }, function(msg) {
                     // error
-                    waitDialog.style.visibility = "hidden";
+                    waitDialog.classList.add("fll-sw-ui-inactive");
                     alert("Failure loading nominees and schedules: " + msg);
                 });
             }, function(msg) {
                 // error
-                waitDialog.style.visibility = "hidden";
+                waitDialog.classList.add("fll-sw-ui-inactive");
                 alert("Failure loading categories and scores: " + msg);
             });
         }, function(msg) {
             // failure
-            waitDialog.style.visibility = "hidden";
+            waitDialog.classList.add("fll-sw-ui-inactive");
             alert("Failure loading current tournament: " + msg);
         });
 
@@ -47,12 +47,12 @@ const finalistScheduleLoad = {}
 
         finalist_module.loadCategoriesAndScores(function() {
             // success
-            waitDialog.style.visibility = "hidden";
+            waitDialog.classList.add("fll-sw-ui-inactive");
             finalist_module.saveToLocalStorage();
             window.location.assign("params.html");
         }, function(msg) {
             // error
-            waitDialog.style.visibility = "hidden";
+            waitDialog.classList.add("fll-sw-ui-inactive");
             alert("Failure loading categories and scores: " + msg);
         });
     }
@@ -61,7 +61,7 @@ const finalistScheduleLoad = {}
         const waitDialog = document.getElementById("wait-dialog");
 
         const chooseClear = document.getElementById("choose_clear");
-        chooseClear.style.visibility = "hidden";
+        chooseClear.classList.add("fll-sw-ui-inactive");
 
         document.getElementById("clear").addEventListener('click', function() {
             clearAndLoad();
@@ -71,7 +71,7 @@ const finalistScheduleLoad = {}
             refreshData();
         });
 
-        waitDialog.style.visibility = "visible";
+        waitDialog.classList.remove("fll-sw-ui-inactive");
 
         // get current state before anything loads
         finalist_module.loadFromLocalStorage();
@@ -87,15 +87,15 @@ const finalistScheduleLoad = {}
                     _log("Clearing data for old tournament: " + currentTournament);
                     clearAndLoad();
                 } else {
-                    waitDialog.style.visibility = "hidden";
-                    chooseClear.style.visibility = "visible";
+                    waitDialog.classList.add("fll-sw-ui-inactive");
+                    chooseClear.classList.remove("fll-sw-ui-inactive");
                 }
             } else {
                 clearAndLoad();
             }
         }, function(msg) {
             // failure
-            waitDialog.style.visibility = "hidden";
+            waitDialog.classList.add("fll-sw-ui-inactive");
             alert("Failure loading current tournament: " + msg);
         });
 

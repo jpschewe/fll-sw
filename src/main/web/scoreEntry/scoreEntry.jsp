@@ -96,12 +96,12 @@ function check_restrictions() {
     if(submitScoreButton) {
       submitScoreButton.disabled = true;
     }
-    document.getElementById("score-errors").style.visibility = "visible";
+    document.getElementById("score-errors").classList.remove("fll-sw-ui-inactive");
   } else {
     if(submitScoreButton) {
       submitScoreButton.disabled = false;
     }
-    document.getElementById("score-errors").style.visibility = "hidden";
+    document.getElementById("score-errors").classList.add("fll-sw-ui-inactive");
   }
 }
 
@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
   </form>
   <!-- end score entry form -->
 
-    <div class="dialog" id="yesno-dialog">
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="yesno-dialog">
         <div>
             <p id='yesno-dialog_text'></p>
             <button type='button' id='yesno-dialog_yes'>Yes</button>

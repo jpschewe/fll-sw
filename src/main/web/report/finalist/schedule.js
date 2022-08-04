@@ -281,9 +281,9 @@ const finalistScheduleModule = {};
         waitList.push(finalist_module.uploadNonNumericNominees(
             nonNumericSuccess, nonNumericFail));
 
-        document.getElementById("wait-dialog").style.visibility = "visible";
+        document.getElementById("wait-dialog").classList.remove("fll-sw-ui-inactive");
         Promise.all(waitList).then(function() {
-            document.getElementById("wait-dialog").style.visibility = "hidden";
+            document.getElementById("wait-dialog").classList.add("fll-sw-ui-inactive");
         });
     }
 

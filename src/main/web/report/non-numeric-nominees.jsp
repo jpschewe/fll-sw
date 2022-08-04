@@ -56,7 +56,7 @@
 
     <button id="nominees_store">Store Nominees</button>
 
-    <div class="dialog" id="wait-dialog">
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="wait-dialog">
         <div>
             <p id='wait-dialog_text'>Loading data. Please wait...</p>
         </div>

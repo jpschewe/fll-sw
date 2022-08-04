@@ -31,9 +31,9 @@ const nonNumericNominees = {}
         waitList.push(finalist_module.uploadNonNumericNominees(
             nonNumericSuccess, nonNumericFail));
 
-        document.getElementById("wait-dialog").style.visibility = "visible";
+        document.getElementById("wait-dialog").classList.remove("fll-sw-ui-inactive");
         Promise.all(waitList).then(function(_) {
-            document.getElementById("wait-dialog").style.visibility = "hidden";
+            document.getElementById("wait-dialog").classList.add("fll-sw-ui-inactive");
         });
     }
 
@@ -44,7 +44,7 @@ const nonNumericNominees = {}
 
         const waitDialog = document.getElementById("wait-dialog");
         document.getElementById("wait-dialog_text").innerText = "Loading data. Please wait...";
-        waitDialog.style.visibility = "visible";
+        waitDialog.classList.remove("fll-sw-ui-inactive");
 
         document.getElementById("nominees_store").addEventListener("click", function() {
             uploadData();
@@ -83,7 +83,7 @@ const nonNumericNominees = {}
             waitList.push(nonNumericNomineesPromise);
 
             Promise.all(waitList).then(function() {
-                waitDialog.style.visibility = "hidden";
+                waitDialog.classList.add("fll-sw-ui-inactive");
 
                 nonNumericUi.initialize();
             });

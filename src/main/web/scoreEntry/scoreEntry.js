@@ -10,10 +10,10 @@ document.addEventListener("DOMContentLoaded", function() {
     // if set, return true to submit, false to skip submit
     var yesCallback = null;
 
-    document.getElementById("verification-warning").style.visibility = "hidden";
+    document.getElementById("verification-warning").classList.add("fll-sw-ui-inactive");
 
     document.getElementById("yesno-dialog_yes").addEventListener("click", function() {
-        document.getElementById("yesno-dialog").style.visibility = "hidden";
+        document.getElementById("yesno-dialog").classList.add("fll-sw-ui-inactive");
 
         let dosubmit = true;
         if (null != yesCallback) {
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     document.getElementById("yesno-dialog_no").addEventListener("click", function() {
-        document.getElementById("yesno-dialog").style.visibility = "hidden";
+        document.getElementById("yesno-dialog").classList.add("fll-sw-ui-inactive");
     });
 
     const submitScoreButton = document.getElementById("submit_score");
@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             document.getElementById("yesno-dialog_text").innerText = text;
-            document.getElementById("yesno-dialog").style.visibility = "visible";
+            document.getElementById("yesno-dialog").classList.remove("fll-sw-ui-inactive");
         });
     }
 
@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
             document.getElementById("yesno-dialog_text").innerText =
                 "Are you sure you want to delete this score?";
-            document.getElementById("yesno-dialog").style.visibility = "visible";
+            document.getElementById("yesno-dialog").classList.remove("fll-sw-ui-inactive");
         });
     }
 
@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function() {
             };
 
             document.getElementById("yesno-dialog_text").innerText = "Are you sure this is a 'No Show'?";
-            document.getElementById("yesno-dialog").style.visibility = "visible";
+            document.getElementById("yesno-dialog").classList.remove("fll-sw-ui-inactive");
         });
     }
 
@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 text = "Cancel and lose data?"
             }
             document.getElementById("yesno-dialog_text").innerText = text;
-            document.getElementById("yesno-dialog").style.visibility = "visible";
+            document.getElementById("yesno-dialog").classList.remove("fll-sw-ui-inactive");
         });
     }
 
