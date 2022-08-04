@@ -27,7 +27,8 @@ td.border-right {
 
 table.score-entry {
     table-layout: fixed;
-    width: 100%;
+    /* 100% causes a horizontal scroll bar */
+    width: 99%;
     border-collapse: collapse;
 }
 
