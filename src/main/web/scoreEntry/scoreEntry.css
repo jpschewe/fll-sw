@@ -64,7 +64,7 @@ table .score-entry {
     background-color: yellow;
 }
 
-td .goal-title {
+.goal-title {
     font-weight: bold;
     text-align: right;
 }

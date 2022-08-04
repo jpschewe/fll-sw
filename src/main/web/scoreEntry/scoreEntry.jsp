@@ -168,17 +168,6 @@ document.addEventListener('DOMContentLoaded', function() {
       value='${team.teamNumber}'
       readonly>
 
-    <table
-      width='100%'
-      border="0"
-      cellpadding="0"
-      cellspacing="0"
-      align="center">
-      <!-- info bar -->
-      <tr>
-        <td
-          align="center"
-          valign="middle">
           <!-- top info bar (team name etc) -->
           <table
             id='top_info'
@@ -250,16 +239,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
           </table> <!--  end info bar -->
 
-        </td>
-      </tr>
-
 
       <!-- score entry -->
-      <tr>
-        <td
-          align="center"
-          valign="middle">
-
           <table
             class='score-entry'>
             <colgroup>
@@ -366,10 +347,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
           </table> <!-- end score entry table  -->
 
-        </td>
-      </tr>
-    </table>
-    <!-- end table to center everything -->
   </form>
   <!-- end score entry form -->
 
