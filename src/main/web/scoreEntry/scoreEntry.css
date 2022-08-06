@@ -87,3 +87,12 @@ input.range {
     border: 0;
     background: transparent;
 }
+
+.verify-score-label {
+    color: red;
+    margin-right: 10px;
+}
+
+.verify-score-buttonbox {
+    width: 30%;
+}

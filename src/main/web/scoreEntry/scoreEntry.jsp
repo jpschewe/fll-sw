@@ -294,9 +294,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     readonly
                     tabindex='-1'></td>
                 </tr>
-                <%
-                  ScoreEntry.generateVerificationInput(out, request, session);
-                %>
               </c:otherwise>
             </c:choose>
             <!-- end check for bye -->
@@ -305,6 +302,12 @@ document.addEventListener('DOMContentLoaded', function() {
 </main>
 
         <footer>
+        <div class='score-entry buttonbox'>
+                <%
+                  ScoreEntry.generateVerificationInput(out, request, session);
+                %>
+        </div>
+        
             <div class='buttonbox'>
                 <c:choose>
                     <c:when test="${practice}">
