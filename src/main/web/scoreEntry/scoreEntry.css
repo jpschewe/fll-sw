@@ -96,3 +96,7 @@ input.range {
 .verify-score-buttonbox {
     width: 30%;
 }
+
+.total-score-label {
+    text-decoration: underline;
+}

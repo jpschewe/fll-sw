@@ -284,9 +284,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 %>
 
                 <!-- Total Score -->
-                <tr>
-                  <td colspan='3'><font size='4'><u>Total
-                        Score:</u></font></td>
+                <tr class='total-score-container'>
+                  <td colspan='3' class='total-score-label'>Total
+                        Score:</td>
                   <td align='right' class='score-cell'><input
                     type='text'
                     name='totalScore'
