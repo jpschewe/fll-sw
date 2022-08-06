@@ -15,9 +15,17 @@ table .score-entry {
     font-size: large;
 }
 
+.enum-button {
+    cursor: pointer;
+}
+
 .score-entry .enum-button {
     display: block;
     border: 1px solid #AAAAAA;
+}
+
+.y-n-button {
+    cursor: pointer;
 }
 
 .score-entry .y-n-button {
@@ -78,7 +86,7 @@ table .score-entry {
     line-height: 2px;
 }
 
-input.range {
+input[type=range] {
     bottom: -10px;
     position: relative;
     width: 100%;
@@ -86,6 +94,7 @@ input.range {
     padding: 0;
     border: 0;
     background: transparent;
+    cursor: pointer;
 }
 
 .verify-score-label {

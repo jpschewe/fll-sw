@@ -98,6 +98,10 @@ button, input {
     font-weight: inherit;
 }
 
+input[type=range] {
+    cursor: pointer;
+}
+
 .score-summary-right-elements {
     padding-left: 1em;
     padding-right: 1em;
@@ -150,4 +154,3 @@ footer button {
     width: 45%;
     margin-left: 20px;
 }
-

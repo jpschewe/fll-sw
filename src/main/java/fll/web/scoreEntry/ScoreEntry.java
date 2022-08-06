@@ -902,8 +902,8 @@ public final class ScoreEntry {
       generateYesNoButtons(name, writer);
     } else if (range <= SLIDER_RANGE_MAX) {
       // use slider
-      writer.println(String.format("<input class='range' type='range' min='%d' max='%d' class='slider' id='%s' />",
-                                   (int) min, (int) max, getSliderName(name)));
+      writer.println(String.format("<input type='range' min='%d' max='%d' class='slider' id='%s' />", (int) min,
+                                   (int) max, getSliderName(name)));
       // tick marks
       final int numInternalTicks = (int) (max
           - min
