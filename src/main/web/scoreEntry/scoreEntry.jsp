@@ -301,61 +301,50 @@ document.addEventListener('DOMContentLoaded', function() {
             </c:choose>
             <!-- end check for bye -->
 
-            <tr>
-<c:choose>
-<c:when test="${practice}">
-<td colspan='3'>&nbsp;</td>
-<td><button type='button' id='reset_score'>Reset Form</button></td>
-</c:when>
-<c:otherwise>
-              <td
-                colspan='3'
-                align='right'>
-                
-                <c:if test="${not isBye}">
-                      <button
-                      type='button'
-                        id='submit_score'
-                        >Submit Score</button>
-                </c:if> 
-                
-                <button
-                type='button'
-                id='cancel'
-                >Cancel</button> 
-                
-                <c:if
-                  test="${EditFlag and isLastRun}">
-                  <button
-                    type='button'
-                    id='submit_delete'
-                    name='submit_delete'
-                    >Delete Score</button>
-                </c:if>
-                
-                </td>
-                
-              <c:if test="${not isBye}">
-                <td colspan='2'>
-                <button
-                  type='button'
-                  id='no_show'
-                  name='no_show'
-                  value='No Show'>No Show</button></td>
-              </c:if>
-              
-            </c:otherwise>
-            </c:choose>
-            </tr>
-            
-          </table> <!-- end score entry table  -->
+           </table> <!-- end score entry table  -->
 </main>
 
-    <footer>
-    <div>Challenge revision: ${challengeDescription.revision}</div>
-</footer>
+        <footer>
+            <div class='buttonbox'>
+                <c:choose>
+                    <c:when test="${practice}">
+                        <button type='button' id='reset_score' class='float_right'>Reset
+                            Form</button>
+                    </c:when>
+                    <c:otherwise>
+                        <c:if test="${not isBye}">
+                            <button type='button' id='submit_score' class='float_right'>Submit
+                                Score</button>
+                        </c:if>
 
-  </form>
+                        <button type='button' id='cancel' class='float_right'>Cancel</button>
+
+                        <c:if test="${EditFlag and isLastRun}">
+                            <button type='button' id='submit_delete'
+                                name='submit_delete' class='float_right'>Delete
+                                Score</button>
+                        </c:if>
+
+
+                        <c:if test="${not isBye}">
+                            <button type='button' id='no_show'
+                                name='no_show' value='No Show' class='float_right'>No
+                                Show</button>
+                        </c:if>
+
+                    </c:otherwise>
+                </c:choose>
+            </div>
+            <div class='buttonbox'>
+                <span id="challenge_revision">Challenge revision:
+                    ${challengeDescription.revision}</span>
+                <span id="software_version" class='float_right'>
+                    Software version:
+                    <%=fll.Version.getVersion()%></span>
+            </div>
+        </footer>
+
+    </form>
   <!-- end score entry form -->
 
 

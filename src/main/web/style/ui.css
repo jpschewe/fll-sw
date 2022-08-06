@@ -77,3 +77,20 @@ html, body {
     text-align: center;
 }
 /* end dialog styling */
+.buttonbox {
+    display: flex;
+    align-items: center;
+}
+
+.buttonbox-fill {
+    display: flex;
+    align-items: center;
+}
+
+.buttonbox-fill>* {
+    flex-grow: 1;
+}
+
+.buttonbox .float_right {
+    margin-left: auto;
+}

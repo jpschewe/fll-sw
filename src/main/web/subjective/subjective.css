@@ -194,17 +194,3 @@ footer button {
     grid-column: 1;
     grid-row: 1;
 }
-
-.buttonbox {
-    display: flex;
-    align-items: center;
-}
-
-.buttonbox-fill {
-    display: flex;
-    align-items: center;
-}
-
-.buttonbox-fill>* {
-    flex-grow: 1;
-}
