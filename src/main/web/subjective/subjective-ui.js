@@ -1031,6 +1031,8 @@ function displayPageTeamsList() {
 }
 
 function displayPageScoreSummary() {
+    document.getElementById("header-main_title").innerText = "Score Summary";
+
     displayPage(document.getElementById("header-main"), document.getElementById("content-score-summary"), document.getElementById("footer-summary"));
 
     document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
