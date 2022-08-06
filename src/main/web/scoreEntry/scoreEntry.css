@@ -100,3 +100,7 @@ input.range {
 .total-score-label {
     text-decoration: underline;
 }
+
+.score-entry-buttons>fll-sw-button:first-child {
+    margin-left: auto;
+}

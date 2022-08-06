@@ -308,42 +308,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 %>
         </div>
         
-            <div class='buttonbox'>
+            <div class='buttonbox score-entry-buttons'>
+            
+            
+                <span id="challenge_revision">Challenge revision:
+                    ${challengeDescription.revision}</span>
+                <span id="software_version">
+                    Software version:
+                    <%=fll.Version.getVersion()%></span>
+                    
+                    <span class='float_right'>&nbsp;</span>
                 <c:choose>
                     <c:when test="${practice}">
-                        <button type='button' id='reset_score' class='float_right'>Reset
+                        <button type='button' id='reset_score' class='fll-sw-button'>Reset
                             Form</button>
                     </c:when>
                     <c:otherwise>
                         <c:if test="${not isBye}">
-                            <button type='button' id='submit_score' class='float_right'>Submit
+                            <button type='button' id='submit_score' class='fll-sw-button'>Submit
                                 Score</button>
                         </c:if>
 
-                        <button type='button' id='cancel' class='float_right'>Cancel</button>
+                        <button type='button' id='cancel' class='fll-sw-button'>Cancel</button>
 
                         <c:if test="${EditFlag and isLastRun}">
                             <button type='button' id='submit_delete'
-                                name='submit_delete' class='float_right'>Delete
+                                name='submit_delete' class='fll-sw-button'>Delete
                                 Score</button>
                         </c:if>
 
 
                         <c:if test="${not isBye}">
                             <button type='button' id='no_show'
-                                name='no_show' value='No Show' class='float_right'>No
+                                name='no_show' value='No Show' class='fll-sw-button'>No
                                 Show</button>
                         </c:if>
 
                     </c:otherwise>
                 </c:choose>
-            </div>
-            <div class='buttonbox'>
-                <span id="challenge_revision">Challenge revision:
-                    ${challengeDescription.revision}</span>
-                <span id="software_version" class='float_right'>
-                    Software version:
-                    <%=fll.Version.getVersion()%></span>
             </div>
         </footer>
 

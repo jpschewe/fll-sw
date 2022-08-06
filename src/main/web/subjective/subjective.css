@@ -94,24 +94,6 @@ span.sliderTickMark {
     background-position: center center;
 }
 
-.fll-sw-button {
-    font-weight: bold;
-    cursor: pointer;
-    padding: 10px;
-    text-decoration: none;
-    margin: 4px;
-    border: 1px solid #ddd;
-}
-
-a.fll-sw-button:hover, div.fll-sw-button:hover, label.fll-sw-button:hover
-    {
-    background-color: #ddd;
-}
-
-a.fll-sw-button:visited, a.fll-sw-button:link {
-    color: inherit;
-}
-
 button, input {
     font-weight: inherit;
 }
