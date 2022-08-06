@@ -242,7 +242,9 @@ document.addEventListener('DOMContentLoaded', function() {
           </table> <!--  end info bar -->
 </header>
 
-<main>
+<main id='review-mode_container'>
+                <div id='review-mode_glasspane'></div>
+
       <!-- score entry -->
           <table
             class='score-entry'>
@@ -302,12 +304,17 @@ document.addEventListener('DOMContentLoaded', function() {
 </main>
 
         <footer>
-        <div class='score-entry buttonbox'>
+            <div class='score-entry buttonbox'>
+
+                <button id='score-entry_toggle-review-mode'
+                    type='button' class='fll-sw-button'>Review
+                    Toggle</button>
+
                 <%
-                  ScoreEntry.generateVerificationInput(out, request, session);
+                ScoreEntry.generateVerificationInput(out, request, session);
                 %>
-        </div>
-        
+            </div>
+
             <div class='buttonbox score-entry-buttons'>
             
             

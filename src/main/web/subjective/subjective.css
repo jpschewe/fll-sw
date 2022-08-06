@@ -141,10 +141,6 @@ footer button {
     margin: 10px;
 }
 
-#enter-score_toggle-review-mode {
-    float: right;
-}
-
 #enter-score-comment-great-job-button {
     width: 45%;
     margin-right: 20px;
@@ -155,24 +151,3 @@ footer button {
     margin-left: 20px;
 }
 
-#enter-score_container {
-    display: grid;
-}
-
-#enter-score_glasspane {
-    grid-column: 1;
-    grid-row: 1;
-    height: 100%;
-    width: 100%;
-    margin: 0px;
-    padding: 0px;
-    top: 0px;
-    left: 0px;
-    background: rgba(0, 0, 0, 0.25);
-    z-index: -1;
-}
-
-#enter-score_main {
-    grid-column: 1;
-    grid-row: 1;
-}
