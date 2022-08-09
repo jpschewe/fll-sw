@@ -1,3 +1,4 @@
+* #971 - Add review mode to performance score entry
 * #972 - Add review mode to subjective application
 * #1036 - display progress dialog while writing outputs from the scheduler UI
 * #793 - Return to original page after editing team data
