@@ -1,3 +1,8 @@
+body {
+    /* keeps the body from scrolling */
+    overflow: hidden;
+}
+
 #score-entry {
     height: 100%;
 }
