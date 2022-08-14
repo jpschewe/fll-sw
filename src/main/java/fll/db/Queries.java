@@ -623,6 +623,15 @@ public final class Queries {
     return numRowsUpdated;
   }
 
+  private static int getSiblingDbLine(final int ptLine) {
+    final int siblingDbLine = ptLine
+        % 2 == 0 ? ptLine
+            - 1
+            : ptLine
+                + 1;
+    return siblingDbLine;
+  }
+
   /**
    * Note that a performance score has changed and update the playoff table with
    * this new information.
@@ -664,11 +673,7 @@ public final class Queries {
 
       H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), division, team, runNumber);
 
-      final int siblingDbLine = ptLine
-          % 2 == 0 ? ptLine
-              - 1
-              : ptLine
-                  + 1;
+      final int siblingDbLine = getSiblingDbLine(ptLine);
       final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, siblingDbLine,
                                                          runNumber);
 
@@ -906,23 +911,23 @@ public final class Queries {
                                          final int lineNumber)
       throws SQLException {
 
+    final int playoffRound = Playoff.getPlayoffRound(connection, currentTournament, division, runNumber);
+
     try (PreparedStatement prep = connection.prepareStatement("UPDATE PlayoffData" //
         + " SET Team = ?" //
         + ", Printed = ?" //
         + " WHERE event_division = ?" //
         + " AND Tournament = ?" //
-        + " AND run_number = ?" //
+        + " AND PlayoffRound = ?" //
         + " AND LineNumber = ?")) {
       prep.setInt(1, team.getTeamNumber());
       prep.setBoolean(2, false);
       prep.setString(3, division);
       prep.setInt(4, currentTournament);
-      prep.setInt(5, runNumber);
+      prep.setInt(5, playoffRound);
       prep.setInt(6, lineNumber);
       prep.executeUpdate();
     }
-
-    final int playoffRound = Playoff.getPlayoffRound(connection, currentTournament, division, runNumber);
 
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Sending H2H update" //
@@ -974,6 +979,8 @@ public final class Queries {
 
     updatePlayoffTable(connection, winner, bracketName, tournamentId, nextRunNumber, nextDbLine);
 
+    assignPlayoffTable(connection, bracketName, tournamentId, nextRunNumber, nextDbLine);
+
     final int semiFinalRound = getNumPlayoffRounds(connection, tournamentId, bracketName)
         - 1;
     final int playoffRun = Playoff.getPlayoffRound(connection, tournamentId, bracketName, runNumber);
@@ -982,6 +989,65 @@ public final class Queries {
       final int thirdPlaceDbLine = Playoff.computeThirdPlaceDbLine(dbLine);
       updatePlayoffTable(connection, loser, bracketName, tournamentId, nextRunNumber, thirdPlaceDbLine);
     }
+  }
+
+  /**
+   * Assign a table to the bracket defined by the team, if it's not already
+   * assigned.
+   */
+  private static void assignPlayoffTable(final Connection connection,
+                                         final String bracketName,
+                                         final int tournamentId,
+                                         final int runNumber,
+                                         final int dbLine)
+      throws SQLException {
+    final boolean oldAutoCommit = connection.getAutoCommit();
+
+    final int playoffRound = Playoff.getPlayoffRound(connection, tournamentId, bracketName, runNumber);
+
+    try (PreparedStatement prep = connection.prepareStatement("UPDATE PlayoffTableData" //
+        + " SET AssignedTable = ?" //
+        + " WHERE event_division = ?" //
+        + " AND Tournament = ?" //
+        + " AND PlayoffRound = ?" //
+        + " AND LineNumber = ?" //
+        + " AND AssignedTable IS NULL")) {
+      prep.setString(2, bracketName);
+      prep.setInt(3, tournamentId);
+      prep.setInt(4, playoffRound);
+
+      connection.setAutoCommit(false);
+
+      // Setting both values in a transaction will ensure that the line isn't modified
+      // elsewhere.
+
+      final List<TableInformation> tables = TableInformation.getTablesToUseForBracket(connection, tournamentId,
+                                                                                      bracketName);
+      final TableInformation tableInfo = tables.get(0);
+
+      prep.setString(1, tableInfo.getSideA());
+      prep.setInt(5, dbLine);
+      prep.executeUpdate();
+
+      prep.setString(1, tableInfo.getSideB());
+      final int siblingDbLine = getSiblingDbLine(dbLine);
+      prep.setInt(5, siblingDbLine);
+      prep.executeUpdate();
+
+      // commit and if there is an error rollback the changes under the assumption
+      // that another thread is updating the assigned table
+      try {
+        connection.commit();
+      } catch (final SQLException e) {
+        LOGGER.debug("Got error writing assigned table information. Assuming this is due to someone else modifying the information at the same time",
+                     e);
+        connection.rollback();
+      }
+
+    } finally {
+      connection.setAutoCommit(oldAutoCommit);
+    }
+
   }
 
   /**

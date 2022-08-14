@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
@@ -1309,29 +1308,8 @@ public class BracketData extends BracketInfo {
                                                                                                    tournament,
                                                                                                    division);
 
-    final List<TableInformation> tablesToUse = tournamentTables.stream().filter(t -> t.getUse())
-                                                               .collect(Collectors.toList());
-    if (tablesToUse.isEmpty()
-        && !tournamentTables.isEmpty()) {
-      LOG.warn("Tables are defined, but none are set to be used by bracket "
-          + division
-          + ". This is unexpected, using all tables");
-      tablesToUse.addAll(tournamentTables);
-    }
-
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Division: "
-          + division
-          + " all Tables: "
-          + tournamentTables
-          + " use tables: "
-          + tablesToUse);
-    }
-
-    // Prevent divide by 0 errors if no tables were set in the database.
-    if (tablesToUse.isEmpty()) {
-      tablesToUse.add(new TableInformation(0, "Table 1", "Table 2", true));
-    }
+    final List<TableInformation> tablesToUse = TableInformation.getTablesToUseForBracket(pConnection, tournament,
+                                                                                         division);
 
     Iterator<TableInformation> tAssignIt = tablesToUse.iterator();
 
