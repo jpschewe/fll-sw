@@ -77,3 +77,61 @@ html, body {
     text-align: center;
 }
 /* end dialog styling */
+.buttonbox {
+    display: flex;
+    align-items: center;
+}
+
+.buttonbox-fill {
+    display: flex;
+    align-items: center;
+}
+
+.buttonbox-fill>* {
+    flex-grow: 1;
+}
+
+.buttonbox .float_right {
+    margin-left: auto;
+}
+
+.fll-sw-button {
+    font-weight: bold;
+    cursor: pointer;
+    padding: 10px;
+    text-decoration: none;
+    margin: 4px;
+    border: 1px solid #ddd;
+}
+
+a.fll-sw-button:hover, div.fll-sw-button:hover, label.fll-sw-button:hover
+    {
+    background-color: #ddd;
+}
+
+a.fll-sw-button:visited, a.fll-sw-button:link {
+    color: inherit;
+}
+
+
+
+
+#review-mode_container {
+    display: grid;
+}
+
+#review-mode_container>* {
+    grid-column: 1;
+    grid-row: 1;   
+}
+
+#review-mode_glasspane {
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+    top: 0px;
+    left: 0px;
+    background: rgba(0, 0, 0, 0.25);
+    z-index: -1;
+}

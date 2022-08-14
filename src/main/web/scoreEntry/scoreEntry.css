@@ -1,3 +1,12 @@
+body {
+    /* keeps the body from scrolling */
+    overflow: hidden;
+}
+
+#score-entry {
+    height: 100%;
+}
+
 table .score-entry {
     width: 100%;
 }
@@ -11,9 +20,17 @@ table .score-entry {
     font-size: large;
 }
 
+.enum-button {
+    cursor: pointer;
+}
+
 .score-entry .enum-button {
     display: block;
     border: 1px solid #AAAAAA;
+}
+
+.y-n-button {
+    cursor: pointer;
 }
 
 .score-entry .y-n-button {
@@ -64,7 +81,7 @@ table .score-entry {
     background-color: yellow;
 }
 
-td .goal-title {
+.goal-title {
     font-weight: bold;
     text-align: right;
 }
@@ -74,7 +91,7 @@ td .goal-title {
     line-height: 2px;
 }
 
-input.range {
+input[type=range] {
     bottom: -10px;
     position: relative;
     width: 100%;
@@ -82,4 +99,22 @@ input.range {
     padding: 0;
     border: 0;
     background: transparent;
+    cursor: pointer;
+}
+
+.verify-score-label {
+    color: red;
+    margin-right: 10px;
+}
+
+.verify-score-buttonbox {
+    width: 30%;
+}
+
+.total-score-label {
+    text-decoration: underline;
+}
+
+.score-entry-buttons>fll-sw-button:first-child {
+    margin-left: auto;
 }

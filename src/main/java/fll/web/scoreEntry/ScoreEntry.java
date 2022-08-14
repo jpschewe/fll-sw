@@ -771,17 +771,17 @@ public final class ScoreEntry {
     final boolean tabletEntry = isTabletEntry(request, session);
 
     writer.println("<!-- Score Verification -->");
-    writer.println("    <tr>");
+    writer.println("      <span class='verify-score-label float_right'>");
     if (!tabletEntry) {
-      writer.println("      <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Score entry verified:</font></td>");
+      writer.println("Score entry verified:");
     } else {
-      writer.println("<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Team Agrees with the above entries:</font></td>");
+      writer.println("Team Agrees with the above entries:");
     }
-    writer.println("      <td><table border='0' cellpadding='0' cellspacing='0' width='150'><tr align='center'>");
+    writer.println("</span>");
+
+    writer.println("      <span class='verify-score-buttonbox'>");
     generateYesNoButtons("Verified", writer);
-    writer.println("      </tr></table></td>");
-    writer.println("      <td colspan='2'>&nbsp;</td>");
-    writer.println("    </tr>");
+    writer.println("      </span>");
   }
 
   /**
@@ -902,8 +902,8 @@ public final class ScoreEntry {
       generateYesNoButtons(name, writer);
     } else if (range <= SLIDER_RANGE_MAX) {
       // use slider
-      writer.println(String.format("<input class='range' type='range' min='%d' max='%d' class='slider' id='%s' />",
-                                   (int) min, (int) max, getSliderName(name)));
+      writer.println(String.format("<input type='range' min='%d' max='%d' class='slider' id='%s' />", (int) min,
+                                   (int) max, getSliderName(name)));
       // tick marks
       final int numInternalTicks = (int) (max
           - min

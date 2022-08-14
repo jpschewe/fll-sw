@@ -101,5 +101,16 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("yesno-dialog").classList.remove("fll-sw-ui-inactive");
         });
     }
+    
+    
+        document.getElementById("score-entry_toggle-review-mode").addEventListener('click', () => {
+        const glassPane = document.getElementById("review-mode_glasspane");
+        if (glassPane.style.zIndex > 0) {
+            glassPane.style.zIndex = -1;
+        } else {
+            glassPane.style.zIndex = 10;
+        }
+    });
+
 
 }); // end ready function

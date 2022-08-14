@@ -139,6 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
     method="POST"
     name="scoreEntry"
     id="scoreEntry"
+     class="fll-sw-ui-body"
     >
     <input
       type='hidden'
@@ -168,17 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
       value='${team.teamNumber}'
       readonly>
 
-    <table
-      width='100%'
-      border="0"
-      cellpadding="0"
-      cellspacing="0"
-      align="center">
-      <!-- info bar -->
-      <tr>
-        <td
-          align="center"
-          valign="middle">
+<header>
           <!-- top info bar (team name etc) -->
           <table
             id='top_info'
@@ -249,17 +240,12 @@ document.addEventListener('DOMContentLoaded', function() {
             </c:if>
 
           </table> <!--  end info bar -->
+</header>
 
-        </td>
-      </tr>
-
+<main id='review-mode_container'>
+                <div id='review-mode_glasspane'></div>
 
       <!-- score entry -->
-      <tr>
-        <td
-          align="center"
-          valign="middle">
-
           <table
             class='score-entry'>
             <colgroup>
@@ -300,9 +286,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 %>
 
                 <!-- Total Score -->
-                <tr>
-                  <td colspan='3'><font size='4'><u>Total
-                        Score:</u></font></td>
+                <tr class='total-score-container'>
+                  <td colspan='3' class='total-score-label'>Total
+                        Score:</td>
                   <td align='right' class='score-cell'><input
                     type='text'
                     name='totalScore'
@@ -310,68 +296,69 @@ document.addEventListener('DOMContentLoaded', function() {
                     readonly
                     tabindex='-1'></td>
                 </tr>
-                <%
-                  ScoreEntry.generateVerificationInput(out, request, session);
-                %>
               </c:otherwise>
             </c:choose>
             <!-- end check for bye -->
 
-            <tr>
-<c:choose>
-<c:when test="${practice}">
-<td colspan='3'>&nbsp;</td>
-<td><button type='button' id='reset_score'>Reset Form</button></td>
-</c:when>
-<c:otherwise>
-              <td
-                colspan='3'
-                align='right'>
-                
-                <c:if test="${not isBye}">
-                      <button
-                      type='button'
-                        id='submit_score'
-                        >Submit Score</button>
-                </c:if> 
-                
-                <button
-                type='button'
-                id='cancel'
-                >Cancel</button> 
-                
-                <c:if
-                  test="${EditFlag and isLastRun}">
-                  <button
-                    type='button'
-                    id='submit_delete'
-                    name='submit_delete'
-                    >Delete Score</button>
-                </c:if>
-                
-                </td>
-                
-              <c:if test="${not isBye}">
-                <td colspan='2'>
-                <button
-                  type='button'
-                  id='no_show'
-                  name='no_show'
-                  value='No Show'>No Show</button></td>
-              </c:if>
-              
-            </c:otherwise>
-            </c:choose>
-            </tr>
-            
-          </table> <!-- end score entry table  -->
+           </table> <!-- end score entry table  -->
+</main>
 
-        </td>
-      </tr>
-    </table>
-    <!-- end table to center everything -->
-  </form>
+        <footer>
+            <div class='score-entry buttonbox'>
+
+                <button id='score-entry_toggle-review-mode'
+                    type='button' class='fll-sw-button'>Review
+                    Toggle</button>
+
+                <%
+                ScoreEntry.generateVerificationInput(out, request, session);
+                %>
+            </div>
+
+            <div class='buttonbox score-entry-buttons'>
+            
+            
+                <span id="challenge_revision">Challenge revision:
+                    ${challengeDescription.revision}</span>
+                <span id="software_version">
+                    Software version:
+                    <%=fll.Version.getVersion()%></span>
+                    
+                    <span class='float_right'>&nbsp;</span>
+                <c:choose>
+                    <c:when test="${practice}">
+                        <button type='button' id='reset_score' class='fll-sw-button'>Reset
+                            Form</button>
+                    </c:when>
+                    <c:otherwise>
+                        <c:if test="${not isBye}">
+                            <button type='button' id='submit_score' class='fll-sw-button'>Submit
+                                Score</button>
+                        </c:if>
+
+                        <button type='button' id='cancel' class='fll-sw-button'>Cancel</button>
+
+                        <c:if test="${EditFlag and isLastRun}">
+                            <button type='button' id='submit_delete'
+                                name='submit_delete' class='fll-sw-button'>Delete
+                                Score</button>
+                        </c:if>
+
+
+                        <c:if test="${not isBye}">
+                            <button type='button' id='no_show'
+                                name='no_show' value='No Show' class='fll-sw-button'>No
+                                Show</button>
+                        </c:if>
+
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </footer>
+
+    </form>
   <!-- end score entry form -->
+
 
     <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="yesno-dialog">
         <div>
@@ -381,7 +368,5 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
     
-    <div>Challenge revision: ${challengeDescription.revision}</div>
-
 </body>
 </html>

@@ -1031,6 +1031,8 @@ function displayPageTeamsList() {
 }
 
 function displayPageScoreSummary() {
+    document.getElementById("header-main_title").innerText = "Score Summary";
+
     displayPage(document.getElementById("header-main"), document.getElementById("content-score-summary"), document.getElementById("footer-summary"));
 
     document.getElementById("header-main_tournament").classList.remove('fll-sw-ui-inactive');
@@ -1275,7 +1277,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.getElementById("enter-score_toggle-review-mode").addEventListener('click', () => {
-        const glassPane = document.getElementById("enter-score_glasspane");
+        const glassPane = document.getElementById("review-mode_glasspane");
         if (glassPane.style.zIndex > 0) {
             glassPane.style.zIndex = -1;
         } else {

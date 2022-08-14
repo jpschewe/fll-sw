@@ -5,3 +5,7 @@
 .score-cell * {
     display: none;
 }
+
+.total-score-container {
+    display: none;
+}
