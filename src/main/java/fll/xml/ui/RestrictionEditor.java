@@ -84,10 +84,14 @@ public class RestrictionEditor extends PolynomialEditor {
       }
     });
 
+    final Box messageBox = Box.createHorizontalBox();
+    final JLabel message = new JLabel("Warning message: ");
+    messageBox.add(message);
+    this.add(messageBox);
     messageEditor = FormatterUtils.createStringField();
     messageEditor.setValue(restriction.getMessage());
     messageEditor.setToolTipText("Message to display when the restriction is violated");
-    this.add(messageEditor);
+    messageBox.add(messageEditor);
 
     messageEditor.addPropertyChangeListener("value", e -> {
       this.restriction.setMessage(messageEditor.getText());
