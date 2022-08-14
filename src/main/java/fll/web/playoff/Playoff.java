@@ -33,7 +33,9 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
 import fll.db.GenerateDB;
+import fll.db.GlobalParameters;
 import fll.db.Queries;
+import fll.db.TableInformation;
 import fll.db.TournamentParameters;
 import fll.util.DummyTeamScore;
 import fll.util.FLLInternalException;
@@ -46,6 +48,7 @@ import fll.xml.ChallengeParser;
 import fll.xml.EnumeratedValue;
 import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
+import fll.xml.ScoreType;
 import fll.xml.TiebreakerTest;
 import fll.xml.WinnerType;
 
@@ -508,6 +511,12 @@ public final class Playoff {
         insertTableStmt.executeUpdate();
 
         ++lineNbr;
+      }
+
+      // initial table assignments
+      for (int i = 1; i < lineNbr; ++i) {
+        assignPlayoffTable(connection, division, currentTournament, baseRunNumber
+            + 1, i);
       }
 
       // Create the remaining entries for the playoff data table using Null team
@@ -1593,6 +1602,329 @@ public final class Playoff {
         return false;
       }
     }
+  }
+
+  /**
+   * Note that a performance score has changed and update the playoff table with
+   * this new information.
+   * 
+   * @param connection database connection
+   * @param verified true if the score has been verified
+   * @param currentTournament the id of the current tournament
+   * @param winnerCriteria how to determine the winner
+   * @param performanceElement the definition of the performance goals
+   * @param tiebreakerElement how to break ties
+   * @param teamNumber the team number
+   * @param runNumber the run number
+   * @param teamScore the score
+   */
+  public static void updatePlayoffScore(final Connection connection,
+                                        final boolean verified,
+                                        final int currentTournament,
+                                        final WinnerType winnerCriteria,
+                                        final PerformanceScoreCategory performanceElement,
+                                        final List<TiebreakerTest> tiebreakerElement,
+                                        final int teamNumber,
+                                        final int runNumber,
+                                        final TeamScore teamScore)
+      throws SQLException, ParseException {
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Updating playoff score for team: "
+          + teamNumber
+          + " run: "
+          + runNumber);
+    }
+
+    final Team team = Team.getTeamFromDatabase(connection, teamNumber);
+
+    final int ptLine = Queries.getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber);
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("line: "
+          + ptLine);
+    }
+
+    final String division = Playoff.getPlayoffDivision(connection, currentTournament, teamNumber, runNumber);
+    if (ptLine > 0) {
+      final double score = performanceElement.evaluate(teamScore);
+
+      // this makes sure that scores get pushed through to the displays
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Sending H2HUpdate with score: "
+            + score);
+      }
+
+      H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), division, team, runNumber);
+
+      final int siblingDbLine = getSiblingDbLine(ptLine);
+      final int siblingTeam = Queries.getTeamNumberByPlayoffLine(connection, currentTournament, division, siblingDbLine,
+                                                                 runNumber);
+
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Sibling is: "
+            + siblingTeam
+            + " division: "
+            + division);
+      }
+
+      // If sibling team is the NULL team, then updating this score is okay,
+      // and no playoff meta data needs updating.
+      if (Team.NULL_TEAM_NUMBER != siblingTeam) {
+        // Sibling team is not null so we have to check if update can happen
+        // anyway
+
+        // See if the modification affects the result of the playoff match
+        final int winnerDbLine = (ptLine
+            + 1)
+            / 2;
+        final int winnerRunNumber = runNumber
+            + 1;
+        final int oldWinnerTeamNumber = Queries.getTeamNumberByPlayoffLine(connection, currentTournament, division,
+                                                                           winnerDbLine, winnerRunNumber);
+
+        final Team teamB = Team.getTeamFromDatabase(connection, siblingTeam);
+        if (teamB == null) {
+          throw new FLLRuntimeException("Unable to find team number in the database: "
+              + teamNumber);
+        }
+        final Team newWinner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement,
+                                                  winnerCriteria, teamB, team, teamScore, runNumber);
+        try (PreparedStatement prep = connection.prepareStatement("SELECT TeamNumber FROM Performance" //
+            + " WHERE TeamNumber = ?" //
+            + " AND RunNumber > ?" //
+            + " AND Tournament = ?")) {
+          if (newWinner != null
+              && oldWinnerTeamNumber != newWinner.getTeamNumber()) {
+            // This score update changes the result of the match, so make sure
+            // no other scores exist in later round for either of these 2 teams.
+            if (Queries.getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber
+                + 1) > 0) {
+              prep.setInt(1, teamNumber);
+              prep.setInt(2, runNumber);
+              prep.setInt(3, currentTournament);
+              try (ResultSet rs = prep.executeQuery()) {
+                if (rs.next()) {
+                  throw new FLLRuntimeException("Unable to update score for team number "
+                      + teamNumber
+                      + " in performance run "
+                      + runNumber
+                      + " because that team has scores entered in subsequent playoff rounds which would become inconsistent. "
+                      + "Delete those scores and then you may update this score.");
+                }
+              }
+            }
+            if (Queries.getPlayoffTableLineNumber(connection, currentTournament, siblingTeam, runNumber
+                + 1) > 0) {
+              prep.setInt(1, siblingTeam);
+              prep.setInt(2, runNumber);
+              prep.setInt(3, currentTournament);
+              try (ResultSet rs = prep.executeQuery()) {
+                if (rs.next()) {
+                  throw new FLLRuntimeException("Unable to update score for team number "
+                      + teamNumber
+                      + " in performance run "
+                      + runNumber
+                      + " because opponent team "
+                      + siblingTeam
+                      + " has scores in subsequent playoff rounds which would become inconsistent. "
+                      + "Delete those scores and then you may update this score.");
+                }
+              }
+            }
+          } // winner of the match changed
+
+        } // PreparedStatement
+
+        // If the second-check flag is NO or the opposing team is not
+        // verified, we set the match "winner" (possibly back) to NULL.
+        if (!verified
+            || !(Queries.performanceScoreExists(connection, currentTournament, teamB, runNumber)
+                && Queries.isVerified(connection, currentTournament, teamB, runNumber))) {
+          removePlayoffScore(connection, division, currentTournament, runNumber, ptLine);
+        } else if (null != newWinner) {
+          // have a winner to record
+          final Team newLoser;
+          if (newWinner.equals(team)) {
+            newLoser = teamB;
+          } else {
+            newLoser = team;
+          }
+          updatePlayoffData(connection, division, currentTournament, runNumber, ptLine, newWinner, newLoser);
+
+        } // verified score
+      } // no sibling
+    } else {
+      throw new FLLRuntimeException("Team "
+          + teamNumber
+          + " could not be found in the playoff table for performance run "
+          + runNumber);
+    }
+  }
+
+  /**
+   * Update a row in the playoff table. Assign the specified team and printed
+   * flags for the row found by (event_division, Tournament, PlayoffRound,
+   * LineNumber).
+   */
+  private static void updatePlayoffTable(final Connection connection,
+                                         final Team team,
+                                         final String division,
+                                         final int currentTournament,
+                                         final int runNumber,
+                                         final int lineNumber)
+      throws SQLException {
+
+    final int playoffRound = Playoff.getPlayoffRound(connection, currentTournament, division, runNumber);
+
+    try (PreparedStatement prep = connection.prepareStatement("UPDATE PlayoffData" //
+        + " SET Team = ?" //
+        + ", Printed = ?" //
+        + " WHERE event_division = ?" //
+        + " AND Tournament = ?" //
+        + " AND PlayoffRound = ?" //
+        + " AND LineNumber = ?")) {
+      prep.setInt(1, team.getTeamNumber());
+      prep.setBoolean(2, false);
+      prep.setString(3, division);
+      prep.setInt(4, currentTournament);
+      prep.setInt(5, playoffRound);
+      prep.setInt(6, lineNumber);
+      prep.executeUpdate();
+    }
+
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Sending H2H update" //
+          + " team: "
+          + team.getTeamNumber() //
+          + " bracket: "
+          + division //
+          + " dbLine: "
+          + lineNumber //
+          + " playoffRound: "
+          + playoffRound //
+      );
+
+    }
+
+    final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
+    final PerformanceScoreCategory performance = description.getPerformance();
+    final ScoreType performanceScoreType = performance.getScoreType();
+
+    H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, team, runNumber, lineNumber);
+  }
+
+  /**
+   * Remove the playoff score for the next run.
+   * 
+   * @param connection database connection
+   * @param division playoff bracket name
+   * @param currentTournament id of the current tournament
+   * @param runNumber the run number
+   * @param ptLine the playoff database line number
+   */
+  public static void removePlayoffScore(final Connection connection,
+                                        final String division,
+                                        final int currentTournament,
+                                        final int runNumber,
+                                        final int ptLine)
+      throws SQLException {
+    // winner and loser are both null now
+    updatePlayoffData(connection, division, currentTournament, runNumber, ptLine, Team.NULL, Team.NULL);
+  }
+
+  private static void updatePlayoffData(final Connection connection,
+                                        final String bracketName,
+                                        final int tournamentId,
+                                        final int runNumber,
+                                        final int dbLine,
+                                        final Team winner,
+                                        final Team loser)
+      throws SQLException {
+    final int nextRunNumber = runNumber
+        + 1;
+    final int nextDbLine = ((dbLine
+        + 1)
+        / 2);
+
+    updatePlayoffTable(connection, winner, bracketName, tournamentId, nextRunNumber, nextDbLine);
+
+    assignPlayoffTable(connection, bracketName, tournamentId, nextRunNumber, nextDbLine);
+
+    final int semiFinalRound = Queries.getNumPlayoffRounds(connection, tournamentId, bracketName)
+        - 1;
+    final int playoffRun = Playoff.getPlayoffRound(connection, tournamentId, bracketName, runNumber);
+    if (playoffRun == semiFinalRound
+        && Queries.isThirdPlaceEnabled(connection, tournamentId, bracketName)) {
+      final int thirdPlaceDbLine = Playoff.computeThirdPlaceDbLine(dbLine);
+      updatePlayoffTable(connection, loser, bracketName, tournamentId, nextRunNumber, thirdPlaceDbLine);
+    }
+  }
+
+  /**
+   * Assign a table to the bracket defined by the team, if it's not already
+   * assigned.
+   */
+  private static void assignPlayoffTable(final Connection connection,
+                                         final String bracketName,
+                                         final int tournamentId,
+                                         final int runNumber,
+                                         final int dbLine)
+      throws SQLException {
+    final boolean oldAutoCommit = connection.getAutoCommit();
+
+    final int playoffRound = Playoff.getPlayoffRound(connection, tournamentId, bracketName, runNumber);
+
+    try (PreparedStatement prep = connection.prepareStatement("UPDATE PlayoffTableData" //
+        + " SET AssignedTable = ?" //
+        + " WHERE event_division = ?" //
+        + " AND Tournament = ?" //
+        + " AND PlayoffRound = ?" //
+        + " AND LineNumber = ?" //
+        + " AND AssignedTable IS NULL")) {
+      prep.setString(2, bracketName);
+      prep.setInt(3, tournamentId);
+      prep.setInt(4, playoffRound);
+
+      connection.setAutoCommit(false);
+
+      // Setting both values in a transaction will ensure that the line isn't modified
+      // elsewhere.
+
+      final List<TableInformation> tables = TableInformation.getTablesToUseForBracket(connection, tournamentId,
+                                                                                      bracketName);
+      final TableInformation tableInfo = tables.get(0);
+
+      prep.setString(1, tableInfo.getSideA());
+      prep.setInt(5, dbLine);
+      prep.executeUpdate();
+
+      prep.setString(1, tableInfo.getSideB());
+      final int siblingDbLine = getSiblingDbLine(dbLine);
+      prep.setInt(5, siblingDbLine);
+      prep.executeUpdate();
+
+      // commit and if there is an error rollback the changes under the assumption
+      // that another thread is updating the assigned table
+      try {
+        connection.commit();
+      } catch (final SQLException e) {
+        LOGGER.debug("Got error writing assigned table information. Assuming this is due to someone else modifying the information at the same time",
+                     e);
+        connection.rollback();
+      }
+
+    } finally {
+      connection.setAutoCommit(oldAutoCommit);
+    }
+
+  }
+
+  private static int getSiblingDbLine(final int ptLine) {
+    final int siblingDbLine = ptLine
+        % 2 == 0 ? ptLine
+            - 1
+            : ptLine
+                + 1;
+    return siblingDbLine;
   }
 
 }
