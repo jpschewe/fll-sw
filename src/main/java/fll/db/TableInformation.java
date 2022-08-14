@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -28,6 +29,9 @@ import fll.Tournament;
  * Information about a tournament table.
  */
 public final class TableInformation implements Serializable {
+
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
   /**
    * @param id the id of the table information
    * @param sideA name of side A
@@ -115,6 +119,48 @@ public final class TableInformation implements Serializable {
   }
 
   /**
+   * Get the list of tables to use for the specified playoff bracket.
+   * 
+   * @param connection database connection
+   * @param tournament tournament identifier
+   * @param division playoff bracket name
+   * @return non-empty list of tables to use sorted by least used first
+   * @throws SQLException on a database error
+   */
+  public static List<TableInformation> getTablesToUseForBracket(final Connection connection,
+                                                                final int tournament,
+                                                                final String division)
+      throws SQLException {
+    final List<TableInformation> tournamentTables = getTournamentTableInformation(connection, tournament, division);
+
+    final List<TableInformation> tablesToUse = tournamentTables.stream().filter(t -> t.getUse())
+                                                               .collect(Collectors.toList());
+    if (tablesToUse.isEmpty()
+        && !tournamentTables.isEmpty()) {
+      LOGGER.warn("Tables are defined, but none are set to be used by bracket "
+          + division
+          + ". This is unexpected, using all tables");
+      tablesToUse.addAll(tournamentTables);
+    }
+
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Division: "
+          + division
+          + " all Tables: "
+          + tournamentTables
+          + " use tables: "
+          + tablesToUse);
+    }
+
+    // Ensure that the list isn't empty
+    if (tablesToUse.isEmpty()) {
+      tablesToUse.add(new TableInformation(0, "Table 1", "Table 2", true));
+    }
+
+    return tablesToUse;
+  }
+
+  /**
    * Get table information for a tournament.
    *
    * @param connection where to get the table information from
@@ -153,11 +199,11 @@ public final class TableInformation implements Serializable {
 
     // sort by the usage
     try (PreparedStatement prep = connection.prepareStatement("select tablenames.PairID, COUNT(tablenames.PairID) as c"//
-        + " FROM PlayoffData, tablenames" //
-        + " WHERE PlayoffData.Tournament = ?" //
-        + " AND PlayoffData.Tournament = tablenames.Tournament" //
+        + " FROM PlayoffTableData, tablenames" //
+        + " WHERE PlayoffTableData.Tournament = ?" //
+        + " AND PlayoffTableData.Tournament = tablenames.Tournament" //
         + " AND AssignedTable IS NOT NULL" //
-        + " AND (PlayoffData.AssignedTable = tablenames.SideA OR PlayoffData.AssignedTable = tablenames.SideB)"//
+        + " AND (PlayoffTableData.AssignedTable = tablenames.SideA OR PlayoffTableData.AssignedTable = tablenames.SideB)"//
         + " GROUP BY tablenames.PairID")) {
       prep.setInt(1, tournament);
 

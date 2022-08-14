@@ -64,7 +64,7 @@ fll.web.setup.SetupIndex.populateContext(application, pageContext);
 
         <input type='file' size='32' name='dbdump'>
         <input type='submit' name='createdb'
-            value='Upload Current Database'
+            value='Upload Database'
             onclick='return confirmOverwrite()' />
 
         <hr />

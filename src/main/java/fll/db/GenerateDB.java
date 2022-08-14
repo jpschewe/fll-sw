@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 34;
+  public static final int DATABASE_VERSION = 35;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -168,6 +168,8 @@ public final class GenerateDB {
       createTableDivision(connection, true);
 
       // table to hold head-to-head playoff meta-data
+      // stored as 2 tables to handle concurrency, one can update team information
+      // separately from assigned tables.
       stmt.executeUpdate("CREATE TABLE PlayoffData ("
           + " event_division varchar(32) NOT NULL," //
           + " Tournament INTEGER  NOT NULL," //
@@ -178,7 +180,6 @@ public final class GenerateDB {
           + " Team integer default "
           + Team.NULL_TEAM_NUMBER
           + "," //
-          + " AssignedTable varchar(64) default NULL," //
           + " Printed boolean default FALSE," //
           + " run_number integer NOT NULL," // the performance run number for
                                             // this score
@@ -186,6 +187,8 @@ public final class GenerateDB {
           + ",CONSTRAINT playoff_data_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
           + ",CONSTRAINT playoff_data_fk2 FOREIGN KEY(Team) REFERENCES Teams(TeamNumber)" //
           + ")");
+
+      createPlayoffTableData(connection, true);
 
       // table to track which teams are in which playoff bracket
       createPlayoffBracketTeams(connection);
@@ -372,6 +375,30 @@ public final class GenerateDB {
 
     }
 
+  }
+
+  /*package*/ static void createPlayoffTableData(final Connection connection,
+                                             final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+
+      final StringBuilder sql = new StringBuilder();
+
+      sql.append("CREATE TABLE PlayoffTableData (");
+      sql.append(" event_division varchar(32) NOT NULL");
+      sql.append(",Tournament INTEGER  NOT NULL");
+      sql.append(",PlayoffRound integer NOT NULL");
+      sql.append(",LineNumber integer NOT NULL");
+      sql.append(",AssignedTable varchar(64) default NULL");
+      sql.append(",CONSTRAINT playoff_table_data_pk PRIMARY KEY (event_division, Tournament, PlayoffRound, LineNumber)");
+      if (createConstraints) {
+        sql.append(",CONSTRAINT playoff_table_data_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)");
+        sql.append(",CONSTRAINT playoff_table_data_fk2 FOREIGN KEY(event_division, Tournament, PlayoffRound, LineNumber) REFERENCES PlayoffData(event_division, Tournament, PlayoffRound, LineNumber)");
+      }
+      sql.append(")");
+
+      stmt.executeUpdate(sql.toString());
+    }
   }
 
   /**

@@ -104,6 +104,13 @@ public class UninitializePlayoff extends BaseFLLServlet {
       }
 
       try (
+          PreparedStatement deletePlayoff = connection.prepareStatement("DELETE FROM PlayoffTableData WHERE event_division = ? AND tournament = ?")) {
+        deletePlayoff.setString(1, division);
+        deletePlayoff.setInt(2, tournamentID);
+        deletePlayoff.executeUpdate();
+      }
+
+      try (
           PreparedStatement deletePlayoff = connection.prepareStatement("DELETE FROM PlayoffData WHERE event_division = ? AND tournament = ?")) {
         deletePlayoff.setString(1, division);
         deletePlayoff.setInt(2, tournamentID);

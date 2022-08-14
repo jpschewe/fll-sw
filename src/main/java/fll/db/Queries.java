@@ -446,8 +446,9 @@ public final class Queries {
           if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Updating playoff score from insert");
           }
-          updatePlayoffScore(connection, verified, tournament.getTournamentID(), winnerCriteria, performanceElement,
-                             tiebreakerElement, teamScore.getTeamNumber(), teamScore.getRunNumber(), teamScore);
+          Playoff.updatePlayoffScore(connection, verified, tournament.getTournamentID(), winnerCriteria,
+                                     performanceElement, tiebreakerElement, teamScore.getTeamNumber(),
+                                     teamScore.getRunNumber(), teamScore);
         } else {
           // send H2H update that this team's score is entered
           final String bracketName = Playoff.getPlayoffDivision(connection, tournament.getTournamentID(),
@@ -609,8 +610,8 @@ public final class Queries {
           }
 
           final boolean verified = "1".equals(request.getParameter("Verified"));
-          updatePlayoffScore(connection, verified, currentTournament, winnerCriteria, performanceElement,
-                             tiebreakerElement, teamNumber, runNumber, teamScore);
+          Playoff.updatePlayoffScore(connection, verified, currentTournament, winnerCriteria, performanceElement,
+                                     tiebreakerElement, teamNumber, runNumber, teamScore);
         }
       } else {
         tournament.recordPerformanceSeedingModified(connection);
@@ -621,156 +622,6 @@ public final class Queries {
     UnverifiedRunsWebSocket.notifyToUpdate();
 
     return numRowsUpdated;
-  }
-
-  /**
-   * Note that a performance score has changed and update the playoff table with
-   * this new information.
-   */
-  private static void updatePlayoffScore(final Connection connection,
-                                         final boolean verified,
-                                         final int currentTournament,
-                                         final WinnerType winnerCriteria,
-                                         final PerformanceScoreCategory performanceElement,
-                                         final List<TiebreakerTest> tiebreakerElement,
-                                         final int teamNumber,
-                                         final int runNumber,
-                                         final TeamScore teamScore)
-      throws SQLException, ParseException {
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Updating playoff score for team: "
-          + teamNumber
-          + " run: "
-          + runNumber);
-    }
-
-    final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-
-    final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber);
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("line: "
-          + ptLine);
-    }
-
-    final String division = Playoff.getPlayoffDivision(connection, currentTournament, teamNumber, runNumber);
-    if (ptLine > 0) {
-      final double score = performanceElement.evaluate(teamScore);
-
-      // this makes sure that scores get pushed through to the displays
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Sending H2HUpdate with score: "
-            + score);
-      }
-
-      H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), division, team, runNumber);
-
-      final int siblingDbLine = ptLine
-          % 2 == 0 ? ptLine
-              - 1
-              : ptLine
-                  + 1;
-      final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, siblingDbLine,
-                                                         runNumber);
-
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Sibling is: "
-            + siblingTeam
-            + " division: "
-            + division);
-      }
-
-      // If sibling team is the NULL team, then updating this score is okay,
-      // and no playoff meta data needs updating.
-      if (Team.NULL_TEAM_NUMBER != siblingTeam) {
-        // Sibling team is not null so we have to check if update can happen
-        // anyway
-
-        // See if the modification affects the result of the playoff match
-        final int winnerDbLine = (ptLine
-            + 1)
-            / 2;
-        final int winnerRunNumber = runNumber
-            + 1;
-        final int oldWinnerTeamNumber = Queries.getTeamNumberByPlayoffLine(connection, currentTournament, division,
-                                                                           winnerDbLine, winnerRunNumber);
-
-        final Team teamB = Team.getTeamFromDatabase(connection, siblingTeam);
-        if (teamB == null) {
-          throw new FLLRuntimeException("Unable to find team number in the database: "
-              + teamNumber);
-        }
-        final Team newWinner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement,
-                                                  winnerCriteria, teamB, team, teamScore, runNumber);
-        try (PreparedStatement prep = connection.prepareStatement("SELECT TeamNumber FROM Performance" //
-            + " WHERE TeamNumber = ?" //
-            + " AND RunNumber > ?" //
-            + " AND Tournament = ?")) {
-          if (newWinner != null
-              && oldWinnerTeamNumber != newWinner.getTeamNumber()) {
-            // This score update changes the result of the match, so make sure
-            // no other scores exist in later round for either of these 2 teams.
-            if (getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber
-                + 1) > 0) {
-              prep.setInt(1, teamNumber);
-              prep.setInt(2, runNumber);
-              prep.setInt(3, currentTournament);
-              try (ResultSet rs = prep.executeQuery()) {
-                if (rs.next()) {
-                  throw new FLLRuntimeException("Unable to update score for team number "
-                      + teamNumber
-                      + " in performance run "
-                      + runNumber
-                      + " because that team has scores entered in subsequent playoff rounds which would become inconsistent. "
-                      + "Delete those scores and then you may update this score.");
-                }
-              }
-            }
-            if (getPlayoffTableLineNumber(connection, currentTournament, siblingTeam, runNumber
-                + 1) > 0) {
-              prep.setInt(1, siblingTeam);
-              prep.setInt(2, runNumber);
-              prep.setInt(3, currentTournament);
-              try (ResultSet rs = prep.executeQuery()) {
-                if (rs.next()) {
-                  throw new FLLRuntimeException("Unable to update score for team number "
-                      + teamNumber
-                      + " in performance run "
-                      + runNumber
-                      + " because opponent team "
-                      + siblingTeam
-                      + " has scores in subsequent playoff rounds which would become inconsistent. "
-                      + "Delete those scores and then you may update this score.");
-                }
-              }
-            }
-          } // winner of the match changed
-
-        } // PreparedStatement
-
-        // If the second-check flag is NO or the opposing team is not
-        // verified, we set the match "winner" (possibly back) to NULL.
-        if (!verified
-            || !(Queries.performanceScoreExists(connection, currentTournament, teamB, runNumber)
-                && Queries.isVerified(connection, currentTournament, teamB, runNumber))) {
-          removePlayoffScore(connection, division, currentTournament, runNumber, ptLine);
-        } else if (null != newWinner) {
-          // have a winner to record
-          final Team newLoser;
-          if (newWinner.equals(team)) {
-            newLoser = teamB;
-          } else {
-            newLoser = team;
-          }
-          updatePlayoffData(connection, division, currentTournament, runNumber, ptLine, newWinner, newLoser);
-
-        } // verified score
-      } // no sibling
-    } else {
-      throw new FLLRuntimeException("Team "
-          + teamNumber
-          + " could not be found in the playoff table for performance run "
-          + runNumber);
-    }
   }
 
   /**
@@ -882,7 +733,7 @@ public final class Queries {
 
         // if the delete of the performance score succeeded it's save to remove the
         // information from the playoff table
-        removePlayoffScore(connection, division, currentTournament, runNumber, dbLine);
+        Playoff.removePlayoffScore(connection, division, currentTournament, runNumber, dbLine);
 
         // update the display for the deleted score
         H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, team, runNumber);
@@ -891,97 +742,6 @@ public final class Queries {
 
     // notify that the list of unverified runs may have changed
     UnverifiedRunsWebSocket.notifyToUpdate();
-  }
-
-  /**
-   * Update a row in the playoff table. Assign the specified team and printed
-   * flags for the row found by (event_division, Tournament, PlayoffRound,
-   * LineNumber).
-   */
-  private static void updatePlayoffTable(final Connection connection,
-                                         final Team team,
-                                         final String division,
-                                         final int currentTournament,
-                                         final int runNumber,
-                                         final int lineNumber)
-      throws SQLException {
-
-    try (PreparedStatement prep = connection.prepareStatement("UPDATE PlayoffData" //
-        + " SET Team = ?" //
-        + ", Printed = ?" //
-        + " WHERE event_division = ?" //
-        + " AND Tournament = ?" //
-        + " AND run_number = ?" //
-        + " AND LineNumber = ?")) {
-      prep.setInt(1, team.getTeamNumber());
-      prep.setBoolean(2, false);
-      prep.setString(3, division);
-      prep.setInt(4, currentTournament);
-      prep.setInt(5, runNumber);
-      prep.setInt(6, lineNumber);
-      prep.executeUpdate();
-    }
-
-    final int playoffRound = Playoff.getPlayoffRound(connection, currentTournament, division, runNumber);
-
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Sending H2H update" //
-          + " team: "
-          + team.getTeamNumber() //
-          + " bracket: "
-          + division //
-          + " dbLine: "
-          + lineNumber //
-          + " playoffRound: "
-          + playoffRound //
-      );
-
-    }
-
-    final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
-    final PerformanceScoreCategory performance = description.getPerformance();
-    final ScoreType performanceScoreType = performance.getScoreType();
-
-    H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, team, runNumber, lineNumber);
-  }
-
-  /**
-   * Remove the playoff score for the next run.
-   */
-  private static void removePlayoffScore(final Connection connection,
-                                         final String division,
-                                         final int currentTournament,
-                                         final int runNumber,
-                                         final int ptLine)
-      throws SQLException {
-    // winner and loser are both null now
-    updatePlayoffData(connection, division, currentTournament, runNumber, ptLine, Team.NULL, Team.NULL);
-  }
-
-  private static void updatePlayoffData(final Connection connection,
-                                        final String bracketName,
-                                        final int tournamentId,
-                                        final int runNumber,
-                                        final int dbLine,
-                                        final Team winner,
-                                        final Team loser)
-      throws SQLException {
-    final int nextRunNumber = runNumber
-        + 1;
-    final int nextDbLine = ((dbLine
-        + 1)
-        / 2);
-
-    updatePlayoffTable(connection, winner, bracketName, tournamentId, nextRunNumber, nextDbLine);
-
-    final int semiFinalRound = getNumPlayoffRounds(connection, tournamentId, bracketName)
-        - 1;
-    final int playoffRun = Playoff.getPlayoffRound(connection, tournamentId, bracketName, runNumber);
-    if (playoffRun == semiFinalRound
-        && isThirdPlaceEnabled(connection, tournamentId, bracketName)) {
-      final int thirdPlaceDbLine = Playoff.computeThirdPlaceDbLine(dbLine);
-      updatePlayoffTable(connection, loser, bracketName, tournamentId, nextRunNumber, thirdPlaceDbLine);
-    }
   }
 
   /**
@@ -1008,9 +768,10 @@ public final class Queries {
 
     final Collection<BracketUpdate> updates = new LinkedList<>();
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT PlayoffData.PlayoffRound, PlayoffData.LineNumber, Teams.TeamNumber, Teams.TeamName, Performance.ComputedTotal, Performance.Verified, PlayoffData.AssignedTable, Performance.NoShow" //
+        PreparedStatement prep = connection.prepareStatement("SELECT PlayoffData.PlayoffRound, PlayoffData.LineNumber, Teams.TeamNumber, Teams.TeamName, Performance.ComputedTotal, Performance.Verified, PlayoffTableData.AssignedTable, Performance.NoShow" //
             + " FROM PlayoffData" //
             + " JOIN Teams ON (PlayoffData.team = Teams.TeamNumber)"//
+            + " JOIN PlayoffTableData ON (PlayoffData.event_division = PlayoffTableData.event_division AND PlayoffData.Tournament = PlayoffTableData.Tournament AND PlayoffData.PlayoffRound = PlayoffTableData.PlayoffRound AND PlayoffData.LineNumber = PlayoffTableData.LineNumber)"//
             + " LEFT OUTER JOIN Performance ON (Performance.TeamNumber = PlayoffData.team"//
             + " AND Performance.Tournament = PlayoffData.Tournament"//
             + " AND Performance.RunNumber = PlayoffData.run_number)"//
@@ -1662,7 +1423,7 @@ public final class Queries {
 
     // delete from PlayoffData
     try (
-        PreparedStatement prep = connection.prepareStatement("DELETE FROM PlayoffData WHERE Team = ? AND Tournament = ?")) {
+        PreparedStatement prep = connection.prepareStatement("DELETE CASCADE FROM PlayoffData WHERE Team = ? AND Tournament = ?")) {
       prep.setInt(1, teamNumber);
       prep.setInt(2, currentTournament);
       prep.executeUpdate();
@@ -2370,7 +2131,7 @@ public final class Queries {
                                                   final int line)
       throws SQLException {
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT AssignedTable FROM PlayoffData WHERE Tournament= ?" //
+        PreparedStatement prep = connection.prepareStatement("SELECT AssignedTable FROM PlayoffTableData WHERE Tournament= ?" //
             + " AND event_division= ?" //
             + " AND PlayoffRound= ?"//
             + " AND LineNumber= ?" //

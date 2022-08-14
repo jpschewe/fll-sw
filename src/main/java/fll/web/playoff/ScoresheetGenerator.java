@@ -16,7 +16,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import jakarta.servlet.http.HttpServletRequest;
 import javax.xml.transform.TransformerException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +31,7 @@ import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.Version;
+import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -46,6 +46,7 @@ import fll.xml.GoalElement;
 import fll.xml.GoalGroup;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreType;
+import jakarta.servlet.http.HttpServletRequest;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -194,12 +195,14 @@ public class ScoresheetGenerator {
     // Loop through checked matches, populate data, and update database to
     // track
     // printed status and remember assigned tables.
-    try (
-        PreparedStatement updatePrep = connection.prepareStatement("UPDATE PlayoffData SET Printed=true, AssignedTable=?"
-            + " WHERE event_division=? AND Tournament=? AND PlayoffRound=? AND Team=?")) {
-      // could do division here, too, but since getting it from Team object,
-      // will defer to same place as other
-      updatePrep.setInt(3, tournament);
+    try (PreparedStatement updatePrep = connection.prepareStatement("UPDATE PlayoffData SET Printed=true" //
+        + " WHERE event_division=? AND Tournament=? AND PlayoffRound=? AND LineNumber=?");
+        PreparedStatement updateTablePrep = connection.prepareStatement("UPDATE PlayoffTableData SET AssignedTable=?" //
+            + " WHERE event_division=? AND Tournament=? AND PlayoffRound=? AND LineNumber=?")) {
+      updatePrep.setString(1, division);
+      updateTablePrep.setString(2, division);
+      updatePrep.setInt(2, tournament);
+      updateTablePrep.setInt(3, tournament);
 
       int j = 0;
       for (int i = 1; i <= numMatches; i++) {
@@ -207,6 +210,9 @@ public class ScoresheetGenerator {
           final String round = WebUtils.getNonNullRequestParameter(request, "round"
               + i);
           final int playoffRound = Integer.parseInt(round);
+
+          updatePrep.setInt(3, playoffRound);
+          updateTablePrep.setInt(4, playoffRound);
 
           // Get teamA info
           final Team teamA = Team.getTeamFromDatabase(connection,
@@ -227,18 +233,24 @@ public class ScoresheetGenerator {
           final String bracketALabel = String.format("Match %d", bracketA);
           this.time[j] = bracketALabel;
 
-          updatePrep.setString(1, table[j]);
-          updatePrep.setString(2, division);
-          updatePrep.setInt(4, playoffRound);
-          updatePrep.setInt(5, teamA.getTeamNumber());
-          if (updatePrep.executeUpdate() < 1) {
+          final int teamAlineNumber = Queries.getPlayoffTableLineNumber(connection, tournament, teamA.getTeamNumber(),
+                                                                        performanceRunA);
+
+          updatePrep.setInt(4, teamAlineNumber);
+          updateTablePrep.setString(1, table[j]);
+          updateTablePrep.setInt(5, teamAlineNumber);
+          final int teamAprintedRowsUpdated = updatePrep.executeUpdate();
+          final int teamAtableRowsUpdated = updateTablePrep.executeUpdate();
+          if (teamAprintedRowsUpdated < 1
+              || teamAtableRowsUpdated < 1) {
             LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff bracket: %s",
                                       teamA.getTeamNumber(), playoffRound, division));
-          } else {
-            // update the brackets with the table name
-            H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, teamA, performanceRunA);
           }
-          j++;
+
+          // update the brackets with the table name
+          H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, teamA, performanceRunA);
+
+          ++j;
 
           // Get teamB info
           final Team teamB = Team.getTeamFromDatabase(connection,
@@ -259,21 +271,27 @@ public class ScoresheetGenerator {
           final String bracketBLabel = String.format("Match %d", bracketB);
           this.time[j] = bracketBLabel;
 
-          updatePrep.setString(1, table[j]);
-          updatePrep.setString(2, division);
-          updatePrep.setInt(4, playoffRound);
-          updatePrep.setInt(5, teamB.getTeamNumber());
-          if (updatePrep.executeUpdate() < 1) {
+          final int teamBlineNumber = Queries.getPlayoffTableLineNumber(connection, tournament, teamB.getTeamNumber(),
+                                                                        performanceRunB);
+
+          updatePrep.setInt(4, teamBlineNumber);
+          updateTablePrep.setString(1, table[j]);
+          updateTablePrep.setInt(5, teamBlineNumber);
+          final int teamBprintedRowsUpdated = updatePrep.executeUpdate();
+          final int teamBtableRowsUpdated = updateTablePrep.executeUpdate();
+          if (teamBprintedRowsUpdated < 1
+              || teamBtableRowsUpdated < 1) {
             LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff bracket: %s",
                                       teamB.getTeamNumber(), playoffRound, division));
-          } else {
-            // update the brackets with the table name
-            H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, teamB, performanceRunB);
           }
-          j++;
-        }
-      }
-    }
+
+          // update the brackets with the table name
+          H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, teamB, performanceRunB);
+
+          ++j;
+        } // if checked match
+      } // foreach match
+    } // allocate prepared statements
   }
 
   /**
@@ -303,7 +321,6 @@ public class ScoresheetGenerator {
     try {
       final Document performanceDoc = createDocument();
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
-
       FOPUtils.renderPdf(fopFactory, performanceDoc, out);
     } catch (FOPException | TransformerException e) {
       throw new FLLInternalException("Error creating the performance schedule PDF", e);
