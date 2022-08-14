@@ -1,3 +1,4 @@
+* #1031 - add support for assigning tables for playoffs without printing
 * #1036 - display progress dialog while writing outputs from the scheduler UI
 * #793 - Return to original page after editing team data
 * #1029 - Fix missing team numbers on head to head brackets 
