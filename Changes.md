@@ -1,3 +1,5 @@
+* #1021 - Add link from scoreboard index page to scrolling version of all teams
+* #1038 - Add label for restriction warning message in challenge editor
 * #971 - Add review mode to performance score entry
 * #972 - Add review mode to subjective application
 * #1036 - display progress dialog while writing outputs from the scheduler UI

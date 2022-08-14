@@ -19,7 +19,9 @@
         Scoreboard (800x600)</a></li>
 
     <li><a href='<c:url value="allteams.jsp"/>' target="_blank">All Teams, All
-        Runs (primarily for internal use)</a></li>
+        Runs</a></li>
+    <li><a href='<c:url value="allteams.jsp?allTeamsScroll=true"/>' target="_blank">All Teams, All
+        Runs (scrolling)</a></li>
     <li><a href='<c:url value="Last8"/>' target="_blank">Last 8 scores</a></li>
     <li><a href='<c:url value="Top10"/>' target="_blank">Top 10 scores</a></li>
 
