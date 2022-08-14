@@ -153,11 +153,11 @@ public final class TableInformation implements Serializable {
 
     // sort by the usage
     try (PreparedStatement prep = connection.prepareStatement("select tablenames.PairID, COUNT(tablenames.PairID) as c"//
-        + " FROM PlayoffData, tablenames" //
-        + " WHERE PlayoffData.Tournament = ?" //
-        + " AND PlayoffData.Tournament = tablenames.Tournament" //
+        + " FROM PlayoffTableData, tablenames" //
+        + " WHERE PlayoffTableData.Tournament = ?" //
+        + " AND PlayoffTableData.Tournament = tablenames.Tournament" //
         + " AND AssignedTable IS NOT NULL" //
-        + " AND (PlayoffData.AssignedTable = tablenames.SideA OR PlayoffData.AssignedTable = tablenames.SideB)"//
+        + " AND (PlayoffTableData.AssignedTable = tablenames.SideA OR PlayoffTableData.AssignedTable = tablenames.SideB)"//
         + " GROUP BY tablenames.PairID")) {
       prep.setInt(1, tournament);
 

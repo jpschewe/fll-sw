@@ -1008,9 +1008,10 @@ public final class Queries {
 
     final Collection<BracketUpdate> updates = new LinkedList<>();
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT PlayoffData.PlayoffRound, PlayoffData.LineNumber, Teams.TeamNumber, Teams.TeamName, Performance.ComputedTotal, Performance.Verified, PlayoffData.AssignedTable, Performance.NoShow" //
+        PreparedStatement prep = connection.prepareStatement("SELECT PlayoffData.PlayoffRound, PlayoffData.LineNumber, Teams.TeamNumber, Teams.TeamName, Performance.ComputedTotal, Performance.Verified, PlayoffTableData.AssignedTable, Performance.NoShow" //
             + " FROM PlayoffData" //
             + " JOIN Teams ON (PlayoffData.team = Teams.TeamNumber)"//
+            + " JOIN PlayoffTableData ON (PlayoffData.event_division = PlayoffTableData.event_division AND PlayoffData.Tournament = PlayoffTableData.Tournament AND PlayoffData.PlayoffRound = PlayoffTableData.PlayoffRound AND PlayoffData.LineNumber = PlayoffTableData.LineNumber)"//
             + " LEFT OUTER JOIN Performance ON (Performance.TeamNumber = PlayoffData.team"//
             + " AND Performance.Tournament = PlayoffData.Tournament"//
             + " AND Performance.RunNumber = PlayoffData.run_number)"//
@@ -1662,7 +1663,7 @@ public final class Queries {
 
     // delete from PlayoffData
     try (
-        PreparedStatement prep = connection.prepareStatement("DELETE FROM PlayoffData WHERE Team = ? AND Tournament = ?")) {
+        PreparedStatement prep = connection.prepareStatement("DELETE CASCADE FROM PlayoffData WHERE Team = ? AND Tournament = ?")) {
       prep.setInt(1, teamNumber);
       prep.setInt(2, currentTournament);
       prep.executeUpdate();
@@ -2370,7 +2371,7 @@ public final class Queries {
                                                   final int line)
       throws SQLException {
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT AssignedTable FROM PlayoffData WHERE Tournament= ?" //
+        PreparedStatement prep = connection.prepareStatement("SELECT AssignedTable FROM PlayoffTableData WHERE Tournament= ?" //
             + " AND event_division= ?" //
             + " AND PlayoffRound= ?"//
             + " AND LineNumber= ?" //

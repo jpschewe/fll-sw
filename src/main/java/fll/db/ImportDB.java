@@ -652,6 +652,11 @@ public final class ImportDB {
       upgrade33To34(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 35) {
+      upgrade34To35(connection);
+    }
+
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -1291,6 +1296,24 @@ public final class ImportDB {
     } // prepared statement
 
     setDBVersion(connection, 34);
+  }
+
+  /**
+   * Split playoffData table into playoffData and playoffTableData.
+   */
+  private static void upgrade34To35(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 34 to 35");
+
+    GenerateDB.createPlayoffTableData(connection, false);
+
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("INSERT INTO PlayoffTableData (event_division, Tournament, PlayoffRound, LineNumber, AssignedTable)" //
+          + " SELECT event_division, Tournament, PlayoffRound, LineNumber, AssignedTable FROM PlayoffData");
+
+      stmt.executeUpdate("ALTER TABLE PlayoffData DROP COLUMN AssignedTable");
+    }
+
+    setDBVersion(connection, 35);
   }
 
   /**
@@ -2041,14 +2064,31 @@ public final class ImportDB {
     }
 
     try (
-        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT event_division, PlayoffRound, LineNumber, Team, AssignedTable, Printed, run_number "
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT event_division, PlayoffRound, LineNumber, Team, Printed, run_number "
             + "FROM PlayoffData WHERE Tournament=?");
         PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO PlayoffData (Tournament, event_division, PlayoffRound,"
-            + "LineNumber, Team, AssignedTable, Printed, run_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
+            + "LineNumber, Team, Printed, run_number) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
       copyData(sourcePrep, destPrep);
     }
+
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM PlayoffTableData WHERE Tournament = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT event_division, PlayoffRound, LineNumber, AssignedTable "
+            + "FROM PlayoffTableData WHERE Tournament=?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO PlayoffTableData (Tournament, event_division, PlayoffRound,"
+            + "LineNumber, AssignedTable) VALUES (?, ?, ?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+      copyData(sourcePrep, destPrep);
+    }
+
   }
 
   private static void importPlayoffTeams(final Connection sourceConnection,

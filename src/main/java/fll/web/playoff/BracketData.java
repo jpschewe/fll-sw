@@ -529,12 +529,16 @@ public class BracketData extends BracketInfo {
       }
 
       try (
-          PreparedStatement stmt = pConnection.prepareStatement("SELECT PlayoffRound,LineNumber,Team,AssignedTable,Printed" //
-              + " FROM PlayoffData" //
+          PreparedStatement stmt = pConnection.prepareStatement("SELECT PlayoffRound,LineNumber,Team,PlayoffTableData.AssignedTable,Printed" //
+              + " FROM PlayoffData, PlayoffTableData" //
               + " WHERE Tournament= ?" //
               + " AND event_division= ?" //
               + " AND PlayoffRound>= ?" //
-              + " AND PlayoffRound<= ?")) {
+              + " AND PlayoffRound<= ?" //
+              + " AND PlayoffTableData.Tournament = PlayoffData.Tournament" //
+              + " AND PlayoffTableData.event_division = PlayoffData.event_division" //
+              + " AND PlayoffTableData.PlayoffRound = PlayoffData.PlayoffRound" //
+              + " AND PlayoffTableData.LineNumber = PlayoffData.LineNumber")) {
         stmt.setInt(1, currentTournament);
         stmt.setString(2, getBracketName());
         stmt.setInt(3, getFirstRound());

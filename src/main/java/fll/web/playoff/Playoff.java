@@ -478,7 +478,10 @@ public final class Playoff {
 
     try (PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO PlayoffData"
         + " (Tournament, event_division, PlayoffRound, LineNumber, Team, run_number)" //
-        + " VALUES (?, ?, ?, ?, ?, ?)")) {
+        + " VALUES (?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertTableStmt = connection.prepareStatement("INSERT INTO PlayoffTableData"
+            + " (Tournament, event_division, PlayoffRound, LineNumber)" //
+            + " VALUES (?, ?, ?, ?)")) {
 
       // Insert those teams into the database.
       // At this time we let the table assignment field default to NULL.
@@ -487,6 +490,10 @@ public final class Playoff {
       insertStmt.setString(2, division);
       insertStmt.setInt(3, 1);
 
+      insertTableStmt.setInt(1, currentTournament);
+      insertTableStmt.setString(2, division);
+      insertTableStmt.setInt(3, 1);
+
       // run_number may overlap, but never for the same team with the
       // exception of the NULL team
       insertStmt.setInt(6, 1
@@ -494,11 +501,13 @@ public final class Playoff {
       int lineNbr = 1;
       while (it.hasNext()) {
         insertStmt.setInt(4, lineNbr);
+        insertTableStmt.setInt(4, lineNbr);
         insertStmt.setInt(5, it.next().getTeamNumber());
 
         insertStmt.executeUpdate();
+        insertTableStmt.executeUpdate();
 
-        lineNbr++;
+        ++lineNbr;
       }
 
       // Create the remaining entries for the playoff data table using Null team
@@ -506,12 +515,12 @@ public final class Playoff {
       int currentRoundSize = firstRound.size()
           / 2;
       int roundNumber = 2;
-      insertStmt.setInt(1, currentTournament);
-      insertStmt.setString(2, division);
       while (currentRoundSize > 0) {
         insertStmt.setInt(3, roundNumber);
         insertStmt.setInt(6, roundNumber
             + baseRunNumber);
+        insertTableStmt.setInt(3, roundNumber);
+
         lineNbr = currentRoundSize;
         if (enableThird
             && currentRoundSize <= 2) {
@@ -521,24 +530,22 @@ public final class Playoff {
         while (lineNbr >= 1) {
           insertStmt.setInt(4, lineNbr);
           insertStmt.setInt(5, Team.NULL.getTeamNumber());
+          insertTableStmt.setInt(4, lineNbr);
+
           insertStmt.executeUpdate();
-          lineNbr--;
+          insertTableStmt.executeUpdate();
+
+          --lineNbr;
         }
-        roundNumber++;
+
+        ++roundNumber;
         currentRoundSize = currentRoundSize
             / 2;
       }
     }
-
-    // Now get all entries, ordered by PlayoffRound and LineNumber, and do
-    // table
-    // assignments in order of their occurrence in the database. Additionally,
-    // for
-    // any byes in the first round, populate the "winner" in the second round,
-    // and
-    // enter a BYE in the Performance table (I think score entry depends on a
-    // "score"
-    // being present for every round.)
+    // For any byes in the first round, populate the "winner" in the second round,
+    // and enter a BYE in the Performance table (I think score entry depends on a
+    // "score" being present for every round.)
     // Number of rounds is the log base 2 of the number of teams in round1
     // (including "bye" teams)
     final int numPlayoffRounds = (int) Math.round(Math.log(firstRound.size())
