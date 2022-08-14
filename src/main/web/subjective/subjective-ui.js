@@ -844,20 +844,37 @@ function updateMainHeader() {
     document.getElementById("header-main_judge-name").innerText = judgeName;
 }
 
-function updateHeaderPadding(header) {
-    const content = document.getElementById("content");
-    content.style.paddingTop = computeHeight(header);
+/**
+ * Enable the specified footer element and hide all other footer elements.
+ */
+function enableFooter(footerElement) {
+    enableContentElement(footerElement, 'footer');
 }
 
-function updateFooterPadding(footer) {
-    const content = document.getElementById("content");
-    content.style.paddingBottom = computeHeight(footer);
+/**
+ * Enable the specified header element and hide all other header elements.
+ */
+function enableHeader(headerElement) {
+    enableContentElement(headerElement, 'header');
 }
 
-function hideAll() {
-    document.querySelectorAll(".fll-sw-ui-footer,.fll-sw-ui-header,.fll-sw-ui-content").forEach(function(el) {
-        el.classList.add('fll-sw-ui-inactive');
-    });
+/**
+ * Enable the specified content element and hide all other content elements.
+ */
+function enableContent(contentElement) {
+    enableContentElement(contentElement, 'main');
+}
+
+function enableContentElement(element, tagName) {
+    for (const e of document.getElementsByTagName(tagName)) {
+        for (const child of e.children) {
+            if (child == element) {
+                child.classList.remove('fll-sw-ui-inactive');
+            } else {
+                child.classList.add('fll-sw-ui-inactive');
+            }
+        }
+    }
 }
 
 /**
@@ -900,14 +917,10 @@ function navigateToPage() {
 
 function displayPage(header, content, footer) {
     uninstallWarnOnReload();
-    hideAll();
 
-    header.classList.remove('fll-sw-ui-inactive');
-    content.classList.remove('fll-sw-ui-inactive');
-    footer.classList.remove('fll-sw-ui-inactive');
-
-    content.style.paddingTop = computeHeight(header) + "px";
-    content.style.paddingBottom = computeHeight(footer) + "px";
+    enableHeader(header);
+    enableContent(content);
+    enableFooter(footer);
 }
 
 function displayPageTop() {
@@ -1038,8 +1051,6 @@ function displayPageScoreSummary() {
 }
 
 function displayPageEnterScore() {
-    installWarnOnReload();
-
     // populate the header before displaying the page to ensure that the header height is properly computed
     const currentTeam = subjective_module.getCurrentTeam();
     document.getElementById("enter-score_team-number").innerText = currentTeam.teamNumber;
@@ -1124,6 +1135,8 @@ function displayPageEnterScore() {
 
     recomputeTotal();
 
+    // needs to be after displayPage as that uninstalls the warning
+    installWarnOnReload();
 }
 
 
@@ -1261,6 +1274,14 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("confirm-noshow-dialog").classList.add("fll-sw-ui-inactive");
     });
 
+    document.getElementById("enter-score_toggle-review-mode").addEventListener('click', () => {
+        const glassPane = document.getElementById("enter-score_glasspane");
+        if (glassPane.style.zIndex > 0) {
+            glassPane.style.zIndex = -1;
+        } else {
+            glassPane.style.zIndex = 10;
+        }
+    });
 
     document.getElementById("enter-score_confirm-zero_yes").addEventListener('click', function() {
         document.getElementById("enter-score_confirm-zero").classList.add("fll-sw-ui-inactive");

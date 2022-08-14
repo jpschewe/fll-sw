@@ -27,7 +27,8 @@ td.border-right {
 
 table.score-entry {
     table-layout: fixed;
-    width: 100%;
+    /* 100% causes a horizontal scroll bar */
+    width: 99%;
     border-collapse: collapse;
 }
 
@@ -102,11 +103,6 @@ span.sliderTickMark {
     border: 1px solid #ddd;
 }
 
-.fll-sw-footer-button {
-    position: absolute;
-    top: 8%;
-}
-
 a.fll-sw-button:hover, div.fll-sw-button:hover, label.fll-sw-button:hover
     {
     background-color: #ddd;
@@ -146,7 +142,7 @@ button, input {
     width: 65%;
 }
 
-.fll-sw-ui-header {
+header {
     font-weight: bold;
 }
 
@@ -159,14 +155,12 @@ button, input {
     font-weight: bold;
 }
 
-.fll-sw-ui-footer button {
+footer button {
     margin: 10px;
 }
 
-/* buttons at the bottom of the score entry page */
-#footer-enter-score button {
-    /* assumes only 4 buttons with margins */
-    width: 20%;
+#enter-score_toggle-review-mode {
+    float: right;
 }
 
 #enter-score-comment-great-job-button {
@@ -177,4 +171,40 @@ button, input {
 #enter-score-comment-think-about-button {
     width: 45%;
     margin-left: 20px;
+}
+
+#enter-score_container {
+    display: grid;
+}
+
+#enter-score_glasspane {
+    grid-column: 1;
+    grid-row: 1;
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+    top: 0px;
+    left: 0px;
+    background: rgba(0, 0, 0, 0.25);
+    z-index: -1;
+}
+
+#enter-score_main {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.buttonbox {
+    display: flex;
+    align-items: center;
+}
+
+.buttonbox-fill {
+    display: flex;
+    align-items: center;
+}
+
+.buttonbox-fill>* {
+    flex-grow: 1;
 }
