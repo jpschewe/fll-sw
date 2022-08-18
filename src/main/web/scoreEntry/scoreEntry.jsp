@@ -127,13 +127,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <body>
 
-  <div id="floating-messages">
-    <div id="score-errors"></div>
-    <div id="verification-warning">Are you sure this score has
-      been Verified? Normally scores are not verified on the initial
-      entry.</div>
-  </div>
-
   <form
     action="SubmitScoreEntry"
     method="POST"
@@ -170,6 +163,13 @@ document.addEventListener('DOMContentLoaded', function() {
       readonly>
 
 <header>
+  <div id="floating-messages">
+    <div id="score-errors"></div>
+    <div id="verification-warning">Are you sure this score has
+      been Verified? Normally scores are not verified on the initial
+      entry.</div>
+  </div>
+
           <!-- top info bar (team name etc) -->
           <table
             id='top_info'
