@@ -104,6 +104,10 @@ html, body {
     border: 1px solid #ddd;
 }
 
+.fll-sw-button.fll-sw-button-pressed {
+    background: darkgrey;    
+}
+
 a.fll-sw-button:hover, div.fll-sw-button:hover, label.fll-sw-button:hover
     {
     background-color: #ddd;

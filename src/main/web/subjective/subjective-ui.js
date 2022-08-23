@@ -502,6 +502,10 @@ function addEventsToSlider(goal, ranges) {
     });
 }
 
+
+/**
+ * Create the rows for a single goal.
+ */
 function createScoreRows(table, totalColumns, score, goal) {
     let goalScore = null;
     if (subjective_module.isScoreCompleted(score)) {
@@ -523,6 +527,14 @@ function createScoreRows(table, totalColumns, score, goal) {
     addRubricToScoreEntry(table, goal, goalComment, ranges);
 
     addSliderToScoreEntry(table, goal, totalColumns, ranges, goalScore);
+
+    const commentsRow = document.createElement("tr");
+    table.appendChild(commentsRow);
+    commentsRow.classList.add("comments-display")
+    const commentsCell = document.createElement("td");
+    commentsRow.appendChild(commentsCell);
+    commentsCell.setAttribute("colspan", totalColumns);
+    commentsCell.innerText = "comments go here";
 
     const row = document.createElement("tr");
     table.appendChild(row);
@@ -1137,6 +1149,9 @@ function displayPageEnterScore() {
 
     recomputeTotal();
 
+    // hide comments by default
+    hideComments();
+
     // needs to be after displayPage as that uninstalls the warning
     installWarnOnReload();
 }
@@ -1285,6 +1300,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    document.getElementById("enter-score_show-comments").addEventListener('click', function() {
+        toggleComments();
+    });
+
     document.getElementById("enter-score_confirm-zero_yes").addEventListener('click', function() {
         document.getElementById("enter-score_confirm-zero").classList.add("fll-sw-ui-inactive");
         saveScore();
@@ -1343,6 +1362,42 @@ document.addEventListener("DOMContentLoaded", () => {
     // navigate to pages when the anchor changes
     window.addEventListener('hashchange', navigateToPage);
 });
+
+function displayComments() {
+    displayOrHideComments(false);
+}
+
+function hideComments() {
+    displayOrHideComments(true);
+}
+
+function toggleComments() {
+    const displayCommentsButton = document.getElementById("enter-score_show-comments");
+    const hide = displayCommentsButton.classList.contains("fll-sw-button-pressed");
+    displayOrHideComments(hide);
+}
+
+/**
+ * @param hide if true, hide the comments
+ */
+function displayOrHideComments(hide) {
+    const displayCommentsButton = document.getElementById("enter-score_show-comments");
+
+    if (hide) {
+        displayCommentsButton.classList.remove("fll-sw-button-pressed");
+    } else {
+        displayCommentsButton.classList.add("fll-sw-button-pressed");
+    }
+
+    for (const element of document.querySelectorAll('.comments-display')) {
+        if (hide) {
+            element.classList.add("fll-sw-ui-inactive");
+        } else {
+            element.classList.remove("fll-sw-ui-inactive");
+        }
+    }
+}
+
 
 window.addEventListener('load', () => {
     // initial state
