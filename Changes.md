@@ -1,3 +1,4 @@
+* #1024 - Allow judges to see comments on the score entry page
 * #1031 - add support for assigning tables for playoffs without printing
 * #1021 - Add link from scoreboard index page to scrolling version of all teams
 * #1038 - Add label for restriction warning message in challenge editor
