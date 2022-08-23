@@ -252,6 +252,10 @@ function getGoalTextId(goal) {
     return "enter-score-comment-" + goal.name + "-text";
 }
 
+function getGoalDisplayCommentsId(goal) {
+    return "enter-score-comment-" + goal.name + "-display";
+}
+
 /**
  * Save the state of the current page's goals to the specified score object. If
  * null, do nothing.
@@ -397,6 +401,9 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges) {
                 } else {
                     commentButton.classList.remove("comment-entered");
                 }
+
+                // make comment available for display on main page
+                commentsDisplay.innerText = comment;
             });
 
             commentButton.addEventListener("click", function() {
@@ -534,7 +541,8 @@ function createScoreRows(table, totalColumns, score, goal) {
     const commentsCell = document.createElement("td");
     commentsRow.appendChild(commentsCell);
     commentsCell.setAttribute("colspan", totalColumns);
-    commentsCell.innerText = "comments go here";
+    commentsCell.id = getGoalDisplayCommentsId(goal);
+    commentsCell.innerText = goalComment;
 
     const row = document.createElement("tr");
     table.appendChild(row);
@@ -542,7 +550,7 @@ function createScoreRows(table, totalColumns, score, goal) {
     const cell = document.createElement("td");
     row.appendChild(cell);
     cell.setAttribute("colspan", totalColumns);
-    cell.innerHtml = "&nbsp;";
+    cell.appendChild(document.createElement("hr"));
 
     addEventsToSlider(goal, ranges);
 
