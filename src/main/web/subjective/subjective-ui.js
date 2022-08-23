@@ -628,6 +628,7 @@ function updateGreatJobButtonBackground() {
     } else {
         greatJobButton.classList.remove("comment-entered");
     }
+    document.getElementById("enter-score-comment-great-job-display").innerText = comment;
 }
 
 function updateThinkAboutButtonBackground() {
@@ -638,6 +639,7 @@ function updateThinkAboutButtonBackground() {
     } else {
         button.classList.remove("comment-entered");
     }
+    document.getElementById("enter-score-comment-think-about-display").innerText = comment;
 }
 
 
@@ -1082,8 +1084,10 @@ function displayPageEnterScore() {
     if (null != score) {
         document.getElementById("enter-score-note-text").value = score.note;
         document.getElementById("enter-score-comment-great-job-text").value = score.commentGreatJob;
+        document.getElementById("enter-score-comment-great-job-display").innerText = score.commentGreatJob;
         document.getElementById("enter-score-comment-think-about-text").value =
             score.commentThinkAbout;
+        document.getElementById("enter-score-comment-think-about-display").innerText = score.commentThinkAbout;
     } else {
         document.getElementById("enter-score-note-text").value = "";
         document.getElementById("enter-score-comment-great-job-text").value = "";
