@@ -1303,12 +1303,14 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("confirm-noshow-dialog").classList.add("fll-sw-ui-inactive");
     });
 
-    document.getElementById("enter-score_toggle-review-mode").addEventListener('click', () => {
+    document.getElementById("enter-score_toggle-review-mode").addEventListener('click', function() {
         const glassPane = document.getElementById("review-mode_glasspane");
         if (glassPane.style.zIndex > 0) {
             glassPane.style.zIndex = -1;
+            this.classList.remove("fll-sw-button-pressed");
         } else {
             glassPane.style.zIndex = 10;
+            this.classList.add("fll-sw-button-pressed");
         }
     });
 
