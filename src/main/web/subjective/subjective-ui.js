@@ -252,6 +252,10 @@ function getGoalTextId(goal) {
     return "enter-score-comment-" + goal.name + "-text";
 }
 
+function getGoalDisplayCommentsId(goal) {
+    return "enter-score-comment-" + goal.name + "-display";
+}
+
 /**
  * Save the state of the current page's goals to the specified score object. If
  * null, do nothing.
@@ -397,6 +401,9 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges) {
                 } else {
                     commentButton.classList.remove("comment-entered");
                 }
+
+                // make comment available for display on main page
+                commentsDisplay.innerText = comment;
             });
 
             commentButton.addEventListener("click", function() {
@@ -502,6 +509,10 @@ function addEventsToSlider(goal, ranges) {
     });
 }
 
+
+/**
+ * Create the rows for a single goal.
+ */
 function createScoreRows(table, totalColumns, score, goal) {
     let goalScore = null;
     if (subjective_module.isScoreCompleted(score)) {
@@ -524,13 +535,22 @@ function createScoreRows(table, totalColumns, score, goal) {
 
     addSliderToScoreEntry(table, goal, totalColumns, ranges, goalScore);
 
+    const commentsRow = document.createElement("tr");
+    table.appendChild(commentsRow);
+    commentsRow.classList.add("comments-display")
+    const commentsCell = document.createElement("td");
+    commentsRow.appendChild(commentsCell);
+    commentsCell.setAttribute("colspan", totalColumns);
+    commentsCell.id = getGoalDisplayCommentsId(goal);
+    commentsCell.innerText = goalComment;
+
     const row = document.createElement("tr");
     table.appendChild(row);
 
     const cell = document.createElement("td");
     row.appendChild(cell);
     cell.setAttribute("colspan", totalColumns);
-    cell.innerHtml = "&nbsp;";
+    cell.appendChild(document.createElement("hr"));
 
     addEventsToSlider(goal, ranges);
 
@@ -608,6 +628,7 @@ function updateGreatJobButtonBackground() {
     } else {
         greatJobButton.classList.remove("comment-entered");
     }
+    document.getElementById("enter-score-comment-great-job-display").innerText = comment;
 }
 
 function updateThinkAboutButtonBackground() {
@@ -618,6 +639,7 @@ function updateThinkAboutButtonBackground() {
     } else {
         button.classList.remove("comment-entered");
     }
+    document.getElementById("enter-score-comment-think-about-display").innerText = comment;
 }
 
 
@@ -1062,8 +1084,10 @@ function displayPageEnterScore() {
     if (null != score) {
         document.getElementById("enter-score-note-text").value = score.note;
         document.getElementById("enter-score-comment-great-job-text").value = score.commentGreatJob;
+        document.getElementById("enter-score-comment-great-job-display").innerText = score.commentGreatJob;
         document.getElementById("enter-score-comment-think-about-text").value =
             score.commentThinkAbout;
+        document.getElementById("enter-score-comment-think-about-display").innerText = score.commentThinkAbout;
     } else {
         document.getElementById("enter-score-note-text").value = "";
         document.getElementById("enter-score-comment-great-job-text").value = "";
@@ -1136,6 +1160,9 @@ function displayPageEnterScore() {
     updateThinkAboutButtonBackground();
 
     recomputeTotal();
+
+    // hide comments by default
+    hideComments();
 
     // needs to be after displayPage as that uninstalls the warning
     installWarnOnReload();
@@ -1276,13 +1303,19 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("confirm-noshow-dialog").classList.add("fll-sw-ui-inactive");
     });
 
-    document.getElementById("enter-score_toggle-review-mode").addEventListener('click', () => {
+    document.getElementById("enter-score_toggle-review-mode").addEventListener('click', function() {
         const glassPane = document.getElementById("review-mode_glasspane");
         if (glassPane.style.zIndex > 0) {
             glassPane.style.zIndex = -1;
+            this.classList.remove("fll-sw-button-pressed");
         } else {
             glassPane.style.zIndex = 10;
+            this.classList.add("fll-sw-button-pressed");
         }
+    });
+
+    document.getElementById("enter-score_show-comments").addEventListener('click', function() {
+        toggleComments();
     });
 
     document.getElementById("enter-score_confirm-zero_yes").addEventListener('click', function() {
@@ -1343,6 +1376,42 @@ document.addEventListener("DOMContentLoaded", () => {
     // navigate to pages when the anchor changes
     window.addEventListener('hashchange', navigateToPage);
 });
+
+function displayComments() {
+    displayOrHideComments(false);
+}
+
+function hideComments() {
+    displayOrHideComments(true);
+}
+
+function toggleComments() {
+    const displayCommentsButton = document.getElementById("enter-score_show-comments");
+    const hide = displayCommentsButton.classList.contains("fll-sw-button-pressed");
+    displayOrHideComments(hide);
+}
+
+/**
+ * @param hide if true, hide the comments
+ */
+function displayOrHideComments(hide) {
+    const displayCommentsButton = document.getElementById("enter-score_show-comments");
+
+    if (hide) {
+        displayCommentsButton.classList.remove("fll-sw-button-pressed");
+    } else {
+        displayCommentsButton.classList.add("fll-sw-button-pressed");
+    }
+
+    for (const element of document.querySelectorAll('.comments-display')) {
+        if (hide) {
+            element.classList.add("fll-sw-ui-inactive");
+        } else {
+            element.classList.remove("fll-sw-ui-inactive");
+        }
+    }
+}
+
 
 window.addEventListener('load', () => {
     // initial state

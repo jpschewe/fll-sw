@@ -195,17 +195,28 @@
                     </table>
 
                     <!-- comment grid -->
-                    <div>
-                        <button type='button'
-                            id="enter-score-comment-great-job-button"
-                            class="center fll-sw-button">Great
-                            Job...</button>
-
-                        <button type='button'
-                            id="enter-score-comment-think-about-button"
-                            class="center fll-sw-button">Think
-                            About...</button>
-                    </div>
+                    <table class='full-width'>
+                        <tr>
+                            <td>
+                                <button type='button'
+                                    id="enter-score-comment-great-job-button"
+                                    class="center fll-sw-button full-width">Great
+                                    Job...</button>
+                            </td>
+                            <td>
+                                <button type='button'
+                                    id="enter-score-comment-think-about-button"
+                                    class="center fll-sw-button full-width">Think
+                                    About...</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class='comments-display'
+                                id='enter-score-comment-great-job-display'></td>
+                            <td class='comments-display'
+                                id='enter-score-comment-think-about-display'></td>
+                        </tr>
+                    </table>
                     <!-- end comment grid -->
 
                     <div id='enter-score_nominates'></div>
@@ -261,6 +272,8 @@
                     class='fll-sw-button'>Delete</button>
                 <button id='enter-score_no-show' type='button'
                     class='fll-sw-button'>No Show</button>
+                <button id='enter-score_show-comments' type='button'
+                    class='fll-sw-button'>Display Comments</button>
             </div>
         </div>
         <!--  end footers -->
