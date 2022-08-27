@@ -1,3 +1,4 @@
+* #1020 - Allow one to override sections of the awards text with an empty string
 * #973 - Show a reasonable error message when a duplicate performance score is entered
 * #971, #972 - make review mode button show as depressed when review mode is on
 * #1024 - Allow judges to see comments on the score entry page

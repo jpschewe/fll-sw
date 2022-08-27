@@ -544,8 +544,7 @@ public final class AwardsScript {
       prep.executeUpdate();
     }
 
-    if (null != newValue
-        && newValue.trim().length() > 0) {
+    if (null != newValue) {
       final Formatter insertSql = new Formatter();
       insertSql.format("INSERT INTO %s", tableName);
       insertSql.format(" (tournament_level_id, tournament_id, layer_rank, %s, %s)", keyColumn, valueColumn);
