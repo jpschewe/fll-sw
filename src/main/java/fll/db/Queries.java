@@ -275,49 +275,6 @@ public final class Queries {
   }
 
   /**
-   * Insert a performance score into the database. All of the values are
-   * expected to be in request.
-   *
-   * @param description describes the challenge
-   * @param connection database connection
-   * @param request HTTP request with all of the data
-   * @throws SQLException on a database error.
-   * @throws RuntimeException if a parameter is missing.
-   * @throws ParseException if the team number cannot be parsed
-   */
-  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Goals determine columns")
-  public static void insertPerformanceScore(final ChallengeDescription description,
-                                            final Connection connection,
-                                            final HttpServletRequest request)
-      throws SQLException, ParseException, RuntimeException {
-    final int currentTournament = getCurrentTournament(connection);
-    final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
-
-    final String teamNumberStr = request.getParameter("TeamNumber");
-    if (null == teamNumberStr) {
-      throw new RuntimeException("Missing parameter: TeamNumber");
-    }
-    final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumberStr).intValue();
-
-    final String runNumberStr = request.getParameter("RunNumber");
-    if (null == runNumberStr) {
-      throw new RuntimeException("Missing parameter: RunNumber");
-    }
-    final int runNumber = Utilities.getIntegerNumberFormat().parse(runNumberStr).intValue();
-
-    final String noShow = request.getParameter("NoShow");
-    if (null == noShow) {
-      throw new RuntimeException("Missing parameter: NoShow");
-    }
-
-    final boolean verified = "1".equals(request.getParameter("Verified"));
-
-    final TeamScore teamScore = new HttpTeamScore(teamNumber, runNumber, request);
-
-    insertPerformanceScore(connection, description, tournament, verified, teamScore);
-  }
-
-  /**
    * Insert a performance score into the database and do all appropriate updates
    * to the playoff tables and notifications to the UI code.
    *
