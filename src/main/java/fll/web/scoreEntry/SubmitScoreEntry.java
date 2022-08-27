@@ -111,6 +111,9 @@ public class SubmitScoreEntry extends BaseFLLServlet {
           SessionAttributes.appendToMessage(session, message);
         } else {
           Queries.insertPerformanceScore(connection, challengeDescription, tournament, verified, teamScore);
+          final String message = String.format("<div class='success'>Entered score for %d run %d</div>", teamNumber,
+                                               runNumber);
+          SessionAttributes.appendToMessage(session, message);
         }
       }
 
