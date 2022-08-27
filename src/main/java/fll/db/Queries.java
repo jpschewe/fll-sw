@@ -275,41 +275,6 @@ public final class Queries {
   }
 
   /**
-   * Insert or update a performance score.
-   *
-   * @param description challenge description
-   * @param connection database connection
-   * @param request HTTP request with all of the data
-   * @throws SQLException on a database error.
-   * @throws RuntimeException if a parameter is missing.
-   * @throws ParseException if the team number cannot be parsed
-   */
-  public static void insertOrUpdatePerformanceScore(final ChallengeDescription description,
-                                                    final Connection connection,
-                                                    final HttpServletRequest request)
-      throws SQLException, ParseException, RuntimeException {
-    final int oldTransactionIsolation = connection.getTransactionIsolation();
-    final boolean oldAutoCommit = connection.getAutoCommit();
-    try {
-      // make sure that we don't get into a race with another thread
-      connection.setAutoCommit(false);
-      connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-
-      final int rowsUpdated = updatePerformanceScore(description, connection, request);
-      if (rowsUpdated < 1) {
-        insertPerformanceScore(description, connection, request);
-      }
-      connection.commit();
-    } finally {
-      connection.setTransactionIsolation(oldTransactionIsolation);
-      connection.setAutoCommit(oldAutoCommit);
-    }
-
-    // notify that there may be more runs to verify
-    UnverifiedRunsWebSocket.notifyToUpdate();
-  }
-
-  /**
    * Insert a performance score into the database. All of the values are
    * expected to be in request.
    *
