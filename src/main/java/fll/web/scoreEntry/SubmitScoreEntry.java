@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
@@ -29,6 +30,8 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.playoff.HttpTeamScore;
+import fll.web.playoff.TeamScore;
 import fll.xml.ChallengeDescription;
 
 /**
@@ -78,7 +81,40 @@ public class SubmitScoreEntry extends BaseFLLServlet {
           throw new FLLInternalException("Updated multiple rows!");
         }
       } else {
-        Queries.insertPerformanceScore(challengeDescription, connection, request);
+        final int currentTournament = Queries.getCurrentTournament(connection);
+        final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
+
+        final String teamNumberStr = request.getParameter("TeamNumber");
+        if (null == teamNumberStr) {
+          throw new RuntimeException("Missing parameter: TeamNumber");
+        }
+        final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumberStr).intValue();
+
+        final String runNumberStr = request.getParameter("RunNumber");
+        if (null == runNumberStr) {
+          throw new RuntimeException("Missing parameter: RunNumber");
+        }
+        final int runNumber = Utilities.getIntegerNumberFormat().parse(runNumberStr).intValue();
+
+        final String noShow = request.getParameter("NoShow");
+        if (null == noShow) {
+          throw new RuntimeException("Missing parameter: NoShow");
+        }
+
+        final boolean verified = "1".equals(request.getParameter("Verified"));
+
+        final TeamScore teamScore = new HttpTeamScore(teamNumber, runNumber, request);
+
+        if (Queries.performanceScoreExists(connection, currentTournament, teamNumber, runNumber)) {
+          final String message = String.format("<div class='error'>Someone else has already entered a score for team %s run %d. Check that you selected the correct team and enter the score again.</div>",
+                                               teamNumber, runNumber);
+          SessionAttributes.appendToMessage(session, message);
+        } else {
+          Queries.insertPerformanceScore(connection, challengeDescription, tournament, verified, teamScore);
+          final String message = String.format("<div class='success'>Entered score for %d run %d</div>", teamNumber,
+                                               runNumber);
+          SessionAttributes.appendToMessage(session, message);
+        }
       }
 
       response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
