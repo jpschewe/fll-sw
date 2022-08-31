@@ -23,6 +23,7 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import fll.util.GuiUtils;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.Restriction;
+import fll.xml.ui.MovableExpandablePanel.DeleteEvent;
 
 /**
  * Edit the list of {@link Restriction} objects on the
@@ -79,20 +80,22 @@ public class RestrictionListEditor extends JPanel implements Validatable {
     final RestrictionEditor editor = new RestrictionEditor(restriction, performance);
     editors.add(editor);
 
-    final JPanel panel = new JPanel(new BorderLayout());
-    panel.add(editor, BorderLayout.CENTER);
-
-    final JButton delete = new JButton("Delete Restriction");
-    panel.add(delete, BorderLayout.EAST);
-
-    delete.addActionListener(e -> {
-      editorContainer.remove(panel);
-      GuiUtils.removeFromContainer(editorContainer, editor);
-      editors.remove(editor);
+    final MovableExpandablePanel container = new MovableExpandablePanel(restriction.getMessage(), editor, false, true);
+    editor.addPropertyChangeListener("message", e -> {
+      final String newTitle = (String) e.getNewValue();
+      container.setTitle(newTitle);
+    });
+    container.addDeleteEventListener(new MovableExpandablePanel.DeleteEventListener() {
+      @Override
+      public void requestDelete(final DeleteEvent e) {
+        editorContainer.remove(container);
+        GuiUtils.removeFromContainer(editorContainer, editor);
+        editors.remove(editor);
+      }
     });
 
-    panel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));
-    GuiUtils.addToContainer(editorContainer, panel);
+    container.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));
+    GuiUtils.addToContainer(editorContainer, container);
   }
 
   /**

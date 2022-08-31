@@ -6,12 +6,15 @@
 
 package fll.xml.ui;
 
+import java.awt.Component;
 import java.text.ParseException;
 import java.util.Collection;
 
 import javax.swing.Box;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
 import fll.util.FormatterUtils;
 
@@ -94,8 +97,18 @@ public class RestrictionEditor extends PolynomialEditor {
     messageBox.add(messageEditor);
 
     messageEditor.addPropertyChangeListener("value", e -> {
-      this.restriction.setMessage(messageEditor.getText());
+      final String oldMessage = this.restriction.getMessage();
+      final String newMessage = messageEditor.getText();
+
+      this.restriction.setMessage(newMessage);
+      fireMessageChange(oldMessage, newMessage);
     });
+  }
+
+  protected void fireMessageChange(@UnknownInitialization(Component.class) RestrictionEditor this,
+                                   final String oldMessage,
+                                   final String newMessage) {
+    firePropertyChange("message", oldMessage, newMessage);
   }
 
   /**
