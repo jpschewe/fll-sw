@@ -33,6 +33,21 @@ table .score-entry {
     cursor: pointer;
 }
 
+.inc-dec-button {
+    cursor: pointer;
+    width: 98%;
+}
+
+.inc-dec-container {
+    width: 100%;
+    border: 0;
+    text-align: center;
+}
+
+.inc-dec-container td {
+    border: 0;
+}
+
 .score-entry .y-n-button {
     display: inline-block;
     border: 1px solid #AAAAAA;

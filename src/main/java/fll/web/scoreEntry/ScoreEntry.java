@@ -81,7 +81,21 @@ public final class ScoreEntry {
   /**
    * Maximum range to use a slider for.
    */
-  private static final int SLIDER_RANGE_MAX = 20;
+  private static final int SLIDER_RANGE_MAX = 10;
+
+  /**
+   * When the range is larger than this value, add increment and decrement buttons
+   * for {@link #GOAL_RANGE_MEDIUM_INCREMENT}.
+   */
+  private static final int GOAL_RANGE_MEDIUM_MIN = 20;
+
+  private static final int GOAL_RANGE_MEDIUM_INCREMENT = 5;
+
+  /**
+   * When the range is larger than this value, add increment and decrement buttons
+   * for the full range;
+   */
+  private static final int GOAL_RANGE_MEDIUM_MAX = 30;
 
   private ScoreEntry() {
   }
@@ -930,18 +944,20 @@ public final class ScoreEntry {
 
     } else {
       // use buttons
-      writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='150'>");
-      writer.println("      <tr align='center'>");
+      writer.println("    <table class='inc-dec-container'>");
+      writer.println("      <tr>");
 
       final int maxRangeIncrement = (int) Math.floor(range);
 
-      generateIncDecButton(name, -1
-          * maxRangeIncrement, writer);
+      if (FP.greaterThanOrEqual(range, GOAL_RANGE_MEDIUM_MAX, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+        // - full value
+        generateIncDecButton(name, -1
+            * maxRangeIncrement, writer);
+      }
 
-      if (FP.greaterThanOrEqual(range, 10, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-        generateIncDecButton(name, -5, writer);
-      } else if (FP.greaterThanOrEqual(range, 5, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-        generateIncDecButton(name, -3, writer);
+      if (FP.greaterThanOrEqual(range, GOAL_RANGE_MEDIUM_MIN, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+        generateIncDecButton(name, -1
+            * GOAL_RANGE_MEDIUM_INCREMENT, writer);
       }
 
       // -1
@@ -950,13 +966,14 @@ public final class ScoreEntry {
       // +1
       generateIncDecButton(name, 1, writer);
 
-      if (FP.greaterThanOrEqual(range, 10, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-        generateIncDecButton(name, 5, writer);
-      } else if (FP.greaterThanOrEqual(range, 5, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-        generateIncDecButton(name, 3, writer);
+      if (FP.greaterThanOrEqual(range, GOAL_RANGE_MEDIUM_MIN, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+        generateIncDecButton(name, GOAL_RANGE_MEDIUM_INCREMENT, writer);
       }
 
-      generateIncDecButton(name, maxRangeIncrement, writer);
+      if (FP.greaterThanOrEqual(range, GOAL_RANGE_MEDIUM_MAX, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+        // + full value
+        generateIncDecButton(name, maxRangeIncrement, writer);
+      }
 
       writer.println("       </tr>");
       writer.println("    </table>");
@@ -997,7 +1014,7 @@ public final class ScoreEntry {
         + getIncrementMethodName(name)
         + "("
         + increment
-        + ")'>");
+        + ")' class='inc-dec-button'>");
     writer.println("        </td>");
   }
 
