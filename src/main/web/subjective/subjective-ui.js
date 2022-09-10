@@ -403,7 +403,7 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges) {
                 }
 
                 // make comment available for display on main page
-                commentsDisplay.innerText = comment;
+                document.getElementById(getGoalDisplayCommentsId(goal)).innerText = comment;
             });
 
             commentButton.addEventListener("click", function() {
