@@ -1,0 +1,135 @@
+body {
+    /* keeps the body from scrolling */
+    overflow: hidden;
+}
+
+#score-entry {
+    height: 100%;
+}
+
+table .score-entry {
+    width: 100%;
+}
+
+.score-entry .slider {
+    width: 100%;
+}
+
+.score-entry th, .score-entry td {
+    border: 1px solid #808080;
+    font-size: large;
+}
+
+.enum-button {
+    cursor: pointer;
+}
+
+.score-entry .enum-button {
+    display: block;
+    border: 1px solid #AAAAAA;
+}
+
+.y-n-button {
+    cursor: pointer;
+}
+
+.inc-dec-button {
+    cursor: pointer;
+    width: 98%;
+}
+
+.inc-dec-container {
+    width: 100%;
+    border: 0;
+    text-align: center;
+}
+
+.inc-dec-container td {
+    border: 0;
+}
+
+.score-entry .y-n-button {
+    display: inline-block;
+    border: 1px solid #AAAAAA;
+    width: 48%;
+}
+
+.score-entry label input {
+    display: none;
+}
+
+.score-entry .y-n-button input+span {
+    display: inline-block;
+    width: 100%;
+    background: #DDDDDD;
+    text-align: center;
+}
+
+.score-entry .enum-button input+span {
+    background: #DDDDDD;
+    text-align: center;
+    display: block;
+}
+
+.score-entry input:checked+span {
+    background: #00FF00;
+}
+
+#floating-messages {
+    position: fixed;
+    top: 0px;
+    left: 0%;
+    z-index: 99;
+}
+
+#score-errors {
+    font-size: 200%;
+    border: 1px solid black;
+    padding: 5px;
+    background-color: red;
+}
+
+#verification-warning {
+    font-size: 200%;
+    border: 1px solid black;
+    padding: 5px;
+    background-color: yellow;
+}
+
+.goal-title {
+    font-weight: bold;
+    text-align: right;
+}
+
+.goal-group-spacer {
+    background-color: black;
+    line-height: 2px;
+}
+
+input[type=range] {
+    bottom: -10px;
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.verify-score-label {
+    color: red;
+    margin-right: 10px;
+}
+
+.verify-score-buttonbox {
+    width: 30%;
+}
+
+.total-score-label {
+    text-decoration: underline;
+}
+
+.score-entry-buttons>fll-sw-button:first-child {
+    margin-left: auto;
+}

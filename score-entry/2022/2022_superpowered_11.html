@@ -1,0 +1,2694 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+  
+  
+    <title>Score Entry</title>
+  
+
+
+<!-- is practice true -->
+<link rel="stylesheet" type="text/css" href="2022_superpowered_11_files/fll-sw.css">
+
+<link rel="stylesheet" type="text/css" href="2022_superpowered_11_files/scoreEntry.css">
+
+<!-- a couple of things come from the JSP, so need to be inline -->
+<style type="text/css">
+table#top_info {
+    background-color: #e0e0e0;
+
+}
+body {
+    background-color: transparent;
+}
+
+.restriction-error {
+    background-color: red;
+}
+</style>
+    
+<script type="text/javascript" src="2022_superpowered_11_files/fll-functions.js"></script>
+<script type="text/javascript" src="2022_superpowered_11_files/fll-objects.js"></script>
+    
+
+
+
+<script type="text/javascript">
+var EditFlag = false;
+
+
+function init() {
+    document.scoreEntry.M04_solar_farm_slider.oninput = function() {
+    document.scoreEntry.M04_solar_farm.innerHTML = this.value;
+    set_M04_solar_farm(this.value);
+  };
+  document.scoreEntry.M07_wind_turbine_slider.oninput = function() {
+    document.scoreEntry.M07_wind_turbine.innerHTML = this.value;
+    set_M07_wind_turbine(this.value);
+  };
+  document.scoreEntry.m10_power_plant_slider.oninput = function() {
+    document.scoreEntry.m10_power_plant.innerHTML = this.value;
+    set_m10_power_plant(this.value);
+  };
+  document.scoreEntry.M02_oil_platform_fuel_units_slider.oninput = function() {
+    document.scoreEntry.M02_oil_platform_fuel_units.innerHTML = this.value;
+    set_M02_oil_platform_fuel_units(this.value);
+  };
+  document.scoreEntry.M12_looped_water_in_reservoir_slider.oninput = function() {
+    document.scoreEntry.M12_looped_water_in_reservoir.innerHTML = this.value;
+    set_M12_looped_water_in_reservoir(this.value);
+  };
+  document.scoreEntry.M12_looped_water_on_hooks_slider.oninput = function() {
+    document.scoreEntry.M12_looped_water_on_hooks.innerHTML = this.value;
+    set_M12_looped_water_on_hooks(this.value);
+  };
+  document.scoreEntry.gp_score_slider.oninput = function() {
+    document.scoreEntry.gp_score.innerHTML = this.value;
+    set_gp_score(this.value);
+  };
+  m00_one_launch_area_raw = 0.0;
+  M04_solar_farm_raw = 0.0;
+  M07_wind_turbine_raw = 0.0;
+  m10_power_plant_raw = 0.0;
+  M11_dam_raw = 0.0;
+  M03_energy_units_raw = 0.0;
+  M03_removed_storage_tray_raw = 0.0;
+  M13_power_to_x_raw = 0.0;
+  M14_red_hopper_raw = 0.0;
+  M14_mini_dino_released_raw = 0.0;
+  M15_rechargeable_battery_area_raw = 0.0;
+  M08_television_raised_raw = 0.0;
+  M08_energy_unit_raw = 0.0;
+  M09_dinosaur_left_home_area_raw = 0.0;
+  M09_lid_raw = "Empty";
+  m01_innovation_project_raw = 0.0;
+  M02_oil_platform_fuel_units_raw = 0.0;
+  M02_truck_over_target_raw = 0.0;
+  M05_connector_raised_raw = 0.0;
+  M05_both_raised_raw = 0.0;
+  M06_car_off_ramp_raw = 0.0;
+  M06_hybrid_unit_in_hybrid_car_raw = 0.0;
+  M12_looped_water_in_reservoir_raw = 0.0;
+  M12_looped_water_on_hooks_raw = 0.0;
+  m16_precision_tokens_raw = "five";
+  m16_precision_tokens_raw = "six";
+  gp_score_raw = 3.0;
+  Verified = 0;
+
+
+  refresh();
+  
+  /* Saves total score for smarter notification popups */
+  savedTotalScore = document.scoreEntry.totalScore.value;
+}
+
+function refresh() { 
+  var score = 0;
+
+  // m00_one_launch_area
+if(m00_one_launch_area_raw == 0) {
+  document.scoreEntry.m00_one_launch_area[0].checked = true
+  document.scoreEntry.m00_one_launch_area_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m00_one_launch_area[1].checked = true
+  document.scoreEntry.m00_one_launch_area_radioValue.value = 'YES'
+}
+m00_one_launch_area_computed = m00_one_launch_area_raw * 20.0;
+score += m00_one_launch_area_computed;
+document.scoreEntry.score_m00_one_launch_area.value = m00_one_launch_area_computed;
+
+// M04_solar_farm
+document.scoreEntry.M04_solar_farm.value = M04_solar_farm_raw;
+M04_solar_farm_computed = M04_solar_farm_raw * 5.0;
+document.scoreEntry.M04_solar_farm_slider.value = M04_solar_farm_raw;
+score += M04_solar_farm_computed;
+document.scoreEntry.score_M04_solar_farm.value = M04_solar_farm_computed;
+
+compute_M04_solar_farm_bonus();
+score += M04_solar_farm_bonus_computed;
+
+// M07_wind_turbine
+document.scoreEntry.M07_wind_turbine.value = M07_wind_turbine_raw;
+M07_wind_turbine_computed = M07_wind_turbine_raw * 10.0;
+document.scoreEntry.M07_wind_turbine_slider.value = M07_wind_turbine_raw;
+score += M07_wind_turbine_computed;
+document.scoreEntry.score_M07_wind_turbine.value = M07_wind_turbine_computed;
+
+// m10_power_plant
+document.scoreEntry.m10_power_plant.value = m10_power_plant_raw;
+m10_power_plant_computed = m10_power_plant_raw * 5.0;
+document.scoreEntry.m10_power_plant_slider.value = m10_power_plant_raw;
+score += m10_power_plant_computed;
+document.scoreEntry.score_m10_power_plant.value = m10_power_plant_computed;
+
+compute_M10_power_plant_bonus();
+score += M10_power_plant_bonus_computed;
+
+// M11_dam
+if(M11_dam_raw == 0) {
+  document.scoreEntry.M11_dam[0].checked = true
+  document.scoreEntry.M11_dam_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.M11_dam[1].checked = true
+  document.scoreEntry.M11_dam_radioValue.value = 'YES'
+}
+M11_dam_computed = M11_dam_raw * 20.0;
+score += M11_dam_computed;
+document.scoreEntry.score_M11_dam.value = M11_dam_computed;
+
+// M03_energy_units
+document.scoreEntry.M03_energy_units.value = M03_energy_units_raw;
+M03_energy_units_computed = M03_energy_units_raw * 0.0;
+score += M03_energy_units_computed;
+document.scoreEntry.score_M03_energy_units.value = M03_energy_units_computed;
+
+compute_M03_energy_units_computed();
+score += M03_energy_units_computed_computed;
+
+// M03_removed_storage_tray
+if(M03_removed_storage_tray_raw == 0) {
+  document.scoreEntry.M03_removed_storage_tray[0].checked = true
+  document.scoreEntry.M03_removed_storage_tray_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.M03_removed_storage_tray[1].checked = true
+  document.scoreEntry.M03_removed_storage_tray_radioValue.value = 'YES'
+}
+M03_removed_storage_tray_computed = M03_removed_storage_tray_raw * 5.0;
+score += M03_removed_storage_tray_computed;
+document.scoreEntry.score_M03_removed_storage_tray.value = M03_removed_storage_tray_computed;
+
+// M13_power_to_x
+document.scoreEntry.M13_power_to_x.value = M13_power_to_x_raw;
+M13_power_to_x_computed = M13_power_to_x_raw * 0.0;
+score += M13_power_to_x_computed;
+document.scoreEntry.score_M13_power_to_x.value = M13_power_to_x_computed;
+
+compute_M13_power_to_x_computed();
+score += M13_power_to_x_computed_computed;
+
+// M14_red_hopper
+document.scoreEntry.M14_red_hopper.value = M14_red_hopper_raw;
+M14_red_hopper_computed = M14_red_hopper_raw * 0.0;
+score += M14_red_hopper_computed;
+document.scoreEntry.score_M14_red_hopper.value = M14_red_hopper_computed;
+
+compute_M14_red_hopper_computed();
+score += M14_red_hopper_computed_computed;
+
+// M14_mini_dino_released
+if(M14_mini_dino_released_raw == 0) {
+  document.scoreEntry.M14_mini_dino_released[0].checked = true
+  document.scoreEntry.M14_mini_dino_released_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.M14_mini_dino_released[1].checked = true
+  document.scoreEntry.M14_mini_dino_released_radioValue.value = 'YES'
+}
+M14_mini_dino_released_computed = M14_mini_dino_released_raw * 10.0;
+score += M14_mini_dino_released_computed;
+document.scoreEntry.score_M14_mini_dino_released.value = M14_mini_dino_released_computed;
+
+// M15_rechargeable_battery_area
+document.scoreEntry.M15_rechargeable_battery_area.value = M15_rechargeable_battery_area_raw;
+M15_rechargeable_battery_area_computed = M15_rechargeable_battery_area_raw * 0.0;
+score += M15_rechargeable_battery_area_computed;
+document.scoreEntry.score_M15_rechargeable_battery_area.value = M15_rechargeable_battery_area_computed;
+
+compute_M15_rechargeable_battery_area_computed();
+score += M15_rechargeable_battery_area_computed_computed;
+
+// M08_television_raised
+if(M08_television_raised_raw == 0) {
+  document.scoreEntry.M08_television_raised[0].checked = true
+  document.scoreEntry.M08_television_raised_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.M08_television_raised[1].checked = true
+  document.scoreEntry.M08_television_raised_radioValue.value = 'YES'
+}
+M08_television_raised_computed = M08_television_raised_raw * 10.0;
+score += M08_television_raised_computed;
+document.scoreEntry.score_M08_television_raised.value = M08_television_raised_computed;
+
+// M08_energy_unit
+if(M08_energy_unit_raw == 0) {
+  document.scoreEntry.M08_energy_unit[0].checked = true
+  document.scoreEntry.M08_energy_unit_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.M08_energy_unit[1].checked = true
+  document.scoreEntry.M08_energy_unit_radioValue.value = 'YES'
+}
+M08_energy_unit_computed = M08_energy_unit_raw * 10.0;
+score += M08_energy_unit_computed;
+document.scoreEntry.score_M08_energy_unit.value = M08_energy_unit_computed;
+
+// M09_dinosaur_left_home_area
+if(M09_dinosaur_left_home_area_raw == 0) {
+  document.scoreEntry.M09_dinosaur_left_home_area[0].checked = true
+  document.scoreEntry.M09_dinosaur_left_home_area_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.M09_dinosaur_left_home_area[1].checked = true
+  document.scoreEntry.M09_dinosaur_left_home_area_radioValue.value = 'YES'
+}
+M09_dinosaur_left_home_area_computed = M09_dinosaur_left_home_area_raw * 10.0;
+score += M09_dinosaur_left_home_area_computed;
+document.scoreEntry.score_M09_dinosaur_left_home_area.value = M09_dinosaur_left_home_area_computed;
+
+// M09_lid
+if(M09_lid_raw == "Empty") {
+  document.scoreEntry.M09_lid[0].checked = true;
+  M09_lid_computed = 0.000000 * 1.0;
+  document.scoreEntry.M09_lid_radioValue.value = 'EMPTY'
+} else if(M09_lid_raw == "Energy_Unit") {
+  document.scoreEntry.M09_lid[1].checked = true;
+  M09_lid_computed = 10.000000 * 1.0;
+  document.scoreEntry.M09_lid_radioValue.value = 'ENERGY_UNIT'
+} else if(M09_lid_raw == "Rechargeable") {
+  document.scoreEntry.M09_lid[2].checked = true;
+  M09_lid_computed = 20.000000 * 1.0;
+  document.scoreEntry.M09_lid_radioValue.value = 'RECHARGEABLE'
+}
+score += M09_lid_computed;
+document.scoreEntry.score_M09_lid.value = M09_lid_computed;
+
+// m01_innovation_project
+if(m01_innovation_project_raw == 0) {
+  document.scoreEntry.m01_innovation_project[0].checked = true
+  document.scoreEntry.m01_innovation_project_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m01_innovation_project[1].checked = true
+  document.scoreEntry.m01_innovation_project_radioValue.value = 'YES'
+}
+m01_innovation_project_computed = m01_innovation_project_raw * 10.0;
+score += m01_innovation_project_computed;
+document.scoreEntry.score_m01_innovation_project.value = m01_innovation_project_computed;
+
+// M02_oil_platform_fuel_units
+document.scoreEntry.M02_oil_platform_fuel_units.value = M02_oil_platform_fuel_units_raw;
+M02_oil_platform_fuel_units_computed = M02_oil_platform_fuel_units_raw * 5.0;
+document.scoreEntry.M02_oil_platform_fuel_units_slider.value = M02_oil_platform_fuel_units_raw;
+score += M02_oil_platform_fuel_units_computed;
+document.scoreEntry.score_M02_oil_platform_fuel_units.value = M02_oil_platform_fuel_units_computed;
+
+// M02_truck_over_target
+if(M02_truck_over_target_raw == 0) {
+  document.scoreEntry.M02_truck_over_target[0].checked = true
+  document.scoreEntry.M02_truck_over_target_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.M02_truck_over_target[1].checked = true
+  document.scoreEntry.M02_truck_over_target_radioValue.value = 'YES'
+}
+M02_truck_over_target_computed = M02_truck_over_target_raw * 0.0;
+score += M02_truck_over_target_computed;
+document.scoreEntry.score_M02_truck_over_target.value = M02_truck_over_target_computed;
+
+compute_M02_fuel_truck_bonus();
+score += M02_fuel_truck_bonus_computed;
+
+// M05_connector_raised
+if(M05_connector_raised_raw == 0) {
+  document.scoreEntry.M05_connector_raised[0].checked = true
+  document.scoreEntry.M05_connector_raised_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.M05_connector_raised[1].checked = true
+  document.scoreEntry.M05_connector_raised_radioValue.value = 'YES'
+}
+M05_connector_raised_computed = M05_connector_raised_raw * 20.0;
+score += M05_connector_raised_computed;
+document.scoreEntry.score_M05_connector_raised.value = M05_connector_raised_computed;
+
+// M05_both_raised
+if(M05_both_raised_raw == 0) {
+  document.scoreEntry.M05_both_raised[0].checked = true
+  document.scoreEntry.M05_both_raised_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.M05_both_raised[1].checked = true
+  document.scoreEntry.M05_both_raised_radioValue.value = 'YES'
+}
+M05_both_raised_computed = M05_both_raised_raw * 10.0;
+score += M05_both_raised_computed;
+document.scoreEntry.score_M05_both_raised.value = M05_both_raised_computed;
+
+// M06_car_off_ramp
+if(M06_car_off_ramp_raw == 0) {
+  document.scoreEntry.M06_car_off_ramp[0].checked = true
+  document.scoreEntry.M06_car_off_ramp_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.M06_car_off_ramp[1].checked = true
+  document.scoreEntry.M06_car_off_ramp_radioValue.value = 'YES'
+}
+M06_car_off_ramp_computed = M06_car_off_ramp_raw * 10.0;
+score += M06_car_off_ramp_computed;
+document.scoreEntry.score_M06_car_off_ramp.value = M06_car_off_ramp_computed;
+
+// M06_hybrid_unit_in_hybrid_car
+if(M06_hybrid_unit_in_hybrid_car_raw == 0) {
+  document.scoreEntry.M06_hybrid_unit_in_hybrid_car[0].checked = true
+  document.scoreEntry.M06_hybrid_unit_in_hybrid_car_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.M06_hybrid_unit_in_hybrid_car[1].checked = true
+  document.scoreEntry.M06_hybrid_unit_in_hybrid_car_radioValue.value = 'YES'
+}
+M06_hybrid_unit_in_hybrid_car_computed = M06_hybrid_unit_in_hybrid_car_raw * 10.0;
+score += M06_hybrid_unit_in_hybrid_car_computed;
+document.scoreEntry.score_M06_hybrid_unit_in_hybrid_car.value = M06_hybrid_unit_in_hybrid_car_computed;
+
+// M12_looped_water_in_reservoir
+document.scoreEntry.M12_looped_water_in_reservoir.value = M12_looped_water_in_reservoir_raw;
+M12_looped_water_in_reservoir_computed = M12_looped_water_in_reservoir_raw * 5.0;
+document.scoreEntry.M12_looped_water_in_reservoir_slider.value = M12_looped_water_in_reservoir_raw;
+score += M12_looped_water_in_reservoir_computed;
+document.scoreEntry.score_M12_looped_water_in_reservoir.value = M12_looped_water_in_reservoir_computed;
+
+// M12_looped_water_on_hooks
+document.scoreEntry.M12_looped_water_on_hooks.value = M12_looped_water_on_hooks_raw;
+M12_looped_water_on_hooks_computed = M12_looped_water_on_hooks_raw * 10.0;
+document.scoreEntry.M12_looped_water_on_hooks_slider.value = M12_looped_water_on_hooks_raw;
+score += M12_looped_water_on_hooks_computed;
+document.scoreEntry.score_M12_looped_water_on_hooks.value = M12_looped_water_on_hooks_computed;
+
+// m16_precision_tokens
+if(m16_precision_tokens_raw == "zero") {
+  document.scoreEntry.m16_precision_tokens[0].checked = true;
+  m16_precision_tokens_computed = 0.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'ZERO'
+} else if(m16_precision_tokens_raw == "one") {
+  document.scoreEntry.m16_precision_tokens[1].checked = true;
+  m16_precision_tokens_computed = 10.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'ONE'
+} else if(m16_precision_tokens_raw == "two") {
+  document.scoreEntry.m16_precision_tokens[2].checked = true;
+  m16_precision_tokens_computed = 15.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'TWO'
+} else if(m16_precision_tokens_raw == "three") {
+  document.scoreEntry.m16_precision_tokens[3].checked = true;
+  m16_precision_tokens_computed = 25.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'THREE'
+} else if(m16_precision_tokens_raw == "four") {
+  document.scoreEntry.m16_precision_tokens[4].checked = true;
+  m16_precision_tokens_computed = 35.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'FOUR'
+} else if(m16_precision_tokens_raw == "five") {
+  document.scoreEntry.m16_precision_tokens[5].checked = true;
+  m16_precision_tokens_computed = 50.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'FIVE'
+} else if(m16_precision_tokens_raw == "six") {
+  document.scoreEntry.m16_precision_tokens[6].checked = true;
+  m16_precision_tokens_computed = 50.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'SIX'
+}
+score += m16_precision_tokens_computed;
+document.scoreEntry.score_m16_precision_tokens.value = m16_precision_tokens_computed;
+
+// gp_score
+document.scoreEntry.gp_score.value = gp_score_raw;
+gp_score_computed = gp_score_raw * 0.0;
+document.scoreEntry.gp_score_slider.value = gp_score_raw;
+score += gp_score_computed;
+document.scoreEntry.score_gp_score.value = gp_score_computed;
+
+if(Verified == 0) {
+  document.scoreEntry.Verified[0].checked = true
+} else {
+  document.scoreEntry.Verified[1].checked = true
+}
+
+
+  //check for minimum total score
+  if(score < 0.0) {
+    score = 0.0;
+  }
+
+  document.scoreEntry.totalScore.value = score;
+
+  check_restrictions();
+}
+
+function check_restrictions() {
+  var error_found = false;
+  removeChildren(document.getElementById("score-errors"));
+  
+  var m00_one_launch_area_error = false;
+  var M04_solar_farm_error = false;
+  var M07_wind_turbine_error = false;
+  var m10_power_plant_error = false;
+  var M11_dam_error = false;
+  var M03_energy_units_error = false;
+  var M03_removed_storage_tray_error = false;
+  var M13_power_to_x_error = false;
+  var M14_red_hopper_error = false;
+  var M14_mini_dino_released_error = false;
+  var M15_rechargeable_battery_area_error = false;
+  var M08_television_raised_error = false;
+  var M08_energy_unit_error = false;
+  var M09_dinosaur_left_home_area_error = false;
+  var M09_lid_error = false;
+  var m01_innovation_project_error = false;
+  var M02_oil_platform_fuel_units_error = false;
+  var M02_truck_over_target_error = false;
+  var M05_connector_raised_error = false;
+  var M05_both_raised_error = false;
+  var M06_car_off_ramp_error = false;
+  var M06_hybrid_unit_in_hybrid_car_error = false;
+  var M12_looped_water_in_reservoir_error = false;
+  var M12_looped_water_on_hooks_error = false;
+  var m16_precision_tokens_error = false;
+  var gp_score_error = false;
+  var restriction_0_value = parseInt(1.000000* M12_looped_water_in_reservoir_raw + 1.000000* M12_looped_water_on_hooks_raw);
+  if(restriction_0_value > 3.000000 || restriction_0_value < 0.000000) {
+    const restriction_0_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_0_error);
+    restriction_0_error.innerText = "Too Many Looped Water Units";
+    error_found = true;
+    M12_looped_water_in_reservoir_error = true;
+    M12_looped_water_on_hooks_error = true;
+  }
+  var restriction_1_value = parseInt(1.000000* M05_connector_raised_raw + -1.000000* M05_both_raised_raw);
+  if(restriction_1_value > 1.000000 || restriction_1_value < 0.000000) {
+    const restriction_1_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_1_error);
+    restriction_1_error.innerText = "Both Connectors must be raised for Bonus";
+    error_found = true;
+    M05_connector_raised_error = true;
+    M05_both_raised_error = true;
+  }
+  var restriction_2_value = parseInt(1.000000* M03_energy_units_raw + 1.000000* M08_energy_unit_raw + 1.000000* M13_power_to_x_raw + 1.000000* M14_red_hopper_raw + 1.000000* M15_rechargeable_battery_area_raw + 3.000000 + -1.000000* M04_solar_farm_raw + 1.000000 + -1.000000* M03_removed_storage_tray_raw + 3.000000 + -1.000000* M07_wind_turbine_raw + 3.000000 + -1.000000* m10_power_plant_raw + 1.000000 + -1.000000* M11_dam_raw);
+  if(restriction_2_value > 12.000000 || restriction_2_value < 0.000000) {
+    const restriction_2_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_2_error);
+    restriction_2_error.innerText = "Too Many Energy Units";
+    error_found = true;
+    M03_energy_units_error = true;
+    M08_energy_unit_error = true;
+    M13_power_to_x_error = true;
+    M14_red_hopper_error = true;
+    M15_rechargeable_battery_area_error = true;
+    M04_solar_farm_error = true;
+    M03_removed_storage_tray_error = true;
+    M07_wind_turbine_error = true;
+    m10_power_plant_error = true;
+    M11_dam_error = true;
+  }
+if(m00_one_launch_area_error) {
+  const ele = document.getElementById("m00_one_launch_area_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m00_one_launch_area_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M04_solar_farm_error) {
+  const ele = document.getElementById("M04_solar_farm_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M04_solar_farm_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M07_wind_turbine_error) {
+  const ele = document.getElementById("M07_wind_turbine_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M07_wind_turbine_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m10_power_plant_error) {
+  const ele = document.getElementById("m10_power_plant_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m10_power_plant_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M11_dam_error) {
+  const ele = document.getElementById("M11_dam_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M11_dam_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M03_energy_units_error) {
+  const ele = document.getElementById("M03_energy_units_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M03_energy_units_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M03_removed_storage_tray_error) {
+  const ele = document.getElementById("M03_removed_storage_tray_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M03_removed_storage_tray_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M13_power_to_x_error) {
+  const ele = document.getElementById("M13_power_to_x_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M13_power_to_x_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M14_red_hopper_error) {
+  const ele = document.getElementById("M14_red_hopper_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M14_red_hopper_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M14_mini_dino_released_error) {
+  const ele = document.getElementById("M14_mini_dino_released_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M14_mini_dino_released_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M15_rechargeable_battery_area_error) {
+  const ele = document.getElementById("M15_rechargeable_battery_area_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M15_rechargeable_battery_area_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M08_television_raised_error) {
+  const ele = document.getElementById("M08_television_raised_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M08_television_raised_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M08_energy_unit_error) {
+  const ele = document.getElementById("M08_energy_unit_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M08_energy_unit_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M09_dinosaur_left_home_area_error) {
+  const ele = document.getElementById("M09_dinosaur_left_home_area_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M09_dinosaur_left_home_area_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M09_lid_error) {
+  const ele = document.getElementById("M09_lid_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M09_lid_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m01_innovation_project_error) {
+  const ele = document.getElementById("m01_innovation_project_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m01_innovation_project_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M02_oil_platform_fuel_units_error) {
+  const ele = document.getElementById("M02_oil_platform_fuel_units_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M02_oil_platform_fuel_units_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M02_truck_over_target_error) {
+  const ele = document.getElementById("M02_truck_over_target_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M02_truck_over_target_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M05_connector_raised_error) {
+  const ele = document.getElementById("M05_connector_raised_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M05_connector_raised_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M05_both_raised_error) {
+  const ele = document.getElementById("M05_both_raised_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M05_both_raised_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M06_car_off_ramp_error) {
+  const ele = document.getElementById("M06_car_off_ramp_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M06_car_off_ramp_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M06_hybrid_unit_in_hybrid_car_error) {
+  const ele = document.getElementById("M06_hybrid_unit_in_hybrid_car_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M06_hybrid_unit_in_hybrid_car_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M12_looped_water_in_reservoir_error) {
+  const ele = document.getElementById("M12_looped_water_in_reservoir_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M12_looped_water_in_reservoir_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(M12_looped_water_on_hooks_error) {
+  const ele = document.getElementById("M12_looped_water_on_hooks_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("M12_looped_water_on_hooks_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m16_precision_tokens_error) {
+  const ele = document.getElementById("m16_precision_tokens_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m16_precision_tokens_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(gp_score_error) {
+  const ele = document.getElementById("gp_score_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("gp_score_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+
+
+  const submitScoreButton = document.getElementById("submit_score")
+  if(error_found) {
+    if(submitScoreButton) {
+      submitScoreButton.disabled = true;
+    }
+    document.getElementById("score-errors").classList.remove("fll-sw-ui-inactive");
+  } else {
+    if(submitScoreButton) {
+      submitScoreButton.disabled = false;
+    }
+    document.getElementById("score-errors").classList.add("fll-sw-ui-inactive");
+  }
+}
+
+function isConsistent() {
+  //m00_one_launch_area
+  if(m00_one_launch_area_raw < 0.0 || m00_one_launch_area_raw > 1.0) {
+    return false;
+  }
+
+  //M04_solar_farm
+  if(M04_solar_farm_raw < 0.0 || M04_solar_farm_raw > 3.0) {
+    return false;
+  }
+
+  //M07_wind_turbine
+  if(M07_wind_turbine_raw < 0.0 || M07_wind_turbine_raw > 3.0) {
+    return false;
+  }
+
+  //m10_power_plant
+  if(m10_power_plant_raw < 0.0 || m10_power_plant_raw > 3.0) {
+    return false;
+  }
+
+  //M11_dam
+  if(M11_dam_raw < 0.0 || M11_dam_raw > 1.0) {
+    return false;
+  }
+
+  //M03_energy_units
+  if(M03_energy_units_raw < 0.0 || M03_energy_units_raw > 12.0) {
+    return false;
+  }
+
+  //M03_removed_storage_tray
+  if(M03_removed_storage_tray_raw < 0.0 || M03_removed_storage_tray_raw > 1.0) {
+    return false;
+  }
+
+  //M13_power_to_x
+  if(M13_power_to_x_raw < 0.0 || M13_power_to_x_raw > 12.0) {
+    return false;
+  }
+
+  //M14_red_hopper
+  if(M14_red_hopper_raw < 0.0 || M14_red_hopper_raw > 12.0) {
+    return false;
+  }
+
+  //M14_mini_dino_released
+  if(M14_mini_dino_released_raw < 0.0 || M14_mini_dino_released_raw > 1.0) {
+    return false;
+  }
+
+  //M15_rechargeable_battery_area
+  if(M15_rechargeable_battery_area_raw < 0.0 || M15_rechargeable_battery_area_raw > 12.0) {
+    return false;
+  }
+
+  //M08_television_raised
+  if(M08_television_raised_raw < 0.0 || M08_television_raised_raw > 1.0) {
+    return false;
+  }
+
+  //M08_energy_unit
+  if(M08_energy_unit_raw < 0.0 || M08_energy_unit_raw > 1.0) {
+    return false;
+  }
+
+  //M09_dinosaur_left_home_area
+  if(M09_dinosaur_left_home_area_raw < 0.0 || M09_dinosaur_left_home_area_raw > 1.0) {
+    return false;
+  }
+
+  //M09_lid
+  // nothing to check
+
+  //m01_innovation_project
+  if(m01_innovation_project_raw < 0.0 || m01_innovation_project_raw > 1.0) {
+    return false;
+  }
+
+  //M02_oil_platform_fuel_units
+  if(M02_oil_platform_fuel_units_raw < 0.0 || M02_oil_platform_fuel_units_raw > 3.0) {
+    return false;
+  }
+
+  //M02_truck_over_target
+  if(M02_truck_over_target_raw < 0.0 || M02_truck_over_target_raw > 1.0) {
+    return false;
+  }
+
+  //M05_connector_raised
+  if(M05_connector_raised_raw < 0.0 || M05_connector_raised_raw > 1.0) {
+    return false;
+  }
+
+  //M05_both_raised
+  if(M05_both_raised_raw < 0.0 || M05_both_raised_raw > 1.0) {
+    return false;
+  }
+
+  //M06_car_off_ramp
+  if(M06_car_off_ramp_raw < 0.0 || M06_car_off_ramp_raw > 1.0) {
+    return false;
+  }
+
+  //M06_hybrid_unit_in_hybrid_car
+  if(M06_hybrid_unit_in_hybrid_car_raw < 0.0 || M06_hybrid_unit_in_hybrid_car_raw > 1.0) {
+    return false;
+  }
+
+  //M12_looped_water_in_reservoir
+  if(M12_looped_water_in_reservoir_raw < 0.0 || M12_looped_water_in_reservoir_raw > 3.0) {
+    return false;
+  }
+
+  //M12_looped_water_on_hooks
+  if(M12_looped_water_on_hooks_raw < 0.0 || M12_looped_water_on_hooks_raw > 2.0) {
+    return false;
+  }
+
+  //m16_precision_tokens
+  // nothing to check
+
+  //gp_score
+  if(gp_score_raw < 2.0 || gp_score_raw > 4.0) {
+    return false;
+  }
+
+  return true;
+}
+
+
+// m00_one_launch_area
+var m00_one_launch_area_raw;
+var m00_one_launch_area_computed;
+function set_m00_one_launch_area(newValue) {
+  var temp = m00_one_launch_area_raw;
+  m00_one_launch_area_raw = newValue;
+  if(!isConsistent()) {
+    m00_one_launch_area_raw = temp;
+  }
+  refresh();
+}
+function check_m00_one_launch_area() {
+  var str = document.scoreEntry.m00_one_launch_area.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m00_one_launch_area(num);
+  }
+  refresh();
+}
+
+
+// M04_solar_farm
+var M04_solar_farm_raw;
+var M04_solar_farm_computed;
+function set_M04_solar_farm(newValue) {
+  var temp = M04_solar_farm_raw;
+  M04_solar_farm_raw = newValue;
+  if(!isConsistent()) {
+    M04_solar_farm_raw = temp;
+  }
+  refresh();
+}
+function check_M04_solar_farm() {
+  var str = document.scoreEntry.M04_solar_farm.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M04_solar_farm(num);
+  }
+  refresh();
+}
+function increment_M04_solar_farm(increment) {
+  var temp = M04_solar_farm_raw
+  M04_solar_farm_raw += increment;
+  if(M04_solar_farm_raw > 3.0) {
+    M04_solar_farm_raw = 3.0;
+   }
+  if(M04_solar_farm_raw < 0.0) {
+    M04_solar_farm_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    M04_solar_farm_raw = temp;
+  }
+  refresh();
+}
+
+
+// M04_solar_farm_bonus
+var M04_solar_farm_bonus_computed;
+function compute_M04_solar_farm_bonus() {
+  if(parseInt(1.000000* M04_solar_farm_raw) >= parseInt(3.000000)) {
+    M04_solar_farm_bonus_computed = parseInt(5.000000);
+  } else {
+    M04_solar_farm_bonus_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_M04_solar_farm_bonus.value = M04_solar_farm_bonus_computed;
+}
+// M07_wind_turbine
+var M07_wind_turbine_raw;
+var M07_wind_turbine_computed;
+function set_M07_wind_turbine(newValue) {
+  var temp = M07_wind_turbine_raw;
+  M07_wind_turbine_raw = newValue;
+  if(!isConsistent()) {
+    M07_wind_turbine_raw = temp;
+  }
+  refresh();
+}
+function check_M07_wind_turbine() {
+  var str = document.scoreEntry.M07_wind_turbine.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M07_wind_turbine(num);
+  }
+  refresh();
+}
+function increment_M07_wind_turbine(increment) {
+  var temp = M07_wind_turbine_raw
+  M07_wind_turbine_raw += increment;
+  if(M07_wind_turbine_raw > 3.0) {
+    M07_wind_turbine_raw = 3.0;
+   }
+  if(M07_wind_turbine_raw < 0.0) {
+    M07_wind_turbine_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    M07_wind_turbine_raw = temp;
+  }
+  refresh();
+}
+
+
+// m10_power_plant
+var m10_power_plant_raw;
+var m10_power_plant_computed;
+function set_m10_power_plant(newValue) {
+  var temp = m10_power_plant_raw;
+  m10_power_plant_raw = newValue;
+  if(!isConsistent()) {
+    m10_power_plant_raw = temp;
+  }
+  refresh();
+}
+function check_m10_power_plant() {
+  var str = document.scoreEntry.m10_power_plant.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m10_power_plant(num);
+  }
+  refresh();
+}
+function increment_m10_power_plant(increment) {
+  var temp = m10_power_plant_raw
+  m10_power_plant_raw += increment;
+  if(m10_power_plant_raw > 3.0) {
+    m10_power_plant_raw = 3.0;
+   }
+  if(m10_power_plant_raw < 0.0) {
+    m10_power_plant_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m10_power_plant_raw = temp;
+  }
+  refresh();
+}
+
+
+// M10_power_plant_bonus
+var M10_power_plant_bonus_computed;
+function compute_M10_power_plant_bonus() {
+  if(parseInt(1.000000* m10_power_plant_raw) >= parseInt(3.000000)) {
+    M10_power_plant_bonus_computed = parseInt(10.000000);
+  } else {
+    M10_power_plant_bonus_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_M10_power_plant_bonus.value = M10_power_plant_bonus_computed;
+}
+// M11_dam
+var M11_dam_raw;
+var M11_dam_computed;
+function set_M11_dam(newValue) {
+  var temp = M11_dam_raw;
+  M11_dam_raw = newValue;
+  if(!isConsistent()) {
+    M11_dam_raw = temp;
+  }
+  refresh();
+}
+function check_M11_dam() {
+  var str = document.scoreEntry.M11_dam.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M11_dam(num);
+  }
+  refresh();
+}
+
+
+// M03_energy_units
+var M03_energy_units_raw;
+var M03_energy_units_computed;
+function set_M03_energy_units(newValue) {
+  var temp = M03_energy_units_raw;
+  M03_energy_units_raw = newValue;
+  if(!isConsistent()) {
+    M03_energy_units_raw = temp;
+  }
+  refresh();
+}
+function check_M03_energy_units() {
+  var str = document.scoreEntry.M03_energy_units.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M03_energy_units(num);
+  }
+  refresh();
+}
+function increment_M03_energy_units(increment) {
+  var temp = M03_energy_units_raw
+  M03_energy_units_raw += increment;
+  if(M03_energy_units_raw > 12.0) {
+    M03_energy_units_raw = 12.0;
+   }
+  if(M03_energy_units_raw < 0.0) {
+    M03_energy_units_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    M03_energy_units_raw = temp;
+  }
+  refresh();
+}
+
+
+// M03_energy_units_computed
+var M03_energy_units_computed_computed;
+function compute_M03_energy_units_computed() {
+  if(parseInt(1.000000* M03_energy_units_raw) <= parseInt(3.000000)) {
+    M03_energy_units_computed_computed = parseInt(10.000000* M03_energy_units_raw);
+  } else {
+    M03_energy_units_computed_computed = parseInt(30.000000);
+  }
+  document.scoreEntry.score_M03_energy_units_computed.value = M03_energy_units_computed_computed;
+}
+// M03_removed_storage_tray
+var M03_removed_storage_tray_raw;
+var M03_removed_storage_tray_computed;
+function set_M03_removed_storage_tray(newValue) {
+  var temp = M03_removed_storage_tray_raw;
+  M03_removed_storage_tray_raw = newValue;
+  if(!isConsistent()) {
+    M03_removed_storage_tray_raw = temp;
+  }
+  refresh();
+}
+function check_M03_removed_storage_tray() {
+  var str = document.scoreEntry.M03_removed_storage_tray.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M03_removed_storage_tray(num);
+  }
+  refresh();
+}
+
+
+// M13_power_to_x
+var M13_power_to_x_raw;
+var M13_power_to_x_computed;
+function set_M13_power_to_x(newValue) {
+  var temp = M13_power_to_x_raw;
+  M13_power_to_x_raw = newValue;
+  if(!isConsistent()) {
+    M13_power_to_x_raw = temp;
+  }
+  refresh();
+}
+function check_M13_power_to_x() {
+  var str = document.scoreEntry.M13_power_to_x.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M13_power_to_x(num);
+  }
+  refresh();
+}
+function increment_M13_power_to_x(increment) {
+  var temp = M13_power_to_x_raw
+  M13_power_to_x_raw += increment;
+  if(M13_power_to_x_raw > 12.0) {
+    M13_power_to_x_raw = 12.0;
+   }
+  if(M13_power_to_x_raw < 0.0) {
+    M13_power_to_x_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    M13_power_to_x_raw = temp;
+  }
+  refresh();
+}
+
+
+// M13_power_to_x_computed
+var M13_power_to_x_computed_computed;
+function compute_M13_power_to_x_computed() {
+  if(parseInt(1.000000* M13_power_to_x_raw) <= parseInt(3.000000)) {
+    M13_power_to_x_computed_computed = parseInt(5.000000* M13_power_to_x_raw);
+  } else {
+    M13_power_to_x_computed_computed = parseInt(15.000000);
+  }
+  document.scoreEntry.score_M13_power_to_x_computed.value = M13_power_to_x_computed_computed;
+}
+// M14_red_hopper
+var M14_red_hopper_raw;
+var M14_red_hopper_computed;
+function set_M14_red_hopper(newValue) {
+  var temp = M14_red_hopper_raw;
+  M14_red_hopper_raw = newValue;
+  if(!isConsistent()) {
+    M14_red_hopper_raw = temp;
+  }
+  refresh();
+}
+function check_M14_red_hopper() {
+  var str = document.scoreEntry.M14_red_hopper.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M14_red_hopper(num);
+  }
+  refresh();
+}
+function increment_M14_red_hopper(increment) {
+  var temp = M14_red_hopper_raw
+  M14_red_hopper_raw += increment;
+  if(M14_red_hopper_raw > 12.0) {
+    M14_red_hopper_raw = 12.0;
+   }
+  if(M14_red_hopper_raw < 0.0) {
+    M14_red_hopper_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    M14_red_hopper_raw = temp;
+  }
+  refresh();
+}
+
+
+// M14_red_hopper_computed
+var M14_red_hopper_computed_computed;
+function compute_M14_red_hopper_computed() {
+  if(parseInt(1.000000* M14_red_hopper_raw) <= parseInt(3.000000)) {
+    M14_red_hopper_computed_computed = parseInt(5.000000* M14_red_hopper_raw);
+  } else {
+    M14_red_hopper_computed_computed = parseInt(15.000000);
+  }
+  document.scoreEntry.score_M14_red_hopper_computed.value = M14_red_hopper_computed_computed;
+}
+// M14_mini_dino_released
+var M14_mini_dino_released_raw;
+var M14_mini_dino_released_computed;
+function set_M14_mini_dino_released(newValue) {
+  var temp = M14_mini_dino_released_raw;
+  M14_mini_dino_released_raw = newValue;
+  if(!isConsistent()) {
+    M14_mini_dino_released_raw = temp;
+  }
+  refresh();
+}
+function check_M14_mini_dino_released() {
+  var str = document.scoreEntry.M14_mini_dino_released.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M14_mini_dino_released(num);
+  }
+  refresh();
+}
+
+
+// M15_rechargeable_battery_area
+var M15_rechargeable_battery_area_raw;
+var M15_rechargeable_battery_area_computed;
+function set_M15_rechargeable_battery_area(newValue) {
+  var temp = M15_rechargeable_battery_area_raw;
+  M15_rechargeable_battery_area_raw = newValue;
+  if(!isConsistent()) {
+    M15_rechargeable_battery_area_raw = temp;
+  }
+  refresh();
+}
+function check_M15_rechargeable_battery_area() {
+  var str = document.scoreEntry.M15_rechargeable_battery_area.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M15_rechargeable_battery_area(num);
+  }
+  refresh();
+}
+function increment_M15_rechargeable_battery_area(increment) {
+  var temp = M15_rechargeable_battery_area_raw
+  M15_rechargeable_battery_area_raw += increment;
+  if(M15_rechargeable_battery_area_raw > 12.0) {
+    M15_rechargeable_battery_area_raw = 12.0;
+   }
+  if(M15_rechargeable_battery_area_raw < 0.0) {
+    M15_rechargeable_battery_area_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    M15_rechargeable_battery_area_raw = temp;
+  }
+  refresh();
+}
+
+
+// M15_rechargeable_battery_area_computed
+var M15_rechargeable_battery_area_computed_computed;
+function compute_M15_rechargeable_battery_area_computed() {
+  if(parseInt(1.000000* M15_rechargeable_battery_area_raw) <= parseInt(3.000000)) {
+    M15_rechargeable_battery_area_computed_computed = parseInt(5.000000* M15_rechargeable_battery_area_raw);
+  } else {
+    M15_rechargeable_battery_area_computed_computed = parseInt(15.000000);
+  }
+  document.scoreEntry.score_M15_rechargeable_battery_area_computed.value = M15_rechargeable_battery_area_computed_computed;
+}
+// M08_television_raised
+var M08_television_raised_raw;
+var M08_television_raised_computed;
+function set_M08_television_raised(newValue) {
+  var temp = M08_television_raised_raw;
+  M08_television_raised_raw = newValue;
+  if(!isConsistent()) {
+    M08_television_raised_raw = temp;
+  }
+  refresh();
+}
+function check_M08_television_raised() {
+  var str = document.scoreEntry.M08_television_raised.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M08_television_raised(num);
+  }
+  refresh();
+}
+
+
+// M08_energy_unit
+var M08_energy_unit_raw;
+var M08_energy_unit_computed;
+function set_M08_energy_unit(newValue) {
+  var temp = M08_energy_unit_raw;
+  M08_energy_unit_raw = newValue;
+  if(!isConsistent()) {
+    M08_energy_unit_raw = temp;
+  }
+  refresh();
+}
+function check_M08_energy_unit() {
+  var str = document.scoreEntry.M08_energy_unit.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M08_energy_unit(num);
+  }
+  refresh();
+}
+
+
+// M09_dinosaur_left_home_area
+var M09_dinosaur_left_home_area_raw;
+var M09_dinosaur_left_home_area_computed;
+function set_M09_dinosaur_left_home_area(newValue) {
+  var temp = M09_dinosaur_left_home_area_raw;
+  M09_dinosaur_left_home_area_raw = newValue;
+  if(!isConsistent()) {
+    M09_dinosaur_left_home_area_raw = temp;
+  }
+  refresh();
+}
+function check_M09_dinosaur_left_home_area() {
+  var str = document.scoreEntry.M09_dinosaur_left_home_area.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M09_dinosaur_left_home_area(num);
+  }
+  refresh();
+}
+
+
+// M09_lid
+var M09_lid_raw;
+var M09_lid_computed;
+function set_M09_lid(newValue) {
+  var temp = M09_lid_raw;
+  M09_lid_raw = newValue;
+  if(!isConsistent()) {
+    M09_lid_raw = temp;
+  }
+  refresh();
+}
+function check_M09_lid() {
+  var str = document.scoreEntry.M09_lid.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M09_lid(num);
+  }
+  refresh();
+}
+
+
+// m01_innovation_project
+var m01_innovation_project_raw;
+var m01_innovation_project_computed;
+function set_m01_innovation_project(newValue) {
+  var temp = m01_innovation_project_raw;
+  m01_innovation_project_raw = newValue;
+  if(!isConsistent()) {
+    m01_innovation_project_raw = temp;
+  }
+  refresh();
+}
+function check_m01_innovation_project() {
+  var str = document.scoreEntry.m01_innovation_project.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m01_innovation_project(num);
+  }
+  refresh();
+}
+
+
+// M02_oil_platform_fuel_units
+var M02_oil_platform_fuel_units_raw;
+var M02_oil_platform_fuel_units_computed;
+function set_M02_oil_platform_fuel_units(newValue) {
+  var temp = M02_oil_platform_fuel_units_raw;
+  M02_oil_platform_fuel_units_raw = newValue;
+  if(!isConsistent()) {
+    M02_oil_platform_fuel_units_raw = temp;
+  }
+  refresh();
+}
+function check_M02_oil_platform_fuel_units() {
+  var str = document.scoreEntry.M02_oil_platform_fuel_units.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M02_oil_platform_fuel_units(num);
+  }
+  refresh();
+}
+function increment_M02_oil_platform_fuel_units(increment) {
+  var temp = M02_oil_platform_fuel_units_raw
+  M02_oil_platform_fuel_units_raw += increment;
+  if(M02_oil_platform_fuel_units_raw > 3.0) {
+    M02_oil_platform_fuel_units_raw = 3.0;
+   }
+  if(M02_oil_platform_fuel_units_raw < 0.0) {
+    M02_oil_platform_fuel_units_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    M02_oil_platform_fuel_units_raw = temp;
+  }
+  refresh();
+}
+
+
+// M02_truck_over_target
+var M02_truck_over_target_raw;
+var M02_truck_over_target_computed;
+function set_M02_truck_over_target(newValue) {
+  var temp = M02_truck_over_target_raw;
+  M02_truck_over_target_raw = newValue;
+  if(!isConsistent()) {
+    M02_truck_over_target_raw = temp;
+  }
+  refresh();
+}
+function check_M02_truck_over_target() {
+  var str = document.scoreEntry.M02_truck_over_target.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M02_truck_over_target(num);
+  }
+  refresh();
+}
+
+
+// M02_fuel_truck_bonus
+var M02_fuel_truck_bonus_computed;
+function compute_M02_fuel_truck_bonus() {
+  if(parseInt(10.000000* M02_truck_over_target_raw + 1.000000* M02_oil_platform_fuel_units_raw) > parseInt(10.000000)) {
+    M02_fuel_truck_bonus_computed = parseInt(10.000000);
+  } else {
+    M02_fuel_truck_bonus_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_M02_fuel_truck_bonus.value = M02_fuel_truck_bonus_computed;
+}
+// M05_connector_raised
+var M05_connector_raised_raw;
+var M05_connector_raised_computed;
+function set_M05_connector_raised(newValue) {
+  var temp = M05_connector_raised_raw;
+  M05_connector_raised_raw = newValue;
+  if(!isConsistent()) {
+    M05_connector_raised_raw = temp;
+  }
+  refresh();
+}
+function check_M05_connector_raised() {
+  var str = document.scoreEntry.M05_connector_raised.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M05_connector_raised(num);
+  }
+  refresh();
+}
+
+
+// M05_both_raised
+var M05_both_raised_raw;
+var M05_both_raised_computed;
+function set_M05_both_raised(newValue) {
+  var temp = M05_both_raised_raw;
+  M05_both_raised_raw = newValue;
+  if(!isConsistent()) {
+    M05_both_raised_raw = temp;
+  }
+  refresh();
+}
+function check_M05_both_raised() {
+  var str = document.scoreEntry.M05_both_raised.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M05_both_raised(num);
+  }
+  refresh();
+}
+
+
+// M06_car_off_ramp
+var M06_car_off_ramp_raw;
+var M06_car_off_ramp_computed;
+function set_M06_car_off_ramp(newValue) {
+  var temp = M06_car_off_ramp_raw;
+  M06_car_off_ramp_raw = newValue;
+  if(!isConsistent()) {
+    M06_car_off_ramp_raw = temp;
+  }
+  refresh();
+}
+function check_M06_car_off_ramp() {
+  var str = document.scoreEntry.M06_car_off_ramp.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M06_car_off_ramp(num);
+  }
+  refresh();
+}
+
+
+// M06_hybrid_unit_in_hybrid_car
+var M06_hybrid_unit_in_hybrid_car_raw;
+var M06_hybrid_unit_in_hybrid_car_computed;
+function set_M06_hybrid_unit_in_hybrid_car(newValue) {
+  var temp = M06_hybrid_unit_in_hybrid_car_raw;
+  M06_hybrid_unit_in_hybrid_car_raw = newValue;
+  if(!isConsistent()) {
+    M06_hybrid_unit_in_hybrid_car_raw = temp;
+  }
+  refresh();
+}
+function check_M06_hybrid_unit_in_hybrid_car() {
+  var str = document.scoreEntry.M06_hybrid_unit_in_hybrid_car.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M06_hybrid_unit_in_hybrid_car(num);
+  }
+  refresh();
+}
+
+
+// M12_looped_water_in_reservoir
+var M12_looped_water_in_reservoir_raw;
+var M12_looped_water_in_reservoir_computed;
+function set_M12_looped_water_in_reservoir(newValue) {
+  var temp = M12_looped_water_in_reservoir_raw;
+  M12_looped_water_in_reservoir_raw = newValue;
+  if(!isConsistent()) {
+    M12_looped_water_in_reservoir_raw = temp;
+  }
+  refresh();
+}
+function check_M12_looped_water_in_reservoir() {
+  var str = document.scoreEntry.M12_looped_water_in_reservoir.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M12_looped_water_in_reservoir(num);
+  }
+  refresh();
+}
+function increment_M12_looped_water_in_reservoir(increment) {
+  var temp = M12_looped_water_in_reservoir_raw
+  M12_looped_water_in_reservoir_raw += increment;
+  if(M12_looped_water_in_reservoir_raw > 3.0) {
+    M12_looped_water_in_reservoir_raw = 3.0;
+   }
+  if(M12_looped_water_in_reservoir_raw < 0.0) {
+    M12_looped_water_in_reservoir_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    M12_looped_water_in_reservoir_raw = temp;
+  }
+  refresh();
+}
+
+
+// M12_looped_water_on_hooks
+var M12_looped_water_on_hooks_raw;
+var M12_looped_water_on_hooks_computed;
+function set_M12_looped_water_on_hooks(newValue) {
+  var temp = M12_looped_water_on_hooks_raw;
+  M12_looped_water_on_hooks_raw = newValue;
+  if(!isConsistent()) {
+    M12_looped_water_on_hooks_raw = temp;
+  }
+  refresh();
+}
+function check_M12_looped_water_on_hooks() {
+  var str = document.scoreEntry.M12_looped_water_on_hooks.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_M12_looped_water_on_hooks(num);
+  }
+  refresh();
+}
+function increment_M12_looped_water_on_hooks(increment) {
+  var temp = M12_looped_water_on_hooks_raw
+  M12_looped_water_on_hooks_raw += increment;
+  if(M12_looped_water_on_hooks_raw > 2.0) {
+    M12_looped_water_on_hooks_raw = 2.0;
+   }
+  if(M12_looped_water_on_hooks_raw < 0.0) {
+    M12_looped_water_on_hooks_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    M12_looped_water_on_hooks_raw = temp;
+  }
+  refresh();
+}
+
+
+// m16_precision_tokens
+var m16_precision_tokens_raw;
+var m16_precision_tokens_computed;
+function set_m16_precision_tokens(newValue) {
+  var temp = m16_precision_tokens_raw;
+  m16_precision_tokens_raw = newValue;
+  if(!isConsistent()) {
+    m16_precision_tokens_raw = temp;
+  }
+  refresh();
+}
+function check_m16_precision_tokens() {
+  var str = document.scoreEntry.m16_precision_tokens.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m16_precision_tokens(num);
+  }
+  refresh();
+}
+
+
+// gp_score
+var gp_score_raw;
+var gp_score_computed;
+function set_gp_score(newValue) {
+  var temp = gp_score_raw;
+  gp_score_raw = newValue;
+  if(!isConsistent()) {
+    gp_score_raw = temp;
+  }
+  refresh();
+}
+function check_gp_score() {
+  var str = document.scoreEntry.gp_score.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_gp_score(num);
+  }
+  refresh();
+}
+function increment_gp_score(increment) {
+  var temp = gp_score_raw
+  gp_score_raw += increment;
+  if(gp_score_raw > 4.0) {
+    gp_score_raw = 4.0;
+   }
+  if(gp_score_raw < 2.0) {
+    gp_score_raw = 2.0;
+   }
+  if(!isConsistent()) {
+    gp_score_raw = temp;
+  }
+  refresh();
+}
+
+
+// Verified 
+var Verified;
+function set_Verified(newValue) {
+  Verified = newValue;
+  refresh();
+}
+
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const resetButton = document.getElementById("reset_score");
+  if(resetButton) {
+      resetButton.addEventListener('click', init);
+  }
+});
+
+</script>
+
+
+<script type="text/javascript" src="2022_superpowered_11_files/scoreEntry.js"></script>
+
+</head>
+
+<body>
+
+  <form action="SubmitScoreEntry" method="POST" name="scoreEntry" id="scoreEntry" class="fll-sw-ui-body">
+    <input type="hidden" id="NoShow" name="NoShow" value="false">
+    <input type="hidden" id="delete" name="delete" value="false">
+
+      <input type="hidden" name="EditFlag" id="EditFlag" value="false" readonly="readonly">
+    
+    <input type="hidden" name="RunNumber" value="" readonly="readonly"> <input type="hidden" name="TeamNumber" value="" readonly="readonly">
+
+<header>
+  <div id="floating-messages">
+    <div id="score-errors" class="fll-sw-ui-inactive"></div>
+    <div id="verification-warning" class="fll-sw-ui-inactive">Are you sure this score has
+      been Verified? Normally scores are not verified on the initial
+      entry.</div>
+  </div>
+
+          <!-- top info bar (team name etc) -->
+          <table id="top_info" width="100%" cellspacing="0" cellpadding="0" border="1">
+            <tbody><tr valign="middle" align="center">
+              <td>
+
+                <table width="90%" cellspacing="0" cellpadding="5" border="0">
+                  <!--  inner box on title -->
+                  <tbody><tr>
+                    <td valign="middle" align="center">
+                        
+                        
+                          <font size="4" face="Arial">Score Entry</font>
+                        
+                      </td>
+                  </tr>
+                  <tr align="center">
+                    <td><font size="4" face="Arial" color="#0000ff">
+
+                                                
+                                                    
+                      Practice
+                      
+                                                    
+                                                
+                                            </font>
+                    </td>
+                  </tr>
+                </tbody></table> <!--  end inner box on title -->
+
+              </td>
+            </tr>
+            <!-- team info -->
+
+            
+
+          </tbody></table> <!--  end info bar -->
+</header>
+
+<main id="review-mode_container">
+                <div id="review-mode_glasspane"></div>
+
+      <!-- score entry -->
+          <table class="score-entry">
+            <colgroup>
+              <!--  goal -->
+              <col width="50%">
+              <!-- buttons -->
+              <col width="30%">
+              <!-- count -->
+              <col width="10%">
+              <!--  score -->
+              <col width="10%">
+            </colgroup>
+            <tbody><tr>
+              <td colspan="2"><font size="4"><u>Goal</u></font></td>
+              <td align="right"><font size="4"><u>Count</u></font>
+              </td>
+              <td class="score-cell" align="right"><font size="4"><u>Score</u></font>
+              </td>
+            </tr>
+
+            
+              
+              
+                
+                <tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M00 - EQUIPMENT INSPECTION BONUS</b></td>
+</tr>
+<!-- m00_one_launch_area -->
+<tr id="m00_one_launch_area_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ALL Equipment Fits in ONE Launch area under 12":
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m00_one_launch_area_no" name="m00_one_launch_area" value="0" onclick="set_m00_one_launch_area(0)" checked="checked">
+        <span id="m00_one_launch_area_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m00_one_launch_area_yes" name="m00_one_launch_area" value="1" onclick="set_m00_one_launch_area(1)">
+        <span id="m00_one_launch_area_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m00_one_launch_area_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m00_one_launch_area" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m00_one_launch_area -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M04 - Solar Farm</b></td>
+</tr>
+<!-- M04_solar_farm -->
+<tr id="M04_solar_farm_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Energy Units Completely Removed from their Starting Circles:
+  </td>
+  <td>
+<input type="range" min="0" max="3" class="slider" id="M04_solar_farm_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="33.33%" y="0" width="2" height="100%"></rect>
+<rect x="66.67%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="M04_solar_farm" size="3" onchange="check_M04_solar_farm()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M04_solar_farm" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M04_solar_farm -->
+
+<!-- M04_solar_farm_bonus -->
+<tr id="M04_solar_farm_bonus_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Solar Farm Bonus:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M04_solar_farm_bonus" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M04_solar_farm_bonus -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M07 - Wind Turbine</b></td>
+</tr>
+<!-- M07_wind_turbine -->
+<tr id="M07_wind_turbine_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Energy Units No Longer Touching Wind Turbine:
+  </td>
+  <td>
+<input type="range" min="0" max="3" class="slider" id="M07_wind_turbine_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="33.33%" y="0" width="2" height="100%"></rect>
+<rect x="66.67%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="M07_wind_turbine" size="3" onchange="check_M07_wind_turbine()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M07_wind_turbine" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M07_wind_turbine -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M10 - Power Plant</b></td>
+</tr>
+<!-- m10_power_plant -->
+<tr id="m10_power_plant_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Energy Units No Longer Touching Power Plant:
+  </td>
+  <td>
+<input type="range" min="0" max="3" class="slider" id="m10_power_plant_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="33.33%" y="0" width="2" height="100%"></rect>
+<rect x="66.67%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m10_power_plant" size="3" onchange="check_m10_power_plant()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m10_power_plant" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m10_power_plant -->
+
+<!-- M10_power_plant_bonus -->
+<tr id="M10_power_plant_bonus_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Power Plant Bonus:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M10_power_plant_bonus" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M10_power_plant_bonus -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M11 - Hydroelectric Dam</b></td>
+</tr>
+<!-- M11_dam -->
+<tr id="M11_dam_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Energy Unit No Longer Touching Hydroelectric Dam:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="M11_dam_no" name="M11_dam" value="0" onclick="set_M11_dam(0)" checked="checked">
+        <span id="M11_dam_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="M11_dam_yes" name="M11_dam" value="1" onclick="set_M11_dam(1)">
+        <span id="M11_dam_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="M11_dam_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M11_dam" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M11_dam -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M03 - Energy Storage </b></td>
+</tr>
+<!-- M03_energy_units -->
+<tr id="M03_energy_units_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Energy Units Completely in Energy Storage Bin:
+  </td>
+  <td>
+    <table class="inc-dec-container">
+      <tbody><tr>
+        <td>
+          <input id="dec_M03_energy_units_1" type="button" value="-1" onclick="increment_M03_energy_units(-1)" class="inc-dec-button">
+        </td>
+        <td>
+          <input id="inc_M03_energy_units_1" type="button" value="+1" onclick="increment_M03_energy_units(1)" class="inc-dec-button">
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="M03_energy_units" size="3" onchange="check_M03_energy_units()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M03_energy_units" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M03_energy_units -->
+
+<!-- M03_energy_units_computed -->
+<tr id="M03_energy_units_computed_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Energy Units Completely in Energy Storage Bin - Score:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M03_energy_units_computed" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M03_energy_units_computed -->
+
+<!-- M03_removed_storage_tray -->
+<tr id="M03_removed_storage_tray_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Energy Unit Completely Removed from Energy Storage Tray:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="M03_removed_storage_tray_no" name="M03_removed_storage_tray" value="0" onclick="set_M03_removed_storage_tray(0)" checked="checked">
+        <span id="M03_removed_storage_tray_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="M03_removed_storage_tray_yes" name="M03_removed_storage_tray" value="1" onclick="set_M03_removed_storage_tray(1)">
+        <span id="M03_removed_storage_tray_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="M03_removed_storage_tray_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M03_removed_storage_tray" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M03_removed_storage_tray -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M13 - Power-To-X</b></td>
+</tr>
+<!-- M13_power_to_x -->
+<tr id="M13_power_to_x_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Energy Units Completely In Hydrogen Plant Target Area:
+  </td>
+  <td>
+    <table class="inc-dec-container">
+      <tbody><tr>
+        <td>
+          <input id="dec_M13_power_to_x_1" type="button" value="-1" onclick="increment_M13_power_to_x(-1)" class="inc-dec-button">
+        </td>
+        <td>
+          <input id="inc_M13_power_to_x_1" type="button" value="+1" onclick="increment_M13_power_to_x(1)" class="inc-dec-button">
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="M13_power_to_x" size="3" onchange="check_M13_power_to_x()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M13_power_to_x" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M13_power_to_x -->
+
+<!-- M13_power_to_x_computed -->
+<tr id="M13_power_to_x_computed_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Energy Units Completely In Hydrogen Plant Target Area - Score:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M13_power_to_x_computed" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M13_power_to_x_computed -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M14 - Toy Factory</b></td>
+</tr>
+<!-- M14_red_hopper -->
+<tr id="M14_red_hopper_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Energy Units At Least Partially in Slot in Back of Toy Factory Or Red Hopper:
+  </td>
+  <td>
+    <table class="inc-dec-container">
+      <tbody><tr>
+        <td>
+          <input id="dec_M14_red_hopper_1" type="button" value="-1" onclick="increment_M14_red_hopper(-1)" class="inc-dec-button">
+        </td>
+        <td>
+          <input id="inc_M14_red_hopper_1" type="button" value="+1" onclick="increment_M14_red_hopper(1)" class="inc-dec-button">
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="M14_red_hopper" size="3" onchange="check_M14_red_hopper()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M14_red_hopper" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M14_red_hopper -->
+
+<!-- M14_red_hopper_computed -->
+<tr id="M14_red_hopper_computed_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Energy Units At Least Partially in Slot in Back of Toy Factory Or Red Hopper - Score:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M14_red_hopper_computed" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M14_red_hopper_computed -->
+
+<!-- M14_mini_dino_released -->
+<tr id="M14_mini_dino_released_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mini Dinosaur Released:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="M14_mini_dino_released_no" name="M14_mini_dino_released" value="0" onclick="set_M14_mini_dino_released(0)" checked="checked">
+        <span id="M14_mini_dino_released_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="M14_mini_dino_released_yes" name="M14_mini_dino_released" value="1" onclick="set_M14_mini_dino_released(1)">
+        <span id="M14_mini_dino_released_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="M14_mini_dino_released_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M14_mini_dino_released" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M14_mini_dino_released -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M15 - Rechargeable Battery</b></td>
+</tr>
+<!-- M15_rechargeable_battery_area -->
+<tr id="M15_rechargeable_battery_area_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Energy Units Completely in Rechargeable Battery Target Area:
+  </td>
+  <td>
+    <table class="inc-dec-container">
+      <tbody><tr>
+        <td>
+          <input id="dec_M15_rechargeable_battery_area_1" type="button" value="-1" onclick="increment_M15_rechargeable_battery_area(-1)" class="inc-dec-button">
+        </td>
+        <td>
+          <input id="inc_M15_rechargeable_battery_area_1" type="button" value="+1" onclick="increment_M15_rechargeable_battery_area(1)" class="inc-dec-button">
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="M15_rechargeable_battery_area" size="3" onchange="check_M15_rechargeable_battery_area()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M15_rechargeable_battery_area" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M15_rechargeable_battery_area -->
+
+<!-- M15_rechargeable_battery_area_computed -->
+<tr id="M15_rechargeable_battery_area_computed_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Energy Units Completely in Rechargeable Battery Target Area - Score:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M15_rechargeable_battery_area_computed" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M15_rechargeable_battery_area_computed -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M08 - Watch Television</b></td>
+</tr>
+<!-- M08_television_raised -->
+<tr id="M08_television_raised_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Television Completely Raised:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="M08_television_raised_no" name="M08_television_raised" value="0" onclick="set_M08_television_raised(0)" checked="checked">
+        <span id="M08_television_raised_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="M08_television_raised_yes" name="M08_television_raised" value="1" onclick="set_M08_television_raised(1)">
+        <span id="M08_television_raised_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="M08_television_raised_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M08_television_raised" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M08_television_raised -->
+
+<!-- M08_energy_unit -->
+<tr id="M08_energy_unit_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Energy Unit Completely in Green Television Slot:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="M08_energy_unit_no" name="M08_energy_unit" value="0" onclick="set_M08_energy_unit(0)" checked="checked">
+        <span id="M08_energy_unit_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="M08_energy_unit_yes" name="M08_energy_unit" value="1" onclick="set_M08_energy_unit(1)">
+        <span id="M08_energy_unit_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="M08_energy_unit_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M08_energy_unit" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M08_energy_unit -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M09 - Dinosaur Toy</b></td>
+</tr>
+<!-- M09_dinosaur_left_home_area -->
+<tr id="M09_dinosaur_left_home_area_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dinosaur Toy Completely in Left Home Area:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="M09_dinosaur_left_home_area_no" name="M09_dinosaur_left_home_area" value="0" onclick="set_M09_dinosaur_left_home_area(0)" checked="checked">
+        <span id="M09_dinosaur_left_home_area_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="M09_dinosaur_left_home_area_yes" name="M09_dinosaur_left_home_area" value="1" onclick="set_M09_dinosaur_left_home_area(1)">
+        <span id="M09_dinosaur_left_home_area_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="M09_dinosaur_left_home_area_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M09_dinosaur_left_home_area" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M09_dinosaur_left_home_area -->
+
+<!-- M09_lid -->
+<tr id="M09_lid_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dinosaur Toy Lid is Completely Closed And Contains:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="M09_lid" value="Empty" id="M09_lid_Empty" onclick='set_M09_lid("Empty")' checked="checked">
+        <span id="M09_lid_Empty_span">
+          Nothing Or Not Closed
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="M09_lid" value="Energy_Unit" id="M09_lid_Energy_Unit" onclick='set_M09_lid("Energy_Unit")'>
+        <span id="M09_lid_Energy_Unit_span">
+          Energy Unit
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="M09_lid" value="Rechargeable" id="M09_lid_Rechargeable" onclick='set_M09_lid("Rechargeable")'>
+        <span id="M09_lid_Rechargeable_span">
+          Rechargeable Battery
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="M09_lid_radioValue" size="10" readonly="readonly" tabindex="-1" value="EMPTY" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M09_lid" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M09_lid -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M01  - INNOVATION PROJECT MODEL</b></td>
+</tr>
+<!-- m01_innovation_project -->
+<tr id="m01_innovation_project_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Innovation Project Model at least Partially In Hydrogen Plant Target Area:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m01_innovation_project_no" name="m01_innovation_project" value="0" onclick="set_m01_innovation_project(0)" checked="checked">
+        <span id="m01_innovation_project_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m01_innovation_project_yes" name="m01_innovation_project" value="1" onclick="set_m01_innovation_project(1)">
+        <span id="m01_innovation_project_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m01_innovation_project_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m01_innovation_project" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m01_innovation_project -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M02 - Oil Platform</b></td>
+</tr>
+<!-- M02_oil_platform_fuel_units -->
+<tr id="M02_oil_platform_fuel_units_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Fuel Units in Fuel Truck:
+  </td>
+  <td>
+<input type="range" min="0" max="3" class="slider" id="M02_oil_platform_fuel_units_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="33.33%" y="0" width="2" height="100%"></rect>
+<rect x="66.67%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="M02_oil_platform_fuel_units" size="3" onchange="check_M02_oil_platform_fuel_units()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M02_oil_platform_fuel_units" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M02_oil_platform_fuel_units -->
+
+<!-- M02_truck_over_target -->
+<tr id="M02_truck_over_target_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fuel Truck at least Partly over Fueling Station Target:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="M02_truck_over_target_no" name="M02_truck_over_target" value="0" onclick="set_M02_truck_over_target(0)" checked="checked">
+        <span id="M02_truck_over_target_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="M02_truck_over_target_yes" name="M02_truck_over_target" value="1" onclick="set_M02_truck_over_target(1)">
+        <span id="M02_truck_over_target_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="M02_truck_over_target_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M02_truck_over_target" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M02_truck_over_target -->
+
+<!-- M02_fuel_truck_bonus -->
+<tr id="M02_fuel_truck_bonus_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fuel Truck Bonus:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M02_fuel_truck_bonus" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M02_fuel_truck_bonus -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M05 - Smart Grid</b></td>
+</tr>
+<!-- M05_connector_raised -->
+<tr id="M05_connector_raised_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your Field's Orange Connector Completely Raised:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="M05_connector_raised_no" name="M05_connector_raised" value="0" onclick="set_M05_connector_raised(0)" checked="checked">
+        <span id="M05_connector_raised_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="M05_connector_raised_yes" name="M05_connector_raised" value="1" onclick="set_M05_connector_raised(1)">
+        <span id="M05_connector_raised_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="M05_connector_raised_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M05_connector_raised" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M05_connector_raised -->
+
+<!-- M05_both_raised -->
+<tr id="M05_both_raised_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BOTH Orange Connectors Completely Raised:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="M05_both_raised_no" name="M05_both_raised" value="0" onclick="set_M05_both_raised(0)" checked="checked">
+        <span id="M05_both_raised_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="M05_both_raised_yes" name="M05_both_raised" value="1" onclick="set_M05_both_raised(1)">
+        <span id="M05_both_raised_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="M05_both_raised_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M05_both_raised" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M05_both_raised -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M06 - Hybrid Car</b></td>
+</tr>
+<!-- M06_car_off_ramp -->
+<tr id="M06_car_off_ramp_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hybrid Car No Longer Touching Ramp:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="M06_car_off_ramp_no" name="M06_car_off_ramp" value="0" onclick="set_M06_car_off_ramp(0)" checked="checked">
+        <span id="M06_car_off_ramp_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="M06_car_off_ramp_yes" name="M06_car_off_ramp" value="1" onclick="set_M06_car_off_ramp(1)">
+        <span id="M06_car_off_ramp_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="M06_car_off_ramp_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M06_car_off_ramp" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M06_car_off_ramp -->
+
+<!-- M06_hybrid_unit_in_hybrid_car -->
+<tr id="M06_hybrid_unit_in_hybrid_car_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hybrid Unit In Hybrid Car:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="M06_hybrid_unit_in_hybrid_car_no" name="M06_hybrid_unit_in_hybrid_car" value="0" onclick="set_M06_hybrid_unit_in_hybrid_car(0)" checked="checked">
+        <span id="M06_hybrid_unit_in_hybrid_car_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="M06_hybrid_unit_in_hybrid_car_yes" name="M06_hybrid_unit_in_hybrid_car" value="1" onclick="set_M06_hybrid_unit_in_hybrid_car(1)">
+        <span id="M06_hybrid_unit_in_hybrid_car_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="M06_hybrid_unit_in_hybrid_car_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M06_hybrid_unit_in_hybrid_car" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M06_hybrid_unit_in_hybrid_car -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M12 - Water Reservoir</b></td>
+</tr>
+<!-- M12_looped_water_in_reservoir -->
+<tr id="M12_looped_water_in_reservoir_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Looped Water Units Completely In Water Reservoir - Touching Mat:
+  </td>
+  <td>
+<input type="range" min="0" max="3" class="slider" id="M12_looped_water_in_reservoir_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="33.33%" y="0" width="2" height="100%"></rect>
+<rect x="66.67%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="M12_looped_water_in_reservoir" size="3" onchange="check_M12_looped_water_in_reservoir()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M12_looped_water_in_reservoir" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M12_looped_water_in_reservoir -->
+
+<!-- M12_looped_water_on_hooks -->
+<tr id="M12_looped_water_on_hooks_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Looped Water Units On Single Red Hook (max 1 per Hook):
+  </td>
+  <td>
+<input type="range" min="0" max="2" class="slider" id="M12_looped_water_on_hooks_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="M12_looped_water_on_hooks" size="3" onchange="check_M12_looped_water_on_hooks()" value="0" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_M12_looped_water_on_hooks" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end M12_looped_water_on_hooks -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M16 - Precision Tokens Remaining on Field</b></td>
+</tr>
+<!-- m16_precision_tokens -->
+<tr id="m16_precision_tokens_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Precision Tokens Remaining on Field:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="zero" id="m16_precision_tokens_zero" onclick='set_m16_precision_tokens("zero")'>
+        <span id="m16_precision_tokens_zero_span">
+          Zero
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="one" id="m16_precision_tokens_one" onclick='set_m16_precision_tokens("one")'>
+        <span id="m16_precision_tokens_one_span">
+          1
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="two" id="m16_precision_tokens_two" onclick='set_m16_precision_tokens("two")'>
+        <span id="m16_precision_tokens_two_span">
+          2
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="three" id="m16_precision_tokens_three" onclick='set_m16_precision_tokens("three")'>
+        <span id="m16_precision_tokens_three_span">
+          3
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="four" id="m16_precision_tokens_four" onclick='set_m16_precision_tokens("four")'>
+        <span id="m16_precision_tokens_four_span">
+          4
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="five" id="m16_precision_tokens_five" onclick='set_m16_precision_tokens("five")'>
+        <span id="m16_precision_tokens_five_span">
+          5
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="six" id="m16_precision_tokens_six" onclick='set_m16_precision_tokens("six")' checked="checked">
+        <span id="m16_precision_tokens_six_span">
+          6
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m16_precision_tokens_radioValue" size="10" readonly="readonly" tabindex="-1" value="SIX" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_m16_precision_tokens" size="3" readonly="readonly" tabindex="-1" value="50" align="right">
+  </td>
+</tr>
+<!-- end m16_precision_tokens -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>GRACIOUS PROFESSIONALISM DISPLAYED AT THE ROBOT GAME TABLE</b></td>
+</tr>
+<!-- gp_score -->
+<tr id="gp_score_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GP - Does not affect Robot Game Score:
+  </td>
+  <td>
+<input type="range" min="2" max="4" class="slider" id="gp_score_slider" value="3">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="gp_score" size="3" onchange="check_gp_score()" value="3" align="right">
+  </td>
+  <td class="score-cell" align="right">
+    <input type="text" name="score_gp_score" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end gp_score -->
+
+
+
+                <!-- Total Score -->
+                <tr class="total-score-container">
+                  <td colspan="3" class="total-score-label">Total
+                        Score:</td>
+                  <td class="score-cell" align="right"><input type="text" name="totalScore" size="3" readonly="readonly" tabindex="-1" value="50"></td>
+                </tr>
+              
+            
+            <!-- end check for bye -->
+
+           </tbody></table> <!-- end score entry table  -->
+</main>
+
+        <footer>
+            <div class="score-entry buttonbox">
+
+                <button id="score-entry_toggle-review-mode" type="button" class="fll-sw-button">Review
+                    Toggle</button>
+
+                <!-- Score Verification -->
+      <span class="verify-score-label float_right">
+Team Agrees with the above entries:
+</span>
+      <span class="verify-score-buttonbox">
+        <label class="y-n-button">
+          <input type="radio" id="Verified_no" name="Verified" value="0" onclick="set_Verified(0)" checked="checked">
+        <span id="Verified_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="Verified_yes" name="Verified" value="1" onclick="set_Verified(1)">
+        <span id="Verified_yes_span">Yes</span>
+        </label>
+      </span>
+
+            </div>
+
+            <div class="buttonbox score-entry-buttons">
+            
+            
+                <span id="challenge_revision">Challenge revision:
+                    11</span>
+                <span id="software_version">
+                    Software version:
+                    16.5.1-beta.190+g241ad0a</span>
+                    
+                    <span class="float_right">&nbsp;</span>
+                
+                    
+                        <button type="button" id="reset_score" class="fll-sw-button">Reset
+                            Form</button>
+                    
+                    
+                
+            </div>
+        </footer>
+
+    </form>
+  <!-- end score entry form -->
+
+
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="yesno-dialog">
+        <div>
+            <p id="yesno-dialog_text"></p>
+            <button type="button" id="yesno-dialog_yes">Yes</button>
+            <button type="button" id="yesno-dialog_no">No</button>
+        </div>
+    </div>
+    
+
+</body></html>
