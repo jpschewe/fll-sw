@@ -419,6 +419,11 @@ public class BracketData extends BracketInfo {
   private String bracketOutput = "";
 
   /**
+   * If true, show checkboxes for selecting score sheets to print.
+   */
+  private final boolean print;
+
+  /**
    * @return the string that was generated with
    *         {@link #generateBracketOutput(Connection, TopRightCornerStyle)} or
    *         the empty string if the method has not been called.
@@ -446,6 +451,7 @@ public class BracketData extends BracketInfo {
    * @param pShowFinals should the final scores be displayed?
    * @param pShowOnlyVerifiedScores true if only verified scores should be
    *          displayed
+   * @param print if true display checkboxes to select score sheets to print
    * @throws SQLException on a database error
    */
   public BracketData(final Connection pConnection,
@@ -454,9 +460,10 @@ public class BracketData extends BracketInfo {
                      final int pLastRound,
                      final int pRowsPerTeam,
                      final boolean pShowFinals,
-                     final boolean pShowOnlyVerifiedScores)
+                     final boolean pShowOnlyVerifiedScores,
+                     final boolean print)
       throws SQLException {
-    this(pConnection, pDivision, pFirstRound, pLastRound, pRowsPerTeam, pShowFinals, pShowOnlyVerifiedScores, 0);
+    this(pConnection, pDivision, pFirstRound, pLastRound, pRowsPerTeam, pShowFinals, pShowOnlyVerifiedScores, 0, print);
   }
 
   /**
@@ -475,6 +482,7 @@ public class BracketData extends BracketInfo {
    * @param pShowFinals should the final scores be displayed?
    * @param pShowOnlyVerifiedScores true if only verified scores should be
    *          displayed
+   * @param print if true, then display checkboxes to select score sheets to print
    * @throws SQLException on a database error
    */
   public BracketData(final Connection pConnection,
@@ -484,12 +492,14 @@ public class BracketData extends BracketInfo {
                      final int pRowsPerTeam,
                      final boolean pShowFinals,
                      final boolean pShowOnlyVerifiedScores,
-                     final int bracketIndex)
+                     final int bracketIndex,
+                     final boolean print)
       throws SQLException {
     super(pDivision, pFirstRound < 1 ? 1 : pFirstRound, pLastRound);
     this.showFinalScores = pShowFinals;
     this.showOnlyVerifiedScores = pShowOnlyVerifiedScores;
     this.bracketIndex = bracketIndex;
+    this.print = print;
 
     if (pRowsPerTeam
         % 2 != 0
@@ -806,13 +816,15 @@ public class BracketData extends BracketInfo {
         sb.append("</font></td>\n</tr>\n");
         sb.append("<tr>");
         sb.append("<td rowspan='2' align='center' valign='middle'>");
-        sb.append("<input type='checkbox' name='print"
-            + myD.getMatchNum()
-            + "'");
-        if (!myD.getPrinted()) {
-          sb.append(" checked");
+        if (print) {
+          sb.append("<input type='checkbox' name='print"
+              + myD.getMatchNum()
+              + "'");
+          if (!myD.getPrinted()) {
+            sb.append(" checked");
+          }
+          sb.append("/>");
         }
-        sb.append("/>");
         sb.append("<input type='hidden' name='teamA"
             + myD.getMatchNum()
             + "' value='"

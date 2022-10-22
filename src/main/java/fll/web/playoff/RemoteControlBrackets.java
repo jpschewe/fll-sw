@@ -63,7 +63,7 @@ public final class RemoteControlBrackets {
         final BracketData bracketData = new BracketData(connection, h2hBracket.getBracket(), h2hBracket.getFirstRound(),
                                                         h2hBracket.getFirstRound()
                                                             + 2,
-                                                        4, false, true, h2hBracket.getIndex());
+                                                        4, false, true, h2hBracket.getIndex(), false);
 
         bracketData.addBracketLabels(h2hBracket.getFirstRound());
         bracketData.addStaticTableLabels(connection);

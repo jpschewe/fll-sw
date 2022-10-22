@@ -53,12 +53,13 @@ public class ScoresheetServlet extends BaseFLLServlet {
 
     final @Nullable String editTablesParam = request.getParameter("editTables");
     final boolean editTablesOnly = Boolean.valueOf(editTablesParam);
+    final boolean print = !editTablesOnly;
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
       final int tournament = Queries.getCurrentTournament(connection);
-      if (!editTablesOnly) {
+      if (print) {
         response.reset();
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
@@ -66,9 +67,10 @@ public class ScoresheetServlet extends BaseFLLServlet {
 
       // Create the scoresheet generator - must provide correct number of
       // scoresheets
-      final ScoresheetGenerator gen = new ScoresheetGenerator(request, connection, tournament, challengeDescription);
+      final ScoresheetGenerator gen = new ScoresheetGenerator(connection, challengeDescription, tournament, request,
+                                                              print);
 
-      if (!editTablesOnly) {
+      if (print) {
         gen.writeFile(response.getOutputStream());
       } else {
         // send back to the same page

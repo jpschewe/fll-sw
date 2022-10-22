@@ -144,19 +144,24 @@ public class ScoresheetGenerator {
    * printed, so table assignments are stored into the database and the match is
    * marked as printed. It is very questionable whether this is where this
    * should happen, but I don't feel like breaking it out.
+   * Records the printed status and any table assignment changes in the database.
    * 
+   * @param connection where to find database information
+   * @param description description of the challenge
+   * @param tournament the tournament ID
    * @param request used to get information about award group and number of
    *          matches
-   * @param connection where to find database information
-   * @param tournament the tournament ID
-   * @param description description of the challenge
+   * @param print if true, print score sheets, otherwise store table assignments
+   *          for <i>all</i> matches
    * @throws SQLException on a database error
    */
-  public ScoresheetGenerator(final HttpServletRequest request,
-                             final Connection connection,
+  public ScoresheetGenerator(final Connection connection,
+                             final ChallengeDescription description,
                              final int tournament,
-                             final ChallengeDescription description)
+                             final HttpServletRequest request,
+                             final boolean print)
       throws SQLException {
+
     this.description = Objects.requireNonNull(description);
     final Tournament tournamentObj = Tournament.findTournamentByID(connection, tournament);
     this.tournamentName = tournamentObj.getName();
@@ -183,7 +188,8 @@ public class ScoresheetGenerator {
       }
     }
 
-    if (checkedMatchCount == 0) {
+    if (print
+        && checkedMatchCount == 0) {
       throw new FLLRuntimeException("No matches were found checked. Please go back and select the checkboxes for the scoresheets that you want to print");
     }
 
@@ -206,44 +212,78 @@ public class ScoresheetGenerator {
 
       int j = 0;
       for (int i = 1; i <= numMatches; i++) {
-        if (checkedMatches[i]) {
-          final String round = WebUtils.getNonNullRequestParameter(request, "round"
-              + i);
-          final int playoffRound = Integer.parseInt(round);
+        final String round = WebUtils.getNonNullRequestParameter(request, "round"
+            + i);
+        final int playoffRound = Integer.parseInt(round);
 
-          updatePrep.setInt(3, playoffRound);
+        // Get info
+        final Team teamA = Team.getTeamFromDatabase(connection,
+                                                    Integer.parseInt(WebUtils.getNonNullRequestParameter(request,
+                                                                                                         "teamA"
+                                                                                                             + i)));
+        final Team teamB = Team.getTeamFromDatabase(connection,
+                                                    Integer.parseInt(WebUtils.getNonNullRequestParameter(request,
+                                                                                                         "teamB"
+                                                                                                             + i)));
+
+        final int performanceRunA = Playoff.getRunNumber(connection, division, teamA.getTeamNumber(), playoffRound);
+
+        final int performanceRunB = Playoff.getRunNumber(connection, division, teamB.getTeamNumber(), playoffRound);
+
+        final int teamAlineNumber = Queries.getPlayoffTableLineNumber(connection, tournament, teamA.getTeamNumber(),
+                                                                      performanceRunA);
+        final int teamBlineNumber = Queries.getPlayoffTableLineNumber(connection, tournament, teamB.getTeamNumber(),
+                                                                      performanceRunB);
+
+        final String teamAtable = WebUtils.getNonNullRequestParameter(request, "tableA"
+            + i);
+        final String teamBtable = WebUtils.getNonNullRequestParameter(request, "tableB"
+            + i);
+
+        if (!print
+            || checkedMatches[i]) {
+          // update table assignments if not printing or printing and this match is
+          // checked
+
           updateTablePrep.setInt(4, playoffRound);
 
-          // Get teamA info
-          final Team teamA = Team.getTeamFromDatabase(connection,
-                                                      Integer.parseInt(WebUtils.getNonNullRequestParameter(request,
-                                                                                                           "teamA"
-                                                                                                               + i)));
+          updateTablePrep.setString(1, teamAtable);
+          updateTablePrep.setInt(5, teamAlineNumber);
+          final int teamAtableRowsUpdated = updateTablePrep.executeUpdate();
+          if (teamAtableRowsUpdated < 1) {
+            LOGGER.warn(String.format("Could not update playoff table for team: %s playoff round: %s playoff bracket: %s",
+                                      teamA.getTeamNumber(), playoffRound, division));
+          }
+
+          updateTablePrep.setString(1, teamBtable);
+          updateTablePrep.setInt(5, teamBlineNumber);
+          final int teamBtableRowsUpdated = updateTablePrep.executeUpdate();
+          if (teamBtableRowsUpdated < 1) {
+            LOGGER.warn(String.format("Could not update playoff table for team: %s playoff round: %s playoff bracket: %s",
+                                      teamB.getTeamNumber(), playoffRound, division));
+          }
+        }
+
+        if (checkedMatches[i]) {
+          // populate scoresheet information if this match is checked
+
+          updatePrep.setInt(3, playoffRound);
+
           this.name[j] = teamA.getTrimmedTeamName();
           this.number[j] = teamA.getTeamNumber();
           this.round[j] = "Round P"
               + round;
-          this.table[j] = WebUtils.getNonNullRequestParameter(request, "tableA"
-              + i);
-
-          final int performanceRunA = Playoff.getRunNumber(connection, division, teamA.getTeamNumber(), playoffRound);
+          this.table[j] = teamAtable;
           this.divisionLabel[j] = HEAD_TO_HEAD_LABEL;
           this.division[j] = division;
           final int bracketA = Playoff.getBracketNumber(connection, tournament, teamA.getTeamNumber(), performanceRunA);
           final String bracketALabel = String.format("Match %d", bracketA);
           this.time[j] = bracketALabel;
 
-          final int teamAlineNumber = Queries.getPlayoffTableLineNumber(connection, tournament, teamA.getTeamNumber(),
-                                                                        performanceRunA);
-
           updatePrep.setInt(4, teamAlineNumber);
-          updateTablePrep.setString(1, table[j]);
-          updateTablePrep.setInt(5, teamAlineNumber);
           final int teamAprintedRowsUpdated = updatePrep.executeUpdate();
-          final int teamAtableRowsUpdated = updateTablePrep.executeUpdate();
-          if (teamAprintedRowsUpdated < 1
-              || teamAtableRowsUpdated < 1) {
-            LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff bracket: %s",
+          if (teamAprintedRowsUpdated < 1) {
+            LOGGER.warn(String.format("Could not update print flag for team: %s playoff round: %s playoff bracket: %s",
                                       teamA.getTeamNumber(), playoffRound, division));
           }
 
@@ -253,35 +293,22 @@ public class ScoresheetGenerator {
           ++j;
 
           // Get teamB info
-          final Team teamB = Team.getTeamFromDatabase(connection,
-                                                      Integer.parseInt(WebUtils.getNonNullRequestParameter(request,
-                                                                                                           "teamB"
-                                                                                                               + i)));
           this.name[j] = teamB.getTrimmedTeamName();
           this.number[j] = teamB.getTeamNumber();
           this.round[j] = "Round P"
               + round;
-          this.table[j] = WebUtils.getNonNullRequestParameter(request, "tableB"
-              + i);
+          this.table[j] = teamBtable;
 
-          final int performanceRunB = Playoff.getRunNumber(connection, division, teamB.getTeamNumber(), playoffRound);
           this.divisionLabel[j] = HEAD_TO_HEAD_LABEL;
           this.division[j] = division;
           final int bracketB = Playoff.getBracketNumber(connection, tournament, teamB.getTeamNumber(), performanceRunB);
           final String bracketBLabel = String.format("Match %d", bracketB);
           this.time[j] = bracketBLabel;
 
-          final int teamBlineNumber = Queries.getPlayoffTableLineNumber(connection, tournament, teamB.getTeamNumber(),
-                                                                        performanceRunB);
-
           updatePrep.setInt(4, teamBlineNumber);
-          updateTablePrep.setString(1, table[j]);
-          updateTablePrep.setInt(5, teamBlineNumber);
           final int teamBprintedRowsUpdated = updatePrep.executeUpdate();
-          final int teamBtableRowsUpdated = updateTablePrep.executeUpdate();
-          if (teamBprintedRowsUpdated < 1
-              || teamBtableRowsUpdated < 1) {
-            LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff bracket: %s",
+          if (teamBprintedRowsUpdated < 1) {
+            LOGGER.warn(String.format("Could not update print flag for team: %s playoff round: %s playoff bracket: %s",
                                       teamB.getTeamNumber(), playoffRound, division));
           }
 
