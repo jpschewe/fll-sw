@@ -20,7 +20,7 @@ fll.web.playoff.ScoregenBrackets.populateContext(application, request, pageConte
 <head>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
-<title>${division} - Head to head Bracket</title>
+<title>${division}&nbsp;-&nbsp;Head&nbsp;to&nbsp;head&nbsp;Bracket</title>
 
 <style type='text/css'>
 TD.Leaf {
