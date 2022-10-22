@@ -107,12 +107,21 @@ FONT.TIE {
         action='ScoresheetServlet' target='_new'>
         <input type='hidden' name='division' value='${division}' />
         <input type='hidden' name='numMatches' value='${numMatches}' />
-        <input type='submit' value='Print scoresheets'
-            id='print_scoresheets'
-            onclick='return checkSomethingToPrint()' />
+
+        <c:choose>
+            <c:when test="${param.editTables}">
+                <input type='submit' value='Save table assignments'
+                    id='save_table_assignments' />
+            </c:when>
+            <c:otherwise>
+                <input type='submit' value='Print scoresheets'
+                    id='print_scoresheets'
+                    onclick='return checkSomethingToPrint()' />
         -
         <b>Print the scoresheets for the matches that have their
-            boxes checked.</b>
+                    boxes checked.</b>
+            </c:otherwise>
+        </c:choose>
 
 
         ${bracketInfo.bracketOutput}
