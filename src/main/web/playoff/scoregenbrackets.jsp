@@ -94,19 +94,35 @@ FONT.TIE {
 
 <script type='text/javascript' src='scoregenbrackets.js'></script>
 
+<c:choose>
+    <c:when test="${param.editTables}">
+        <c:set var="form_target" value="" />
+    </c:when>
+    <c:otherwise>
+        <c:set var="form_target" value="_new" />
+    </c:otherwise>
+</c:choose>
+
 </head>
 
 
 <body>
     <h2>Head to head Bracket: ${division }</h2>
+
+    <div class='status-message'>${message}</div>
+    <%-- clear out the message, so that we don't see it again --%>
+    <c:remove var="message" />
+
     <p>
         <a href="index.jsp">Return to Head to head menu</a>
     </p>
 
     <form name='printScoreSheets' method='post'
-        action='ScoresheetServlet' target='_new'>
+        action='ScoresheetServlet' target='${form_target}'>
         <input type='hidden' name='division' value='${division}' />
         <input type='hidden' name='numMatches' value='${numMatches}' />
+        <input type='hidden' name='editTables'
+            value='${param.editTables}' />
 
         <c:choose>
             <c:when test="${param.editTables}">
