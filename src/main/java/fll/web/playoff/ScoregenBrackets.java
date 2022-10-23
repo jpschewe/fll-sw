@@ -15,6 +15,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.db.Queries;
 import fll.db.TableInformation;
 import fll.web.ApplicationAttributes;
@@ -38,6 +40,10 @@ public final class ScoregenBrackets {
   public static void populateContext(final ServletContext application,
                                      final HttpServletRequest request,
                                      final PageContext pageContext) {
+
+    final @Nullable String editTablesParam = request.getParameter("editTables");
+    final boolean editTablesOnly = Boolean.valueOf(editTablesParam);
+    final boolean print = !editTablesOnly;
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
@@ -104,7 +110,8 @@ public final class ScoregenBrackets {
 
       final int currentTournament = Queries.getCurrentTournament(connection);
 
-      final BracketData bracketInfo = new BracketData(connection, division, firstRound, lastRound, 4, true, false);
+      final BracketData bracketInfo = new BracketData(connection, division, firstRound, lastRound, 4, true, false,
+                                                      print);
 
       final int numMatches = bracketInfo.addBracketLabelsAndScoreGenFormElements(connection, currentTournament,
                                                                                  division);

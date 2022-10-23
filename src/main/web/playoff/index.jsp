@@ -134,6 +134,82 @@ fll.web.playoff.PlayoffIndex.populateContext(application, session, pageContext);
                     </form>
                 </li>
 
+                <%-- edit table assignments --%>
+                <li>
+                    <form name='edit_table_assignments'
+                        action='scoregenbrackets.jsp' method='get'
+                        target="_blank">
+                        <input type='hidden' name='editTables'
+                            value='true' />
+
+                        Edit Table Assignments
+                        <br />
+                        <%-- bracket --%>
+                        Select Bracket:
+                        <select id='edit_tables.division'
+                            name='division'>
+                            <c:forEach
+                                items="${playoff_data.initializedBrackets }"
+                                var="division">
+                                <option value='${division}'>${division}</option>
+                            </c:forEach>
+                        </select>
+
+                        <%-- select rounds --%>
+                        from round
+                        <select name='firstRound'>
+                            <c:forEach begin="1"
+                                end="${playoff_data.numPlayoffRounds }"
+                                var="numRounds">
+                                <c:choose>
+                                    <c:when test="${numRounds == 1 }">
+                                        <option value='${numRounds }'
+                                            selected>${numRounds }</option>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <option value='${numRounds }'>${numRounds }</option>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:forEach>
+                        </select>
+                        to
+
+                        <%-- numPlayoffRounds+1 == the column in which the 1st place winner is displayed  --%>
+                        <select name='lastRound'>
+                            <c:forEach begin="2"
+                                end="${playoff_data.numPlayoffRounds+1 }"
+                                var="numRounds">
+                                <c:choose>
+                                    <c:when
+                                        test="${numRounds == playoff_data.numPlayoffRounds+1 }">
+                                        <option value='${numRounds }'
+                                            selected>${numRounds }</option>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <option value='${numRounds }'>${numRounds }</option>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:forEach>
+                        </select>
+
+                        <%-- submit--%>
+                        <input type='submit'
+                            id='display_edit_table_assignments'
+                            value='Display Brackets'>
+                        <a href='javascript:display("EditTablesHelp")'>[help]</a>
+                        <div id='EditTablesHelp' class='help'
+                            style='display: none'>
+                            This page is used to edit table assignments.
+                            This page is primarly used when scoring is
+                            done electronically and no score sheets are
+                            printed. <a
+                                href='javascript:hide("EditTablesHelp")'>[hide]</a>
+                        </div>
+
+                    </form>
+                </li>
+                <%-- end edit table assignments --%>
+
                 <%-- scoresheet generation --%>
                 <li>
                     <form name='printable' action='scoregenbrackets.jsp'

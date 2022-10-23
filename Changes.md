@@ -1,3 +1,4 @@
+* #1032 - Add page to change head to head bracket tables without printing score sheets
 * #1042 - Fix bug where subjective comments were not displayed immediately
 * #1042 - Use buttons instead of slider for performance entry when range is greater than 10
 * #1041 - Collapse restrictions by default in the editor to make them more manageable 

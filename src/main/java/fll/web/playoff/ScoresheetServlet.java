@@ -11,13 +11,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
+
+import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
@@ -27,6 +24,12 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Displays a score sheet.
@@ -48,19 +51,33 @@ public class ScoresheetServlet extends BaseFLLServlet {
       return;
     }
 
+    final @Nullable String editTablesParam = request.getParameter("editTables");
+    final boolean editTablesOnly = Boolean.valueOf(editTablesParam);
+    final boolean print = !editTablesOnly;
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
       final int tournament = Queries.getCurrentTournament(connection);
-      response.reset();
-      response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
+      if (print) {
+        response.reset();
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
+      }
 
       // Create the scoresheet generator - must provide correct number of
       // scoresheets
-      final ScoresheetGenerator gen = new ScoresheetGenerator(request, connection, tournament, challengeDescription);
+      final ScoresheetGenerator gen = new ScoresheetGenerator(connection, challengeDescription, tournament, request,
+                                                              print);
 
-      gen.writeFile(response.getOutputStream());
+      if (print) {
+        gen.writeFile(response.getOutputStream());
+      } else {
+        // send back to the same page
+        SessionAttributes.appendToMessage(session, "<div class='success'>Table assignments updated</div>");
+        final String referrer = request.getHeader("Referer");
+        response.sendRedirect(response.encodeRedirectURL(StringUtils.isEmpty(referrer) ? "index.jsp" : referrer));
+      }
 
     } catch (final SQLException e) {
       final String errorMessage = "There was an error talking to the database";
