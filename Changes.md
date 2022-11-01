@@ -1,4 +1,4 @@
-Release 16.17.0
+Release 17.0.0
 ==============
 * #1032 - Add page to change head to head bracket tables without printing score sheets
 * #1042 - Fix bug where subjective comments were not displayed immediately
