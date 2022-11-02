@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><fll copyright="" revision="11" revisionComment="fix energy unit restriction upper bound" schemaVersion="3" title="2022 Minnesota FIRST LEGO League - SUPERPOWERED" winner="HIGH">
+<?xml version="1.0" encoding="UTF-8"?><fll copyright="" revision="12" revisionComment="" schemaVersion="3" title="2022 Minnesota FIRST LEGO League - SUPERPOWERED (10)" winner="HIGH">
   <Performance minimumScore="0.00" weight="1.00">
     <goalGroup title="M00">
       <description>EQUIPMENT INSPECTION BONUS</description>
@@ -90,7 +90,7 @@
     </goalGroup>
     <goalGroup title="M03">
       <description>Energy Storage </description>
-      <goal initialValue="0.00" max="12.00" min="0.00" multiplier="0.00" name="M03_energy_units" required="false" scoreType="INTEGER" title="# Energy Units Completely in Energy Storage Bin">
+      <goal initialValue="0.00" max="12.00" min="0.00" multiplier="0.00" name="M03_energy_units" required="false" scoreType="INTEGER" title="# Energy Units Completely in Energy Storage Bin - Not Touching Equipment at End">
         <description># of Energy United Completely in Energy Storage Bin</description>
       </goal>
       <computedGoal name="M03_energy_units_computed" title="# Energy Units Completely in Energy Storage Bin - Score">
@@ -167,8 +167,8 @@
     </goalGroup>
     <goalGroup title="M14">
       <description>Toy Factory</description>
-      <goal initialValue="0.00" max="12.00" min="0.00" multiplier="0.00" name="M14_red_hopper" required="false" scoreType="INTEGER" title="# Energy Units At Least Partially in Slot in Back of Toy Factory Or Red Hopper">
-        <description># of Energy Units At Lest Partially in Slot in Back of the Toy Factory (Or In Red Hopper) Maximum of 3</description>
+      <goal initialValue="0.00" max="12.00" min="0.00" multiplier="0.00" name="M14_red_hopper" required="false" scoreType="INTEGER" title="# Energy Units At Least Partially in Slot in Back of Toy Factory Or Red Hopper -  Not Touching Equipment at End">
+        <description># of Energy Units At Lest Partially in Slot in Back of the Toy Factory (Or In Red Hopper) Maximum of 3 - Not Touching Equipment at End</description>
       </goal>
       <computedGoal name="M14_red_hopper_computed" title="# Energy Units At Least Partially in Slot in Back of Toy Factory Or Red Hopper - Score">
         <switch>
@@ -207,8 +207,8 @@
     </goalGroup>
     <goalGroup title="M15">
       <description>Rechargeable Battery</description>
-      <goal initialValue="0.00" max="12.00" min="0.00" multiplier="0.00" name="M15_rechargeable_battery_area" required="false" scoreType="INTEGER" title="# Energy Units Completely in Rechargeable Battery Target Area">
-        <description># of Energy Units Completely in Rechargeable Battery Target Area Maximum of 3</description>
+      <goal initialValue="0.00" max="12.00" min="0.00" multiplier="0.00" name="M15_rechargeable_battery_area" required="false" scoreType="INTEGER" title="# Energy Units Completely in Rechargeable Battery Target Area -  Not Touching Equipment at End">
+        <description># of Energy Units Completely in Rechargeable Battery Target Area Maximum of 3 - Not Touching Equipment at End</description>
       </goal>
       <computedGoal name="M15_rechargeable_battery_area_computed" title="# Energy Units Completely in Rechargeable Battery Target Area - Score">
         <switch>
@@ -244,8 +244,8 @@
     </goalGroup>
     <goalGroup title="M08">
       <description>Watch Television</description>
-      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="M08_television_raised" required="false" scoreType="INTEGER" title="Television Completely Raised">
-        <description>Television Screen is Completely Raised</description>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="M08_television_raised" required="false" scoreType="INTEGER" title="Television Completely Raised -  Not Touching Equipment at End">
+        <description>Television Screen is Completely Raised - Not Touching Equipment at End</description>
       </goal>
       <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="M08_energy_unit" required="false" scoreType="INTEGER" title="Energy Unit Completely in Green Television Slot">
         <description>Energy Unit is Completely in Green Television Slot</description>
@@ -311,8 +311,8 @@
     </goalGroup>
     <goalGroup title="M05">
       <description>Smart Grid</description>
-      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="M05_connector_raised" required="false" scoreType="INTEGER" title="Your Field's Orange Connector Completely Raised">
-        <description>Your Field's Orange Connector is Completely Raised</description>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="M05_connector_raised" required="false" scoreType="INTEGER" title="Your Field's Orange Connector Completely Raised - Not Touching Equipment at End">
+        <description>Your Field's Orange Connector is Completely Raised - Not Touching Equipment at End</description>
       </goal>
       <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="M05_both_raised" required="false" scoreType="INTEGER" title="BOTH Orange Connectors Completely Raised">
         <description>Both team's Orange Connectors are Completely Raised</description>
@@ -329,15 +329,15 @@
     </goalGroup>
     <goalGroup title="M12">
       <description>Water Reservoir</description>
-      <goal initialValue="0.00" max="3.00" min="0.00" multiplier="5.00" name="M12_looped_water_in_reservoir" required="false" scoreType="INTEGER" title="# Looped Water Units Completely In Water Reservoir - Touching Mat">
-        <description># of Looper Water Units Completely In Water Reservoir and Touching Mat</description>
+      <goal initialValue="0.00" max="3.00" min="0.00" multiplier="5.00" name="M12_looped_water_in_reservoir" required="false" scoreType="INTEGER" title="# Looped Water Units Completely In Water Reservoir - Touching Mat -  Not Touching Equipment at End">
+        <description># of Looper Water Units Completely In Water Reservoir and Touching Mat - Not Touching Equipment at End</description>
       </goal>
-      <goal initialValue="0.00" max="2.00" min="0.00" multiplier="10.00" name="M12_looped_water_on_hooks" required="false" scoreType="INTEGER" title="# Looped Water Units On Single Red Hook (max 1 per Hook)">
-        <description># Looped Water Units Placed on a Single Red Hook - Max 1 per hook </description>
+      <goal initialValue="0.00" max="2.00" min="0.00" multiplier="10.00" name="M12_looped_water_on_hooks" required="false" scoreType="INTEGER" title="# Hooks with Single Looped Water Unit (max 1 per Hook) -  Not Touching Equipment at End">
+        <description># Looped Water Units Placed on a Single Red Hook - Max 1 per hook - Not Touching Equipment at End</description>
       </goal>
     </goalGroup>
     <goalGroup title="M16">
-      <description>Precision Tokens Remaining on Field</description>
+      <description>Precision Tokens Remaining</description>
       <goal initialValue="50.00" name="m16_precision_tokens" required="false" scoreType="INTEGER" title="# Precision Tokens Remaining on Field">
         <value score="0.00" title="Zero" value="zero"/>
         <value score="10.00" title="1" value="one"/>
@@ -392,15 +392,13 @@
         <constant value="1.00"/>
         <goalRef goal="M15_rechargeable_battery_area" scoreType="raw"/>
       </term>
-
       <term>
-        <constant value="3"/>
+        <constant value="3.00"/>
       </term>
       <term>
         <constant value="-1.00"/>
         <goalRef goal="M04_solar_farm" scoreType="raw"/>
       </term>
-      
       <term>
         <constant value="1.00"/>
       </term>
@@ -408,7 +406,6 @@
         <constant value="-1.00"/>
         <goalRef goal="M03_removed_storage_tray" scoreType="raw"/>
       </term>
-      
       <term>
         <constant value="3.00"/>
       </term>
@@ -416,7 +413,6 @@
         <constant value="-1.00"/>
         <goalRef goal="M07_wind_turbine" scoreType="raw"/>
       </term>
-      
       <term>
         <constant value="3.00"/>
       </term>
@@ -424,7 +420,6 @@
         <constant value="-1.00"/>
         <goalRef goal="m10_power_plant" scoreType="raw"/>
       </term>
-      
       <term>
         <constant value="1.00"/>
       </term>
