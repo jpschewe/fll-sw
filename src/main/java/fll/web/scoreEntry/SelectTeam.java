@@ -30,6 +30,7 @@ import fll.scheduler.PerformanceTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
+import fll.web.SessionAttributes;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.PageContext;
@@ -71,7 +72,9 @@ public final class SelectTeam {
 
       final Tournament tournament = Tournament.getCurrentTournament(connection);
 
-      final @Nullable String scoreEntrySelectedTable = (String) session.getAttribute("scoreEntrySelectedTable");
+      final @Nullable String scoreEntrySelectedTable = SessionAttributes.getAttribute(session,
+                                                                                      "scoreEntrySelectedTable",
+                                                                                      String.class);
 
       // get latest performance round for each team
       final Map<Integer, Integer> maxRunNumbers = getMaxRunNumbers(connection, tournament);
