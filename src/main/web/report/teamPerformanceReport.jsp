@@ -55,6 +55,7 @@ table#perf-data th, table#perf-data td {
             <th>Run Number</th>
             <th>Score</th>
             <th>Last Edited</th>
+            <th></th>
         </tr>
         <c:forEach items="${result.rows}" var="row">
             <tr>
@@ -72,6 +73,11 @@ table#perf-data th, table#perf-data td {
                 <td class="right">
                     <fmt:formatDate value="${row.TIMESTAMP}"
                         pattern="h:mm" />
+                </td>
+                <td>
+                    <a
+                        href='<c:url value="/scoreEntry/scoreEntry.jsp?TeamNumber=${param.TeamNumber}&EditFlag=true&RunNumber=${row.RunNumber}"/>'>Edit
+                    </a>
                 </td>
             </tr>
         </c:forEach>

@@ -62,6 +62,7 @@ table#perf-data th, table#perf-data td {
                         <th>Organization</th>
                         <th>Score</th>
                         <th>Last Edited</th>
+                        <th></th>
                     </tr>
                     <sql:query var="result" dataSource="${datasource}">
             SELECT Teams.TeamNumber,Teams.TeamName,Teams.Organization,Performance.ComputedTotal,Performance.NoShow,Performance.TIMESTAMP
@@ -95,6 +96,11 @@ table#perf-data th, table#perf-data td {
                             <td class="right">
                                 <fmt:formatDate value="${row.TIMESTAMP}"
                                     pattern="h:mm" />
+                            </td>
+                            <td>
+                                <a
+                                    href='<c:url value="/scoreEntry/scoreEntry.jsp?TeamNumber=${row.TeamNumber}&EditFlag=true&RunNumber=${param.RunNumber}"/>'>Edit
+                                </a>
                             </td>
                         </tr>
                     </c:forEach>
