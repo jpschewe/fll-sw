@@ -10,11 +10,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
@@ -104,7 +102,6 @@ public final class SelectTeam {
                                                                                      nextPerformance, nextRunNumber);
                                                          }) //
                                                          .collect(Collectors.toList());
-      Collections.sort(teamSelectData);
 
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
       // assume that the string is going to be put inside single quotes in the
@@ -173,10 +170,11 @@ public final class SelectTeam {
   }
 
   /**
-   * Data class for displaying team information on the web.
+   * Data class for displaying team information on the web. Sorting is done inside
+   * the javascript.
    */
-  @SuppressFBWarnings(value = "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", justification = "only used for sort, not stored")
-  public static final class SelectTeamData implements Comparable<SelectTeamData> {
+  @SuppressFBWarnings(value = "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", justification = "only used for sort, not stored via serialization")
+  public static final class SelectTeamData {
 
     private final TournamentTeam team;
 
@@ -218,55 +216,20 @@ public final class SelectTeam {
       return team;
     }
 
-    @Override
-    public int hashCode() {
-      return Objects.hash(this.nextPerformance, this.nextRunNumber);
+    /**
+     * @return the next performance
+     */
+    public @Nullable PerformanceTime getNextPerformance() {
+      return nextPerformance;
     }
 
-    @Override
-    public boolean equals(final @Nullable Object o) {
-      if (this == o) {
-        return true;
-      } else if (null == o) {
-        return false;
-      } else if (this.getClass().equals(o.getClass())) {
-        final SelectTeamData other = (SelectTeamData) o;
-        return 0 == this.compareTo(other);
-      } else {
-        return false;
-      }
+    /**
+     * @return next run number
+     */
+    public int getNextRunNumber() {
+      return nextRunNumber;
     }
 
-    @Override
-    public int compareTo(final SelectTeamData other) {
-      if (null == this.nextPerformance
-          && null == other.nextPerformance) {
-        return Integer.compare(this.nextRunNumber, other.nextRunNumber);
-      } else if (null == this.nextPerformance) {
-        // this is after other
-        return 1;
-      } else if (null == other.nextPerformance) {
-        // this is before other
-        return -1;
-      } else {
-        final String oneTable = this.nextPerformance.getTableAndSide();
-        final String twoTable = other.nextPerformance.getTableAndSide();
-
-        if (oneTable.equals(scoreEntrySelectedTable)
-            && !twoTable.equals(scoreEntrySelectedTable)) {
-          // prefer selected table
-          return -1;
-        } else if (!oneTable.equals(scoreEntrySelectedTable)
-            && twoTable.equals(scoreEntrySelectedTable)) {
-          // prefer selected table
-          return 1;
-        } else if (this.nextPerformance.equals(other.nextPerformance)) {
-          return Integer.compare(this.team.getTeamNumber(), other.team.getTeamNumber());
-        } else {
-          return this.nextPerformance.compareTo(other.nextPerformance);
-        }
-      }
-    }
   }
 
 }

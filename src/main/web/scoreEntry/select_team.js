@@ -72,10 +72,85 @@ function populateTeamsSelect() {
     }
 }
 
+/**
+ * Prefer the selected table, then sort by next performance time.
+ */
+function compareByPerformanceTime(teamDataA, teamDataB) {
+    if (null == teamDataA.nextPerformance
+        && null == teamDataB.nextPerformance) {
+        if (teamDataA.nextRunNumber == teamDataB.nextRunNumber) {
+            return 0;
+        } else if (teamDataA.nextRunNumber < teamDataB.nextRunNumber) {
+            return -1;
+        } else {
+            return 1;
+        }
+    } else if (null == teamDataA.nextPerformance) {
+        // this is after other
+        return 1;
+    } else if (null == teamDataB.nextPerformance) {
+        // this is before other
+        return -1;
+    } else {
+        const oneTable = teamDataA.nextPerformance.tableAndSide;
+        const twoTable = teamDataB.nextPerformance.tableAndSide;
+
+        if (oneTable == scoreEntrySelectedTable
+            && twoTable != scoreEntrySelectedTable) {
+            // prefer selected table
+            return -1;
+        } else if (oneTable != scoreEntrySelectedTable
+            && twoTable == scoreEntrySelectedTable) {
+            // prefer selected table
+            return 1;
+        } else {
+            const perfCompare = comparePerformanceTimes(teamDataA.nextPerformance, teamDataB.nextPerformance);
+            if (0 == perfCompare) {
+                if (teamDataA.team.teamNumber < teamDataB.team.teamNumber) {
+                    return -1;
+                } else if (teamDataA.team.teamNumber > teamDataB.team.teamNumber) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            } else {
+                return perfCompare;
+            }
+        }
+    }
+}
+
+/**
+ * Compare PerformanceTime objects.
+ */
+function comparePerformanceTimes(ptimeA, ptimeB) {
+    if (ptimeA.time < ptimeB.time) {
+        return -1;
+    } else if (ptimeA.time > ptimeB.time) {
+        return 1;
+    } else {
+        if (ptimeA.table < ptimeB.table) {
+            return -1;
+        } else if (ptimeA.table > ptimeB.table) {
+            return 1;
+        } else {
+            if (ptimeA.practice && !ptimeB.practice) {
+                return -1;
+            } else if (!ptimeA.practice && ptimeB.practice) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    }
+}
+
+
 document.addEventListener('DOMContentLoaded', function() {
     if (!tabletMode) {
         editFlagBoxClicked();
-    }
+    }    
+    teamSelectData.sort(compareByPerformanceTime);
     populateTeamsSelect();
 
     if (!scoreEntrySelectedTable) {
