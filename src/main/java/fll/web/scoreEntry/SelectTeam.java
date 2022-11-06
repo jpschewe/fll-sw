@@ -22,13 +22,19 @@ import javax.sql.DataSource;
 import org.apache.commons.lang3.tuple.Pair;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.TournamentTeam;
+import fll.Utilities;
 import fll.db.Queries;
 import fll.scheduler.PerformanceTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
+import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import jakarta.servlet.ServletContext;
@@ -42,8 +48,6 @@ public final class SelectTeam {
 
   private SelectTeam() {
   }
-
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * @param application get application variables
@@ -88,6 +92,7 @@ public final class SelectTeam {
 
       final List<SelectTeamData> teamSelectData = Queries.getTournamentTeams(connection, tournament.getTournamentID())
                                                          .values().stream() //
+                                                         .filter(team -> !team.isInternal()) //
                                                          .map(team -> {
                                                            final int nextRunNumber = maxRunNumbers.getOrDefault(team.getTeamNumber(),
                                                                                                                 0)
@@ -100,11 +105,17 @@ public final class SelectTeam {
                                                          }) //
                                                          .collect(Collectors.toList());
       Collections.sort(teamSelectData);
-      pageContext.setAttribute("teamSelectData", teamSelectData);
+
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
+      // assume that the string is going to be put inside single quotes in the
+      // javascript code
+      final String teamSelectDataJson = jsonMapper.writeValueAsString(teamSelectData).replace("'", "\\'");
+      pageContext.setAttribute("teamSelectDataJson", teamSelectDataJson);
 
     } catch (final SQLException e) {
-      LOGGER.error(e.getMessage(), e);
-      throw new RuntimeException(e.getMessage(), e);
+      throw new FLLRuntimeException("Error talking to the database", e);
+    } catch (final JsonProcessingException e) {
+      throw new FLLInternalException("Error converting data to JSON", e);
     }
 
   }

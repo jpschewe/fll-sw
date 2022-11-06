@@ -50,72 +50,14 @@ OPTION {
     src="<c:url value='/js/fll-functions.js' />"></script>
 
 <script type='text/javascript'>
-  const scoreEntrySelectedTable = "${scoreEntrySelectedTable}";
-
-  function editFlagBoxClicked() {
-    var text = document.getElementById('select_number_text');
-    if (document.selectTeam.EditFlag.checked) {
-      document.selectTeam.RunNumber.disabled = false;
-      text.style.color = "black";
-    } else {
-      document.selectTeam.RunNumber.disabled = true;
-      text.style.color = "gray";
-    }
-  }
-
-  function reloadRuns() {
-    document.body.removeChild(document.getElementById('reloadruns'));
-    document.verify.TeamNumber.length = 0;
-    var s = document.createElement('script');
-    s.type = 'text/javascript';
-    s.id = 'reloadruns';
-    s.src = 'UpdateUnverifiedRuns?' + Math.random();
-    document.body.appendChild(s);
-  }
-
-  function messageReceived(event) {
-    console.log("received: " + event.data);
-
-    // data doesn't matter, just reload runs on any message
-    reloadRuns();
-  }
-
-  function socketOpened(event) {
-    console.log("Socket opened");
-  }
-
-  function socketClosed(event) {
-    console.log("Socket closed");
-
-    // open the socket a second later
-    setTimeout(openSocket, 1000);
-  }
-
-  function openSocket() {
-    console.log("opening socket");
-
-    var url = window.location.pathname;
-    var directory = url.substring(0, url.lastIndexOf('/'));
-    var webSocketAddress = getWebsocketProtocol() + "//" + window.location.host
-        + directory + "/UnverifiedRunsWebSocket";
-
-    var socket = new WebSocket(webSocketAddress);
-    socket.onmessage = messageReceived;
-    socket.onopen = socketOpened;
-    socket.onclose = socketClosed;
-  }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    editFlagBoxClicked();
-
-    if (!scoreEntrySelectedTable) {
-      // only use unverified code when not using the tablets 
-
-      reloadRuns();
-      openSocket();
-    }
-  });
+  // use var instead of const so that the variables are available globally
+  var scoreEntrySelectedTable = "${scoreEntrySelectedTable}";
+  var teamSelectData = JSON.parse('${teamSelectDataJson}');
+  var tabletMode = Boolean(scoreEntrySelectedTable);
 </script>
+
+<script type='text/javascript' src="select_team.js"></script>
+
 </head>
 <body>
 
@@ -213,14 +155,6 @@ Entering scores for all tables. Teams are sorted in schedule order.
                                 <select size='20' id='select-teamnumber'
                                     name='TeamNumber'
                                     ondblclick='selectTeam.submit()'>
-                                    <c:forEach items="${teamSelectData}"
-                                        var="teamData">
-                                        <c:if
-                                            test="${not teamData.team.internal}">
-                                            <option
-                                                value="${teamData.team.teamNumber }">${teamData.displayString}</option>
-                                        </c:if>
-                                    </c:forEach>
                                 </select>
                             </td>
                         </tr>
