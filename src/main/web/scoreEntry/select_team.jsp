@@ -145,6 +145,20 @@ Entering scores for all tables. Teams are sorted in schedule order.
                         <tr align='left' valign='top'>
                             <!-- pick team from a list -->
                             <td>
+                                <div>Sort by selected table and
+                                    then:</div>
+                                <div>
+                                    <button id='sort-next-perf'
+                                        type='button'>Next
+                                        Performance</button>
+                                    <button id='sort-team-name'
+                                        type='button'>Team Name</button>
+                                    <button id='sort-team-number'
+                                        type='button'>Team
+                                        Number</button>
+                                    <button id='sort-organization'
+                                        type='button'>Organization</button>
+                                </div>
                                 <br>
                                 <span style="vertical-align: top">Select
                                     team to enter score for:</span>

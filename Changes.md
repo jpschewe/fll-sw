@@ -1,3 +1,4 @@
+* #1015 - add the ability to sort the performance team selection by various team properties
 * Add links from the report of performance runs for a team or a round to be able to edit the score
 
 Release 17.0.0

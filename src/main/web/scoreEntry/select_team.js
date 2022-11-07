@@ -145,13 +145,99 @@ function comparePerformanceTimes(ptimeA, ptimeB) {
     }
 }
 
+function compareByTeamNumber(teamDataA, teamDataB) {
+    const oneTable = teamDataA.nextPerformance.tableAndSide;
+    const twoTable = teamDataB.nextPerformance.tableAndSide;
+
+    if (oneTable == scoreEntrySelectedTable
+        && twoTable != scoreEntrySelectedTable) {
+        // prefer selected table
+        return -1;
+    } else if (oneTable != scoreEntrySelectedTable
+        && twoTable == scoreEntrySelectedTable) {
+        // prefer selected table
+        return 1;
+    } else {
+        if (teamDataA.team.teamNumber < teamDataB.team.teamNumber) {
+            return -1;
+        } else if (teamDataA.team.teamNumber > teamDataB.team.teamNumber) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+}
+
+function compareByTeamName(teamDataA, teamDataB) {
+    const oneTable = teamDataA.nextPerformance.tableAndSide;
+    const twoTable = teamDataB.nextPerformance.tableAndSide;
+
+    if (oneTable == scoreEntrySelectedTable
+        && twoTable != scoreEntrySelectedTable) {
+        // prefer selected table
+        return -1;
+    } else if (oneTable != scoreEntrySelectedTable
+        && twoTable == scoreEntrySelectedTable) {
+        // prefer selected table
+        return 1;
+    } else {
+        if (teamDataA.team.teamName < teamDataB.team.teamName) {
+            return -1;
+        } else if (teamDataA.team.teamName > teamDataB.team.teamName) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+}
+
+function compareByOrganization(teamDataA, teamDataB) {
+    const oneTable = teamDataA.nextPerformance.tableAndSide;
+    const twoTable = teamDataB.nextPerformance.tableAndSide;
+
+    if (oneTable == scoreEntrySelectedTable
+        && twoTable != scoreEntrySelectedTable) {
+        // prefer selected table
+        return -1;
+    } else if (oneTable != scoreEntrySelectedTable
+        && twoTable == scoreEntrySelectedTable) {
+        // prefer selected table
+        return 1;
+    } else {
+        if (teamDataA.team.organization < teamDataB.team.organization) {
+            return -1;
+        } else if (teamDataA.team.organization > teamDataB.team.organization) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+}
+
 
 document.addEventListener('DOMContentLoaded', function() {
     if (!tabletMode) {
         editFlagBoxClicked();
-    }    
+    }
     teamSelectData.sort(compareByPerformanceTime);
     populateTeamsSelect();
+
+    document.getElementById("sort-team-name").addEventListener('click', () => {
+        teamSelectData.sort(compareByTeamName);
+        populateTeamsSelect();
+    });
+    document.getElementById("sort-team-number").addEventListener('click', () => {
+        teamSelectData.sort(compareByTeamNumber);
+        populateTeamsSelect();
+    });
+    document.getElementById("sort-organization").addEventListener('click', () => {
+        teamSelectData.sort(compareByOrganization);
+        populateTeamsSelect();
+    });
+    document.getElementById("sort-next-perf").addEventListener('click', () => {
+        teamSelectData.sort(compareByPerformanceTime);
+        populateTeamsSelect();
+    });
 
     if (!scoreEntrySelectedTable) {
         // only use unverified code when not using the tablets 
