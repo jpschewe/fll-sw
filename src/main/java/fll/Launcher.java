@@ -23,6 +23,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.Console;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -32,18 +34,23 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
 import javax.sql.DataSource;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -68,6 +75,9 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.Authentication;
+import fll.db.DumpDB;
+import fll.db.GlobalParameters;
+import fll.db.ImportDB;
 import fll.scheduler.SchedulerUI;
 import fll.tomcat.TomcatLauncher;
 import fll.util.ConsoleExceptionHandler;
@@ -75,6 +85,8 @@ import fll.util.FLLRuntimeException;
 import fll.util.FormatterUtils;
 import fll.util.GuiExceptionHandler;
 import fll.web.UserRole;
+import fll.web.setup.CreateDB.UserAccount;
+import fll.xml.ChallengeDescription;
 import fll.xml.ui.ChallengeDescriptionEditor;
 import fll.xml.ui.ChallengeDescriptionFrame;
 import it.sauronsoftware.junique.AlreadyLockedException;
@@ -144,6 +156,8 @@ public class Launcher extends JFrame {
 
   private static final String OPT_CREATE_ADMIN = "create-admin";
 
+  private static final String OPT_MIGRATE = "migrate";
+
   private static Options buildOptions() {
     final Options options = new Options();
     options.addOption(null, OPT_START_WEB, false, "Immediately start the webserver");
@@ -151,6 +165,7 @@ public class Launcher extends JFrame {
         + DEFAULT_WEB_PORT);
     options.addOption(null, OPT_HEADLESS, false, "Run without the GUI and immediately start the webserver");
     options.addOption(null, OPT_CREATE_ADMIN, false, "Create an admin user");
+    options.addOption(null, OPT_MIGRATE, true, "Replace database with the one from the specified installation");
 
     options.addOption("h", OPT_HELP, false, "help");
 
@@ -208,6 +223,18 @@ public class Launcher extends JFrame {
         startWeb = true;
         headless = true;
       }
+      if (cmd.hasOption(OPT_MIGRATE)) {
+        final String directory = cmd.getOptionValue(OPT_MIGRATE);
+        try {
+          migrate(directory);
+
+          LOGGER.info("Migration of data from '{}' successful", directory);
+        } catch (final FLLMigrationException e) {
+          LOGGER.fatal("Error migrating data: {}", e.getMessage());
+          System.exit(1);
+        }
+      }
+
       if (cmd.hasOption(OPT_CREATE_ADMIN)) {
         createAdminUserCli();
       }
@@ -509,6 +536,8 @@ public class Launcher extends JFrame {
 
   private final JButton mainPage;
 
+  private final JButton migrateButton;
+
   /**
    * @param port the port to use for the web server
    */
@@ -568,6 +597,9 @@ public class Launcher extends JFrame {
 
     final JButton createAdminUser = new JButton("Create Admin User");
     buttonBox.add(createAdminUser);
+
+    migrateButton = new JButton("Migrate database from other installation");
+    buttonBox.add(migrateButton);
 
     final JButton exit = new JButton("Exit");
     cpane.add(exit, BorderLayout.SOUTH);
@@ -657,6 +689,11 @@ public class Launcher extends JFrame {
     createAdminUser.addActionListener(ae -> {
       createAdminUserGui();
     });
+
+    migrateButton.addActionListener(ae -> {
+      migrateGui();
+    });
+
     exit.addActionListener(ae -> {
       maybeExit();
     });
@@ -722,6 +759,7 @@ public class Launcher extends JFrame {
 
     webserverStartButton.setEnabled(!mServerOnline);
     webserverStopButton.setEnabled(mServerOnline);
+    migrateButton.setEnabled(!mServerOnline);
     mainPage.setEnabled(mServerOnline);
   }
 
@@ -1046,6 +1084,140 @@ public class Launcher extends JFrame {
       System.exit(1);
     }
 
+  }
+
+  private static final class FLLMigrationException extends Exception {
+    FLLMigrationException(final String message) {
+      super(message);
+    }
+  }
+
+  private void migrateGui(@UnknownInitialization(Launcher.class) Launcher this) {
+    if (mServerOnline) {
+      JOptionPane.showMessageDialog(this, "Cannot migrate data while the web server is running", "Migration Error",
+                                    JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+
+    final JFileChooser chooser = new JFileChooser();
+    chooser.setCurrentDirectory(new java.io.File("."));
+    chooser.setDialogTitle("Choose the base directory of the installation to migrate from");
+    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    //
+    // disable the "All files" option.
+    //
+    chooser.setAcceptAllFileFilterUsed(false);
+    //
+    if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+      System.out.println("getCurrentDirectory(): "
+          + chooser.getCurrentDirectory());
+      System.out.println("getSelectedFile() : "
+          + chooser.getSelectedFile());
+
+      final int result = JOptionPane.showConfirmDialog(this,
+                                                       "This action will clear any data in the current database. Do you want to continue?",
+                                                       "Question", JOptionPane.YES_NO_OPTION);
+      if (JOptionPane.YES_OPTION == result) {
+        final String oldInstallationDir = chooser.getCurrentDirectory().getAbsolutePath();
+        try {
+          migrate(oldInstallationDir);
+        } catch (final FLLMigrationException e) {
+          final String msg = String.format("Error during migration from '%s'", oldInstallationDir);
+
+          LOGGER.error(msg, e);
+          JOptionPane.showMessageDialog(this, msg, "Migration Error", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+
+    } else {
+      return;
+    }
+  }
+
+  /**
+   * Migrate the database from the specified installation to the current
+   * installation.
+   * This cannot be executed with the web server running.
+   * 
+   * @param oldInstallationDirectory where to read the data from
+   * @throws FLLMigrationException if there is an error, the message should be
+   *           reported to the user
+   */
+  private static void migrate(final String oldInstallationDirectory) throws FLLMigrationException {
+    try {
+      final Path exportFile = Files.createTempFile("migrate", "flldb");
+
+      final String oldDatabase = oldInstallationDirectory
+          + "/web/WEB-INF/flldb";
+      final DataSource oldDatasource = Utilities.createFileDataSource(oldDatabase);
+
+      final Collection<UserAccount> oldAccounts = new LinkedList<>();
+
+      try (Connection oldConnection = oldDatasource.getConnection()) {
+        try {
+          if (!Utilities.testDatabaseInitialized(oldConnection)) {
+            throw new FLLMigrationException("The database at '"
+                + oldDatabase
+                + "' in the installation '"
+                + oldInstallationDirectory
+                + "' does not exist");
+          }
+        } catch (final SQLException e) {
+          throw new FLLMigrationException("Error checking database at '"
+              + oldDatabase
+              + "': "
+              + e.getMessage());
+        }
+
+        for (final String username : Authentication.getUsers(oldConnection)) {
+          // password cannot be null for users that are known to be in the database
+          final String hashedPassword = castNonNull(Authentication.getHashedPassword(oldConnection, username));
+          final Set<UserRole> roles = Authentication.getRoles(oldConnection, username);
+
+          final UserAccount account = new UserAccount(username, hashedPassword, roles);
+          oldAccounts.add(account);
+        }
+        try (OutputStream os = Files.newOutputStream(exportFile); ZipOutputStream zipOut = new ZipOutputStream(os)) {
+          final ChallengeDescription challengeDescription = GlobalParameters.getChallengeDescription(oldConnection);
+          DumpDB.dumpDatabase(zipOut, oldConnection, challengeDescription, null);
+        } catch (final SQLException | IOException e) {
+          throw new FLLMigrationException("Error exporting from old database at '"
+              + oldDatabase
+              + "': "
+              + e.getMessage());
+        }
+      } catch (final SQLException e) {
+        throw new FLLMigrationException("Error reading accounts from old database at '"
+            + oldDatabase
+            + "': "
+            + e.getMessage());
+      }
+
+      final DataSource newDatasource = createDatasource();
+      try (Connection newConnection = newDatasource.getConnection()) {
+        try (InputStream is = Files.newInputStream(exportFile); ZipInputStream zis = new ZipInputStream(is)) {
+          ImportDB.loadFromDumpIntoNewDB(zis, newConnection);
+
+          final Collection<String> newDbUsers = Authentication.getUsers(newConnection);
+          final Iterator<UserAccount> accountIter = oldAccounts.iterator();
+          while (accountIter.hasNext()) {
+            final UserAccount account = accountIter.next();
+            if (!newDbUsers.contains(account.getUsername())) {
+              // don't overwrite users
+              Authentication.addAccount(newConnection, account);
+            }
+          }
+        } catch (final IOException | SQLException e) {
+          throw new FLLMigrationException("Error importing into the current database: "
+              + e.getMessage());
+        }
+      } catch (final SQLException e) {
+        throw new FLLMigrationException("Error importing into the curren database: "
+            + e.getMessage());
+      }
+    } catch (final IOException e) {
+      throw new FLLRuntimeException("Error creating temporary file", e);
+    }
   }
 
 }

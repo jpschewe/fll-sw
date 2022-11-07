@@ -258,9 +258,9 @@ public class CreateDB extends BaseFLLServlet {
      * @param hashedPassword {@link #getHashedPassword()}
      * @param roles {@link #getRoles()}
      */
-    /* package */ UserAccount(final String username,
-                              final String hashedPassword,
-                              final Set<UserRole> roles) {
+    public UserAccount(final String username,
+                       final String hashedPassword,
+                       final Set<UserRole> roles) {
       this.username = username;
       this.hashedPassword = hashedPassword;
       this.roles = new HashSet<>(roles);
