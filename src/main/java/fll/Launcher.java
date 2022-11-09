@@ -22,6 +22,7 @@ import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.Console;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -1118,7 +1119,12 @@ public class Launcher extends JFrame {
                                                        "This action will clear any data in the current database. Do you want to continue?",
                                                        "Question", JOptionPane.YES_NO_OPTION);
       if (JOptionPane.YES_OPTION == result) {
-        final String oldInstallationDir = chooser.getCurrentDirectory().getAbsolutePath();
+        final File directory = chooser.getSelectedFile();
+        if(null == directory) {
+          return;
+        }
+        
+        final String oldInstallationDir = directory.getAbsolutePath();
         try {
           migrate(oldInstallationDir);
         } catch (final FLLMigrationException e) {
