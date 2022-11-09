@@ -34,9 +34,7 @@ import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
-import fll.web.SessionAttributes;
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.PageContext;
 
 /**
@@ -50,10 +48,8 @@ public final class SelectTeam {
   /**
    * @param application get application variables
    * @param pageContext set page variables
-   * @param session session variables
    */
   public static void populateContext(final ServletContext application,
-                                     final HttpSession session,
                                      final PageContext pageContext) {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
@@ -73,10 +69,6 @@ public final class SelectTeam {
       } // prepared statement
 
       final Tournament tournament = Tournament.getCurrentTournament(connection);
-
-      final @Nullable String scoreEntrySelectedTable = SessionAttributes.getAttribute(session,
-                                                                                      "scoreEntrySelectedTable",
-                                                                                      String.class);
 
       // get latest performance round for each team
       final Map<Integer, Integer> maxRunNumbers = getMaxRunNumbers(connection, tournament);
@@ -98,8 +90,8 @@ public final class SelectTeam {
                                                            final @Nullable PerformanceTime nextPerformance = getNextPerformance(schedule,
                                                                                                                                 team.getTeamNumber(),
                                                                                                                                 nextRunNumber);
-                                                           return new SelectTeamData(scoreEntrySelectedTable, team,
-                                                                                     nextPerformance, nextRunNumber);
+                                                           return new SelectTeamData(team, nextPerformance,
+                                                                                     nextRunNumber);
                                                          }) //
                                                          .collect(Collectors.toList());
 
@@ -182,13 +174,9 @@ public final class SelectTeam {
 
     private final int nextRunNumber;
 
-    private final @Nullable String scoreEntrySelectedTable;
-
-    SelectTeamData(final @Nullable String scoreEntrySelectedTable,
-                   final TournamentTeam team,
+    SelectTeamData(final TournamentTeam team,
                    final @Nullable PerformanceTime nextPerformance,
                    final int nextRunNumber) {
-      this.scoreEntrySelectedTable = scoreEntrySelectedTable;
       this.team = team;
       this.nextPerformance = nextPerformance;
       this.nextRunNumber = nextRunNumber;

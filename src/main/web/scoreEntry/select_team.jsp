@@ -3,7 +3,7 @@
 <fll-sw:required-roles roles="REF" allowSetup="false" />
 
 <%
-fll.web.scoreEntry.SelectTeam.populateContext(application, session, pageContext);
+fll.web.scoreEntry.SelectTeam.populateContext(application, pageContext);
 %>
 
 <html>
