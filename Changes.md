@@ -1,3 +1,4 @@
+* #1046 - Add the ability to migrate a database from a previous installation
 * #1024 - Add support for database migration from another installation
 * Add links from the report of performance runs for a team or a round to be able to edit the score
 
