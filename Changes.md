@@ -1,3 +1,4 @@
+* #1024 - Add support for database migration from another installation
 * Add links from the report of performance runs for a team or a round to be able to edit the score
 
 Release 17.0.0
