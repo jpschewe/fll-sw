@@ -1120,13 +1120,15 @@ public class Launcher extends JFrame {
                                                        "Question", JOptionPane.YES_NO_OPTION);
       if (JOptionPane.YES_OPTION == result) {
         final File directory = chooser.getSelectedFile();
-        if(null == directory) {
+        if (null == directory) {
           return;
         }
-        
+
         final String oldInstallationDir = directory.getAbsolutePath();
         try {
           migrate(oldInstallationDir);
+          JOptionPane.showMessageDialog(this, "Migration complete", "Migration Information",
+                                        JOptionPane.INFORMATION_MESSAGE);
         } catch (final FLLMigrationException e) {
           final String msg = String.format("Error during migration from '%s'", oldInstallationDir);
 
