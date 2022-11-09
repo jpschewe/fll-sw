@@ -1,5 +1,5 @@
-* #1046 - Add the ability to migrate a database from a previous installation
-* #1024 - Add support for database migration from another installation
+* #1015 - add the ability to sort the performance team selection by various team properties
+* #1046 - Add the ability to migrate a database from another installation
 * Add links from the report of performance runs for a team or a round to be able to edit the score
 
 Release 17.0.0
