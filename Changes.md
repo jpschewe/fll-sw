@@ -1,3 +1,4 @@
+* #1047 - Limit the display of performance scores to the top 5 ranks
 * #1049 - Make ties in the subjective web application readable (white on red)
 * #1049 - Set header on subjective web application side panel to "Task menu"
 * #1049 - Add link to judge index from subjective web application

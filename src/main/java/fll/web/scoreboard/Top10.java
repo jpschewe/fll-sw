@@ -62,6 +62,11 @@ public class Top10 extends BaseFLLServlet {
    */
   public static final int MAX_ORG_NAME = 20;
 
+  /**
+   * Highest rank to display.
+   */
+  public static final int MAX_DISPLAY_RANK = 5;
+
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -143,22 +148,24 @@ public class Top10 extends BaseFLLServlet {
                                                                              organization,
                                                                              formattedScore,
                                                                              rank) -> {
-          formatter.format("<tr>%n");
-          formatter.format("<td class='center'>%d</td>%n", rank);
-          formatter.format("<td class='right'>%d</td>%n", teamNumber);
-          if (null == teamName) {
-            teamName = "&nbsp;";
-          }
-          formatter.format("<td class='left truncate'>%s</td>%n", teamName);
-
-          if (showOrg) {
-            if (null == organization) {
-              organization = "&nbsp;";
+          if (rank <= MAX_DISPLAY_RANK) {
+            formatter.format("<tr>%n");
+            formatter.format("<td class='center'>%d</td>%n", rank);
+            formatter.format("<td class='right'>%d</td>%n", teamNumber);
+            if (null == teamName) {
+              teamName = "&nbsp;";
             }
-            formatter.format("<td class='left truncate'>%s</td>%n", organization);
+            formatter.format("<td class='left truncate'>%s</td>%n", teamName);
+
+            if (showOrg) {
+              if (null == organization) {
+                organization = "&nbsp;";
+              }
+              formatter.format("<td class='left truncate'>%s</td>%n", organization);
+            }
+            formatter.format("<td class='right'>%s</td>%n", formattedScore);
+            formatter.format("</tr>");
           }
-          formatter.format("<td class='right'>%s</td>%n", formattedScore);
-          formatter.format("</tr>");
         });
 
       } // end divisions not empty
