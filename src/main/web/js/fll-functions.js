@@ -136,13 +136,16 @@ function computeHeight(element) {
 
 /**
  * Open the link in a new window without any browser buttons. Will fall back to standard link
- * opening if the popup is blocked.
+ * opening if the popup is blocked. The window will attempt to be maximized and put in the top left of the screen.
  * 
  * @param link an anchor DOM object
  */
 function openMinimalBrowser(link) {
     const w = window.open(link.href,
         link.target || "_blank",
-        'menubar=no,toolbar=no,location=no,directories=no,status=no,scrollbars=no,resizable=no,dependent,left=0,top=0');
+        'menubar=no,toolbar=no,location=no,directories=no,status=no,scrollbars=no,resizable=no,dependent,left=0,top=0,height=' + screen.availHeight + ',width=' + screen.availWidth + ',fullscreen=yes');
+    if (w) {
+        w.moveTo(0, 0);
+    }
     return w ? false : true; // allow the link to work if popup is blocked
 }
