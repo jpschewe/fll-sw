@@ -143,9 +143,12 @@ function computeHeight(element) {
 function openMinimalBrowser(link) {
     const w = window.open(link.href,
         link.target || "_blank",
-        'menubar=no,toolbar=no,location=no,directories=no,status=no,scrollbars=no,resizable=no,dependent,left=0,top=0,height=' + screen.availHeight + ',width=' + screen.availWidth + ',fullscreen=yes');
+        'menubar=no,toolbar=no,location=no,directories=no,status=no,scrollbars=no,resizable=no,dependent,left=0,top=0,fullscreen=yes');
     if (w) {
         w.moveTo(0, 0);
+        if (w.outerWidth < screen.availWidth || w.outerHeight < screen.availHeight) {
+            w.resizeTo(screen.availWidth, screen.availHeight);
+        }
     }
     return w ? false : true; // allow the link to work if popup is blocked
 }
