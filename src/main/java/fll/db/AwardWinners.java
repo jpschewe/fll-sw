@@ -413,9 +413,11 @@ public final class AwardWinners {
     try (PreparedStatement prep = connection.prepareStatement("SELECT description, place FROM subjective_overall_award"
         + " WHERE tournament_id = ?" //
         + " AND team_number = ?" //
+        + " AND name = ?"
     )) {
       prep.setInt(1, tournamentId);
       prep.setInt(2, teamNumber);
+      prep.setString(3, name);
 
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
