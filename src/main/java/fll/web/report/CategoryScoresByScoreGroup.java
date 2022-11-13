@@ -18,17 +18,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
 
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -49,6 +44,12 @@ import fll.xml.ChallengeDescription;
 import fll.xml.GoalElement;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -306,7 +307,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
   private Element createTableHeader(final Document document,
                                     final String challengeTitle,
                                     final String catTitle,
-                                    final String goalGroup,
+                                    final @Nullable String goalGroup,
                                     final String division,
                                     final String judgingGroup,
                                     final Tournament tournament) {
@@ -328,16 +329,37 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
     final Element row2 = FOPUtils.createTableRow(document);
     tableHeader.appendChild(row2);
 
-    final String categoryText;
     if (null == goalGroup
         || goalGroup.trim().isEmpty()) {
-      categoryText = String.format("Category: %s - Award Group: %s - JudgingGroup: %s", catTitle, division,
-                                   judgingGroup);
+      final String categoryText = String.format("Category: %s - Award Group: %s - JudgingGroup: %s", catTitle, division,
+                                                judgingGroup);
+      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, categoryText);
     } else {
-      categoryText = String.format("Category: %s - Goal Group - %s - Award Group: %s - JudgingGroup: %s", catTitle,
-                                   goalGroup, division, judgingGroup);
+      cell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+
+      final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+      cell.appendChild(container);
+      container.setAttribute("overflow", "hidden");
+      container.setAttribute("wrap-option", "no-wrap");
+
+      final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      container.appendChild(block);
+      block.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_CENTER);
+
+      final Element inline1 = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+      block.appendChild(inline1);
+      inline1.appendChild(document.createTextNode(String.format("Category: %s - ", catTitle)));
+
+      final Element inline2 = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+      block.appendChild(inline2);
+      inline2.appendChild(document.createTextNode(String.format("Goal Group: %s", goalGroup)));
+      inline2.setAttribute("color", "red");
+
+      final Element inline3 = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+      block.appendChild(inline3);
+      inline3.appendChild(document.createTextNode(String.format(" - Award Group: %s - JudgingGroup: %s", division,
+                                                                judgingGroup)));
     }
-    cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, categoryText);
     row2.appendChild(cell);
     cell.setAttribute("number-columns-spanned", "4");
     FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
