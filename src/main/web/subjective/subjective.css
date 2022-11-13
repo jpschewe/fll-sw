@@ -4,7 +4,7 @@ body {
     background-color: #f9f9f9;
 }
 
-.tie {
+.score.tie {
     background-color: red;
     color: white;
 }
