@@ -1,3 +1,4 @@
+* #1051 - Highlight goal group table in category scores by goal group
 * #1052 - Fix adding team to multiple subjective overall awards
 * #1047 - Limit the display of performance scores to the top 5 ranks
 * #1049 - Make ties in the subjective web application readable (white on red)
