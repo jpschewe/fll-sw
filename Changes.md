@@ -1,3 +1,4 @@
+* #1047 - Limit the display of performance scores to the top 5 ranks
 * #1015 - add the ability to sort the performance team selection by various team properties
 * #1046 - Add the ability to migrate a database from another installation
 * Add links from the report of performance runs for a team or a round to be able to edit the score
