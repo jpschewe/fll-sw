@@ -47,7 +47,7 @@ fll.web.JudgeIndex.populateContext(application, pageContext);
     <a class="wide" target="_subjective"
         href="<c:url value='/subjective/Auth' />"
         onclick="return openMinimalBrowser(this)">Enter subjective
-        scores. This is done through the subjective web application</a>.
+        scores. This is done through the subjective web application</a>
 
     <a class="wide"
         href="<c:url value='/report/edit-award-winners.jsp' />"
