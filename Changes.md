@@ -1,3 +1,6 @@
+* #1049 - Make ties in the subjective web application readable (white on red)
+* #1049 - Set header on subjective web application side panel to "Task menu"
+* #1049 - Add link to judge index from subjective web application
 * #1015 - add the ability to sort the performance team selection by various team properties
 * #1046 - Add the ability to migrate a database from another installation
 * Add links from the report of performance runs for a team or a round to be able to edit the score
