@@ -1,3 +1,6 @@
+Release 17.1.0
+==============
+* #1053 - Make sure window is maximized when I want it maximized
 * #1051 - Highlight goal group table in category scores by goal group
 * #1052 - Fix adding team to multiple subjective overall awards
 * #1047 - Limit the display of performance scores to the top 5 ranks
