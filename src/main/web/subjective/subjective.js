@@ -906,17 +906,18 @@ const subjective_module = {}
                     })
                 });
 
+                subjective_module.log("Executing fetch: " + request);
                 fetch(request)
                     .then(function(response) {
                         // Clear the timeout as cleanup
                         clearTimeout(timeout);
                         if (!didTimeOut) {
-                            console.log('fetch good! ', response);
+                            subjective_module.log('fetch good! ' + response);
                             resolve(response);
                         }
                     })
                     .catch(function(err) {
-                        console.log('Server offline ', err);
+                        subjective_module.log('Server offline (fetch error): ' + err);
 
                         // Rejection already happened with setTimeout
                         if (didTimeOut) {
@@ -928,11 +929,11 @@ const subjective_module = {}
             })
                 .then(function() {
                     // Request success and no timeout
-                    console.log("server online");
+                    subjective_module.log("server online");
                     onlineCallback();
                 }).catch(function(err) {
                     // Error: response error, request timeout or runtime error
-                    console.log("server offline: ", err);
+                    subjective_module.log("server offline: " + err);
                     offlineCallback();
                 });
 
