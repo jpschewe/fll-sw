@@ -1,3 +1,4 @@
+* #1055 - Fix problem deleting teams
 * #1054 - Fix bug moving team between tournaments
 
 Release 17.1.0
