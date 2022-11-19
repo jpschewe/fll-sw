@@ -1,3 +1,5 @@
+* #1055 - Fix problem deleting teams
+
 Release 17.1.0
 ==============
 * #1053 - Make sure window is maximized when I want it maximized
