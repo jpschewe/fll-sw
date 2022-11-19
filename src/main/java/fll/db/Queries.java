@@ -1343,11 +1343,13 @@ public final class Queries {
       prep.executeUpdate();
     }
 
-    // delete from PlayoffData
+    // Modify PlayoffData to have the BYE team. This seems like a reasonable way to
+    // hopefully not break things.
     try (
-        PreparedStatement prep = connection.prepareStatement("DELETE CASCADE FROM PlayoffData WHERE Team = ? AND Tournament = ?")) {
-      prep.setInt(1, teamNumber);
-      prep.setInt(2, currentTournament);
+        PreparedStatement prep = connection.prepareStatement("UPDATE PlayoffData SET Team = ? WHERE Team = ? AND Tournament = ?")) {
+      prep.setInt(1, Team.BYE_TEAM_NUMBER);
+      prep.setInt(2, teamNumber);
+      prep.setInt(3, currentTournament);
       prep.executeUpdate();
     }
 
