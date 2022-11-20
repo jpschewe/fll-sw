@@ -40,8 +40,6 @@ public final class ReportIndex {
   private ReportIndex() {
   }
 
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
   /**
    * @param session session variables
    * @param application application context
