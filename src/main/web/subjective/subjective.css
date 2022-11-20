@@ -4,16 +4,15 @@ body {
     background-color: #f9f9f9;
 }
 
-.score.tie {
-    background-color: red;
-    color: white;
+.tie, .score.tie {
+    background-color: orange;
 }
 
 .text-left {
     text-align: left
 }
 
-.no-show {
+.no-show, .score.no-show {
     background-color: yellow;
 }
 

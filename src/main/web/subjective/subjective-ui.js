@@ -780,6 +780,7 @@ function populateScoreSummary() {
             scoreText = "";
         } else if (score.noShow) {
             scoreText = "No Show";
+            scoreBlock.classList.add("no-show");
         } else {
             scoreText = computedScore;
         }
