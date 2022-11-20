@@ -38,6 +38,7 @@ import org.w3c.dom.Element;
 
 import com.diffplug.common.base.Errors;
 
+import fll.Utilities;
 import fll.scheduler.TournamentSchedule.SubjectiveComparatorByAwardGroup;
 import fll.scheduler.TournamentSchedule.SubjectiveComparatorByTime;
 import fll.util.FLLInternalException;
@@ -325,7 +326,28 @@ public final class ScheduleWriter {
                                                              final OutputStream pdfFos)
       throws IOException {
     try {
-      final Document performanceDoc = createPerformanceSchedulePerTable(schedule);
+      final Document performanceDoc = createPerformanceSchedulePerTable(schedule, true, false);
+      final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
+
+      FOPUtils.renderPdf(fopFactory, performanceDoc, pdfFos);
+    } catch (FOPException | TransformerException e) {
+      throw new FLLInternalException("Error creating the performance schedule PDF", e);
+    }
+  }
+
+  /**
+   * Like {@link #outputPerformanceSchedulePerTableByTime(TournamentSchedule,
+   * OutputStream), only drops the award group column and adds a notes column.
+   *
+   * @param schedule the schedule to write
+   * @param pdfFos where to write the schedule
+   * @throws IOException error writing to the stream
+   */
+  public static void outputPerformanceSchedulePerTableByTimeForNotes(final TournamentSchedule schedule,
+                                                                     final OutputStream pdfFos)
+      throws IOException {
+    try {
+      final Document performanceDoc = createPerformanceSchedulePerTable(schedule, false, true);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
       FOPUtils.renderPdf(fopFactory, performanceDoc, pdfFos);
@@ -344,7 +366,9 @@ public final class ScheduleWriter {
    */
   public static final double THICK_BORDER_WIDTH = 2;
 
-  private static Document createPerformanceSchedulePerTable(final TournamentSchedule schedule) {
+  private static Document createPerformanceSchedulePerTable(final TournamentSchedule schedule,
+                                                            final boolean displayAwardGroup,
+                                                            final boolean displayNotes) {
     final SortedSet<ImmutablePair<String, Integer>> tables = new TreeSet<>();
 
     final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = new HashMap<>();
@@ -394,7 +418,8 @@ public final class ScheduleWriter {
                                                                                            .collect(Collectors.toMap(Map.Entry::getKey,
                                                                                                                      Map.Entry::getValue));
 
-      final Element ele = createPerformanceScheduleTable(schedule, headerText, document, tablePerformanceTimes);
+      final Element ele = createPerformanceScheduleTable(schedule, headerText, document, tablePerformanceTimes,
+                                                         displayAwardGroup, displayNotes);
       documentBody.appendChild(ele);
       ele.setAttribute("page-break-after", "always");
     });
@@ -434,7 +459,7 @@ public final class ScheduleWriter {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    final Element ele = createPerformanceScheduleTable(schedule, headerText, document, performanceTimes);
+    final Element ele = createPerformanceScheduleTable(schedule, headerText, document, performanceTimes, true, false);
     documentBody.appendChild(ele);
 
     return document;
@@ -455,35 +480,52 @@ public final class ScheduleWriter {
   private static Element createPerformanceScheduleTable(final TournamentSchedule schedule,
                                                         final String headerText,
                                                         final Document document,
-                                                        final Map<PerformanceTime, TeamScheduleInfo> performanceTimes) {
+                                                        final Map<PerformanceTime, TeamScheduleInfo> performanceTimes,
+                                                        final boolean displayAwardGroup,
+                                                        final boolean displayNotes) {
 
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
     final Element table = FOPUtils.createBasicTable(document);
     container.appendChild(table);
 
-    table.appendChild(FOPUtils.createTableColumn(document, 2));
-    table.appendChild(FOPUtils.createTableColumn(document, 2));
-    table.appendChild(FOPUtils.createTableColumn(document, 3));
-    table.appendChild(FOPUtils.createTableColumn(document, 3));
-    table.appendChild(FOPUtils.createTableColumn(document, 2));
-    table.appendChild(FOPUtils.createTableColumn(document, 2));
-    table.appendChild(FOPUtils.createTableColumn(document, 2));
+    table.appendChild(FOPUtils.createTableColumn(document, 2)); // team number
+    if (displayAwardGroup) {
+      table.appendChild(FOPUtils.createTableColumn(document, 2)); // award group
+    }
+    table.appendChild(FOPUtils.createTableColumn(document, 2)); // organization
+    table.appendChild(FOPUtils.createTableColumn(document, 3)); // team name
+    table.appendChild(FOPUtils.createTableColumn(document, 2)); // time
+    table.appendChild(FOPUtils.createTableColumn(document, 2)); // table
+    table.appendChild(FOPUtils.createTableColumn(document, 2)); // round
+    if (displayNotes) {
+      table.appendChild(FOPUtils.createTableColumn(document, 3)); // notes
+    }
 
     final Element header = FOPUtils.createTableHeader(document);
     table.appendChild(header);
 
-    final String[] headerNames = new String[] { TournamentSchedule.TEAM_NUMBER_HEADER,
-                                                TournamentSchedule.AWARD_GROUP_HEADER,
-                                                TournamentSchedule.ORGANIZATION_HEADER,
-                                                TournamentSchedule.TEAM_NAME_HEADER, "Time", "Table", "Round" };
+    final List<String> headerNames = new LinkedList<>();
+
+    headerNames.add(TournamentSchedule.TEAM_NUMBER_HEADER);
+    if (displayAwardGroup) {
+      headerNames.add(TournamentSchedule.AWARD_GROUP_HEADER);
+    }
+    headerNames.add(TournamentSchedule.ORGANIZATION_HEADER);
+    headerNames.add(TournamentSchedule.TEAM_NAME_HEADER);
+    headerNames.add("Time");
+    headerNames.add("Table");
+    headerNames.add("Round");
+    if (displayNotes) {
+      headerNames.add("Notes");
+    }
 
     final Element headerRow1 = FOPUtils.createTableRow(document);
     header.appendChild(headerRow1);
 
     final Element tournamentHeader = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, headerText);
     headerRow1.appendChild(tournamentHeader);
-    tournamentHeader.setAttribute("number-columns-spanned", String.valueOf(headerNames.length));
+    tournamentHeader.setAttribute("number-columns-spanned", String.valueOf(headerNames.size()));
     FOPUtils.addTopBorder(tournamentHeader, STANDARD_BORDER_WIDTH);
     FOPUtils.addBottomBorder(tournamentHeader, STANDARD_BORDER_WIDTH);
     FOPUtils.addLeftBorder(tournamentHeader, STANDARD_BORDER_WIDTH);
@@ -539,11 +581,13 @@ public final class ScheduleWriter {
       FOPUtils.addBorders(teamNumberCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
                           STANDARD_BORDER_WIDTH);
 
-      final Element awardGroupCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                              String.valueOf(si.getAwardGroup()));
-      row.appendChild(awardGroupCell);
-      FOPUtils.addBorders(awardGroupCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
-                          STANDARD_BORDER_WIDTH);
+      if (displayAwardGroup) {
+        final Element awardGroupCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                                String.valueOf(si.getAwardGroup()));
+        row.appendChild(awardGroupCell);
+        FOPUtils.addBorders(awardGroupCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
+                            STANDARD_BORDER_WIDTH);
+      }
 
       final Element organizationCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                 String.valueOf(si.getOrganization()));
@@ -576,6 +620,14 @@ public final class ScheduleWriter {
       row.appendChild(perfRoundCell);
       FOPUtils.addBorders(perfRoundCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
                           STANDARD_BORDER_WIDTH);
+
+      if (displayNotes) {
+        final Element notesCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                           String.valueOf(Utilities.NON_BREAKING_SPACE));
+        row.appendChild(notesCell);
+        FOPUtils.addBorders(notesCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
+                            STANDARD_BORDER_WIDTH);
+      }
 
       prevTime = performanceTime;
       prevRow = row;
