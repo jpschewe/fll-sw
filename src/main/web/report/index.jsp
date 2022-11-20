@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
@@ -10,7 +12,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     href="<c:url value='/style/fll-sw.css'/>" />
 <title>Reporting</title>
 
-<script type="text/javascript">
+<script type='text/javascript'>
+  var categoryJudges = JSON.parse('${categoryJudgesJson}');
+
   function display(id) {
     document.getElementById(id).style.display = "block";
   }
@@ -18,6 +22,11 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     document.getElementById(id).style.display = "none";
   }
 </script>
+
+<script type='text/javascript'
+    src="<c:url value='/js/fll-functions.js' />"></script>
+
+<script type='text/javascript' src='index.js'></script>
 
 </head>
 
@@ -107,6 +116,23 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
             </select>
             <input type='submit' value='Get Results' />
         </form>
+    </div>
+
+    <div class="wide">
+        <form action='JudgeRubrics' method='post' target='_blank'>
+            Rubrics for a single judge
+            <select name='category_name' id='rubric_category_name'>
+                <c:forEach
+                    items="${challengeDescription.subjectiveCategories}"
+                    var="category">
+                    <option value='${category.name}'>${category.title}</option>
+                </c:forEach>
+            </select>
+            <select name='judge' id='rubric_judge'></select>
+
+            <input type='submit' value='Get Rubrics' />
+        </form>
+
     </div>
 
 

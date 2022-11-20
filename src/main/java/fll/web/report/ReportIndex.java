@@ -11,16 +11,26 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import fll.JudgeInformation;
+import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.report.finalist.FinalistSchedule;
+import fll.xml.ChallengeDescription;
+import fll.xml.SubjectiveScoreCategory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Populate the page context for the report index page.
@@ -29,8 +39,6 @@ public final class ReportIndex {
 
   private ReportIndex() {
   }
-
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * @param session session variables
@@ -44,6 +52,7 @@ public final class ReportIndex {
     // clear out some variables
     session.removeAttribute(PromptSummarizeScores.SUMMARY_REDIRECT_KEY);
 
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
@@ -69,9 +78,24 @@ public final class ReportIndex {
       final Collection<String> finalistDivisions = FinalistSchedule.getAllDivisions(connection, tournament);
       pageContext.setAttribute("finalistDivisions", finalistDivisions);
 
+      // gather up judges per category
+      final Collection<JudgeInformation> judges = JudgeInformation.getJudges(connection, tournament);
+      final Map<String, List<String>> categoryJudges = new HashMap<>();
+      for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+        final List<String> judgesInCategory = judges.stream().filter(ji -> ji.getCategory().equals(category.getName()))
+                                                    .map(JudgeInformation::getId).toList();
+        categoryJudges.put(category.getName(), judgesInCategory);
+      }
+
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
+      // assume that the string is going to be put inside single quotes in the
+      // javascript code
+      final String categoryJudgesJson = jsonMapper.writeValueAsString(categoryJudges).replace("'", "\\'");
+      pageContext.setAttribute("categoryJudgesJson", categoryJudgesJson);
     } catch (final SQLException e) {
-      LOGGER.error(e, e);
-      throw new FLLRuntimeException(e);
+      throw new FLLRuntimeException("Error talking to the database", e);
+    } catch (final JsonProcessingException e) {
+      throw new FLLRuntimeException("Error converting variable to JSON", e);
     }
   }
 
