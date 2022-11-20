@@ -10,29 +10,20 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.sql.DataSource;
-import javax.xml.transform.TransformerException;
-
-import org.apache.fop.apps.FOPException;
-import org.apache.fop.apps.FopFactory;
-import org.w3c.dom.Document;
 
 import fll.SubjectiveScore;
-import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.documents.writers.SubjectivePdfWriter;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
@@ -74,8 +65,6 @@ public class JudgeRubrics extends BaseFLLServlet {
 
     try (Connection connection = datasource.getConnection()) {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
-
-      final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, tournament.getTournamentID());
 
       response.reset();
       response.setContentType("application/zip");
