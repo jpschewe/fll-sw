@@ -22,8 +22,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 /**
  * Judge information.
  */
@@ -108,24 +106,20 @@ public final class JudgeInformation implements Serializable {
   public static Collection<JudgeInformation> getJudges(final Connection connection,
                                                        final int tournament)
       throws SQLException {
-    Collection<JudgeInformation> judges = new LinkedList<JudgeInformation>();
+    final Collection<JudgeInformation> judges = new LinkedList<JudgeInformation>();
 
-    ResultSet rs = null;
-    PreparedStatement stmt = null;
-    try {
-      stmt = connection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?");
+    try (
+        PreparedStatement stmt = connection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?")) {
       stmt.setInt(1, tournament);
-      rs = stmt.executeQuery();
-      while (rs.next()) {
-        final String id = castNonNull(rs.getString(1));
-        final String category = castNonNull(rs.getString(2));
-        final String station = castNonNull(rs.getString(3));
-        final JudgeInformation judge = new JudgeInformation(id, category, station);
-        judges.add(judge);
+      try (ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+          final String id = castNonNull(rs.getString(1));
+          final String category = castNonNull(rs.getString(2));
+          final String station = castNonNull(rs.getString(3));
+          final JudgeInformation judge = new JudgeInformation(id, category, station);
+          judges.add(judge);
+        }
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
     }
 
     return judges;
