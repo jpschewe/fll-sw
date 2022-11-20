@@ -472,7 +472,7 @@ public final class GlobalParameters {
   /**
    * Default value for {@link #HEAD_TO_HEAD_SCROLL_RATE}.
    */
-  public static final double HEAD_TO_HEAD_SCROLL_RATE_DEFAULT = 1;
+  public static final double HEAD_TO_HEAD_SCROLL_RATE_DEFAULT = 0.03;
 
   /**
    * Some control over the scroll rate of the head to head brackets.

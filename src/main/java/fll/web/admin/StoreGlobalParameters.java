@@ -64,10 +64,10 @@ public class StoreGlobalParameters extends BaseFLLServlet {
       GlobalParameters.setIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE,
                                              WebUtils.getIntRequestParameter(request, "gDivisionFlipRate"));
 
-      GlobalParameters.setAllTeamsScrollRate(connection, WebUtils.getIntRequestParameter(request, "gAllTeamsScrollRate"));
+      GlobalParameters.setAllTeamsScrollRate(connection, WebUtils.getDoubleRequestParameter(request, "gAllTeamsScrollRate"));
 
       GlobalParameters.setHeadToHeadScrollRate(connection,
-                                             WebUtils.getIntRequestParameter(request, "gHeadToHeadMsPerRow"));
+                                             WebUtils.getDoubleRequestParameter(request, "gHeadToHeadSecondsPerRow"));
 
       final String mhubHostname = request.getParameter("gMhubHostname");
       if (StringUtils.isBlank(mhubHostname)) {
