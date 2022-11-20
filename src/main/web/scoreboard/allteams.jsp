@@ -41,7 +41,7 @@ TABLE.B {
   function scrollDown(timestamp) {
     if (!elementIsVisible(document.getElementById("bottom"))) {
       const diff = timestamp - prevScrollTimestamp;
-      if (diff >= secondsBetweenScrolls) {
+      if (diff / 1000.0 >= secondsBetweenScrolls) {
         window.scrollBy(0, pixelsToScroll);
         prevScrollTimestamp = timestamp;
       }

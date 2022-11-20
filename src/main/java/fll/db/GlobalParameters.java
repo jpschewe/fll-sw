@@ -432,7 +432,7 @@ public final class GlobalParameters {
   /**
    * Default value for {@link #ALL_TEAMS_SCROLL_RATE}.
    */
-  public static final double ALL_TEAMS_SCROLL_RATE_DEFAULT = 1;
+  public static final double ALL_TEAMS_SCROLL_RATE_DEFAULT = 0.03;
 
   /**
    * Some control over the scroll rate of the all teams part of the score board.
