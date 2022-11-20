@@ -337,7 +337,7 @@ public final class ScheduleWriter {
 
   /**
    * Like {@link #outputPerformanceSchedulePerTableByTime(TournamentSchedule,
-   * OutputStream), only drops the award group column and adds a notes column.
+   * OutputStream)}, only drops the award group column and adds a notes column.
    *
    * @param schedule the schedule to write
    * @param pdfFos where to write the schedule
