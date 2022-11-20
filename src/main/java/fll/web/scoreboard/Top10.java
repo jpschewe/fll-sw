@@ -84,8 +84,13 @@ public class Top10 extends BaseFLLServlet {
     }
 
     final Formatter formatter = new Formatter(response.getWriter());
+
     final String showOrgStr = request.getParameter("showOrganization");
     final boolean showOrg = null == showOrgStr ? true : Boolean.parseBoolean(showOrgStr);
+
+    final String displayAllStr = request.getParameter("displayAll");
+    final boolean displayAll = null == displayAllStr ? false : Boolean.parseBoolean(displayAllStr);
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
 
@@ -148,7 +153,8 @@ public class Top10 extends BaseFLLServlet {
                                                                              organization,
                                                                              formattedScore,
                                                                              rank) -> {
-          if (rank <= MAX_DISPLAY_RANK) {
+          if (displayAll
+              || rank <= MAX_DISPLAY_RANK) {
             formatter.format("<tr>%n");
             formatter.format("<td class='center'>%d</td>%n", rank);
             formatter.format("<td class='right'>%d</td>%n", teamNumber);
