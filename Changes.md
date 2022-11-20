@@ -1,3 +1,4 @@
+* #1048 - Add the ability to get populated subjective rubrics for a judge 
 * #1055 - Fix problem deleting teams
 * #1054 - Fix bug moving team between tournaments
 
