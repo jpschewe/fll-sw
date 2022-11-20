@@ -1,3 +1,4 @@
+* Adjust all teams scroll parameters so that Chromebooks scroll
 * Add scoreboard display for teams and top scores only
 * Skip no show and bye from last 8 scoreboard display 
 * #1048 - Add the ability to get populated subjective rubrics for a judge 

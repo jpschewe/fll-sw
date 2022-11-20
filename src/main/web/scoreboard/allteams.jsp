@@ -31,7 +31,8 @@ TABLE.B {
 <script type="text/javascript">
   let prevScrollTimestamp = 0;
   const secondsBetweenScrolls = parseFloat("${scrollRate}");
-  const pixelsToScroll = 1;
+  // using 1 doesn't work with chromebooks
+  const pixelsToScroll = 2;
 
   function reload() {
     window.scrollTo(0, 0);
