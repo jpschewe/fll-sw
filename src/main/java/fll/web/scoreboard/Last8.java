@@ -209,8 +209,6 @@ public class Last8 extends BaseFLLServlet {
           + ", Teams.Organization" //
           + ", Teams.TeamName" //
           + ", TournamentTeams.event_division" //
-          + ", verified_performance.Bye" //
-          + ", verified_performance.NoShow" //
           + ", verified_performance.ComputedTotal" //
           + " FROM Teams,verified_performance,TournamentTeams"//
           + " WHERE verified_performance.Tournament = ?" //
@@ -220,6 +218,8 @@ public class Last8 extends BaseFLLServlet {
           + "  AND verified_performance.Bye = False" //
           + "  AND (? OR verified_performance.RunNumber <= ?)" //
           + "  AND verified_performance.RunNumber <= ?" //
+          + "  AND NOT verified_performance.NoShow" // skip no shows to save space
+          + "  AND NOT verified_performance.Bye" // skip bytes to save space
           + " ORDER BY verified_performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 20")) {
         prep.setInt(1, currentTournamentId);
         prep.setBoolean(2, !runningHeadToHead);
@@ -234,15 +234,8 @@ public class Last8 extends BaseFLLServlet {
             final String organization = rs.getString("Organization");
             final String awardGroup = castNonNull(rs.getString("event_division"));
 
-            final String formattedScore;
-            if (rs.getBoolean("NoShow")) {
-              formattedScore = "No Show";
-            } else if (rs.getBoolean("Bye")) {
-              formattedScore = "Bye";
-            } else {
-              formattedScore = Utilities.getFormatForScoreType(performanceScoreType)
-                                        .format(rs.getDouble("ComputedTotal"));
-            }
+            final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType)
+                                                   .format(rs.getDouble("ComputedTotal"));
 
             processor.execute(teamNumber, teamName, organization, awardGroup, formattedScore);
           } // end while next
