@@ -229,6 +229,10 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                             table</a>
                     </li>
                     <li>
+                        <a href="PerformanceNotes" target="_new">Performance
+                            Schedule per table for notes</a>
+                    </li>
+                    <li>
                         <a href="<c:url value='/admin/ScheduleAsCsv' />"
                             target="_new">Full Schedule as CSV</a> - for
                         use with scheduling tools

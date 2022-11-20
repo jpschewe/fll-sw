@@ -89,6 +89,10 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         href="<c:url value='/admin/PerformanceSchedulePerTable' />"
         target="_new">Performance Schedule per table</a>
 
+    <a class="wide"
+        href="<c:url value='/admin/PerformanceNotes' />"
+        target="_new">Performance Schedule per table for notes</a>
+
     <a class="wide" href="<c:url value='/admin/PerformanceSheets' />"
         target="_new">Performance sheets for regular match play</a>
 

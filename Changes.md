@@ -1,3 +1,4 @@
+* Add performance schedule by table that has space for notes
 * Add scoreboard display for teams and top scores only
 * Skip no show and bye from last 8 scoreboard display 
 * #1048 - Add the ability to get populated subjective rubrics for a judge 
