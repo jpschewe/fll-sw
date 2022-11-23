@@ -158,10 +158,10 @@ public class H2HUpdateWebSocket {
       }
 
     } catch (final IOException e) {
-      LOGGER.error("Error reading JSON data", e);
-      throw new FLLRuntimeException("Error parsing string array", e);
+      throw new FLLRuntimeException("Error parsing bracket info from #"
+          + msg
+          + "#", e);
     } catch (final SQLException e) {
-      LOGGER.error("Error getting playoffdata from the database", e);
       throw new FLLRuntimeException("Error getting playoff data from the database", e);
     }
   }
