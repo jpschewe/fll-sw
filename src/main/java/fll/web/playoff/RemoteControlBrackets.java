@@ -6,8 +6,6 @@
 
 package fll.web.playoff;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedList;
@@ -15,12 +13,13 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Team;
 import fll.Utilities;
 import fll.db.GlobalParameters;
-import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 import fll.web.playoff.BracketData.TopRightCornerStyle;
@@ -35,8 +34,6 @@ public final class RemoteControlBrackets {
 
   private RemoteControlBrackets() {
   }
-
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * @param application application variables
@@ -77,20 +74,15 @@ public final class RemoteControlBrackets {
 
       // expose allBracketData to the javascript
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
-      final StringWriter writer = new StringWriter();
-      try {
-        jsonMapper.writeValue(writer, allBracketData);
-      } catch (final IOException e) {
-        throw new FLLInternalException("Error writing JSON for allBracketData", e);
-      }
-      final String allBracketDataJson = writer.toString();
+      final String allBracketDataJson = jsonMapper.writeValueAsString(allBracketData).replace("'", "\\'");
       pageContext.setAttribute("allBracketDataJson", allBracketDataJson);
 
       final double scrollRate = GlobalParameters.getHeadToHeadScrollRate(connection);
       pageContext.setAttribute("scrollRate", scrollRate);
     } catch (final SQLException sqle) {
-      LOGGER.error("Error talking to the database", sqle);
-      throw new RuntimeException("Error talking to the database", sqle);
+      throw new FLLRuntimeException("Error talking to the database", sqle);
+    } catch (final JsonProcessingException e) {
+      throw new FLLRuntimeException("Error converting data to JSON", e);
     }
 
   }

@@ -31,7 +31,8 @@ TABLE.B {
 <script type="text/javascript">
   let prevScrollTimestamp = 0;
   const secondsBetweenScrolls = parseFloat("${scrollRate}");
-  const pixelsToScroll = 1;
+  // using 1 doesn't work with chromebooks
+  const pixelsToScroll = 2;
 
   function reload() {
     window.scrollTo(0, 0);
@@ -41,7 +42,7 @@ TABLE.B {
   function scrollDown(timestamp) {
     if (!elementIsVisible(document.getElementById("bottom"))) {
       const diff = timestamp - prevScrollTimestamp;
-      if (diff >= secondsBetweenScrolls) {
+      if (diff / 1000.0 >= secondsBetweenScrolls) {
         window.scrollBy(0, pixelsToScroll);
         prevScrollTimestamp = timestamp;
       }

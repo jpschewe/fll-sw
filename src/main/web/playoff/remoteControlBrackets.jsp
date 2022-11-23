@@ -59,37 +59,40 @@ SPAN.TIE {
     src="<c:url value='/js/fll-functions.js'/>"></script>
 
 <script type="text/javascript">
-  var allBracketData = ${allBracketDataJson};
+  var allBracketData = JSON.parse('${allBracketDataJson}');
   var scrollRate = parseInt("${scrollRate}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
   var maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
 </script>
 
-<script type='text/javascript' src="<c:url value='/js/fll-functions.js' />"></script>
+<script type='text/javascript'
+    src="<c:url value='/js/fll-functions.js' />"></script>
 <script type='text/javascript' src='h2hutils.js'></script>
 <script type='text/javascript' src='remoteControlBrackets.js'></script>
 
 <script type="text/javascript">
-let prevScrollTimestamp = 0;
-const secondsBetweenScrolls = parseFloat("${scrollRate}");
-const pixelsToScroll = 1;
-let scrollingDown = true;
+  let prevScrollTimestamp = 0;
+  const secondsBetweenScrolls = parseFloat("${scrollRate}");
+  // if less than 1, then Chromebooks don't appear to scroll
+  const pixelsToScroll = 2;
+  let scrollingDown = true;
 
-function doScroll(timestamp) {
-  const diff = timestamp - prevScrollTimestamp;
-  if (diff >= secondsBetweenScrolls) {
-      if(scrollingDown && elementIsVisible(document.getElementById("bottom"))) {
-          scrollingDown = false;
-      } else if(!scrollingDown && elementIsVisible(document.getElementById("top"))) {
-          scrollingDown = true;
+  function doScroll(timestamp) {
+    const diff = timestamp - prevScrollTimestamp;
+    if (diff / 1000.0 >= secondsBetweenScrolls) {
+      if (scrollingDown && elementIsVisible(document.getElementById("bottom"))) {
+        scrollingDown = false;
+      } else if (!scrollingDown
+          && elementIsVisible(document.getElementById("top"))) {
+        scrollingDown = true;
       }
 
       const scrollAmount = scrollingDown ? pixelsToScroll : -1 * pixelsToScroll;
       window.scrollBy(0, scrollAmount);
       prevScrollTimestamp = timestamp;
-  }
+    }
 
-  requestAnimationFrame(doScroll);
-}
+    requestAnimationFrame(doScroll);
+  }
 
   document.addEventListener("DOMContentLoaded", function() {
     <c:if test="${empty param.scroll}">

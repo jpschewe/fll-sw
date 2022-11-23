@@ -136,35 +136,37 @@ GatherParameterInformation.populateContext(application, pageContext);
                             href='javascript:display("gAllTeamsScrollRateHelp")'>[help]</a>
                         <div id='gAllTeamsScrollRateHelp' class='help'
                             style='display: none'>The value is
-                            number of seconds between calls to scroll 1
-                            pixel.</div>
+                            number of seconds between calls to scroll 2
+                            pixels.</div>
                     </th>
 
                     <td>
                         <input type='number'
                             value="${gAllTeamsScrollRate }"
                             id='gAllTeamsScrollRate'
-                            name='gAllTeamsScrollRate' min='0.1' required />
+                            name='gAllTeamsScrollRate' min='0.0000001'
+                            step='any' required />
                     </td>
                 </tr>
 
                 <tr>
                     <th>
                         Head to head scroll rate control. <a
-                            href='javascript:display("gHeadToHeadMsPerRowHelp")'>[help]</a>
-                        <div id='gHeadToHeadMsPerRowHelp' class='help'
+                            href='javascript:display("gHeadToHeadSecondsPerRowHelp")'>[help]</a>
+                        <div id='gHeadToHeadSecondsPerRowHelp' class='help'
                             style='display: none'>The value is
-                            number of seconds between calls to scroll 1
-                            pixel. The remote control brackets page
+                            number of seconds between calls to scroll 2
+                            pixels. The remote control brackets page
                             needs to be refreshed for this parameter to
                             take effect.</div>
                     </th>
 
                     <td>
                         <input type='number'
-                            value="${gHeadToHeadMsPerRow }"
-                            id='gHeadToHeadMsPerRow'
-                            name='gHeadToHeadMsPerRow' min='0.1' required />
+                            value="${gHeadToHeadSecondsPerRow }"
+                            id='gHeadToHeadSecondsPerRow'
+                            name='gHeadToHeadSecondsPerRow' min='0.0000001'
+                            step='any' required />
                     </td>
                 </tr>
                 <tr>
