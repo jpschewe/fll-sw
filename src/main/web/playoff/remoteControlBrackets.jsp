@@ -59,10 +59,7 @@ SPAN.TIE {
     src="<c:url value='/js/fll-functions.js'/>"></script>
 
 <script type="text/javascript">
-  var allBracketData = $
-  {
-    allBracketDataJson
-  };
+  var allBracketData = JSON.parse('${allBracketDataJson}');
   var scrollRate = parseInt("${scrollRate}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
   var maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
 </script>
