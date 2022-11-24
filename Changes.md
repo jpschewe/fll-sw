@@ -1,3 +1,4 @@
+* #1056 - Don't display teams with all no shows in all teams 
 * #1075 - Use distinct colors for ties and no shows on subjective score summary, also add legend
 * Adjust all teams scroll parameters so that Chromebooks scroll
 * Add performance schedule by table that has space for notes
