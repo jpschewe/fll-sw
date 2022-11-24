@@ -1,3 +1,4 @@
+* #1056 - Don't display teams with all no shows in all teams 
 * Adjust all teams scroll parameters so that Chromebooks scroll
 * Add performance schedule by table that has space for notes
 * Add scoreboard display for teams and top scores only

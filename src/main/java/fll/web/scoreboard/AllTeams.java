@@ -100,16 +100,24 @@ public final class AllTeams {
 
           prep.setInt(2, entry.getKey());
 
+          int nonNoShowScores = 0;
           final List<ComputedPerformanceScore> teamScores = new LinkedList<>();
           try (ResultSet rs = prep.executeQuery()) {
             while (rs.next()) {
-              final ComputedPerformanceScore score = new ComputedPerformanceScore(floatingPointScores, rs.getInt(1),
-                                                                                  rs.getBoolean(2), rs.getDouble(3));
+              final int runNumber = rs.getInt(1);
+              final boolean noShow = rs.getBoolean(2);
+              final double computedTotal = rs.getDouble(3);
+              final ComputedPerformanceScore score = new ComputedPerformanceScore(floatingPointScores, runNumber,
+                                                                                  noShow, computedTotal);
               teamScores.add(score);
+              if (!noShow) {
+                ++nonNoShowScores;
+              }
             }
           }
 
-          if (!teamScores.isEmpty()) {
+          if (!teamScores.isEmpty()
+              && nonNoShowScores > 0) {
             teamsWithScores.add(entry.getValue());
             scores.put(entry.getKey(), teamScores);
           }
