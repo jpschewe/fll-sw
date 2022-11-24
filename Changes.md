@@ -1,4 +1,4 @@
-* Use distinct colors for ties and no shows on subjective score summary
+* Use distinct colors for ties and no shows on subjective score summary, also add legend
 * Add performance schedule by table that has space for notes
 * Add scoreboard display for teams and top scores only
 * Skip no show and bye from last 8 scoreboard display 

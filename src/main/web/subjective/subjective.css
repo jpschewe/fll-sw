@@ -16,6 +16,10 @@ body {
     background-color: yellow;
 }
 
+#score-summary_legend .no-show, #score-summary_legend .tie {
+    padding: 0.5em;
+}
+
 .score {
     background-color: LawnGreen;
 }
