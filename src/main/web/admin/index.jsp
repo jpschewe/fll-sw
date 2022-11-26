@@ -320,7 +320,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
 
 
         <li>
-            <a href='<c:url value="select_team.jsp"/>'>Edit team
+            <a href='<c:url value="edit_select_team.jsp"/>'>Edit team
                 data</a>
         </li>
 
