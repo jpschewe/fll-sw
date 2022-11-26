@@ -1,0 +1,22 @@
+SELECT {
+    line-height: 150%;
+    font-size: 10pt;
+    font-weight: bold;
+    background: black;
+    color: #e0e0e0;
+}
+
+OPTION {
+    color: #e0e0e0;
+}
+
+INPUT {
+    font-size: 10pt;
+    font-weight: bold;
+    background-color: black;
+    color: #e0e0e0;
+}
+
+#team_search {
+    width: 100%;
+}

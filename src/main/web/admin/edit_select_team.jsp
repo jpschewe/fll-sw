@@ -25,35 +25,16 @@ final Connection connection = datasource.getConnection();
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" type="text/css"
-    href="<c:url value='/style/fll-sw.css'/>" />
 <title>Edit Team [Select Team]</title>
 
-<!--<style type='text/css'>
-   SELECT {line-height: 150%; font-size: 10pt; font-weight: bold; background-color: black }
-   OPTION {color: #e0e0e0;}
-   INPUT  {font-size: 10pt; font-weight: bold; background-color: black;color:#e0e0e0 }
-  </style>-->
-<style type='text/css'>
-SELECT {
-    line-height: 150%;
-    font-size: 10pt;
-    font-weight: bold;
-    background: black;
-    color: #e0e0e0;
-}
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/style/fll-sw.css'/>" />
 
-OPTION {
-    color: #e0e0e0;
-}
+<link rel="stylesheet" type="text/css" href="edit_select_team.css" />
 
-INPUT {
-    font-size: 10pt;
-    font-weight: bold;
-    background-color: black;
-    color: #e0e0e0;
-}
-</style>
+<script type='text/javascript'
+    src='<c:url value="/js/fll-functions.js" />'></script>
+<script type='text/javascript' src='edit_select_team.js'></script>
 
 </head>
 <body>
@@ -91,10 +72,15 @@ INPUT {
             <tr align='left' valign='top'>
                 <!-- pick team from a list -->
                 <td>
-                    <font face='arial' size='4'>Select Team to
-                        Edit From List:</font>
-                    <br>
-                    <select size='20' name='teamNumber'
+                    <div>
+                        <font face='arial' size='4'>Select Team
+                            to Edit From List:</font>
+                    </div>
+                    <div>
+                        <input type='search' placeholder='Search ...'
+                            id='team_search' />
+                    </div>
+                    <select size='20' name='teamNumber' id='teamNumber'
                         ondblclick='selectTeam.submit()'>
                         <%
                         final Statement stmt = connection.createStatement();
