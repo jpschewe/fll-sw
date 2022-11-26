@@ -890,53 +890,43 @@ const subjective_module = {}
          */
         subjective_module.checkServerStatus = function(onlineCallback, offlineCallback) {
             subjective_module.log("Checking server status");
+
             const FETCH_TIMEOUT = 1000; // milliseconds            
-            let didTimeOut = false;
+            const controller = new AbortController();
+            const timeout = setTimeout(function() {
+                controller.abort('Request timed out');
+            }, FETCH_TIMEOUT);
 
-            new Promise(function(resolve, reject) {
-                const timeout = setTimeout(function() {
-                    didTimeOut = true;
-                    reject(new Error('Request timed out'));
-                }, FETCH_TIMEOUT);
+            const request = new Request("../images/blank.gif", {
+                headers: new Headers({
+                    'pragma': 'no-cache',
+                    'cache-control': 'no-cache'
+                }),
+                cache: "no-store",
+                signal: controller.signal
+            });
 
-                const request = new Request("../images/blank.gif", {
-                    headers: new Headers({
-                        'pragma': 'no-cache',
-                        'cache-control': 'no-cache'
-                    })
-                });
+            subjective_module.log("Executing fetch: " + request);
+            fetch(request)
+                .then(function(response) {
+                    // Clear the timeout as cleanup
+                    clearTimeout(timeout);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error: ${response.status}`);
+                    } else {
+                        subjective_module.log('fetch good! ' + response);
+                        subjective_module.log("server online");
+                        onlineCallback();
+                    }
+                    // no need to resolve the response object as we know the server is online, we don't need the data in the response
+                })
+                .catch(function(err) {
+                    subjective_module.log('Server offline (fetch error): ' + err);
 
-                subjective_module.log("Executing fetch: " + request);
-                fetch(request)
-                    .then(function(response) {
-                        // Clear the timeout as cleanup
-                        clearTimeout(timeout);
-                        if (!didTimeOut) {
-                            subjective_module.log('fetch good! ' + response);
-                            resolve(response);
-                        }
-                    })
-                    .catch(function(err) {
-                        subjective_module.log('Server offline (fetch error): ' + err);
-
-                        // Rejection already happened with setTimeout
-                        if (didTimeOut) {
-                            return;
-                        }
-                        // Reject with error
-                        reject(err);
-                    });
-            })
-                .then(function() {
-                    // Request success and no timeout
-                    subjective_module.log("server online");
-                    onlineCallback();
-                }).catch(function(err) {
                     // Error: response error, request timeout or runtime error
                     subjective_module.log("server offline: " + err);
                     offlineCallback();
                 });
-
         },
 
         /**
