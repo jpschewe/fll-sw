@@ -47,7 +47,7 @@ public class WebTest {
                                             "index.jsp", //
                                             "welcome.jsp", "admin", "admin/index.jsp", "admin/edit_event_division.jsp",
                                             "admin/tournaments.jsp", "admin/judges.jsp", "admin/tables.jsp",
-                                            "admin/select_team.jsp", "admin/remoteControl.jsp", //
+                                            "admin/edit_select_team.jsp", "admin/remoteControl.jsp", //
                                             "credits/credits.jsp", //
                                             "developer/index.jsp", "developer/query.jsp", //
                                             "playoff/index.jsp", "playoff/check.jsp?division=__all__",
