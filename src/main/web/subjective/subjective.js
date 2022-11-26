@@ -903,7 +903,8 @@ const subjective_module = {}
                     headers: new Headers({
                         'pragma': 'no-cache',
                         'cache-control': 'no-cache'
-                    })
+                    }),
+                    cache: "no-store"
                 });
 
                 subjective_module.log("Executing fetch: " + request);
