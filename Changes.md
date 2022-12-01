@@ -1,3 +1,5 @@
+Release 17.2.0
+==============
 * #523 - Allow one to search for teams on the team edit page
 * #1056 - Don't display teams with all no shows in all teams 
 * #1075 - Use distinct colors for ties and no shows on subjective score summary, also add legend
