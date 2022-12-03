@@ -1196,7 +1196,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         subjective_module.uploadData(function(result) {
             // scoresSuccess
-            document.getElementById('alert-dialog_text').innerText = "Uploaded " + result.numModified + " scores. message: "
+            document.getElementById('alert-dialog_text').innerText = "Uploaded " + result.numModified + " scores."
                 + result.message;
             document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
         }, //
