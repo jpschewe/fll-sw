@@ -891,7 +891,7 @@ const subjective_module = {}
         subjective_module.checkServerStatus = function(onlineCallback, offlineCallback) {
             subjective_module.log("Checking server status");
 
-            const FETCH_TIMEOUT = 1000; // milliseconds            
+            const FETCH_TIMEOUT = 35000; // milliseconds, need 35 seconds for chromebooks (not sure why)            
             const controller = new AbortController();
             const timeout = setTimeout(function() {
                 controller.abort('Request timed out');
@@ -903,12 +903,15 @@ const subjective_module = {}
                     'cache-control': 'no-cache'
                 }),
                 cache: "no-store",
-                signal: controller.signal
+                signal: controller.signal,
+                method: 'HEAD'
             });
 
             subjective_module.log("Executing fetch: " + request);
             fetch(request)
                 .then(function(response) {
+                    subjective_module.log("Response received");
+                    
                     // Clear the timeout as cleanup
                     clearTimeout(timeout);
                     if (!response.ok) {
