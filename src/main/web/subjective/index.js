@@ -52,6 +52,8 @@ function checkStoredData() {
 }
 
 function promptForJudgingGroup() {
+    document.getElementById("wait-dialog").classList.add("fll-sw-ui-inactive");
+
     window.location = "#choose-judging-group";
 }
 
@@ -100,6 +102,8 @@ function checkTournament() {
 }
 
 function serverLoadPage() {
+    document.getElementById("wait-dialog").classList.add("fll-sw-ui-inactive");
+
     const chooseClear = document.getElementById("index-page_choose_clear");
     chooseClear.classList.add("fll-sw-ui-inactive");
 

@@ -964,6 +964,8 @@ function displayPageTop() {
     document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
 
     removeChildren(document.getElementById("index-page_messages"));
+
+    document.getElementById("wait-dialog").classList.remove("fll-sw-ui-inactive");
     subjective_module.checkServerStatus(serverLoadPage, promptForJudgingGroup);
     updateMainHeader();
 }

@@ -911,7 +911,7 @@ const subjective_module = {}
             fetch(request)
                 .then(function(response) {
                     subjective_module.log("Response received");
-                    
+
                     // Clear the timeout as cleanup
                     clearTimeout(timeout);
                     if (!response.ok) {
