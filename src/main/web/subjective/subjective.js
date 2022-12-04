@@ -897,32 +897,30 @@ const subjective_module = {}
                 controller.abort('Request timed out');
             }, FETCH_TIMEOUT);
 
-            const request = new Request("../images/blank.gif", {
+
+            subjective_module.log("Executing fetch");
+            fetch("../images/blank.gif", {
+                method: 'HEAD',
                 headers: new Headers({
                     'pragma': 'no-cache',
                     'cache-control': 'no-cache'
                 }),
                 cache: "no-store",
-                signal: controller.signal,
-                method: 'HEAD'
-            });
+                signal: controller.signal
+            }).then(function(response) {
+                subjective_module.log("Response received");
 
-            subjective_module.log("Executing fetch: " + request);
-            fetch(request)
-                .then(function(response) {
-                    subjective_module.log("Response received");
-
-                    // Clear the timeout as cleanup
-                    clearTimeout(timeout);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error: ${response.status}`);
-                    } else {
-                        subjective_module.log('fetch good! ' + response);
-                        subjective_module.log("server online");
-                        onlineCallback();
-                    }
-                    // no need to resolve the response object as we know the server is online, we don't need the data in the response
-                })
+                // Clear the timeout as cleanup
+                clearTimeout(timeout);
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                } else {
+                    subjective_module.log('fetch good! ' + response);
+                    subjective_module.log("server online");
+                    onlineCallback();
+                }
+                // no need to resolve the response object as we know the server is online, we don't need the data in the response
+            })
                 .catch(function(err) {
                     subjective_module.log('Server offline (fetch error): ' + err);
 
