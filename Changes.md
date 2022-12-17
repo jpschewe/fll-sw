@@ -1,3 +1,4 @@
+* #1062 - Create automatic database backups before the database is overwritten or an import occurs
 * Fix bug where an extra performance score can't be deleted when head to head is not used
 * Add titles to scoreboard pages
 

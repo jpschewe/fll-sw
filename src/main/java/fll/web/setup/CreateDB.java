@@ -30,6 +30,7 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 
 import fll.Utilities;
 import fll.db.Authentication;
+import fll.db.DumpDB;
 import fll.db.GenerateDB;
 import fll.db.ImportDB;
 import fll.util.FLLInternalException;
@@ -108,6 +109,8 @@ public class CreateDB extends BaseFLLServlet {
           final ChallengeDescription challengeDescription = ChallengeParser.parse(new InputStreamReader(descriptionURL.openStream(),
                                                                                                         Utilities.DEFAULT_CHARSET));
 
+          DumpDB.automaticBackup(connection, "before-create-from-description");
+
           GenerateDB.generateDB(challengeDescription, connection);
 
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
@@ -128,6 +131,8 @@ public class CreateDB extends BaseFLLServlet {
           final ChallengeDescription challengeDescription = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
                                                                                                         Utilities.DEFAULT_CHARSET));
 
+          DumpDB.automaticBackup(connection, "before-create-from-xml");
+
           GenerateDB.generateDB(challengeDescription, connection);
 
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
@@ -142,6 +147,7 @@ public class CreateDB extends BaseFLLServlet {
             || dumpFileItem.getSize() < 1) {
           message.append("<p class='error'>Database dump not specified</p>");
         } else {
+          DumpDB.automaticBackup(connection, "before-create-from-dump");
 
           final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileItem.getInputStream()),
                                                                                     connection);
