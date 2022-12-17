@@ -4,6 +4,7 @@
 
 <HTML>
 <head>
+<title>Main Scoreboard (small)</title>
 <script type='text/javascript'>
   if (screen.width >= 1024) {
     //redirect to 1024x768 scoreboard

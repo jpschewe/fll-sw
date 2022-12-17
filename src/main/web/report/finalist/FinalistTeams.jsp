@@ -11,6 +11,7 @@ fll.web.report.finalist.FinalistTeams.populateContext(application, pageContext);
 
 <html>
 <head>
+<title>Finalist teams</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/base.css'/>" />
 
