@@ -1,3 +1,5 @@
+* Add titles to scoreboard pages
+
 Release 17.2.0
 ==============
 * #523 - Allow one to search for teams on the team edit page
