@@ -454,7 +454,7 @@ public final class FOPUtils {
   public static Element createNoWrapTableCell(final Document document,
                                               final @Nullable String textAlignment,
                                               final String text) {
-    return createNoWrapTableCell(document, textAlignment, text);
+    return createTableCell(document, textAlignment, text, true);
   }
 
   /**
