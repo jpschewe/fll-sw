@@ -141,6 +141,15 @@ public final class DumpDB extends BaseFLLServlet {
    */
   public static void automaticBackup(final Connection connection,
                                      final String label) {
+    try {
+      if (!Utilities.testDatabaseInitialized(connection)) {
+        return;
+      }
+    } catch (final SQLException e) {
+      LOGGER.error("Error checking if database is initialized, assuming it's not and not creating an automatic backup",
+                   e);
+    }
+
     final Path backupDirectory = Paths.get(AUTOMATIC_BACKUP_DIRECTORY_NAME);
 
     try {
