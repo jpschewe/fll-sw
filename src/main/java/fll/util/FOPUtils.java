@@ -14,11 +14,7 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
@@ -442,55 +438,29 @@ public final class FOPUtils {
   public static Element createTableCell(final Document document,
                                         final @Nullable String textAlignment,
                                         final String text) {
-    return createTableCell(document, textAlignment, text, 0, false);
+    return createTableCell(document, textAlignment, text, false);
   }
 
   /**
    * Rotation is set to 0.
    * 
    * @param document see
-   *          {@link #createNoWrapTableCell(Document, String, String, int)}
+   *          {@link #createNoWrapTableCell(Document, String, String)}
    * @param textAlignment see
-   *          {@link #createNoWrapTableCell(Document, String, String, int)}
-   * @param text see {@link #createNoWrapTableCell(Document, String, String, int)}
-   * @return see {@link #createNoWrapTableCell(Document, String, String, int)}
+   *          {@link #createNoWrapTableCell(Document, String, String)}
+   * @param text see {@link #createNoWrapTableCell(Document, String, String)}
+   * @return see {@link #createNoWrapTableCell(Document, String, String)}
    */
   public static Element createNoWrapTableCell(final Document document,
                                               final @Nullable String textAlignment,
                                               final String text) {
-    return createNoWrapTableCell(document, textAlignment, text, 0);
-  }
-
-  private static final List<Integer> VALID_ROTATIONS = Collections.unmodifiableList(Arrays.asList(0, 90, 180, 270, -90,
-                                                                                                  -180, -270));
-
-  /**
-   * Create a table cell that hides text that is too long for the cell.
-   * Borders are not set.
-   * 
-   * @param document used to create elements
-   * @param text the text to put in the cell
-   * @param textAlignment CSS text alignment attribute, may be null
-   * @param rotation rotation in degrees, must be one of 0, 90, 180, 270, -90,
-   *          -180, -270
-   * @return the table cell
-   * @throws IllegalArgumentException if the rotation is invalid
-   * @see #createTableCell(Document, String, String, int, boolean)
-   */
-  public static Element createNoWrapTableCell(final Document document,
-                                              final @Nullable String textAlignment,
-                                              final String text,
-                                              final int rotation)
-      throws IllegalArgumentException {
-    return createTableCell(document, textAlignment, text, rotation, true);
+    return createNoWrapTableCell(document, textAlignment, text);
   }
 
   /**
    * @param document used to create elements
    * @param textAlign CSS text alignment attribute, may be null
    * @param text the text to put in the cell
-   * @param rotation rotation in degrees, must be one of 0, 90, 180, 270, -90,
-   *          -180, -270
    * @param noWrap true if the text should not be wrapped, overflow is hidden
    * @return the table cell
    * @throws IllegalArgumentException if the rotation is invalid
@@ -498,14 +468,7 @@ public final class FOPUtils {
   public static Element createTableCell(final Document document,
                                         final @Nullable String textAlign,
                                         final String text,
-                                        final int rotation,
                                         final boolean noWrap) {
-    if (!VALID_ROTATIONS.contains(rotation)) {
-      throw new IllegalArgumentException(String.format("%d is not a valid rotation. Valid rotations are %s", rotation,
-                                                       VALID_ROTATIONS.stream().map(String::valueOf)
-                                                                      .collect(Collectors.joining(","))));
-    }
-
     final Element cell = createXslFoElement(document, TABLE_CELL_TAG);
 
     final Element blockContainer = createXslFoElement(document, BLOCK_CONTAINER_TAG);
@@ -514,14 +477,6 @@ public final class FOPUtils {
       blockContainer.setAttribute("wrap-option", "no-wrap");
     }
 
-    if (rotation != 0) {
-      throw new UnsupportedOperationException("Rotations aren't properly supported. One needs to create an SVG and rotate the text there.");
-
-      // width and height are relative to the orientation
-      // when rotated by 90 degrees, the height is left to right
-      // blockContainer.setAttribute("reference-orientation",
-      // String.valueOf(rotation));
-    }
     cell.appendChild(blockContainer);
 
     final Element block = createXslFoElement(document, BLOCK_TAG);
