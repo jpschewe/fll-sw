@@ -10,24 +10,21 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -44,6 +41,12 @@ import fll.web.GatherBugReport;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -85,6 +88,8 @@ public final class DumpDB extends BaseFLLServlet {
     }
   }
 
+  private static final DateTimeFormatter DATABASE_DUMP_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+
   /**
    * Export the current database using a standard filename format.
    *
@@ -106,8 +111,7 @@ public final class DumpDB extends BaseFLLServlet {
     final int tournamentId = Queries.getCurrentTournament(connection);
     final Tournament tournament = Tournament.findTournamentByID(connection, tournamentId);
 
-    final DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-    final String dateStr = df.format(new Date());
+    final String dateStr = LocalDateTime.now().format(DATABASE_DUMP_DATETIME_FORMATTER);
 
     final String filename = String.format("%s_%s%s.flldb", tournament.getName(), dateStr, (null == label ? "" : label));
     response.reset();
@@ -116,12 +120,64 @@ public final class DumpDB extends BaseFLLServlet {
         + filename
         + "\"");
 
-    final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
-    try {
+    try (ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream())) {
       DumpDB.dumpDatabase(zipOut, connection, challengeDescription, application);
-    } finally {
-      zipOut.close();
     }
+  }
+
+  private static final String AUTOMATIC_BACKUP_DIRECTORY_NAME = "database-backups";
+
+  /**
+   * Create an automatic backup of the specified database. Create the file in the
+   * directory "database-backups" relative to the current directory. The file is
+   * named based on the current date and time and the specified label.
+   * <p>
+   * All exceptions are caught and turned into logging errors.
+   * </p>
+   * 
+   * @param connection database to backup
+   * @param label the label to use, may be null. Appended to the end of the
+   *          filename before the suffix.
+   */
+  public static void automaticBackup(final Connection connection,
+                                     final String label) {
+    try {
+      if (!Utilities.testDatabaseInitialized(connection)) {
+        return;
+      }
+    } catch (final SQLException e) {
+      LOGGER.error("Error checking if database is initialized, assuming it's not and not creating an automatic backup",
+                   e);
+    }
+
+    final Path backupDirectory = Paths.get(AUTOMATIC_BACKUP_DIRECTORY_NAME);
+
+    try {
+      Files.createDirectories(backupDirectory);
+    } catch (final FileAlreadyExistsException e) {
+      LOGGER.error("Unable to create automatic database backup because the output directory %s exists and is not a directory");
+      return;
+    } catch (final IOException e) {
+      LOGGER.error("Error creating automatic database backups directory", e);
+      return;
+    }
+
+    try {
+      final ChallengeDescription challengeDescription = GlobalParameters.getChallengeDescription(connection);
+
+      final String dateStr = LocalDateTime.now().format(DATABASE_DUMP_DATETIME_FORMATTER);
+      final String dumpFilename = String.format("%s-%s.flldb", dateStr, label);
+      final Path outputFile = backupDirectory.resolve(dumpFilename);
+      try (ZipOutputStream zipOut = new ZipOutputStream(Files.newOutputStream(outputFile))) {
+        DumpDB.dumpDatabase(zipOut, connection, challengeDescription, null);
+      }
+
+    } catch (final SQLException e) {
+      LOGGER.error("Error reading database to create automatic backup", e);
+    } catch (final IOException e) {
+      LOGGER.error("Error writing automatic database backup", e);
+    }
+
   }
 
   /**

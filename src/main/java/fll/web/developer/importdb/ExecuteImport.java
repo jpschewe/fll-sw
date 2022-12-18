@@ -13,6 +13,7 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import fll.Tournament;
+import fll.db.DumpDB;
 import fll.db.GlobalParameters;
 import fll.db.ImportDB;
 import fll.db.Queries;
@@ -76,6 +77,8 @@ public class ExecuteImport extends BaseFLLServlet {
         message.append("<p class='error'>Error, there are still differences that need to be resolved before the import can be completed.</p>");
         session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTeamInfo");
       } else {
+        DumpDB.automaticBackup(destConnection, "before-import");
+        
         ImportDB.importDatabase(sourceConnection, destConnection, tournament, sessionInfo.isImportPerformance(),
                                 sessionInfo.isImportSubjective(), sessionInfo.isImportFinalist());
 

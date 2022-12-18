@@ -1204,6 +1204,8 @@ public class Launcher extends JFrame {
       final DataSource newDatasource = createDatasource();
       try (Connection newConnection = newDatasource.getConnection()) {
         try (InputStream is = Files.newInputStream(exportFile); ZipInputStream zis = new ZipInputStream(is)) {
+          DumpDB.automaticBackup(newConnection, "before-migrate");
+
           ImportDB.loadFromDumpIntoNewDB(zis, newConnection);
 
           final Collection<String> newDbUsers = Authentication.getUsers(newConnection);
