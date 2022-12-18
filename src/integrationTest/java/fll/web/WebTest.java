@@ -59,9 +59,7 @@ public class WebTest {
                                             "scoreEntry/select_team.jsp", "setup/index.jsp",
                                             "troubleshooting/index.jsp", };
       for (final String page : pages) {
-        LOGGER.info("Testing page #"
-            + page
-            + "#");
+        LOGGER.info("Testing page #{}#", page);
         IntegrationTestUtils.initializeDatabaseFromDump(selenium, seleniumWait,
                                                         TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
 
