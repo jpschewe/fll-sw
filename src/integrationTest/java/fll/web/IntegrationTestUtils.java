@@ -379,7 +379,7 @@ public final class IntegrationTestUtils {
    */
   private static void waitForDatabaseInit() {
     try {
-      Thread.sleep(700);
+      Thread.sleep(1000);
     } catch (final InterruptedException e) {
       LOGGER.warn("Interrupted waiting for database init, continuing", e);
     }
