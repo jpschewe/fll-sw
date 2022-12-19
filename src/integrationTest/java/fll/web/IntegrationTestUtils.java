@@ -118,7 +118,7 @@ public final class IntegrationTestUtils {
    *
    * @see #createWebDriverWait(WebDriver)
    */
-  private static final Duration WAIT_FOR_ELEMENT = Duration.ofSeconds(4);
+  private static final Duration WAIT_FOR_ELEMENT = Duration.ofSeconds(10);
 
   /**
    * How long to wait between polls of the page for a web element with the waiter.
