@@ -118,7 +118,7 @@ public final class IntegrationTestUtils {
    *
    * @see #createWebDriverWait(WebDriver)
    */
-  private static final Duration WAIT_FOR_ELEMENT = Duration.ofSeconds(4);
+  private static final Duration WAIT_FOR_ELEMENT = Duration.ofSeconds(10);
 
   /**
    * How long to wait between polls of the page for a web element with the waiter.
@@ -279,21 +279,7 @@ public final class IntegrationTestUtils {
     reinitDB.click();
     LOGGER.trace("Clicked reinitializeDatabase");
 
-    if (expectAlert) {
-      handleDatabaseEraseConfirmation(driver, driverWait);
-    }
-
-    waitForDatabaseInit();
-
-    driverWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
-
-    handleImportUsers(driver);
-
-    LOGGER.trace("Found database success, calling createUser");
-    createUser(driver, driverWait);
-
-    LOGGER.trace("Finished with create user, calling login");
-    login(driver);
+    finishDatabaseInitialization(driver, driverWait, expectAlert);
   }
 
   /**
@@ -337,23 +323,37 @@ public final class IntegrationTestUtils {
       createEle.click();
       LOGGER.trace("Clicked createdb button");
 
-      if (expectAlert) {
-        handleDatabaseEraseConfirmation(selenium, seleniumWait);
-      }
-
-      waitForDatabaseInit();
-
-      seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
-
-      handleImportUsers(selenium);
-      createUser(selenium, seleniumWait);
-
-      login(selenium);
+      finishDatabaseInitialization(selenium, seleniumWait, expectAlert);
     } finally {
       if (!dumpFile.delete()) {
         dumpFile.deleteOnExit();
       }
     }
+    login(selenium);
+  }
+
+  private static void finishDatabaseInitialization(final WebDriver selenium,
+                                                   final WebDriverWait seleniumWait,
+                                                   final boolean expectAlert) {
+    if (expectAlert) {
+      handleDatabaseEraseConfirmation(selenium, seleniumWait);
+    }
+
+    // wait for all possible conditions that can me the server has finished creating
+    // the database
+    seleniumWait.until(ExpectedConditions.or(ExpectedConditions.presenceOfElementLocated(By.id("success")),
+                                             ExpectedConditions.presenceOfElementLocated(By.id("exception-handler")),
+                                             ExpectedConditions.urlContains("import-users.jsp"),
+                                             ExpectedConditions.urlContains("ask-create-admin.jsp")));
+
+    assertNoException(selenium);
+
+    handleImportUsers(selenium);
+
+    LOGGER.trace("Found database success, calling createUser");
+    createUser(selenium, seleniumWait);
+
+    LOGGER.trace("Finished with create user, calling login");
     login(selenium);
   }
 
@@ -370,20 +370,6 @@ public final class IntegrationTestUtils {
 
       driver.findElement(By.name("import_users")).click();
     }
-  }
-
-  /**
-   * Checking for the success page right away seems to be causing the setup index
-   * to be hit first. So
-   * instead sleep for a short time to let everything catch up.
-   */
-  private static void waitForDatabaseInit() {
-    try {
-      Thread.sleep(1000);
-    } catch (final InterruptedException e) {
-      LOGGER.warn("Interrupted waiting for database init, continuing", e);
-    }
-
   }
 
   private static void createUser(final WebDriver selenium,

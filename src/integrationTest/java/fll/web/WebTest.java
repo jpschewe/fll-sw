@@ -50,7 +50,7 @@ public class WebTest {
                                             "admin/edit_select_team.jsp", "admin/remoteControl.jsp", //
                                             "credits/credits.jsp", //
                                             "developer/index.jsp", "developer/query.jsp", //
-                                            "playoff/index.jsp", "playoff/check.jsp?division=__all__",
+                                            "playoff/index.jsp",
                                             // "playoff/remoteMain.jsp",
                                             "report/index.jsp",
                                             // "scoreboard/index.jsp",
