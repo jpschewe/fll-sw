@@ -16,10 +16,6 @@ body {
     background-color: yellow;
 }
 
-#score-summary_legend .no-show, #score-summary_legend .tie {
-    padding: 0.5em;
-}
-
 .score {
     background-color: LawnGreen;
 }
@@ -112,6 +108,15 @@ input[type=range] {
     padding-bottom: 0.7em;
     margin-right: 1em;
     margin-left: 1em;
+}
+
+#score-summary_legend .no-show, #score-summary_legend .tie {
+    padding: 0.5em;
+}
+
+#score-summary_content hr {
+    width: 99%;
+    margin-top: 30px;
 }
 
 .nominate-label {

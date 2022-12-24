@@ -823,13 +823,36 @@ function populateScoreSummary() {
         });
 
 
-        const noteRow = document.createElement("div");
         if (score && score.note) {
+            const noteRow = document.createElement("div");
+            scoreSummaryContent.appendChild(noteRow);
+            noteRow.classList.add("score-summary_note");
+            noteRow.classList.add("fll-sw-ui-inactive");
             noteRow.innerText = score.note;
-        } else {
-            noteRow.innerText = "No notes";
         }
-        scoreSummaryContent.appendChild(noteRow);
+
+        const commentRow = document.createElement("div");
+        scoreSummaryContent.appendChild(commentRow);
+        commentRow.classList.add("score-summary_comment");
+        commentRow.classList.add("fll-sw-ui-inactive");
+        if (score && score.commentGreatJob) {
+            const row = document.createElement("div");
+            commentRow.appendChild(row);
+            row.innerText = score.commentGreatJob;
+        }
+        if (score && score.commentThinkAbout) {
+            const row = document.createElement("div");
+            commentRow.appendChild(row);
+            row.innerText = score.commentThinkAbout;
+        }
+        if (score && score.goalComments) {
+            for (const [_, goalComment] of Object.entries(score.goalComments)) {
+                const row = document.createElement("div");
+                commentRow.appendChild(row);
+                row.innerText = goalComment;
+            }
+        }
+
         scoreSummaryContent.appendChild(document.createElement("hr"));
 
         prevScore = computedScore;
@@ -1316,7 +1339,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.getElementById("enter-score_show-comments").addEventListener('click', function() {
-        toggleComments();
+        toggleScoreEntryComments();
     });
 
     document.getElementById("enter-score_confirm-zero_yes").addEventListener('click', function() {
@@ -1374,37 +1397,50 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('confirm-modified-scores-dialog').classList.add("fll-sw-ui-inactive");
     });
 
+    document.getElementById("score-summary_show-comments").addEventListener('click', function() {
+        toggleScoreSummaryComments();
+    });
+
+    document.getElementById("score-summary_show-notes").addEventListener('click', function() {
+        toggleScoreSummaryNotes();
+    });
+
+
     // navigate to pages when the anchor changes
     window.addEventListener('hashchange', navigateToPage);
 });
 
-function displayComments() {
-    displayOrHideComments(false);
-}
-
-function hideComments() {
-    displayOrHideComments(true);
-}
-
-function toggleComments() {
+function toggleScoreEntryComments() {
     const displayCommentsButton = document.getElementById("enter-score_show-comments");
     const hide = displayCommentsButton.classList.contains("fll-sw-button-pressed");
-    displayOrHideComments(hide);
+    displayOrHideCommentsOrNotes(hide, displayCommentsButton, '.comments-display');
+}
+
+function toggleScoreSummaryComments() {
+    const button = document.getElementById("score-summary_show-comments");
+    const hide = button.classList.contains("fll-sw-button-pressed");
+    displayOrHideCommentsOrNotes(hide, button, '.score-summary_comment');
+}
+
+function toggleScoreSummaryNotes() {
+    const button = document.getElementById("score-summary_show-notes");
+    const hide = button.classList.contains("fll-sw-button-pressed");
+    displayOrHideCommentsOrNotes(hide, button, '.score-summary_note');
 }
 
 /**
- * @param hide if true, hide the comments
+ * @param hide if true, hide the comments or notes
+ * @param button the button that is toggled
+ * @param selector CSS selector to find all elements to toggle
  */
-function displayOrHideComments(hide) {
-    const displayCommentsButton = document.getElementById("enter-score_show-comments");
-
+function displayOrHideCommentsOrNotes(hide, button, selector) {
     if (hide) {
-        displayCommentsButton.classList.remove("fll-sw-button-pressed");
+        button.classList.remove("fll-sw-button-pressed");
     } else {
-        displayCommentsButton.classList.add("fll-sw-button-pressed");
+        button.classList.add("fll-sw-button-pressed");
     }
 
-    for (const element of document.querySelectorAll('.comments-display')) {
+    for (const element of document.querySelectorAll(selector)) {
         if (hide) {
             element.classList.add("fll-sw-ui-inactive");
         } else {
