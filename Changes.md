@@ -1,3 +1,4 @@
+* #1018 - Allow the awards script order to handle non-numeric categories added after initial setup
 * #1060 - Add comments to score summary page and allow them and the notes to be toggled
 * #1062 - Create automatic database backups before the database is overwritten or an import occurs
 * Fix bug where an extra performance score can't be deleted when head to head is not used
