@@ -2066,6 +2066,8 @@ public final class AwardsScript {
                                                   final Connection connection,
                                                   final Tournament tournament)
       throws SQLException {
+    final List<AwardCategory> awardOrder = new LinkedList<>();
+
     try (
         PreparedStatement findLayer = connection.prepareStatement("SELECT MAX(layer_rank) FROM awards_script_parameters"
             + "  WHERE "
@@ -2122,28 +2124,48 @@ public final class AwardsScript {
             prep.setInt(7, layerRank);
 
             try (ResultSet rs = prep.executeQuery()) {
-              final List<AwardCategory> awardOrder = new LinkedList<>();
-
               while (rs.next()) {
                 final String categoryTitle = castNonNull(rs.getString(1));
                 final AwardCategory category = getCategoryByTitle(description, categoryTitle);
                 awardOrder.add(category);
               }
-
-              if (awardOrder.isEmpty()) {
-                return getDefaultAwardOrder(description);
-              } else {
-                return awardOrder;
-              }
             }
 
           }
-        } else {
-          // can't find anything
-          return getDefaultAwardOrder(description);
-        }
+        } // found a value for layer
+      } // allocate ResultSet
+    } // allocate PreparedStatement
 
+    addMissingAwardCategories(description, awardOrder);
+    return awardOrder;
+  }
+
+  /**
+   * Add any AwardCategories that aren't already in <code>awardOrder</code>.
+   * This handles the challenge description changing after the order has been
+   * initially specified. The parameter <code>awardOrder</code> is modified.
+   */
+  private static void addMissingAwardCategories(final ChallengeDescription description,
+                                                final List<AwardCategory> awardOrder) {
+
+    for (final AwardCategory ac : description.getSubjectiveCategories()) {
+      if (!awardOrder.contains(ac)) {
+        awardOrder.add(ac);
       }
+    }
+    for (final AwardCategory ac : description.getNonNumericCategories()) {
+      if (!awardOrder.contains(ac)) {
+        awardOrder.add(ac);
+      }
+    }
+    if (!awardOrder.contains(description.getPerformance())) {
+      awardOrder.add(description.getPerformance());
+    }
+    if (!awardOrder.contains(HeadToHeadCategory.INSTANCE)) {
+      awardOrder.add(HeadToHeadCategory.INSTANCE);
+    }
+    if (!awardOrder.contains(ChampionshipCategory.INSTANCE)) {
+      awardOrder.add(ChampionshipCategory.INSTANCE);
     }
   }
 
@@ -2178,20 +2200,6 @@ public final class AwardsScript {
         }
       }
     }
-  }
-
-  /**
-   * @param description challenge description for awards
-   * @return the default award order when none is specified
-   */
-  private static List<AwardCategory> getDefaultAwardOrder(final ChallengeDescription description) {
-    final List<AwardCategory> awardOrder = new LinkedList<>();
-    awardOrder.addAll(description.getSubjectiveCategories());
-    awardOrder.addAll(description.getNonNumericCategories());
-    awardOrder.add(description.getPerformance());
-    awardOrder.add(HeadToHeadCategory.INSTANCE);
-    awardOrder.add(ChampionshipCategory.INSTANCE);
-    return awardOrder;
   }
 
   /**
@@ -2588,10 +2596,13 @@ public final class AwardsScript {
                                                       final int tournamentLevelId,
                                                       final int tournamentId)
       throws SQLException {
-    return getRankTable(connection, tournamentLevelId, tournamentId, "awards_script_award_order", "award",
-                        "award_rank").stream() //
-                                     .map(s -> getCategoryByTitle(description, s)) //
-                                     .collect(Collectors.toList());
+    final List<AwardCategory> awardOrder = getRankTable(connection, tournamentLevelId, tournamentId,
+                                                        "awards_script_award_order", "award", "award_rank").stream() //
+                                                                                                           .map(s -> getCategoryByTitle(description,
+                                                                                                                                        s)) //
+                                                                                                           .collect(Collectors.toList());
+    addMissingAwardCategories(description, awardOrder);
+    return awardOrder;
   }
 
 }
