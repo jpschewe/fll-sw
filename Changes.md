@@ -1,3 +1,4 @@
+* #1061 - Warn the user when reloading the subjective application and not connected to the server
 * #1018 - Allow the awards script order to handle non-numeric categories added after initial setup
 * #1060 - Add comments to score summary page and allow them and the notes to be toggled
 * #1062 - Create automatic database backups before the database is overwritten or an import occurs

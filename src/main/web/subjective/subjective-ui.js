@@ -6,6 +6,10 @@
 
 "use strict";
 
+
+
+let server_online = false;
+
 let alertCallback = null;
 
 /**
@@ -694,16 +698,25 @@ function enterNoShow() {
     window.location = subjective_module.getScoreEntryBackPage();
 }
 
+/**
+ * Install warning for user.
+ */
 function installWarnOnReload() {
+    console.log("Installing warning on reload");
     window.onbeforeunload = function() {
         // most browsers won't show the custom message, but we can try
         // returning anything other than undefined will cause the user to be prompted
-        return "Are you sure you want to leave?";
+        return "Are you sure you want to leave? You will likely lose data.";
     };
 }
 
+/**
+ * Remove the user warning, if the server is online
+ */
 function uninstallWarnOnReload() {
-    window.onbeforeunload = undefined;
+    if (server_online) {
+        window.onbeforeunload = undefined;
+    }
 }
 
 function rangeSort(a, b) {
@@ -970,6 +983,12 @@ function displayPage(header, content, footer) {
 }
 
 function displayPageTop() {
+    if (!server_online) {
+        document.getElementById('alert-dialog_text').innerText = "Server is offline, cannot reload the application.";
+        document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+        return;
+    }
+
     document.getElementById("header-main_title").innerText = "Load subjective data";
 
     displayPage(document.getElementById("header-main"), document.getElementById("content-top"), document.getElementById("footer-main"));
@@ -987,7 +1006,9 @@ function displayPageTop() {
     document.getElementById("side-panel_enter-scores").parentNode.classList.add('fll-sw-ui-inactive');
 
     removeChildren(document.getElementById("index-page_messages"));
-    subjective_module.checkServerStatus(serverLoadPage, promptForJudgingGroup);
+
+    document.getElementById("wait-dialog").classList.remove("fll-sw-ui-inactive");
+    subjective_module.checkServerStatus(true, serverLoadPage, promptForJudgingGroup);
     updateMainHeader();
 }
 
@@ -1212,12 +1233,19 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("side-panel_synchronize").addEventListener('click', () => {
         sidePanel.classList.remove('open');
 
+        if (!server_online) {
+            document.getElementById('alert-dialog_text').innerText = "Server is offline, cannot synchronize.";
+            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+            return;
+        }
+
+
         const waitDialog = document.getElementById("wait-dialog");
         waitDialog.classList.remove("fll-sw-ui-inactive");
 
         subjective_module.uploadData(function(result) {
             // scoresSuccess
-            document.getElementById('alert-dialog_text').innerText = "Uploaded " + result.numModified + " scores. message: "
+            document.getElementById('alert-dialog_text').innerText = "Uploaded " + result.numModified + " scores."
                 + result.message;
             document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
         }, //
@@ -1449,9 +1477,46 @@ function displayOrHideCommentsOrNotes(hide, button, selector) {
     }
 }
 
+function postServerStatusCallback() {
+    const sidePanelServerStatus = document.getElementById('side-panel_server-status');
+    if (server_online) {
+        uninstallWarnOnReload();
+        sidePanelServerStatus.innerText = "Online";
+        sidePanelServerStatus.classList.add("online");
+    } else {
+        installWarnOnReload();
+        sidePanelServerStatus.innerText = "Offline";
+        sidePanelServerStatus.classList.remove("online");
+    }
 
+    // schedule another update check in 30 seconds
+    setTimeout(updateServerStatus, 30 * 1000);
+}
+
+function updateServerStatus() {
+    subjective_module.checkServerStatus(false,
+        () => {
+            if (!server_online) {
+                subjective_module.log("Server is now online");
+            }
+            server_online = true;
+            postServerStatusCallback();
+        },
+        () => {
+            if (server_online) {
+                subjective_module.log("Server is now offline");
+            }
+            server_online = false;
+            postServerStatusCallback();
+        }
+    );
+}
+
+
+// fires after DOMContentLoaded and all resources are loaded
 window.addEventListener('load', () => {
     // initial state
     updateMainHeader();
     navigateToPage();
+    updateServerStatus();
 });
