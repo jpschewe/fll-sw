@@ -702,7 +702,7 @@ function enterNoShow() {
  * Install warning for user.
  */
 function installWarnOnReload() {
-console.log("Installing warning on reload");
+    console.log("Installing warning on reload");
     window.onbeforeunload = function() {
         // most browsers won't show the custom message, but we can try
         // returning anything other than undefined will cause the user to be prompted
@@ -960,6 +960,12 @@ function displayPage(header, content, footer) {
 }
 
 function displayPageTop() {
+    if (!server_online) {
+        document.getElementById('alert-dialog_text').innerText = "Server is offline, cannot reload the application.";
+        document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+        return;
+    }
+
     document.getElementById("header-main_title").innerText = "Load subjective data";
 
     displayPage(document.getElementById("header-main"), document.getElementById("content-top"), document.getElementById("footer-main"));
@@ -1204,6 +1210,13 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("side-panel_synchronize").addEventListener('click', () => {
         sidePanel.classList.remove('open');
 
+        if (!server_online) {
+            document.getElementById('alert-dialog_text').innerText = "Server is offline, cannot synchronize.";
+            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+            return;
+        }
+
+
         const waitDialog = document.getElementById("wait-dialog");
         waitDialog.classList.remove("fll-sw-ui-inactive");
 
@@ -1434,8 +1447,6 @@ function postServerStatusCallback() {
     } else {
         installWarnOnReload();
     }
-
-    // TODO: do something with the side panel buttons
 
     // schedule another update check in 30 seconds
     setTimeout(updateServerStatus, 30 * 1000);
