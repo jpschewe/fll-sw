@@ -312,8 +312,10 @@ function recomputeTotal() {
     document.getElementById("enter-score_total-score").innerText = total;
 }
 
-function addGoalHeaderToScoreEntry(table, totalColumns, goal) {
+function addGoalHeaderToScoreEntry(table, totalColumns, goal, rowClass) {
     const goalDescriptionRow = document.createElement("tr");
+    goalDescriptionRow.classList.add(rowClass);
+
     const goalDescriptionCell = document.createElement("td");
     goalDescriptionCell.setAttribute("colspan", totalColumns);
     const goalDescTable = document.createElement("table");
@@ -345,9 +347,10 @@ function getRubricCellId(goal, rangeIndex) {
     return goal.name + "_" + rangeIndex;
 }
 
-function addRubricToScoreEntry(table, goal, goalComment, ranges) {
+function addRubricToScoreEntry(table, goal, goalComment, ranges, rowClass) {
 
     const row = document.createElement("tr");
+    row.classList.add(rowClass);
 
     for (let index = 0; index < ranges.length; ++index) {
         const range = ranges[index];
@@ -423,10 +426,9 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges) {
     }
 
     table.appendChild(row);
-
 }
 
-function addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore) {
+function addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore, rowClass) {
     let initValue;
     if (null == subscore) {
         initValue = goal.initialValue;
@@ -435,6 +437,7 @@ function addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore) {
     }
 
     const row = document.createElement("tr");
+    row.classList.add(rowClass);
     const cell = document.createElement("td");
     cell.setAttribute("colspan", totalColumns);
     cell.classList.add("score-slider-cell");
@@ -518,7 +521,7 @@ function addEventsToSlider(goal, ranges) {
 /**
  * Create the rows for a single goal.
  */
-function createScoreRows(table, totalColumns, score, goal) {
+function createScoreRows(table, totalColumns, score, goal, rowClass) {
     let goalScore = null;
     if (subjective_module.isScoreCompleted(score)) {
         goalScore = score.standardSubScores[goal.name];
@@ -531,16 +534,17 @@ function createScoreRows(table, totalColumns, score, goal) {
         goalComment = "";
     }
 
-    addGoalHeaderToScoreEntry(table, totalColumns, goal);
+    addGoalHeaderToScoreEntry(table, totalColumns, goal, rowClass);
 
     const ranges = goal.rubric;
     ranges.sort(rangeSort);
 
-    addRubricToScoreEntry(table, goal, goalComment, ranges);
+    addRubricToScoreEntry(table, goal, goalComment, ranges, rowClass);
 
-    addSliderToScoreEntry(table, goal, totalColumns, ranges, goalScore);
+    addSliderToScoreEntry(table, goal, totalColumns, ranges, goalScore, rowClass);
 
     const commentsRow = document.createElement("tr");
+    commentsRow.classList.add(rowClass);
     table.appendChild(commentsRow);
     commentsRow.classList.add("comments-display")
     const commentsCell = document.createElement("td");
@@ -549,11 +553,11 @@ function createScoreRows(table, totalColumns, score, goal) {
     commentsCell.id = getGoalDisplayCommentsId(goal);
     commentsCell.innerText = goalComment;
 
-    const row = document.createElement("tr");
-    table.appendChild(row);
+    const dividerRow = document.createElement("tr");
+    table.appendChild(dividerRow);
 
     const cell = document.createElement("td");
-    row.appendChild(cell);
+    dividerRow.appendChild(cell);
     cell.setAttribute("colspan", totalColumns);
     cell.appendChild(document.createElement("hr"));
 
@@ -600,7 +604,7 @@ function populateEnterScoreRubricTitles(table, hidden) {
 /**
  * Create rows for a goal group and it's goals.
  */
-function createGoalGroupRows(table, totalColumns, score, goalGroup) {
+function createGoalGroupRows(table, totalColumns, score, goalGroup, rowClass) {
     let groupText = goalGroup.title;
     if (goalGroup.description) {
         groupText = groupText + " - " + goalGroup.description;
@@ -619,7 +623,7 @@ function createGoalGroupRows(table, totalColumns, score, goalGroup) {
             document.getElementById('alert-dialog_text').innerText = "Enumerated goals not supported: " + goal.name;
             document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
         } else {
-            createScoreRows(table, totalColumns, score, goal);
+            createScoreRows(table, totalColumns, score, goal, rowClass);
         }
     }
 
@@ -1158,16 +1162,22 @@ function displayPageEnterScore() {
 
     const totalColumns = populateEnterScoreRubricTitles(table, true);
 
+    let rowClass = "odd";
     for (const ge of subjective_module.getCurrentCategory().goalElements) {
         if (ge.goalGroup) {
-            createGoalGroupRows(table, totalColumns, score, ge)
+            createGoalGroupRows(table, totalColumns, score, ge, rowClass);
         } else if (ge.goal) {
             if (ge.enumerated) {
                 document.getElementById('alert-dialog_text').innerText = "Enumerated goals not supported: " + goal.name;
                 document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
             } else {
-                createScoreRows(table, totalColumns, score, ge);
+                createScoreRows(table, totalColumns, score, ge, rowClass);
             }
+        }
+        if (rowClass == "odd") {
+            rowClass = "even";
+        } else {
+            rowClass = "odd";
         }
     }
 

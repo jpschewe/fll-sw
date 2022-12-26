@@ -164,3 +164,7 @@ footer button {
 #enter-score-comment-think-about-button {
     margin-left: 20px;
 }
+
+#enter-score_score-table .odd {
+    background-color: lightgrey;
+}
