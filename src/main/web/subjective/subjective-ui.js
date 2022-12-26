@@ -1212,7 +1212,7 @@ function displayPageEnterScore() {
     recomputeTotal();
 
     // hide comments by default
-    hideComments();
+    hideScoreEntryComments();
 
     // needs to be after displayPage as that uninstalls the warning
     installWarnOnReload();
@@ -1454,6 +1454,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // navigate to pages when the anchor changes
     window.addEventListener('hashchange', navigateToPage);
 });
+
+function hideScoreEntryComments() {
+    const displayCommentsButton = document.getElementById("enter-score_show-comments");
+    const hide = true;
+    displayOrHideCommentsOrNotes(hide, displayCommentsButton, '.comments-display');
+}
 
 function toggleScoreEntryComments() {
     const displayCommentsButton = document.getElementById("enter-score_show-comments");
