@@ -85,11 +85,15 @@ span.sliderTickMark {
     border: solid 2px black;
 }
 
-#side-panel_close {
+#side-panel_bottom {
     bottom: 0;
     left: 0;
     right: 0;
     position: absolute;
+}
+
+#side-panel_server-status.online {
+    background: lightgreen;
 }
 
 #side-panel_open {

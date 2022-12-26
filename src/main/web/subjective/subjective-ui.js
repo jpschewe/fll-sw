@@ -1442,10 +1442,15 @@ function displayOrHideComments(hide) {
 }
 
 function postServerStatusCallback() {
+    const sidePanelServerStatus = document.getElementById('side-panel_server-status');
     if (server_online) {
         uninstallWarnOnReload();
+        sidePanelServerStatus.innerText = "Online";
+        sidePanelServerStatus.classList.add("online");
     } else {
         installWarnOnReload();
+        sidePanelServerStatus.innerText = "Offline";
+        sidePanelServerStatus.classList.remove("online");
     }
 
     // schedule another update check in 30 seconds
