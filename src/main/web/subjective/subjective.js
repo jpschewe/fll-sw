@@ -31,6 +31,7 @@ const subjective_module = {}
     let _currentTeam;
     let _scoreEntryBackPage;
     let _categoryColumnMapping;
+    let _server_checks_running = 0;
 
     function _init_variables() {
         _subjectiveCategories = {};
@@ -809,7 +810,7 @@ const subjective_module = {}
         subjective_module.uploadData = function(scoresSuccess, scoresFail, judgesSuccess, judgesFail,
             loadSuccess, loadFail) {
 
-            subjective_module.checkServerStatus(function() {
+            subjective_module.checkServerStatus(true, function() {
                 fetch("CheckAuth").then(checkJsonResponse).then(function(data) {
                     if (data.authenticated) {
                         subjective_module
@@ -885,10 +886,17 @@ const subjective_module = {}
         /**
          * Check if the server is reachable.
          *
+         * @param force_check if true, then execute the check even if another one is pending
          * @param onlineCallback function to execute if the server is reachable
          * @param offlineCallback function to execute if the server is not reachable 
          */
-        subjective_module.checkServerStatus = function(onlineCallback, offlineCallback) {
+        subjective_module.checkServerStatus = function(force_check, onlineCallback, offlineCallback) {
+            if (!force_check && _server_checks_running > 0) {
+                subjective_module.log("Skipping server check while another one is active and force is not true");
+                return;
+            }
+            ++_server_checks_running;
+
             subjective_module.log("Checking server status");
 
             const FETCH_TIMEOUT = 35000; // milliseconds, need 35 seconds for chromebooks (not sure why)            
@@ -907,26 +915,30 @@ const subjective_module = {}
                 }),
                 cache: "no-store",
                 signal: controller.signal
-            }).then(function(response) {
-                subjective_module.log("Response received");
+            }).
+                then((response) => {
+                    subjective_module.log("Response received");
 
-                // Clear the timeout as cleanup
-                clearTimeout(timeout);
-                if (!response.ok) {
-                    throw new Error(`HTTP error: ${response.status}`);
-                } else {
-                    subjective_module.log('fetch good! ' + response);
-                    subjective_module.log("server online");
-                    onlineCallback();
-                }
-                // no need to resolve the response object as we know the server is online, we don't need the data in the response
-            })
-                .catch(function(err) {
+                    // Clear the timeout as cleanup
+                    clearTimeout(timeout);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error: ${response.status}`);
+                    } else {
+                        subjective_module.log('fetch good! ' + response);
+                        subjective_module.log("server online");
+                        onlineCallback();
+                    }
+                    // no need to resolve the response object as we know the server is online, we don't need the data in the response
+                }).
+                catch((err) => {
                     subjective_module.log('Server offline (fetch error): ' + err);
 
                     // Error: response error, request timeout or runtime error
                     subjective_module.log("server offline: " + err);
                     offlineCallback();
+                }).
+                finally(() => {
+                    _server_checks_running = Math.min(0, --_server_checks_running);
                 });
         },
 

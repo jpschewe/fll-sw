@@ -1,3 +1,5 @@
+* #1061 - Warn the user when reloading the subjective application and not connected to the server
+
 Release 17.2.0
 ==============
 * #523 - Allow one to search for teams on the team edit page

@@ -6,6 +6,10 @@
 
 "use strict";
 
+
+
+let server_online = false;
+
 let alertCallback = null;
 
 /**
@@ -694,16 +698,25 @@ function enterNoShow() {
     window.location = subjective_module.getScoreEntryBackPage();
 }
 
+/**
+ * Install warning for user.
+ */
 function installWarnOnReload() {
+console.log("Installing warning on reload");
     window.onbeforeunload = function() {
         // most browsers won't show the custom message, but we can try
         // returning anything other than undefined will cause the user to be prompted
-        return "Are you sure you want to leave?";
+        return "Are you sure you want to leave? You will likely lose data.";
     };
 }
 
+/**
+ * Remove the user warning, if the server is online
+ */
 function uninstallWarnOnReload() {
-    window.onbeforeunload = undefined;
+    if (server_online) {
+        window.onbeforeunload = undefined;
+    }
 }
 
 function rangeSort(a, b) {
@@ -966,7 +979,7 @@ function displayPageTop() {
     removeChildren(document.getElementById("index-page_messages"));
 
     document.getElementById("wait-dialog").classList.remove("fll-sw-ui-inactive");
-    subjective_module.checkServerStatus(serverLoadPage, promptForJudgingGroup);
+    subjective_module.checkServerStatus(true, serverLoadPage, promptForJudgingGroup);
     updateMainHeader();
 }
 
@@ -1415,9 +1428,43 @@ function displayOrHideComments(hide) {
     }
 }
 
+function postServerStatusCallback() {
+    if (server_online) {
+        uninstallWarnOnReload();
+    } else {
+        installWarnOnReload();
+    }
 
+    // TODO: do something with the side panel buttons
+
+    // schedule another update check in 30 seconds
+    setTimeout(updateServerStatus, 30 * 1000);
+}
+
+function updateServerStatus() {
+    subjective_module.checkServerStatus(false,
+        () => {
+            if (!server_online) {
+                subjective_module.log("Server is now online");
+            }
+            server_online = true;
+            postServerStatusCallback();
+        },
+        () => {
+            if (server_online) {
+                subjective_module.log("Server is now offline");
+            }
+            server_online = false;
+            postServerStatusCallback();
+        }
+    );
+}
+
+
+// fires after DOMContentLoaded and all resources are loaded
 window.addEventListener('load', () => {
     // initial state
     updateMainHeader();
     navigateToPage();
+    updateServerStatus();
 });
