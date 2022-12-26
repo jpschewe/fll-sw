@@ -102,6 +102,9 @@ function checkTournament() {
 }
 
 function serverLoadPage() {
+    server_online = true;
+    postServerStatusCallback();
+
     document.getElementById("wait-dialog").classList.add("fll-sw-ui-inactive");
 
     const chooseClear = document.getElementById("index-page_choose_clear");

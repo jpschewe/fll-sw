@@ -8,7 +8,8 @@
 
 
 
-let server_online = false;
+// start online under the assumption that it's just been loaded from the server
+let server_online = true;
 
 let alertCallback = null;
 
@@ -1008,7 +1009,11 @@ function displayPageTop() {
     removeChildren(document.getElementById("index-page_messages"));
 
     document.getElementById("wait-dialog").classList.remove("fll-sw-ui-inactive");
-    subjective_module.checkServerStatus(true, serverLoadPage, promptForJudgingGroup);
+    subjective_module.checkServerStatus(true, serverLoadPage, function() {
+        server_online = false;
+        postServerStatusCallback();
+        promptForJudgingGroup()
+    });
     updateMainHeader();
 }
 
@@ -1243,56 +1248,68 @@ document.addEventListener("DOMContentLoaded", () => {
         const waitDialog = document.getElementById("wait-dialog");
         waitDialog.classList.remove("fll-sw-ui-inactive");
 
-        subjective_module.uploadData(function(result) {
-            // scoresSuccess
-            document.getElementById('alert-dialog_text').innerText = "Uploaded " + result.numModified + " scores."
-                + result.message;
-            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
-        }, //
-            function(result) {
-                // scoresFail
+        subjective_module.checkServerStatus(true, function() {
+            server_online = true;
+            postServerStatusCallback();
 
-                let message;
-                if (null == result) {
-                    message = "Unknown server error";
-                } else {
-                    message = result.message;
-                }
-
-                document.getElementById('alert-dialog_text').innerText = "Failed to upload scores: " + message;
+            subjective_module.uploadData(function(result) {
+                // scoresSuccess
+                document.getElementById('alert-dialog_text').innerText = "Uploaded " + result.numModified + " scores."
+                    + result.message;
                 document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
             }, //
-            function(result) {
-                // judgesSuccess
-                subjective_module.log("Judges modified: " + result.numModifiedJudges
-                    + " new: " + result.numNewJudges);
-            }
+                function(result) {
+                    // scoresFail
 
-            ,//
-            function(result) {
-                // judgesFail
-                let message;
-                if (null == result) {
-                    message = "Unknown server error";
-                } else {
-                    message = result.message;
+                    let message;
+                    if (null == result) {
+                        message = "Unknown server error";
+                    } else {
+                        message = result.message;
+                    }
+
+                    document.getElementById('alert-dialog_text').innerText = "Failed to upload scores: " + message;
+                    document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+                }, //
+                function(result) {
+                    // judgesSuccess
+                    subjective_module.log("Judges modified: " + result.numModifiedJudges
+                        + " new: " + result.numNewJudges);
                 }
 
-                document.getElementById('alert-dialog_text').innerText = "Failed to upload judges: " + message
-                document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
-            }, //
+                ,//
+                function(result) {
+                    // judgesFail
+                    let message;
+                    if (null == result) {
+                        message = "Unknown server error";
+                    } else {
+                        message = result.message;
+                    }
+
+                    document.getElementById('alert-dialog_text').innerText = "Failed to upload judges: " + message
+                    document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+                }, //
+                function() {
+                    // loadSuccess
+                    populateChooseJudgingGroup();
+                    waitDialog.classList.add("fll-sw-ui-inactive");
+                }, //
+                function(message) {
+                    // loadFail
+                    populateChooseJudgingGroup();
+
+                    waitDialog.classList.add("fll-sw-ui-inactive");
+
+                    document.getElementById('alert-dialog_text').innerText = "Failed to load scores from server: " + message
+                    document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+                });
+        },
             function() {
-                // loadSuccess
-                populateChooseJudgingGroup();
-                waitDialog.classList.add("fll-sw-ui-inactive");
-            }, //
-            function(message) {
-                // loadFail
-                populateChooseJudgingGroup();
+                server_online = false;
+                postServerStatusCallback();
 
-                waitDialog.classList.add("fll-sw-ui-inactive");
-
-                document.getElementById('alert-dialog_text').innerText = "Failed to load scores from server: " + message
+                document.getElementById('alert-dialog_text').innerText = "Server is offline, cannot synchronize.";
                 document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
             });
     });
