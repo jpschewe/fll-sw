@@ -110,9 +110,7 @@ public class SubjectiveSheets extends BaseFLLServlet {
         LOGGER.error(sqle.getMessage(), sqle);
         throw new RuntimeException(sqle);
       }
-    } else
-
-    {
+    } else {
       throw new FLLRuntimeException("You must specify a subjective category name in the URL");
     }
   }
