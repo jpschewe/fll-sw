@@ -447,6 +447,13 @@ const subjective_module = {}
             return _currentCategory;
         },
 
+        /**
+         * @return current category column, may be null
+         */
+        subjective_module.getCurrentCategoryColumn = function() {
+            return _currentCategoryColumn;
+        },
+
         subjective_module.setCurrentCategory = function(category, column) {
             _currentCategory = category;
             _currentCategoryColumn = column;

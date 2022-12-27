@@ -88,6 +88,7 @@ public class SubjectiveSheets extends BaseFLLServlet {
 
         final Collection<CategoryColumnMapping> mappings = CategoryColumnMapping.load(connection, currentTournamentID);
 
+        // FIXME needs column name in the URL in addition to the category name
         final Optional<CategoryColumnMapping> categoryMapping = mappings.stream()
                                                                         .filter(m -> m.getCategoryName()
                                                                                       .equals(category.getName()))

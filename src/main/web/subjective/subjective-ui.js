@@ -7,7 +7,6 @@
 "use strict";
 
 
-
 // start online under the assumption that it's just been loaded from the server
 let server_online = true;
 
@@ -66,7 +65,7 @@ function populateChooseCategory() {
             button.classList.add("center");
             button.classList.add("fll-sw-button");
 
-            if (columns.lenth > 1) {
+            if (columns.length > 1) {
                 button.innerText = category.title + " - " + column;
             } else {
                 button.innerText = category.title;
@@ -900,7 +899,13 @@ function updateMainHeader() {
     if (null == category) {
         categoryTitle = "No Category";
     } else {
-        categoryTitle = category.title;
+        const columns = subjective_module
+            .getScheduleColumnsForCategory(category.name);
+        if (columns.length > 1) {
+            categoryTitle = category.title + " " + subjective_module.getCurrentCategoryColumn();
+        } else {
+            categoryTitle = category.title;
+        }
     }
     document.getElementById("header-main_category-name").innerText = categoryTitle;
 

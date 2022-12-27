@@ -12,6 +12,7 @@ import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -57,6 +58,8 @@ class ChooseScheduleHeadersDialog extends JDialog {
   private final List<JComboBox<String>> performanceRoundTables;
 
   private final Map<SubjectiveScoreCategory, JComboBox<String>> subjectiveCategories = new HashMap<>();
+
+  private final Map<SubjectiveScoreCategory, JComboBox<String>> subjectiveCategories2 = new HashMap<>();
 
   /**
    * @param owner the owner for the dialog
@@ -142,9 +145,16 @@ class ChooseScheduleHeadersDialog extends JDialog {
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
       panel.add(new JLabel(category.getTitle()));
 
+      final JPanel selectPanel = new JPanel(new GridLayout(0, 2));
+      panel.add(selectPanel);
+
       final JComboBox<String> columnSelect = new JComboBox<>(requiredHeaderNames);
-      panel.add(columnSelect);
+      selectPanel.add(columnSelect);
       subjectiveCategories.put(category, columnSelect);
+
+      final JComboBox<String> columnSelect2 = new JComboBox<>(notRequiredHeaderNames);
+      selectPanel.add(columnSelect2);
+      subjectiveCategories2.put(category, columnSelect2);
     }
 
     final Box buttonBox = Box.createHorizontalBox();
@@ -169,13 +179,25 @@ class ChooseScheduleHeadersDialog extends JDialog {
    */
   public ColumnInformation createColumnInformation(final int headerRowIndex,
                                                    final @Nullable String[] headerRow) {
-    final Collection<CategoryColumnMapping> subjectiveColumnMappings = subjectiveCategories.entrySet().stream() //
-                                                                                           .map(e -> new CategoryColumnMapping(e.getKey()
-                                                                                                                                .getName(),
-                                                                                                                               e.getValue()
-                                                                                                                                .getItemAt(e.getValue()
-                                                                                                                                            .getSelectedIndex()))) //
-                                                                                           .collect(Collectors.toList());
+    final Collection<CategoryColumnMapping> subjectiveColumnMappings = new LinkedList<>();
+
+    for (final Map.Entry<SubjectiveScoreCategory, JComboBox<String>> entry : subjectiveCategories.entrySet()) {
+      final SubjectiveScoreCategory category = entry.getKey();
+      final JComboBox<String> select = entry.getValue();
+      final String scheduleColumn = select.getItemAt(select.getSelectedIndex());
+      final CategoryColumnMapping mapping = new CategoryColumnMapping(category.getName(), scheduleColumn);
+      subjectiveColumnMappings.add(mapping);
+    }
+
+    for (final Map.Entry<SubjectiveScoreCategory, JComboBox<String>> entry2 : subjectiveCategories2.entrySet()) {
+      final SubjectiveScoreCategory category = entry2.getKey();
+      final JComboBox<String> select2 = entry2.getValue();
+      final String scheduleColumn2 = select2.getItemAt(select2.getSelectedIndex());
+      if (!"".equals(scheduleColumn2)) {
+        final CategoryColumnMapping mapping2 = new CategoryColumnMapping(category.getName(), scheduleColumn2);
+        subjectiveColumnMappings.add(mapping2);
+      }
+    }
 
     final String[] perfColumn = performanceRounds.stream().map(c -> c.getItemAt(c.getSelectedIndex()))
                                                  .collect(Collectors.toList()).toArray(new String[0]);

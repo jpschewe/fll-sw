@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -33,6 +33,7 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
+import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -122,15 +123,20 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
         perfTableColumn[i] = WebUtils.getNonNullRequestParameter(request, String.format("perfTable%d", round));
       }
 
-      final Collection<CategoryColumnMapping> subjectiveColumnMappings = challenge.getSubjectiveCategories().stream() //
-                                                                                  .map(cat -> {
-                                                                                    final String column = WebUtils.getNonNullRequestParameter(request,
-                                                                                                                                              String.format("%s:header",
-                                                                                                                                                            cat.getName()));
-                                                                                    return new CategoryColumnMapping(cat.getName(),
-                                                                                                                     column);
-                                                                                  }) //
-                                                                                  .collect(Collectors.toList());
+      final Collection<CategoryColumnMapping> subjectiveColumnMappings = new LinkedList<>();
+      for (final SubjectiveScoreCategory category : challenge.getSubjectiveCategories()) {
+        final String column = WebUtils.getNonNullRequestParameter(request,
+                                                                  String.format("%s:header", category.getName()));
+        final CategoryColumnMapping mapping = new CategoryColumnMapping(category.getName(), column);
+        subjectiveColumnMappings.add(mapping);
+
+        final String column2 = WebUtils.getNonNullRequestParameter(request,
+                                                                   String.format("%s:header2", category.getName()));
+        if (!"none".equals(column2)) {
+          final CategoryColumnMapping mapping2 = new CategoryColumnMapping(category.getName(), column2);
+          subjectiveColumnMappings.add(mapping2);
+        }
+      }
 
       final ColumnInformation columnInfo = new ColumnInformation(uploadScheduleData.getHeaderRowIndex(), headerLine,
                                                                  teamNumber,

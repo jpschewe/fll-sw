@@ -39,7 +39,6 @@ import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -999,18 +998,21 @@ public class SchedulerUI extends JFrame {
           return;
         }
 
-        final Map<ScoreCategory, String> categoryToSchedule = new HashMap<>();
+        final Map<ScoreCategory, Collection<String>> categoryToScheduleColumns = new HashMap<>();
         final Map<ScoreCategory, @Nullable String> filenameSuffixes = new HashMap<>();
         for (final SubjectiveScoreCategory scoreCategory : description.getSubjectiveCategories()) {
-          final Optional<CategoryColumnMapping> scheduleColumn = categoryMappings.stream()
-                                                                                 .filter(mapping -> mapping.getCategoryName()
-                                                                                                           .equals(scoreCategory.getName()))
-                                                                                 .findFirst();
-          if (!scheduleColumn.isPresent()) {
+          final Collection<CategoryColumnMapping> scheduleColumnMappings = categoryMappings.stream()
+                                                                                           .filter(mapping -> mapping.getCategoryName()
+                                                                                                                     .equals(scoreCategory.getName()))
+                                                                                           .toList();
+          if (scheduleColumnMappings.isEmpty()) {
             throw new FLLInternalException("Did not find a schedule column for "
                 + scoreCategory.getTitle());
           }
-          categoryToSchedule.put(scoreCategory, scheduleColumn.get().getScheduleColumn());
+          final Collection<String> scheduleColumns = scheduleColumnMappings.stream()
+                                                                           .map(CategoryColumnMapping::getScheduleColumn)
+                                                                           .toList();
+          categoryToScheduleColumns.put(scoreCategory, scheduleColumns);
           filenameSuffixes.put(scoreCategory, mapDialog.getFilenameSuffixForCategory(scoreCategory));
         }
 
@@ -1019,7 +1021,7 @@ public class SchedulerUI extends JFrame {
           protected Boolean doInBackground() {
             try {
               getScheduleData().outputSubjectiveSheets(tournamentName, directory.getAbsolutePath(), baseFilename,
-                                                       description, categoryToSchedule, filenameSuffixes);
+                                                       description, categoryToScheduleColumns, filenameSuffixes);
               return true;
             } catch (final IOException e) {
               final Formatter errorFormatter = new Formatter();
