@@ -7,7 +7,6 @@
 "use strict";
 
 
-
 // start online under the assumption that it's just been loaded from the server
 let server_online = true;
 
@@ -56,17 +55,27 @@ function populateChooseCategory() {
 
     const categories = subjective_module.getSubjectiveCategories();
     for (const category of categories) {
-        const button = document.createElement("a");
-        container.appendChild(button);
-        button.classList.add("wide");
-        button.classList.add("center");
-        button.classList.add("fll-sw-button");
-        button.innerText = category.title;
-        button.addEventListener('click', function() {
-            subjective_module.setCurrentCategory(category);
-            updateMainHeader();
-            window.location = "#choose-judge";
-        });
+        const columns = subjective_module
+            .getScheduleColumnsForCategory(category.name);
+
+        for (const column of columns) {
+            const button = document.createElement("a");
+            container.appendChild(button);
+            button.classList.add("wide");
+            button.classList.add("center");
+            button.classList.add("fll-sw-button");
+
+            if (columns.length > 1) {
+                button.innerText = category.title + " - " + column;
+            } else {
+                button.innerText = category.title;
+            }
+            button.addEventListener('click', function() {
+                subjective_module.setCurrentCategory(category, column);
+                updateMainHeader();
+                window.location = "#choose-judge";
+            });
+        }
     }
 }
 
@@ -894,7 +903,13 @@ function updateMainHeader() {
     if (null == category) {
         categoryTitle = "No Category";
     } else {
-        categoryTitle = category.title;
+        const columns = subjective_module
+            .getScheduleColumnsForCategory(category.name);
+        if (columns.length > 1) {
+            categoryTitle = category.title + " " + subjective_module.getCurrentCategoryColumn();
+        } else {
+            categoryTitle = category.title;
+        }
     }
     document.getElementById("header-main_category-name").innerText = categoryTitle;
 

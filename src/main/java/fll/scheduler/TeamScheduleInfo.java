@@ -248,7 +248,7 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * Get the subjective time by name.
    *
-   * @param name name of a judging station
+   * @param name name of a subjective station (schedule column)
    * @return null if no time with that name found
    */
   public @Nullable SubjectiveTime getSubjectiveTimeByName(final String name) {
@@ -256,7 +256,7 @@ public final class TeamScheduleInfo implements Serializable {
   }
 
   /**
-   * @return unmodifiable set of the subjective stations
+   * @return unmodifiable set of the subjective stations (schedule columns)
    */
   public Set<String> getKnownSubjectiveStations() {
     return Collections.unmodifiableSet(subjectiveTimes.keySet());

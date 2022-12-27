@@ -792,36 +792,51 @@ public class TournamentSchedule implements Serializable {
                                      final String dir,
                                      final String baseFileName,
                                      final ChallengeDescription description,
-                                     @Nonnull final Map<ScoreCategory, String> categoryToSchedule,
+                                     @Nonnull final Map<ScoreCategory, Collection<String>> categoryToSchedule,
                                      @Nonnull final Map<ScoreCategory, @Nullable String> filenameSuffixes)
       throws IOException {
 
     // setup the sheets from the sucked in xml
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+      final Collection<String> scheduleColumns = categoryToSchedule.get(category);
       final String suffix = filenameSuffixes.get(category);
+      if (null == scheduleColumns) {
+        final String filename = dir
+            + File.separator
+            + baseFileName
+            + "-"
+            + category.getName()
+            + (null != suffix ? "_"
+                + suffix : "")
+            + ".pdf";
+        try (OutputStream stream = new FileOutputStream(filename)) {
+          SubjectivePdfWriter.createDocumentForSchedule(stream, description, tournamentName, category, null, schedule);
+        }
+      } else {
+        for (final String scheduleColumn : scheduleColumns) {
+          final String filename = dir
+              + File.separator
+              + baseFileName
+              + "-"
+              + category.getName()
+              + (scheduleColumns.size() > 1 ? ""
+                  : "-"
+                      + scheduleColumn)
+              + (null != suffix ? "_"
+                  + suffix : "")
+              + ".pdf";
+          // sort the schedule by the category we're working with
+          if (null != scheduleColumn) {
+            Collections.sort(schedule, new SubjectiveComparatorByAwardGroup(scheduleColumn));
+          }
 
-      final String filename = dir
-          + File.separator
-          + baseFileName
-          + "-"
-          + category.getName()
-          + (null != suffix ? "_"
-              + suffix : "")
-          + ".pdf";
-
-      // sort the schedule by the category we're working with
-      final String subjectiveStation = categoryToSchedule.get(category);
-      if (null != subjectiveStation) {
-        Collections.sort(schedule, new SubjectiveComparatorByAwardGroup(subjectiveStation));
-      }
-
-      final String schedulerColumn = categoryToSchedule.get(category);
-
-      try (OutputStream stream = new FileOutputStream(filename)) {
-        SubjectivePdfWriter.createDocumentForSchedule(stream, description, tournamentName, category, schedulerColumn,
-                                                      schedule);
-      }
-    }
+          try (OutputStream stream = new FileOutputStream(filename)) {
+            SubjectivePdfWriter.createDocumentForSchedule(stream, description, tournamentName, category, scheduleColumn,
+                                                          schedule);
+          }
+        } // foreach schedule column
+      } // mappings found
+    } // foreach category
   }
 
   /**
@@ -872,7 +887,7 @@ public class TournamentSchedule implements Serializable {
     private final String name;
 
     /**
-     * @param name the award group to sort by
+     * @param name the schedule column to sort by
      */
     public SubjectiveComparatorByAwardGroup(final String name) {
       this.name = name;

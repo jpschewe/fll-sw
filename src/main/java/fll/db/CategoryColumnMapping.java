@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import fll.util.FLLInternalException;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Mapping between subjective category and schedule columns.
@@ -62,26 +61,21 @@ public class CategoryColumnMapping implements Serializable {
                            final int tournamentId,
                            final Collection<CategoryColumnMapping> categoryColumnMappings)
       throws SQLException {
-    PreparedStatement insert = null;
-    PreparedStatement delete = null;
-    try {
-      delete = connection.prepareStatement("DELETE FROM category_schedule_column WHERE tournament = ?");
+    try (
+        PreparedStatement delete = connection.prepareStatement("DELETE FROM category_schedule_column WHERE tournament = ?")) {
       delete.setInt(1, tournamentId);
       delete.executeUpdate();
+    }
 
-      insert = connection.prepareStatement("INSERT INTO category_schedule_column" //
-          + " (tournament, category, schedule_column)" //
-          + " VALUES(?, ?, ?)");
+    try (PreparedStatement insert = connection.prepareStatement("INSERT INTO category_schedule_column" //
+        + " (tournament, category, schedule_column)" //
+        + " VALUES(?, ?, ?)")) {
       insert.setInt(1, tournamentId);
       for (final CategoryColumnMapping mapping : categoryColumnMappings) {
         insert.setString(2, mapping.getCategoryName());
         insert.setString(3, mapping.getScheduleColumn());
         insert.executeUpdate();
       }
-
-    } finally {
-      SQLFunctions.close(delete);
-      SQLFunctions.close(insert);
     }
   }
 
@@ -98,25 +92,21 @@ public class CategoryColumnMapping implements Serializable {
       throws SQLException {
     final Collection<CategoryColumnMapping> mappings = new LinkedList<>();
 
-    PreparedStatement get = null;
-    ResultSet found = null;
-    try {
-      get = connection.prepareStatement("SELECT category, schedule_column FROM category_schedule_column WHERE tournament = ?");
+    try (
+        PreparedStatement get = connection.prepareStatement("SELECT category, schedule_column FROM category_schedule_column WHERE tournament = ?")) {
       get.setInt(1, tournamentId);
-      found = get.executeQuery();
-      while (found.next()) {
-        final String category = found.getString(1);
-        final String column = found.getString(2);
-        if (null == category
-            || null == column) {
-          throw new FLLInternalException("Inconsistent database, category or schedule_column is null in category_schedule_column");
+      try (ResultSet found = get.executeQuery()) {
+        while (found.next()) {
+          final String category = found.getString(1);
+          final String column = found.getString(2);
+          if (null == category
+              || null == column) {
+            throw new FLLInternalException("Inconsistent database, category or schedule_column is null in category_schedule_column");
+          }
+          final CategoryColumnMapping map = new CategoryColumnMapping(category, column);
+          mappings.add(map);
         }
-        final CategoryColumnMapping map = new CategoryColumnMapping(category, column);
-        mappings.add(map);
       }
-    } finally {
-      SQLFunctions.close(found);
-      SQLFunctions.close(get);
     }
 
     return mappings;

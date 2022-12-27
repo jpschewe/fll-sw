@@ -124,17 +124,18 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
                         </select>
                     </td>
                 </tr>
-                <td bgcolor='yellow'>Practice
-                    ${practiceLoopStatus.index} table</td>
-                <td>
-                    <select
-                        name='practiceTable${practiceLoopStatus.index}'>
-                        <c:forEach items="${spreadsheetHeaderNames}"
-                            var="fileHeader">
-                            <option value="${fileHeader}">${fileHeader}</option>
-                        </c:forEach>
-                    </select>
-                </td>
+                <tr>
+                    <td bgcolor='yellow'>Practice
+                        ${practiceLoopStatus.index} table</td>
+                    <td>
+                        <select
+                            name='practiceTable${practiceLoopStatus.index}'>
+                            <c:forEach items="${spreadsheetHeaderNames}"
+                                var="fileHeader">
+                                <option value="${fileHeader}">${fileHeader}</option>
+                            </c:forEach>
+                        </select>
+                    </td>
                 </tr>
 
             </c:forEach>
@@ -153,16 +154,17 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
                         </select>
                     </td>
                 </tr>
-                <td bgcolor='yellow'>Performance
-                    ${perfLoopStatus.index} table</td>
-                <td>
-                    <select name='perfTable${perfLoopStatus.index}'>
-                        <c:forEach items="${spreadsheetHeaderNames}"
-                            var="fileHeader">
-                            <option value="${fileHeader}">${fileHeader}</option>
-                        </c:forEach>
-                    </select>
-                </td>
+                <tr>
+                    <td bgcolor='yellow'>Performance
+                        ${perfLoopStatus.index} table</td>
+                    <td>
+                        <select name='perfTable${perfLoopStatus.index}'>
+                            <c:forEach items="${spreadsheetHeaderNames}"
+                                var="fileHeader">
+                                <option value="${fileHeader}">${fileHeader}</option>
+                            </c:forEach>
+                        </select>
+                    </td>
                 </tr>
 
             </c:forEach>
@@ -178,6 +180,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
             <tr>
                 <th>Subjective Category</th>
                 <th>Data file column name</th>
+                <th>2nd Data file column name (optional)</th>
             </tr>
             <c:forEach
                 items="${challengeDescription.subjectiveCategories}"
@@ -188,6 +191,19 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
 
                     <td>
                         <select name='${subcat.name}:header'>
+
+                            <c:forEach items="${spreadsheetHeaderNames}"
+                                var="subjHeader">
+                                <option value='${subjHeader}'>${subjHeader}</option>
+                            </c:forEach>
+                            <!-- foreach data file header -->
+
+                        </select>
+                    </td>
+
+                    <td>
+                        <select name='${subcat.name}:header2'>
+                            <option value="none">None</option>
 
                             <c:forEach items="${spreadsheetHeaderNames}"
                                 var="subjHeader">
