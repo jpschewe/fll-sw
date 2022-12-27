@@ -24,6 +24,7 @@ const subjective_module = {}
     let _schedule;
     let _currentJudgingGroup;
     let _currentCategory;
+    let _currentCategoryColumn;
     let _judges;
     let _currentJudge;
     let _allScores;
@@ -41,6 +42,7 @@ const subjective_module = {}
         _schedule = null;
         _currentJudgingGroup = null;
         _currentCategory = null;
+        _currentCategoryColumn = null;
         _judges = [];
         _currentJudge = null;
         _allScores = {};
@@ -86,6 +88,10 @@ const subjective_module = {}
         value = fllStorage.get(STORAGE_PREFIX, "_currentCategory");
         if (null != value) {
             _currentCategory = value;
+        }
+        value = fllStorage.get(STORAGE_PREFIX, "_currentCategoryColumn");
+        if (null != value) {
+            _currentCategoryColumn = value;
         }
 
         value = fllStorage.get(STORAGE_PREFIX, "_judges");
@@ -135,6 +141,7 @@ const subjective_module = {}
         fllStorage.set(STORAGE_PREFIX, "_currentJudgingGroup",
             _currentJudgingGroup);
         fllStorage.set(STORAGE_PREFIX, "_currentCategory", _currentCategory);
+        fllStorage.set(STORAGE_PREFIX, "_currentCategoryColumn", _currentCategoryColumn);
         fllStorage.set(STORAGE_PREFIX, "_judges", _judges);
         fllStorage.set(STORAGE_PREFIX, "_currentJudge", _currentJudge);
         fllStorage.set(STORAGE_PREFIX, "_allScores", _allScores);
@@ -440,8 +447,9 @@ const subjective_module = {}
             return _currentCategory;
         },
 
-        subjective_module.setCurrentCategory = function(v) {
-            _currentCategory = v;
+        subjective_module.setCurrentCategory = function(category, column) {
+            _currentCategory = category;
+            _currentCategoryColumn = column;
 
             _teamTimeCache = {};
 
@@ -662,18 +670,18 @@ const subjective_module = {}
         },
 
         /**
-         * Get the schedule column for the specified category name.
+         * Get the schedule columns for the specified category name.
          */
-        subjective_module.getScheduleColumnForCategory = function(categoryName) {
-            let column = null;
+        subjective_module.getScheduleColumnsForCategory = function(categoryName) {
+            let columns = [];
 
             for (const mapping of _categoryColumnMapping) {
                 if (mapping.categoryName == categoryName) {
-                    column = mapping.scheduleColumn;
+                    columns.push(mapping.scheduleColumn);
                 }
             }
 
-            return column;
+            return columns;
         },
 
         /**
@@ -697,10 +705,8 @@ const subjective_module = {}
                 retval = null;
             } else {
                 let time = null;
-                const column = subjective_module
-                    .getScheduleColumnForCategory(_currentCategory.name);
                 for (const value of schedInfo.subjectiveTimes) {
-                    if (value.name == column) {
+                    if (value.name == _currentCategoryColumn) {
                         time = value.time;
                     }
                 }

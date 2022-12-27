@@ -56,17 +56,27 @@ function populateChooseCategory() {
 
     const categories = subjective_module.getSubjectiveCategories();
     for (const category of categories) {
-        const button = document.createElement("a");
-        container.appendChild(button);
-        button.classList.add("wide");
-        button.classList.add("center");
-        button.classList.add("fll-sw-button");
-        button.innerText = category.title;
-        button.addEventListener('click', function() {
-            subjective_module.setCurrentCategory(category);
-            updateMainHeader();
-            window.location = "#choose-judge";
-        });
+        const columns = subjective_module
+            .getScheduleColumnsForCategory(category.name);
+
+        for (const column of columns) {
+            const button = document.createElement("a");
+            container.appendChild(button);
+            button.classList.add("wide");
+            button.classList.add("center");
+            button.classList.add("fll-sw-button");
+
+            if (columns.lenth > 1) {
+                button.innerText = category.title + " - " + column;
+            } else {
+                button.innerText = category.title;
+            }
+            button.addEventListener('click', function() {
+                subjective_module.setCurrentCategory(category, column);
+                updateMainHeader();
+                window.location = "#choose-judge";
+            });
+        }
     }
 }
 
