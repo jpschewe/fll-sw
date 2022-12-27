@@ -1506,7 +1506,7 @@ public class GreedySolver {
           + 1);
     }
 
-    // 12/27/2021 JPS - This assumes that the subjective category names match the
+    // TODO 12/27/2021 JPS - This assumes that the subjective category names match the
     // columns. There is a good chance this isn't going to be true and something
     // smarter should be done using a challenge description
     final Collection<CategoryColumnMapping> subjectiveColumnMappings = solverParameters.getSubjectiveStations().stream() //
