@@ -786,7 +786,7 @@ const subjective_module = {}
         },
 
         /**
-         * Upload all data to the server
+         * Upload all data to the server and then download the most recent data.
          * 
          * @param scoresSuccess
          *          called with a SubjectiveScoresServlet.UploadResult object on
@@ -810,52 +810,47 @@ const subjective_module = {}
         subjective_module.uploadData = function(scoresSuccess, scoresFail, judgesSuccess, judgesFail,
             loadSuccess, loadFail) {
 
-            subjective_module.checkServerStatus(true, function() {
-                fetch("CheckAuth").then(checkJsonResponse).then(function(data) {
-                    if (data.authenticated) {
-                        subjective_module
-                            .getServerTournament(function(serverTournament) {
-                                const storedTournament = subjective_module.getTournament();
-                                if (null == storedTournament) {
-                                    loadFail("Internal error, no saved tournament");
-                                } else if (storedTournament.name != serverTournament.name
-                                    || storedTournament.tournamentID != serverTournament.tournamentID) {
-                                    loadFail("Tournament mismatch local: "
-                                        + storedTournament.name + "("
-                                        + storedTournament.tournamentID + ")"
-                                        + " server: " + serverTournament.name + "("
-                                        + serverTournament.tournamentID + ")");
-                                } else {
-                                    const waitList = []
-                                    waitList.push(subjective_module.uploadScores(
-                                        scoresSuccess, scoresFail));
-                                    waitList.push(subjective_module.uploadJudges(
-                                        judgesSuccess, judgesFail));
+            fetch("CheckAuth").then(checkJsonResponse).then(function(data) {
+                if (data.authenticated) {
+                    subjective_module
+                        .getServerTournament(function(serverTournament) {
+                            const storedTournament = subjective_module.getTournament();
+                            if (null == storedTournament) {
+                                loadFail("Internal error, no saved tournament");
+                            } else if (storedTournament.name != serverTournament.name
+                                || storedTournament.tournamentID != serverTournament.tournamentID) {
+                                loadFail("Tournament mismatch local: "
+                                    + storedTournament.name + "("
+                                    + storedTournament.tournamentID + ")"
+                                    + " server: " + serverTournament.name + "("
+                                    + serverTournament.tournamentID + ")");
+                            } else {
+                                const waitList = [];
+                                waitList.push(subjective_module.uploadScores(
+                                    scoresSuccess, scoresFail));
+                                waitList.push(subjective_module.uploadJudges(
+                                    judgesSuccess, judgesFail));
 
-                                    Promise.all(waitList).then(function() {
-                                        subjective_module.loadFromServer(function() {
-                                            loadSuccess();
-                                        }, function() {
-                                            loadFail("Error getting updated scores");
-                                        }, false);
-                                    });
-                                }
-                            });
-                    } else {
-                        alertCallback = function() {
-                            // hide the spinning animation
-                            loadSuccess();
+                                Promise.all(waitList).then(function() {
+                                    subjective_module.loadFromServer(function() {
+                                        loadSuccess();
+                                    }, function() {
+                                        loadFail("Error getting updated scores");
+                                    }, false);
+                                });
+                            }
+                        });
+                } else {
+                    alertCallback = function() {
+                        // hide the spinning animation
+                        loadSuccess();
 
-                            window.open('../login.jsp', '_login');
-                        }
-                        document.getElementById("alert-dialog_text").innerText = "Your device has been logged out. A new window will be opened to the login page. Once you have logged in, close that window and synchronize again.";
-                        document.getElementById("alert-dialog").classList.remove("fll-sw-ui-inactive");
+                        window.open('../login.jsp', '_login');
                     }
-                });
-            }, // server online
-                function() {
-                    loadFail("Server is offline, please connect to the network before synchronizing");
-                }); // server offline
+                    document.getElementById("alert-dialog_text").innerText = "Your device has been logged out. A new window will be opened to the login page. Once you have logged in, close that window and synchronize again.";
+                    document.getElementById("alert-dialog").classList.remove("fll-sw-ui-inactive");
+                }
+            });
         },
 
         /**
