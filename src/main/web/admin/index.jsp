@@ -245,14 +245,38 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                             regular match play</a>
                     </li>
 
+                    <!-- subjective sheets -->
                     <c:forEach
                         items="${challengeDescription.subjectiveCategories}"
                         var="category">
-                        <li>
-                            <a
-                                href="<c:url value='SubjectiveSheets/${category.name}' />">Subjective
-                                sheets for ${category.title}</a>
+
+                        <c:set var="columns"
+                            value="${categoryNameToColumn[category.name]}" />
+
+                        <c:forEach items="${columns}" var="columnName">
+
+                            <c:choose>
+                                <c:when test="${columns.size() gt 1}">
+                                    <li>
+                                        <a
+                                            target="_${category.name}-${columnName}"
+                                            href="<c:url value='SubjectiveSheets/${category.name}/${columnName}'/>">Subjective
+                                            sheets for ${category.title}
+                                            schedule ${columnName}</a>
+                                    </li>
+                                </c:when>
+                                <c:otherwise>
+                                    <li>
+                                        <a target="_${category.name}"
+                                            href="<c:url value='SubjectiveSheets/${category.name}/${columnName}'/>">Subjective
+                                            sheets for ${category.title}</a>
+                                    </li>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:forEach>
+
                     </c:forEach>
+                    <!-- end subjective sheets -->
 
                 </ul>
             </c:if>
@@ -320,8 +344,8 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
 
 
         <li>
-            <a href='<c:url value="edit_select_team.jsp"/>'>Edit team
-                data</a>
+            <a href='<c:url value="edit_select_team.jsp"/>'>Edit
+                team data</a>
         </li>
 
 

@@ -10,20 +10,25 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import fll.Tournament;
+import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeDescription;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Populate context for admin index.
@@ -78,6 +83,13 @@ public final class AdminIndex {
       final boolean tablesAssigned = Tables.tablesAssigned(connection, currentTournamentID);
       pageContext.setAttribute("tablesAssigned", tablesAssigned);
 
+      final Collection<CategoryColumnMapping> mappings = CategoryColumnMapping.load(connection, currentTournamentID);
+      final Map<String, Collection<String>> categoryNameToColumn = new HashMap<>();
+      for (final CategoryColumnMapping mapping : mappings) {
+        categoryNameToColumn.computeIfAbsent(mapping.getCategoryName(), k -> new LinkedList<>())
+                            .add(mapping.getScheduleColumn());
+      }
+      pageContext.setAttribute("categoryNameToColumn", categoryNameToColumn);
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
           + sqle.getMessage()

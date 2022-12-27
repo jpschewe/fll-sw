@@ -9,23 +9,22 @@ package fll.web.admin;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.Tournament;
 import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
 import fll.documents.writers.SubjectivePdfWriter;
+import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
+import fll.scheduler.TournamentSchedule.SubjectiveComparatorByAwardGroup;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -36,6 +35,12 @@ import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Output the subjective sheets for a particular category. The category name is
@@ -64,7 +69,14 @@ public class SubjectiveSheets extends BaseFLLServlet {
     final String pathInfo = request.getPathInfo();
     if (null != pathInfo
         && pathInfo.length() > 1) {
-      final String subjectiveCategoryName = pathInfo.substring(1);
+      final String nameAndColumn = pathInfo.substring(1);
+      final String[] tokens = nameAndColumn.split("/");
+      if (tokens.length != 2) {
+        throw new FLLRuntimeException("Expecting category namd AND column in the URL");
+      }
+
+      final String categoryName = tokens[0];
+      final String columnName = tokens[1];
 
       try (Connection connection = datasource.getConnection()) {
         final int currentTournamentID = Queries.getCurrentTournament(connection);
@@ -79,33 +91,38 @@ public class SubjectiveSheets extends BaseFLLServlet {
 
         final Tournament tournament = Tournament.findTournamentByID(connection, currentTournamentID);
 
-        final SubjectiveScoreCategory category = description.getSubjectiveCategoryByName(subjectiveCategoryName);
+        final SubjectiveScoreCategory category = description.getSubjectiveCategoryByName(categoryName);
         if (null == category) {
           throw new FLLRuntimeException("A subjective category with name '"
-              + subjectiveCategoryName
+              + categoryName
               + "' does not exist");
         }
 
         final Collection<CategoryColumnMapping> mappings = CategoryColumnMapping.load(connection, currentTournamentID);
 
-        // FIXME needs column name in the URL in addition to the category name
         final Optional<CategoryColumnMapping> categoryMapping = mappings.stream()
                                                                         .filter(m -> m.getCategoryName()
-                                                                                      .equals(category.getName()))
+                                                                                      .equals(category.getName())
+                                                                            && m.getScheduleColumn().equals(columnName))
                                                                         .findFirst();
         if (!categoryMapping.isPresent()) {
           throw new FLLInternalException("Cannot find schedule column information for subjective category '"
               + category.getName()
+              + "' and column '"
+              + columnName
               + "'");
         } else {
           response.reset();
           response.setContentType("application/pdf");
           response.setHeader("Content-Disposition",
-                             String.format("filename=\"subjective-%s.pdf\"", subjectiveCategoryName));
+                             String.format("filename=\"subjective-%s-%s.pdf\"", categoryName, columnName));
+
+          final List<TeamScheduleInfo> scheduleEntries = new ArrayList<>(schedule.getSchedule());
+          Collections.sort(scheduleEntries, new SubjectiveComparatorByAwardGroup(columnName));
 
           SubjectivePdfWriter.createDocumentForSchedule(response.getOutputStream(), description, tournament.getName(),
                                                         category, categoryMapping.get().getScheduleColumn(),
-                                                        schedule.getSchedule());
+                                                        scheduleEntries);
         }
       } catch (final SQLException sqle) {
         LOGGER.error(sqle.getMessage(), sqle);
