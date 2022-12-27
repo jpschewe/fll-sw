@@ -377,8 +377,8 @@ public final class GenerateDB {
 
   }
 
-  /*package*/ static void createPlayoffTableData(final Connection connection,
-                                             final boolean createConstraints)
+  /* package */ static void createPlayoffTableData(final Connection connection,
+                                                   final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
 
@@ -977,7 +977,7 @@ public final class GenerateDB {
       sql.append("  tournament INTEGER NOT NULL");
       sql.append(" ,category LONGVARCHAR NOT NULL");
       sql.append(" ,schedule_column LONGVARCHAR NOT NULL");
-      sql.append(" ,CONSTRAINT category_schedule_column_pk PRIMARY KEY (tournament, category)");
+      sql.append(" ,CONSTRAINT category_schedule_column_pk PRIMARY KEY (tournament, category, schedule_column)");
       sql.append(")");
       stmt.executeUpdate(sql.toString());
 
