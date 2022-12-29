@@ -99,6 +99,7 @@ public class InitFilter implements Filter {
       httpResponse.setHeader("Cache-Control", "no-store"); // HTTP 1.1
       httpResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0
       httpResponse.setDateHeader("Expires", 0); // proxy server cache
+      httpResponse.setHeader("Access-Control-Allow-Origin", "*");
 
       requestToPass = httpRequest;
     } else {
