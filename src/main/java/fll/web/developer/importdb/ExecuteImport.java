@@ -78,7 +78,7 @@ public class ExecuteImport extends BaseFLLServlet {
         session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTeamInfo");
       } else {
         DumpDB.automaticBackup(destConnection, "before-import");
-        
+
         ImportDB.importDatabase(sourceConnection, destConnection, tournament, sessionInfo.isImportPerformance(),
                                 sessionInfo.isImportSubjective(), sessionInfo.isImportFinalist());
 
@@ -89,9 +89,12 @@ public class ExecuteImport extends BaseFLLServlet {
         Queries.updateScoreTotals(description, destConnection, destTournamentID);
 
         message.append(String.format("<p>Import of tournament %s successful.</p>", tournament));
-        session.setAttribute(SessionAttributes.REDIRECT_URL, sessionInfo.getRedirectURL());
+        session.setAttribute(SessionAttributes.REDIRECT_URL,
+                             SessionAttributes.getAttribute(session, ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY,
+                                                            String.class));
 
         session.removeAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY);
+        session.removeAttribute(ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY);
       }
 
     } catch (final SQLException sqle) {

@@ -1,10 +1,10 @@
 digraph import_database {
 
-"developer_index.jsp" -> ImportDBDump [label="Import Database"];
+"start" -> ImportDBDump [label="Import Database"];
 
 ImportDBDump -> "selectTournament.jsp";
 
-ImportDBDump -> "developer_index.jsp" [label="Incompatible challenge descriptions"]
+ImportDBDump -> "start" [label="Incompatible challenge descriptions"]
 
 "selectTournament.jsp" -> CheckTournamentExists;
 
