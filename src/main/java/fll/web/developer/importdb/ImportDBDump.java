@@ -56,6 +56,11 @@ public class ImportDBDump extends BaseFLLServlet {
   private static int importdbCount = 0;
 
   /**
+   * Where to send the user at the end of the import.
+   */
+  public static final String IMPORT_DB_FINAL_REDIRECT_KEY = "ImportDBFinalRedirect";
+
+  /**
    * @return an integer to differentiate in-memory databases.
    */
   @SuppressFBWarnings(value = "SSD_DO_NOT_USE_INSTANCE_LOCK_ON_SHARED_STATIC_DATA", justification = "https://github.com/spotbugs/spotbugs/issues/1978")
@@ -76,6 +81,8 @@ public class ImportDBDump extends BaseFLLServlet {
     if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
       return;
     }
+
+    session.setAttribute(IMPORT_DB_FINAL_REDIRECT_KEY, request.getHeader("Referer"));
 
     final StringBuilder message = new StringBuilder();
 
@@ -121,7 +128,12 @@ public class ImportDBDump extends BaseFLLServlet {
                 message.append("Import failed: Challenge descriptors are incompatible. ");
                 message.append(docMessage);
                 message.append("</p>");
-                session.setAttribute(SessionAttributes.REDIRECT_URL, "../index.jsp");
+
+                final String redirect = SessionAttributes.getAttribute(session, IMPORT_DB_FINAL_REDIRECT_KEY,
+                                                                       String.class);
+                session.removeAttribute(IMPORT_DB_FINAL_REDIRECT_KEY);
+                WebUtils.sendRedirect(response, redirect);
+                return;
               }
             } // allocate destConnection
           } // allocate zipfile

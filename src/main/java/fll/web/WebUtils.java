@@ -412,15 +412,30 @@ public final class WebUtils {
                                   final HttpSession session)
       throws IOException {
     final String redirect = SessionAttributes.getRedirectURL(session);
+
+    // clear variable since it's been used
+    session.removeAttribute(SessionAttributes.REDIRECT_URL);
+
+    sendRedirect(response, redirect);
+  }
+
+  /**
+   * Redirect to the page specified
+   * or "/" if {@code redirect} doesn't specify a location.
+   * 
+   * @param response the response to redirect
+   * @param redirect where to send the user
+   * @throws IOException {@link HttpServletResponse#sendRedirect(String)}
+   */
+  public static void sendRedirect(final HttpServletResponse response,
+                                  final @Nullable String redirect)
+      throws IOException {
     final String whereTo;
     if (null != redirect) {
       whereTo = redirect;
     } else {
       whereTo = "/";
     }
-
-    // clear variable since it's been used
-    session.removeAttribute(SessionAttributes.REDIRECT_URL);
 
     response.sendRedirect(response.encodeRedirectURL(whereTo));
   }
