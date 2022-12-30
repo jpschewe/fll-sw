@@ -58,6 +58,8 @@ public class ProcessImportPerformance extends BaseFLLServlet {
       return;
     }
 
+    session.setAttribute(ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY, request.getHeader("Referer"));
+
     final StringBuilder message = new StringBuilder();
 
     Utilities.loadDBDriver();
@@ -101,7 +103,11 @@ public class ProcessImportPerformance extends BaseFLLServlet {
                 if (!destTournamentName.equals(sourceTournamentName)) {
                   message.append(String.format("<p class='error'>The tournament being imported is %s, but the selected tournament is %s. Import of performance data cannot continue.</p>",
                                                sourceTournamentName, destTournamentName));
-                  session.setAttribute(SessionAttributes.REDIRECT_URL, "index.jsp");
+                  session.setAttribute(SessionAttributes.REDIRECT_URL,
+                                       SessionAttributes.getAttribute(session,
+                                                                      ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY,
+                                                                      String.class));
+                  session.removeAttribute(ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY);
                 } else {
 
                   sessionInfo.setTournamentName(sourceTournamentName);
@@ -116,7 +122,10 @@ public class ProcessImportPerformance extends BaseFLLServlet {
                 message.append("Import failed: Challenge descriptors are incompatible. This performance dump is not from the same tournament.");
                 message.append(docMessage);
                 message.append("</p>");
-                session.setAttribute(SessionAttributes.REDIRECT_URL, "index.jsp");
+                session.setAttribute(SessionAttributes.REDIRECT_URL,
+                                     SessionAttributes.getAttribute(session, ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY,
+                                                                    String.class));
+                session.removeAttribute(ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY);
               }
             } // allocate destConnection
           } // allocate zipfile
@@ -125,7 +134,10 @@ public class ProcessImportPerformance extends BaseFLLServlet {
         session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
       } else {
         message.append("<p class='error'>Missing performance data file</p>");
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "index.jsp");
+        session.setAttribute(SessionAttributes.REDIRECT_URL,
+                             SessionAttributes.getAttribute(session, ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY,
+                                                            String.class));
+        session.removeAttribute(ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY);
       }
     } catch (final FileUploadException fue) {
       LOG.error(fue);

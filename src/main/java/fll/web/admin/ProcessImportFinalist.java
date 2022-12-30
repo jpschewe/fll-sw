@@ -58,6 +58,8 @@ public class ProcessImportFinalist extends BaseFLLServlet {
       return;
     }
 
+    session.setAttribute(ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY, request.getHeader("Referer"));
+
     final StringBuilder message = new StringBuilder();
 
     Utilities.loadDBDriver();
@@ -101,9 +103,12 @@ public class ProcessImportFinalist extends BaseFLLServlet {
                 if (!destTournamentName.equals(sourceTournamentName)) {
                   message.append(String.format("<p class='error'>The tournament being imported is %s, but the selected tournament is %s. Import of performance data cannot continue.</p>",
                                                sourceTournamentName, destTournamentName));
-                  session.setAttribute(SessionAttributes.REDIRECT_URL, "index.jsp");
+                  session.setAttribute(SessionAttributes.REDIRECT_URL,
+                                       SessionAttributes.getAttribute(session,
+                                                                      ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY,
+                                                                      String.class));
+                  session.removeAttribute(ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY);
                 } else {
-
                   sessionInfo.setTournamentName(sourceTournamentName);
                   sessionInfo.setImportFinalist(true);
                   sessionInfo.setImportPerformance(false);
@@ -117,14 +122,20 @@ public class ProcessImportFinalist extends BaseFLLServlet {
                 message.append("Import failed: Challenge descriptors are incompatible. This finalist dump is not from the same tournament.");
                 message.append(docMessage);
                 message.append("</p>");
-                session.setAttribute(SessionAttributes.REDIRECT_URL, "index.jsp");
+                session.setAttribute(SessionAttributes.REDIRECT_URL,
+                                     SessionAttributes.getAttribute(session, ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY,
+                                                                    String.class));
+                session.removeAttribute(ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY);
               }
             } // allocate destConnection
           } // allocate zipfile
         } // allocate memConnection
       } else {
         message.append("<p class='error'>Missing finalist data file</p>");
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "index.jsp");
+        session.setAttribute(SessionAttributes.REDIRECT_URL,
+                             SessionAttributes.getAttribute(session, ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY,
+                                                            String.class));
+        session.removeAttribute(ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY);
       }
 
       SessionAttributes.appendToMessage(session, message.toString());
