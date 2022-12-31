@@ -117,7 +117,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const scoreGroups = finalist_module.getScoreGroups(teams, division);
         const numericCategories = finalist_module.getNumericCategories();
         for (const category of numericCategories) {
-        console.log("Initializing numeric category " + category.name + " for award group " + division);
             finalist_module.initializeTeamsInNumericCategory(division, category,
                 teams, scoreGroups);
             finalist_module.saveToLocalStorage();
