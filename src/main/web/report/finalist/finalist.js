@@ -635,36 +635,40 @@ const finalist_module = {}
         }
 
         finalist_module.clearTeamsInCategory(currentCategory, currentDivision);
-        let checkedEnoughTeams = false;
         const prevScores = {};
         finalist_module.sortTeamsByCategory(teams, currentCategory);
         for (const team of teams) {
             if (currentCategory.overall
                 || finalist_module.isTeamInDivision(team, currentDivision)) {
-                if (!checkedEnoughTeams) {
-                    const group = team.judgingGroup;
-                    const prevScore = prevScores[group];
-                    const curScore = finalist_module.getCategoryScore(team, currentCategory);
-                    if (curScore != undefined && curScore > 0) {
-                        if (prevScore == undefined) {
-                            finalist_module.addTeamToCategory(currentCategory, team.num);
-                        } else if (scoreGroups[group] > 0) {
-                            if (Math.abs(prevScore - curScore) < 1) {
-                                finalist_module.addTeamToCategory(currentCategory, team.num);
-                            } else {
-                                scoreGroups[group] = scoreGroups[group] - 1;
-
-                                checkedEnoughTeams = true;
-                                for (const [g, value] of Object.entries(scoreGroups)) {
-                                    if (value > 0) {
-                                        checkedEnoughTeams = false;
-                                    }
-                                }
+                const group = team.judgingGroup;
+                const prevScore = prevScores[group];
+                const curScore = finalist_module.getCategoryScore(team, currentCategory);
+                if (curScore != undefined && curScore > 0) {
+                    if (prevScore == undefined) {
+                        finalist_module.addTeamToCategory(currentCategory, team.num);
+                        scoreGroups[group] = scoreGroups[group] - 1;
+                        prevScores[group] = curScore;
+                    } else if (Math.abs(prevScore - curScore) < 1) {
+                        // tie
+                        finalist_module.addTeamToCategory(currentCategory, team.num);
+                        prevScores[group] = curScore;
+                    } else if (scoreGroups[group] > 0) {
+                        finalist_module.addTeamToCategory(currentCategory, team.num);
+                        scoreGroups[group] = scoreGroups[group] - 1;
+                        prevScores[group] = curScore;
+                    } else {
+                        // check if we can short circuit the loop over teams
+                        let checkedEnoughTeams = true;
+                        for (const [_, value] of Object.entries(scoreGroups)) {
+                            if (value > 0) {
+                                checkedEnoughTeams = false;
                             }
                         }
-                        prevScores[group] = curScore;
-                    }// valid curScore
-                } // checked enough teams
+                        if (checkedEnoughTeams) {
+                            break;
+                        }
+                    }
+                }// valid curScore
             } // if current division
         } // foreach team
     };
