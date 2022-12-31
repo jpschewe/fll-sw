@@ -152,3 +152,15 @@ function openMinimalBrowser(link) {
     }
     return w ? false : true; // allow the link to work if popup is blocked
 }
+
+/**
+ * Generates [index, value] from iterable.
+ * Based on code from https://stackoverflow.com/questions/10179815/get-loop-counter-index-using-for-of-syntax-in-javascript
+ */
+function* enumerate(iterable) {
+    let i = 0;
+    for (const x of iterable) {
+        yield [i, x];
+        ++i;
+    }
+}
