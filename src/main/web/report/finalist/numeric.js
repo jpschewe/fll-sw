@@ -253,7 +253,7 @@ const finalistNumericModule = {};
         }
 
         document.getElementById("deselect-all").addEventListener("click", function() {
-            document.querySelectorAll(":checkbox").forEach((checkbox) => {
+            document.querySelectorAll("[type=checkbox]").forEach((checkbox) => {
                 checkbox.checked = false;
             });
         });
