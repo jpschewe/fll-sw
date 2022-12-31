@@ -305,8 +305,6 @@ const finalistNumericModule = {};
         });
         handleDivisionChange();
 
-        updatePage();
-
         finalist_module.displayNavbar();
     }); // end ready function
 } // scope
