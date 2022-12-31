@@ -1,3 +1,5 @@
+* Fix bug with finalist scheduling not automatically selecting tied top teams
+* Fix bug with finalist scheduling and multiple award groups
 * #1030 - Allow up to 2 schedules for a subjective category
 * #982 - Alternate colors of goal groups in the subjective application
 * #1061 - Warn the user when reloading the subjective application and not connected to the server

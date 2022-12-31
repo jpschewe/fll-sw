@@ -33,7 +33,12 @@ const finalistNumericModule = {};
                     numFinalists = numFinalists + 1;
                 }
             }
-            document.getElementById(getNumFinalistsId(team)).innerText = numFinalists;
+            const elementId = getNumFinalistsId(team);
+            const finalistCountElement = document.getElementById(elementId);
+            if (finalistCountElement) {
+                // easy way to skip teams that aren't displayed
+                finalistCountElement.innerText = numFinalists;
+            }
         }
     }
 
@@ -248,7 +253,7 @@ const finalistNumericModule = {};
         }
 
         document.getElementById("deselect-all").addEventListener("click", function() {
-            document.querySelectorAll(":checkbox").forEach((checkbox) => {
+            document.querySelectorAll("[type=checkbox]").forEach((checkbox) => {
                 checkbox.checked = false;
             });
         });
@@ -299,8 +304,6 @@ const finalistNumericModule = {};
             handleDivisionChange();
         });
         handleDivisionChange();
-
-        updatePage();
 
         finalist_module.displayNavbar();
     }); // end ready function

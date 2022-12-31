@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const teams = finalist_module.getAllTeams();
     const divisions = finalist_module.getDivisions();
-    divisions.forEach(function(division, i) {
+    for (const [i, division] of enumerate(divisions)) {
         const divisionOption = document.createElement("option");
         divisionOption.setAttribute("value", i);
         divisionOption.innerText = division;
@@ -116,12 +116,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // initialize categories with the auto selected teams
         const scoreGroups = finalist_module.getScoreGroups(teams, division);
         const numericCategories = finalist_module.getNumericCategories();
-        numericCategories.forEach(function(category, _) {
+        for (const category of numericCategories) {
             finalist_module.initializeTeamsInNumericCategory(division, category,
                 teams, scoreGroups);
             finalist_module.saveToLocalStorage();
-        });// foreach numeric category
-    }); // foreach division
+        } // foreach numeric category
+    } // foreach division
 
     finalist_module.setCurrentDivision(finalist_module.getDivisionByIndex(divisionsElement.value));
     finalist_module.saveToLocalStorage();
