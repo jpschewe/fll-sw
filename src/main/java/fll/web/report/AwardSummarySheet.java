@@ -32,6 +32,7 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import fll.web.report.awards.ChampionshipCategory;
 import fll.xml.ChallengeDescription;
 import fll.xml.WinnerType;
 import jakarta.servlet.ServletContext;
@@ -47,6 +48,10 @@ import net.mtu.eggplant.xml.XMLUtils;
  */
 @WebServlet("/report/AwardSummarySheet")
 public class AwardSummarySheet extends BaseFLLServlet {
+
+  private static final int LINE_THICKNESS = 1;
+
+  private static final int SEPARATOR_THICKNESS = 2;
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -143,7 +148,52 @@ public class AwardSummarySheet extends BaseFLLServlet {
     awardGroupSection.appendChild(document.createTextNode("Judging Group: "));
     awardGroupSection.appendChild(document.createTextNode(awardGroup));
 
+    final Element champions = createChampionsBlock(document);
+    report.appendChild(champions);
+
+    report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+
     return document;
+  }
+
+  private Element createChampionsBlock(final Document document) {
+    final Element section = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
+    final Element title = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    section.appendChild(title);
+    title.appendChild(document.createTextNode(ChampionshipCategory.INSTANCE.getTitle()));
+    title.setAttribute("font-weight", "bold");
+
+    section.appendChild(FOPUtils.createBlankLine(document));
+
+    final Element row1Block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    section.appendChild(row1Block);
+
+    final Element list = FOPUtils.createXslFoElement(document, "list-block");
+    section.appendChild(list);
+
+    final Element listItem = FOPUtils.createXslFoElement(document, "list-item");
+    list.appendChild(listItem);
+    listItem.setAttribute("keep-together.within-page", "always");
+
+    final Element itemLabel = FOPUtils.createXslFoElement(document, "list-item-label");
+    listItem.appendChild(itemLabel);
+
+    final Element itemLabelBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    itemLabel.appendChild(itemLabelBlock);
+    itemLabelBlock.appendChild(document.createTextNode("1."));
+    itemLabel.setAttribute("end-indent", "label-end()");
+
+    final Element itemBody = FOPUtils.createXslFoElement(document, "list-item-body");
+    listItem.appendChild(itemBody);
+    itemBody.setAttribute("start-indent", "body-start()");
+
+    final Element bodyBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    itemBody.appendChild(bodyBlock);
+    bodyBlock.appendChild(FOPUtils.createHorizontalLine(document, LINE_THICKNESS));
+
+    return section;
+
   }
 
 }
