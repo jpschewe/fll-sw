@@ -56,6 +56,19 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         Summarized numeric scores - by judging group aka "Final Computed
         Scores"</a>
 
+    <div class="wide">
+        <form action="AwardSummarySheet" method="POST"
+            target="award-summary-sheet">
+            Generate award summary sheet for award group
+            <select name="awardGroup">
+                <c:forEach items="${awardGroups}" var="awardGroup">
+                    <option value="${awardGroup}">${awardGroup}</option>
+                </c:forEach>
+            </select>
+            <input type='submit' value='Create Sheet' />
+        </form>
+    </div>
+
     <a class="wide" href="CategoryScoresByScoreGroup" target="_blank">Award
         category scores - by category and judging group</a>
 
