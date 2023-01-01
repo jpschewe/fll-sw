@@ -9,6 +9,8 @@ package fll.web.report;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -20,9 +22,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.Tournament;
-import fll.db.GlobalParameters;
 import fll.db.Queries;
-import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
@@ -32,7 +32,10 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import fll.web.report.awards.AwardCategory;
 import fll.web.report.awards.ChampionshipCategory;
+import fll.web.scoreboard.Top10;
+import fll.web.scoreboard.Top10.ScoreEntry;
 import fll.xml.ChallengeDescription;
 import fll.xml.WinnerType;
 import jakarta.servlet.ServletContext;
@@ -52,6 +55,10 @@ public class AwardSummarySheet extends BaseFLLServlet {
   private static final int LINE_THICKNESS = 1;
 
   private static final int SEPARATOR_THICKNESS = 2;
+
+  private static final int NUM_FINALISTS = 4;
+
+  private static final int NUM_PERFORMANCE_FINALISTS = 1;
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -153,6 +160,13 @@ public class AwardSummarySheet extends BaseFLLServlet {
 
     report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
 
+    final AwardCategory performanceCategory = challengeDescription.getPerformance();
+    final Element performance = createPerformanceBlock(document, connection, challengeDescription, awardGroup,
+                                                       performanceCategory);
+    report.appendChild(performance);
+
+    report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+
     return document;
   }
 
@@ -191,6 +205,70 @@ public class AwardSummarySheet extends BaseFLLServlet {
     final Element bodyBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     itemBody.appendChild(bodyBlock);
     bodyBlock.appendChild(FOPUtils.createHorizontalLine(document, LINE_THICKNESS));
+
+    return section;
+  }
+
+  private Element createPerformanceBlock(final Document document,
+                                         final Connection connection,
+                                         final ChallengeDescription description,
+                                         final String awardGroup,
+                                         final AwardCategory awardCategory)
+      throws SQLException {
+    final Element section = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
+    final Element title = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    section.appendChild(title);
+    title.appendChild(document.createTextNode(awardCategory.getTitle()));
+    title.setAttribute("font-weight", "bold");
+
+    section.appendChild(FOPUtils.createBlankLine(document));
+
+    final Element row1Block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    section.appendChild(row1Block);
+
+    final Element list = FOPUtils.createXslFoElement(document, "list-block");
+    section.appendChild(list);
+
+    final Map<String, List<ScoreEntry>> performanceData = Top10.getTableAsMapByAwardGroup(connection, description);
+    final List<Top10.ScoreEntry> scores = performanceData.get(awardGroup);
+    if (null == scores) {
+      throw new FLLRuntimeException("Unable to find performance scores for award group '"
+          + awardGroup
+          + "'");
+    }
+
+    for (final Top10.ScoreEntry entry : scores) {
+      if (entry.getRank() > NUM_PERFORMANCE_FINALISTS) {
+        break;
+      }
+
+      final Element listItem = FOPUtils.createXslFoElement(document, "list-item");
+      list.appendChild(listItem);
+      listItem.setAttribute("keep-together.within-page", "always");
+
+      final Element itemLabel = FOPUtils.createXslFoElement(document, "list-item-label");
+      listItem.appendChild(itemLabel);
+
+      final Element itemLabelBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      itemLabel.appendChild(itemLabelBlock);
+      itemLabelBlock.appendChild(document.createTextNode(String.format("%d.", entry.getRank())));
+      itemLabel.setAttribute("end-indent", "label-end()");
+
+      final Element itemBody = FOPUtils.createXslFoElement(document, "list-item-body");
+      listItem.appendChild(itemBody);
+      itemBody.setAttribute("start-indent", "body-start()");
+
+      final Element bodyBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      itemBody.appendChild(bodyBlock);
+      bodyBlock.appendChild(document.createTextNode(String.valueOf(entry.getTeamNumber())));
+      bodyBlock.appendChild(document.createTextNode(" "));
+      bodyBlock.appendChild(document.createTextNode(entry.getTeamName()));
+      bodyBlock.appendChild(document.createTextNode(" "));
+      bodyBlock.appendChild(document.createTextNode(entry.getOrganization()));
+      bodyBlock.appendChild(document.createTextNode(" - "));
+      bodyBlock.appendChild(document.createTextNode(entry.getFormattedScore()));
+    }
 
     return section;
 
