@@ -180,6 +180,12 @@ public class AwardSummarySheet extends BaseFLLServlet {
       }
     }
 
+    for (final AwardCategory awardCategory : challengeDescription.getNonNumericCategories()) {
+      report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+      final Element element = createNonNumericBlock(document, awardCategory);
+      report.appendChild(element);
+    }
+
     return document;
   }
 
@@ -363,6 +369,42 @@ public class AwardSummarySheet extends BaseFLLServlet {
     } else {
       return section;
     }
+  }
+
+  private Element createNonNumericBlock(final Document document,
+                                        final AwardCategory awardCategory) {
+    final Element section = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
+    final Element title = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    section.appendChild(title);
+    title.appendChild(document.createTextNode(awardCategory.getTitle()));
+    title.setAttribute("font-weight", "bold");
+
+    section.appendChild(FOPUtils.createBlankLine(document));
+
+    final Element row1Block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    section.appendChild(row1Block);
+
+    final Element list = FOPUtils.createXslFoElement(document, "list-block");
+    section.appendChild(list);
+
+    for (int i = 0; i < 2; ++i) {
+      final Element listItem = FOPUtils.createXslFoElement(document, "list-item");
+      list.appendChild(listItem);
+      listItem.setAttribute("keep-together.within-page", "always");
+
+      final Element itemLabel = FOPUtils.createSimpleListItemLabel(document);
+      listItem.appendChild(itemLabel);
+      itemLabel.setAttribute("end-indent", "label-end()");
+
+      final Element itemBody = FOPUtils.createXslFoElement(document, "list-item-body");
+      listItem.appendChild(itemBody);
+      itemBody.setAttribute("start-indent", "body-start()");
+
+      final Element bodyBlock = FOPUtils.createHorizontalLineBlock(document, LINE_THICKNESS);
+      itemBody.appendChild(bodyBlock);
+    }
+    return section;
   }
 
 }
