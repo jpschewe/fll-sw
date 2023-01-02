@@ -18,9 +18,11 @@ import javax.xml.transform.TransformerException;
 
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.Team;
 import fll.Tournament;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
@@ -37,6 +39,7 @@ import fll.web.report.awards.ChampionshipCategory;
 import fll.web.scoreboard.Top10;
 import fll.web.scoreboard.Top10.ScoreEntry;
 import fll.xml.ChallengeDescription;
+import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -113,8 +116,6 @@ public class AwardSummarySheet extends BaseFLLServlet {
       throw new FLLRuntimeException("Cannot generate report for a tournament other than the current tournament");
     }
 
-    final WinnerType winnerCriteria = challengeDescription.getWinner();
-
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
     final Element rootElement = FOPUtils.createRoot(document);
@@ -152,7 +153,7 @@ public class AwardSummarySheet extends BaseFLLServlet {
 
     final Element awardGroupSection = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
     headerBlock.appendChild(awardGroupSection);
-    awardGroupSection.appendChild(document.createTextNode("Judging Group: "));
+    awardGroupSection.appendChild(document.createTextNode("Award Group: "));
     awardGroupSection.appendChild(document.createTextNode(awardGroup));
 
     final Element champions = createChampionsBlock(document);
@@ -165,7 +166,19 @@ public class AwardSummarySheet extends BaseFLLServlet {
                                                        performanceCategory);
     report.appendChild(performance);
 
-    report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+    for (final SubjectiveScoreCategory awardCategory : challengeDescription.getSubjectiveCategories()) {
+      for (final String judgingGroup : Queries.getJudgingStations(connection, tournament.getTournamentID())) {
+        final @Nullable Element subjectiveElement = createSubjectiveBlock(document, connection,
+                                                                          challengeDescription.getWinner(), tournament,
+                                                                          awardGroup, judgingGroup, awardCategory);
+        if (null != subjectiveElement) {
+          report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+
+          report.appendChild(subjectiveElement);
+
+        }
+      }
+    }
 
     return document;
   }
@@ -271,7 +284,85 @@ public class AwardSummarySheet extends BaseFLLServlet {
     }
 
     return section;
+  }
 
+  private @Nullable Element createSubjectiveBlock(final Document document,
+                                                  final Connection connection,
+                                                  final WinnerType winnerCriteria,
+                                                  final Tournament tournament,
+                                                  final String awardGroup,
+                                                  final String judgingGroup,
+                                                  final SubjectiveScoreCategory awardCategory)
+      throws SQLException {
+    final Element section = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
+    final Element title = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    section.appendChild(title);
+    title.appendChild(document.createTextNode(awardCategory.getTitle()));
+    title.appendChild(document.createTextNode(" - "));
+    title.appendChild(document.createTextNode(judgingGroup));
+    title.setAttribute("font-weight", "bold");
+
+    section.appendChild(FOPUtils.createBlankLine(document));
+
+    final Element row1Block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    section.appendChild(row1Block);
+
+    final Element list = FOPUtils.createXslFoElement(document, "list-block");
+    section.appendChild(list);
+
+    FinalComputedScores.iterateOverSubjectiveScores(connection, awardCategory, winnerCriteria, tournament, awardGroup,
+                                                    judgingGroup, (teamNumber,
+                                                                   score,
+                                                                   rank) -> {
+                                                      if (rank <= NUM_FINALISTS) {
+                                                        try {
+                                                          final Team team = Team.getTeamFromDatabase(connection,
+                                                                                                     teamNumber);
+
+                                                          final Element listItem = FOPUtils.createXslFoElement(document,
+                                                                                                               "list-item");
+                                                          list.appendChild(listItem);
+                                                          listItem.setAttribute("keep-together.within-page", "always");
+
+                                                          final Element itemLabel = FOPUtils.createXslFoElement(document,
+                                                                                                                "list-item-label");
+                                                          listItem.appendChild(itemLabel);
+
+                                                          final Element itemLabelBlock = FOPUtils.createXslFoElement(document,
+                                                                                                                     FOPUtils.BLOCK_TAG);
+                                                          itemLabel.appendChild(itemLabelBlock);
+                                                          itemLabelBlock.appendChild(document.createTextNode(String.format("%d.",
+                                                                                                                           rank)));
+                                                          itemLabel.setAttribute("end-indent", "label-end()");
+
+                                                          final Element itemBody = FOPUtils.createXslFoElement(document,
+                                                                                                               "list-item-body");
+                                                          listItem.appendChild(itemBody);
+                                                          itemBody.setAttribute("start-indent", "body-start()");
+
+                                                          final Element bodyBlock = FOPUtils.createXslFoElement(document,
+                                                                                                                FOPUtils.BLOCK_TAG);
+                                                          itemBody.appendChild(bodyBlock);
+                                                          bodyBlock.appendChild(document.createTextNode(String.valueOf(team.getTeamNumber())));
+                                                          bodyBlock.appendChild(document.createTextNode(" "));
+                                                          bodyBlock.appendChild(document.createTextNode(team.getTeamName()));
+                                                          bodyBlock.appendChild(document.createTextNode(" "));
+                                                          final String org = team.getOrganization();
+                                                          bodyBlock.appendChild(document.createTextNode(null == org ? ""
+                                                              : org));
+                                                        } catch (final SQLException e) {
+                                                          throw new FLLRuntimeException("Unable to find team with number "
+                                                              + teamNumber, e);
+                                                        }
+                                                      }
+                                                    });
+
+    if (list.getChildNodes().getLength() < 1) {
+      return null;
+    } else {
+      return section;
+    }
   }
 
 }
