@@ -1,3 +1,4 @@
+* #1066 - Add link to edit unverified runs
 * Fix bug with finalist scheduling not automatically selecting tied top teams
 * Fix bug with finalist scheduling and multiple award groups
 * #1030 - Allow up to 2 schedules for a subjective category
