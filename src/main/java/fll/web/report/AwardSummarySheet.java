@@ -197,8 +197,6 @@ public class AwardSummarySheet extends BaseFLLServlet {
     title.appendChild(document.createTextNode(ChampionshipCategory.INSTANCE.getTitle()));
     title.setAttribute("font-weight", "bold");
 
-    section.appendChild(FOPUtils.createBlankLine(document));
-
     final Element row1Block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     section.appendChild(row1Block);
 
@@ -257,8 +255,6 @@ public class AwardSummarySheet extends BaseFLLServlet {
       allScoresEntered.setAttribute("font-style", "italic");
       allScoresEntered.setAttribute("font-size", "10pt");
     }
-
-    section.appendChild(FOPUtils.createBlankLine(document));
 
     final Element row1Block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     section.appendChild(row1Block);
@@ -326,8 +322,6 @@ public class AwardSummarySheet extends BaseFLLServlet {
     title.appendChild(document.createTextNode(" - "));
     title.appendChild(document.createTextNode(judgingGroup));
     title.setAttribute("font-weight", "bold");
-
-    section.appendChild(FOPUtils.createBlankLine(document));
 
     final Element row1Block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     section.appendChild(row1Block);
@@ -397,8 +391,6 @@ public class AwardSummarySheet extends BaseFLLServlet {
     section.appendChild(title);
     title.appendChild(document.createTextNode(awardCategory.getTitle()));
     title.setAttribute("font-weight", "bold");
-
-    section.appendChild(FOPUtils.createBlankLine(document));
 
     final Element row1Block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     section.appendChild(row1Block);
