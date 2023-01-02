@@ -150,7 +150,7 @@ public class NonNumericNomineesReport extends BaseFLLServlet {
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     container.setAttribute("keep-together.within-page", "always");
 
-    container.appendChild(FOPUtils.createHorizontalLine(document, 2));
+    container.appendChild(FOPUtils.createHorizontalLineBlock(document, 2));
 
     final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(categoryTitleBlock);

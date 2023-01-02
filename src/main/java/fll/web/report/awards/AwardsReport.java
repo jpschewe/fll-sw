@@ -179,7 +179,7 @@ public class AwardsReport extends BaseFLLServlet {
 
     final List<AdvancingTeam> advancing = AdvancingTeam.loadAdvancingTeams(connection, tournament.getTournamentID());
     if (!advancing.isEmpty()) {
-      documentBody.appendChild(FOPUtils.createHorizontalLine(document, AWARD_SEPARATOR_WIDTH));
+      documentBody.appendChild(FOPUtils.createHorizontalLineBlock(document, AWARD_SEPARATOR_WIDTH));
 
       final Element advancingElement = addAdvancingTeams(advancing, connection, document, tournament,
                                                          sortedAwardGroups);
@@ -201,7 +201,7 @@ public class AwardsReport extends BaseFLLServlet {
 
     container.setAttribute("keep-together.within-page", "always");
 
-    container.appendChild(FOPUtils.createHorizontalLine(document, AWARD_SEPARATOR_WIDTH));
+    container.appendChild(FOPUtils.createHorizontalLineBlock(document, AWARD_SEPARATOR_WIDTH));
 
     PlayoffReport.populateBody(connection, tournament, challengeDescription, document, container, sortedGroups);
   }
@@ -362,7 +362,7 @@ public class AwardsReport extends BaseFLLServlet {
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     container.setAttribute("keep-together.within-page", "always");
 
-    container.appendChild(FOPUtils.createHorizontalLine(document, AWARD_SEPARATOR_WIDTH));
+    container.appendChild(FOPUtils.createHorizontalLineBlock(document, AWARD_SEPARATOR_WIDTH));
 
     final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(categoryTitleBlock);
@@ -430,7 +430,7 @@ public class AwardsReport extends BaseFLLServlet {
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     container.setAttribute("keep-together.within-page", "always");
 
-    container.appendChild(FOPUtils.createHorizontalLine(document, AWARD_SEPARATOR_WIDTH));
+    container.appendChild(FOPUtils.createHorizontalLineBlock(document, AWARD_SEPARATOR_WIDTH));
 
     final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(categoryTitleBlock);
@@ -591,7 +591,7 @@ public class AwardsReport extends BaseFLLServlet {
     } // foreach group
 
     if (haveScores) {
-      documentBody.appendChild(FOPUtils.createHorizontalLine(document, AWARD_SEPARATOR_WIDTH));
+      documentBody.appendChild(FOPUtils.createHorizontalLineBlock(document, AWARD_SEPARATOR_WIDTH));
       documentBody.appendChild(categoryTitleBlock);
       documentBody.appendChild(table);
     }

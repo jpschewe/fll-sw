@@ -348,7 +348,7 @@ public class PlayoffReport extends BaseFLLServlet {
       subtitleBlock.appendChild(document.createTextNode(dateString));
     }
 
-    staticContent.appendChild(FOPUtils.createHorizontalLine(document, 1));
+    staticContent.appendChild(FOPUtils.createHorizontalLineBlock(document, 1));
 
     return staticContent;
   }

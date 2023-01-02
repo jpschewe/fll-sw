@@ -699,22 +699,33 @@ public final class FOPUtils {
   }
 
   /**
+   * @param document {@link #createHorizontalLine(Document, int)}
+   * @param thickness {@link #createHorizontalLine(Document, int)}
+   * @return block containing the horizontal line
+   */
+  public static Element createHorizontalLineBlock(final Document document,
+                                                  final int thickness) {
+    final Element lineBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    final Element line = createHorizontalLine(document, thickness);
+    lineBlock.appendChild(line);
+    return lineBlock;
+  }
+
+  /**
+   * Create a line element to add to a block or an inline element.
+   * 
    * @param document used to create elements
    * @param thickness the thickness of the line in points
-   * @return block containing the horizontal line
+   * @return element for the horizontal line
    */
   public static Element createHorizontalLine(final Document document,
                                              final int thickness) {
-    final Element lineBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-
     final Element line = FOPUtils.createXslFoElement(document, FOPUtils.LEADER_TAG);
     line.setAttribute("leader-pattern", "rule");
     line.setAttribute("leader-length", "100%");
     line.setAttribute("rule-style", "solid");
     line.setAttribute("rule-thickness", String.format("%dpt", thickness));
-    lineBlock.appendChild(line);
-
-    return lineBlock;
+    return line;
   }
 
   /**

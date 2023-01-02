@@ -92,6 +92,8 @@ public final class ReportIndex {
       // javascript code
       final String categoryJudgesJson = jsonMapper.writeValueAsString(categoryJudges).replace("'", "\\'");
       pageContext.setAttribute("categoryJudgesJson", categoryJudgesJson);
+
+      pageContext.setAttribute("awardGroups", Queries.getAwardGroups(connection, tournament));
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     } catch (final JsonProcessingException e) {
