@@ -24,6 +24,7 @@ import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Tournament;
+import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -37,7 +38,6 @@ import fll.web.WebUtils;
 import fll.web.report.awards.AwardCategory;
 import fll.web.report.awards.ChampionshipCategory;
 import fll.web.scoreboard.Top10;
-import fll.web.scoreboard.Top10.ScoreEntry;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
@@ -162,8 +162,8 @@ public class AwardSummarySheet extends BaseFLLServlet {
     report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
 
     final AwardCategory performanceCategory = challengeDescription.getPerformance();
-    final Element performance = createPerformanceBlock(document, connection, challengeDescription, awardGroup,
-                                                       performanceCategory);
+    final Element performance = createPerformanceBlock(document, connection, challengeDescription, tournament,
+                                                       awardGroup, performanceCategory);
     report.appendChild(performance);
 
     for (final SubjectiveScoreCategory awardCategory : challengeDescription.getSubjectiveCategories()) {
@@ -231,15 +231,32 @@ public class AwardSummarySheet extends BaseFLLServlet {
   private Element createPerformanceBlock(final Document document,
                                          final Connection connection,
                                          final ChallengeDescription description,
+                                         final Tournament tournament,
                                          final String awardGroup,
                                          final AwardCategory awardCategory)
       throws SQLException {
+    final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection,
+                                                                                    tournament.getTournamentID());
+    final List<Team> teamsNeedingSeeding = Queries.getTeamsNeedingSeedingRuns(connection, tournamentTeams, true);
+
     final Element section = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
     final Element title = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     section.appendChild(title);
-    title.appendChild(document.createTextNode(awardCategory.getTitle()));
-    title.setAttribute("font-weight", "bold");
+
+    final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+    title.appendChild(categoryTitle);
+    categoryTitle.appendChild(document.createTextNode(awardCategory.getTitle()));
+    categoryTitle.setAttribute("font-weight", "bold");
+
+    if (!teamsNeedingSeeding.isEmpty()) {
+      final Element allScoresEntered = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+      title.appendChild(allScoresEntered);
+      allScoresEntered.appendChild(document.createTextNode(String.format(" %d teams have not finished regular match play",
+                                                                         teamsNeedingSeeding.size())));
+      allScoresEntered.setAttribute("font-style", "italic");
+      allScoresEntered.setAttribute("font-size", "10pt");
+    }
 
     section.appendChild(FOPUtils.createBlankLine(document));
 
@@ -249,7 +266,8 @@ public class AwardSummarySheet extends BaseFLLServlet {
     final Element list = FOPUtils.createXslFoElement(document, "list-block");
     section.appendChild(list);
 
-    final Map<String, List<ScoreEntry>> performanceData = Top10.getTableAsMapByAwardGroup(connection, description);
+    final Map<String, List<Top10.ScoreEntry>> performanceData = Top10.getTableAsMapByAwardGroup(connection,
+                                                                                                description);
     final List<Top10.ScoreEntry> scores = performanceData.get(awardGroup);
     if (null == scores) {
       throw new FLLRuntimeException("Unable to find performance scores for award group '"
