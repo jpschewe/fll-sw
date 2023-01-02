@@ -63,6 +63,8 @@ public class AwardSummarySheet extends BaseFLLServlet {
 
   private static final int NUM_PERFORMANCE_FINALISTS = 1;
 
+  private static final int NUM_NON_NUMERIC_FINALISTS = 1;
+
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -398,7 +400,7 @@ public class AwardSummarySheet extends BaseFLLServlet {
     final Element list = FOPUtils.createXslFoElement(document, "list-block");
     section.appendChild(list);
 
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < NUM_NON_NUMERIC_FINALISTS; ++i) {
       final Element listItem = FOPUtils.createXslFoElement(document, "list-item");
       list.appendChild(listItem);
       listItem.setAttribute("keep-together.within-page", "always");
