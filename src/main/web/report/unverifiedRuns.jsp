@@ -31,10 +31,11 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
         Tournament:
         <c:out value="${currentTournament}" />
     </h2>
-    <table border='0'>
+    <table border='1'>
         <tr>
             <th>Team #</th>
             <th>Run Number</th>
+            <th>Edit</th>
         </tr>
         <sql:query var="result" dataSource="${datasource}">
    SELECT
@@ -52,6 +53,11 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
                 </td>
                 <td>
                     <c:out value="${row[1]}" />
+                </td>
+                <td>
+                    <a
+                        href='<c:url value="/scoreEntry/scoreEntry.jsp?TeamNumber=${row[0]}&EditFlag=true&RunNumber=${row[1]}"/>'>Edit
+                    </a>
                 </td>
             </tr>
         </c:forEach>
