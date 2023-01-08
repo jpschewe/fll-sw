@@ -40,4 +40,6 @@ CommitTeamChanges -> CheckTeamInfo;
 
 ExecuteImport -> CheckTournamentExists [label="Found differences"];
 
+ExecuteImport -> "finished";
+
 }
