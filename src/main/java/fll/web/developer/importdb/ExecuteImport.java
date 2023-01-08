@@ -75,7 +75,7 @@ public class ExecuteImport extends BaseFLLServlet {
       final boolean differences = ImportDB.checkForDifferences(sourceConnection, destConnection, tournament);
       if (differences) {
         message.append("<p class='error'>Error, there are still differences that need to be resolved before the import can be completed.</p>");
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTeamInfo");
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentExists");
       } else {
         DumpDB.automaticBackup(destConnection, "before-import");
 
