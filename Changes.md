@@ -1,3 +1,5 @@
+Release 17.3.0
+==============
 * #1066 - Add link to edit unverified runs
 * Fix bug with finalist scheduling not automatically selecting tied top teams
 * Fix bug with finalist scheduling and multiple award groups
