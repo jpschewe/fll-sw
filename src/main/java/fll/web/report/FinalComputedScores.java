@@ -507,7 +507,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * @param category the category to select scores for
    * @param winnerCriteria who is the winner
    * @param tournament which tournament to get scores for
-   * @param awardGroup which award group
    * @param judgingStation which judging station
    * @param visitor called with the data
    * @throws SQLException if a database error occurs
@@ -517,7 +516,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                  final SubjectiveScoreCategory category,
                                                  final WinnerType winnerCriteria,
                                                  final Tournament tournament,
-                                                 final String awardGroup,
                                                  final String judgingStation,
                                                  final SubjectiveScoreVisitor visitor)
       throws SQLException {
@@ -527,17 +525,15 @@ public final class FinalComputedScores extends BaseFLLServlet {
             + " FROM final_scores, TournamentTeams" //
             + " WHERE final_scores.tournament = ?" //
             + " AND TournamentTeams.Tournament = final_scores.tournament" //
-            + " AND TournamentTeams.event_division = ?"//
             + " AND TournamentTeams.TeamNumber = final_scores.team_number"//
             + " AND TournamentTeams.judging_station = ?" //
             + " AND final_scores.category = ?" //
             + " AND final_scores.goal_group = ?" //
             + String.format(" ORDER BY final_scores.final_score %s", winnerCriteria.getSortString()))) {
       prep.setInt(1, tournament.getTournamentID());
-      prep.setString(2, awardGroup);
-      prep.setString(3, judgingStation);
-      prep.setString(4, category.getName());
-      prep.setString(5, "");
+      prep.setString(2, judgingStation);
+      prep.setString(3, category.getName());
+      prep.setString(4, "");
 
       int numTied = 1;
       int rank = 0;
@@ -572,7 +568,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
    *          {@link ChallengeDescription#getSubjectiveCategories()}
    * @param winnerCriteria from {@link ChallengeDescription#getWinner()}
    * @param tournament the tournament to get scores for
-   * @param awardGroup the award group to get scores for
    * @return category, Judging Group, team number, {rank, scaled score}
    * @throws SQLException on a database error
    */
@@ -580,8 +575,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
   public static Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> gatherRankedSubjectiveTeams(final Connection connection,
                                                                                                                           final List<SubjectiveScoreCategory> subjectiveCategories,
                                                                                                                           final WinnerType winnerCriteria,
-                                                                                                                          final Tournament tournament,
-                                                                                                                          final String awardGroup)
+                                                                                                                          final Tournament tournament)
       throws SQLException {
     final Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> retval = new HashMap<>();
     final List<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
@@ -590,18 +584,15 @@ public final class FinalComputedScores extends BaseFLLServlet {
       final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> categoryRanks = new HashMap<>();
 
       for (final String judgingStation : judgingStations) {
-
         final Map<Integer, ImmutablePair<Integer, Double>> rankedTeams = new HashMap<>();
 
-        iterateOverSubjectiveScores(connection, category, winnerCriteria, tournament, awardGroup, judgingStation,
-                                    (teamNumber,
-                                     score,
-                                     rank) -> {
-                                      rankedTeams.put(teamNumber, ImmutablePair.of(rank, score));
-                                    });
+        iterateOverSubjectiveScores(connection, category, winnerCriteria, tournament, judgingStation, (teamNumber,
+                                                                                                       score,
+                                                                                                       rank) -> {
+          rankedTeams.put(teamNumber, ImmutablePair.of(rank, score));
+        });
 
         categoryRanks.put(judgingStation, rankedTeams);
-
       } // foreach judging station
 
       retval.put(category, categoryRanks);
@@ -628,8 +619,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     final Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> teamSubjectiveRanks = gatherRankedSubjectiveTeams(connection,
                                                                                                                                           subjectiveCategories,
                                                                                                                                           winnerCriteria,
-                                                                                                                                          tournament,
-                                                                                                                                          groupName);
+                                                                                                                                          tournament);
 
     final Map<Integer, ImmutablePair<Integer, Double>> teamPerformanceRanks = gatherRankedPerformanceTeams(connection,
                                                                                                            winnerCriteria,

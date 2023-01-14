@@ -172,7 +172,7 @@ public class AwardSummarySheet extends BaseFLLServlet {
       for (final String judgingGroup : Queries.getJudgingStations(connection, tournament.getTournamentID())) {
         final @Nullable Element subjectiveElement = createSubjectiveBlock(document, connection,
                                                                           challengeDescription.getWinner(), tournament,
-                                                                          awardGroup, judgingGroup, awardCategory);
+                                                                          judgingGroup, awardCategory);
         if (null != subjectiveElement) {
           report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
 
@@ -312,7 +312,6 @@ public class AwardSummarySheet extends BaseFLLServlet {
                                                   final Connection connection,
                                                   final WinnerType winnerCriteria,
                                                   final Tournament tournament,
-                                                  final String awardGroup,
                                                   final String judgingGroup,
                                                   final SubjectiveScoreCategory awardCategory)
       throws SQLException {
@@ -331,10 +330,10 @@ public class AwardSummarySheet extends BaseFLLServlet {
     final Element list = FOPUtils.createXslFoElement(document, "list-block");
     section.appendChild(list);
 
-    FinalComputedScores.iterateOverSubjectiveScores(connection, awardCategory, winnerCriteria, tournament, awardGroup,
-                                                    judgingGroup, (teamNumber,
-                                                                   score,
-                                                                   rank) -> {
+    FinalComputedScores.iterateOverSubjectiveScores(connection, awardCategory, winnerCriteria, tournament, judgingGroup,
+                                                    (teamNumber,
+                                                     score,
+                                                     rank) -> {
                                                       if (rank <= NUM_FINALISTS) {
                                                         try {
                                                           final Team team = Team.getTeamFromDatabase(connection,
