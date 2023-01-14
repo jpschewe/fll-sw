@@ -1,3 +1,4 @@
+* Rework award summary sheet to be by judging group
 * #1067 - Allow the user to generate the final computed scores report by award group or judging station
 
 Release 17.3.0

@@ -89,10 +89,11 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <div class="wide">
         <form action="AwardSummarySheet" method="POST"
             target="award-summary-sheet">
-            Generate award summary sheet for award group
-            <select name="awardGroup">
-                <c:forEach items="${awardGroups}" var="awardGroup">
-                    <option value="${awardGroup}">${awardGroup}</option>
+            Generate award summary sheet for judging group
+            <select name="groupName">
+                <c:forEach items="${judgingStations}"
+                    var="judgingStation">
+                    <option value="${judgingStation}">${judgingStation}</option>
                 </c:forEach>
             </select>
             <input type='submit' value='Create Sheet' />
