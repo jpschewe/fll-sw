@@ -487,7 +487,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
   /**
    * Used with
-   * {@link FinalComputedScores#iterateOverSubjectiveScores(Connection, SubjectiveScoreCategory, WinnerType, Tournament, String, String, SubjectiveScoreVisitor)}.
+   * {@link FinalComputedScores#iterateOverSubjectiveScores(Connection, SubjectiveScoreCategory, WinnerType, Tournament, String, SubjectiveScoreVisitor)}.
    */
   @FunctionalInterface
   public interface SubjectiveScoreVisitor {
