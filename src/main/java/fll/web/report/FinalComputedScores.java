@@ -52,6 +52,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.report.awards.AwardsReport;
 import fll.xml.ChallengeDescription;
@@ -83,14 +84,19 @@ public final class FinalComputedScores extends BaseFLLServlet {
   private static final double FOOTER_MARGIN_INCHES = 0.5;
 
   /**
+   * Group name for all values of the group.
+   */
+  public static final String ALL_GROUP_NAME = "_all_";
+
+  /**
    * Used to specify how to select teams for the report.
    */
   public enum ReportSelector {
     /** Select teams by award group. */
     AWARD_GROUP("Award Group", "event_division"),
 
-    /** Select teams by judging group. */
-    JUDGING_GROUP("Judging Gruop", "judging_station");
+    /** Select teams by judging station. */
+    JUDGING_STATION("Judging Group", "judging_station");
 
     private final String title;
 
@@ -137,6 +143,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
       return;
     }
 
+    final ReportSelector selector = ReportSelector.valueOf(WebUtils.getNonNullRequestParameter(request, "selector"));
+    final String groupName = WebUtils.getNonNullRequestParameter(request, "groupName");
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
     try (Connection connection = datasource.getConnection()) {
@@ -170,7 +179,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
       try {
         final Document document = generateReport(connection, challengeDescription, challengeTitle, tournament,
-                                                 bestTeams, percentageHurdle, standardMean, standardSigma);
+                                                 bestTeams, percentageHurdle, standardMean, standardSigma, groupName,
+                                                 selector);
         final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
         FOPUtils.renderPdf(fopFactory, document, response.getOutputStream());
@@ -258,7 +268,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                   final Set<Integer> bestTeams,
                                   final int percentageHurdle,
                                   final double standardMean,
-                                  final double standardSigma)
+                                  final double standardSigma,
+                                  final String groupName,
+                                  final ReportSelector selector)
       throws SQLException, IOException {
     if (tournament.getTournamentID() != Queries.getCurrentTournament(connection)) {
       throw new FLLRuntimeException("Cannot generate final score report for a tournament other than the current tournament");
@@ -282,13 +294,19 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     final Element legend = createLegend(document, percentageHurdle, standardMean, standardSigma);
 
-    for (final String awardGroup : Queries.getAwardGroups(connection)) {
+    if (ALL_GROUP_NAME.equals(groupName)) {
+      for (final String awardGroup : Queries.getAwardGroups(connection)) {
+        final Element pageSequence = createAwardGroupPageSequence(connection, document, challengeDescription,
+                                                                  challengeTitle, winnerCriteria, tournament,
+                                                                  pageMasterName, legend, bestTeams, awardGroup,
+                                                                  selector);
+        rootElement.appendChild(pageSequence);
+      }
+    } else {
       final Element pageSequence = createAwardGroupPageSequence(connection, document, challengeDescription,
                                                                 challengeTitle, winnerCriteria, tournament,
-                                                                pageMasterName, legend, bestTeams, awardGroup,
-                                                                ReportSelector.AWARD_GROUP);
+                                                                pageMasterName, legend, bestTeams, groupName, selector);
       rootElement.appendChild(pageSequence);
-
     }
 
     return document;
