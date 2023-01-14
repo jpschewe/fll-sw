@@ -1,3 +1,7 @@
+* #1068 - Store form parameters when redirecting to compute summarized scores
+* Rework award summary sheet to be by judging group
+* #1067 - Allow the user to generate the final computed scores report by award group or judging station
+
 Release 17.3.0
 ==============
 * #1066 - Add link to edit unverified runs
@@ -8,6 +12,7 @@ Release 17.3.0
 * #1061 - Warn the user when reloading the subjective application and not connected to the server
 * #1018 - Allow the awards script order to handle non-numeric categories added after initial setup
 * #1060 - Add comments to score summary page and allow them and the notes to be toggled
+* #1063 - Add award summary sheet
 * #1062 - Create automatic database backups before the database is overwritten or an import occurs
 * Fix bug where an extra performance score can't be deleted when head to head is not used
 * Add titles to scoreboard pages

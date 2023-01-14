@@ -291,27 +291,24 @@ public final class FinalistLoad {
       } // prepared statement
 
       final WinnerType winnerCriteria = description.getWinner();
-      final List<String> awardGroups = Queries.getAwardGroups(connection, tournament.getTournamentID());
       final List<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
       for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
         final String categoryName = category.getName();
         final String categoryVar = getCategoryVarName(categoryName);
 
-        for (final String awardGroup : awardGroups) {
-          for (final String judgingStation : judgingStations) {
-            FinalComputedScores.iterateOverSubjectiveScores(connection, category, winnerCriteria, tournament,
-                                                            awardGroup, judgingStation, (teamNumber,
-                                                                                         score,
-                                                                                         rank) -> {
+        for (final String judgingStation : judgingStations) {
+          FinalComputedScores.iterateOverSubjectiveScores(connection, category, winnerCriteria, tournament,
+                                                          judgingStation, (teamNumber,
+                                                                           score,
+                                                                           rank) -> {
 
-                                                              final String teamVar = getTeamVarName(teamNumber);
+                                                            final String teamVar = getTeamVarName(teamNumber);
 
-                                                              output.format("$.finalist.setCategoryScore(%s, %s, %.02f);%n",
-                                                                            teamVar, categoryVar, score);
+                                                            output.format("$.finalist.setCategoryScore(%s, %s, %.02f);%n",
+                                                                          teamVar, categoryVar, score);
 
-                                                            });
-          } // judging station
-        } // award group
+                                                          });
+        } // judging station
       } // category
 
     } // connection

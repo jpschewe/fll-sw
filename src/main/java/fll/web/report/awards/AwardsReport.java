@@ -92,7 +92,7 @@ public class AwardsReport extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/AwardsReport")) {
+    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session, "/report/AwardsReport")) {
       return;
     }
 

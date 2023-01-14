@@ -77,9 +77,11 @@ public class AwardSummarySheet extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/AwardSummarySheet")) {
+    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session, "/report/AwardSummarySheet")) {
       return;
     }
+
+    final String groupName = WebUtils.getNonNullRequestParameter(request, "groupName");
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
@@ -93,10 +95,8 @@ public class AwardSummarySheet extends BaseFLLServlet {
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=awardSummarySheet.pdf");
 
-      final String awardGroup = WebUtils.getNonNullRequestParameter(request, "awardGroup");
-
       try {
-        final Document document = generateReport(connection, challengeDescription, tournament, awardGroup);
+        final Document document = generateReport(connection, challengeDescription, tournament, groupName);
         final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
         FOPUtils.renderPdf(fopFactory, document, response.getOutputStream());
@@ -112,7 +112,7 @@ public class AwardSummarySheet extends BaseFLLServlet {
   private Document generateReport(final Connection connection,
                                   final ChallengeDescription challengeDescription,
                                   final Tournament tournament,
-                                  final String awardGroup)
+                                  final String groupName)
       throws SQLException, IOException {
     if (tournament.getTournamentID() != Queries.getCurrentTournament(connection)) {
       throw new FLLRuntimeException("Cannot generate report for a tournament other than the current tournament");
@@ -153,10 +153,10 @@ public class AwardSummarySheet extends BaseFLLServlet {
     titleInline.appendChild(headerSpacer);
     headerSpacer.setAttribute("leader-pattern", "space");
 
-    final Element awardGroupSection = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
-    headerBlock.appendChild(awardGroupSection);
-    awardGroupSection.appendChild(document.createTextNode("Award Group: "));
-    awardGroupSection.appendChild(document.createTextNode(awardGroup));
+    final Element groupSection = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+    headerBlock.appendChild(groupSection);
+    groupSection.appendChild(document.createTextNode("Judging Group: "));
+    groupSection.appendChild(document.createTextNode(groupName));
 
     final Element champions = createChampionsBlock(document);
     report.appendChild(champions);
@@ -165,20 +165,18 @@ public class AwardSummarySheet extends BaseFLLServlet {
 
     final AwardCategory performanceCategory = challengeDescription.getPerformance();
     final Element performance = createPerformanceBlock(document, connection, challengeDescription, tournament,
-                                                       awardGroup, performanceCategory);
+                                                       groupName, performanceCategory);
     report.appendChild(performance);
 
     for (final SubjectiveScoreCategory awardCategory : challengeDescription.getSubjectiveCategories()) {
-      for (final String judgingGroup : Queries.getJudgingStations(connection, tournament.getTournamentID())) {
-        final @Nullable Element subjectiveElement = createSubjectiveBlock(document, connection,
-                                                                          challengeDescription.getWinner(), tournament,
-                                                                          awardGroup, judgingGroup, awardCategory);
-        if (null != subjectiveElement) {
-          report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+      final @Nullable Element subjectiveElement = createSubjectiveBlock(document, connection,
+                                                                        challengeDescription.getWinner(), tournament,
+                                                                        groupName, awardCategory);
+      if (null != subjectiveElement) {
+        report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
 
-          report.appendChild(subjectiveElement);
+        report.appendChild(subjectiveElement);
 
-        }
       }
     }
 
@@ -232,7 +230,7 @@ public class AwardSummarySheet extends BaseFLLServlet {
                                          final Connection connection,
                                          final ChallengeDescription description,
                                          final Tournament tournament,
-                                         final String awardGroup,
+                                         final String groupName,
                                          final AwardCategory awardCategory)
       throws SQLException {
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection,
@@ -264,13 +262,14 @@ public class AwardSummarySheet extends BaseFLLServlet {
     final Element list = FOPUtils.createXslFoElement(document, "list-block");
     section.appendChild(list);
 
-    final Map<String, List<Top10.ScoreEntry>> performanceData = Top10.getTableAsMapByAwardGroup(connection,
-                                                                                                description);
-    final List<Top10.ScoreEntry> scores = performanceData.get(awardGroup);
+    final Map<String, List<Top10.ScoreEntry>> performanceData = Top10.getTableAsMapByJudgingStation(connection,
+                                                                                                    description,
+                                                                                                    tournament);
+
+    final List<Top10.ScoreEntry> scores = performanceData.get(groupName);
     if (null == scores) {
-      throw new FLLRuntimeException("Unable to find performance scores for award group '"
-          + awardGroup
-          + "'");
+      throw new FLLRuntimeException(String.format("Unable to find performance scores for Judging Station '%s'",
+                                                  groupName));
     }
 
     for (final Top10.ScoreEntry entry : scores) {
@@ -312,7 +311,6 @@ public class AwardSummarySheet extends BaseFLLServlet {
                                                   final Connection connection,
                                                   final WinnerType winnerCriteria,
                                                   final Tournament tournament,
-                                                  final String awardGroup,
                                                   final String judgingGroup,
                                                   final SubjectiveScoreCategory awardCategory)
       throws SQLException {
@@ -321,8 +319,6 @@ public class AwardSummarySheet extends BaseFLLServlet {
     final Element title = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     section.appendChild(title);
     title.appendChild(document.createTextNode(awardCategory.getTitle()));
-    title.appendChild(document.createTextNode(" - "));
-    title.appendChild(document.createTextNode(judgingGroup));
     title.setAttribute("font-weight", "bold");
 
     final Element row1Block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
@@ -331,10 +327,10 @@ public class AwardSummarySheet extends BaseFLLServlet {
     final Element list = FOPUtils.createXslFoElement(document, "list-block");
     section.appendChild(list);
 
-    FinalComputedScores.iterateOverSubjectiveScores(connection, awardCategory, winnerCriteria, tournament, awardGroup,
-                                                    judgingGroup, (teamNumber,
-                                                                   score,
-                                                                   rank) -> {
+    FinalComputedScores.iterateOverSubjectiveScores(connection, awardCategory, winnerCriteria, tournament, judgingGroup,
+                                                    (teamNumber,
+                                                     score,
+                                                     rank) -> {
                                                       if (rank <= NUM_FINALISTS) {
                                                         try {
                                                           final Team team = Team.getTeamFromDatabase(connection,

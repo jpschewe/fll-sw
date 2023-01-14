@@ -72,7 +72,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session,
+    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
                                                     "/report/CategoryScoresByScoreGroup")) {
       return;
     }

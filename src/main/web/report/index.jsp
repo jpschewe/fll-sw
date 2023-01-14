@@ -52,17 +52,48 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <a class="wide" href="topScoreReportPerJudgingStation.jsp"> Top
         performance - Judging group </a>
 
-    <a class="wide" href='FinalComputedScores' target="_blank">
+    <div class="wide">
         Summarized numeric scores - by judging group aka "Final Computed
-        Scores"</a>
+        Scores"
+        <form action="FinalComputedScores" target="_finalComputedScores"
+            method="POST">
+            <input type="hidden" name="selector"
+                value="<%=fll.web.report.FinalComputedScores.ReportSelector.AWARD_GROUP.name()%>" />
+            <select name="groupName">
+                <option
+                    value="<%=fll.web.report.FinalComputedScores.ALL_GROUP_NAME%>">All</option>
+                <c:forEach items="${awardGroups}" var="awardGroup">
+                    <option value="${awardGroup}">${awardGroup}</option>
+                </c:forEach>
+            </select>
+            <input type="submit" value="Report by Award Group" />
+        </form>
+
+        <form action="FinalComputedScores" target="_finalComputedScores"
+            method="POST">
+            <input type="hidden" name="selector"
+                value="<%=fll.web.report.FinalComputedScores.ReportSelector.JUDGING_STATION.name()%>" />
+            <select name="groupName">
+                <option
+                    value="<%=fll.web.report.FinalComputedScores.ALL_GROUP_NAME%>">All</option>
+                <c:forEach items="${judgingStations}"
+                    var="judgingStation">
+                    <option value="${judgingStation}">${judgingStation}</option>
+                </c:forEach>
+            </select>
+            <input type="submit" value="Report by Judging Station" />
+        </form>
+    </div>
+    <!-- end FinalComputedScores -->
 
     <div class="wide">
         <form action="AwardSummarySheet" method="POST"
             target="award-summary-sheet">
-            Generate award summary sheet for award group
-            <select name="awardGroup">
-                <c:forEach items="${awardGroups}" var="awardGroup">
-                    <option value="${awardGroup}">${awardGroup}</option>
+            Generate award summary sheet for judging group
+            <select name="groupName">
+                <c:forEach items="${judgingStations}"
+                    var="judgingStation">
+                    <option value="${judgingStation}">${judgingStation}</option>
                 </c:forEach>
             </select>
             <input type='submit' value='Create Sheet' />

@@ -75,7 +75,8 @@ public class SubjectiveByJudge extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/SubjectiveByJudge")) {
+    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
+                                                    "/report/SubjectiveByJudge")) {
       return;
     }
 

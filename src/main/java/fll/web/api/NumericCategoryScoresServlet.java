@@ -69,24 +69,21 @@ public class NumericCategoryScoresServlet extends HttpServlet {
       final Map<String, Map<Integer, Double>> scores = new HashMap<>();
 
       final WinnerType winnerCriteria = description.getWinner();
-      final List<String> awardGroups = Queries.getAwardGroups(connection, tournament.getTournamentID());
       final List<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
       for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
         final String categoryTitle = category.getTitle();
 
         final Map<Integer, Double> categoryScores = scores.computeIfAbsent(categoryTitle, k -> new HashMap<>());
 
-        for (final String awardGroup : awardGroups) {
-          for (final String judgingStation : judgingStations) {
-            FinalComputedScores.iterateOverSubjectiveScores(connection, category, winnerCriteria, tournament,
-                                                            awardGroup, judgingStation, (teamNumber,
-                                                                                         score,
-                                                                                         rank) -> {
+        for (final String judgingStation : judgingStations) {
+          FinalComputedScores.iterateOverSubjectiveScores(connection, category, winnerCriteria, tournament,
+                                                          judgingStation, (teamNumber,
+                                                                           score,
+                                                                           rank) -> {
 
-                                                              categoryScores.put(teamNumber, score);
-                                                            });
-          } // judging station
-        } // award group
+                                                            categoryScores.put(teamNumber, score);
+                                                          });
+        } // judging station
       } // category
 
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();

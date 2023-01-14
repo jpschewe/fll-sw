@@ -70,7 +70,8 @@ public class PerformanceReport extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/PerformanceReport")) {
+    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
+                                                    "/report/PerformanceReport")) {
       return;
     }
 

@@ -94,6 +94,7 @@ public final class ReportIndex {
       pageContext.setAttribute("categoryJudgesJson", categoryJudgesJson);
 
       pageContext.setAttribute("awardGroups", Queries.getAwardGroups(connection, tournament));
+      pageContext.setAttribute("judgingStations", Queries.getJudgingStations(connection, tournament));
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     } catch (final JsonProcessingException e) {

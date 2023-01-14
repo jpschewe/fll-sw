@@ -120,8 +120,11 @@ public class TournamentAdvancement extends BaseFLLServlet {
 
     // award group -> team -> {rank, score}
     final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> performanceRanks = new HashMap<>();
-    // award group -> category -> Judging Group -> team number -> {rank, score}
-    final Map<String, Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>>> subjectiveRanks = new HashMap<>();
+    // category -> Judging Group -> team number -> {rank, score}
+    final Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> subjectiveRanks = FinalComputedScores.gatherRankedSubjectiveTeams(connection,
+                                                                                                                                                          description.getSubjectiveCategories(),
+                                                                                                                                                          description.getWinner(),
+                                                                                                                                                          tournament);
 
     final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> overallRanks = gatherOverallRanks(connection,
                                                                                                       description,
@@ -133,11 +136,6 @@ public class TournamentAdvancement extends BaseFLLServlet {
                            FinalComputedScores.gatherRankedPerformanceTeams(connection, description.getWinner(),
                                                                             tournament, awardGroup));
 
-      subjectiveRanks.put(awardGroup,
-                          FinalComputedScores.gatherRankedSubjectiveTeams(connection,
-                                                                          description.getSubjectiveCategories(),
-                                                                          description.getWinner(), tournament,
-                                                                          awardGroup));
     } // foreach award group
 
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection,
@@ -170,12 +168,9 @@ public class TournamentAdvancement extends BaseFLLServlet {
       csvData.add(team.getAwardGroup());
       csvData.add(team.getJudgingGroup());
 
-      final Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> sranks = subjectiveRanks.getOrDefault(team.getAwardGroup(),
-                                                                                                                                Collections.emptyMap());
-
       for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
-        final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> cranks = sranks.getOrDefault(category,
-                                                                                                     Collections.emptyMap());
+        final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> cranks = subjectiveRanks.getOrDefault(category,
+                                                                                                              Collections.emptyMap());
         final Map<Integer, ImmutablePair<Integer, Double>> jranks = cranks.getOrDefault(team.getJudgingGroup(),
                                                                                         Collections.emptyMap());
 

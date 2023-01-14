@@ -3,7 +3,7 @@
 <fll-sw:required-roles roles="HEAD_JUDGE" allowSetup="false" />
 
 <%
-if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(response, application, session,
+if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
 		"/report/finalist/load.jsp")) {
 	return;
 }

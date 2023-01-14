@@ -71,7 +71,7 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session,
+    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
                                                     "/report/ScaledSubjectiveByAwardGroup")) {
       return;
     }
@@ -133,8 +133,7 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
       final Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> teamSubjectiveRanks = FinalComputedScores.gatherRankedSubjectiveTeams(connection,
                                                                                                                                                                 challengeDescription.getSubjectiveCategories(),
                                                                                                                                                                 challengeDescription.getWinner(),
-                                                                                                                                                                tournament,
-                                                                                                                                                                awardGroup);
+                                                                                                                                                                tournament);
 
       for (final SubjectiveScoreCategory category : challengeDescription.getSubjectiveCategories()) {
         final @Nullable Map<String, Map<Integer, ImmutablePair<Integer, Double>>> categoryTeamRanks = teamSubjectiveRanks.get(category);

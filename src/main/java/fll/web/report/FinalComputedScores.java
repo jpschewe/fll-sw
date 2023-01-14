@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -20,12 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
 
@@ -52,6 +47,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.report.awards.AwardsReport;
 import fll.xml.ChallengeDescription;
@@ -61,6 +57,12 @@ import fll.xml.ScoreCategory;
 import fll.xml.ScoreType;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -82,6 +84,50 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
   private static final double FOOTER_MARGIN_INCHES = 0.5;
 
+  /**
+   * Group name for all values of the group.
+   */
+  public static final String ALL_GROUP_NAME = "_all_";
+
+  /**
+   * Used to specify how to select teams for the report.
+   */
+  public enum ReportSelector {
+    /** Select teams by award group. */
+    AWARD_GROUP("Award Group", "event_division"),
+
+    /** Select teams by judging station. */
+    JUDGING_STATION("Judging Group", "judging_station");
+
+    private final String title;
+
+    /**
+     * @return title to put in the report
+     */
+    public String getTitle() {
+      return title;
+    }
+
+    private final String column;
+
+    /**
+     * @return database column to filter teams by
+     */
+    public String getColumn() {
+      return column;
+    }
+
+    /**
+     * @param title {@see #getTitle()}
+     * @param column {@see #getColumn()}
+     */
+    ReportSelector(final String title,
+                   final String column) {
+      this.title = title;
+      this.column = column;
+    }
+  }
+
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -94,9 +140,13 @@ public final class FinalComputedScores extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/FinalComputedScores")) {
+    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
+                                                    "/report/FinalComputedScores")) {
       return;
     }
+
+    final ReportSelector selector = ReportSelector.valueOf(WebUtils.getNonNullRequestParameter(request, "selector"));
+    final String groupName = WebUtils.getNonNullRequestParameter(request, "groupName");
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
@@ -131,9 +181,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
       try {
         final Document document = generateReport(connection, challengeDescription, challengeTitle, tournament,
-                                                 bestTeams, percentageHurdle, standardMean, standardSigma);
+                                                 bestTeams, percentageHurdle, standardMean, standardSigma, groupName,
+                                                 selector);
         final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
-
         FOPUtils.renderPdf(fopFactory, document, response.getOutputStream());
       } catch (FOPException | TransformerException e) {
         throw new FLLInternalException("Error creating the final scoresPDF", e);
@@ -219,7 +269,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                   final Set<Integer> bestTeams,
                                   final int percentageHurdle,
                                   final double standardMean,
-                                  final double standardSigma)
+                                  final double standardSigma,
+                                  final String groupName,
+                                  final ReportSelector selector)
       throws SQLException, IOException {
     if (tournament.getTournamentID() != Queries.getCurrentTournament(connection)) {
       throw new FLLRuntimeException("Cannot generate final score report for a tournament other than the current tournament");
@@ -243,12 +295,27 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     final Element legend = createLegend(document, percentageHurdle, standardMean, standardSigma);
 
-    for (final String awardGroup : Queries.getAwardGroups(connection)) {
+    if (ALL_GROUP_NAME.equals(groupName)) {
+      final Collection<String> groups;
+      if (ReportSelector.AWARD_GROUP.equals(selector)) {
+        groups = Queries.getAwardGroups(connection, tournament.getTournamentID());
+      } else if (ReportSelector.JUDGING_STATION.equals(selector)) {
+        groups = Queries.getJudgingStations(connection, tournament.getTournamentID());
+      } else {
+        throw new FLLInternalException(String.format("Unknown report selector: %s", selector));
+      }
+
+      for (final String group : groups) {
+        final Element pageSequence = createAwardGroupPageSequence(connection, document, challengeDescription,
+                                                                  challengeTitle, winnerCriteria, tournament,
+                                                                  pageMasterName, legend, bestTeams, group, selector);
+        rootElement.appendChild(pageSequence);
+      }
+    } else {
       final Element pageSequence = createAwardGroupPageSequence(connection, document, challengeDescription,
                                                                 challengeTitle, winnerCriteria, tournament,
-                                                                pageMasterName, legend, bestTeams, awardGroup);
+                                                                pageMasterName, legend, bestTeams, groupName, selector);
       rootElement.appendChild(pageSequence);
-
     }
 
     return document;
@@ -263,11 +330,12 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                final String pageMasterName,
                                                final Element legend,
                                                final Set<Integer> bestTeams,
-                                               final String awardGroup)
+                                               final String groupName,
+                                               final ReportSelector selector)
       throws SQLException {
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
 
-    final Element headerContent = createAwardGroupHeader(document, challengeTitle, tournament, awardGroup);
+    final Element headerContent = createAwardGroupHeader(document, challengeTitle, tournament, groupName, selector);
 
     final Element header = FOPUtils.createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
     pageSequence.appendChild(header);
@@ -304,8 +372,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
     divTable.appendChild(tableHeader);
 
     final Element tableBody = writeScores(connection, document, subjectiveCategories,
-                                          challengeDescription.getPerformance(), awardGroup, winnerCriteria, tournament,
-                                          bestTeams);
+                                          challengeDescription.getPerformance(), groupName, selector, winnerCriteria,
+                                          tournament, bestTeams);
     divTable.appendChild(tableBody);
 
     return pageSequence;
@@ -353,11 +421,20 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * @return team number, {rank, score}
    * @throws SQLException on a database error
    */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Winner criteria determines the sort")
   public static Map<Integer, ImmutablePair<Integer, Double>> gatherRankedPerformanceTeams(final Connection connection,
                                                                                           final WinnerType winnerCriteria,
                                                                                           final Tournament tournament,
                                                                                           final String awardGroup)
+      throws SQLException {
+    return gatherRankedPerformanceTeams(connection, winnerCriteria, tournament, awardGroup, ReportSelector.AWARD_GROUP);
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Winner criteria determines the sort, group column determines the column")
+  public static Map<Integer, ImmutablePair<Integer, Double>> gatherRankedPerformanceTeams(final Connection connection,
+                                                                                          final WinnerType winnerCriteria,
+                                                                                          final Tournament tournament,
+                                                                                          final String groupName,
+                                                                                          final ReportSelector selector)
       throws SQLException {
     final Map<Integer, ImmutablePair<Integer, Double>> rankedTeams = new HashMap<>();
 
@@ -370,14 +447,13 @@ public final class FinalComputedScores extends BaseFLLServlet {
             + " FROM final_scores, TournamentTeams" //
             + " WHERE final_scores.Tournament = ?" //
             + " AND TournamentTeams.Tournament = final_scores.tournament" //
-            + " AND TournamentTeams.event_division = ?"//
+            + String.format(" AND TournamentTeams.%s = ?", selector.getColumn()) //
             + " AND TournamentTeams.TeamNumber = final_scores.team_number"//
             + " AND final_scores.category = ?" //
             + " AND final_scores.goal_group = ?" //
-            + " ORDER BY final_scores.final_score "
-            + winnerCriteria.getSortString())) {
+            + String.format(" ORDER BY final_scores.final_score %s", winnerCriteria.getSortString()))) {
       prep.setInt(1, tournament.getTournamentID());
-      prep.setString(2, awardGroup);
+      prep.setString(2, groupName);
       prep.setString(3, PerformanceScoreCategory.CATEGORY_NAME);
       prep.setString(4, "");
 
@@ -411,7 +487,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
   /**
    * Used with
-   * {@link FinalComputedScores#iterateOverSubjectiveScores(Connection, SubjectiveScoreCategory, WinnerType, Tournament, String, String, SubjectiveScoreVisitor)}.
+   * {@link FinalComputedScores#iterateOverSubjectiveScores(Connection, SubjectiveScoreCategory, WinnerType, Tournament, String, SubjectiveScoreVisitor)}.
    */
   @FunctionalInterface
   public interface SubjectiveScoreVisitor {
@@ -432,7 +508,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * @param category the category to select scores for
    * @param winnerCriteria who is the winner
    * @param tournament which tournament to get scores for
-   * @param awardGroup which award group
    * @param judgingStation which judging station
    * @param visitor called with the data
    * @throws SQLException if a database error occurs
@@ -442,7 +517,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                  final SubjectiveScoreCategory category,
                                                  final WinnerType winnerCriteria,
                                                  final Tournament tournament,
-                                                 final String awardGroup,
                                                  final String judgingStation,
                                                  final SubjectiveScoreVisitor visitor)
       throws SQLException {
@@ -452,19 +526,15 @@ public final class FinalComputedScores extends BaseFLLServlet {
             + " FROM final_scores, TournamentTeams" //
             + " WHERE final_scores.tournament = ?" //
             + " AND TournamentTeams.Tournament = final_scores.tournament" //
-            + " AND TournamentTeams.event_division = ?"//
             + " AND TournamentTeams.TeamNumber = final_scores.team_number"//
             + " AND TournamentTeams.judging_station = ?" //
             + " AND final_scores.category = ?" //
             + " AND final_scores.goal_group = ?" //
-            + " ORDER BY final_scores.final_score"
-            + " "
-            + winnerCriteria.getSortString())) {
+            + String.format(" ORDER BY final_scores.final_score %s", winnerCriteria.getSortString()))) {
       prep.setInt(1, tournament.getTournamentID());
-      prep.setString(2, awardGroup);
-      prep.setString(3, judgingStation);
-      prep.setString(4, category.getName());
-      prep.setString(5, "");
+      prep.setString(2, judgingStation);
+      prep.setString(3, category.getName());
+      prep.setString(4, "");
 
       int numTied = 1;
       int rank = 0;
@@ -499,7 +569,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
    *          {@link ChallengeDescription#getSubjectiveCategories()}
    * @param winnerCriteria from {@link ChallengeDescription#getWinner()}
    * @param tournament the tournament to get scores for
-   * @param awardGroup the award group to get scores for
    * @return category, Judging Group, team number, {rank, scaled score}
    * @throws SQLException on a database error
    */
@@ -507,8 +576,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
   public static Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> gatherRankedSubjectiveTeams(final Connection connection,
                                                                                                                           final List<SubjectiveScoreCategory> subjectiveCategories,
                                                                                                                           final WinnerType winnerCriteria,
-                                                                                                                          final Tournament tournament,
-                                                                                                                          final String awardGroup)
+                                                                                                                          final Tournament tournament)
       throws SQLException {
     final Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> retval = new HashMap<>();
     final List<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
@@ -517,18 +585,15 @@ public final class FinalComputedScores extends BaseFLLServlet {
       final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> categoryRanks = new HashMap<>();
 
       for (final String judgingStation : judgingStations) {
-
         final Map<Integer, ImmutablePair<Integer, Double>> rankedTeams = new HashMap<>();
 
-        iterateOverSubjectiveScores(connection, category, winnerCriteria, tournament, awardGroup, judgingStation,
-                                    (teamNumber,
-                                     score,
-                                     rank) -> {
-                                      rankedTeams.put(teamNumber, ImmutablePair.of(rank, score));
-                                    });
+        iterateOverSubjectiveScores(connection, category, winnerCriteria, tournament, judgingStation, (teamNumber,
+                                                                                                       score,
+                                                                                                       rank) -> {
+          rankedTeams.put(teamNumber, ImmutablePair.of(rank, score));
+        });
 
         categoryRanks.put(judgingStation, rankedTeams);
-
       } // foreach judging station
 
       retval.put(category, categoryRanks);
@@ -543,7 +608,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
                               final Document document,
                               final List<SubjectiveScoreCategory> subjectiveCategories,
                               final PerformanceScoreCategory performanceCategory,
-                              final String awardGroup,
+                              final String groupName,
+                              final ReportSelector selector,
                               final WinnerType winnerCriteria,
                               final Tournament tournament,
                               final Set<Integer> bestTeams)
@@ -554,20 +620,20 @@ public final class FinalComputedScores extends BaseFLLServlet {
     final Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> teamSubjectiveRanks = gatherRankedSubjectiveTeams(connection,
                                                                                                                                           subjectiveCategories,
                                                                                                                                           winnerCriteria,
-                                                                                                                                          tournament,
-                                                                                                                                          awardGroup);
+                                                                                                                                          tournament);
 
     final Map<Integer, ImmutablePair<Integer, Double>> teamPerformanceRanks = gatherRankedPerformanceTeams(connection,
                                                                                                            winnerCriteria,
                                                                                                            tournament,
-                                                                                                           awardGroup);
+                                                                                                           groupName,
+                                                                                                           selector);
 
     try (
         PreparedStatement overallPrep = connection.prepareStatement("SELECT Teams.Organization, Teams.TeamName, Teams.TeamNumber, overall_score, TournamentTeams.judging_station" //
             + " FROM overall_scores, Teams, TournamentTeams" //
             + " WHERE overall_scores.tournament = ?"//
             + " AND TournamentTeams.tournament = overall_scores.tournament" //
-            + " AND TournamentTeams.event_division = ?"//
+            + String.format(" AND TournamentTeams.%s = ?", selector.getColumn()) //
             + " AND TournamentTeams.TeamNumber = Teams.TeamNumber" //
             + " AND TournamentTeams.TeamNumber = overall_scores.team_number" //
             + " ORDER BY overall_scores.overall_score "
@@ -575,7 +641,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
             + ", Teams.TeamNumber" //
         )) {
       overallPrep.setInt(1, tournament.getTournamentID());
-      overallPrep.setString(2, awardGroup);
+      overallPrep.setString(2, groupName);
 
       try (ResultSet overallResult = overallPrep.executeQuery()) {
         while (overallResult.next()) {
@@ -1012,7 +1078,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
   private Element createAwardGroupHeader(final Document document,
                                          final String challengeTitle,
                                          final Tournament tournament,
-                                         final String division) {
+                                         final String groupName,
+                                         final ReportSelector selector) {
     final String sidePadding = "3pt";
     final double borderWidth = 0.5;
 
@@ -1054,8 +1121,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
     row2.appendChild(finalScoresCell);
     finalScoresCell.setAttribute("padding-left", sidePadding);
 
-    final Element awardGroupCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Award Group: "
-        + division);
+    final Element awardGroupCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
+                                                            String.format("%s: %s", selector.getTitle(), groupName));
     row2.appendChild(awardGroupCell);
     awardGroupCell.setAttribute("padding-right", sidePadding);
 
