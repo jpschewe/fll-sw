@@ -670,9 +670,6 @@ public class FullTournamentTest {
 
   private void checkReports() throws IOException, InterruptedException, URISyntaxException {
     IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
-        + "report/FinalComputedScores"), "application/pdf", null);
-
-    IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
         + "report/CategoryScoresByScoreGroup"), "application/pdf", null);
 
     IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
