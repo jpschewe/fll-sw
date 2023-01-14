@@ -55,7 +55,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <div class="wide">
         Summarized numeric scores - by judging group aka "Final Computed
         Scores"
-        <form action="FinalComputedScores" target="_finalComputedScores">
+        <form action="FinalComputedScores" target="_finalComputedScores"
+            method="POST">
             <input type="hidden" name="selector"
                 value="<%=fll.web.report.FinalComputedScores.ReportSelector.AWARD_GROUP.name()%>" />
             <select name="groupName">
@@ -68,7 +69,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
             <input type="submit" value="Report by Award Group" />
         </form>
 
-        <form action="FinalComputedScores" target="_finalComputedScores">
+        <form action="FinalComputedScores" target="_finalComputedScores"
+            method="POST">
             <input type="hidden" name="selector"
                 value="<%=fll.web.report.FinalComputedScores.ReportSelector.JUDGING_STATION.name()%>" />
             <select name="groupName">
