@@ -1,3 +1,4 @@
+* #1068 - Store form parameters when redirecting to compute summarized scores
 * Rework award summary sheet to be by judging group
 * #1067 - Allow the user to generate the final computed scores report by award group or judging station
 

@@ -71,7 +71,7 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session,
+    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
                                                     "/report/ScaledSubjectiveByAwardGroup")) {
       return;
     }

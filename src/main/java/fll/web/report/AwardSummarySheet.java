@@ -77,7 +77,7 @@ public class AwardSummarySheet extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/AwardSummarySheet")) {
+    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session, "/report/AwardSummarySheet")) {
       return;
     }
 

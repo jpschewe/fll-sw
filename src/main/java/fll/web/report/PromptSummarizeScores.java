@@ -24,6 +24,7 @@ import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.FormParameterStorage;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
@@ -72,6 +73,7 @@ public class PromptSummarizeScores extends BaseFLLServlet {
    * the session variable SUMMARY_REDIRECT to point to
    * redirect.
    *
+   * @param request used to store form parameters if redirecting
    * @param response used to send a redirect
    * @param application the application context
    * @param session the session context
@@ -79,7 +81,8 @@ public class PromptSummarizeScores extends BaseFLLServlet {
    * @return if the summary scores need to be updated, the calling method should
    *         return immediately if this is true as a redirect has been executed.
    */
-  public static boolean checkIfSummaryUpdated(final HttpServletResponse response,
+  public static boolean checkIfSummaryUpdated(final HttpServletRequest request,
+                                              final HttpServletResponse response,
                                               final ServletContext application,
                                               final HttpSession session,
                                               final String redirect) {
@@ -109,6 +112,8 @@ public class PromptSummarizeScores extends BaseFLLServlet {
           LOGGER.debug("redirect has already been set, it must be the case that the user is skipping summarization, allow it");
           return false;
         } else {
+          FormParameterStorage.storeParameters(request, session);
+
           session.setAttribute(SUMMARY_REDIRECT_KEY, redirect);
           WebUtils.sendRedirect(application, response, "/report/promptSummarizeScores.jsp");
           return true;

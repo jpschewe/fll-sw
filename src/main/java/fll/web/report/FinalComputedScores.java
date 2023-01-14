@@ -140,7 +140,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/FinalComputedScores")) {
+    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
+                                                    "/report/FinalComputedScores")) {
       return;
     }
 
