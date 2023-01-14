@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -20,12 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
 
@@ -62,6 +57,12 @@ import fll.xml.ScoreCategory;
 import fll.xml.ScoreType;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -182,7 +183,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                  bestTeams, percentageHurdle, standardMean, standardSigma, groupName,
                                                  selector);
         final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
-
         FOPUtils.renderPdf(fopFactory, document, response.getOutputStream());
       } catch (FOPException | TransformerException e) {
         throw new FLLInternalException("Error creating the final scoresPDF", e);
@@ -295,11 +295,19 @@ public final class FinalComputedScores extends BaseFLLServlet {
     final Element legend = createLegend(document, percentageHurdle, standardMean, standardSigma);
 
     if (ALL_GROUP_NAME.equals(groupName)) {
-      for (final String awardGroup : Queries.getAwardGroups(connection)) {
+      final Collection<String> groups;
+      if (ReportSelector.AWARD_GROUP.equals(selector)) {
+        groups = Queries.getAwardGroups(connection, tournament.getTournamentID());
+      } else if (ReportSelector.JUDGING_STATION.equals(selector)) {
+        groups = Queries.getJudgingStations(connection, tournament.getTournamentID());
+      } else {
+        throw new FLLInternalException(String.format("Unknown report selector: %s", selector));
+      }
+
+      for (final String group : groups) {
         final Element pageSequence = createAwardGroupPageSequence(connection, document, challengeDescription,
                                                                   challengeTitle, winnerCriteria, tournament,
-                                                                  pageMasterName, legend, bestTeams, awardGroup,
-                                                                  selector);
+                                                                  pageMasterName, legend, bestTeams, group, selector);
         rootElement.appendChild(pageSequence);
       }
     } else {
