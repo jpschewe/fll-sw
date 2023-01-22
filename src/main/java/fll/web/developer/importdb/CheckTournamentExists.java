@@ -69,20 +69,15 @@ public class CheckTournamentExists extends BaseFLLServlet {
       sessionInfo.setImportSubjective(null != request.getParameter("importSubjective"));
       sessionInfo.setImportPerformance(null != request.getParameter("importPerformance"));
       sessionInfo.setImportFinalist(null != request.getParameter("importFinalist"));
+      sessionInfo.setImportAwardsScript(null != request.getParameter("importAwardsScript"));
 
       if (LOG.isDebugEnabled()) {
-        LOG.debug("subjective: "
-            + request.getParameter("importSubjective"));
-        LOG.debug("performance: "
-            + request.getParameter("importPerformance"));
-        LOG.debug("finalist: "
-            + request.getParameter("importFinalist"));
-        LOG.debug("import subjective: "
-            + sessionInfo.isImportSubjective()
-            + " performance: "
-            + sessionInfo.isImportPerformance()
-            + " finalist: "
-            + sessionInfo.isImportFinalist());
+        LOG.debug("subjective: {}", request.getParameter("importSubjective"));
+        LOG.debug("performance: {}", request.getParameter("importPerformance"));
+        LOG.debug("finalist: {}", request.getParameter("importFinalist"));
+        LOG.debug("finalist: {}", request.getParameter("importAwardsScript"));
+        LOG.debug("import subjective: {} performance: {} finalist: {} awards script: {}",
+                  sessionInfo.isImportSubjective(), sessionInfo.isImportPerformance(), sessionInfo.isImportFinalist());
       }
     }
 

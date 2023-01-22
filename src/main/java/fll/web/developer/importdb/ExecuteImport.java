@@ -80,7 +80,8 @@ public class ExecuteImport extends BaseFLLServlet {
         DumpDB.automaticBackup(destConnection, "before-import");
 
         ImportDB.importDatabase(sourceConnection, destConnection, tournament, sessionInfo.isImportPerformance(),
-                                sessionInfo.isImportSubjective(), sessionInfo.isImportFinalist());
+                                sessionInfo.isImportSubjective(), sessionInfo.isImportFinalist(),
+                                sessionInfo.isImportAwardsScript());
 
         // update score totals
         final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);

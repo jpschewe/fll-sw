@@ -161,7 +161,7 @@ public final class ImportDB {
       for (final Tournament sourceTournament : Tournament.getTournaments(sourceConnection)) {
         final String tournament = sourceTournament.getName();
         // import the data from the tournament
-        importDatabase(sourceConnection, destConnection, tournament, true, true, true);
+        importDatabase(sourceConnection, destConnection, tournament, true, true, true, true);
       }
 
       // for each tournament level import the data relating to the tournament level
@@ -1708,6 +1708,7 @@ public final class ImportDB {
    *          be imported
    * @param importSubjective if the subjective data should be imported
    * @param importFinalist if the finalist schedule should be imported
+   * @param importAwardsScript if the awards script data should be imported
    * @throws SQLException on a database error
    */
   public static void importDatabase(final Connection sourceConnection,
@@ -1715,7 +1716,8 @@ public final class ImportDB {
                                     final String tournamentName,
                                     final boolean importPerformance,
                                     final boolean importSubjective,
-                                    final boolean importFinalist)
+                                    final boolean importFinalist,
+                                    final boolean importAwardsScript)
       throws SQLException {
 
     final ChallengeDescription description = GlobalParameters.getChallengeDescription(destinationConnection);
@@ -1729,6 +1731,11 @@ public final class ImportDB {
                  destTournamentID);
 
     importTournamentData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+
+    if (importAwardsScript) {
+      importAwardsScriptData(sourceConnection, destinationConnection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
+                             sourceTournamentID, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, destTournamentID);
+    }
 
     if (importPerformance) {
       importPerformanceData(sourceConnection, destinationConnection, description, sourceTournamentID, destTournamentID);
@@ -1891,9 +1898,6 @@ public final class ImportDB {
     importTableNames(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importCategoryScheduleMapping(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
-
-    importAwardsScriptData(sourceConnection, destinationConnection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
-                           sourceTournamentID, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, destTournamentID);
   }
 
   private static void importSchedule(final Connection sourceConnection,

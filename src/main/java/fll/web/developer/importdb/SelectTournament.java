@@ -62,6 +62,12 @@ public final class SelectTournament {
         page.setAttribute("importFinalistChecked", "");
       }
 
+      if (sessionInfo.isImportAwardsScript()) {
+        page.setAttribute("importAwardsScriptChecked", "checked");
+      } else {
+        page.setAttribute("importAwardsScriptChecked", "");
+      }
+
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
