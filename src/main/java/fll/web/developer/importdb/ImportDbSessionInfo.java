@@ -153,6 +153,23 @@ public final class ImportDbSessionInfo {
     return importFinalist;
   }
 
+  private boolean importAwardsScript = true;
+
+  /**
+   * @param v set to true to import the awards script data into the destination
+   *          database
+   */
+  public void setImportAwardsScript(final boolean v) {
+    importAwardsScript = v;
+  }
+
+  /**
+   * @return see {@link #setImportAwardsScript(boolean)}
+   */
+  public boolean isImportAwardsScript() {
+    return importAwardsScript;
+  }
+
   private String redirectURL = "../index.jsp";
 
   /**

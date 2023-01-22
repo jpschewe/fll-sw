@@ -114,6 +114,7 @@ public class ProcessImportPerformance extends BaseFLLServlet {
                   sessionInfo.setImportFinalist(false);
                   sessionInfo.setImportPerformance(true);
                   sessionInfo.setImportSubjective(false);
+                  sessionInfo.setImportAwardsScript(false);
 
                   session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckPerformanceEmpty");
                 }

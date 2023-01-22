@@ -60,6 +60,13 @@ fll.web.developer.importdb.SelectTournament.populateContext(session, pageContext
         <br />
 
         <!--  -->
+        <input name="importAwardsScript" id="importAwardsScript"
+            type="checkbox" ${importAwardsScriptChecked} />
+        <label for="importAwardsScript">Import Awards Script
+            Data</label>
+        <br />
+
+        <!--  -->
         <input name='submit_tournament' type='submit'
             value='Select Tournament' />
     </form>

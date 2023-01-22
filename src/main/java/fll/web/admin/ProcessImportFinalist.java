@@ -113,6 +113,7 @@ public class ProcessImportFinalist extends BaseFLLServlet {
                   sessionInfo.setImportFinalist(true);
                   sessionInfo.setImportPerformance(false);
                   sessionInfo.setImportSubjective(true);
+                  sessionInfo.setImportAwardsScript(false);
                   session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
 
                   session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckSubjectiveEmptyForJudgeImport");
