@@ -23,12 +23,15 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.catalina.LifecycleException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import fll.Launcher;
 import fll.TestUtils;
 import fll.Tournament;
 import fll.db.ImportDB;
+import fll.tomcat.TomcatLauncher;
 import fll.util.GuiExceptionHandler;
 import net.mtu.eggplant.util.BasicFileFilter;
 
@@ -92,9 +95,22 @@ public final class ReplayTournament {
         final FullTournamentTest replay = new FullTournamentTest();
         final WebDriver selenium = IntegrationTestUtils.createWebDriver(driver);
         final WebDriverWait seleniumWait = IntegrationTestUtils.createWebDriverWait(selenium);
+        final TomcatLauncher launcher = new TomcatLauncher(Launcher.DEFAULT_WEB_PORT);
         try {
+          try {
+            LOGGER.info("Starting tomcat");
+            launcher.start();
+          } catch (final LifecycleException e) {
+            LOGGER.error("Error starting tomcat", e);
+            throw new RuntimeException(e);
+          }
+
           replay.replayTournament(selenium, seleniumWait, testDataConn, testTournament.getName(), outputDirectory);
         } finally {
+
+          LOGGER.info("Stopping tomcat");
+          launcher.stop();
+
           selenium.quit();
         }
       }
