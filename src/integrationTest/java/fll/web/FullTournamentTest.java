@@ -517,18 +517,20 @@ public class FullTournamentTest {
     }
     // decrement by one since this index wasn't found
     --maxIndex;
+    LOGGER.trace("MaxIndex is {}", maxIndex);
 
     // make sure the row exists to enter the judge
     for (; maxIndex < judgeIndex; ++maxIndex) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Adding a row to the judges entry form to get to: "
-            + judgeIndex);
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Adding a row to the judges entry form to get to: {}", judgeIndex);
         IntegrationTestUtils.storeScreenshot(selenium);
       }
       selenium.findElement(By.id("add_rows")).click();
 
-      final String expectedId = String.format("id%d", maxIndex);
-      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id(expectedId)));
+      // wait for the next element to show up
+      final String expectedId = String.format("id%d", maxIndex
+          + 1);
+      seleniumWait.until(ExpectedConditions.elementToBeClickable((By.name(expectedId))));
     }
 
     selenium.findElement(By.name("id"
