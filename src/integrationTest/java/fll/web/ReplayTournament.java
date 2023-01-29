@@ -14,11 +14,14 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
 import java.util.prefs.Preferences;
 import java.util.zip.ZipInputStream;
 
+import javax.sql.DataSource;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
@@ -30,6 +33,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import fll.Launcher;
 import fll.TestUtils;
 import fll.Tournament;
+import fll.Utilities;
+import fll.db.Authentication;
 import fll.db.ImportDB;
 import fll.tomcat.TomcatLauncher;
 import fll.util.GuiExceptionHandler;
@@ -91,6 +96,8 @@ public final class ReplayTournament {
           return;
         }
 
+        createAdmin();
+
         // run
         final FullTournamentTest replay = new FullTournamentTest();
         final WebDriver selenium = IntegrationTestUtils.createWebDriver(driver);
@@ -107,7 +114,6 @@ public final class ReplayTournament {
 
           replay.replayTournament(selenium, seleniumWait, testDataConn, testTournament.getName(), outputDirectory);
         } finally {
-
           LOGGER.info("Stopping tomcat");
           launcher.stop();
 
@@ -122,7 +128,27 @@ public final class ReplayTournament {
           + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
       System.exit(1);
     }
+  }
 
+  /**
+   * Make sure there is a user configured that can be used.
+   */
+  private static void createAdmin() throws SQLException {
+    final DataSource datasource = Launcher.createDatasource();
+    try (Connection connection = datasource.getConnection()) {
+      if (Utilities.testDatabaseInitialized(connection)) {
+        // create the user
+        final Collection<String> existingUsers = Authentication.getUsers(connection);
+        if (existingUsers.contains(IntegrationTestUtils.TEST_USERNAME)) {
+          Authentication.changePassword(connection, IntegrationTestUtils.TEST_USERNAME,
+                                        IntegrationTestUtils.TEST_PASSWORD);
+        } else {
+          Authentication.addUser(connection, IntegrationTestUtils.TEST_USERNAME, IntegrationTestUtils.TEST_PASSWORD);
+          Authentication.setRoles(connection, IntegrationTestUtils.TEST_USERNAME,
+                                  Collections.singleton(UserRole.ADMIN));
+        }
+      }
+    }
   }
 
   private static IntegrationTestUtils.WebDriverType selectWebDriver() {

@@ -504,7 +504,13 @@ public class Launcher extends JFrame {
     }
   }
 
-  private static DataSource createDatasource() {
+  /**
+   * Create a {@link DataSource} that points to the database that will be used by
+   * the web application.
+   * 
+   * @return the DataSource
+   */
+  public static DataSource createDatasource() {
     final Path classesPath = TomcatLauncher.getClassesPath();
     LOGGER.debug("Classes path {}", classesPath);
 
