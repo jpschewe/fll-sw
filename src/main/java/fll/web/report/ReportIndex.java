@@ -25,6 +25,7 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.WebUtils;
 import fll.web.report.finalist.FinalistSchedule;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
@@ -90,7 +91,7 @@ public final class ReportIndex {
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
       // assume that the string is going to be put inside single quotes in the
       // javascript code
-      final String categoryJudgesJson = jsonMapper.writeValueAsString(categoryJudges).replace("'", "\\'");
+      final String categoryJudgesJson = WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(categoryJudges));
       pageContext.setAttribute("categoryJudgesJson", categoryJudgesJson);
 
       pageContext.setAttribute("awardGroups", Queries.getAwardGroups(connection, tournament));

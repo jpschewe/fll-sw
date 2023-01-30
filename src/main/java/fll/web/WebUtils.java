@@ -274,6 +274,21 @@ public final class WebUtils {
   }
 
   /**
+   * Escape a string that will be put into single quotes in javascript and parsed
+   * with {@code JSON.parse}.
+   * 
+   * @param str the string
+   * @return the escaped string
+   */
+  public static String escapeStringForJsonParse(final String str) {
+    return str
+              // escape the single quotes
+              .replace("'", "\\'")
+              // double quotes need to have 3 slashes in front of them
+              .replace("\\\"", "\\\\\\\"");
+  }
+
+  /**
    * @param str the string that needs to be escaped
    * @return A string suitable to be used in a form field
    */

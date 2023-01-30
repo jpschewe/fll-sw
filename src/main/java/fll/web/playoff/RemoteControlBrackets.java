@@ -22,6 +22,7 @@ import fll.db.GlobalParameters;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
+import fll.web.WebUtils;
 import fll.web.playoff.BracketData.TopRightCornerStyle;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
@@ -74,7 +75,7 @@ public final class RemoteControlBrackets {
 
       // expose allBracketData to the javascript
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
-      final String allBracketDataJson = jsonMapper.writeValueAsString(allBracketData).replace("'", "\\'");
+      final String allBracketDataJson = WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(allBracketData));
       pageContext.setAttribute("allBracketDataJson", allBracketDataJson);
 
       final double scrollRate = GlobalParameters.getHeadToHeadScrollRate(connection);
