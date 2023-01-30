@@ -288,6 +288,13 @@ public class FullTournamentTest {
                                                                                       safeTestTournamentName
                                                                                           + "_05-seeding-rounds-completed.flldb"));
 
+            LOGGER.info("Entering the subjective scores");
+            enterSubjectiveScores(testDataConn, challengeDescription, sourceTournament);
+            IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
+                + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
+                                                                                      safeTestTournamentName
+                                                                                          + "_06-subjective-entered.flldb"));
+
             checkSeedingRounds(selenium, seleniumWait);
 
             // initialize the playoff brackets with playoff/index.jsp form
@@ -324,9 +331,6 @@ public class FullTournamentTest {
 
       LOGGER.info("Checking displays");
       checkDisplays(selenium, seleniumWait);
-
-      LOGGER.info("Entering the subjective scores");
-      enterSubjectiveScores(testDataConn, challengeDescription, sourceTournament);
 
       LOGGER.info("Writing final datbaase");
       IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
