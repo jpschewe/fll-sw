@@ -34,6 +34,7 @@ import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.WebUtils;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.jsp.PageContext;
 
@@ -98,7 +99,7 @@ public final class SelectTeam {
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
       // assume that the string is going to be put inside single quotes in the
       // javascript code
-      final String teamSelectDataJson = jsonMapper.writeValueAsString(teamSelectData).replace("'", "\\'");
+      final String teamSelectDataJson = WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(teamSelectData));
       pageContext.setAttribute("teamSelectDataJson", teamSelectDataJson);
 
     } catch (final SQLException e) {
