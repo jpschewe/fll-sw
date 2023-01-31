@@ -103,13 +103,11 @@ public class InitializeBrackets extends BaseFLLServlet {
 
           Playoff.initializeBrackets(connection, challengeDescription, bracket, data.getEnableThird(), teams,
                                      data.getSort());
+          message.append("<p id='success'>Playoffs have been successfully initialized for division "
+              + data.getBracket()
+              + ".</p>");
         }
-
-        message.append("<p id='success'>Playoffs have been successfully initialized for division "
-            + data.getBracket()
-            + ".</p>");
       }
-
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
           + sqle.getMessage()
