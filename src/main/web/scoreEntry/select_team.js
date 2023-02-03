@@ -222,24 +222,24 @@ document.addEventListener('DOMContentLoaded', function() {
     teamSelectData.sort(compareByPerformanceTime);
     populateTeamsSelect();
 
-    document.getElementById("sort-team-name").addEventListener('click', () => {
-        teamSelectData.sort(compareByTeamName);
-        populateTeamsSelect();
-    });
-    document.getElementById("sort-team-number").addEventListener('click', () => {
-        teamSelectData.sort(compareByTeamNumber);
-        populateTeamsSelect();
-    });
-    document.getElementById("sort-organization").addEventListener('click', () => {
-        teamSelectData.sort(compareByOrganization);
-        populateTeamsSelect();
-    });
-    document.getElementById("sort-next-perf").addEventListener('click', () => {
-        teamSelectData.sort(compareByPerformanceTime);
-        populateTeamsSelect();
-    });
-
     if (!scoreEntrySelectedTable) {
+        document.getElementById("sort-team-name").addEventListener('click', () => {
+            teamSelectData.sort(compareByTeamName);
+            populateTeamsSelect();
+        });
+        document.getElementById("sort-team-number").addEventListener('click', () => {
+            teamSelectData.sort(compareByTeamNumber);
+            populateTeamsSelect();
+        });
+        document.getElementById("sort-organization").addEventListener('click', () => {
+            teamSelectData.sort(compareByOrganization);
+            populateTeamsSelect();
+        });
+        document.getElementById("sort-next-perf").addEventListener('click', () => {
+            teamSelectData.sort(compareByPerformanceTime);
+            populateTeamsSelect();
+        });
+
         // only use unverified code when not using the tablets 
 
         reloadRuns();
