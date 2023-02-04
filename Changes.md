@@ -1,3 +1,4 @@
+* #1072 - Fix bug creating team finalist schedule
 * #1069 - support viewing a bye run
 * sort teams by table during head to head
 * Don't import awards script data when importing performance data
