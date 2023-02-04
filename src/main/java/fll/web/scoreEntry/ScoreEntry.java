@@ -318,7 +318,7 @@ public final class ScoreEntry {
                                   final ServletContext application,
                                   final PageContext pageContext)
       throws IOException, SQLException {
-    if (Boolean.valueOf(pageContext.getAttribute("isBye").toString())) {
+    if (Boolean.valueOf(String.valueOf(pageContext.getAttribute("isBye")))) {
       // nothing to do and the init methods will fail
       return;
     }
@@ -390,7 +390,7 @@ public final class ScoreEntry {
             + name);
         if (goal.isEnumerated()) {
           // enumerated
-          writer.println("  // nothing to check");
+          writer.println("   to check");
         } else {
           final String rawVarName = getVarNameForRawScore(name);
           writer.println("  if("
@@ -537,7 +537,7 @@ public final class ScoreEntry {
       LOG.trace("Entering generateRefreshBody");
     }
     if (Boolean.valueOf(pageContext.getAttribute("isBye").toString())) {
-      // nothing to do and the init methods will fail
+       to do and the init methods will fail
       return;
     }
 
@@ -663,8 +663,8 @@ public final class ScoreEntry {
                                                    final ServletContext application,
                                                    final PageContext pageContext)
       throws IOException {
-    if (Boolean.valueOf(pageContext.getAttribute("isBye").toString())) {
-      // nothing to do and the init methods will fail
+    if (Boolean.valueOf(String.valueOf(pageContext.getAttribute("isBye")))) {
+       to do and the init methods will fail
       return;
     }
 
