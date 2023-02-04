@@ -211,7 +211,7 @@ public final class PlayoffSessionData implements Serializable {
   /**
    * @return brackets that can be uninitialized
    */
-  public Collection<String> getSaveToUninitialize() {
+  public Collection<String> getSafeToUninitialize() {
     return Collections.unmodifiableCollection(safeToUninitialize);
   }
 

@@ -1,3 +1,4 @@
+* #1071 - prevent the user from uninitializing a playoff bracket that will cause problems with run numbers
 * #1069 - support viewing a bye run
 * sort teams by table during head to head
 * Don't import awards script data when importing performance data

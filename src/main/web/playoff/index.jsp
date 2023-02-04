@@ -358,7 +358,7 @@ fll.web.playoff.PlayoffIndex.populateContext(application, session, pageContext);
                         <select id='uninitialize-division'
                             name='division'>
                             <c:forEach
-                                items="${playoff_data.initializedBrackets }"
+                                items="${playoff_data.safeToUninitialize }"
                                 var="division">
                                 <option value='${division}'>${division}</option>
                             </c:forEach>
@@ -366,7 +366,7 @@ fll.web.playoff.PlayoffIndex.populateContext(application, session, pageContext);
                         <input type='submit'
                             id='uninitialize_playoff-submit'
                             value='Submit'
-                            onclick='return confirm("Are you absolutly sure you want to delete all scores associated with this head to head bracket?")' />
+                            onclick='return confirm("Are you absolutely sure you want to delete all scores associated with this head to head bracket?")' />
 
                         <a
                             href='javascript:display("UninitializeBracketsHelp")'>[help]</a>
