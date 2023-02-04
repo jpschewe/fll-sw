@@ -1956,7 +1956,12 @@ public final class Playoff {
       prep.setInt(3, tournament.getTournamentID());
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
-          return castNonNull(rs.getString(1));
+          final String table = rs.getString(1);
+          if (null == table) {
+            return "";
+          } else {
+            return table;
+          }
         } else {
           return "";
         }
