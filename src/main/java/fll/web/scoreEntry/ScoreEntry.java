@@ -390,7 +390,7 @@ public final class ScoreEntry {
             + name);
         if (goal.isEnumerated()) {
           // enumerated
-          writer.println("   to check");
+          writer.println("   // nothing to check");
         } else {
           final String rawVarName = getVarNameForRawScore(name);
           writer.println("  if("
