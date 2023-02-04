@@ -606,8 +606,9 @@ public final class Queries {
                 }
               }
             }
-            if (getPlayoffTableLineNumber(connection, currentTournament, siblingTeam, runNumber
-                + 1) > 0) {
+            if (siblingTeam != Team.BYE_TEAM_NUMBER
+                && getPlayoffTableLineNumber(connection, currentTournament, siblingTeam, runNumber
+                    + 1) > 0) {
               prep.setInt(1, siblingTeam);
               prep.setInt(2, runNumber);
               prep.setInt(3, currentTournament);
