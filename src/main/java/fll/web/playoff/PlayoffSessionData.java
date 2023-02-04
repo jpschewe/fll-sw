@@ -50,17 +50,18 @@ public final class PlayoffSessionData implements Serializable {
     for (final String bracketName : mExistingBrackets) {
       final int bracketMaxRounds = Playoff.getMaxPerformanceRound(connection, mCurrentTournament.getTournamentID(),
                                                                   bracketName);
-      if (bracketMaxRounds == playoffMaxPerformanceRound
-          && maxPerformanceRound <= bracketMaxRounds) {
-        // It's only safe to uninitialize the last bracket initialized, otherwise we
-        // leave gaps in the performance round numbers. We also check against the max
-        // performance round in case there are performance rounds after the playoffs.
-        // This shouldn't happen, but we should check anyway.
-        safeToUninitialize.add(bracketName);
-      }
 
       if (Queries.isPlayoffDataInitialized(connection, mCurrentTournament.getTournamentID(), bracketName)) {
         mInitializedBrackets.add(bracketName);
+
+        if (bracketMaxRounds == playoffMaxPerformanceRound
+            && maxPerformanceRound <= bracketMaxRounds) {
+          // It's only safe to uninitialize the last bracket initialized, otherwise we
+          // leave gaps in the performance round numbers. We also check against the max
+          // performance round in case there are performance rounds after the playoffs.
+          // This shouldn't happen, but we should check anyway.
+          safeToUninitialize.add(bracketName);
+        }
       } else {
         mUninitializedBrackets.add(bracketName);
       }
