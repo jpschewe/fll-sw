@@ -1,3 +1,4 @@
+* sort teams by table during head to head
 * Don't import awards script data when importing performance data
 * #1068 - Store form parameters when redirecting to compute summarized scores
 * Rework award summary sheet to be by judging group

@@ -1927,4 +1927,40 @@ public final class Playoff {
     return siblingDbLine;
   }
 
+  /**
+   * Get table information for a team in the playoffs.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament
+   * @param teamNumber number of the team to find
+   * @param runNumber the performance run number to find
+   * @return the table information or the empty string if not found
+   * @throws SQLException on a database error
+   */
+  public static String getTableForRun(final Connection connection,
+                                      final Tournament tournament,
+                                      final int teamNumber,
+                                      final int runNumber)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT assignedtable FROM playoffdata, playofftabledata" //
+        + " WHERE playoffdata.team = ?" //
+        + " AND playoffdata.run_number = ?" //
+        + " AND playoffdata.tournament = ?" //
+        + " AND playoffdata.tournament = playofftabledata.tournament" //
+        + " AND playoffdata.playoffround = playofftabledata.playoffround" //
+        + " AND playoffdata.event_division = playofftabledata.event_division" //
+        + " AND playoffdata.linenumber = playofftabledata.linenumber" //
+    )) {
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, runNumber);
+      prep.setInt(3, tournament.getTournamentID());
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          return castNonNull(rs.getString(1));
+        } else {
+          return "";
+        }
+      }
+    }
+  }
 }
