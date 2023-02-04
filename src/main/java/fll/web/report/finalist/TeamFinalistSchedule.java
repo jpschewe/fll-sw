@@ -225,12 +225,9 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
       final TournamentTeam team = tournamentTeams.get(teamNum);
 
       for (final FinalistSchedule schedule : schedules) {
-        outputData = true;
-
         final Map<String, @Nullable String> rooms = schedule.getRooms();
 
         final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
-        documentBody.appendChild(container);
         container.setAttribute("font-weight", TITLE_FONT_WEIGHT);
         container.setAttribute("font-size", TITLE_FONT_SIZE);
         container.setAttribute("font-family", TITLE_FONT_FAMILY);
@@ -250,7 +247,7 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
         block3.appendChild(document.createTextNode(String.format("Award Group: %s", team.getAwardGroup())));
 
         final Element table = FOPUtils.createBasicTable(document);
-        documentBody.appendChild(table);
+        container.appendChild(table);
         table.setAttribute("font-family", VALUE_FONT_FAMILY);
         table.setAttribute("font-size", VALUE_FONT_SIZE);
 
@@ -330,6 +327,7 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
 
           if (teamHasSchedule) {
             documentBody.appendChild(container);
+            outputData = true;
           }
 
         } // foreach row in the schedule
