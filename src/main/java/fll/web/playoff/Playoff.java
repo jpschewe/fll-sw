@@ -744,6 +744,33 @@ public final class Playoff {
   }
 
   /**
+   * Get max performance run number across all playoff brackets.
+   *
+   * @return performance round, -1 if there are no playoff rounds
+   * @param connection database connection
+   * @param currentTournament tournament to work with
+   * @throws SQLException on database error
+   */
+  public static int getMaxPerformanceRound(final Connection connection,
+                                           final int currentTournament)
+      throws SQLException {
+    try (PreparedStatement maxPrep = connection.prepareStatement("SELECT MAX(run_number) FROM PlayoffData WHERE" //
+        + " tournament = ?")) {
+
+      maxPrep.setInt(1, currentTournament);
+
+      try (ResultSet max = maxPrep.executeQuery()) {
+        if (max.next()) {
+          final int runNumber = max.getInt(1);
+          return runNumber;
+        } else {
+          return -1;
+        }
+      }
+    }
+  }
+
+  /**
    * Compute the assignments to the initial playoff brackets.
    *
    * @param numTeams will be rounded up to the next power of 2
@@ -1968,4 +1995,5 @@ public final class Playoff {
       }
     }
   }
+
 }

@@ -40,9 +40,25 @@ public final class PlayoffSessionData implements Serializable {
 
     mExistingBrackets = Playoff.getPlayoffBrackets(connection, mCurrentTournament.getTournamentID());
 
+    final int playoffMaxPerformanceRound = Playoff.getMaxPerformanceRound(connection,
+                                                                          mCurrentTournament.getTournamentID());
+    final int maxPerformanceRound = Queries.getMaxRunNumber(connection, mCurrentTournament.getTournamentID());
+
     mInitializedBrackets = new LinkedList<>();
     mUninitializedBrackets = new LinkedList<>();
+    safeToUninitialize = new LinkedList<>();
     for (final String bracketName : mExistingBrackets) {
+      final int bracketMaxRounds = Playoff.getMaxPerformanceRound(connection, mCurrentTournament.getTournamentID(),
+                                                                  bracketName);
+      if (bracketMaxRounds == playoffMaxPerformanceRound
+          && maxPerformanceRound <= bracketMaxRounds) {
+        // It's only safe to uninitialize the last bracket initialized, otherwise we
+        // leave gaps in the performance round numbers. We also check against the max
+        // performance round in case there are performance rounds after the playoffs.
+        // This shouldn't happen, but we should check anyway.
+        safeToUninitialize.add(bracketName);
+      }
+
       if (Queries.isPlayoffDataInitialized(connection, mCurrentTournament.getTournamentID(), bracketName)) {
         mInitializedBrackets.add(bracketName);
       } else {
@@ -188,6 +204,15 @@ public final class PlayoffSessionData implements Serializable {
    */
   public void setTeamsNeedingSeedingRounds(final List<Team> v) {
     mTeamsNeedingSeedingRuns = v;
+  }
+
+  private final Collection<String> safeToUninitialize;
+
+  /**
+   * @return brackets that can be uninitialized
+   */
+  public Collection<String> getSaveToUninitialize() {
+    return Collections.unmodifiableCollection(safeToUninitialize);
   }
 
 }

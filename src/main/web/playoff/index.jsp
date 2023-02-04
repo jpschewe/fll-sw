@@ -376,9 +376,10 @@ fll.web.playoff.PlayoffIndex.populateContext(application, session, pageContext);
                             head bracket. In most cases this link should
                             not be used. It may be useful if a head to
                             head bracket was initialized by mistake and
-                            a different one should be run first. Any
-                            scores that have been entered for this
-                            bracket will be deleted.<a
+                            a different one should be run first or the
+                            options for how the bracket is initialized
+                            should change. Any scores that have been
+                            entered for this bracket will be deleted.<a
                                 href='javascript:hide("UninitializeBracketsHelp")'>[hide]</a>
                         </div>
 

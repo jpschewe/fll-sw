@@ -55,86 +55,100 @@ public class UninitializePlayoff extends BaseFLLServlet {
 
       final boolean oldAutocommit = connection.getAutoCommit();
       connection.setAutoCommit(false);
+      try {
 
-      final int tournamentID = Queries.getCurrentTournament(connection);
+        final int tournamentID = Queries.getCurrentTournament(connection);
 
-      final String division = request.getParameter("division");
-      if (null == division
-          || "".equals(division)) {
-        SessionAttributes.appendToMessage(session, "<p class='error'>No playoff bracket specified to uninitialize</p>");
-        WebUtils.sendRedirect(application, response, "/playoff/index.jsp");
-        return;
-      }
+        final String division = request.getParameter("division");
+        if (null == division
+            || "".equals(division)) {
+          SessionAttributes.appendToMessage(session,
+                                            "<p class='error'>No playoff bracket specified to uninitialize</p>");
+          WebUtils.sendRedirect(application, response, "/playoff/index.jsp");
+          return;
+        }
 
-      final int minRun;
-      final int maxRun;
-      try (
-          PreparedStatement getMinMaxRunPrep = connection.prepareStatement("SELECT MIN(run_number), MAX(run_number) FROM PlayoffData" //
-              + " WHERE tournament = ?" //
-              + " AND event_division = ?")) {
-        getMinMaxRunPrep.setInt(1, tournamentID);
-        getMinMaxRunPrep.setString(2, division);
-        try (ResultSet getMinMaxRunResult = getMinMaxRunPrep.executeQuery()) {
-          if (getMinMaxRunResult.next()) {
-            minRun = getMinMaxRunResult.getInt(1);
-            maxRun = getMinMaxRunResult.getInt(2);
-          } else {
-            minRun = -1;
-            maxRun = -1;
+        final int minRun;
+        final int maxRun;
+        try (
+            PreparedStatement getMinMaxRunPrep = connection.prepareStatement("SELECT MIN(run_number), MAX(run_number) FROM PlayoffData" //
+                + " WHERE tournament = ?" //
+                + " AND event_division = ?")) {
+          getMinMaxRunPrep.setInt(1, tournamentID);
+          getMinMaxRunPrep.setString(2, division);
+          try (ResultSet getMinMaxRunResult = getMinMaxRunPrep.executeQuery()) {
+            if (getMinMaxRunResult.next()) {
+              minRun = getMinMaxRunResult.getInt(1);
+              maxRun = getMinMaxRunResult.getInt(2);
+            } else {
+              minRun = -1;
+              maxRun = -1;
+            }
           }
         }
-      }
 
-      if (minRun != -1
-          && maxRun != -1) {
-        try (PreparedStatement deletePerformance = connection.prepareStatement("DELETE FROM Performance" //
-            + " WHERE runNumber >= ?"//
-            + " AND runNumber <= ?" //
-            + " AND tournament = ?" //
-            + " AND teamnumber IN (" //
-            + "  SELECT DISTINCT team" //
-            + "    FROM PlayoffData" //
-            + "    WHERE event_division = ? )")) {
-          deletePerformance.setInt(1, minRun);
-          deletePerformance.setInt(2, maxRun);
-          deletePerformance.setInt(3, tournamentID);
-          deletePerformance.setString(4, division);
-          deletePerformance.executeUpdate();
+        final int playoffMaxPerformanceRound = Playoff.getMaxPerformanceRound(connection, tournamentID);
+        final int maxPerformanceRound = Queries.getMaxRunNumber(connection, tournamentID);
+        if (maxRun == playoffMaxPerformanceRound
+            && maxPerformanceRound <= maxRun) {
+          if (minRun != -1
+              && maxRun != -1) {
+            try (PreparedStatement deletePerformance = connection.prepareStatement("DELETE FROM Performance" //
+                + " WHERE runNumber >= ?"//
+                + " AND runNumber <= ?" //
+                + " AND tournament = ?" //
+                + " AND teamnumber IN (" //
+                + "  SELECT DISTINCT team" //
+                + "    FROM PlayoffData" //
+                + "    WHERE event_division = ? )")) {
+              deletePerformance.setInt(1, minRun);
+              deletePerformance.setInt(2, maxRun);
+              deletePerformance.setInt(3, tournamentID);
+              deletePerformance.setString(4, division);
+              deletePerformance.executeUpdate();
+            }
+          }
+
+          try (
+              PreparedStatement deletePlayoff = connection.prepareStatement("DELETE FROM PlayoffTableData WHERE event_division = ? AND tournament = ?")) {
+            deletePlayoff.setString(1, division);
+            deletePlayoff.setInt(2, tournamentID);
+            deletePlayoff.executeUpdate();
+          }
+
+          try (
+              PreparedStatement deletePlayoff = connection.prepareStatement("DELETE FROM PlayoffData WHERE event_division = ? AND tournament = ?")) {
+            deletePlayoff.setString(1, division);
+            deletePlayoff.setInt(2, tournamentID);
+            deletePlayoff.executeUpdate();
+          }
+
+          try (
+              PreparedStatement deleteAutoFinish = connection.prepareStatement("DELETE FROM automatic_finished_playoff WHERE tournament_id = ? and bracket_name = ?")) {
+            deleteAutoFinish.setInt(1, tournamentID);
+            deleteAutoFinish.setString(2, division);
+            deleteAutoFinish.executeUpdate();
+          }
+
+          connection.commit();
+
+          LOGGER.info("Uninitialized playoff division "
+              + division);
+
+          SessionAttributes.appendToMessage(session, "<p id='success'>Uninitialized playoff bracket "
+              + division
+              + ".</p>");
+        } else {
+          SessionAttributes.appendToMessage(session, "<p class='error'>Unable to uninitialize playoff bracket "
+              + division
+              + ".</p>");
         }
+
+        WebUtils.sendRedirect(application, response, "/playoff/index.jsp");
+
+      } finally {
+        connection.setAutoCommit(oldAutocommit);
       }
-
-      try (
-          PreparedStatement deletePlayoff = connection.prepareStatement("DELETE FROM PlayoffTableData WHERE event_division = ? AND tournament = ?")) {
-        deletePlayoff.setString(1, division);
-        deletePlayoff.setInt(2, tournamentID);
-        deletePlayoff.executeUpdate();
-      }
-
-      try (
-          PreparedStatement deletePlayoff = connection.prepareStatement("DELETE FROM PlayoffData WHERE event_division = ? AND tournament = ?")) {
-        deletePlayoff.setString(1, division);
-        deletePlayoff.setInt(2, tournamentID);
-        deletePlayoff.executeUpdate();
-      }
-
-      try (
-          PreparedStatement deleteAutoFinish = connection.prepareStatement("DELETE FROM automatic_finished_playoff WHERE tournament_id = ? and bracket_name = ?")) {
-        deleteAutoFinish.setInt(1, tournamentID);
-        deleteAutoFinish.setString(2, division);
-        deleteAutoFinish.executeUpdate();
-      }
-
-      connection.commit();
-
-      connection.setAutoCommit(oldAutocommit);
-
-      LOGGER.info("Uninitialized playoff division "
-          + division);
-
-      SessionAttributes.appendToMessage(session, "<p id='success'>Uninitialized playoff bracket "
-          + division
-          + ".</p>");
-      WebUtils.sendRedirect(application, response, "/playoff/index.jsp");
     } catch (final SQLException e) {
       LOGGER.error(e.getMessage(), e);
       throw new FLLRuntimeException("Database error uninitializing playoffs", e);
