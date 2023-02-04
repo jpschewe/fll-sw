@@ -273,14 +273,14 @@ public final class Utilities {
           || "".equals(data.trim())) {
         prep.setNull(index, Types.VARCHAR);
       } else {
-        prep.setString(index, data);
+        prep.setString(index, data.trim());
       }
     } else if (typeLower.startsWith("char")) {
       if (null == data
           || "".equals(data.trim())) {
         prep.setNull(index, Types.CHAR);
       } else {
-        prep.setString(index, data);
+        prep.setString(index, data.trim());
       }
     } else if ("integer".equals(typeLower)) {
       if (null == data

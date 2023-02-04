@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 import org.apache.commons.lang3.tuple.Pair;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import com.diffplug.common.base.Errors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -28,12 +29,15 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.scheduler.PerformanceTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.WebUtils;
+import fll.web.playoff.Playoff;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.jsp.PageContext;
 
@@ -83,22 +87,31 @@ public final class SelectTeam {
       final List<SelectTeamData> teamSelectData = Queries.getTournamentTeams(connection, tournament.getTournamentID())
                                                          .values().stream() //
                                                          .filter(team -> !team.isInternal()) //
-                                                         .map(team -> {
+                                                         .map(Errors.rethrow().wrapFunction(team -> {
                                                            final int nextRunNumber = maxRunNumbers.getOrDefault(team.getTeamNumber(),
                                                                                                                 0)
                                                                + 1;
                                                            final @Nullable PerformanceTime nextPerformance = getNextPerformance(schedule,
                                                                                                                                 team.getTeamNumber(),
                                                                                                                                 nextRunNumber);
-                                                           return new SelectTeamData(team, nextPerformance,
-                                                                                     nextRunNumber);
-                                                         }) //
+                                                           if (null != nextPerformance) {
+                                                             return new SelectTeamData(team, nextPerformance,
+                                                                                       nextRunNumber);
+                                                           } else {
+                                                             final String nextTableAndSide = getNextTableAndSide(connection,
+                                                                                                                 tournament,
+                                                                                                                 team.getTeamNumber(),
+                                                                                                                 nextRunNumber);
+                                                             return new SelectTeamData(team, nextTableAndSide,
+                                                                                       nextRunNumber);
+                                                           }
+                                                         })) //
                                                          .collect(Collectors.toList());
 
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
       // assume that the string is going to be put inside single quotes in the
       // javascript code
-      final String teamSelectDataJson = jsonMapper.writeValueAsString(teamSelectData).replace("'", "\\'");
+      final String teamSelectDataJson = WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(teamSelectData));
       pageContext.setAttribute("teamSelectDataJson", teamSelectDataJson);
 
     } catch (final SQLException e) {
@@ -107,6 +120,24 @@ public final class SelectTeam {
       throw new FLLInternalException("Error converting data to JSON", e);
     }
 
+  }
+
+  /**
+   * @return the next table and side or the empty string if this cannot be
+   *         determined.
+   */
+  private static String getNextTableAndSide(final Connection connection,
+                                            final Tournament tournament,
+                                            final int teamNumber,
+                                            final int nextRunNumber)
+      throws SQLException {
+    if (nextRunNumber <= TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID())) {
+      // no schedule, not going to know the table
+      return "";
+    } else {
+      // get information from the playoffs
+      return Playoff.getTableForRun(connection, tournament, teamNumber, nextRunNumber);
+    }
   }
 
   private static @Nullable PerformanceTime getNextPerformance(final @Nullable TournamentSchedule schedule,
@@ -174,12 +205,24 @@ public final class SelectTeam {
 
     private final int nextRunNumber;
 
+    private final String nextTableAndSide;
+
     SelectTeamData(final TournamentTeam team,
-                   final @Nullable PerformanceTime nextPerformance,
+                   final PerformanceTime nextPerformance,
                    final int nextRunNumber) {
       this.team = team;
       this.nextPerformance = nextPerformance;
       this.nextRunNumber = nextRunNumber;
+      this.nextTableAndSide = nextPerformance.getTableAndSide();
+    }
+
+    SelectTeamData(final TournamentTeam team,
+                   final String nextTableAndSide,
+                   final int nextRunNumber) {
+      this.team = team;
+      this.nextPerformance = null;
+      this.nextRunNumber = nextRunNumber;
+      this.nextTableAndSide = nextTableAndSide;
     }
 
     /**
@@ -218,6 +261,13 @@ public final class SelectTeam {
       return nextRunNumber;
     }
 
+    /**
+     * @return the table and side the team is performing on next, the empty string
+     *         if the table isn't known
+     */
+    public String getNextTableAndSide() {
+      return nextTableAndSide;
+    }
   }
 
 }
