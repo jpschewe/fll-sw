@@ -15,24 +15,26 @@ function populateLeaf(leafId, teamNumber, teamName, score, verified) {
         leafEle.appendChild(teamNumberEle);
         teamNumberEle.innerText = "#" + teamNumber;
         teamNumberEle.classList.add("TeamNumber");
+    }
 
+    if (null != teamName) {
         const teamNameEle = document.createElement("span");
         leafEle.appendChild(teamNameEle);
         teamNameEle.innerText = " " + teamName;
         teamNameEle.classList.add("TeamName");
+    }
 
-        if (null != score && "" != score) {
-            const outerSpan = document.createElement("span");
-            leafEle.appendChild(outerSpan);
-            if (!verified) {
-                outerSpan.style.color = "red";
-            }
-
-            const scoreEle = document.createElement("span");
-            outerSpan.appendChild(scoreEle);
-            scoreEle.classList.add("TeamScore");
-            scoreEle.innerText = " Score: " + score;
+    if (null != score && "" != score) {
+        const outerSpan = document.createElement("span");
+        leafEle.appendChild(outerSpan);
+        if (!verified) {
+            outerSpan.style.color = "red";
         }
+
+        const scoreEle = document.createElement("span");
+        outerSpan.appendChild(scoreEle);
+        scoreEle.classList.add("TeamScore");
+        scoreEle.innerText = " Score: " + score;
     }
 }
 
