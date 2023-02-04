@@ -319,7 +319,7 @@ public final class ScoreEntry {
                                   final PageContext pageContext)
       throws IOException, SQLException {
     if (Boolean.valueOf(String.valueOf(pageContext.getAttribute("isBye")))) {
-      // nothing to do and the init methods will fail
+       // nothing to do and the init methods will fail
       return;
     }
 
@@ -537,7 +537,7 @@ public final class ScoreEntry {
       LOG.trace("Entering generateRefreshBody");
     }
     if (Boolean.valueOf(pageContext.getAttribute("isBye").toString())) {
-       to do and the init methods will fail
+      // nothing to do and the init methods will fail
       return;
     }
 
@@ -664,7 +664,7 @@ public final class ScoreEntry {
                                                    final PageContext pageContext)
       throws IOException {
     if (Boolean.valueOf(String.valueOf(pageContext.getAttribute("isBye")))) {
-       to do and the init methods will fail
+      // nothing to do and the init methods will fail
       return;
     }
 
