@@ -66,21 +66,25 @@ function init() {
 
   refresh();
   
-  /* Saves total score for smarter notification popups */
-  savedTotalScore = document.scoreEntry.totalScore.value;
+  if(document.scoreEntry.totalScore) {
+      /* Saves total score for smarter notification popups */
+    savedTotalScore = document.scoreEntry.totalScore.value;
+  }
 }
 
 function refresh() { 
   var score = 0;
 
-  <%ScoreEntry.generateRefreshBody(out, application);%>
+  <%ScoreEntry.generateRefreshBody(out, application, pageContext);%>
 
   //check for minimum total score
   if(score < ${minimumAllowedScore}) {
     score = ${minimumAllowedScore};
   }
 
-  document.scoreEntry.totalScore.value = score;
+  if(document.scoreEntry.totalScore) {
+    document.scoreEntry.totalScore.value = score;
+  }
 
   check_restrictions();
 }
@@ -89,7 +93,7 @@ function check_restrictions() {
   var error_found = false;
   removeChildren(document.getElementById("score-errors"));
   
-<%ScoreEntry.generateCheckRestrictionsBody(out, application);%>
+<%ScoreEntry.generateCheckRestrictionsBody(out, application, pageContext);%>
 
   const submitScoreButton = document.getElementById("submit_score")
   if(error_found) {

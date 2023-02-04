@@ -318,6 +318,10 @@ public final class ScoreEntry {
                                   final ServletContext application,
                                   final PageContext pageContext)
       throws IOException, SQLException {
+    if (Boolean.valueOf(pageContext.getAttribute("isBye").toString())) {
+      // nothing to do and the init methods will fail
+      return;
+    }
 
     setupRangeSliders(writer, application);
 
@@ -522,13 +526,19 @@ public final class ScoreEntry {
    * 
    * @param writer where to write the HTML
    * @param application used to get the challenge descrption
+   * @param pageContext used to check if this is a bye run
    * @throws IOException if there is an error writing to {@code writer}
    */
   public static void generateRefreshBody(final Writer writer,
-                                         final ServletContext application)
+                                         final ServletContext application,
+                                         final PageContext pageContext)
       throws IOException {
     if (LOG.isTraceEnabled()) {
       LOG.trace("Entering generateRefreshBody");
+    }
+    if (Boolean.valueOf(pageContext.getAttribute("isBye").toString())) {
+      // nothing to do and the init methods will fail
+      return;
     }
 
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
@@ -646,11 +656,18 @@ public final class ScoreEntry {
    *
    * @param writer where to write
    * @param application used to get the challenge description
+   * @param pageContext used to check if this is a bye run
    * @throws IOException on an error writing to {@code writer}
    */
   public static void generateCheckRestrictionsBody(final Writer writer,
-                                                   final ServletContext application)
+                                                   final ServletContext application,
+                                                   final PageContext pageContext)
       throws IOException {
+    if (Boolean.valueOf(pageContext.getAttribute("isBye").toString())) {
+      // nothing to do and the init methods will fail
+      return;
+    }
+
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final Formatter formatter = new Formatter(writer);
 
