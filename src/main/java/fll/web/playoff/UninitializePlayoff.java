@@ -143,14 +143,10 @@ public class UninitializePlayoff extends BaseFLLServlet {
           + " WHERE runNumber >= ?"//
           + " AND runNumber <= ?" //
           + " AND tournament = ?" //
-          + " AND teamnumber IN (" //
-          + "  SELECT DISTINCT team" //
-          + "    FROM PlayoffData" //
-          + "    WHERE event_division = ? )")) {
+      )) {
         deletePerformance.setInt(1, minRun);
         deletePerformance.setInt(2, maxRun);
         deletePerformance.setInt(3, tournamentID);
-        deletePerformance.setString(4, division);
         deletePerformance.executeUpdate();
       }
     }
