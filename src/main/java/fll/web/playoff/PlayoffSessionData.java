@@ -47,16 +47,31 @@ public final class PlayoffSessionData implements Serializable {
     mInitializedBrackets = new LinkedList<>();
     mUninitializedBrackets = new LinkedList<>();
     safeToUninitialize = new LinkedList<>();
+    safeToDelete = new LinkedList<>();
     for (final String bracketName : mExistingBrackets) {
       final int bracketMaxRounds = Playoff.getMaxPerformanceRound(connection, mCurrentTournament.getTournamentID(),
                                                                   bracketName);
 
-      if (Queries.isPlayoffDataInitialized(connection, mCurrentTournament.getTournamentID(), bracketName)) {
+      final boolean bracketInitialized = Queries.isPlayoffDataInitialized(connection,
+                                                                          mCurrentTournament.getTournamentID(),
+                                                                          bracketName);
+      if (!bracketInitialized
+          || (bracketMaxRounds == playoffMaxPerformanceRound
+              && maxPerformanceRound <= bracketMaxRounds)) {
+        // It's safe to delete the last bracket initialized or a bracket that hasn't
+        // been initialized. Otherwise we
+        // leave gaps in the performance round numbers. We also check against the max
+        // performance round in case there are performance rounds after the playoffs.
+        // This shouldn't happen, but we should check anyway.
+        safeToDelete.add(bracketName);
+      }
+
+      if (bracketInitialized) {
         mInitializedBrackets.add(bracketName);
 
         if (bracketMaxRounds == playoffMaxPerformanceRound
             && maxPerformanceRound <= bracketMaxRounds) {
-          // It's only safe to uninitialize the last bracket initialized, otherwise we
+          // It's only safe to uninitialize the last bracket initialized. Otherwise we
           // leave gaps in the performance round numbers. We also check against the max
           // performance round in case there are performance rounds after the playoffs.
           // This shouldn't happen, but we should check anyway.
@@ -214,6 +229,15 @@ public final class PlayoffSessionData implements Serializable {
    */
   public Collection<String> getSafeToUninitialize() {
     return Collections.unmodifiableCollection(safeToUninitialize);
+  }
+
+  private final Collection<String> safeToDelete;
+
+  /**
+   * @return brackets that can be deleted.
+   */
+  public Collection<String> getSafeToDelete() {
+    return Collections.unmodifiableCollection(safeToDelete);
   }
 
 }
