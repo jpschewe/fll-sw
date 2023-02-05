@@ -97,10 +97,10 @@ public class DeletePlayoff extends BaseFLLServlet {
           UninitializePlayoff.uninitializePlayoffBracket(connection, tournamentID, bracketName, minRun, maxRun);
 
           try (
-              PreparedStatement deleteAutoFinish = connection.prepareStatement("DELETE FROM playoff_bracket_teams WHERE tournament_id = ? AND bracket_name = ?")) {
-            deleteAutoFinish.setInt(1, tournamentID);
-            deleteAutoFinish.setString(2, bracketName);
-            deleteAutoFinish.executeUpdate();
+              PreparedStatement delete = connection.prepareStatement("DELETE FROM playoff_bracket_teams WHERE tournament_id = ? AND bracket_name = ?")) {
+            delete.setInt(1, tournamentID);
+            delete.setString(2, bracketName);
+            delete.executeUpdate();
           }
 
           connection.commit();
