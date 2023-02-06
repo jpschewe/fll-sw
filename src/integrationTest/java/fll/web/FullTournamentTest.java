@@ -985,9 +985,23 @@ public class FullTournamentTest {
             // need to get the score entry form
             IntegrationTestUtils.loadPage(selenium, seleniumWait, selectTeamPage);
 
-            new Select(selenium.findElement(By.id("select-verify-teamnumber"))).selectByValue(teamNumber
-                + "-"
-                + runNumber);
+            // search for the element by team number due to the run numbers changing in head
+            // to head
+            final Select verifySelect = new Select(selenium.findElement(By.id("select-verify-teamnumber")));
+            boolean found = false;
+            for (final WebElement option : verifySelect.getOptions()) {
+              final String value = option.getAttribute("value");
+              if (value.startsWith(teamNumber
+                  + "-")) {
+                verifySelect.selectByValue(value);
+                found = true;
+                break;
+              }
+            }
+            if (!found) {
+              fail("Unable to find verification for team "
+                  + teamNumber);
+            }
 
             // submit the page
             selenium.findElement(By.id("verify_submit")).click();
