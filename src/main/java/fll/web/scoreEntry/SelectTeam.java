@@ -84,6 +84,9 @@ public final class SelectTeam {
         schedule = null;
       }
 
+      final List<String> unfinishedBrackets = Playoff.getUnfinishedPlayoffBrackets(connection,
+                                                                                   tournament.getTournamentID());
+
       final List<SelectTeamData> teamSelectData = Queries.getTournamentTeams(connection, tournament.getTournamentID())
                                                          .values().stream() //
                                                          .filter(team -> !team.isInternal()) //
@@ -98,12 +101,31 @@ public final class SelectTeam {
                                                              return new SelectTeamData(team, nextPerformance,
                                                                                        nextRunNumber);
                                                            } else {
+                                                             final String playoffBracketName = Playoff.getPlayoffBracketsForTeam(connection,
+                                                                                                                                 team.getTeamNumber())
+                                                                                                      .stream() //
+                                                                                                      .filter(b -> unfinishedBrackets.contains(b)) //
+                                                                                                      .findFirst() //
+                                                                                                      .orElse("");
+
                                                              final String nextTableAndSide = getNextTableAndSide(connection,
                                                                                                                  tournament,
                                                                                                                  team.getTeamNumber(),
                                                                                                                  nextRunNumber);
+                                                             final String runNumberDisplay;
+                                                             if (!playoffBracketName.isEmpty()) {
+                                                               final int playoffRound = Playoff.getPlayoffRound(connection,
+                                                                                                                tournament.getTournamentID(),
+                                                                                                                playoffBracketName,
+                                                                                                                nextRunNumber);
+                                                               runNumberDisplay = String.format("%s P%d",
+                                                                                                playoffBracketName,
+                                                                                                playoffRound);
+                                                             } else {
+                                                               runNumberDisplay = String.valueOf(nextRunNumber);
+                                                             }
                                                              return new SelectTeamData(team, nextTableAndSide,
-                                                                                       nextRunNumber);
+                                                                                       nextRunNumber, runNumberDisplay);
                                                            }
                                                          })) //
                                                          .collect(Collectors.toList());
@@ -207,6 +229,8 @@ public final class SelectTeam {
 
     private final String nextTableAndSide;
 
+    private final String runNumberDisplay;
+
     SelectTeamData(final TournamentTeam team,
                    final PerformanceTime nextPerformance,
                    final int nextRunNumber) {
@@ -214,15 +238,18 @@ public final class SelectTeam {
       this.nextPerformance = nextPerformance;
       this.nextRunNumber = nextRunNumber;
       this.nextTableAndSide = nextPerformance.getTableAndSide();
+      this.runNumberDisplay = String.valueOf(nextRunNumber);
     }
 
     SelectTeamData(final TournamentTeam team,
                    final String nextTableAndSide,
-                   final int nextRunNumber) {
+                   final int nextRunNumber,
+                   final String runNumberDisplay) {
       this.team = team;
       this.nextPerformance = null;
       this.nextRunNumber = nextRunNumber;
       this.nextTableAndSide = nextTableAndSide;
+      this.runNumberDisplay = runNumberDisplay;
     }
 
     /**
@@ -235,8 +262,14 @@ public final class SelectTeam {
       } else {
         scheduleInfo = "";
       }
-      return String.format("%d [%s] - %d%s - %s", team.getTeamNumber(), team.getTrimmedTeamName(), nextRunNumber,
-                           scheduleInfo, getNextTableAndSide());
+      final String tableInfo;
+      if (nextTableAndSide.isEmpty()) {
+        tableInfo = "";
+      } else {
+        tableInfo = String.format(" - %s", nextTableAndSide);
+      }
+      return String.format("%d [%s] - %s%s%s", team.getTeamNumber(), team.getTrimmedTeamName(), runNumberDisplay,
+                           scheduleInfo, tableInfo);
     }
 
     /**
