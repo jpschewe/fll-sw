@@ -520,8 +520,10 @@ public final class Playoff {
 
       // initial table assignments
       for (int i = 1; i < lineNbr; ++i) {
-        assignPlayoffTable(connection, division, currentTournament, baseRunNumber
-            + 1, i);
+        final int runNumber = baseRunNumber
+            + 1;
+        final int playoffRound = Playoff.getPlayoffRound(connection, currentTournament, division, runNumber);
+        assignPlayoffTable(connection, division, currentTournament, playoffRound, i);
       }
 
       // Create the remaining entries for the playoff data table using Null team
@@ -622,26 +624,33 @@ public final class Playoff {
                 + " AND event_division= ?" //
                 + " AND PlayoffRound= ?" //
                 + " AND LineNumber=?")) {
+              final int lineNumber = (line2
+                  + 1)
+                  / 2;
+
               insertStmt.setInt(1, teamToAdvance);
               insertStmt.setInt(2, currentTournament);
               insertStmt.setString(3, division);
               insertStmt.setInt(4, round1
                   + 1);
-              insertStmt.setInt(5, line2
-                  / 2); // technically (line2+1)/2 but we
-              // know
-              // line2 is always the even team so this
-              // is the same...
+              insertStmt.setInt(5, lineNumber);
               insertStmt.execute();
+              assignPlayoffTable(connection, division, currentTournament, round1
+                  + 1, lineNumber);
+
               // Degenerate case of BYE team advancing to the loser's bracket
               // (i.e. a 3-team tournament with 3rd/4th place bracket enabled...)
               if (enableThird
                   && (numPlayoffRounds
                       - round1) == 1) {
-                insertStmt.setInt(1, Team.BYE_TEAM_NUMBER);
-                insertStmt.setInt(5, line2
+                final int thirdPlaceDbLine = line2
                     / 2
-                    + 2);
+                    + 2;
+                insertStmt.setInt(1, Team.BYE_TEAM_NUMBER);
+                insertStmt.setInt(5, thirdPlaceDbLine);
+                insertStmt.execute();
+                assignPlayoffTable(connection, division, currentTournament, round1
+                    + 1, thirdPlaceDbLine);
               }
             } // allocate insertStmt
           }
@@ -1853,12 +1862,10 @@ public final class Playoff {
   private static void assignPlayoffTable(final Connection connection,
                                          final String bracketName,
                                          final int tournamentId,
-                                         final int runNumber,
+                                         final int playoffRound,
                                          final int dbLine)
       throws SQLException {
     final boolean oldAutoCommit = connection.getAutoCommit();
-
-    final int playoffRound = Playoff.getPlayoffRound(connection, tournamentId, bracketName, runNumber);
 
     try (PreparedStatement prep = connection.prepareStatement("UPDATE PlayoffTableData" //
         + " SET AssignedTable = ?" //
