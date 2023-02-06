@@ -123,6 +123,7 @@ public class ImportDBDump extends BaseFLLServlet {
               final String docMessage = checkChallengeDescriptors(memConnection, destConnection);
               if (null == docMessage) {
                 session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
+                session.setAttribute(IMPORT_DB_SESSION_KEY, sessionInfo);
               } else {
                 message.append("<p class='error'>");
                 message.append("Import failed: Challenge descriptors are incompatible. ");
@@ -132,14 +133,12 @@ public class ImportDBDump extends BaseFLLServlet {
                 final String redirect = SessionAttributes.getAttribute(session, IMPORT_DB_FINAL_REDIRECT_KEY,
                                                                        String.class);
                 session.removeAttribute(IMPORT_DB_FINAL_REDIRECT_KEY);
-                WebUtils.sendRedirect(response, redirect);
-                return;
+                session.setAttribute(SessionAttributes.REDIRECT_URL, redirect);
               }
             } // allocate destConnection
           } // allocate zipfile
         } // allocate memConnection
 
-        session.setAttribute(IMPORT_DB_SESSION_KEY, sessionInfo);
       } else {
         message.append("<p class='error'>Unknown form state, expected form fields not seen: "
             + request
