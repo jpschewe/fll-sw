@@ -231,13 +231,12 @@ public final class SelectTeam {
     public String getDisplayString() {
       final String scheduleInfo;
       if (null != nextPerformance) {
-        scheduleInfo = String.format(" @ %s - %s", TournamentSchedule.formatTime(nextPerformance.getTime()),
-                                     nextPerformance.getTableAndSide());
+        scheduleInfo = String.format(" @ %s", TournamentSchedule.formatTime(nextPerformance.getTime()));
       } else {
         scheduleInfo = "";
       }
-      return String.format("%d [%s] - %d%s", team.getTeamNumber(), team.getTrimmedTeamName(), nextRunNumber,
-                           scheduleInfo);
+      return String.format("%d [%s] - %d%s - %s", team.getTeamNumber(), team.getTrimmedTeamName(), nextRunNumber,
+                           scheduleInfo, getNextTableAndSide());
     }
 
     /**
