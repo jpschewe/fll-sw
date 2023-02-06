@@ -358,7 +358,7 @@ fll.web.playoff.PlayoffIndex.populateContext(application, session, pageContext);
                         <select id='uninitialize-division'
                             name='division'>
                             <c:forEach
-                                items="${playoff_data.initializedBrackets }"
+                                items="${playoff_data.safeToUninitialize }"
                                 var="division">
                                 <option value='${division}'>${division}</option>
                             </c:forEach>
@@ -366,7 +366,7 @@ fll.web.playoff.PlayoffIndex.populateContext(application, session, pageContext);
                         <input type='submit'
                             id='uninitialize_playoff-submit'
                             value='Submit'
-                            onclick='return confirm("Are you absolutly sure you want to delete all scores associated with this head to head bracket?")' />
+                            onclick='return confirm("Are you absolutely sure you want to delete all scores associated with this head to head bracket?")' />
 
                         <a
                             href='javascript:display("UninitializeBracketsHelp")'>[help]</a>
@@ -376,14 +376,48 @@ fll.web.playoff.PlayoffIndex.populateContext(application, session, pageContext);
                             head bracket. In most cases this link should
                             not be used. It may be useful if a head to
                             head bracket was initialized by mistake and
-                            a different one should be run first. Any
-                            scores that have been entered for this
-                            bracket will be deleted.<a
+                            a different one should be run first or the
+                            options for how the bracket is initialized
+                            should change. Any scores that have been
+                            entered for this bracket will be deleted.<a
                                 href='javascript:hide("UninitializeBracketsHelp")'>[hide]</a>
                         </div>
 
                     </form>
-                    <%-- end uninitialize division --%>
+                    <%-- end uninitialize bracket --%>
+                </li>
+
+                <li>
+                    <%-- delete bracket --%>
+                    <form name="delete_playoff" method="POST"
+                        action="DeletePlayoff">
+                        Select bracket to delete:
+                        <select id='delete-division' name='division'>
+                            <c:forEach
+                                items="${playoff_data.safeToDelete }"
+                                var="division">
+                                <option value='${division}'>${division}</option>
+                            </c:forEach>
+                        </select>
+                        <input type='submit' id='delete_playoff-submit'
+                            value='Submit'
+                            onclick='return confirm("Are you absolutely sure you want to delete all scores associated with this head to head bracket?")' />
+
+                        <a
+                            href='javascript:display("DeleteBracketsHelp")'>[help]</a>
+                        <div id='DeleteBracketsHelp' class='help'
+                            style='display: none'>
+                            This link is used to delete a head to head
+                            bracket. In most cases this link should not
+                            be used. It may be useful if a head to head
+                            bracket was created by mistake. Any scores
+                            that have been entered for this bracket will
+                            be deleted.<a
+                                href='javascript:hide("DeleteBracketsHelp")'>[hide]</a>
+                        </div>
+
+                    </form>
+                    <%-- end delete bracket --%>
                 </li>
 
                 <li>
