@@ -450,7 +450,9 @@ public final class Playoff {
 
     final List<Integer> teamNumbers = new LinkedList<>();
     for (final Team t : firstRound) {
-      teamNumbers.add(t.getTeamNumber());
+      if (!Team.isInternalTeamNumber(t.getTeamNumber())) {
+        teamNumbers.add(t.getTeamNumber());
+      }
     }
     final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournament, teamNumbers);
     if (null != errors) {
@@ -463,7 +465,10 @@ public final class Playoff {
           + firstRound);
     }
 
-    final int maxRoundForTeams = Playoff.getMaxPerformanceRound(connection, currentTournament, teamNumbers);
+    // find the max performance round across the whole tournament. This puts each
+    // playoff bracket in it's own set of performance rounds.
+    // This makes it possible to uninitialize and delete brackets.
+    final int maxRoundForTeams = Playoff.getMaxPerformanceRound(connection, currentTournament);
 
     // the performance run number that is equal to playoff round 0, the round
     // before the first playoff round
@@ -646,51 +651,6 @@ public final class Playoff {
   }
 
   /**
-   * Determine the max performance run number used by any playoff bracket that
-   * any of the listed teams have been involved in.
-   *
-   * @param connection the database connection
-   * @param currentTournament the tournament
-   * @param teamNumbers the team numbers to check
-   * @return the max performance run number or 0 if no teams are in the playoffs
-   *         yet
-   * @throws SQLException on database error
-   */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate query from list of teams")
-  private static int getMaxPerformanceRound(final Connection connection,
-                                            final int currentTournament,
-                                            final List<Integer> teamNumbers)
-      throws SQLException {
-    final String teamNumbersStr = StringUtils.join(teamNumbers, ",");
-
-    int maxRunNumber = 0;
-    try (
-        PreparedStatement divisionsPrep = connection.prepareStatement("SELECT DISTINCT event_division from PlayoffData WHERE" //
-            + " Tournament = ?" //
-            + " AND Team IN ( "
-            + teamNumbersStr
-            + " )")) {
-      divisionsPrep.setInt(1, currentTournament);
-      try (ResultSet divisions = divisionsPrep.executeQuery()) {
-
-        while (divisions.next()) {
-          final String eventDivision = castNonNull(divisions.getString(1));
-
-          // find max run number for ANY team in the specified division, not
-          // necessarily those in our list
-          final int runNumber = getMaxPerformanceRound(connection, currentTournament, eventDivision);
-          if (-1 != runNumber) {
-            maxRunNumber = Math.max(maxRunNumber, runNumber);
-          }
-        }
-      }
-    }
-
-    return maxRunNumber;
-
-  }
-
-  /**
    * Maximum playoff round, this is the final winner.
    *
    * @param connection database connection
@@ -731,6 +691,33 @@ public final class Playoff {
 
       maxPrep.setString(1, playoffDivision);
       maxPrep.setInt(2, currentTournament);
+
+      try (ResultSet max = maxPrep.executeQuery()) {
+        if (max.next()) {
+          final int runNumber = max.getInt(1);
+          return runNumber;
+        } else {
+          return -1;
+        }
+      }
+    }
+  }
+
+  /**
+   * Get max performance run number across all playoff brackets.
+   *
+   * @return performance round, -1 if there are no playoff rounds
+   * @param connection database connection
+   * @param currentTournament tournament to work with
+   * @throws SQLException on database error
+   */
+  public static int getMaxPerformanceRound(final Connection connection,
+                                           final int currentTournament)
+      throws SQLException {
+    try (PreparedStatement maxPrep = connection.prepareStatement("SELECT MAX(run_number) FROM PlayoffData WHERE" //
+        + " tournament = ?")) {
+
+      maxPrep.setInt(1, currentTournament);
 
       try (ResultSet max = maxPrep.executeQuery()) {
         if (max.next()) {
@@ -1968,4 +1955,5 @@ public final class Playoff {
       }
     }
   }
+
 }
