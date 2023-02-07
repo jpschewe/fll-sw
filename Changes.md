@@ -1,3 +1,5 @@
+Release 17.4.0
+==============
 * Add playoff bracket name to the team selection box and display the playoff round number rather than performance run number
 * #1071 - allow the user to delete a playoff bracket
 * #1071 - prevent the user from uninitializing a playoff bracket that will cause problems with run numbers
