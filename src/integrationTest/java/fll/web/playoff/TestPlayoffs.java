@@ -71,7 +71,7 @@ public class TestPlayoffs {
       }
 
       // initialize playoffs
-      IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, seleniumWait, "1");
+      IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, seleniumWait, "1", false);
 
       IntegrationTestUtils.assertNoException(selenium);
 

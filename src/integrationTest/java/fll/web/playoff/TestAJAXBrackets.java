@@ -122,8 +122,8 @@ public class TestAJAXBrackets {
 
       final String division = "1";
 
-      IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, seleniumWait, division,
-                                                           BracketSortType.ALPHA_TEAM);
+      IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, seleniumWait, division, BracketSortType.ALPHA_TEAM,
+                                                           false);
 
       // set display to show the head to head brackets
       IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT

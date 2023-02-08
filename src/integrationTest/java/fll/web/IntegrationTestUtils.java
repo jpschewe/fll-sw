@@ -763,31 +763,31 @@ public final class IntegrationTestUtils {
    * @param selenium passed along
    * @param seleniumWait passed along
    * @param awardGroup passed along
-   * @throws IOException test error
+   * @param enableThirdPlace passed along
    * @see #initializePlayoffsForAwardGroup(WebDriver, WebDriverWait, String,
-   *      BracketSortType)
+   *      BracketSortType, boolean)
    */
   public static void initializePlayoffsForAwardGroup(final WebDriver selenium,
                                                      final WebDriverWait seleniumWait,
-                                                     final String awardGroup)
-      throws IOException {
-    initializePlayoffsForAwardGroup(selenium, seleniumWait, awardGroup, BracketSortType.SEEDING);
+                                                     final String awardGroup,
+                                                     final boolean enableThirdPlace) {
+    initializePlayoffsForAwardGroup(selenium, seleniumWait, awardGroup, BracketSortType.SEEDING, enableThirdPlace);
   }
 
   /**
-   * Initialize playoffs for the specified award group.
+   * Create and initialize playoffs for the specified award group.
    *
    * @param selenium web browser controller
    * @param seleniumWait wait for elements
    * @param awardGroup the award group
    * @param bracketSort how to sort teams
-   * @throws IOException test error
+   * @param enableThirdPlace true if 3rd place bracket should be enabled
    */
   public static void initializePlayoffsForAwardGroup(final WebDriver selenium,
                                                      final WebDriverWait seleniumWait,
                                                      final String awardGroup,
-                                                     final BracketSortType bracketSort)
-      throws IOException {
+                                                     final BracketSortType bracketSort,
+                                                     final boolean enableThirdPlace) {
     loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
         + "playoff");
 
@@ -798,8 +798,76 @@ public final class IntegrationTestUtils {
         + "']"))).click();
     seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
+    initializePlayoffBracketCommon(selenium, seleniumWait, awardGroup, bracketSort, enableThirdPlace);
+  }
+
+  /**
+   * Uses {@link BracketSortType#SEEDING} as the sort.
+   *
+   * @param selenium passed along
+   * @param seleniumWait passed along
+   * @param bracketName passed along
+   * @param teamNumbers passed along
+   * @param enableThirdPlace passed along
+   * @see #initializePlayoffBracket(WebDriver, WebDriverWait, String, List,
+   *      BracketSortType, boolean)
+   */
+  public static void initializePlayoffBracket(final WebDriver selenium,
+                                              final WebDriverWait seleniumWait,
+                                              final String bracketName,
+                                              final List<Integer> teamNumbers,
+                                              final boolean enableThirdPlace) {
+    initializePlayoffBracket(selenium, seleniumWait, bracketName, teamNumbers, BracketSortType.SEEDING,
+                             enableThirdPlace);
+  }
+
+  /**
+   * Create and initialize a bracket based on the name and specified team numbers.
+   * 
+   * @param selenium web browser driver
+   * @param seleniumWait wait for elements
+   * @param bracketName name of the bracket to create
+   * @param teamNumbers teams to put in the bracket
+   * @param bracketSort how to sort teams
+   * @param enableThirdPlace true if 3rd place bracket should be enabled
+   */
+  public static void initializePlayoffBracket(final WebDriver selenium,
+                                              final WebDriverWait seleniumWait,
+                                              final String bracketName,
+                                              final List<Integer> teamNumbers,
+                                              final BracketSortType bracketSort,
+                                              final boolean enableThirdPlace) {
+    loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
+        + "playoff");
+    selenium.findElement(By.id("create-bracket")).click();
+
+    seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.name("bracket_name"))).sendKeys(bracketName);
+
+    // select the teams
+    for (final Integer teamNumber : teamNumbers) {
+      final String elementId = String.format("select_%d", teamNumber);
+      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id(elementId))).click();
+    }
+
+    selenium.findElement(By.name("selected_teams")).click();
+
+    seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
+
+    initializePlayoffBracketCommon(selenium, seleniumWait, bracketName, bracketSort, enableThirdPlace);
+  }
+
+  private static void initializePlayoffBracketCommon(final WebDriver selenium,
+                                                     final WebDriverWait seleniumWait,
+                                                     final String bracketName,
+                                                     final BracketSortType bracketSort,
+                                                     final boolean enableThirdPlace) {
     final Select initDiv = new Select(selenium.findElement(By.id("initialize-division")));
-    initDiv.selectByValue(awardGroup);
+    initDiv.selectByValue(bracketName);
+
+    if (enableThirdPlace) {
+      selenium.findElement(By.name("enableThird")).click();
+    }
+
     selenium.findElement(By.id("initialize_brackets")).click();
 
     final WebElement sortElement = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("sort")));

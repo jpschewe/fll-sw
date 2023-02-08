@@ -744,6 +744,37 @@ public final class Playoff {
   }
 
   /**
+   * Get minimum (first) performance run number for playoff division.
+   *
+   * @param playoffDivision the division to check
+   * @return performance round, -1 if there are no playoff rounds for this
+   *         division
+   * @param connection database connection
+   * @param currentTournament tournament to work with
+   * @throws SQLException on database error
+   */
+  public static int getMinPerformanceRound(final Connection connection,
+                                           final int currentTournament,
+                                           final String playoffDivision)
+      throws SQLException {
+    try (PreparedStatement maxPrep = connection.prepareStatement("SELECT MIN(run_number) FROM PlayoffData WHERE" //
+        + " event_division = ? AND tournament = ?")) {
+
+      maxPrep.setString(1, playoffDivision);
+      maxPrep.setInt(2, currentTournament);
+
+      try (ResultSet min = maxPrep.executeQuery()) {
+        if (min.next()) {
+          final int runNumber = min.getInt(1);
+          return runNumber;
+        } else {
+          return -1;
+        }
+      }
+    }
+  }
+
+  /**
    * Compute the assignments to the initial playoff brackets.
    *
    * @param numTeams will be rounded up to the next power of 2
