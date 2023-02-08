@@ -378,7 +378,7 @@ public class FullTournamentTest {
     final List<Integer> teamNumbers = Playoff.getTeamNumbersForPlayoffBracket(testDataConn,
                                                                               sourceTournament.getTournamentID(),
                                                                               bracketName);
-    final boolean enableThirdPlace = Queries.isThirdPlaceEnabled(testDataConn, sourceTournament.getTournamentID(),
+    final boolean enableThirdPlace = Playoff.isThirdPlaceEnabled(testDataConn, sourceTournament.getTournamentID(),
                                                                  bracketName);
     IntegrationTestUtils.initializePlayoffBracket(selenium, seleniumWait, bracketName, teamNumbers, enableThirdPlace);
   }

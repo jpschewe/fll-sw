@@ -1884,7 +1884,7 @@ public final class Playoff {
         - 1;
     final int playoffRun = Playoff.getPlayoffRound(connection, tournamentId, bracketName, runNumber);
     if (playoffRun == semiFinalRound
-        && Queries.isThirdPlaceEnabled(connection, tournamentId, bracketName)) {
+        && Playoff.isThirdPlaceEnabled(connection, tournamentId, bracketName)) {
       final int thirdPlaceDbLine = Playoff.computeThirdPlaceDbLine(dbLine);
       updatePlayoffTable(connection, loser, bracketName, tournamentId, nextRunNumber, thirdPlaceDbLine);
     }
@@ -1956,6 +1956,36 @@ public final class Playoff {
             : ptLine
                 + 1;
     return siblingDbLine;
+  }
+
+  /**
+   * @param connection the database connection
+   * @param tournament the tournament
+   * @param division the head to head bracket
+   * @return true if third place is enabled for the specified bracket
+   * @throws SQLException on a database error
+   */
+  public static boolean isThirdPlaceEnabled(final Connection connection,
+                                            final int tournament,
+                                            final String division)
+      throws SQLException {
+    final int finalRound = Queries.getNumPlayoffRounds(connection, tournament, division);
+  
+    try (PreparedStatement prep = connection.prepareStatement("SELECT count(*) FROM PlayoffData" //
+        + " WHERE Tournament= ?" //
+        + " AND event_division= ?" //
+        + " AND PlayoffRound= ?")) {
+      prep.setInt(1, tournament);
+      prep.setString(2, division);
+      prep.setInt(3, finalRound);
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          return rs.getInt(1) == 4;
+        } else {
+          return false;
+        }
+      }
+    }
   }
 
 }

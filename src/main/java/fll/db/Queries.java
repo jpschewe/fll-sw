@@ -390,36 +390,6 @@ public final class Queries {
   }
 
   /**
-   * @param connection the database connection
-   * @param tournament the tournament
-   * @param division the head to head bracket
-   * @return true if third place is enabled for the specified bracket
-   * @throws SQLException on a database error
-   */
-  public static boolean isThirdPlaceEnabled(final Connection connection,
-                                            final int tournament,
-                                            final String division)
-      throws SQLException {
-    final int finalRound = getNumPlayoffRounds(connection, tournament, division);
-
-    try (PreparedStatement prep = connection.prepareStatement("SELECT count(*) FROM PlayoffData" //
-        + " WHERE Tournament= ?" //
-        + " AND event_division= ?" //
-        + " AND PlayoffRound= ?")) {
-      prep.setInt(1, tournament);
-      prep.setString(2, division);
-      prep.setInt(3, finalRound);
-      try (ResultSet rs = prep.executeQuery()) {
-        if (rs.next()) {
-          return rs.getInt(1) == 4;
-        } else {
-          return false;
-        }
-      }
-    }
-  }
-
-  /**
    * Update a performance score in the database. All of the values are expected
    * to be in request.
    *
