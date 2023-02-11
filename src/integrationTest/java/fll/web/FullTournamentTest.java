@@ -324,12 +324,12 @@ public class FullTournamentTest {
           final String bracketName = entry.getKey();
           // initialize brackets that start at the current run
           if (entry.getValue() == runNumber) {
-              LOGGER.info("Initializing playoff bracket '{}'", bracketName);
-              initializePlayoffBracket(selenium, seleniumWait, testDataConn, sourceTournament, bracketName);
+            LOGGER.info("Initializing playoff bracket '{}'", bracketName);
+            initializePlayoffBracket(selenium, seleniumWait, testDataConn, sourceTournament, bracketName);
 
-              // remove the bracket so that we don't process it again the next time around
-              bracketIter.remove();
-              initializedBracketNames.add(bracketName);
+            // remove the bracket so that we don't process it again the next time around
+            bracketIter.remove();
+            initializedBracketNames.add(bracketName);
           }
         } // foreach bracket to initialize
 
@@ -338,11 +338,11 @@ public class FullTournamentTest {
           // for each score in a run
           while (rs.next()) {
             final int teamNumber = rs.getInt(1);
-              enterPerformanceScore(selenium, seleniumWait, testDataConn, performanceElement, sourceTournament,
-                                    runNumber, teamNumber);
+            enterPerformanceScore(selenium, seleniumWait, testDataConn, performanceElement, sourceTournament, runNumber,
+                                  teamNumber);
 
-              verifyPerformanceScore(selenium, seleniumWait, testDataConn, performanceElement, sourceTournament,
-                                     runNumber, teamNumber);
+            verifyPerformanceScore(selenium, seleniumWait, testDataConn, performanceElement, sourceTournament,
+                                   runNumber, teamNumber);
           }
         }
 
