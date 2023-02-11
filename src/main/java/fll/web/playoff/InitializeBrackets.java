@@ -32,6 +32,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
 
 /**
@@ -81,9 +82,14 @@ public class InitializeBrackets extends BaseFLLServlet {
             + bracket
             + ".</p>");
       } else {
-        final List<Integer> teamNumbersInBracket = Playoff.getTeamNumbersForPlayoffBracket(connection,
-                                                                                           currentTournamentID,
-                                                                                           bracket);
+        final List<Integer> teamNumbersInBracket;
+
+        if (BracketSortType.CUSTOM.equals(data.getSort())) {
+          teamNumbersInBracket = data.getCustomSortOrder();
+        } else {
+          teamNumbersInBracket = Playoff.getTeamNumbersForPlayoffBracket(connection, currentTournamentID, bracket);
+        }
+
         final Map<Integer, TournamentTeam> tournamentTeams = data.getTournamentTeams();
 
         final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournamentID,

@@ -89,15 +89,17 @@ public final class Playoff {
     }
 
     final List<? extends Team> seedingOrder;
-    if (BracketSortType.ALPHA_TEAM == bracketSort) {
+    if (BracketSortType.ALPHA_TEAM.equals(bracketSort)) {
       seedingOrder = teams;
 
       // sort by team name
       Collections.sort(seedingOrder, Team.TEAM_NAME_COMPARATOR);
-    } else if (BracketSortType.RANDOM == bracketSort) {
+    } else if (BracketSortType.RANDOM.equals(bracketSort)) {
       seedingOrder = teams;
       Collections.shuffle(seedingOrder);
-    } else {
+    } else if (BracketSortType.CUSTOM.equals(bracketSort)) {
+      seedingOrder = teams;
+    } else if (BracketSortType.SEEDING.equals(bracketSort)) {
       // standard seeding
       final int tournament = Queries.getCurrentTournament(connection);
       final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament);
@@ -106,6 +108,8 @@ public final class Playoff {
       }
 
       seedingOrder = Queries.getPlayoffSeedingOrder(connection, winnerCriteria, teams);
+    } else {
+      throw new FLLInternalException(String.format("Unknown bracket sort type: '%s'", bracketSort));
     }
 
     if (LOGGER.isDebugEnabled()) {
@@ -1970,7 +1974,7 @@ public final class Playoff {
                                             final String division)
       throws SQLException {
     final int finalRound = Queries.getNumPlayoffRounds(connection, tournament, division);
-  
+
     try (PreparedStatement prep = connection.prepareStatement("SELECT count(*) FROM PlayoffData" //
         + " WHERE Tournament= ?" //
         + " AND event_division= ?" //

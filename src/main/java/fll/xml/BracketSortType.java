@@ -9,7 +9,8 @@ public enum BracketSortType {
 
   SEEDING("Use the best score from regular match play"), //
   ALPHA_TEAM("Sort alphabetically on team name"), //
-  RANDOM("Use random assignment");
+  RANDOM("Use random assignment"), //
+  CUSTOM("Custom sort order");
 
   BracketSortType(final String description) {
     mDescription = description;
