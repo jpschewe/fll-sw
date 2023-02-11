@@ -454,7 +454,9 @@ public final class Playoff {
 
     final List<Integer> teamNumbers = new LinkedList<>();
     for (final Team t : firstRound) {
-      teamNumbers.add(t.getTeamNumber());
+      if (!Team.isInternalTeamNumber(t.getTeamNumber())) {
+        teamNumbers.add(t.getTeamNumber());
+      }
     }
     final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournament, teamNumbers);
     if (null != errors) {
@@ -467,7 +469,10 @@ public final class Playoff {
           + firstRound);
     }
 
-    final int maxRoundForTeams = Playoff.getMaxPerformanceRound(connection, currentTournament, teamNumbers);
+    // find the max performance round across the whole tournament. This puts each
+    // playoff bracket in it's own set of performance rounds.
+    // This makes it possible to uninitialize and delete brackets.
+    final int maxRoundForTeams = Playoff.getMaxPerformanceRound(connection, currentTournament);
 
     // the performance run number that is equal to playoff round 0, the round
     // before the first playoff round
@@ -519,8 +524,10 @@ public final class Playoff {
 
       // initial table assignments
       for (int i = 1; i < lineNbr; ++i) {
-        assignPlayoffTable(connection, division, currentTournament, baseRunNumber
-            + 1, i);
+        final int runNumber = baseRunNumber
+            + 1;
+        final int playoffRound = Playoff.getPlayoffRound(connection, currentTournament, division, runNumber);
+        assignPlayoffTable(connection, division, currentTournament, playoffRound, i);
       }
 
       // Create the remaining entries for the playoff data table using Null team
@@ -621,77 +628,39 @@ public final class Playoff {
                 + " AND event_division= ?" //
                 + " AND PlayoffRound= ?" //
                 + " AND LineNumber=?")) {
+              final int lineNumber = (line2
+                  + 1)
+                  / 2;
+
               insertStmt.setInt(1, teamToAdvance);
               insertStmt.setInt(2, currentTournament);
               insertStmt.setString(3, division);
               insertStmt.setInt(4, round1
                   + 1);
-              insertStmt.setInt(5, line2
-                  / 2); // technically (line2+1)/2 but we
-              // know
-              // line2 is always the even team so this
-              // is the same...
+              insertStmt.setInt(5, lineNumber);
               insertStmt.execute();
+              assignPlayoffTable(connection, division, currentTournament, round1
+                  + 1, lineNumber);
+
               // Degenerate case of BYE team advancing to the loser's bracket
               // (i.e. a 3-team tournament with 3rd/4th place bracket enabled...)
               if (enableThird
                   && (numPlayoffRounds
                       - round1) == 1) {
-                insertStmt.setInt(1, Team.BYE_TEAM_NUMBER);
-                insertStmt.setInt(5, line2
+                final int thirdPlaceDbLine = line2
                     / 2
-                    + 2);
+                    + 2;
+                insertStmt.setInt(1, Team.BYE_TEAM_NUMBER);
+                insertStmt.setInt(5, thirdPlaceDbLine);
+                insertStmt.execute();
+                assignPlayoffTable(connection, division, currentTournament, round1
+                    + 1, thirdPlaceDbLine);
               }
             } // allocate insertStmt
           }
         }
       } // allocate rs
     } // allocate selStmt
-  }
-
-  /**
-   * Determine the max performance run number used by any playoff bracket that
-   * any of the listed teams have been involved in.
-   *
-   * @param connection the database connection
-   * @param currentTournament the tournament
-   * @param teamNumbers the team numbers to check
-   * @return the max performance run number or 0 if no teams are in the playoffs
-   *         yet
-   * @throws SQLException on database error
-   */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate query from list of teams")
-  private static int getMaxPerformanceRound(final Connection connection,
-                                            final int currentTournament,
-                                            final List<Integer> teamNumbers)
-      throws SQLException {
-    final String teamNumbersStr = StringUtils.join(teamNumbers, ",");
-
-    int maxRunNumber = 0;
-    try (
-        PreparedStatement divisionsPrep = connection.prepareStatement("SELECT DISTINCT event_division from PlayoffData WHERE" //
-            + " Tournament = ?" //
-            + " AND Team IN ( "
-            + teamNumbersStr
-            + " )")) {
-      divisionsPrep.setInt(1, currentTournament);
-      try (ResultSet divisions = divisionsPrep.executeQuery()) {
-
-        while (divisions.next()) {
-          final String eventDivision = castNonNull(divisions.getString(1));
-
-          // find max run number for ANY team in the specified division, not
-          // necessarily those in our list
-          final int runNumber = getMaxPerformanceRound(connection, currentTournament, eventDivision);
-          if (-1 != runNumber) {
-            maxRunNumber = Math.max(maxRunNumber, runNumber);
-          }
-        }
-      }
-    }
-
-    return maxRunNumber;
-
   }
 
   /**
@@ -770,6 +739,33 @@ public final class Playoff {
       try (ResultSet min = maxPrep.executeQuery()) {
         if (min.next()) {
           final int runNumber = min.getInt(1);
+          return runNumber;
+        } else {
+          return -1;
+        }
+      }
+    }
+  }
+
+  /**
+   * Get max performance run number across all playoff brackets.
+   *
+   * @return performance round, -1 if there are no playoff rounds
+   * @param connection database connection
+   * @param currentTournament tournament to work with
+   * @throws SQLException on database error
+   */
+  public static int getMaxPerformanceRound(final Connection connection,
+                                           final int currentTournament)
+      throws SQLException {
+    try (PreparedStatement maxPrep = connection.prepareStatement("SELECT MAX(run_number) FROM PlayoffData WHERE" //
+        + " tournament = ?")) {
+
+      maxPrep.setInt(1, currentTournament);
+
+      try (ResultSet max = maxPrep.executeQuery()) {
+        if (max.next()) {
+          final int runNumber = max.getInt(1);
           return runNumber;
         } else {
           return -1;
@@ -1901,12 +1897,10 @@ public final class Playoff {
   private static void assignPlayoffTable(final Connection connection,
                                          final String bracketName,
                                          final int tournamentId,
-                                         final int runNumber,
+                                         final int playoffRound,
                                          final int dbLine)
       throws SQLException {
     final boolean oldAutoCommit = connection.getAutoCommit();
-
-    final int playoffRound = Playoff.getPlayoffRound(connection, tournamentId, bracketName, runNumber);
 
     try (PreparedStatement prep = connection.prepareStatement("UPDATE PlayoffTableData" //
         + " SET AssignedTable = ?" //
@@ -1987,6 +1981,49 @@ public final class Playoff {
           return rs.getInt(1) == 4;
         } else {
           return false;
+        }
+      }
+    }
+  }
+
+  /**
+   * Get table information for a team in the playoffs.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament
+   * @param teamNumber number of the team to find
+   * @param runNumber the performance run number to find
+   * @return the table information or the empty string if not found
+   * @throws SQLException on a database error
+   */
+
+  public static String getTableForRun(final Connection connection,
+                                      final Tournament tournament,
+                                      final int teamNumber,
+                                      final int runNumber)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT assignedtable FROM playoffdata, playofftabledata" //
+        + " WHERE playoffdata.team = ?" //
+        + " AND playoffdata.run_number = ?" //
+        + " AND playoffdata.tournament = ?" //
+        + " AND playoffdata.tournament = playofftabledata.tournament" //
+        + " AND playoffdata.playoffround = playofftabledata.playoffround" //
+        + " AND playoffdata.event_division = playofftabledata.event_division" //
+        + " AND playoffdata.linenumber = playofftabledata.linenumber" //
+    )) {
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, runNumber);
+      prep.setInt(3, tournament.getTournamentID());
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          final String table = rs.getString(1);
+          if (null == table) {
+            return "";
+          } else {
+            return table;
+          }
+        } else {
+          return "";
         }
       }
     }

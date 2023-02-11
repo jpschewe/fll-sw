@@ -76,33 +76,33 @@ function populateTeamsSelect() {
  * Prefer the selected table, then sort by next performance time.
  */
 function compareByPerformanceTime(teamDataA, teamDataB) {
-    if (null == teamDataA.nextPerformance
-        && null == teamDataB.nextPerformance) {
-        if (teamDataA.nextRunNumber == teamDataB.nextRunNumber) {
-            return 0;
-        } else if (teamDataA.nextRunNumber < teamDataB.nextRunNumber) {
-            return -1;
-        } else {
-            return 1;
-        }
-    } else if (null == teamDataA.nextPerformance) {
-        // this is after other
-        return 1;
-    } else if (null == teamDataB.nextPerformance) {
-        // this is before other
-        return -1;
-    } else {
-        const oneTable = teamDataA.nextPerformance.tableAndSide;
-        const twoTable = teamDataB.nextPerformance.tableAndSide;
+    const oneTable = teamDataA.nextTableAndSide;
+    const twoTable = teamDataB.nextTableAndSide;
 
-        if (oneTable == scoreEntrySelectedTable
-            && twoTable != scoreEntrySelectedTable) {
-            // prefer selected table
-            return -1;
-        } else if (oneTable != scoreEntrySelectedTable
-            && twoTable == scoreEntrySelectedTable) {
-            // prefer selected table
+    if (oneTable == scoreEntrySelectedTable
+        && twoTable != scoreEntrySelectedTable) {
+        // prefer selected table
+        return -1;
+    } else if (oneTable != scoreEntrySelectedTable
+        && twoTable == scoreEntrySelectedTable) {
+        // prefer selected table
+        return 1;
+    } else {
+        if (null == teamDataA.nextPerformance
+            && null == teamDataB.nextPerformance) {
+            if (teamDataA.nextRunNumber == teamDataB.nextRunNumber) {
+                return 0;
+            } else if (teamDataA.nextRunNumber < teamDataB.nextRunNumber) {
+                return -1;
+            } else {
+                return 1;
+            }
+        } else if (null == teamDataA.nextPerformance) {
+            // this is after other
             return 1;
+        } else if (null == teamDataB.nextPerformance) {
+            // this is before other
+            return -1;
         } else {
             const perfCompare = comparePerformanceTimes(teamDataA.nextPerformance, teamDataB.nextPerformance);
             if (0 == perfCompare) {
@@ -146,8 +146,8 @@ function comparePerformanceTimes(ptimeA, ptimeB) {
 }
 
 function compareByTeamNumber(teamDataA, teamDataB) {
-    const oneTable = teamDataA.nextPerformance.tableAndSide;
-    const twoTable = teamDataB.nextPerformance.tableAndSide;
+    const oneTable = teamDataA.nextTableAndSide;
+    const twoTable = teamDataB.nextTableAndSide;
 
     if (oneTable == scoreEntrySelectedTable
         && twoTable != scoreEntrySelectedTable) {
@@ -169,8 +169,8 @@ function compareByTeamNumber(teamDataA, teamDataB) {
 }
 
 function compareByTeamName(teamDataA, teamDataB) {
-    const oneTable = teamDataA.nextPerformance.tableAndSide;
-    const twoTable = teamDataB.nextPerformance.tableAndSide;
+    const oneTable = teamDataA.nextTableAndSide;
+    const twoTable = teamDataB.nextTableAndSide;
 
     if (oneTable == scoreEntrySelectedTable
         && twoTable != scoreEntrySelectedTable) {
@@ -192,8 +192,8 @@ function compareByTeamName(teamDataA, teamDataB) {
 }
 
 function compareByOrganization(teamDataA, teamDataB) {
-    const oneTable = teamDataA.nextPerformance.tableAndSide;
-    const twoTable = teamDataB.nextPerformance.tableAndSide;
+    const oneTable = teamDataA.nextTableAndSide;
+    const twoTable = teamDataB.nextTableAndSide;
 
     if (oneTable == scoreEntrySelectedTable
         && twoTable != scoreEntrySelectedTable) {
@@ -222,24 +222,24 @@ document.addEventListener('DOMContentLoaded', function() {
     teamSelectData.sort(compareByPerformanceTime);
     populateTeamsSelect();
 
-    document.getElementById("sort-team-name").addEventListener('click', () => {
-        teamSelectData.sort(compareByTeamName);
-        populateTeamsSelect();
-    });
-    document.getElementById("sort-team-number").addEventListener('click', () => {
-        teamSelectData.sort(compareByTeamNumber);
-        populateTeamsSelect();
-    });
-    document.getElementById("sort-organization").addEventListener('click', () => {
-        teamSelectData.sort(compareByOrganization);
-        populateTeamsSelect();
-    });
-    document.getElementById("sort-next-perf").addEventListener('click', () => {
-        teamSelectData.sort(compareByPerformanceTime);
-        populateTeamsSelect();
-    });
-
     if (!scoreEntrySelectedTable) {
+        document.getElementById("sort-team-name").addEventListener('click', () => {
+            teamSelectData.sort(compareByTeamName);
+            populateTeamsSelect();
+        });
+        document.getElementById("sort-team-number").addEventListener('click', () => {
+            teamSelectData.sort(compareByTeamNumber);
+            populateTeamsSelect();
+        });
+        document.getElementById("sort-organization").addEventListener('click', () => {
+            teamSelectData.sort(compareByOrganization);
+            populateTeamsSelect();
+        });
+        document.getElementById("sort-next-perf").addEventListener('click', () => {
+            teamSelectData.sort(compareByPerformanceTime);
+            populateTeamsSelect();
+        });
+
         // only use unverified code when not using the tablets 
 
         reloadRuns();

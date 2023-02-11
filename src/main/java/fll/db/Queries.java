@@ -275,6 +275,33 @@ public final class Queries {
   }
 
   /**
+   * Figure out the highest run number across all teams in the specified
+   * tournament. Does not ignore unverified scores.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament to check
+   * @return the highest run number that the team has completed
+   * @throws SQLException on a database error
+   */
+  public static int getMaxRunNumber(final Connection connection,
+                                    final Tournament tournament)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?")) {
+      prep.setInt(1, tournament.getTournamentID());
+      try (ResultSet rs = prep.executeQuery()) {
+        final int runNumber;
+        if (rs.next()) {
+          runNumber = rs.getInt(1);
+        } else {
+          runNumber = 0;
+        }
+        return runNumber;
+      }
+    }
+  }
+
+  /**
    * Insert a performance score into the database and do all appropriate updates
    * to the playoff tables and notifications to the UI code.
    *
@@ -576,8 +603,9 @@ public final class Queries {
                 }
               }
             }
-            if (getPlayoffTableLineNumber(connection, currentTournament, siblingTeam, runNumber
-                + 1) > 0) {
+            if (siblingTeam != Team.BYE_TEAM_NUMBER
+                && getPlayoffTableLineNumber(connection, currentTournament, siblingTeam, runNumber
+                    + 1) > 0) {
               prep.setInt(1, siblingTeam);
               prep.setInt(2, runNumber);
               prep.setInt(3, currentTournament);

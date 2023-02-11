@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import fll.TestUtils;
 import fll.Utilities;
 import fll.web.ApplicationAttributes;
+import fll.web.DummyPageContext;
 import fll.web.DummyServletContext;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -70,7 +71,7 @@ public class ScoreEntryTest {
   public void testGenerateCheckRestrictionsBody() throws IOException {
     final StringWriter writer = new StringWriter();
 
-    ScoreEntry.generateCheckRestrictionsBody(writer, new TestServletContext());
+    ScoreEntry.generateCheckRestrictionsBody(writer, new TestServletContext(), new DummyPageContext());
     assertTrue(writer.toString().length() > 0);
   }
 

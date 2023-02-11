@@ -1,3 +1,11 @@
+Release 17.4.0
+==============
+* Add playoff bracket name to the team selection box and display the playoff round number rather than performance run number
+* #1071 - allow the user to delete a playoff bracket
+* #1071 - prevent the user from uninitializing a playoff bracket that will cause problems with run numbers
+* #1072 - Fix bug creating team finalist schedule
+* #1069 - support viewing a bye run
+* sort teams by table during head to head
 * Don't import awards script data when importing performance data
 * #1068 - Store form parameters when redirecting to compute summarized scores
 * Rework award summary sheet to be by judging group

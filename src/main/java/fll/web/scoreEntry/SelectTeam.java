@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 import org.apache.commons.lang3.tuple.Pair;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import com.diffplug.common.base.Errors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -28,6 +29,7 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.scheduler.PerformanceTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
@@ -35,6 +37,7 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
+import fll.web.playoff.Playoff;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.jsp.PageContext;
 
@@ -81,19 +84,50 @@ public final class SelectTeam {
         schedule = null;
       }
 
+      final List<String> unfinishedBrackets = Playoff.getUnfinishedPlayoffBrackets(connection,
+                                                                                   tournament.getTournamentID());
+
       final List<SelectTeamData> teamSelectData = Queries.getTournamentTeams(connection, tournament.getTournamentID())
                                                          .values().stream() //
                                                          .filter(team -> !team.isInternal()) //
-                                                         .map(team -> {
+                                                         .map(Errors.rethrow().wrapFunction(team -> {
                                                            final int nextRunNumber = maxRunNumbers.getOrDefault(team.getTeamNumber(),
                                                                                                                 0)
                                                                + 1;
                                                            final @Nullable PerformanceTime nextPerformance = getNextPerformance(schedule,
                                                                                                                                 team.getTeamNumber(),
                                                                                                                                 nextRunNumber);
-                                                           return new SelectTeamData(team, nextPerformance,
-                                                                                     nextRunNumber);
-                                                         }) //
+                                                           if (null != nextPerformance) {
+                                                             return new SelectTeamData(team, nextPerformance,
+                                                                                       nextRunNumber);
+                                                           } else {
+                                                             final String playoffBracketName = Playoff.getPlayoffBracketsForTeam(connection,
+                                                                                                                                 team.getTeamNumber())
+                                                                                                      .stream() //
+                                                                                                      .filter(b -> unfinishedBrackets.contains(b)) //
+                                                                                                      .findFirst() //
+                                                                                                      .orElse("");
+
+                                                             final String nextTableAndSide = getNextTableAndSide(connection,
+                                                                                                                 tournament,
+                                                                                                                 team.getTeamNumber(),
+                                                                                                                 nextRunNumber);
+                                                             final String runNumberDisplay;
+                                                             if (!playoffBracketName.isEmpty()) {
+                                                               final int playoffRound = Playoff.getPlayoffRound(connection,
+                                                                                                                tournament.getTournamentID(),
+                                                                                                                playoffBracketName,
+                                                                                                                nextRunNumber);
+                                                               runNumberDisplay = String.format("%s P%d",
+                                                                                                playoffBracketName,
+                                                                                                playoffRound);
+                                                             } else {
+                                                               runNumberDisplay = String.valueOf(nextRunNumber);
+                                                             }
+                                                             return new SelectTeamData(team, nextTableAndSide,
+                                                                                       nextRunNumber, runNumberDisplay);
+                                                           }
+                                                         })) //
                                                          .collect(Collectors.toList());
 
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
@@ -108,6 +142,24 @@ public final class SelectTeam {
       throw new FLLInternalException("Error converting data to JSON", e);
     }
 
+  }
+
+  /**
+   * @return the next table and side or the empty string if this cannot be
+   *         determined.
+   */
+  private static String getNextTableAndSide(final Connection connection,
+                                            final Tournament tournament,
+                                            final int teamNumber,
+                                            final int nextRunNumber)
+      throws SQLException {
+    if (nextRunNumber <= TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID())) {
+      // no schedule, not going to know the table
+      return "";
+    } else {
+      // get information from the playoffs
+      return Playoff.getTableForRun(connection, tournament, teamNumber, nextRunNumber);
+    }
   }
 
   private static @Nullable PerformanceTime getNextPerformance(final @Nullable TournamentSchedule schedule,
@@ -175,12 +227,29 @@ public final class SelectTeam {
 
     private final int nextRunNumber;
 
+    private final String nextTableAndSide;
+
+    private final String runNumberDisplay;
+
     SelectTeamData(final TournamentTeam team,
-                   final @Nullable PerformanceTime nextPerformance,
+                   final PerformanceTime nextPerformance,
                    final int nextRunNumber) {
       this.team = team;
       this.nextPerformance = nextPerformance;
       this.nextRunNumber = nextRunNumber;
+      this.nextTableAndSide = nextPerformance.getTableAndSide();
+      this.runNumberDisplay = String.valueOf(nextRunNumber);
+    }
+
+    SelectTeamData(final TournamentTeam team,
+                   final String nextTableAndSide,
+                   final int nextRunNumber,
+                   final String runNumberDisplay) {
+      this.team = team;
+      this.nextPerformance = null;
+      this.nextRunNumber = nextRunNumber;
+      this.nextTableAndSide = nextTableAndSide;
+      this.runNumberDisplay = runNumberDisplay;
     }
 
     /**
@@ -189,13 +258,18 @@ public final class SelectTeam {
     public String getDisplayString() {
       final String scheduleInfo;
       if (null != nextPerformance) {
-        scheduleInfo = String.format(" @ %s - %s", TournamentSchedule.formatTime(nextPerformance.getTime()),
-                                     nextPerformance.getTableAndSide());
+        scheduleInfo = String.format(" @ %s", TournamentSchedule.formatTime(nextPerformance.getTime()));
       } else {
         scheduleInfo = "";
       }
-      return String.format("%d [%s] - %d%s", team.getTeamNumber(), team.getTrimmedTeamName(), nextRunNumber,
-                           scheduleInfo);
+      final String tableInfo;
+      if (nextTableAndSide.isEmpty()) {
+        tableInfo = "";
+      } else {
+        tableInfo = String.format(" - %s", nextTableAndSide);
+      }
+      return String.format("%d [%s] - %s%s%s", team.getTeamNumber(), team.getTrimmedTeamName(), runNumberDisplay,
+                           scheduleInfo, tableInfo);
     }
 
     /**
@@ -219,6 +293,13 @@ public final class SelectTeam {
       return nextRunNumber;
     }
 
+    /**
+     * @return the table and side the team is performing on next, the empty string
+     *         if the table isn't known
+     */
+    public String getNextTableAndSide() {
+      return nextTableAndSide;
+    }
   }
 
 }
