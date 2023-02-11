@@ -27,8 +27,10 @@ import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import fll.xml.BracketSortType;
 
 /**
@@ -92,21 +94,17 @@ public class BracketParameters extends BaseFLLServlet {
       return;
     }
 
-    final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
-                                                                          PlayoffSessionData.class);
-
-    final String sortStr = request.getParameter("sort");
-    if (null == sortStr
-        || "".equals(sortStr)) {
-      throw new FLLRuntimeException("Missing parameter 'sort'");
-    }
-
-    final BracketSortType sort = BracketSortType.valueOf(sortStr);
-
-    data.setSort(sort);
-
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
+
+      final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
+                                                                            PlayoffSessionData.class);
+
+      final String sortStr = WebUtils.getNonNullRequestParameter(request, "sort");
+
+      final BracketSortType sort = BracketSortType.valueOf(sortStr);
+
+      data.setSort(sort);
 
       try (PreparedStatement delete = connection.prepareStatement("DELETE FROM table_division" //
           + " WHERE tournament = ?" //
@@ -133,12 +131,14 @@ public class BracketParameters extends BaseFLLServlet {
 
       session.setAttribute(PlayoffIndex.SESSION_DATA, data);
 
+      response.sendRedirect(response.encodeRedirectURL("InitializeBrackets"));
     } catch (final SQLException e) {
       final String errorMessage = "There was an error talking to the database";
       LOGGER.error(errorMessage, e);
       throw new FLLRuntimeException(errorMessage, e);
+    } catch (final MissingRequiredParameterException e) {
+      SessionAttributes.appendToMessage(session, String.format("<p class='error'>%s</p>", e.getMessage()));
+      WebUtils.sendRedirect(response, "bracket_parameters.jsp");
     }
-
-    response.sendRedirect(response.encodeRedirectURL("InitializeBrackets"));
   }
 }
