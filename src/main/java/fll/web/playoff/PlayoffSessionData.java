@@ -98,7 +98,7 @@ public final class PlayoffSessionData implements Serializable {
   }
 
   /**
-   * @param v see {@Link #getCustomSortOrder()}
+   * @param v see {@link #getCustomSortOrder()}
    */
   public void setCustomSortOrder(final List<Integer> v) {
     customSortOrder.clear();
