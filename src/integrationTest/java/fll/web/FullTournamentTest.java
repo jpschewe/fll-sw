@@ -390,8 +390,10 @@ public class FullTournamentTest {
         final Map<Integer, Integer> teamNumbers = new HashMap<>();
         while (rs.next()) {
           final int teamNum = rs.getInt(1);
-          final int lineNum = rs.getInt(2);
-          teamNumbers.put(teamNum, lineNum);
+          if (!Team.isInternalTeamNumber(teamNum)) {
+            final int lineNum = rs.getInt(2);
+            teamNumbers.put(teamNum, lineNum);
+          }
         }
 
         final int[] seeding = Playoff.computeInitialBrackets(teamNumbers.size());

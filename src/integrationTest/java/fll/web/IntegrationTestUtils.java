@@ -875,16 +875,17 @@ public final class IntegrationTestUtils {
       selenium.findElement(By.name("enableThird")).click();
     }
 
-    if (BracketSortType.CUSTOM.equals(bracketSort)) {
-      final String teamsStr = teamNumbers.stream().map(String::valueOf).collect(Collectors.joining(","));
-      selenium.findElement(By.id("custom_order")).sendKeys(teamsStr);
-    }
-
     selenium.findElement(By.id("initialize_brackets")).click();
 
     final WebElement sortElement = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("sort")));
     final Select sort = new Select(sortElement);
     sort.selectByValue(bracketSort.name());
+
+    if (BracketSortType.CUSTOM.equals(bracketSort)) {
+      final String teamsStr = teamNumbers.stream().map(String::valueOf).collect(Collectors.joining(","));
+      selenium.findElement(By.id("custom_order")).sendKeys(teamsStr);
+    }
+
     selenium.findElement(By.id("submit_data")).click();
 
     seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
