@@ -12,16 +12,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
+import fll.db.Queries;
 import fll.db.TableInformation;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -32,6 +27,13 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.xml.BracketSortType;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Work with bracket_parameters.jsp.
@@ -101,9 +103,40 @@ public class BracketParameters extends BaseFLLServlet {
                                                                             PlayoffSessionData.class);
 
       final String sortStr = WebUtils.getNonNullRequestParameter(request, "sort");
-
       final BracketSortType sort = BracketSortType.valueOf(sortStr);
 
+      if (BracketSortType.CUSTOM.equals(sort)) {
+        final String customSortOrderStr = WebUtils.getNonNullRequestParameter(request, "custom_order");
+        final List<Integer> customSortOrder = Stream.of(customSortOrderStr.split("[,\\s]+")) //
+                                                    .map(Integer::valueOf) //
+                                                    .toList();
+
+        // check that all teams are in the sort order
+        final String bracket = data.getBracket();
+        if (null == bracket) {
+          throw new CustomSortOrderException("No playoff bracket specified");
+        } else if (Queries.isPlayoffDataInitialized(connection, bracket)) {
+          throw new CustomSortOrderException(String.format("Playoffs have already been initialized for playoff bracket %s",
+                                                           bracket));
+        }
+
+        final List<Integer> teamNumbersInBracket = Playoff.getTeamNumbersForPlayoffBracket(connection,
+                                                                                           data.getCurrentTournament()
+                                                                                               .getTournamentID(),
+                                                                                           bracket);
+        if (customSortOrder.size() != teamNumbersInBracket.size()) {
+          throw new CustomSortOrderException(String.format("Custom order must contain the exact list of teams in the bracket. Provided size: %d Actual size: %d",
+                                                           customSortOrder.size(), teamNumbersInBracket.size()));
+        }
+
+        for (final Integer teamNum : customSortOrder) {
+          if (!teamNumbersInBracket.contains(teamNum)) {
+            throw new CustomSortOrderException(String.format("Specified team %d is not in the bracket", teamNum));
+          }
+        }
+
+        data.setCustomSortOrder(customSortOrder);
+      }
       data.setSort(sort);
 
       try (PreparedStatement delete = connection.prepareStatement("DELETE FROM table_division" //
@@ -139,6 +172,20 @@ public class BracketParameters extends BaseFLLServlet {
     } catch (final MissingRequiredParameterException e) {
       SessionAttributes.appendToMessage(session, String.format("<p class='error'>%s</p>", e.getMessage()));
       WebUtils.sendRedirect(response, "bracket_parameters.jsp");
+    } catch (final NumberFormatException e) {
+      SessionAttributes.appendToMessage(session,
+                                        String.format("<p class='error'>The custom sort order must be a comma or space separated list of numbers: %s</p>",
+                                                      e.getMessage()));
+      WebUtils.sendRedirect(response, "bracket_parameters.jsp");
+    } catch (final CustomSortOrderException e) {
+      SessionAttributes.appendToMessage(session, String.format("<p class='error'>%s</p>", e.getMessage()));
+      WebUtils.sendRedirect(response, "bracket_parameters.jsp");
+    }
+  }
+
+  private static final class CustomSortOrderException extends FLLRuntimeException {
+    CustomSortOrderException(final String msg) {
+      super(msg);
     }
   }
 }

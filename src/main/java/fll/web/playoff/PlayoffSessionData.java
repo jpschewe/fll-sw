@@ -88,6 +88,23 @@ public final class PlayoffSessionData implements Serializable {
     mSort = sort;
   }
 
+  private final List<Integer> customSortOrder = new LinkedList<>();
+
+  /**
+   * @return order used with {@link BracketSortType#CUSTOM}
+   */
+  public List<Integer> getCustomSortOrder() {
+    return Collections.unmodifiableList(customSortOrder);
+  }
+
+  /**
+   * @param v see {@Link #getCustomSortOrder()}
+   */
+  public void setCustomSortOrder(final List<Integer> v) {
+    customSortOrder.clear();
+    customSortOrder.addAll(v);
+  }
+
   private final Map<Integer, TournamentTeam> mTournamentTeams;
 
   /**
