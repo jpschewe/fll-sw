@@ -43,6 +43,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -798,7 +799,12 @@ public final class IntegrationTestUtils {
         + "']"))).click();
     seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
-    initializePlayoffBracketCommon(selenium, seleniumWait, awardGroup, bracketSort, enableThirdPlace);
+    if (BracketSortType.CUSTOM.equals(bracketSort)) {
+      throw new FLLRuntimeException("Custom bracket sort type isn't supported");
+    }
+
+    initializePlayoffBracketCommon(selenium, seleniumWait, awardGroup, Collections.emptyList(), bracketSort,
+                                   enableThirdPlace);
   }
 
   /**
@@ -853,12 +859,13 @@ public final class IntegrationTestUtils {
 
     seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
-    initializePlayoffBracketCommon(selenium, seleniumWait, bracketName, bracketSort, enableThirdPlace);
+    initializePlayoffBracketCommon(selenium, seleniumWait, bracketName, teamNumbers, bracketSort, enableThirdPlace);
   }
 
   private static void initializePlayoffBracketCommon(final WebDriver selenium,
                                                      final WebDriverWait seleniumWait,
                                                      final String bracketName,
+                                                     final List<Integer> teamNumbers,
                                                      final BracketSortType bracketSort,
                                                      final boolean enableThirdPlace) {
     final Select initDiv = new Select(selenium.findElement(By.id("initialize-division")));
@@ -866,6 +873,11 @@ public final class IntegrationTestUtils {
 
     if (enableThirdPlace) {
       selenium.findElement(By.name("enableThird")).click();
+    }
+
+    if (BracketSortType.CUSTOM.equals(bracketSort)) {
+      final String teamsStr = teamNumbers.stream().map(String::valueOf).collect(Collectors.joining(","));
+      selenium.findElement(By.id("custom_order")).sendKeys(teamsStr);
     }
 
     selenium.findElement(By.id("initialize_brackets")).click();

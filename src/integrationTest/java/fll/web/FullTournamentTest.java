@@ -31,6 +31,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -71,6 +72,7 @@ import com.opencsv.CSVWriter;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.SubjectiveScore;
+import fll.Team;
 import fll.TestUtils;
 import fll.Tournament;
 import fll.TournamentTeam;
@@ -85,6 +87,7 @@ import fll.web.developer.QueryHandler;
 import fll.web.playoff.Playoff;
 import fll.web.scoreEntry.ScoreEntry;
 import fll.xml.AbstractGoal;
+import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
 import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
@@ -375,12 +378,43 @@ public class FullTournamentTest {
                                               final Tournament sourceTournament,
                                               final String bracketName)
       throws SQLException {
-    final List<Integer> teamNumbers = Playoff.getTeamNumbersForPlayoffBracket(testDataConn,
-                                                                              sourceTournament.getTournamentID(),
-                                                                              bracketName);
-    final boolean enableThirdPlace = Playoff.isThirdPlaceEnabled(testDataConn, sourceTournament.getTournamentID(),
-                                                                 bracketName);
-    IntegrationTestUtils.initializePlayoffBracket(selenium, seleniumWait, bracketName, teamNumbers, enableThirdPlace);
+    try (PreparedStatement prep = testDataConn.prepareStatement("SELECT Team, LineNumber FROM playoffdata" //
+        + " WHERE playoffround = 1" //
+        + " AND tournament = ?" //
+        + " AND event_division = ?")) {
+      prep.setInt(1, sourceTournament.getTournamentID());
+      prep.setString(2, bracketName);
+
+      try (ResultSet rs = prep.executeQuery()) {
+        // team -> line
+        final Map<Integer, Integer> teamNumbers = new HashMap<>();
+        while (rs.next()) {
+          final int teamNum = rs.getInt(1);
+          final int lineNum = rs.getInt(2);
+          teamNumbers.put(teamNum, lineNum);
+        }
+
+        final int[] seeding = Playoff.computeInitialBrackets(teamNumbers.size());
+
+        final List<Integer> seedingOrder = new LinkedList<>(Collections.nCopies(teamNumbers.size(),
+                                                                                Team.NULL.getTeamNumber()));
+
+        for (final Map.Entry<Integer, Integer> entry : teamNumbers.entrySet()) {
+          final Integer teamNum = entry.getKey();
+          final int lineNum = entry.getValue();
+          final int seedingIndex = lineNum
+              - 1;
+          final int seedingOrderIndex = seeding[seedingIndex]
+              - 1;
+          seedingOrder.set(seedingOrderIndex, teamNum);
+        }
+
+        final boolean enableThirdPlace = Playoff.isThirdPlaceEnabled(testDataConn, sourceTournament.getTournamentID(),
+                                                                     bracketName);
+        IntegrationTestUtils.initializePlayoffBracket(selenium, seleniumWait, bracketName, seedingOrder,
+                                                      BracketSortType.CUSTOM, enableThirdPlace);
+      }
+    }
   }
 
   private void uploadSchedule(final WebDriver selenium,
