@@ -48,12 +48,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.opentest4j.AssertionFailedError;
 
 import com.diffplug.common.base.Errors;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -324,17 +324,12 @@ public class FullTournamentTest {
           final String bracketName = entry.getKey();
           // initialize brackets that start at the current run
           if (entry.getValue() == runNumber) {
-            // DEBUG
-            try {
-              LOGGER.info("Initializing playoff bracket '{}'", bracketName);
-              initializePlayoffBracket(selenium, seleniumWait, testDataConn, sourceTournament, bracketName);
+            LOGGER.info("Initializing playoff bracket '{}'", bracketName);
+            initializePlayoffBracket(selenium, seleniumWait, testDataConn, sourceTournament, bracketName);
 
-              // remove the bracket so that we don't process it again the next time around
-              bracketIter.remove();
-              initializedBracketNames.add(bracketName);
-            } catch (final org.opentest4j.AssertionFailedError ae) {
-              throw ae;
-            }
+            // remove the bracket so that we don't process it again the next time around
+            bracketIter.remove();
+            initializedBracketNames.add(bracketName);
           }
         } // foreach bracket to initialize
 
@@ -941,12 +936,7 @@ public class FullTournamentTest {
           // submit the page
           selenium.findElement(By.id("enter_submit")).click();
 
-          // DEBUG
-          try {
-            assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
-          } catch (final AssertionFailedError ae) {
-            throw ae;
-          }
+          assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
 
           if (rs.getBoolean("NoShow")) {
             selenium.findElement(By.id("no_show")).click();
@@ -989,13 +979,20 @@ public class FullTournamentTest {
                   selenium.findElement(By.id(buttonID)).click();
                 } else {
                   final int value = rs.getInt(name);
-                  selenium.findElement(By.name(name)).sendKeys(String.valueOf(value));
+                  final WebElement scoreInput = selenium.findElement(By.name(name));
+
+                  // setup backspace keys to delete all current text and then input the value
+                  // without
+                  // losing focus
+                  final String currentText = scoreInput.getAttribute("value");
+                  final String backSpaces = Keys.BACK_SPACE.toString().repeat(currentText.length());
+                  final CharSequence keys = String.format("%s%s", backSpaces, String.valueOf(value));
+                  scoreInput.sendKeys(keys);
                 }
               } // !computed
             } // foreach goal
 
             IntegrationTestUtils.submitPerformanceScore(selenium, seleniumWait);
-
           } // not NoShow
 
           seleniumWait.until(ExpectedConditions.urlContains("select_team"));
