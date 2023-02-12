@@ -89,15 +89,17 @@ public final class Playoff {
     }
 
     final List<? extends Team> seedingOrder;
-    if (BracketSortType.ALPHA_TEAM == bracketSort) {
+    if (BracketSortType.ALPHA_TEAM.equals(bracketSort)) {
       seedingOrder = teams;
 
       // sort by team name
       Collections.sort(seedingOrder, Team.TEAM_NAME_COMPARATOR);
-    } else if (BracketSortType.RANDOM == bracketSort) {
+    } else if (BracketSortType.RANDOM.equals(bracketSort)) {
       seedingOrder = teams;
       Collections.shuffle(seedingOrder);
-    } else {
+    } else if (BracketSortType.CUSTOM.equals(bracketSort)) {
+      seedingOrder = teams;
+    } else if (BracketSortType.SEEDING.equals(bracketSort)) {
       // standard seeding
       final int tournament = Queries.getCurrentTournament(connection);
       final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament);
@@ -106,6 +108,8 @@ public final class Playoff {
       }
 
       seedingOrder = Queries.getPlayoffSeedingOrder(connection, winnerCriteria, teams);
+    } else {
+      throw new FLLInternalException(String.format("Unknown bracket sort type: '%s'", bracketSort));
     }
 
     if (LOGGER.isDebugEnabled()) {
@@ -704,6 +708,37 @@ public final class Playoff {
       try (ResultSet max = maxPrep.executeQuery()) {
         if (max.next()) {
           final int runNumber = max.getInt(1);
+          return runNumber;
+        } else {
+          return -1;
+        }
+      }
+    }
+  }
+
+  /**
+   * Get minimum (first) performance run number for playoff division.
+   *
+   * @param playoffDivision the division to check
+   * @return performance round, -1 if there are no playoff rounds for this
+   *         division
+   * @param connection database connection
+   * @param currentTournament tournament to work with
+   * @throws SQLException on database error
+   */
+  public static int getMinPerformanceRound(final Connection connection,
+                                           final int currentTournament,
+                                           final String playoffDivision)
+      throws SQLException {
+    try (PreparedStatement maxPrep = connection.prepareStatement("SELECT MIN(run_number) FROM PlayoffData WHERE" //
+        + " event_division = ? AND tournament = ?")) {
+
+      maxPrep.setString(1, playoffDivision);
+      maxPrep.setInt(2, currentTournament);
+
+      try (ResultSet min = maxPrep.executeQuery()) {
+        if (min.next()) {
+          final int runNumber = min.getInt(1);
           return runNumber;
         } else {
           return -1;
@@ -1849,7 +1884,7 @@ public final class Playoff {
         - 1;
     final int playoffRun = Playoff.getPlayoffRound(connection, tournamentId, bracketName, runNumber);
     if (playoffRun == semiFinalRound
-        && Queries.isThirdPlaceEnabled(connection, tournamentId, bracketName)) {
+        && Playoff.isThirdPlaceEnabled(connection, tournamentId, bracketName)) {
       final int thirdPlaceDbLine = Playoff.computeThirdPlaceDbLine(dbLine);
       updatePlayoffTable(connection, loser, bracketName, tournamentId, nextRunNumber, thirdPlaceDbLine);
     }
@@ -1922,6 +1957,36 @@ public final class Playoff {
   }
 
   /**
+   * @param connection the database connection
+   * @param tournament the tournament
+   * @param division the head to head bracket
+   * @return true if third place is enabled for the specified bracket
+   * @throws SQLException on a database error
+   */
+  public static boolean isThirdPlaceEnabled(final Connection connection,
+                                            final int tournament,
+                                            final String division)
+      throws SQLException {
+    final int finalRound = Queries.getNumPlayoffRounds(connection, tournament, division);
+
+    try (PreparedStatement prep = connection.prepareStatement("SELECT count(*) FROM PlayoffData" //
+        + " WHERE Tournament= ?" //
+        + " AND event_division= ?" //
+        + " AND PlayoffRound= ?")) {
+      prep.setInt(1, tournament);
+      prep.setString(2, division);
+      prep.setInt(3, finalRound);
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          return rs.getInt(1) == 4;
+        } else {
+          return false;
+        }
+      }
+    }
+  }
+
+  /**
    * Get table information for a team in the playoffs.
    * 
    * @param connection database connection
@@ -1931,6 +1996,7 @@ public final class Playoff {
    * @return the table information or the empty string if not found
    * @throws SQLException on a database error
    */
+
   public static String getTableForRun(final Connection connection,
                                       final Tournament tournament,
                                       final int teamNumber,

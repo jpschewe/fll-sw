@@ -1,3 +1,5 @@
+* #1074 - Make ReplayTournament more robust for handling other databases, particularly head to head
+
 Release 17.4.0
 ==============
 * Add playoff bracket name to the team selection box and display the playoff round number rather than performance run number

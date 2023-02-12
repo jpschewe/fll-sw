@@ -31,13 +31,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -45,12 +48,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.diffplug.common.base.Errors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.Page;
@@ -67,6 +72,7 @@ import com.opencsv.CSVWriter;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.SubjectiveScore;
+import fll.Team;
 import fll.TestUtils;
 import fll.Tournament;
 import fll.TournamentTeam;
@@ -78,8 +84,10 @@ import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
 import fll.web.developer.QueryHandler;
+import fll.web.playoff.Playoff;
 import fll.web.scoreEntry.ScoreEntry;
 import fll.xml.AbstractGoal;
+import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
 import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
@@ -275,30 +283,55 @@ public class FullTournamentTest {
     try (
         PreparedStatement prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?")) {
 
-      boolean initializedPlayoff = false;
+      boolean postSeedingActions = false;
       prep.setInt(1, sourceTournament.getTournamentID());
 
-      final Set<String> awardGroups = getAwardGroups(selenium, seleniumWait);
-      for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
+      // compute bracket names and sort by max run number so that they can be created
+      // in the same order
+      final List<String> bracketNames = Playoff.getPlayoffBrackets(testDataConn, sourceTournament.getTournamentID());
+      final List<String> initializedBracketNames = new LinkedList<>();
+      final Map<String, Integer> bracketStartingRounds = bracketNames.stream() //
+                                                                     .collect(Collectors.toMap(Function.identity(),
+                                                                                               Errors.rethrow()
+                                                                                                     .wrapFunction(bracketName -> Integer.valueOf(Playoff.getMinPerformanceRound(testDataConn,
+                                                                                                                                                                                 sourceTournament.getTournamentID(),
+                                                                                                                                                                                 bracketName)))));
+      LOGGER.info("Bracket starting rounds: {}", bracketStartingRounds);
 
+      for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
         if (runNumber > numSeedingRounds) {
-          if (!initializedPlayoff) {
+          if (!postSeedingActions) {
             IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
                 + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
                                                                                       safeTestTournamentName
                                                                                           + "_05-seeding-rounds-completed.flldb"));
 
-            checkSeedingRounds(selenium, seleniumWait);
+            LOGGER.info("Entering the subjective scores");
+            enterSubjectiveScores(testDataConn, challengeDescription, sourceTournament);
+            IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
+                + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
+                                                                                      safeTestTournamentName
+                                                                                          + "_06-subjective-entered.flldb"));
 
-            // initialize the playoff brackets with playoff/index.jsp form
-            for (final String awardGroup : awardGroups) {
-              LOGGER.info("Initializing playoff brackets for division "
-                  + awardGroup);
-              IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, seleniumWait, awardGroup);
-            }
-            initializedPlayoff = true;
+            checkSeedingRounds(selenium, seleniumWait);
+            postSeedingActions = true;
           }
         }
+
+        final Iterator<Map.Entry<String, Integer>> bracketIter = bracketStartingRounds.entrySet().iterator();
+        while (bracketIter.hasNext()) {
+          final Map.Entry<String, Integer> entry = bracketIter.next();
+          final String bracketName = entry.getKey();
+          // initialize brackets that start at the current run
+          if (entry.getValue() == runNumber) {
+            LOGGER.info("Initializing playoff bracket '{}'", bracketName);
+            initializePlayoffBracket(selenium, seleniumWait, testDataConn, sourceTournament, bracketName);
+
+            // remove the bracket so that we don't process it again the next time around
+            bracketIter.remove();
+            initializedBracketNames.add(bracketName);
+          }
+        } // foreach bracket to initialize
 
         prep.setInt(2, runNumber);
         try (ResultSet rs = prep.executeQuery()) {
@@ -315,18 +348,15 @@ public class FullTournamentTest {
 
         if (runNumber > numSeedingRounds
             && runNumber != maxRuns) {
-          for (final String division : awardGroups) {
-            printPlayoffScoresheets(division);
+          for (final String bracketName : initializedBracketNames) {
+            printPlayoffScoresheets(bracketName);
           }
         }
 
-      }
+      } // foreach run
 
       LOGGER.info("Checking displays");
       checkDisplays(selenium, seleniumWait);
-
-      LOGGER.info("Entering the subjective scores");
-      enterSubjectiveScores(testDataConn, challengeDescription, sourceTournament);
 
       LOGGER.info("Writing final datbaase");
       IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
@@ -335,6 +365,53 @@ public class FullTournamentTest {
                                                                                     + "_99-final.flldb"));
     }
 
+  }
+
+  public static void initializePlayoffBracket(final WebDriver selenium,
+                                              final WebDriverWait seleniumWait,
+                                              final Connection testDataConn,
+                                              final Tournament sourceTournament,
+                                              final String bracketName)
+      throws SQLException {
+    try (PreparedStatement prep = testDataConn.prepareStatement("SELECT Team, LineNumber FROM playoffdata" //
+        + " WHERE playoffround = 1" //
+        + " AND tournament = ?" //
+        + " AND event_division = ?")) {
+      prep.setInt(1, sourceTournament.getTournamentID());
+      prep.setString(2, bracketName);
+
+      try (ResultSet rs = prep.executeQuery()) {
+        // team -> line
+        final Map<Integer, Integer> teamNumbers = new HashMap<>();
+        while (rs.next()) {
+          final int teamNum = rs.getInt(1);
+          if (!Team.isInternalTeamNumber(teamNum)) {
+            final int lineNum = rs.getInt(2);
+            teamNumbers.put(teamNum, lineNum);
+          }
+        }
+
+        final int[] seeding = Playoff.computeInitialBrackets(teamNumbers.size());
+
+        final List<Integer> seedingOrder = new LinkedList<>(Collections.nCopies(teamNumbers.size(),
+                                                                                Team.NULL.getTeamNumber()));
+
+        for (final Map.Entry<Integer, Integer> entry : teamNumbers.entrySet()) {
+          final Integer teamNum = entry.getKey();
+          final int lineNum = entry.getValue();
+          final int seedingIndex = lineNum
+              - 1;
+          final int seedingOrderIndex = seeding[seedingIndex]
+              - 1;
+          seedingOrder.set(seedingOrderIndex, teamNum);
+        }
+
+        final boolean enableThirdPlace = Playoff.isThirdPlaceEnabled(testDataConn, sourceTournament.getTournamentID(),
+                                                                     bracketName);
+        IntegrationTestUtils.initializePlayoffBracket(selenium, seleniumWait, bracketName, seedingOrder,
+                                                      BracketSortType.CUSTOM, enableThirdPlace);
+      }
+    }
   }
 
   private void uploadSchedule(final WebDriver selenium,
@@ -445,31 +522,6 @@ public class FullTournamentTest {
                 "Some teams with more or less than seeding rounds found");
   }
 
-  /**
-   * Get the award groups in this tournament.
-   */
-  private Set<String> getAwardGroups(final WebDriver selenium,
-                                     final WebDriverWait seleniumWait)
-      throws IOException {
-    IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
-        + "admin/index.jsp");
-
-    selenium.findElement(By.id("change-award-groups")).click();
-
-    final Set<String> awardGroups = new HashSet<>();
-    final List<WebElement> inputs = selenium.findElements(By.cssSelector("input:checked[type='radio']"));
-    for (final WebElement radioButton : inputs) {
-      final String awardGroup = radioButton.getAttribute("value");
-      awardGroups.add(awardGroup);
-    }
-
-    LOGGER.info("Found awardGroups: "
-        + awardGroups);
-
-    assertFalse(awardGroups.isEmpty());
-    return awardGroups;
-  }
-
   private void assignTableLabels(final WebDriver selenium,
                                  final WebDriverWait seleniumWait)
       throws IOException {
@@ -517,18 +569,20 @@ public class FullTournamentTest {
     }
     // decrement by one since this index wasn't found
     --maxIndex;
+    LOGGER.trace("MaxIndex is {}", maxIndex);
 
     // make sure the row exists to enter the judge
     for (; maxIndex < judgeIndex; ++maxIndex) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Adding a row to the judges entry form to get to: "
-            + judgeIndex);
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Adding a row to the judges entry form to get to: {}", judgeIndex);
         IntegrationTestUtils.storeScreenshot(selenium);
       }
       selenium.findElement(By.id("add_rows")).click();
 
-      final String expectedId = String.format("id%d", maxIndex);
-      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id(expectedId)));
+      // wait for the next element to show up
+      final String expectedId = String.format("id%d", maxIndex
+          + 1);
+      seleniumWait.until(ExpectedConditions.elementToBeClickable((By.name(expectedId))));
     }
 
     selenium.findElement(By.name("id"
@@ -737,7 +791,7 @@ public class FullTournamentTest {
   }
 
   /**
-   * Visit the printable brackets for the division specified and print the
+   * Visit the printable brackets for the bracket specified and print the
    * brackets.
    */
   private static void printPlayoffScoresheets(final String division) throws MalformedURLException, IOException {
@@ -925,13 +979,20 @@ public class FullTournamentTest {
                   selenium.findElement(By.id(buttonID)).click();
                 } else {
                   final int value = rs.getInt(name);
-                  selenium.findElement(By.name(name)).sendKeys(String.valueOf(value));
+                  final WebElement scoreInput = selenium.findElement(By.name(name));
+
+                  // setup backspace keys to delete all current text and then input the value
+                  // without
+                  // losing focus
+                  final String currentText = scoreInput.getAttribute("value");
+                  final String backSpaces = Keys.BACK_SPACE.toString().repeat(currentText.length());
+                  final CharSequence keys = String.format("%s%s", backSpaces, String.valueOf(value));
+                  scoreInput.sendKeys(keys);
                 }
               } // !computed
             } // foreach goal
 
             IntegrationTestUtils.submitPerformanceScore(selenium, seleniumWait);
-
           } // not NoShow
 
           seleniumWait.until(ExpectedConditions.urlContains("select_team"));
@@ -980,6 +1041,9 @@ public class FullTournamentTest {
         if (rs.next()) {
           if (rs.getBoolean("NoShow")) {
             // no shows don't need verifying
+            return;
+          } else if (rs.getBoolean("BYE")) {
+            // byes don't need verifying
             return;
           } else {
             // need to get the score entry form

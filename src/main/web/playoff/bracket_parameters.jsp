@@ -19,7 +19,8 @@ fll.web.playoff.BracketParameters.populateContext(application, session, pageCont
   function sanityCheck() {
 
     <c:if test="${not empty tableInfo}">
-    const selectedTables = document.querySelectorAll("input[name='tables']:checked");
+    const selectedTables = document
+        .querySelectorAll("input[name='tables']:checked");
     if (selectedTables.length == 0) {
       alert('You must select at least 1 pair of tables to run the bracket on.');
       return false;
@@ -46,7 +47,6 @@ fll.web.playoff.BracketParameters.populateContext(application, session, pageCont
         </p>
 
         <select name="sort" id="sort">
-
             <c:forEach items="${sortOptions}" var="sortType">
 
                 <c:choose>
@@ -60,6 +60,14 @@ fll.web.playoff.BracketParameters.populateContext(application, session, pageCont
 
             </c:forEach>
         </select>
+
+        <div>
+            <label>
+                Order of teams for custom sort order. This is only used
+                in special circumstances.
+                <input type='text' name='custom_order' id='custom_order' />
+            </label>
+        </div>
 
         <c:if test="${not empty tableInfo}">
             <p>
