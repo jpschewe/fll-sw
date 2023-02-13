@@ -143,6 +143,9 @@ public final class ScoreEntry {
     final boolean previousVerified;
     final boolean regularMatchPlay;
     if (practice) {
+      pageContext.setAttribute("isBye", false);
+      pageContext.setAttribute("isNoShow", false);
+
       regularMatchPlay = true;
       previousVerified = true;
     } else {
@@ -319,7 +322,7 @@ public final class ScoreEntry {
                                   final PageContext pageContext)
       throws IOException, SQLException {
     if (Boolean.valueOf(String.valueOf(pageContext.getAttribute("isBye")))) {
-       // nothing to do and the init methods will fail
+      // nothing to do and the init methods will fail
       return;
     }
 
@@ -536,7 +539,7 @@ public final class ScoreEntry {
     if (LOG.isTraceEnabled()) {
       LOG.trace("Entering generateRefreshBody");
     }
-    if (Boolean.valueOf(pageContext.getAttribute("isBye").toString())) {
+    if (Boolean.valueOf(String.valueOf(pageContext.getAttribute("isBye")))) {
       // nothing to do and the init methods will fail
       return;
     }
