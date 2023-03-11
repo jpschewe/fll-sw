@@ -192,7 +192,7 @@ dependencies {
   implementation(group: "commons-cli", name: "commons-cli", version: "1.5.0")
   implementation(group: "org.hsqldb", name: "hsqldb", version: "2.7.1")
     
-  runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-slf4j-impl", version: project.log4j_version)
+  runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-slf4j2-impl", version: project.log4j_version)
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-jcl", version: project.log4j_version)
   implementation(group: "org.apache.logging.log4j", name: "log4j-api", version: project.log4j_version)
   implementation(group: "org.apache.logging.log4j", name: "log4j-core", version: project.log4j_version)
