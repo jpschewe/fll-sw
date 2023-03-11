@@ -216,7 +216,7 @@ dependencies {
 
   implementation(group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0")
             
-  implementation(group: "dnsjava", name: "dnsjava", version: "3.5.1")
+  implementation(group: "dnsjava", name: "dnsjava", version: "3.5.2")
        
   implementation(group: "org.apache.tika", name: "tika-core", version: "2.4.1")
     
@@ -228,7 +228,7 @@ dependencies {
     
   implementation(group: "net.java.linoleum", name: "jlfgr", version: "1_0")
         
-  implementation(group: "com.opencsv", name: "opencsv", version: "5.6")
+  implementation(group: "com.opencsv", name: "opencsv", version: "5.7.1")
     
   implementation(group: "net.mtu.eggplant", name: "JonsInfra", version: "3.2.0"   )
     
