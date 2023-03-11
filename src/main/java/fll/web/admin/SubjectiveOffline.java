@@ -16,7 +16,6 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,22 +31,24 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
-import fll.web.UploadProcessor;
 import fll.web.UserRole;
 import fll.web.api.JudgesServlet;
 import fll.web.api.SubjectiveScoresServlet;
 import fll.xml.ChallengeDescription;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 /**
  * Process offline data file from the subjective application.
  */
 @WebServlet("/admin/SubjectiveOffline")
+@MultipartConfig()
 public class SubjectiveOffline extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
@@ -66,13 +67,10 @@ public class SubjectiveOffline extends BaseFLLServlet {
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
     try {
-      // must be first to ensure the form parameters are set
-      UploadProcessor.processUpload(request);
-
-      if (null == request.getAttribute("subjectiveOfflineFile")) {
+      if (null == request.getPart("subjectiveOfflineFile")) {
         throw new MissingRequiredParameterException("subjectiveOfflineFile");
       }
-      final FileItem fileItem = (FileItem) request.getAttribute("subjectiveOfflineFile");
+      final Part fileItem = request.getPart("subjectiveOfflineFile");
       if (null == fileItem) {
         throw new MissingRequiredParameterException("subjectiveOfflineFile");
       }

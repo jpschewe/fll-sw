@@ -14,7 +14,6 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 
 import fll.Utilities;
@@ -24,21 +23,23 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
-import fll.web.UploadProcessor;
 import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 /**
  * Replace the challenge description.
  */
 @WebServlet("/developer/ReplaceChallengeDescriptor")
+@MultipartConfig()
 public class ReplaceChallengeDescriptor extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
@@ -66,11 +67,8 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
 
       final ChallengeDescription curDescription = ApplicationAttributes.getChallengeDescription(application);
 
-      // must be first to ensure the form parameters are set
-      UploadProcessor.processUpload(request);
-
       // create a new empty database from an XML descriptor
-      final FileItem xmlFileItem = (FileItem) request.getAttribute("xmldoc");
+      final Part xmlFileItem = request.getPart("xmldoc");
       if (null == xmlFileItem) {
         throw new MissingRequiredParameterException("xmldoc");
       }

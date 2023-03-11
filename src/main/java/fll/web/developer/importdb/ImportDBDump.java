@@ -9,7 +9,6 @@ import java.util.zip.ZipInputStream;
 
 import javax.sql.DataSource;
 
-import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -22,17 +21,18 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
-import fll.web.UploadProcessor;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 /**
  * Import a database dump into the existing database.
@@ -40,6 +40,7 @@ import jakarta.servlet.http.HttpSession;
  * @author jpschewe
  */
 @WebServlet("/developer/importdb/ImportDBDump")
+@MultipartConfig()
 public class ImportDBDump extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
@@ -88,10 +89,7 @@ public class ImportDBDump extends BaseFLLServlet {
 
     Utilities.loadDBDriver();
     try {
-      // must be first to ensure the form parameters are set
-      UploadProcessor.processUpload(request);
-
-      if (null != request.getAttribute("importdb")) {
+      if (null != request.getPart("importdb")) {
 
         final String databaseName = "dbimport"
             + String.valueOf(getNextDBCount());
@@ -103,7 +101,7 @@ public class ImportDBDump extends BaseFLLServlet {
         try (Connection memConnection = importDataSource.getConnection()) {
 
           // import the database
-          final FileItem dumpFileItem = (FileItem) request.getAttribute("dbdump");
+          final Part dumpFileItem = request.getPart("dbdump");
           if (null == dumpFileItem) {
             throw new MissingRequiredParameterException("dbdump");
           }
