@@ -133,7 +133,7 @@ ext {
     poi_version = "5.2.2"
     junit_version = "5.9.0"
     log4j_version = "2.18.0"
-    spotbugs_version = "4.7.1"
+    spotbugs_version = "4.7.3"
     checker_framework_version = "3.24.0"
 
     web_build_dir = new File(project.buildDir, "web")
