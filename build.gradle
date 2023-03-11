@@ -21,20 +21,20 @@ buildscript {
 plugins {
     id "java"
     id "distribution"
-    id "com.dorongold.task-tree" version "2.1.0" // gradle <task> taskTree
+    id "com.dorongold.task-tree" version "2.1.1" // gradle <task> taskTree
     id "org.unbroken-dome.test-sets" version "4.0.0"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
-    id "com.github.spotbugs" version "5.0.9"
+    id "com.github.spotbugs" version "5.0.13"
     id "de.aaschmid.cpd" version "3.3"
-    id "edu.sc.seis.launch4j" version "2.5.3"
+    id "edu.sc.seis.launch4j" version "2.5.4"
     id "com.gorylenko.gradle-git-properties" version "2.4.1"
-    id "com.github.ben-manes.versions" version "0.42.0" // adds dependencyUpdates task
-    id "de.undercouch.download" version "5.1.1" // file download
+    id "com.github.ben-manes.versions" version "0.46.0" // adds dependencyUpdates task
+    id "de.undercouch.download" version "5.3.1" // file download
     id "checkstyle"
         
     // Checker Framework pluggable type-checking
-    id "org.checkerframework" version "0.6.15"
+    id "org.checkerframework" version "0.6.25"
     
     // code coverage
     id "jacoco"
