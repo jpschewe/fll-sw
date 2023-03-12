@@ -21,20 +21,20 @@ buildscript {
 plugins {
     id "java"
     id "distribution"
-    id "com.dorongold.task-tree" version "2.1.0" // gradle <task> taskTree
+    id "com.dorongold.task-tree" version "2.1.1" // gradle <task> taskTree
     id "org.unbroken-dome.test-sets" version "4.0.0"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
-    id "com.github.spotbugs" version "5.0.9"
+    id "com.github.spotbugs" version "5.0.13"
     id "de.aaschmid.cpd" version "3.3"
-    id "edu.sc.seis.launch4j" version "2.5.3"
+    id "edu.sc.seis.launch4j" version "2.5.4"
     id "com.gorylenko.gradle-git-properties" version "2.4.1"
-    id "com.github.ben-manes.versions" version "0.42.0" // adds dependencyUpdates task
-    id "de.undercouch.download" version "5.1.1" // file download
+    id "com.github.ben-manes.versions" version "0.46.0" // adds dependencyUpdates task
+    id "de.undercouch.download" version "5.3.1" // file download
     id "checkstyle"
         
     // Checker Framework pluggable type-checking
-    id "org.checkerframework" version "0.6.15"
+    id "org.checkerframework" version "0.6.25"
     
     // code coverage
     id "jacoco"
@@ -77,7 +77,7 @@ eclipse {
 }
 
 dependencies {
-  jspc("org.apache.ant:ant:1.10.12")
+  jspc("org.apache.ant:ant:1.10.13")
 }
 
 testSets {
@@ -127,14 +127,14 @@ integrationTest {
 }
 
 ext {
-    jackson_version = "2.13.3"
-    slf4j_version = "1.7.36"
-    tomcat_version = "10.0.23"
-    poi_version = "5.2.2"
-    junit_version = "5.9.0"
-    log4j_version = "2.18.0"
-    spotbugs_version = "4.7.1"
-    checker_framework_version = "3.24.0"
+    jackson_version = "2.14.2"
+    slf4j_version = "2.0.6"
+    tomcat_version = "10.1.7"
+    poi_version = "5.2.3"
+    junit_version = "5.9.2"
+    log4j_version = "2.20.0"
+    spotbugs_version = "4.7.3"
+    checker_framework_version = "3.31.0"
 
     web_build_dir = new File(project.buildDir, "web")
     documentation_build_dir = new File(project.buildDir, "gen-documentation")    
@@ -190,9 +190,9 @@ dependencies {
 
   implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.12.0")
   implementation(group: "commons-cli", name: "commons-cli", version: "1.5.0")
-  implementation(group: "org.hsqldb", name: "hsqldb", version: "2.7.0")
+  implementation(group: "org.hsqldb", name: "hsqldb", version: "2.7.1")
     
-  runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-slf4j-impl", version: project.log4j_version)
+  runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-slf4j2-impl", version: project.log4j_version)
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-jcl", version: project.log4j_version)
   implementation(group: "org.apache.logging.log4j", name: "log4j-api", version: project.log4j_version)
   implementation(group: "org.apache.logging.log4j", name: "log4j-core", version: project.log4j_version)
@@ -216,9 +216,9 @@ dependencies {
 
   implementation(group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0")
             
-  implementation(group: "dnsjava", name: "dnsjava", version: "3.5.1")
+  implementation(group: "dnsjava", name: "dnsjava", version: "3.5.2")
        
-  implementation(group: "org.apache.tika", name: "tika-core", version: "2.4.1")
+  implementation(group: "org.apache.tika", name: "tika-core", version: "2.7.0")
     
   implementation(group: "com.diffplug.durian", name: "durian-core", version: "1.2.0")
         
@@ -228,13 +228,13 @@ dependencies {
     
   implementation(group: "net.java.linoleum", name: "jlfgr", version: "1_0")
         
-  implementation(group: "com.opencsv", name: "opencsv", version: "5.6")
+  implementation(group: "com.opencsv", name: "opencsv", version: "5.7.1")
     
   implementation(group: "net.mtu.eggplant", name: "JonsInfra", version: "3.2.0"   )
     
   implementation(group: "com.google.guava", name: "guava", version: "31.1-jre")
     
-  implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.7") {
+  implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.8") {
     // only needed for BMP and TIFF formats
     exclude(group: "com.sun.media", module: "jai-codec")
     
@@ -249,7 +249,7 @@ dependencies {
   implementation(group: "org.checkerframework", name: "checker-util", version: project.checker_framework_version)
   checkerFramework(group: "org.checkerframework", name: "checker", version: project.checker_framework_version)
     
-  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.26")
+  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.27")
   
   // for templating reports
   implementation(group: "org.apache.velocity", name: "velocity-engine-core", version: "2.3")
@@ -264,7 +264,7 @@ dependencies {
   integrationTestImplementation(sourceSets.test.output)
         
   integrationTestImplementation(group: "org.easytesting", name: "fest-swing", version: "1.2.1")
-  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.63.0") {
+  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.70.0") {
       
     // xml APIs are part of the JDK
     exclude(group: "xml-apis", module: "xml-apis")

@@ -14,7 +14,6 @@ import java.util.zip.ZipInputStream;
 
 import javax.sql.DataSource;
 
-import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 
 import fll.Tournament;
@@ -25,23 +24,25 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
-import fll.web.UploadProcessor;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.web.developer.importdb.ImportDBDump;
 import fll.web.developer.importdb.ImportDbSessionInfo;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 /**
  * Start the import of finalist data by setting up the expected parameters
  * and then calling into the import database workflow.
  */
 @WebServlet("/admin/ProcessImportFinalist")
+@MultipartConfig()
 public class ProcessImportFinalist extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
@@ -64,10 +65,7 @@ public class ProcessImportFinalist extends BaseFLLServlet {
 
     Utilities.loadDBDriver();
     try {
-      // must be first to ensure the form parameters are set
-      UploadProcessor.processUpload(request);
-
-      if (null != request.getAttribute("finalistFile")) {
+      if (null != request.getPart("finalistFile")) {
 
         final String databaseName = "dbimport"
             + String.valueOf(ImportDBDump.getNextDBCount());
@@ -83,7 +81,7 @@ public class ProcessImportFinalist extends BaseFLLServlet {
         try (Connection memConnection = importDataSource.getConnection()) {
 
           // import the database
-          final FileItem dumpFileItem = (FileItem) request.getAttribute("finalistFile");
+          final Part dumpFileItem = request.getPart("finalistFile");
           if (null == dumpFileItem) {
             throw new MissingRequiredParameterException("finalistFile");
           }

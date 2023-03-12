@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 
 import fll.Utilities;
@@ -19,10 +18,12 @@ import fll.util.FLLRuntimeException;
 import fll.web.schedule.UploadScheduleData;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 /**
  * Handle uploading a spreadsheet (csv or Excel). The filename is stored in the
@@ -35,6 +36,7 @@ import jakarta.servlet.http.HttpSession;
  * {@link #SHEET_NAME_KEY}.
  */
 @WebServlet("/UploadSpreadsheet")
+@MultipartConfig()
 public final class UploadSpreadsheet extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
@@ -87,15 +89,14 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
     String nextPage;
     try {
-      UploadProcessor.processUpload(request);
-      final String uploadRedirect = (String) request.getAttribute(UploadSpreadsheet.UPLOAD_REDIRECT_KEY);
+      final String uploadRedirect = request.getParameter(UploadSpreadsheet.UPLOAD_REDIRECT_KEY);
       if (null == uploadRedirect) {
         throw new MissingRequiredParameterException(UploadSpreadsheet.UPLOAD_REDIRECT_KEY);
       }
       session.setAttribute(UploadSpreadsheet.UPLOAD_REDIRECT_KEY, uploadRedirect);
       LOGGER.debug("Redirect: {}", uploadRedirect);
 
-      final FileItem fileItem = (FileItem) request.getAttribute("file");
+      final Part fileItem = request.getPart("file");
       if (null == fileItem) {
         throw new MissingRequiredParameterException("file");
       }
@@ -112,7 +113,7 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
         LOGGER.error(errorMessage);
         throw new FLLRuntimeException(errorMessage);
       }
-      fileItem.write(file);
+      fileItem.write(file.getAbsolutePath());
       session.setAttribute(SPREADSHEET_FILE_KEY, file.getAbsolutePath());
 
       if (ExcelCellReader.isExcelFile(file)) {

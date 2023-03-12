@@ -38,7 +38,7 @@
     <!-- transform constant -->
     <xsl:template match="constant">
         <term>
-            <xsl:copy select=".">
+            <xsl:copy>
                 <xsl:copy-of select="@*" />
             </xsl:copy>
         </term>
