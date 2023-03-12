@@ -89,7 +89,7 @@ public class DummyServletContext implements ServletContext {
    */
   @Override
   public jakarta.servlet.ServletRegistration.Dynamic addServlet(final String arg0,
-                                                              final String arg1) {
+                                                                final String arg1) {
     return null;
   }
 
@@ -99,7 +99,7 @@ public class DummyServletContext implements ServletContext {
    */
   @Override
   public jakarta.servlet.ServletRegistration.Dynamic addServlet(final String arg0,
-                                                              final Servlet arg1) {
+                                                                final Servlet arg1) {
     return null;
   }
 
@@ -109,7 +109,7 @@ public class DummyServletContext implements ServletContext {
    */
   @Override
   public jakarta.servlet.ServletRegistration.Dynamic addServlet(final String arg0,
-                                                              final Class<? extends Servlet> arg1) {
+                                                                final Class<? extends Servlet> arg1) {
     return null;
   }
 
@@ -336,28 +336,11 @@ public class DummyServletContext implements ServletContext {
     return null;
   }
 
-  @SuppressWarnings("deprecation")
-  @Override
-  @Deprecated
-  public Servlet getServlet(final String arg0) throws ServletException {
-    return null;
-  }
-
   /**
    * @see jakarta.servlet.ServletContext#getServletContextName()
    */
   @Override
   public String getServletContextName() {
-    return null;
-  }
-
-  /**
-   * @see jakarta.servlet.ServletContext#getServletNames()
-   */
-  @Override
-  @Deprecated
-  @SuppressWarnings("deprecation")
-  public Enumeration<String> getServletNames() {
     return null;
   }
 
@@ -378,16 +361,6 @@ public class DummyServletContext implements ServletContext {
   }
 
   /**
-   * @see jakarta.servlet.ServletContext#getServlets()
-   */
-  @Override
-  @Deprecated
-  @SuppressWarnings("deprecation")
-  public Enumeration<Servlet> getServlets() {
-    return null;
-  }
-
-  /**
    * @see jakarta.servlet.ServletContext#getSessionCookieConfig()
    */
   @Override
@@ -400,17 +373,6 @@ public class DummyServletContext implements ServletContext {
    */
   @Override
   public void log(final String arg0) {
-  }
-
-  /**
-   * @see jakarta.servlet.ServletContext#log(java.lang.Exception,
-   *      java.lang.String)
-   */
-  @Override
-  @Deprecated
-  @SuppressWarnings("deprecation")
-  public void log(final Exception arg0,
-                  final String arg1) {
   }
 
   /**
