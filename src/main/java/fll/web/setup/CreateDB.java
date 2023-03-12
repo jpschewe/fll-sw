@@ -23,7 +23,6 @@ import java.util.zip.ZipInputStream;
 
 import javax.sql.DataSource;
 
-import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
@@ -37,18 +36,19 @@ import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
-import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
-import fll.web.UploadProcessor;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 /**
  * Create a new database either from an xml descriptor or from a database dump.
@@ -56,6 +56,7 @@ import jakarta.servlet.http.HttpSession;
  * @author jpschewe
  */
 @WebServlet("/setup/CreateDB")
+@MultipartConfig()
 public class CreateDB extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
@@ -94,15 +95,9 @@ public class CreateDB extends BaseFLLServlet {
         }
       }
 
-      // must be first to ensure the form parameters are set
-      UploadProcessor.processUpload(request);
-
       boolean success = false;
       if (null != request.getAttribute("chooseDescription")) {
-        final String description = (String) request.getAttribute("description");
-        if (null == description) {
-          throw new MissingRequiredParameterException("description");
-        }
+        final String description = WebUtils.getNonNullRequestParameter(request, "description");
 
         try {
           final URL descriptionURL = new URL(description);
@@ -120,9 +115,9 @@ public class CreateDB extends BaseFLLServlet {
           throw new FLLInternalException("Could not parse URL from choosen description: "
               + description, e);
         }
-      } else if (null != request.getAttribute("reinitializeDatabase")) {
+      } else if (null != request.getPart("reinitializeDatabase")) {
         // create a new empty database from an XML descriptor
-        final FileItem xmlFileItem = (FileItem) request.getAttribute("xmldocument");
+        final Part xmlFileItem = request.getPart("xmldocument");
 
         if (null == xmlFileItem
             || xmlFileItem.getSize() < 1) {
@@ -139,9 +134,9 @@ public class CreateDB extends BaseFLLServlet {
 
           success = true;
         }
-      } else if (null != request.getAttribute("createdb")) {
+      } else if (null != request.getPart("createdb")) {
         // import a database from a dump
-        final FileItem dumpFileItem = (FileItem) request.getAttribute("dbdump");
+        final Part dumpFileItem = request.getPart("dbdump");
 
         if (null == dumpFileItem
             || dumpFileItem.getSize() < 1) {
