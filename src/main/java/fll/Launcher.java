@@ -71,6 +71,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.SystemUtils;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
@@ -1040,6 +1041,7 @@ public class Launcher extends JFrame {
 
   private static final int[] ICON_SIZES = new int[] { 8, 16, 32, 64, 128, 256, 512, 1024 };
 
+  @SideEffectFree
   private static void setApplicationIcon(final @UnknownInitialization(JFrame.class) JFrame window) {
     try {
       // get images from small to large

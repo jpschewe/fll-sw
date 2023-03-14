@@ -2,21 +2,26 @@ package java.awt;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 public abstract class Component implements ImageObserver, MenuContainer,
                                            Serializable
 {
 
+  @SideEffectFree
   public synchronized void addComponentListener(@UnknownInitialization(Component.class) Component this, ComponentListener l);
 
+  @SideEffectFree
   protected void firePropertyChange(@UnknownInitialization(Component.class) Component this, String propertyName,
                                     Object oldValue, Object newValue);
 
+  @SideEffectFree
   public synchronized void addMouseListener(@UnknownInitialization MouseListener l);
 
   public void setForeground(@Nullable Color c);
   public void setBackground(@Nullable Color c);
 
+  @SideEffectFree
   public Font getFont(@UnknownInitialization(Component.class) Component this);
   
 }

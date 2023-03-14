@@ -7,6 +7,7 @@ package fll.web.playoff;
 
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 /**
  * Represents a score for a team. Only the values of simple goals are available
@@ -45,6 +46,7 @@ public abstract class TeamScore {
    *
    * @return the team
    */
+  @SideEffectFree
   public final int getTeamNumber(@UnknownInitialization(TeamScore.class) TeamScore this) {
     return teamNumber;
   }
@@ -80,6 +82,7 @@ public abstract class TeamScore {
    *
    * @return the run for the scores
    */
+  @SideEffectFree
   public final int getRunNumber(@UnknownInitialization(TeamScore.class) TeamScore this) {
     return runNumber;
   }
