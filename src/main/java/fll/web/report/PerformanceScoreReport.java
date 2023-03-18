@@ -261,12 +261,6 @@ public class PerformanceScoreReport extends BaseFLLServlet {
       }
     }
 
-    for (final AbstractGoal goal : performance.getAllGoals()) {
-
-      outputGoal(document, tableBody, performance, scores, goal);
-
-    } // foreach goal
-
     // totals
     final Element totalRow = FOPUtils.createTableRow(document);
     tableBody.appendChild(totalRow);

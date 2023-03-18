@@ -1,3 +1,4 @@
+* #1057 - Remove duplicate copy of performance goals in team performance report
 * #1074 - Make ReplayTournament more robust for handling other databases, particularly head to head
 
 Release 17.4.0
