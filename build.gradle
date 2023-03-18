@@ -296,7 +296,7 @@ compileJava {
 
 tasks.register("distributionDependencies") {
     doFirst {
-      println("Distribution dependnecies")
+      println("Distribution dependencies")
     }
 }
 distTar.dependsOn(distributionDependencies)
@@ -650,7 +650,7 @@ distributions {
 
 tasks.register("windowsDistributionDependencies") {
     doLast {
-      println("Windows distribution dependnecies")
+      println("Windows distribution dependencies")
     }
 }
 windowsDistributionDependencies.dependsOn(distributionDependencies)
@@ -714,7 +714,7 @@ distributions {
 
 tasks.register("linuxDistributionDependencies") {
     doFirst {
-        println("Linux distribution dependnecies")
+        println("Linux distribution dependencies")
     }
 }
 linuxDistributionDependencies.dependsOn(distributionDependencies)
@@ -779,7 +779,7 @@ distributions {
 
 tasks.register("macDistributionDependencies") {
     doFirst {
-      println("Mac distribution dependnecies")
+      println("Mac distribution dependencies")
     }
 }
 macDistributionDependencies.dependsOn(distributionDependencies)
