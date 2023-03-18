@@ -80,10 +80,9 @@ public class TestComputedScores {
       assertNotNull(rs, "Error getting performance scores");
       assertTrue(rs.next(), "No scores found");
 
-      try (DatabaseTeamScore score = new DatabaseTeamScore(teamNumber, runNumber, rs)) {
-        final double computedTotal = performanceElement.evaluate(score);
-        assertEquals(expectedTotal, computedTotal, 0D);
-      }
+      final DatabaseTeamScore score = new DatabaseTeamScore(teamNumber, runNumber, rs);
+      final double computedTotal = performanceElement.evaluate(score);
+      assertEquals(expectedTotal, computedTotal, 0D);
 
     } finally {
       if (!tempFile.delete()) {

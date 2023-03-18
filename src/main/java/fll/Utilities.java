@@ -20,6 +20,7 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
@@ -32,6 +33,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -923,6 +925,24 @@ public final class Utilities {
     }
 
     return ClassLoader.getSystemClassLoader();
+  }
+
+  /**
+   * Convert the current row of {@code rs} to a map for later use.
+   * 
+   * @param rs the {@link ResultSet} to read, must have next already called to be
+   *          at the row to convert
+   * @return a new map of the data
+   * @throws SQLException on a database error
+   */
+  public static Map<String, @Nullable Object> resultSetRowToMap(final ResultSet rs) throws SQLException {
+    final ResultSetMetaData md = rs.getMetaData();
+    final int columns = md.getColumnCount();
+    final Map<String, @Nullable Object> row = new HashMap<>();
+    for (int i = 1; i <= columns; i++) {
+      row.put(md.getColumnName(i), rs.getObject(i));
+    }
+    return row;
   }
 
 }
