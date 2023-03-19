@@ -29,7 +29,6 @@ import fll.Utilities;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  *
@@ -51,46 +50,42 @@ public class TestComputedScores {
     final String tournamentName = "11-21 Plymouth Middle";
     final double expectedTotal = 295;
 
-    PreparedStatement selectPrep = null;
-    ResultSet rs = null;
-    Connection connection = null;
-
     final File tempFile = File.createTempFile("flltest", null);
     final String database = tempFile.getAbsolutePath();
     try {
       final InputStream dumpFileIS = TestComputedScores.class.getResourceAsStream("data/plymouth-2009-11-21.zip");
       assertNotNull(dumpFileIS, "Cannot find test data");
 
-      connection = Utilities.createFileDataSource(database).getConnection();
+      try (Connection connection = Utilities.createFileDataSource(database).getConnection()) {
 
-      final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
-                                                                                connection);
-      TestUtils.deleteImportData(importResult);
+        final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
+                                                                                  connection);
+        TestUtils.deleteImportData(importResult);
 
-      final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
-      final PerformanceScoreCategory performanceElement = description.getPerformance();
+        final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
+        final PerformanceScoreCategory performanceElement = description.getPerformance();
 
-      final Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
-      final int tournamentID = tournament.getTournamentID();
-      selectPrep = connection.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? and TeamNumber = ? AND RunNumber = ?");
-      selectPrep.setInt(1, tournamentID);
-      selectPrep.setInt(2, teamNumber);
-      selectPrep.setInt(3, runNumber);
-      rs = selectPrep.executeQuery();
-      assertNotNull(rs, "Error getting performance scores");
-      assertTrue(rs.next(), "No scores found");
+        final Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
+        final int tournamentID = tournament.getTournamentID();
+        try (
+            PreparedStatement selectPrep = connection.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? and TeamNumber = ? AND RunNumber = ?")) {
+          selectPrep.setInt(1, tournamentID);
+          selectPrep.setInt(2, teamNumber);
+          selectPrep.setInt(3, runNumber);
+          try (ResultSet rs = selectPrep.executeQuery()) {
+            assertNotNull(rs, "Error getting performance scores");
+            assertTrue(rs.next(), "No scores found");
 
-      final DatabaseTeamScore score = new DatabaseTeamScore(teamNumber, runNumber, rs);
-      final double computedTotal = performanceElement.evaluate(score);
-      assertEquals(expectedTotal, computedTotal, 0D);
-
+            final DatabaseTeamScore score = new DatabaseTeamScore(teamNumber, runNumber, rs);
+            final double computedTotal = performanceElement.evaluate(score);
+            assertEquals(expectedTotal, computedTotal, 0D);
+          } // result set
+        } // prepared statement
+      } // connection
     } finally {
       if (!tempFile.delete()) {
         tempFile.deleteOnExit();
       }
-      SQLFunctions.close(rs);
-      SQLFunctions.close(selectPrep);
-      SQLFunctions.close(connection);
       TestUtils.deleteDatabase(database);
     }
 
