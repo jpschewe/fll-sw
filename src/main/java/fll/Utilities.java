@@ -33,7 +33,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +45,7 @@ import java.util.stream.StreamSupport;
 import javax.sql.DataSource;
 import javax.swing.ImageIcon;
 
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hsqldb.jdbc.JDBCDataSource;
 
@@ -932,13 +932,14 @@ public final class Utilities {
    * 
    * @param rs the {@link ResultSet} to read, must have next already called to be
    *          at the row to convert
-   * @return a new map of the data
+   * @return a new map of the data. The keys are the column names. The map keys
+   *         are case insensitve so that the map behaves like an SQL database.
    * @throws SQLException on a database error
    */
   public static Map<String, @Nullable Object> resultSetRowToMap(final ResultSet rs) throws SQLException {
     final ResultSetMetaData md = rs.getMetaData();
     final int columns = md.getColumnCount();
-    final Map<String, @Nullable Object> row = new HashMap<>();
+    final Map<String, @Nullable Object> row = new CaseInsensitiveMap<>();
     for (int i = 1; i <= columns; i++) {
       row.put(md.getColumnName(i), rs.getObject(i));
     }
