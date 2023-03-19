@@ -1,0 +1,15 @@
+package java.io;
+
+import org.checkerframework.dataflow.qual.SideEffectFree;
+
+public class File
+    implements Serializable, Comparable<File>
+{
+
+  @SideEffectFree
+  public synchronized void delete();
+
+  @SideEffectFree
+  public synchronized void deleteOnExit();
+  
+}

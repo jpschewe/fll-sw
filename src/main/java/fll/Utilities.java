@@ -20,6 +20,7 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
@@ -44,6 +45,7 @@ import java.util.stream.StreamSupport;
 import javax.sql.DataSource;
 import javax.swing.ImageIcon;
 
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hsqldb.jdbc.JDBCDataSource;
 
@@ -923,6 +925,25 @@ public final class Utilities {
     }
 
     return ClassLoader.getSystemClassLoader();
+  }
+
+  /**
+   * Convert the current row of {@code rs} to a map for later use.
+   * 
+   * @param rs the {@link ResultSet} to read, must have next already called to be
+   *          at the row to convert
+   * @return a new map of the data. The keys are the column names. The map keys
+   *         are case insensitve so that the map behaves like an SQL database.
+   * @throws SQLException on a database error
+   */
+  public static Map<String, @Nullable Object> resultSetRowToMap(final ResultSet rs) throws SQLException {
+    final ResultSetMetaData md = rs.getMetaData();
+    final int columns = md.getColumnCount();
+    final Map<String, @Nullable Object> row = new CaseInsensitiveMap<>();
+    for (int i = 1; i <= columns; i++) {
+      row.put(md.getColumnName(i), rs.getObject(i));
+    }
+    return row;
   }
 
 }

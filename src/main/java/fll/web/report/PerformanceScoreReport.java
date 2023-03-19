@@ -293,11 +293,6 @@ public class PerformanceScoreReport extends BaseFLLServlet {
 
     }
 
-    // cleanup scores
-    for (final DatabaseTeamScore score : scores) {
-      score.close();
-    }
-
     final Element legendBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(legendBlock);
     legendBlock.appendChild(document.createTextNode("The team's top score for each goal and overall are in bold."));

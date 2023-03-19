@@ -9,20 +9,19 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Map;
 
-import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Utilities;
 
 /**
- * TeamScore implementation for a performance score in the database. Note that
- * this object is only valid as long as the {@link ResultSet} used to create it
- * is valid.
+ * TeamScore implementation for a performance score in the database.
  */
-public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
+public class DatabaseTeamScore extends TeamScore {
 
-  private final boolean closeResultSet;
+  private final Map<String, @Nullable Object> data;
 
   /**
    * Create a database team score object for a non-performance score, for use
@@ -30,17 +29,16 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
    *
    * @param teamNumber passed to superclass
    * @param rs the {@link ResultSet} to pull the scores from, the object is to be
-   *          closed by the caller
-   * @throws SQLException if there is an error getting the current tournament
+   *          closed by the caller. The {@link ResultSet} is not stored.
+   * @throws SQLException if there is an error getting the data
    */
   public DatabaseTeamScore(final int teamNumber,
                            final ResultSet rs)
       throws SQLException {
     super(teamNumber);
 
-    result = rs;
+    data = Utilities.resultSetRowToMap(rs);
     scoreExists = true;
-    closeResultSet = false;
   }
 
   /**
@@ -51,7 +49,7 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
    * @param connection the connection to get the data from
    * @param teamNumber passed to superclass
    * @param runNumber passed to superclass
-   * @throws SQLException if there is an error getting the current tournament
+   * @throws SQLException if there is an error getting the data
    */
   public DatabaseTeamScore(final String categoryName,
                            final int tournament,
@@ -61,9 +59,26 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
       throws SQLException {
     super(teamNumber, runNumber);
 
-    result = createResultSet(connection, tournament, categoryName);
-    scoreExists = result.next();
-    closeResultSet = true;
+    try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
+        + categoryName
+        + " WHERE TeamNumber = ? AND Tournament = ?"
+        + (NON_PERFORMANCE_RUN_NUMBER == getRunNumber() ? "" : " AND RunNumber = ?"))) {
+      if (NON_PERFORMANCE_RUN_NUMBER != getRunNumber()) {
+        prep.setInt(3, getRunNumber());
+      }
+
+      prep.setInt(1, getTeamNumber());
+      prep.setInt(2, tournament);
+      try (ResultSet result = prep.executeQuery()) {
+        if (result.next()) {
+          scoreExists = true;
+          data = Utilities.resultSetRowToMap(result);
+        } else {
+          scoreExists = false;
+          data = Collections.emptyMap();
+        }
+      }
+    }
   }
 
   /**
@@ -74,7 +89,7 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
    * @param runNumber passed to superclass
    * @param rs the {@link ResultSet} to pull the scores from, the object is to be
    *          closed by the caller
-   * @throws SQLException if there is an error getting the current tournament
+   * @throws SQLException if there is an error getting the data
    */
   public DatabaseTeamScore(final int teamNumber,
                            final int runNumber,
@@ -82,9 +97,39 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
       throws SQLException {
     super(teamNumber, runNumber);
 
-    result = rs;
+    data = Utilities.resultSetRowToMap(rs);
     scoreExists = true;
-    closeResultSet = false;
+  }
+
+  private @Nullable String getString(final String goalName) {
+    final Object value = data.get(goalName);
+    if (null == value) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  public double getDouble(final String goalName) {
+    final Object value = data.get(goalName);
+    if (null == value) {
+      return Double.NaN;
+    } else if (value instanceof Number) {
+      return ((Number) value).doubleValue();
+    } else {
+      return Double.parseDouble(value.toString());
+    }
+  }
+
+  public boolean getBoolean(final String goalName) {
+    final Object value = data.get(goalName);
+    if (null == value) {
+      return false;
+    } else if (value instanceof Boolean) {
+      return ((Boolean) value).booleanValue();
+    } else {
+      return Boolean.valueOf(value.toString());
+    }
   }
 
   @Override
@@ -92,11 +137,7 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
     if (!scoreExists()) {
       return null;
     } else {
-      try {
-        return getResultSet().getString(goalName);
-      } catch (final SQLException sqle) {
-        throw new RuntimeException(sqle);
-      }
+      return getString(goalName);
     }
   }
 
@@ -105,16 +146,7 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
     if (!scoreExists()) {
       return Double.NaN;
     } else {
-      try {
-        final double val = getResultSet().getDouble(goalName);
-        if (getResultSet().wasNull()) {
-          return Double.NaN;
-        } else {
-          return val;
-        }
-      } catch (final SQLException sqle) {
-        throw new RuntimeException(sqle);
-      }
+      return getDouble(goalName);
     }
   }
 
@@ -123,11 +155,7 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
     if (!scoreExists()) {
       return false;
     } else {
-      try {
-        return getResultSet().getBoolean("NoShow");
-      } catch (final SQLException sqle) {
-        throw new RuntimeException(sqle);
-      }
+      return getBoolean("NoShow");
     }
   }
 
@@ -136,11 +164,7 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
     if (!scoreExists()) {
       return false;
     } else {
-      try {
-        return getResultSet().getBoolean("Bye");
-      } catch (final SQLException sqle) {
-        throw new RuntimeException(sqle);
-      }
+      return getBoolean("Bye");
     }
   }
 
@@ -153,53 +177,5 @@ public class DatabaseTeamScore extends TeamScore implements AutoCloseable {
   }
 
   private final boolean scoreExists;
-
-  private final ResultSet result;
-
-  private ResultSet getResultSet() {
-    return result;
-  }
-
-  private @Nullable PreparedStatement prep = null;
-
-  /**
-   * Create the result set.
-   */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table")
-  private ResultSet createResultSet(@UnknownInitialization(TeamScore.class) DatabaseTeamScore this,
-                                    final Connection connection,
-                                    final int tournament,
-                                    final String categoryName)
-      throws SQLException {
-    ResultSet result;
-    if (NON_PERFORMANCE_RUN_NUMBER == getRunNumber()) {
-      prep = connection.prepareStatement("SELECT * FROM "
-          + categoryName
-          + " WHERE TeamNumber = ? AND Tournament = ?");
-    } else {
-      prep = connection.prepareStatement("SELECT * FROM "
-          + categoryName
-          + " WHERE TeamNumber = ? AND Tournament = ? AND RunNumber = ?");
-      prep.setInt(3, getRunNumber());
-    }
-    prep.setInt(1, getTeamNumber());
-    prep.setInt(2, tournament);
-    result = prep.executeQuery();
-    return result;
-  }
-
-  // AutoCloseable
-  @Override
-  public void close() throws SQLException {
-    if (closeResultSet) {
-      result.close();
-    }
-
-    if (null != prep) {
-      prep.close();
-      prep = null;
-    }
-  }
-  // end AutoCloseable
 
 }

@@ -1050,19 +1050,17 @@ public final class FinalComputedScores extends BaseFLLServlet {
         try (ResultSet rs = prep.executeQuery()) {
           while (!zeroInRequiredGoal
               && rs.next()) {
-            try (DatabaseTeamScore score = new DatabaseTeamScore(teamNumber, rs)) {
+            final DatabaseTeamScore score = new DatabaseTeamScore(teamNumber, rs);
 
-              final Iterator<Goal> iter = requiredGoals.iterator();
-              while (!zeroInRequiredGoal
-                  && iter.hasNext()) {
-                final Goal goal = iter.next();
-                final double goalScore = score.getRawScore(goal.getName());
-                if (FP.equals(0, goalScore, TIE_TOLERANCE)) {
-                  zeroInRequiredGoal = true;
-                }
+            final Iterator<Goal> iter = requiredGoals.iterator();
+            while (!zeroInRequiredGoal
+                && iter.hasNext()) {
+              final Goal goal = iter.next();
+              final double goalScore = score.getRawScore(goal.getName());
+              if (FP.equals(0, goalScore, TIE_TOLERANCE)) {
+                zeroInRequiredGoal = true;
               }
-
-            } // score
+            }
           }
 
         } // result set
