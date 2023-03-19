@@ -117,7 +117,7 @@ public class DatabaseTeamScore extends TeamScore {
     } else if (value instanceof Number) {
       return ((Number) value).doubleValue();
     } else {
-      return Double.valueOf(value.toString());
+      return Double.parseDouble(value.toString());
     }
   }
 
