@@ -1,3 +1,4 @@
+* #1089 - Allow everyone to see the list of finalist teams
 * #1057 - Remove duplicate copy of performance goals in team performance report
 * #1074 - Make ReplayTournament more robust for handling other databases, particularly head to head
 
