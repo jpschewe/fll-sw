@@ -34,6 +34,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.checkerframework.checker.nullness.qual.KeyFor;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -61,6 +62,7 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.report.FinalComputedScores;
+import fll.web.report.PlayoffReport;
 import fll.web.report.PromptSummarizeScores;
 import fll.web.report.finalist.FinalistDBRow;
 import fll.web.report.finalist.FinalistSchedule;
@@ -331,9 +333,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                                             finalistSchedulesPerAwardGroup);
       } else if (category instanceof HeadToHeadCategory) {
         if (TournamentParameters.getRunningHeadToHead(connection, tournament.getTournamentID())) {
-          categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, document, templateContext,
-                                                              awardGroupOrder, category, organizedSubjectiveWinners,
-                                                              finalistSchedulesPerAwardGroup);
+          categoryPage = createHeadToHead(connection, tournament, description, document, templateContext,
+                                          awardGroupOrder, category);
         } else {
           categoryPage = null;
         }
@@ -573,6 +574,33 @@ public class AwardsScriptReport extends BaseFLLServlet {
     } else {
       return Collections.emptyList();
     }
+  }
+
+  private Element createHeadToHead(final Connection connection,
+                                   final Tournament tournament,
+                                   final ChallengeDescription challengeDescription,
+                                   final Document document,
+                                   final VelocityContext templateContext,
+                                   final List<String> awardGroupOrder,
+                                   final AwardCategory category)
+      throws DOMException, SQLException {
+
+    final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
+    final Element categoryTitle = createCategoryTitle(document, category);
+    container.appendChild(categoryTitle);
+
+    final Element categoryDescription = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(categoryDescription);
+    categoryDescription.appendChild(document.createTextNode(getCategoryDescription(connection, tournament,
+                                                                                   templateContext, category)));
+
+    final Element categoryPresenter = createPresenter(document, connection, tournament, category);
+    container.appendChild(categoryPresenter);
+
+    PlayoffReport.populateBody(connection, tournament, challengeDescription, document, container, awardGroupOrder);
+
+    return container;
   }
 
   private Element createNonNumericOrSubjectiveCategory(final Connection connection,
