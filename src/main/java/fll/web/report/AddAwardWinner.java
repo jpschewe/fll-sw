@@ -305,7 +305,9 @@ public class AddAwardWinner extends BaseFLLServlet {
 
       response.sendRedirect("edit-award-winners.jsp");
     } catch (final SQLException e) {
-      throw new FLLInternalException("Error adding/editing award winner", e);
+      throw new FLLInternalException(String.format("Error adding/editing award winner. category: %s awardGroup: %s awardType: %s team: %d place: %d edit: %s",
+                                                   categoryTitle, awardGroup, awardType, teamNumber, place, edit),
+                                     e);
     }
   }
 
