@@ -32,7 +32,7 @@
         <c:forEach
           items="${playoff_data.teamsNeedingSeedingRuns }"
           var="team">
-          <li class='warning'>${team.teamName }(${team.teamNumber })</li>
+          <li class='warning'>${team.teamName}&nbsp;(${team.teamNumber })</li>
         </c:forEach>
       </ul>
     </c:otherwise>
