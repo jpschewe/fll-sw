@@ -38,6 +38,12 @@ function populateLeaf(leafId, teamNumber, teamName, score, verified) {
     }
 }
 
+function placeTableLabel(lid, table) {
+    if (null != table && "" != table) {
+        document.getElementById(lid + "-table").innerText = table;
+    }
+}
+
 function messageReceived(event) {
 
     console.log("received: " + event.data);
@@ -56,6 +62,9 @@ function messageReceived(event) {
             bracketMessage.bracketUpdate.teamName,
             bracketMessage.bracketUpdate.score,
             bracketMessage.bracketUpdate.verified);
+
+        placeTableLabel(leafId, bracketMessage.bracketUpdate.table);
+
     }
     if (bracketMessage.isDisplayUpdate) {
         // currently ignored, but may be useful in the future
