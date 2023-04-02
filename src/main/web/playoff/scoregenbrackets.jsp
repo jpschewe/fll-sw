@@ -20,7 +20,14 @@ fll.web.playoff.ScoregenBrackets.populateContext(application, request, pageConte
 <head>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
-<title>${division}&nbsp;-&nbsp;Head&nbsp;to&nbsp;head&nbsp;Bracket</title>
+<c:choose>
+    <c:when test="${param.editTables}">
+        <title>${division}&nbsp;-&nbsp;Table&nbsp;Assignments</title>
+    </c:when>
+    <c:otherwise>
+        <title>${division}&nbsp;-&nbsp;Scoresheets</title>
+    </c:otherwise>
+</c:choose>
 
 <style type='text/css'>
 TD.Leaf {
@@ -107,7 +114,14 @@ FONT.TIE {
 
 
 <body>
-    <h2>Head to head Bracket: ${division }</h2>
+    <c:choose>
+        <c:when test="${param.editTables}">
+            <h2>Table Assignments: ${division}</h2>
+        </c:when>
+        <c:otherwise>
+            <h2>Scoresheets: ${division}</h2>
+        </c:otherwise>
+    </c:choose>
 
     <div class='status-message'>${message}</div>
     <%-- clear out the message, so that we don't see it again --%>

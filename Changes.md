@@ -1,3 +1,4 @@
+* #1085 - Add titles to scoresheet generation and table assignment brackets
 * #1086 - Add playoff match number to team selection
 * #1088 - Assign head to head table labels before sending update to display
 * #1084 - Properly display head to head winners in the awards script
