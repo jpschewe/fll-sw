@@ -118,9 +118,15 @@ public final class SelectTeam {
                                                                                                                 tournament.getTournamentID(),
                                                                                                                 playoffBracketName,
                                                                                                                 nextRunNumber);
-                                                               runNumberDisplay = String.format("%s P%d",
+
+                                                               final int playoffMatch = Playoff.getPlayoffMatch(connection,
+                                                                                                                tournament.getTournamentID(),
+                                                                                                                playoffBracketName,
+                                                                                                                nextRunNumber);
+                                                               runNumberDisplay = String.format("%s P%d M%d",
                                                                                                 playoffBracketName,
-                                                                                                playoffRound);
+                                                                                                playoffRound,
+                                                                                                playoffMatch);
                                                              } else {
                                                                runNumberDisplay = String.valueOf(nextRunNumber);
                                                              }

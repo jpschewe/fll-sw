@@ -1071,6 +1071,45 @@ public final class Playoff {
   }
 
   /**
+   * Find the playoff match run number for the specified division and
+   * performance
+   * run number in the tournament.
+   *
+   * @param connection database connection
+   * @param tournament the tournament to work with
+   * @param division head to head bracket name
+   * @param runNumber run number
+   * @return the playoff match or -1 if not found
+   * @throws SQLException on database error
+   */
+  public static int getPlayoffMatch(final Connection connection,
+                                    final int tournament,
+                                    final String division,
+                                    final int runNumber)
+      throws SQLException {
+
+    try (PreparedStatement prep = connection.prepareStatement("SELECT LineNumber FROM PlayoffData"
+        + " WHERE Tournament = ?"
+        + " AND event_division = ?"
+        + " AND run_number = ?")) {
+      prep.setInt(1, tournament);
+      prep.setString(2, division);
+      prep.setInt(3, runNumber);
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          final int lineNumber = rs.getInt(1);
+          final int match = (int) Math.floor(lineNumber
+              / 2)
+              + 1;
+          return match;
+        } else {
+          return -1;
+        }
+      }
+    }
+  }
+
+  /**
    * Given a team, get the playoff brackets that the team is associated with.
    *
    * @param connection database connection
