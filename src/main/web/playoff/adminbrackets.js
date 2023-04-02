@@ -17,7 +17,7 @@ function populateLeaf(leafId, teamNumber, teamName, score, verified) {
         teamNumberEle.classList.add("TeamNumber");
     }
 
-    if (null != teamName) {
+    if (null != teamName && "NULL" != teamName) {
         const teamNameEle = document.createElement("span");
         leafEle.appendChild(teamNameEle);
         teamNameEle.innerText = " " + teamName;
@@ -35,6 +35,12 @@ function populateLeaf(leafId, teamNumber, teamName, score, verified) {
         outerSpan.appendChild(scoreEle);
         scoreEle.classList.add("TeamScore");
         scoreEle.innerText = " Score: " + score;
+    }
+}
+
+function placeTableLabel(lid, table) {
+    if (null != table && "" != table) {
+        document.getElementById(lid + "-table").innerText = table;
     }
 }
 
@@ -56,6 +62,9 @@ function messageReceived(event) {
             bracketMessage.bracketUpdate.teamName,
             bracketMessage.bracketUpdate.score,
             bracketMessage.bracketUpdate.verified);
+
+        placeTableLabel(leafId, bracketMessage.bracketUpdate.table);
+
     }
     if (bracketMessage.isDisplayUpdate) {
         // currently ignored, but may be useful in the future

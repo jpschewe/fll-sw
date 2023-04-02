@@ -259,6 +259,9 @@ public class H2HUpdateWebSocket {
                                     final boolean verified,
                                     final @Nullable String table) {
 
+    LOGGER.trace("Sending H2H update team: {} bracket: {} dbLine: {} playoffRound: {} score: {} table: {}", teamNumber,
+                 bracketName, dbLine, playoffRound, score, table);
+
     final BracketMessage message = new BracketMessage();
     message.isBracketUpdate = true;
     message.bracketUpdate = new BracketUpdate(bracketName, dbLine, playoffRound, maxPlayoffRound, teamNumber, teamName,

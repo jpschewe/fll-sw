@@ -1666,21 +1666,10 @@ public final class Playoff {
     final Team team = Team.getTeamFromDatabase(connection, teamNumber);
 
     final int ptLine = Queries.getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber);
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("line: "
-          + ptLine);
-    }
 
     final String division = Playoff.getPlayoffDivision(connection, currentTournament, teamNumber, runNumber);
     if (ptLine > 0) {
-      final double score = performanceElement.evaluate(teamScore);
-
       // this makes sure that scores get pushed through to the displays
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Sending H2HUpdate with score: "
-            + score);
-      }
-
       H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), division, team, runNumber);
 
       final int siblingDbLine = getSiblingDbLine(ptLine);
@@ -1819,20 +1808,6 @@ public final class Playoff {
       prep.executeUpdate();
     }
 
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Sending H2H update" //
-          + " team: "
-          + team.getTeamNumber() //
-          + " bracket: "
-          + division //
-          + " dbLine: "
-          + lineNumber //
-          + " playoffRound: "
-          + playoffRound //
-      );
-
-    }
-
     final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
     final PerformanceScoreCategory performance = description.getPerformance();
     final ScoreType performanceScoreType = performance.getScoreType();
@@ -1873,9 +1848,10 @@ public final class Playoff {
         + 1)
         / 2);
 
-    updatePlayoffTable(connection, winner, bracketName, tournamentId, nextRunNumber, nextDbLine);
+    final int nextPlayoffRound = Playoff.getPlayoffRound(connection, tournamentId, bracketName, nextRunNumber);
+    assignPlayoffTable(connection, bracketName, tournamentId, nextPlayoffRound, nextDbLine);
 
-    assignPlayoffTable(connection, bracketName, tournamentId, nextRunNumber, nextDbLine);
+    updatePlayoffTable(connection, winner, bracketName, tournamentId, nextRunNumber, nextDbLine);
 
     final int semiFinalRound = Queries.getNumPlayoffRounds(connection, tournamentId, bracketName)
         - 1;
@@ -1897,6 +1873,9 @@ public final class Playoff {
                                          final int playoffRound,
                                          final int dbLine)
       throws SQLException {
+    LOGGER.trace("Assigning table label for bracket: {} tournament: {} playoffRound: {} dbLine: {}", bracketName,
+                 tournamentId, playoffRound, dbLine);
+
     final boolean oldAutoCommit = connection.getAutoCommit();
 
     try (PreparedStatement prep = connection.prepareStatement("UPDATE PlayoffTableData" //

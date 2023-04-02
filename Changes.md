@@ -1,3 +1,4 @@
+* #1088 - Assign head to head table labels before sending update to display
 * #1084 - Properly display head to head winners in the awards script
 * #1089 - Allow everyone to see the list of finalist teams
 * #1057 - Remove duplicate copy of performance goals in team performance report
