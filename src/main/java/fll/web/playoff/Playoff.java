@@ -1098,7 +1098,7 @@ public final class Playoff {
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
           final int lineNumber = rs.getInt(1);
-          final int match = (int) Math.floor(lineNumber
+          final int match = (lineNumber
               / 2)
               + 1;
           return match;
