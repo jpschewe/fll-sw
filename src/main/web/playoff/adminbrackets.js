@@ -17,7 +17,7 @@ function populateLeaf(leafId, teamNumber, teamName, score, verified) {
         teamNumberEle.classList.add("TeamNumber");
     }
 
-    if (null != teamName) {
+    if (null != teamName && "NULL" != teamName) {
         const teamNameEle = document.createElement("span");
         leafEle.appendChild(teamNameEle);
         teamNameEle.innerText = " " + teamName;
