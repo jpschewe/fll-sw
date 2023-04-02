@@ -1875,7 +1875,8 @@ public final class Playoff {
 
     updatePlayoffTable(connection, winner, bracketName, tournamentId, nextRunNumber, nextDbLine);
 
-    assignPlayoffTable(connection, bracketName, tournamentId, nextRunNumber, nextDbLine);
+    final int nextPlayoffRound = Playoff.getPlayoffRound(connection, tournamentId, bracketName, nextRunNumber);
+    assignPlayoffTable(connection, bracketName, tournamentId, nextPlayoffRound, nextDbLine);
 
     final int semiFinalRound = Queries.getNumPlayoffRounds(connection, tournamentId, bracketName)
         - 1;
@@ -1897,6 +1898,9 @@ public final class Playoff {
                                          final int playoffRound,
                                          final int dbLine)
       throws SQLException {
+    LOGGER.trace("Assigning table label for bracket: {} tournament: {} playoffRound: {} dbLine: {}", bracketName,
+                 tournamentId, playoffRound, dbLine);
+
     final boolean oldAutoCommit = connection.getAutoCommit();
 
     try (PreparedStatement prep = connection.prepareStatement("UPDATE PlayoffTableData" //
