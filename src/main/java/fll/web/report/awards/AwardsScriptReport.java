@@ -1003,15 +1003,17 @@ public class AwardsScriptReport extends BaseFLLServlet {
         throw new FLLRuntimeException(String.format("Error evaluating template for section %s", section));
       }
       final String text = writer.toString();
-      for (final String paragraph : text.split("\n")) {
+      for (final String paragraph : text.split("\\R+")) {
         final String t;
         if (paragraph.isEmpty()) {
           t = String.valueOf(Utilities.NON_BREAKING_SPACE);
         } else {
           t = paragraph;
         }
+
         final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
         container.appendChild(block);
+        block.setAttribute("space-after", "1em");
         block.appendChild(document.createTextNode(t));
       }
     } catch (final IOException e) {
