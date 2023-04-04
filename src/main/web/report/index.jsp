@@ -205,6 +205,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
                     </c:forEach>
                 </select>
                 <input type='submit' value='Finalist Schedule (PDF)' />
+                - Can be used for check-in
             </form>
         </div>
     </c:if>

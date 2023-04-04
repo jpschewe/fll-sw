@@ -1,3 +1,4 @@
+* #1083 - Make it clear which report to use for finalist check in
 * #1080 - Add blank lines after paragraphs in the awards script
 * #1085 - Add titles to scoresheet generation and table assignment brackets
 * #1086 - Add playoff match number to team selection
