@@ -18,6 +18,7 @@ fll.web.report.finalist.FinalistTeams.populateContext(application, pageContext);
 <link rel='stylesheet' type='text/css'
     href='<c:url value="/scoreboard/score_style.css"/>' />
 
+<link rel='stylesheet' type='text/css' href="finalist_teams.css" />
 
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js'/>"></script>
@@ -42,7 +43,7 @@ fll.web.report.finalist.FinalistTeams.populateContext(application, pageContext);
       }
       requestAnimationFrame(scrollDown);
     } else {
-      // show the last scores for a bit and then reload
+      // show the bottom for a bit and then reload
       setTimeout(reload, 3000);
     }
   }
