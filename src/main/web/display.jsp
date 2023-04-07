@@ -7,20 +7,19 @@
 <html>
 <head>
 
-<link
-  rel="stylesheet"
-  type="text/css"
-  href="<c:url value='/style/fll-sw.css'/>" />
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/style/fll-sw.css'/>" />
 
 <title>Display</title>
 
-<script type='text/javascript' src="<c:url value='/js/fll-functions.js' />"></script>
+<script type='text/javascript'
+    src="<c:url value='/js/fll-functions.js' />"></script>
 
 <script type='text/javascript'>
-  var width = screen.width - 10;
-  var height = screen.height - 10;
+  const width = screen.width - 10;
+  const height = screen.height - 10;
   var newWindow = null;
-  var str = 'height='
+  const windowOptions = 'height='
       + height
       + ',width='
       + width
@@ -30,9 +29,12 @@
   
   function displayPage(url) {
     if (null == newWindow || newWindow.location.pathname != url) {
-      newWindow = window.open(url, 'displayWindow', str);
+      newWindow = window.open(url, 'displayWindow', windowOptions);
+      if(!newWindow || newWindow.closed || typeof newWindow.closed=='undefined') {
+        alert("For this page to work you need to disable the popup blocker for this site");
+      }
     }
-  };
+  }
 
   function pollSuccess(newURL) {
     if (!connected) {
@@ -48,7 +50,7 @@
     } else {
       displayPage(newURL);
     }
-  };
+  }
 
   function pollFailure() {
     connected = false;
@@ -64,7 +66,7 @@
 
     // open the socket a second later
     setTimeout(openSocket, 1000);
-  };
+  }
 
   function update() {
     fetch("<c:url value='/ajax/DisplayQuery'/>").then(response => {
@@ -104,9 +106,9 @@
   function openSocket() {
     console.log("opening socket");
 
-    var url = window.location.pathname;
-    var directory = url.substring(0, url.lastIndexOf('/'));
-    var webSocketAddress = getWebsocketProtocol() + "//" + window.location.host + directory
+    const url = window.location.pathname;
+    const directory = url.substring(0, url.lastIndexOf('/'));
+    const webSocketAddress = getWebsocketProtocol() + "//" + window.location.host + directory
         + "/DisplayWebSocket";
 
     socket = new WebSocket(webSocketAddress);
@@ -122,34 +124,30 @@
 
 <body>
 
-  <h1>Big Screen Display Control page</h1>
+    <h1>Big Screen Display Control page</h1>
 
-  <c:if test="${not empty param.name}">
-    <%
-      DisplayInfo.appendDisplayName(application, session, request.getParameter("name"));
-    %>
-    <p>Display set to ${displayName}</p>
-  </c:if>
+    <c:if test="${not empty param.name}">
+        <%
+        DisplayInfo.appendDisplayName(application, session, request.getParameter("name"));
+        %>
+        <p>Display set to ${displayName}</p>
+    </c:if>
 
-  <c:if test="${not empty displayName}">
-    <p>This display is named ${displayName}</p>
-  </c:if>
+    <c:if test="${not empty displayName}">
+        <p>This display is named ${displayName}</p>
+    </c:if>
 
-  <p>Leave this page open on the display computer. It's used to
-    control the actual display window. You may need to press F11 in the
-    newly opened window to remove the titlebar and make it fullscreen.</p>
+    <p>Leave this page open on the display computer. It's used to
+        control the actual display window. You may need to press F11 in
+        the newly opened window to remove the titlebar and make it
+        fullscreen.</p>
 
-  <form
-    action="display.jsp"
-    method="POST">
-    Name this display computer: <input
-      name="name"
-      type="text"
-      size="40"
-      value="${displayName}" /><br /> <input
-      type='submit'
-      value='Submit' />
-  </form>
+    <form action="display.jsp" method="POST">
+        Name this display computer:
+        <input name="name" type="text" size="40" value="${displayName}" />
+        <br />
+        <input type='submit' value='Submit' />
+    </form>
 
 
 </body>
