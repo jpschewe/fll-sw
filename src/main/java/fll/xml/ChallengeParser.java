@@ -465,9 +465,9 @@ public final class ChallengeParser {
 
     if (ChallengeParser.isEnumeratedGoal(goalElement)) {
       boolean foundMatch = false;
-      for (final Element valueEle : new NodelistElementCollectionAdapter(goalElement.getChildNodes())) {
-        final double score = Utilities.getXmlFloatingPointNumberFormat().parse(valueEle.getAttribute("score"))
-                                      .doubleValue();
+      for (final Element valueEle : new NodelistElementCollectionAdapter(goalElement.getElementsByTagName(EnumeratedValue.TAG_NAME))) {
+        final String scoreStr = valueEle.getAttribute("score");
+        final double score = Utilities.getXmlFloatingPointNumberFormat().parse(scoreStr).doubleValue();
         if (FP.equals(score, initialValue, INITIAL_VALUE_TOLERANCE)) {
           foundMatch = true;
         }
