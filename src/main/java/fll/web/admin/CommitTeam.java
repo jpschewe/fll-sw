@@ -105,7 +105,7 @@ public class CommitTeam extends BaseFLLServlet {
 
           final String otherTeam = Queries.addTeam(connection, teamNumber, teamName, organization);
           if (null != otherTeam) {
-            final String msg = String.format("Team number %s is already assigned");
+            final String msg = String.format("Team number %s is already assigned to %s", teamNumber, teamName);
             message.append("<p class='error'>"
                 + msg
                 + "</p>");
