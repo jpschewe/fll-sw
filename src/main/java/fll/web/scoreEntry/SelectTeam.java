@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,6 @@ import javax.sql.DataSource;
 import org.apache.commons.lang3.tuple.Pair;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import com.diffplug.common.base.Errors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -45,6 +45,8 @@ import jakarta.servlet.jsp.PageContext;
  * Java code for scoreEntry/select_team.jsp.
  */
 public final class SelectTeam {
+
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private SelectTeam() {
   }
@@ -75,7 +77,7 @@ public final class SelectTeam {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
 
       // get latest performance round for each team
-      final Map<Integer, Integer> maxRunNumbers = getMaxRunNumbers(connection, tournament);
+      final Map<Integer, Integer> maxRunNumbers = Collections.unmodifiableMap(getMaxRunNumbers(connection, tournament));
 
       final @Nullable TournamentSchedule schedule;
       if (TournamentSchedule.scheduleExistsInDatabase(connection, tournament.getTournamentID())) {
@@ -84,56 +86,15 @@ public final class SelectTeam {
         schedule = null;
       }
 
-      final List<String> unfinishedBrackets = Playoff.getUnfinishedPlayoffBrackets(connection,
-                                                                                   tournament.getTournamentID());
+      final List<String> unfinishedBrackets = Collections.unmodifiableList(Playoff.getUnfinishedPlayoffBrackets(connection,
+                                                                                                                tournament.getTournamentID()));
 
       final List<SelectTeamData> teamSelectData = Queries.getTournamentTeams(connection, tournament.getTournamentID())
                                                          .values().stream() //
                                                          .filter(team -> !team.isInternal()) //
-                                                         .map(Errors.rethrow().wrapFunction(team -> {
-                                                           final int nextRunNumber = maxRunNumbers.getOrDefault(team.getTeamNumber(),
-                                                                                                                0)
-                                                               + 1;
-                                                           final @Nullable PerformanceTime nextPerformance = getNextPerformance(schedule,
-                                                                                                                                team.getTeamNumber(),
-                                                                                                                                nextRunNumber);
-                                                           if (null != nextPerformance) {
-                                                             return new SelectTeamData(team, nextPerformance,
-                                                                                       nextRunNumber);
-                                                           } else {
-                                                             final String playoffBracketName = Playoff.getPlayoffBracketsForTeam(connection,
-                                                                                                                                 team.getTeamNumber())
-                                                                                                      .stream() //
-                                                                                                      .filter(b -> unfinishedBrackets.contains(b)) //
-                                                                                                      .findFirst() //
-                                                                                                      .orElse("");
-
-                                                             final String nextTableAndSide = getNextTableAndSide(connection,
-                                                                                                                 tournament,
-                                                                                                                 team.getTeamNumber(),
-                                                                                                                 nextRunNumber);
-                                                             final String runNumberDisplay;
-                                                             if (!playoffBracketName.isEmpty()) {
-                                                               final int playoffRound = Playoff.getPlayoffRound(connection,
-                                                                                                                tournament.getTournamentID(),
-                                                                                                                playoffBracketName,
-                                                                                                                nextRunNumber);
-
-                                                               final int playoffMatch = Playoff.getPlayoffMatch(connection,
-                                                                                                                tournament.getTournamentID(),
-                                                                                                                playoffBracketName,
-                                                                                                                nextRunNumber);
-                                                               runNumberDisplay = String.format("%s P%d M%d",
-                                                                                                playoffBracketName,
-                                                                                                playoffRound,
-                                                                                                playoffMatch);
-                                                             } else {
-                                                               runNumberDisplay = String.valueOf(nextRunNumber);
-                                                             }
-                                                             return new SelectTeamData(team, nextTableAndSide,
-                                                                                       nextRunNumber, runNumberDisplay);
-                                                           }
-                                                         })) //
+                                                         .map(team -> teamToTeamSelectData(connection, tournament,
+                                                                                           maxRunNumbers, schedule,
+                                                                                           unfinishedBrackets, team)) //
                                                          .collect(Collectors.toList());
 
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
@@ -150,6 +111,46 @@ public final class SelectTeam {
 
   }
 
+  private static SelectTeamData teamToTeamSelectData(Connection connection,
+                                                     final Tournament tournament,
+                                                     final Map<Integer, Integer> maxRunNumbers,
+                                                     final @Nullable TournamentSchedule schedule,
+                                                     final List<String> unfinishedBrackets,
+                                                     final TournamentTeam team) {
+    final int nextRunNumber = maxRunNumbers.getOrDefault(team.getTeamNumber(), 0)
+        + 1;
+    final @Nullable PerformanceTime nextPerformance = getNextPerformance(schedule, team.getTeamNumber(), nextRunNumber);
+    if (null != nextPerformance) {
+      return new SelectTeamData(team, nextPerformance, nextRunNumber);
+    } else {
+
+      final String nextTableAndSide = getNextTableAndSide(connection, tournament, team.getTeamNumber(), nextRunNumber);
+
+      try {
+        final String playoffBracketName = Playoff.getPlayoffBracketsForTeam(connection, team.getTeamNumber()).stream() //
+                                                 .filter(b -> unfinishedBrackets.contains(b)) //
+                                                 .findFirst() //
+                                                 .orElse("");
+        final String runNumberDisplay;
+        if (!playoffBracketName.isEmpty()) {
+          final int playoffRound = Playoff.getPlayoffRound(connection, tournament.getTournamentID(), playoffBracketName,
+                                                           nextRunNumber);
+
+          final int playoffMatch = Playoff.getPlayoffMatch(connection, tournament.getTournamentID(), playoffBracketName,
+                                                           nextRunNumber);
+          runNumberDisplay = String.format("%s P%d M%d", playoffBracketName, playoffRound, playoffMatch);
+        } else {
+          runNumberDisplay = String.valueOf(nextRunNumber);
+        }
+        return new SelectTeamData(team, nextTableAndSide, nextRunNumber, runNumberDisplay);
+      } catch (final SQLException e) {
+        LOGGER.warn("Got error retrieving playoff bracket information for team {} run {}", team.getTeamNumber(),
+                    nextRunNumber, e);
+        return new SelectTeamData(team, nextTableAndSide, nextRunNumber, String.valueOf(nextRunNumber));
+      }
+    }
+  }
+
   /**
    * @return the next table and side or the empty string if this cannot be
    *         determined.
@@ -157,14 +158,18 @@ public final class SelectTeam {
   private static String getNextTableAndSide(final Connection connection,
                                             final Tournament tournament,
                                             final int teamNumber,
-                                            final int nextRunNumber)
-      throws SQLException {
-    if (nextRunNumber <= TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID())) {
-      // no schedule, not going to know the table
+                                            final int nextRunNumber) {
+    try {
+      if (nextRunNumber <= TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID())) {
+        // no schedule, not going to know the table
+        return "";
+      } else {
+        // get information from the playoffs
+        return Playoff.getTableForRun(connection, tournament, teamNumber, nextRunNumber);
+      }
+    } catch (final SQLException e) {
+      LOGGER.warn("Got error retrieving next table and side for team {} run {}", teamNumber, nextRunNumber, e);
       return "";
-    } else {
-      // get information from the playoffs
-      return Playoff.getTableForRun(connection, tournament, teamNumber, nextRunNumber);
     }
   }
 
