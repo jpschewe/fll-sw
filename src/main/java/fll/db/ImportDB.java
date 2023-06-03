@@ -2529,7 +2529,7 @@ public final class ImportDB {
   }
 
   /**
-   * Check for differences between two tournaments in team information.
+   * Check for differences in a tournament between two databases.
    *
    * @param sourceConnection the incoming database
    * @param destConnection the database to insert the data into
