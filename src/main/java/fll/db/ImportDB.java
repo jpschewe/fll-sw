@@ -62,6 +62,8 @@ import fll.util.FLLRuntimeException;
 import fll.web.GatherBugReport;
 import fll.web.UserRole;
 import fll.web.developer.importdb.ImportDBDump;
+import fll.web.developer.importdb.awardsScript.AwardsScriptDifference;
+import fll.web.developer.importdb.awardsScript.SponsorsDifference;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -2629,6 +2631,49 @@ public final class ImportDB {
         }
       } // source result set
     }
+    return differences;
+  }
+
+  /**
+   * Check the awards script information between the two databases.
+   * 
+   * @param sourceConnection source database
+   * @param destConnection destination database
+   * @param tournament tournament to compare
+   * @return list of differences, empty if no differences
+   * @throws SQLException on a database error
+   */
+  public static List<AwardsScriptDifference> checkAwardsScriptInfo(final Connection sourceConnection,
+                                                                   final Connection destConnection,
+                                                                   final String tournament)
+      throws SQLException {
+    final List<AwardsScriptDifference> differences = new LinkedList<>();
+
+    final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournament);
+    final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
+
+    // presenter - non-numeric category
+    // presenter - subjective category
+    // macros
+    // award order
+
+    // category text - non-numeric category
+    // category text - subjective category
+
+    // num performance awards
+
+    // section
+    // SectionDifference
+
+    // sponsors
+    if (!AwardsScript.isSponsorsSpecifiedForTournament(sourceConnection, sourceTournament)) {
+      final List<String> sourceValue = AwardsScript.getSponsors(sourceConnection, sourceTournament);
+      final List<String> destValue = AwardsScript.getSponsors(destConnection, destTournament);
+      if (!sourceValue.equals(destValue)) {
+        differences.add(new SponsorsDifference(sourceValue, destValue));
+      }
+    }
+
     return differences;
   }
 

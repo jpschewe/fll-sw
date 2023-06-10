@@ -1,9 +1,10 @@
 /*
- * Copyright (c) 2000-2002 INSciTE.  All rights reserved
- * INSciTE is on the web at: http://www.hightechkids.org
+ * Copyright (c) 2023 High Tech Kids.  All rights reserved
+ * HighTechKids is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.web.developer.importdb;
+
+package fll.web.developer.importdb.awardsScript;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -11,16 +12,9 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.db.ImportDB;
-import fll.db.TeamPropertyDifference;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -28,16 +22,23 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import fll.web.developer.importdb.ImportDBDump;
+import fll.web.developer.importdb.ImportDbSessionInfo;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
- * Servlet to check team information between the source and dest database.
- * 
- * @author jpschewe
+ * Servlet to check if there are differences in the awards script that need to
+ * be resolved.
  */
-@WebServlet("/developer/importdb/CheckTeamInfo")
-public class CheckTeamInfo extends BaseFLLServlet {
+@WebServlet("/developer/importdb/awardsScript/CheckAwardsScriptInfo")
+public class CheckAwardsScriptInfo extends BaseFLLServlet {
 
-  private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -46,12 +47,9 @@ public class CheckTeamInfo extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
-
     if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
       return;
     }
-
-    final StringBuilder message = new StringBuilder();
 
     final ImportDbSessionInfo sessionInfo = SessionAttributes.getNonNullAttribute(session,
                                                                                   ImportDBDump.IMPORT_DB_SESSION_KEY,
@@ -69,21 +67,21 @@ public class CheckTeamInfo extends BaseFLLServlet {
     try (Connection sourceConnection = sourceDataSource.getConnection();
         Connection destConnection = destDataSource.getConnection()) {
 
-      final List<TeamPropertyDifference> teamDifferences = ImportDB.checkTeamInfo(sourceConnection, destConnection,
-                                                                                  tournament);
-      if (teamDifferences.isEmpty()) {
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "/developer/importdb/awardsScript/CheckAwardsScriptInfo");
+      final List<AwardsScriptDifference> differences = ImportDB.checkAwardsScriptInfo(sourceConnection, destConnection,
+                                                                                      tournament);
+      if (differences.isEmpty()) {
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "/developer/importdb/ExecuteImport");
       } else {
-        sessionInfo.setTeamDifferences(teamDifferences);
+        sessionInfo.setAwardsScriptDifferences(differences);
         session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "/developer/importdb/resolveTeamInfoDifferences.jsp");
+        session.setAttribute(SessionAttributes.REDIRECT_URL,
+                             "/developer/importdb/awardsScript/resolveAwardsScriptDifferences.jsp");
       }
     } catch (final SQLException sqle) {
-      LOG.error(sqle, sqle);
+      LOGGER.error(sqle);
       throw new RuntimeException("Error talking to the database", sqle);
     }
 
-    session.setAttribute("message", message.toString());
     WebUtils.sendRedirect(response, session);
   }
 
