@@ -15,18 +15,19 @@ import java.util.List;
 import fll.Tournament;
 import fll.db.AwardsScript;
 import fll.util.FLLInternalException;
+import fll.web.report.awards.AwardCategory;
 
 /**
- * Difference in the sponsors list between 2 databases.
+ * Difference in the award order between 2 databases.
  */
-public final class SponsorsDifference extends AwardsScriptDifference {
+public final class AwardOrderDifference extends AwardsScriptDifference {
 
   /**
    * @param sourceValue see {@link #getSourceValue()}
-   * @param destValue see {@link #getDestValues()}
+   * @param destValue see {@link #getDestValue()}
    */
-  public SponsorsDifference(final List<String> sourceValue,
-                            final List<String> destValue) {
+  public AwardOrderDifference(final List<AwardCategory> sourceValue,
+                              final List<AwardCategory> destValue) {
     this.sourceValue = Collections.unmodifiableList(new ArrayList<>(sourceValue));
     this.destValue = Collections.unmodifiableList(new ArrayList<>(destValue));
   }
@@ -34,39 +35,39 @@ public final class SponsorsDifference extends AwardsScriptDifference {
   @Override
   public String getDescription() {
     final StringBuilder description = new StringBuilder();
-    description.append("<div>The list of sponsors is different between the source database and the destination database.</div>");
+    description.append("<div>The order of awards is different between the source database and the destination database.</div>");
     description.append("<div>Source:<ul>");
-    for (final String svalue : sourceValue) {
+    for (final AwardCategory svalue : sourceValue) {
       description.append("<li>");
-      description.append(svalue);
+      description.append(svalue.getTitle());
       description.append("</li>");
     }
     description.append("</ul></div>");
     description.append("<div>Destination:<ul>");
-    for (final String dvalue : destValue) {
+    for (final AwardCategory dvalue : destValue) {
       description.append("<li>");
-      description.append(dvalue);
+      description.append(dvalue.getTitle());
       description.append("</li>");
     }
     description.append("</ul></div>");
     return description.toString();
   }
 
-  private final List<String> sourceValue;
+  private final List<AwardCategory> sourceValue;
 
   /**
-   * @return sponsors in the source database (unmodifiable)
+   * @return award in the source database (unmodifiable)
    */
-  public List<String> getSourceValue() {
+  public List<AwardCategory> getSourceValue() {
     return sourceValue;
   }
 
-  private final List<String> destValue;
+  private final List<AwardCategory> destValue;
 
   /**
-   * @return sponsors in the destination database (unmodifiable)
+   * @return award in the destination database (unmodifiable)
    */
-  public List<String> getDestValue() {
+  public List<AwardCategory> getDestValue() {
     return destValue;
   }
 
@@ -79,21 +80,20 @@ public final class SponsorsDifference extends AwardsScriptDifference {
       throws SQLException {
     switch (action) {
     case KEEP_DESTINATION:
-      AwardsScript.updateSponsorsForTournament(sourceConnection, sourceTournament, getDestValue());
+      AwardsScript.updateAwardOrderForTournament(sourceConnection, sourceTournament, getDestValue());
       break;
     case KEEP_SOURCE_AS_TOURNAMENT:
-      AwardsScript.updateSponsorsForTournament(destConnection, destTournament, getSourceValue());
+      AwardsScript.updateAwardOrderForTournament(destConnection, destTournament, getSourceValue());
       break;
     case KEEP_SOURCE_AS_TOURNAMENT_LEVEL:
-      AwardsScript.updateSponsorsForTournamentLevel(destConnection, destTournament.getLevel(), getSourceValue());
+      AwardsScript.updateAwardOrderForTournamentLevel(destConnection, destTournament.getLevel(), getSourceValue());
       break;
     case KEEP_SOURCE_AS_SEASON:
-      AwardsScript.updateSponsorsForSeason(destConnection, getSourceValue());
+      AwardsScript.updateAwardOrderForSeason(destConnection, getSourceValue());
       break;
     default:
       throw new FLLInternalException(String.format("Unknown enum value for %s: %s", action.getClass().getName(),
                                                    action.getName()));
     }
-
   }
 }

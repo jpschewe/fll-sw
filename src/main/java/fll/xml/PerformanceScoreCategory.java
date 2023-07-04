@@ -6,8 +6,6 @@
 
 package fll.xml;
 
-import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -16,6 +14,8 @@ import java.util.List;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.Utilities;
 import fll.web.playoff.TeamScore;
@@ -263,6 +263,26 @@ public class PerformanceScoreCategory extends ScoreCategory implements AwardCate
   @Override
   public boolean getPerAwardGroup() {
     return true;
+  }
+
+  @Override
+  public int hashCode() {
+    return getTitle().hashCode();
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (null == o) {
+      return false;
+    } else if (this == o) {
+      return true;
+    } else if (!o.getClass().equals(this.getClass())) {
+      return false;
+    } else {
+      final PerformanceScoreCategory other = (PerformanceScoreCategory) o;
+      return getTitle().equals(other.getTitle())
+          && getPerAwardGroup() == other.getPerAwardGroup();
+    }
   }
 
 }

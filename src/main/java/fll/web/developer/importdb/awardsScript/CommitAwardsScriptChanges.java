@@ -15,7 +15,6 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import fll.Tournament;
-import fll.db.AwardsScript;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -75,14 +74,7 @@ public class CommitAwardsScriptChanges extends BaseFLLServlet {
         final AwardsScriptDifference difference = iter.next();
         final String actionStr = WebUtils.getNonNullRequestParameter(request, String.format("difference_%d", index));
         final AwardsScriptDifferenceAction action = AwardsScriptDifferenceAction.valueOf(actionStr);
-
-        if (difference instanceof SponsorsDifference) {
-          final SponsorsDifference sd = (SponsorsDifference) difference;
-          applySponsorDifference(sourceConnection, sourceTournament, destConnection, destTournament, sd, action);
-        } else {
-          throw new FLLInternalException(String.format("Unknown data type for awards script difference: %s",
-                                                       difference.getClass().getName()));
-        }
+        difference.resolveDifference(sourceConnection, sourceTournament, destConnection, destTournament, action);
       }
     } catch (final SQLException sqle) {
       LOGGER.error(sqle);
@@ -91,33 +83,6 @@ public class CommitAwardsScriptChanges extends BaseFLLServlet {
 
     session.setAttribute(SessionAttributes.REDIRECT_URL, "/developer/importdb/awardsScript/CheckAwardsScriptInfo");
     WebUtils.sendRedirect(response, session);
-  }
-
-  private void applySponsorDifference(final Connection sourceConnection,
-                                      final Tournament sourceTournament,
-                                      final Connection destConnection,
-                                      final Tournament destTournament,
-                                      final SponsorsDifference sd,
-                                      final AwardsScriptDifferenceAction action)
-      throws SQLException {
-    switch (action) {
-    case KEEP_DESTINATION:
-      AwardsScript.updateSponsorsForTournament(sourceConnection, sourceTournament, sd.getDestSponsors());
-      break;
-    case KEEP_SOURCE_AS_TOURNAMENT:
-      AwardsScript.updateSponsorsForTournament(destConnection, destTournament, sd.getSourceSponsors());
-      break;
-    case KEEP_SOURCE_AS_TOURNAMENT_LEVEL:
-      AwardsScript.updateSponsorsForTournamentLevel(destConnection, destTournament.getLevel(), sd.getSourceSponsors());
-      break;
-    case KEEP_SOURCE_AS_SEASON:
-      AwardsScript.updateSponsorsForSeason(destConnection, sd.getSourceSponsors());
-      break;
-    default:
-      throw new FLLInternalException(String.format("Unknown enum value for %s: %s", action.getClass().getName(),
-                                                   action.getName()));
-    }
-
   }
 
 }

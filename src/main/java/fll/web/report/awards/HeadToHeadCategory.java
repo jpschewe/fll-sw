@@ -34,4 +34,24 @@ public final class HeadToHeadCategory implements AwardCategory {
     return true;
   }
 
+  @Override
+  public int hashCode() {
+    return getTitle().hashCode();
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (null == o) {
+      return false;
+    } else if (this == o) {
+      return true;
+    } else if (!o.getClass().equals(this.getClass())) {
+      return false;
+    } else {
+      final HeadToHeadCategory other = (HeadToHeadCategory) o;
+      return getTitle().equals(other.getTitle())
+          && getPerAwardGroup() == other.getPerAwardGroup();
+    }
+  }
+
 }

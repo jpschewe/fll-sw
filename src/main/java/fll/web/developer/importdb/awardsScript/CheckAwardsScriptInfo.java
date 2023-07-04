@@ -24,6 +24,7 @@ import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.web.developer.importdb.ImportDBDump;
 import fll.web.developer.importdb.ImportDbSessionInfo;
+import fll.xml.ChallengeDescription;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -62,13 +63,14 @@ public class CheckAwardsScriptInfo extends BaseFLLServlet {
       throw new FLLInternalException("Missing tournament to import");
     }
 
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
 
     try (Connection sourceConnection = sourceDataSource.getConnection();
         Connection destConnection = destDataSource.getConnection()) {
 
-      final List<AwardsScriptDifference> differences = ImportDB.checkAwardsScriptInfo(sourceConnection, destConnection,
-                                                                                      tournament);
+      final List<AwardsScriptDifference> differences = ImportDB.checkAwardsScriptInfo(description, sourceConnection,
+                                                                                      destConnection, tournament);
       sessionInfo.setAwardsScriptDifferences(differences);
       session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
 
