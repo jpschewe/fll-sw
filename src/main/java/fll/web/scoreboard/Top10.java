@@ -101,7 +101,7 @@ public class Top10 extends BaseFLLServlet {
       int awardGroupIndex = -1;
       if (null != divisionIndexParam) {
         try {
-          awardGroupIndex = Integer.valueOf(divisionIndexParam);
+          awardGroupIndex = Integer.parseInt(divisionIndexParam);
         } catch (final NumberFormatException nfe) {
           awardGroupIndex = -1;
           LOGGER.debug("Error parsing divisionIndex parameter '{}', ignoring", divisionIndexParam);
