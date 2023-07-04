@@ -276,4 +276,24 @@ public class SubjectiveScoreCategory extends ScoreCategory implements AwardCateg
         + this.getName();
   }
 
+  @Override
+  public int hashCode() {
+    return getTitle().hashCode();
+  }
+
+  @Override
+  public boolean equals(final @Nullable Object o) {
+    if (null == o) {
+      return false;
+    } else if (this == o) {
+      return true;
+    } else if (!o.getClass().equals(this.getClass())) {
+      return false;
+    } else {
+      final SubjectiveScoreCategory other = (SubjectiveScoreCategory) o;
+      return getTitle().equals(other.getTitle())
+          && getPerAwardGroup() == other.getPerAwardGroup();
+    }
+  }
+
 }

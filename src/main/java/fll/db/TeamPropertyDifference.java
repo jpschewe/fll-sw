@@ -11,7 +11,7 @@ import java.io.Serializable;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Represents a different in a property for a team.
+ * Represents a difference in a property for a team.
  */
 public class TeamPropertyDifference implements Serializable {
   /**

@@ -56,12 +56,25 @@ import fll.TournamentLevel;
 import fll.TournamentLevel.NoSuchTournamentLevelException;
 import fll.TournamentTeam;
 import fll.Utilities;
+import fll.db.AwardsScript.Macro;
+import fll.db.AwardsScript.Section;
 import fll.db.TeamPropertyDifference.TeamProperty;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.GatherBugReport;
 import fll.web.UserRole;
 import fll.web.developer.importdb.ImportDBDump;
+import fll.web.developer.importdb.awardsScript.AwardOrderDifference;
+import fll.web.developer.importdb.awardsScript.AwardsScriptDifference;
+import fll.web.developer.importdb.awardsScript.MacroValueDifference;
+import fll.web.developer.importdb.awardsScript.NonNumericCategoryPresenterDifference;
+import fll.web.developer.importdb.awardsScript.NonNumericCategoryTextDifference;
+import fll.web.developer.importdb.awardsScript.NumPerformanceAwardsDifference;
+import fll.web.developer.importdb.awardsScript.SectionTextDifference;
+import fll.web.developer.importdb.awardsScript.SponsorsDifference;
+import fll.web.developer.importdb.awardsScript.SubjectiveCategoryPresenterDifference;
+import fll.web.developer.importdb.awardsScript.SubjectiveCategoryTextDifference;
+import fll.web.report.awards.AwardCategory;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -2529,7 +2542,7 @@ public final class ImportDB {
   }
 
   /**
-   * Check for differences between two tournaments in team information.
+   * Check for differences in a tournament between two databases.
    *
    * @param sourceConnection the incoming database
    * @param destConnection the database to insert the data into
@@ -2629,6 +2642,119 @@ public final class ImportDB {
         }
       } // source result set
     }
+    return differences;
+  }
+
+  /**
+   * Check the awards script information between the two databases.
+   * 
+   * @param description challenge description for the tournament
+   * @param sourceConnection source database
+   * @param destConnection destination database
+   * @param tournament tournament to compare
+   * @return list of differences, empty if no differences
+   * @throws SQLException on a database error
+   */
+  public static List<AwardsScriptDifference> checkAwardsScriptInfo(final ChallengeDescription description,
+                                                                   final Connection sourceConnection,
+                                                                   final Connection destConnection,
+                                                                   final String tournament)
+      throws SQLException {
+    final List<AwardsScriptDifference> differences = new LinkedList<>();
+
+    final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournament);
+    final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
+
+    // macro values
+    for (final Macro macro : Macro.values()) {
+      if (!AwardsScript.isMacroSpecifiedForTournament(sourceConnection, sourceTournament, macro)) {
+        final String sourceValue = AwardsScript.getMacroValue(sourceConnection, sourceTournament, macro);
+        final String destValue = AwardsScript.getMacroValue(destConnection, destTournament, macro);
+        if (!sourceValue.equals(destValue)) {
+          differences.add(new MacroValueDifference(macro, sourceValue, destValue));
+        }
+      }
+    }
+
+    // award order
+    if (!AwardsScript.isAwardOrderSpecifiedForTournament(sourceConnection, sourceTournament)) {
+      final List<AwardCategory> sourceValue = AwardsScript.getAwardOrder(description, sourceConnection,
+                                                                         sourceTournament);
+      final List<AwardCategory> destValue = AwardsScript.getAwardOrder(description, destConnection, destTournament);
+      if (!sourceValue.equals(destValue)) {
+        differences.add(new AwardOrderDifference(sourceValue, destValue));
+      }
+    }
+
+    for (final NonNumericCategory category : description.getNonNumericCategories()) {
+      // presenter - non-numeric category
+      if (!AwardsScript.isPresenterSpecifiedForTournament(sourceConnection, sourceTournament, category)) {
+        final String sourceValue = AwardsScript.getPresenter(sourceConnection, sourceTournament, category);
+        final String destValue = AwardsScript.getPresenter(destConnection, destTournament, category);
+        if (!sourceValue.equals(destValue)) {
+          differences.add(new NonNumericCategoryPresenterDifference(category, sourceValue, destValue));
+        }
+      }
+
+      // category text - non-numeric category
+      if (!AwardsScript.isCategoryTextSpecifiedForTournament(sourceConnection, sourceTournament, category)) {
+        final String sourceValue = AwardsScript.getCategoryText(sourceConnection, sourceTournament, category);
+        final String destValue = AwardsScript.getCategoryText(destConnection, destTournament, category);
+        if (!sourceValue.equals(destValue)) {
+          differences.add(new NonNumericCategoryTextDifference(category, sourceValue, destValue));
+        }
+      }
+    }
+
+    for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+      // presenter - subjective category
+      if (!AwardsScript.isPresenterSpecifiedForTournament(sourceConnection, sourceTournament, category)) {
+        final String sourceValue = AwardsScript.getPresenter(sourceConnection, sourceTournament, category);
+        final String destValue = AwardsScript.getPresenter(destConnection, destTournament, category);
+        if (!sourceValue.equals(destValue)) {
+          differences.add(new SubjectiveCategoryPresenterDifference(category, sourceValue, destValue));
+        }
+      }
+
+      // category text - subjective category
+      if (!AwardsScript.isCategoryTextSpecifiedForTournament(sourceConnection, sourceTournament, category)) {
+        final String sourceValue = AwardsScript.getCategoryText(sourceConnection, sourceTournament, category);
+        final String destValue = AwardsScript.getCategoryText(destConnection, destTournament, category);
+        if (!sourceValue.equals(destValue)) {
+          differences.add(new SubjectiveCategoryTextDifference(category, sourceValue, destValue));
+        }
+      }
+    }
+
+    // num performance awards
+    if (!AwardsScript.isNumPerformanceAwardsSpecifiedForTournament(sourceConnection, sourceTournament)) {
+      final int sourceValue = AwardsScript.getNumPerformanceAwards(sourceConnection, sourceTournament);
+      final int destValue = AwardsScript.getNumPerformanceAwards(destConnection, destTournament);
+      if (sourceValue != destValue) {
+        differences.add(new NumPerformanceAwardsDifference(sourceValue, destValue));
+      }
+    }
+
+    // section text
+    for (final Section section : Section.values()) {
+      if (!AwardsScript.isSectionSpecifiedForTournament(sourceConnection, sourceTournament, section)) {
+        final String sourceValue = AwardsScript.getSectionText(sourceConnection, sourceTournament, section);
+        final String destValue = AwardsScript.getSectionText(destConnection, destTournament, section);
+        if (!sourceValue.equals(destValue)) {
+          differences.add(new SectionTextDifference(section, sourceValue, destValue));
+        }
+      }
+    }
+
+    // sponsors
+    if (!AwardsScript.isSponsorsSpecifiedForTournament(sourceConnection, sourceTournament)) {
+      final List<String> sourceValue = AwardsScript.getSponsors(sourceConnection, sourceTournament);
+      final List<String> destValue = AwardsScript.getSponsors(destConnection, destTournament);
+      if (!sourceValue.equals(destValue)) {
+        differences.add(new SponsorsDifference(sourceValue, destValue));
+      }
+    }
+
     return differences;
   }
 

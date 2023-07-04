@@ -28,7 +28,7 @@ FindMissingTeams -> "promptCreateMissingTeams.jsp" [label="Found missing teams"]
 
 AddMissingTeams -> CheckTeamInfo;
 
-CheckTeamInfo -> ExecuteImport;
+CheckTeamInfo -> CheckAwardsScriptInfo;
 
 CheckTeamInfo -> "resolveTeamInfoDifferences.jsp" [label="Found differences"];
 
@@ -38,6 +38,16 @@ CheckTeamInfo -> "resolveTeamInfoDifferences.jsp" [label="Found differences"];
 
 CommitTeamChanges -> CheckTeamInfo;
 
-ExecuteImport -> CheckTeamInfo [label="Found differences"];
+CheckAwardsScriptInfo -> "resolveAwardsScriptDifferences.jsp" [label="Found differences"];
+
+CheckAwardsScriptInfo -> ExecuteImport;
+
+"resolveAwardsScriptDifferences.jsp" -> CommitAwardsScriptChanges;
+
+CommitAwardsScriptChanges -> CheckAwardsScriptInfo;
+
+ExecuteImport -> CheckTournamentExists [label="Found differences"];
+
+ExecuteImport -> "finished";
 
 }

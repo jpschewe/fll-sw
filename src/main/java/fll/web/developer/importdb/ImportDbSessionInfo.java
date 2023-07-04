@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -19,6 +18,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Team;
 import fll.db.TeamPropertyDifference;
+import fll.web.developer.importdb.awardsScript.AwardsScriptDifference;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Information needed for importing a database. This object is stored in the
@@ -89,7 +90,7 @@ public final class ImportDbSessionInfo {
   private final List<TeamPropertyDifference> teamDifferences = new LinkedList<>();
 
   /**
-   * @param v the differences between the source and destination database
+   * @param v the team differences between the source and destination database
    */
   public void setTeamDifferences(final List<TeamPropertyDifference> v) {
     teamDifferences.clear();
@@ -102,6 +103,24 @@ public final class ImportDbSessionInfo {
    */
   public List<TeamPropertyDifference> getTeamDifferences() {
     return Collections.unmodifiableList(teamDifferences);
+  }
+
+  private final List<AwardsScriptDifference> awardsScriptDifferences = new LinkedList<>();
+
+  /**
+   * @param v the awards script differences between the source and destination
+   *          database
+   */
+  public void setAwardsScriptDifferences(final List<AwardsScriptDifference> v) {
+    awardsScriptDifferences.clear();
+    awardsScriptDifferences.addAll(v);
+  }
+
+  /**
+   * @return see {@link #setAwardsScriptDifferences(List)}
+   */
+  public List<AwardsScriptDifference> getAwardsScriptDifferences() {
+    return Collections.unmodifiableList(awardsScriptDifferences);
   }
 
   private boolean importPerformance = true;
