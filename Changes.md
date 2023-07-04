@@ -1,3 +1,4 @@
+* #906 - Handle differences in the awards script fields when merging a database
 * #1077 - Increase font size on finalist teams display
 * #1083 - Make it clear which report to use for finalist check in
 * #1080 - Add blank lines after paragraphs in the awards script
