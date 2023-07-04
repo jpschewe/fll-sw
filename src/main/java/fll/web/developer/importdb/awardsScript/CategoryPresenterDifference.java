@@ -29,13 +29,8 @@ public abstract class CategoryPresenterDifference extends CategoryStringDifferen
   }
 
   @Override
-  public String getDescription() {
-    final StringBuilder description = new StringBuilder();
-    description.append(String.format("<div>The presenter for category %s is different between the source database and the destination database.</div>",
-                                     getCategory().getTitle()));
-    description.append(String.format("<div>Source: %s</div>", getSourceValue()));
-    description.append(String.format("<div>Destination:%s </div>", getDestValue()));
-    return description.toString();
+  public String getFieldDescription() {
+    return "presenter";
   }
 
   @Override

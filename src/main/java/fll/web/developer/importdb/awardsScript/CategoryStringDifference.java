@@ -37,6 +37,21 @@ abstract class CategoryStringDifference extends StringDifference {
     return category;
   }
 
+  /**
+   * @return description of the field that has a difference
+   */
+  public abstract String getFieldDescription();
+
+  @Override
+  public final String getDescription() {
+    final StringBuilder description = new StringBuilder();
+    description.append(String.format("<div>The %s for category %s is different between the source database and the destination database.</div>",
+                                     getFieldDescription(), getCategory().getTitle()));
+    description.append(String.format("<div>Source: %s</div>", getSourceValue()));
+    description.append(String.format("<div>Destination:%s </div>", getDestValue()));
+    return description.toString();
+  }
+
   @Override
   public abstract void resolveDifference(Connection sourceConnection,
                                          Tournament sourceTournament,

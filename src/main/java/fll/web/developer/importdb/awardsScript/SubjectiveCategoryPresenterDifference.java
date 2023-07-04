@@ -17,7 +17,7 @@ import fll.xml.SubjectiveScoreCategory;
 /**
  * Difference in the presenter for a subjective category between 2 databases.
  */
-public class SubjectiveCategoryPresenterDifference extends CategoryTextDifference {
+public class SubjectiveCategoryPresenterDifference extends CategoryPresenterDifference {
 
   /**
    * @param category see {@link #getCategory()}
