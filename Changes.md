@@ -1,3 +1,4 @@
+* #1076 - Add the ability to easily get all teams ranked by performance score
 * #906 - Handle differences in the awards script fields when merging a database
 * #1077 - Increase font size on finalist teams display
 * #1083 - Make it clear which report to use for finalist check in

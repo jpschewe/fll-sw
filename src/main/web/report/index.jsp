@@ -115,6 +115,25 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <a class="wide" href="PerformanceScoreReport" target="_blank">Performance
         scores - by team </a>
 
+    <!-- performance ranks -->
+    <div class="wide">
+        <form action="<c:url value='/scoreboard/Top10'/>" method="POST"
+            target="report-top10">
+            Display performance scores with ranks
+            <input type="hidden" name="displayAll" value="true" />
+
+            <select name="divisionIndex">
+                <c:forEach items="${awardGroups}" var="awardGroup"
+                    varStatus="loopStatus">
+                    <option value="${loopStatus.index}">${awardGroup}</option>
+                </c:forEach>
+
+            </select>
+            <input type='submit' value='Display Performance Ranks' />
+        </form>
+    </div>
+    <!-- end performance ranks -->
+
     <a class="wide" href="PlayoffReport" target="_blank">Winners of
         each head to head bracket</a>
 

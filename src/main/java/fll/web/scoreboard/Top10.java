@@ -17,13 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
@@ -43,6 +39,12 @@ import fll.web.report.FinalComputedScores;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
 import fll.xml.WinnerType;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Compute top scores from the seeding rounds.
@@ -95,20 +97,31 @@ public class Top10 extends BaseFLLServlet {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
 
     try (Connection connection = datasource.getConnection()) {
-      final Integer divisionIndexObj = SessionAttributes.getAttribute(session, "divisionIndex", Integer.class);
-      int awardGroupIndex;
-      if (null == divisionIndexObj) {
-        awardGroupIndex = 0;
-      } else {
-        awardGroupIndex = divisionIndexObj.intValue();
+      final @Nullable String divisionIndexParam = request.getParameter("divisionIndex");
+      int awardGroupIndex = -1;
+      if (null != divisionIndexParam) {
+        try {
+          awardGroupIndex = Integer.valueOf(divisionIndexParam);
+        } catch (final NumberFormatException nfe) {
+          awardGroupIndex = -1;
+          LOGGER.debug("Error parsing divisionIndex parameter '{}', ignoring", divisionIndexParam);
+        }
       }
-      ++awardGroupIndex;
+
+      if (awardGroupIndex < 0) {
+        final @Nullable Integer divisionIndexObj = SessionAttributes.getAttribute(session, "divisionIndex",
+                                                                                  Integer.class);
+        if (null == divisionIndexObj) {
+          awardGroupIndex = 0;
+        } else {
+          awardGroupIndex = divisionIndexObj.intValue();
+        }
+      }
 
       final List<String> allAwardGroups = Queries.getAwardGroups(connection);
       if (awardGroupIndex >= allAwardGroups.size()) {
         awardGroupIndex = 0;
       }
-      session.setAttribute("divisionIndex", Integer.valueOf(awardGroupIndex));
 
       formatter.format("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">%n");
       formatter.format("<html>%n");
@@ -116,8 +129,12 @@ public class Top10 extends BaseFLLServlet {
       formatter.format("<title>Top scores</title>%n");
       formatter.format("<link rel='stylesheet' type='text/css' href='../style/fll-sw.css' />%n");
       formatter.format("<link rel='stylesheet' type='text/css' href='score_style.css' />%n");
-      formatter.format("<meta http-equiv='refresh' content='%d' />%n",
-                       GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
+
+      if (null == divisionIndexParam) {
+        // only refresh when using session
+        formatter.format("<meta http-equiv='refresh' content='%d' />%n",
+                         GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
+      }
 
       formatter.format("<script type=\"text/javascript\" src=\"set-font-size.js\"></script>%n");
 
@@ -176,6 +193,12 @@ public class Top10 extends BaseFLLServlet {
         });
 
       } // end divisions not empty
+
+      if (null == divisionIndexParam) {
+        // increment for next run if not specified as a parameter
+        ++awardGroupIndex;
+        session.setAttribute("divisionIndex", Integer.valueOf(awardGroupIndex));
+      }
 
     } catch (final SQLException e) {
       throw new RuntimeException("Error talking to the database", e);
