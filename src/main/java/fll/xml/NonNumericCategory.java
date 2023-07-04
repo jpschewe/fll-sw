@@ -168,7 +168,7 @@ public class NonNumericCategory implements AwardCategory, Serializable {
   }
 
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(final @Nullable Object o) {
     if (null == o) {
       return false;
     } else if (this == o) {

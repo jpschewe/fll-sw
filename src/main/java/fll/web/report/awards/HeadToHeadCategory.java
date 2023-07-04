@@ -6,6 +6,8 @@
 
 package fll.web.report.awards;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Store information about the head to head category.
  */
@@ -40,7 +42,7 @@ public final class HeadToHeadCategory implements AwardCategory {
   }
 
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(final @Nullable Object o) {
     if (null == o) {
       return false;
     } else if (this == o) {

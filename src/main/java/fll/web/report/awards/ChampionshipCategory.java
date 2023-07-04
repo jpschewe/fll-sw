@@ -6,6 +6,8 @@
 
 package fll.web.report.awards;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Store information about the championship.
  */
@@ -44,7 +46,7 @@ public final class ChampionshipCategory implements AwardCategory {
   }
 
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(final @Nullable Object o) {
     if (null == o) {
       return false;
     } else if (this == o) {
