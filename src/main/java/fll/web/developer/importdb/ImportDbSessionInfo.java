@@ -117,7 +117,7 @@ public final class ImportDbSessionInfo {
   }
 
   /**
-   * @return see {@link #setAwardsScriptDifferences(Collection)}
+   * @return see {@link #setAwardsScriptDifferences(List)}
    */
   public List<AwardsScriptDifference> getAwardsScriptDifferences() {
     return Collections.unmodifiableList(awardsScriptDifferences);

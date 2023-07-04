@@ -23,7 +23,7 @@ public final class SponsorsDifference extends AwardsScriptDifference {
 
   /**
    * @param sourceValue see {@link #getSourceValue()}
-   * @param destValue see {@link #getDestValues()}
+   * @param destValue see {@link #getDestValue()}
    */
   public SponsorsDifference(final List<String> sourceValue,
                             final List<String> destValue) {
