@@ -17,7 +17,7 @@ import fll.util.FLLInternalException;
 /**
  * Difference in a {@link Macro} value 2 databases.
  */
-public final class MacroValueDifference extends AwardsScriptDifference {
+public final class MacroValueDifference extends StringDifference {
 
   /**
    * @param macro see {@link #getMacro()}
@@ -27,18 +27,17 @@ public final class MacroValueDifference extends AwardsScriptDifference {
   public MacroValueDifference(final Macro macro,
                               final String sourceValue,
                               final String destValue) {
+    super(sourceValue, destValue);
     this.macro = macro;
-    this.sourceValue = sourceValue;
-    this.destValue = destValue;
   }
 
   @Override
   public String getDescription() {
     final StringBuilder description = new StringBuilder();
     description.append(String.format("<div>The value of macro %s is different between the source database and the destination database.</div>",
-                                     macro));
-    description.append(String.format("<div>Source: %s</div>", sourceValue));
-    description.append(String.format("<div>Destination:%s </div>", destValue));
+                                     getMacro()));
+    description.append(String.format("<div>Source: %s</div>", getSourceValue()));
+    description.append(String.format("<div>Destination:%s </div>", getDestValue()));
     return description.toString();
   }
 
@@ -49,24 +48,6 @@ public final class MacroValueDifference extends AwardsScriptDifference {
    */
   public Macro getMacro() {
     return macro;
-  }
-
-  private final String sourceValue;
-
-  /**
-   * @return macro value in the source database
-   */
-  public String getSourceValue() {
-    return sourceValue;
-  }
-
-  private final String destValue;
-
-  /**
-   * @return macro value in the destination database
-   */
-  public String getDestValue() {
-    return destValue;
   }
 
   @Override

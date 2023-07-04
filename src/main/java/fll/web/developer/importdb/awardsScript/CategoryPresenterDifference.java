@@ -15,7 +15,7 @@ import fll.web.report.awards.AwardCategory;
 /**
  * Difference in the presenter for a category between 2 databases.
  */
-public abstract class CategoryPresenterDifference extends AwardsScriptDifference {
+public abstract class CategoryPresenterDifference extends CategoryStringDifference {
 
   /**
    * @param category see {@link #getCategory()}
@@ -25,9 +25,7 @@ public abstract class CategoryPresenterDifference extends AwardsScriptDifference
   public CategoryPresenterDifference(final AwardCategory category,
                                      final String sourceValue,
                                      final String destValue) {
-    this.category = category;
-    this.sourceValue = sourceValue;
-    this.destValue = destValue;
+    super(category, sourceValue, destValue);
   }
 
   @Override
@@ -38,33 +36,6 @@ public abstract class CategoryPresenterDifference extends AwardsScriptDifference
     description.append(String.format("<div>Source: %s</div>", getSourceValue()));
     description.append(String.format("<div>Destination:%s </div>", getDestValue()));
     return description.toString();
-  }
-
-  private final AwardCategory category;
-
-  /**
-   * @return the category that has a different value
-   */
-  public AwardCategory getCategory() {
-    return category;
-  }
-
-  private final String sourceValue;
-
-  /**
-   * @return macro value in the source database
-   */
-  public final String getSourceValue() {
-    return sourceValue;
-  }
-
-  private final String destValue;
-
-  /**
-   * @return macro value in the destination database
-   */
-  public final String getDestValue() {
-    return destValue;
   }
 
   @Override

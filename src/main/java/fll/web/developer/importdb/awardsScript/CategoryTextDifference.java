@@ -15,7 +15,7 @@ import fll.web.report.awards.AwardCategory;
 /**
  * Difference in the text for a category between 2 databases.
  */
-public abstract class CategoryTextDifference extends AwardsScriptDifference {
+public abstract class CategoryTextDifference extends CategoryStringDifference {
 
   /**
    * @param category see {@link #getCategory()}
@@ -25,46 +25,17 @@ public abstract class CategoryTextDifference extends AwardsScriptDifference {
   public CategoryTextDifference(final AwardCategory category,
                                 final String sourceValue,
                                 final String destValue) {
-    this.category = category;
-    this.sourceValue = sourceValue;
-    this.destValue = destValue;
+    super(category, sourceValue, destValue);
   }
 
   @Override
   public String getDescription() {
     final StringBuilder description = new StringBuilder();
     description.append(String.format("<div>The text for category %s is different between the source database and the destination database.</div>",
-                                     category.getTitle()));
-    description.append(String.format("<div>Source: %s</div>", sourceValue));
-    description.append(String.format("<div>Destination:%s </div>", destValue));
+                                     getCategory().getTitle()));
+    description.append(String.format("<div>Source: %s</div>", getSourceValue()));
+    description.append(String.format("<div>Destination:%s </div>", getDestValue()));
     return description.toString();
-  }
-
-  private final AwardCategory category;
-
-  /**
-   * @return the category that has a different value
-   */
-  public AwardCategory getCategory() {
-    return category;
-  }
-
-  private final String sourceValue;
-
-  /**
-   * @return macro value in the source database
-   */
-  public String getSourceValue() {
-    return sourceValue;
-  }
-
-  private final String destValue;
-
-  /**
-   * @return macro value in the destination database
-   */
-  public String getDestValue() {
-    return destValue;
   }
 
   @Override

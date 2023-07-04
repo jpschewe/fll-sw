@@ -17,7 +17,7 @@ import fll.util.FLLInternalException;
 /**
  * Difference in the text for a {@link Section} between 2 databases.
  */
-public final class SectionTextDifference extends AwardsScriptDifference {
+public final class SectionTextDifference extends StringDifference {
 
   /**
    * @param section see {@link #getSection()}
@@ -27,18 +27,17 @@ public final class SectionTextDifference extends AwardsScriptDifference {
   public SectionTextDifference(final Section section,
                                final String sourceValue,
                                final String destValue) {
+    super(sourceValue, destValue);
     this.section = section;
-    this.sourceValue = sourceValue;
-    this.destValue = destValue;
   }
 
   @Override
   public String getDescription() {
     final StringBuilder description = new StringBuilder();
     description.append(String.format("<div>The text for section %s is different between the source database and the destination database.</div>",
-                                     section));
-    description.append(String.format("<div>Source: %s</div>", sourceValue));
-    description.append(String.format("<div>Destination:%s </div>", destValue));
+                                     getSection()));
+    description.append(String.format("<div>Source: %s</div>", getSourceValue()));
+    description.append(String.format("<div>Destination:%s </div>", getDestValue()));
     return description.toString();
   }
 
@@ -49,24 +48,6 @@ public final class SectionTextDifference extends AwardsScriptDifference {
    */
   public Section getSection() {
     return section;
-  }
-
-  private final String sourceValue;
-
-  /**
-   * @return macro value in the source database
-   */
-  public String getSourceValue() {
-    return sourceValue;
-  }
-
-  private final String destValue;
-
-  /**
-   * @return macro value in the destination database
-   */
-  public String getDestValue() {
-    return destValue;
   }
 
   @Override
