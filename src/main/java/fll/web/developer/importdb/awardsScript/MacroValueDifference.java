@@ -31,14 +31,8 @@ public final class MacroValueDifference extends StringDifference {
     this.macro = macro;
   }
 
-  @Override
-  public String getDescription() {
-    final StringBuilder description = new StringBuilder();
-    description.append(String.format("<div>The value of macro %s is different between the source database and the destination database.</div>",
-                                     getMacro()));
-    description.append(String.format("<div>Source: %s</div>", getSourceValue()));
-    description.append(String.format("<div>Destination:%s </div>", getDestValue()));
-    return description.toString();
+  protected String getTextDescription() {
+    return String.format("value of macro %s", getMacro());
   }
 
   private final Macro macro;

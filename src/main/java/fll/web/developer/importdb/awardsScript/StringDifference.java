@@ -26,8 +26,21 @@ import fll.Tournament;
     this.destValue = destValue;
   }
 
+  /**
+   * @return descriptive text for the description. See source for
+   *         {@link #getDescription()} for details.
+   */
+  protected abstract String getTextDescription();
+
   @Override
-  public abstract String getDescription();
+  public final String getDescription() {
+    final StringBuilder description = new StringBuilder();
+    description.append(String.format("<div>The % is different between the source database and the destination database.</div>",
+                                     getTextDescription()));
+    description.append(String.format("<div>Source: %s</div>", getSourceValue()));
+    description.append(String.format("<div>Destination:%s </div>", getDestValue()));
+    return description.toString();
+  }
 
   private final String sourceValue;
 

@@ -31,14 +31,8 @@ public final class SectionTextDifference extends StringDifference {
     this.section = section;
   }
 
-  @Override
-  public String getDescription() {
-    final StringBuilder description = new StringBuilder();
-    description.append(String.format("<div>The text for section %s is different between the source database and the destination database.</div>",
-                                     getSection()));
-    description.append(String.format("<div>Source: %s</div>", getSourceValue()));
-    description.append(String.format("<div>Destination:%s </div>", getDestValue()));
-    return description.toString();
+  protected String getTextDescription() {
+    return String.format("text for section %s", getSection());
   }
 
   private final Section section;
