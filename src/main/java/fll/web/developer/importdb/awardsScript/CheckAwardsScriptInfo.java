@@ -69,11 +69,12 @@ public class CheckAwardsScriptInfo extends BaseFLLServlet {
 
       final List<AwardsScriptDifference> differences = ImportDB.checkAwardsScriptInfo(sourceConnection, destConnection,
                                                                                       tournament);
+      sessionInfo.setAwardsScriptDifferences(differences);
+      session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
+
       if (differences.isEmpty()) {
         session.setAttribute(SessionAttributes.REDIRECT_URL, "/developer/importdb/ExecuteImport");
       } else {
-        sessionInfo.setAwardsScriptDifferences(differences);
-        session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
         session.setAttribute(SessionAttributes.REDIRECT_URL,
                              "/developer/importdb/awardsScript/resolveAwardsScriptDifferences.jsp");
       }
