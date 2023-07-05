@@ -19,13 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
 
@@ -48,6 +41,13 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -129,7 +129,7 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
   private Element createHeader(final Document document,
                                final String challengeName,
                                final Tournament tournament) {
-    final Element staticContent = FOPUtils.createXslFoElement(document, "static-content");
+    final Element staticContent = FOPUtils.createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
     staticContent.setAttribute("flow-name", "xsl-region-before");
     staticContent.setAttribute("font-weight", TITLE_FONT_WEIGHT);
     staticContent.setAttribute("font-size", TITLE_FONT_SIZE);

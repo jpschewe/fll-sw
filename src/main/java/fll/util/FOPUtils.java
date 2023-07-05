@@ -275,7 +275,7 @@ public final class FOPUtils {
                                                     final @Nullable String additionalFooterText,
                                                     final String pageSequenceId) {
 
-    final Element staticContent = createXslFoElement(document, "static-content");
+    final Element staticContent = createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
     staticContent.setAttribute("flow-name", "xsl-region-after");
     staticContent.setAttribute("font-size", "10pt");
 
@@ -978,7 +978,7 @@ public final class FOPUtils {
       return null;
     }
 
-    final Element staticContent = FOPUtils.createXslFoElement(document, "static-content");
+    final Element staticContent = FOPUtils.createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
     staticContent.setAttribute("flow-name", "xsl-region-after");
 
     final Element block = createCopyrightBlock(document, description);

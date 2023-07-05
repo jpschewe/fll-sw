@@ -293,7 +293,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
   private Element createLegend(final Document document) {
 
-    final Element staticContent = FOPUtils.createXslFoElement(document, "static-content");
+    final Element staticContent = FOPUtils.createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
     staticContent.setAttribute("flow-name", "xsl-region-before");
 
     final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
