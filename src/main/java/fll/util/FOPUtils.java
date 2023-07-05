@@ -239,7 +239,8 @@ public final class FOPUtils {
 
   /**
    * Simple footer with page numbers. Font size is set to 10pt.
-   * This needs the id {@link #PAGE_SEQUENCE_NAME} in the page sequence.
+   * This needs the id {@link #PAGE_SEQUENCE_NAME} set in an element that is on
+   * the last page.
    * 
    * @param document used to create elements
    * @return the element to be added to the page sequence
@@ -251,29 +252,33 @@ public final class FOPUtils {
 
   /**
    * @param document used to create elements
-   * @param pageSequenceId the id to reference for counting pages
+   * @param lastPageElementId the id to reference for counting pages, this id
+   *          needs
+   *          to be in an element on the last page of the document
    * @return the footer element
    */
   public static Element createSimpleFooter(final Document document,
-                                           final String pageSequenceId) {
-    return createSimpleFooterInternal(document, null, pageSequenceId);
+                                           final String lastPageElementId) {
+    return createSimpleFooterInternal(document, null, lastPageElementId);
   }
 
   /**
    * @param document used to create elements
    * @param additionalFooterText additional text to put in the footer
-   * @param pageSequenceId the id to reference for counting pages
+   * @param lastPageElementId the id to reference for counting pages, this id
+   *          needs
+   *          to be in an element on the last page of the document
    * @return the footer element
    */
   public static Element createSimpleFooter(final Document document,
                                            final String additionalFooterText,
-                                           final String pageSequenceId) {
-    return createSimpleFooterInternal(document, additionalFooterText, pageSequenceId);
+                                           final String lastPageElementId) {
+    return createSimpleFooterInternal(document, additionalFooterText, lastPageElementId);
   }
 
   private static Element createSimpleFooterInternal(final Document document,
                                                     final @Nullable String additionalFooterText,
-                                                    final String pageSequenceId) {
+                                                    final String lastPageElementId) {
 
     final Element staticContent = createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
     staticContent.setAttribute("flow-name", "xsl-region-after");
@@ -291,7 +296,7 @@ public final class FOPUtils {
     block.appendChild(createXslFoElement(document, "page-number"));
     block.appendChild(document.createTextNode(" of "));
     final Element lastPage = createXslFoElement(document, "page-number-citation-last");
-    lastPage.setAttribute("ref-id", pageSequenceId);
+    lastPage.setAttribute("ref-id", lastPageElementId);
     block.appendChild(lastPage);
 
     staticContent.appendChild(block);

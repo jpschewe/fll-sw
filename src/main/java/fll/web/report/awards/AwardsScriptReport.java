@@ -158,6 +158,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     final Element rootElement = FOPUtils.createRoot(document);
     document.appendChild(rootElement);
+    rootElement.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
 
     final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
     rootElement.appendChild(layoutMasterSet);
@@ -184,7 +185,6 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     final Element footer = FOPUtils.createSimpleFooter(document);
     pageSequence.appendChild(footer);
-    pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
 
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
