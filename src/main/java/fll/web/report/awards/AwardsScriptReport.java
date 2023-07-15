@@ -177,43 +177,55 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                                                headerHeight, footerHeight);
     layoutMasterSet.appendChild(pageMaster);
 
-    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
-    rootElement.appendChild(pageSequence);
+    final Element pageSequenceStart = FOPUtils.createPageSequence(document, pageMasterName);
+    rootElement.appendChild(pageSequenceStart);
 
-    final Element header = createHeader(document, description, tournament, null);
-    pageSequence.appendChild(header);
+    final Element headerStart = createHeader(document, description, tournament, null);
+    pageSequenceStart.appendChild(headerStart);
 
-    final Element footer = createFooter(document, null);
-    pageSequence.appendChild(footer);
+    final Element footerStart = createFooter(document, null);
+    pageSequenceStart.appendChild(footerStart);
 
-    final Element documentBody = FOPUtils.createBody(document);
-    pageSequence.appendChild(documentBody);
+    final Element documentBodyStart = FOPUtils.createBody(document);
+    pageSequenceStart.appendChild(documentBodyStart);
 
     final Element intro = createSectionBlock(connection, document, tournament, templateContext,
                                              AwardsScript.Section.FRONT_MATTER);
-    documentBody.appendChild(intro);
+    documentBodyStart.appendChild(intro);
     intro.setAttribute("space-after", BLOCK_SPACING);
 
     final Element sponsors = createSponsors(connection, document, tournament, templateContext);
-    documentBody.appendChild(sponsors);
+    documentBodyStart.appendChild(sponsors);
     sponsors.setAttribute("space-after", BLOCK_SPACING);
 
     final Element volunteers = createVolunteers(connection, tournament, document, templateContext);
-    documentBody.appendChild(volunteers);
+    documentBodyStart.appendChild(volunteers);
     volunteers.setAttribute("page-break-after", "always");
 
-    addAwards(description, connection, document, tournament, templateContext, documentBody);
+    addAwards(description, connection, document, tournament, templateContext, pageMasterName, rootElement);
+
+    final Element pageSequenceEnd = FOPUtils.createPageSequence(document, pageMasterName);
+    rootElement.appendChild(pageSequenceEnd);
+
+    final Element headerEnd = createHeader(document, description, tournament, null);
+    pageSequenceEnd.appendChild(headerEnd);
+
+    final Element footerEnd = createFooter(document, null);
+    pageSequenceEnd.appendChild(footerEnd);
+
+    final Element documentBodyEnd = FOPUtils.createBody(document);
+    pageSequenceEnd.appendChild(documentBodyEnd);
 
     final Element endAwards = createSectionBlock(connection, document, tournament, templateContext,
                                                  AwardsScript.Section.END_AWARDS);
-    documentBody.appendChild(endAwards);
+    documentBodyEnd.appendChild(endAwards);
 
     final Element advancing = createAdvancingTeams(connection, document, tournament);
-    documentBody.appendChild(advancing);
+    documentBodyEnd.appendChild(advancing);
 
     final Element footerSection = createSectionBlock(connection, document, tournament, templateContext,
                                                      AwardsScript.Section.FOOTER);
-    documentBody.appendChild(footerSection);
+    documentBodyEnd.appendChild(footerSection);
 
     return document;
   }
@@ -313,7 +325,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
                          final Document document,
                          final Tournament tournament,
                          final VelocityContext templateContext,
-                         final Element documentBody)
+                         final String pageMasterName,
+                         final Element rootElement)
       throws SQLException {
     final List<String> awardGroupOrder = getAwardGroupOrder(connection, tournament);
     final List<AwardCategory> awardOrder = AwardsScript.getAwardOrder(description, connection, tournament);
@@ -390,6 +403,20 @@ public class AwardsScriptReport extends BaseFLLServlet {
       }
 
       if (null != categoryPage) {
+        final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
+        rootElement.appendChild(pageSequence);
+
+        // FIXME add the after award here
+        final Element header = createHeader(document, description, tournament, null);
+        pageSequence.appendChild(header);
+
+        // FIXME add the before award here
+        final Element footer = createFooter(document, null);
+        pageSequence.appendChild(footer);
+
+        final Element documentBody = FOPUtils.createBody(document);
+        pageSequence.appendChild(documentBody);
+
         documentBody.appendChild(categoryPage);
         categoryPage.setAttribute("page-break-after", "always");
       }
