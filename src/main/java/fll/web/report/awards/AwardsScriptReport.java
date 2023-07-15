@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Formatter;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Objects;
@@ -320,6 +321,32 @@ public class AwardsScriptReport extends BaseFLLServlet {
                             .collect(Collectors.toList());
   }
 
+  private List<AwardCategory> filterAwardOrder(final Connection connection,
+                                               final Tournament tournament,
+                                               final List<AwardCategory> fullAwardOrder)
+      throws SQLException {
+
+    final List<AwardCategory> filteredAwardOrder = new LinkedList<>();
+    for (final AwardCategory category : fullAwardOrder) {
+      LOGGER.trace("Processing category {}", category.getTitle());
+
+      if (category instanceof NonNumericCategory
+          && CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournament.getLevel(),
+                                                           (NonNumericCategory) category)) {
+        LOGGER.debug("Ignoring category {}", category.getTitle());
+        continue;
+      } else if (category instanceof HeadToHeadCategory) {
+        if (!TournamentParameters.getRunningHeadToHead(connection, tournament.getTournamentID())) {
+          continue;
+        }
+      } else {
+        filteredAwardOrder.add(category);
+      }
+    }
+
+    return filteredAwardOrder;
+  }
+
   private void addAwards(final ChallengeDescription description,
                          final Connection connection,
                          final Document document,
@@ -329,7 +356,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
                          final Element rootElement)
       throws SQLException {
     final List<String> awardGroupOrder = getAwardGroupOrder(connection, tournament);
-    final List<AwardCategory> awardOrder = AwardsScript.getAwardOrder(description, connection, tournament);
+    final List<AwardCategory> fullAwardOrder = AwardsScript.getAwardOrder(description, connection, tournament);
+    final List<AwardCategory> awardOrder = filterAwardOrder(connection, tournament, fullAwardOrder);
 
     final Map<String, FinalistSchedule> finalistSchedulesPerAwardGroup = FinalistSchedule.loadSchedules(connection,
                                                                                                         tournament);
@@ -355,14 +383,17 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     @Nullable
     AwardCategory prevCategory = null;
-    for (final AwardCategory category : awardOrder) {
+    final ListIterator<AwardCategory> iter = awardOrder.listIterator();
+    while (iter.hasNext()) {
+      final AwardCategory category = iter.next();
+
       LOGGER.trace("Processing category {}", category.getTitle());
 
       if (category instanceof NonNumericCategory
           && CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournament.getLevel(),
                                                            (NonNumericCategory) category)) {
-        LOGGER.debug("Ignoring category {}", category.getTitle());
-        continue;
+        throw new FLLInternalException("Should have filtered this ignored non-numberic category out: "
+            + category.getTitle());
       }
 
       final Element categoryPage;
@@ -395,7 +426,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
           categoryPage = createHeadToHead(connection, tournament, description, document, templateContext,
                                           awardGroupOrder, category);
         } else {
-          continue;
+          throw new FLLInternalException("Should have filtered out head to head category when not enabled in this tournament");
         }
       } else {
         categoryPage = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
@@ -412,8 +443,18 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                             null == prevCategory ? null : prevCategory.getTitle());
         pageSequence.appendChild(header);
 
-        // FIXME add the before award here
-        final Element footer = createFooter(document, null);
+        final @Nullable String beforeText;
+        if (iter.hasNext()) {
+          final AwardCategory nextCategory = iter.next();
+          beforeText = nextCategory.getTitle();
+
+          // move back
+          iter.previous();
+        } else {
+          beforeText = null;
+        }
+
+        final Element footer = createFooter(document, beforeText);
         pageSequence.appendChild(footer);
 
         final Element documentBody = FOPUtils.createBody(document);
