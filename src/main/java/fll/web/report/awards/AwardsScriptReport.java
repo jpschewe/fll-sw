@@ -180,10 +180,10 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
 
-    final Element header = createHeader(document, description, tournament);
+    final Element header = createHeader(document, description, tournament, null);
     pageSequence.appendChild(header);
 
-    final Element footer = FOPUtils.createSimpleFooter(document);
+    final Element footer = createFooter(document, null);
     pageSequence.appendChild(footer);
 
     final Element documentBody = FOPUtils.createBody(document);
@@ -216,6 +216,50 @@ public class AwardsScriptReport extends BaseFLLServlet {
     documentBody.appendChild(footerSection);
 
     return document;
+  }
+
+  /**
+   * @param beforeText used to specify the award that this is before
+   */
+  private Element createFooter(final Document document,
+                               final @Nullable String beforeText) {
+    final Element staticContent = FOPUtils.createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
+    staticContent.setAttribute("flow-name", "xsl-region-after");
+    staticContent.setAttribute("font-size", "10pt");
+
+    final Element table = FOPUtils.createBasicTable(document);
+    staticContent.appendChild(table);
+
+    table.appendChild(FOPUtils.createTableColumn(document, 1));
+    table.appendChild(FOPUtils.createTableColumn(document, 1));
+    table.appendChild(FOPUtils.createTableColumn(document, 1));
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+    table.appendChild(tableBody);
+
+    final Element row = FOPUtils.createTableRow(document);
+    tableBody.appendChild(row);
+
+    final Element leftCell = FOPUtils.createTableCell(document, null, "");
+    row.appendChild(leftCell);
+
+    final Element centerCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "");
+    row.appendChild(centerCell);
+    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    block.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_CENTER);
+    block.appendChild(document.createTextNode("Page "));
+    block.appendChild(FOPUtils.createXslFoElement(document, "page-number"));
+    block.appendChild(document.createTextNode(" of "));
+    final Element lastPage = FOPUtils.createXslFoElement(document, "page-number-citation-last");
+    lastPage.setAttribute("ref-id", FOPUtils.PAGE_SEQUENCE_NAME);
+    block.appendChild(lastPage);
+    centerCell.appendChild(block);
+
+    final Element rightCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, null == beforeText ? ""
+        : String.format("Before %s", beforeText));
+    row.appendChild(rightCell);
+
+    return staticContent;
   }
 
   private Element createAdvancingTeams(final Connection connection,
@@ -936,9 +980,13 @@ public class AwardsScriptReport extends BaseFLLServlet {
     return titleBuilder.toString();
   }
 
+  /**
+   * @param afterText used to specify the award that this is after
+   */
   private Element createHeader(final Document document,
                                final ChallengeDescription description,
-                               final Tournament tournament) {
+                               final Tournament tournament,
+                               final @Nullable String afterText) {
     final Element staticContent = FOPUtils.createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
     staticContent.setAttribute("flow-name", "xsl-region-before");
     staticContent.setAttribute("font-size", "10pt");
@@ -973,6 +1021,14 @@ public class AwardsScriptReport extends BaseFLLServlet {
       final String dateString = String.format("Date: %s", AwardsReport.DATE_FORMATTER.format(tournamentDate));
 
       subtitleBlock.appendChild(document.createTextNode(dateString));
+    }
+
+    if (null != afterText) {
+      final Element afterBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      staticContent.appendChild(afterBlock);
+
+      afterBlock.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_RIGHT);
+      afterBlock.appendChild(document.createTextNode(String.format("After %s", afterText)));
     }
 
     staticContent.appendChild(FOPUtils.createBlankLine(document));
