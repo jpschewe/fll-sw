@@ -365,7 +365,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
         continue;
       }
 
-      final @Nullable Element categoryPage;
+      final Element categoryPage;
       if (category instanceof PerformanceScoreCategory) {
         categoryPage = createPerformanceCategory(description, connection, tournament, document, templateContext,
                                                  awardGroupOrder, (PerformanceScoreCategory) category);
@@ -395,7 +395,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
           categoryPage = createHeadToHead(connection, tournament, description, document, templateContext,
                                           awardGroupOrder, category);
         } else {
-          categoryPage = null;
+          continue;
         }
       } else {
         categoryPage = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
