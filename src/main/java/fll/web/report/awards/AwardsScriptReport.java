@@ -353,6 +353,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                                                                        tournament.getTournamentID());
     final Map<String, Map<String, List<AwardWinner>>> organizedSubjectiveWinners = AwardsReport.organizeAwardWinners(subjectiveWinners);
 
+    @Nullable
+    AwardCategory prevCategory = null;
     for (final AwardCategory category : awardOrder) {
       LOGGER.trace("Processing category {}", category.getTitle());
 
@@ -406,8 +408,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
         final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
         rootElement.appendChild(pageSequence);
 
-        // FIXME add the after award here
-        final Element header = createHeader(document, description, tournament, null);
+        final Element header = createHeader(document, description, tournament,
+                                            null == prevCategory ? null : prevCategory.getTitle());
         pageSequence.appendChild(header);
 
         // FIXME add the before award here
@@ -419,6 +421,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
         documentBody.appendChild(categoryPage);
         categoryPage.setAttribute("page-break-after", "always");
+
+        prevCategory = category;
       }
     }
   }
@@ -1018,6 +1022,14 @@ public class AwardsScriptReport extends BaseFLLServlet {
     staticContent.setAttribute("flow-name", "xsl-region-before");
     staticContent.setAttribute("font-size", "10pt");
 
+    if (null != afterText) {
+      final Element afterBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      staticContent.appendChild(afterBlock);
+
+      afterBlock.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_LEFT);
+      afterBlock.appendChild(document.createTextNode(String.format("After %s", afterText)));
+    }
+
     final Element titleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     staticContent.appendChild(titleBlock);
     titleBlock.setAttribute("text-align", "center");
@@ -1048,14 +1060,6 @@ public class AwardsScriptReport extends BaseFLLServlet {
       final String dateString = String.format("Date: %s", AwardsReport.DATE_FORMATTER.format(tournamentDate));
 
       subtitleBlock.appendChild(document.createTextNode(dateString));
-    }
-
-    if (null != afterText) {
-      final Element afterBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-      staticContent.appendChild(afterBlock);
-
-      afterBlock.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_RIGHT);
-      afterBlock.appendChild(document.createTextNode(String.format("After %s", afterText)));
     }
 
     staticContent.appendChild(FOPUtils.createBlankLine(document));
