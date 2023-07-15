@@ -1,3 +1,4 @@
+* #1079 - Add before and after award text to the awards script
 * #1076 - Add the ability to easily get all teams ranked by performance score
 * #906 - Handle differences in the awards script fields when merging a database
 * #1077 - Increase font size on finalist teams display
