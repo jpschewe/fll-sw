@@ -80,7 +80,7 @@ import jakarta.servlet.http.HttpSession;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
- * 
+ * Generate the awards script as a PDF.
  */
 @WebServlet("/report/awards/AwardsScriptReport")
 public class AwardsScriptReport extends BaseFLLServlet {
