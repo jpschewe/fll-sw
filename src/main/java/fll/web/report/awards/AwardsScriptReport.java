@@ -166,9 +166,9 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     final double leftMargin = 0.5;
     final double rightMargin = leftMargin;
-    final double topMargin = 1;
+    final double topMargin = 0.5;
     final double bottomMargin = 0.5;
-    final double headerHeight = topMargin;
+    final double headerHeight = 1.2;
     final double footerHeight = 0.3;
 
     final String pageMasterName = "simple";
