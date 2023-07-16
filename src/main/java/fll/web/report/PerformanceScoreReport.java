@@ -460,7 +460,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
                                       final String challengeName,
                                       final Tournament tournament,
                                       final @Nullable TournamentTeam team) {
-    final Element staticContent = FOPUtils.createXslFoElement(document, "static-content");
+    final Element staticContent = FOPUtils.createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
     staticContent.setAttribute("flow-name", "xsl-region-before");
     staticContent.setAttribute("font-weight", TITLE_FONT_WEIGHT);
     staticContent.setAttribute("font-size", TITLE_FONT_SIZE);

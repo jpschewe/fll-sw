@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Formatter;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Objects;
@@ -80,7 +81,7 @@ import jakarta.servlet.http.HttpSession;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
- * 
+ * Generate the awards script as a PDF.
  */
 @WebServlet("/report/awards/AwardsScriptReport")
 public class AwardsScriptReport extends BaseFLLServlet {
@@ -158,15 +159,16 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     final Element rootElement = FOPUtils.createRoot(document);
     document.appendChild(rootElement);
+    rootElement.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
 
     final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
     rootElement.appendChild(layoutMasterSet);
 
     final double leftMargin = 0.5;
     final double rightMargin = leftMargin;
-    final double topMargin = 1;
+    final double topMargin = 0.5;
     final double bottomMargin = 0.5;
-    final double headerHeight = topMargin;
+    final double headerHeight = 1.2;
     final double footerHeight = 0.3;
 
     final String pageMasterName = "simple";
@@ -176,46 +178,101 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                                                headerHeight, footerHeight);
     layoutMasterSet.appendChild(pageMaster);
 
-    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
-    rootElement.appendChild(pageSequence);
+    final Element pageSequenceStart = FOPUtils.createPageSequence(document, pageMasterName);
+    rootElement.appendChild(pageSequenceStart);
 
-    final Element header = createHeader(document, description, tournament);
-    pageSequence.appendChild(header);
+    final Element headerStart = createHeader(document, description, tournament, null);
+    pageSequenceStart.appendChild(headerStart);
 
-    final Element footer = FOPUtils.createSimpleFooter(document);
-    pageSequence.appendChild(footer);
-    pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
+    final Element footerStart = createFooter(document, null);
+    pageSequenceStart.appendChild(footerStart);
 
-    final Element documentBody = FOPUtils.createBody(document);
-    pageSequence.appendChild(documentBody);
+    final Element documentBodyStart = FOPUtils.createBody(document);
+    pageSequenceStart.appendChild(documentBodyStart);
 
     final Element intro = createSectionBlock(connection, document, tournament, templateContext,
                                              AwardsScript.Section.FRONT_MATTER);
-    documentBody.appendChild(intro);
+    documentBodyStart.appendChild(intro);
     intro.setAttribute("space-after", BLOCK_SPACING);
 
     final Element sponsors = createSponsors(connection, document, tournament, templateContext);
-    documentBody.appendChild(sponsors);
+    documentBodyStart.appendChild(sponsors);
     sponsors.setAttribute("space-after", BLOCK_SPACING);
 
     final Element volunteers = createVolunteers(connection, tournament, document, templateContext);
-    documentBody.appendChild(volunteers);
+    documentBodyStart.appendChild(volunteers);
     volunteers.setAttribute("page-break-after", "always");
 
-    addAwards(description, connection, document, tournament, templateContext, documentBody);
+    addAwards(description, connection, document, tournament, templateContext, pageMasterName, rootElement);
+
+    final Element pageSequenceEnd = FOPUtils.createPageSequence(document, pageMasterName);
+    rootElement.appendChild(pageSequenceEnd);
+
+    final Element headerEnd = createHeader(document, description, tournament, null);
+    pageSequenceEnd.appendChild(headerEnd);
+
+    final Element footerEnd = createFooter(document, null);
+    pageSequenceEnd.appendChild(footerEnd);
+
+    final Element documentBodyEnd = FOPUtils.createBody(document);
+    pageSequenceEnd.appendChild(documentBodyEnd);
 
     final Element endAwards = createSectionBlock(connection, document, tournament, templateContext,
                                                  AwardsScript.Section.END_AWARDS);
-    documentBody.appendChild(endAwards);
+    documentBodyEnd.appendChild(endAwards);
 
     final Element advancing = createAdvancingTeams(connection, document, tournament);
-    documentBody.appendChild(advancing);
+    documentBodyEnd.appendChild(advancing);
 
     final Element footerSection = createSectionBlock(connection, document, tournament, templateContext,
                                                      AwardsScript.Section.FOOTER);
-    documentBody.appendChild(footerSection);
+    documentBodyEnd.appendChild(footerSection);
 
     return document;
+  }
+
+  /**
+   * @param beforeText used to specify the award that this is before
+   */
+  private Element createFooter(final Document document,
+                               final @Nullable String beforeText) {
+    final Element staticContent = FOPUtils.createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
+    staticContent.setAttribute("flow-name", "xsl-region-after");
+    staticContent.setAttribute("font-size", "10pt");
+
+    final Element table = FOPUtils.createBasicTable(document);
+    staticContent.appendChild(table);
+
+    table.appendChild(FOPUtils.createTableColumn(document, 1));
+    table.appendChild(FOPUtils.createTableColumn(document, 1));
+    table.appendChild(FOPUtils.createTableColumn(document, 1));
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+    table.appendChild(tableBody);
+
+    final Element row = FOPUtils.createTableRow(document);
+    tableBody.appendChild(row);
+
+    final Element leftCell = FOPUtils.createTableCell(document, null, "");
+    row.appendChild(leftCell);
+
+    final Element centerCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "");
+    row.appendChild(centerCell);
+    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    block.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_CENTER);
+    block.appendChild(document.createTextNode("Page "));
+    block.appendChild(FOPUtils.createXslFoElement(document, "page-number"));
+    block.appendChild(document.createTextNode(" of "));
+    final Element lastPage = FOPUtils.createXslFoElement(document, "page-number-citation-last");
+    lastPage.setAttribute("ref-id", FOPUtils.PAGE_SEQUENCE_NAME);
+    block.appendChild(lastPage);
+    centerCell.appendChild(block);
+
+    final Element rightCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, null == beforeText ? ""
+        : String.format("Before %s", beforeText));
+    row.appendChild(rightCell);
+
+    return staticContent;
   }
 
   private Element createAdvancingTeams(final Connection connection,
@@ -264,15 +321,43 @@ public class AwardsScriptReport extends BaseFLLServlet {
                             .collect(Collectors.toList());
   }
 
+  private List<AwardCategory> filterAwardOrder(final Connection connection,
+                                               final Tournament tournament,
+                                               final List<AwardCategory> fullAwardOrder)
+      throws SQLException {
+
+    final List<AwardCategory> filteredAwardOrder = new LinkedList<>();
+    for (final AwardCategory category : fullAwardOrder) {
+      LOGGER.trace("Processing category {}", category.getTitle());
+
+      if (category instanceof NonNumericCategory
+          && CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournament.getLevel(),
+                                                           (NonNumericCategory) category)) {
+        LOGGER.debug("Ignoring category {}", category.getTitle());
+        continue;
+      } else if (category instanceof HeadToHeadCategory) {
+        if (!TournamentParameters.getRunningHeadToHead(connection, tournament.getTournamentID())) {
+          continue;
+        }
+      } else {
+        filteredAwardOrder.add(category);
+      }
+    }
+
+    return filteredAwardOrder;
+  }
+
   private void addAwards(final ChallengeDescription description,
                          final Connection connection,
                          final Document document,
                          final Tournament tournament,
                          final VelocityContext templateContext,
-                         final Element documentBody)
+                         final String pageMasterName,
+                         final Element rootElement)
       throws SQLException {
     final List<String> awardGroupOrder = getAwardGroupOrder(connection, tournament);
-    final List<AwardCategory> awardOrder = AwardsScript.getAwardOrder(description, connection, tournament);
+    final List<AwardCategory> fullAwardOrder = AwardsScript.getAwardOrder(description, connection, tournament);
+    final List<AwardCategory> awardOrder = filterAwardOrder(connection, tournament, fullAwardOrder);
 
     final Map<String, FinalistSchedule> finalistSchedulesPerAwardGroup = FinalistSchedule.loadSchedules(connection,
                                                                                                         tournament);
@@ -296,17 +381,22 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                                                                        tournament.getTournamentID());
     final Map<String, Map<String, List<AwardWinner>>> organizedSubjectiveWinners = AwardsReport.organizeAwardWinners(subjectiveWinners);
 
-    for (final AwardCategory category : awardOrder) {
+    @Nullable
+    AwardCategory prevCategory = null;
+    final ListIterator<AwardCategory> iter = awardOrder.listIterator();
+    while (iter.hasNext()) {
+      final AwardCategory category = iter.next();
+
       LOGGER.trace("Processing category {}", category.getTitle());
 
       if (category instanceof NonNumericCategory
           && CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournament.getLevel(),
                                                            (NonNumericCategory) category)) {
-        LOGGER.debug("Ignoring category {}", category.getTitle());
-        continue;
+        throw new FLLInternalException("Should have filtered this ignored non-numberic category out: "
+            + category.getTitle());
       }
 
-      final @Nullable Element categoryPage;
+      final Element categoryPage;
       if (category instanceof PerformanceScoreCategory) {
         categoryPage = createPerformanceCategory(description, connection, tournament, document, templateContext,
                                                  awardGroupOrder, (PerformanceScoreCategory) category);
@@ -336,7 +426,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
           categoryPage = createHeadToHead(connection, tournament, description, document, templateContext,
                                           awardGroupOrder, category);
         } else {
-          categoryPage = null;
+          throw new FLLInternalException("Should have filtered out head to head category when not enabled in this tournament");
         }
       } else {
         categoryPage = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
@@ -346,8 +436,34 @@ public class AwardsScriptReport extends BaseFLLServlet {
       }
 
       if (null != categoryPage) {
+        final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
+        rootElement.appendChild(pageSequence);
+
+        final Element header = createHeader(document, description, tournament,
+                                            null == prevCategory ? null : prevCategory.getTitle());
+        pageSequence.appendChild(header);
+
+        final @Nullable String beforeText;
+        if (iter.hasNext()) {
+          final AwardCategory nextCategory = iter.next();
+          beforeText = nextCategory.getTitle();
+
+          // move back
+          iter.previous();
+        } else {
+          beforeText = null;
+        }
+
+        final Element footer = createFooter(document, beforeText);
+        pageSequence.appendChild(footer);
+
+        final Element documentBody = FOPUtils.createBody(document);
+        pageSequence.appendChild(documentBody);
+
         documentBody.appendChild(categoryPage);
         categoryPage.setAttribute("page-break-after", "always");
+
+        prevCategory = category;
       }
     }
   }
@@ -936,12 +1052,24 @@ public class AwardsScriptReport extends BaseFLLServlet {
     return titleBuilder.toString();
   }
 
+  /**
+   * @param afterText used to specify the award that this is after
+   */
   private Element createHeader(final Document document,
                                final ChallengeDescription description,
-                               final Tournament tournament) {
-    final Element staticContent = FOPUtils.createXslFoElement(document, "static-content");
+                               final Tournament tournament,
+                               final @Nullable String afterText) {
+    final Element staticContent = FOPUtils.createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
     staticContent.setAttribute("flow-name", "xsl-region-before");
     staticContent.setAttribute("font-size", "10pt");
+
+    if (null != afterText) {
+      final Element afterBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      staticContent.appendChild(afterBlock);
+
+      afterBlock.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_LEFT);
+      afterBlock.appendChild(document.createTextNode(String.format("After %s", afterText)));
+    }
 
     final Element titleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     staticContent.appendChild(titleBlock);

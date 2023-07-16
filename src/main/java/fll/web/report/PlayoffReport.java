@@ -310,7 +310,7 @@ public class PlayoffReport extends BaseFLLServlet {
   private static Element createHeader(final Document document,
                                       final ChallengeDescription description,
                                       final Tournament tournament) {
-    final Element staticContent = FOPUtils.createXslFoElement(document, "static-content");
+    final Element staticContent = FOPUtils.createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
     staticContent.setAttribute("flow-name", "xsl-region-before");
     staticContent.setAttribute("font-size", "10pt");
 
