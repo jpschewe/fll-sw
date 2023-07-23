@@ -1111,7 +1111,7 @@ public class SubjectivePdfWriter {
     final Element commentsLabelRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
     tableBody.appendChild(commentsLabelRow);
 
-    final Element commentsLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Comments");
+    final Element commentsLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Feedback Comments");
     commentsLabelRow.appendChild(commentsLabel);
     commentsLabel.setAttribute("font-size", "10pt");
     commentsLabel.setAttribute("font-weight", "bold");
