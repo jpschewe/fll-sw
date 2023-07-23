@@ -36,6 +36,7 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.SubjectiveScore;
+import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
@@ -276,16 +277,22 @@ public class SubjectivePdfWriter {
     final Element teamNumberEle = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
     categoryTeamNumberBlock.appendChild(teamNumberEle);
     teamNumberEle.setAttribute("font-size", "12pt");
-    teamNumberEle.appendChild(document.createTextNode(String.format("    Team Number: %d", teamNumber)));
+    teamNumberEle.appendChild(document.createTextNode(String.format("    Team Number: %s",
+                                                                    Team.NULL_TEAM_NUMBER == teamNumber ? ""
+                                                                        : Integer.toString(teamNumber))));
 
     final String scheduledTimeStr;
-    if (null == scheduledTime) {
+    if (Team.NULL_TEAM_NUMBER == teamNumber) {
+      scheduledTimeStr = "";
+    } else if (null == scheduledTime) {
       scheduledTimeStr = "N/A";
     } else {
       scheduledTimeStr = TournamentSchedule.formatTime(scheduledTime);
     }
     final Element timeCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
-                                                            String.format("Time: %s", scheduledTimeStr));
+                                                            String.format("Time: %s",
+                                                                          StringUtils.leftPad(scheduledTimeStr, 5,
+                                                                                              Utilities.NON_BREAKING_SPACE)));
     row1.appendChild(timeCell);
     timeCell.setAttribute("font-size", "12pt");
     timeCell.setAttribute("font-weight", "bold");
