@@ -249,8 +249,7 @@ public class SubjectivePdfWriter {
     final Element imageGraphic = FOPUtils.createXslFoElement(document, "external-graphic");
     imageBlock.appendChild(imageGraphic);
     // make it a little smaller
-    imageGraphic.setAttribute("content-width", "115px");
-    imageGraphic.setAttribute("content-height", "100px");
+    imageGraphic.setAttribute("content-width", "105px");
     imageGraphic.setAttribute("scaling", "uniform");
     imageGraphic.setAttribute("src", String.format("url('data:image/png;base64,%s')", imageBase64));
 
