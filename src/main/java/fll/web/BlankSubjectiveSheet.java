@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import fll.Team;
 import fll.Tournament;
 import fll.db.Queries;
 import fll.documents.writers.SubjectivePdfWriter;
@@ -69,11 +70,11 @@ public class BlankSubjectiveSheet extends HttpServlet {
               + "' does not exist");
         }
 
-        final TeamScheduleInfo dummy = new TeamScheduleInfo(111111);
-        dummy.setTeamName("Really long team name, something that is really really long");
-        dummy.setOrganization("Some organization");
-        dummy.setDivision("State");
-        dummy.setJudgingGroup("Lakes");
+        final TeamScheduleInfo dummy = new TeamScheduleInfo(Team.NULL_TEAM_NUMBER);
+        dummy.setTeamName("");
+        dummy.setOrganization("");
+        dummy.setDivision("");
+        dummy.setJudgingGroup("");
 
         final Tournament tournament = Tournament.findTournamentByID(connection,
                                                                     Queries.getCurrentTournament(connection));
