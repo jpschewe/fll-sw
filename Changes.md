@@ -1,4 +1,5 @@
 * #1094 - update subjective rubrics for new FLL design
+* #1095 - Make blank subjective rubrics blank - no team information
 * #1079 - Add before and after award text to the awards script
 * #1076 - Add the ability to easily get all teams ranked by performance score
 * #906 - Handle differences in the awards script fields when merging a database
