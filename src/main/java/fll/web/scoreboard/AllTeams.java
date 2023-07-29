@@ -80,8 +80,7 @@ public final class AllTeams {
 
       final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
       final List<String> allAwardGroups = Queries.getAwardGroups(connection, tournamentId);
-      final List<String> allJudgingGroups = Queries.getJudgingStations(connection, tournamentId);
-      final List<String> judgingGroupsToDisplay = displayInfo.determineScoreboardJudgingGroups(allJudgingGroups);
+      final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
 
       prep.setInt(1, tournamentId);
       prep.setBoolean(3, !runningHeadToHead);
@@ -94,7 +93,7 @@ public final class AllTeams {
       for (final Map.Entry<Integer, TournamentTeam> entry : tournamentTeams.entrySet()) {
         final TournamentTeam team = entry.getValue();
 
-        if (judgingGroupsToDisplay.contains(team.getJudgingGroup())) {
+        if (awardGroupsToDisplay.contains(team.getAwardGroup())) {
           final String headerColor = Queries.getColorForIndex(allAwardGroups.indexOf(team.getAwardGroup()));
           teamHeaderColor.put(entry.getKey(), headerColor);
 
@@ -121,7 +120,7 @@ public final class AllTeams {
             teamsWithScores.add(entry.getValue());
             scores.put(entry.getKey(), teamScores);
           }
-        } // if in displayed judging groups
+        } // if in displayed award groups
 
       } // foreach tournament team
 

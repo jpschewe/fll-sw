@@ -20,7 +20,7 @@ fll.web.scoreboard.Title.populateContext(application, session, pageContext);
 </head>
 <body bgcolor='#008000'>
     <div class='center bold'>
-        <font face='arial' size='3' color='#ffffff'>${judgeGroupTitle}<br />
+        <font face='arial' size='3' color='#ffffff'>${awardGroupTitle}<br />
             ${ScorePageText }
         </font>
     </div>

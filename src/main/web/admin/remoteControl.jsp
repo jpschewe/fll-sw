@@ -163,8 +163,8 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
                 <th>
                     Scoreboard
                     <br />
-                    Select the judging groups to show on the display
-                    (non checked is the same as all checked)
+                    Select the award groups to show on the display (non
+                    checked is the same as all checked)
                 </th>
                 <c:forEach items="${displayInformation}"
                     var="displayInfo">
@@ -183,26 +183,26 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
                             </c:otherwise>
                         </c:choose>
                         <br />
-                        <!-- choose judging groups -->
-                        <c:forEach items="${allJudgingGroups}"
-                            var="judgingGroup" varStatus="jgIterStatus">
+                        <!-- choose award groups -->
+                        <c:forEach items="${allAwardGroups}"
+                            var="awardGroup" varStatus="agIterStatus">
                             <c:choose>
                                 <c:when
-                                    test="${ displayInfo.determineScoreboardJudgingGroups(allJudgingGroups).contains(judgingGroup) }">
+                                    test="${ displayInfo.determineScoreboardAwardGroups(allAwardGroups).contains(awardGroup) }">
                                     <input type="checkbox"
-                                        name="${displayInfo.judgingGroupsFormParamName}"
-                                        id="${displayInfo.judgingGroupsFormParamName}${jgIterStatus.index}"
-                                        value="${judgingGroup}" checked />
+                                        name="${displayInfo.awardGroupsFormParamName}"
+                                        id="${displayInfo.awardGroupsFormParamName}${agIterStatus.index}"
+                                        value="${awardGroup}" checked />
                                 </c:when>
                                 <c:otherwise>
                                     <input type="checkbox"
-                                        name="${displayInfo.judgingGroupsFormParamName}"
-                                        id="${displayInfo.judgingGroupsFormParamName}${jgIterStatus.index}"
-                                        value="${judgingGroup}" />
+                                        name="${displayInfo.awardGroupsFormParamName}"
+                                        id="${displayInfo.awardGroupsFormParamName}${agIterStatus.index}"
+                                        value="${awardGroup}" />
                                 </c:otherwise>
                             </c:choose>
                             <label
-                                for="${displayInfo.judgingGroupsFormParamName}${jgIterStatus.index}">${judgingGroup}</label>
+                                for="${displayInfo.awardGroupsFormParamName}${agIterStatus.index}">${awardGroup}</label>
                             <br />
                         </c:forEach>
                     </td>

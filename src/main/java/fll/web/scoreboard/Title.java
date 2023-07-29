@@ -46,12 +46,12 @@ public final class Title {
 
       final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
 
-      final List<String> allJudgingGroups = Queries.getJudgingStations(connection, tournament.getTournamentID());
-      final List<String> judgingGroupsToDisplay = displayInfo.determineScoreboardJudgingGroups(allJudgingGroups);
+      final List<String> allAwardGroups = Queries.getAwardGroups(connection, tournament.getTournamentID());
+      final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
 
-      final String judgingGroupTitle = String.join(", ", judgingGroupsToDisplay);
+      final String awardGroupTitle = String.join(", ", awardGroupsToDisplay);
 
-      pageContext.setAttribute("judgeGroupTitle", judgingGroupTitle);
+      pageContext.setAttribute("awardGroupTitle", awardGroupTitle);
     } catch (final SQLException sqle) {
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
