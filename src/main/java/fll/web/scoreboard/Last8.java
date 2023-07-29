@@ -31,12 +31,14 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.DelayedPerformance;
+import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.flltools.displaySystem.list.SetArray;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.DisplayInfo;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
@@ -107,27 +109,34 @@ public class Last8 extends BaseFLLServlet {
     // scores here
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
+      final Tournament currentTournament = Tournament.getCurrentTournament(connection);
+      final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+      final List<String> allAwardGroups = Queries.getAwardGroups(connection, currentTournament.getTournamentID());
+      final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
+
       processScores(application, (teamNumber,
                                   teamName,
                                   organization,
                                   awardGroup,
                                   formattedScore) -> {
-        formatter.format("<tr>%n");
-        formatter.format("<td class='left'>%d</td>%n", teamNumber);
-        if (null == teamName) {
-          teamName = "&nbsp;";
-        }
-        formatter.format("<td class='left truncate'>%s</td>%n", teamName);
-        if (showOrg) {
-          if (null == organization) {
-            organization = "&nbsp;";
+        if (awardGroupsToDisplay.contains(awardGroup)) {
+          formatter.format("<tr>%n");
+          formatter.format("<td class='left'>%d</td>%n", teamNumber);
+          if (null == teamName) {
+            teamName = "&nbsp;";
           }
-          formatter.format("<td class='left truncate'>%s</td>%n", organization);
-        }
-        formatter.format("<td class='right truncate'>%s</td>%n", awardGroup);
+          formatter.format("<td class='left truncate'>%s</td>%n", teamName);
+          if (showOrg) {
+            if (null == organization) {
+              organization = "&nbsp;";
+            }
+            formatter.format("<td class='left truncate'>%s</td>%n", organization);
+          }
+          formatter.format("<td class='right truncate'>%s</td>%n", awardGroup);
 
-        formatter.format("<td class='right'>%s</td>", formattedScore);
-        formatter.format("</tr>%n");
+          formatter.format("<td class='right'>%s</td>", formattedScore);
+          formatter.format("</tr>%n");
+        }
       });
     } catch (final SQLException e) {
       throw new FLLInternalException("Got an error getting the most recent scores from the database", e);
