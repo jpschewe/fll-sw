@@ -14,10 +14,7 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
 import javax.sql.DataSource;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
@@ -112,59 +109,6 @@ public class Last8 extends BaseFLLServlet {
       final List<String> allAwardGroups = Queries.getAwardGroups(connection, currentTournament.getTournamentID());
       final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
 
-      processScores(application, (teamNumber,
-                                  teamName,
-                                  organization,
-                                  awardGroup,
-                                  formattedScore) -> {
-        if (awardGroupsToDisplay.contains(awardGroup)) {
-          formatter.format("<tr>%n");
-          formatter.format("<td class='left'>%d</td>%n", teamNumber);
-          if (null == teamName) {
-            teamName = "&nbsp;";
-          }
-          formatter.format("<td class='left truncate'>%s</td>%n", teamName);
-          if (showOrg) {
-            if (null == organization) {
-              organization = "&nbsp;";
-            }
-            formatter.format("<td class='left truncate'>%s</td>%n", organization);
-          }
-          formatter.format("<td class='right truncate'>%s</td>%n", awardGroup);
-
-          formatter.format("<td class='right'>%s</td>", formattedScore);
-          formatter.format("</tr>%n");
-        }
-      });
-    } catch (final SQLException e) {
-      throw new FLLInternalException("Got an error getting the most recent scores from the database", e);
-    }
-
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Exiting doPost");
-    }
-  }
-
-  private interface ProcessScoreEntry {
-    void execute(int teamNumber,
-                 @Nullable String teamName,
-                 @Nullable String organization,
-                 String awardGroup,
-                 String formattedScore);
-  }
-
-  /**
-   * @param application the context to get the database connection from
-   * @param processor passed the {@link ResultSet} for each row. (Team Number,
-   *          Organization, Team
-   *          Name, award group, bye, no show, computed total)
-   */
-  private static void processScores(@Nonnull final ServletContext application,
-                                    @Nonnull final ProcessScoreEntry processor)
-      throws SQLException {
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    try (Connection connection = datasource.getConnection()) {
-      final Tournament currentTournament = Tournament.getCurrentTournament(connection);
       final int currentTournamentId = currentTournament.getTournamentID();
       final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournamentId);
       final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, currentTournamentId);
@@ -204,11 +148,43 @@ public class Last8 extends BaseFLLServlet {
             final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType)
                                                    .format(rs.getDouble("ComputedTotal"));
 
-            processor.execute(teamNumber, teamName, organization, awardGroup, formattedScore);
+            if (awardGroupsToDisplay.contains(awardGroup)) {
+              formatter.format("<tr>%n");
+              formatter.format("<td class='left'>%d</td>%n", teamNumber);
+
+              final String teamNameDisplay;
+              if (null == teamName) {
+                teamNameDisplay = "&nbsp;";
+              } else {
+                teamNameDisplay = teamName;
+              }
+              formatter.format("<td class='left truncate'>%s</td>%n", teamNameDisplay);
+
+              if (showOrg) {
+                final String organizationDisplay;
+                if (null == organization) {
+                  organizationDisplay = "&nbsp;";
+                } else {
+                  organizationDisplay = organization;
+                }
+                formatter.format("<td class='left truncate'>%s</td>%n", organizationDisplay);
+              }
+              formatter.format("<td class='right truncate'>%s</td>%n", awardGroup);
+
+              formatter.format("<td class='right'>%s</td>", formattedScore);
+              formatter.format("</tr>%n");
+            }
+
           } // end while next
         } // try ResultSet
       } // try PreparedStatement
+    } catch (final SQLException e) {
+      throw new FLLInternalException("Got an error getting the most recent scores from the database", e);
+    }
 
-    } // try connection
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Exiting doPost");
+    }
   }
+
 }
