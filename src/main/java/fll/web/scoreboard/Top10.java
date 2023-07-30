@@ -33,6 +33,7 @@ import fll.util.FP;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.DisplayInfo;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.report.FinalComputedScores;
@@ -97,6 +98,11 @@ public class Top10 extends BaseFLLServlet {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
 
     try (Connection connection = datasource.getConnection()) {
+      final Tournament currentTournament = Tournament.getCurrentTournament(connection);
+      final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+      final List<String> allAwardGroups = Queries.getAwardGroups(connection, currentTournament.getTournamentID());
+      final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
+
       final @Nullable String divisionIndexParam = request.getParameter("divisionIndex");
       int awardGroupIndex = -1;
       if (null != divisionIndexParam) {
@@ -108,19 +114,38 @@ public class Top10 extends BaseFLLServlet {
         }
       }
 
+      // if the award group wasn't passed as a parameter or was invalid, then get it
+      // from the session
       if (awardGroupIndex < 0) {
         final @Nullable Integer divisionIndexObj = SessionAttributes.getAttribute(session, "divisionIndex",
                                                                                   Integer.class);
         if (null == divisionIndexObj) {
           awardGroupIndex = 0;
         } else {
-          awardGroupIndex = divisionIndexObj.intValue();
+          awardGroupIndex = Math.max(0, Math.min(divisionIndexObj.intValue(), allAwardGroups.size()
+              - 1));
         }
       }
 
-      final List<String> allAwardGroups = Queries.getAwardGroups(connection);
-      if (awardGroupIndex >= allAwardGroups.size()) {
-        awardGroupIndex = 0;
+      // handle filtered award groups
+      final int startingAwardGroupIndex = awardGroupIndex;
+      while (true) {
+        final String awardGroupName = allAwardGroups.get(awardGroupIndex);
+        if (awardGroupsToDisplay.contains(awardGroupName)) {
+          break;
+        } else {
+          ++awardGroupIndex;
+        }
+
+        if (awardGroupIndex >= allAwardGroups.size()) {
+          awardGroupIndex = 0;
+        }
+
+        if (startingAwardGroupIndex == awardGroupIndex) {
+          LOGGER.error("While finding award group to display we cycled all the way around. Award groups to display: {}",
+                       awardGroupsToDisplay);
+          break;
+        }
       }
 
       formatter.format("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">%n");
@@ -192,7 +217,7 @@ public class Top10 extends BaseFLLServlet {
           }
         });
 
-      } // end divisions not empty
+      } // end award groups not empty
 
       if (null == divisionIndexParam) {
         // increment for next run if not specified as a parameter
