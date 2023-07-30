@@ -41,12 +41,16 @@ import jakarta.servlet.http.HttpSession;
 
 /**
  * Display the most recent scores.
- * Currently hard coded to 20. This was originally 8, thus the name 'Last8'.
  */
-@WebServlet("/scoreboard/Last8")
-public class Last8 extends BaseFLLServlet {
+@WebServlet("/scoreboard/MostRecent")
+public class MostRecent extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
+  /**
+   * Maximum number of rows to display.
+   */
+  private static final int MAX_ROWS = 20;
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -131,13 +135,14 @@ public class Last8 extends BaseFLLServlet {
           + "  AND verified_performance.RunNumber <= ?" //
           + "  AND NOT verified_performance.NoShow" // skip no shows to save space
           + "  AND NOT verified_performance.Bye" // skip byes to save space
-          + " ORDER BY verified_performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 20")) {
+          + " ORDER BY verified_performance.TimeStamp DESC, Teams.TeamNumber ASC")) {
         prep.setInt(1, currentTournamentId);
         prep.setBoolean(2, !runningHeadToHead);
         prep.setInt(3, numSeedingRounds);
         prep.setInt(4, maxRunNumberToDisplay);
 
         try (ResultSet rs = prep.executeQuery()) {
+          int rowCount = 0;
           while (rs.next()) {
             final int teamNumber = rs.getInt("TeamNumber");
             final String teamName = castNonNull(rs.getString("TeamName"));
@@ -173,7 +178,12 @@ public class Last8 extends BaseFLLServlet {
 
               formatter.format("<td class='right'>%s</td>", formattedScore);
               formatter.format("</tr>%n");
-            }
+
+              ++rowCount;
+              if (rowCount >= MAX_ROWS) {
+                break;
+              }
+            } // award group to display
 
           } // end while next
         } // try ResultSet

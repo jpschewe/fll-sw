@@ -29,8 +29,8 @@
                 target="_blank">All Teams, All Runs (scrolling)</a>
         </li>
         <li>
-            <a href='<c:url value="Last8"/>' target="_blank">Last 8
-                scores</a>
+            <a href='<c:url value="MostRecent"/>' target="_blank">Most
+                Recent scores</a>
         </li>
         <li>
             <a href='<c:url value="Top10"/>' target="_blank">Top 10

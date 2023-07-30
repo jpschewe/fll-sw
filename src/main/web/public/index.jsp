@@ -36,7 +36,7 @@ fll.web.PublicIndex.populateContext(application, pageContext);
     <a class="wide" href='<c:url value="/scoreboard/allteams.jsp"/>'>All
         Teams, All Performance Runs</a>
 
-    <a class="wide" href='<c:url value="/scoreboard/Last8"/>'>Most
+    <a class="wide" href='<c:url value="/scoreboard/MostRecent"/>'>Most
         recent performance scores</a>
 
     <a class="wide" href='<c:url value="/scoreboard/Top10"/>'>Top

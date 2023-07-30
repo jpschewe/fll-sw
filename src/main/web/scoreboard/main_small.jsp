@@ -34,7 +34,7 @@ html {
             src='<c:url value="Top10"><c:param name="showOrganization" value="false" /></c:url>'
             marginheight='0' marginwidth='0' noresize scrolling='no'>
         <frame
-            src='<c:url value="Last8"><c:param name="showOrganization" value="false" /></c:url>'
+            src='<c:url value="MostRecent"><c:param name="showOrganization" value="false" /></c:url>'
             marginheight='3' marginwidth='0' noresize scrolling='no'>
     </frameset>
 </frameset>

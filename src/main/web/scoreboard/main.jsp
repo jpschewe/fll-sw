@@ -32,7 +32,7 @@ html {
     <frameset rows='350,*' border='1' framespacing='0'>
         <frame src='<c:url value="Top10"/>' marginheight='0'
             marginwidth='0' noresize scrolling='no'>
-        <frame src='<c:url value="Last8" />' marginheight='3'
+        <frame src='<c:url value="MostRecent" />' marginheight='3'
             marginwidth='0' noresize scrolling='no'>
     </frameset>
 </frameset>
