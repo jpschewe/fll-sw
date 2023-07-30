@@ -65,8 +65,8 @@ public final class RemoteControl {
                                                                                     currentTournament.getTournamentID());
       pageContext.setAttribute("finalistDivisions", finalistDivisions);
 
-      pageContext.setAttribute("allJudgingGroups",
-                               Queries.getJudgingStations(connection, currentTournament.getTournamentID()));
+      pageContext.setAttribute("allAwardGroups",
+                               Queries.getAwardGroups(connection, currentTournament.getTournamentID()));
 
     } catch (final SQLException e) {
       LOGGER.error(e.getMessage(), e);

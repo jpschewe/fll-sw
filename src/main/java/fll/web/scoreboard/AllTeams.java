@@ -16,9 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import fll.Tournament;
@@ -28,11 +25,15 @@ import fll.db.DelayedPerformance;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
+import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Support for allteams.jsp.
@@ -80,8 +81,7 @@ public final class AllTeams {
 
       final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
       final List<String> allAwardGroups = Queries.getAwardGroups(connection, tournamentId);
-      final List<String> allJudgingGroups = Queries.getJudgingStations(connection, tournamentId);
-      final List<String> judgingGroupsToDisplay = displayInfo.determineScoreboardJudgingGroups(allJudgingGroups);
+      final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
 
       prep.setInt(1, tournamentId);
       prep.setBoolean(3, !runningHeadToHead);
@@ -94,8 +94,9 @@ public final class AllTeams {
       for (final Map.Entry<Integer, TournamentTeam> entry : tournamentTeams.entrySet()) {
         final TournamentTeam team = entry.getValue();
 
-        if (judgingGroupsToDisplay.contains(team.getJudgingGroup())) {
-          final String headerColor = Queries.getColorForIndex(allAwardGroups.indexOf(team.getAwardGroup()));
+        if (awardGroupsToDisplay.contains(team.getAwardGroup())) {
+          final String headerColor = AllTeams.getColorForAwardGroup(team.getAwardGroup(),
+                                                                    allAwardGroups.indexOf(team.getAwardGroup()));
           teamHeaderColor.put(entry.getKey(), headerColor);
 
           prep.setInt(2, entry.getKey());
@@ -121,7 +122,7 @@ public final class AllTeams {
             teamsWithScores.add(entry.getValue());
             scores.put(entry.getKey(), teamScores);
           }
-        } // if in displayed judging groups
+        } // if in displayed award groups
 
       } // foreach tournament team
 
@@ -206,5 +207,49 @@ public final class AllTeams {
       return mScoreString;
     }
 
+  }
+
+  /**
+   * Colors for award groups.
+   *
+   * @param awardGroup the name of the award group, used to recognize regularly
+   *          used award groups
+   * @param index the award group index
+   * @return color in a format suitable for use in an HTML document
+   */
+  public static String getColorForAwardGroup(final String awardGroup,
+                                             final int index) {
+    if ("lakes".equals(awardGroup.toLowerCase())) {
+      return "#800000"; // maroon
+    } else if ("woods".equals(awardGroup.toLowerCase())) {
+      return "#008000"; // green
+    } else if ("prairie".equals(awardGroup.toLowerCase())) {
+      return "#CC6600"; // orange
+    } else if ("marsh".equals(awardGroup.toLowerCase())) {
+      return "#FF00FF"; // magenta
+    } else if ("rivers".equals(awardGroup.toLowerCase())) {
+      return "#800080"; // purple
+    } else if ("snow".equals(awardGroup.toLowerCase())) {
+      return "#808080"; // grey
+    } else {
+      final int idx = index
+          % 6;
+      switch (idx) {
+      case 0:
+        return "#800000"; // maroon
+      case 1:
+        return "#008000"; // green
+      case 2:
+        return "#CC6600"; // orange
+      case 3:
+        return "#FF00FF"; // magenta
+      case 4:
+        return "#800080"; // purple
+      case 5:
+        return "#808080"; // grey
+      default:
+        throw new FLLInternalException("Internal error, cannot choose color");
+      }
+    }
   }
 }

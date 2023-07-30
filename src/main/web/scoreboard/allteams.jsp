@@ -212,6 +212,8 @@ TABLE.B {
                 </table>
                 <!-- team table -->
 
+
+                <%--alternate background colors --%>
                 <c:choose>
                     <c:when test="${'A' == colorStr}">
                         <c:set var="colorStr" value="B" />
@@ -226,6 +228,7 @@ TABLE.B {
 
         </c:when>
         <c:when test="${not empty sponsorLogos}">
+            <!-- no teams with scores - display all sponsor logos -->
             <table class="center"
                 style='background-color: white; color: black'
                 width="99%">
@@ -243,6 +246,7 @@ TABLE.B {
         </c:when>
     </c:choose>
 
+    <%-- blank space at the bottom --%>
     <table border='0' cellpadding='0' cellspacing='0' width='99%'>
         <tr>
             <td colspan='2'>

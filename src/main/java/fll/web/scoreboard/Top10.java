@@ -28,11 +28,11 @@ import fll.db.DelayedPerformance;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
-import fll.flltools.displaySystem.list.SetArray;
 import fll.util.FP;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.DisplayInfo;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.report.FinalComputedScores;
@@ -97,6 +97,11 @@ public class Top10 extends BaseFLLServlet {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
 
     try (Connection connection = datasource.getConnection()) {
+      final Tournament currentTournament = Tournament.getCurrentTournament(connection);
+      final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+      final List<String> allAwardGroups = Queries.getAwardGroups(connection, currentTournament.getTournamentID());
+      final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
+
       final @Nullable String divisionIndexParam = request.getParameter("divisionIndex");
       int awardGroupIndex = -1;
       if (null != divisionIndexParam) {
@@ -104,23 +109,46 @@ public class Top10 extends BaseFLLServlet {
           awardGroupIndex = Integer.parseInt(divisionIndexParam);
         } catch (final NumberFormatException nfe) {
           awardGroupIndex = -1;
-          LOGGER.debug("Error parsing divisionIndex parameter '{}', ignoring", divisionIndexParam);
+          LOGGER.warn("Error parsing divisionIndex parameter '{}', ignoring", divisionIndexParam);
         }
       }
 
+      // if the award group wasn't passed as a parameter or was invalid, then get it
+      // from the session
       if (awardGroupIndex < 0) {
         final @Nullable Integer divisionIndexObj = SessionAttributes.getAttribute(session, "divisionIndex",
                                                                                   Integer.class);
         if (null == divisionIndexObj) {
           awardGroupIndex = 0;
         } else {
-          awardGroupIndex = divisionIndexObj.intValue();
+          awardGroupIndex = Math.max(0, divisionIndexObj.intValue());
+
+          ++awardGroupIndex;
+          if (awardGroupIndex >= allAwardGroups.size()) {
+            awardGroupIndex = 0;
+          }
         }
       }
 
-      final List<String> allAwardGroups = Queries.getAwardGroups(connection);
-      if (awardGroupIndex >= allAwardGroups.size()) {
-        awardGroupIndex = 0;
+      // handle filtered award groups
+      final int startingAwardGroupIndex = awardGroupIndex;
+      while (true) {
+        final String awardGroupName = allAwardGroups.get(awardGroupIndex);
+        if (awardGroupsToDisplay.contains(awardGroupName)) {
+          break;
+        } else {
+          ++awardGroupIndex;
+        }
+
+        if (awardGroupIndex >= allAwardGroups.size()) {
+          awardGroupIndex = 0;
+        }
+
+        if (startingAwardGroupIndex == awardGroupIndex) {
+          LOGGER.error("While finding award group to display we cycled all the way around. Award groups to display: {}",
+                       awardGroupsToDisplay);
+          break;
+        }
       }
 
       formatter.format("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">%n");
@@ -163,7 +191,8 @@ public class Top10 extends BaseFLLServlet {
           --numColumns;
         }
         formatter.format("<th colspan='%d' bgcolor='%s'>Top Performance Scores: %s</th>", numColumns,
-                         Queries.getColorForIndex(allAwardGroups.indexOf(awardGroupName)), awardGroupName);
+                         AllTeams.getColorForAwardGroup(awardGroupName, allAwardGroups.indexOf(awardGroupName)),
+                         awardGroupName);
         formatter.format("</tr>%n");
 
         processScoresForAwardGroup(connection, description, awardGroupName, (teamName,
@@ -192,11 +221,9 @@ public class Top10 extends BaseFLLServlet {
           }
         });
 
-      } // end divisions not empty
+      } // end award groups not empty
 
       if (null == divisionIndexParam) {
-        // increment for next run if not specified as a parameter
-        ++awardGroupIndex;
         session.setAttribute("divisionIndex", Integer.valueOf(awardGroupIndex));
       }
 
@@ -345,50 +372,6 @@ public class Top10 extends BaseFLLServlet {
     public int getRank() {
       return rank;
     }
-
-  }
-
-  /**
-   * Get the displayed data as a list for flltools.
-   *
-   * @param awardGroupName the award group to get scores for
-   * @param connection database connection
-   * @param description challenge description
-   * @return payload for the set array message
-   * @throws SQLException on a database error
-   */
-  public static SetArray.Payload getTableAsListForAwardGroup(final Connection connection,
-                                                             final ChallengeDescription description,
-                                                             final String awardGroupName)
-      throws SQLException {
-    final List<List<String>> data = new LinkedList<>();
-    processScoresForAwardGroup(connection, description, awardGroupName, (teamName,
-                                                                         teamNumber,
-                                                                         organization,
-                                                                         formattedScore,
-                                                                         rank) -> {
-      final List<String> row = new LinkedList<>();
-
-      row.add(String.valueOf(rank));
-      row.add(String.valueOf(teamNumber));
-      if (null == teamName) {
-        row.add("");
-      } else {
-        row.add(teamName);
-      }
-
-      if (null == organization) {
-        row.add("");
-      } else {
-        row.add(organization);
-      }
-      row.add(formattedScore);
-      data.add(row);
-    });
-
-    final SetArray.Payload payload = new SetArray.Payload("Top Performance Scores: "
-        + awardGroupName, data);
-    return payload;
 
   }
 

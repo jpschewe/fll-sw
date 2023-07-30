@@ -12,15 +12,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import fll.Tournament;
 import fll.db.GlobalParameters;
 import fll.db.TournamentParameters;
-import fll.flltools.MhubParameters;
 import fll.web.ApplicationAttributes;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Gather parameter information for edit_all_parameters.jsp.
@@ -82,10 +81,6 @@ public final class GatherParameterInformation {
 
       pageContext.setAttribute("gAllTeamsScrollRate", GlobalParameters.getAllTeamScrollRate(connection));
       pageContext.setAttribute("gHeadToHeadSecondsPerRow", GlobalParameters.getHeadToHeadScrollRate(connection));
-
-      pageContext.setAttribute("gMhubHostname", MhubParameters.getHostname(connection));
-      pageContext.setAttribute("gMhubPort", MhubParameters.getPort(connection));
-      pageContext.setAttribute("gMhubDisplayNode", MhubParameters.getDisplayNode(connection));
     }
   }
 }

@@ -153,80 +153,22 @@ GatherParameterInformation.populateContext(application, pageContext);
                     <th>
                         Head to head scroll rate control. <a
                             href='javascript:display("gHeadToHeadSecondsPerRowHelp")'>[help]</a>
-                        <div id='gHeadToHeadSecondsPerRowHelp' class='help'
-                            style='display: none'>The value is
-                            number of seconds between calls to scroll 2
-                            pixels. The remote control brackets page
-                            needs to be refreshed for this parameter to
-                            take effect.</div>
+                        <div id='gHeadToHeadSecondsPerRowHelp'
+                            class='help' style='display: none'>The
+                            value is number of seconds between calls to
+                            scroll 2 pixels. The remote control brackets
+                            page needs to be refreshed for this
+                            parameter to take effect.</div>
                     </th>
 
                     <td>
                         <input type='number'
                             value="${gHeadToHeadSecondsPerRow }"
                             id='gHeadToHeadSecondsPerRow'
-                            name='gHeadToHeadSecondsPerRow' min='0.0000001'
-                            step='any' required />
+                            name='gHeadToHeadSecondsPerRow'
+                            min='0.0000001' step='any' required />
                     </td>
                 </tr>
-                <tr>
-                    <th colspan="2">FLL Tools integration</th>
-                </tr>
-
-                <tr>
-                    <th>
-                        Mhub hostname<a
-                            href='javascript:display("MhubHostnameHelp")'>[help]</a>
-                        <div id='MhubHostnameHelp' class='help'
-                            style='display: none'>
-                            The hostname where mhub is running. Clear to
-                            specify that mhub is not in use. <a
-                                href='javascript:hide("MhubHostnameHelp")'>[hide]</a>
-                        </div>
-
-                    </th>
-                    <td>
-                        <input type='text' value="${gMhubHostname }"
-                            id='gMhubHostname' name='gMhubHostname' />
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>
-                        Mhub port<a
-                            href='javascript:display("MhubPortHelp")'>[help]</a>
-                        <div id='MhubPortHelp' class='help'
-                            style='display: none'>
-                            The port where mhub is running.<a
-                                href='javascript:hide("MhubPortHelp")'>[hide]</a>
-                        </div>
-
-                    </th>
-                    <td>
-                        <input type='nuimber' value="${gMhubPort }"
-                            id='gMhubPort' name='gMhubPort' min='0'
-                            required />
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>
-                        Display node<a
-                            href='javascript:display("MhubDisplayNodeHelp")'>[help]</a>
-                        <div id='MhubDisplayNodeHelp' class='help'
-                            style='display: none'>
-                            The node to send display messages to. <a
-                                href='javascript:hide("MhubDisplayNodeHelp")'>[hide]</a>
-                        </div>
-
-                    </th>
-                    <td>
-                        <input type='text' value="${gMhubDisplayNode }"
-                            id='gMhubDisplayNode'
-                            name='gMhubDisplayNode' />
-                    </td>
-                </tr>
-
 
             </table>
 
