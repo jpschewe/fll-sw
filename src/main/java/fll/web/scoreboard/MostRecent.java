@@ -41,10 +41,10 @@ import jakarta.servlet.http.HttpSession;
 
 /**
  * Display the most recent scores.
- * Currently hard coded to 20. This was originally 8, thus the name 'Last8'.
+ * Currently hard coded to 20.
  */
-@WebServlet("/scoreboard/Last8")
-public class Last8 extends BaseFLLServlet {
+@WebServlet("/scoreboard/MostRecent")
+public class MostRecent extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 

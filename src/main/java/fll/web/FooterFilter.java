@@ -260,7 +260,7 @@ public class FooterFilter implements Filter {
     formatter.format("      <a href='' class='dropbtn'>Scoreboard</a>%n");
     formatter.format("      <div class='dropdown-content'>%n");
     formatter.format("        <a href='%s/scoreboard/allteams.jsp'>All Teams, All Performance Runs</a>%n", contextPath);
-    formatter.format("        <a href='%s/scoreboard/Last8'>Most recent performance scores</a>%n", contextPath);
+    formatter.format("        <a href='%s/scoreboard/MostRecent'>Most recent performance scores</a>%n", contextPath);
     formatter.format("        <a href='%s/scoreboard/Top10'>Top scores</a>%n", contextPath);
     formatter.format("      </div>%n");
     formatter.format("    </li>%n");
