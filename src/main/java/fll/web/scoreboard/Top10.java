@@ -110,7 +110,7 @@ public class Top10 extends BaseFLLServlet {
           awardGroupIndex = Integer.parseInt(divisionIndexParam);
         } catch (final NumberFormatException nfe) {
           awardGroupIndex = -1;
-          LOGGER.debug("Error parsing divisionIndex parameter '{}', ignoring", divisionIndexParam);
+          LOGGER.warn("Error parsing divisionIndex parameter '{}', ignoring", divisionIndexParam);
         }
       }
 
@@ -122,8 +122,12 @@ public class Top10 extends BaseFLLServlet {
         if (null == divisionIndexObj) {
           awardGroupIndex = 0;
         } else {
-          awardGroupIndex = Math.max(0, Math.min(divisionIndexObj.intValue(), allAwardGroups.size()
-              - 1));
+          awardGroupIndex = Math.max(0, divisionIndexObj.intValue());
+
+          ++awardGroupIndex;
+          if (awardGroupIndex >= allAwardGroups.size()) {
+            awardGroupIndex = 0;
+          }
         }
       }
 
@@ -188,7 +192,8 @@ public class Top10 extends BaseFLLServlet {
           --numColumns;
         }
         formatter.format("<th colspan='%d' bgcolor='%s'>Top Performance Scores: %s</th>", numColumns,
-                         Queries.getColorForIndex(allAwardGroups.indexOf(awardGroupName)), awardGroupName);
+                         AllTeams.getColorForAwardGroup(awardGroupName, allAwardGroups.indexOf(awardGroupName)),
+                         awardGroupName);
         formatter.format("</tr>%n");
 
         processScoresForAwardGroup(connection, description, awardGroupName, (teamName,
@@ -220,8 +225,6 @@ public class Top10 extends BaseFLLServlet {
       } // end award groups not empty
 
       if (null == divisionIndexParam) {
-        // increment for next run if not specified as a parameter
-        ++awardGroupIndex;
         session.setAttribute("divisionIndex", Integer.valueOf(awardGroupIndex));
       }
 

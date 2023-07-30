@@ -24,8 +24,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
@@ -37,7 +35,6 @@ import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
-import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.playoff.BracketUpdate;
 import fll.web.playoff.DatabaseTeamScore;
@@ -53,6 +50,7 @@ import fll.xml.ScoreType;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.TiebreakerTest;
 import fll.xml.WinnerType;
+import jakarta.servlet.http.HttpServletRequest;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -1736,36 +1734,6 @@ public final class Queries {
           return rs.getInt(1) == 1;
         }
       }
-    }
-  }
-
-  /**
-   * Colors for index into a list.
-   * Below are the colors used in order.
-   * <ol>
-   * <li>#800000</li>
-   * <li>#008000</li>
-   * <li>#CC6600</li>
-   * <li>#FF00FF</li>
-   * </ol>
-   *
-   * @param index the division index
-   * @return color in a format suitable for use in an HTML document
-   */
-  public static String getColorForIndex(final int index) {
-    final int idx = index
-        % 4;
-    switch (idx) {
-    case 0:
-      return "#800000";
-    case 1:
-      return "#008000";
-    case 2:
-      return "#CC6600";
-    case 3:
-      return "#FF00FF";
-    default:
-      throw new FLLInternalException("Internal error, cannot choose color");
     }
   }
 

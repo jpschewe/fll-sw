@@ -213,7 +213,7 @@ TABLE.B {
                 <!-- team table -->
 
 
-                <%--alternate header colors --%>
+                <%--alternate background colors --%>
                 <c:choose>
                     <c:when test="${'A' == colorStr}">
                         <c:set var="colorStr" value="B" />
