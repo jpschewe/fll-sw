@@ -11,17 +11,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Formatter;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -33,7 +26,6 @@ import fll.Utilities;
 import fll.db.DelayedPerformance;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
-import fll.flltools.displaySystem.list.SetArray;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -43,6 +35,12 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Display the most recent scores.
@@ -145,47 +143,6 @@ public class Last8 extends BaseFLLServlet {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Exiting doPost");
     }
-  }
-
-  /**
-   * Get the displayed data as a list for flltools.
-   *
-   * @param application get all of the appropriate parameters
-   * @return payload for the set array message
-   * @throws SQLException if a database error occurs
-   */
-  public static SetArray.Payload getTableAsList(@Nonnull final ServletContext application) throws SQLException {
-
-    final List<List<String>> data = new LinkedList<>();
-    processScores(application, (teamNumber,
-                                teamName,
-                                organization,
-                                awardGroup,
-                                formattedScore) -> {
-      final List<String> row = new LinkedList<>();
-
-      row.add(String.valueOf(teamNumber));
-      if (null == teamName) {
-        row.add("");
-      } else {
-        row.add(teamName);
-      }
-
-      if (null == organization) {
-        row.add("");
-      } else {
-        row.add(organization);
-      }
-
-      row.add(awardGroup);
-
-      row.add(formattedScore);
-
-      data.add(row);
-    });
-
-    final SetArray.Payload payload = new SetArray.Payload("Most Recent Performance Scores", data);
-    return payload;
   }
 
   private interface ProcessScoreEntry {

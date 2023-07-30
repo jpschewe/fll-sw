@@ -1,3 +1,4 @@
+* Remove flltools integration
 * Scoreboard group filter is by award group rather than judging group
 * #1094 - update subjective rubrics for new FLL design
 * #1095 - Make blank subjective rubrics blank - no team information

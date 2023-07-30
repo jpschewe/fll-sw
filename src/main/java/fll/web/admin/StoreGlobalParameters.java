@@ -11,24 +11,21 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.apache.commons.lang3.StringUtils;
-
 import fll.db.GlobalParameters;
-import fll.flltools.MhubParameters;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Submit action for edit_global_parameters.jsp.
@@ -64,21 +61,11 @@ public class StoreGlobalParameters extends BaseFLLServlet {
       GlobalParameters.setIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE,
                                              WebUtils.getIntRequestParameter(request, "gDivisionFlipRate"));
 
-      GlobalParameters.setAllTeamsScrollRate(connection, WebUtils.getDoubleRequestParameter(request, "gAllTeamsScrollRate"));
+      GlobalParameters.setAllTeamsScrollRate(connection,
+                                             WebUtils.getDoubleRequestParameter(request, "gAllTeamsScrollRate"));
 
       GlobalParameters.setHeadToHeadScrollRate(connection,
-                                             WebUtils.getDoubleRequestParameter(request, "gHeadToHeadSecondsPerRow"));
-
-      final String mhubHostname = request.getParameter("gMhubHostname");
-      if (StringUtils.isBlank(mhubHostname)) {
-        MhubParameters.setHostname(connection, null);
-      } else {
-        MhubParameters.setHostname(connection, mhubHostname.trim());
-      }
-
-      MhubParameters.setPort(connection, WebUtils.getIntRequestParameter(request, "gMhubPort"));
-
-      MhubParameters.setDisplayNode(connection, request.getParameter("gMhubDisplayNode"));
+                                               WebUtils.getDoubleRequestParameter(request, "gHeadToHeadSecondsPerRow"));
 
       if (message.length() == 0) {
         message.append("<p id='success'>Parameters saved</p>");

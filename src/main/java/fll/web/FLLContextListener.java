@@ -10,16 +10,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.sql.DataSource;
+
+import fll.Utilities;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
-import javax.sql.DataSource;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
-
-import fll.Utilities;
-import fll.flltools.MhubMessageHandler;
 
 /**
  * Take care of initializing some variables in the servlet context.
@@ -28,8 +25,6 @@ import fll.flltools.MhubMessageHandler;
 public class FLLContextListener implements ServletContextListener {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
-  private @Nullable MhubMessageHandler mhubMessageHandler = null;
 
   @Override
   public void contextInitialized(final ServletContextEvent event) {
@@ -46,19 +41,11 @@ public class FLLContextListener implements ServletContextListener {
 
     // make sure the default display object exists
     DisplayInfo.getDisplayInformation(application);
-
-    mhubMessageHandler = new MhubMessageHandler(application);
-    mhubMessageHandler.start();
-
   }
 
   @Override
   public void contextDestroyed(final ServletContextEvent event) {
     final ServletContext application = event.getServletContext();
-
-    if (null != mhubMessageHandler) {
-      mhubMessageHandler.shutdown();
-    }
 
     // shutdown the database
     final DataSource datasource = ApplicationAttributes.getDataSource(application);

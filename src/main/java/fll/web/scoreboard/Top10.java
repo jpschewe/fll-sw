@@ -28,7 +28,6 @@ import fll.db.DelayedPerformance;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
-import fll.flltools.displaySystem.list.SetArray;
 import fll.util.FP;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -373,50 +372,6 @@ public class Top10 extends BaseFLLServlet {
     public int getRank() {
       return rank;
     }
-
-  }
-
-  /**
-   * Get the displayed data as a list for flltools.
-   *
-   * @param awardGroupName the award group to get scores for
-   * @param connection database connection
-   * @param description challenge description
-   * @return payload for the set array message
-   * @throws SQLException on a database error
-   */
-  public static SetArray.Payload getTableAsListForAwardGroup(final Connection connection,
-                                                             final ChallengeDescription description,
-                                                             final String awardGroupName)
-      throws SQLException {
-    final List<List<String>> data = new LinkedList<>();
-    processScoresForAwardGroup(connection, description, awardGroupName, (teamName,
-                                                                         teamNumber,
-                                                                         organization,
-                                                                         formattedScore,
-                                                                         rank) -> {
-      final List<String> row = new LinkedList<>();
-
-      row.add(String.valueOf(rank));
-      row.add(String.valueOf(teamNumber));
-      if (null == teamName) {
-        row.add("");
-      } else {
-        row.add(teamName);
-      }
-
-      if (null == organization) {
-        row.add("");
-      } else {
-        row.add(organization);
-      }
-      row.add(formattedScore);
-      data.add(row);
-    });
-
-    final SetArray.Payload payload = new SetArray.Payload("Top Performance Scores: "
-        + awardGroupName, data);
-    return payload;
 
   }
 
