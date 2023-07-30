@@ -229,7 +229,7 @@ public class Last8 extends BaseFLLServlet {
           + "  AND (? OR verified_performance.RunNumber <= ?)" //
           + "  AND verified_performance.RunNumber <= ?" //
           + "  AND NOT verified_performance.NoShow" // skip no shows to save space
-          + "  AND NOT verified_performance.Bye" // skip bytes to save space
+          + "  AND NOT verified_performance.Bye" // skip byes to save space
           + " ORDER BY verified_performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 20")) {
         prep.setInt(1, currentTournamentId);
         prep.setBoolean(2, !runningHeadToHead);
