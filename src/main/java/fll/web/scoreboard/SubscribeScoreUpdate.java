@@ -7,7 +7,6 @@
 package fll.web.scoreboard;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import fll.web.BaseFLLServlet;
 import jakarta.servlet.AsyncContext;
@@ -36,25 +35,8 @@ public class SubscribeScoreUpdate extends BaseFLLServlet {
 
     final AsyncContext asyncContext = request.startAsync();
     asyncContext.setTimeout(0); // never time out
-    
+
     ScoreboardUpdates.addClient(asyncContext);
-//
-//    // Start a new thread to send events to the client
-//    new Thread(() -> {
-//      try (PrintWriter writer = asyncContext.getResponse().getWriter()) {
-//        for (int i = 0; i < 10; i++) {
-//          writer.write("event: score_update\n");
-//          writer.write("data: This is event "
-//              + i
-//              + "\n\n");
-//          writer.flush();
-//          Thread.sleep(1000);
-//        }
-//        asyncContext.complete();
-//      } catch (IOException | InterruptedException e) {
-//        e.printStackTrace();
-//      }
-//    }).start();
   }
 
 }

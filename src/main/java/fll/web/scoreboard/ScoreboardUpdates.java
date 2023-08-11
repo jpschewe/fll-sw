@@ -9,13 +9,18 @@ package fll.web.scoreboard;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +35,11 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
+import fll.web.playoff.DatabaseTeamScore;
+import fll.web.playoff.TeamScore;
+import fll.xml.ChallengeDescription;
+import fll.xml.PerformanceScoreCategory;
+import fll.xml.ScoreType;
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
@@ -69,21 +79,83 @@ public final class ScoreboardUpdates {
     synchronized (CLIENTS_LOCK) {
       ALL_CLIENTS.add(client);
     }
-    // sendAllScores(client);
+    sendAllScores(client);
   }
 
-  // private void sendAllScores(final AsyncContext client) {
-  // final ObjectMapper jsonMapper = Utilities.createJsonMapper();
-  //
-  // final DataSource datasource =
-  // ApplicationAttributes.getDataSource(client.getRequest().getServletContext());
-  // try (Connection connection = datasource.getConnection()) {
-  // final Tournament currentTournament =
-  // Tournament.getCurrentTournament(connection);
-  //
-  // }
-  //
-  // }
+  private static void sendAllScores(final AsyncContext client) {
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
+
+    final ServletContext application = client.getRequest().getServletContext();
+    // cast is checked in addClient()
+    final HttpSession session = ((HttpServletRequest) client.getRequest()).getSession();
+
+    final ChallengeDescription challengeDscription = ApplicationAttributes.getChallengeDescription(application);
+    final ScoreType performanceScoreType = challengeDscription.getPerformance().getScoreType();
+    final PerformanceScoreCategory performanceElement = challengeDscription.getPerformance();
+
+    try {
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      try (Connection connection = datasource.getConnection()) {
+        final Tournament currentTournament = Tournament.getCurrentTournament(connection);
+        final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection,
+                                                                              currentTournament.getTournamentID());
+        final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
+                                                                                    currentTournament.getTournamentID());
+        final int maxRunNumberToDisplay = DelayedPerformance.getMaxRunNumberToDisplay(connection, currentTournament);
+
+        final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+        final List<String> allAwardGroups = Queries.getAwardGroups(connection, currentTournament.getTournamentID());
+        final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
+
+        final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection,
+                                                                              currentTournament.getTournamentID());
+
+        // get all scores in ascending order by time. This ensures that the most recent
+        // scores display sees the newest scores last
+        try (PreparedStatement prep = connection.prepareStatement("SELECT * from Performance" //
+            + " WHERE tournament = ?" //
+            + " ORDER BY TimeStamp ASC, TeamNumber ASC" //
+        )) {
+          prep.setInt(1, currentTournament.getTournamentID());
+          try (ResultSet rs = prep.executeQuery()) {
+            while (rs.next()) {
+              final int teamNumber = rs.getInt("teamNumber");
+
+              final @Nullable TournamentTeam team = teams.get(teamNumber);
+              if (null == team) {
+                LOGGER.error("Unable to find team {} in the list of teams while getting all scores to display, skipping",
+                             teamNumber);
+                continue;
+              }
+
+              final TeamScore teamScore = new DatabaseTeamScore(teamNumber, rs);
+              final double score = performanceElement.evaluate(teamScore);
+              final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
+              final ScoreUpdate update = new ScoreUpdate(team, teamScore.getRunNumber(), score, formattedScore);
+
+              try {
+                final String updateStr = jsonMapper.writeValueAsString(update);
+
+                notifyClient(client, awardGroupsToDisplay, numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay,
+                             team, teamScore.getRunNumber(), updateStr);
+              } catch (final JsonProcessingException e) {
+                throw new FLLInternalException("Unable to format score update as JSON", e);
+              }
+            }
+          }
+        }
+
+      } catch (final SQLException e) {
+        throw new FLLRuntimeException("Error getting initial scores for display", e);
+      }
+    } catch (final IOException e) {
+      LOGGER.error("Got error sending initial scores to client, dropping: {}", client.getRequest().getRemoteAddr(), e);
+      synchronized (CLIENTS_LOCK) {
+        ALL_CLIENTS.remove(client);
+      }
+    }
+
+  }
 
   /**
    * Notify all clients of a new verified score.

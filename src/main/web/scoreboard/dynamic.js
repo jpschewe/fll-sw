@@ -47,7 +47,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const tableBody = table.createTBody();
     scoreEventSource = new EventSource('/scoreboard/SubscribeScoreUpdate');
     scoreEventSource.addEventListener('score_update', function(e) {
-        console.log("Received score update: " + e.data);
+        //console.log("Received score update: " + e.data);
+
         const scoreUpdate = JSON.parse(e.data);
 
         const trElement = tableBody.insertRow(0);
