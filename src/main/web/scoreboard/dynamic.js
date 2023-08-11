@@ -76,5 +76,9 @@ document.addEventListener("DOMContentLoaded", () => {
         score.classList.add('right');
         score.innerText = scoreUpdate.formattedScore;
 
+        // limit the table size to 20 rows
+        while (tableBody.rows.length > 20) {
+            tableBody.deleteRow(tableBody.rows.length - 1);
+        }
     }, true);
 });
