@@ -74,6 +74,13 @@ public abstract class TeamScore {
    * @return true if this score is a no show
    */
   public abstract boolean isBye();
+  
+  /**
+   * Is the score verified.
+   * 
+   * @return true if this score has been verified
+   */
+  public abstract boolean isVerified();
 
   /**
    * What run do these scores apply to?

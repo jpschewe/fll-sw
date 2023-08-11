@@ -43,6 +43,7 @@ import fll.web.playoff.HttpTeamScore;
 import fll.web.playoff.Playoff;
 import fll.web.playoff.TeamScore;
 import fll.web.scoreEntry.UnverifiedRunsWebSocket;
+import fll.web.scoreboard.ScoreboardUpdates;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
@@ -324,6 +325,7 @@ public final class Queries {
 
     final StringBuffer columns = new StringBuffer();
     final StringBuffer values = new StringBuffer();
+    final double score = performanceElement.evaluate(teamScore);
 
     columns.append("TeamNumber");
     values.append(teamScore.getTeamNumber());
@@ -336,7 +338,7 @@ public final class Queries {
       values.append(", NULL");
     } else {
       values.append(", "
-          + performanceElement.evaluate(teamScore));
+          + score);
     }
 
     columns.append(", RunNumber");
@@ -388,14 +390,21 @@ public final class Queries {
     final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
                                                                                 tournament.getTournamentID());
     if (teamScore.getRunNumber() > numSeedingRounds) {
+      if (teamScore.isVerified()) {
+        final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, tournament,
+                                                                                 teamScore.getTeamNumber());
+        final ScoreType performanceScoreType = description.getPerformance().getScoreType();
+        final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
+        ScoreboardUpdates.notifyClients(team, score, formattedScore);
+      }
+
       if (runningHeadToHead) {
         if (verified) {
           if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Updating playoff score from insert");
           }
-          Playoff.updatePlayoffScore(connection, verified, tournament.getTournamentID(), winnerCriteria,
-                                     performanceElement, tiebreakerElement, teamScore.getTeamNumber(),
-                                     teamScore.getRunNumber(), teamScore);
+          Playoff.updatePlayoffScore(connection, tournament.getTournamentID(), winnerCriteria, performanceElement,
+                                     tiebreakerElement, teamScore.getTeamNumber(), teamScore.getRunNumber(), teamScore);
         } else {
           // send H2H update that this team's score is entered
           final String bracketName = Playoff.getPlayoffDivision(connection, tournament.getTournamentID(),
@@ -457,6 +466,7 @@ public final class Queries {
     }
 
     final TeamScore teamScore = new HttpTeamScore(teamNumber, runNumber, request);
+    final double score = performanceElement.evaluate(teamScore);
 
     final StringBuffer sql = new StringBuffer();
 
@@ -471,7 +481,7 @@ public final class Queries {
       sql.append(", ComputedTotal = NULL");
     } else {
       sql.append(", ComputedTotal = "
-          + performanceElement.evaluate(teamScore));
+          + score);
     }
 
     // now do each goal
@@ -517,6 +527,14 @@ public final class Queries {
     }
 
     if (numRowsUpdated > 0) {
+      if (teamScore.isVerified()) {
+        final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, tournament,
+                                                                                 teamScore.getTeamNumber());
+        final ScoreType performanceScoreType = description.getPerformance().getScoreType();
+        final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
+        ScoreboardUpdates.notifyClients(team, score, formattedScore);
+      }
+
       // Check if we need to update the PlayoffData table
       final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
       if (runNumber > numSeedingRounds) {
@@ -526,8 +544,7 @@ public final class Queries {
             LOGGER.trace("Updating playoff score from updatePerformanceScore");
           }
 
-          final boolean verified = "1".equals(request.getParameter("Verified"));
-          Playoff.updatePlayoffScore(connection, verified, currentTournament, winnerCriteria, performanceElement,
+          Playoff.updatePlayoffScore(connection, currentTournament, winnerCriteria, performanceElement,
                                      tiebreakerElement, teamNumber, runNumber, teamScore);
         }
       } else {

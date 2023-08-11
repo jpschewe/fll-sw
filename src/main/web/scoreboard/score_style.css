@@ -22,3 +22,19 @@ th.scoreboard {
 td.scoreboard {
     padding: 4;
 }
+
+table {
+    border-collapse: collapse;
+    border: 1;
+    padding: 2px;
+    border-spacing: 0px;
+    border: 1px solid white;
+}
+
+td {
+    border: 1px solid white;
+}
+
+#most_recent_table {
+    width: 98%;
+}

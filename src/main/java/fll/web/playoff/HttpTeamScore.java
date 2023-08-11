@@ -85,6 +85,23 @@ public final class HttpTeamScore extends TeamScore {
   }
 
   @Override
+  public boolean isVerified() {
+    if (NON_PERFORMANCE_RUN_NUMBER == getRunNumber()) {
+      return false;
+    } else if (!scoreExists()) {
+      return false;
+    } else {
+      final String verified = request.getParameter("Verified");
+      if (null == verified) {
+        throw new RuntimeException("Missing parameter: Verified");
+      }
+      return verified.equalsIgnoreCase("true")
+          || verified.equalsIgnoreCase("t")
+          || verified.equals("1");
+    }
+  }
+
+  @Override
   public boolean scoreExists() {
     return true;
   }
