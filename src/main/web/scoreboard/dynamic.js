@@ -46,16 +46,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const tableBody = table.createTBody();
     scoreEventSource = new EventSource('/scoreboard/SubscribeScoreUpdate');
-    /*
-    scoreEventSource.onmessage = function(event) {
-        console.log("Received event: " + JSON.stringify(event));
-    };
-    */
     scoreEventSource.addEventListener('score_update', function(e) {
         console.log("Received score update: " + e.data);
         const scoreUpdate = JSON.parse(e.data);
 
-        // FIXME: check award group to display
         const trElement = tableBody.insertRow(0);
 
         const teamNumElement = trElement.insertCell();

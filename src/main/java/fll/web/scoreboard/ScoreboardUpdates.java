@@ -8,17 +8,32 @@ package fll.web.scoreboard;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import javax.sql.DataSource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
+import fll.db.DelayedPerformance;
+import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
+import fll.web.ApplicationAttributes;
+import fll.web.DisplayInfo;
 import jakarta.servlet.AsyncContext;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Handle sending scoreboard updates to the web clients.
@@ -45,22 +60,44 @@ public final class ScoreboardUpdates {
    * @param client the session to add
    */
   public static void addClient(final AsyncContext client) {
+    if (!(client.getRequest() instanceof HttpServletRequest)) {
+      LOGGER.warn("Found client that doesn't have a servlet request, ignoring: "
+          + client.getRequest().getRemoteAddr());
+      return;
+    }
+
     synchronized (CLIENTS_LOCK) {
       ALL_CLIENTS.add(client);
     }
+    // sendAllScores(client);
   }
+
+  // private void sendAllScores(final AsyncContext client) {
+  // final ObjectMapper jsonMapper = Utilities.createJsonMapper();
+  //
+  // final DataSource datasource =
+  // ApplicationAttributes.getDataSource(client.getRequest().getServletContext());
+  // try (Connection connection = datasource.getConnection()) {
+  // final Tournament currentTournament =
+  // Tournament.getCurrentTournament(connection);
+  //
+  // }
+  //
+  // }
 
   /**
    * Notify all clients of a new verified score.
    * 
-   * @param team {@link ScoreUpdate#team}
-   * @param score {@link ScoreUpdate#score}
-   * @param formattedScore {@link ScoreUpdate#formattedScore}
+   * @param team {@link ScoreUpdate#getTeam()}
+   * @param score {@link ScoreUpdate#getScore()}
+   * @param formattedScore {@link ScoreUpdate#getFormattedScore()}
+   * @param runNumber {@link ScoreUpdate#getRunNumber()}
    */
   public static void notifyClients(final TournamentTeam team,
+                                   final int runNumber,
                                    final double score,
                                    final String formattedScore) {
-    final ScoreUpdate update = new ScoreUpdate(team, score, formattedScore);
+    final ScoreUpdate update = new ScoreUpdate(team, runNumber, score, formattedScore);
     notifyClients(update);
   }
 
@@ -77,10 +114,7 @@ public final class ScoreboardUpdates {
 
       for (final AsyncContext client : clients) {
         try {
-          final PrintWriter writer = client.getResponse().getWriter();
-          writer.write(String.format("event: %s\n", SCORE_UPDATE_TYPE));
-          writer.write(String.format("data: %s\n\n", updateStr));
-          writer.flush();
+          notifyClient(client, update.getTeam(), update.getRunNumber(), updateStr);
         } catch (final IOException e) {
           LOGGER.warn("Got error writing to client, dropping: {}", client.getRequest().getRemoteAddr(), e);
           toRemove.add(client);
@@ -98,6 +132,58 @@ public final class ScoreboardUpdates {
 
   }
 
+  private static void notifyClient(final AsyncContext client,
+                                   final TournamentTeam team,
+                                   final int runNumber,
+                                   final String data)
+      throws IOException {
+
+    final ServletContext application = client.getRequest().getServletContext();
+    // cast is checked in addClient()
+    final HttpSession session = ((HttpServletRequest) client.getRequest()).getSession();
+
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
+      final Tournament currentTournament = Tournament.getCurrentTournament(connection);
+      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection,
+                                                                            currentTournament.getTournamentID());
+      final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
+                                                                                  currentTournament.getTournamentID());
+      final int maxRunNumberToDisplay = DelayedPerformance.getMaxRunNumberToDisplay(connection, currentTournament);
+
+      final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+      final List<String> allAwardGroups = Queries.getAwardGroups(connection, currentTournament.getTournamentID());
+      final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
+
+      notifyClient(client, awardGroupsToDisplay, numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay, team,
+                   runNumber, data);
+    } catch (final SQLException e) {
+      throw new FLLRuntimeException("Error talking to the database", e);
+    }
+  }
+
+  private static void notifyClient(final AsyncContext client,
+                                   final Collection<String> awardGroupsToDisplay,
+                                   final int numSeedingRounds,
+                                   final boolean runningHeadToHead,
+                                   final int maxRunNumberToDisplay,
+                                   final TournamentTeam team,
+                                   final int runNumber,
+                                   final String data)
+      throws IOException {
+    if (runNumber <= maxRunNumberToDisplay
+        && awardGroupsToDisplay.contains(team.getAwardGroup())
+        && (!runningHeadToHead
+            || runNumber <= numSeedingRounds)) {
+
+      final PrintWriter writer = client.getResponse().getWriter();
+      writer.write(String.format("event: %s\n", SCORE_UPDATE_TYPE));
+      writer.write(String.format("data: %s\n\n", data));
+      writer.flush();
+    }
+
+  }
+
   /**
    * Message sent on the client.
    */
@@ -107,32 +193,53 @@ public final class ScoreboardUpdates {
      * @param team {@link #team}
      * @param score {@link #score}
      * @param formattedScore {@link #formattedScore}
+     * @param runNumber {@link #getRunNumber()}
      */
     public ScoreUpdate(final TournamentTeam team,
+                       final int runNumber,
                        final double score,
                        final String formattedScore) {
       this.team = team;
       this.score = score;
       this.formattedScore = formattedScore;
+      this.runNumber = runNumber;
     }
 
     /**
-     * The team that the score is for.
+     * @return The team that the score is for.
      */
-    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
-    public final TournamentTeam team;
+    public TournamentTeam getTeam() {
+      return team;
+    }
+
+    private final TournamentTeam team;
 
     /**
-     * The score.
+     * @return The score.
      */
-    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
-    public final double score;
+    public double getScore() {
+      return score;
+    }
+
+    private final double score;
 
     /**
-     * The score string to display.
+     * @return The score string to display.
      */
-    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
-    public final String formattedScore;
+    public String getFormattedScore() {
+      return formattedScore;
+    }
+
+    private final String formattedScore;
+
+    /**
+     * @return the run number for the score
+     */
+    public int getRunNumber() {
+      return runNumber;
+    }
+
+    private final int runNumber;
 
   }
 
