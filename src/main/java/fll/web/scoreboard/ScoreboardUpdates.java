@@ -25,6 +25,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
@@ -249,8 +250,8 @@ public final class ScoreboardUpdates {
             || runNumber <= numSeedingRounds)) {
 
       final PrintWriter writer = client.getResponse().getWriter();
-      writer.write(String.format("event: %s\n", SCORE_UPDATE_TYPE));
-      writer.write(String.format("data: %s\n\n", data));
+      writer.write(String.format("event: %s%n", SCORE_UPDATE_TYPE));
+      writer.write(String.format("data: %s%n%n", data));
       writer.flush();
     }
 
