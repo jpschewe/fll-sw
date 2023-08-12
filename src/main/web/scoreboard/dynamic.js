@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const table = document.getElementById("most_recent_table");
     removeChildren(table);
 
-    //FIXME check if the org column is to be shown
+    const displayOrganization = window.innerWidth >= 1024;
 
     // setup columns
     const colGroup = document.createElement("colgroup");
@@ -25,8 +25,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const teamNameCol = document.createElement("col");
     colGroup.appendChild(teamNameCol);
 
-    const orgCol = document.createElement("col");
-    colGroup.appendChild(orgCol);
+    if (displayOrganization) {
+        const orgCol = document.createElement("col");
+        colGroup.appendChild(orgCol);
+    }
 
     const awardGroupCol = document.createElement("col");
     colGroup.appendChild(awardGroupCol);
@@ -40,7 +42,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const headerRow = table.createTHead().insertRow();
     const header = document.createElement("th");
     headerRow.appendChild(header);
-    header.setAttribute("colspan", "5"); // FIXME changes based on organization
+    if (displayOrganization) {
+        header.setAttribute("colspan", "5");
+    } else {
+        header.setAttribute("colspan", "4");
+    }
     header.setAttribute("bgcolor", "#800080");
     header.innerText = "Most Recent Performance Scores";
 
@@ -62,10 +68,12 @@ document.addEventListener("DOMContentLoaded", () => {
         teamName.classList.add('truncate');
         teamName.innerText = scoreUpdate.team.teamName;
 
-        const org = trElement.insertCell();
-        org.classList.add('left');
-        org.classList.add('truncate');
-        org.innerText = scoreUpdate.team.organization;
+        if (displayOrganization) {
+            const org = trElement.insertCell();
+            org.classList.add('left');
+            org.classList.add('truncate');
+            org.innerText = scoreUpdate.team.organization;
+        }
 
         const awardGroup = trElement.insertCell();
         awardGroup.classList.add('right');
