@@ -53,9 +53,12 @@ td.scoreboard {
 
 #title {
     top: 0;
-    height: 40;
+    height: 40px;
     width: 100%;
-    background-color: cyan;
+    background-color: #008000;
+    color: white;
+    font-family: arial;
+    font-size: medium;
 }
 
 #all_teams {

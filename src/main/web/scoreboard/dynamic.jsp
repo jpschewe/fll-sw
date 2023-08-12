@@ -3,6 +3,10 @@
 
 <fll-sw:required-roles roles="PUBLIC" allowSetup="false" />
 
+<%
+fll.web.scoreboard.Title.populateContext(application, session, pageContext);
+%>
+
 <html>
 <head>
 <title>Scoreboard</title>
@@ -23,7 +27,11 @@
 <body class='scoreboard'>
 
     <div id='left'>
-        <div id='title'>TITLE</div>
+        <div id='title' class='center bold'>
+            ${awardGroupTitle}
+            <br />
+            ${ScorePageText }
+        </div>
 
         <div id='all_teams'>ALL TEAMS</div>
     </div>
@@ -36,7 +44,6 @@
             </table>
         </div>
     </div>
-
 
 </body>
 </html>
