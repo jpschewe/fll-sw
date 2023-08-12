@@ -23,7 +23,7 @@ td.scoreboard {
     padding: 4;
 }
 
-table {
+#most_recent table {
     border-collapse: collapse;
     border: 1;
     padding: 2px;
@@ -31,8 +31,42 @@ table {
     border: 1px solid white;
 }
 
-td {
+#most_recent td {
     border: 1px solid white;
+}
+
+#left,
+#right {
+    position: fixed;
+    height: 100%;
+}
+
+#left {
+    left: 0;
+    width: 40%;
+}
+
+#right {
+    right: 0;
+    width: 60%;
+}
+
+#title {
+    top: 0;
+    height: 40;
+    width: 100%;
+    background-color: cyan;
+}
+
+#all_teams {
+    height: 100%;
+    background-color: purple;
+}
+
+#top_scores {
+    top: 0;
+    height: 50%;
+    background-color: green;
 }
 
 #most_recent_table {

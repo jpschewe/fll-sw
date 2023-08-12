@@ -22,10 +22,21 @@
 </head>
 <body class='scoreboard'>
 
-    <div id='most_recent'>
-        <table id="most_recent_table">
-        </table>
+    <div id='left'>
+        <div id='title'>TITLE</div>
+
+        <div id='all_teams'>ALL TEAMS</div>
     </div>
+
+    <div id='right'>
+        <div id='top_scores'>top scores</div>
+
+        <div id='most_recent'>
+            <table id="most_recent_table">
+            </table>
+        </div>
+    </div>
+
 
 </body>
 </html>
