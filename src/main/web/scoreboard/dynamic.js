@@ -9,6 +9,30 @@
 let scoreEventSource = null;
 let displayOrganization = true;
 
+let prevScrollTimestamp = 0;
+// if less than 1, then Chromebooks don't appear to scroll
+const pixelsToScroll = 2;
+let scrollingDown = true;
+
+
+function doScroll(timestamp) {
+    const diff = timestamp - prevScrollTimestamp;
+    if (diff / 1000.0 >= secondsBetweenScrolls) {
+        if (scrollingDown && elementIsVisible(document.getElementById("all_teams_bottom"))) {
+            scrollingDown = false;
+        } else if (!scrollingDown
+            && elementIsVisible(document.getElementById("all_teams_top"))) {
+            scrollingDown = true;
+        }
+
+        const scrollAmount = scrollingDown ? pixelsToScroll : -1 * pixelsToScroll;
+        document.getElementById("all_teams").scrollBy(0, scrollAmount);
+        prevScrollTimestamp = timestamp;
+    }
+
+    requestAnimationFrame(doScroll);
+}
+
 function addToMostRecent(tableBody, scoreUpdate) {
     const trElement = tableBody.insertRow(0);
 
@@ -105,4 +129,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
     }, true);
+
+    requestAnimationFrame(doScroll);
 });

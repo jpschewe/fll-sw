@@ -63,6 +63,7 @@ td.scoreboard {
 
 #all_teams {
     height: 100%;
+    overflow-y: scroll;
 }
 
 #top_scores {

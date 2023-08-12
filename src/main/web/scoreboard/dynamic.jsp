@@ -16,6 +16,10 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
     href="<c:url value='/style/fll-sw.css'/>" />
 <link rel='stylesheet' type='text/css' href='score_style.css' />
 
+<script type="text/javascript">
+  var secondsBetweenScrolls = parseFloat("${scrollRate}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
+</script>
+
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js'/>"></script>
 
@@ -35,6 +39,8 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
         </div>
 
         <div id='all_teams'>
+            <div id="all_teams_top"></div>
+
             <c:forEach items="${allTeams}" var="team"
                 varStatus="loopStatus">
                 <c:set var="teamIndex" value="${loopStatus.index }" />
@@ -166,6 +172,8 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
 
             </c:forEach>
             <!-- foreach team -->
+
+            <div id="all_teams_bottom"></div>
         </div>
         <!-- end all teams -->
     </div>
