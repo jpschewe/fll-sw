@@ -99,6 +99,7 @@ public final class AllTeams {
           final String headerColor = AllTeams.getColorForAwardGroup(team.getAwardGroup(),
                                                                     allAwardGroups.indexOf(team.getAwardGroup()));
           teamHeaderColor.put(entry.getKey(), headerColor);
+          allTeams.add(entry.getValue());
 
           prep.setInt(2, entry.getKey());
 
@@ -123,7 +124,6 @@ public final class AllTeams {
             teamsWithScores.add(entry.getValue());
             scores.put(entry.getKey(), teamScores);
           }
-          allTeams.add(entry.getValue());
         } // if in displayed award groups
 
       } // foreach tournament team
