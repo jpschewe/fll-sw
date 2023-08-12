@@ -69,19 +69,8 @@ public final class HttpTeamScore extends TeamScore {
 
   @Override
   public boolean isBye() {
-    if (NON_PERFORMANCE_RUN_NUMBER == getRunNumber()) {
-      return false;
-    } else if (!scoreExists()) {
-      return false;
-    } else {
-      final String noShow = request.getParameter("Bye");
-      if (null == noShow) {
-        throw new RuntimeException("Missing parameter: Bye");
-      }
-      return noShow.equalsIgnoreCase("true")
-          || noShow.equalsIgnoreCase("t")
-          || noShow.equals("1");
-    }
+    // one cannot enter a BYE through the web interface
+    return false;
   }
 
   @Override
