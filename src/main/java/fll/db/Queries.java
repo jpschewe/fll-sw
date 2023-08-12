@@ -395,7 +395,7 @@ public final class Queries {
                                                                                  teamScore.getTeamNumber());
         final ScoreType performanceScoreType = description.getPerformance().getScoreType();
         final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-        ScoreboardUpdates.notifyClients(team, teamScore.getRunNumber(), score, formattedScore);
+        ScoreboardUpdates.notifyClients(team, score, formattedScore, teamScore);
       }
 
       if (runningHeadToHead) {
@@ -532,7 +532,7 @@ public final class Queries {
                                                                                  teamScore.getTeamNumber());
         final ScoreType performanceScoreType = description.getPerformance().getScoreType();
         final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-        ScoreboardUpdates.notifyClients(team, teamScore.getRunNumber(), score, formattedScore);
+        ScoreboardUpdates.notifyClients(team, score, formattedScore, teamScore);
       }
 
       // Check if we need to update the PlayoffData table

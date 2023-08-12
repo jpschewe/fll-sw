@@ -89,6 +89,7 @@ public final class AllTeams {
       prep.setInt(5, maxRunNumberToDisplay);
 
       final List<TournamentTeam> teamsWithScores = new LinkedList<>();
+      final List<TournamentTeam> allTeams = new LinkedList<>();
       final Map<Integer, String> teamHeaderColor = new HashMap<>();
       final Map<Integer, List<ComputedPerformanceScore>> scores = new HashMap<>();
       for (final Map.Entry<Integer, TournamentTeam> entry : tournamentTeams.entrySet()) {
@@ -122,6 +123,7 @@ public final class AllTeams {
             teamsWithScores.add(entry.getValue());
             scores.put(entry.getKey(), teamScores);
           }
+          allTeams.add(entry.getValue());
         } // if in displayed award groups
 
       } // foreach tournament team
@@ -133,6 +135,7 @@ public final class AllTeams {
       pageContext.setAttribute("sponsorLogos", sponsorLogos);
       pageContext.setAttribute("teamsBetweenLogos", Integer.valueOf(TEAMS_BETWEEN_LOGOS));
       pageContext.setAttribute("teamsWithScores", teamsWithScores);
+      pageContext.setAttribute("allTeams", allTeams);
       pageContext.setAttribute("scores", scores);
       pageContext.setAttribute("scrollRate", Double.valueOf(scrollRate));
       pageContext.setAttribute("teamHeaderColor", teamHeaderColor);

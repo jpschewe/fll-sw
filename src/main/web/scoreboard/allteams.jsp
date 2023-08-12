@@ -12,7 +12,7 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
 <html>
 <head>
 <title>All Teams scoreboard</title>
-<link rel='stylesheet' type='text/css' href='../style/base.css' />
+<link rel='stylesheet' type='text/css' href='../style/fll-sw.css' />
 <link rel='stylesheet' type='text/css' href='score_style.css' />
 
 <script type="text/javascript"

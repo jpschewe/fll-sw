@@ -131,7 +131,7 @@ public final class ScoreboardUpdates {
               final TeamScore teamScore = new DatabaseTeamScore(teamNumber, rs);
               final double score = performanceElement.evaluate(teamScore);
               final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-              final ScoreUpdate update = new ScoreUpdate(team, teamScore.getRunNumber(), score, formattedScore);
+              final ScoreUpdate update = new ScoreUpdate(team, score, formattedScore, teamScore);
 
               try {
                 final String updateStr = jsonMapper.writeValueAsString(update);
@@ -163,13 +163,13 @@ public final class ScoreboardUpdates {
    * @param team {@link ScoreUpdate#getTeam()}
    * @param score {@link ScoreUpdate#getScore()}
    * @param formattedScore {@link ScoreUpdate#getFormattedScore()}
-   * @param runNumber {@link ScoreUpdate#getRunNumber()}
+   * @param teamScore used to get some score information
    */
   public static void notifyClients(final TournamentTeam team,
-                                   final int runNumber,
                                    final double score,
-                                   final String formattedScore) {
-    final ScoreUpdate update = new ScoreUpdate(team, runNumber, score, formattedScore);
+                                   final String formattedScore,
+                                   final TeamScore teamScore) {
+    final ScoreUpdate update = new ScoreUpdate(team, score, formattedScore, teamScore);
     notifyClients(update);
   }
 
@@ -265,16 +265,19 @@ public final class ScoreboardUpdates {
      * @param team {@link #team}
      * @param score {@link #score}
      * @param formattedScore {@link #formattedScore}
-     * @param runNumber {@link #getRunNumber()}
+     * @param teamScore used to gather {@link #isBye()} {@link #isNoShow()}
+     *          {@link #getRunNumber()}
      */
     public ScoreUpdate(final TournamentTeam team,
-                       final int runNumber,
                        final double score,
-                       final String formattedScore) {
+                       final String formattedScore,
+                       final TeamScore teamScore) {
       this.team = team;
       this.score = score;
       this.formattedScore = formattedScore;
-      this.runNumber = runNumber;
+      this.runNumber = teamScore.getRunNumber();
+      this.bye = teamScore.isBye();
+      this.noShow = teamScore.isNoShow();
     }
 
     /**
@@ -312,6 +315,24 @@ public final class ScoreboardUpdates {
     }
 
     private final int runNumber;
+
+    /**
+     * @return if this is a bye
+     */
+    public boolean isBye() {
+      return bye;
+    }
+
+    private final boolean bye;
+
+    /**
+     * @return if this is a no show
+     */
+    public boolean isNoShow() {
+      return noShow;
+    }
+
+    private final boolean noShow;
 
   }
 
