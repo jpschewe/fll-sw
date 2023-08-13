@@ -29,22 +29,23 @@ function allTeamsEnsureScoreRowExists(teamNumber, runNumber) {
             // ensure previous run exists
             allTeamsEnsureScoreRowExists(teamNumber, runNumber - 1);
         }
-        // create element
+
+        // create elements
         /*
-                                            <tr id="all_teams_${team.teamNumber}_run_${runNumber}" class='right'>
-                                        <td>
-                                            <img class='run_spacer'
-                                                src='<c:url value="/images/blank.gif"/>'
-                                                />
-                                        </td>
-                                        <td>${score.runNumber }</td>
-                                        <td>
-                                            <img class='score_spacer'
-                                                src='<c:url value="/images/blank.gif"/>'
-                                                 />
-                                        </td>
-                                        <td>${score.scoreString }</td>
-                                    </tr>
+  <tr id="all_teams_${team.teamNumber}_run_${runNumber}" class='right'>
+      <td>
+          <img class='run_spacer'
+              src='<c:url value="/images/blank.gif"/>'
+              />
+      </td>
+      <td>${score.runNumber }</td>
+      <td>
+          <img class='score_spacer'
+              src='<c:url value="/images/blank.gif"/>'
+               />
+      </td>
+      <td>${score.scoreString }</td>
+  </tr>
 */
         const scoreTable = document.getElementById("all_teams_" + teamNumber + "_scores");
         row = scoreTable.insertRow();

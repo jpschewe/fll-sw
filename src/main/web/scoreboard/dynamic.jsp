@@ -60,13 +60,16 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
                 </tr>
             </table>
 
+            <%-- Initial value for colorStr --%>
+            <c:set var="colorStr" value="A" />
+
             <c:forEach items="${allTeams}" var="team"
                 varStatus="loopStatus">
                 <c:set var="teamIndex" value="${loopStatus.index }" />
 
                 <!--  start team -->
-                <table class="team" id='all_teams_${team.teamNumber}'
-                    class='${colorStr}'>
+                <table class="team ${colorStr}"
+                    id='all_teams_${team.teamNumber}'>
                     <tr>
                         <td colspan='2'>
                             <img
@@ -119,24 +122,6 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
                                     </td>
                                     <td>Score</td>
                                 </tr>
-
-                                <!-- FIXME need to figure out how to know the number of runs -->
-                                <!-- 
-                                    <tr id="all_teams_${team.teamNumber}_run_${runNumber}" class='right'>
-                                        <td>
-                                            <img class='run_spacer'
-                                                src='<c:url value="/images/blank.gif"/>'
-                                                />
-                                        </td>
-                                        <td>${score.runNumber }</td>
-                                        <td>
-                                            <img class='score_spacer'
-                                                src='<c:url value="/images/blank.gif"/>'
-                                                 />
-                                        </td>
-                                        <td>${score.scoreString }</td>
-                                    </tr>
-                             -->
                             </table>
                         </td>
                     </tr>

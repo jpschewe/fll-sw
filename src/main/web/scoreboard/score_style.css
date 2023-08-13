@@ -111,6 +111,14 @@ td.scoreboard {
     padding: 3px;
 }
 
+#all_teams table.team.A {
+    background-color: #000080
+}
+
+#all_teams table.team.B {
+    background-color: #0000d0
+}
+
 table.spacer {
     width: 99%;
     border: 0px;
