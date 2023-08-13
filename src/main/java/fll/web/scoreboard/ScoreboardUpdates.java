@@ -152,6 +152,7 @@ public final class ScoreboardUpdates {
     } catch (final IOException e) {
       LOGGER.error("Got error sending initial scores to client, dropping: {}", client.getRequest().getRemoteAddr(), e);
       synchronized (CLIENTS_LOCK) {
+        client.complete();
         ALL_CLIENTS.remove(client);
       }
     }
@@ -196,7 +197,10 @@ public final class ScoreboardUpdates {
 
       // remove clients that had issues
       synchronized (CLIENTS_LOCK) {
-        ALL_CLIENTS.removeAll(toRemove);
+        for (final AsyncContext client : toRemove) {
+          client.complete();
+          ALL_CLIENTS.remove(client);
+        }
       }
 
     } catch (final JsonProcessingException e) {
