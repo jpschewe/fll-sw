@@ -39,6 +39,7 @@ td.scoreboard {
 #right {
     position: fixed;
     height: 100%;
+    top: 0;
 }
 
 #left {
@@ -63,7 +64,7 @@ td.scoreboard {
 
 #all_teams {
     height: 100%;
-    overflow-y: scroll;
+    overflow-y: hidden;
 }
 
 #top_scores {

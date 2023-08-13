@@ -41,6 +41,29 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
         <div id='all_teams'>
             <div id="all_teams_top"></div>
 
+            <%-- blank space at the top --%>
+            <table border='0' cellpadding='0' cellspacing='0'
+                width='99%'>
+                <tr>
+                    <td colspan='2'>
+                        <img src='<c:url value="/images/blank.gif"/>'
+                            width='1' height='15' />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan='2'>
+                        <img src='<c:url value="/images/blank.gif"/>'
+                            width='1' height='15' />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan='2'>
+                        <img src='<c:url value="/images/blank.gif"/>'
+                            width='1' height='15' />
+                    </td>
+                </tr>
+            </table>
+
             <c:forEach items="${allTeams}" var="team"
                 varStatus="loopStatus">
                 <c:set var="teamIndex" value="${loopStatus.index }" />
@@ -173,7 +196,53 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
             </c:forEach>
             <!-- foreach team -->
 
-            <div id="all_teams_bottom"></div>
+            <%-- blank space at the bottom --%>
+            <table border='0' cellpadding='0' cellspacing='0'
+                width='99%'>
+                <tr>
+                    <td colspan='2'>
+                        <img src='<c:url value="/images/blank.gif"/>'
+                            width='1' height='15' />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan='2'>
+                        <img src='<c:url value="/images/blank.gif"/>'
+                            width='1' height='15' />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan='2'>
+                        <img src='<c:url value="/images/blank.gif"/>'
+                            width='1' height='15' />
+                    </td>
+                </tr>
+            </table>
+
+            <div id="all_teams_bottom">&nbsp;</div>
+
+            <!-- bottom space for the scrolling to work correctly -->
+            <table border='0' cellpadding='0' cellspacing='0'
+                width='99%'>
+                <tr>
+                    <td colspan='2'>
+                        <img src='<c:url value="/images/blank.gif"/>'
+                            width='1' height='15' />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan='2'>
+                        <img src='<c:url value="/images/blank.gif"/>'
+                            width='1' height='15' />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan='2'>
+                        <img src='<c:url value="/images/blank.gif"/>'
+                            width='1' height='15' />
+                    </td>
+                </tr>
+            </table>
         </div>
         <!-- end all teams -->
     </div>
