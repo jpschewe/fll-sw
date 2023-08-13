@@ -67,6 +67,62 @@ td.scoreboard {
     overflow-y: hidden;
 }
 
+#all_teams table.team {
+    width: 99%;
+    border: 0px;
+    padding: 0px;
+    border-spacing: 0px;
+}
+
+#all_teams table.team table.runs {
+    border: 0px;
+    padding: 1px;
+    border-spacing: 0px;
+}
+
+#all_teams img.run_spacer {
+    width: 60px;
+    height: 1px;
+}
+
+#all_teams img.score_spacer {
+    width: 20px;
+    height: 1px;
+}
+
+#all_teams img.all_teams_blank {
+    width: 1px;
+    height: 15px;
+}
+
+#all_teams tr.sponsor {
+    background-color: white;
+}
+
+#all_teams tr.sponsor td.sponsor_title {
+    width: 50%;
+    vertical-align: middle;
+    color: black;
+}
+
+#all_teams tr.sponsor td.sponsor_logo {
+    width: 50%;
+    vertical-align: middle;
+    padding: 3px;
+}
+
+table.spacer {
+    width: 99%;
+    border: 0px;
+    padding: 0px;
+    border-spacing: 0px;
+}
+
+table.spacer img {
+    width: 1px;
+    height: 15px;
+}
+
 #top_scores {
     top: 0;
     height: 50%;

@@ -42,24 +42,20 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
             <div id="all_teams_top"></div>
 
             <%-- blank space at the top --%>
-            <table border='0' cellpadding='0' cellspacing='0'
-                width='99%'>
+            <table class='spacer'>
                 <tr>
                     <td colspan='2'>
-                        <img src='<c:url value="/images/blank.gif"/>'
-                            width='1' height='15' />
+                        <img src='<c:url value="/images/blank.gif"/>' />
                     </td>
                 </tr>
                 <tr>
                     <td colspan='2'>
-                        <img src='<c:url value="/images/blank.gif"/>'
-                            width='1' height='15' />
+                        <img src='<c:url value="/images/blank.gif"/>' />
                     </td>
                 </tr>
                 <tr>
                     <td colspan='2'>
-                        <img src='<c:url value="/images/blank.gif"/>'
-                            width='1' height='15' />
+                        <img src='<c:url value="/images/blank.gif"/>' />
                     </td>
                 </tr>
             </table>
@@ -69,8 +65,7 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
                 <c:set var="teamIndex" value="${loopStatus.index }" />
 
                 <!--  start team table -->
-                <table border='0' cellpadding='0' cellspacing='0'
-                    width='99%' id='all_teams_${team.teamNumber}'
+                <table class="team" id='all_teams_${team.teamNumber}'
                     class='${colorStr}'>
                     <tr>
                         <td colspan='2'>
@@ -106,21 +101,19 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
                         </td>
                     </tr>
 
+                    <!-- top scores table -->
                     <tr>
                         <td colspan='2'>
-                            <table border='0' cellpadding='1'
-                                cellspacing='0'>
+                            <table class='runs'>
                                 <tr class='center'>
                                     <td>
-                                        <img
-                                            src='<c:url value="/images/blank.gif"/>'
-                                            height='1' width='60' />
+                                        <img class='run_spacer'
+                                            src='<c:url value="/images/blank.gif"/>' />
                                     </td>
                                     <td>Run #</td>
                                     <td>
-                                        <img
-                                            src='<c:url value="/images/blank.gif"/>'
-                                            width='20' height='1' />
+                                        <img class='score_spacer'
+                                            src='<c:url value="/images/blank.gif"/>' />
                                     </td>
                                     <td>Score</td>
                                 </tr>
@@ -129,37 +122,33 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
                                 <!-- 
                                     <tr class='right'>
                                         <td>
-                                            <img
+                                            <img class='run_spacer'
                                                 src='<c:url value="/images/blank.gif"/>'
-                                                height='1' width='60' />
+                                                />
                                         </td>
                                         <td>${score.runNumber }</td>
                                         <td>
-                                            <img
+                                            <img class='score_spacer'
                                                 src='<c:url value="/images/blank.gif"/>'
-                                                width='20' height='1' />
+                                                 />
                                         </td>
                                         <td>${score.scoreString }</td>
                                     </tr>
                              -->
                             </table>
-                            <!-- scores table -->
                         </td>
                     </tr>
+                    <!-- end scores table -->
 
                     <!-- sponsor section for team -->
                     <c:choose>
                         <c:when
                             test="${not empty sponsorLogos and (teamIndex mod teamsBetweenLogos) == 1}">
-                            <tr style='background-color: white'>
-                                <td width='50%'
-                                    style='vertical-align: middle; color: black'
-                                    class="right sponsor_title">This
-                                    tournament sponsored by:</td>
+                            <tr class='sponsor'>
+                                <td class="right sponsor_title">This
+                                    tournament sponsored by:&nbsp;</td>
 
-                                <td width='50%'
-                                    style='vertical-align: middle; padding: 3px'
-                                    class="left sponsor_logo">
+                                <td class="left sponsor_logo">
                                     <img
                                         src='../${sponsorLogos[(teamIndex / teamsBetweenLogos) mod fn:length(sponsorLogos)] }' />
 
@@ -171,7 +160,6 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
                                 <td colspan='2'>
                                     <img
                                         src='<c:url value="/images/blank.gif"/>'
-                                        width='1' height='15'
                                         class='all_teams_blank' />
                                 </td>
                             </tr>
@@ -197,24 +185,20 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
             <!-- foreach team -->
 
             <%-- blank space at the bottom --%>
-            <table border='0' cellpadding='0' cellspacing='0'
-                width='99%'>
+            <table class='spacer'>
                 <tr>
                     <td colspan='2'>
-                        <img src='<c:url value="/images/blank.gif"/>'
-                            width='1' height='15' />
+                        <img src='<c:url value="/images/blank.gif"/>' />
                     </td>
                 </tr>
                 <tr>
                     <td colspan='2'>
-                        <img src='<c:url value="/images/blank.gif"/>'
-                            width='1' height='15' />
+                        <img src='<c:url value="/images/blank.gif"/>' />
                     </td>
                 </tr>
                 <tr>
                     <td colspan='2'>
-                        <img src='<c:url value="/images/blank.gif"/>'
-                            width='1' height='15' />
+                        <img src='<c:url value="/images/blank.gif"/>' />
                     </td>
                 </tr>
             </table>
@@ -222,24 +206,20 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
             <div id="all_teams_bottom">&nbsp;</div>
 
             <!-- bottom space for the scrolling to work correctly -->
-            <table border='0' cellpadding='0' cellspacing='0'
-                width='99%'>
+            <table class='spacer'>
                 <tr>
                     <td colspan='2'>
-                        <img src='<c:url value="/images/blank.gif"/>'
-                            width='1' height='15' />
+                        <img src='<c:url value="/images/blank.gif"/>' />
                     </td>
                 </tr>
                 <tr>
                     <td colspan='2'>
-                        <img src='<c:url value="/images/blank.gif"/>'
-                            width='1' height='15' />
+                        <img src='<c:url value="/images/blank.gif"/>' />
                     </td>
                 </tr>
                 <tr>
                     <td colspan='2'>
-                        <img src='<c:url value="/images/blank.gif"/>'
-                            width='1' height='15' />
+                        <img src='<c:url value="/images/blank.gif"/>' />
                     </td>
                 </tr>
             </table>
