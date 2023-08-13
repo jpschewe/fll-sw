@@ -64,7 +64,7 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
                 varStatus="loopStatus">
                 <c:set var="teamIndex" value="${loopStatus.index }" />
 
-                <!--  start team table -->
+                <!--  start team -->
                 <table class="team" id='all_teams_${team.teamNumber}'
                     class='${colorStr}'>
                     <tr>
@@ -101,10 +101,12 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
                         </td>
                     </tr>
 
-                    <!-- top scores table -->
+                    <!-- team scores -->
                     <tr>
                         <td colspan='2'>
-                            <table class='runs'>
+                            <table
+                                id="all_teams_${team.teamNumber}_scores"
+                                class='runs'>
                                 <tr class='center'>
                                     <td>
                                         <img class='run_spacer'
@@ -120,7 +122,7 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
 
                                 <!-- FIXME need to figure out how to know the number of runs -->
                                 <!-- 
-                                    <tr class='right'>
+                                    <tr id="all_teams_${team.teamNumber}_run_${runNumber}" class='right'>
                                         <td>
                                             <img class='run_spacer'
                                                 src='<c:url value="/images/blank.gif"/>'
@@ -138,7 +140,7 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
                             </table>
                         </td>
                     </tr>
-                    <!-- end scores table -->
+                    <!-- end team scores -->
 
                     <!-- sponsor section for team -->
                     <c:choose>
@@ -168,7 +170,7 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
                     <!-- end sponsor section for team -->
 
                 </table>
-                <!-- end team table -->
+                <!-- end team -->
 
 
                 <%--alternate background colors --%>

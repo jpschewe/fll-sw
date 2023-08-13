@@ -120,6 +120,7 @@ public final class ScoreboardUpdates {
           try (ResultSet rs = prep.executeQuery()) {
             while (rs.next()) {
               final int teamNumber = rs.getInt("teamNumber");
+              final int runNumber = rs.getInt("runNumber");
 
               final @Nullable TournamentTeam team = teams.get(teamNumber);
               if (null == team) {
@@ -128,7 +129,7 @@ public final class ScoreboardUpdates {
                 continue;
               }
 
-              final TeamScore teamScore = new DatabaseTeamScore(teamNumber, rs);
+              final TeamScore teamScore = new DatabaseTeamScore(teamNumber, runNumber, rs);
               final double score = performanceElement.evaluate(teamScore);
               final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
               final ScoreUpdate update = new ScoreUpdate(team, score, formattedScore, teamScore);

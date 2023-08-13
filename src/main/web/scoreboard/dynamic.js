@@ -14,8 +14,78 @@ let prevScrollTimestamp = 0;
 const pixelsToScroll = 2;
 let scrollingDown = true;
 
+function allTeamsScoreCellId(teamNumber, runNumber) {
+    return "all_teams_" + teamNumber + "_run_" + runNumber + "_score";
+}
 
-function doScroll(timestamp) {
+function allTeamsScoreRowId(teamNumber, runNumber) {
+    return "all_teams_" + teamNumber + "_run_" + runNumber;
+}
+
+function allTeamsEnsureScoreRowExists(teamNumber, runNumber) {
+    let row = document.getElementById("all_teams_" + teamNumber + "_run_" + runNumber);
+    if (null == row) {
+        if (runNumber > 1) {
+            // ensure previous run exists
+            allTeamsEnsureScoreRowExists(teamNumber, runNumber - 1);
+        }
+        // create element
+        /*
+                                            <tr id="all_teams_${team.teamNumber}_run_${runNumber}" class='right'>
+                                        <td>
+                                            <img class='run_spacer'
+                                                src='<c:url value="/images/blank.gif"/>'
+                                                />
+                                        </td>
+                                        <td>${score.runNumber }</td>
+                                        <td>
+                                            <img class='score_spacer'
+                                                src='<c:url value="/images/blank.gif"/>'
+                                                 />
+                                        </td>
+                                        <td>${score.scoreString }</td>
+                                    </tr>
+*/
+        const scoreTable = document.getElementById("all_teams_" + teamNumber + "_scores");
+        row = scoreTable.insertRow();
+        row.id = allTeamsScoreRowId(teamNumber, runNumber);
+        row.classList.add("right");
+        row.classList.add("fll-sw-ui-inactive");
+
+        const runSpacerCell = row.insertCell();
+        const runSpacer = document.createElement("img");
+        runSpacerCell.appendChild(runSpacer);
+        runSpacer.classList.add("run_spacer");
+        runSpacer.setAttribute("src", "/images/blank.gif");
+
+        const runCell = row.insertCell();
+        runCell.innerText = runNumber;
+
+        const scoreSpacerCell = row.insertCell();
+        const scoreSpacer = document.createElement("img");
+        scoreSpacerCell.appendChild(scoreSpacer);
+        scoreSpacer.classList.add("score_spacer");
+        scoreSpacer.setAttribute("src", "/images/blank.gif");
+
+        const scoreCell = row.insertCell();
+        scoreCell.id = allTeamsScoreCellId(teamNumber, runNumber);
+    }
+}
+
+function addToAllTeams(scoreUpdate) {
+    // make sure the row exists
+    allTeamsEnsureScoreRowExists(scoreUpdate.team.teamNumber, scoreUpdate.runNumber);
+
+    // populate the score
+    const scoreCell = document.getElementById(allTeamsScoreCellId(scoreUpdate.team.teamNumber, scoreUpdate.runNumber));
+    scoreCell.innerText = scoreUpdate.formattedScore;
+
+    // make the row visible
+    const row = document.getElementById(allTeamsScoreRowId(scoreUpdate.team.teamNumber, scoreUpdate.runNumber));
+    row.classList.remove("fll-sw-ui-inactive");
+}
+
+function allTeamsDoScroll(timestamp) {
     const diff = timestamp - prevScrollTimestamp;
     if (diff / 1000.0 >= secondsBetweenScrolls) {
         if (scrollingDown && elementIsVisible(document.getElementById("all_teams_bottom"))) {
@@ -30,7 +100,7 @@ function doScroll(timestamp) {
         prevScrollTimestamp = timestamp;
     }
 
-    requestAnimationFrame(doScroll);
+    requestAnimationFrame(allTeamsDoScroll);
 }
 
 function addToMostRecent(tableBody, scoreUpdate) {
@@ -113,7 +183,6 @@ function initMostRecent() {
     return tableBody;
 }
 
-
 document.addEventListener("DOMContentLoaded", () => {
 
     const mostRecentTableBody = initMostRecent();
@@ -126,9 +195,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!scoreUpdate.bye && !scoreUpdate.noShow) {
             addToMostRecent(mostRecentTableBody, scoreUpdate);
+            addToAllTeams(scoreUpdate);
         }
 
     }, true);
 
-    requestAnimationFrame(doScroll);
+    requestAnimationFrame(allTeamsDoScroll);
 });
