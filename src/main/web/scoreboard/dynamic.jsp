@@ -77,7 +77,7 @@ divisionFlipRate = parseInt("${divisionFlipRate}");
                 <c:set var="teamIndex" value="${loopStatus.index }" />
 
                 <!--  start team -->
-                <table class="team ${colorStr}"
+                <table class="team ${colorStr} fll-sw-ui-inactive"
                     id='all_teams_${team.teamNumber}'>
                     <tr>
                         <td colspan='2'>

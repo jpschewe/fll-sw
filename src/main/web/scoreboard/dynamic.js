@@ -29,11 +29,14 @@ let divisionFlipRate = 10;
 
 function topScoresChangeAwardGroup() {
     if (awardGroupColors.size > 0) {
+        let changed = false;
         if (null == topScoresAwardGroup) {
             // set current award group to start
             topScoresAwardGroup = awardGroupColors.keys().next().value;
-        } else {
-            // move to the next award group
+            changed = true;
+        } else if (awardGroupColors.size > 1) {
+            // move to the next award group if there are more award groups
+
             let done = false;
             let keyIter = awardGroupColors.keys();
             let loopCount = 0;
@@ -55,9 +58,14 @@ function topScoresChangeAwardGroup() {
             }
             // next value is what we want
             const keyIterData = keyIter.next();
-            topScoresAwardGroup = keyIterData.value;
+            if (keyIterData.value != topScoresAwardGroup) {
+                topScoresAwardGroup = keyIterData.value;
+                changed = true;
+            }
         }
-        topScoresDisplay();
+        if (changed) {
+            topScoresDisplay();
+        }
     } else {
         console.log("Warning: no award groups found");
     }
@@ -203,6 +211,10 @@ function addToAllTeams(scoreUpdate) {
     // make the row visible
     const row = document.getElementById(allTeamsScoreRowId(scoreUpdate.team.teamNumber, scoreUpdate.runNumber));
     row.classList.remove("fll-sw-ui-inactive");
+
+    // make team table visible
+    const teamTable = document.getElementById("all_teams_" + scoreUpdate.team.teamNumber);
+    teamTable.classList.remove("fll-sw-ui-inactive");
 }
 
 function allTeamsDoScroll(timestamp) {
