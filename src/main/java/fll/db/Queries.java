@@ -385,18 +385,19 @@ public final class Queries {
       stmt.executeUpdate(sql);
     }
 
+    if (teamScore.isVerified()) {
+      final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, tournament,
+                                                                               teamScore.getTeamNumber());
+      final ScoreType performanceScoreType = description.getPerformance().getScoreType();
+      final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
+      ScoreboardUpdates.notifyClients(team, score, formattedScore, teamScore);
+    }
+
     // Perform updates to the playoff data table if in playoff rounds.
     final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
     final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
                                                                                 tournament.getTournamentID());
     if (teamScore.getRunNumber() > numSeedingRounds) {
-      if (teamScore.isVerified()) {
-        final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, tournament,
-                                                                                 teamScore.getTeamNumber());
-        final ScoreType performanceScoreType = description.getPerformance().getScoreType();
-        final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-        ScoreboardUpdates.notifyClients(team, score, formattedScore, teamScore);
-      }
 
       if (runningHeadToHead) {
         if (verified) {
