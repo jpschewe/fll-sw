@@ -23,18 +23,6 @@ td.scoreboard {
     padding: 4;
 }
 
-#most_recent table {
-    border-collapse: collapse;
-    border: 1;
-    padding: 2px;
-    border-spacing: 0px;
-    border: 1px solid white;
-}
-
-#most_recent td {
-    border: 1px solid white;
-}
-
 #left,
 #right {
     position: fixed;
@@ -136,6 +124,21 @@ table.spacer img {
     height: 50%;
 }
 
-#most_recent_table {
+#most_recent_table,
+#top_scores_table {
     width: 98%;
+}
+
+
+#most_recent table,
+#top_scores table {
+    border-collapse: collapse;
+    border: 1;
+    padding: 2px;
+    border-spacing: 0px;
+    border: 1px solid white;
+}
+
+#most_recent td {
+    border: 1px solid white;
 }

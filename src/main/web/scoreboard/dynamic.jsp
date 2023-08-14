@@ -6,6 +6,7 @@
 <%
 fll.web.scoreboard.Title.populateContext(application, session, pageContext);
 fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
+fll.web.scoreboard.Dynamic.populateContext(application, pageContext);
 %>
 
 <html>
@@ -27,6 +28,14 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
 
 <script type="text/javascript" src="set-font-size.js"></script>
 
+<script type="text/javascript">
+const awardGroupColorsRaw = JSON.parse('${awardGroupColors}');
+for (const [awardGroup, color] of Object.entries(awardGroupColorsRaw)) {
+  awardGroupColors.set(awardGroup, color);
+}
+
+divisionFlipRate = parseInt("${divisionFlipRate}");
+</script>
 
 </head>
 <body class='scoreboard'>
@@ -216,7 +225,9 @@ fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
     <!-- end left -->
 
     <div id='right'>
-        <div id='top_scores'>top scores</div>
+        <div id='top_scores'>
+            <table id="top_scores_table"></table>
+        </div>
         <!-- end top scores -->
 
         <div id='most_recent'>

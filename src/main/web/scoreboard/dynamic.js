@@ -14,6 +14,125 @@ let prevScrollTimestamp = 0;
 const pixelsToScroll = 2;
 let scrollingDown = true;
 
+// how many ranks to display unless told to show all
+const TOP_SCORES_MAX_RANK = 5;
+
+// maximum number of rows in the most recent table
+const MOST_RECENT_MAX_ROWS = 20;
+
+const teamMaxScore = new Map();
+
+let topScoresAwardGroup = null;
+const awardGroupColors = new Map();
+
+let divisionFlipRate = 10;
+
+function topScoresChangeAwardGroup() {
+    if (awardGroupColors.size > 0) {
+        if (null == topScoresAwardGroup) {
+            // set current award group to start
+            topScoresAwardGroup = awardGroupColors.keys().next().value;
+        } else {
+            // move to the next award group
+            let done = false;
+            let keyIter = awardGroupColors.keys();
+            let loopCount = 0;
+            while (!done) {
+                const keyIterData = keyIter.next();
+                if (keyIterData.value == topScoresAwardGroup) {
+                    done = true;
+                }
+
+                // make sure there is a next value
+                if (keyIterData.done) {
+                    keyIter = awardGroupColors.keys();
+                    if (loopCount >= 1) {
+                        console.log("Error: found infinite loop finding award group");
+                        break;
+                    }
+                    ++loopCount;
+                }
+            }
+            // next value is what we want
+            const keyIterData = keyIter.next();
+            topScoresAwardGroup = keyIterData.value;
+        }
+        topScoresDisplay();
+    } else {
+        console.log("Warning: no award groups found");
+    }
+    setTimeout(topScoresChangeAwardGroup, divisionFlipRate * 1000);
+}
+
+function topScoresAddScore(scoreUpdate) {
+    let changed = false;
+    if (!teamMaxScore.has(scoreUpdate.team.teamNumber)) {
+        teamMaxScore.set(scoreUpdate.team.teamNumber, scoreUpdate);
+        changed = true;
+    } else {
+        const prevScoreUpdate = teamMaxScore.get(team.teamNumber);
+        if (scoreUpdate.score > prevScoreUpdate.score) {
+            teamMaxScore.set(team.teamNumber, scoreUpdate);
+            changed = true;
+        }
+    }
+
+    if (changed && topScoresAwardGroup == scoreUpdate.team.awardGroup) {
+        // TODO: consider being smarter and only rebuilding when the score will be displayed
+        topScoresDisplay();
+    }
+}
+
+function topScoresDisplay() {
+    const topScoresTable = document.getElementById("top_scores_table");
+    removeChildren(topScoresTable);
+
+    // setup columns
+    const colGroup = document.createElement("colgroup");
+    topScoresTable.appendChild(colGroup);
+
+    const rankCol = document.createElement("col");
+    colGroup.appendChild(rankCol);
+    rankCol.setAttribute("width", "30px");
+
+    const teamNumCol = document.createElement("col");
+    colGroup.appendChild(teamNumCol);
+    teamNumCol.setAttribute("width", "75px");
+
+    const teamNameCol = document.createElement("col");
+    colGroup.appendChild(teamNameCol);
+
+    if (displayOrganization) {
+        const orgCol = document.createElement("col");
+        colGroup.appendChild(orgCol);
+    }
+
+    const scoreCol = document.createElement("col");
+    colGroup.appendChild(scoreCol);
+    scoreCol.setAttribute("width", "70px");
+
+    // header
+    const headerRow = topScoresTable.createTHead().insertRow();
+    const header = document.createElement("th");
+    headerRow.appendChild(header);
+    if (displayOrganization) {
+        header.setAttribute("colspan", "5");
+    } else {
+        header.setAttribute("colspan", "4");
+    }
+    if (!awardGroupColors.has(topScoresAwardGroup)) {
+        console.log("Warning cannot find color for award group '" + topScoresAwardGroup + "' in: " + awardGroupColors);
+    } else {
+        const color = awardGroupColors.get(topScoresAwardGroup)
+        header.setAttribute("bgcolor", color);
+    }
+    header.innerText = "Top Performance Scores: " + topScoresAwardGroup;
+
+    const tableBody = topScoresTable.createTBody();
+
+    // FIXME display scores
+}
+
 function allTeamsScoreCellId(teamNumber, runNumber) {
     return "all_teams_" + teamNumber + "_run_" + runNumber + "_score";
 }
@@ -132,8 +251,8 @@ function addToMostRecent(tableBody, scoreUpdate) {
     score.classList.add('right');
     score.innerText = scoreUpdate.formattedScore;
 
-    // limit the table size to 20 rows
-    while (tableBody.rows.length > 20) {
+    // limit the table size
+    while (tableBody.rows.length > MOST_RECENT_MAX_ROWS) {
         tableBody.deleteRow(tableBody.rows.length - 1);
     }
 }
@@ -166,7 +285,7 @@ function initMostRecent() {
 
     const scoreCol = document.createElement("col");
     colGroup.appendChild(scoreCol);
-    scoreCol.setAttribute("width", "75px");
+    scoreCol.setAttribute("width", "70px");
 
     // header
     const headerRow = mostRecentTable.createTHead().insertRow();
@@ -185,8 +304,9 @@ function initMostRecent() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-
     const mostRecentTableBody = initMostRecent();
+
+    topScoresChangeAwardGroup();
 
     scoreEventSource = new EventSource('/scoreboard/SubscribeScoreUpdate');
     scoreEventSource.addEventListener('score_update', function(e) {
