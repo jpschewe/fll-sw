@@ -38,17 +38,19 @@ function topScoresChangeAwardGroup() {
             // move to the next award group if there are more award groups
 
             let done = false;
-            let keyIter = awardGroupColors.keys();
+            const awardGroups = Array.from(awardGroupColors.keys());
+            let idx = 0;
             let loopCount = 0;
             while (!done) {
-                const keyIterData = keyIter.next();
-                if (keyIterData.value == topScoresAwardGroup) {
+                const ag = awardGroups[idx];
+                if (ag == topScoresAwardGroup) {
                     done = true;
                 }
 
                 // make sure there is a next value
-                if (keyIterData.done) {
-                    keyIter = awardGroupColors.keys();
+                ++idx;
+                if (idx >= awardGroups.length) {
+                    idx = 0;
                     if (loopCount >= 1) {
                         console.log("Error: found infinite loop finding award group");
                         break;
@@ -57,9 +59,9 @@ function topScoresChangeAwardGroup() {
                 }
             }
             // next value is what we want
-            const keyIterData = keyIter.next();
-            if (keyIterData.value != topScoresAwardGroup) {
-                topScoresAwardGroup = keyIterData.value;
+            const ag = awardGroups[idx];
+            if (ag != topScoresAwardGroup) {
+                topScoresAwardGroup = ag;
                 changed = true;
             }
         }
@@ -78,9 +80,9 @@ function topScoresAddScore(scoreUpdate) {
         teamMaxScore.set(scoreUpdate.team.teamNumber, scoreUpdate);
         changed = true;
     } else {
-        const prevScoreUpdate = teamMaxScore.get(team.teamNumber);
+        const prevScoreUpdate = teamMaxScore.get(scoreUpdate.team.teamNumber);
         if (scoreUpdate.score > prevScoreUpdate.score) {
-            teamMaxScore.set(team.teamNumber, scoreUpdate);
+            teamMaxScore.set(scoreUpdate.team.teamNumber, scoreUpdate);
             changed = true;
         }
     }
@@ -138,7 +140,62 @@ function topScoresDisplay() {
 
     const tableBody = topScoresTable.createTBody();
 
-    // FIXME display scores
+    // display scores
+    const allScores = Array.from(teamMaxScore.values());
+    const awardGroupScores = allScores.filter((scoreUpdate) => scoreUpdate.team.awardGroup == topScoresAwardGroup);
+    // sort descending by score
+    awardGroupScores.sort(topScoresComparator);
+
+    // output in order based on score
+    let prevScoreFormatted = null;
+    let rank = 0;
+    for (const scoreUpdate of awardGroupScores) {
+        if (prevScoreFormatted != scoreUpdate.formattedScore) {
+            ++rank;
+        }
+
+        const row = tableBody.insertRow();
+
+        const rankColumn = row.insertCell();
+        rankColumn.classList.add("center");
+        rankColumn.innerText = rank;
+
+        const teamNumberColumn = row.insertCell();
+        teamNumberColumn.classList.add("right");
+        teamNumberColumn.innerText = scoreUpdate.team.teamNumber;
+
+        const teamNameColumn = row.insertCell();
+        teamNameColumn.classList.add("left");
+        teamNameColumn.classList.add("truncate");
+        teamNameColumn.innerText = scoreUpdate.team.teamName;
+
+        if (displayOrganization) {
+            const orgColumn = row.insertCell();
+            orgColumn.classList.add("left");
+            orgColumn.classList.add("truncate");
+            orgColumn.innerText = scoreUpdate.team.organization;
+        }
+
+        const scoreColumn = row.insertCell();
+        scoreColumn.classList.add("right");
+        scoreColumn.innerText = scoreUpdate.formattedScore;
+
+        prevScoreFormatted = scoreUpdate.formattedScore;
+        //FIXME need to check parameter that shows all scores
+        if (rank >= TOP_SCORES_MAX_RANK) {
+            break;
+        }
+    }
+}
+
+function topScoresComparator(a, b) {
+    if (a.score > b.score) {
+        return -1;
+    } else if (b.score > a.score) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 function allTeamsScoreCellId(teamNumber, runNumber) {
@@ -329,6 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!scoreUpdate.bye && !scoreUpdate.noShow) {
             addToMostRecent(mostRecentTableBody, scoreUpdate);
             addToAllTeams(scoreUpdate);
+            topScoresAddScore(scoreUpdate);
         }
 
     }, true);

@@ -121,7 +121,7 @@ table.spacer img {
 
 #top_scores {
     top: 0;
-    height: 50%;
+    height: 40%;
 }
 
 #most_recent_table,
@@ -139,6 +139,7 @@ table.spacer img {
     border: 1px solid white;
 }
 
-#most_recent td {
+#most_recent td,
+#top_scores td {
     border: 1px solid white;
 }
