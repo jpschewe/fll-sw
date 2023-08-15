@@ -14,18 +14,18 @@ let prevScrollTimestamp = 0;
 const pixelsToScroll = 2;
 let scrollingDown = true;
 
-// how many ranks to display unless told to show all
-const TOP_SCORES_MAX_RANK = 5;
-
 // maximum number of rows in the most recent table
 const MOST_RECENT_MAX_ROWS = 20;
 
 const teamMaxScore = new Map();
 
-let topScoresAwardGroup = null;
-const awardGroupColors = new Map();
+// how many ranks to display unless told to show all
+const TOP_SCORES_MAX_RANK = 5;
 
-let divisionFlipRate = 10;
+let topScoresAwardGroup = null;
+let topScoresDisplayAllTeams = false;
+
+const awardGroupColors = new Map();
 
 function topScoresChangeAwardGroup() {
     if (awardGroupColors.size > 0) {
@@ -181,8 +181,7 @@ function topScoresDisplay() {
         scoreColumn.innerText = scoreUpdate.formattedScore;
 
         prevScoreFormatted = scoreUpdate.formattedScore;
-        //FIXME need to check parameter that shows all scores
-        if (rank >= TOP_SCORES_MAX_RANK) {
+        if (!topScoresDisplayAllTeams && rank >= TOP_SCORES_MAX_RANK) {
             break;
         }
     }
@@ -391,5 +390,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }, true);
 
-    requestAnimationFrame(allTeamsDoScroll);
+    if ("all_teams_top_scores" == layout) {
+        document.getElementById("most_recent").classList.add("fll-sw-ui-inactive");
+        topScoresDisplayAllTeams = true;
+        requestAnimationFrame(allTeamsDoScroll);
+        document.getElementById("all_teams").classList.add("automatic_scroll");
+        document.getElementById("all_teams").classList.add("manual_scroll");
+    } else {
+        requestAnimationFrame(allTeamsDoScroll);
+        document.getElementById("all_teams").classList.add("automatic_scroll");
+    }
 });

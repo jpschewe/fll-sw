@@ -24,6 +24,7 @@ import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.jsp.PageContext;
 
 /**
@@ -36,11 +37,13 @@ public final class Dynamic {
 
   /**
    * Setup variables for the page.
-   * 
+   *
+   * @param request to get parameters
    * @param application application context
    * @param page page context
    */
-  public static void populateContext(final ServletContext application,
+  public static void populateContext(final HttpServletRequest request,
+                                     final ServletContext application,
                                      final PageContext page) {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
@@ -58,6 +61,8 @@ public final class Dynamic {
       final int divisionFlipRate = GlobalParameters.getIntGlobalParameter(connection,
                                                                           GlobalParameters.DIVISION_FLIP_RATE);
       page.setAttribute("divisionFlipRate", divisionFlipRate);
+
+      page.setAttribute("layout", request.getParameter("layout"));
     } catch (final SQLException e) {
       throw new FLLInternalException("Error talking to the database", e);
     } catch (final JsonProcessingException e) {

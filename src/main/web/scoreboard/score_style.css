@@ -50,9 +50,16 @@ td.scoreboard {
     font-size: medium;
 }
 
+.automatic_scroll {
+    overflow: hidden;
+}
+
+.manual_scroll {
+    overflow: auto;
+}
+
 #all_teams {
     height: 100%;
-    overflow-y: hidden;
 }
 
 #all_teams table.team {

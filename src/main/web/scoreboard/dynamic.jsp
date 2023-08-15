@@ -6,7 +6,7 @@
 <%
 fll.web.scoreboard.Title.populateContext(application, session, pageContext);
 fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
-fll.web.scoreboard.Dynamic.populateContext(application, pageContext);
+fll.web.scoreboard.Dynamic.populateContext(request, application, pageContext);
 %>
 
 <html>
@@ -34,7 +34,8 @@ for (const [awardGroup, color] of Object.entries(awardGroupColorsRaw)) {
   awardGroupColors.set(awardGroup, color);
 }
 
-divisionFlipRate = parseInt("${divisionFlipRate}");
+const divisionFlipRate = parseInt("${divisionFlipRate}");
+const layout = "${layout}"
 </script>
 
 </head>
