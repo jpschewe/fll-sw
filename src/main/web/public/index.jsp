@@ -30,7 +30,7 @@ fll.web.PublicIndex.populateContext(application, pageContext);
 
     <a class="wide" href='<c:url value="/welcome.jsp"/>'>Welcome
         Page</a>
-    <a class="wide" href='<c:url value="/scoreboard/main.jsp" />'>Performance
+    <a class="wide" href='<c:url value="/scoreboard/dynamic.jsp" />'>Performance
         Scoreboard</a>
 
     <a class="wide" href='<c:url value="/scoreboard/allteams.jsp"/>'>All

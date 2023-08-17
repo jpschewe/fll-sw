@@ -393,11 +393,28 @@ document.addEventListener("DOMContentLoaded", () => {
     if ("all_teams_top_scores" == layout) {
         document.getElementById("most_recent").classList.add("fll-sw-ui-inactive");
         topScoresDisplayAllTeams = true;
-        requestAnimationFrame(allTeamsDoScroll);
+
         document.getElementById("all_teams").classList.add("automatic_scroll");
+        requestAnimationFrame(allTeamsDoScroll);
+    } else if ("all_teams_no_scroll" == layout) {
+        document.getElementById("left").classList.add("fll-sw-ui-inactive");
+        document.getElementById("right").classList.add("fll-sw-ui-inactive");
+        const allTeams = document.getElementById("all_teams");
+        const container = document.getElementById("container");
+        container.appendChild(allTeams);
+
         document.getElementById("all_teams").classList.add("manual_scroll");
-    } else {
-        requestAnimationFrame(allTeamsDoScroll);
+    } else if ("all_teams_auto_scroll" == layout) {
+        document.getElementById("left").classList.add("fll-sw-ui-inactive");
+        document.getElementById("right").classList.add("fll-sw-ui-inactive");
+        const allTeams = document.getElementById("all_teams");
+        const container = document.getElementById("container");
+        container.appendChild(allTeams);
+
         document.getElementById("all_teams").classList.add("automatic_scroll");
+        requestAnimationFrame(allTeamsDoScroll);
+    } else {
+        document.getElementById("all_teams").classList.add("automatic_scroll");
+        requestAnimationFrame(allTeamsDoScroll);
     }
 });

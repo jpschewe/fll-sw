@@ -21,11 +21,13 @@
         </li>
 
         <li>
-            <a href='<c:url value="allteams.jsp"/>' target="_blank">All
-                Teams, All Runs</a>
+            <a
+                href='<c:url value="/scoreboard/dynamic.jsp"><c:param name="layout" value="all_teams_auto_scroll"/></c:url>'
+                target="_blank">All Teams, All Runs</a>
         </li>
         <li>
-            <a href='<c:url value="allteams.jsp?allTeamsScroll=true"/>'
+            <a
+                href='<c:url value="/scoreboard/dynamic.jsp"><c:param name="layout" value="all_teams_no_scroll"/></c:url>'
                 target="_blank">All Teams, All Runs (scrolling)</a>
         </li>
         <li>
@@ -38,7 +40,8 @@
         </li>
 
         <li>
-            <a href='<c:url value="/scoreboard/teams-top_scores.jsp"/>'
+            <a
+                href='<c:url value="/scoreboard/dynamic.jsp"><c:param name="layout" value="all_teams_top_scores"/></c:url>'
                 target="_blank">All teams and all top scores</a>
         </li>
 
