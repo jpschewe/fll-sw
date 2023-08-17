@@ -35,8 +35,15 @@
                 Recent scores</a>
         </li>
         <li>
-            <a href='<c:url value="Top10"/>' target="_blank">Top 10
-                scores</a>
+            <a
+                href='<c:url value="/scoreboard/dynamic.jsp"><c:param name="layout" value="top_scores"/></c:url>'
+                target="_blank">Top scores</a>
+        </li>
+
+        <li>
+            <a
+                href='<c:url value="/scoreboard/dynamic.jsp"><c:param name="layout" value="top_scores_all"/></c:url>'
+                target="_blank">All Top scores</a>
         </li>
 
         <li>

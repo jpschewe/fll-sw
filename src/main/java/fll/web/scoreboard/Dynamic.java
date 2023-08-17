@@ -14,6 +14,9 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -62,7 +65,13 @@ public final class Dynamic {
                                                                           GlobalParameters.DIVISION_FLIP_RATE);
       page.setAttribute("divisionFlipRate", divisionFlipRate);
 
-      page.setAttribute("layout", request.getParameter("layout"));
+      final @Nullable String layout = request.getParameter("layout");
+      page.setAttribute("layout", layout);
+      if (!StringUtils.isEmpty(layout)) {
+        page.setAttribute("additionalTitle", String.format(" - %s", layout));
+      } else {
+        page.setAttribute("additionalTitle", "");
+      }
     } catch (final SQLException e) {
       throw new FLLInternalException("Error talking to the database", e);
     } catch (final JsonProcessingException e) {

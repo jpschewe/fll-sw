@@ -11,7 +11,7 @@ fll.web.scoreboard.Dynamic.populateContext(request, application, pageContext);
 
 <html>
 <head>
-<title>Scoreboard</title>
+<title>Scoreboard${additionalTitle}</title>
 
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
