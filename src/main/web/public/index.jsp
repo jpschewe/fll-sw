@@ -33,14 +33,17 @@ fll.web.PublicIndex.populateContext(application, pageContext);
     <a class="wide" href='<c:url value="/scoreboard/dynamic.jsp" />'>Performance
         Scoreboard</a>
 
-    <a class="wide" href='<c:url value="/scoreboard/allteams.jsp"/>'>All
+    <a class="wide"
+        href='<c:url value="/scoreboard/dynamic.jsp"><c:param name="layout" value="all_teams_auto_scroll"/></c:url>'>All
         Teams, All Performance Runs</a>
 
-    <a class="wide" href='<c:url value="/scoreboard/MostRecent"/>'>Most
+    <a class="wide"
+        href='<c:url value="/scoreboard/dynamic.jsp"><c:param name="layout" value="most_recent"/></c:url>'>Most
         recent performance scores</a>
 
-    <a class="wide" href='<c:url value="/scoreboard/Top10"/>'>Top
-        performance scores</a>
+    <a class="wide"
+        href='<c:url value="/scoreboard/dynamic.jsp"><c:param name="layout" value="top_scores"/></c:url>'
+        target="_blank">Top performance scores</a>
 
     <a class="wide" href='<c:url value="/playoff/remoteMain.jsp"/>'>Head
         to head brackets that are currently on the big screen</a>

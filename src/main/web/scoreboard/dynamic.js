@@ -428,6 +428,12 @@ document.addEventListener("DOMContentLoaded", () => {
         container.appendChild(allTeams);
 
         topScoresDisplayAllTeams = true;
+    } else if ("most_recent" == layout) {
+        document.getElementById("left").classList.add("fll-sw-ui-inactive");
+        document.getElementById("right").classList.add("fll-sw-ui-inactive");
+        const allTeams = document.getElementById("most_recent");
+        const container = document.getElementById("container");
+        container.appendChild(allTeams);
     } else {
         document.getElementById("all_teams").classList.add("automatic_scroll");
         requestAnimationFrame(allTeamsDoScroll);

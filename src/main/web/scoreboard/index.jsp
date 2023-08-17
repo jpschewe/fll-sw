@@ -12,12 +12,8 @@
     <h1>Scoreboard</h1>
     <ul>
         <li>
-            <a href='<c:url value="main.jsp" />' target="_blank">Primary
-                Scoreboard (1024x768)</a>
-        </li>
-        <li>
-            <a href='<c:url value="/scoreboard/main_small.jsp" />'
-                target="_blank">Primary Scoreboard (800x600)</a>
+            <a href='<c:url value="/scoreboard/dynamic.jsp" />'
+                target="_blank">Primary Scoreboard</a>
         </li>
 
         <li>
@@ -31,8 +27,9 @@
                 target="_blank">All Teams, All Runs (scrolling)</a>
         </li>
         <li>
-            <a href='<c:url value="MostRecent"/>' target="_blank">Most
-                Recent scores</a>
+            <a
+                href='<c:url value="/scoreboard/dynamic.jsp"><c:param name="layout" value="most_recent"/></c:url>'
+                target="_blank">Most Recent scores</a>
         </li>
         <li>
             <a
