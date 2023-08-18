@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import javax.sql.DataSource;
 
@@ -55,9 +56,7 @@ public final class ScoreboardUpdates {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  private static final Set<AsyncContext> ALL_CLIENTS = new HashSet<>();
-
-  private static final Object CLIENTS_LOCK = new Object();
+  private static final Collection<AsyncContext> ALL_CLIENTS = new ConcurrentLinkedDeque<>();
 
   /**
    * Message type used for score updates.
@@ -76,9 +75,7 @@ public final class ScoreboardUpdates {
       return;
     }
 
-    synchronized (CLIENTS_LOCK) {
-      ALL_CLIENTS.add(client);
-    }
+    ALL_CLIENTS.add(client);
     sendAllScores(client);
   }
 
@@ -151,10 +148,8 @@ public final class ScoreboardUpdates {
       }
     } catch (final IOException e) {
       LOGGER.error("Got error sending initial scores to client, dropping: {}", client.getRequest().getRemoteAddr(), e);
-      synchronized (CLIENTS_LOCK) {
-        client.complete();
-        ALL_CLIENTS.remove(client);
-      }
+      client.complete();
+      ALL_CLIENTS.remove(client);
     }
 
   }
@@ -181,12 +176,7 @@ public final class ScoreboardUpdates {
       final String updateStr = jsonMapper.writeValueAsString(update);
 
       final Set<AsyncContext> toRemove = new HashSet<>();
-      final Set<AsyncContext> clients;
-      synchronized (CLIENTS_LOCK) {
-        clients = new HashSet<>(ALL_CLIENTS);
-      }
-
-      for (final AsyncContext client : clients) {
+      for (final AsyncContext client : ALL_CLIENTS) {
         try {
           notifyClient(client, update.getTeam(), update.getRunNumber(), updateStr);
         } catch (final IOException e) {
@@ -196,11 +186,9 @@ public final class ScoreboardUpdates {
       }
 
       // remove clients that had issues
-      synchronized (CLIENTS_LOCK) {
-        for (final AsyncContext client : toRemove) {
-          client.complete();
-          ALL_CLIENTS.remove(client);
-        }
+      for (final AsyncContext client : toRemove) {
+        client.complete();
+        ALL_CLIENTS.remove(client);
       }
 
     } catch (final JsonProcessingException e) {
