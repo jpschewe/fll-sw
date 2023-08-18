@@ -191,7 +191,7 @@ public class Top10 extends BaseFLLServlet {
           --numColumns;
         }
         formatter.format("<th colspan='%d' bgcolor='%s'>Top Performance Scores: %s</th>", numColumns,
-                         AllTeams.getColorForAwardGroup(awardGroupName, allAwardGroups.indexOf(awardGroupName)),
+                         Dynamic.getColorForAwardGroup(awardGroupName, allAwardGroups.indexOf(awardGroupName)),
                          awardGroupName);
         formatter.format("</tr>%n");
 

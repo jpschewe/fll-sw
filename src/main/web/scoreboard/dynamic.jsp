@@ -5,7 +5,6 @@
 
 <%
 fll.web.scoreboard.Title.populateContext(application, session, pageContext);
-fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
 fll.web.scoreboard.Dynamic.populateContext(request, application, pageContext);
 %>
 

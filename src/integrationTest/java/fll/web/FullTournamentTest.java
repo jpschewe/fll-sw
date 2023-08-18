@@ -1151,7 +1151,7 @@ public class FullTournamentTest {
                              final WebDriverWait seleniumWait)
       throws IOException {
     IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
-        + "scoreboard/main.jsp");
+        + "scoreboard/dynamic.jsp");
 
     IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
         + "playoff/remoteMain.jsp");
