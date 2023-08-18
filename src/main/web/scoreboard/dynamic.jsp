@@ -4,8 +4,7 @@
 <fll-sw:required-roles roles="PUBLIC" allowSetup="false" />
 
 <%
-fll.web.scoreboard.Title.populateContext(application, session, pageContext);
-fll.web.scoreboard.Dynamic.populateContext(request, application, pageContext);
+fll.web.scoreboard.Dynamic.populateContext(request, application, session, pageContext);
 %>
 
 <html>
