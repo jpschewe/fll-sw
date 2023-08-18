@@ -168,9 +168,15 @@ public class DatabaseTeamScore extends TeamScore {
     }
   }
 
-  /**
-   * @see fll.web.playoff.TeamScore#scoreExists()
-   */
+  @Override
+  public boolean isVerified() {
+    if (!scoreExists()) {
+      return false;
+    } else {
+      return getBoolean("Verified");
+    }
+  }
+
   @Override
   public boolean scoreExists() {
     return scoreExists;

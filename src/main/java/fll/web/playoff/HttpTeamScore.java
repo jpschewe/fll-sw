@@ -69,18 +69,24 @@ public final class HttpTeamScore extends TeamScore {
 
   @Override
   public boolean isBye() {
+    // one cannot enter a BYE through the web interface
+    return false;
+  }
+
+  @Override
+  public boolean isVerified() {
     if (NON_PERFORMANCE_RUN_NUMBER == getRunNumber()) {
       return false;
     } else if (!scoreExists()) {
       return false;
     } else {
-      final String noShow = request.getParameter("Bye");
-      if (null == noShow) {
-        throw new RuntimeException("Missing parameter: Bye");
+      final String verified = request.getParameter("Verified");
+      if (null == verified) {
+        throw new RuntimeException("Missing parameter: Verified");
       }
-      return noShow.equalsIgnoreCase("true")
-          || noShow.equalsIgnoreCase("t")
-          || noShow.equals("1");
+      return verified.equalsIgnoreCase("true")
+          || verified.equalsIgnoreCase("t")
+          || verified.equals("1");
     }
   }
 

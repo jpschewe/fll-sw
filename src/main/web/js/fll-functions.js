@@ -164,3 +164,10 @@ function* enumerate(iterable) {
         ++i;
     }
 }
+
+/**
+ * Parse a boolean from a string. Matches Java's Boolean.parseBoolean().
+ */
+function parseBoolean(str) {
+    return /^true$/i.test(str);
+}

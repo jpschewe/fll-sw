@@ -38,7 +38,7 @@ import fll.xml.ChallengeDescription;
 /**
  * Initialize web attributes.
  */
-@WebFilter("/*")
+@WebFilter(urlPatterns = "/*", asyncSupported = true)
 public class InitFilter implements Filter {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();

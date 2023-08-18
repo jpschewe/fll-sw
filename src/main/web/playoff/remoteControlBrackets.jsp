@@ -60,7 +60,7 @@ SPAN.TIE {
 
 <script type="text/javascript">
   var allBracketData = JSON.parse('${allBracketDataJson}');
-  var scrollRate = parseInt("${scrollRate}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
+  var secondsBetweenScrolls = parseInt("${scrollRate}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
   var maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
 </script>
 
@@ -71,7 +71,6 @@ SPAN.TIE {
 
 <script type="text/javascript">
   let prevScrollTimestamp = 0;
-  const secondsBetweenScrolls = parseFloat("${scrollRate}");
   // if less than 1, then Chromebooks don't appear to scroll
   const pixelsToScroll = 2;
   let scrollingDown = true;

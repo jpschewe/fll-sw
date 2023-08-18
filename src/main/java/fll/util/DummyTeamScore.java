@@ -98,6 +98,11 @@ public class DummyTeamScore extends TeamScore {
   }
 
   @Override
+  public boolean isVerified() {
+    return true;
+  }
+
+  @Override
   public boolean scoreExists() {
     return true;
   }

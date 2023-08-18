@@ -74,7 +74,7 @@ public class DisplayQueryServlet extends BaseFLLServlet {
           + "/welcome.jsp";
     } else if (displayInfo.isScoreboard()) {
       return contextPath
-          + "/scoreboard/main.jsp";
+          + "/scoreboard/dynamic.jsp";
     } else if (displayInfo.isSlideshow()) {
       return contextPath
           + "/slideshow.jsp";

@@ -22,3 +22,136 @@ th.scoreboard {
 td.scoreboard {
     padding: 4;
 }
+
+#left,
+#right,
+#container {
+    position: fixed;
+    height: 100%;
+    top: 0;
+}
+
+#left {
+    left: 0;
+    width: 40%;
+}
+
+#right {
+    right: 0;
+    width: 60%;
+}
+
+#container {
+    width: 100%;
+}
+
+#title {
+    top: 0;
+    height: 40px;
+    width: 100%;
+    background-color: #008000;
+    color: white;
+    font-family: arial;
+    font-size: medium;
+}
+
+.automatic_scroll {
+    overflow: hidden;
+}
+
+.manual_scroll {
+    overflow: auto;
+}
+
+#all_teams {
+    height: 100%;
+}
+
+#all_teams table.team {
+    width: 99%;
+    border: 0px;
+    padding: 0px;
+    border-spacing: 0px;
+}
+
+#all_teams table.team table.runs {
+    border: 0px;
+    padding: 1px;
+    border-spacing: 0px;
+}
+
+#all_teams img.run_spacer {
+    width: 60px;
+    height: 1px;
+}
+
+#all_teams img.score_spacer {
+    width: 20px;
+    height: 1px;
+}
+
+#all_teams img.all_teams_blank {
+    width: 1px;
+    height: 15px;
+}
+
+#all_teams tr.sponsor {
+    background-color: white;
+}
+
+#all_teams tr.sponsor td.sponsor_title {
+    width: 50%;
+    vertical-align: middle;
+    color: black;
+}
+
+#all_teams tr.sponsor td.sponsor_logo {
+    width: 50%;
+    vertical-align: middle;
+    padding: 3px;
+}
+
+#all_teams table.team.A {
+    background-color: #000080
+}
+
+#all_teams table.team.B {
+    background-color: #0000d0
+}
+
+table.spacer {
+    width: 99%;
+    border: 0px;
+    padding: 0px;
+    border-spacing: 0px;
+}
+
+table.spacer img {
+    width: 1px;
+    height: 15px;
+}
+
+#top_scores {
+    top: 0;
+    height: 40%;
+}
+
+#most_recent_table,
+#top_scores_table {
+    width: 98%;
+}
+
+
+#most_recent table,
+#top_scores table {
+    border-collapse: collapse;
+    border: 1;
+    padding: 2px;
+    border-spacing: 0px;
+    border: 1px solid white;
+}
+
+#most_recent td,
+#top_scores td {
+    border: 1px solid white;
+}

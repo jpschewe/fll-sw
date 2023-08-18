@@ -1676,7 +1676,6 @@ public final class Playoff {
    * this new information.
    * 
    * @param connection database connection
-   * @param verified true if the score has been verified
    * @param currentTournament the id of the current tournament
    * @param winnerCriteria how to determine the winner
    * @param performanceElement the definition of the performance goals
@@ -1686,7 +1685,6 @@ public final class Playoff {
    * @param teamScore the score
    */
   public static void updatePlayoffScore(final Connection connection,
-                                        final boolean verified,
                                         final int currentTournament,
                                         final WinnerType winnerCriteria,
                                         final PerformanceScoreCategory performanceElement,
@@ -1792,7 +1790,7 @@ public final class Playoff {
 
         // If the second-check flag is NO or the opposing team is not
         // verified, we set the match "winner" (possibly back) to NULL.
-        if (!verified
+        if (!teamScore.isVerified()
             || !(Queries.performanceScoreExists(connection, currentTournament, teamB, runNumber)
                 && Queries.isVerified(connection, currentTournament, teamB, runNumber))) {
           removePlayoffScore(connection, division, currentTournament, runNumber, ptLine);

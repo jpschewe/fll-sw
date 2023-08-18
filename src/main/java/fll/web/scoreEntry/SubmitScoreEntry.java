@@ -101,8 +101,6 @@ public class SubmitScoreEntry extends BaseFLLServlet {
           throw new RuntimeException("Missing parameter: NoShow");
         }
 
-        final boolean verified = "1".equals(request.getParameter("Verified"));
-
         final TeamScore teamScore = new HttpTeamScore(teamNumber, runNumber, request);
 
         if (Queries.performanceScoreExists(connection, currentTournament, teamNumber, runNumber)) {
@@ -110,7 +108,7 @@ public class SubmitScoreEntry extends BaseFLLServlet {
                                                teamNumber, runNumber);
           SessionAttributes.appendToMessage(session, message);
         } else {
-          Queries.insertPerformanceScore(connection, challengeDescription, tournament, verified, teamScore);
+          Queries.insertPerformanceScore(connection, challengeDescription, tournament, teamScore.isVerified(), teamScore);
           final String message = String.format("<div class='success'>Entered score for %d run %d</div>", teamNumber,
                                                runNumber);
           SessionAttributes.appendToMessage(session, message);
