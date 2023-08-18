@@ -117,10 +117,10 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
     <!-- performance ranks -->
     <div class="wide">
-        <form action="<c:url value='/scoreboard/Top10'/>" method="POST"
-            target="report-top10">
+        <form action="<c:url value='/scoreboard/dynamic.jsp'/>"
+            method="POST" target="report-top10">
             Display performance scores with ranks
-            <input type="hidden" name="displayAll" value="true" />
+            <input type="hidden" name="layout" value="top_scores_all" />
 
             <select name="divisionIndex">
                 <c:forEach items="${awardGroups}" var="awardGroup"

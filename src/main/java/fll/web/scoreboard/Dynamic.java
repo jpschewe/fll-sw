@@ -40,6 +40,8 @@ import jakarta.servlet.jsp.PageContext;
  */
 public final class Dynamic {
 
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
   private static final int TEAMS_BETWEEN_LOGOS = 2;
 
   private Dynamic() {
@@ -65,11 +67,31 @@ public final class Dynamic {
                                                                                       tournament.getTournamentID());
 
       final Map<String, String> awardGroupColors = new HashMap<>();
-      for (int index = 0; index < awardGroups.size(); ++index) {
-        final String awardGroup = awardGroups.get(index);
-        final String color = Dynamic.getColorForAwardGroup(awardGroup, index);
-        awardGroupColors.put(awardGroup, color);
+      // if divisionIndex is specified and is a valid index into awardGroups, then
+      // only display that award group
+      final @Nullable String divisionIndexParam = request.getParameter("divisionIndex");
+      if (null != divisionIndexParam) {
+        try {
+          final int divisionIndex = Integer.parseInt(divisionIndexParam);
+          if (0 <= divisionIndex
+              && divisionIndex < awardGroups.size()) {
+            final String awardGroup = awardGroups.get(divisionIndex);
+            final String color = Dynamic.getColorForAwardGroup(awardGroup, divisionIndex);
+            awardGroupColors.put(awardGroup, color);
+          }
+        } catch (final NumberFormatException nfe) {
+          LOGGER.warn("Error parsing divisionIndex, ignoring parameter", nfe);
+        }
       }
+
+      if (awardGroupColors.isEmpty()) {
+        for (int index = 0; index < awardGroups.size(); ++index) {
+          final String awardGroup = awardGroups.get(index);
+          final String color = Dynamic.getColorForAwardGroup(awardGroup, index);
+          awardGroupColors.put(awardGroup, color);
+        }
+      }
+
       final ObjectMapper mapper = Utilities.createJsonMapper();
       page.setAttribute("awardGroupColors", mapper.writeValueAsString(awardGroupColors));
 
