@@ -378,8 +378,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     scoreEventSource = new EventSource('/scoreboard/SubscribeScoreUpdate');
     scoreEventSource.addEventListener('score_update', function(e) {
-        //console.log("Received score update: " + e.data);
-
         const scoreUpdate = JSON.parse(e.data);
 
         if (!scoreUpdate.bye && !scoreUpdate.noShow) {
@@ -388,6 +386,10 @@ document.addEventListener("DOMContentLoaded", () => {
             topScoresAddScore(scoreUpdate);
         }
 
+    }, true);
+
+    scoreEventSource.addEventListener('score_delete', function(_) {
+        location.reload();
     }, true);
 
     if ("all_teams_top_scores" == layout) {

@@ -64,6 +64,11 @@ public final class ScoreboardUpdates {
   public static final String SCORE_UPDATE_TYPE = "score_update";
 
   /**
+   * Message type used for score deletes.
+   */
+  public static final String SCORE_DELETE_TYPE = "score_delete";
+
+  /**
    * Add the client to the list of clients to receive score updates.
    * 
    * @param client the session to add
@@ -134,8 +139,8 @@ public final class ScoreboardUpdates {
               try {
                 final String updateStr = jsonMapper.writeValueAsString(update);
 
-                notifyClient(client, awardGroupsToDisplay, numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay,
-                             team, teamScore.getRunNumber(), updateStr);
+                newScore(client, awardGroupsToDisplay, numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay, team,
+                         teamScore.getRunNumber(), updateStr);
               } catch (final JsonProcessingException e) {
                 throw new FLLInternalException("Unable to format score update as JSON", e);
               }
@@ -155,6 +160,31 @@ public final class ScoreboardUpdates {
   }
 
   /**
+   * Tell the clients that a score was deleted. For now the clients just reload
+   * the page. In the future this may be smarter.
+   */
+  public static void deleteScore() {
+    final Set<AsyncContext> toRemove = new HashSet<>();
+    for (final AsyncContext client : ALL_CLIENTS) {
+      try {
+        final PrintWriter writer = client.getResponse().getWriter();
+        writer.write(String.format("event: %s%n", SCORE_DELETE_TYPE));
+        writer.write(String.format("data: %s%n%n", ""));
+        writer.flush();
+      } catch (final IOException e) {
+        LOGGER.warn("Got error writing to client, dropping: {}", client.getRequest().getRemoteAddr(), e);
+        toRemove.add(client);
+      }
+    }
+
+    // remove clients that had issues
+    for (final AsyncContext client : toRemove) {
+      client.complete();
+      ALL_CLIENTS.remove(client);
+    }
+  }
+
+  /**
    * Notify all clients of a new verified score.
    * 
    * @param team {@link ScoreUpdate#getTeam()}
@@ -162,15 +192,15 @@ public final class ScoreboardUpdates {
    * @param formattedScore {@link ScoreUpdate#getFormattedScore()}
    * @param teamScore used to get some score information
    */
-  public static void notifyClients(final TournamentTeam team,
-                                   final double score,
-                                   final String formattedScore,
-                                   final TeamScore teamScore) {
+  public static void newScore(final TournamentTeam team,
+                              final double score,
+                              final String formattedScore,
+                              final TeamScore teamScore) {
     final ScoreUpdate update = new ScoreUpdate(team, score, formattedScore, teamScore);
-    notifyClients(update);
+    newScore(update);
   }
 
-  private static void notifyClients(final ScoreUpdate update) {
+  private static void newScore(final ScoreUpdate update) {
     final ObjectMapper jsonMapper = Utilities.createJsonMapper();
     try {
       final String updateStr = jsonMapper.writeValueAsString(update);
@@ -178,7 +208,7 @@ public final class ScoreboardUpdates {
       final Set<AsyncContext> toRemove = new HashSet<>();
       for (final AsyncContext client : ALL_CLIENTS) {
         try {
-          notifyClient(client, update.getTeam(), update.getRunNumber(), updateStr);
+          newScore(client, update.getTeam(), update.getRunNumber(), updateStr);
         } catch (final IOException e) {
           LOGGER.warn("Got error writing to client, dropping: {}", client.getRequest().getRemoteAddr(), e);
           toRemove.add(client);
@@ -197,10 +227,10 @@ public final class ScoreboardUpdates {
 
   }
 
-  private static void notifyClient(final AsyncContext client,
-                                   final TournamentTeam team,
-                                   final int runNumber,
-                                   final String data)
+  private static void newScore(final AsyncContext client,
+                               final TournamentTeam team,
+                               final int runNumber,
+                               final String data)
       throws IOException {
 
     final ServletContext application = client.getRequest().getServletContext();
@@ -220,21 +250,21 @@ public final class ScoreboardUpdates {
       final List<String> allAwardGroups = Queries.getAwardGroups(connection, currentTournament.getTournamentID());
       final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
 
-      notifyClient(client, awardGroupsToDisplay, numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay, team,
-                   runNumber, data);
+      newScore(client, awardGroupsToDisplay, numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay, team,
+               runNumber, data);
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     }
   }
 
-  private static void notifyClient(final AsyncContext client,
-                                   final Collection<String> awardGroupsToDisplay,
-                                   final int numSeedingRounds,
-                                   final boolean runningHeadToHead,
-                                   final int maxRunNumberToDisplay,
-                                   final TournamentTeam team,
-                                   final int runNumber,
-                                   final String data)
+  private static void newScore(final AsyncContext client,
+                               final Collection<String> awardGroupsToDisplay,
+                               final int numSeedingRounds,
+                               final boolean runningHeadToHead,
+                               final int maxRunNumberToDisplay,
+                               final TournamentTeam team,
+                               final int runNumber,
+                               final String data)
       throws IOException {
     if (runNumber <= maxRunNumberToDisplay
         && awardGroupsToDisplay.contains(team.getAwardGroup())
@@ -246,11 +276,10 @@ public final class ScoreboardUpdates {
       writer.write(String.format("data: %s%n%n", data));
       writer.flush();
     }
-
   }
 
   /**
-   * Message sent on the client.
+   * Message sent to the client for a new score.
    */
   public static final class ScoreUpdate {
 

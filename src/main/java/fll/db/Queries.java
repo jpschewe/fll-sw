@@ -390,7 +390,7 @@ public final class Queries {
                                                                                teamScore.getTeamNumber());
       final ScoreType performanceScoreType = description.getPerformance().getScoreType();
       final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-      ScoreboardUpdates.notifyClients(team, score, formattedScore, teamScore);
+      ScoreboardUpdates.newScore(team, score, formattedScore, teamScore);
     }
 
     // Perform updates to the playoff data table if in playoff rounds.
@@ -533,7 +533,7 @@ public final class Queries {
                                                                                  teamScore.getTeamNumber());
         final ScoreType performanceScoreType = description.getPerformance().getScoreType();
         final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-        ScoreboardUpdates.notifyClients(team, score, formattedScore, teamScore);
+        ScoreboardUpdates.newScore(team, score, formattedScore, teamScore);
       }
 
       // Check if we need to update the PlayoffData table
@@ -680,6 +680,7 @@ public final class Queries {
 
     // notify that the list of unverified runs may have changed
     UnverifiedRunsWebSocket.notifyToUpdate();
+    ScoreboardUpdates.deleteScore();
   }
 
   /**
