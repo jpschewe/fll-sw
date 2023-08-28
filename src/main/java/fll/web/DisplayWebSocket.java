@@ -109,7 +109,7 @@ public class DisplayWebSocket {
                   + displayInfo.getName());
             }
 
-            displayInfo.updateLastSeen(httpApplication);
+            displayInfo.updateLastSeen();
           } // non-null DisplayInfo
         } else {
           LOGGER.info("Removing closed session: "

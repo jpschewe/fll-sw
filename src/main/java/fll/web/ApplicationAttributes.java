@@ -9,12 +9,13 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.servlet.ServletContext;
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.web.display.DisplayHandler;
 import fll.xml.ChallengeDescription;
+import jakarta.servlet.ServletContext;
 
 /**
  * Keys for all attributes in the application. These are initialized from
@@ -32,6 +33,7 @@ public final class ApplicationAttributes {
    */
   public static final String DATASOURCE = "datasource";
 
+  //FIXME needs to go away
   /**
    * Application attribute to hold names of all displays. Type is
    * SortedSet&lt;{@link DisplayInfo}&gt;. The default display is sorted first.
@@ -77,6 +79,16 @@ public final class ApplicationAttributes {
    * {@link String} that keeps track of which display page is being shown.
    */
   public static final String DISPLAY_PAGE = "displayPage";
+
+  public static final String DISPLAY_HANDLER = "displayHandler";
+
+  /**
+   * @param application where to get variables from
+   * @return the {@link DisplayHandler}
+   */
+  public static DisplayHandler getDisplayHandler(final ServletContext application) {
+    return getNonNullAttribute(application, DISPLAY_HANDLER, DisplayHandler.class);
+  }
 
   /**
    * Get session attribute and send appropriate error if type is wrong. Note

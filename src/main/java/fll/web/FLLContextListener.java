@@ -69,9 +69,8 @@ public class FLLContextListener implements ServletContextListener {
 
     // initialize the datasource
     if (null == ApplicationAttributes.getAttribute(application, ApplicationAttributes.DATASOURCE, DataSource.class)) {
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Datasource not available, creating");
-      }
+      LOGGER.trace("Datasource not available, creating");
+
       final DataSource datasource = Utilities.createFileDataSource(database);
       application.setAttribute(ApplicationAttributes.DATASOURCE, datasource);
 

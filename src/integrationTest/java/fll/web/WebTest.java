@@ -43,7 +43,7 @@ public class WebTest {
     try {
       final String[] pages = new String[] { //
                                             "", //
-                                            "display.jsp", //
+                                            "display/index.jsp", //
                                             "index.jsp", //
                                             "welcome.jsp", "admin", "admin/index.jsp", "admin/edit_event_division.jsp",
                                             "admin/tournaments.jsp", "admin/judges.jsp", "admin/tables.jsp",

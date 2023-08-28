@@ -18,9 +18,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpSession;
-
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
@@ -28,6 +25,8 @@ import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.FLLRuntimeException;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Information about a display.
@@ -275,7 +274,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    *
    * @param name the name of the display.
    */
-  private DisplayInfo(final String name) {
+  public DisplayInfo(final String name) {
     mName = name;
     mLastSeen = LocalTime.now();
     mRemotePage = DEFAULT_REMOTE_PAGE;
@@ -284,13 +283,20 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     mBrackets.add(new H2HBracketDisplay(this, 0, "", 1));
   }
 
-  private final String mName;
+  private String mName;
 
   /**
    * @return display name
    */
   public String getName() {
     return mName;
+  }
+
+  /**
+   * @param v {@link #getName()}
+   */
+  public void setName(final String v) {
+    mName = v;
   }
 
   private LocalTime mLastSeen;
@@ -305,45 +311,11 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
   /**
    * Update the last seen time to be now.
-   *
-   * @param application used to store the updated {@link DisplayInfo} object.
    */
-  public void updateLastSeen(final ServletContext application) {
+  public void updateLastSeen() {
     mLastSeen = LocalTime.now();
 
-    LOGGER.trace("updateLastSeen: "
-        + getName()
-        + " -> "
-        + mLastSeen
-        + " default: "
-        + isDefaultDisplay());
-
-    if (!isDefaultDisplay()) {
-      synchronized (LOCK) {
-        final SortedSet<DisplayInfo> displayInformation = internalGetDisplayInformation(application);
-
-        LOGGER.trace("Before remove of display copy: "
-            + displayInformation);
-
-        final boolean removed = displayInformation.remove(this); // remove
-                                                                 // possible
-                                                                 // outdated
-                                                                 // copy
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("updateLastSeen: removed old data for display "
-              + getName()
-              + "? "
-              + removed);
-        }
-
-        displayInformation.add(this); // insert updated version
-
-        LOGGER.trace("After add of updated display information: "
-            + displayInformation);
-
-        application.setAttribute(ApplicationAttributes.DISPLAY_INFORMATION, displayInformation);
-      }
-    }
+    LOGGER.trace("updateLastSeen: {} -> {} default: {}", getName(), mLastSeen, isDefaultDisplay());
   }
 
   /**
@@ -699,7 +671,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     } else {
       // filter to those selected
       final List<String> filtered = allAwardGroups.stream().filter(v -> configuredGroups.contains(v))
-                                                    .collect(Collectors.toList());
+                                                  .collect(Collectors.toList());
       if (filtered.isEmpty()) {
         return allAwardGroups;
       } else {
@@ -709,11 +681,50 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   }
 
   /**
+   * @param awardGroup the award group to check
+   * @return true if the award group is shown on this display
+   */
+  public boolean isShowAwardGroup(final String awardGroup) {
+    final List<String> configuredGroups = getScoreboardAwardGroups();
+    if (configuredGroups.isEmpty()) {
+      // display all award groups
+      return true;
+    } else {
+      return configuredGroups.contains(awardGroup);
+    }
+  }
+
+  /**
    * @return the parameter name for the remote page
    */
   public String getAwardGroupsFormParamName() {
     return getFormParamPrefix()
         + "awardGroups";
+  }
+
+  /**
+   * This returns a URL starting with a slash. It is expected that the consumer of
+   * this information will prepend the context path.
+   * 
+   * @return the URL
+   */
+  public String getUrl() {
+    if (isWelcome()) {
+      return "/welcome.jsp";
+    } else if (isScoreboard()) {
+      return "/scoreboard/dynamic.jsp";
+    } else if (isSlideshow()) {
+      return "/slideshow.jsp";
+    } else if (isHeadToHead()) {
+      return "/playoff/remoteMain.jsp";
+    } else if (isFinalistTeams()) {
+      return "/report/finalist/FinalistTeams.jsp?finalistTeamsScroll=true";
+    } else if (isSpecial()) {
+      return "/custom/"
+          + getSpecialUrl();
+    } else {
+      return "/welcome.jsp";
+    }
   }
 
 }
