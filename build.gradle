@@ -237,7 +237,7 @@ dependencies {
     
   implementation(group: "com.google.guava", name: "guava", version: "31.1-jre")
     
-  implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.8") {
+  implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.9") {
     // only needed for BMP and TIFF formats
     exclude(group: "com.sun.media", module: "jai-codec")
     
@@ -247,7 +247,7 @@ dependencies {
     
     // xml APIs are part of the JDK
     exclude(group: "xml-apis", module: "xml-apis")
-    exclude(group: "xml-apis", module: "xml-apis-ext")    
+    // needed for org.w3c.dom.svg.SVGDocument with FOP 2.9 and JDK 17 exclude(group: "xml-apis", module: "xml-apis-ext")    
   }
   
   implementation(group: "org.checkerframework", name: "checker-qual", version: project.checker_framework_version)

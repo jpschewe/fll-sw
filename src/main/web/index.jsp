@@ -76,8 +76,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         <a class="wide" href='challenge.xml'>Challenge Descriptor.
             One can use this to see the scoring and the tie breaker.</a>
 
-        <a class="wide" href='BlankScoresheet'>Blank performance
-            score sheet, one regular match play and one practice (PDF)</a>
+        <a class="wide" href='BlankScoresheet' target="_blankScoresheet">Blank
+            performance score sheet, one regular match play and one
+            practice (PDF)</a>
 
         <c:forEach items="${challengeDescription.subjectiveCategories}"
             var="category">
