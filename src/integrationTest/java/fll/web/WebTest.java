@@ -56,7 +56,7 @@ public class WebTest {
                                             // "scoreboard/index.jsp",
                                             // "scoreboard/dynamic.jsp",
                                             "scoreEntry/select_team.jsp", "setup/index.jsp",
-                                            "troubleshooting/index.jsp", };
+                                            "troubleshooting/index.jsp", "BlankScoresheet", };
       for (final String page : pages) {
         LOGGER.info("Testing page #{}#", page);
         IntegrationTestUtils.initializeDatabaseFromDump(selenium, seleniumWait,
