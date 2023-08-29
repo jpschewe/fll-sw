@@ -69,6 +69,11 @@ public final class ScoreboardUpdates {
   public static final String SCORE_DELETE_TYPE = "score_delete";
 
   /**
+   * Message type used to reload the page.
+   */
+  public static final String RELOAD_TYPE = "reload";
+
+  /**
    * Add the client to the list of clients to receive score updates.
    * 
    * @param client the session to add
@@ -169,6 +174,32 @@ public final class ScoreboardUpdates {
       try {
         final PrintWriter writer = client.getResponse().getWriter();
         writer.write(String.format("event: %s%n", SCORE_DELETE_TYPE));
+        writer.write(String.format("data: %s%n%n", ""));
+        writer.flush();
+      } catch (final IOException e) {
+        LOGGER.warn("Got error writing to client, dropping: {}", client.getRequest().getRemoteAddr(), e);
+        toRemove.add(client);
+      }
+    }
+
+    // remove clients that had issues
+    for (final AsyncContext client : toRemove) {
+      client.complete();
+      ALL_CLIENTS.remove(client);
+    }
+  }
+
+  /**
+   * Notify the display to reload because the award groups being displayed have
+   * changed.
+   */
+  public static void awardGroupChange() {
+    // TODO: make this smarter and only require the displays that changed to reload
+    final Set<AsyncContext> toRemove = new HashSet<>();
+    for (final AsyncContext client : ALL_CLIENTS) {
+      try {
+        final PrintWriter writer = client.getResponse().getWriter();
+        writer.write(String.format("event: %s%n", RELOAD_TYPE));
         writer.write(String.format("data: %s%n%n", ""));
         writer.flush();
       } catch (final IOException e) {
