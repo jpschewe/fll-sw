@@ -65,6 +65,9 @@ public final class Dynamic {
       final List<String> awardGroups = Queries.getAwardGroups(connection, tournament.getTournamentID());
       final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection,
                                                                                       tournament.getTournamentID());
+      final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+
+      final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(awardGroups);
 
       final Map<String, String> awardGroupColors = new HashMap<>();
       // if divisionIndex is specified and is a valid index into awardGroups, then
@@ -78,6 +81,7 @@ public final class Dynamic {
             final String awardGroup = awardGroups.get(divisionIndex);
             final String color = Dynamic.getColorForAwardGroup(awardGroup, divisionIndex);
             awardGroupColors.put(awardGroup, color);
+
           }
         } catch (final NumberFormatException nfe) {
           LOGGER.warn("Error parsing divisionIndex, ignoring parameter", nfe);
@@ -88,7 +92,12 @@ public final class Dynamic {
         for (int index = 0; index < awardGroups.size(); ++index) {
           final String awardGroup = awardGroups.get(index);
           final String color = Dynamic.getColorForAwardGroup(awardGroup, index);
-          awardGroupColors.put(awardGroup, color);
+          if (awardGroupsToDisplay.contains(awardGroup)) {
+            // loop over all award groups to keep the colors by index consistent, however
+            // filter the list sent to the display so that only the correct award groups are
+            // seen.
+            awardGroupColors.put(awardGroup, color);
+          }
         }
       }
 
@@ -128,8 +137,6 @@ public final class Dynamic {
       page.setAttribute("allTeams", allTeams);
       page.setAttribute("teamHeaderColor", teamHeaderColor);
 
-      final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
-      final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(awardGroups);
       final String awardGroupTitle = String.join(", ", awardGroupsToDisplay);
       page.setAttribute("awardGroupTitle", awardGroupTitle);
 

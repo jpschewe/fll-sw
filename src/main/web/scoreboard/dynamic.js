@@ -392,6 +392,10 @@ document.addEventListener("DOMContentLoaded", () => {
         location.reload();
     }, true);
 
+    scoreEventSource.addEventListener('reload', function(_) {
+        location.reload();
+    }, true);
+
     if ("all_teams_top_scores" == layout) {
         document.getElementById("most_recent").classList.add("fll-sw-ui-inactive");
 

@@ -33,6 +33,7 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.web.playoff.H2HUpdateWebSocket;
+import fll.web.scoreboard.ScoreboardUpdates;
 
 /**
  * Handle changes to the remote control parameters.
@@ -144,7 +145,11 @@ public class RemoteControlPost extends BaseFLLServlet {
             throw new MissingRequiredParameterException(awardGroupsFormParamName);
           }
           final List<String> awardGroupsToDisplay = Arrays.asList(awardGroupsParamValues);
-          display.setScoreboardAwardGroups(awardGroupsToDisplay);
+          final List<String> currentAwardGroupsToDisplay = display.getScoreboardAwardGroups();
+          if (!awardGroupsToDisplay.equals(currentAwardGroupsToDisplay)) {
+            display.setScoreboardAwardGroups(awardGroupsToDisplay);
+            ScoreboardUpdates.awardGroupChange();
+          }
         } // scoreboard
 
       } // display to keep
