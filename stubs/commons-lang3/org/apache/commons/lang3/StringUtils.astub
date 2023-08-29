@@ -15,6 +15,7 @@ public class StringUtils {
   
   public static int length(final @Nullable CharSequence cs);
 
+  @EnsuresNonNullIf(expression="#1", result=true)
   public static boolean isNotBlank(final @Nullable CharSequence cs);
   
 }
