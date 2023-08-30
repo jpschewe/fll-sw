@@ -23,10 +23,15 @@ let displayUrl = null;
 let displayName = "";
 
 function messageReceived(event) {
-    console.log("received: " + event.data);
-
-    //FIXME read type, expecting ASSIGN_UUID or DISPLAY_URL
-    // data doesn't matter, just execute reload on any message    
+    const message = JSON.parse(event.data);
+    if(message.type == ASSIGN_UUID_MESSAGE_TYPE) {
+        displayUuid = message.uuid;
+    } else if(message.type == DISPLAY_URL_MESSAGE_TYPE) {
+        //FIXME handle this
+    } else {
+        console.log("Ignoring unexpected message type: " + message.type);
+        console.log("Full message: " + event.data);
+    }
 }
 
 function socketOpened(event) {

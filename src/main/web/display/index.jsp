@@ -32,10 +32,8 @@ fll.web.display.DisplayIndex.populateContext(request, application, pageContext);
 </script>
 </head>
 
-<!-- FIXME store UUID -->
 <!-- FIXME don't open a page until a URL message is received after the UUID is stored -->
 <!-- FIXME use setInterval to send a ping message every minute -->
-<!-- FIXME require a name be set before sending the hello message, consider creating the display name automatically -->
 
 <body>
 
