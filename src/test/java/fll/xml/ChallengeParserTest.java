@@ -6,7 +6,6 @@
 package fll.xml;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -15,10 +14,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
-import java.util.Collection;
+import java.util.Comparator;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import static org.hamcrest.Matchers.notNullValue;
 
 import fll.TestUtils;
 import fll.Utilities;
@@ -397,24 +401,41 @@ public class ChallengeParserTest {
     assertTrue(exception, "Expected a runtime exception due to two variables having the same name in a computed goal.");
   }
 
+  private static final class UrlStringComparator implements Comparator<URL> {
+    public static final UrlStringComparator INSTANCE = new UrlStringComparator();
+
+    @Override
+    public int compare(final URL u1,
+                       final URL u2) {
+      return u1.toString().compareTo(u2.toString());
+    }
+
+  }
+
+  /**
+   * @return urls to use for {@link #testAllDescriptors(URL)}
+   */
+  public static Stream<URL> knownChallengeDescriptors() {
+    return ChallengeParser.getAllKnownChallengeDescriptorURLs().stream().sorted(UrlStringComparator.INSTANCE);
+  }
+
   /**
    * Check that all known challenge descriptors are still valid.
    *
+   * @param url the challenge description to test
    * @throws IOException on test error
+   * @throws ChallengeXMLException on a test error
    */
-  @Test
-  public void testAllDescriptors() throws IOException {
-    final Collection<URL> urls = ChallengeParser.getAllKnownChallengeDescriptorURLs();
+  @ParameterizedTest
+  @MethodSource("knownChallengeDescriptors")
+  public void testAllDescriptors(final URL url) throws IOException {
+    LOGGER.info("Challenge: "
+        + url.toString());
 
-    for (final URL u : urls) {
-      LOGGER.info("Challenge: "
-          + u.toString());
-
-      try (InputStream stream = u.openStream();
-          Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET)) {
-        final ChallengeDescription description = ChallengeParser.parse(reader);
-        assertThat(description, notNullValue());
-      }
+    try (InputStream stream = url.openStream();
+        Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET)) {
+      final ChallengeDescription description = ChallengeParser.parse(reader);
+      assertThat(description, notNullValue());
     }
   }
 
