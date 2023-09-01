@@ -33,7 +33,6 @@ fll.web.display.DisplayIndex.populateContext(request, application, pageContext);
 </head>
 
 <!-- FIXME don't open a page until a URL message is received after the UUID is stored -->
-<!-- FIXME use setInterval to send a ping message every minute -->
 
 <body>
 

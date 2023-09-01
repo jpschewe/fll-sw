@@ -50,7 +50,7 @@ public class DisplayEndpoint {
     if (null == this.session) {
       throw new FLLInternalException("Received websocket message before receiving the session from start");
     }
-    
+
     LOGGER.trace("Received message: {}", text);
 
     try {

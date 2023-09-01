@@ -6,6 +6,8 @@
 
 package fll.web.display;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Sent to the client to specify the UUID.
  */
@@ -14,7 +16,7 @@ package fll.web.display;
   /**
    * @param uuid {@link #getUuid()}
    */
-  /* package */ AssignUuidMessage(final String uuid) {
+  /* package */ AssignUuidMessage(@JsonProperty("uuid") final String uuid) {
     super(Message.MessageType.ASSIGN_UUID, uuid);
   }
 

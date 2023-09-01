@@ -18,15 +18,17 @@ const windowOptions = 'height='
 let connected = true;
 let socket = null;
 
-let displayUuid = "";
+let displayUuid = null;
 let displayUrl = null;
 let displayName = "";
 
+let pingIntervalId = null;
+
 function messageReceived(event) {
     const message = JSON.parse(event.data);
-    if(message.type == ASSIGN_UUID_MESSAGE_TYPE) {
+    if (message.type == ASSIGN_UUID_MESSAGE_TYPE) {
         displayUuid = message.uuid;
-    } else if(message.type == DISPLAY_URL_MESSAGE_TYPE) {
+    } else if (message.type == DISPLAY_URL_MESSAGE_TYPE) {
         //FIXME handle this
     } else {
         console.log("Ignoring unexpected message type: " + message.type);
@@ -34,14 +36,25 @@ function messageReceived(event) {
     }
 }
 
-function socketOpened(event) {
+function socketOpened(_event) {
     console.log("Socket opened");
     sendRegisterDisplay();
+
+    if (null == pingIntervalId) {
+        // send ping every minute
+        pingIntervalId = setTimeout(sendPing, 60 * 1000);
+    }
 }
 
-function socketClosed(event) {
+function socketClosed(_event) {
     console.log("Socket closed");
     socket = null;
+
+    if (null != pingIntervalId) {
+        // stop sending pings until the socket is opened again
+        clearInterval(pingIntervalId);
+        pingIntervalId = null;
+    }
 
     // open the socket a second later
     setTimeout(openSocket, 1000);
@@ -111,6 +124,16 @@ function sendRegisterDisplay() {
         message.type = REGISTER_DISPLAY_MESSAGE_TYPE;
         message.uuid = displayUuid;
         message.name = displayName;
+
+        socket.send(JSON.stringify(message));
+    }
+}
+
+function sendPing() {
+    if (displayUuid) {
+        const message = new Object()
+        message.type = PING_MESSAGE_TYPE;
+        message.uuid = displayUuid;
 
         socket.send(JSON.stringify(message));
     }

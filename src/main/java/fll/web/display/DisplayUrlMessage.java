@@ -6,6 +6,8 @@
 
 package fll.web.display;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Sent from server to client to specify the url to display.
  */
@@ -14,7 +16,7 @@ package fll.web.display;
   /**
    * @param url {@link #getUrl()}
    */
-  /* package */ DisplayUrlMessage(final String url) {
+  /* package */ DisplayUrlMessage(@JsonProperty("url") final String url) {
     super(Message.MessageType.DISPLAY_URL);
     this.url = url;
   }
