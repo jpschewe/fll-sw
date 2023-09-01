@@ -306,6 +306,7 @@ public class GoalEditor extends AbstractGoalEditor {
       messages.add("One initial value must be set");
     }
 
+    final Set<Double> scores = new HashSet<>();
     final Set<String> values = new HashSet<>();
     for (final EnumeratedValue enumValue : getGoal().getValues()) {
       final String value = enumValue.getValue();
@@ -314,6 +315,13 @@ public class GoalEditor extends AbstractGoalEditor {
       if (!newValue) {
         messages.add(String.format("Values must be unique, the value \"%s\" is used more than once", value));
       }
+
+      final double score = enumValue.getScore();
+      final boolean newScore = scores.add(score);
+      if (!newScore) {
+        messages.add(String.format("Scores must be unique, the score \"%s\" is used more than once", score));
+      }
+
     }
   }
 
