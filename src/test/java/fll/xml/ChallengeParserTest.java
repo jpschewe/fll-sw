@@ -337,6 +337,24 @@ public class ChallengeParserTest {
   }
 
   /**
+   * Check that setting an initial value for an enum goal that matches multiple values.
+   *
+   * @throws IOException test error
+   */
+  @Test
+  public void testInitialValueEnumMultipleMatches() throws IOException {
+    boolean exception = false;
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/initial-value-enum-no-match.xml")) {
+      assertNotNull(stream);
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
+    } catch (final InvalidInitialValue e) {
+      exception = true;
+    }
+    assertTrue(exception,
+               "Expected a runtime exception due the initial value being set to something that doesn't match an enum value");
+  }
+
+  /**
    * Check that a variableRef is not allowed in a tiebreaker.
    *
    * @throws IOException test error
