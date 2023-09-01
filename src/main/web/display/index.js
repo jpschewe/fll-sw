@@ -8,7 +8,7 @@
 
 const width = screen.width - 10;
 const height = screen.height - 10;
-let newWindow = null;
+let displayWindow = null;
 const windowOptions = 'height='
     + height
     + ',width='
@@ -29,7 +29,7 @@ function messageReceived(event) {
     if (message.type == ASSIGN_UUID_MESSAGE_TYPE) {
         displayUuid = message.uuid;
     } else if (message.type == DISPLAY_URL_MESSAGE_TYPE) {
-        //FIXME handle this
+        displayPage(message.url);
     } else {
         console.log("Ignoring unexpected message type: " + message.type);
         console.log("Full message: " + event.data);
@@ -42,7 +42,7 @@ function socketOpened(_event) {
 
     if (null == pingIntervalId) {
         // send ping every minute
-        pingIntervalId = setTimeout(sendPing, 60 * 1000);
+        pingIntervalId = setInterval(sendPing, 60 * 1000);
     }
 }
 
@@ -75,46 +75,24 @@ function openSocket() {
 }
 
 
-function displayPage(url) {
-    //FIXME need to add the display_uuid parameter
-    if (null == newWindow || newWindow.location.pathname != url) {
-        newWindow = window.open(url, 'displayWindow', windowOptions);
-        if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+function displayPage(urlStr) {
+    if (!displayUuid) {
+        console.log("Error: trying to display page without UUID being set. URL: " + urlStr);
+        return;
+    }
+
+    if (null == displayWindow || displayWindow.location.pathname != urlStr) {
+        // add UUID to the URL so that the display page can use it to get the DisplayInfo object       
+        const url = new URL(urlStr, window.location);
+        const params = new URLSearchParams(url.search);
+        params.append("display_uuid", displayUuid);
+        url.search = params;
+
+        displayWindow = window.open(url, 'displayWindow', windowOptions);
+        if (!displayWindow || displayWindow.closed || typeof displayWindow.closed == 'undefined') {
             alert("For this page to work you need to disable the popup blocker for this site");
         }
     }
-}
-
-function pollSuccess(newURL) {
-    if (!connected) {
-        connected = true;
-
-        // display welcome for a second so that the browser doesn't cache the page currenty displayed
-        displayPage('<c:url value="/welcome.jsp"/>');
-
-        // display the page that we want to see
-        setTimeout(function() {
-            displayPage(newURL);
-        }, 1000);
-    } else {
-        displayPage(newURL);
-    }
-}
-
-function pollFailure() {
-    connected = false;
-
-    console.log("Got failure getting current display page, reconnecting...");
-
-    if (null != socket) {
-        socket.onclose = function() {
-        }; // ensure that the closeSocket method doesn't get called and cause a race
-        socket.close();
-        socket = null;
-    }
-
-    // open the socket a second later
-    setTimeout(openSocket, 1000);
 }
 
 function sendRegisterDisplay() {
@@ -156,11 +134,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     updateNameInstructions();
 
-    document.getElementById("name_button").addEventListener("click", () => {
+    const nameButton = document.getElementById("name_button");
+    nameButton.addEventListener("click", () => {
         const newName = document.getElementById("name").value;
         if (displayName != newName) {
             sendRegisterDisplay();
             updateNameInstructions();
+        }
+    });
+
+    document.getElementById("name").addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            nameButton.click();
         }
     });
 
