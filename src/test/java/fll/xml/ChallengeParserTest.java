@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.hamcrest.Matchers.notNullValue;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.TestUtils;
 import fll.Utilities;
 
@@ -337,7 +338,8 @@ public class ChallengeParserTest {
   }
 
   /**
-   * Check that setting an initial value for an enum goal that matches multiple values.
+   * Check that setting an initial value for an enum goal that matches multiple
+   * values.
    *
    * @throws IOException test error
    */
@@ -419,6 +421,7 @@ public class ChallengeParserTest {
     assertTrue(exception, "Expected a runtime exception due to two variables having the same name in a computed goal.");
   }
 
+  @SuppressFBWarnings(value = "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", justification = "This class won't be serialized of put inside of a serializable class")
   private static final class UrlStringComparator implements Comparator<URL> {
     public static final UrlStringComparator INSTANCE = new UrlStringComparator();
 
