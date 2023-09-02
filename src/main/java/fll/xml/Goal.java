@@ -363,8 +363,8 @@ public class Goal extends AbstractGoal {
     if (!isEnumerated()) {
       ele.setAttribute(MIN_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mMin));
       ele.setAttribute(MAX_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mMax));
-      ele.setAttribute(MULTIPLIER_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mMultiplier));
     }
+    ele.setAttribute(MULTIPLIER_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mMultiplier));
     ele.setAttribute(INITIAL_VALUE_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mInitialValue));
 
     ele.setAttribute(ChallengeParser.SCORE_TYPE_ATTRIBUTE, mScoreType.toXmlString());
