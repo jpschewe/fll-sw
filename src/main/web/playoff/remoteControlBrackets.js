@@ -176,14 +176,19 @@ function messageReceived(event) {
     }
 }
 
-function socketOpened(event) {
+function socketOpened(_event) {
     console.log("Socket opened");
 
-    var str = JSON.stringify(allBracketData);
+
+    const message = new Object();
+    message.uuid = displayUuid;
+    message.brackInfo = allBracketData;
+
+    const str = JSON.stringify(message);
     this.send(str);
 }
 
-function socketClosed(event) {
+function socketClosed(_event) {
     console.log("Socket closed");
 
     // open the socket a second later

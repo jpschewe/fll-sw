@@ -85,7 +85,7 @@ function displayPage(urlStr) {
         // add UUID to the URL so that the display page can use it to get the DisplayInfo object       
         const url = new URL(urlStr, window.location);
         const params = new URLSearchParams(url.search);
-        params.append("display_uuid", displayUuid);
+        params.append(DISPLAY_UUID_PARAMETER_NAME, displayUuid);
         url.search = params;
 
         displayWindow = window.open(url, 'displayWindow', windowOptions);

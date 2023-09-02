@@ -38,9 +38,6 @@ public class FLLContextListener implements ServletContextListener {
 
     // set some default text
     application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "");
-
-    // make sure the default display object exists
-    DisplayInfo.getDisplayInformation(application);
   }
 
   @Override

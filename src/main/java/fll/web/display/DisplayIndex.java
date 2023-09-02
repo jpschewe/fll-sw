@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.web.DisplayInfo;
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.jsp.PageContext;
 
@@ -23,12 +22,12 @@ public final class DisplayIndex {
   }
 
   public static void populateContext(final HttpServletRequest request,
-                                     final ServletContext application,
                                      final PageContext page) {
     page.setAttribute("REGISTER_DISPLAY_MESSAGE_TYPE", Message.MessageType.REGISTER_DISPLAY.toString());
     page.setAttribute("PING_MESSAGE_TYPE", Message.MessageType.PING.toString());
     page.setAttribute("ASSIGN_UUID_MESSAGE_TYPE", Message.MessageType.ASSIGN_UUID.toString());
     page.setAttribute("DISPLAY_URL_MESSAGE_TYPE", Message.MessageType.DISPLAY_URL.toString());
+    page.setAttribute("DISPLAY_UUID_PARAMETER_NAME", DisplayHandler.DISPLAY_UUID_PARAMETER_NAME);
 
     final String name;
     final @Nullable String uuidParam = request.getParameter("display_uuid");

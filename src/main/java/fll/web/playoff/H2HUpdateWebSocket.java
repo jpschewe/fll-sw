@@ -7,30 +7,24 @@
 package fll.web.playoff;
 
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
-import jakarta.websocket.OnError;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.Session;
-import jakarta.websocket.server.ServerEndpoint;
 
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -43,7 +37,14 @@ import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 import fll.web.GetHttpSessionConfigurator;
+import fll.web.display.DisplayHandler;
 import fll.xml.ScoreType;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
+import jakarta.websocket.OnError;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.Session;
+import jakarta.websocket.server.ServerEndpoint;
 
 /**
  * Provide updates on the state of head to head brackets.
@@ -53,9 +54,11 @@ public class H2HUpdateWebSocket {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  private static final Map<String, Set<Session>> SESSIONS = new HashMap<>();
+  // bracketname -> display uuids
+  private static final Map<String, Set<String>> SESSIONS = new HashMap<>();
 
-  private static final Set<Session> ALL_SESSIONS = new HashSet<>();
+  // uuid -> session
+  private static final Map<String, Session> ALL_SESSIONS = new HashMap<>();
 
   private static final Object SESSIONS_LOCK = new Object();
 
@@ -63,12 +66,14 @@ public class H2HUpdateWebSocket {
    * Add the session and send out messages for all bracket information for the
    * specified brackets.
    * 
+   * @param displayUuid the UUID of the display
    * @param session the session to add
    * @param allBracketInfo the brackets that the session is interested in
    * @throws IOException
    * @throws SQLException
    */
-  private static void addSession(final Session session,
+  private static void addSession(final String displayUuid,
+                                 final Session session,
                                  final Collection<BracketInfo> allBracketInfo,
                                  final Connection connection,
                                  final int currentTournament)
@@ -76,17 +81,17 @@ public class H2HUpdateWebSocket {
     synchronized (SESSIONS_LOCK) {
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
-      ALL_SESSIONS.add(session);
+      ALL_SESSIONS.put(displayUuid, session);
 
-      updateDisplayedBracket(session);
+      updateDisplayedBracket(displayUuid, session);
 
       for (final BracketInfo bracketInfo : allBracketInfo) {
 
         if (!SESSIONS.containsKey(bracketInfo.getBracketName())) {
-          SESSIONS.put(bracketInfo.getBracketName(), new HashSet<Session>());
+          SESSIONS.put(bracketInfo.getBracketName(), new HashSet<String>());
         }
 
-        SESSIONS.get(bracketInfo.getBracketName()).add(session);
+        SESSIONS.get(bracketInfo.getBracketName()).add(displayUuid);
 
         // send the current information for the bracket to the session so that
         // it's current
@@ -126,20 +131,17 @@ public class H2HUpdateWebSocket {
           + "'");
     }
 
-    final Reader reader = new StringReader(msg);
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
+    // may get passed a javascript object with extra fields, just ignore them
+    // this happens when BracketInfo is subclassed and the subclass is passed
+    // in
+    jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     try {
-      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
-
-      // may get passed a javascript object with extra fields, just ignore them
-      // this happens when BracketInfo is subclassed and the subclass is passed
-      // in
-      jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-      final Collection<BracketInfo> allBracketInfo = jsonMapper.readValue(reader, BracketInfoTypeInformation.INSTANCE);
+      final RegisterMessage message = jsonMapper.readValue(msg, RegisterMessage.class);
 
       if (LOGGER.isTraceEnabled()) {
-        for (final BracketInfo bracketInfo : allBracketInfo) {
+        for (final BracketInfo bracketInfo : message.brackInfo) {
           LOGGER.trace("Bracket name: "
               + bracketInfo.getBracketName()
               + " first: "
@@ -149,12 +151,19 @@ public class H2HUpdateWebSocket {
         }
       }
 
+      final String uuid;
+      if (!StringUtils.isBlank(message.uuid)) {
+        uuid = message.uuid;
+      } else {
+        uuid = UUID.randomUUID().toString();
+      }
+
       final HttpSession httpSession = getHttpSession(session);
       final ServletContext httpApplication = httpSession.getServletContext();
       final DataSource datasource = ApplicationAttributes.getDataSource(httpApplication);
       try (Connection connection = datasource.getConnection()) {
         final int currentTournament = Queries.getCurrentTournament(connection);
-        addSession(session, allBracketInfo, connection, currentTournament);
+        addSession(uuid, session, message.brackInfo, connection, currentTournament);
       }
 
     } catch (final IOException e) {
@@ -177,15 +186,13 @@ public class H2HUpdateWebSocket {
     return httpSession;
   }
 
-  private static void updateDisplayedBracket(final Session session) {
+  private static void updateDisplayedBracket(final String displayUuid,
+                                             final Session session) {
 
     if (session.isOpen()) {
 
       try {
-        final HttpSession httpSession = getHttpSession(session);
-        final ServletContext httpApplication = httpSession.getServletContext();
-
-        final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(httpApplication, httpSession);
+        final DisplayInfo displayInfo = DisplayHandler.getDisplay(displayUuid);
 
         final BracketMessage message = new BracketMessage();
         message.isDisplayUpdate = true;
@@ -225,8 +232,8 @@ public class H2HUpdateWebSocket {
    */
   public static void updateDisplayedBracket() {
     synchronized (SESSIONS_LOCK) {
-      for (final Session session : ALL_SESSIONS) {
-        updateDisplayedBracket(session);
+      for (final Map.Entry<String, Session> entry : ALL_SESSIONS.entrySet()) {
+        updateDisplayedBracket(entry.getKey(), entry.getValue());
       } // foreach session
 
     } // sessions lock
@@ -272,7 +279,7 @@ public class H2HUpdateWebSocket {
         return;
       }
 
-      final Set<Session> toRemove = new HashSet<>();
+      final Set<String> toRemove = new HashSet<>();
 
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
@@ -285,8 +292,14 @@ public class H2HUpdateWebSocket {
       }
       final String messageText = writer.toString();
 
-      final Set<Session> sessions = SESSIONS.get(bracketName);
-      for (final Session session : sessions) {
+      final Set<String> uuids = SESSIONS.get(bracketName);
+      for (final String uuid : uuids) {
+        final Session session = ALL_SESSIONS.get(uuid);
+        if (null == session) {
+          LOGGER.warn("Found invalid uuid in sessions: {}", uuid);
+          continue;
+        }
+
         if (session.isOpen()) {
           try {
             session.getBasicRemote().sendText(messageText);
@@ -294,25 +307,27 @@ public class H2HUpdateWebSocket {
             LOGGER.error("Got error sending message to session ("
                 + session.getId()
                 + "), dropping session", ioe);
-            toRemove.add(session);
+            toRemove.add(uuid);
           }
         } else {
-          toRemove.add(session);
+          toRemove.add(uuid);
         }
       } // foreach session
 
       // cleanup dead sessions
-      for (final Session session : toRemove) {
-        try {
-          session.close();
-        } catch (final IOException ioe) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Got error closing session, ignoring", ioe);
+      for (final String uuid : toRemove) {
+        final Session session = ALL_SESSIONS.get(uuid);
+        if (null != session) {
+          try {
+            session.close();
+          } catch (final IOException ioe) {
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("Got error closing session, ignoring", ioe);
+            }
           }
         }
-
-        sessions.remove(session);
-        ALL_SESSIONS.remove(session);
+        uuids.remove(uuid);
+        ALL_SESSIONS.remove(uuid);
       } // foreach session to remove
 
     } // end lock
@@ -398,6 +413,21 @@ public class H2HUpdateWebSocket {
   }
 
   // CHECKSTYLE:OFF - data class for websocket
+
+  public static final class RegisterMessage {
+    /**
+     * Uuid of the display.
+     */
+    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
+    public String uuid = "";
+
+    /**
+     * Bracket information.
+     */
+    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
+    public Collection<BracketInfo> brackInfo = Collections.emptyList();
+  }
+
   /**
    * Message sent on the WebSocket.
    */
@@ -423,9 +453,5 @@ public class H2HUpdateWebSocket {
 
   }
   // CHECKSTYLE:ON
-
-  private static final class BracketInfoTypeInformation extends TypeReference<Collection<BracketInfo>> {
-    public static final BracketInfoTypeInformation INSTANCE = new BracketInfoTypeInformation();
-  }
 
 }

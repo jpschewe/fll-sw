@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 import fll.Tournament;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
+import fll.web.display.DisplayHandler;
 import fll.web.playoff.Playoff;
 import fll.web.report.finalist.FinalistSchedule;
 
@@ -67,6 +68,8 @@ public final class RemoteControl {
 
       pageContext.setAttribute("allAwardGroups",
                                Queries.getAwardGroups(connection, currentTournament.getTournamentID()));
+
+      pageContext.setAttribute("displayInformation", DisplayHandler.getAllDisplays());
 
     } catch (final SQLException e) {
       LOGGER.error(e.getMessage(), e);

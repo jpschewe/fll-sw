@@ -14,7 +14,7 @@ fll.web.playoff.AdminBrackets.populateContext(request, application, pageContext)
 </head>
 
 <script type="text/javascript">
-  var bracketInfo = ${bracketInfoJson};
+  const bracketInfo = ${bracketInfoJson};
 </script>
 
 

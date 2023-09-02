@@ -5,7 +5,7 @@
 <%@ page import="fll.web.DisplayInfo"%>
 
 <%
-fll.web.display.DisplayIndex.populateContext(request, application, pageContext);
+fll.web.display.DisplayIndex.populateContext(request, pageContext);
 %>
 
 <fll-sw:required-roles roles="PUBLIC" allowSetup="false" />
@@ -29,6 +29,7 @@ fll.web.display.DisplayIndex.populateContext(request, application, pageContext);
   const ASSIGN_UUID_MESSAGE_TYPE = "${ASSIGN_UUID_MESSAGE_TYPE}";
   const DISPLAY_URL_MESSAGE_TYPE = "${DISPLAY_URL_MESSAGE_TYPE}";
   const PARAM_DISPLAY_UUID = "${param.display_uuid}";
+  const DISPLAY_UUID_PARAMETER_NAME = "${DISPLAY_UUID_PARAMETER_NAME}";
 </script>
 </head>
 

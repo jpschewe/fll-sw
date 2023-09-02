@@ -13,6 +13,8 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -23,8 +25,10 @@ import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 import fll.web.WebUtils;
+import fll.web.display.DisplayHandler;
 import fll.web.playoff.BracketData.TopRightCornerStyle;
 import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.PageContext;
 
@@ -40,11 +44,19 @@ public final class RemoteControlBrackets {
    * @param application application variables
    * @param session session variables
    * @param pageContext page variables
+   * @param request used to get parameters
    */
   public static void populateContext(final ServletContext application,
                                      final HttpSession session,
+                                     final HttpServletRequest request,
                                      final PageContext pageContext) {
-    final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+    final String displayUuid = request.getParameter(DisplayHandler.DISPLAY_UUID_PARAMETER_NAME);
+    final DisplayInfo displayInfo;
+    if (!StringUtils.isBlank(displayUuid)) {
+      displayInfo = DisplayHandler.getDisplay(displayUuid);
+    } else {
+      displayInfo = DisplayHandler.getDefaultDisplay();
+    }
 
     // store the brackets to know when a refresh is required
     session.setAttribute("brackets", displayInfo.getBrackets());

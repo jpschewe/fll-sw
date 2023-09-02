@@ -7,11 +7,15 @@
 package fll.web.display;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -28,6 +32,9 @@ public final class DisplayHandler {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  /**
+   * UUID for the default display.
+   */
   private static final String DEFAULT_DISPLAY_UUID = new UUID(0, 0).toString();
 
   private final BlockingQueue<WorkItem> workItems = new LinkedBlockingQueue<>();
@@ -36,8 +43,14 @@ public final class DisplayHandler {
 
   private static final Object LOCK = new Object();
 
+  /**
+   * Parameter name used to pass the display uuid to the various display pages.
+   */
+  public static final String DISPLAY_UUID_PARAMETER_NAME = "display_uuid";
+
   static {
-    final DisplayInfo defaultDisplay = new DisplayInfo(DisplayInfo.DEFAULT_DISPLAY_NAME);
+    final DisplayInfo defaultDisplay = new DisplayInfo(DEFAULT_DISPLAY_UUID, DisplayInfo.DEFAULT_DISPLAY_NAME);
+    defaultDisplay.setRemotePage(DisplayInfo.WELCOME_REMOTE_PAGE);
     DISPLAYS.put(DEFAULT_DISPLAY_UUID, new DisplayData(defaultDisplay, new DisplaySocket()));
   }
 
@@ -56,6 +69,24 @@ public final class DisplayHandler {
       } else {
         throw new FLLRuntimeException(String.format("Display with the ID '%s' is not known", uuid));
       }
+    }
+  }
+
+  /**
+   * @return the default display
+   */
+  public static DisplayInfo getDefaultDisplay() {
+    return getDisplay(DEFAULT_DISPLAY_UUID);
+  }
+
+  /**
+   * @return all {@link DisplayInfo} objects sorted with default first.
+   *         Unmodifiable.
+   */
+  public static List<DisplayInfo> getAllDisplays() {
+    synchronized (LOCK) {
+      return Collections.unmodifiableList(DISPLAYS.values().stream().map(DisplayData::getInfo)
+                                                  .collect(Collectors.toList()));
     }
   }
 
@@ -82,7 +113,7 @@ public final class DisplayHandler {
       data = DISPLAYS.get(uuid);
       if (null == data) {
         final DisplaySocket socket = new DisplaySocket(session);
-        final DisplayInfo info = new DisplayInfo(name);
+        final DisplayInfo info = new DisplayInfo(uuid, name);
         data = new DisplayData(info, socket);
         DISPLAYS.put(uuid, data);
       } else {
@@ -91,13 +122,25 @@ public final class DisplayHandler {
     }
 
     send(uuid, data.getSocket(), new AssignUuidMessage(uuid));
-    sendCurrentUrl(uuid, data);
+    sendCurrentUrl(data);
   }
 
-  private static void sendCurrentUrl(final String uuid,
-                                     final DisplayData data) {
+  /**
+   * Send the current URL to all displays.
+   */
+  public static void sendUpdateUrl() {
+    final List<DisplayData> data;
+    synchronized (LOCK) {
+      data = new LinkedList<>(DISPLAYS.values());
+    }
+    for (final DisplayData d : data) {
+      sendCurrentUrl(d);
+    }
+  }
+
+  private static void sendCurrentUrl(final DisplayData data) {
     final String url = data.getInfo().getUrl();
-    send(uuid, data.getSocket(), new DisplayUrlMessage(url));
+    send(data.getInfo().getUuid(), data.getSocket(), new DisplayUrlMessage(url));
   }
 
   /**
@@ -182,4 +225,5 @@ public final class DisplayHandler {
       return socket;
     }
   }
+
 }

@@ -5,54 +5,34 @@
  */
 package fll.web.scoreboard;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import javax.sql.DataSource;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.DelayedPerformance;
-import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.util.FP;
-import fll.web.ApplicationAttributes;
-import fll.web.AuthenticationContext;
-import fll.web.BaseFLLServlet;
-import fll.web.DisplayInfo;
-import fll.web.SessionAttributes;
-import fll.web.UserRole;
 import fll.web.report.FinalComputedScores;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
 import fll.xml.WinnerType;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 /**
  * Compute top scores from the seeding rounds.
  */
-@WebServlet("/scoreboard/Top10")
-public class Top10 extends BaseFLLServlet {
+public final class Top10 {
 
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+  private Top10() {
+  }
 
   /**
    * Max number of characters in a team name to display.
@@ -68,177 +48,6 @@ public class Top10 extends BaseFLLServlet {
    * Highest rank to display.
    */
   public static final int MAX_DISPLAY_RANK = 5;
-
-  @Override
-  protected void processRequest(final HttpServletRequest request,
-                                final HttpServletResponse response,
-                                final ServletContext application,
-                                final HttpSession session)
-      throws IOException, ServletException {
-    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
-
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.PUBLIC), false)) {
-      return;
-    }
-
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Entering doPost");
-    }
-
-    final Formatter formatter = new Formatter(response.getWriter());
-
-    final String showOrgStr = request.getParameter("showOrganization");
-    final boolean showOrg = null == showOrgStr ? true : Boolean.parseBoolean(showOrgStr);
-
-    final String displayAllStr = request.getParameter("displayAll");
-    final boolean displayAll = null == displayAllStr ? false : Boolean.parseBoolean(displayAllStr);
-
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
-
-    try (Connection connection = datasource.getConnection()) {
-      final Tournament currentTournament = Tournament.getCurrentTournament(connection);
-      final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
-      final List<String> allAwardGroups = Queries.getAwardGroups(connection, currentTournament.getTournamentID());
-      final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
-
-      final @Nullable String divisionIndexParam = request.getParameter("divisionIndex");
-      int awardGroupIndex = -1;
-      if (null != divisionIndexParam) {
-        try {
-          awardGroupIndex = Integer.parseInt(divisionIndexParam);
-        } catch (final NumberFormatException nfe) {
-          awardGroupIndex = -1;
-          LOGGER.warn("Error parsing divisionIndex parameter '{}', ignoring", divisionIndexParam);
-        }
-      }
-
-      // if the award group wasn't passed as a parameter or was invalid, then get it
-      // from the session
-      if (awardGroupIndex < 0) {
-        final @Nullable Integer divisionIndexObj = SessionAttributes.getAttribute(session, "divisionIndex",
-                                                                                  Integer.class);
-        if (null == divisionIndexObj) {
-          awardGroupIndex = 0;
-        } else {
-          awardGroupIndex = Math.max(0, divisionIndexObj.intValue());
-
-          ++awardGroupIndex;
-          if (awardGroupIndex >= allAwardGroups.size()) {
-            awardGroupIndex = 0;
-          }
-        }
-      }
-
-      // handle filtered award groups
-      final int startingAwardGroupIndex = awardGroupIndex;
-      while (true) {
-        final String awardGroupName = allAwardGroups.get(awardGroupIndex);
-        if (awardGroupsToDisplay.contains(awardGroupName)) {
-          break;
-        } else {
-          ++awardGroupIndex;
-        }
-
-        if (awardGroupIndex >= allAwardGroups.size()) {
-          awardGroupIndex = 0;
-        }
-
-        if (startingAwardGroupIndex == awardGroupIndex) {
-          LOGGER.error("While finding award group to display we cycled all the way around. Award groups to display: {}",
-                       awardGroupsToDisplay);
-          break;
-        }
-      }
-
-      formatter.format("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">%n");
-      formatter.format("<html>%n");
-      formatter.format("<head>%n");
-      formatter.format("<title>Top scores</title>%n");
-      formatter.format("<link rel='stylesheet' type='text/css' href='../style/fll-sw.css' />%n");
-      formatter.format("<link rel='stylesheet' type='text/css' href='score_style.css' />%n");
-
-      if (null == divisionIndexParam) {
-        // only refresh when using session
-        formatter.format("<meta http-equiv='refresh' content='%d' />%n",
-                         GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
-      }
-
-      formatter.format("<script type=\"text/javascript\" src=\"set-font-size.js\"></script>%n");
-
-      formatter.format("</head>%n");
-
-      formatter.format("<body class='scoreboard'>%n");
-
-      formatter.format("<table border='1' cellpadding='2' cellspacing='0' width='98%%'>%n");
-
-      formatter.format("<colgroup>%n");
-      formatter.format("<col width='30px' />%n");
-      formatter.format("<col width='75px' />%n");
-      formatter.format("<col />%n");
-      if (showOrg) {
-        formatter.format("<col />%n");
-      }
-      formatter.format("<col width='70px' />%n");
-      formatter.format("</colgroup>%n");
-
-      if (!allAwardGroups.isEmpty()) {
-        final String awardGroupName = allAwardGroups.get(awardGroupIndex);
-
-        formatter.format("<tr>%n");
-        int numColumns = 5;
-        if (!showOrg) {
-          --numColumns;
-        }
-        formatter.format("<th colspan='%d' bgcolor='%s'>Top Performance Scores: %s</th>", numColumns,
-                         Dynamic.getColorForAwardGroup(awardGroupName, allAwardGroups.indexOf(awardGroupName)),
-                         awardGroupName);
-        formatter.format("</tr>%n");
-
-        processScoresForAwardGroup(connection, description, awardGroupName, (teamName,
-                                                                             teamNumber,
-                                                                             organization,
-                                                                             formattedScore,
-                                                                             rank) -> {
-          if (displayAll
-              || rank <= MAX_DISPLAY_RANK) {
-            formatter.format("<tr>%n");
-            formatter.format("<td class='center'>%d</td>%n", rank);
-            formatter.format("<td class='right'>%d</td>%n", teamNumber);
-            if (null == teamName) {
-              teamName = "&nbsp;";
-            }
-            formatter.format("<td class='left truncate'>%s</td>%n", teamName);
-
-            if (showOrg) {
-              if (null == organization) {
-                organization = "&nbsp;";
-              }
-              formatter.format("<td class='left truncate'>%s</td>%n", organization);
-            }
-            formatter.format("<td class='right'>%s</td>%n", formattedScore);
-            formatter.format("</tr>");
-          }
-        });
-
-      } // end award groups not empty
-
-      if (null == divisionIndexParam) {
-        session.setAttribute("divisionIndex", Integer.valueOf(awardGroupIndex));
-      }
-
-    } catch (final SQLException e) {
-      throw new RuntimeException("Error talking to the database", e);
-    }
-
-    formatter.format("</table>%n");
-    formatter.format("</body>%n");
-    formatter.format("</html>%n");
-
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Exiting doPost");
-    }
-  }
 
   /**
    * Used for processing the result of a score query.
