@@ -376,7 +376,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     topScoresChangeAwardGroup();
 
-    scoreEventSource = new EventSource('/scoreboard/SubscribeScoreUpdate');
+    scoreEventSource = new EventSource('/scoreboard/SubscribeScoreUpdate?display_uuid=' + displayUuid);
     scoreEventSource.addEventListener('score_update', function(e) {
         const scoreUpdate = JSON.parse(e.data);
 
