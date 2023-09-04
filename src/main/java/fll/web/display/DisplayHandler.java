@@ -73,6 +73,31 @@ public final class DisplayHandler {
   }
 
   /**
+   * Find the display given the uuid, if it is following the default display,
+   * return the default display instead.
+   * 
+   * @param uuid from {@link #registerDisplay(String, String, Session)}, if null
+   *          or empty, return the default display
+   * @return the display information
+   * @see DisplayHandler#getDisplay(String)
+   * @see #getDefaultDisplay()
+   * @throws FLLRuntimeException if a display with the specified uuid isn't found
+   */
+  public static DisplayInfo resolveDisplay(final @Nullable String uuid) {
+    if (!StringUtils.isBlank(uuid)) {
+      final DisplayInfo di = DisplayHandler.getDisplay(uuid);
+      if (di.isFollowDefault()) {
+        return DisplayHandler.getDefaultDisplay();
+      } else {
+        return di;
+      }
+    } else {
+      LOGGER.warn("No display UUID specified, using the default display");
+      return DisplayHandler.getDefaultDisplay();
+    }
+  }
+
+  /**
    * @return the default display
    */
   public static DisplayInfo getDefaultDisplay() {

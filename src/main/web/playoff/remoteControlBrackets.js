@@ -198,12 +198,12 @@ function socketClosed(_event) {
 function openSocket() {
     console.log("opening socket");
 
-    var url = window.location.pathname;
-    var directory = url.substring(0, url.lastIndexOf('/'));
-    var webSocketAddress = getWebsocketProtocol() + "//" + window.location.host + directory
+    const url = window.location.pathname;
+    const directory = url.substring(0, url.lastIndexOf('/'));
+    const webSocketAddress = getWebsocketProtocol() + "//" + window.location.host + directory
         + "/H2HUpdateWebSocket";
 
-    var socket = new WebSocket(webSocketAddress);
+    const socket = new WebSocket(webSocketAddress);
     socket.onmessage = messageReceived;
     socket.onopen = socketOpened;
     socket.onclose = socketClosed;

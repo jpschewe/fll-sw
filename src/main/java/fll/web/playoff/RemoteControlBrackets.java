@@ -13,8 +13,6 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -37,8 +35,6 @@ import jakarta.servlet.jsp.PageContext;
  */
 public final class RemoteControlBrackets {
 
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
   private RemoteControlBrackets() {
   }
 
@@ -53,20 +49,8 @@ public final class RemoteControlBrackets {
                                      final HttpServletRequest request,
                                      final PageContext pageContext) {
     final String displayUuid = request.getParameter(DisplayHandler.DISPLAY_UUID_PARAMETER_NAME);
-    
-    // determine the display information
-    final DisplayInfo displayInfo;
-    if (!StringUtils.isBlank(displayUuid)) {
-      final DisplayInfo di = DisplayHandler.getDisplay(displayUuid);
-      if (di.isFollowDefault()) {
-        displayInfo = DisplayHandler.getDefaultDisplay();
-      } else {
-        displayInfo = di;
-      }
-    } else {
-      LOGGER.warn("No display UUID specified, using the default display");
-      displayInfo = DisplayHandler.getDefaultDisplay();
-    }
+
+    final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
 
     // store the brackets to know when a refresh is required
     session.setAttribute("brackets", displayInfo.getBrackets());

@@ -192,7 +192,7 @@ public class H2HUpdateWebSocket {
     if (session.isOpen()) {
 
       try {
-        final DisplayInfo displayInfo = DisplayHandler.getDisplay(displayUuid);
+        final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
 
         final BracketMessage message = new BracketMessage();
         message.isDisplayUpdate = true;
