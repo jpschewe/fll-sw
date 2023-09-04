@@ -22,7 +22,7 @@ import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 
 /**
- * 
+ * Registration point for displays.
  */
 @ServerEndpoint("/display/DisplayEndpoint")
 public class DisplayEndpoint {
