@@ -121,10 +121,11 @@ public final class DisplayHandler {
    * @param providedUuid uuid provided by the client, may be null or empty
    * @param name the name of the display
    * @param session the websocket
+   * @return the uuid of the display in case the provided UUID is empty
    */
-  public static void registerDisplay(final @Nullable String providedUuid,
-                                     final String name,
-                                     final Session session) {
+  public static String registerDisplay(final @Nullable String providedUuid,
+                                       final String name,
+                                       final Session session) {
     final String uuid;
     if (StringUtils.isBlank(providedUuid)) {
       uuid = UUID.randomUUID().toString();
@@ -148,6 +149,8 @@ public final class DisplayHandler {
 
     send(uuid, data.getSocket(), new AssignUuidMessage(uuid));
     sendCurrentUrl(data);
+
+    return uuid;
   }
 
   /**
