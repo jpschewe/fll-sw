@@ -464,15 +464,15 @@ public final class ChallengeParser {
                  initialValue);
 
     if (ChallengeParser.isEnumeratedGoal(goalElement)) {
-      boolean foundMatch = false;
+      int numMatches = 0;
       for (final Element valueEle : new NodelistElementCollectionAdapter(goalElement.getElementsByTagName(EnumeratedValue.TAG_NAME))) {
         final String scoreStr = valueEle.getAttribute("score");
         final double score = Utilities.getXmlFloatingPointNumberFormat().parse(scoreStr).doubleValue();
         if (FP.equals(score, initialValue, INITIAL_VALUE_TOLERANCE)) {
-          foundMatch = true;
+          ++numMatches;
         }
       }
-      if (!foundMatch) {
+      if (numMatches < 1) {
         throw new InvalidInitialValue(String.format("Initial value for %s(%f) does not match the score of any value element within the goal",
                                                     name, initialValue));
       }

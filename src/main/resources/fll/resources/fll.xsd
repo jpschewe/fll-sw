@@ -581,6 +581,16 @@
             </xsd:attribute>
 
         </xsd:complexType>
+
+        <xsd:key name="goalValueValueKey">
+            <xsd:annotation>
+                <xsd:documentation>
+                    Enumerated values must have unique values in a goal.
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:selector xpath="./value" />
+            <xsd:field xpath="@value" />
+        </xsd:key>
     </xsd:element>
 
     <xsd:simpleType name="scoreType">
