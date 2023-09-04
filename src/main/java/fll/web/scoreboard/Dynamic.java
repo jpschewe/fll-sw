@@ -66,7 +66,7 @@ public final class Dynamic {
       final String displayUuid = request.getParameter(DisplayHandler.DISPLAY_UUID_PARAMETER_NAME);
       final DisplayInfo displayInfo;
       if (!StringUtils.isBlank(displayUuid)) {
-        displayInfo = DisplayHandler.getDisplay(displayUuid);
+        displayInfo = DisplayHandler.resolveDisplay(displayUuid);
       } else {
         displayInfo = DisplayHandler.getDefaultDisplay();
       }
