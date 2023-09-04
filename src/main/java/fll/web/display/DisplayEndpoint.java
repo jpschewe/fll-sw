@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
 import fll.util.FLLInternalException;
-import fll.web.GetHttpSessionConfigurator;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnError;
 import jakarta.websocket.OnMessage;
@@ -25,7 +24,7 @@ import jakarta.websocket.server.ServerEndpoint;
 /**
  * 
  */
-@ServerEndpoint(value = "/display/DisplayEndpoint", configurator = GetHttpSessionConfigurator.class)
+@ServerEndpoint("/display/DisplayEndpoint")
 public class DisplayEndpoint {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
