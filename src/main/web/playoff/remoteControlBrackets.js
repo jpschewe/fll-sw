@@ -164,7 +164,7 @@ function handleBracketUpdate(bracketUpdate) {
 function messageReceived(event) {
 
     console.log("received: " + event.data);
-    var bracketMessage = JSON.parse(event.data);
+    const bracketMessage = JSON.parse(event.data);
     if (bracketMessage.isDisplayUpdate) {
         if (isDisplayInfoDifferent(bracketMessage.allBracketInfo)) {
             // reload
@@ -181,7 +181,7 @@ function socketOpened(_event) {
 
 
     const message = new Object();
-    message.uuid = displayUuid;
+    message.displayUuid = displayUuid;
     message.brackInfo = allBracketData;
 
     const str = JSON.stringify(message);

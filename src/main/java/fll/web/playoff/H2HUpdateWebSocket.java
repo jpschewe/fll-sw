@@ -54,7 +54,26 @@ public class H2HUpdateWebSocket {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  // bracketname -> display uuids
+  /*
+   * Note about UUIDs and how they relate to DisplayInfo UUIDs.
+   * 
+   * The UUIDs can be used to map from bracket names to web socket sessions and to
+   * map from
+   * the individual UUID to a web socket session.
+   * The UUID is used as a way to refer to a web socket session.
+   * 
+   * When the web socket is from a display page, then the UUID matches the UUID
+   * from a DisplayInfo object.
+   * When the web socket is from another head to head page, the UUID has been
+   * generated inside addSession.
+   * This allows the remote control display page to update information in this
+   * class using UUIDs from DisplayInfo objects.
+   * However one cannot assume the every UUID here corresponds to a DisplayInfo
+   * object.
+   * 
+   */
+
+  // bracketname -> uuids
   private static final Map<String, Set<String>> SESSIONS = new HashMap<>();
 
   // uuid -> session
@@ -66,13 +85,14 @@ public class H2HUpdateWebSocket {
    * Add the session and send out messages for all bracket information for the
    * specified brackets.
    * 
-   * @param displayUuid the UUID of the display
+   * @param displayUuid the UUID of the display, will be null or empty if no
+   *          display is associated with this web socket
    * @param session the session to add
    * @param allBracketInfo the brackets that the session is interested in
    * @throws IOException
    * @throws SQLException
    */
-  private static void addSession(final String displayUuid,
+  private static void addSession(final @Nullable String displayUuid,
                                  final Session session,
                                  final Collection<BracketInfo> allBracketInfo,
                                  final Connection connection,
@@ -81,9 +101,17 @@ public class H2HUpdateWebSocket {
     synchronized (SESSIONS_LOCK) {
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
-      ALL_SESSIONS.put(displayUuid, session);
+      final String h2hUuid;
+      if (!StringUtils.isBlank(displayUuid)) {
+        h2hUuid = displayUuid;
+        final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
+        updateDisplayedBracket(displayInfo, session);
+      } else {
+        // not associated with a display
+        h2hUuid = UUID.randomUUID().toString();
+      }
 
-      updateDisplayedBracket(displayUuid, session);
+      ALL_SESSIONS.put(h2hUuid, session);
 
       for (final BracketInfo bracketInfo : allBracketInfo) {
 
@@ -91,7 +119,7 @@ public class H2HUpdateWebSocket {
           SESSIONS.put(bracketInfo.getBracketName(), new HashSet<String>());
         }
 
-        SESSIONS.get(bracketInfo.getBracketName()).add(displayUuid);
+        SESSIONS.get(bracketInfo.getBracketName()).add(h2hUuid);
 
         // send the current information for the bracket to the session so that
         // it's current
@@ -137,18 +165,11 @@ public class H2HUpdateWebSocket {
       final RegisterMessage message = jsonMapper.readValue(msg, RegisterMessage.class);
 
       if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Display UUID: '{}'", message.uuid);
+        LOGGER.trace("Display UUID: '{}'", message.displayUuid);
         for (final BracketInfo bracketInfo : message.brackInfo) {
           LOGGER.trace("Bracket name: {} first: {} last: {}", bracketInfo.getBracketName(), bracketInfo.getFirstRound(),
                        bracketInfo.getLastRound());
         }
-      }
-
-      final String uuid;
-      if (!StringUtils.isBlank(message.uuid)) {
-        uuid = message.uuid;
-      } else {
-        uuid = UUID.randomUUID().toString();
       }
 
       final HttpSession httpSession = getHttpSession(session);
@@ -156,7 +177,7 @@ public class H2HUpdateWebSocket {
       final DataSource datasource = ApplicationAttributes.getDataSource(httpApplication);
       try (Connection connection = datasource.getConnection()) {
         final int currentTournament = Queries.getCurrentTournament(connection);
-        addSession(uuid, session, message.brackInfo, connection, currentTournament);
+        addSession(message.displayUuid, session, message.brackInfo, connection, currentTournament);
       }
 
     } catch (final IOException e) {
@@ -179,14 +200,39 @@ public class H2HUpdateWebSocket {
     return httpSession;
   }
 
-  private static void updateDisplayedBracket(final String displayUuid,
+  /**
+   * Notify a specify display to update the brackets it's showing.
+   * If the {@link DisplayInfo} isn't showing the brackets, nothing is sent to the
+   * display.
+   * 
+   * @param displayInfo the display information for the display
+   */
+  public static void updateDisplayedBracket(final DisplayInfo displayInfo) {
+    if (displayInfo.isHeadToHead()) {
+      synchronized (SESSIONS_LOCK) {
+        final @Nullable Session session = ALL_SESSIONS.get(displayInfo.getUuid());
+        if (null != session) {
+          updateDisplayedBracket(displayInfo, session);
+        } else {
+          LOGGER.warn("Found display info with uuid {} that is displaying head to head and doesn't have a head to head web socket",
+                      displayInfo.getUuid());
+        }
+      }
+    }
+  }
+
+  /**
+   * Notify a head to head display what brackets it should be displaying.
+   * 
+   * @param h2hUuid
+   * @param session
+   */
+  private static void updateDisplayedBracket(final DisplayInfo displayInfo,
                                              final Session session) {
 
     if (session.isOpen()) {
 
       try {
-        final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
-
         final BracketMessage message = new BracketMessage();
         message.isDisplayUpdate = true;
 
@@ -218,19 +264,6 @@ public class H2HUpdateWebSocket {
             + session.isOpen(), e);
       }
     } // open session
-  }
-
-  /**
-   * Send each display the most recent bracket information to show.
-   */
-  public static void updateDisplayedBracket() {
-    synchronized (SESSIONS_LOCK) {
-      for (final Map.Entry<String, Session> entry : ALL_SESSIONS.entrySet()) {
-        updateDisplayedBracket(entry.getKey(), entry.getValue());
-      } // foreach session
-
-    } // sessions lock
-
   }
 
   /**
@@ -409,10 +442,10 @@ public class H2HUpdateWebSocket {
 
   public static final class RegisterMessage {
     /**
-     * Uuid of the display.
+     * Uuid of the display, may be empty.
      */
     @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
-    public String uuid = "";
+    public String displayUuid = "";
 
     /**
      * Bracket information.

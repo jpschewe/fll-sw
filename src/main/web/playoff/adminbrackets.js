@@ -78,7 +78,7 @@ function socketOpened(_) {
     const allBracketInfo = [bracketInfo];
 
     const message = new Object();
-    message.uuid = ""; // no display information
+    message.displayUuid = ""; // no display associated
     message.brackInfo = allBracketInfo;
 
     const str = JSON.stringify(message);
