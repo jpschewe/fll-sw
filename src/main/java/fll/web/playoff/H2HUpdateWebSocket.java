@@ -125,11 +125,7 @@ public class H2HUpdateWebSocket {
   @OnMessage
   public void receiveTextMessage(final Session session,
                                  final String msg) {
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Received message '"
-          + msg
-          + "'");
-    }
+    LOGGER.trace("Received message '{}'", msg);
 
     final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
@@ -141,13 +137,10 @@ public class H2HUpdateWebSocket {
       final RegisterMessage message = jsonMapper.readValue(msg, RegisterMessage.class);
 
       if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Display UUID: '{}'", message.uuid);
         for (final BracketInfo bracketInfo : message.brackInfo) {
-          LOGGER.trace("Bracket name: "
-              + bracketInfo.getBracketName()
-              + " first: "
-              + bracketInfo.getFirstRound()
-              + " last: "
-              + bracketInfo.getLastRound());
+          LOGGER.trace("Bracket name: {} first: {} last: {}", bracketInfo.getBracketName(), bracketInfo.getFirstRound(),
+                       bracketInfo.getLastRound());
         }
       }
 
