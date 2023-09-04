@@ -47,6 +47,11 @@ public class BracketData extends BracketInfo {
   private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
+   * Number of rows typically used for each team in the displays.
+   */
+  public static final int DEFAULT_ROWS_PER_TEAM = 4;
+
+  /**
    * Data type for brackets.
    */
   public abstract static class BracketDataType {
@@ -441,7 +446,8 @@ public class BracketData extends BracketInfo {
   }
 
   /**
-   * Constructor that assumes the object is not in a list.
+   * Constructor that assumes the object is not in a list and therefore sets
+   * {@link #getBracketIndex()} to zero.
    * 
    * @param pConnection database connection
    * @param pDivision playoff bracket name
@@ -495,7 +501,7 @@ public class BracketData extends BracketInfo {
                      final int bracketIndex,
                      final boolean print)
       throws SQLException {
-    super(pDivision, pFirstRound < 1 ? 1 : pFirstRound, pLastRound);
+    super(pDivision, Math.max(1, pFirstRound), pLastRound);
     this.showFinalScores = pShowFinals;
     this.showOnlyVerifiedScores = pShowOnlyVerifiedScores;
     this.bracketIndex = bracketIndex;

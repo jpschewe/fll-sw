@@ -110,8 +110,8 @@ public final class ScoregenBrackets {
 
       final int currentTournament = Queries.getCurrentTournament(connection);
 
-      final BracketData bracketInfo = new BracketData(connection, division, firstRound, lastRound, 4, true, false,
-                                                      print);
+      final BracketData bracketInfo = new BracketData(connection, division, firstRound, lastRound,
+                                                      BracketData.DEFAULT_ROWS_PER_TEAM, true, false, print);
 
       final int numMatches = bracketInfo.addBracketLabelsAndScoreGenFormElements(connection, currentTournament,
                                                                                  division);
