@@ -118,7 +118,7 @@ public final class ScoreboardUpdates {
                                                                                     currentTournament.getTournamentID());
         final int maxRunNumberToDisplay = DelayedPerformance.getMaxRunNumberToDisplay(connection, currentTournament);
 
-        final DisplayInfo displayInfo = DisplayHandler.getDisplay(displayUuid);
+        final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
         final List<String> allAwardGroups = Queries.getAwardGroups(connection, currentTournament.getTournamentID());
         final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
 
@@ -311,7 +311,7 @@ public final class ScoreboardUpdates {
                                                                                 currentTournament.getTournamentID());
     final int maxRunNumberToDisplay = DelayedPerformance.getMaxRunNumberToDisplay(connection, currentTournament);
 
-    final DisplayInfo displayInfo = DisplayHandler.getDisplay(displayUuid);
+    final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
     final List<String> allAwardGroups = Queries.getAwardGroups(connection, currentTournament.getTournamentID());
     final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
 

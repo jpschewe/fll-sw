@@ -58,6 +58,9 @@ public final class DisplayHandler {
   }
 
   /**
+   * Get the information for a particular display. In most cases
+   * {@link #resolveDisplay(String)} is the right method to call.
+   * 
    * @param uuid from {@link #registerDisplay(String, String, Session)}
    * @return the display information
    * @throws FLLRuntimeException if a display with the specified uuid isn't found

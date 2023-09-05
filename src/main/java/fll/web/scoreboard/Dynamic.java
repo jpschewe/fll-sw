@@ -108,15 +108,17 @@ public final class Dynamic {
       final ObjectMapper mapper = Utilities.createJsonMapper();
       page.setAttribute("awardGroupColors", mapper.writeValueAsString(awardGroupColors));
 
-      final List<TournamentTeam> allTeams = new LinkedList<>(tournamentTeams.values());
+      final List<TournamentTeam> allTeams = new LinkedList<>();
       final Map<Integer, String> teamHeaderColor = new HashMap<>();
       for (final Map.Entry<Integer, TournamentTeam> entry : tournamentTeams.entrySet()) {
         final TournamentTeam team = entry.getValue();
+        if (awardGroupsToDisplay.contains(team.getAwardGroup())) {
 
-        final String headerColor = Dynamic.getColorForAwardGroup(team.getAwardGroup(),
-                                                                 awardGroups.indexOf(team.getAwardGroup()));
-        teamHeaderColor.put(entry.getKey(), headerColor);
-        allTeams.add(entry.getValue());
+          final String headerColor = Dynamic.getColorForAwardGroup(team.getAwardGroup(),
+                                                                   awardGroups.indexOf(team.getAwardGroup()));
+          teamHeaderColor.put(entry.getKey(), headerColor);
+          allTeams.add(entry.getValue());
+        }
       } // foreach tournament team
 
       final int divisionFlipRate = GlobalParameters.getIntGlobalParameter(connection,
