@@ -48,8 +48,12 @@ public class DisplaySocket {
    */
   public void sendMessage(final Message message) throws IOException {
     if (null != session) {
-      final String msg = jsonWriter.writeValueAsString(message);
-      session.getBasicRemote().sendText(msg);
+      if (!session.isOpen()) {
+        throw new IOException("Session is closed");
+      } else {
+        final String msg = jsonWriter.writeValueAsString(message);
+        session.getBasicRemote().sendText(msg);
+      }
     }
   }
 
