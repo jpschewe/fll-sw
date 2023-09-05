@@ -144,6 +144,11 @@ public final class Dynamic {
       final String awardGroupTitle = String.join(", ", awardGroupsToDisplay);
       page.setAttribute("awardGroupTitle", awardGroupTitle);
 
+      page.setAttribute("REGISTER_MESSAGE_TYPE", Message.MessageType.REGISTER.toString());
+      page.setAttribute("UPDATE_MESSAGE_TYPE", Message.MessageType.UPDATE.toString());
+      page.setAttribute("DELETE_MESSAGE_TYPE", Message.MessageType.DELETE.toString());
+      page.setAttribute("RELOAD_MESSAGE_TYPE", Message.MessageType.RELOAD.toString());
+
     } catch (final SQLException e) {
       throw new FLLInternalException("Error talking to the database", e);
     } catch (final JsonProcessingException e) {

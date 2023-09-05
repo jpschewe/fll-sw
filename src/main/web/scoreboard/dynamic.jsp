@@ -35,6 +35,10 @@ for (const [awardGroup, color] of Object.entries(awardGroupColorsRaw)) {
 const divisionFlipRate = parseInt("${divisionFlipRate}");
 const layout = "${layout}"
 const displayUuid = "${param.display_uuid}";
+const REGISTER_MESSAGE_TYPE = "${REGISTER_MESSAGE_TYPE}";
+const UPDATE_MESSAGE_TYPE = "${UPDATE_MESSAGE_TYPE}";
+const DELETE_MESSAGE_TYPE = "${DELETE_MESSAGE_TYPE}";
+const RELOAD_MESSAGE_TYPE = "${RELOAD_MESSAGE_TYPE}";
 </script>
 
 </head>
