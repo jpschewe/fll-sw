@@ -133,7 +133,7 @@ public class TestAJAXBrackets {
 
       final DisplayInfo defaultDisplay = DisplayHandler.getDefaultDisplay();
       final String inputName = defaultDisplay.getRemotePageFormParamName();
-      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.xpath(String.format("//input[@name='{}' and @value='{}']",
+      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.xpath(String.format("//input[@name='%s' and @value='%s']",
                                                                                         inputName,
                                                                                         DisplayInfo.HEAD_TO_HEAD_REMOTE_PAGE))))
                   .click();
