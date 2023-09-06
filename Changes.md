@@ -1,3 +1,4 @@
+* #1091 - Use web sockets for the display updates
 * #1101 - Ensure that enumerated values have distinct scores
 * #1099 - Properly initialize StringValueEditor 
 * #1097 - fix error generating PDF scoresheets

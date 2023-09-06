@@ -9,12 +9,12 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.servlet.ServletContext;
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.xml.ChallengeDescription;
+import jakarta.servlet.ServletContext;
 
 /**
  * Keys for all attributes in the application. These are initialized from
@@ -31,12 +31,6 @@ public final class ApplicationAttributes {
    * Initialized in 'jspf/init.jspf'.
    */
   public static final String DATASOURCE = "datasource";
-
-  /**
-   * Application attribute to hold names of all displays. Type is
-   * SortedSet&lt;{@link DisplayInfo}&gt;. The default display is sorted first.
-   */
-  public static final String DISPLAY_INFORMATION = "displayInformation";
 
   private ApplicationAttributes() {
     // no instances

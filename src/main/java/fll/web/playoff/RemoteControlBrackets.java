@@ -23,8 +23,10 @@ import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 import fll.web.WebUtils;
+import fll.web.display.DisplayHandler;
 import fll.web.playoff.BracketData.TopRightCornerStyle;
 import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.PageContext;
 
@@ -40,11 +42,15 @@ public final class RemoteControlBrackets {
    * @param application application variables
    * @param session session variables
    * @param pageContext page variables
+   * @param request used to get parameters
    */
   public static void populateContext(final ServletContext application,
                                      final HttpSession session,
+                                     final HttpServletRequest request,
                                      final PageContext pageContext) {
-    final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+    final String displayUuid = request.getParameter(DisplayHandler.DISPLAY_UUID_PARAMETER_NAME);
+
+    final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
 
     // store the brackets to know when a refresh is required
     session.setAttribute("brackets", displayInfo.getBrackets());
@@ -61,7 +67,8 @@ public final class RemoteControlBrackets {
         final BracketData bracketData = new BracketData(connection, h2hBracket.getBracket(), h2hBracket.getFirstRound(),
                                                         h2hBracket.getFirstRound()
                                                             + 2,
-                                                        4, false, true, h2hBracket.getIndex(), false);
+                                                        BracketData.DEFAULT_ROWS_PER_TEAM, false, true,
+                                                        h2hBracket.getIndex(), false);
 
         bracketData.addBracketLabels(h2hBracket.getFirstRound());
         bracketData.addStaticTableLabels(connection);

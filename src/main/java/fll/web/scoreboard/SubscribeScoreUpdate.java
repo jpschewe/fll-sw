@@ -7,8 +7,12 @@
 package fll.web.scoreboard;
 
 import java.io.IOException;
+import java.util.UUID;
+
+import org.apache.commons.lang3.StringUtils;
 
 import fll.web.BaseFLLServlet;
+import fll.web.display.DisplayHandler;
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -23,6 +27,8 @@ import jakarta.servlet.http.HttpSession;
 @WebServlet(urlPatterns = "/scoreboard/SubscribeScoreUpdate", asyncSupported = true)
 public class SubscribeScoreUpdate extends BaseFLLServlet {
 
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -36,7 +42,12 @@ public class SubscribeScoreUpdate extends BaseFLLServlet {
     final AsyncContext asyncContext = request.startAsync();
     asyncContext.setTimeout(0); // never time out
 
-    ScoreboardUpdates.addClient(asyncContext);
+    String displayUuid = request.getParameter(DisplayHandler.DISPLAY_UUID_PARAMETER_NAME);
+    if (StringUtils.isBlank(displayUuid)) {
+      LOGGER.warn("Received connection from display without a UUID");
+      displayUuid = UUID.randomUUID().toString();
+    }
+    ScoreboardUpdates.addClient(displayUuid, asyncContext);
   }
 
 }

@@ -13,13 +13,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -27,13 +20,19 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.DisplayInfo;
-import fll.web.DisplayWebSocket;
 import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import fll.web.display.DisplayHandler;
 import fll.web.playoff.H2HUpdateWebSocket;
 import fll.web.scoreboard.ScoreboardUpdates;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Handle changes to the remote control parameters.
@@ -55,41 +54,30 @@ public class RemoteControlPost extends BaseFLLServlet {
       return;
     }
 
-    final Collection<DisplayInfo> displays = DisplayInfo.getDisplayInformation(application);
+    final Collection<DisplayInfo> displays = DisplayHandler.getAllDisplays();
 
     if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("finalistDivision "
-          + request.getParameter("finalistDivision"));
+      LOGGER.trace("finalistDivision {}", request.getParameter("finalistDivision"));
 
       for (final DisplayInfo display : displays) {
-        final String displayName = display.getName();
-
-        LOGGER.trace("display "
-            + displayName);
-        LOGGER.trace("\tremotePage "
-            + request.getParameter(display.getRemotePageFormParamName()));
-        LOGGER.trace("\tremoteURL "
-            + request.getParameter(display.getRemoteUrlFormParamName()));
+        LOGGER.trace("display name: {} uuid: {} ", display.getName(), display.getUuid());
+        LOGGER.trace("\tremotePage {}", request.getParameter(display.getRemotePageFormParamName()));
+        LOGGER.trace("\tremoteURL {}", request.getParameter(display.getRemoteUrlFormParamName()));
 
         final int numBrackets = WebUtils.getIntRequestParameter(request,
                                                                 display.getHead2HeadNumBracketsFormParamName());
         LOGGER.trace("\tnum brackets:");
         for (int i = 0; i < numBrackets; ++i) {
-          LOGGER.trace("\t\tplayoffDivision "
-              + i
-              + ": "
-              + request.getParameter(display.getHead2HeadBracketFormParamName(i)));
+          LOGGER.trace("\t\tplayoffDivision {}: {}", i,
+                       request.getParameter(display.getHead2HeadBracketFormParamName(i)));
 
-          LOGGER.trace("\t\tplayoffRoundNumber "
-              + i
-              + ": "
-              + request.getParameter(display.getHead2HeadFirstRoundFormParamName(i)));
+          LOGGER.trace("\t\tplayoffRoundNumber {}: {}", i,
+                       request.getParameter(display.getHead2HeadFirstRoundFormParamName(i)));
         }
-        LOGGER.trace("\tdelete? "
-            + request.getParameter(display.getDeleteFormParamName()));
+        LOGGER.trace("\tdelete? {}", request.getParameter(display.getDeleteFormParamName()));
 
-        LOGGER.trace("\tfinalistDivision "
-            + request.getParameter(display.getFinalistScheduleAwardGroupFormParamName()));
+        LOGGER.trace("\tfinalistDivision {}",
+                     request.getParameter(display.getFinalistScheduleAwardGroupFormParamName()));
 
       } // foreach display
     } // if trace enabled
@@ -156,17 +144,20 @@ public class RemoteControlPost extends BaseFLLServlet {
     } // foreach display
 
     for (final DisplayInfo display : toDelete) {
-      DisplayInfo.deleteDisplay(application, display);
+      DisplayHandler.removeDisplay(display.getUuid());
     }
 
     // notify brackets that there may be changes
-    H2HUpdateWebSocket.updateDisplayedBracket();
+    for (final DisplayInfo display : displays) {
+      if (!toDelete.contains(display)) {
+        H2HUpdateWebSocket.updateDisplayedBracket(display);
+      }
+    }
 
-    DisplayWebSocket.notifyToUpdate(application);
+    DisplayHandler.sendUpdateUrl();
+
     SessionAttributes.appendToMessage(session, "<i id='success'>Successfully set remote control parameters</i>");
-
     response.sendRedirect(response.encodeRedirectURL("remoteControl.jsp"));
-
   }
 
 }

@@ -4,7 +4,7 @@
 <fll-sw:required-roles roles="PUBLIC" allowSetup="false" />
 
 <%
-fll.web.scoreboard.Dynamic.populateContext(request, application, session, pageContext);
+fll.web.scoreboard.Dynamic.populateContext(request, application, pageContext);
 %>
 
 <html>
@@ -34,6 +34,7 @@ for (const [awardGroup, color] of Object.entries(awardGroupColorsRaw)) {
 
 const divisionFlipRate = parseInt("${divisionFlipRate}");
 const layout = "${layout}"
+const displayUuid = "${param.display_uuid}";
 </script>
 
 </head>

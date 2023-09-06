@@ -38,9 +38,6 @@ public class FLLContextListener implements ServletContextListener {
 
     // set some default text
     application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "");
-
-    // make sure the default display object exists
-    DisplayInfo.getDisplayInformation(application);
   }
 
   @Override
@@ -69,9 +66,8 @@ public class FLLContextListener implements ServletContextListener {
 
     // initialize the datasource
     if (null == ApplicationAttributes.getAttribute(application, ApplicationAttributes.DATASOURCE, DataSource.class)) {
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Datasource not available, creating");
-      }
+      LOGGER.trace("Datasource not available, creating");
+
       final DataSource datasource = Utilities.createFileDataSource(database);
       application.setAttribute(ApplicationAttributes.DATASOURCE, datasource);
 

@@ -92,7 +92,8 @@ public final class AdminBrackets {
             - 1; // force the display of at least 2 rounds
       }
 
-      final BracketData bracketInfo = new BracketData(connection, divisionStr, firstRound, lastRound, 4, true, false, false);
+      final BracketData bracketInfo = new BracketData(connection, divisionStr, firstRound, lastRound,
+                                                      BracketData.DEFAULT_ROWS_PER_TEAM, true, false, false);
 
       for (int i = 1; i < lastColumn; i++) {
         bracketInfo.addBracketLabels(i);

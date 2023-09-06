@@ -30,9 +30,9 @@ import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
+import fll.web.display.DisplayHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.PageContext;
 
 /**
@@ -53,11 +53,9 @@ public final class Dynamic {
    * @param request to get parameters
    * @param application application context
    * @param page page context
-   * @param session session variables
    */
   public static void populateContext(final HttpServletRequest request,
                                      final ServletContext application,
-                                     final HttpSession session,
                                      final PageContext page) {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
@@ -65,7 +63,13 @@ public final class Dynamic {
       final List<String> awardGroups = Queries.getAwardGroups(connection, tournament.getTournamentID());
       final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection,
                                                                                       tournament.getTournamentID());
-      final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+      final String displayUuid = request.getParameter(DisplayHandler.DISPLAY_UUID_PARAMETER_NAME);
+      final DisplayInfo displayInfo;
+      if (!StringUtils.isBlank(displayUuid)) {
+        displayInfo = DisplayHandler.resolveDisplay(displayUuid);
+      } else {
+        displayInfo = DisplayHandler.getDefaultDisplay();
+      }
 
       final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(awardGroups);
 

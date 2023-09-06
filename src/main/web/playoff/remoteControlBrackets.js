@@ -164,7 +164,7 @@ function handleBracketUpdate(bracketUpdate) {
 function messageReceived(event) {
 
     console.log("received: " + event.data);
-    var bracketMessage = JSON.parse(event.data);
+    const bracketMessage = JSON.parse(event.data);
     if (bracketMessage.isDisplayUpdate) {
         if (isDisplayInfoDifferent(bracketMessage.allBracketInfo)) {
             // reload
@@ -176,14 +176,19 @@ function messageReceived(event) {
     }
 }
 
-function socketOpened(event) {
+function socketOpened(_event) {
     console.log("Socket opened");
 
-    var str = JSON.stringify(allBracketData);
+
+    const message = new Object();
+    message.displayUuid = displayUuid;
+    message.brackInfo = allBracketData;
+
+    const str = JSON.stringify(message);
     this.send(str);
 }
 
-function socketClosed(event) {
+function socketClosed(_event) {
     console.log("Socket closed");
 
     // open the socket a second later
@@ -193,12 +198,12 @@ function socketClosed(event) {
 function openSocket() {
     console.log("opening socket");
 
-    var url = window.location.pathname;
-    var directory = url.substring(0, url.lastIndexOf('/'));
-    var webSocketAddress = getWebsocketProtocol() + "//" + window.location.host + directory
+    const url = window.location.pathname;
+    const directory = url.substring(0, url.lastIndexOf('/'));
+    const webSocketAddress = getWebsocketProtocol() + "//" + window.location.host + directory
         + "/H2HUpdateWebSocket";
 
-    var socket = new WebSocket(webSocketAddress);
+    const socket = new WebSocket(webSocketAddress);
     socket.onmessage = messageReceived;
     socket.onopen = socketOpened;
     socket.onclose = socketClosed;

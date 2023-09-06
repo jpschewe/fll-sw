@@ -31,9 +31,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
     <h2>Main links</h2>
 
-    <a class="wide" href='display.jsp'>Big Screen Display - follow
-        this link on the computer that's used to display scores with the
-        projector.</a>
+    <a class="wide" href="<c:url value='/display'/>">Big Screen
+        Display - follow this link on the computer that's used to
+        display scores with the projector.</a>
 
 
     <c:if test="${authentication.headJudge}">

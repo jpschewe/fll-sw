@@ -17,7 +17,7 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
   "use-strict";
   var numPlayoffRounds = parseInt("${numPlayoffRounds}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
   var divisions = [];
-  var displayNames = [];
+  var displayUuids = [];
 </script>
 
 <c:forEach items="${divisions}" var="division">
@@ -27,14 +27,12 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
         </script>
 </c:forEach>
 
-<c:if test="${not empty displayInformation}">
-    <c:forEach items="${displayInformation}" var="displayInfo">
-        <script type="text/javascript">
-                  "use-strict";
-                  displayNames.push("${displayInfo.name}");
-                </script>
-    </c:forEach>
-</c:if>
+<c:forEach items="${displayInformation}" var="displayInfo">
+    <script type="text/javascript">
+          "use-strict";
+          displayUuids.push("${displayInfo.uuid}");
+        </script>
+</c:forEach>
 
 <script type="text/javascript" src="remoteControl.js"></script>
 
@@ -52,7 +50,7 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
         server.</p>
 
 
-    <%-- NOTE: The values of the radio buttons need to match up with the strings in DisplayQueryServlet.pickURL() --%>
+    <%-- NOTE: The values of the radio buttons need to match up with the strings in DisplayInfo --%>
     <div class='status-message'>${message}</div>
     <%-- clear out the message, so that we don't see it again --%>
     <c:remove var="message" />
@@ -84,7 +82,8 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
                 <c:forEach items="${displayInformation}"
                     var="displayInfo">
                     <td>
-                        <!-- name: ${displayInfo.name} default:  ${displayInfo.defaultDisplay} -->
+                        <!-- uuid: ${displayInfo.uuid} name: ${displayInfo.name} -->
+                        <!-- default: ${displayInfo.defaultDisplay} -->
                         <!-- form prefix: ${displayInfo.formParamPrefix} -->
                         <!-- followDefault: ${displayInfo.followDefault} -->
                         <!-- welcome: ${displayInfo.welcome} -->

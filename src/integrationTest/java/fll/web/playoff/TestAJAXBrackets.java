@@ -26,7 +26,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
+import fll.web.DisplayInfo;
 import fll.web.IntegrationTestUtils;
+import fll.web.display.DisplayHandler;
 import fll.xml.BracketSortType;
 
 /**
@@ -128,7 +130,13 @@ public class TestAJAXBrackets {
       // set display to show the head to head brackets
       IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
           + "admin/remoteControl.jsp");
-      selenium.findElement(By.cssSelector("[type='radio'][name='remotePage'][value='playoffs']")).click();
+
+      final DisplayInfo defaultDisplay = DisplayHandler.getDefaultDisplay();
+      final String inputName = defaultDisplay.getRemotePageFormParamName();
+      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.xpath(String.format("//input[@name='%s' and @value='%s']",
+                                                                                        inputName,
+                                                                                        DisplayInfo.HEAD_TO_HEAD_REMOTE_PAGE))))
+                  .click();
       selenium.findElement(By.name("submit_data")).click();
       seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 

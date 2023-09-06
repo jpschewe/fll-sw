@@ -7,29 +7,25 @@
 "use strict";
 
 /**
- * The prefix used on variables based on the display name.
+ * The prefix used on variables based on the display uuid.
  * Needs to match DisplayInfo.getFormParamPrefix() in the Java code. 
  * 
- * @param displayName
- *          string display name from the list displayNames
+ * @param displayUuid
+ *          string display uuid from the list displayNames
  * @returns
  */
-function displayPrefix(displayName) {
-    if ("Default" == displayName) {
-        return "";
-    } else {
-        return displayName + "_";
-    }
+function displayPrefix(displayUuid) {
+    return displayUuid + "_";
 }
 
 /**
  * Get the number of brackets for the specified display.
  * 
- * @param displayName the name of the display
+ * @param displayUuid the name of the display
  * @returns an integer number of brackets
  */
-function getNumBracketsForDisplay(displayName) {
-    const lDisplayPrefix = displayPrefix(displayName);
+function getNumBracketsForDisplay(displayUuid) {
+    const lDisplayPrefix = displayPrefix(displayUuid);
     const numBracketsEle = document.getElementById(lDisplayPrefix + "numBrackets");
     const numBrackets = parseInt(numBracketsEle.value);
     return numBrackets;
@@ -38,19 +34,19 @@ function getNumBracketsForDisplay(displayName) {
 /**
  * Set the number of brackets for the specified display.
  * 
- * @param displayName the name of the display
+ * @param displayUuid the name of the display
  * @param numBrackets the number of brackets
  */
-function setNumBracketsForDisplay(displayName, numBrackets) {
-    const lDisplayPrefix = displayPrefix(displayName);
+function setNumBracketsForDisplay(displayUuid, numBrackets) {
+    const lDisplayPrefix = displayPrefix(displayUuid);
     const numBracketsEle = document.getElementById(lDisplayPrefix + "numBrackets");
     numBracketsEle.value = numBrackets;
 }
 
 function updateButtonStates() {
-    for (const displayName of displayNames) {
-        const remove_button_id = displayPrefix(displayName) + "remove_bracket";
-        const nBrackets = getNumBracketsForDisplay(displayName);
+    for (const displayUuid of displayUuids) {
+        const remove_button_id = displayPrefix(displayUuid) + "remove_bracket";
+        const nBrackets = getNumBracketsForDisplay(displayUuid);
         const removeButton = document.getElementById(remove_button_id);
         if (nBrackets < 2) {
             removeButton.disabled = true;

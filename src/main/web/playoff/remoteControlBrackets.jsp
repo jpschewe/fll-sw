@@ -8,7 +8,7 @@
 <%@ page import="fll.web.playoff.RemoteControlBrackets"%>
 
 <%
-RemoteControlBrackets.populateContext(application, session, pageContext);
+RemoteControlBrackets.populateContext(application, session, request, pageContext);
 %>
 
 <html>
@@ -59,9 +59,10 @@ SPAN.TIE {
     src="<c:url value='/js/fll-functions.js'/>"></script>
 
 <script type="text/javascript">
-  var allBracketData = JSON.parse('${allBracketDataJson}');
-  var secondsBetweenScrolls = parseInt("${scrollRate}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
-  var maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
+  let allBracketData = JSON.parse('${allBracketDataJson}');
+  let secondsBetweenScrolls = parseInt("${scrollRate}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
+  const maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
+  const displayUuid = "${param.display_uuid}";
 </script>
 
 <script type='text/javascript'
