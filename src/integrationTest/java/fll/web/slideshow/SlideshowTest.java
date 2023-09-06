@@ -21,6 +21,7 @@ import fll.db.GenerateDB;
 import fll.web.DisplayInfo;
 import fll.web.InitializeDatabaseTest;
 import fll.web.IntegrationTestUtils;
+import fll.web.display.DisplayHandler;
 
 /**
  * Test for the slideshow code.
@@ -58,9 +59,12 @@ public class SlideshowTest {
 
       selenium.findElement(By.id("remote-control")).click();
 
-      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@name='remotePage' and @value='"
-          + DisplayInfo.SLIDESHOW_REMOTE_PAGE
-          + "']"))).click();
+      final DisplayInfo defaultDisplay = DisplayHandler.getDefaultDisplay();
+      final String inputName = defaultDisplay.getRemotePageFormParamName();
+      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.xpath(String.format("//input[@name='%s' and @value='%s']",
+                                                                                        inputName,
+                                                                                        DisplayInfo.SLIDESHOW_REMOTE_PAGE))))
+                  .click();
       selenium.findElement(By.name("slideInterval")).sendKeys("5");
       selenium.findElement(By.name("submit_data")).click();
 

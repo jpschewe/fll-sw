@@ -302,7 +302,8 @@ public class GoalEditor extends AbstractGoalEditor {
   }
 
   private void checkEnumeratedValid(final Collection<String> messages) {
-    if (Double.isNaN(getGoal().getInitialValue())) {
+    final double initialValue = getGoal().getInitialValue();
+    if (Double.isNaN(initialValue)) {
       messages.add("One initial value must be set");
     }
 

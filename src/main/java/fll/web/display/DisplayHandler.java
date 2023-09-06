@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -22,7 +20,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.FLLRuntimeException;
 import fll.web.DisplayInfo;
-import fll.web.display.Message.MessageType;
 import jakarta.websocket.Session;
 
 /**
@@ -36,8 +33,6 @@ public final class DisplayHandler {
    * UUID for the default display.
    */
   private static final String DEFAULT_DISPLAY_UUID = new UUID(0, 0).toString();
-
-  private final BlockingQueue<WorkItem> workItems = new LinkedBlockingQueue<>();
 
   private static final SortedMap<String, DisplayData> DISPLAYS = new TreeMap<>();
 
@@ -201,18 +196,6 @@ public final class DisplayHandler {
       } else {
         LOGGER.warn("Got notification to update last seen time for {}, however it's not a known uuid. Ignoring.", uuid);
       }
-    }
-  }
-
-  private static class WorkItem {
-    /* package */ WorkItem(final MessageType type) {
-      this.type = type;
-    }
-
-    private final MessageType type;
-
-    public final MessageType getType() {
-      return type;
     }
   }
 

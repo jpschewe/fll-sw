@@ -82,7 +82,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
         <c:forEach items="${challengeDescription.subjectiveCategories}"
             var="category">
-            <a class="wide" href="BlankSubjectiveSheet/${category.name}">Blank
+            <a class="wide" href="BlankSubjectiveSheet/${category.name}" target="_new">Blank
                 subjective sheet - ${category.title} (PDF)</a>
         </c:forEach>
     </c:if>

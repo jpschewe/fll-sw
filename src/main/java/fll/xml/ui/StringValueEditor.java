@@ -127,6 +127,11 @@ class StringValueEditor extends JPanel implements Validatable {
     if (value.isGoalRef()) {
       final GoalRef goalRef = (GoalRef) value;
       goalRef.getGoal().addPropertyChangeListener(nameListener);
+      layout.show(panel, GOAL_PANEL);
+      final AbstractGoal selected = goalRef.getGoal();
+      this.selectedGoal = selected;
+      selected.addPropertyChangeListener(nameListener);
+      goalEditor.setText(selected.getTitle());
     }
 
     // initial setup

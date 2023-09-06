@@ -58,8 +58,8 @@ public class DisplayEndpoint {
 
       switch (message.getType()) {
       case REGISTER_DISPLAY:
-        final RegisterDisplayMessage helloMessage = (RegisterDisplayMessage) message;
-        DisplayHandler.registerDisplay(helloMessage.getUuid(), helloMessage.getName(), session);
+        final RegisterDisplayMessage registerMessage = (RegisterDisplayMessage) message;
+        this.uuid = DisplayHandler.registerDisplay(registerMessage.getUuid(), registerMessage.getName(), session);
         break;
       case PING:
         final PingMessage pingMessage = (PingMessage) message;

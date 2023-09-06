@@ -25,7 +25,7 @@ import static org.hamcrest.Matchers.is;
 public final class UnfinishedBrackets extends UnfinishedBaseTest {
 
   /**
-   * @return brack names for {@link #test(String)}
+   * @return bracket names for {@link #test(String)}
    */
   public static Stream<String> names() {
     return Arrays.stream(UnfinishedBaseTest.UNFINISHED_BRACKET_NAMES);
