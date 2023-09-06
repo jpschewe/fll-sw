@@ -137,8 +137,6 @@ public class TestAJAXBrackets {
                                                                                         inputName,
                                                                                         DisplayInfo.HEAD_TO_HEAD_REMOTE_PAGE))))
                   .click();
-
-      selenium.findElement(By.cssSelector("[type='radio'][name='remotePage'][value='playoffs']")).click();
       selenium.findElement(By.name("submit_data")).click();
       seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
