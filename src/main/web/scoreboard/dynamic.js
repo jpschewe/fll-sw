@@ -368,33 +368,65 @@ function initMostRecent() {
     header.innerText = "Most Recent Performance Scores";
 
     const tableBody = mostRecentTable.createTBody();
+    tableBody.id = "most_recent_table_body";
     return tableBody;
 }
 
+
+function socketOpened(_) {
+    console.log("Socket opened");
+
+    const message = new Object()
+    message.type = REGISTER_MESSAGE_TYPE;
+    message.displayUuid = displayUuid;
+
+    this.send(JSON.stringify(message));
+}
+
+function socketClosed(_) {
+    console.log("Socket closed");
+
+    // open the socket a second later
+    setTimeout(openSocket, 1000);
+}
+
+function openSocket() {
+    console.log("opening socket");
+
+    const url = window.location.pathname;
+    const directory = url.substring(0, url.lastIndexOf('/'));
+    const webSocketAddress = getWebsocketProtocol() + "//" + window.location.host + directory
+        + "/ScoreboardEndpoint";
+
+    const socket = new WebSocket(webSocketAddress);
+    socket.onmessage = messageReceived;
+    socket.onopen = socketOpened;
+    socket.onclose = socketClosed;
+}
+
+function messageReceived(event) {
+    const message = JSON.parse(event.data);
+    if (message.type == UPDATE_MESSAGE_TYPE) {
+        if (!message.bye && !message.noShow) {
+            const mostRecentTableBody = document.getElementById("most_recent_table_body");
+            addToMostRecent(mostRecentTableBody, message);
+            addToAllTeams(message);
+            topScoresAddScore(message);
+        }
+    } else if (message.type == DELETE_MESSAGE_TYPE) {
+        location.reload();
+    } else if (message.type == RELOAD_MESSAGE_TYPE) {
+        location.reload();
+    } else {
+        console.log("Ignoring unexpected message type: " + message.type);
+        console.log("Full message: " + event.data);
+    }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-    const mostRecentTableBody = initMostRecent();
+    initMostRecent();
 
     topScoresChangeAwardGroup();
-
-    scoreEventSource = new EventSource('/scoreboard/SubscribeScoreUpdate?display_uuid=' + displayUuid);
-    scoreEventSource.addEventListener('score_update', function(e) {
-        const scoreUpdate = JSON.parse(e.data);
-
-        if (!scoreUpdate.bye && !scoreUpdate.noShow) {
-            addToMostRecent(mostRecentTableBody, scoreUpdate);
-            addToAllTeams(scoreUpdate);
-            topScoresAddScore(scoreUpdate);
-        }
-
-    }, true);
-
-    scoreEventSource.addEventListener('score_delete', function(_) {
-        location.reload();
-    }, true);
-
-    scoreEventSource.addEventListener('reload', function(_) {
-        location.reload();
-    }, true);
 
     if ("all_teams_top_scores" == layout) {
         document.getElementById("most_recent").classList.add("fll-sw-ui-inactive");
@@ -444,4 +476,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("all_teams").classList.add("automatic_scroll");
         requestAnimationFrame(allTeamsDoScroll);
     }
+
+    openSocket();
 });

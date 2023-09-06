@@ -108,15 +108,17 @@ public final class Dynamic {
       final ObjectMapper mapper = Utilities.createJsonMapper();
       page.setAttribute("awardGroupColors", mapper.writeValueAsString(awardGroupColors));
 
-      final List<TournamentTeam> allTeams = new LinkedList<>(tournamentTeams.values());
+      final List<TournamentTeam> allTeams = new LinkedList<>();
       final Map<Integer, String> teamHeaderColor = new HashMap<>();
       for (final Map.Entry<Integer, TournamentTeam> entry : tournamentTeams.entrySet()) {
         final TournamentTeam team = entry.getValue();
+        if (awardGroupsToDisplay.contains(team.getAwardGroup())) {
 
-        final String headerColor = Dynamic.getColorForAwardGroup(team.getAwardGroup(),
-                                                                 awardGroups.indexOf(team.getAwardGroup()));
-        teamHeaderColor.put(entry.getKey(), headerColor);
-        allTeams.add(entry.getValue());
+          final String headerColor = Dynamic.getColorForAwardGroup(team.getAwardGroup(),
+                                                                   awardGroups.indexOf(team.getAwardGroup()));
+          teamHeaderColor.put(entry.getKey(), headerColor);
+          allTeams.add(entry.getValue());
+        }
       } // foreach tournament team
 
       final int divisionFlipRate = GlobalParameters.getIntGlobalParameter(connection,
@@ -143,6 +145,11 @@ public final class Dynamic {
 
       final String awardGroupTitle = String.join(", ", awardGroupsToDisplay);
       page.setAttribute("awardGroupTitle", awardGroupTitle);
+
+      page.setAttribute("REGISTER_MESSAGE_TYPE", Message.MessageType.REGISTER.toString());
+      page.setAttribute("UPDATE_MESSAGE_TYPE", Message.MessageType.UPDATE.toString());
+      page.setAttribute("DELETE_MESSAGE_TYPE", Message.MessageType.DELETE.toString());
+      page.setAttribute("RELOAD_MESSAGE_TYPE", Message.MessageType.RELOAD.toString());
 
     } catch (final SQLException e) {
       throw new FLLInternalException("Error talking to the database", e);

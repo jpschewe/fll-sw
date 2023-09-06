@@ -68,6 +68,9 @@ public class UnverifiedRunsWebSocket {
                 + session.getId()
                 + "), dropping session", ioe);
             toRemove.add(session);
+          } catch (final IllegalStateException e) {
+            LOGGER.warn("Illegal state exception writing to client, dropping: {}", session.getId(), e);
+            toRemove.add(session);
           }
         } else {
           toRemove.add(session);

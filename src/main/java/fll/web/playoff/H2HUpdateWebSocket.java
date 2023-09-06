@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -97,7 +98,7 @@ public class H2HUpdateWebSocket {
                                  final Collection<BracketInfo> allBracketInfo,
                                  final Connection connection,
                                  final int currentTournament)
-      throws IOException, SQLException {
+      throws SQLException {
     synchronized (SESSIONS_LOCK) {
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
@@ -105,7 +106,13 @@ public class H2HUpdateWebSocket {
       if (!StringUtils.isBlank(displayUuid)) {
         h2hUuid = displayUuid;
         final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
-        updateDisplayedBracket(displayInfo, session);
+        try {
+          updateDisplayedBracket(displayInfo, session);
+        } catch (final IOException e) {
+          LOGGER.warn("Got error writing to new session, dropping: "
+              + displayUuid, e);
+          return;
+        }
       } else {
         // not associated with a display
         h2hUuid = UUID.randomUUID().toString();
@@ -115,11 +122,7 @@ public class H2HUpdateWebSocket {
 
       for (final BracketInfo bracketInfo : allBracketInfo) {
 
-        if (!SESSIONS.containsKey(bracketInfo.getBracketName())) {
-          SESSIONS.put(bracketInfo.getBracketName(), new HashSet<String>());
-        }
-
-        SESSIONS.get(bracketInfo.getBracketName()).add(h2hUuid);
+        SESSIONS.computeIfAbsent(bracketInfo.getBracketName(), k -> new HashSet<>()).add(h2hUuid);
 
         // send the current information for the bracket to the session so that
         // it's current
@@ -139,7 +142,16 @@ public class H2HUpdateWebSocket {
           } catch (final IOException e) {
             throw new FLLInternalException("Error writing JSON for brackets", e);
           }
-          session.getBasicRemote().sendText(writer.toString());
+          try {
+            if (session.isOpen()) {
+              session.getBasicRemote().sendText(writer.toString());
+            } else {
+              throw new IOException("Session is closed");
+            }
+          } catch (final IOException e) {
+            SESSIONS.remove(h2hUuid);
+            SESSIONS.getOrDefault(bracketInfo.getBracketName(), Collections.emptySet()).remove(h2hUuid);
+          }
         } // foreach update
 
       }
@@ -180,7 +192,7 @@ public class H2HUpdateWebSocket {
         addSession(message.displayUuid, session, message.brackInfo, connection, currentTournament);
       }
 
-    } catch (final IOException e) {
+    } catch (final JsonProcessingException e) {
       throw new FLLRuntimeException("Error parsing bracket info from #"
           + msg
           + "#", e);
@@ -212,7 +224,15 @@ public class H2HUpdateWebSocket {
       synchronized (SESSIONS_LOCK) {
         final @Nullable Session session = ALL_SESSIONS.get(displayInfo.getUuid());
         if (null != session) {
-          updateDisplayedBracket(displayInfo, session);
+          try {
+            updateDisplayedBracket(displayInfo, session);
+          } catch (final IOException e) {
+            LOGGER.warn("Error writing to {}, dropping", displayInfo.getUuid(), e);
+            ALL_SESSIONS.remove(displayInfo.getUuid());
+            for (final Map.Entry<String, Set<String>> entry : SESSIONS.entrySet()) {
+              entry.getValue().remove(displayInfo.getUuid());
+            }
+          }
         } else {
           LOGGER.warn("Found display info with uuid {} that is displaying head to head and doesn't have a head to head web socket",
                       displayInfo.getUuid());
@@ -228,10 +248,10 @@ public class H2HUpdateWebSocket {
    * @param session
    */
   private static void updateDisplayedBracket(final DisplayInfo displayInfo,
-                                             final Session session) {
+                                             final Session session)
+      throws IOException {
 
     if (session.isOpen()) {
-
       try {
         final BracketMessage message = new BracketMessage();
         message.isDisplayUpdate = true;
@@ -246,24 +266,25 @@ public class H2HUpdateWebSocket {
 
         // expose all bracketInfo to the javascript
         final ObjectMapper jsonMapper = Utilities.createJsonMapper();
-        try (StringWriter writer = new StringWriter()) {
-          jsonMapper.writeValue(writer, message);
-          final String allBracketInfoJson = writer.toString();
+        try {
+          final String allBracketInfoJson = jsonMapper.writeValueAsString(message);
 
           session.getBasicRemote().sendText(allBracketInfoJson);
-        } catch (final IOException e) {
+        } catch (final JsonProcessingException e) {
           throw new FLLInternalException("Error writing JSON for allBracketInfo", e);
         }
 
       } catch (final IllegalStateException e) {
-        LOGGER.error("Got an illegal state exception, likely from an invalid HttpSession object, skipping update of session: "
+        throw new IOException("Got an illegal state exception, likely from an invalid HttpSession object, skipping update of session: "
             + session.getId()
             + " websocket session: "
             + session.getId()
             + " open: "
             + session.isOpen(), e);
       }
-    } // open session
+    } else {
+      throw new IOException("Session is closed");
+    }
   }
 
   /**
@@ -333,6 +354,9 @@ public class H2HUpdateWebSocket {
             LOGGER.error("Got error sending message to session ("
                 + session.getId()
                 + "), dropping session", ioe);
+            toRemove.add(uuid);
+          } catch (final IllegalStateException e) {
+            LOGGER.warn("Illegal state exception writing to client, dropping: {}", session.getId(), e);
             toRemove.add(uuid);
           }
         } else {
