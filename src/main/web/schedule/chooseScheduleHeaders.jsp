@@ -19,13 +19,20 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
 
 <script type='text/javascript' src="chooseScheduleHeaders.js"></script>
 
-<script>
+<script type='text/javascript'>
   "use strict";
+
   const TEAM_NUMBER_HEADER = "${TEAM_NUMBER_HEADER}";
   const TEAM_NAME_HEADER = "${TEAM_NAME_HEADER}";
   const ORGANIZATION_HEADER = "${ORGANIZATION_HEADER}";
   const AWARD_GROUP_HEADER = "${AWARD_GROUP_HEADER}";
   const JUDGE_GROUP_HEADER = "${JUDGE_GROUP_HEADER}";
+  const numSeedingRounds = parseInt("${numSeedingRounds}");
+  const numPracticeRounds = parseInt("${numPracticeRounds}");
+  const perfHeaders = JSON.parse('${perfHeaders}');
+  const perfTableHeaders = JSON.parse('${perfTableHeaders}');
+  const practiceHeaders = JSON.parse('${practiceHeaders}');
+  const practiceTableHeaders = JSON.parse('${practiceTableHeaders}');
 </script>
 
 </head>
@@ -164,7 +171,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
                     <td bgcolor='yellow'>Performance
                         ${perfLoopStatus.index}</td>
                     <td>
-                        <select id='perf${practiceLoopStatus.index}'
+                        <select id='perf${perfLoopStatus.index}'
                             name='perf${perfLoopStatus.index}'>
                             <c:forEach items="${spreadsheetHeaderNames}"
                                 var="fileHeader">
@@ -177,8 +184,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
                     <td bgcolor='yellow'>Performance
                         ${perfLoopStatus.index} table</td>
                     <td>
-                        <select
-                            id='perfTable${practiceLoopStatus.index}'
+                        <select id='perfTable${perfLoopStatus.index}'
                             name='perfTable${perfLoopStatus.index}'>
                             <c:forEach items="${spreadsheetHeaderNames}"
                                 var="fileHeader">

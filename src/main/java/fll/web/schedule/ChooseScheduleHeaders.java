@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -19,13 +20,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fll.Tournament;
+import fll.Utilities;
 import fll.db.CategoryColumnMapping;
 import fll.db.TournamentParameters;
 import fll.scheduler.SchedParams;
 import fll.scheduler.TournamentSchedule;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CellFileReader;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -75,6 +81,37 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
       pageContext.setAttribute("ORGANIZATION_HEADER", TournamentSchedule.ORGANIZATION_HEADER);
       pageContext.setAttribute("AWARD_GROUP_HEADER", TournamentSchedule.AWARD_GROUP_HEADER);
       pageContext.setAttribute("JUDGE_GROUP_HEADER", TournamentSchedule.JUDGE_GROUP_HEADER);
+
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
+
+      final List<String> perfHeaders = new LinkedList<>();
+      final List<String> perfTableHeaders = new LinkedList<>();
+      for (int i = 0; i < numSeedingRounds; ++i) {
+        final int roundNumber = i
+            + 1;
+        perfHeaders.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, roundNumber));
+        perfTableHeaders.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, roundNumber));
+      }
+      pageContext.setAttribute("perfHeaders",
+                               WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(perfHeaders)));
+      pageContext.setAttribute("perfTableHeaders",
+                               WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(perfTableHeaders)));
+
+      final List<String> practiceHeaders = new LinkedList<>();
+      final List<String> practiceTableHeaders = new LinkedList<>();
+      for (int i = 0; i < numPracticeRounds; ++i) {
+        final int roundNumber = i
+            + 1;
+        practiceHeaders.add(String.format(TournamentSchedule.PRACTICE_HEADER_FORMAT, roundNumber));
+        practiceTableHeaders.add(String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT, roundNumber));
+      }
+      pageContext.setAttribute("practiceHeaders",
+                               WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(practiceHeaders)));
+      pageContext.setAttribute("practiceTableHeaders",
+                               WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(practiceTableHeaders)));
+
+    } catch (final JsonProcessingException e) {
+      throw new FLLInternalException("Error converting header arrays to JSON", e);
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     }
