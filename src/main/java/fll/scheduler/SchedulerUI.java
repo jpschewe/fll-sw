@@ -1065,6 +1065,24 @@ public class SchedulerUI extends JFrame {
     }
   }
 
+  private List<List<String>> promptForTableGroups() {
+    final Collection<String> tableColors = mScheduleData.getTableColors();
+
+    final TableGroupDialog dialog = new TableGroupDialog(this, tableColors);
+    dialog.pack();
+
+    // center window
+    dialog.setLocationRelativeTo(null);
+
+    dialog.setVisible(true);
+
+    final List<List<String>> tableGroups = dialog.getTableGroups();
+
+    dialog.dispose();
+
+    return tableGroups;
+  }
+
   /**
    * Run the table optimizer on the current schedule and open the resulting
    * file.
@@ -1077,7 +1095,9 @@ public class SchedulerUI extends JFrame {
         scheduleDirectory = new File(".");
       }
 
-      final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData, scheduleDirectory);
+      final List<List<String>> tableGroups = promptForTableGroups();
+
+      final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData, scheduleDirectory, tableGroups);
 
       final OptimizerWorker optimizerWorker = new OptimizerWorker(optimizer);
 

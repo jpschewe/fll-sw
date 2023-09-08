@@ -530,6 +530,9 @@ public class TableOptimizer {
   }
 
   /**
+   * Determines the table groups by looking for alternating groups of tables in
+   * the schedule.
+   * 
    * @param params the schedule parameters
    * @param schedule the schedule to optimize (will be modified)
    * @param basedir the directory to store better schedules in
@@ -540,10 +543,26 @@ public class TableOptimizer {
                         final TournamentSchedule schedule,
                         final File basedir)
       throws IllegalArgumentException {
+    this(params, schedule, basedir, determineTableGroups(schedule));
+  }
+
+  /**
+   * @param params the schedule parameters
+   * @param schedule the schedule to optimize (will be modified)
+   * @param basedir the directory to store better schedules in
+   * @param tableGroups groups of tables to optimize within
+   * @throws IllegalArgumentException if the schedule has hard constraint
+   *           violations
+   */
+  public TableOptimizer(final SchedParams params,
+                        final TournamentSchedule schedule,
+                        final File basedir,
+                        final List<List<String>> tableGroups)
+      throws IllegalArgumentException {
     this.schedule = schedule;
     this.basedir = basedir;
     this.checker = new ScheduleChecker(params, schedule);
-    this.tableGroups = determineTableGroups(schedule);
+    this.tableGroups = tableGroups.isEmpty() ? determineTableGroups(schedule) : tableGroups;
 
     if (tableGroups.isEmpty()) {
       throw new FLLInternalException("Something went wrong. Table groups list is empty");
