@@ -60,7 +60,7 @@ if (null == session.getAttribute("columnSelectOptions")) {
                 <td>Number</td>
                 <td>
                     <select name='TeamNumber'>
-                        <%=session.getAttribute("columnSelectOptions")%>
+                        ${columnSelectOptions}
                     </select>
                 </td>
             </tr>
@@ -71,7 +71,7 @@ if (null == session.getAttribute("columnSelectOptions")) {
                 <td>
                     <select name='TeamName'>
                         <option value='' selected>None</option>
-                        <%=session.getAttribute("columnSelectOptions")%>
+                        ${columnSelectOptions}
                     </select>
                 </td>
             </tr>
@@ -82,7 +82,7 @@ if (null == session.getAttribute("columnSelectOptions")) {
                 <td>
                     <select name='Organization'>
                         <option value='' selected>None</option>
-                        <%=session.getAttribute("columnSelectOptions")%>
+                        ${columnSelectOptions}
                     </select>
                 </td>
             </tr>
@@ -98,7 +98,7 @@ if (null == session.getAttribute("columnSelectOptions")) {
                 <td>
                     <select name='tournament'>
                         <option value='' selected>None</option>
-                        <%=session.getAttribute("columnSelectOptions")%>
+                        ${columnSelectOptions}
                     </select>
                 </td>
             </tr>
@@ -109,7 +109,7 @@ if (null == session.getAttribute("columnSelectOptions")) {
                 <td>
                     <select name='event_division'>
                         <option value='' selected>None</option>
-                        <%=session.getAttribute("columnSelectOptions")%>
+                        ${columnSelectOptions}
                     </select>
                 </td>
             </tr>
@@ -120,7 +120,7 @@ if (null == session.getAttribute("columnSelectOptions")) {
                 <td>
                     <select name='judging_station'>
                         <option value='' selected>None</option>
-                        <%=session.getAttribute("columnSelectOptions")%>
+                        ${columnSelectOptions}
                     </select>
                 </td>
             </tr>
