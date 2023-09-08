@@ -171,3 +171,15 @@ function* enumerate(iterable) {
 function parseBoolean(str) {
     return /^true$/i.test(str);
 }
+
+/**
+ * If value matches an option in select, select it, otherwise do nothing.
+ */
+function setSelectValue(select, value) {
+    for(const option of select.options) {
+        if(option.value == value) {
+            select.value = option.value;
+            return;
+        }
+    }
+}

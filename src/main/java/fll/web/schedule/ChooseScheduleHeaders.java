@@ -23,6 +23,7 @@ import fll.Tournament;
 import fll.db.CategoryColumnMapping;
 import fll.db.TournamentParameters;
 import fll.scheduler.SchedParams;
+import fll.scheduler.TournamentSchedule;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CellFileReader;
 import fll.util.FLLRuntimeException;
@@ -69,6 +70,11 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
       final int numPracticeRounds = TournamentParameters.getNumPracticeRounds(connection, tournament.getTournamentID());
       pageContext.setAttribute("numPracticeRounds", numPracticeRounds);
 
+      pageContext.setAttribute("TEAM_NUMBER_HEADER", TournamentSchedule.TEAM_NUMBER_HEADER);
+      pageContext.setAttribute("TEAM_NAME_HEADER", TournamentSchedule.TEAM_NAME_HEADER);
+      pageContext.setAttribute("ORGANIZATION_HEADER", TournamentSchedule.ORGANIZATION_HEADER);
+      pageContext.setAttribute("AWARD_GROUP_HEADER", TournamentSchedule.AWARD_GROUP_HEADER);
+      pageContext.setAttribute("JUDGE_GROUP_HEADER", TournamentSchedule.JUDGE_GROUP_HEADER);
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     }
