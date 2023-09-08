@@ -1,4 +1,5 @@
 * #1096 - Allow one to optimize tables in groups
+* automatically select common columns when loading a schedule into the scheduler UI, website and when uploading teams
 * #1100 - Switch the scoreboard to web sockets to avoid issues with web servers
 * #1091 - Use web sockets for the display updates
 * #1101 - Ensure that enumerated values have distinct scores
