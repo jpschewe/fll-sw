@@ -93,53 +93,62 @@ class ChooseScheduleHeadersDialog extends JDialog {
     panel.add(new JLabel("Team Number"));
     teamNumber = new JComboBox<>(requiredHeaderNames);
     panel.add(teamNumber);
+    teamNumber.setSelectedItem(TournamentSchedule.TEAM_NUMBER_HEADER);
 
     panel.add(new JLabel("Team Name"));
     teamName = new JComboBox<>(notRequiredHeaderNames);
     panel.add(teamName);
+    teamName.setSelectedItem(TournamentSchedule.TEAM_NAME_HEADER);
 
     panel.add(new JLabel("Organization"));
     organization = new JComboBox<>(notRequiredHeaderNames);
     panel.add(organization);
+    organization.setSelectedItem(TournamentSchedule.ORGANIZATION_HEADER);
 
     panel.add(new JLabel("Award Group"));
     awardGroup = new JComboBox<>(notRequiredHeaderNames);
     panel.add(awardGroup);
+    awardGroup.setSelectedItem(TournamentSchedule.AWARD_GROUP_HEADER);
 
     panel.add(new JLabel("Judging Group"));
     judgingGroup = new JComboBox<>(notRequiredHeaderNames);
     panel.add(judgingGroup);
+    judgingGroup.setSelectedItem(TournamentSchedule.JUDGE_GROUP_HEADER);
 
     practiceRounds = new ArrayList<>(numPracticeRounds);
     practiceRoundTables = new ArrayList<>(numPracticeRounds);
     for (int i = 0; i < numPracticeRounds; ++i) {
-      panel.add(new JLabel(String.format("Practice %d", (i
-          + 1))));
+      final int roundNumber = i
+          + 1;
+      panel.add(new JLabel(String.format("Practice %d", roundNumber)));
       final JComboBox<String> time = new JComboBox<>(requiredHeaderNames);
       panel.add(time);
       practiceRounds.add(time);
+      time.setSelectedItem(String.format(TournamentSchedule.PRACTICE_HEADER_FORMAT, roundNumber));
 
-      panel.add(new JLabel(String.format("Practice %d table", (i
-          + 1))));
+      panel.add(new JLabel(String.format("Practice %d table", roundNumber)));
       final JComboBox<String> table = new JComboBox<>(requiredHeaderNames);
       panel.add(table);
       practiceRoundTables.add(table);
+      table.setSelectedItem(String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT, roundNumber));
     }
 
     performanceRounds = new ArrayList<>(numRegularMatchRounds);
     performanceRoundTables = new ArrayList<>(numRegularMatchRounds);
     for (int i = 0; i < numRegularMatchRounds; ++i) {
-      panel.add(new JLabel(String.format("Performance %d", (i
-          + 1))));
+      final int roundNumber = i
+          + 1;
+      panel.add(new JLabel(String.format("Performance %d", roundNumber)));
       final JComboBox<String> time = new JComboBox<>(requiredHeaderNames);
       panel.add(time);
       performanceRounds.add(time);
+      time.setSelectedItem(String.format(TournamentSchedule.PERF_HEADER_FORMAT, roundNumber));
 
-      panel.add(new JLabel(String.format("Performance %d table", (i
-          + 1))));
+      panel.add(new JLabel(String.format("Performance %d table", roundNumber)));
       final JComboBox<String> table = new JComboBox<>(requiredHeaderNames);
       panel.add(table);
       performanceRoundTables.add(table);
+      table.setSelectedItem(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, roundNumber));
     }
 
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
