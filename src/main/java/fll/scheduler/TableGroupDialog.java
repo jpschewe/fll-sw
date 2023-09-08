@@ -45,7 +45,6 @@ final class TableGroupDialog extends JDialog {
     instructions.setText("Create a row for each group. Click the checkboxes to indicate which tables are to be grouped. The table optimizer will only move teams between tables in the same group. If all tables shoulod be used, don't create any groups.");
     instructions.setWrapStyleWord(true);
     instructions.setEditable(false);
-    instructions.setEnabled(false);
     cpane.add(instructions, BorderLayout.NORTH);
 
     final JPanel groupPanel = new JPanel(new GridLayout(0, tables.size()
