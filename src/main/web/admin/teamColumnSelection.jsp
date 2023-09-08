@@ -4,19 +4,33 @@
 
 <fll-sw:required-roles roles="ADMIN" allowSetup="false" />
 
+<%
+fll.web.admin.TeamColumnSelection.populateContext(session, pageContext);
+%>
+
 <!-- query string <c:out value="${request.queryString}"/> -->
 
-<%
-if (null == session.getAttribute("columnSelectOptions")) {
-	throw new RuntimeException(
-	"Error columnSelectOptions not set.  Please start back at administration page and go forward.");
-}
-%>
 <html>
 <head>
 <title>Team Column Selection</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
+
+<script type='text/javascript'
+    src="<c:url value='/js/fll-functions.js'/>"></script>
+
+<script type='text/javascript' src="teamColumnSelection.js"></script>
+
+<script type='text/javascript'>
+  "use strict";
+
+  const TEAM_NUMBER_HEADER = "${TEAM_NUMBER_HEADER}";
+  const TEAM_NAME_HEADER = "${TEAM_NAME_HEADER}";
+  const ORGANIZATION_HEADER = "${ORGANIZATION_HEADER}";
+  const AWARD_GROUP_HEADER = "${AWARD_GROUP_HEADER}";
+  const JUDGE_GROUP_HEADER = "${JUDGE_GROUP_HEADER}";
+</script>
+
 </head>
 
 <body>
@@ -59,7 +73,7 @@ if (null == session.getAttribute("columnSelectOptions")) {
                 <td>TeamNumber</td>
                 <td>Number</td>
                 <td>
-                    <select name='TeamNumber'>
+                    <select id='teamNumber' name='TeamNumber'>
                         ${columnSelectOptions}
                     </select>
                 </td>
@@ -69,7 +83,7 @@ if (null == session.getAttribute("columnSelectOptions")) {
                 <td>Team Name</td>
                 <td>Text - 255 characters</td>
                 <td>
-                    <select name='TeamName'>
+                    <select id='teamName' name='TeamName'>
                         <option value='' selected>None</option>
                         ${columnSelectOptions}
                     </select>
@@ -80,7 +94,7 @@ if (null == session.getAttribute("columnSelectOptions")) {
                 <td>Organization</td>
                 <td>Text - 255 characters</td>
                 <td>
-                    <select name='Organization'>
+                    <select id='organization' name='Organization'>
                         <option value='' selected>None</option>
                         ${columnSelectOptions}
                     </select>
@@ -107,7 +121,7 @@ if (null == session.getAttribute("columnSelectOptions")) {
                 <td>Award Group</td>
                 <td>Text - 32 characters</td>
                 <td>
-                    <select name='event_division'>
+                    <select id='awardGroup' name='event_division'>
                         <option value='' selected>None</option>
                         ${columnSelectOptions}
                     </select>
@@ -118,7 +132,7 @@ if (null == session.getAttribute("columnSelectOptions")) {
                 <td>Judging Group</td>
                 <td>Text - 32 characters</td>
                 <td>
-                    <select name='judging_station'>
+                    <select id='judgingGroup' name='judging_station'>
                         <option value='' selected>None</option>
                         ${columnSelectOptions}
                     </select>

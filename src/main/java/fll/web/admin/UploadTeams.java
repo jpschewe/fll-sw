@@ -575,10 +575,12 @@ public final class UploadTeams extends BaseFLLServlet {
   }
 
   /**
-   * Create a string that's a valid column name.
-   * </ul>
+   * Create a string that's a valid database column name.
+   * 
+   * @param str the string to sanitize
+   * @return a string that can be used as a database column name
    */
-  private static String sanitizeColumnName(final @Nullable String str) {
+  public static String sanitizeColumnName(final @Nullable String str) {
     if (null == str
         || "".equals(str)) {
       return "EMPTYHEADER_"
