@@ -31,7 +31,8 @@ public final class UnfinishedTestFinish extends UnfinishedBaseTest {
    * @return bracket names for {@link #test(String)}
    */
   public static String[] names() {
-    return new String[] { UnfinishedBaseTest.UNFINISHED_3RD_BRACKET_NAME, UnfinishedBaseTest.UNFINISHED_1ST_3RD_BRACKET_NAME,
+    return new String[] { UnfinishedBaseTest.UNFINISHED_3RD_BRACKET_NAME,
+                          UnfinishedBaseTest.UNFINISHED_1ST_3RD_BRACKET_NAME,
                           UnfinishedBaseTest.UNFINISHED_BRACKET_NAME, UnfinishedBaseTest.UNFINISHED_LARGE };
   }
 
@@ -52,7 +53,7 @@ public final class UnfinishedTestFinish extends UnfinishedBaseTest {
                                                               bracketName);
     assertThat(before, is(true));
 
-    Playoff.finishBracket(getConnection(), challenge, getTournament(), bracketName);
+    Playoff.finishBracket(getConnection(), getDatasource(), challenge, getTournament(), bracketName);
 
     final boolean after = Playoff.isPlayoffBracketUnfinished(getConnection(), getTournament().getTournamentID(),
                                                              bracketName);

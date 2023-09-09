@@ -24,6 +24,8 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
@@ -305,6 +307,7 @@ public final class Queries {
    * to the playoff tables and notifications to the UI code.
    *
    * @param connection the database connection
+   * @param datasource used to create background database connections
    * @param description the challenge description
    * @param tournament which tournament
    * @param verified if the run is verified
@@ -314,6 +317,7 @@ public final class Queries {
    */
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
   public static void insertPerformanceScore(final Connection connection,
+                                            final DataSource datasource,
                                             final ChallengeDescription description,
                                             final Tournament tournament,
                                             final boolean verified,
@@ -390,7 +394,7 @@ public final class Queries {
                                                                                teamScore.getTeamNumber());
       final ScoreType performanceScoreType = description.getPerformance().getScoreType();
       final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-      ScoreboardUpdates.newScore(connection, team, score, formattedScore, teamScore);
+      ScoreboardUpdates.newScore(datasource, team, score, formattedScore, teamScore);
     }
 
     // Perform updates to the playoff data table if in playoff rounds.
@@ -431,6 +435,7 @@ public final class Queries {
    * @param description
    *          description of the challenge
    * @param connection database connection
+   * @param datasource used to create background database connections
    * @param request HTTP request that contains the expected values
    * @return the number of rows updated, should be 0 or 1
    * @throws SQLException on a database error.
@@ -440,6 +445,7 @@ public final class Queries {
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
   public static int updatePerformanceScore(final ChallengeDescription description,
                                            final Connection connection,
+                                           final DataSource datasource,
                                            final HttpServletRequest request)
       throws SQLException, ParseException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
@@ -533,7 +539,7 @@ public final class Queries {
                                                                                  teamScore.getTeamNumber());
         final ScoreType performanceScoreType = description.getPerformance().getScoreType();
         final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-        ScoreboardUpdates.newScore(connection, team, score, formattedScore, teamScore);
+        ScoreboardUpdates.newScore(datasource, team, score, formattedScore, teamScore);
       }
 
       // Check if we need to update the PlayoffData table

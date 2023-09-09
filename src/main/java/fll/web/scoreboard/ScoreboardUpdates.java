@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.sql.DataSource;
 
@@ -57,23 +59,10 @@ public final class ScoreboardUpdates {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
+
   // uuid -> session
   private static final Map<String, Session> ALL_CLIENTS = new ConcurrentHashMap<>();
-
-  /**
-   * Message type used for score updates.
-   */
-  public static final String SCORE_UPDATE_TYPE = "score_update";
-
-  /**
-   * Message type used for score deletes.
-   */
-  public static final String SCORE_DELETE_TYPE = "score_delete";
-
-  /**
-   * Message type used to reload the page.
-   */
-  public static final String RELOAD_TYPE = "reload";
 
   /**
    * Add the client to the list of clients to receive score updates.
@@ -95,21 +84,23 @@ public final class ScoreboardUpdates {
 
     final ServletContext application = httpSession.getServletContext();
     ALL_CLIENTS.put(uuid, client);
-    sendAllScores(application, uuid, client);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+    sendAllScores(datasource, challengeDescription, uuid, client);
+
     return uuid;
   }
 
-  private static void sendAllScores(final ServletContext application,
+  private static void sendAllScores(final DataSource datasource,
+                                    final ChallengeDescription challengeDescription,
                                     final String displayUuid,
                                     final Session client) {
     final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
-    final ChallengeDescription challengeDscription = ApplicationAttributes.getChallengeDescription(application);
-    final ScoreType performanceScoreType = challengeDscription.getPerformance().getScoreType();
-    final PerformanceScoreCategory performanceElement = challengeDscription.getPerformance();
+    final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
+    final PerformanceScoreCategory performanceElement = challengeDescription.getPerformance();
 
     try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
       try (Connection connection = datasource.getConnection()) {
         final Tournament currentTournament = Tournament.getCurrentTournament(connection);
         final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection,
@@ -187,38 +178,41 @@ public final class ScoreboardUpdates {
 
   /**
    * Tell the clients that a score was deleted. For now the clients just reload
-   * the page. In the future this may be smarter.
+   * the page. In the future this may be smarter. Messages are sent
+   * asynchronously.
    */
   public static void deleteScore() {
-    final DeleteMessage message = new DeleteMessage();
-    try {
-      final String msg = Utilities.createJsonMapper().writeValueAsString(message);
-      final Set<String> toRemove = new HashSet<>();
-      for (final Map.Entry<String, Session> entry : ALL_CLIENTS.entrySet()) {
-        try {
-          final Session client = entry.getValue();
-          client.getBasicRemote().sendText(msg);
-        } catch (final IOException e) {
-          LOGGER.warn("Got error writing to client, dropping: {}", entry.getKey(), e);
-          toRemove.add(entry.getKey());
-        } catch (final IllegalStateException e) {
-          LOGGER.warn("Illegal state exception writing to client, dropping: {}", entry.getKey(), e);
-          toRemove.add(entry.getKey());
+    THREAD_POOL.execute(() -> {
+      final DeleteMessage message = new DeleteMessage();
+      try {
+        final String msg = Utilities.createJsonMapper().writeValueAsString(message);
+        final Set<String> toRemove = new HashSet<>();
+        for (final Map.Entry<String, Session> entry : ALL_CLIENTS.entrySet()) {
+          try {
+            final Session client = entry.getValue();
+            client.getBasicRemote().sendText(msg);
+          } catch (final IOException e) {
+            LOGGER.warn("Got error writing to client, dropping: {}", entry.getKey(), e);
+            toRemove.add(entry.getKey());
+          } catch (final IllegalStateException e) {
+            LOGGER.warn("Illegal state exception writing to client, dropping: {}", entry.getKey(), e);
+            toRemove.add(entry.getKey());
+          }
         }
-      }
 
-      // remove clients that had issues
-      for (final String uuid : toRemove) {
-        removeClient(uuid);
+        // remove clients that had issues
+        for (final String uuid : toRemove) {
+          removeClient(uuid);
+        }
+      } catch (final JsonProcessingException e) {
+        throw new FLLInternalException("Error converting DeleteMessage to JSON", e);
       }
-    } catch (final JsonProcessingException e) {
-      throw new FLLInternalException("Error converting DeleteMessage to JSON", e);
-    }
+    });
   }
 
   /**
    * Notify the display to reload because the award groups being displayed have
-   * changed.
+   * changed. Executed asynchronously.
    */
   public static void awardGroupChange() {
     final ReloadMessage message = new ReloadMessage();
@@ -228,16 +222,18 @@ public final class ScoreboardUpdates {
       // TODO: make this smarter and only require the displays that changed to reload
       final Set<String> toRemove = new HashSet<>();
       for (final Map.Entry<String, Session> entry : ALL_CLIENTS.entrySet()) {
-        try {
-          final Session client = entry.getValue();
-          client.getBasicRemote().sendText(msg);
-        } catch (final IOException e) {
-          LOGGER.warn("Got error writing to client, dropping: {}", entry.getKey(), e);
-          toRemove.add(entry.getKey());
-        } catch (final IllegalStateException e) {
-          LOGGER.warn("Illegal state exception writing to client, dropping: {}", entry.getKey(), e);
-          toRemove.add(entry.getKey());
-        }
+        THREAD_POOL.execute(() -> {
+          try {
+            final Session client = entry.getValue();
+            client.getBasicRemote().sendText(msg);
+          } catch (final IOException e) {
+            LOGGER.warn("Got error writing to client, dropping: {}", entry.getKey(), e);
+            toRemove.add(entry.getKey());
+          } catch (final IllegalStateException e) {
+            LOGGER.warn("Illegal state exception writing to client, dropping: {}", entry.getKey(), e);
+            toRemove.add(entry.getKey());
+          }
+        });
       }
 
       // remove clients that had issues
@@ -250,69 +246,77 @@ public final class ScoreboardUpdates {
   }
 
   /**
-   * Notify all clients of a new verified score.
+   * Notify all clients of a new verified score. Messages are sent asynchronously.
    * 
-   * @param connection database connection
+   * @param datasource database connection
    * @param team {@link ScoreUpdateMessage#getTeam()}
    * @param score {@link ScoreUpdateMessage#getScore()}
    * @param formattedScore {@link ScoreUpdateMessage#getFormattedScore()}
    * @param teamScore used to get some score information
    */
-  public static void newScore(final Connection connection,
+  public static void newScore(final DataSource datasource,
                               final TournamentTeam team,
                               final double score,
                               final String formattedScore,
-                              final TeamScore teamScore)
-      throws SQLException {
+                              final TeamScore teamScore) {
     final ScoreUpdateMessage update = new ScoreUpdateMessage(team, score, formattedScore, teamScore);
-    newScore(connection, update);
+    newScore(datasource, update);
   }
 
-  private static void newScore(final Connection connection,
-                               final ScoreUpdateMessage update)
-      throws SQLException {
-    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
-    try {
-      final String updateStr = jsonMapper.writeValueAsString(update);
+  private static void newScore(final DataSource datasource,
+                               final ScoreUpdateMessage update) {
+    THREAD_POOL.execute(() -> {
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
+      try (Connection connection = datasource.getConnection()) {
 
-      final Set<String> toRemove = new HashSet<>();
-      for (final Map.Entry<String, Session> entry : ALL_CLIENTS.entrySet()) {
+        final Tournament currentTournament = Tournament.getCurrentTournament(connection);
+        final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection,
+                                                                              currentTournament.getTournamentID());
+        final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
+                                                                                    currentTournament.getTournamentID());
+        final int maxRunNumberToDisplay = DelayedPerformance.getMaxRunNumberToDisplay(connection, currentTournament);
+
+        final List<String> allAwardGroups = Queries.getAwardGroups(connection, currentTournament.getTournamentID());
+
         try {
-          newScore(connection, entry.getKey(), entry.getValue(), update.getTeam(), update.getRunNumber(), updateStr);
-        } catch (final IOException e) {
-          LOGGER.warn("Got error writing to client, dropping: {}", entry.getKey(), e);
-          toRemove.add(entry.getKey());
+          final String updateStr = jsonMapper.writeValueAsString(update);
+
+          final Set<String> toRemove = new HashSet<>();
+          for (final Map.Entry<String, Session> entry : ALL_CLIENTS.entrySet()) {
+            try {
+              newScore(numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay, allAwardGroups, entry.getKey(),
+                       entry.getValue(), update.getTeam(), update.getRunNumber(), updateStr);
+            } catch (final IOException e) {
+              LOGGER.warn("Got error writing to client, dropping: {}", entry.getKey(), e);
+              toRemove.add(entry.getKey());
+            }
+          }
+
+          // remove clients that had issues
+          for (final String uuid : toRemove) {
+            removeClient(uuid);
+          }
+
+        } catch (final JsonProcessingException e) {
+          throw new FLLInternalException("Unable to format scoreboard message as JSON", e);
         }
+      } catch (final SQLException e) {
+        throw new FLLInternalException("Error talking to the database while sending scores to the scoreboards", e);
       }
-
-      // remove clients that had issues
-      for (final String uuid : toRemove) {
-        removeClient(uuid);
-      }
-
-    } catch (final JsonProcessingException e) {
-      throw new FLLInternalException("Unable to format scoreboard message as JSON", e);
-    }
-
+    });
   }
 
-  private static void newScore(final Connection connection,
+  private static void newScore(final int numSeedingRounds,
+                               final boolean runningHeadToHead,
+                               final int maxRunNumberToDisplay,
+                               final List<String> allAwardGroups,
                                final String displayUuid,
                                final Session client,
                                final TournamentTeam team,
                                final int runNumber,
                                final String data)
       throws IOException, SQLException {
-
-    final Tournament currentTournament = Tournament.getCurrentTournament(connection);
-    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection,
-                                                                          currentTournament.getTournamentID());
-    final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
-                                                                                currentTournament.getTournamentID());
-    final int maxRunNumberToDisplay = DelayedPerformance.getMaxRunNumberToDisplay(connection, currentTournament);
-
     final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
-    final List<String> allAwardGroups = Queries.getAwardGroups(connection, currentTournament.getTournamentID());
     final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
 
     newScore(client, awardGroupsToDisplay, numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay, team, runNumber,

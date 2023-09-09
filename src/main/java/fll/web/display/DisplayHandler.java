@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +44,8 @@ public final class DisplayHandler {
    * Parameter name used to pass the display uuid to the various display pages.
    */
   public static final String DISPLAY_UUID_PARAMETER_NAME = "display_uuid";
+
+  private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
 
   static {
     final DisplayInfo defaultDisplay = new DisplayInfo(DEFAULT_DISPLAY_UUID, DisplayInfo.DEFAULT_DISPLAY_NAME);
@@ -152,7 +156,7 @@ public final class DisplayHandler {
   }
 
   /**
-   * Send the current URL to all displays.
+   * Send the current URL to all displays. This executes asynchronously.
    */
   public static void sendUpdateUrl() {
     final List<DisplayData> data;
@@ -160,12 +164,15 @@ public final class DisplayHandler {
       data = new LinkedList<>(DISPLAYS.values());
     }
     for (final DisplayData d : data) {
-      sendCurrentUrl(d);
+      THREAD_POOL.execute(() -> {
+        sendCurrentUrl(d);
+      });
     }
   }
 
   private static void sendCurrentUrl(final DisplayData data) {
-    final String url = data.getInfo().getUrl();
+    final DisplayInfo resolved = resolveDisplay(data.getInfo().getUuid());
+    final String url = resolved.getUrl();
     send(data.getInfo().getUuid(), data.getSocket(), new DisplayUrlMessage(url));
   }
 

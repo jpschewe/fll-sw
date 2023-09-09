@@ -74,7 +74,7 @@ public class SubmitScoreEntry extends BaseFLLServlet {
 
         Queries.deletePerformanceScore(connection, teamNumber, irunNumber);
       } else if (Boolean.valueOf(request.getParameter("EditFlag"))) {
-        final int rowsUpdated = Queries.updatePerformanceScore(challengeDescription, connection, request);
+        final int rowsUpdated = Queries.updatePerformanceScore(challengeDescription, connection, datasource, request);
         if (0 == rowsUpdated) {
           throw new FLLInternalException("No rows updated - did the score get deleted?");
         } else if (rowsUpdated > 1) {
@@ -108,7 +108,8 @@ public class SubmitScoreEntry extends BaseFLLServlet {
                                                teamNumber, runNumber);
           SessionAttributes.appendToMessage(session, message);
         } else {
-          Queries.insertPerformanceScore(connection, challengeDescription, tournament, teamScore.isVerified(), teamScore);
+          Queries.insertPerformanceScore(connection, datasource, challengeDescription, tournament,
+                                         teamScore.isVerified(), teamScore);
           final String message = String.format("<div class='success'>Entered score for %d run %d</div>", teamNumber,
                                                runNumber);
           SessionAttributes.appendToMessage(session, message);

@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
+import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
@@ -1352,6 +1353,7 @@ public final class Playoff {
    * be finished.
    *
    * @param connection the database connection
+   * @param datasource used to create background database connections
    * @param tournament the tournament that the bracket is in
    * @param bracketName the name of the head to head bracket
    * @param challenge the challenge description, used to get the goal names and
@@ -1362,6 +1364,7 @@ public final class Playoff {
    * @throws ParseException if there is an error parsing the score data
    */
   public static boolean finishBracket(final Connection connection,
+                                      final DataSource datasource,
                                       final ChallengeDescription challenge,
                                       final Tournament tournament,
                                       final String bracketName)
@@ -1389,7 +1392,7 @@ public final class Playoff {
           + info.round
           + " line: "
           + info.dbLine);
-      finishRound(connection, challenge, tournament, simpleGoals, enumGoals, bracketName, info);
+      finishRound(connection, datasource, challenge, tournament, simpleGoals, enumGoals, bracketName, info);
     }
 
     // mark bracket as automatically finished
@@ -1404,6 +1407,7 @@ public final class Playoff {
   }
 
   private static void finishRound(final Connection connection,
+                                  final DataSource datasource,
                                   final ChallengeDescription description,
                                   final Tournament tournament,
                                   final Map<String, Double> simpleGoals,
@@ -1479,22 +1483,22 @@ public final class Playoff {
     } else if (teamAscoreExists) {
       final TeamScore teamBscore = new DummyTeamScore(teamBteamNumber, performanceRunNumberToEnter, simpleGoals,
                                                       enumGoals, true, false);
-      Queries.insertPerformanceScore(connection, description, tournament, true, teamBscore);
+      Queries.insertPerformanceScore(connection, datasource, description, tournament, true, teamBscore);
 
     } else if (teamBscoreExists) {
       final TeamScore teamAscore = new DummyTeamScore(teamAteamNumber, performanceRunNumberToEnter, simpleGoals,
                                                       enumGoals, true, false);
-      Queries.insertPerformanceScore(connection, description, tournament, true, teamAscore);
+      Queries.insertPerformanceScore(connection, datasource, description, tournament, true, teamAscore);
     } else {
       // initial value score
       final TeamScore teamAscore = new DummyTeamScore(teamAteamNumber, performanceRunNumberToEnter, simpleGoals,
                                                       enumGoals, false, false);
-      Queries.insertPerformanceScore(connection, description, tournament, true, teamAscore);
+      Queries.insertPerformanceScore(connection, datasource, description, tournament, true, teamAscore);
 
       // no show
       final TeamScore teamBscore = new DummyTeamScore(teamBteamNumber, performanceRunNumberToEnter, simpleGoals,
                                                       enumGoals, true, false);
-      Queries.insertPerformanceScore(connection, description, tournament, true, teamBscore);
+      Queries.insertPerformanceScore(connection, datasource, description, tournament, true, teamBscore);
     }
 
   }
@@ -1569,7 +1573,8 @@ public final class Playoff {
    * @return non-null list of brackets, may be empty
    * @throws SQLException on a database error
    * @see #isPlayoffBracketUnfinished(Connection, int, String)
-   * @see #finishBracket(Connection, ChallengeDescription, Tournament, String)
+   * @see #finishBracket(Connection, DataSource, ChallengeDescription, Tournament,
+   *      String)
    */
   @Nonnull
   public static List<String> getCompletedBrackets(final Connection connection,
@@ -1598,7 +1603,8 @@ public final class Playoff {
    * @return true if automatically finished, false otherwise (including
    *         unfinished)
    * @throws SQLException on a database error
-   * @see #finishBracket(Connection, ChallengeDescription, Tournament, String)
+   * @see #finishBracket(Connection, DataSource, ChallengeDescription, Tournament,
+   *      String)
    */
   public static boolean isAutomaticallyFinished(final Connection connection,
                                                 final int tournamentId,
