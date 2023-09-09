@@ -1,3 +1,4 @@
+* #1102 - Send to web sockets in the background to speed up web clients
 * automatically select common columns when loading a schedule into the scheduler UI, website and when uploading teams
 * #1100 - Switch the scoreboard to web sockets to avoid issues with web servers
 * #1091 - Use web sockets for the display updates
