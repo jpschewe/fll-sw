@@ -197,7 +197,7 @@ pipeline {
           
                 archiveArtifacts artifacts: 'logs/,screenshots/,build/distributions/'
                 
-                recordIssues tool: taskScanner(includePattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', excludePattern: 'checkstyle*.xml', highTags: 'FIXME,HACK', normalTags: 'TODO')
+                recordIssues tool: taskScanner(includePattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', excludePattern: 'checkstyle*.xml,build/reports/**', highTags: 'FIXME,HACK', normalTags: 'TODO')
                 
                 recordIssues tool: java(), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]  
 
