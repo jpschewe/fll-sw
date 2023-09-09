@@ -224,24 +224,30 @@ public class H2HUpdateWebSocket {
    * @param displayInfo the display information for the display
    */
   public static void updateDisplayedBracket(final DisplayInfo displayInfo) {
-    if (displayInfo.isHeadToHead()) {
+    // used to find the sockets to talk to
+    final String h2hUuid = displayInfo.getUuid();
+
+    // make sure that we update the correct bracket information used
+    final DisplayInfo resolved = DisplayHandler.resolveDisplay(displayInfo.getUuid());
+
+    if (resolved.isHeadToHead()) {
       synchronized (SESSIONS_LOCK) {
-        final @Nullable Session session = ALL_SESSIONS.get(displayInfo.getUuid());
+        final @Nullable Session session = ALL_SESSIONS.get(h2hUuid);
         if (null != session) {
           THREAD_POOL.submit(() -> {
             try {
-              updateDisplayedBracket(displayInfo, session);
+              updateDisplayedBracket(resolved, session);
             } catch (final IOException e) {
-              LOGGER.warn("Error writing to {}, dropping", displayInfo.getUuid(), e);
-              ALL_SESSIONS.remove(displayInfo.getUuid());
+              LOGGER.warn("Error writing to {}, dropping", h2hUuid, e);
+              ALL_SESSIONS.remove(h2hUuid);
               for (final Map.Entry<String, Set<String>> entry : SESSIONS.entrySet()) {
-                entry.getValue().remove(displayInfo.getUuid());
+                entry.getValue().remove(h2hUuid);
               }
             }
           });
         } else {
           LOGGER.warn("Found display info with uuid {} that is displaying head to head and doesn't have a head to head web socket",
-                      displayInfo.getUuid());
+                      h2hUuid);
         }
       }
     }
