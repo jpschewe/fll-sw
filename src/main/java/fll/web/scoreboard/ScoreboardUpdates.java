@@ -61,21 +61,6 @@ public final class ScoreboardUpdates {
   private static final Map<String, Session> ALL_CLIENTS = new ConcurrentHashMap<>();
 
   /**
-   * Message type used for score updates.
-   */
-  public static final String SCORE_UPDATE_TYPE = "score_update";
-
-  /**
-   * Message type used for score deletes.
-   */
-  public static final String SCORE_DELETE_TYPE = "score_delete";
-
-  /**
-   * Message type used to reload the page.
-   */
-  public static final String RELOAD_TYPE = "reload";
-
-  /**
    * Add the client to the list of clients to receive score updates.
    * 
    * @param client the session to add
