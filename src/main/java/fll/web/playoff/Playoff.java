@@ -1573,7 +1573,8 @@ public final class Playoff {
    * @return non-null list of brackets, may be empty
    * @throws SQLException on a database error
    * @see #isPlayoffBracketUnfinished(Connection, int, String)
-   * @see #finishBracket(Connection, ChallengeDescription, Tournament, String)
+   * @see #finishBracket(Connection, DataSource, ChallengeDescription, Tournament,
+   *      String)
    */
   @Nonnull
   public static List<String> getCompletedBrackets(final Connection connection,
@@ -1602,7 +1603,8 @@ public final class Playoff {
    * @return true if automatically finished, false otherwise (including
    *         unfinished)
    * @throws SQLException on a database error
-   * @see #finishBracket(Connection, ChallengeDescription, Tournament, String)
+   * @see #finishBracket(Connection, DataSource, ChallengeDescription, Tournament,
+   *      String)
    */
   public static boolean isAutomaticallyFinished(final Connection connection,
                                                 final int tournamentId,

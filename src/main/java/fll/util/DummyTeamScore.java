@@ -16,8 +16,7 @@ import fll.web.playoff.TeamScore;
 /**
  * Team score that is populated from a map of values. This is most often used
  * for testing, but is also useful for
- * {@link Playoff#finishBracket(java.sql.Connection,
- * fll.xml.ChallengeDescription, fll.Tournament, String)}.
+ * {@link Playoff#finishBracket(java.sql.Connection, javax.sql.DataSource, fll.xml.ChallengeDescription, fll.Tournament, String)}.
  *
  * @author jpschewe
  */
