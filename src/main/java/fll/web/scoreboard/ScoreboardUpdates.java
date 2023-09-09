@@ -29,6 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
@@ -181,6 +182,7 @@ public final class ScoreboardUpdates {
    * the page. In the future this may be smarter. Messages are sent
    * asynchronously.
    */
+  @SuppressFBWarnings(value = "BAD_PRACTICE", justification = "Return value of submit doesn't need to be checked")
   public static void deleteScore() {
     THREAD_POOL.submit(() -> {
       final DeleteMessage message = new DeleteMessage();
@@ -214,6 +216,7 @@ public final class ScoreboardUpdates {
    * Notify the display to reload because the award groups being displayed have
    * changed. Executed asynchronously.
    */
+  @SuppressFBWarnings(value = "BAD_PRACTICE", justification = "Return value of submit doesn't need to be checked")
   public static void awardGroupChange() {
     final ReloadMessage message = new ReloadMessage();
     try {
@@ -263,6 +266,7 @@ public final class ScoreboardUpdates {
     newScore(datasource, update);
   }
 
+  @SuppressFBWarnings(value = "BAD_PRACTICE", justification = "Return value of submit doesn't need to be checked")
   private static void newScore(final DataSource datasource,
                                final ScoreUpdateMessage update) {
     THREAD_POOL.submit(() -> {

@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.FLLRuntimeException;
 import fll.web.DisplayInfo;
 import jakarta.websocket.Session;
@@ -158,8 +159,8 @@ public final class DisplayHandler {
   /**
    * Send the current URL to all displays. This executes asynchronously.
    */
+  @SuppressFBWarnings(value = "BAD_PRACTICE", justification = "Return value of submit doesn't need to be checked")
   public static void sendUpdateUrl() {
-
     final List<DisplayData> data;
     synchronized (LOCK) {
       data = new LinkedList<>(DISPLAYS.values());
