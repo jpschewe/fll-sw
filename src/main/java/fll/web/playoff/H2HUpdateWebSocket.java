@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.sql.DataSource;
 
@@ -54,6 +56,8 @@ import jakarta.websocket.server.ServerEndpoint;
 public class H2HUpdateWebSocket {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
+  private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
 
   /*
    * Note about UUIDs and how they relate to DisplayInfo UUIDs.
@@ -215,7 +219,7 @@ public class H2HUpdateWebSocket {
   /**
    * Notify a specify display to update the brackets it's showing.
    * If the {@link DisplayInfo} isn't showing the brackets, nothing is sent to the
-   * display.
+   * display. This is executed asynchronously.
    * 
    * @param displayInfo the display information for the display
    */
@@ -224,15 +228,17 @@ public class H2HUpdateWebSocket {
       synchronized (SESSIONS_LOCK) {
         final @Nullable Session session = ALL_SESSIONS.get(displayInfo.getUuid());
         if (null != session) {
-          try {
-            updateDisplayedBracket(displayInfo, session);
-          } catch (final IOException e) {
-            LOGGER.warn("Error writing to {}, dropping", displayInfo.getUuid(), e);
-            ALL_SESSIONS.remove(displayInfo.getUuid());
-            for (final Map.Entry<String, Set<String>> entry : SESSIONS.entrySet()) {
-              entry.getValue().remove(displayInfo.getUuid());
+          THREAD_POOL.submit(() -> {
+            try {
+              updateDisplayedBracket(displayInfo, session);
+            } catch (final IOException e) {
+              LOGGER.warn("Error writing to {}, dropping", displayInfo.getUuid(), e);
+              ALL_SESSIONS.remove(displayInfo.getUuid());
+              for (final Map.Entry<String, Set<String>> entry : SESSIONS.entrySet()) {
+                entry.getValue().remove(displayInfo.getUuid());
+              }
             }
-          }
+          });
         } else {
           LOGGER.warn("Found display info with uuid {} that is displaying head to head and doesn't have a head to head web socket",
                       displayInfo.getUuid());
@@ -428,7 +434,8 @@ public class H2HUpdateWebSocket {
 
   /**
    * Update the display for the information in this bracket. This function queries
-   * the database for the the information to display.
+   * the database for the the information to display. This is executed
+   * asynchronously.
    * 
    * @param connection the database connection
    * @param performanceScoreType the type of scores for performance (used for
@@ -458,8 +465,10 @@ public class H2HUpdateWebSocket {
 
     final String table = Queries.getAssignedTable(connection, tournamentId, headToHeadBracket, playoffRound, dbLine);
 
-    updateBracket(headToHeadBracket, dbLine, playoffRound, maxPlayoffRound, teamNumber, team.getTeamName(), score,
-                  performanceScoreType, noShow, verified, table);
+    THREAD_POOL.submit(() -> {
+      updateBracket(headToHeadBracket, dbLine, playoffRound, maxPlayoffRound, teamNumber, team.getTeamName(), score,
+                    performanceScoreType, noShow, verified, table);
+    });
   }
 
   // CHECKSTYLE:OFF - data class for websocket
