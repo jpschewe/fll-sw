@@ -484,6 +484,9 @@ assemble.dependsOn(jspToClasses)
 cpdCheck {
     // allow the build to continue, catch this in CI as warnings
     ignoreFailures = true
+
+    // default of 50 seems low and is finding sections that don't make sense to collapse
+    minimumTokenCount = 100
 }
 
 tasks.register("sloccount", Exec) {
