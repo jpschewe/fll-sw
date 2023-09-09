@@ -16,6 +16,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.zip.ZipInputStream;
 
+import javax.sql.DataSource;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -34,7 +36,17 @@ public abstract class UnfinishedBaseTest {
 
   private String database;
 
+  private DataSource datasource;
+
   private Connection connection;
+
+  /**
+   * @return the datasource that created the connection
+   * @see #getConnection()
+   */
+  protected DataSource getDatasource() {
+    return datasource;
+  }
 
   /**
    * @return the database connection for testing
@@ -98,7 +110,8 @@ public abstract class UnfinishedBaseTest {
   public void setUp() throws IOException, SQLException {
     tempFile = File.createTempFile("flltest", null);
     database = tempFile.getAbsolutePath();
-    connection = Utilities.createFileDataSource(database).getConnection();
+    datasource = Utilities.createFileDataSource(database);
+    connection = datasource.getConnection();
 
     final InputStream dumpFileIS = UnfinishedBaseTest.class.getResourceAsStream("data/unfinished-bracket-tests.flldb");
     assertThat(dumpFileIS, notNullValue());

@@ -66,7 +66,7 @@ public class FinishBracket extends BaseFLLServlet {
 
       final ChallengeDescription challenge = ApplicationAttributes.getChallengeDescription(application);
 
-      final boolean result = Playoff.finishBracket(connection, challenge, tournament, bracketName);
+      final boolean result = Playoff.finishBracket(connection, datasource, challenge, tournament, bracketName);
 
       if (!result) {
         LOGGER.warn("Could not finish bracket "
