@@ -223,7 +223,6 @@ public class H2HUpdateWebSocket {
    * 
    * @param displayInfo the display information for the display
    */
-  @SuppressFBWarnings(value = "BAD_PRACTICE", justification = "Return value of submit doesn't need to be checked")
   public static void updateDisplayedBracket(final DisplayInfo displayInfo) {
     // used to find the sockets to talk to
     final String h2hUuid = displayInfo.getUuid();
@@ -235,7 +234,7 @@ public class H2HUpdateWebSocket {
       synchronized (SESSIONS_LOCK) {
         final @Nullable Session session = ALL_SESSIONS.get(h2hUuid);
         if (null != session) {
-          THREAD_POOL.submit(() -> {
+          THREAD_POOL.execute(() -> {
             try {
               updateDisplayedBracket(resolved, session);
             } catch (final IOException e) {
@@ -453,7 +452,6 @@ public class H2HUpdateWebSocket {
    * @param dbLine the line in the playoff table to find the bracket entry at
    * @throws SQLException on a database error
    */
-  @SuppressFBWarnings(value = "BAD_PRACTICE", justification = "Return value of submit doesn't need to be checked")
   public static void updateBracket(final Connection connection,
                                    final ScoreType performanceScoreType,
                                    final String headToHeadBracket,
@@ -473,7 +471,7 @@ public class H2HUpdateWebSocket {
 
     final String table = Queries.getAssignedTable(connection, tournamentId, headToHeadBracket, playoffRound, dbLine);
 
-    THREAD_POOL.submit(() -> {
+    THREAD_POOL.execute(() -> {
       updateBracket(headToHeadBracket, dbLine, playoffRound, maxPlayoffRound, teamNumber, team.getTeamName(), score,
                     performanceScoreType, noShow, verified, table);
     });
