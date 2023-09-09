@@ -172,7 +172,8 @@ public final class DisplayHandler {
   }
 
   private static void sendCurrentUrl(final DisplayData data) {
-    final String url = data.getInfo().getUrl();
+    final DisplayInfo resolved = resolveDisplay(data.getInfo().getUuid());
+    final String url = resolved.getUrl();
     send(data.getInfo().getUuid(), data.getSocket(), new DisplayUrlMessage(url));
   }
 

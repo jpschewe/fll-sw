@@ -19,7 +19,6 @@ import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.FLLRuntimeException;
-import fll.web.display.DisplayHandler;
 
 /**
  * Information about a display.
@@ -517,9 +516,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * @return the URL
    */
   public String getUrl() {
-    if (isFollowDefault()) {
-      return DisplayHandler.getDefaultDisplay().getUrl();
-    } else if (isWelcome()) {
+    if (isWelcome()) {
       return "/welcome.jsp";
     } else if (isScoreboard()) {
       return "/scoreboard/dynamic.jsp";
