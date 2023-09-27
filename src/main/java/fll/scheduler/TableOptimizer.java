@@ -564,7 +564,7 @@ public class TableOptimizer {
     this.checker = new ScheduleChecker(params, schedule);
     this.tableGroups = tableGroups.isEmpty() ? determineTableGroups(schedule) : tableGroups;
 
-    if (tableGroups.isEmpty()) {
+    if (this.tableGroups.isEmpty()) {
       throw new FLLInternalException("Something went wrong. Table groups list is empty");
     }
 
