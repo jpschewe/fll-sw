@@ -124,13 +124,29 @@ class ChooseScheduleHeadersDialog extends JDialog {
       final JComboBox<String> time = new JComboBox<>(requiredHeaderNames);
       panel.add(time);
       practiceRounds.add(time);
-      time.setSelectedItem(String.format(TournamentSchedule.PRACTICE_HEADER_FORMAT, roundNumber));
 
       panel.add(new JLabel(String.format("Practice %d table", roundNumber)));
       final JComboBox<String> table = new JComboBox<>(requiredHeaderNames);
       panel.add(table);
       practiceRoundTables.add(table);
-      table.setSelectedItem(String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT, roundNumber));
+
+      // be smart about picking columns
+      if (roundNumber == 1) {
+        // try the short version
+        if (requiredHeaderNames.contains(TournamentSchedule.BASE_PRACTICE_HEADER_SHORT)) {
+          time.setSelectedItem(TournamentSchedule.BASE_PRACTICE_HEADER_SHORT);
+        } else {
+          time.setSelectedItem(String.format(TournamentSchedule.PRACTICE_HEADER_FORMAT, roundNumber));
+        }
+        if (requiredHeaderNames.contains(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT_SHORT)) {
+          table.setSelectedItem(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT_SHORT);
+        } else {
+          table.setSelectedItem(String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT, roundNumber));
+        }
+      } else {
+        time.setSelectedItem(String.format(TournamentSchedule.PRACTICE_HEADER_FORMAT, roundNumber));
+        table.setSelectedItem(String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT, roundNumber));
+      }
     }
 
     performanceRounds = new ArrayList<>(numRegularMatchRounds);

@@ -33,6 +33,8 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
   const perfTableHeaders = JSON.parse('${perfTableHeaders}');
   const practiceHeaders = JSON.parse('${practiceHeaders}');
   const practiceTableHeaders = JSON.parse('${practiceTableHeaders}');
+  const BASE_PRACTICE_HEADER_SHORT = "${BASE_PRACTICE_HEADER_SHORT}";
+  const PRACTICE_TABLE_HEADER_FORMAT_SHORT = "${PRACTICE_TABLE_HEADER_FORMAT_SHORT}";
 </script>
 
 </head>

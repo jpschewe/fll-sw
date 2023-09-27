@@ -9,6 +9,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     for (let i = 0; i < numPracticeRounds; ++i) {
         const roundNumber = i + 1;
+        if (roundNumber == 1) {
+            // try short versions
+            setSelectValue(document.getElementById("practice" + roundNumber), BASE_PRACTICE_HEADER_SHORT);
+            setSelectValue(document.getElementById("practiceTable" + roundNumber), PRACTICE_TABLE_HEADER_FORMAT_SHORT);
+        }
         setSelectValue(document.getElementById("practice" + roundNumber), practiceHeaders[i]);
         setSelectValue(document.getElementById("practiceTable" + roundNumber), practiceTableHeaders[i]);
     }

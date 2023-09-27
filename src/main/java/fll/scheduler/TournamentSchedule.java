@@ -124,7 +124,10 @@ public class TournamentSchedule implements Serializable {
    */
   private static final String BASE_PRACTICE_HEADER = "Practice #";
 
-  private static final String BASE_PRACTICE_HEADER_SHORT = "Practice";
+  /**
+   * Simple string for a single practice round. No formatting needed.
+   */
+  public static final String BASE_PRACTICE_HEADER_SHORT = "Practice";
 
   /**
    * Used with {@link String#format(String, Object...)} to create a performance
@@ -152,7 +155,10 @@ public class TournamentSchedule implements Serializable {
    */
   public static final String PRACTICE_TABLE_HEADER_FORMAT = "Practice %d Table";
 
-  private static final String PRACTICE_TABLE_HEADER_FORMAT_SHORT = "Practice Table";
+  /**
+   * Simple string for a single practice round table. No formatting needed.
+   */
+  public static final String PRACTICE_TABLE_HEADER_FORMAT_SHORT = "Practice Table";
 
   /**
    * @return Number of rounds in this schedule (practice and regular match play).

@@ -96,7 +96,9 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
                                WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(perfHeaders)));
       pageContext.setAttribute("perfTableHeaders",
                                WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(perfTableHeaders)));
-
+      pageContext.setAttribute("BASE_PRACTICE_HEADER_SHORT", TournamentSchedule.BASE_PRACTICE_HEADER_SHORT);
+      pageContext.setAttribute("PRACTICE_TABLE_HEADER_FORMAT_SHORT",
+                               TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT_SHORT);
       final List<String> practiceHeaders = new LinkedList<>();
       final List<String> practiceTableHeaders = new LinkedList<>();
       for (int i = 0; i < numPracticeRounds; ++i) {
