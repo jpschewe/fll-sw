@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
@@ -318,6 +319,7 @@ public class SchedulerUI extends JFrame {
     scheduleMenu.add(mRunOptimizerAction);
     scheduleMenu.add(mWriteSchedulesAction);
     scheduleMenu.add(mDisplayGeneralScheduleAction);
+    scheduleMenu.add(savecheduleAction);
     menubar.add(scheduleMenu);
 
     setJMenuBar(menubar);
@@ -327,6 +329,7 @@ public class SchedulerUI extends JFrame {
     mDisplayGeneralScheduleAction.setEnabled(false);
     mRunOptimizerAction.setEnabled(false);
     mReloadFileAction.setEnabled(false);
+    savecheduleAction.setEnabled(false);
 
     // Once https://github.com/typetools/checker-framework/issues/4613 is resolved I
     // can try and figure out what is wrong here
@@ -872,6 +875,56 @@ public class SchedulerUI extends JFrame {
     }
   }
 
+  private final Action savecheduleAction = new SaveScheduleAction();
+
+  private final class SaveScheduleAction extends AbstractAction {
+    SaveScheduleAction() {
+      super("Save Schedule");
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Save16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Save24.gif"));
+      putValue(SHORT_DESCRIPTION, "Save changes made to the schedule");
+    }
+
+    @Override
+    public void actionPerformed(final ActionEvent ae) {
+      final JFileChooser fileChooser = new JFileChooser();
+      final FileFilter filter = new BasicFileFilter("Schedule File (csv)", new String[] { "csv" });
+      fileChooser.setFileFilter(filter);
+      final File directory = getScheduleFile().getParentFile();
+      if (null != directory) {
+        fileChooser.setCurrentDirectory(directory);
+      }
+
+      final int returnVal = fileChooser.showSaveDialog(SchedulerUI.this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = fileChooser.getSelectedFile();
+        if (null == selectedFile) {
+          // user canceled
+          return;
+        }
+
+        if (!selectedFile.getName().endsWith(".csv")) {
+          selectedFile = new File(selectedFile.getAbsolutePath()
+              + ".csv");
+        }
+
+        try (OutputStream os = new FileOutputStream(selectedFile)) {
+          getScheduleData().outputScheduleAsCSV(os);
+        } catch (IOException e) {
+          final Formatter errorFormatter = new Formatter();
+          errorFormatter.format("Unexpected error writing schedule: %s", e.getMessage());
+          LOGGER.error(errorFormatter, e);
+          JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
+          return;
+        }
+
+      } else {
+        // user canceled
+        return;
+      }
+    }
+  }
+
   private final Action mWriteSchedulesAction = new WriteSchedulesAction();
 
   private final class WriteSchedulesAction extends AbstractAction {
@@ -905,6 +958,13 @@ public class SchedulerUI extends JFrame {
           @Override
           protected Boolean doInBackground() {
             try {
+              // output the schedule as a CSV file so that table optimization information can
+              // be saved
+              final File fullSchedule = new File(directory, String.format("%s-schedule.csv", baseFilename));
+              try (OutputStream os = new FileOutputStream(fullSchedule)) {
+                getScheduleData().outputScheduleAsCSV(os);
+              }
+
               getScheduleData().outputDetailedSchedules(getSchedParams(), directory, baseFilename);
               return true;
             } catch (final IOException e) {
@@ -1065,6 +1125,24 @@ public class SchedulerUI extends JFrame {
     }
   }
 
+  private List<List<String>> promptForTableGroups() {
+    final Collection<String> tableColors = mScheduleData.getTableColors();
+
+    final TableGroupDialog dialog = new TableGroupDialog(this, tableColors);
+    dialog.pack();
+
+    // center window
+    dialog.setLocationRelativeTo(null);
+
+    dialog.setVisible(true);
+
+    final List<List<String>> tableGroups = dialog.getTableGroups();
+
+    dialog.dispose();
+
+    return tableGroups;
+  }
+
   /**
    * Run the table optimizer on the current schedule and open the resulting
    * file.
@@ -1077,7 +1155,9 @@ public class SchedulerUI extends JFrame {
         scheduleDirectory = new File(".");
       }
 
-      final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData, scheduleDirectory);
+      final List<List<String>> tableGroups = promptForTableGroups();
+
+      final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData, scheduleDirectory, tableGroups);
 
       final OptimizerWorker optimizerWorker = new OptimizerWorker(optimizer);
 
@@ -1249,6 +1329,7 @@ public class SchedulerUI extends JFrame {
       mRunOptimizerAction.setEnabled(true);
       mReloadFileAction.setEnabled(true);
       mScheduleFilename.setText(mScheduleFile.getName());
+      savecheduleAction.setEnabled(true);
 
       mTabbedPane.setSelectedIndex(1);
     } catch (final ParseException e) {
