@@ -200,7 +200,7 @@ public class ExcelCellReader extends CellFileReader {
       return new String[0];
     }
 
-    final @Nullable String @Nullable [] data = new String[row.getLastCellNum()];
+    final @Nullable String @Nullable [] data = new String[Math.max(0, row.getLastCellNum())];
     for (int cellIdx = 0; cellIdx < row.getLastCellNum(); ++cellIdx) {
       final Cell cell = row.getCell(cellIdx, MissingCellPolicy.RETURN_NULL_AND_BLANK);
       if (null == cell) {
