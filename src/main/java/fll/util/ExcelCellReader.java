@@ -121,16 +121,9 @@ public class ExcelCellReader extends CellFileReader {
    * @throws IOException see {@link #getAllSheetNames(InputStream)}
    */
   public static List<String> getAllSheetNames(final File file) throws IOException {
-    FileInputStream fis = null;
-    try {
-      fis = new FileInputStream(file);
+    try (FileInputStream fis = new FileInputStream(file)) {
       final List<String> result = getAllSheetNames(fis);
-      fis.close();
       return result;
-    } finally {
-      if (null != fis) {
-        fis.close();
-      }
     }
   }
 
@@ -243,7 +236,7 @@ public class ExcelCellReader extends CellFileReader {
    */
   @Override
   public void close() throws IOException {
-    // nop
+    workbook.close();
   }
 
 }
