@@ -12,7 +12,8 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -40,7 +41,7 @@ public class StoreColumnNames extends BaseFLLServlet {
   public static final String HEADER_ROW_INDEX_KEY = "headerRowIndex";
 
   /**
-   * Session variable that stores a possibly empty {@link List} of
+   * Session variable that stores a possibly empty immutable {@link List} of
    * {@link String} elements that are the headers. Indices of this list match the
    * indices of the data.
    */
@@ -82,7 +83,7 @@ public class StoreColumnNames extends BaseFLLServlet {
    * @param file the file to read with {@link CellFileReader}
    * @param sheetName the name of the sheet if loading a spreadsheet
    * @param headerRowIndex the index of the header row
-   * @return the header names
+   * @return the header names as an immutable list
    * @throws InvalidFormatException if there is an error parsing the spreadsheet
    * @throws IOException if there is an error reading the file
    */
@@ -98,11 +99,36 @@ public class StoreColumnNames extends BaseFLLServlet {
     if (null == headerRow) {
       headerNames = Collections.emptyList();
     } else {
-      headerNames = Arrays.asList(headerRow).stream() //
-                          .filter(StringUtils::isNotBlank) //
-                          .collect(Collectors.toList());
+      final String[] headerArray = new String[headerRow.length];
+      for (int i = 0; i < headerRow.length; ++i) {
+        if (StringUtils.isBlank(headerRow[i])) {
+          headerArray[i] = String.valueOf(i);
+        } else {
+          headerArray[i] = String.format("%d_%s", i, sanitizeColumnName(headerRow[i].trim()));
+        }
+      }
+      headerNames = Collections.unmodifiableList(Arrays.asList(headerArray));
     }
     return headerNames;
   }
 
+  /**
+   * Create a string that's a valid database column name.
+   * 
+   * @param str the string to sanitize
+   * @return a string that can be used as a database column name
+   */
+  public static String sanitizeColumnName(final String str) {
+    if ("constraint".equalsIgnoreCase(str)) {
+      return "CONSTRAINT_";
+    } else {
+      String ret = str.trim();
+      final Matcher illegalCharMatcher = ILLEGAL_CHAR_PATTERN.matcher(ret);
+      ret = illegalCharMatcher.replaceAll("_");
+
+      return ret;
+    }
+  }
+
+  private static final Pattern ILLEGAL_CHAR_PATTERN = Pattern.compile("[^A-Za-z0-9_]");
 }

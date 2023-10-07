@@ -7,6 +7,7 @@
 package fll.web.admin;
 
 import fll.scheduler.TournamentSchedule;
+import fll.web.StoreColumnNames;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.PageContext;
 
@@ -30,11 +31,11 @@ public final class TeamColumnSelection {
       "Error columnSelectOptions not set.  Please start back at administration page and go forward.");
     }
 
-    page.setAttribute("TEAM_NUMBER_HEADER", UploadTeams.sanitizeColumnName(TournamentSchedule.TEAM_NUMBER_HEADER));
-    page.setAttribute("TEAM_NAME_HEADER", UploadTeams.sanitizeColumnName(TournamentSchedule.TEAM_NAME_HEADER));
-    page.setAttribute("ORGANIZATION_HEADER", UploadTeams.sanitizeColumnName(TournamentSchedule.ORGANIZATION_HEADER));
-    page.setAttribute("AWARD_GROUP_HEADER", UploadTeams.sanitizeColumnName(TournamentSchedule.AWARD_GROUP_HEADER));
-    page.setAttribute("JUDGE_GROUP_HEADER", UploadTeams.sanitizeColumnName(TournamentSchedule.JUDGE_GROUP_HEADER));
+    page.setAttribute("TEAM_NUMBER_HEADER", StoreColumnNames.sanitizeColumnName(TournamentSchedule.TEAM_NUMBER_HEADER));
+    page.setAttribute("TEAM_NAME_HEADER", StoreColumnNames.sanitizeColumnName(TournamentSchedule.TEAM_NAME_HEADER));
+    page.setAttribute("ORGANIZATION_HEADER", StoreColumnNames.sanitizeColumnName(TournamentSchedule.ORGANIZATION_HEADER));
+    page.setAttribute("AWARD_GROUP_HEADER", StoreColumnNames.sanitizeColumnName(TournamentSchedule.AWARD_GROUP_HEADER));
+    page.setAttribute("JUDGE_GROUP_HEADER", StoreColumnNames.sanitizeColumnName(TournamentSchedule.JUDGE_GROUP_HEADER));
   }
 
 }
