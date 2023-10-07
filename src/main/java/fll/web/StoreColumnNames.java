@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -40,9 +41,9 @@ public class StoreColumnNames extends BaseFLLServlet {
   public static final String HEADER_ROW_INDEX_KEY = "headerRowIndex";
 
   /**
-   * Session variable that stores a possibly empty {@link Collection} of
-   * {@link String} elements that are the headers. All null and empty headers are
-   * removed.
+   * Session variable that stores a possibly empty {@link List} of
+   * {@link String} elements that are the headers. Indices of this list match the
+   * indices of the data.
    */
   public static final String HEADER_NAMES_KEY = "spreadsheetHeaderNames";
 
@@ -62,7 +63,7 @@ public class StoreColumnNames extends BaseFLLServlet {
     final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
 
     try {
-      final Collection<String> headerNames = extractHeaderNames(file, sheetName, headerRowIndex);
+      final List<String> headerNames = extractHeaderNames(file, sheetName, headerRowIndex);
 
       session.setAttribute(HEADER_NAMES_KEY, headerNames);
 
@@ -86,15 +87,15 @@ public class StoreColumnNames extends BaseFLLServlet {
    * @throws InvalidFormatException if there is an error parsing the spreadsheet
    * @throws IOException if there is an error reading the file
    */
-  public static Collection<String> extractHeaderNames(final Path file,
-                                                      final @Nullable String sheetName,
-                                                      final int headerRowIndex)
+  public static List<String> extractHeaderNames(final Path file,
+                                                final @Nullable String sheetName,
+                                                final int headerRowIndex)
       throws InvalidFormatException, IOException {
     final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
     reader.skipRows(headerRowIndex);
     final @Nullable String @Nullable [] headerRow = reader.readNext();
 
-    final Collection<String> headerNames;
+    final List<String> headerNames;
     if (null == headerRow) {
       headerNames = Collections.emptyList();
     } else {
