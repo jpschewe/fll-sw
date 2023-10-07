@@ -207,11 +207,11 @@ public class ExcelCellReader extends CellFileReader {
       return new String[0];
     }
 
-    final List<@Nullable String> data = new LinkedList<>();
+    final @Nullable String @Nullable [] data = new String[row.getLastCellNum()];
     for (int cellIdx = 0; cellIdx < row.getLastCellNum(); ++cellIdx) {
       final Cell cell = row.getCell(cellIdx, MissingCellPolicy.RETURN_NULL_AND_BLANK);
       if (null == cell) {
-        data.add(null);
+        data[cellIdx] = null;
       } else {
         final String str;
         if (CellType.NUMERIC.equals(cell.getCellType())) {
@@ -232,10 +232,10 @@ public class ExcelCellReader extends CellFileReader {
         } else {
           str = formatter.formatCellValue(cell, formulaEvaluator);
         }
-        data.add(str);
+        data[cellIdx] = str;
       }
     }
-    return data.toArray(new String[data.size()]);
+    return data;
   }
 
   /**
