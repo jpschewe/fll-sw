@@ -563,6 +563,10 @@
           <constant value="1.00"/>
           <goalRef goal="concert_noah" scoreType="raw"/>
         </term>
+        <term>
+          <constant value="1.00"/>
+          <goalRef goal="movie_sam" scoreType="raw"/>
+        </term>
       </test>
     </tiebreaker>
   </Performance>
