@@ -1,3 +1,5 @@
+Release 18.0.0
+==============
 * Automatically select short practice round columns when loading a schedule
 * Allow one to save a modified schedule from the SchedulerUI
 * #1096 - Allow one to optimize tables in groups
