@@ -1,0 +1,3311 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+  
+  
+    <title>Score Entry</title>
+  
+
+
+<!-- is practice true -->
+<link rel="stylesheet" type="text/css" href="Score%20Entry_files/fll-sw.css">
+
+<link rel="stylesheet" type="text/css" href="Score%20Entry_files/scoreEntry.css">
+
+<!-- a couple of things come from the JSP, so need to be inline -->
+<style type="text/css">
+table#top_info {
+    background-color: #e0e0e0;
+
+}
+body {
+    background-color: transparent;
+}
+
+.restriction-error {
+    background-color: red;
+}
+</style>
+    
+<script type="text/javascript" src="Score%20Entry_files/fll-functions.js"></script>
+<script type="text/javascript" src="Score%20Entry_files/fll-objects.js"></script>
+    
+
+
+<script type="text/javascript">
+var EditFlag = false;
+
+
+function init() {
+    document.scoreEntry.m10_sound_mixer_slider.oninput = function() {
+    document.scoreEntry.m10_sound_mixer.innerHTML = this.value;
+    set_m10_sound_mixer(this.value);
+  };
+  document.scoreEntry.cinema_audience_slider.oninput = function() {
+    document.scoreEntry.cinema_audience.innerHTML = this.value;
+    set_cinema_audience(this.value);
+  };
+  document.scoreEntry.theater_audience_slider.oninput = function() {
+    document.scoreEntry.theater_audience.innerHTML = this.value;
+    set_theater_audience(this.value);
+  };
+  document.scoreEntry.skateboard_audience_slider.oninput = function() {
+    document.scoreEntry.skateboard_audience.innerHTML = this.value;
+    set_skateboard_audience(this.value);
+  };
+  document.scoreEntry.museum_audience_slider.oninput = function() {
+    document.scoreEntry.museum_audience.innerHTML = this.value;
+    set_museum_audience(this.value);
+  };
+  document.scoreEntry.audience_concert_slider.oninput = function() {
+    document.scoreEntry.audience_concert.innerHTML = this.value;
+    set_audience_concert(this.value);
+  };
+  document.scoreEntry.audience_movie_slider.oninput = function() {
+    document.scoreEntry.audience_movie.innerHTML = this.value;
+    set_audience_movie(this.value);
+  };
+  document.scoreEntry.audience_lightshow_slider.oninput = function() {
+    document.scoreEntry.audience_lightshow.innerHTML = this.value;
+    set_audience_lightshow(this.value);
+  };
+  document.scoreEntry.gp_score_slider.oninput = function() {
+    document.scoreEntry.gp_score.innerHTML = this.value;
+    set_gp_score(this.value);
+  };
+  m00_one_launch_area_raw = 0.0;
+  m01_cinema_raw = 0.0;
+  m02_scene_change_raw = "zero";
+  m02_b_other_team_scene_change_raw = "zeroother";
+  m03_immersive_screens_up_raw = 0.0;
+  m05_aug_reality_orange_level_raw = 0.0;
+  m06_lights_lever_raw = 0.0;
+  m06_speaker_lever_raw = 0.0;
+  m07_hologram_performer_raw = 0.0;
+  m08_rolling_camera_raw = "zero";
+  m09_Boat_raw = 0.0;
+  m09_camera_raw = 0.0;
+  m10_sound_mixer_raw = 0.0;
+  m11_light_show_pointer_raw = "zero";
+  m_12_chicken_moved_raw = "zero";
+  m13_lid_open_raw = 0.0;
+  m13_pink_latch_down_raw = 0.0;
+  cinema_audience_raw = 0.0;
+  cinema_emily_raw = 0.0;
+  theater_audience_raw = 0.0;
+  skateboard_audience_raw = 0.0;
+  skateboard_izzy_raw = 0.0;
+  museum_audience_raw = 0.0;
+  museum_anna_raw = 0.0;
+  m04_art_piece_in_museum_raw = "no_art";
+  audience_concert_raw = 0.0;
+  concert_noah_raw = 0.0;
+  audience_movie_raw = 0.0;
+  movie_sam_raw = 0.0;
+  audience_lightshow_raw = 0.0;
+  m16_precision_tokens_raw = "five";
+  m16_precision_tokens_raw = "six";
+  gp_score_raw = 3.0;
+  Verified = 0;
+
+
+  refresh();
+  
+  if(document.scoreEntry.totalScore) {
+      /* Saves total score for smarter notification popups */
+    savedTotalScore = document.scoreEntry.totalScore.value;
+  }
+}
+
+function refresh() { 
+  var score = 0;
+
+  // m00_one_launch_area
+if(m00_one_launch_area_raw == 0) {
+  document.scoreEntry.m00_one_launch_area[0].checked = true
+  document.scoreEntry.m00_one_launch_area_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m00_one_launch_area[1].checked = true
+  document.scoreEntry.m00_one_launch_area_radioValue.value = 'YES'
+}
+m00_one_launch_area_computed = m00_one_launch_area_raw * 20.0;
+score += m00_one_launch_area_computed;
+document.scoreEntry.score_m00_one_launch_area.value = m00_one_launch_area_computed;
+
+// m01_cinema
+if(m01_cinema_raw == 0) {
+  document.scoreEntry.m01_cinema[0].checked = true
+  document.scoreEntry.m01_cinema_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m01_cinema[1].checked = true
+  document.scoreEntry.m01_cinema_radioValue.value = 'YES'
+}
+m01_cinema_computed = m01_cinema_raw * 20.0;
+score += m01_cinema_computed;
+document.scoreEntry.score_m01_cinema.value = m01_cinema_computed;
+
+// m02_scene_change
+if(m02_scene_change_raw == "zero") {
+  document.scoreEntry.m02_scene_change[0].checked = true;
+  m02_scene_change_computed = 0.000000 * 1.0;
+  document.scoreEntry.m02_scene_change_radioValue.value = 'ZERO'
+} else if(m02_scene_change_raw == "blue") {
+  document.scoreEntry.m02_scene_change[1].checked = true;
+  m02_scene_change_computed = 10.000000 * 1.0;
+  document.scoreEntry.m02_scene_change_radioValue.value = 'BLUE'
+} else if(m02_scene_change_raw == "pink") {
+  document.scoreEntry.m02_scene_change[2].checked = true;
+  m02_scene_change_computed = 20.000000 * 1.0;
+  document.scoreEntry.m02_scene_change_radioValue.value = 'PINK'
+} else if(m02_scene_change_raw == "orange") {
+  document.scoreEntry.m02_scene_change[3].checked = true;
+  m02_scene_change_computed = 30.000000 * 1.0;
+  document.scoreEntry.m02_scene_change_radioValue.value = 'ORANGE'
+}
+score += m02_scene_change_computed;
+document.scoreEntry.score_m02_scene_change.value = m02_scene_change_computed;
+
+// m02_b_other_team_scene_change
+if(m02_b_other_team_scene_change_raw == "blueother") {
+  document.scoreEntry.m02_b_other_team_scene_change[0].checked = true;
+  m02_b_other_team_scene_change_computed = 0.000000 * 1.0;
+  document.scoreEntry.m02_b_other_team_scene_change_radioValue.value = 'BLUEOTHER'
+} else if(m02_b_other_team_scene_change_raw == "orangeother") {
+  document.scoreEntry.m02_b_other_team_scene_change[1].checked = true;
+  m02_b_other_team_scene_change_computed = 1.000000 * 1.0;
+  document.scoreEntry.m02_b_other_team_scene_change_radioValue.value = 'ORANGEOTHER'
+} else if(m02_b_other_team_scene_change_raw == "pinkother") {
+  document.scoreEntry.m02_b_other_team_scene_change[2].checked = true;
+  m02_b_other_team_scene_change_computed = 2.000000 * 1.0;
+  document.scoreEntry.m02_b_other_team_scene_change_radioValue.value = 'PINKOTHER'
+} else if(m02_b_other_team_scene_change_raw == "zeroother") {
+  document.scoreEntry.m02_b_other_team_scene_change[3].checked = true;
+  m02_b_other_team_scene_change_computed = 3.000000 * 1.0;
+  document.scoreEntry.m02_b_other_team_scene_change_radioValue.value = 'ZEROOTHER'
+}
+score += m02_b_other_team_scene_change_computed;
+document.scoreEntry.score_m02_b_other_team_scene_change.value = m02_b_other_team_scene_change_computed;
+
+compute_computer_other_theater_color();
+score += computer_other_theater_color_computed;
+
+// m03_immersive_screens_up
+if(m03_immersive_screens_up_raw == 0) {
+  document.scoreEntry.m03_immersive_screens_up[0].checked = true
+  document.scoreEntry.m03_immersive_screens_up_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m03_immersive_screens_up[1].checked = true
+  document.scoreEntry.m03_immersive_screens_up_radioValue.value = 'YES'
+}
+m03_immersive_screens_up_computed = m03_immersive_screens_up_raw * 20.0;
+score += m03_immersive_screens_up_computed;
+document.scoreEntry.score_m03_immersive_screens_up.value = m03_immersive_screens_up_computed;
+
+// m05_aug_reality_orange_level
+if(m05_aug_reality_orange_level_raw == 0) {
+  document.scoreEntry.m05_aug_reality_orange_level[0].checked = true
+  document.scoreEntry.m05_aug_reality_orange_level_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m05_aug_reality_orange_level[1].checked = true
+  document.scoreEntry.m05_aug_reality_orange_level_radioValue.value = 'YES'
+}
+m05_aug_reality_orange_level_computed = m05_aug_reality_orange_level_raw * 30.0;
+score += m05_aug_reality_orange_level_computed;
+document.scoreEntry.score_m05_aug_reality_orange_level.value = m05_aug_reality_orange_level_computed;
+
+// m06_lights_lever
+if(m06_lights_lever_raw == 0) {
+  document.scoreEntry.m06_lights_lever[0].checked = true
+  document.scoreEntry.m06_lights_lever_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m06_lights_lever[1].checked = true
+  document.scoreEntry.m06_lights_lever_radioValue.value = 'YES'
+}
+m06_lights_lever_computed = m06_lights_lever_raw * 10.0;
+score += m06_lights_lever_computed;
+document.scoreEntry.score_m06_lights_lever.value = m06_lights_lever_computed;
+
+// m06_speaker_lever
+if(m06_speaker_lever_raw == 0) {
+  document.scoreEntry.m06_speaker_lever[0].checked = true
+  document.scoreEntry.m06_speaker_lever_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m06_speaker_lever[1].checked = true
+  document.scoreEntry.m06_speaker_lever_radioValue.value = 'YES'
+}
+m06_speaker_lever_computed = m06_speaker_lever_raw * 10.0;
+score += m06_speaker_lever_computed;
+document.scoreEntry.score_m06_speaker_lever.value = m06_speaker_lever_computed;
+
+// m07_hologram_performer
+if(m07_hologram_performer_raw == 0) {
+  document.scoreEntry.m07_hologram_performer[0].checked = true
+  document.scoreEntry.m07_hologram_performer_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m07_hologram_performer[1].checked = true
+  document.scoreEntry.m07_hologram_performer_radioValue.value = 'YES'
+}
+m07_hologram_performer_computed = m07_hologram_performer_raw * 20.0;
+score += m07_hologram_performer_computed;
+document.scoreEntry.score_m07_hologram_performer.value = m07_hologram_performer_computed;
+
+// m08_rolling_camera
+if(m08_rolling_camera_raw == "zero") {
+  document.scoreEntry.m08_rolling_camera[0].checked = true;
+  m08_rolling_camera_computed = 0.000000 * 1.0;
+  document.scoreEntry.m08_rolling_camera_radioValue.value = 'ZERO'
+} else if(m08_rolling_camera_raw == "left_dark_blue") {
+  document.scoreEntry.m08_rolling_camera[1].checked = true;
+  m08_rolling_camera_computed = 10.000000 * 1.0;
+  document.scoreEntry.m08_rolling_camera_radioValue.value = 'LEFT_DARK_BLUE'
+} else if(m08_rolling_camera_raw == "left_dark_med_blue") {
+  document.scoreEntry.m08_rolling_camera[2].checked = true;
+  m08_rolling_camera_computed = 20.000000 * 1.0;
+  document.scoreEntry.m08_rolling_camera_radioValue.value = 'LEFT_DARK_MED_BLUE'
+} else if(m08_rolling_camera_raw == "left_dark_med_light_blue") {
+  document.scoreEntry.m08_rolling_camera[3].checked = true;
+  m08_rolling_camera_computed = 30.000000 * 1.0;
+  document.scoreEntry.m08_rolling_camera_radioValue.value = 'LEFT_DARK_MED_LIGHT_BLUE'
+}
+score += m08_rolling_camera_computed;
+document.scoreEntry.score_m08_rolling_camera.value = m08_rolling_camera_computed;
+
+// m09_Boat
+if(m09_Boat_raw == 0) {
+  document.scoreEntry.m09_Boat[0].checked = true
+  document.scoreEntry.m09_Boat_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m09_Boat[1].checked = true
+  document.scoreEntry.m09_Boat_radioValue.value = 'YES'
+}
+m09_Boat_computed = m09_Boat_raw * 10.0;
+score += m09_Boat_computed;
+document.scoreEntry.score_m09_Boat.value = m09_Boat_computed;
+
+// m09_camera
+if(m09_camera_raw == 0) {
+  document.scoreEntry.m09_camera[0].checked = true
+  document.scoreEntry.m09_camera_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m09_camera[1].checked = true
+  document.scoreEntry.m09_camera_radioValue.value = 'YES'
+}
+m09_camera_computed = m09_camera_raw * 10.0;
+score += m09_camera_computed;
+document.scoreEntry.score_m09_camera.value = m09_camera_computed;
+
+// m10_sound_mixer
+document.scoreEntry.m10_sound_mixer.value = m10_sound_mixer_raw;
+m10_sound_mixer_computed = m10_sound_mixer_raw * 10.0;
+document.scoreEntry.m10_sound_mixer_slider.value = m10_sound_mixer_raw;
+score += m10_sound_mixer_computed;
+document.scoreEntry.score_m10_sound_mixer.value = m10_sound_mixer_computed;
+
+// m11_light_show_pointer
+if(m11_light_show_pointer_raw == "zero") {
+  document.scoreEntry.m11_light_show_pointer[0].checked = true;
+  m11_light_show_pointer_computed = 0.000000 * 1.0;
+  document.scoreEntry.m11_light_show_pointer_radioValue.value = 'ZERO'
+} else if(m11_light_show_pointer_raw == "yellow") {
+  document.scoreEntry.m11_light_show_pointer[1].checked = true;
+  m11_light_show_pointer_computed = 10.000000 * 1.0;
+  document.scoreEntry.m11_light_show_pointer_radioValue.value = 'YELLOW'
+} else if(m11_light_show_pointer_raw == "green") {
+  document.scoreEntry.m11_light_show_pointer[2].checked = true;
+  m11_light_show_pointer_computed = 20.000000 * 1.0;
+  document.scoreEntry.m11_light_show_pointer_radioValue.value = 'GREEN'
+} else if(m11_light_show_pointer_raw == "blue") {
+  document.scoreEntry.m11_light_show_pointer[3].checked = true;
+  m11_light_show_pointer_computed = 30.000000 * 1.0;
+  document.scoreEntry.m11_light_show_pointer_radioValue.value = 'BLUE'
+}
+score += m11_light_show_pointer_computed;
+document.scoreEntry.score_m11_light_show_pointer.value = m11_light_show_pointer_computed;
+
+// m_12_chicken_moved
+if(m_12_chicken_moved_raw == "zero") {
+  document.scoreEntry.m_12_chicken_moved[0].checked = true;
+  m_12_chicken_moved_computed = 0.000000 * 1.0;
+  document.scoreEntry.m_12_chicken_moved_radioValue.value = 'ZERO'
+} else if(m_12_chicken_moved_raw == "ten") {
+  document.scoreEntry.m_12_chicken_moved[1].checked = true;
+  m_12_chicken_moved_computed = 10.000000 * 1.0;
+  document.scoreEntry.m_12_chicken_moved_radioValue.value = 'TEN'
+} else if(m_12_chicken_moved_raw == "bonus") {
+  document.scoreEntry.m_12_chicken_moved[2].checked = true;
+  m_12_chicken_moved_computed = 30.000000 * 1.0;
+  document.scoreEntry.m_12_chicken_moved_radioValue.value = 'BONUS'
+}
+score += m_12_chicken_moved_computed;
+document.scoreEntry.score_m_12_chicken_moved.value = m_12_chicken_moved_computed;
+
+// m13_lid_open
+if(m13_lid_open_raw == 0) {
+  document.scoreEntry.m13_lid_open[0].checked = true
+  document.scoreEntry.m13_lid_open_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m13_lid_open[1].checked = true
+  document.scoreEntry.m13_lid_open_radioValue.value = 'YES'
+}
+m13_lid_open_computed = m13_lid_open_raw * 10.0;
+score += m13_lid_open_computed;
+document.scoreEntry.score_m13_lid_open.value = m13_lid_open_computed;
+
+// m13_pink_latch_down
+if(m13_pink_latch_down_raw == 0) {
+  document.scoreEntry.m13_pink_latch_down[0].checked = true
+  document.scoreEntry.m13_pink_latch_down_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m13_pink_latch_down[1].checked = true
+  document.scoreEntry.m13_pink_latch_down_radioValue.value = 'YES'
+}
+m13_pink_latch_down_computed = m13_pink_latch_down_raw * 20.0;
+score += m13_pink_latch_down_computed;
+document.scoreEntry.score_m13_pink_latch_down.value = m13_pink_latch_down_computed;
+
+// cinema_audience
+document.scoreEntry.cinema_audience.value = cinema_audience_raw;
+cinema_audience_computed = cinema_audience_raw * 5.0;
+document.scoreEntry.cinema_audience_slider.value = cinema_audience_raw;
+score += cinema_audience_computed;
+document.scoreEntry.score_cinema_audience.value = cinema_audience_computed;
+
+// cinema_emily
+if(cinema_emily_raw == 0) {
+  document.scoreEntry.cinema_emily[0].checked = true
+  document.scoreEntry.cinema_emily_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.cinema_emily[1].checked = true
+  document.scoreEntry.cinema_emily_radioValue.value = 'YES'
+}
+cinema_emily_computed = cinema_emily_raw * 10.0;
+score += cinema_emily_computed;
+document.scoreEntry.score_cinema_emily.value = cinema_emily_computed;
+
+// theater_audience
+document.scoreEntry.theater_audience.value = theater_audience_raw;
+theater_audience_computed = theater_audience_raw * 5.0;
+document.scoreEntry.theater_audience_slider.value = theater_audience_raw;
+score += theater_audience_computed;
+document.scoreEntry.score_theater_audience.value = theater_audience_computed;
+
+// skateboard_audience
+document.scoreEntry.skateboard_audience.value = skateboard_audience_raw;
+skateboard_audience_computed = skateboard_audience_raw * 5.0;
+document.scoreEntry.skateboard_audience_slider.value = skateboard_audience_raw;
+score += skateboard_audience_computed;
+document.scoreEntry.score_skateboard_audience.value = skateboard_audience_computed;
+
+// skateboard_izzy
+if(skateboard_izzy_raw == 0) {
+  document.scoreEntry.skateboard_izzy[0].checked = true
+  document.scoreEntry.skateboard_izzy_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.skateboard_izzy[1].checked = true
+  document.scoreEntry.skateboard_izzy_radioValue.value = 'YES'
+}
+skateboard_izzy_computed = skateboard_izzy_raw * 10.0;
+score += skateboard_izzy_computed;
+document.scoreEntry.score_skateboard_izzy.value = skateboard_izzy_computed;
+
+// museum_audience
+document.scoreEntry.museum_audience.value = museum_audience_raw;
+museum_audience_computed = museum_audience_raw * 5.0;
+document.scoreEntry.museum_audience_slider.value = museum_audience_raw;
+score += museum_audience_computed;
+document.scoreEntry.score_museum_audience.value = museum_audience_computed;
+
+// museum_anna
+if(museum_anna_raw == 0) {
+  document.scoreEntry.museum_anna[0].checked = true
+  document.scoreEntry.museum_anna_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.museum_anna[1].checked = true
+  document.scoreEntry.museum_anna_radioValue.value = 'YES'
+}
+museum_anna_computed = museum_anna_raw * 10.0;
+score += museum_anna_computed;
+document.scoreEntry.score_museum_anna.value = museum_anna_computed;
+
+// m04_art_piece_in_museum
+if(m04_art_piece_in_museum_raw == "no_art") {
+  document.scoreEntry.m04_art_piece_in_museum[0].checked = true;
+  m04_art_piece_in_museum_computed = 0.000000 * 1.0;
+  document.scoreEntry.m04_art_piece_in_museum_radioValue.value = 'NO_ART'
+} else if(m04_art_piece_in_museum_raw == "partly_in") {
+  document.scoreEntry.m04_art_piece_in_museum[1].checked = true;
+  m04_art_piece_in_museum_computed = 10.000000 * 1.0;
+  document.scoreEntry.m04_art_piece_in_museum_radioValue.value = 'PARTLY_IN'
+} else if(m04_art_piece_in_museum_raw == "supported") {
+  document.scoreEntry.m04_art_piece_in_museum[2].checked = true;
+  m04_art_piece_in_museum_computed = 30.000000 * 1.0;
+  document.scoreEntry.m04_art_piece_in_museum_radioValue.value = 'SUPPORTED'
+}
+score += m04_art_piece_in_museum_computed;
+document.scoreEntry.score_m04_art_piece_in_museum.value = m04_art_piece_in_museum_computed;
+
+// audience_concert
+document.scoreEntry.audience_concert.value = audience_concert_raw;
+audience_concert_computed = audience_concert_raw * 5.0;
+document.scoreEntry.audience_concert_slider.value = audience_concert_raw;
+score += audience_concert_computed;
+document.scoreEntry.score_audience_concert.value = audience_concert_computed;
+
+// concert_noah
+if(concert_noah_raw == 0) {
+  document.scoreEntry.concert_noah[0].checked = true
+  document.scoreEntry.concert_noah_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.concert_noah[1].checked = true
+  document.scoreEntry.concert_noah_radioValue.value = 'YES'
+}
+concert_noah_computed = concert_noah_raw * 10.0;
+score += concert_noah_computed;
+document.scoreEntry.score_concert_noah.value = concert_noah_computed;
+
+// audience_movie
+document.scoreEntry.audience_movie.value = audience_movie_raw;
+audience_movie_computed = audience_movie_raw * 5.0;
+document.scoreEntry.audience_movie_slider.value = audience_movie_raw;
+score += audience_movie_computed;
+document.scoreEntry.score_audience_movie.value = audience_movie_computed;
+
+// movie_sam
+if(movie_sam_raw == 0) {
+  document.scoreEntry.movie_sam[0].checked = true
+  document.scoreEntry.movie_sam_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.movie_sam[1].checked = true
+  document.scoreEntry.movie_sam_radioValue.value = 'YES'
+}
+movie_sam_computed = movie_sam_raw * 10.0;
+score += movie_sam_computed;
+document.scoreEntry.score_movie_sam.value = movie_sam_computed;
+
+// audience_lightshow
+document.scoreEntry.audience_lightshow.value = audience_lightshow_raw;
+audience_lightshow_computed = audience_lightshow_raw * 5.0;
+document.scoreEntry.audience_lightshow_slider.value = audience_lightshow_raw;
+score += audience_lightshow_computed;
+document.scoreEntry.score_audience_lightshow.value = audience_lightshow_computed;
+
+// m16_precision_tokens
+if(m16_precision_tokens_raw == "zero") {
+  document.scoreEntry.m16_precision_tokens[0].checked = true;
+  m16_precision_tokens_computed = 0.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'ZERO'
+} else if(m16_precision_tokens_raw == "one") {
+  document.scoreEntry.m16_precision_tokens[1].checked = true;
+  m16_precision_tokens_computed = 10.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'ONE'
+} else if(m16_precision_tokens_raw == "two") {
+  document.scoreEntry.m16_precision_tokens[2].checked = true;
+  m16_precision_tokens_computed = 15.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'TWO'
+} else if(m16_precision_tokens_raw == "three") {
+  document.scoreEntry.m16_precision_tokens[3].checked = true;
+  m16_precision_tokens_computed = 25.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'THREE'
+} else if(m16_precision_tokens_raw == "four") {
+  document.scoreEntry.m16_precision_tokens[4].checked = true;
+  m16_precision_tokens_computed = 35.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'FOUR'
+} else if(m16_precision_tokens_raw == "five") {
+  document.scoreEntry.m16_precision_tokens[5].checked = true;
+  m16_precision_tokens_computed = 50.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'FIVE'
+} else if(m16_precision_tokens_raw == "six") {
+  document.scoreEntry.m16_precision_tokens[6].checked = true;
+  m16_precision_tokens_computed = 50.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'SIX'
+}
+score += m16_precision_tokens_computed;
+document.scoreEntry.score_m16_precision_tokens.value = m16_precision_tokens_computed;
+
+// gp_score
+document.scoreEntry.gp_score.value = gp_score_raw;
+gp_score_computed = gp_score_raw * 0.0;
+document.scoreEntry.gp_score_slider.value = gp_score_raw;
+score += gp_score_computed;
+document.scoreEntry.score_gp_score.value = gp_score_computed;
+
+compute_count_cinema();
+score += count_cinema_computed;
+
+compute_count_audience_theater();
+score += count_audience_theater_computed;
+
+compute_count_audience_skateboard();
+score += count_audience_skateboard_computed;
+
+compute_count_audience_museum();
+score += count_audience_museum_computed;
+
+compute_count_audience_music();
+score += count_audience_music_computed;
+
+compute_count_audience_movie_set();
+score += count_audience_movie_set_computed;
+
+compute_count_audience_light_show();
+score += count_audience_light_show_computed;
+
+if(Verified == 0) {
+  document.scoreEntry.Verified[0].checked = true
+} else {
+  document.scoreEntry.Verified[1].checked = true
+}
+
+
+  //check for minimum total score
+  if(score < 0.0) {
+    score = 0.0;
+  }
+
+  if(document.scoreEntry.totalScore) {
+    document.scoreEntry.totalScore.value = score;
+  }
+
+  check_restrictions();
+}
+
+function check_restrictions() {
+  var error_found = false;
+  removeChildren(document.getElementById("score-errors"));
+  
+  var m00_one_launch_area_error = false;
+  var m01_cinema_error = false;
+  var m02_scene_change_error = false;
+  var m02_b_other_team_scene_change_error = false;
+  var m03_immersive_screens_up_error = false;
+  var m05_aug_reality_orange_level_error = false;
+  var m06_lights_lever_error = false;
+  var m06_speaker_lever_error = false;
+  var m07_hologram_performer_error = false;
+  var m08_rolling_camera_error = false;
+  var m09_Boat_error = false;
+  var m09_camera_error = false;
+  var m10_sound_mixer_error = false;
+  var m11_light_show_pointer_error = false;
+  var m_12_chicken_moved_error = false;
+  var m13_lid_open_error = false;
+  var m13_pink_latch_down_error = false;
+  var cinema_audience_error = false;
+  var cinema_emily_error = false;
+  var theater_audience_error = false;
+  var skateboard_audience_error = false;
+  var skateboard_izzy_error = false;
+  var museum_audience_error = false;
+  var museum_anna_error = false;
+  var m04_art_piece_in_museum_error = false;
+  var audience_concert_error = false;
+  var concert_noah_error = false;
+  var audience_movie_error = false;
+  var movie_sam_error = false;
+  var audience_lightshow_error = false;
+  var m16_precision_tokens_error = false;
+  var gp_score_error = false;
+  var restriction_0_value = parseInt(1.000000* cinema_audience_raw + 1.000000* theater_audience_raw + 1.000000* skateboard_audience_raw + 1.000000* museum_audience_raw + 1.000000* audience_concert_raw + 1.000000* audience_movie_raw + 1.000000* audience_lightshow_raw);
+  if(restriction_0_value > 7.000000 || restriction_0_value < -1.000000) {
+    const restriction_0_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_0_error);
+    restriction_0_error.innerText = "Too Many Audience Members";
+    error_found = true;
+    cinema_audience_error = true;
+    theater_audience_error = true;
+    skateboard_audience_error = true;
+    museum_audience_error = true;
+    audience_concert_error = true;
+    audience_movie_error = true;
+    audience_lightshow_error = true;
+  }
+if(m00_one_launch_area_error) {
+  const ele = document.getElementById("m00_one_launch_area_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m00_one_launch_area_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m01_cinema_error) {
+  const ele = document.getElementById("m01_cinema_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m01_cinema_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m02_scene_change_error) {
+  const ele = document.getElementById("m02_scene_change_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m02_scene_change_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m02_b_other_team_scene_change_error) {
+  const ele = document.getElementById("m02_b_other_team_scene_change_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m02_b_other_team_scene_change_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m03_immersive_screens_up_error) {
+  const ele = document.getElementById("m03_immersive_screens_up_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m03_immersive_screens_up_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m05_aug_reality_orange_level_error) {
+  const ele = document.getElementById("m05_aug_reality_orange_level_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m05_aug_reality_orange_level_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m06_lights_lever_error) {
+  const ele = document.getElementById("m06_lights_lever_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m06_lights_lever_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m06_speaker_lever_error) {
+  const ele = document.getElementById("m06_speaker_lever_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m06_speaker_lever_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m07_hologram_performer_error) {
+  const ele = document.getElementById("m07_hologram_performer_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m07_hologram_performer_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m08_rolling_camera_error) {
+  const ele = document.getElementById("m08_rolling_camera_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m08_rolling_camera_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m09_Boat_error) {
+  const ele = document.getElementById("m09_Boat_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m09_Boat_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m09_camera_error) {
+  const ele = document.getElementById("m09_camera_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m09_camera_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m10_sound_mixer_error) {
+  const ele = document.getElementById("m10_sound_mixer_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m10_sound_mixer_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m11_light_show_pointer_error) {
+  const ele = document.getElementById("m11_light_show_pointer_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m11_light_show_pointer_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m_12_chicken_moved_error) {
+  const ele = document.getElementById("m_12_chicken_moved_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m_12_chicken_moved_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m13_lid_open_error) {
+  const ele = document.getElementById("m13_lid_open_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m13_lid_open_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m13_pink_latch_down_error) {
+  const ele = document.getElementById("m13_pink_latch_down_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m13_pink_latch_down_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(cinema_audience_error) {
+  const ele = document.getElementById("cinema_audience_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("cinema_audience_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(cinema_emily_error) {
+  const ele = document.getElementById("cinema_emily_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("cinema_emily_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(theater_audience_error) {
+  const ele = document.getElementById("theater_audience_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("theater_audience_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(skateboard_audience_error) {
+  const ele = document.getElementById("skateboard_audience_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("skateboard_audience_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(skateboard_izzy_error) {
+  const ele = document.getElementById("skateboard_izzy_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("skateboard_izzy_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(museum_audience_error) {
+  const ele = document.getElementById("museum_audience_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("museum_audience_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(museum_anna_error) {
+  const ele = document.getElementById("museum_anna_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("museum_anna_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m04_art_piece_in_museum_error) {
+  const ele = document.getElementById("m04_art_piece_in_museum_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m04_art_piece_in_museum_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(audience_concert_error) {
+  const ele = document.getElementById("audience_concert_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("audience_concert_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(concert_noah_error) {
+  const ele = document.getElementById("concert_noah_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("concert_noah_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(audience_movie_error) {
+  const ele = document.getElementById("audience_movie_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("audience_movie_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(movie_sam_error) {
+  const ele = document.getElementById("movie_sam_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("movie_sam_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(audience_lightshow_error) {
+  const ele = document.getElementById("audience_lightshow_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("audience_lightshow_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m16_precision_tokens_error) {
+  const ele = document.getElementById("m16_precision_tokens_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m16_precision_tokens_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(gp_score_error) {
+  const ele = document.getElementById("gp_score_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("gp_score_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+
+
+  const submitScoreButton = document.getElementById("submit_score")
+  if(error_found) {
+    if(submitScoreButton) {
+      submitScoreButton.disabled = true;
+    }
+    document.getElementById("score-errors").classList.remove("fll-sw-ui-inactive");
+  } else {
+    if(submitScoreButton) {
+      submitScoreButton.disabled = false;
+    }
+    document.getElementById("score-errors").classList.add("fll-sw-ui-inactive");
+  }
+}
+
+function isConsistent() {
+  //m00_one_launch_area
+  if(m00_one_launch_area_raw < 0.0 || m00_one_launch_area_raw > 1.0) {
+    return false;
+  }
+
+  //m01_cinema
+  if(m01_cinema_raw < 0.0 || m01_cinema_raw > 1.0) {
+    return false;
+  }
+
+  //m02_scene_change
+   // nothing to check
+
+  //m02_b_other_team_scene_change
+   // nothing to check
+
+  //m03_immersive_screens_up
+  if(m03_immersive_screens_up_raw < 0.0 || m03_immersive_screens_up_raw > 1.0) {
+    return false;
+  }
+
+  //m05_aug_reality_orange_level
+  if(m05_aug_reality_orange_level_raw < 0.0 || m05_aug_reality_orange_level_raw > 1.0) {
+    return false;
+  }
+
+  //m06_lights_lever
+  if(m06_lights_lever_raw < 0.0 || m06_lights_lever_raw > 1.0) {
+    return false;
+  }
+
+  //m06_speaker_lever
+  if(m06_speaker_lever_raw < 0.0 || m06_speaker_lever_raw > 1.0) {
+    return false;
+  }
+
+  //m07_hologram_performer
+  if(m07_hologram_performer_raw < 0.0 || m07_hologram_performer_raw > 1.0) {
+    return false;
+  }
+
+  //m08_rolling_camera
+   // nothing to check
+
+  //m09_Boat
+  if(m09_Boat_raw < 0.0 || m09_Boat_raw > 1.0) {
+    return false;
+  }
+
+  //m09_camera
+  if(m09_camera_raw < 0.0 || m09_camera_raw > 1.0) {
+    return false;
+  }
+
+  //m10_sound_mixer
+  if(m10_sound_mixer_raw < 0.0 || m10_sound_mixer_raw > 3.0) {
+    return false;
+  }
+
+  //m11_light_show_pointer
+   // nothing to check
+
+  //m_12_chicken_moved
+   // nothing to check
+
+  //m13_lid_open
+  if(m13_lid_open_raw < 0.0 || m13_lid_open_raw > 1.0) {
+    return false;
+  }
+
+  //m13_pink_latch_down
+  if(m13_pink_latch_down_raw < 0.0 || m13_pink_latch_down_raw > 1.0) {
+    return false;
+  }
+
+  //cinema_audience
+  if(cinema_audience_raw < 0.0 || cinema_audience_raw > 7.0) {
+    return false;
+  }
+
+  //cinema_emily
+  if(cinema_emily_raw < 0.0 || cinema_emily_raw > 1.0) {
+    return false;
+  }
+
+  //theater_audience
+  if(theater_audience_raw < 0.0 || theater_audience_raw > 7.0) {
+    return false;
+  }
+
+  //skateboard_audience
+  if(skateboard_audience_raw < 0.0 || skateboard_audience_raw > 7.0) {
+    return false;
+  }
+
+  //skateboard_izzy
+  if(skateboard_izzy_raw < 0.0 || skateboard_izzy_raw > 1.0) {
+    return false;
+  }
+
+  //museum_audience
+  if(museum_audience_raw < 0.0 || museum_audience_raw > 7.0) {
+    return false;
+  }
+
+  //museum_anna
+  if(museum_anna_raw < 0.0 || museum_anna_raw > 1.0) {
+    return false;
+  }
+
+  //m04_art_piece_in_museum
+   // nothing to check
+
+  //audience_concert
+  if(audience_concert_raw < 0.0 || audience_concert_raw > 7.0) {
+    return false;
+  }
+
+  //concert_noah
+  if(concert_noah_raw < 0.0 || concert_noah_raw > 1.0) {
+    return false;
+  }
+
+  //audience_movie
+  if(audience_movie_raw < 0.0 || audience_movie_raw > 7.0) {
+    return false;
+  }
+
+  //movie_sam
+  if(movie_sam_raw < 0.0 || movie_sam_raw > 1.0) {
+    return false;
+  }
+
+  //audience_lightshow
+  if(audience_lightshow_raw < 0.0 || audience_lightshow_raw > 7.0) {
+    return false;
+  }
+
+  //m16_precision_tokens
+   // nothing to check
+
+  //gp_score
+  if(gp_score_raw < 2.0 || gp_score_raw > 4.0) {
+    return false;
+  }
+
+  return true;
+}
+
+
+// m00_one_launch_area
+var m00_one_launch_area_raw;
+var m00_one_launch_area_computed;
+function set_m00_one_launch_area(newValue) {
+  var temp = m00_one_launch_area_raw;
+  m00_one_launch_area_raw = newValue;
+  if(!isConsistent()) {
+    m00_one_launch_area_raw = temp;
+  }
+  refresh();
+}
+function check_m00_one_launch_area() {
+  var str = document.scoreEntry.m00_one_launch_area.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m00_one_launch_area(num);
+  }
+  refresh();
+}
+
+
+// m01_cinema
+var m01_cinema_raw;
+var m01_cinema_computed;
+function set_m01_cinema(newValue) {
+  var temp = m01_cinema_raw;
+  m01_cinema_raw = newValue;
+  if(!isConsistent()) {
+    m01_cinema_raw = temp;
+  }
+  refresh();
+}
+function check_m01_cinema() {
+  var str = document.scoreEntry.m01_cinema.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m01_cinema(num);
+  }
+  refresh();
+}
+
+
+// m02_scene_change
+var m02_scene_change_raw;
+var m02_scene_change_computed;
+function set_m02_scene_change(newValue) {
+  var temp = m02_scene_change_raw;
+  m02_scene_change_raw = newValue;
+  if(!isConsistent()) {
+    m02_scene_change_raw = temp;
+  }
+  refresh();
+}
+function check_m02_scene_change() {
+  var str = document.scoreEntry.m02_scene_change.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m02_scene_change(num);
+  }
+  refresh();
+}
+
+
+// m02_b_other_team_scene_change
+var m02_b_other_team_scene_change_raw;
+var m02_b_other_team_scene_change_computed;
+function set_m02_b_other_team_scene_change(newValue) {
+  var temp = m02_b_other_team_scene_change_raw;
+  m02_b_other_team_scene_change_raw = newValue;
+  if(!isConsistent()) {
+    m02_b_other_team_scene_change_raw = temp;
+  }
+  refresh();
+}
+function check_m02_b_other_team_scene_change() {
+  var str = document.scoreEntry.m02_b_other_team_scene_change.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m02_b_other_team_scene_change(num);
+  }
+  refresh();
+}
+
+
+// computer_other_theater_color
+var computer_other_theater_color_computed;
+function compute_computer_other_theater_color() {
+  if(m02_scene_change_raw == 'orange') {
+    if(m02_b_other_team_scene_change_raw == 'orangeother') {
+      computer_other_theater_color_computed = parseInt(10.000000);
+    } else {
+      computer_other_theater_color_computed = parseInt(0.000000);
+    }
+  } else if(m02_scene_change_raw == 'blue') {
+    if(m02_b_other_team_scene_change_raw == 'blueother') {
+      computer_other_theater_color_computed = parseInt(20.000000);
+    } else {
+      computer_other_theater_color_computed = parseInt(0.000000);
+    }
+  } else if(m02_scene_change_raw == 'pink') {
+    if(m02_b_other_team_scene_change_raw == 'pinkother') {
+      computer_other_theater_color_computed = parseInt(30.000000);
+    } else {
+      computer_other_theater_color_computed = parseInt(0.000000);
+    }
+  } else {
+    computer_other_theater_color_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_computer_other_theater_color.value = computer_other_theater_color_computed;
+}
+// m03_immersive_screens_up
+var m03_immersive_screens_up_raw;
+var m03_immersive_screens_up_computed;
+function set_m03_immersive_screens_up(newValue) {
+  var temp = m03_immersive_screens_up_raw;
+  m03_immersive_screens_up_raw = newValue;
+  if(!isConsistent()) {
+    m03_immersive_screens_up_raw = temp;
+  }
+  refresh();
+}
+function check_m03_immersive_screens_up() {
+  var str = document.scoreEntry.m03_immersive_screens_up.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m03_immersive_screens_up(num);
+  }
+  refresh();
+}
+
+
+// m05_aug_reality_orange_level
+var m05_aug_reality_orange_level_raw;
+var m05_aug_reality_orange_level_computed;
+function set_m05_aug_reality_orange_level(newValue) {
+  var temp = m05_aug_reality_orange_level_raw;
+  m05_aug_reality_orange_level_raw = newValue;
+  if(!isConsistent()) {
+    m05_aug_reality_orange_level_raw = temp;
+  }
+  refresh();
+}
+function check_m05_aug_reality_orange_level() {
+  var str = document.scoreEntry.m05_aug_reality_orange_level.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m05_aug_reality_orange_level(num);
+  }
+  refresh();
+}
+
+
+// m06_lights_lever
+var m06_lights_lever_raw;
+var m06_lights_lever_computed;
+function set_m06_lights_lever(newValue) {
+  var temp = m06_lights_lever_raw;
+  m06_lights_lever_raw = newValue;
+  if(!isConsistent()) {
+    m06_lights_lever_raw = temp;
+  }
+  refresh();
+}
+function check_m06_lights_lever() {
+  var str = document.scoreEntry.m06_lights_lever.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m06_lights_lever(num);
+  }
+  refresh();
+}
+
+
+// m06_speaker_lever
+var m06_speaker_lever_raw;
+var m06_speaker_lever_computed;
+function set_m06_speaker_lever(newValue) {
+  var temp = m06_speaker_lever_raw;
+  m06_speaker_lever_raw = newValue;
+  if(!isConsistent()) {
+    m06_speaker_lever_raw = temp;
+  }
+  refresh();
+}
+function check_m06_speaker_lever() {
+  var str = document.scoreEntry.m06_speaker_lever.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m06_speaker_lever(num);
+  }
+  refresh();
+}
+
+
+// m07_hologram_performer
+var m07_hologram_performer_raw;
+var m07_hologram_performer_computed;
+function set_m07_hologram_performer(newValue) {
+  var temp = m07_hologram_performer_raw;
+  m07_hologram_performer_raw = newValue;
+  if(!isConsistent()) {
+    m07_hologram_performer_raw = temp;
+  }
+  refresh();
+}
+function check_m07_hologram_performer() {
+  var str = document.scoreEntry.m07_hologram_performer.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m07_hologram_performer(num);
+  }
+  refresh();
+}
+
+
+// m08_rolling_camera
+var m08_rolling_camera_raw;
+var m08_rolling_camera_computed;
+function set_m08_rolling_camera(newValue) {
+  var temp = m08_rolling_camera_raw;
+  m08_rolling_camera_raw = newValue;
+  if(!isConsistent()) {
+    m08_rolling_camera_raw = temp;
+  }
+  refresh();
+}
+function check_m08_rolling_camera() {
+  var str = document.scoreEntry.m08_rolling_camera.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m08_rolling_camera(num);
+  }
+  refresh();
+}
+
+
+// m09_Boat
+var m09_Boat_raw;
+var m09_Boat_computed;
+function set_m09_Boat(newValue) {
+  var temp = m09_Boat_raw;
+  m09_Boat_raw = newValue;
+  if(!isConsistent()) {
+    m09_Boat_raw = temp;
+  }
+  refresh();
+}
+function check_m09_Boat() {
+  var str = document.scoreEntry.m09_Boat.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m09_Boat(num);
+  }
+  refresh();
+}
+
+
+// m09_camera
+var m09_camera_raw;
+var m09_camera_computed;
+function set_m09_camera(newValue) {
+  var temp = m09_camera_raw;
+  m09_camera_raw = newValue;
+  if(!isConsistent()) {
+    m09_camera_raw = temp;
+  }
+  refresh();
+}
+function check_m09_camera() {
+  var str = document.scoreEntry.m09_camera.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m09_camera(num);
+  }
+  refresh();
+}
+
+
+// m10_sound_mixer
+var m10_sound_mixer_raw;
+var m10_sound_mixer_computed;
+function set_m10_sound_mixer(newValue) {
+  var temp = m10_sound_mixer_raw;
+  m10_sound_mixer_raw = newValue;
+  if(!isConsistent()) {
+    m10_sound_mixer_raw = temp;
+  }
+  refresh();
+}
+function check_m10_sound_mixer() {
+  var str = document.scoreEntry.m10_sound_mixer.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m10_sound_mixer(num);
+  }
+  refresh();
+}
+function increment_m10_sound_mixer(increment) {
+  var temp = m10_sound_mixer_raw
+  m10_sound_mixer_raw += increment;
+  if(m10_sound_mixer_raw > 3.0) {
+    m10_sound_mixer_raw = 3.0;
+   }
+  if(m10_sound_mixer_raw < 0.0) {
+    m10_sound_mixer_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m10_sound_mixer_raw = temp;
+  }
+  refresh();
+}
+
+
+// m11_light_show_pointer
+var m11_light_show_pointer_raw;
+var m11_light_show_pointer_computed;
+function set_m11_light_show_pointer(newValue) {
+  var temp = m11_light_show_pointer_raw;
+  m11_light_show_pointer_raw = newValue;
+  if(!isConsistent()) {
+    m11_light_show_pointer_raw = temp;
+  }
+  refresh();
+}
+function check_m11_light_show_pointer() {
+  var str = document.scoreEntry.m11_light_show_pointer.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m11_light_show_pointer(num);
+  }
+  refresh();
+}
+
+
+// m_12_chicken_moved
+var m_12_chicken_moved_raw;
+var m_12_chicken_moved_computed;
+function set_m_12_chicken_moved(newValue) {
+  var temp = m_12_chicken_moved_raw;
+  m_12_chicken_moved_raw = newValue;
+  if(!isConsistent()) {
+    m_12_chicken_moved_raw = temp;
+  }
+  refresh();
+}
+function check_m_12_chicken_moved() {
+  var str = document.scoreEntry.m_12_chicken_moved.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m_12_chicken_moved(num);
+  }
+  refresh();
+}
+
+
+// m13_lid_open
+var m13_lid_open_raw;
+var m13_lid_open_computed;
+function set_m13_lid_open(newValue) {
+  var temp = m13_lid_open_raw;
+  m13_lid_open_raw = newValue;
+  if(!isConsistent()) {
+    m13_lid_open_raw = temp;
+  }
+  refresh();
+}
+function check_m13_lid_open() {
+  var str = document.scoreEntry.m13_lid_open.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m13_lid_open(num);
+  }
+  refresh();
+}
+
+
+// m13_pink_latch_down
+var m13_pink_latch_down_raw;
+var m13_pink_latch_down_computed;
+function set_m13_pink_latch_down(newValue) {
+  var temp = m13_pink_latch_down_raw;
+  m13_pink_latch_down_raw = newValue;
+  if(!isConsistent()) {
+    m13_pink_latch_down_raw = temp;
+  }
+  refresh();
+}
+function check_m13_pink_latch_down() {
+  var str = document.scoreEntry.m13_pink_latch_down.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m13_pink_latch_down(num);
+  }
+  refresh();
+}
+
+
+// cinema_audience
+var cinema_audience_raw;
+var cinema_audience_computed;
+function set_cinema_audience(newValue) {
+  var temp = cinema_audience_raw;
+  cinema_audience_raw = newValue;
+  if(!isConsistent()) {
+    cinema_audience_raw = temp;
+  }
+  refresh();
+}
+function check_cinema_audience() {
+  var str = document.scoreEntry.cinema_audience.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_cinema_audience(num);
+  }
+  refresh();
+}
+function increment_cinema_audience(increment) {
+  var temp = cinema_audience_raw
+  cinema_audience_raw += increment;
+  if(cinema_audience_raw > 7.0) {
+    cinema_audience_raw = 7.0;
+   }
+  if(cinema_audience_raw < 0.0) {
+    cinema_audience_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    cinema_audience_raw = temp;
+  }
+  refresh();
+}
+
+
+// cinema_emily
+var cinema_emily_raw;
+var cinema_emily_computed;
+function set_cinema_emily(newValue) {
+  var temp = cinema_emily_raw;
+  cinema_emily_raw = newValue;
+  if(!isConsistent()) {
+    cinema_emily_raw = temp;
+  }
+  refresh();
+}
+function check_cinema_emily() {
+  var str = document.scoreEntry.cinema_emily.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_cinema_emily(num);
+  }
+  refresh();
+}
+
+
+// theater_audience
+var theater_audience_raw;
+var theater_audience_computed;
+function set_theater_audience(newValue) {
+  var temp = theater_audience_raw;
+  theater_audience_raw = newValue;
+  if(!isConsistent()) {
+    theater_audience_raw = temp;
+  }
+  refresh();
+}
+function check_theater_audience() {
+  var str = document.scoreEntry.theater_audience.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_theater_audience(num);
+  }
+  refresh();
+}
+function increment_theater_audience(increment) {
+  var temp = theater_audience_raw
+  theater_audience_raw += increment;
+  if(theater_audience_raw > 7.0) {
+    theater_audience_raw = 7.0;
+   }
+  if(theater_audience_raw < 0.0) {
+    theater_audience_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    theater_audience_raw = temp;
+  }
+  refresh();
+}
+
+
+// skateboard_audience
+var skateboard_audience_raw;
+var skateboard_audience_computed;
+function set_skateboard_audience(newValue) {
+  var temp = skateboard_audience_raw;
+  skateboard_audience_raw = newValue;
+  if(!isConsistent()) {
+    skateboard_audience_raw = temp;
+  }
+  refresh();
+}
+function check_skateboard_audience() {
+  var str = document.scoreEntry.skateboard_audience.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_skateboard_audience(num);
+  }
+  refresh();
+}
+function increment_skateboard_audience(increment) {
+  var temp = skateboard_audience_raw
+  skateboard_audience_raw += increment;
+  if(skateboard_audience_raw > 7.0) {
+    skateboard_audience_raw = 7.0;
+   }
+  if(skateboard_audience_raw < 0.0) {
+    skateboard_audience_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    skateboard_audience_raw = temp;
+  }
+  refresh();
+}
+
+
+// skateboard_izzy
+var skateboard_izzy_raw;
+var skateboard_izzy_computed;
+function set_skateboard_izzy(newValue) {
+  var temp = skateboard_izzy_raw;
+  skateboard_izzy_raw = newValue;
+  if(!isConsistent()) {
+    skateboard_izzy_raw = temp;
+  }
+  refresh();
+}
+function check_skateboard_izzy() {
+  var str = document.scoreEntry.skateboard_izzy.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_skateboard_izzy(num);
+  }
+  refresh();
+}
+
+
+// museum_audience
+var museum_audience_raw;
+var museum_audience_computed;
+function set_museum_audience(newValue) {
+  var temp = museum_audience_raw;
+  museum_audience_raw = newValue;
+  if(!isConsistent()) {
+    museum_audience_raw = temp;
+  }
+  refresh();
+}
+function check_museum_audience() {
+  var str = document.scoreEntry.museum_audience.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_museum_audience(num);
+  }
+  refresh();
+}
+function increment_museum_audience(increment) {
+  var temp = museum_audience_raw
+  museum_audience_raw += increment;
+  if(museum_audience_raw > 7.0) {
+    museum_audience_raw = 7.0;
+   }
+  if(museum_audience_raw < 0.0) {
+    museum_audience_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    museum_audience_raw = temp;
+  }
+  refresh();
+}
+
+
+// museum_anna
+var museum_anna_raw;
+var museum_anna_computed;
+function set_museum_anna(newValue) {
+  var temp = museum_anna_raw;
+  museum_anna_raw = newValue;
+  if(!isConsistent()) {
+    museum_anna_raw = temp;
+  }
+  refresh();
+}
+function check_museum_anna() {
+  var str = document.scoreEntry.museum_anna.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_museum_anna(num);
+  }
+  refresh();
+}
+
+
+// m04_art_piece_in_museum
+var m04_art_piece_in_museum_raw;
+var m04_art_piece_in_museum_computed;
+function set_m04_art_piece_in_museum(newValue) {
+  var temp = m04_art_piece_in_museum_raw;
+  m04_art_piece_in_museum_raw = newValue;
+  if(!isConsistent()) {
+    m04_art_piece_in_museum_raw = temp;
+  }
+  refresh();
+}
+function check_m04_art_piece_in_museum() {
+  var str = document.scoreEntry.m04_art_piece_in_museum.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m04_art_piece_in_museum(num);
+  }
+  refresh();
+}
+
+
+// audience_concert
+var audience_concert_raw;
+var audience_concert_computed;
+function set_audience_concert(newValue) {
+  var temp = audience_concert_raw;
+  audience_concert_raw = newValue;
+  if(!isConsistent()) {
+    audience_concert_raw = temp;
+  }
+  refresh();
+}
+function check_audience_concert() {
+  var str = document.scoreEntry.audience_concert.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_audience_concert(num);
+  }
+  refresh();
+}
+function increment_audience_concert(increment) {
+  var temp = audience_concert_raw
+  audience_concert_raw += increment;
+  if(audience_concert_raw > 7.0) {
+    audience_concert_raw = 7.0;
+   }
+  if(audience_concert_raw < 0.0) {
+    audience_concert_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    audience_concert_raw = temp;
+  }
+  refresh();
+}
+
+
+// concert_noah
+var concert_noah_raw;
+var concert_noah_computed;
+function set_concert_noah(newValue) {
+  var temp = concert_noah_raw;
+  concert_noah_raw = newValue;
+  if(!isConsistent()) {
+    concert_noah_raw = temp;
+  }
+  refresh();
+}
+function check_concert_noah() {
+  var str = document.scoreEntry.concert_noah.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_concert_noah(num);
+  }
+  refresh();
+}
+
+
+// audience_movie
+var audience_movie_raw;
+var audience_movie_computed;
+function set_audience_movie(newValue) {
+  var temp = audience_movie_raw;
+  audience_movie_raw = newValue;
+  if(!isConsistent()) {
+    audience_movie_raw = temp;
+  }
+  refresh();
+}
+function check_audience_movie() {
+  var str = document.scoreEntry.audience_movie.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_audience_movie(num);
+  }
+  refresh();
+}
+function increment_audience_movie(increment) {
+  var temp = audience_movie_raw
+  audience_movie_raw += increment;
+  if(audience_movie_raw > 7.0) {
+    audience_movie_raw = 7.0;
+   }
+  if(audience_movie_raw < 0.0) {
+    audience_movie_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    audience_movie_raw = temp;
+  }
+  refresh();
+}
+
+
+// movie_sam
+var movie_sam_raw;
+var movie_sam_computed;
+function set_movie_sam(newValue) {
+  var temp = movie_sam_raw;
+  movie_sam_raw = newValue;
+  if(!isConsistent()) {
+    movie_sam_raw = temp;
+  }
+  refresh();
+}
+function check_movie_sam() {
+  var str = document.scoreEntry.movie_sam.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_movie_sam(num);
+  }
+  refresh();
+}
+
+
+// audience_lightshow
+var audience_lightshow_raw;
+var audience_lightshow_computed;
+function set_audience_lightshow(newValue) {
+  var temp = audience_lightshow_raw;
+  audience_lightshow_raw = newValue;
+  if(!isConsistent()) {
+    audience_lightshow_raw = temp;
+  }
+  refresh();
+}
+function check_audience_lightshow() {
+  var str = document.scoreEntry.audience_lightshow.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_audience_lightshow(num);
+  }
+  refresh();
+}
+function increment_audience_lightshow(increment) {
+  var temp = audience_lightshow_raw
+  audience_lightshow_raw += increment;
+  if(audience_lightshow_raw > 7.0) {
+    audience_lightshow_raw = 7.0;
+   }
+  if(audience_lightshow_raw < 0.0) {
+    audience_lightshow_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    audience_lightshow_raw = temp;
+  }
+  refresh();
+}
+
+
+// m16_precision_tokens
+var m16_precision_tokens_raw;
+var m16_precision_tokens_computed;
+function set_m16_precision_tokens(newValue) {
+  var temp = m16_precision_tokens_raw;
+  m16_precision_tokens_raw = newValue;
+  if(!isConsistent()) {
+    m16_precision_tokens_raw = temp;
+  }
+  refresh();
+}
+function check_m16_precision_tokens() {
+  var str = document.scoreEntry.m16_precision_tokens.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m16_precision_tokens(num);
+  }
+  refresh();
+}
+
+
+// gp_score
+var gp_score_raw;
+var gp_score_computed;
+function set_gp_score(newValue) {
+  var temp = gp_score_raw;
+  gp_score_raw = newValue;
+  if(!isConsistent()) {
+    gp_score_raw = temp;
+  }
+  refresh();
+}
+function check_gp_score() {
+  var str = document.scoreEntry.gp_score.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_gp_score(num);
+  }
+  refresh();
+}
+function increment_gp_score(increment) {
+  var temp = gp_score_raw
+  gp_score_raw += increment;
+  if(gp_score_raw > 4.0) {
+    gp_score_raw = 4.0;
+   }
+  if(gp_score_raw < 2.0) {
+    gp_score_raw = 2.0;
+   }
+  if(!isConsistent()) {
+    gp_score_raw = temp;
+  }
+  refresh();
+}
+
+
+// count_cinema
+var count_cinema_computed;
+function compute_count_cinema() {
+  if(parseInt(1.000000* cinema_audience_raw) > parseInt(0.000000)) {
+    count_cinema_computed = parseInt(5.000000);
+  } else {
+    count_cinema_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_count_cinema.value = count_cinema_computed;
+}
+// count_audience_theater
+var count_audience_theater_computed;
+function compute_count_audience_theater() {
+  if(parseInt(1.000000* theater_audience_raw) > parseInt(0.000000)) {
+    count_audience_theater_computed = parseInt(5.000000);
+  } else {
+    count_audience_theater_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_count_audience_theater.value = count_audience_theater_computed;
+}
+// count_audience_skateboard
+var count_audience_skateboard_computed;
+function compute_count_audience_skateboard() {
+  if(parseInt(1.000000* skateboard_audience_raw) > parseInt(0.000000)) {
+    count_audience_skateboard_computed = parseInt(5.000000);
+  } else {
+    count_audience_skateboard_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_count_audience_skateboard.value = count_audience_skateboard_computed;
+}
+// count_audience_museum
+var count_audience_museum_computed;
+function compute_count_audience_museum() {
+  if(parseInt(1.000000* museum_audience_raw) > parseInt(0.000000)) {
+    count_audience_museum_computed = parseInt(5.000000);
+  } else {
+    count_audience_museum_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_count_audience_museum.value = count_audience_museum_computed;
+}
+// count_audience_music
+var count_audience_music_computed;
+function compute_count_audience_music() {
+  if(parseInt(1.000000* audience_concert_raw) > parseInt(0.000000)) {
+    count_audience_music_computed = parseInt(5.000000);
+  } else {
+    count_audience_music_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_count_audience_music.value = count_audience_music_computed;
+}
+// count_audience_movie_set
+var count_audience_movie_set_computed;
+function compute_count_audience_movie_set() {
+  if(parseInt(1.000000* audience_movie_raw) > parseInt(0.000000)) {
+    count_audience_movie_set_computed = parseInt(5.000000);
+  } else {
+    count_audience_movie_set_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_count_audience_movie_set.value = count_audience_movie_set_computed;
+}
+// count_audience_light_show
+var count_audience_light_show_computed;
+function compute_count_audience_light_show() {
+  if(parseInt(1.000000* audience_lightshow_raw) > parseInt(0.000000)) {
+    count_audience_light_show_computed = parseInt(5.000000);
+  } else {
+    count_audience_light_show_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_count_audience_light_show.value = count_audience_light_show_computed;
+}
+// Verified 
+var Verified;
+function set_Verified(newValue) {
+  Verified = newValue;
+  refresh();
+}
+
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const resetButton = document.getElementById("reset_score");
+  if(resetButton) {
+      resetButton.addEventListener('click', init);
+  }
+});
+
+</script>
+
+
+<script type="text/javascript" src="Score%20Entry_files/scoreEntry.js"></script>
+
+</head>
+
+<body>
+
+  <form action="SubmitScoreEntry" method="POST" name="scoreEntry" id="scoreEntry" class="fll-sw-ui-body">
+    <input type="hidden" id="NoShow" name="NoShow" value="false">
+    <input type="hidden" id="delete" name="delete" value="false">
+
+      <input type="hidden" name="EditFlag" id="EditFlag" value="false" readonly="readonly">
+    
+    <input type="hidden" name="RunNumber" value="" readonly="readonly"> <input type="hidden" name="TeamNumber" value="" readonly="readonly">
+
+<header>
+  <div id="floating-messages">
+    <div id="score-errors" class="fll-sw-ui-inactive"></div>
+    <div id="verification-warning" class="fll-sw-ui-inactive">Are you sure this score has
+      been Verified? Normally scores are not verified on the initial
+      entry.</div>
+  </div>
+
+          <!-- top info bar (team name etc) -->
+          <table id="top_info" border="1" cellpadding="0" cellspacing="0" width="100%">
+            <tbody><tr align="center" valign="middle">
+              <td>
+
+                <table border="0" cellpadding="5" cellspacing="0" width="90%">
+                  <!--  inner box on title -->
+                  <tbody><tr>
+                    <td valign="middle" align="center">
+                        
+                        
+                          <font face="Arial" size="4">Score Entry</font>
+                        
+                      </td>
+                  </tr>
+                  <tr align="center">
+                    <td><font face="Arial" size="4" color="#0000ff">
+
+                                                
+                                                    
+                      Practice
+                      
+                                                    
+                                                
+                                            </font>
+                    </td>
+                  </tr>
+                </tbody></table> <!--  end inner box on title -->
+
+              </td>
+            </tr>
+            <!-- team info -->
+
+            
+
+          </tbody></table> <!--  end info bar -->
+</header>
+
+<main id="review-mode_container">
+                <div id="review-mode_glasspane"></div>
+
+      <!-- score entry -->
+          <table class="score-entry">
+            <colgroup>
+              <!--  goal -->
+              <col width="50%">
+              <!-- buttons -->
+              <col width="30%">
+              <!-- count -->
+              <col width="10%">
+              <!--  score -->
+              <col width="10%">
+            </colgroup>
+            <tbody><tr>
+              <td colspan="2"><font size="4"><u>Goal</u></font></td>
+              <td align="right"><font size="4"><u>Count</u></font>
+              </td>
+              <td align="right" class="score-cell"><font size="4"><u>Score</u></font>
+              </td>
+            </tr>
+
+            
+              
+              
+                
+                <tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M00 - EQUIPMENT INSPECTION BONUS</b></td>
+</tr>
+<!-- m00_one_launch_area -->
+<tr id="m00_one_launch_area_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ALL Equipment Fits in ONE Launch area under 12":
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m00_one_launch_area_no" name="m00_one_launch_area" value="0" onclick="set_m00_one_launch_area(0)" checked="checked">
+        <span id="m00_one_launch_area_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m00_one_launch_area_yes" name="m00_one_launch_area" value="1" onclick="set_m00_one_launch_area(1)">
+        <span id="m00_one_launch_area_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m00_one_launch_area_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m00_one_launch_area" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m00_one_launch_area -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M01 - 3D Cinema</b></td>
+</tr>
+<!-- m01_cinema -->
+<tr id="m01_cinema_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3D Cinema Small RED Beam Completely to right of black frame:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m01_cinema_no" name="m01_cinema" value="0" onclick="set_m01_cinema(0)" checked="checked">
+        <span id="m01_cinema_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m01_cinema_yes" name="m01_cinema" value="1" onclick="set_m01_cinema(1)">
+        <span id="m01_cinema_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m01_cinema_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m01_cinema" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m01_cinema -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M02 - Theater Scene Change</b></td>
+</tr>
+<!-- m02_scene_change -->
+<tr id="m02_scene_change_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Theater RED Flag down and active Scene color is:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m02_scene_change" value="zero" id="m02_scene_change_zero" onclick='set_m02_scene_change("zero")' checked="checked">
+        <span id="m02_scene_change_zero_span">
+          Flag NOT down
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m02_scene_change" value="blue" id="m02_scene_change_blue" onclick='set_m02_scene_change("blue")'>
+        <span id="m02_scene_change_blue_span">
+          Blue
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m02_scene_change" value="pink" id="m02_scene_change_pink" onclick='set_m02_scene_change("pink")'>
+        <span id="m02_scene_change_pink_span">
+          Pink
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m02_scene_change" value="orange" id="m02_scene_change_orange" onclick='set_m02_scene_change("orange")'>
+        <span id="m02_scene_change_orange_span">
+          Orange
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m02_scene_change_radioValue" size="10" align="right" readonly="readonly" tabindex="-1" value="ZERO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m02_scene_change" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m02_scene_change -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M02B - Theater Scene Change Other Team</b></td>
+</tr>
+<!-- m02_b_other_team_scene_change -->
+<tr id="m02_b_other_team_scene_change_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OTHER Team Theater RED Flag Down:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m02_b_other_team_scene_change" value="blueother" id="m02_b_other_team_scene_change_blueother" onclick='set_m02_b_other_team_scene_change("blueother")'>
+        <span id="m02_b_other_team_scene_change_blueother_span">
+          Other Team Blue
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m02_b_other_team_scene_change" value="orangeother" id="m02_b_other_team_scene_change_orangeother" onclick='set_m02_b_other_team_scene_change("orangeother")'>
+        <span id="m02_b_other_team_scene_change_orangeother_span">
+          Other Team Orange
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m02_b_other_team_scene_change" value="pinkother" id="m02_b_other_team_scene_change_pinkother" onclick='set_m02_b_other_team_scene_change("pinkother")'>
+        <span id="m02_b_other_team_scene_change_pinkother_span">
+          Other Team Pink
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m02_b_other_team_scene_change" value="zeroother" id="m02_b_other_team_scene_change_zeroother" onclick='set_m02_b_other_team_scene_change("zeroother")' checked="checked">
+        <span id="m02_b_other_team_scene_change_zeroother_span">
+          Other Team Flag NOT Down
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m02_b_other_team_scene_change_radioValue" size="10" align="right" readonly="readonly" tabindex="-1" value="ZEROOTHER">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m02_b_other_team_scene_change" size="3" align="right" readonly="readonly" tabindex="-1" value="3">
+  </td>
+</tr>
+<!-- end m02_b_other_team_scene_change -->
+
+<!-- computer_other_theater_color -->
+<tr id="computer_other_theater_color_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Compute Other Team Theater Color:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_computer_other_theater_color" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end computer_other_theater_color -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M03 - Immersive Experience</b></td>
+</tr>
+<!-- m03_immersive_screens_up -->
+<tr id="m03_immersive_screens_up_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All 3 Immersive Experience Screens Raised - Not Touching Equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m03_immersive_screens_up_no" name="m03_immersive_screens_up" value="0" onclick="set_m03_immersive_screens_up(0)" checked="checked">
+        <span id="m03_immersive_screens_up_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m03_immersive_screens_up_yes" name="m03_immersive_screens_up" value="1" onclick="set_m03_immersive_screens_up(1)">
+        <span id="m03_immersive_screens_up_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m03_immersive_screens_up_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m03_immersive_screens_up" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m03_immersive_screens_up -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M05 - Augmented Reality Statue</b></td>
+</tr>
+<!-- m05_aug_reality_orange_level -->
+<tr id="m05_aug_reality_orange_level_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Augmented Reality Statue Orange Lever Rotated Completely to Right:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m05_aug_reality_orange_level_no" name="m05_aug_reality_orange_level" value="0" onclick="set_m05_aug_reality_orange_level(0)" checked="checked">
+        <span id="m05_aug_reality_orange_level_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m05_aug_reality_orange_level_yes" name="m05_aug_reality_orange_level" value="1" onclick="set_m05_aug_reality_orange_level(1)">
+        <span id="m05_aug_reality_orange_level_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m05_aug_reality_orange_level_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m05_aug_reality_orange_level" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m05_aug_reality_orange_level -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M06 - Music Concert Lights and Sounds</b></td>
+</tr>
+<!-- m06_lights_lever -->
+<tr id="m06_lights_lever_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lights Orange Lever Rotated Completely Downwards:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m06_lights_lever_no" name="m06_lights_lever" value="0" onclick="set_m06_lights_lever(0)" checked="checked">
+        <span id="m06_lights_lever_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m06_lights_lever_yes" name="m06_lights_lever" value="1" onclick="set_m06_lights_lever(1)">
+        <span id="m06_lights_lever_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m06_lights_lever_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m06_lights_lever" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m06_lights_lever -->
+
+<!-- m06_speaker_lever -->
+<tr id="m06_speaker_lever_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Speakers Orange Lever Rotated Completely Left:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m06_speaker_lever_no" name="m06_speaker_lever" value="0" onclick="set_m06_speaker_lever(0)" checked="checked">
+        <span id="m06_speaker_lever_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m06_speaker_lever_yes" name="m06_speaker_lever" value="1" onclick="set_m06_speaker_lever(1)">
+        <span id="m06_speaker_lever_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m06_speaker_lever_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m06_speaker_lever" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m06_speaker_lever -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M07 - Hologram Performer</b></td>
+</tr>
+<!-- m07_hologram_performer -->
+<tr id="m07_hologram_performer_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hologram Performer Orange Push Activator Completely Past Black Line:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m07_hologram_performer_no" name="m07_hologram_performer" value="0" onclick="set_m07_hologram_performer(0)" checked="checked">
+        <span id="m07_hologram_performer_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m07_hologram_performer_yes" name="m07_hologram_performer" value="1" onclick="set_m07_hologram_performer(1)">
+        <span id="m07_hologram_performer_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m07_hologram_performer_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m07_hologram_performer" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m07_hologram_performer -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M08 - Rolling Camera</b></td>
+</tr>
+<!-- m08_rolling_camera -->
+<tr id="m08_rolling_camera_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rolling Camera White Pointer is Left of:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m08_rolling_camera" value="zero" id="m08_rolling_camera_zero" onclick='set_m08_rolling_camera("zero")' checked="checked">
+        <span id="m08_rolling_camera_zero_span">
+          Right of Dark Blue
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m08_rolling_camera" value="left_dark_blue" id="m08_rolling_camera_left_dark_blue" onclick='set_m08_rolling_camera("left_dark_blue")'>
+        <span id="m08_rolling_camera_left_dark_blue_span">
+          Dark Blue
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m08_rolling_camera" value="left_dark_med_blue" id="m08_rolling_camera_left_dark_med_blue" onclick='set_m08_rolling_camera("left_dark_med_blue")'>
+        <span id="m08_rolling_camera_left_dark_med_blue_span">
+          Dark and Medium Blue
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m08_rolling_camera" value="left_dark_med_light_blue" id="m08_rolling_camera_left_dark_med_light_blue" onclick='set_m08_rolling_camera("left_dark_med_light_blue")'>
+        <span id="m08_rolling_camera_left_dark_med_light_blue_span">
+          Left of Dark Med and Light Blue
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m08_rolling_camera_radioValue" size="10" align="right" readonly="readonly" tabindex="-1" value="ZERO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m08_rolling_camera" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m08_rolling_camera -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M09 - Movie Set</b></td>
+</tr>
+<!-- m09_Boat -->
+<tr id="m09_Boat_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Boat Touching Mat and Completely Past Black Scene Line:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m09_Boat_no" name="m09_Boat" value="0" onclick="set_m09_Boat(0)" checked="checked">
+        <span id="m09_Boat_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m09_Boat_yes" name="m09_Boat" value="1" onclick="set_m09_Boat(1)">
+        <span id="m09_Boat_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m09_Boat_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m09_Boat" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m09_Boat -->
+
+<!-- m09_camera -->
+<tr id="m09_camera_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Camera Touching Mat and at Least Partly in Camera Target Area:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m09_camera_no" name="m09_camera" value="0" onclick="set_m09_camera(0)" checked="checked">
+        <span id="m09_camera_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m09_camera_yes" name="m09_camera" value="1" onclick="set_m09_camera(1)">
+        <span id="m09_camera_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m09_camera_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m09_camera" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m09_camera -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M10 - Sound Mixer</b></td>
+</tr>
+<!-- m10_sound_mixer -->
+<tr id="m10_sound_mixer_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Sound Mixer Sliders Raised - Not Touching Equipment at end:
+  </td>
+  <td>
+<input type="range" min="0" max="3" class="slider" id="m10_sound_mixer_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="33.33%" y="0" width="2" height="100%"></rect>
+<rect x="66.67%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m10_sound_mixer" size="3" align="right" onchange="check_m10_sound_mixer()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m10_sound_mixer" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m10_sound_mixer -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M11 - Light Show</b></td>
+</tr>
+<!-- m11_light_show_pointer -->
+<tr id="m11_light_show_pointer_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Light Show White Pointer within Zone:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m11_light_show_pointer" value="zero" id="m11_light_show_pointer_zero" onclick='set_m11_light_show_pointer("zero")' checked="checked">
+        <span id="m11_light_show_pointer_zero_span">
+          White
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m11_light_show_pointer" value="yellow" id="m11_light_show_pointer_yellow" onclick='set_m11_light_show_pointer("yellow")'>
+        <span id="m11_light_show_pointer_yellow_span">
+          Yellow
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m11_light_show_pointer" value="green" id="m11_light_show_pointer_green" onclick='set_m11_light_show_pointer("green")'>
+        <span id="m11_light_show_pointer_green_span">
+          Green
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m11_light_show_pointer" value="blue" id="m11_light_show_pointer_blue" onclick='set_m11_light_show_pointer("blue")'>
+        <span id="m11_light_show_pointer_blue_span">
+          Blue
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m11_light_show_pointer_radioValue" size="10" align="right" readonly="readonly" tabindex="-1" value="ZERO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m11_light_show_pointer" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m11_light_show_pointer -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M12 - Virtual Reality Artist</b></td>
+</tr>
+<!-- m_12_chicken_moved -->
+<tr id="m_12_chicken_moved_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chicken Intact and Moved from Starting Position:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m_12_chicken_moved" value="zero" id="m_12_chicken_moved_zero" onclick='set_m_12_chicken_moved("zero")' checked="checked">
+        <span id="m_12_chicken_moved_zero_span">
+          Chicken NOT Moved
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m_12_chicken_moved" value="ten" id="m_12_chicken_moved_ten" onclick='set_m_12_chicken_moved("ten")'>
+        <span id="m_12_chicken_moved_ten_span">
+          Chicken Intact and Moved from Starting Position
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m_12_chicken_moved" value="bonus" id="m_12_chicken_moved_bonus" onclick='set_m_12_chicken_moved("bonus")'>
+        <span id="m_12_chicken_moved_bonus_span">
+          Chicken Over OR Completely past Lavendar Dot
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m_12_chicken_moved_radioValue" size="10" align="right" readonly="readonly" tabindex="-1" value="ZERO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m_12_chicken_moved" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m_12_chicken_moved -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M13 - Craft Creator</b></td>
+</tr>
+<!-- m13_lid_open -->
+<tr id="m13_lid_open_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Craft Machine Orange and White Lid Completely Open:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m13_lid_open_no" name="m13_lid_open" value="0" onclick="set_m13_lid_open(0)" checked="checked">
+        <span id="m13_lid_open_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m13_lid_open_yes" name="m13_lid_open" value="1" onclick="set_m13_lid_open(1)">
+        <span id="m13_lid_open_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m13_lid_open_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m13_lid_open" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m13_lid_open -->
+
+<!-- m13_pink_latch_down -->
+<tr id="m13_pink_latch_down_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Craft Machine Light Pink Latch Pointing Straight Down:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m13_pink_latch_down_no" name="m13_pink_latch_down" value="0" onclick="set_m13_pink_latch_down(0)" checked="checked">
+        <span id="m13_pink_latch_down_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m13_pink_latch_down_yes" name="m13_pink_latch_down" value="1" onclick="set_m13_pink_latch_down(1)">
+        <span id="m13_pink_latch_down_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m13_pink_latch_down_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m13_pink_latch_down" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m13_pink_latch_down -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>Cinema Area (POPCORN) - Count Audience Members and Expert in Cinema</b></td>
+</tr>
+<!-- cinema_audience -->
+<tr id="cinema_audience_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Audience Members Completely in Cinema Area:
+  </td>
+  <td>
+<input type="range" min="0" max="7" class="slider" id="cinema_audience_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="14.29%" y="0" width="2" height="100%"></rect>
+<rect x="28.57%" y="0" width="2" height="100%"></rect>
+<rect x="42.86%" y="0" width="2" height="100%"></rect>
+<rect x="57.14%" y="0" width="2" height="100%"></rect>
+<rect x="71.43%" y="0" width="2" height="100%"></rect>
+<rect x="85.71%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="cinema_audience" size="3" align="right" onchange="check_cinema_audience()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_cinema_audience" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end cinema_audience -->
+
+<!-- cinema_emily -->
+<tr id="cinema_emily_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cinema Expert at Least Partly In - Emily (Big Hair/Red Scarf):
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="cinema_emily_no" name="cinema_emily" value="0" onclick="set_cinema_emily(0)" checked="checked">
+        <span id="cinema_emily_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="cinema_emily_yes" name="cinema_emily" value="1" onclick="set_cinema_emily(1)">
+        <span id="cinema_emily_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="cinema_emily_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_cinema_emily" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end cinema_emily -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>Theater Area (MASKS) - Count Audience Members in Theater</b></td>
+</tr>
+<!-- theater_audience -->
+<tr id="theater_audience_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Audience Members Completely in Theater Area:
+  </td>
+  <td>
+<input type="range" min="0" max="7" class="slider" id="theater_audience_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="14.29%" y="0" width="2" height="100%"></rect>
+<rect x="28.57%" y="0" width="2" height="100%"></rect>
+<rect x="42.86%" y="0" width="2" height="100%"></rect>
+<rect x="57.14%" y="0" width="2" height="100%"></rect>
+<rect x="71.43%" y="0" width="2" height="100%"></rect>
+<rect x="85.71%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="theater_audience" size="3" align="right" onchange="check_theater_audience()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_theater_audience" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end theater_audience -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>Skateboard Area (SKATEBOARD) - Count Audience Members and Expert in Skateboard</b></td>
+</tr>
+<!-- skateboard_audience -->
+<tr id="skateboard_audience_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Audience Members Completely in Skateboard Area:
+  </td>
+  <td>
+<input type="range" min="0" max="7" class="slider" id="skateboard_audience_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="14.29%" y="0" width="2" height="100%"></rect>
+<rect x="28.57%" y="0" width="2" height="100%"></rect>
+<rect x="42.86%" y="0" width="2" height="100%"></rect>
+<rect x="57.14%" y="0" width="2" height="100%"></rect>
+<rect x="71.43%" y="0" width="2" height="100%"></rect>
+<rect x="85.71%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="skateboard_audience" size="3" align="right" onchange="check_skateboard_audience()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_skateboard_audience" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end skateboard_audience -->
+
+<!-- skateboard_izzy -->
+<tr id="skateboard_izzy_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Skateboard Expert at Least Partly In- Izzy  (Helmet/Skateboard):
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="skateboard_izzy_no" name="skateboard_izzy" value="0" onclick="set_skateboard_izzy(0)" checked="checked">
+        <span id="skateboard_izzy_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="skateboard_izzy_yes" name="skateboard_izzy" value="1" onclick="set_skateboard_izzy(1)">
+        <span id="skateboard_izzy_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="skateboard_izzy_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_skateboard_izzy" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end skateboard_izzy -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>Museum Area (BUILDING) - Count Audience Members and Expert in Museum</b></td>
+</tr>
+<!-- museum_audience -->
+<tr id="museum_audience_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Audience Members Completely in Museum Area:
+  </td>
+  <td>
+<input type="range" min="0" max="7" class="slider" id="museum_audience_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="14.29%" y="0" width="2" height="100%"></rect>
+<rect x="28.57%" y="0" width="2" height="100%"></rect>
+<rect x="42.86%" y="0" width="2" height="100%"></rect>
+<rect x="57.14%" y="0" width="2" height="100%"></rect>
+<rect x="71.43%" y="0" width="2" height="100%"></rect>
+<rect x="85.71%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="museum_audience" size="3" align="right" onchange="check_museum_audience()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_museum_audience" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end museum_audience -->
+
+<!-- museum_anna -->
+<tr id="museum_anna_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Museum Expert at Least Partly In - Anna  (Brown Hair/Yellow Jacket):
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="museum_anna_no" name="museum_anna" value="0" onclick="set_museum_anna(0)" checked="checked">
+        <span id="museum_anna_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="museum_anna_yes" name="museum_anna" value="1" onclick="set_museum_anna(1)">
+        <span id="museum_anna_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="museum_anna_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_museum_anna" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end museum_anna -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M04 - MASTERPIECE MODEL</b></td>
+</tr>
+<!-- m04_art_piece_in_museum -->
+<tr id="m04_art_piece_in_museum_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Art Piece at least Partly in Museum 
+Target Area (Art on Pedestal Not Touching Equipment at end):
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m04_art_piece_in_museum" value="no_art" id="m04_art_piece_in_museum_no_art" onclick='set_m04_art_piece_in_museum("no_art")' checked="checked">
+        <span id="m04_art_piece_in_museum_no_art_span">
+          Art Piece Not in Museum 
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m04_art_piece_in_museum" value="partly_in" id="m04_art_piece_in_museum_partly_in" onclick='set_m04_art_piece_in_museum("partly_in")'>
+        <span id="m04_art_piece_in_museum_partly_in_span">
+          Art Piece at least Partly In Museum Target Area
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m04_art_piece_in_museum" value="supported" id="m04_art_piece_in_museum_supported" onclick='set_m04_art_piece_in_museum("supported")'>
+        <span id="m04_art_piece_in_museum_supported_span">
+          Art Piece Completely supported by Pedestal
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m04_art_piece_in_museum_radioValue" size="10" align="right" readonly="readonly" tabindex="-1" value="NO_ART">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m04_art_piece_in_museum" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m04_art_piece_in_museum -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>Music Concert Area (MUSIC NOTES) - Count Audience Members and Expert in Music Concert</b></td>
+</tr>
+<!-- audience_concert -->
+<tr id="audience_concert_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Audience Members Completely in Music Concert Area:
+  </td>
+  <td>
+<input type="range" min="0" max="7" class="slider" id="audience_concert_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="14.29%" y="0" width="2" height="100%"></rect>
+<rect x="28.57%" y="0" width="2" height="100%"></rect>
+<rect x="42.86%" y="0" width="2" height="100%"></rect>
+<rect x="57.14%" y="0" width="2" height="100%"></rect>
+<rect x="71.43%" y="0" width="2" height="100%"></rect>
+<rect x="85.71%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="audience_concert" size="3" align="right" onchange="check_audience_concert()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_audience_concert" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end audience_concert -->
+
+<!-- concert_noah -->
+<tr id="concert_noah_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sound Expert  at Least Partly In - Noah  (Grey Hair/Checkered Vest):
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="concert_noah_no" name="concert_noah" value="0" onclick="set_concert_noah(0)" checked="checked">
+        <span id="concert_noah_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="concert_noah_yes" name="concert_noah" value="1" onclick="set_concert_noah(1)">
+        <span id="concert_noah_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="concert_noah_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_concert_noah" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end concert_noah -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>Movie Set Area (CLAPBOARD) - Count Audience Members and Expert in Movie Set</b></td>
+</tr>
+<!-- audience_movie -->
+<tr id="audience_movie_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Audience Members Completely in Movie Set Area:
+  </td>
+  <td>
+<input type="range" min="0" max="7" class="slider" id="audience_movie_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="14.29%" y="0" width="2" height="100%"></rect>
+<rect x="28.57%" y="0" width="2" height="100%"></rect>
+<rect x="42.86%" y="0" width="2" height="100%"></rect>
+<rect x="57.14%" y="0" width="2" height="100%"></rect>
+<rect x="71.43%" y="0" width="2" height="100%"></rect>
+<rect x="85.71%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="audience_movie" size="3" align="right" onchange="check_audience_movie()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_audience_movie" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end audience_movie -->
+
+<!-- movie_sam -->
+<tr id="movie_sam_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Stage Expert at Least Partly In - Sam  (RedHair/Teal Outfit):
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="movie_sam_no" name="movie_sam" value="0" onclick="set_movie_sam(0)" checked="checked">
+        <span id="movie_sam_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="movie_sam_yes" name="movie_sam" value="1" onclick="set_movie_sam(1)">
+        <span id="movie_sam_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="movie_sam_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_movie_sam" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end movie_sam -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>Light Show Area (YELLOW CIRCLE) - Count Audience Members in Light Show Area</b></td>
+</tr>
+<!-- audience_lightshow -->
+<tr id="audience_lightshow_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Audience Members Completely in Light Show Area:
+  </td>
+  <td>
+<input type="range" min="0" max="7" class="slider" id="audience_lightshow_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="14.29%" y="0" width="2" height="100%"></rect>
+<rect x="28.57%" y="0" width="2" height="100%"></rect>
+<rect x="42.86%" y="0" width="2" height="100%"></rect>
+<rect x="57.14%" y="0" width="2" height="100%"></rect>
+<rect x="71.43%" y="0" width="2" height="100%"></rect>
+<rect x="85.71%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="audience_lightshow" size="3" align="right" onchange="check_audience_lightshow()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_audience_lightshow" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end audience_lightshow -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M16 - Precision Tokens Remaining</b></td>
+</tr>
+<!-- m16_precision_tokens -->
+<tr id="m16_precision_tokens_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Precision Tokens Remaining on Field:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="zero" id="m16_precision_tokens_zero" onclick='set_m16_precision_tokens("zero")'>
+        <span id="m16_precision_tokens_zero_span">
+          Zero
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="one" id="m16_precision_tokens_one" onclick='set_m16_precision_tokens("one")'>
+        <span id="m16_precision_tokens_one_span">
+          1
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="two" id="m16_precision_tokens_two" onclick='set_m16_precision_tokens("two")'>
+        <span id="m16_precision_tokens_two_span">
+          2
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="three" id="m16_precision_tokens_three" onclick='set_m16_precision_tokens("three")'>
+        <span id="m16_precision_tokens_three_span">
+          3
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="four" id="m16_precision_tokens_four" onclick='set_m16_precision_tokens("four")'>
+        <span id="m16_precision_tokens_four_span">
+          4
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="five" id="m16_precision_tokens_five" onclick='set_m16_precision_tokens("five")'>
+        <span id="m16_precision_tokens_five_span">
+          5
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="six" id="m16_precision_tokens_six" onclick='set_m16_precision_tokens("six")' checked="checked">
+        <span id="m16_precision_tokens_six_span">
+          6
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m16_precision_tokens_radioValue" size="10" align="right" readonly="readonly" tabindex="-1" value="SIX">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m16_precision_tokens" size="3" align="right" readonly="readonly" tabindex="-1" value="50">
+  </td>
+</tr>
+<!-- end m16_precision_tokens -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>GRACIOUS PROFESSIONALISM DISPLAYED AT THE ROBOT GAME TABLE</b></td>
+</tr>
+<!-- gp_score -->
+<tr id="gp_score_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GP - Does not affect Robot Game Score:
+  </td>
+  <td>
+<input type="range" min="2" max="4" class="slider" id="gp_score_slider" value="3">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="gp_score" size="3" align="right" onchange="check_gp_score()" value="3">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_gp_score" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end gp_score -->
+
+<!-- count_cinema -->
+<tr id="count_cinema_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Count Audience Cinema:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_count_cinema" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end count_cinema -->
+
+<!-- count_audience_theater -->
+<tr id="count_audience_theater_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Count Audience Theater:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_count_audience_theater" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end count_audience_theater -->
+
+<!-- count_audience_skateboard -->
+<tr id="count_audience_skateboard_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Count Audience Skateboard:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_count_audience_skateboard" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end count_audience_skateboard -->
+
+<!-- count_audience_museum -->
+<tr id="count_audience_museum_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Count Audience Museum:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_count_audience_museum" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end count_audience_museum -->
+
+<!-- count_audience_music -->
+<tr id="count_audience_music_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Count Audience Music Concert:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_count_audience_music" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end count_audience_music -->
+
+<!-- count_audience_movie_set -->
+<tr id="count_audience_movie_set_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Count Audience Movie Set:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_count_audience_movie_set" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end count_audience_movie_set -->
+
+<!-- count_audience_light_show -->
+<tr id="count_audience_light_show_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Count Audience Light Show:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_count_audience_light_show" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end count_audience_light_show -->
+
+
+
+                <!-- Total Score -->
+                <tr class="total-score-container">
+                  <td colspan="3" class="total-score-label">Total
+                        Score:</td>
+                  <td align="right" class="score-cell"><input type="text" name="totalScore" size="3" readonly="readonly" tabindex="-1" value="53"></td>
+                </tr>
+              
+            
+            <!-- end check for bye -->
+
+           </tbody></table> <!-- end score entry table  -->
+</main>
+
+        <footer>
+            <div class="score-entry buttonbox">
+
+                <button id="score-entry_toggle-review-mode" type="button" class="fll-sw-button">Review
+                    Toggle</button>
+
+                <!-- Score Verification -->
+      <span class="verify-score-label float_right">
+Team Agrees with the above entries:
+</span>
+      <span class="verify-score-buttonbox">
+        <label class="y-n-button">
+          <input type="radio" id="Verified_no" name="Verified" value="0" onclick="set_Verified(0)" checked="checked">
+        <span id="Verified_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="Verified_yes" name="Verified" value="1" onclick="set_Verified(1)">
+        <span id="Verified_yes_span">Yes</span>
+        </label>
+      </span>
+
+            </div>
+
+            <div class="buttonbox score-entry-buttons">
+            
+            
+                <span id="challenge_revision">Challenge revision:
+                    08</span>
+                <span id="software_version">
+                    Software version:
+                    18.0.0</span>
+                    
+                    <span class="float_right">&nbsp;</span>
+                
+                    
+                        <button type="button" id="reset_score" class="fll-sw-button">Reset
+                            Form</button>
+                    
+                    
+                
+            </div>
+        </footer>
+
+    </form>
+  <!-- end score entry form -->
+
+
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="yesno-dialog">
+        <div>
+            <p id="yesno-dialog_text"></p>
+            <button type="button" id="yesno-dialog_yes">Yes</button>
+            <button type="button" id="yesno-dialog_no">No</button>
+        </div>
+    </div>
+    
+
+
+</body></html>
