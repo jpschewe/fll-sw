@@ -11,7 +11,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
- * Log exeption information and then exit.
+ * Log exception information and then exit.
  */
 public class ConsoleExceptionHandler implements UncaughtExceptionHandler {
 
