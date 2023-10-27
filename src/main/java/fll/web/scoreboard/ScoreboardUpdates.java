@@ -40,6 +40,7 @@ import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 import fll.web.display.DisplayHandler;
+import fll.web.display.UnknownDisplayException;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.TeamScore;
 import fll.xml.ChallengeDescription;
@@ -86,7 +87,11 @@ public final class ScoreboardUpdates {
     ALL_CLIENTS.put(uuid, client);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-    sendAllScores(datasource, challengeDescription, uuid, client);
+    try {
+      sendAllScores(datasource, challengeDescription, uuid, client);
+    } catch (final UnknownDisplayException e) {
+      LOGGER.error("Cannot find display {} that was just added", uuid);
+    }
 
     return uuid;
   }
@@ -94,7 +99,8 @@ public final class ScoreboardUpdates {
   private static void sendAllScores(final DataSource datasource,
                                     final ChallengeDescription challengeDescription,
                                     final String displayUuid,
-                                    final Session client) {
+                                    final Session client)
+      throws UnknownDisplayException {
     final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
     final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
@@ -286,7 +292,7 @@ public final class ScoreboardUpdates {
             try {
               newScore(numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay, allAwardGroups, entry.getKey(),
                        entry.getValue(), update.getTeam(), update.getRunNumber(), updateStr);
-            } catch (final IOException e) {
+            } catch (final IOException | UnknownDisplayException e) {
               LOGGER.warn("Got error writing to client, dropping: {}", entry.getKey(), e);
               toRemove.add(entry.getKey());
             }
@@ -315,7 +321,7 @@ public final class ScoreboardUpdates {
                                final TournamentTeam team,
                                final int runNumber,
                                final String data)
-      throws IOException, SQLException {
+      throws IOException, SQLException, UnknownDisplayException {
     final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
     final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
 

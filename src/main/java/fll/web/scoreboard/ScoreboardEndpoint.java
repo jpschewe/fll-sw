@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
-import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.GetHttpSessionConfigurator;
 import jakarta.servlet.http.HttpSession;
@@ -52,7 +51,8 @@ public class ScoreboardEndpoint {
   @OnMessage
   public void onMessage(final String text) {
     if (null == this.session) {
-      throw new FLLInternalException("Received websocket message before receiving the session from start");
+      LOGGER.error("Received websocket message before receiving the session from start, ignoring");
+      return;
     }
 
     LOGGER.trace("{}: Received message: {}", session, text);
@@ -79,7 +79,7 @@ public class ScoreboardEndpoint {
         LOGGER.error("{}: Received unknown message type from client: {}", uuid, message.getType());
       }
     } catch (final JsonProcessingException e) {
-      throw new FLLInternalException(String.format("Error reading json data from string: %s", text), e);
+      LOGGER.error("Error reading json data from string: {}, ignoring", text, e);
     }
   }
 

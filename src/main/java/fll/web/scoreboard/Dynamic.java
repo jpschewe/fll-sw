@@ -31,6 +31,7 @@ import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 import fll.web.display.DisplayHandler;
+import fll.web.display.UnknownDisplayException;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.jsp.PageContext;
@@ -64,9 +65,14 @@ public final class Dynamic {
       final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection,
                                                                                       tournament.getTournamentID());
       final String displayUuid = request.getParameter(DisplayHandler.DISPLAY_UUID_PARAMETER_NAME);
-      final DisplayInfo displayInfo;
+      DisplayInfo displayInfo;
       if (!StringUtils.isBlank(displayUuid)) {
-        displayInfo = DisplayHandler.resolveDisplay(displayUuid);
+        try {
+          displayInfo = DisplayHandler.resolveDisplay(displayUuid);
+        } catch (final UnknownDisplayException e) {
+          LOGGER.warn("Unable to find display {}, using default display", displayUuid);
+          displayInfo = DisplayHandler.getDefaultDisplay();
+        }
       } else {
         displayInfo = DisplayHandler.getDefaultDisplay();
       }

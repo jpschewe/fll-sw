@@ -1,3 +1,5 @@
+* Better handling of unknown displays
+
 Release 18.0.0
 ==============
 * Automatically select short practice round columns when loading a schedule

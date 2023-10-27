@@ -24,6 +24,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 import fll.web.WebUtils;
 import fll.web.display.DisplayHandler;
+import fll.web.display.UnknownDisplayException;
 import fll.web.playoff.BracketData.TopRightCornerStyle;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,6 +35,8 @@ import jakarta.servlet.jsp.PageContext;
  * Data for remoteControlBrackets.jsp.
  */
 public final class RemoteControlBrackets {
+
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private RemoteControlBrackets() {
   }
@@ -50,7 +53,13 @@ public final class RemoteControlBrackets {
                                      final PageContext pageContext) {
     final String displayUuid = request.getParameter(DisplayHandler.DISPLAY_UUID_PARAMETER_NAME);
 
-    final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
+    DisplayInfo displayInfo;
+    try {
+      displayInfo = DisplayHandler.resolveDisplay(displayUuid);
+    } catch (final UnknownDisplayException e) {
+      LOGGER.warn("Unable to find display {}, using default display", displayUuid);
+      displayInfo = DisplayHandler.getDefaultDisplay();
+    }
 
     // store the brackets to know when a refresh is required
     session.setAttribute("brackets", displayInfo.getBrackets());

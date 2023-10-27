@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import fll.util.FLLRuntimeException;
+import fll.util.FLLInternalException;
 import fll.web.DisplayInfo;
 import jakarta.websocket.Session;
 
@@ -62,14 +62,15 @@ public final class DisplayHandler {
    * 
    * @param uuid from {@link #registerDisplay(String, String, Session)}
    * @return the display information
-   * @throws FLLRuntimeException if a display with the specified uuid isn't found
+   * @throws UnknownDisplayException if a display with the specified uuid isn't
+   *           found
    */
-  public static DisplayInfo getDisplay(final String uuid) {
+  public static DisplayInfo getDisplay(final String uuid) throws UnknownDisplayException {
     synchronized (LOCK) {
       if (DISPLAYS.containsKey(uuid)) {
         return DISPLAYS.get(uuid).getInfo();
       } else {
-        throw new FLLRuntimeException(String.format("Display with the ID '%s' is not known", uuid));
+        throw new UnknownDisplayException(uuid);
       }
     }
   }
@@ -83,9 +84,10 @@ public final class DisplayHandler {
    * @return the display information
    * @see DisplayHandler#getDisplay(String)
    * @see #getDefaultDisplay()
-   * @throws FLLRuntimeException if a display with the specified uuid isn't found
+   * @throws UnknownDisplayException if a display with the specified uuid isn't
+   *           found
    */
-  public static DisplayInfo resolveDisplay(final @Nullable String uuid) {
+  public static DisplayInfo resolveDisplay(final @Nullable String uuid) throws UnknownDisplayException {
     if (!StringUtils.isBlank(uuid)) {
       final DisplayInfo di = DisplayHandler.getDisplay(uuid);
       if (di.isFollowDefault()) {
@@ -103,7 +105,11 @@ public final class DisplayHandler {
    * @return the default display
    */
   public static DisplayInfo getDefaultDisplay() {
-    return getDisplay(DEFAULT_DISPLAY_UUID);
+    try {
+      return getDisplay(DEFAULT_DISPLAY_UUID);
+    } catch (final UnknownDisplayException e) {
+      throw new FLLInternalException("Unable to find default display");
+    }
   }
 
   /**
@@ -171,9 +177,13 @@ public final class DisplayHandler {
   }
 
   private static void sendCurrentUrl(final DisplayData data) {
-    final DisplayInfo resolved = resolveDisplay(data.getInfo().getUuid());
-    final String url = resolved.getUrl();
-    send(data.getInfo().getUuid(), data.getSocket(), new DisplayUrlMessage(url));
+    try {
+      final DisplayInfo resolved = resolveDisplay(data.getInfo().getUuid());
+      final String url = resolved.getUrl();
+      send(data.getInfo().getUuid(), data.getSocket(), new DisplayUrlMessage(url));
+    } catch (final UnknownDisplayException e) {
+      LOGGER.warn("Unable to find display with UUID: {}. Not sending URL.", data.getInfo().getUuid());
+    }
   }
 
   /**
