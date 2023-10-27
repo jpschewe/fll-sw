@@ -6,6 +6,8 @@
 
 package fll.web.scoreboard;
 
+import java.io.EOFException;
+
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -53,7 +55,7 @@ public class ScoreboardEndpoint {
       throw new FLLInternalException("Received websocket message before receiving the session from start");
     }
 
-    LOGGER.trace("Received message: {}", text);
+    LOGGER.trace("{}: Received message: {}", session, text);
 
     try {
       final JsonNode raw = mapper.readTree(text);
@@ -65,16 +67,16 @@ public class ScoreboardEndpoint {
         this.uuid = ScoreboardUpdates.addClient(registerMessage.getDisplayUuid(), session, getHttpSession(session));
         break;
       case UPDATE:
-        LOGGER.warn("Received UPDATE message from client, ignoring");
+        LOGGER.warn("{}: Received UPDATE message from client, ignoring", uuid);
         break;
       case DELETE:
-        LOGGER.warn("Received DELETE message from client, ignoring");
+        LOGGER.warn("{}: Received DELETE message from client, ignoring", uuid);
         break;
       case RELOAD:
-        LOGGER.warn("Received RELOAD message from client, ignoring");
+        LOGGER.warn("{}: Received RELOAD message from client, ignoring", uuid);
         break;
       default:
-        LOGGER.error("Received unknown message type from client: {}", message.getType());
+        LOGGER.error("{}: Received unknown message type from client: {}", uuid, message.getType());
       }
     } catch (final JsonProcessingException e) {
       throw new FLLInternalException(String.format("Error reading json data from string: %s", text), e);
@@ -90,7 +92,11 @@ public class ScoreboardEndpoint {
 
   @OnError
   public void onError(final Throwable t) throws Throwable {
-    LOGGER.warn("Display socket error", t);
+    if (t instanceof EOFException) {
+      LOGGER.debug("{}: Socket closed.", uuid);
+    } else {
+      LOGGER.error("{}: Display socket error", uuid, t);
+    }
   }
 
   private static HttpSession getHttpSession(final Session session) {
