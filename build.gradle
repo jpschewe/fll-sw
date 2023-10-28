@@ -9,10 +9,6 @@ buildscript {
         mavenCentral()
         gradlePluginPortal()
     }
-    dependencies {
-      // needs to use old plugin mechanism otherwise I can't set the extra properties   
-      classpath(group: "com.cinnober.gradle", name: "semver-git", version: "2.3.1")
-    }
     configurations.classpath {
       exclude(group: "com.google.guava", module: "guava")
     }
@@ -38,14 +34,24 @@ plugins {
     
     // code coverage
     id "jacoco"
+    
+    // semver - adds showVersion and showInfo
+    // https://github.com/ilovemilk/semver-git-plugin
+    id "io.wusa.semver-git-plugin" version "2.3.7"
 }
 
-// needs to use old plugin mechanism otherwise I can't set nextVersion and snapshotSuffix
-ext.nextVersion = "patch"
-ext.snapshotSuffix = "beta.<count>+g<sha><dirty>"
-// optionally: ext.dirtyMarker = "-dirty" (default) replaces <dirty> in snapshotSuffix
-// optionally: ext.gitDescribeArgs = '--match *[0-9].[0-9]*.[0-9]*' (default) or other arguments for git describe.
-apply plugin: "com.cinnober.gradle.semver-git"
+semver {
+    snapshotSuffix="beta"
+    branches {
+        branch {
+            regex = ".+"
+            incrementer = "PATCH_INCREMENTER"
+            // desired format 18.0.1-beta.3+g4cfdea8-dirty, this gets close
+            formatter = { "${semver.info.version.major}.${semver.info.version.minor}.${semver.info.version.patch}+build.${semver.info.count}.sha.${semver.info.shortCommit}" }
+        }
+    }
+}
+project.version = semver.info
 
 repositories {
     mavenCentral()
