@@ -42,7 +42,7 @@ plugins {
 
 // needs to use old plugin mechanism otherwise I can't set nextVersion and snapshotSuffix
 ext.nextVersion = "patch"
-ext.snapshotSuffix = "beta.<count>+g<sha><dirty>"
+ext.snapshotSuffix = "beta.<count>+g<sha>"
 // optionally: ext.dirtyMarker = "-dirty" (default) replaces <dirty> in snapshotSuffix
 // optionally: ext.gitDescribeArgs = '--match *[0-9].[0-9]*.[0-9]*' (default) or other arguments for git describe.
 apply plugin: "com.cinnober.gradle.semver-git"
