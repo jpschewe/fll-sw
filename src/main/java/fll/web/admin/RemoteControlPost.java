@@ -19,12 +19,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
-import fll.web.DisplayInfo;
 import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.web.display.DisplayHandler;
+import fll.web.display.DisplayInfo;
 import fll.web.playoff.H2HUpdateWebSocket;
 import fll.web.scoreboard.ScoreboardUpdates;
 import jakarta.servlet.ServletContext;
@@ -54,7 +54,7 @@ public class RemoteControlPost extends BaseFLLServlet {
       return;
     }
 
-    final Collection<DisplayInfo> displays = DisplayHandler.getAllDisplays();
+    final Collection<DisplayInfo> displays = DisplayHandler.getAllRemoteControlDisplays();
 
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("finalistDivision {}", request.getParameter("finalistDivision"));

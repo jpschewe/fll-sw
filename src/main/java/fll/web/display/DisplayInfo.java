@@ -4,7 +4,7 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-package fll.web;
+package fll.web.display;
 
 import java.io.Serializable;
 import java.time.LocalTime;
@@ -73,16 +73,28 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    *
    * @param name {@link #getName()}
    * @param uuid {@link #getUuid()}
+   * @param useRemoteControl {@link #isUseRemoteControl()}
    */
-  public DisplayInfo(final String uuid,
-                     final String name) {
+  /* package */ DisplayInfo(final String uuid,
+                            final String name,
+                            final boolean useRemoteControl) {
     this.uuid = uuid;
     mName = name;
     mLastSeen = LocalTime.now();
     mRemotePage = DEFAULT_REMOTE_PAGE;
+    this.useRemoteControl = useRemoteControl;
 
     // make sure there is 1 bracket object all of the time
     mBrackets.add(new H2HBracketDisplay(this, 0, "", 1));
+  }
+
+  private final boolean useRemoteControl;
+
+  /**
+   * @return if this display is controlled by the remote control page
+   */
+  public boolean isUseRemoteControl() {
+    return useRemoteControl;
   }
 
   private final String uuid;

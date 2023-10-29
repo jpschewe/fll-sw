@@ -1,3 +1,4 @@
+* #1105 - Rework dynamic display to properly work with stand alone scoreboard pages
 * Better handling of unknown displays
 
 Release 18.0.0

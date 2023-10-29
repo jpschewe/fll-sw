@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,8 +37,8 @@ import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
-import fll.web.DisplayInfo;
 import fll.web.display.DisplayHandler;
+import fll.web.display.DisplayInfo;
 import fll.web.display.UnknownDisplayException;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.TeamScore;
@@ -78,7 +77,7 @@ public final class ScoreboardUpdates {
                                  final HttpSession httpSession) {
     final String uuid;
     if (StringUtils.isBlank(displayUuid)) {
-      uuid = UUID.randomUUID().toString();
+      uuid = DisplayHandler.registerStandaloneScoreboard(client);
     } else {
       uuid = displayUuid;
     }
@@ -90,7 +89,7 @@ public final class ScoreboardUpdates {
     try {
       sendAllScores(datasource, challengeDescription, uuid, client);
     } catch (final UnknownDisplayException e) {
-      LOGGER.error("Cannot find display {} that was just added", uuid);
+      LOGGER.error("Cannot find display {} that was just added as a new client", uuid);
     }
 
     return uuid;

@@ -18,10 +18,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
-import fll.web.DisplayInfo;
 import fll.web.InitializeDatabaseTest;
 import fll.web.IntegrationTestUtils;
 import fll.web.display.DisplayHandler;
+import fll.web.display.DisplayInfo;
 
 /**
  * Test for the slideshow code.

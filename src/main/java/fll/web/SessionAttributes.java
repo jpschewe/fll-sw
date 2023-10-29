@@ -70,7 +70,7 @@ public final class SessionAttributes {
   /**
    * Key in the session used to store the display name.
    *
-   * @see fll.web.DisplayInfo
+   * @see fll.web.display.DisplayInfo
    */
   public static final String DISPLAY_NAME = "displayName";
 
