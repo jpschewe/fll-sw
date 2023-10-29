@@ -9,7 +9,6 @@ package fll.web.display;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import fll.web.DisplayInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.jsp.PageContext;
 

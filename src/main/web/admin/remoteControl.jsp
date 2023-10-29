@@ -1,4 +1,4 @@
-<%@page import="fll.web.DisplayInfo"%>
+<%@page import="fll.web.display.DisplayInfo"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <fll-sw:required-roles roles="ADMIN" allowSetup="false" />

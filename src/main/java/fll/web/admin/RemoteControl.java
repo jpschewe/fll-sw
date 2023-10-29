@@ -69,7 +69,7 @@ public final class RemoteControl {
       pageContext.setAttribute("allAwardGroups",
                                Queries.getAwardGroups(connection, currentTournament.getTournamentID()));
 
-      pageContext.setAttribute("displayInformation", DisplayHandler.getAllDisplays());
+      pageContext.setAttribute("displayInformation", DisplayHandler.getAllRemoteControlDisplays());
 
     } catch (final SQLException e) {
       LOGGER.error(e.getMessage(), e);

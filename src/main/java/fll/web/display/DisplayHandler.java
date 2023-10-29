@@ -15,13 +15,13 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.FLLInternalException;
-import fll.web.DisplayInfo;
 import jakarta.websocket.Session;
 
 /**
@@ -48,7 +48,7 @@ public final class DisplayHandler {
   private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
 
   static {
-    final DisplayInfo defaultDisplay = new DisplayInfo(DEFAULT_DISPLAY_UUID, DisplayInfo.DEFAULT_DISPLAY_NAME);
+    final DisplayInfo defaultDisplay = new DisplayInfo(DEFAULT_DISPLAY_UUID, DisplayInfo.DEFAULT_DISPLAY_NAME, true);
     defaultDisplay.setRemotePage(DisplayInfo.WELCOME_REMOTE_PAGE);
     DISPLAYS.put(DEFAULT_DISPLAY_UUID, new DisplayData(defaultDisplay, new DisplaySocket()));
   }
@@ -113,14 +113,30 @@ public final class DisplayHandler {
   }
 
   /**
-   * @return all {@link DisplayInfo} objects sorted with default first.
+   * @return all {@link DisplayInfo} objects that use the remote control sorted
+   *         with default first.
    *         Unmodifiable.
+   * @see DisplayInfo#isUseRemoteControl()
    */
-  public static List<DisplayInfo> getAllDisplays() {
+  public static List<DisplayInfo> getAllRemoteControlDisplays() {
     synchronized (LOCK) {
       return Collections.unmodifiableList(DISPLAYS.values().stream().map(DisplayData::getInfo)
+                                                  .filter(DisplayInfo::isUseRemoteControl)
                                                   .collect(Collectors.toList()));
     }
+  }
+
+  private static final AtomicInteger STANDALONE_SCOREBOARDS = new AtomicInteger(0);
+
+  /**
+   * @param session the websocket
+   * @return the uuid of the display
+   */
+  public static String registerStandaloneScoreboard(final Session session) {
+    final String name = String.format("standalone-%d", STANDALONE_SCOREBOARDS.incrementAndGet());
+    final DisplayData data = internalRegisterDisplay(null, name, session, false);
+    data.getInfo().setRemotePage(DisplayInfo.SCOREBOARD_REMOTE_PAGE);
+    return data.getInfo().getUuid();
   }
 
   /**
@@ -134,6 +150,13 @@ public final class DisplayHandler {
   public static String registerDisplay(final @Nullable String providedUuid,
                                        final String name,
                                        final Session session) {
+    return internalRegisterDisplay(providedUuid, name, session, true).getInfo().getUuid();
+  }
+
+  private static DisplayData internalRegisterDisplay(final @Nullable String providedUuid,
+                                                     final String name,
+                                                     final Session session,
+                                                     final boolean useRemoteControl) {
     final String uuid;
     if (StringUtils.isBlank(providedUuid)) {
       uuid = UUID.randomUUID().toString();
@@ -147,7 +170,7 @@ public final class DisplayHandler {
       data = DISPLAYS.get(uuid);
       if (null == data) {
         final DisplaySocket socket = new DisplaySocket(session);
-        final DisplayInfo info = new DisplayInfo(uuid, name);
+        final DisplayInfo info = new DisplayInfo(uuid, name, useRemoteControl);
         data = new DisplayData(info, socket);
         DISPLAYS.put(uuid, data);
       } else {
@@ -158,7 +181,7 @@ public final class DisplayHandler {
     send(uuid, data.getSocket(), new AssignUuidMessage(uuid));
     sendCurrentUrl(data);
 
-    return uuid;
+    return data;
   }
 
   /**
