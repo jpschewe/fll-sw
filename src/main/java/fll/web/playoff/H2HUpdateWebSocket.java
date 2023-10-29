@@ -41,6 +41,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 import fll.web.GetHttpSessionConfigurator;
 import fll.web.display.DisplayHandler;
+import fll.web.display.UnknownDisplayException;
 import fll.xml.ScoreType;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
@@ -109,12 +110,16 @@ public class H2HUpdateWebSocket {
       final String h2hUuid;
       if (!StringUtils.isBlank(displayUuid)) {
         h2hUuid = displayUuid;
-        final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
         try {
+          final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
           updateDisplayedBracket(displayInfo, session);
+        } catch (final UnknownDisplayException e) {
+          LOGGER.warn("Cannot find display {}, dropping from head to head", displayUuid);
+          removeH2HDisplay(h2hUuid);
         } catch (final IOException e) {
-          LOGGER.warn("Got error writing to new session, dropping: "
-              + displayUuid, e);
+          LOGGER.warn("Got error writing to new session, dropping display {}", displayUuid, e);
+          removeH2HDisplay(h2hUuid);
+          DisplayHandler.removeDisplay(displayUuid);
           return;
         }
       } else {
@@ -153,13 +158,32 @@ public class H2HUpdateWebSocket {
               throw new IOException("Session is closed");
             }
           } catch (final IOException e) {
-            SESSIONS.remove(h2hUuid);
-            SESSIONS.getOrDefault(bracketInfo.getBracketName(), Collections.emptySet()).remove(h2hUuid);
+            removeH2HDisplay(h2hUuid);
           }
         } // foreach update
 
+      } // foreach bracket
+    } // session lock
+  }
+
+  private static void removeH2HDisplay(final String h2hUuid) {
+    synchronized (SESSIONS_LOCK) {
+      final Session session = ALL_SESSIONS.get(h2hUuid);
+      if (null != session) {
+        try {
+          session.close();
+        } catch (final IOException ioe) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Got error closing session, ignoring", ioe);
+          }
+        }
       }
-    }
+
+      ALL_SESSIONS.remove(h2hUuid);
+      for (final Map.Entry<String, Set<String>> entry : SESSIONS.entrySet()) {
+        entry.getValue().remove(h2hUuid);
+      } // foreach set of sessions
+    } // sessions lock
   }
 
   /**
@@ -227,29 +251,31 @@ public class H2HUpdateWebSocket {
     // used to find the sockets to talk to
     final String h2hUuid = displayInfo.getUuid();
 
-    // make sure that we update the correct bracket information used
-    final DisplayInfo resolved = DisplayHandler.resolveDisplay(displayInfo.getUuid());
+    try {
+      // make sure that we update the correct bracket information used
+      final DisplayInfo resolved = DisplayHandler.resolveDisplay(displayInfo.getUuid());
 
-    if (resolved.isHeadToHead()) {
-      synchronized (SESSIONS_LOCK) {
-        final @Nullable Session session = ALL_SESSIONS.get(h2hUuid);
-        if (null != session) {
-          THREAD_POOL.execute(() -> {
-            try {
-              updateDisplayedBracket(resolved, session);
-            } catch (final IOException e) {
-              LOGGER.warn("Error writing to {}, dropping", h2hUuid, e);
-              ALL_SESSIONS.remove(h2hUuid);
-              for (final Map.Entry<String, Set<String>> entry : SESSIONS.entrySet()) {
-                entry.getValue().remove(h2hUuid);
+      if (resolved.isHeadToHead()) {
+        synchronized (SESSIONS_LOCK) {
+          final @Nullable Session session = ALL_SESSIONS.get(h2hUuid);
+          if (null != session) {
+            THREAD_POOL.execute(() -> {
+              try {
+                updateDisplayedBracket(resolved, session);
+              } catch (final IOException e) {
+                LOGGER.warn("Error writing to {}, dropping", h2hUuid, e);
+                removeH2HDisplay(h2hUuid);
               }
-            }
-          });
-        } else {
-          LOGGER.warn("Found display info with uuid {} that is displaying head to head and doesn't have a head to head web socket",
-                      h2hUuid);
-        }
-      }
+            });
+          } else {
+            LOGGER.warn("Found display info with uuid {} that is displaying head to head and doesn't have a head to head web socket",
+                        h2hUuid);
+          }
+        } // session lock
+      } // is head to head
+    } catch (final UnknownDisplayException e) {
+      LOGGER.warn("Unable to find display {}, removing from head to head", displayInfo.getUuid());
+      removeH2HDisplay(h2hUuid);
     }
   }
 
@@ -378,18 +404,7 @@ public class H2HUpdateWebSocket {
 
       // cleanup dead sessions
       for (final String uuid : toRemove) {
-        final Session session = ALL_SESSIONS.get(uuid);
-        if (null != session) {
-          try {
-            session.close();
-          } catch (final IOException ioe) {
-            if (LOGGER.isDebugEnabled()) {
-              LOGGER.debug("Got error closing session, ignoring", ioe);
-            }
-          }
-        }
-        uuids.remove(uuid);
-        ALL_SESSIONS.remove(uuid);
+        removeH2HDisplay(uuid);
       } // foreach session to remove
 
     } // end lock
@@ -403,7 +418,7 @@ public class H2HUpdateWebSocket {
   @OnError
   public void error(@SuppressWarnings("unused") final Session session,
                     final Throwable t) {
-    LOGGER.error("Caught websocket error", t);
+    LOGGER.error("Caught websocket error, ignoring", t);
   }
 
   /**
