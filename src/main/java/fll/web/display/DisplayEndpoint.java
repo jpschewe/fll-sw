@@ -6,6 +6,8 @@
 
 package fll.web.display;
 
+import java.io.EOFException;
+
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -88,7 +90,12 @@ public class DisplayEndpoint {
 
   @OnError
   public void onError(final Throwable t) throws Throwable {
-    LOGGER.warn("Display socket error", t);
+    if (t instanceof EOFException) {
+      LOGGER.debug("Socket closed", t);
+      end();
+    } else {
+      LOGGER.warn("Display socket error", t);
+    }
   }
 
 }
