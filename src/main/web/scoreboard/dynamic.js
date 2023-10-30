@@ -292,8 +292,15 @@ function allTeamsDoScroll(timestamp) {
 }
 
 function addToMostRecent(tableBody, scoreUpdate) {
+    const rowId = "most_recent_" + scoreUpdate.team.teamNumber + "_run_" + scoreUpdate.runNumber;
+    const prevRow = document.getElementById(rowId);
+    if(prevRow) {
+        prevRow.parentNode.removeChild(prevRow);
+    }
+    
     const trElement = tableBody.insertRow(0);
-
+    trElement.id = rowId;
+    
     const teamNumElement = trElement.insertCell();
     teamNumElement.classList.add("left");
     teamNumElement.innerText = scoreUpdate.team.teamNumber;
