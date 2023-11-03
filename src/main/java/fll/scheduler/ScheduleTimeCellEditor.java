@@ -8,6 +8,7 @@ package fll.scheduler;
 
 import java.awt.Component;
 import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.JOptionPane;
@@ -65,7 +66,25 @@ import org.checkerframework.checker.nullness.qual.Nullable;
                                                final boolean isSelected,
                                                final int row,
                                                final int column) {
-    final LocalTime time = (LocalTime) value;
+    LocalTime time;
+    if (null == value) {
+      time = LocalTime.now();
+    } else if (value instanceof String) {
+      final String s = (String) value;
+      if (s.isEmpty()) {
+        time = LocalTime.now();
+      } else {
+        try {
+          time = LocalTime.parse(s);
+        } catch (final DateTimeParseException e) {
+          time = LocalTime.now();
+        }
+      }
+    } else if (value instanceof LocalTime) {
+      time = (LocalTime) value;
+    } else {
+      time = LocalTime.now();
+    }
     delegate.setTime(time);
     return delegate;
   }

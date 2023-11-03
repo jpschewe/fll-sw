@@ -1,3 +1,4 @@
+* Fix bug in schedule UI where the default value of a time is a string
 * #1106 - Ensure no duplicate rows in most recent scores scoreboard display
 * #1105 - Rework dynamic display to properly work with stand alone scoreboard pages
 * Better handling of unknown displays
