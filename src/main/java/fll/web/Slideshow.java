@@ -31,7 +31,8 @@ public final class Slideshow {
                                      final HttpSession session,
                                      final PageContext pageContext) {
     // All images are be located under slideshow/ in the fll web folder.
-    final String imagePath = application.getRealPath("/slideshow");
+    final String imagePath = application.getRealPath("/"
+        + WebUtils.SLIDESHOW_PATH);
 
     // This varible holds the name of the last image, relative to imagePath
     String lastImage = SessionAttributes.getAttribute(session, "slideShowLastImage", String.class);

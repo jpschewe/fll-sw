@@ -6,6 +6,7 @@
 
 package fll.web.admin;
 
+import fll.web.WebUtils;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,13 +19,11 @@ import jakarta.servlet.jsp.PageContext;
 @MultipartConfig()
 public class ManageSlideshow extends ImageManagement {
 
-  private static final String BASE_PATH = "slideshow";
-
   /**
    * Setup management for slideshow images.
    */
   public ManageSlideshow() {
-    super(BASE_PATH);
+    super(WebUtils.SLIDESHOW_PATH);
   }
 
   /**
@@ -33,6 +32,6 @@ public class ManageSlideshow extends ImageManagement {
    */
   public static void populateContext(final ServletContext application,
                                      final PageContext page) {
-    ImageManagement.populateContext(BASE_PATH, application, page);
+    ImageManagement.populateContext(WebUtils.SLIDESHOW_PATH, application, page);
   }
 }

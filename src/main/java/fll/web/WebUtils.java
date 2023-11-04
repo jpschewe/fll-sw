@@ -466,6 +466,12 @@ public final class WebUtils {
   public static final String SPONSOR_LOGOS_PATH = "sponsor_logos";
 
   /**
+   * The path to the slideshow images relative to the root of the web application.
+   * Does not have a leading or trailing slash.
+   */
+  public static final String SLIDESHOW_PATH = "slideshow";
+
+  /**
    * Get the sponsor logo filenames.
    *
    * @param application used to get the absolute path of the sponsor logos

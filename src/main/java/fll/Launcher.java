@@ -973,7 +973,7 @@ public class Launcher extends JFrame {
     if (null == webroot) {
       return null;
     } else {
-      final Path check = webroot.resolve("slideshow");
+      final Path check = webroot.resolve(WebUtils.SLIDESHOW_PATH);
       if (Files.exists(check)
           && Files.isDirectory(check)) {
         return check.normalize();
@@ -1256,7 +1256,7 @@ public class Launcher extends JFrame {
     }
 
     // copy slideshow
-    final Path oldSlideshow = oldWebDir.resolve("slideshow");
+    final Path oldSlideshow = oldWebDir.resolve(WebUtils.SLIDESHOW_PATH);
     final Path newSlideshow = getSlideshowDirectory();
     if (null == newSlideshow) {
       throw new FLLRuntimeException("Unable to find current slideshow directory");
