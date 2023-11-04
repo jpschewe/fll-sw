@@ -173,6 +173,11 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
         </li>
 
         <li>
+            <a href="manage-sponsor-logos.jsp" target="_blank">Add
+                or delete sponsor logos</a>
+        </li>
+
+        <li>
             <c:if test="${scheduleUploaded }">
                 <span class='completed'>DONE </span>
             </c:if>
