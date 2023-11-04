@@ -2,7 +2,7 @@
 <fll-sw:required-roles roles="ADMIN" allowSetup="false" />
 
 <%
-fll.web.admin.ManageSponsorLogos.populateContext(application, pageContext);
+fll.web.admin.ManageSlideshow.populateContext(application, pageContext);
 %>
 
 <html>
@@ -10,14 +10,14 @@ fll.web.admin.ManageSponsorLogos.populateContext(application, pageContext);
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
-<title>Manage sponsor logos</title>
+<title>Manage slideshow</title>
 </head>
 
 <body>
 
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
 
-    <form id='sponsor_upload' action='ManageSponsorLogos' method='post'
+    <form id='sponsor_upload' action='ManageSlideshow' method='post'
         enctype='multipart/form-data'>
 
         <div>

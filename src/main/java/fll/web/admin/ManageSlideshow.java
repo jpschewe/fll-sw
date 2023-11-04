@@ -12,18 +12,18 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.jsp.PageContext;
 
 /**
- * Support for managing sponsor logos.
+ * Support for managing slideshow images.
  */
-@WebServlet("/admin/ManageSponsorLogos")
+@WebServlet("/admin/ManageSlideshow")
 @MultipartConfig()
-public class ManageSponsorLogos extends ImageManagement {
+public class ManageSlideshow extends ImageManagement {
 
-  private static final String BASE_PATH = "sponsor_logos";
+  private static final String BASE_PATH = "slideshow";
 
   /**
-   * Setup management for sponsor logos.
+   * Setup management for slideshow images.
    */
-  public ManageSponsorLogos() {
+  public ManageSlideshow() {
     super(BASE_PATH);
   }
 

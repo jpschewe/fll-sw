@@ -173,11 +173,6 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
         </li>
 
         <li>
-            <a href="manage-sponsor-logos.jsp" target="_blank">Add
-                or delete sponsor logos</a>
-        </li>
-
-        <li>
             <c:if test="${scheduleUploaded }">
                 <span class='completed'>DONE </span>
             </c:if>
@@ -322,6 +317,16 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
         <li>
             <a href="<c:url value='/admin/delayed_performance.jsp'/>">Setup
                 delay of displaying performance scores</a>
+        </li>
+
+        <li>
+            <a href="manage-sponsor-logos.jsp" target="_blank">Add
+                or delete sponsor logos</a>
+        </li>
+
+        <li>
+            <a href="manage-slideshow.jsp" target="_blank">Add or
+                delete slideshow images</a>
         </li>
 
     </ol>
