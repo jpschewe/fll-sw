@@ -6,6 +6,7 @@
 
 package fll.web;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -18,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,6 +36,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fll.Utilities;
 
 /**
  * Some utilities for dealing with the web.
@@ -453,5 +457,21 @@ public final class WebUtils {
     }
 
     response.sendRedirect(response.encodeRedirectURL(whereTo));
+  }
+
+  /**
+   * Get the sponsor logo filenames.
+   *
+   * @param application used to get the absolute path of the sponsor logos
+   *          directory
+   * @return sorted sponsor logos list
+   * @see Utilities#getGraphicFiles(File)
+   */
+  public static List<String> getSponsorLogos(final ServletContext application) {
+    final String imagePath = application.getRealPath("/sponsor_logos");
+
+    final List<String> logoFiles = Utilities.getGraphicFiles(new File(imagePath));
+
+    return logoFiles;
   }
 }

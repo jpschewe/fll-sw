@@ -6,7 +6,6 @@
 
 package fll.web.scoreboard;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -29,6 +28,7 @@ import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
+import fll.web.WebUtils;
 import fll.web.display.DisplayHandler;
 import fll.web.display.DisplayInfo;
 import fll.web.display.UnknownDisplayException;
@@ -142,7 +142,7 @@ public final class Dynamic {
       final double scrollRate = GlobalParameters.getAllTeamScrollRate(connection);
       page.setAttribute("scrollRate", scrollRate);
 
-      final List<String> sponsorLogos = getSponsorLogos(application);
+      final List<String> sponsorLogos = WebUtils.getSponsorLogos(application);
       page.setAttribute("sponsorLogos", sponsorLogos);
 
       page.setAttribute("teamsBetweenLogos", Integer.valueOf(TEAMS_BETWEEN_LOGOS));
@@ -207,19 +207,6 @@ public final class Dynamic {
         throw new FLLInternalException("Internal error, cannot choose color");
       }
     }
-  }
-
-  /**
-   * Get the sponsor logo filenames relative to "/sponsor_logos".
-   *
-   * @return sorted sponsor logos list
-   */
-  private static List<String> getSponsorLogos(final ServletContext application) {
-    final String imagePath = application.getRealPath("/sponsor_logos");
-
-    final List<String> logoFiles = Utilities.getGraphicFiles(new File(imagePath));
-
-    return logoFiles;
   }
 
 }

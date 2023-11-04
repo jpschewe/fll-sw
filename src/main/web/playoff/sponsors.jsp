@@ -1,3 +1,4 @@
+<%@page import="fll.web.WebUtils"%>
 <%@ page language="java" contentType="text/html; charset=us-ascii"
     pageEncoding="UTF-8"%>
     
@@ -9,10 +10,7 @@
 <fll-sw:required-roles roles="PUBLIC" allowSetup="false" />
 
 <%
-//All logos shall be located under sponsor_logos in the fll web folder.
-String imagePath = application.getRealPath("/sponsor_logos");
-
-List<String> logoFiles = Utilities.getGraphicFiles(new File(imagePath));
+List<String> logoFiles = WebUtils.getSponsorLogos(application);
 
 //This varible holds the index of the last image, relative to imagePath
 final int numLogos = logoFiles.size();
