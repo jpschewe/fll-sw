@@ -210,7 +210,7 @@ public final class Dynamic {
   }
 
   /**
-   * Get the URsponsor logo filenames relative to "/sponsor_logos".
+   * Get the sponsor logo filenames relative to "/sponsor_logos".
    *
    * @return sorted sponsor logos list
    */
