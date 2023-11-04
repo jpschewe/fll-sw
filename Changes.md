@@ -1,3 +1,4 @@
+* Copy slideshow and sponsor logs during migration from an older version of the software
 * #1107 - allow one to manipulate sponsor logos from the web
 * Fix bug in schedule UI where the default value of a time is a string
 * #1106 - Ensure no duplicate rows in most recent scores scoreboard display
