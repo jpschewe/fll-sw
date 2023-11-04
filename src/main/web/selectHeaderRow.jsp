@@ -21,10 +21,7 @@ fll.web.SelectHeaderRow.populateContext(request, session, pageContext);
 </style>
 <body>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <p>Select the row that contains the headers</p>
 
     <form action="StoreColumnNames" method="POST">

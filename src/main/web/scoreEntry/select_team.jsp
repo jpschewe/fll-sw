@@ -92,10 +92,7 @@ OPTION {
 
 
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <a class="wide" href="choose-table.jsp"> <c:choose>
             <c:when test="${not empty scoreEntrySelectedTable}">
 Entering scores for table ${scoreEntrySelectedTable}. Teams are sorted in schedule order with this table first.

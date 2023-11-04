@@ -33,10 +33,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
 <body>
     <h1>${challengeDescription.title }(Administration)</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <h2>Before tournament day</h2>
     <ol>
         <li>

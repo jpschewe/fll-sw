@@ -50,10 +50,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
         again.
     </p>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <form name="choose_headers" id="choose_headers" method='POST'
         action="<c:url value='/schedule/ChooseScheduleHeaders'/>">
 

@@ -14,10 +14,7 @@ fll.web.report.awards.AwardsIndex.populateContext(application, pageContext);
     href="<c:url value='/style/fll-sw.css'/>" />
 <body>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <h1>Configuration of how the awards report and awards script
         are generated</h1>
 

@@ -59,10 +59,7 @@ fll.web.report.finalist.FinalistTeams.populateContext(application, pageContext);
 </head>
 
 <body class='scoreboard'>
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <h1>Teams in finalist judging</h1>
 
     <p>Please send a coach to the information desk to pickup your

@@ -18,10 +18,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 <body>
     <h1>${challengeDescription.title }</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
 
     <p>
         The current tournament is

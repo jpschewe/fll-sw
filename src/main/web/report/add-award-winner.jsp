@@ -31,10 +31,7 @@ fll.web.report.AddAwardWinner.populateContext(request, response, application, se
 
 <body>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <h1>Add winner to ${param.categoryTitle}</h1>
     <form action="AddAwardWinner" method="POST" id="add_award_winner">
 

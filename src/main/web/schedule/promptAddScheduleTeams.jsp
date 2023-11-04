@@ -11,10 +11,7 @@
 
 <body>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <form name="promptCreateMissingTeams" action="AddScheduleTeams">
 
         <p>The following teams are in the schedule and not in the
