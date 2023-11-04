@@ -460,6 +460,12 @@ public final class WebUtils {
   }
 
   /**
+   * The path to the sponsor logos relative to the root of the web application.
+   * Does not have a leading or trailing slash.
+   */
+  public static final String SPONSOR_LOGOS_PATH = "sponsor_logos";
+
+  /**
    * Get the sponsor logo filenames.
    *
    * @param application used to get the absolute path of the sponsor logos
@@ -468,7 +474,8 @@ public final class WebUtils {
    * @see Utilities#getGraphicFiles(File)
    */
   public static List<String> getSponsorLogos(final ServletContext application) {
-    final String imagePath = application.getRealPath("/sponsor_logos");
+    final String imagePath = application.getRealPath("/"
+        + SPONSOR_LOGOS_PATH);
 
     final List<String> logoFiles = Utilities.getGraphicFiles(new File(imagePath));
 

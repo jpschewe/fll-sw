@@ -89,6 +89,7 @@ import fll.util.FLLRuntimeException;
 import fll.util.FormatterUtils;
 import fll.util.GuiExceptionHandler;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import fll.web.setup.CreateDB.UserAccount;
 import fll.xml.ChallengeDescription;
 import fll.xml.ui.ChallengeDescriptionEditor;
@@ -648,13 +649,13 @@ public class Launcher extends JFrame {
         try {
           Desktop.getDesktop().open(dir.toFile());
         } catch (final IOException e) {
-          final String message = "Error opening sponsor_logos directory: "
+          final String message = "Error opening sponsor logos directory: "
               + e.getMessage();
           LOGGER.error(message, e);
           JOptionPane.showMessageDialog(this, message, "ERROR", JOptionPane.ERROR_MESSAGE);
         }
       } else {
-        JOptionPane.showMessageDialog(this, "Cannot find sponsor_logos directory.", "ERROR", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Cannot find sponsor logos directory.", "ERROR", JOptionPane.ERROR_MESSAGE);
       }
     });
 
@@ -953,7 +954,7 @@ public class Launcher extends JFrame {
     if (null == webroot) {
       return null;
     } else {
-      final Path check = webroot.resolve("sponsor_logos");
+      final Path check = webroot.resolve(WebUtils.SPONSOR_LOGOS_PATH);
       if (Files.exists(check)
           && Files.isDirectory(check)) {
         return check.normalize();
@@ -1243,7 +1244,7 @@ public class Launcher extends JFrame {
     final Path oldWebDir = oldBaseDir.resolve("web");
 
     // copy sponsor logos
-    final Path oldSponsorLogos = oldWebDir.resolve("sponsor_logos");
+    final Path oldSponsorLogos = oldWebDir.resolve(WebUtils.SPONSOR_LOGOS_PATH);
     final Path newSponsorLogos = getSponsorLogosDirectory();
     if (null == newSponsorLogos) {
       throw new FLLRuntimeException("Unable to find current sponsor logos directory");

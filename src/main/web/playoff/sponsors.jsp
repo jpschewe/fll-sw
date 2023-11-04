@@ -1,50 +1,31 @@
-<%@page import="fll.web.WebUtils"%>
-<%@ page language="java" contentType="text/html; charset=us-ascii"
-    pageEncoding="UTF-8"%>
-    
-<%@ page import="java.io.File"%>
-<%@ page import="java.util.ArrayList"%>
-<%@ page import="java.util.List"%>
-<%@ page import="fll.Utilities"%>
+<%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <fll-sw:required-roles roles="PUBLIC" allowSetup="false" />
 
 <%
-List<String> logoFiles = WebUtils.getSponsorLogos(application);
-
-//This varible holds the index of the last image, relative to imagePath
-final int numLogos = logoFiles.size();
-int lastLogoIndex;
-if(numLogos < 1) {
-    lastLogoIndex = -1;
-} else if(null != session.getAttribute("lastLogoIndex")) {
-    lastLogoIndex = ((Integer)session.getAttribute("lastLogoIndex")).intValue();
-} else {
-    lastLogoIndex = numLogos - 1;
-}
+fll.web.playoff.Sponsors.populateContext(application, session, pageContext);
 %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
 <html>
 <head>
-<title>Sponsor frame</title>
-  <script language=javascript>
-    window.setInterval("location.href='sponsors.jsp'", 15000);
-  </script>
+<title>Sponsors</title>
+<script type="text/javascript">
+  window.setInterval("location.href='sponsors.jsp'", 15000);
+</script>
 </head>
 <body>
-<% if (numLogos > 0) { %>
-<table align="center">
-  <tr>
-    <td width="50%" style="text-align:right; vertical-align:middle">
-      This tournament sponsored by:
-    </td>
-    <td width="50%" style="text-align:left; vertical-align:middle">
-      <% lastLogoIndex = (lastLogoIndex + 1) % numLogos; %>
-     <% out.print("<img src='../" + logoFiles.get(lastLogoIndex) + "'/>"); %>
-      <% session.setAttribute("lastLogoIndex",lastLogoIndex); %>
-    </td>
-  </tr>
-</table>
-<% } // end if %>
+    <c:if test="${numLogos > 0}">
+        <table class="center">
+            <tr>
+                <td width="50%"
+                    style="text-align: right; vertical-align: middle">
+                    This tournament sponsored by:</td>
+                <td width="50%"
+                    style="text-align: left; vertical-align: middle">
+                    <img src='<c:url value="/${imageFileName}"/>' />
+                </td>
+            </tr>
+        </table>
+    </c:if>
 </body>
 </html>
