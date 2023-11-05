@@ -33,10 +33,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
 <body>
     <h1>${challengeDescription.title }(Administration)</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <h2>Before tournament day</h2>
     <ol>
         <li>
@@ -317,6 +314,16 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
         <li>
             <a href="<c:url value='/admin/delayed_performance.jsp'/>">Setup
                 delay of displaying performance scores</a>
+        </li>
+
+        <li>
+            <a href="manage-sponsor-logos.jsp" target="_blank">Add
+                or delete sponsor logos</a>
+        </li>
+
+        <li>
+            <a href="manage-slideshow.jsp" target="_blank">Add or
+                delete slideshow images</a>
         </li>
 
     </ol>

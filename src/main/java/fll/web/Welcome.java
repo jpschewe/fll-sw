@@ -6,14 +6,11 @@
 
 package fll.web;
 
-import java.io.File;
 import java.util.Formatter;
 import java.util.List;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.jsp.JspWriter;
-
-import fll.Utilities;
 
 /**
  * Helpers for welcome.jsp.
@@ -31,10 +28,7 @@ public final class Welcome {
    */
   public static void outputLogos(final ServletContext application,
                                  final JspWriter out) {
-    // All logos shall be located under sponsor_logos in the fll web folder.
-    final String imagePath = application.getRealPath("/sponsor_logos");
-
-    final List<String> logoFiles = Utilities.getGraphicFiles(new File(imagePath));
+    final List<String> logoFiles = WebUtils.getSponsorLogos(application);
 
     // final int numColumns = (int) Math.ceil((double) logoFiles.size()
     // / (double) MAX_NUM_LOGOS_PER_COLUMN);

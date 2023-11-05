@@ -14,10 +14,7 @@ fll.web.developer.importdb.SelectTournament.populateContext(session, pageContext
 </head>
 
 <body>
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <form name="selectTournament" action="CheckTournamentExists">
         <p>Select a tournament to import</p>
         <select name="tournament">

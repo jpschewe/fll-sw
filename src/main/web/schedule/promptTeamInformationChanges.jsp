@@ -12,10 +12,7 @@
 <body>
     <h1>Update team information (Upload Schedule)</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <p>There are some differences between the schedule and the
         database.</p>
 

@@ -67,10 +67,7 @@ fll.web.playoff.CreatePlayoffDivision.populateContext(application, pageContext);
 <body>
     <h1>Create Playoff Bracket</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <c:choose>
         <c:when test="${not runningHeadToHead}">
             <p>Head to head is disabled for this tournament. Playoff

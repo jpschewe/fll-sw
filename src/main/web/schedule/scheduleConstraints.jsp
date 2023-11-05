@@ -12,10 +12,7 @@
 <body>
     <h1>Specify schedule constraints (Upload Schedule)</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <form name="constraints" id="constraints" method='POST'
         action='ProcessScheduleConstraints'>
         <p>Specify the constraints to use for checking the uploaded

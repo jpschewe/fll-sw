@@ -21,10 +21,7 @@ fll.web.schedule.SpecifySubjectiveStationDurations.populateContext(session, page
     <p>Specify the amount of time allocated for each subjective
         judging station.</p>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <form name="specify_durations" id="specify_durations" method='POST'
         action="<c:url value='/schedule/SpecifySubjectiveStationDurations'/>">
 

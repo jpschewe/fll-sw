@@ -31,10 +31,7 @@
 
 <body>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <h1>Non Numeric Categories</h1>
 
     <p>This page allows you to select teams that are nominated for

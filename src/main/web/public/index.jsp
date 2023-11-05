@@ -16,10 +16,7 @@ fll.web.PublicIndex.populateContext(application, pageContext);
 <body>
     <h1>${challengeDescription.title }</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     Below are listed the web pages that are available to the public.
 
     <c:if test="$not empty ScorePageText}">

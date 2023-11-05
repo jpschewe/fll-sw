@@ -26,10 +26,7 @@ fll.web.playoff.PlayoffIndex.populateContext(application, session, pageContext);
 <body>
     <h1>Head to Head menu</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <c:choose>
         <c:when test="${not runningHeadToHead}">
             <p>Head to head is disabled for this tournament. There

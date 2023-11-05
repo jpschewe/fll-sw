@@ -17,10 +17,7 @@ fll.web.admin.AskCreateAdmin.populateContext(application, pageContext);
 
 <body>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <div>
         The following admin users exist in the database. Would you like
         to create an additional admin user?
