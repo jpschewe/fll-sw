@@ -70,8 +70,8 @@ public class PromptSummarizeScores extends BaseFLLServlet {
 
   /**
    * Check if summary scores need to be updated. If they do, redirect and set
-   * the session variable SUMMARY_REDIRECT to point to
-   * redirect.
+   * the session variable {@link PromptSummarizeScores#SUMMARY_REDIRECT_KEY} to
+   * point to redirect.
    *
    * @param request used to store form parameters if redirecting
    * @param response used to send a redirect
