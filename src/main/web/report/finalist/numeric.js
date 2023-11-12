@@ -46,6 +46,7 @@ const finalistNumericModule = {};
         let prevJudgingGroup = null;
         let prevScore = 0;
         let topTeams = false;
+        let prevRow = null;
 
         const dataElement = document.getElementById("data");
         for (const team of teams) {
@@ -64,14 +65,22 @@ const finalistNumericModule = {};
                 } else {
                     // same judging group
                     if (topTeams && Math.abs(prevScore - score) < 1) {
-                        // close score
+                        // close to top score
                         row.classList.add("top-score");
+                    } else if (Math.abs(prevScore - score) < 1) {
+                        // close score
+                        row.classList.add("tie-score");
+                        if (prevRow) {
+                            // need to mark previous row as well
+                            prevRow.classList.add("tie-score");
+                        }
                     } else {
                         // don't consider other close scores as ties'
                         topTeams = false;
                     }
                 }
                 prevScore = score;
+                prevRow = row;
 
                 const finalistCol = document.createElement("td");
                 row.appendChild(finalistCol);
