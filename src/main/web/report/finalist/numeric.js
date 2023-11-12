@@ -43,9 +43,9 @@ const finalistNumericModule = {};
     }
 
     function createTeamTable(teams, currentDivision, currentCategory) {
-        let prevJudgingGroup = null;
-        let prevScore = 0;
-        let topTeams = false;
+        const prevScore = new Map();
+        const topTeams = new Map();
+        const prevRow = new Map();
 
         const dataElement = document.getElementById("data");
         for (const team of teams) {
@@ -57,21 +57,28 @@ const finalistNumericModule = {};
                 const score = finalist_module.getCategoryScore(team, currentCategory);
                 const group = team.judgingGroup;
                 //  || (group == prevJudgingGroup && Math.abs(prevScore - score) < 1)
-                if (group != prevJudgingGroup) {
-                    topTeams = true;
+                if (!topTeams.has(group)) {
+                    topTeams.set(group, true);
                     row.classList.add("top-score");
-                    prevJudgingGroup = group;
                 } else {
                     // same judging group
-                    if (topTeams && Math.abs(prevScore - score) < 1) {
-                        // close score
+                    if (topTeams.get(group) && Math.abs(prevScore.get(group) - score) < 1) {
+                        // close to top score
                         row.classList.add("top-score");
+                    } else if (Math.abs(prevScore.get(group) - score) < 1) {
+                        // close score
+                        row.classList.add("tie-score");
+                        if (prevRow.get(group)) {
+                            // need to mark previous row as well
+                            prevRow.get(group).classList.add("tie-score");
+                        }
                     } else {
                         // don't consider other close scores as ties'
-                        topTeams = false;
+                        topTeams.set(group, false);
                     }
                 }
-                prevScore = score;
+                prevScore.set(group, score);
+                prevRow.set(group, row);
 
                 const finalistCol = document.createElement("td");
                 row.appendChild(finalistCol);

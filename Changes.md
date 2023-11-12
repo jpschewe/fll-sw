@@ -1,3 +1,5 @@
+* 105 - Highlight ties in the finalist in the numeric awards
+
 Release 18.1.0
 ==============
 * #1108 - allow one to manipulate slideshow images from the web
