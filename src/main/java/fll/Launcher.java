@@ -166,7 +166,7 @@ public class Launcher extends JFrame {
   private static Options buildOptions() {
     final Options options = new Options();
     options.addOption(null, OPT_START_WEB, false, "Immediately start the webserver");
-    options.addOption(null, OPT_PORT, true, "The port to use for the web server. Deafult is "
+    options.addOption(null, OPT_PORT, true, "The port to use for the web server. Default is "
         + DEFAULT_WEB_PORT);
     options.addOption(null, OPT_HEADLESS, false, "Run without the GUI and immediately start the webserver");
     options.addOption(null, OPT_CREATE_ADMIN, false, "Create an admin user");
