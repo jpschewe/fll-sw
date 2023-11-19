@@ -1,4 +1,5 @@
-* 105 - Highlight ties in the finalist in the numeric awards
+* #1110 - Allow one to set change time to be 0 minutes when creating new schedules
+* #105 - Highlight ties in the finalist in the numeric awards
 
 Release 18.1.0
 ==============
