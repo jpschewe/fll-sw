@@ -22,11 +22,11 @@
     </goalGroup>
     <goalGroup title="M02B">
       <description>Theater Scene Change Other Team</description>
-      <goal initialValue="0.00" multiplier="1.00" name="m02_b_other_team_scene_change" required="false" scoreType="INTEGER" title="OTHER Team Theater RED Flag Down">
+      <goal initialValue="0.00" multiplier="0.00" name="m02_b_other_team_scene_change" required="false" scoreType="INTEGER" title="OTHER Team Theater RED Flag Down">
         <value score="0.00" title="Other Team Flag NOT Down" value="zeroother"/>
-        <value score="20.00" title="Other Team Blue" value="blueother"/>
-        <value score="30.00" title="Other Team Pink" value="pinkother"/>
-        <value score="10.00" title="Other Team Orange" value="orangeother"/>
+        <value score="2.00" title="Other Team Blue" value="blueother"/>
+        <value score="3.00" title="Other Team Pink" value="pinkother"/>
+        <value score="1.00" title="Other Team Orange" value="orangeother"/>
       </goal>
       <computedGoal name="computer_other_theater_color" title="Compute Other Team Theater Color">
         <switch>
