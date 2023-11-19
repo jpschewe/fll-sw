@@ -32,6 +32,7 @@ body {
     
 
 
+
 <script type="text/javascript">
 var EditFlag = false;
 
@@ -166,22 +167,22 @@ score += m02_scene_change_computed;
 document.scoreEntry.score_m02_scene_change.value = m02_scene_change_computed;
 
 // m02_b_other_team_scene_change
-if(m02_b_other_team_scene_change_raw == "blueother") {
+if(m02_b_other_team_scene_change_raw == "zeroother") {
   document.scoreEntry.m02_b_other_team_scene_change[0].checked = true;
   m02_b_other_team_scene_change_computed = 0.000000 * 1.0;
-  document.scoreEntry.m02_b_other_team_scene_change_radioValue.value = 'BLUEOTHER'
+  document.scoreEntry.m02_b_other_team_scene_change_radioValue.value = 'ZEROOTHER'
 } else if(m02_b_other_team_scene_change_raw == "orangeother") {
   document.scoreEntry.m02_b_other_team_scene_change[1].checked = true;
-  m02_b_other_team_scene_change_computed = 1.000000 * 1.0;
+  m02_b_other_team_scene_change_computed = 10.000000 * 1.0;
   document.scoreEntry.m02_b_other_team_scene_change_radioValue.value = 'ORANGEOTHER'
-} else if(m02_b_other_team_scene_change_raw == "pinkother") {
+} else if(m02_b_other_team_scene_change_raw == "blueother") {
   document.scoreEntry.m02_b_other_team_scene_change[2].checked = true;
-  m02_b_other_team_scene_change_computed = 2.000000 * 1.0;
-  document.scoreEntry.m02_b_other_team_scene_change_radioValue.value = 'PINKOTHER'
-} else if(m02_b_other_team_scene_change_raw == "zeroother") {
+  m02_b_other_team_scene_change_computed = 20.000000 * 1.0;
+  document.scoreEntry.m02_b_other_team_scene_change_radioValue.value = 'BLUEOTHER'
+} else if(m02_b_other_team_scene_change_raw == "pinkother") {
   document.scoreEntry.m02_b_other_team_scene_change[3].checked = true;
-  m02_b_other_team_scene_change_computed = 3.000000 * 1.0;
-  document.scoreEntry.m02_b_other_team_scene_change_radioValue.value = 'ZEROOTHER'
+  m02_b_other_team_scene_change_computed = 30.000000 * 1.0;
+  document.scoreEntry.m02_b_other_team_scene_change_radioValue.value = 'PINKOTHER'
 }
 score += m02_b_other_team_scene_change_computed;
 document.scoreEntry.score_m02_b_other_team_scene_change.value = m02_b_other_team_scene_change_computed;
@@ -2250,9 +2251,9 @@ document.addEventListener('DOMContentLoaded', function() {
   </td>
   <td>
       <label class="enum-button">
-          <input type="radio" name="m02_b_other_team_scene_change" value="blueother" id="m02_b_other_team_scene_change_blueother" onclick='set_m02_b_other_team_scene_change("blueother")'>
-        <span id="m02_b_other_team_scene_change_blueother_span">
-          Other Team Blue
+          <input type="radio" name="m02_b_other_team_scene_change" value="zeroother" id="m02_b_other_team_scene_change_zeroother" onclick='set_m02_b_other_team_scene_change("zeroother")' checked="checked">
+        <span id="m02_b_other_team_scene_change_zeroother_span">
+          Other Team Flag NOT Down
         </span>
       </label>
       <label class="enum-button">
@@ -2262,15 +2263,15 @@ document.addEventListener('DOMContentLoaded', function() {
         </span>
       </label>
       <label class="enum-button">
-          <input type="radio" name="m02_b_other_team_scene_change" value="pinkother" id="m02_b_other_team_scene_change_pinkother" onclick='set_m02_b_other_team_scene_change("pinkother")'>
-        <span id="m02_b_other_team_scene_change_pinkother_span">
-          Other Team Pink
+          <input type="radio" name="m02_b_other_team_scene_change" value="blueother" id="m02_b_other_team_scene_change_blueother" onclick='set_m02_b_other_team_scene_change("blueother")'>
+        <span id="m02_b_other_team_scene_change_blueother_span">
+          Other Team Blue
         </span>
       </label>
       <label class="enum-button">
-          <input type="radio" name="m02_b_other_team_scene_change" value="zeroother" id="m02_b_other_team_scene_change_zeroother" onclick='set_m02_b_other_team_scene_change("zeroother")' checked="checked">
-        <span id="m02_b_other_team_scene_change_zeroother_span">
-          Other Team Flag NOT Down
+          <input type="radio" name="m02_b_other_team_scene_change" value="pinkother" id="m02_b_other_team_scene_change_pinkother" onclick='set_m02_b_other_team_scene_change("pinkother")'>
+        <span id="m02_b_other_team_scene_change_pinkother_span">
+          Other Team Pink
         </span>
       </label>
   </td>
@@ -2278,7 +2279,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <input type="text" name="m02_b_other_team_scene_change_radioValue" size="10" align="right" readonly="readonly" tabindex="-1" value="ZEROOTHER">
   </td>
   <td align="right" class="score-cell">
-    <input type="text" name="score_m02_b_other_team_scene_change" size="3" align="right" readonly="readonly" tabindex="-1" value="3">
+    <input type="text" name="score_m02_b_other_team_scene_change" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
   </td>
 </tr>
 <!-- end m02_b_other_team_scene_change -->
@@ -3242,7 +3243,7 @@ Target Area (Art on Pedestal Not Touching Equipment at end):
                 <tr class="total-score-container">
                   <td colspan="3" class="total-score-label">Total
                         Score:</td>
-                  <td align="right" class="score-cell"><input type="text" name="totalScore" size="3" readonly="readonly" tabindex="-1" value="53"></td>
+                  <td align="right" class="score-cell"><input type="text" name="totalScore" size="3" readonly="readonly" tabindex="-1" value="50"></td>
                 </tr>
               
             
@@ -3281,7 +3282,7 @@ Team Agrees with the above entries:
                     08</span>
                 <span id="software_version">
                     Software version:
-                    18.0.0</span>
+                    18.1.0</span>
                     
                     <span class="float_right">&nbsp;</span>
                 
