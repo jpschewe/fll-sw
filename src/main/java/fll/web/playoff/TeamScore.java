@@ -74,13 +74,22 @@ public abstract class TeamScore {
    * @return true if this score is a no show
    */
   public abstract boolean isBye();
-  
+
   /**
    * Is the score verified.
    * 
    * @return true if this score has been verified
    */
   public abstract boolean isVerified();
+
+  /**
+   * When the score is entered from a tablet where the table is known, this has
+   * the table name, otherwise the value is "ALL" meaning that the person entering
+   * the score has "all tables" selected.
+   * 
+   * @return the table that the score was entered from.
+   */
+  public abstract String getTable();
 
   /**
    * What run do these scores apply to?

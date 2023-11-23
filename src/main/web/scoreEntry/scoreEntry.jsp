@@ -138,7 +138,17 @@ document.addEventListener('DOMContentLoaded', function() {
     id="scoreEntry"
      class="fll-sw-ui-body"
     >
-    <input
+        <c:choose>
+            <c:when test="${not empty scoreEntrySelectedTable}">
+                <input type='hidden' name='tablename'
+                    value='${scoreEntrySelectedTable}' />
+            </c:when>
+            <c:otherwise>
+                <input type='hidden' name='tablename' value='ALL' />
+            </c:otherwise>
+        </c:choose>
+
+        <input
       type='hidden'
       id='NoShow'
       name='NoShow'

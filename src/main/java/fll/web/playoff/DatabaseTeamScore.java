@@ -184,4 +184,14 @@ public class DatabaseTeamScore extends TeamScore {
 
   private final boolean scoreExists;
 
+  @Override
+  public String getTable() {
+    final @Nullable String table = getString("tablename");
+    if (null == table) {
+      return "UNKNOWN";
+    } else {
+      return table;
+    }
+  }
+
 }
