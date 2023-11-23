@@ -23,6 +23,7 @@ import javax.sql.DataSource;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -31,6 +32,7 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.playoff.HttpTeamScore;
+import fll.web.playoff.Playoff;
 import fll.web.playoff.TeamScore;
 import fll.xml.ChallengeDescription;
 
@@ -108,10 +110,31 @@ public class SubmitScoreEntry extends BaseFLLServlet {
                                                teamNumber, runNumber);
           SessionAttributes.appendToMessage(session, message);
         } else {
+          final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
+                                                                                      tournament.getTournamentID());
+          final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection,
+                                                                                tournament.getTournamentID());
+          final boolean regularMatchPlay = runNumber <= numSeedingRounds;
+
+          final String roundText;
+          if (runningHeadToHead
+              && !regularMatchPlay) {
+            final String division = Playoff.getPlayoffDivision(connection, tournament.getTournamentID(), teamNumber,
+                                                               runNumber);
+            final int playoffRun = Playoff.getPlayoffRound(connection, tournament.getTournamentID(), division,
+                                                           runNumber);
+            roundText = "playoff round "
+                + playoffRun;
+          } else {
+            roundText = "run Number "
+                + runNumber;
+          }
+
           Queries.insertPerformanceScore(connection, datasource, challengeDescription, tournament,
                                          teamScore.isVerified(), teamScore);
-          final String message = String.format("<div class='success'>Entered score for %d run %d</div>", teamNumber,
-                                               runNumber);
+          
+          final String message = String.format("<div class='success'>Entered score for team number %d %s</div>",
+                                               teamNumber, roundText);
           SessionAttributes.appendToMessage(session, message);
         }
       }
