@@ -35,12 +35,14 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
         <tr>
             <th>Team #</th>
             <th>Run Number</th>
+            <th>Table</th>
             <th>Edit</th>
         </tr>
         <sql:query var="result" dataSource="${datasource}">
    SELECT
      TeamNumber
     ,RunNumber
+    ,tablename
      FROM Performance
      WHERE Verified <> TRUE 
        AND Tournament = <c:out value="${currentTournament}" />
@@ -53,6 +55,9 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
                 </td>
                 <td>
                     <c:out value="${row[1]}" />
+                </td>
+                <td>
+                    <c:out value="${row[2]}" />
                 </td>
                 <td>
                     <a
