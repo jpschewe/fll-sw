@@ -349,6 +349,11 @@ public final class Queries {
     values.append(", "
         + teamScore.getRunNumber());
 
+    columns.append(", tablename");
+    values.append(", '"
+        + teamScore.getTable()
+        + "'");
+
     // TODO: this should be reworked to use ? in the prepared statement
 
     columns.append(", NoShow");

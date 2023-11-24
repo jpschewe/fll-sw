@@ -45,6 +45,7 @@ table#perf-data th, table#perf-data td {
             <th>Scheduled Time</th>
             <th>Last edited Time</th>
             <th>Score</th>
+            <th>Table</th>
         </tr>
 
         <c:forEach items="${data}" var="entry">
@@ -76,13 +77,14 @@ table#perf-data th, table#perf-data td {
                             <javatime:format value="${entry.lastEdited}"
                                 pattern="h:mm " />
                         </td>
-                        <td>${entry.formattedScore}</td>
                     </c:when>
                     <c:otherwise>
                         <td>&nbsp;</td>
-                        <td>&nbsp;</td>
                     </c:otherwise>
                 </c:choose>
+                
+                <td>${entry.formattedScore}</td>
+                <td>${entry.table}</td>
 
             </tr>
         </c:forEach>

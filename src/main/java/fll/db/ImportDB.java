@@ -670,6 +670,11 @@ public final class ImportDB {
       upgrade34To35(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 36) {
+      upgrade35To36(connection);
+    }
+
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -1327,6 +1332,25 @@ public final class ImportDB {
     }
 
     setDBVersion(connection, 35);
+  }
+
+  /**
+   * Add tablename to performance table.
+   */
+  private static void upgrade35To36(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 35 to 36");
+
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("ALTER TABLE "
+          + GenerateDB.PERFORMANCE_TABLE_NAME
+          + " ADD COLUMN tablename varchar(64)");
+
+      stmt.executeUpdate("UPDATE "
+          + GenerateDB.PERFORMANCE_TABLE_NAME
+          + " SET tablename = 'UNKNOWN'");
+    }
+    
+    setDBVersion(connection, 36);
   }
 
   /**

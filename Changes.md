@@ -1,3 +1,4 @@
+* #1114 - Add table name to performance data
 * 105 - Highlight ties in the finalist in the numeric awards
 
 Release 18.1.0

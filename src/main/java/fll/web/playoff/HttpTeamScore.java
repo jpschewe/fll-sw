@@ -96,4 +96,14 @@ public final class HttpTeamScore extends TeamScore {
   }
 
   private final HttpServletRequest request;
+
+  @Override
+  public String getTable() {
+    final String table = request.getParameter("tablename");
+    if (null == table) {
+      return "UNKNOWN";
+    } else {
+      return table;
+    }
+  }
 }

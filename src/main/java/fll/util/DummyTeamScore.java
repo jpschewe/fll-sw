@@ -109,4 +109,9 @@ public class DummyTeamScore extends TeamScore {
   private final Map<String, Double> simpleGoals;
 
   private final Map<String, String> enumGoals;
+
+  @Override
+  public String getTable() {
+    return "ALL";
+  }
 }

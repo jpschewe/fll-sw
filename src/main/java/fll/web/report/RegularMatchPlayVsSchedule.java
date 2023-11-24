@@ -32,6 +32,7 @@ import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
+import fll.web.playoff.TeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
 import jakarta.servlet.ServletContext;
@@ -86,7 +87,7 @@ public final class RegularMatchPlayVsSchedule {
 
       // update with tournament data
       try (
-          PreparedStatement prep = connection.prepareStatement("SELECT teamnumber, runnumber, computedtotal, noshow, bye, timestamp FROM performance" //
+          PreparedStatement prep = connection.prepareStatement("SELECT teamnumber, runnumber, computedtotal, noshow, bye, timestamp, tablename FROM performance" //
               + " WHERE tournament = ?" //
               + "   AND runnumber <= ?")) {
         prep.setInt(1, currentTournament.getTournamentID());
@@ -102,6 +103,7 @@ public final class RegularMatchPlayVsSchedule {
             final boolean bye = rs.getBoolean(5);
             final Timestamp lastEditedTs = castNonNull(rs.getTimestamp(6));
             final LocalTime lastEdited = lastEditedTs.toLocalDateTime().toLocalTime();
+            final String tablename = castNonNull(rs.getString(7));
 
             final String value;
             if (noShow) {
@@ -121,10 +123,11 @@ public final class RegularMatchPlayVsSchedule {
             if (needle.isPresent()) {
               needle.get().setFormattedScore(value);
               needle.get().setLastEdited(lastEdited);
+              needle.get().setTable(tablename);
             } else {
               final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, currentTournament,
                                                                                        teamNumber);
-              final Data entry = new Data(team, runNumber, lastEdited, value);
+              final Data entry = new Data(team, runNumber, lastEdited, value, tablename);
               data.add(entry);
             }
           }
@@ -158,6 +161,7 @@ public final class RegularMatchPlayVsSchedule {
       this.perfTime = perfTime;
       this.lastEdited = null;
       this.formattedScore = "";
+      this.table = "";
     }
 
     /**
@@ -166,16 +170,19 @@ public final class RegularMatchPlayVsSchedule {
      * @param team {@link #getTeam()}
      * @param roundNumber {@link #getRoundNumber()}
      * @param lastEdited {@link #getLastEdited()}
+     * @param table {@link #getTable()}
      */
     Data(final TournamentTeam team,
          final int roundNumber,
          final LocalTime lastEdited,
-         final String formattedScore) {
+         final String formattedScore,
+         final String table) {
       this.team = team;
       this.roundNumber = roundNumber;
       this.perfTime = null;
       this.lastEdited = lastEdited;
       this.formattedScore = formattedScore;
+      this.table = table;
     }
 
     private final TournamentTeam team;
@@ -235,6 +242,22 @@ public final class RegularMatchPlayVsSchedule {
      */
     public void setFormattedScore(final String v) {
       formattedScore = v;
+    }
+
+    private String table;
+
+    /**
+     * @return {@link TeamScore#getTable()}
+     */
+    public String getTable() {
+      return table;
+    }
+
+    /**
+     * @param v {@link #getTable()}
+     */
+    public void setTable(final String v) {
+      table = v;
     }
 
     @Override
