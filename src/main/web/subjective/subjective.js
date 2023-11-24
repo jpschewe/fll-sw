@@ -13,7 +13,7 @@ const subjective_module = {}
         throw new Error("fllStorage needs to be loaded!");
     }
 
-    const STORAGE_PREFIX = "fll.subjective.";
+    const STORAGE_PREFIX = "fll.subjective";
 
     // //////////////////////// PRIVATE INTERFACE ////////////////////////
 
