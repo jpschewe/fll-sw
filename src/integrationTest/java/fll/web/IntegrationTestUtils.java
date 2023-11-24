@@ -1275,10 +1275,13 @@ public final class IntegrationTestUtils {
 
     selenium.findElement(By.id("submit_score")).click();
 
-    // wait for dialog element
+    // wait for yes/no dialog
     final WebElement confirmScoreYesButton = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("yesno-dialog_yes")));
-
     confirmScoreYesButton.click();
+
+    // wait for upload dialog
+    final WebElement uploadCloseButton = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("score-entry-upload_close")));
+    uploadCloseButton.click();
   }
 
   /**

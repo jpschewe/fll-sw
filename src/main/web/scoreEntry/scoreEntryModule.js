@@ -63,6 +63,7 @@ const score_entry_module = {}
     score_entry_module.uploadScore = function(storageData) {
         const dialog = document.createElement("div");
         dialog.classList.add("fll-sw-ui-dialog");
+        dialog.setAttribute("id", "score-entry-upload");
 
         const dialogContainer = document.createElement("div");
         dialog.appendChild(dialogContainer);
@@ -72,6 +73,7 @@ const score_entry_module = {}
         textElement.innerHTML = "Please wait while the score is uploaded...";
 
         const closeButton = document.createElement("button");
+        closeButton.setAttribute("id", "score-entry-upload_close");
         closeButton.setAttribute("type", "button");
         closeButton.innerText = "Close";
         closeButton.classList.add("fll-sw-ui-inactive");
