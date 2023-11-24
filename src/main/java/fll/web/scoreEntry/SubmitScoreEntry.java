@@ -54,6 +54,9 @@ public class SubmitScoreEntry extends HttpServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  private static final TypeReference<Map<String, String>> FORM_DATA_TYPE_REF = new TypeReference<Map<String, String>>() {
+  };
+
   @Override
   protected final void doPost(final HttpServletRequest request,
                               final HttpServletResponse response)
@@ -72,16 +75,14 @@ public class SubmitScoreEntry extends HttpServlet {
     response.setContentType("application/json");
     final PrintWriter writer = response.getWriter();
 
-    final TypeReference<Map<String, String>> formDataTypeRef = new TypeReference<Map<String, String>>() {
-    };
     final Map<String, String> formData;
     if (LOGGER.isTraceEnabled()) {
       final StringWriter debugWriter = new StringWriter();
       request.getReader().transferTo(debugWriter);
       LOGGER.trace("Read data: {}", debugWriter.toString());
-      formData = jsonMapper.readValue(debugWriter.toString(), formDataTypeRef);
+      formData = jsonMapper.readValue(debugWriter.toString(), FORM_DATA_TYPE_REF);
     } else {
-      formData = jsonMapper.readValue(request.getReader(), formDataTypeRef);
+      formData = jsonMapper.readValue(request.getReader(), FORM_DATA_TYPE_REF);
     }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
