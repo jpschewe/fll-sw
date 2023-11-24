@@ -48,6 +48,8 @@ OPTION {
 
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js' />"></script>
+<script type='text/javascript' src="<c:url value='/js/fll-storage.js'/>"></script>
+<script type='text/javascript' src="scoreEntryModule.js"></script>
 
 <script type='text/javascript'>
   // use var instead of const so that the variables are available globally
@@ -109,6 +111,8 @@ Entering scores for all tables. Teams are sorted in schedule order.
             href="<c:url value='/scoreEntry/scoreEntry.jsp?tablet=true&practice=true&showScores=false'/>">Practice
             round score entry</a>
     </div>
+
+    <div id='stored-values'></div>
 
     <c:if test="${empty scoreEntrySelectedTable}">
         <p>Use the browser search, ctrl-f, to find teams by name,

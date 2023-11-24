@@ -214,13 +214,39 @@ function compareByOrganization(teamDataA, teamDataB) {
     }
 }
 
+function displayStoredData() {
+    const storedData = score_entry_module.getAllStorageData();
+    if (storedData.length > 0) {
+        const container = document.getElementById("stored-values");
+
+        const message = document.createElement("div");
+        container.appendChild(message);
+        message.classList.add("warning");
+        message.innerText = "There are scores that have not been sent to the server.";
+
+        for (const data of storedData) {
+            const dataContainer = document.createElement("div");
+            container.appendChild(dataContainer);
+
+            const dataButton = document.createElement("button");
+            dataContainer.appendChild(dataButton);
+            dataButton.innerHTML = "Submit Team " + data.teamNumber + " " + data.roundText;
+            dataButton.addEventListener("click", () => {
+                score_entry_module.uploadScore(data);
+            });
+        }
+    }
+}
+
 
 document.addEventListener('DOMContentLoaded', function() {
     if (!tabletMode) {
+        // only support edit when not on a tablet
         editFlagBoxClicked();
     }
     teamSelectData.sort(compareByPerformanceTime);
     populateTeamsSelect();
+    displayStoredData();
 
     if (!scoreEntrySelectedTable) {
         document.getElementById("sort-team-name").addEventListener('click', () => {
@@ -239,8 +265,6 @@ document.addEventListener('DOMContentLoaded', function() {
             teamSelectData.sort(compareByPerformanceTime);
             populateTeamsSelect();
         });
-
-        // only use unverified code when not using the tablets 
 
         reloadRuns();
         openSocket();

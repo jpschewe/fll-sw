@@ -11,10 +11,10 @@ import java.util.Optional;
 /**
  * Generic result of a post.
  */
-/* package */ class PostResult {
+public class PostResult {
 
-  /* package */ PostResult(final boolean success,
-                           final Optional<String> message) {
+  public PostResult(final boolean success,
+                    final Optional<String> message) {
     mSuccess = success;
     mMessage = message;
   }
