@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <fll-sw:required-roles roles="REF" allowSetup="false" />
@@ -14,7 +16,7 @@ fll.web.scoreEntry.SelectTeam.populateContext(application, pageContext);
 
 <c:choose>
     <c:when test="${not empty scoreEntrySelectedTable}">
-        <style title='select_style' type='text/css'>
+        <style type='text/css'>
 SELECT {
     font-size: x-large;
     font-weight: bold;
@@ -25,7 +27,7 @@ SELECT {
 </style>
     </c:when>
     <c:otherwise>
-        <style title='select_style' type='text/css'>
+        <style type='text/css'>
 SELECT {
     font-weight: bold;
     background: black;
@@ -34,7 +36,7 @@ SELECT {
 </style>
     </c:otherwise>
 </c:choose>
-<style title='local_style' type='text/css'>
+<style type='text/css'>
 OPTION {
     color: #e0e0e0;
 }
@@ -43,6 +45,11 @@ OPTION {
     font-weight: bold;
     background-color: black;
     color: #e0e0e0;
+}
+
+.delete_button {
+    margin-left: 40px;
+    margin-top: 10px;
 }
 </style>
 

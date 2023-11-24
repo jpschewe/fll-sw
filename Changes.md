@@ -1,3 +1,4 @@
+* #1115 - Store performance data locally in case there is an error talking to the server
 * #1114 - Add table name to performance data
 * 105 - Highlight ties in the finalist in the numeric awards
 

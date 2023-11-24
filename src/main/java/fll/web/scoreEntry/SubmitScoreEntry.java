@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -32,6 +33,7 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.api.PostResult;
 import fll.web.playoff.MapTeamScore;
+import fll.web.playoff.Playoff;
 import fll.web.playoff.TeamScore;
 import fll.xml.ChallengeDescription;
 import jakarta.servlet.ServletContext;
@@ -126,10 +128,32 @@ public class SubmitScoreEntry extends HttpServlet {
           final PostResult result = new PostResult(false, Optional.of(message));
           jsonMapper.writeValue(writer, result);
         } else {
+          final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
+                                                                                      tournament.getTournamentID());
+          final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection,
+                                                                                tournament.getTournamentID());
+          final boolean regularMatchPlay = runNumber <= numSeedingRounds;
+
+          final String roundText;
+          if (runningHeadToHead
+              && !regularMatchPlay) {
+            final String division = Playoff.getPlayoffDivision(connection, tournament.getTournamentID(), teamNumber,
+                                                               runNumber);
+            final int playoffRun = Playoff.getPlayoffRound(connection, tournament.getTournamentID(), division,
+                                                           runNumber);
+            roundText = "playoff round "
+                + playoffRun;
+          } else {
+            roundText = "run Number "
+                + runNumber;
+          }
+
           Queries.insertPerformanceScore(connection, datasource, challengeDescription, tournament,
                                          teamScore.isVerified(), teamScore);
 
-          final PostResult result = new PostResult(true, Optional.empty());
+          final String message = String.format("<div class='success'>Entered score for team number %d %s</div>",
+                                               teamNumber, roundText);
+          final PostResult result = new PostResult(true, Optional.of(message));
           jsonMapper.writeValue(writer, result);
         }
       }

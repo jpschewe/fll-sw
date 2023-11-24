@@ -216,9 +216,10 @@ function compareByOrganization(teamDataA, teamDataB) {
 
 function displayStoredData() {
     const storedData = score_entry_module.getAllStorageData();
-    if (storedData.length > 0) {
-        const container = document.getElementById("stored-values");
 
+    const container = document.getElementById("stored-values");
+    removeChildren(container);
+    if (storedData.length > 0) {
         const message = document.createElement("div");
         container.appendChild(message);
         message.classList.add("warning");
@@ -230,10 +231,21 @@ function displayStoredData() {
 
             const dataButton = document.createElement("button");
             dataContainer.appendChild(dataButton);
-            dataButton.innerHTML = "Submit Team " + data.teamNumber + " " + data.roundText;
+            dataButton.innerHTML = "Submit score data for Team " + data.teamNumber + " " + data.roundText;
             dataButton.addEventListener("click", () => {
                 score_entry_module.uploadScore(data);
             });
+
+            const deleteButton = document.createElement("button");
+            deleteButton.classList.add("delete_button");
+            dataContainer.appendChild(deleteButton);
+            deleteButton.innerHTML = "Delete score data for Team " + data.teamNumber + " " + data.roundText;
+            deleteButton.addEventListener("click", () => {
+                score_entry_module.deleteStorageData(data);
+
+                // refresh the local data displayed
+                displayStoredData();
+            })
         }
     }
 }
