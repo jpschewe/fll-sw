@@ -254,7 +254,7 @@ public final class GenerateDB {
         performanceColumns.append("Bye,");
         createStatement.append(" Bye boolean DEFAULT FALSE NOT NULL,");
         createStatement.append(" Verified boolean DEFAULT FALSE NOT NULL,");
-        createStatement.append(" tablename varchar(64) NOT NULL,");
+        createStatement.append(" tablename varchar(64) DEFAULT 'UNKNOWN' NOT NULL,");
         for (final AbstractGoal element : performanceElement.getAllGoals()) {
           if (!element.isComputed()) {
             final String columnDefinition = generateGoalColumnDefinition(element);
