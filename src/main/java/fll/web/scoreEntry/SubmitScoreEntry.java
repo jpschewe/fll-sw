@@ -107,6 +107,11 @@ public class SubmitScoreEntry extends HttpServlet {
       final boolean deleteScore = Boolean.valueOf(formData.get("delete"));
       if (deleteScore) {
         Queries.deletePerformanceScore(connection, teamNumber, runNumber);
+
+        final String message = String.format("<div class='success'>Deleted score for team %d run %d</div>", teamNumber,
+                                             runNumber);
+        final PostResult result = new PostResult(true, Optional.of(message));
+        jsonMapper.writeValue(writer, result);
       } else if (Boolean.valueOf(formData.get("EditFlag"))) {
         final TeamScore teamScore = new MapTeamScore(teamNumber, runNumber, formData);
         final int rowsUpdated = Queries.updatePerformanceScore(challengeDescription, connection, datasource, teamScore);
@@ -115,6 +120,11 @@ public class SubmitScoreEntry extends HttpServlet {
         } else if (rowsUpdated > 1) {
           throw new FLLInternalException("Updated multiple rows!");
         }
+
+        final String message = String.format("<div class='success'>Edited score for team %d run %d</div>", teamNumber,
+                                             runNumber);
+        final PostResult result = new PostResult(true, Optional.of(message));
+        jsonMapper.writeValue(writer, result);
       } else {
         final String noShow = formData.get("NoShow");
         if (null == noShow) {
@@ -126,6 +136,7 @@ public class SubmitScoreEntry extends HttpServlet {
         if (Queries.performanceScoreExists(connection, currentTournament, teamNumber, runNumber)) {
           final String message = String.format("<div class='error'>Someone else has already entered a score for team %s run %d. Check that you selected the correct team and enter the score again.</div>",
                                                teamNumber, runNumber);
+
           final PostResult result = new PostResult(false, Optional.of(message));
           jsonMapper.writeValue(writer, result);
         } else {
