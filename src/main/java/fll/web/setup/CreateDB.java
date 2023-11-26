@@ -96,7 +96,7 @@ public class CreateDB extends BaseFLLServlet {
       }
 
       boolean success = false;
-      if (null != request.getAttribute("chooseDescription")) {
+      if (null != request.getParameter("chooseDescription")) {
         final String description = WebUtils.getNonNullRequestParameter(request, "description");
 
         try {
