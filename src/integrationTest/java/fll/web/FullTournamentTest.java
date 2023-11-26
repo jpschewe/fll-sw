@@ -1130,6 +1130,10 @@ public class FullTournamentTest {
           final WebElement confirmScoreYesButton = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("yesno-dialog_yes")));
           confirmScoreYesButton.click();
 
+          // wait for upload dialog
+          final WebElement uploadCloseButton = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("score-entry-upload_close")));
+          uploadCloseButton.click();
+
           // ensure we are on the select team page
           seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("select-verify-teamnumber")));
 

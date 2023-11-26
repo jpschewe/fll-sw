@@ -315,12 +315,14 @@ public final class Playoff {
           + " run: "
           + runNumber);
     }
-    try (
-        PreparedStatement prep = connection.prepareStatement("INSERT INTO Performance(TeamNumber, Tournament, RunNumber, Bye, Verified)"
-            + " VALUES( ?, ?, ?, 1, 1)")) {
+    try (PreparedStatement prep = connection.prepareStatement("INSERT INTO "
+        + GenerateDB.PERFORMANCE_TABLE_NAME
+        + "(TeamNumber, Tournament, RunNumber, Bye, Verified, tablename)"
+        + " VALUES( ?, ?, ?, 1, 1, ?)")) {
       prep.setInt(1, team.getTeamNumber());
       prep.setInt(2, tournament);
       prep.setInt(3, runNumber);
+      prep.setString(4, "BYE");
       prep.executeUpdate();
     }
   }

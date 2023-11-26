@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <fll-sw:required-roles roles="REF" allowSetup="false" />
@@ -14,7 +16,7 @@ fll.web.scoreEntry.SelectTeam.populateContext(application, pageContext);
 
 <c:choose>
     <c:when test="${not empty scoreEntrySelectedTable}">
-        <style title='select_style' type='text/css'>
+        <style type='text/css'>
 SELECT {
     font-size: x-large;
     font-weight: bold;
@@ -25,7 +27,7 @@ SELECT {
 </style>
     </c:when>
     <c:otherwise>
-        <style title='select_style' type='text/css'>
+        <style type='text/css'>
 SELECT {
     font-weight: bold;
     background: black;
@@ -34,7 +36,7 @@ SELECT {
 </style>
     </c:otherwise>
 </c:choose>
-<style title='local_style' type='text/css'>
+<style type='text/css'>
 OPTION {
     color: #e0e0e0;
 }
@@ -44,10 +46,17 @@ OPTION {
     background-color: black;
     color: #e0e0e0;
 }
+
+.delete_button {
+    margin-left: 40px;
+    margin-top: 10px;
+}
 </style>
 
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js' />"></script>
+<script type='text/javascript' src="<c:url value='/js/fll-storage.js'/>"></script>
+<script type='text/javascript' src="scoreEntryModule.js"></script>
 
 <script type='text/javascript'>
   // use var instead of const so that the variables are available globally
@@ -109,6 +118,8 @@ Entering scores for all tables. Teams are sorted in schedule order.
             href="<c:url value='/scoreEntry/scoreEntry.jsp?tablet=true&practice=true&showScores=false'/>">Practice
             round score entry</a>
     </div>
+
+    <div id='stored-values'></div>
 
     <c:if test="${empty scoreEntrySelectedTable}">
         <p>Use the browser search, ctrl-f, to find teams by name,
