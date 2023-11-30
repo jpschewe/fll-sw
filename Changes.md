@@ -1,3 +1,5 @@
+Release 18.2.0
+==============
 * #1116 - fix error creating database from internal challenge description
 * #1115 - Store performance data locally in case there is an error talking to the server
 * #1114 - Add table name to performance data
