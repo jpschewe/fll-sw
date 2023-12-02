@@ -901,19 +901,19 @@ const finalist_module = {}
     /**
      * @param division
      *          the division to work with
-     * @return map (object) with key of team number and value is an array of scheduled
+     * @return Map with key of team number and value is an array of scheduled
      *         categories that the team is being judged in
      */
     finalist_module.getTeamToCategoryMap = function(division) {
-        const finalistsCount = {};
+        const finalistsCount = new Map();
         for (const category of finalist_module.getAllScheduledCategories()) {
             for (const teamNum of category.teams) {
                 const team = finalist_module.lookupTeam(teamNum);
                 if (category.overall || finalist_module.isTeamInDivision(team, division)) {
-                    if (null == finalistsCount[teamNum]) {
-                        finalistsCount[teamNum] = [];
+                    if (!finalistsCount.has(teamNum)) {
+                        finalistsCount.set(teamNum, []);
                     }
-                    finalistsCount[teamNum].push(category);
+                    finalistsCount.get(teamNum).push(category);
                 }
             }
         }
@@ -922,28 +922,18 @@ const finalist_module = {}
     };
 
     /**
-     * Create the finalist schedule for the specified division.
-     * 
-     * @param currentDivision
-     *          the division to create the schedule for
-     * @return array of timeslots in order from earliest to latest
+     * @param finalistsCount the output of getTeamToCategoryMap
+     * @return array of teams sorted so that the team in the most categories is first
      */
-    finalist_module.scheduleFinalists = function(currentDivision) {
-        _log("Creating schedule for " + currentDivision);
-
-        let finalistsCount = finalist_module.getTeamToCategoryMap(currentDivision);
-
-        // sort the map so that the team in the most categories is first,
-        // this
-        // should ensure the minimum amount of time to do the finalist
-        // judging
+    finalist_module.sortTeamsByCategoryCount = function(finalistsCount) {
         const sortedTeams = [];
-        for (const [teamNum, _] of Object.entries(finalistsCount)) {
+
+        for (const [teamNum, _] of finalistsCount) {
             sortedTeams.push(teamNum);
         }
         sortedTeams.sort(function(a, b) {
-            const aCategories = finalistsCount[a];
-            const bCategories = finalistsCount[b];
+            const aCategories = finalistsCount.get(a);
+            const bCategories = finalistsCount.get(b);
 
             const aCount = aCategories.length;
             const bCount = bCategories.length;
@@ -956,6 +946,27 @@ const finalist_module = {}
             }
         });
 
+        return sortedTeams;
+    };
+
+    /**
+     * Create the finalist schedule for the specified division.
+     * 
+     * @param currentDivision
+     *          the division to create the schedule for
+     * @return array of timeslots in order from earliest to latest
+     */
+    finalist_module.scheduleFinalists = function(currentDivision) {
+        _log("Creating schedule for " + currentDivision);
+
+        const finalistsCount = finalist_module.getTeamToCategoryMap(currentDivision);
+
+        // sort the map so that the team in the most categories is first,
+        // this
+        // should ensure the minimum amount of time to do the finalist
+        // judging
+        const sortedTeams = finalist_module.sortTeamsByCategoryCount(finalistsCount);
+
         // list of Timeslots in time order
         const schedule = [];
         let nextTime = finalist_module.getStartTime(currentDivision);
@@ -964,7 +975,7 @@ const finalist_module = {}
         finalist_module.log("Next timeslot starts at " + nextTime + " duration is " + slotDuration);
         for (const teamNum of sortedTeams) {
             const team = finalist_module.lookupTeam(teamNum);
-            const teamCategories = finalistsCount[teamNum];
+            const teamCategories = finalistsCount.get(teamNum);
             for (const category of teamCategories) {
                 if (finalist_module.isCategoryScheduled(category)) {
 
