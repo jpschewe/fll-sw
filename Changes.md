@@ -1,3 +1,5 @@
+* #1112 - Add save as for schedule description to the scheduler UI
+
 Release 18.2.0
 ==============
 * #1116 - fix error creating database from internal challenge description
