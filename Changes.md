@@ -1,3 +1,5 @@
+* #161 - color teams in the finalist schedule
+
 Release 18.2.0
 ==============
 * #1116 - fix error creating database from internal challenge description

@@ -20,6 +20,11 @@ const finalistScheduleModule = {};
     let finalistsCount = {};
 
     /**
+     * Team numbers sorted by number of categories.
+     */
+    let sortedTeams = [];
+
+    /**
      * Map time string to map of category name to div cell.
      */
     const timeToCells = {};
@@ -104,12 +109,21 @@ const finalistScheduleModule = {};
      * @returns an HTML div element for the team
      */
     function createTeamDiv(team, category) {
-        const teamCategories = finalistsCount[team.num];
+        const teamCategories = finalistsCount.get(team.num);
         const numCategories = teamCategories.length;
         const group = team.judgingGroup;
         const teamDiv = document.createElement("div");
         teamDiv.setAttribute("draggable", "true");
         teamDiv.innerText = team.num + " - " + team.name + " (" + group + ", " + numCategories + ")";
+
+        // determine the class for the cell. We have 25 colors defined in schedule.css.
+        const sortedTeamIndex = sortedTeams.indexOf(team.num);
+        if (sortedTeamIndex < 0) {
+            _log("Warning: can't find team " + team.num + " in sortedTeams")
+        } else if (sortedTeamIndex < 25) {
+            const className = "team-" + (sortedTeamIndex + 1);
+            teamDiv.classList.add(className);
+        }
 
         teamDiv.addEventListener('dragstart', function(e) {
             let rawEvent;
@@ -499,6 +513,7 @@ const finalistScheduleModule = {};
 
         finalistsCount = finalist_module.getTeamToCategoryMap(finalist_module
             .getCurrentDivision());
+        sortedTeams = finalist_module.sortTeamsByCategoryCount(finalistsCount);
 
         removeChildren(document.getElementById("schedule_body"));
         for (const slot of schedule) {
