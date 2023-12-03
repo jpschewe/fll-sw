@@ -1,3 +1,4 @@
+* #1110 - Allow one to set change time to be 0 minutes when creating new schedules
 * #1112 - Add save as for schedule description to the scheduler UI
 * #161 - color teams in the finalist schedule
 

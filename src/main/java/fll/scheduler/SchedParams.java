@@ -46,13 +46,13 @@ public class SchedParams implements Serializable {
   /**
    * Default number of minutes for a team to get from one session to another.
    */
-  public static final int MINIMUM_CHANGETIME_MINUTES = 15;
+  public static final int DEFAULT_CHANGETIME_MINUTES = 15;
 
   /**
    * Default number of minutes that a team should have between performance
    * sessions.
    */
-  public static final int MINIMUM_PERFORMANCE_CHANGETIME_MINUTES = 30;
+  public static final int DEFAULT_PERFORMANCE_CHANGETIME_MINUTES = 30;
 
   /**
    * Thrown when the parameters are not valid.
@@ -108,9 +108,9 @@ public class SchedParams implements Serializable {
     final String[] subjectiveNames = Utilities.parseListOfStrings(subjectiveNamesStr);
 
     mPerformanceMinutes = Utilities.readIntProperty(properties, ALPHA_PERF_MINUTES_KEY, DEFAULT_PERFORMANCE_MINUTES);
-    mChangetimeMinutes = Utilities.readIntProperty(properties, CT_MINUTES_KEY, MINIMUM_CHANGETIME_MINUTES);
+    mChangetimeMinutes = Utilities.readIntProperty(properties, CT_MINUTES_KEY, DEFAULT_CHANGETIME_MINUTES);
     mPerformanceChangetimeMinutes = Utilities.readIntProperty(properties, PCT_MINUTES_KEY,
-                                                              MINIMUM_PERFORMANCE_CHANGETIME_MINUTES);
+                                                              DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
 
     mSubjectiveStations = new ArrayList<>();
     for (int i = 0; i < subjectiveDurations.length; ++i) {
@@ -165,11 +165,11 @@ public class SchedParams implements Serializable {
     mPerformanceMinutes = v;
   }
 
-  private int mChangetimeMinutes = MINIMUM_CHANGETIME_MINUTES;
+  private int mChangetimeMinutes = DEFAULT_CHANGETIME_MINUTES;
 
   /**
    * @return Number of minutes between judging stations for each team.
-   *         Default is {@link #MINIMUM_CHANGETIME_MINUTES}
+   *         Default is {@link #DEFAULT_CHANGETIME_MINUTES}
    */
   public final int getChangetimeMinutes() {
     return mChangetimeMinutes;
@@ -182,11 +182,11 @@ public class SchedParams implements Serializable {
     mChangetimeMinutes = v;
   }
 
-  private int mPerformanceChangetimeMinutes = MINIMUM_PERFORMANCE_CHANGETIME_MINUTES;
+  private int mPerformanceChangetimeMinutes = DEFAULT_PERFORMANCE_CHANGETIME_MINUTES;
 
   /**
    * @return Number of minutes between performance rounds for a team.
-   *         Default value is {@link #MINIMUM_PERFORMANCE_CHANGETIME_MINUTES}.
+   *         Default value is {@link #DEFAULT_PERFORMANCE_CHANGETIME_MINUTES}.
    */
   public final int getPerformanceChangetimeMinutes() {
     return mPerformanceChangetimeMinutes;
@@ -277,16 +277,12 @@ public class SchedParams implements Serializable {
   public List<String> isValid() {
     final List<String> errors = new LinkedList<>();
 
-    if (getChangetimeMinutes() < SchedParams.MINIMUM_CHANGETIME_MINUTES) {
-      errors.add("Change time between events is too short, cannot be less than "
-          + SchedParams.MINIMUM_CHANGETIME_MINUTES
-          + " minutes");
+    if (getChangetimeMinutes() < 0) {
+      errors.add("Change time between events must be a non-negative value");
     }
 
-    if (getPerformanceChangetimeMinutes() < SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES) {
-      errors.add("Change time between performance rounds is too short, cannot be less than "
-          + SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES
-          + " minutes");
+    if (getPerformanceChangetimeMinutes() < 0) {
+      errors.add("Change time between performance rounds must be a non-negative value");
     }
 
     return errors;
