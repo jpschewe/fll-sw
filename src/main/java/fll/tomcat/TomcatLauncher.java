@@ -30,6 +30,7 @@ import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.db.DumpDB;
 import fll.util.FLLRuntimeException;
 
 /**
@@ -153,6 +154,10 @@ public class TomcatLauncher {
 
     resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", classesPath.toAbsolutePath().toString(),
                                                  "/"));
+
+    resources.addPreResources(new DirResourceSet(resources, "/"+ DumpDB.getDatabaseBackupPath().getFileName(),
+                                                 DumpDB.getDatabaseBackupPath().toAbsolutePath().toString(), "/"
+                                                     ));
 
     ctx.setResources(resources);
 
