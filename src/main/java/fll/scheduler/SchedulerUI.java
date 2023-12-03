@@ -308,6 +308,7 @@ public class SchedulerUI extends JFrame {
     descriptionMenu.add(mNewScheduleDescriptionAction);
     descriptionMenu.add(mOpenScheduleDescriptionAction);
     descriptionMenu.add(mSaveScheduleDescriptionAction);
+    descriptionMenu.add(mSaveAsScheduleDescriptionAction);
     descriptionMenu.add(mRunSchedulerAction);
     menubar.add(descriptionMenu);
 
@@ -319,7 +320,7 @@ public class SchedulerUI extends JFrame {
     scheduleMenu.add(mRunOptimizerAction);
     scheduleMenu.add(mWriteSchedulesAction);
     scheduleMenu.add(mDisplayGeneralScheduleAction);
-    scheduleMenu.add(savecheduleAction);
+    scheduleMenu.add(saveScheduleAction);
     menubar.add(scheduleMenu);
 
     setJMenuBar(menubar);
@@ -329,7 +330,7 @@ public class SchedulerUI extends JFrame {
     mDisplayGeneralScheduleAction.setEnabled(false);
     mRunOptimizerAction.setEnabled(false);
     mReloadFileAction.setEnabled(false);
-    savecheduleAction.setEnabled(false);
+    saveScheduleAction.setEnabled(false);
 
     // Once https://github.com/typetools/checker-framework/issues/4613 is resolved I
     // can try and figure out what is wrong here
@@ -368,8 +369,13 @@ public class SchedulerUI extends JFrame {
     }
   };
 
-  void saveScheduleDescription() {
-    if (null == mScheduleDescriptionFile) {
+  /**
+   * @param chooseFilename if true, always prompt the user for the file name to
+   *          save as
+   */
+  void saveScheduleDescription(final boolean chooseFilename) {
+    if (chooseFilename
+        || null == mScheduleDescriptionFile) {
       // prompt the user for a filename to save to
 
       final String startingDirectory = PREFS.get(DESCRIPTION_STARTING_DIRECTORY_PREF, null);
@@ -445,7 +451,23 @@ public class SchedulerUI extends JFrame {
 
     @Override
     public void actionPerformed(final ActionEvent ae) {
-      saveScheduleDescription();
+      saveScheduleDescription(false);
+    }
+  }
+
+  private final Action mSaveAsScheduleDescriptionAction = new SaveAsScheduleDescriptionAction();
+
+  private final class SaveAsScheduleDescriptionAction extends AbstractAction {
+    SaveAsScheduleDescriptionAction() {
+      super("Save As Schedule Description");
+      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/SaveAs16.gif"));
+      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/SaveAs24.gif"));
+      putValue(SHORT_DESCRIPTION, "Save the schedule description file to a new file");
+    }
+
+    @Override
+    public void actionPerformed(final ActionEvent ae) {
+      saveScheduleDescription(true);
     }
   }
 
@@ -485,7 +507,7 @@ public class SchedulerUI extends JFrame {
    */
   private void runScheduler() {
     try {
-      saveScheduleDescription();
+      saveScheduleDescription(false);
 
       if (null == mScheduleDescriptionFile) {
         final Formatter errorFormatter = new Formatter();
@@ -747,6 +769,7 @@ public class SchedulerUI extends JFrame {
     toolbar.add(mNewScheduleDescriptionAction);
     toolbar.add(mOpenScheduleDescriptionAction);
     toolbar.add(mSaveScheduleDescriptionAction);
+    toolbar.add(mSaveAsScheduleDescriptionAction);
     toolbar.add(mRunSchedulerAction);
 
     return toolbar;
@@ -875,7 +898,7 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private final Action savecheduleAction = new SaveScheduleAction();
+  private final Action saveScheduleAction = new SaveScheduleAction();
 
   private final class SaveScheduleAction extends AbstractAction {
     SaveScheduleAction() {
@@ -1329,7 +1352,7 @@ public class SchedulerUI extends JFrame {
       mRunOptimizerAction.setEnabled(true);
       mReloadFileAction.setEnabled(true);
       mScheduleFilename.setText(mScheduleFile.getName());
-      savecheduleAction.setEnabled(true);
+      saveScheduleAction.setEnabled(true);
 
       mTabbedPane.setSelectedIndex(1);
     } catch (final ParseException e) {

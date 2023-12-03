@@ -1,3 +1,4 @@
+* #1112 - Add save as for schedule description to the scheduler UI
 * #161 - color teams in the finalist schedule
 
 Release 18.2.0
