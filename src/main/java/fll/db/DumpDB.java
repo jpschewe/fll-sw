@@ -128,6 +128,13 @@ public final class DumpDB extends BaseFLLServlet {
   private static final String AUTOMATIC_BACKUP_DIRECTORY_NAME = "database-backups";
 
   /**
+   * @return path to the database backups directory
+   */
+  public static Path getDatabaseBackupPath() {
+    return Paths.get(AUTOMATIC_BACKUP_DIRECTORY_NAME);
+  }
+
+  /**
    * Create an automatic backup of the specified database. Create the file in the
    * directory "database-backups" relative to the current directory. The file is
    * named based on the current date and time and the specified label.
@@ -150,7 +157,7 @@ public final class DumpDB extends BaseFLLServlet {
                    e);
     }
 
-    final Path backupDirectory = Paths.get(AUTOMATIC_BACKUP_DIRECTORY_NAME);
+    final Path backupDirectory = getDatabaseBackupPath();
 
     try {
       Files.createDirectories(backupDirectory);

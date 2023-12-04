@@ -326,6 +326,11 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                 delete slideshow images</a>
         </li>
 
+        <li>
+            <a href="database-backups.jsp" target="_blank">Access to
+                database backups</a>
+        </li>
+
     </ol>
 
     <h2>Tournament day</h2>
