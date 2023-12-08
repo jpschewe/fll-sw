@@ -641,11 +641,16 @@ public final class ScoreEntry {
     } // end foreach goal
 
     // set the radio buttons for score verification
+    formatter.format("const verifiedLabel = document.getElementById('verify-score-label');%n");
     formatter.format("if(Verified == 0) {%n");
     // order of elements needs to match generateYesNoButtons
-    formatter.format("  document.scoreEntry.Verified[0].checked = true%n"); // NO
+    formatter.format("  document.scoreEntry.Verified[0].checked = true;%n"); // NO
+    formatter.format("  verifiedLabel.classList.add('verify-score-unverified');%n"); // NO
+    formatter.format("  verifiedLabel.classList.remove('verify-score-verified');%n"); // NO
     formatter.format("} else {%n");
-    formatter.format("  document.scoreEntry.Verified[1].checked = true%n"); // YES
+    formatter.format("  document.scoreEntry.Verified[1].checked = true;%n"); // YES
+    formatter.format("  verifiedLabel.classList.remove('verify-score-unverified');%n"); // YES
+    formatter.format("  verifiedLabel.classList.add('verify-score-verified');%n"); // YES
     formatter.format("}%n");
 
     if (LOG.isTraceEnabled()) {
@@ -805,7 +810,7 @@ public final class ScoreEntry {
     final boolean tabletEntry = isTabletEntry(request, session);
 
     writer.println("<!-- Score Verification -->");
-    writer.println("      <span class='verify-score-label float_right'>");
+    writer.println("      <span id='verify-score-label' class='float_right'>");
     if (!tabletEntry) {
       writer.println("Score entry verified:");
     } else {
