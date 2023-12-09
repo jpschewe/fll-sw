@@ -1,3 +1,4 @@
+* #1130 - make it clear when a score needs to be verified on the score entry form
 * Make database backups accessible via the web
 * #1110 - Allow one to set change time to be 0 minutes when creating new schedules
 * #1112 - Add save as for schedule description to the scheduler UI

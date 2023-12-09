@@ -118,8 +118,14 @@ input[type=range] {
 }
 
 .verify-score-label {
-    color: red;
     margin-right: 10px;
+}
+
+.verify-score-unverified {
+    background: red;
+}
+.verify-score-verified {
+    background: #00ff00;
 }
 
 .verify-score-buttonbox {
