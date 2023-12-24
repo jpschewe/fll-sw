@@ -123,9 +123,12 @@ input[type=range] {
 
 .verify-score-unverified {
     background: red;
+    text-shadow: none;
 }
+
 .verify-score-verified {
     background: #00ff00;
+    text-shadow: none;
 }
 
 .verify-score-buttonbox {
@@ -138,4 +141,8 @@ input[type=range] {
 
 .score-entry-buttons>fll-sw-button:first-child {
     margin-left: auto;
+}
+
+#scoreEntry footer {
+    border-top: 2px solid black;
 }

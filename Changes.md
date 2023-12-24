@@ -1,3 +1,4 @@
+* #1124 - Add a border to the top of the buttons on score entry
 * #1130 - make it clear when a score needs to be verified on the score entry form
 * Make database backups accessible via the web
 * #1110 - Allow one to set change time to be 0 minutes when creating new schedules
