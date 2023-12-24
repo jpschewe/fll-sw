@@ -19,39 +19,15 @@ fll.web.scoreEntry.SelectTeam.populateContext(application, pageContext);
         <style type='text/css'>
 SELECT {
     font-size: x-large;
-    font-weight: bold;
-    background: black;
-    color: #e0e0e0;
-    font-weight: bold;
+}
+
+#enter_submit {
+    font-size: xx-large;
 }
 </style>
     </c:when>
-    <c:otherwise>
-        <style type='text/css'>
-SELECT {
-    font-weight: bold;
-    background: black;
-    color: #e0e0e0;
-}
-</style>
-    </c:otherwise>
 </c:choose>
-<style type='text/css'>
-OPTION {
-    color: #e0e0e0;
-}
-
-.dark_bg {
-    font-weight: bold;
-    background-color: black;
-    color: #e0e0e0;
-}
-
-.delete_button {
-    margin-left: 40px;
-    margin-top: 10px;
-}
-</style>
+<link rel="stylesheet" type='text/css' href="select_team.css" />
 
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js' />"></script>
@@ -237,7 +213,6 @@ Entering scores for all tables. Teams are sorted in schedule order.
                         <tr>
                             <!-- submit button -->
                             <td align='left'>
-                                <!--<font face='arial' size='4'><b>Submit</b></font>-->
                                 <input class='dark_bg' type="submit"
                                     value="Enter score"
                                     id='enter_submit'>
