@@ -1,0 +1,20 @@
+OPTION {
+    color: #e0e0e0;
+}
+
+SELECT {
+    font-weight: bold;
+    background: black;
+    color: #e0e0e0;
+}
+
+.dark_bg {
+    font-weight: bold;
+    background-color: black;
+    color: #e0e0e0;
+}
+
+.delete_button {
+    margin-left: 40px;
+    margin-top: 10px;
+}
