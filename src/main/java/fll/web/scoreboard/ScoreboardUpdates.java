@@ -216,10 +216,10 @@ public final class ScoreboardUpdates {
   }
 
   /**
-   * Notify the display to reload because the award groups being displayed have
-   * changed. Executed asynchronously.
+   * Notify the display to reload due to some change in the scores that can't be
+   * handled by incremental score updates.
    */
-  public static void awardGroupChange() {
+  public static void reload() {
     final ReloadMessage message = new ReloadMessage();
     try {
       final String msg = Utilities.createJsonMapper().writeValueAsString(message);
@@ -248,6 +248,14 @@ public final class ScoreboardUpdates {
     } catch (final JsonProcessingException e) {
       throw new FLLInternalException("Error converting ReloadMessage to JSON", e);
     }
+  }
+
+  /**
+   * Notify the display to reload because the award groups being displayed have
+   * changed. Executed asynchronously.
+   */
+  public static void awardGroupChange() {
+    reload();
   }
 
   /**
