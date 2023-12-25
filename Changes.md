@@ -1,3 +1,4 @@
+* #1127 - Add PDF reports for top performance scores
 * #1122 - Add scheduled time to subjective score entry page
 * #1125 - Make performance enter score button larger on tablet
 * #1124 - Add a border to the top of the buttons on score entry

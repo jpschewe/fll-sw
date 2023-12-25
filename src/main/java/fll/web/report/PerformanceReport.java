@@ -36,7 +36,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
-import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
@@ -205,17 +204,21 @@ public class PerformanceReport extends BaseFLLServlet {
             final double average = rs.getDouble(7);
             final double stdev = rs.getDouble(8);
 
-            row.appendChild(createCell(document, String.valueOf(teamNumber)));
-            row.appendChild(createCell(document, null == teamName ? "" : teamName));
-            row.appendChild(createCell(document, null == organization ? "" : organization));
+            row.appendChild(FOPUtils.createStandardTableCell(document, String.valueOf(teamNumber)));
+            row.appendChild(FOPUtils.createStandardTableCell(document, null == teamName ? "" : teamName));
+            row.appendChild(FOPUtils.createStandardTableCell(document, null == organization ? "" : organization));
 
             final String scoresText = scoresToText(rawScoreFormat, scores);
-            row.appendChild(createCell(document, scoresText));
+            row.appendChild(FOPUtils.createStandardTableCell(document, scoresText));
 
-            row.appendChild(createCell(document, Utilities.getFloatingPointNumberFormat().format(minScore)));
-            row.appendChild(createCell(document, Utilities.getFloatingPointNumberFormat().format(maxScore)));
-            row.appendChild(createCell(document, Utilities.getFloatingPointNumberFormat().format(average)));
-            row.appendChild(createCell(document, Utilities.getFloatingPointNumberFormat().format(stdev)));
+            row.appendChild(FOPUtils.createStandardTableCell(document, Utilities.getFloatingPointNumberFormat()
+                                                                                .format(minScore)));
+            row.appendChild(FOPUtils.createStandardTableCell(document, Utilities.getFloatingPointNumberFormat()
+                                                                                .format(maxScore)));
+            row.appendChild(FOPUtils.createStandardTableCell(document,
+                                                             Utilities.getFloatingPointNumberFormat().format(average)));
+            row.appendChild(FOPUtils.createStandardTableCell(document,
+                                                             Utilities.getFloatingPointNumberFormat().format(stdev)));
           } // foreach result
         } // allocate rs
 
@@ -254,39 +257,29 @@ public class PerformanceReport extends BaseFLLServlet {
     final Element row1 = FOPUtils.createTableRow(document);
     tableHeader.appendChild(row1);
 
-    Element cell = createCell(document, String.format("%s - %s", challengeTitle, tournament.getDescription()));
+    Element cell = FOPUtils.createStandardTableCell(document, String.format("%s - %s", challengeTitle,
+                                                                            tournament.getDescription()));
     row1.appendChild(cell);
     cell.setAttribute("number-columns-spanned", String.valueOf(NUM_COLMNS));
 
     final Element row2 = FOPUtils.createTableRow(document);
     tableHeader.appendChild(row2);
-    cell = createCell(document, String.format("Award Group: %s", awardGroup));
+    cell = FOPUtils.createStandardTableCell(document, String.format("Award Group: %s", awardGroup));
     row2.appendChild(cell);
     cell.setAttribute("number-columns-spanned", String.valueOf(NUM_COLMNS));
 
     final Element row3 = FOPUtils.createTableRow(document);
     tableHeader.appendChild(row3);
 
-    row3.appendChild(createCell(document, TournamentSchedule.TEAM_NUMBER_HEADER));
-    row3.appendChild(createCell(document, TournamentSchedule.TEAM_NAME_HEADER));
-    row3.appendChild(createCell(document, TournamentSchedule.ORGANIZATION_HEADER));
-    row3.appendChild(createCell(document, "Scores"));
-    row3.appendChild(createCell(document, "Min"));
-    row3.appendChild(createCell(document, "Max"));
-    row3.appendChild(createCell(document, "Avg"));
-    row3.appendChild(createCell(document, "Std Dev"));
+    row3.appendChild(FOPUtils.createStandardTableCell(document, TournamentSchedule.TEAM_NUMBER_HEADER));
+    row3.appendChild(FOPUtils.createStandardTableCell(document, TournamentSchedule.TEAM_NAME_HEADER));
+    row3.appendChild(FOPUtils.createStandardTableCell(document, TournamentSchedule.ORGANIZATION_HEADER));
+    row3.appendChild(FOPUtils.createStandardTableCell(document, "Scores"));
+    row3.appendChild(FOPUtils.createStandardTableCell(document, "Min"));
+    row3.appendChild(FOPUtils.createStandardTableCell(document, "Max"));
+    row3.appendChild(FOPUtils.createStandardTableCell(document, "Avg"));
+    row3.appendChild(FOPUtils.createStandardTableCell(document, "Std Dev"));
 
     return tableHeader;
-  }
-
-  private Element createCell(final Document document,
-                             final String text) {
-    final Element cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, text);
-    FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
-                        ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
-    FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                        FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
-
-    return cell;
   }
 }
