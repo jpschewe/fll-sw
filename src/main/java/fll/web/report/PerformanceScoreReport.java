@@ -35,7 +35,6 @@ import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
-import fll.scheduler.ScheduleWriter;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.util.FP;
@@ -448,8 +447,8 @@ public class PerformanceScoreReport extends BaseFLLServlet {
   private static Element createCell(final Document document,
                                     final String text) {
     final Element cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, text);
-    FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
-                        ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+    FOPUtils.addBorders(cell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
+                        FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
     FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
                         FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
@@ -487,11 +486,11 @@ public class PerformanceScoreReport extends BaseFLLServlet {
 
     final Element title = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, REPORT_TITLE);
     row2.appendChild(title);
-    FOPUtils.addBottomBorder(title, ScheduleWriter.THICK_BORDER_WIDTH);
+    FOPUtils.addBottomBorder(title, FOPUtils.THICK_BORDER_WIDTH);
 
     final Element date = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, tournament.getDateString());
     row2.appendChild(date);
-    FOPUtils.addBottomBorder(date, ScheduleWriter.THICK_BORDER_WIDTH);
+    FOPUtils.addBottomBorder(date, FOPUtils.THICK_BORDER_WIDTH);
 
     if (null != team) {
       // team information

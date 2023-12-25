@@ -46,6 +46,16 @@ public final class FOPUtils {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  /**
+   * Standard border for table cells in points.
+   */
+  public static final double STANDARD_BORDER_WIDTH = 0.5;
+
+  /**
+   * Think border for table cells in points.
+   */
+  public static final double THICK_BORDER_WIDTH = 2;
+
   private FOPUtils() {
   }
 
@@ -1068,5 +1078,26 @@ public final class FOPUtils {
     bodyBlock.appendChild(document.createTextNode("\u2022"));
 
     return itemLabel;
+  }
+
+  /**
+   * Create a basic table cell with a border and standard padding.
+   * 
+   * @param document used to create elements
+   * @param text the text to put in the cell
+   * @return the cell
+   * @see STANDARD_BORDER_WIDTH
+   * @see TEXT_ALIGN_CENTER
+   * @see TABLE_CELL_STANDARD_PADDING
+   */
+  public static Element createStandardTableCell(final Document document,
+                                                final String text) {
+    final Element cell = createTableCell(document, TEXT_ALIGN_CENTER, text);
+    addBorders(cell, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
+                        STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH);
+    addPadding(cell, TABLE_CELL_STANDARD_PADDING, TABLE_CELL_STANDARD_PADDING,
+                        TABLE_CELL_STANDARD_PADDING, TABLE_CELL_STANDARD_PADDING);
+  
+    return cell;
   }
 }

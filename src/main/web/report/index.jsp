@@ -43,11 +43,16 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <a class="wide" href="NonNumericNomineesReport" target="_blank">Optional
         award nominations</a>
 
-    <a class="wide" href="topScoreReportPerAwardGroup.jsp">Top
-        performance - Award group </a>
+    <a class="wide" target="_topScoreReportPerAwardGroup"
+        href="topScoreReportPerAwardGroup.jsp">Top performance -
+        Award group (HTML)</a>
 
     <a class="wide" href="topScoreReportPerJudgingStation.jsp"> Top
         performance - Judging group </a>
+    <a class="wide" target="_topScoreReportPerAwardGroup"
+        href="TopScoreReportPerAwardGroupPdf">Top performance -
+        Award group (PDF)</a>
+
 
     <div class="wide">
         Summarized numeric scores - by judging group aka "Final Computed
