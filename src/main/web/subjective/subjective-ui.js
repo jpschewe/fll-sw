@@ -12,6 +12,9 @@ let server_online = true;
 
 let alertCallback = null;
 
+// common time formatter
+const timeFormatter = JSJoda.DateTimeFormatter.ofPattern("HH:mm");
+
 /**
  * Create the JSON object to download and set it as the href. 
  * This is meant to be called from the onclick handler of the anchor.
@@ -186,7 +189,6 @@ function populateTeams() {
     const teamsList = document.getElementById("teams-list_teams");
     removeChildren(teamsList);
 
-    const timeFormatter = JSJoda.DateTimeFormatter.ofPattern("HH:mm");
     const teams = subjective_module.getCurrentTeams();
     for (const team of teams) {
         const time = subjective_module.getScheduledTime(team.teamNumber);
@@ -1148,6 +1150,14 @@ function displayPageEnterScore() {
     const currentTeam = subjective_module.getCurrentTeam();
     document.getElementById("enter-score_team-number").innerText = currentTeam.teamNumber;
     document.getElementById("enter-score_team-name").innerText = currentTeam.teamName;
+
+    const time = subjective_module.getScheduledTime(currentTeam.teamNumber);
+    if (null != time) {
+        const timeStr = time.format(timeFormatter);
+        document.getElementById("enter-score_scheduled-time").innerText = timeStr;
+    } else {
+        document.getElementById("enter-score_scheduled-time").innerText = "";
+    }
 
     const score = subjective_module.getScore(currentTeam.teamNumber);
     if (null != score) {
