@@ -32,7 +32,6 @@ import org.w3c.dom.Element;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
-import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
@@ -438,8 +437,8 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     final DatabaseTeamScore[] scores = new DatabaseTeamScore[numSeedingRounds];
     for (int runNumber = 1; runNumber <= numSeedingRounds; ++runNumber) {
       scores[runNumber
-          - 1] = new DatabaseTeamScore(GenerateDB.PERFORMANCE_TABLE_NAME, tournament.getTournamentID(),
-                                       team.getTeamNumber(), runNumber, connection);
+          - 1] = new DatabaseTeamScore(tournament.getTournamentID(), team.getTeamNumber(),
+                                       runNumber, connection);
     }
     return scores;
   }
