@@ -27,10 +27,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * PDF of top performance scores organized by award group.
+ * PDF of top performance scores organized by judging station.
  */
-@WebServlet("/report/TopScoreReportPerAwardGroupPdf")
-public class TopScoreReportPerAwardGroupPdf extends TopScoreReportPdf {
+@WebServlet("/report/TopScoreReportPerJudgingStationPdf")
+public class TopScoreReportPerJudgingStationPdf extends TopScoreReportPdf {
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -39,13 +39,13 @@ public class TopScoreReportPerAwardGroupPdf extends TopScoreReportPdf {
                                 final HttpSession session)
       throws IOException, ServletException {
     if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
-                                                    "/report/TopScoreReportPerAwardGroupPdf")) {
+                                                    "/report/TopScoreReportPerJudgingStationPdf")) {
       return;
     }
 
     response.reset();
     response.setContentType("application/pdf");
-    response.setHeader("Content-Disposition", "filename=TopScoreReportPerAwardGroup.pdf");
+    response.setHeader("Content-Disposition", "filename=TopScoreReportPerJudgingStation.pdf");
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
@@ -53,8 +53,9 @@ public class TopScoreReportPerAwardGroupPdf extends TopScoreReportPdf {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
-      final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
-      outputReport(response.getOutputStream(), challengeDescription, tournament, "Award Group", scores);
+      final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByJudgingStation(connection, description,
+                                                                                             tournament);
+      outputReport(response.getOutputStream(), challengeDescription, tournament, "Judging Station", scores);
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     }
