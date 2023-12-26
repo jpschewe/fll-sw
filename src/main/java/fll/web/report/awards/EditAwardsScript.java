@@ -81,14 +81,12 @@ public class EditAwardsScript extends BaseFLLServlet {
         tournamentLevel = TournamentLevel.getById(connection, id);
         tournament = Tournament.findTournamentByID(connection, GenerateDB.INTERNAL_TOURNAMENT_ID);
         page.setAttribute("descriptionText", String.format("tournament level %s", tournamentLevel.getName()));
-        page.setAttribute("tournamentLevel", tournamentLevel);
       } else if (null != tournamentId) {
         final int id = Integer.parseInt(tournamentId);
         tournament = Tournament.findTournamentByID(connection, id);
         tournamentLevel = tournament.getLevel();
         page.setAttribute("descriptionText",
                           String.format("tournament %s - %s", tournament.getName(), tournament.getDescription()));
-        page.setAttribute("tournament", tournament);
       } else {
         page.setAttribute("descriptionText", "season");
         tournament = Tournament.findTournamentByID(connection, GenerateDB.INTERNAL_TOURNAMENT_ID);
