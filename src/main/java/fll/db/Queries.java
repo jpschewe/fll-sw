@@ -458,6 +458,12 @@ public final class Queries {
     final PerformanceScoreCategory performanceElement = description.getPerformance();
     final List<TiebreakerTest> tiebreakerElement = performanceElement.getTiebreaker();
 
+    final TeamScore prevTeamScore = new DatabaseTeamScore(currentTournament, teamScore.getTeamNumber(),
+                                                          teamScore.getRunNumber(), connection);
+    final boolean prevNoShow = prevTeamScore.isNoShow();
+    final double prevScore = performanceElement.evaluate(prevTeamScore);
+    final boolean prevVerified = prevTeamScore.isVerified();
+
     final int teamNumber = teamScore.getTeamNumber();
     final int runNumber = teamScore.getRunNumber();
 
@@ -520,11 +526,23 @@ public final class Queries {
 
     if (numRowsUpdated > 0) {
       if (teamScore.isVerified()) {
-        final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, tournament,
-                                                                                 teamScore.getTeamNumber());
-        final ScoreType performanceScoreType = description.getPerformance().getScoreType();
-        final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-        ScoreboardUpdates.newScore(datasource, team, score, formattedScore, teamScore);
+        if (prevVerified
+            && ((!prevNoShow
+                && teamScore.isNoShow())
+                || (prevScore > score))) {
+          // The top scores portion of the scoreboard depends on scores never going down,
+          // if that happens the scoreboard needs a reload so that the top scores can be
+          // properly computed.
+          // TODO: if this happens alot and slows things down we can look into having a
+          // reload message for a single team
+          ScoreboardUpdates.reload();
+        } else {
+          final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, tournament,
+                                                                                   teamScore.getTeamNumber());
+          final ScoreType performanceScoreType = description.getPerformance().getScoreType();
+          final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
+          ScoreboardUpdates.newScore(datasource, team, score, formattedScore, teamScore);
+        }
       }
 
       // Check if we need to update the PlayoffData table

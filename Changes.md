@@ -1,3 +1,4 @@
+* #1126 - Reload scoreboard if a score is edited to be lower than it was previously
 * #1127 - Add PDF reports for top performance scores
 * #1122 - Add scheduled time to subjective score entry page
 * #1125 - Make performance enter score button larger on tablet

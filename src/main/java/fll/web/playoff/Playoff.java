@@ -174,8 +174,8 @@ public final class Playoff {
                                           final TeamScore teamBScore,
                                           final int runNumber)
       throws SQLException {
-    final DatabaseTeamScore teamAScore = new DatabaseTeamScore(GenerateDB.PERFORMANCE_TABLE_NAME, tournament,
-                                                               teamA.getTeamNumber(), runNumber, connection);
+    final DatabaseTeamScore teamAScore = new DatabaseTeamScore(tournament, teamA.getTeamNumber(),
+                                                               runNumber, connection);
     final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
                                    teamBScore);
     return retval;
@@ -209,10 +209,10 @@ public final class Playoff {
                                           final Team teamB,
                                           final int runNumber)
       throws SQLException {
-    final DatabaseTeamScore teamAScore = new DatabaseTeamScore(GenerateDB.PERFORMANCE_TABLE_NAME, tournament,
-                                                               teamA.getTeamNumber(), runNumber, connection);
-    final DatabaseTeamScore teamBScore = new DatabaseTeamScore(PerformanceScoreCategory.CATEGORY_TITLE, tournament,
-                                                               teamB.getTeamNumber(), runNumber, connection);
+    final DatabaseTeamScore teamAScore = new DatabaseTeamScore(tournament, teamA.getTeamNumber(),
+                                                               runNumber, connection);
+    final DatabaseTeamScore teamBScore = new DatabaseTeamScore(tournament, teamB.getTeamNumber(),
+                                                               runNumber, connection);
     final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
                                    teamBScore);
     return retval;
