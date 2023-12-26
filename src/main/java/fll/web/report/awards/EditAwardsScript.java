@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -36,8 +37,10 @@ import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.xml.ChallengeDescription;
@@ -402,6 +405,10 @@ public class EditAwardsScript extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
