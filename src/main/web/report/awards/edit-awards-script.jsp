@@ -198,7 +198,7 @@ awardsScriptModule.init = ( ) => {
             The order of the award groups for each category is the same
             as the <a
                 href="<c:url value='/report/edit-advancing-teams.jsp'/>">award
-                group order for advancing teams.</a>
+                group order for advancing teams</a>.
         </div>
 
         <label>
