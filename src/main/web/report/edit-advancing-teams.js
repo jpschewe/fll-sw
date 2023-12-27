@@ -217,10 +217,8 @@ function initPage() {
         addAdvancingGroup(group, true);
     });
 
-    var awardGroupOrder = document.getElementById("award-group-order");
-    while (awardGroupOrder.firstChild) {
-        awardGroupOrder.removeChild(awardGroupOrder.firstChild);
-    }
+    const awardGroupOrder = document.getElementById("award-group-order");
+    removeChildren(awardGroupOrder);
 
     if (_initialSortedGroups) {
         _initialSortedGroups.forEach(function(group) {

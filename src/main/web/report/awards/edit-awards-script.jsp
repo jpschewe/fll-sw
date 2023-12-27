@@ -194,12 +194,35 @@ awardsScriptModule.init = ( ) => {
 
         <h2>Award presentation order</h2>
 
-        <div>
-            The order of the award groups for each category is the same
-            as the <a
-                href="<c:url value='/report/edit-advancing-teams.jsp'/>">award
-                group order for advancing teams.</a>
-        </div>
+        <c:choose>
+            <c:when
+                test="${tournament.tournamentID != INTERNAL_TOURNAMENT_ID}">
+                <p>Specify the sort order for the award groups when
+                    printing. This is used in both the awards report and
+                    the awards script. Put a number next to each group
+                    name. The groups will be output from lowest number
+                    to highest.</p>
+                <ul id="award-group-order">
+                    <c:forEach items="${awardGroups}" var="awardGroup"
+                        varStatus="loopStatus">
+                        <li>
+                            <input type='number' step='1'
+                                name='awardGroupOrder_${awardGroup}'
+                                value='${loopStatus.count}' />
+                            ${awardGroup}
+                        </li>
+                    </c:forEach>
+                </ul>
+            </c:when>
+            <c:otherwise>
+                <div>
+                    The order of the award groups for each category is
+                    the same as the <a
+                        href="<c:url value='/report/edit-advancing-teams.jsp'/>">award
+                        group order for advancing teams</a>.
+                </div>
+            </c:otherwise>
+        </c:choose>
 
         <label>
             Specify value:
