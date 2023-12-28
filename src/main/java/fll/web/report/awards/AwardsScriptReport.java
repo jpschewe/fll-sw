@@ -97,7 +97,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.HEAD_JUDGE), false)) {
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.HEAD_JUDGE, UserRole.REPORT_GENERATOR), false)) {
       return;
     }
 
