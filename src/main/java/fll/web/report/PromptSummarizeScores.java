@@ -91,7 +91,8 @@ public class PromptSummarizeScores extends BaseFLLServlet {
     }
 
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
-    if (!auth.isHeadJudge()) {
+    if (!auth.isHeadJudge()
+        && !auth.isReportGenerator()) {
       // only the head judge can summarize scores, so don't prompt others to summarize
       // the scores
       return false;
