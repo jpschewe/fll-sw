@@ -6,6 +6,7 @@
 
 package fll.web.scoreEntry;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,14 +16,18 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.text.StringEscapeUtils;
-import org.checkerframework.checker.lock.qual.GuardedBy;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,6 +38,7 @@ import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.GetHttpSessionConfigurator;
 import fll.web.playoff.Playoff;
@@ -53,11 +59,13 @@ public class PerformanceRunsEndpoint {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  private static final @GuardedBy("SESSIONS_LOCK") Set<Session> ALL_SESSIONS = new HashSet<>();
-
-  private static final Object SESSIONS_LOCK = new Object();
+  private static final ConcurrentHashMap<String, Session> ALL_SESSIONS = new ConcurrentHashMap<>();
 
   private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
+
+  private @MonotonicNonNull Session session;
+
+  private @MonotonicNonNull String uuid;
 
   /**
    * @param session the newly opened session
@@ -75,56 +83,53 @@ public class PerformanceRunsEndpoint {
         final String msg = jsonMapper.writeValueAsString(runData);
         sendToClient(session, msg);
       } catch (final SQLException e) {
-        LOGGER.error("Error getting peprformance run data to send to client", e);
+        throw new FLLRuntimeException("Error getting peprformance run data to send to client", e);
       }
 
-      synchronized (SESSIONS_LOCK) {
-        ALL_SESSIONS.add(session);
-      }
+      this.uuid = UUID.randomUUID().toString();
+      this.session = session;
+      ALL_SESSIONS.put(uuid, session);
     } catch (final IOException e) {
       LOGGER.warn("Got error sending intial message to client, not adding", e);
     }
   }
 
-  /**
-   * @param session the session for the closed websocket
-   */
   @OnClose
-  public void onClose(final Session session) {
-    synchronized (SESSIONS_LOCK) {
-      internalRemoveSession(session);
+  public void onClose() {
+    if (null != uuid) {
+      internalRemoveSession(uuid);
     }
   }
 
   /**
    * Error handler.
    * 
-   * @param session the session that had the error
    * @param t the exception
    */
   @OnError
-  public void error(final Session session,
-                    final Throwable t) {
-    synchronized (SESSIONS_LOCK) {
-      LOGGER.error("Caught websocket error, closing session", t);
-
-      internalRemoveSession(session);
+  public void error(final Throwable t) {
+    if (t instanceof EOFException) {
+      LOGGER.debug("{}: Socket closed.", uuid);
+    } else {
+      LOGGER.error("{}: websocket error", uuid, t);
+      if (null != uuid) {
+        internalRemoveSession(uuid);
+      }
     }
   }
 
   /**
-   * Close the session and remove it from the global list without locking.
+   * Close the session and remove it from the global list.
    */
-  private static void internalRemoveSession(final Session session) {
-    try {
-      session.close();
-    } catch (final IOException ioe) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Got error closing session, ignoring", ioe);
+  private static void internalRemoveSession(final String uuid) {
+    final @Nullable Session client = ALL_SESSIONS.remove(uuid);
+    if (null != client) {
+      try {
+        client.close();
+      } catch (final IOException e) {
+        LOGGER.debug("Got error closing websocket, ignoring", e);
       }
     }
-
-    ALL_SESSIONS.remove(session);
   }
 
   /**
@@ -138,8 +143,6 @@ public class PerformanceRunsEndpoint {
     sendData(unverifiedData);
   }
 
-  // FIXME modify client side to clear the unverified options and create new ones
-  // based on the data
   private static void sendData(final Collection<UnverifiedRunData> unverifiedData) {
     THREAD_POOL.execute(() -> {
       try {
@@ -147,23 +150,22 @@ public class PerformanceRunsEndpoint {
         final ObjectMapper jsonMapper = Utilities.createJsonMapper();
         final String msg = jsonMapper.writeValueAsString(runData);
 
-        synchronized (SESSIONS_LOCK) {
-          final Set<Session> toRemove = new HashSet<>();
+        final Set<String> toRemove = new HashSet<>();
 
-          for (final Session session : ALL_SESSIONS) {
-            try {
-              sendToClient(session, msg);
-            } catch (final IOException e) {
-              LOGGER.warn("Error sending to client: "
-                  + e.getMessage(), e);
-              toRemove.add(session);
-            }
-          } // foreach session
-
-          // cleanup dead sessions
-          for (final Session session : toRemove) {
-            internalRemoveSession(session);
+        for (final Map.Entry<String, Session> entry : ALL_SESSIONS.entrySet()) {
+          final Session session = entry.getValue();
+          try {
+            sendToClient(session, msg);
+          } catch (final IOException e) {
+            LOGGER.warn("Error sending to client: "
+                + e.getMessage(), e);
+            toRemove.add(entry.getKey());
           }
+        } // foreach session
+
+        // cleanup dead sessions
+        for (final String uuid : toRemove) {
+          internalRemoveSession(uuid);
         }
       } catch (final JsonProcessingException e) {
         throw new FLLInternalException("Error converting message to JSON", e);
