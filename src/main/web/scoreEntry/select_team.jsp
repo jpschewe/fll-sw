@@ -37,7 +37,6 @@ SELECT {
 <script type='text/javascript'>
   // use var instead of const so that the variables are available globally
   var scoreEntrySelectedTable = "${scoreEntrySelectedTable}";
-  var teamSelectData = JSON.parse('${teamSelectDataJson}');
   var tabletMode = Boolean(scoreEntrySelectedTable);
 </script>
 

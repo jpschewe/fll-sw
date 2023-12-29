@@ -1,3 +1,4 @@
+* #1128 - Refresh the performance score team selection page when scores are entered
 * #1135 - Allow editing of the award group order on the awards script editor page
 * #1126 - Reload scoreboard if a score is edited to be lower than it was previously
 * #1127 - Add PDF reports for top performance scores

@@ -7,6 +7,9 @@
 "use strict";
 
 
+var teamSelectData = [];
+var sort = compareByPerformanceTime;
+
 function editFlagBoxClicked() {
     const text = document.getElementById('select_number_text');
     if (document.selectTeam.EditFlag.checked) {
@@ -22,6 +25,10 @@ function messageReceived(event) {
     const message = JSON.parse(event.data);
 
     populateUnverifiedSelect(message.unverified);
+
+    teamSelectData = message.teamSelectData;
+    teamSelectData.sort(sort);
+    populateTeamsSelect();
 }
 
 function socketOpened(event) {
@@ -257,20 +264,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // only support edit when not on a tablet
         editFlagBoxClicked();
     }
-    teamSelectData.sort(compareByPerformanceTime);
+    teamSelectData.sort(sort);
     populateTeamsSelect();
     displayStoredData();
 
     if (!scoreEntrySelectedTable) {
         document.getElementById("sort-team-name").addEventListener('click', () => {
+            sort = compareByTeamName;
             teamSelectData.sort(compareByTeamName);
             populateTeamsSelect();
         });
         document.getElementById("sort-team-number").addEventListener('click', () => {
+            sort = compareByTeamNumber;
             teamSelectData.sort(compareByTeamNumber);
             populateTeamsSelect();
         });
         document.getElementById("sort-organization").addEventListener('click', () => {
+            sort = compareByOrganization;
             teamSelectData.sort(compareByOrganization);
             populateTeamsSelect();
         });
