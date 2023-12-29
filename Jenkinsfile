@@ -109,7 +109,9 @@ pipeline {
         timeout(time: 3, unit: 'HOURS') {      
           // runs all of the test tasks
           callGradle('test')
-          callGradle('integrationTest')
+          xnc {
+            callGradle('integrationTest')
+          }
           callGradle('jacocoTestReport')
           junit testResults: "build/test-results/*est/TEST-*.xml", keepLongStdio: true
           jacoco classPattern: 'build/classes/*/*', execPattern: 'build/jacoco/*.exec', sourcePattern: 'src/main/java,src/test/java,src/integrationTest/java'
