@@ -43,7 +43,7 @@ import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.H2HUpdateWebSocket;
 import fll.web.playoff.Playoff;
 import fll.web.playoff.TeamScore;
-import fll.web.scoreEntry.UnverifiedRunsWebSocket;
+import fll.web.scoreEntry.PerformanceRunsEndpoint;
 import fll.web.scoreboard.ScoreboardUpdates;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -428,7 +428,7 @@ public final class Queries {
     }
 
     // notify that there may be more runs to verify
-    UnverifiedRunsWebSocket.notifyToUpdate();
+    PerformanceRunsEndpoint.notifyToUpdate(connection);
   }
 
   /**
@@ -563,7 +563,7 @@ public final class Queries {
     }
 
     // notify that there may be more runs to verify
-    UnverifiedRunsWebSocket.notifyToUpdate();
+    PerformanceRunsEndpoint.notifyToUpdate(connection);
 
     return numRowsUpdated;
   }
@@ -688,7 +688,7 @@ public final class Queries {
     }
 
     // notify that the list of unverified runs may have changed
-    UnverifiedRunsWebSocket.notifyToUpdate();
+    PerformanceRunsEndpoint.notifyToUpdate(connection);
     ScoreboardUpdates.deleteScore();
   }
 

@@ -18,21 +18,10 @@ function editFlagBoxClicked() {
     }
 }
 
-function reloadRuns() {
-    document.body.removeChild(document.getElementById('reloadruns'));
-    document.verify.TeamNumber.length = 0;
-    const s = document.createElement('script');
-    s.type = 'text/javascript';
-    s.id = 'reloadruns';
-    s.src = 'UpdateUnverifiedRuns?' + Math.random();
-    document.body.appendChild(s);
-}
-
 function messageReceived(event) {
-    console.log("received: " + event.data);
+    const message = JSON.parse(event.data);
 
-    // data doesn't matter, just reload runs on any message
-    reloadRuns();
+    populateUnverifiedSelect(message.unverified);
 }
 
 function socketOpened(event) {
@@ -52,12 +41,24 @@ function openSocket() {
     const url = window.location.pathname;
     const directory = url.substring(0, url.lastIndexOf('/'));
     const webSocketAddress = getWebsocketProtocol() + "//" + window.location.host
-        + directory + "/UnverifiedRunsWebSocket";
+        + directory + "/PerformanceRunsEndpoint";
 
     const socket = new WebSocket(webSocketAddress);
     socket.onmessage = messageReceived;
     socket.onopen = socketOpened;
     socket.onclose = socketClosed;
+}
+
+function populateUnverifiedSelect(unverifiedData) {
+    const selectBox = document.getElementById("select-verify-teamnumber");
+    removeChildren(selectBox);
+
+    for (const unverifiedTeamData of unverifiedData) {
+        const option = document.createElement("option");
+        option.value = unverifiedTeamData.teamNumber + "-" + unverifiedTeamData.runNumber;
+        option.innerText = unverifiedTeamData.display;
+        selectBox.appendChild(option);
+    }
 }
 
 function populateTeamsSelect() {
@@ -278,7 +279,6 @@ document.addEventListener('DOMContentLoaded', function() {
             populateTeamsSelect();
         });
 
-        reloadRuns();
         openSocket();
     }
 });

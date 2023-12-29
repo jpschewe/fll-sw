@@ -229,7 +229,6 @@ public final class SelectTeam {
    * Data class for displaying team information on the web. Sorting is done inside
    * the javascript.
    */
-  @SuppressFBWarnings(value = "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", justification = "only used for sort, not stored via serialization")
   public static final class SelectTeamData {
 
     private final TournamentTeam team;

@@ -269,10 +269,5 @@ Entering scores for all tables. Teams are sorted in schedule order.
     </table>
     <!-- outer table -->
 
-    <c:if test="${empty scoreEntrySelectedTable}">
-        <script type="text/javascript" id="reloadruns"
-            src="UpdateUnverifiedRuns"></script>
-    </c:if>
-
 </body>
 </html>
