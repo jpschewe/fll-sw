@@ -931,7 +931,9 @@ public class FullTournamentTest {
               + "scoreEntry/select_team.jsp");
 
           // select this entry
-          new Select(selenium.findElement(By.id("select-teamnumber"))).selectByValue(String.valueOf(teamNumber));
+          final WebElement teamSelect = selenium.findElement(By.id("select-teamnumber"));
+          seleniumWait.until(ExpectedConditions.presenceOfNestedElementLocatedBy(teamSelect, By.tagName("option")));
+          new Select(teamSelect).selectByValue(String.valueOf(teamNumber));
 
           // submit the page
           selenium.findElement(By.id("enter_submit")).click();
@@ -1051,7 +1053,10 @@ public class FullTournamentTest {
 
             // search for the element by team number due to the run numbers changing in head
             // to head
-            final Select verifySelect = new Select(selenium.findElement(By.id("select-verify-teamnumber")));
+            final WebElement verifySelectElement = selenium.findElement(By.id("select-verify-teamnumber"));
+            seleniumWait.until(ExpectedConditions.presenceOfNestedElementLocatedBy(verifySelectElement,
+                                                                                   By.tagName("option")));
+            final Select verifySelect = new Select(verifySelectElement);
             boolean found = false;
             for (final WebElement option : verifySelect.getOptions()) {
               final String value = option.getAttribute("value");
