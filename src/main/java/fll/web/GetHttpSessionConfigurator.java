@@ -6,8 +6,10 @@
 
 package fll.web;
 
+import fll.util.FLLRuntimeException;
 import jakarta.servlet.http.HttpSession;
 import jakarta.websocket.HandshakeResponse;
+import jakarta.websocket.Session;
 import jakarta.websocket.server.HandshakeRequest;
 import jakarta.websocket.server.ServerEndpointConfig;
 import jakarta.websocket.server.ServerEndpointConfig.Configurator;
@@ -30,6 +32,22 @@ public class GetHttpSessionConfigurator extends Configurator {
     final HttpSession httpSession = (HttpSession) request.getHttpSession();
 
     config.getUserProperties().put(HTTP_SESSION_KEY, httpSession);
+  }
+
+  /**
+   * @param session a session configured with {@link GetHttpSessionConfigurator}
+   * @return the http session
+   * @throws FLLRuntimeException if the session isn't available
+   */
+  public static HttpSession getHttpSession(final Session session) {
+    final HttpSession httpSession = (HttpSession) session.getUserProperties()
+                                                         .get(HTTP_SESSION_KEY);
+  
+    if (null == httpSession) {
+      throw new FLLRuntimeException("Unable to find httpSession in the userProperties");
+    }
+  
+    return httpSession;
   }
 
 }

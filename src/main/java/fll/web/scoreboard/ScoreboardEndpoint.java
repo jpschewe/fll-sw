@@ -15,9 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
-import fll.util.FLLRuntimeException;
 import fll.web.GetHttpSessionConfigurator;
-import jakarta.servlet.http.HttpSession;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnError;
 import jakarta.websocket.OnMessage;
@@ -64,7 +62,7 @@ public class ScoreboardEndpoint {
       switch (message.getType()) {
       case REGISTER:
         final RegisterMessage registerMessage = (RegisterMessage) message;
-        this.uuid = ScoreboardUpdates.addClient(registerMessage.getDisplayUuid(), session, getHttpSession(session));
+        this.uuid = ScoreboardUpdates.addClient(registerMessage.getDisplayUuid(), session, GetHttpSessionConfigurator.getHttpSession(session));
         break;
       case UPDATE:
         LOGGER.warn("{}: Received UPDATE message from client, ignoring", uuid);
@@ -97,17 +95,6 @@ public class ScoreboardEndpoint {
     } else {
       LOGGER.error("{}: Display socket error", uuid, t);
     }
-  }
-
-  private static HttpSession getHttpSession(final Session session) {
-    final HttpSession httpSession = (HttpSession) session.getUserProperties()
-                                                         .get(GetHttpSessionConfigurator.HTTP_SESSION_KEY);
-
-    if (null == httpSession) {
-      throw new FLLRuntimeException("Unable to find httpSession in the userProperties");
-    }
-
-    return httpSession;
   }
 
 }
