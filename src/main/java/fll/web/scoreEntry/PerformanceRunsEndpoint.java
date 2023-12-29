@@ -404,7 +404,7 @@ public class PerformanceRunsEndpoint {
   public static final class PerformanceRunData {
 
     /**
-     * @param teamSelectData {@Link #getTeamSelectData()}
+     * @param teamSelectData {@link #getTeamSelectData()}
      * @param unverified {@link #getUnverified()}
      */
     public PerformanceRunData(final List<SelectTeamData> teamSelectData,
