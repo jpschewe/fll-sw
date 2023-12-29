@@ -5,7 +5,7 @@ pipeline {
   options { buildDiscarder(logRotator(numToKeepStr: '5')) }
 
   agent {
-    label 'fll-sw_windows'
+    label 'fll-sw_linux'
   }
 
   stages {
