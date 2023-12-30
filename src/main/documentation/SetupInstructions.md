@@ -116,7 +116,7 @@ If you do not have a zip tool to open up the archives you can use the jar tool t
   1. Copy the zip file to the directory you want to uncompress it in
   1. Right click on the file and extract here
   1. You should now have the files uncompressed in a directory and you can move them around as needed.
-  1. [Install Java (the JRE) 1.8 or higher](InstallJava.md) (the language everything is written in). If you downloaded a version of the software is the JRE bundled in, then you can skip this step for the server. This needs to be done on the server and on any machines that will be used to enter subjective scores.
+  1. [Install Java (the JRE)](InstallJava.md) (the language everything is written in). If you downloaded a version of the software is the JRE bundled in, then you can skip this step for the server.
   1. Test the server
       1. Open an explorer window to the directory you you unzipped install file into. It should be called something like fll-sw-<version>
       1. Run fll-sw.exe (fll-sw.sh on Linux and Mac)
@@ -135,18 +135,6 @@ If you do not have a zip tool to open up the archives you can use the jar tool t
       * You can find links to copy to the score entry computers at the bottom of the main page
   1. Subjective
       * Web application. This is the preferred method. The web application can be run on tablets, laptops or desktops, phones are generally too hard to use for this. There is a link to the subjective web application from the main index.
-      * Stand-alone application
-          1. Follow the instructions above for installing Java
-          1. Unzip subjective.zip to a location on the computer
-          1. Goto a computer that's connected to the server and goto the main page, then Administration then Download the datafile for subjective score entry
-          1. Save this file somewhere on the computer used for subjective score entry, this can be copied around with a floppy
-          1. Run subjective.bat from the location you unzipped subjective.zip and when prompted give it the location of the subjective.zip file that was downloaded from the server
-          1. Enter scores for teams by selecting the category tab at the top then entering the scores under each subcategory
-          1. Save often
-          1. When done, quit the application and copy the file back to a computer that has access to the server
-          1. Goto Adminstration and click on the Browse button next to Upload the datafile for subjective scores
-          1. Select the file you just copied
-          1. Click upload and if all is well you'll be returned to the Adminstration page again
   1. When you're done for the day you should make a copy of the database for the Lead Scoring Coordinator.
       1. The database can be downloaded from the Scoring Coordinator page or from the admin index page
       1. Shut down the web server
