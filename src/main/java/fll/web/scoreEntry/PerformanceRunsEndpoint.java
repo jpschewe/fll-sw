@@ -73,8 +73,6 @@ public class PerformanceRunsEndpoint {
 
   private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
 
-  private @MonotonicNonNull Session session;
-
   private @MonotonicNonNull String uuid;
 
   /**
@@ -98,7 +96,6 @@ public class PerformanceRunsEndpoint {
       }
 
       this.uuid = UUID.randomUUID().toString();
-      this.session = session;
       ALL_SESSIONS.put(uuid, session);
     } catch (final IOException e) {
       LOGGER.warn("Got error sending intial message to client, not adding", e);
