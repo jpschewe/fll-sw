@@ -109,7 +109,7 @@ pipeline {
         timeout(time: 3, unit: 'HOURS') {      
           // runs all of the test tasks
           callGradle('test')
-          xnc {
+          xvnc {
             callGradle('integrationTest')
           }
           callGradle('jacocoTestReport')
