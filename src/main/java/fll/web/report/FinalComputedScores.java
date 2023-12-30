@@ -83,9 +83,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
    */
   public static final double TIE_TOLERANCE = 1E-6;
 
-  private static final double HEADER_MARGIN_INCHES = 0.8;
+  private static final double HEADER_MARGIN_INCHES = 1;
 
-  private static final double FOOTER_MARGIN_INCHES = 0.5;
+  private static final double FOOTER_MARGIN_INCHES = 1;
 
   private static final DateTimeFormatter REPORT_TIMESTAMP_FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.MONTH_OF_YEAR,
                                                                                                                  2)
