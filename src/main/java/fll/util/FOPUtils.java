@@ -146,7 +146,7 @@ public final class FOPUtils {
   public static final Dimension2D PAGE_LETTER_SIZE = new Dimension2DDouble(8.5, 11);
 
   /**
-   * 0.5" on each side.
+   * 0.5" on each side, 0.2" on top and bottom.
    */
   public static final Margins STANDARD_MARGINS = new Margins(0.2, 0.2, 0.5, 0.5);
 
@@ -1093,11 +1093,10 @@ public final class FOPUtils {
   public static Element createStandardTableCell(final Document document,
                                                 final String text) {
     final Element cell = createTableCell(document, TEXT_ALIGN_CENTER, text);
-    addBorders(cell, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
-                        STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH);
-    addPadding(cell, TABLE_CELL_STANDARD_PADDING, TABLE_CELL_STANDARD_PADDING,
-                        TABLE_CELL_STANDARD_PADDING, TABLE_CELL_STANDARD_PADDING);
-  
+    addBorders(cell, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH);
+    addPadding(cell, TABLE_CELL_STANDARD_PADDING, TABLE_CELL_STANDARD_PADDING, TABLE_CELL_STANDARD_PADDING,
+               TABLE_CELL_STANDARD_PADDING);
+
     return cell;
   }
 }
