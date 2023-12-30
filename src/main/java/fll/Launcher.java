@@ -1331,6 +1331,17 @@ public class Launcher extends JFrame {
       throw new FLLRuntimeException("Error copying slideshow", e);
     }
 
+    // copy user images
+    final Path oldUserImages = oldBaseDir.resolve(UserImages.getImagesPath());
+    if (Files.exists(oldUserImages)) {
+      final Path newUserImages = UserImages.getImagesPath();
+      try {
+        FileUtils.copyDirectory(oldUserImages.toFile(), newUserImages.toFile());
+      } catch (final IOException e) {
+        throw new FLLRuntimeException("Error copying user images", e);
+      }
+    }
+
   }
 
 }
