@@ -11,6 +11,7 @@ import java.util.List;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Helpers for welcome.jsp.
@@ -18,6 +19,14 @@ import jakarta.servlet.jsp.JspWriter;
 public final class Welcome {
 
   private Welcome() {
+  }
+
+  /**
+   * @param page used to set variables for the page
+   */
+  public static void populateContext(final PageContext page) {
+//    page.setAttribute("partner_logo", String.format("%s/partner_logo.jpg", UserImages.getImagesPath().getFileName()));
+    page.setAttribute("partner_logo", "/images/htk_logo.jpg");
   }
 
   // private static final int MAX_NUM_LOGOS_PER_COLUMN = 6;
