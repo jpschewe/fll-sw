@@ -37,7 +37,6 @@ SELECT {
 <script type='text/javascript'>
   // use var instead of const so that the variables are available globally
   var scoreEntrySelectedTable = "${scoreEntrySelectedTable}";
-  var teamSelectData = JSON.parse('${teamSelectDataJson}');
   var tabletMode = Boolean(scoreEntrySelectedTable);
 </script>
 
@@ -268,11 +267,6 @@ Entering scores for all tables. Teams are sorted in schedule order.
 
     </table>
     <!-- outer table -->
-
-    <c:if test="${empty scoreEntrySelectedTable}">
-        <script type="text/javascript" id="reloadruns"
-            src="UpdateUnverifiedRuns"></script>
-    </c:if>
 
 </body>
 </html>

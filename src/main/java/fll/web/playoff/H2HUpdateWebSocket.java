@@ -212,7 +212,7 @@ public class H2HUpdateWebSocket {
         }
       }
 
-      final HttpSession httpSession = getHttpSession(session);
+      final HttpSession httpSession = GetHttpSessionConfigurator.getHttpSession(session);
       final ServletContext httpApplication = httpSession.getServletContext();
       final DataSource datasource = ApplicationAttributes.getDataSource(httpApplication);
       try (Connection connection = datasource.getConnection()) {
@@ -227,17 +227,6 @@ public class H2HUpdateWebSocket {
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error getting playoff data from the database", e);
     }
-  }
-
-  private static HttpSession getHttpSession(final Session session) {
-    final HttpSession httpSession = (HttpSession) session.getUserProperties()
-                                                         .get(GetHttpSessionConfigurator.HTTP_SESSION_KEY);
-
-    if (null == httpSession) {
-      throw new FLLRuntimeException("Unable to find httpSession in the userProperties");
-    }
-
-    return httpSession;
   }
 
   /**
