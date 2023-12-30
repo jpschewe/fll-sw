@@ -43,7 +43,7 @@ fll.web.Welcome.populateContext(pageContext);
         <table class="center first_logo">
             <tr>
                 <td>
-                    <img src='images/fll_logo.gif' />
+                    <img src='${fll_logo}' />
                 </td>
             </tr>
         </table>

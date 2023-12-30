@@ -9,6 +9,7 @@ package fll.web;
 import java.util.Formatter;
 import java.util.List;
 
+import fll.UserImages;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.jsp.JspWriter;
 import jakarta.servlet.jsp.PageContext;
@@ -22,11 +23,23 @@ public final class Welcome {
   }
 
   /**
+   * Name of file in {@link UserImages#getImagesPath()} with the logo for the
+   * partner.
+   */
+  public static final String PARTNER_LOGO_FILENAME = "partner_logo.jpg";
+
+  /**
+   * Name of file in {@link UserImages#getImagesPath()} with the logo for FLL.
+   */
+  public static final String FLL_LOGO_FILENAME = "fll_logo.jpg";
+
+  /**
    * @param page used to set variables for the page
    */
   public static void populateContext(final PageContext page) {
-//    page.setAttribute("partner_logo", String.format("%s/partner_logo.jpg", UserImages.getImagesPath().getFileName()));
-    page.setAttribute("partner_logo", "/images/htk_logo.jpg");
+    page.setAttribute("partner_logo",
+                      String.format("%s/%s", UserImages.getImagesPath().getFileName(), PARTNER_LOGO_FILENAME));
+    page.setAttribute("fll_logo", String.format("%s/%s", UserImages.getImagesPath().getFileName(), FLL_LOGO_FILENAME));
   }
 
   // private static final int MAX_NUM_LOGOS_PER_COLUMN = 6;

@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -85,11 +86,13 @@ import fll.db.ImportDB;
 import fll.scheduler.SchedulerUI;
 import fll.tomcat.TomcatLauncher;
 import fll.util.ConsoleExceptionHandler;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FormatterUtils;
 import fll.util.GuiExceptionHandler;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import fll.web.Welcome;
 import fll.web.setup.CreateDB.UserAccount;
 import fll.xml.ChallengeDescription;
 import fll.xml.ui.ChallengeDescriptionEditor;
@@ -255,6 +258,8 @@ public class Launcher extends JFrame {
       System.exit(1);
     }
 
+    setupDataDirectories();
+
     if (headless) {
       runHeadless(port);
     } else {
@@ -279,6 +284,65 @@ public class Launcher extends JFrame {
         System.exit(1);
       }
     }
+  }
+
+  /**
+   * Setup data directories that the user can put files in.
+   */
+  private static void setupDataDirectories() {
+    // make sure the database backup directory exists
+    try {
+      Files.createDirectories(DumpDB.getDatabaseBackupPath());
+    } catch (final FileAlreadyExistsException e) {
+      LOGGER.error("Unable to create automatic database backup because the output directory %s exists and is not a directory");
+    } catch (final IOException e) {
+      LOGGER.error("Unable to create database backup directories, web server will likely fail to start", e);
+    }
+
+    // make sure the user images directory exists
+    try {
+      Files.createDirectories(UserImages.getImagesPath());
+    } catch (final FileAlreadyExistsException e) {
+      LOGGER.error("Unable to create user imgaes directory because the directory %s exists and is not a directory");
+    } catch (final IOException e) {
+      LOGGER.error("Unable to user images directory", e);
+    }
+
+    final Path classesPath = TomcatLauncher.getClassesPath();
+    final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
+    if (null == webroot) {
+      throw new FLLInternalException("Unable to find web server root directory");
+    }
+
+    // make sure the default images are there
+    final Path partnerLogo = UserImages.getImagesPath().resolve(Welcome.PARTNER_LOGO_FILENAME);
+    if (!Files.exists(partnerLogo)) {
+      final Path htkLogo = webroot.resolve("images").resolve("htk_logo.jpg");
+      if (!Files.exists(htkLogo)) {
+        throw new FLLInternalException("Unable to find default partner logo: "
+            + htkLogo.toAbsolutePath().toString());
+      }
+      try {
+        Files.copy(htkLogo, partnerLogo);
+      } catch (final IOException e) {
+        throw new FLLInternalException("Error copying default partner logo", e);
+      }
+    }
+
+    final Path fllLogo = UserImages.getImagesPath().resolve(Welcome.FLL_LOGO_FILENAME);
+    if (!Files.exists(fllLogo)) {
+      final Path defaultFllLogo = webroot.resolve("images").resolve("fll_logo.jpg");
+      if (!Files.exists(defaultFllLogo)) {
+        throw new FLLInternalException("Unable to find default FLL logo: "
+            + defaultFllLogo.toAbsolutePath().toString());
+      }
+      try {
+        Files.copy(defaultFllLogo, fllLogo);
+      } catch (final IOException e) {
+        throw new FLLInternalException("Error copying default FLL logo", e);
+      }
+    }
+
   }
 
   private static final Pattern USERNAME_PATTERN = Pattern.compile("^\\w+$");

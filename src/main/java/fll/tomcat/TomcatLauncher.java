@@ -7,10 +7,8 @@
 package fll.tomcat;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,6 +30,7 @@ import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.UserImages;
 import fll.db.DumpDB;
 import fll.util.FLLRuntimeException;
 
@@ -157,17 +156,12 @@ public class TomcatLauncher {
     resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", classesPath.toAbsolutePath().toString(),
                                                  "/"));
 
-    // make sure the database backup directory exists
-    try {
-      Files.createDirectories(DumpDB.getDatabaseBackupPath());
-    } catch (final FileAlreadyExistsException e) {
-      LOGGER.error("Unable to create automatic database backup because the output directory %s exists and is not a directory");
-    } catch (final IOException e) {
-      LOGGER.error("Unable to create database backup directories, Tomcat will likely fail to start", e);
-    }
     resources.addPreResources(new DirResourceSet(resources, "/"
         + DumpDB.getDatabaseBackupPath().getFileName(), DumpDB.getDatabaseBackupPath().toAbsolutePath().toString(),
                                                  "/"));
+
+    resources.addPreResources(new DirResourceSet(resources, "/"
+        + UserImages.getImagesPath().getFileName(), UserImages.getImagesPath().toAbsolutePath().toString(), "/"));
 
     ctx.setResources(resources);
 
