@@ -317,6 +317,11 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
         </li>
 
         <li>
+            <a href="manage-user-images.jsp" target="_blank">Modify
+                the partner and FLL logos used</a>
+        </li>
+
+        <li>
             <a href="manage-sponsor-logos.jsp" target="_blank">Add
                 or delete sponsor logos</a>
         </li>

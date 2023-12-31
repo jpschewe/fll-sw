@@ -2,8 +2,6 @@
 
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@page import="fll.web.Welcome"%>
-
 <%
 fll.web.Welcome.populateContext(pageContext);
 %>
@@ -16,7 +14,8 @@ fll.web.Welcome.populateContext(pageContext);
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/base.css'/>" />
 
-<link rel="stylesheet" type="text/css" href="welcome.css" />
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/welcome.css'/>" />
 
 <meta http-equiv='refresh' content='90' />
 
@@ -37,10 +36,10 @@ fll.web.Welcome.populateContext(pageContext);
         </table>
 
         <%
-        Welcome.outputLogos(application, out);
+        fll.web.Welcome.outputLogos(application, out);
         %>
 
-        <table class="center first_logo">
+        <table class="center fll_logo">
             <tr>
                 <td>
                     <img src='${fll_logo}' />

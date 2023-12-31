@@ -86,7 +86,6 @@ import fll.db.ImportDB;
 import fll.scheduler.SchedulerUI;
 import fll.tomcat.TomcatLauncher;
 import fll.util.ConsoleExceptionHandler;
-import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FormatterUtils;
 import fll.util.GuiExceptionHandler;
@@ -308,39 +307,15 @@ public class Launcher extends JFrame {
       LOGGER.error("Unable to user images directory", e);
     }
 
-    final Path classesPath = TomcatLauncher.getClassesPath();
-    final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
-    if (null == webroot) {
-      throw new FLLInternalException("Unable to find web server root directory");
-    }
-
     // make sure the default images are there
     final Path partnerLogo = UserImages.getImagesPath().resolve(Welcome.PARTNER_LOGO_FILENAME);
     if (!Files.exists(partnerLogo)) {
-      final Path htkLogo = webroot.resolve("images").resolve("htk_logo.jpg");
-      if (!Files.exists(htkLogo)) {
-        throw new FLLInternalException("Unable to find default partner logo: "
-            + htkLogo.toAbsolutePath().toString());
-      }
-      try {
-        Files.copy(htkLogo, partnerLogo);
-      } catch (final IOException e) {
-        throw new FLLInternalException("Error copying default partner logo", e);
-      }
+      UserImages.useDefaultPartnerLogo();
     }
 
     final Path fllLogo = UserImages.getImagesPath().resolve(Welcome.FLL_LOGO_FILENAME);
     if (!Files.exists(fllLogo)) {
-      final Path defaultFllLogo = webroot.resolve("images").resolve("fll_logo.jpg");
-      if (!Files.exists(defaultFllLogo)) {
-        throw new FLLInternalException("Unable to find default FLL logo: "
-            + defaultFllLogo.toAbsolutePath().toString());
-      }
-      try {
-        Files.copy(defaultFllLogo, fllLogo);
-      } catch (final IOException e) {
-        throw new FLLInternalException("Error copying default FLL logo", e);
-      }
+      UserImages.useDefaultFllLogo();
     }
 
   }

@@ -6,8 +6,15 @@
 
 package fll;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
+import fll.tomcat.TomcatLauncher;
+import fll.util.FLLInternalException;
+import fll.web.Welcome;
 
 /**
  * Access to various images used by the software.
@@ -25,6 +32,52 @@ public final class UserImages {
    */
   public static Path getImagesPath() {
     return Paths.get(DIRECTORY_NAME);
+  }
+
+  /**
+   * Use the default partner logo replacing whatever logo the user has provided.
+   */
+  public static void useDefaultPartnerLogo() {
+    final Path classesPath = TomcatLauncher.getClassesPath();
+    final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
+    if (null == webroot) {
+      throw new FLLInternalException("Unable to find web server root directory");
+    }
+
+    final Path partnerLogo = UserImages.getImagesPath().resolve(Welcome.PARTNER_LOGO_FILENAME);
+    final Path partnerDefaultLogo = webroot.resolve("images").resolve("htk_logo.jpg");
+    if (!Files.exists(partnerDefaultLogo)) {
+      throw new FLLInternalException("Unable to find default partner logo: "
+          + partnerDefaultLogo.toAbsolutePath().toString());
+    }
+    try {
+      Files.copy(partnerDefaultLogo, partnerLogo, StandardCopyOption.REPLACE_EXISTING);
+    } catch (final IOException e) {
+      throw new FLLInternalException("Error copying default partner logo", e);
+    }
+  }
+
+  /**
+   * Use the default FLL logo replacing whatever logo the user has provided.
+   */
+  public static void useDefaultFllLogo() {
+    final Path classesPath = TomcatLauncher.getClassesPath();
+    final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
+    if (null == webroot) {
+      throw new FLLInternalException("Unable to find web server root directory");
+    }
+
+    final Path fllLogo = UserImages.getImagesPath().resolve(Welcome.FLL_LOGO_FILENAME);
+    final Path fllDefaultLogo = webroot.resolve("images").resolve("fll_logo.jpg");
+    if (!Files.exists(fllDefaultLogo)) {
+      throw new FLLInternalException("Unable to find default FLL logo: "
+          + fllDefaultLogo.toAbsolutePath().toString());
+    }
+    try {
+      Files.copy(fllDefaultLogo, fllLogo, StandardCopyOption.REPLACE_EXISTING);
+    } catch (final IOException e) {
+      throw new FLLInternalException("Error copying default FLL logo", e);
+    }
   }
 
 }
