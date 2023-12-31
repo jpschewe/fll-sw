@@ -24,6 +24,8 @@ fll.web.Welcome.populateContext(pageContext);
 
 <body>
 
+    <p>All images are to be jpegs (ends with .jpg).</p>
+
     <form action='ManageUserImages' method='post'
         enctype='multipart/form-data'>
 
@@ -68,6 +70,28 @@ fll.web.Welcome.populateContext(pageContext);
             <label for='fll_logo_default'>Use default image</label>
         </div>
 
+        <hr />
+
+        <h1>FLL Subjective Logo</h1>
+        <p>Logo used at the top of the subjective rubrics.</p>
+        <table class="center fll_logo">
+            <tr>
+                <td>
+                    <img
+                        src="<c:url value='/${fll_subjective_logo}'/>?${uuid}" />
+                </td>
+            </tr>
+        </table>
+        <div>
+            Upload image:
+            <input type='file' name='fll_subjective_logo' />
+        </div>
+        <div>
+            <input type="checkbox" name='fll_subjective_logo_default'
+                id='fll_subjective_logo_default' />
+            <label for='fll_subjective_logo_default'>Use default
+                image</label>
+        </div>
         <input type='submit' value='Submit Changes' />
     </form>
 

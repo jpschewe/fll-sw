@@ -7,10 +7,13 @@
 package fll;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.tomcat.TomcatLauncher;
 import fll.util.FLLInternalException;
@@ -75,6 +78,30 @@ public final class UserImages {
     }
     try {
       Files.copy(fllDefaultLogo, fllLogo, StandardCopyOption.REPLACE_EXISTING);
+    } catch (final IOException e) {
+      throw new FLLInternalException("Error copying default FLL logo", e);
+    }
+  }
+
+  /**
+   * Name of file in user images that contains the fll logo used for the
+   * subjective score sheets.
+   */
+  public static final String FLL_SUBJECTIVE_LOGO_FILENAME = "fll_logo_subjective.jpg";
+
+  /**
+   * Replace any user provided FLL subjective logo with the default one in the
+   * software.
+   */
+  public static void useDefaultFllSubjectiveLogo() {
+    final Path fllSubjectiveLogo = UserImages.getImagesPath().resolve(FLL_SUBJECTIVE_LOGO_FILENAME);
+
+    final ClassLoader loader = castNonNull(UserImages.class.getClassLoader());
+    try (InputStream input = loader.getResourceAsStream("fll/resources/documents/FLLHeader.jpg")) {
+      if (null == input) {
+        throw new FLLInternalException("Unable to find default FLL subjective logo");
+      }
+      Files.copy(input, fllSubjectiveLogo, StandardCopyOption.REPLACE_EXISTING);
     } catch (final IOException e) {
       throw new FLLInternalException("Error copying default FLL logo", e);
     }

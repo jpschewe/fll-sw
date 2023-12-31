@@ -41,6 +41,8 @@ public class ManageUserImages extends BaseFLLServlet {
    */
   public static void populateContext(final PageContext page) {
     page.setAttribute("uuid", UUID.randomUUID().toString());
+    page.setAttribute("fll_subjective_logo", String.format("%s/%s", UserImages.getImagesPath().getFileName(),
+                                                           UserImages.FLL_SUBJECTIVE_LOGO_FILENAME));
   }
 
   @Override
@@ -58,7 +60,8 @@ public class ManageUserImages extends BaseFLLServlet {
     final @Nullable Part partnerLogo = request.getPart("partner_logo");
     if (null != partnerLogoDefault) {
       UserImages.useDefaultPartnerLogo();
-    } else if (null != partnerLogo) {
+    } else if (null != partnerLogo
+        && partnerLogo.getSize() > 0) {
       partnerLogo.write(UserImages.getImagesPath().resolve(Welcome.PARTNER_LOGO_FILENAME).toAbsolutePath().toString());
     }
 
@@ -69,6 +72,16 @@ public class ManageUserImages extends BaseFLLServlet {
     } else if (null != fllLogo
         && fllLogo.getSize() > 0) {
       fllLogo.write(UserImages.getImagesPath().resolve(Welcome.FLL_LOGO_FILENAME).toAbsolutePath().toString());
+    }
+
+    final @Nullable Part fllSubjectiveLogoDefault = request.getPart("fll_subjective_logo_default");
+    final @Nullable Part fllSubjectiveLogo = request.getPart("fll_subjective_logo");
+    if (null != fllSubjectiveLogoDefault) {
+      UserImages.useDefaultFllSubjectiveLogo();
+    } else if (null != fllSubjectiveLogo
+        && fllSubjectiveLogo.getSize() > 0) {
+      fllSubjectiveLogo.write(UserImages.getImagesPath().resolve(UserImages.FLL_SUBJECTIVE_LOGO_FILENAME)
+                                        .toAbsolutePath().toString());
     }
 
     final String referrer = request.getHeader("Referer");

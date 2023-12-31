@@ -3,8 +3,9 @@ package fll.documents.writers;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalTime;
@@ -16,7 +17,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -32,13 +32,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.SubjectiveScore;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
+import fll.UserImages;
 import fll.Utilities;
 import fll.scheduler.SubjectiveTime;
 import fll.scheduler.TeamScheduleInfo;
@@ -193,15 +192,14 @@ public class SubjectivePdfWriter {
 
     final Base64.Encoder encoder = Base64.getEncoder();
 
-    final ClassLoader loader = castNonNull(this.getClass().getClassLoader());
-    try (InputStream input = loader.getResourceAsStream("fll/resources/documents/FLLHeader.png");
-        ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-      if (null == input) {
-        throw new FLLInternalException("Cannot find FLLHeader.png");
+    final Path fllSubjectiveLogo = UserImages.getImagesPath().resolve(UserImages.FLL_SUBJECTIVE_LOGO_FILENAME);
+    try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+      if (!Files.exists(fllSubjectiveLogo)) {
+        throw new FLLInternalException("Cannot find FLL Subjective Logo: "
+            + fllSubjectiveLogo.toAbsolutePath().toString());
       }
 
-      Objects.requireNonNull(input);
-      input.transferTo(output);
+      Files.copy(fllSubjectiveLogo, output);
 
       final String encoded = encoder.encodeToString(output.toByteArray());
       return encoded;
