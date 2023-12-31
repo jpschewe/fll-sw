@@ -288,7 +288,7 @@ public class Launcher extends JFrame {
   /**
    * Setup data directories that the user can put files in.
    */
-  private static void setupDataDirectories() {
+  public static void setupDataDirectories() {
     // make sure the database backup directory exists
     try {
       Files.createDirectories(DumpDB.getDatabaseBackupPath());

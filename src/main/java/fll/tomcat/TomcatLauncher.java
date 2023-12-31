@@ -30,6 +30,7 @@ import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.Launcher;
 import fll.UserImages;
 import fll.db.DumpDB;
 import fll.util.FLLRuntimeException;
@@ -152,6 +153,8 @@ public class TomcatLauncher {
     ctx.setManager(manager);
 
     final WebResourceRoot resources = new StandardRoot(ctx);
+
+    Launcher.setupDataDirectories();
 
     resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", classesPath.toAbsolutePath().toString(),
                                                  "/"));
