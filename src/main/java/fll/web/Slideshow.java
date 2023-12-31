@@ -34,20 +34,17 @@ public final class Slideshow {
     final String imagePath = application.getRealPath("/"
         + WebUtils.SLIDESHOW_PATH);
 
-    // This varible holds the name of the last image, relative to imagePath
+    // This variable holds the name of the last image, relative to imagePath
     String lastImage = SessionAttributes.getAttribute(session, "slideShowLastImage", String.class);
-    if (null == lastImage) {
-      lastImage = "../images/logo.gif";
-    }
-
     final List<String> files = Utilities.getGraphicFiles(new File(imagePath));
-
     if (files.size() == 0) {
       lastImage = "";
+    } else if (null == lastImage) {
+      lastImage = files.get(0);
     } else {
       final int oldFileIdx = files.indexOf(lastImage);
       if (oldFileIdx < 0
-          || oldFileIdx == files.size()
+          || oldFileIdx >= files.size()
               - 1) {
         lastImage = files.get(0);
       } else {

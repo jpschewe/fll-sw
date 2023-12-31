@@ -17,6 +17,9 @@ fll.web.admin.ManageSponsorLogos.populateContext(application, pageContext);
 
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
 
+    <p>To display well, a logo graphic should be approximately
+        150-200 pixels wide and 45-60 pixels high.</p>
+
     <form id='sponsor_upload' action='ManageSponsorLogos' method='post'
         enctype='multipart/form-data'>
 

@@ -31,7 +31,7 @@ import jakarta.servlet.http.Part;
 import jakarta.servlet.jsp.PageContext;
 
 /**
- * Base class for image management.
+ * Base class for management of a directory of images.
  */
 /* package */ abstract class ImageManagement extends BaseFLLServlet {
 

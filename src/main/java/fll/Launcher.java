@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -90,6 +91,7 @@ import fll.util.FormatterUtils;
 import fll.util.GuiExceptionHandler;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import fll.web.Welcome;
 import fll.web.setup.CreateDB.UserAccount;
 import fll.xml.ChallengeDescription;
 import fll.xml.ui.ChallengeDescriptionEditor;
@@ -255,6 +257,8 @@ public class Launcher extends JFrame {
       System.exit(1);
     }
 
+    setupDataDirectories();
+
     if (headless) {
       runHeadless(port);
     } else {
@@ -279,6 +283,46 @@ public class Launcher extends JFrame {
         System.exit(1);
       }
     }
+  }
+
+  /**
+   * Setup data directories that the user can put files in.
+   */
+  public static void setupDataDirectories() {
+    // make sure the database backup directory exists
+    try {
+      Files.createDirectories(DumpDB.getDatabaseBackupPath());
+    } catch (final FileAlreadyExistsException e) {
+      LOGGER.error("Unable to create automatic database backup because the output directory %s exists and is not a directory");
+    } catch (final IOException e) {
+      LOGGER.error("Unable to create database backup directories, web server will likely fail to start", e);
+    }
+
+    // make sure the user images directory exists
+    try {
+      Files.createDirectories(UserImages.getImagesPath());
+    } catch (final FileAlreadyExistsException e) {
+      LOGGER.error("Unable to create user imgaes directory because the directory %s exists and is not a directory");
+    } catch (final IOException e) {
+      LOGGER.error("Unable to user images directory", e);
+    }
+
+    // make sure the default images are there
+    final Path partnerLogo = UserImages.getImagesPath().resolve(Welcome.PARTNER_LOGO_FILENAME);
+    if (!Files.exists(partnerLogo)) {
+      UserImages.useDefaultPartnerLogo();
+    }
+
+    final Path fllLogo = UserImages.getImagesPath().resolve(Welcome.FLL_LOGO_FILENAME);
+    if (!Files.exists(fllLogo)) {
+      UserImages.useDefaultFllLogo();
+    }
+
+    final Path fllSubjectiveLogo = UserImages.getImagesPath().resolve(UserImages.FLL_SUBJECTIVE_LOGO_FILENAME);
+    if (!Files.exists(fllSubjectiveLogo)) {
+      UserImages.useDefaultFllSubjectiveLogo();
+    }
+
   }
 
   private static final Pattern USERNAME_PATTERN = Pattern.compile("^\\w+$");
@@ -1265,6 +1309,17 @@ public class Launcher extends JFrame {
       FileUtils.copyDirectory(oldSlideshow.toFile(), newSlideshow.toFile());
     } catch (final IOException e) {
       throw new FLLRuntimeException("Error copying slideshow", e);
+    }
+
+    // copy user images
+    final Path oldUserImages = oldBaseDir.resolve(UserImages.getImagesPath());
+    if (Files.exists(oldUserImages)) {
+      final Path newUserImages = UserImages.getImagesPath();
+      try {
+        FileUtils.copyDirectory(oldUserImages.toFile(), newUserImages.toFile());
+      } catch (final IOException e) {
+        throw new FLLRuntimeException("Error copying user images", e);
+      }
     }
 
   }
