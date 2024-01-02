@@ -1,0 +1,52 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>Finalist Scheduling</title>
+
+<script type='text/javascript'
+    src='../../extlib/js-joda/packages/core/dist/js-joda.min.js'></script>
+
+<script type='text/javascript' src='../../js/fll-functions.js'></script>
+<script type='text/javascript' src='../../js/fll-storage.js'></script>
+<script type='text/javascript' src='../../js/fll-objects.js'></script>
+<script type='text/javascript' src='../finalist/finalist.js'></script>
+<script type='text/javascript' src='index.js'></script>
+
+<link rel="stylesheet" type="text/css" href="../../style/fll-sw.css" />
+<link rel="stylesheet" type="text/css"
+    href="../../style/team-colors.css" />
+
+<link rel="stylesheet" type="text/css" href="index.css" />
+
+</head>
+
+<body>
+    <h2>
+        Award Group:
+        <select id='award_groups'></select>
+    </h2>
+
+    <div class='rTable' id='deliberation'>
+
+        <div class='rTableHeading' id='deliberation_header'></div>
+
+        <div class='rTableBody' id='deliberation_body'></div>
+
+    </div>
+
+    <br />
+
+    <button id='upload'>Send Data To Server</button>
+    once the deliberations are finished and you are connected to the
+    network.
+
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="wait-dialog">
+        <div>
+            <p id='wait-dialog_text'>Uploading data. Please wait...</p>
+        </div>
+    </div>
+
+</body>
+</html>
