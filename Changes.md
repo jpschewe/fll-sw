@@ -1,3 +1,5 @@
+Release 18.3.0
+==============
 * #1138 - Add timestamp of when report generated to final computed scores
 * #1136 - Add role for report generators
 * #1120 - Add support for changing the FLL logo on the subjective rubrics
