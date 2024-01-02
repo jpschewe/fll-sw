@@ -1141,7 +1141,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     final Element timestampEle = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
     titleCellBlock.appendChild(timestampEle);
-    timestampEle.setAttribute("font-size", "6pt");
+    timestampEle.setAttribute("font-size", "8pt");
     timestampEle.appendChild(document.createTextNode(REPORT_TIMESTAMP_FORMATTER.format(LocalDateTime.now())));
     timestampEle.setAttribute("padding-left", sidePadding);
 
