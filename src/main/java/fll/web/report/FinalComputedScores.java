@@ -11,7 +11,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,6 +30,7 @@ import javax.xml.transform.TransformerException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -49,7 +53,6 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.web.playoff.DatabaseTeamScore;
-import fll.web.report.awards.AwardsReport;
 import fll.xml.ChallengeDescription;
 import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
@@ -80,9 +83,23 @@ public final class FinalComputedScores extends BaseFLLServlet {
    */
   public static final double TIE_TOLERANCE = 1E-6;
 
-  private static final double HEADER_MARGIN_INCHES = 0.8;
+  private static final double HEADER_MARGIN_INCHES = 1;
 
-  private static final double FOOTER_MARGIN_INCHES = 0.5;
+  private static final double FOOTER_MARGIN_INCHES = 1;
+
+  private static final DateTimeFormatter REPORT_TIMESTAMP_FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.MONTH_OF_YEAR,
+                                                                                                                 2)
+                                                                                                    .appendLiteral('/')
+                                                                                                    .appendValue(ChronoField.DAY_OF_MONTH,
+                                                                                                                 2)
+                                                                                                    .appendLiteral('/')
+                                                                                                    .appendValue(ChronoField.YEAR,
+                                                                                                                 4)
+                                                                                                    .appendLiteral(' ')
+                                                                                                    .appendValue(ChronoField.HOUR_OF_DAY)
+                                                                                                    .appendLiteral(':')
+                                                                                                    .appendValue(ChronoField.MINUTE_OF_HOUR)
+                                                                                                    .toFormatter();
 
   /**
    * Group name for all values of the group.
@@ -1100,16 +1117,33 @@ public final class FinalComputedScores extends BaseFLLServlet {
     row1.appendChild(challengeTitleCell);
     challengeTitleCell.setAttribute("padding-left", sidePadding);
 
-    final StringBuilder title = new StringBuilder();
-    final LocalDate tournamentDate = tournament.getDate();
-    if (null != tournamentDate) {
-      title.append(AwardsReport.DATE_FORMATTER.format(tournamentDate)
-          + " - ");
-    }
-    title.append(tournament.getDescription());
-    final Element titleCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, title.toString());
+    final Element titleCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
     row1.appendChild(titleCell);
     titleCell.setAttribute("padding-right", sidePadding);
+
+    final Element titleCellContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+    titleCell.appendChild(titleCellContainer);
+
+    final Element titleCellBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    titleCellContainer.appendChild(titleCellBlock);
+    titleCellBlock.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_RIGHT);
+
+    final Element tournamentDescriptionEle = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+    titleCellBlock.appendChild(tournamentDescriptionEle);
+    final String titleText;
+    final @Nullable String description = tournament.getDescription();
+    if (null != description) {
+      titleText = description;
+    } else {
+      titleText = tournament.getName();
+    }
+    tournamentDescriptionEle.appendChild(document.createTextNode(titleText));
+
+    final Element timestampEle = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+    titleCellBlock.appendChild(timestampEle);
+    timestampEle.setAttribute("font-size", "8pt");
+    timestampEle.appendChild(document.createTextNode(REPORT_TIMESTAMP_FORMATTER.format(LocalDateTime.now())));
+    timestampEle.setAttribute("padding-left", sidePadding);
 
     final Element row2 = FOPUtils.createTableRow(document);
     tableBody.appendChild(row2);
