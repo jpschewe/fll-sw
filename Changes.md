@@ -1,3 +1,4 @@
+* #1136 - Add role for report generators
 * #1120 - Add support for changing the FLL logo on the subjective rubrics
 * #1119 - Add support for changing the FLL logo on the welcome page
 * #1121 - Add support for changing the partner logo on the welcome page

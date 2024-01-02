@@ -1,6 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="HEAD_JUDGE" allowSetup="false" />
+<fll-sw:required-roles roles="HEAD_JUDGE, REPORT_GENERATOR" allowSetup="false" />
 
 <%
 if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,

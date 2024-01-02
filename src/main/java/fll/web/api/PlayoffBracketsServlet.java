@@ -45,7 +45,8 @@ public class PlayoffBracketsServlet extends HttpServlet {
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
     if (!auth.isRef()
-        && !auth.isJudge()) {
+        && !auth.isJudge()
+        && !auth.isReportGenerator()) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }

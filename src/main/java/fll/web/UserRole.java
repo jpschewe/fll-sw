@@ -11,8 +11,9 @@ package fll.web;
  */
 public enum UserRole {
   PUBLIC("This role has no special permissions"), REF("This role can enter performance scores"), JUDGE(
-      "This role can enter subjective scores"), ADMIN(
-          "This role can do anything"), HEAD_JUDGE("This role is a judge that can run reports");
+      "This role can enter subjective scores"), ADMIN("This role can do anything"), HEAD_JUDGE(
+          "This role is a judge that can run reports"), REPORT_GENERATOR(
+              "This role can run reports, but not enter scores");
 
   UserRole(final String description) {
     this.description = description;
