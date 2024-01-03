@@ -243,6 +243,41 @@ const deliberationModule = {};
         });
     }
 
+    function addPlaceRows(body) {
+        for (let place = 1; place <= 4; ++place) {
+            const row = document.createElement("div");
+            row.classList.add("rTableRow");
+            body.appendChild(row);
+
+            const placeCell = document.createElement("div");
+            row.appendChild(placeCell);
+            placeCell.classList.add("rTableCell");
+            placeCell.innerText = place;
+
+            for (let i = 0; i < sortedCategories.length; ++i) {
+                const cell = document.createElement("div");
+                row.appendChild(cell);
+                cell.classList.add("rTableCell");
+            }
+
+        }
+    }
+
+    function addSeparator(body) {
+        const row = document.createElement("div");
+        row.classList.add("rTableRow");
+        body.appendChild(row);
+
+        // place, all categories
+        const numColumns = 1 + sortedCategories.length;
+        for (let i = 0; i < numColumns; ++i) {
+            const cell = document.createElement("div");
+            row.appendChild(cell);
+            cell.classList.add("rTableCell");
+            cell.classList.add("separator");
+        }
+    }
+
     function updatePage() {
         createSortedCategories();
 
@@ -250,8 +285,12 @@ const deliberationModule = {};
         updateHeader();
 
         const currentDivision = finalist_module.getCurrentDivision()
-
-        removeChildren(document.getElementById("deliberation_body"));
+        const body = document.getElementById("deliberation_body");
+        removeChildren(body);
+        addPlaceRows(body);
+        addSeparator(body);
+        // FIXME add 2 rows for who is writing
+        // FIXME add teams
     }
 
     document.addEventListener("DOMContentLoaded", function() {

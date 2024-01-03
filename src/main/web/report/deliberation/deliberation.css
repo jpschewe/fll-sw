@@ -25,3 +25,7 @@ and mark draggable things as movable. */
     background: #00b0f0;
     color: white;
 }
+
+.rTableCell.separator {
+    background: black;
+}
