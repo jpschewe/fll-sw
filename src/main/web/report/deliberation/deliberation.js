@@ -35,6 +35,7 @@ const deliberationModule = {};
     function updateHeader() {
         const headerRow = document.getElementById("deliberation_header");
         removeChildren(headerRow);
+        headerRow.setAttribute("id", "header_row");
 
         const placeHeader = document.createElement("div");
         headerRow.appendChild(placeHeader);
@@ -243,23 +244,28 @@ const deliberationModule = {};
         });
     }
 
-    function addPlaceRows(body) {
-        for (let place = 1; place <= 4; ++place) {
-            const row = document.createElement("div");
-            row.classList.add("rTableRow");
-            body.appendChild(row);
+    function placeRowIdentifier(place) {
+        return "place_row_" + place;
+    }
 
-            const placeCell = document.createElement("div");
-            row.appendChild(placeCell);
-            placeCell.classList.add("rTableCell");
-            placeCell.innerText = place;
+    function addPlaceRow(body, place) {
+        const headerRow = document.getElementById("header_row");
+        const prevRow = place < 2 ? headerRow : document.getElementById(placeRowIdentifier(place - 1));
 
-            for (let i = 0; i < sortedCategories.length; ++i) {
-                const cell = document.createElement("div");
-                row.appendChild(cell);
-                cell.classList.add("rTableCell");
-            }
+        const row = document.createElement("div");
+        row.classList.add("rTableRow");
+        body.appendChild(row);
+        row.setAttribute("id", placeRowIdentifier(place));
 
+        const placeCell = document.createElement("div");
+        row.appendChild(placeCell);
+        placeCell.classList.add("rTableCell");
+        placeCell.innerText = place;
+
+        for (let i = 0; i < sortedCategories.length; ++i) {
+            const cell = document.createElement("div");
+            row.appendChild(cell);
+            cell.classList.add("rTableCell");
         }
     }
 
@@ -305,7 +311,7 @@ const deliberationModule = {};
         writingCell.classList.add("rTableCell");
         writingCell.innerText = "Writing script";
 
-        for (const [i, category] of enumerate(sortedCategories)) {
+        for (const category of sortedCategories) {
             const cell1 = document.createElement("div");
             row1.appendChild(cell1);
             cell1.classList.add("rTableCell");
@@ -328,6 +334,36 @@ const deliberationModule = {};
         }
     }
 
+    function numAwardsIdentifier(category) {
+        return "numAwards_" + category.catId;
+    }
+
+    function addNumAwardsRow(body) {
+        const row = document.createElement("div");
+        row.classList.add("rTableRow");
+        body.appendChild(row);
+
+        const numAwardsCell = document.createElement("div");
+        row.appendChild(numAwardsCell);
+        numAwardsCell.classList.add("rTableCell");
+        numAwardsCell.innerText = "# Awards";
+
+        for (const category of sortedCategories) {
+            const cell = document.createElement("div");
+            row.appendChild(cell);
+            cell.classList.add("rTableCell");
+            const input = document.createElement("input");
+            cell.appendChild(input);
+            input.setAttribute("type", "number");
+            input.setAttribute("id", numAwardsIdentifier(category));
+            input.setAttribute("name", numAwardsIdentifier(category));
+            input.setAttribute("min", "1");
+            input.setAttribute("size", "3");
+            input.setAttribute("required", "true")
+            input.value = 1;
+        }
+    }
+
     function updatePage() {
         createSortedCategories();
 
@@ -338,7 +374,8 @@ const deliberationModule = {};
         const body = document.getElementById("deliberation_body");
         // FIXME add row for number of awards given
         removeChildren(body);
-        addPlaceRows(body);
+        addNumAwardsRow(body);
+        addPlaceRow(body, 1);
         addSeparator(body);
         addWriters(body);
         addSeparator(body);
