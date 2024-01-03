@@ -10,3 +10,18 @@ and mark draggable things as movable. */
     -webkit-user-drag: element;
     cursor: move;
 }
+
+#deliberation_header .performance.numeric {
+    background: #00ff00;
+    color: black;
+}
+
+#deliberation_header .numeric {
+    background: #0070c0;
+    color: white;
+}
+
+#deliberation_header .non-numeric {
+    background: #00b0f0;
+    color: white;
+}

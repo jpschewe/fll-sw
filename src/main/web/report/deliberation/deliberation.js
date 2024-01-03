@@ -45,6 +45,14 @@ const deliberationModule = {};
             const header = document.createElement("div");
             headerRow.appendChild(header);
             header.classList.add("rTableHead");
+            if (category.numeric) {
+                header.classList.add("numeric");
+            } else {
+                header.classList.add("non-numeric");
+            }
+            if (category.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
+                header.classList.add("performance");
+            }
 
             const categoryNameEle = document.createElement("div");
             header.appendChild(categoryNameEle);
