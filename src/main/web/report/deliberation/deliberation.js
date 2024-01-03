@@ -278,6 +278,56 @@ const deliberationModule = {};
         }
     }
 
+    function writing1Identifier(category) {
+        return "writing1_" + category.catId;
+    }
+
+    function writing2Identifier(category) {
+        return "writing2_" + category.catId;
+    }
+
+    function addWriters(body) {
+        const row1 = document.createElement("div");
+        row1.classList.add("rTableRow");
+        body.appendChild(row1);
+
+        const row2 = document.createElement("div");
+        row2.classList.add("rTableRow");
+        body.appendChild(row2);
+
+        const judgeCell = document.createElement("div");
+        row1.appendChild(judgeCell);
+        judgeCell.classList.add("rTableCell");
+        judgeCell.innerText = "Judge"
+
+        const writingCell = document.createElement("div");
+        row2.appendChild(writingCell);
+        writingCell.classList.add("rTableCell");
+        writingCell.innerText = "Writing script";
+
+        for (const [i, category] of enumerate(sortedCategories)) {
+            const cell1 = document.createElement("div");
+            row1.appendChild(cell1);
+            cell1.classList.add("rTableCell");
+            const input1 = document.createElement("input");
+            cell1.appendChild(input1);
+            input1.setAttribute("type", "text");
+            input1.setAttribute("id", writing1Identifier(category));
+            input1.setAttribute("name", writing1Identifier(category));
+            input1.setAttribute("size", "10");
+
+            const cell2 = document.createElement("div");
+            row2.appendChild(cell2);
+            cell2.classList.add("rTableCell");
+            const input2 = document.createElement("input");
+            cell2.appendChild(input2);
+            input2.setAttribute("type", "text");
+            input2.setAttribute("id", writing2Identifier(category));
+            input2.setAttribute("name", writing2Identifier(category));
+            input2.setAttribute("size", "10");
+        }
+    }
+
     function updatePage() {
         createSortedCategories();
 
@@ -286,10 +336,12 @@ const deliberationModule = {};
 
         const currentDivision = finalist_module.getCurrentDivision()
         const body = document.getElementById("deliberation_body");
+        // FIXME add row for number of awards given
         removeChildren(body);
         addPlaceRows(body);
         addSeparator(body);
-        // FIXME add 2 rows for who is writing
+        addWriters(body);
+        addSeparator(body);
         // FIXME add teams
     }
 
