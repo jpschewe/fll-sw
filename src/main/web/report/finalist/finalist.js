@@ -822,16 +822,18 @@ const finalist_module = {}
         teamNum = parseInt(teamNum, 10);
         const index = category.teams.indexOf(teamNum);
         if (-1 == index) {
-            if (category.overall) {
-                // clear schedule for all categories
-                for (const division of finalist_module.getDivisions()) {
-                    _schedules[division] = null;
+            if (finalist_module.isCategoryScheduled(category)) {
+                if (category.overall) {
+                    // clear schedule for all categories
+                    for (const division of finalist_module.getDivisions()) {
+                        _schedules[division] = null;
+                    }
+                } else {
+                    // clear the schedule for the current division
+                    _schedules[finalist_module.getCurrentDivision()] = null;
                 }
-            } else {
-                // clear the schedule for the current division
-                _schedules[finalist_module.getCurrentDivision()] = null;
             }
-
+            
             category.teams.push(teamNum);
         }
     };

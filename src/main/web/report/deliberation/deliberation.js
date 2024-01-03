@@ -15,6 +15,11 @@ const deliberationModule = {};
     let schedule = null;
 
     /**
+     * Categories sorted in the order for the table. These are finalist Category objects. 
+     */
+    let sortedCategories = [];
+
+    /**
      * Mapping of team numbers to categories.
      */
     let finalistsCount = {};
@@ -76,7 +81,7 @@ const deliberationModule = {};
         placeHeader.classList.add("rTableHead");
         placeHeader.innerText = "Place";
 
-        for (const category of finalist_module.getAllCategories()) {
+        for (const category of sortedCategories) {
             const header = document.createElement("div");
             headerRow.appendChild(header);
             header.classList.add("rTableHead");
@@ -434,7 +439,33 @@ const deliberationModule = {};
         }
     }
 
+    function createSortedCategories() {
+        sortedCategories = [];
+
+        for (const category of finalist_module.getAllCategories()) {
+            sortedCategories.push(category);
+        }
+        deliberationModule.sortedCategories.sort(function(a, b) {
+            if (a.name == finalist_module.CHAMPIONSHIP_NAME && b.name != finalist_module.CHAMPIONSHIP_NAME) {
+                return -1;
+            } else if (a.name == finalist_module.CHAMPIONSHIP_NAME && b.name == finalist_module.CHAMPIONSHIP_NAME) {
+                // shouldn't happen
+                return 0;
+            } else if (a.name != finalist_module.CHAMPIONSHIP_NAME && b.name == finalist_module.CHAMPIONSHIP_NAME) {
+                return 1;
+            } else if (a.numeric && !b.numeric) {
+                return -1;
+            } else if (!a.numeric && b.numeric) {
+                return 1;
+            } else {
+                // sort by name
+                return a.name.localeCompare(b.name);
+            }
+        });
+    }
+
     function updatePage() {
+        createSortedCategories();
 
         // output header
         updateHeader();
