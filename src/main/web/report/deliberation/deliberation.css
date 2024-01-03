@@ -11,17 +11,17 @@ and mark draggable things as movable. */
     cursor: move;
 }
 
-#deliberation_header .performance.numeric {
+#deliberation_header .performance {
     background: #00ff00;
     color: black;
 }
 
-#deliberation_header .numeric {
+#deliberation_header .scheduled {
     background: #0070c0;
     color: white;
 }
 
-#deliberation_header .non-numeric {
+#deliberation_header .non-scheduled {
     background: #00b0f0;
     color: white;
 }

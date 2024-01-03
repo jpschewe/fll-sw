@@ -45,13 +45,13 @@ const deliberationModule = {};
             const header = document.createElement("div");
             headerRow.appendChild(header);
             header.classList.add("rTableHead");
-            if (category.numeric) {
-                header.classList.add("numeric");
-            } else {
-                header.classList.add("non-numeric");
-            }
             if (category.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
                 header.classList.add("performance");
+            }
+            else if (category.scheduled) {
+                header.classList.add("scheduled");
+            } else {
+                header.classList.add("non-scheduled");
             }
 
             const categoryNameEle = document.createElement("div");
@@ -224,17 +224,17 @@ const deliberationModule = {};
             } else if (a.name == deliberationModule.PERFORMANCE_CATEGORY_NAME && b.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
                 // shouldn't happen
                 return 0;
-            } else if (a.name == deliberationModule.PERFORMANCE_CATEGORY_NAME && b.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && !b.numeric) {
+            } else if (a.name == deliberationModule.PERFORMANCE_CATEGORY_NAME && b.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && !b.scheduled) {
                 return -1;
-            } else if (a.name == deliberationModule.PERFORMANCE_CATEGORY_NAME && b.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && b.numeric) {
+            } else if (a.name == deliberationModule.PERFORMANCE_CATEGORY_NAME && b.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && b.scheduled) {
                 return 1;
-            } else if (a.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && a.numeric && b.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
+            } else if (a.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && a.scheduled && b.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
                 return -1;
-            } else if (a.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && !a.numeric && b.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
+            } else if (a.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && !a.scheduled && b.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
                 return 1;
-            } else if (a.numeric && !b.numeric) {
+            } else if (a.scheduled && !b.scheduled) {
                 return -1;
-            } else if (!a.numeric && b.numeric) {
+            } else if (!a.scheduled && b.scheduled) {
                 return 1;
             } else {
                 // sort by name
