@@ -15,54 +15,14 @@ const deliberationModule = {};
     let schedule = null;
 
     /**
-     * Categories sorted in the order for the table. These are finalist Category objects. 
+     * Name of the performance category. Used to display in the table header and to reference teams. Should not need to match the category name in the challenge description.
+     */
+    deliberationModule.PERFORMANCE_CATEGORY_NAME = "Performance";
+
+    /**
+     * {Array} of finalist {Category} objects sorted in the order for the table. 
      */
     let sortedCategories = [];
-
-    /**
-     * Mapping of team numbers to categories.
-     */
-    let finalistsCount = {};
-
-    /**
-     * Team numbers sorted by number of categories.
-     */
-    let sortedTeams = [];
-
-    /**
-     * Map time string to map of category name to div cell.
-     */
-    const timeToCells = {};
-
-    /**
-     * Find the cell for the specified time and category id. This does a lookup by
-     * comparing the times, so slots added later are ok as long as a cell has been
-     * added for the specified time.
-     * 
-     * @param searchTime
-     *          the time to search for
-     * @param serachCatName
-     *          the category name to search for
-     * @return the cell or null if not found
-     */
-    function getCellForTimeAndCategory(searchTime, searchCatName) {
-        const searchTimeStr = finalist_module.timeToDisplayString(searchTime);
-
-        let foundCell = null;
-
-        for (const [timeStr, categoryToCells] of Object.entries(timeToCells)) {
-            if (searchTimeStr == timeStr) {
-
-                for (const [catName, cell] of Object.entries(categoryToCells)) {
-                    if (catName == searchCatName) {
-                        foundCell = cell;
-                    }
-                }
-            }
-        }
-
-        return foundCell;
-    }
 
     function handleAwardGroupChange() {
         const divIndex = document.getElementById("award_groups").value;
@@ -149,6 +109,7 @@ const deliberationModule = {};
         return teamDiv;
     }
 
+    //FIXME needs new implementation
     /**
      * 
      * @param slot
@@ -224,219 +185,12 @@ const deliberationModule = {};
     function uploadData() {
         const waitList = [];
 
-        const playoffSchedulesSuccess = function(_) {
-            _log("Playoff schedules upload success")
-        };
-        const playoffSchedulesFail = function(result) {
-            let message;
-            if (null == result) {
-                message = "Unknown server error";
-            } else {
-                message = result.message;
-            }
-
-            alert("Playoff schedules upload failure: " + message);
-        }
-        waitList.push(finalist_module.uploadPlayoffSchedules(
-            playoffSchedulesSuccess, playoffSchedulesFail));
-
-        const scheduleParamsSuccess = function(_) {
-            _log("Schedule parameters upload success")
-        };
-        const scheduleParamsFail = function(result) {
-            let message;
-            if (null == result) {
-                message = "Unknown server error";
-            } else {
-                message = result.message;
-            }
-
-            alert("Schedule parameters upload failure: " + message);
-        }
-        waitList.push(finalist_module.uploadScheduleParameters(
-            scheduleParamsSuccess, scheduleParamsFail));
-
-        const schedulesSuccess = function(_) {
-            _log("Schedules upload success")
-        };
-        const schedulesFail = function(result) {
-            let message;
-            if (null == result) {
-                message = "Unknown server error";
-            } else {
-                message = result.message;
-            }
-
-            alert("Schedules upload failure: " + message);
-        }
-        waitList.push(finalist_module.uploadSchedules(
-            schedulesSuccess, schedulesFail));
-
-        const nonNumericSuccess = function(_) {
-            _log("Non-numeric upload success")
-        };
-        const nonNumericFail = function(result) {
-            let message;
-            if (null == result) {
-                message = "Unknown server error";
-            } else {
-                message = result.message;
-            }
-
-            alert("Non-numeric nominees upload failure: " + message);
-        }
-        waitList.push(finalist_module.uploadNonNumericNominees(
-            nonNumericSuccess, nonNumericFail));
+        //FIXME
 
         document.getElementById("wait-dialog").classList.remove("fll-sw-ui-inactive");
         Promise.all(waitList).then(function() {
             document.getElementById("wait-dialog").classList.add("fll-sw-ui-inactive");
         });
-    }
-
-    /**
-     * Move a team from it's current timeslot to the newly specified timeslot for
-     * the specified category. If the specified timeslot contains another team, then
-     * the two teams are swapped.
-     * 
-     * @param team
-     *          a Team object to move
-     * @param category
-     *          a Category object that the team is moving in
-     * @param newSlot
-     *          the new slot to put the team in
-     */
-    function moveTeam(team, category, newSlot) {
-        let destSlot = null;
-        let srcSlot = null;
-
-        // remove team from all slots with this category
-        for (const slot of schedule) {
-            let foundTeam = false;
-            for (const [categoryName, teamNumber] of Object.entries(slot.categories)) {
-                if (categoryName == category.name && teamNumber == team.num) {
-                    foundTeam = true;
-                }
-            } // foreach category
-
-            if (slot.time.equals(newSlot.time)) {
-                destSlot = slot;
-            }
-
-            if (foundTeam) {
-                srcSlot = slot;
-            }
-        } // foreach timeslot
-
-        if (null == destSlot) {
-            alert("Internal error, can't find destination slot in schedule");
-            return;
-        }
-
-        if (srcSlot.time.equals(destSlot.time)) {
-            // dropping on the same slot where the team already was
-            return;
-        }
-
-        // remove warning from source cell as it may become empty
-        const srcCell = getCellForTimeAndCategory(srcSlot.time, category.name);
-        srcCell.classList.remove("overlap-schedule");
-        srcCell.classList.remove("overlap-playoff");
-
-        if (null == destSlot.categories[category.name]) {
-            // no team in the destination, just delete this team from the old slot
-            delete srcSlot.categories[category.name];
-        } else {
-            const oldTeamNumber = destSlot.categories[category.name];
-            const oldTeam = finalist_module.lookupTeam(oldTeamNumber);
-
-            // clear the destination slot so that the warning check sees the correct
-            // state for this team
-            delete destSlot.categories[category.name];
-
-            // move team to the source slot
-            srcSlot.categories[category.name] = oldTeamNumber;
-
-            // check new position to set warnings
-            checkForTimeOverlap(srcSlot, oldTeamNumber);
-
-            // check old position to clear warnings
-            checkForTimeOverlap(destSlot, oldTeamNumber);
-
-            if (finalist_module.hasPlayoffConflict(oldTeam, srcSlot)) {
-                srcCell.classList.add("overlap-playoff");
-            }
-        }
-
-        // add team to new slot, reference actual slot in case
-        // newSlot and destSlot are not the same instance.
-        // 12/23/2015 JPS - not sure how this could happen, but I must have thought it
-        // possible.
-        destSlot.categories[category.name] = team.num;
-
-        // check where the team now is to see what warnings are needed
-        checkForTimeOverlap(destSlot, team.num);
-
-        // need to check where the team was to clear the warning
-        checkForTimeOverlap(srcSlot, team.num);
-
-        finalist_module.setSchedule(finalist_module.getCurrentDivision(), schedule);
-        finalist_module.saveToLocalStorage();
-    }
-
-    /**
-     * Add a row to the schedule table for the specified slot.
-     */
-    function addRowForSlot(slot) {
-        const row = document.createElement("div");
-        row.classList.add("rTableRow");
-        document.getElementById("schedule_body").appendChild(row);
-
-        const timeCell = document.createElement("div");
-        row.appendChild(timeCell);
-        timeCell.classList.add("rTableCell");
-        timeCell.innerText = finalist_module.timeToDisplayString(slot.time);
-
-        const playoffCell = document.createElement("div");
-        row.appendChild(playoffCell);
-        playoffCell.classList.add("rTableCell");
-        let text = "";
-        let first = true;
-        for (const [bracketName, playoffSchedule] of Object.entries(finalist_module.getPlayoffSchedules())) {
-            if (finalist_module.slotHasPlayoffConflict(playoffSchedule, slot)) {
-                if (first) {
-                    first = false;
-                } else {
-                    text = text + ",";
-                }
-                text = text + bracketName;
-            }
-        }
-        playoffCell.innerText = text;
-
-        const categoriesToCells = {};
-        const teamsInSlot = {};
-        for (const category of finalist_module.getAllScheduledCategories()) {
-            const cell = createTimeslotCell(slot, category);
-            row.appendChild(cell);
-
-            categoriesToCells[category.name] = cell;
-
-            const teamNum = slot.categories[category.name];
-            if (teamNum != null) {
-                const team = finalist_module.lookupTeam(teamNum);
-                const teamDiv = createTeamDiv(team, category);
-                cell.appendChild(teamDiv);
-                teamsInSlot[teamNum] = true;
-            }
-        } // foreach category
-
-        timeToCells[finalist_module.timeToDisplayString(slot.time)] = categoriesToCells;
-
-        // now check for overlaps in the loaded schedule
-        for (const [teamNum, _] of Object.entries(teamsInSlot)) {
-            checkForTimeOverlap(slot, teamNum);
-        }
     }
 
     function createSortedCategories() {
@@ -445,13 +199,30 @@ const deliberationModule = {};
         for (const category of finalist_module.getAllCategories()) {
             sortedCategories.push(category);
         }
-        deliberationModule.sortedCategories.sort(function(a, b) {
+        let performanceCategory = finalist_module.getCategoryByName(deliberationModule.PERFORMANCE_CATEGORY_NAME);
+        if (null == performanceCategory) {
+            performanceCategory = finalist_module.addCategory(deliberationModule.PERFORMANCE_CATEGORY_NAME, true, true);
+            sortedCategories.push(performanceCategory);
+        }
+
+        sortedCategories.sort(function(a, b) {
             if (a.name == finalist_module.CHAMPIONSHIP_NAME && b.name != finalist_module.CHAMPIONSHIP_NAME) {
                 return -1;
             } else if (a.name == finalist_module.CHAMPIONSHIP_NAME && b.name == finalist_module.CHAMPIONSHIP_NAME) {
                 // shouldn't happen
                 return 0;
             } else if (a.name != finalist_module.CHAMPIONSHIP_NAME && b.name == finalist_module.CHAMPIONSHIP_NAME) {
+                return 1;
+            } else if (a.name == deliberationModule.PERFORMANCE_CATEGORY_NAME && b.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
+                // shouldn't happen
+                return 0;
+            } else if (a.name == deliberationModule.PERFORMANCE_CATEGORY_NAME && b.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && !b.numeric) {
+                return -1;
+            } else if (a.name == deliberationModule.PERFORMANCE_CATEGORY_NAME && b.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && b.numeric) {
+                return 1;
+            } else if (a.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && a.numeric && b.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
+                return -1;
+            } else if (a.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && !a.numeric && b.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
                 return 1;
             } else if (a.numeric && !b.numeric) {
                 return -1;
@@ -471,16 +242,6 @@ const deliberationModule = {};
         updateHeader();
 
         const currentDivision = finalist_module.getCurrentDivision()
-        schedule = finalist_module.getSchedule(currentDivision);
-        if (null == schedule || 0 == schedule.length) {
-            schedule = finalist_module.scheduleFinalists(currentDivision);
-            finalist_module.setSchedule(currentDivision, schedule);
-            finalist_module.saveToLocalStorage();
-        }
-
-        finalistsCount = finalist_module.getTeamToCategoryMap(finalist_module
-            .getCurrentDivision());
-        sortedTeams = finalist_module.sortTeamsByCategoryCount(finalistsCount);
 
         removeChildren(document.getElementById("deliberation_body"));
     }
