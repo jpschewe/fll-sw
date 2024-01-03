@@ -29,3 +29,7 @@ and mark draggable things as movable. */
 .rTableCell.separator {
     background: black;
 }
+
+.rTableCell.unavailable {
+    background: #bfbfbf;
+}

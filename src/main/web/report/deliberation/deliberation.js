@@ -9,10 +9,150 @@
 const deliberationModule = {};
 
 {
+    if (typeof fllStorage != 'object') {
+        throw new Error("fllStorage needs to be loaded");
+    }
+    if (typeof finalist_module != 'object') {
+        throw new Error("finalist_modeule needs to be loaded");
+    }
+
+    const STORAGE_PREFIX = "fll.deliberation";
+
+    let _categories;
+
+    function _init_variables() {
+        _categories = new Map();
+    }
+
+    function _save() {
+        fllStorage.set(STORAGE_PREFIX, "_categories", _categories);
+    }
+
+    function _load() {
+        _init_variables();
+
+        let value = fllStorage.get(STORAGE_PREFIX, "_categories");
+        if (null != value) {
+            _categories = value;
+        }
+    }
+
+    function _clear_local_storage() {
+        fllStorage.clearNamespace(STORAGE_PREFIX);
+    }
+
+
+    class Category {
+        /**
+         * Constructor for a category. Finds the first free ID and assigns it to this
+         * new category.
+         * 
+         * @param name
+         *          the name of the category
+         * @param scheduled
+         *          boolean stating if this is a scheduled category
+         */
+        constructor(name, scheduled) {
+            let category_id;
+            // find the next available id
+            for (category_id = 0; category_id < Number.MAX_VALUE
+                && _categories[category_id]; category_id = category_id + 1)
+                ;
+
+            if (category_id == Number.MAX_VALUE || category_id + 1 == Number.MAX_VALUE) {
+                throw new Error("No free category IDs");
+            }
+
+            this.name = name;
+            this.catId = category_id;
+            this.teams = []; // all teams regardless of division
+            this.winners = new Map(); // award group -> list of teams, null for empty cells
+            this.scheduled = scheduled;
+            this.writer1 = new Map(); // award group -> string
+            this.writer2 = new Map(); // award group -> string
+
+            _categories[this.catId] = this;
+        }
+
+        getWriter1() {
+            return this.writer1.get(finalist_module.getCurrentDivision());
+        }
+        setWriter1(v) {
+            this.writer1.set(finalist_module.getCurrentDivision(), v);
+        }
+
+        getWriter2() {
+            return this.writer2.get(finalist_module.getCurrentDivision());
+        }
+        setWriter2(v) {
+            this.writer2.set(finalist_module.getCurrentDivision(), v);
+        }
+
+        getWinners() {
+            const value = this.winners.get(finalist_module.getCurrentDivision());
+            if (null == value) {
+                return [null];
+            } else {
+                return value;
+            }
+        }
+        setWinners(v) {
+            this.winners.set(finalist_module.getCurrentDivision(), v);
+        }
+        /**
+         * @param place the place (1-based) of the team
+         * @param teamNumber the team number in this place
+         */
+        setWinner(place, teamNumber) {
+            const winners = this.getWinners();
+            if (place < 1) {
+                throw new Error("Place must be greater than 0");
+            }
+            if (place > winners.length) {
+                throw new Error("Place must less than or equal to the number of awards");
+            }
+
+            const placeIndex = place - 1;
+            winners[placeIndex] = teamNumber;
+            this.setWinners(winners);
+        }
+        /**
+         * Remove a winner. Sets the winner to null.
+         * 
+         * @param place the place (1-based) of the team
+         */
+        unsetWinner(place) {
+            const winners = getWinners();
+            if (place < 1) {
+                throw new Error("Place must be greater than 0");
+            }
+            if (place > winners.length) {
+                throw new Error("Place must less than or equal to the number of awards");
+            }
+
+            const placeIndex = place - 1;
+            winners[placeIndex] = null;
+        }
+
+        getNumAwards() {
+            return this.getWinners().length;
+        }
+        setNumAwards(v) {
+            const winners = this.getWinners();
+            while (winners.length > v) {
+                winners.pop();
+            }
+            while (winners.length < v) {
+                winners.push(null);
+            }
+            this.setWinners(winners);
+        }
+
+    }
+
     let draggingTeam = null;
     let draggingCategory = null;
     let draggingTeamDiv = null;
-    let schedule = null;
 
     /**
      * Name of the performance category. Used to display in the table header and to reference teams. Should not need to match the category name in the challenge description.
@@ -20,9 +160,33 @@ const deliberationModule = {};
     deliberationModule.PERFORMANCE_CATEGORY_NAME = "Performance";
 
     /**
-     * {Array} of finalist {Category} objects sorted in the order for the table. 
+     * {Array} of {Category} objects sorted in the order for the table. 
      */
     let sortedCategories = [];
+
+
+
+    /**
+      * Get a category by name
+      * 
+      * @param toFind
+      *          the name to find
+      * @returns the category or null
+      */
+    function getCategoryByName(toFind) {
+        let category = null;
+        for (const [_, val] of _categories) {
+            if (val.name == toFind) {
+                category = val;
+            }
+        }
+        return category;
+    };
+
+    function loadFromFinalist() {
+        createSortedCategories();
+        _save();
+    }
 
     function handleAwardGroupChange() {
         const divIndex = document.getElementById("award_groups").value;
@@ -206,12 +370,15 @@ const deliberationModule = {};
         sortedCategories = [];
 
         for (const category of finalist_module.getAllCategories()) {
-            sortedCategories.push(category);
+            const dCategory = new Category(category.name, category.scheduled);
+            dCategory.teams = [...category.teams];
+            sortedCategories.push(dCategory);
         }
-        let performanceCategory = finalist_module.getCategoryByName(deliberationModule.PERFORMANCE_CATEGORY_NAME);
+        let performanceCategory = getCategoryByName(deliberationModule.PERFORMANCE_CATEGORY_NAME);
         if (null == performanceCategory) {
-            performanceCategory = finalist_module.addCategory(deliberationModule.PERFORMANCE_CATEGORY_NAME, true, true);
+            performanceCategory = new Category(deliberationModule.PERFORMANCE_CATEGORY_NAME, true);
             sortedCategories.push(performanceCategory);
+            //FIXME need to load performance winners from somewhere
         }
 
         sortedCategories.sort(function(a, b) {
@@ -248,13 +415,16 @@ const deliberationModule = {};
         return "place_row_" + place;
     }
 
+    function placeCellIdentifier(category, place) {
+        return "place_cell_" + category.catId + "_" + place;
+    }
+
     function addPlaceRow(body, place) {
-        const headerRow = document.getElementById("header_row");
-        const prevRow = place < 2 ? headerRow : document.getElementById(placeRowIdentifier(place - 1));
+        const prevRow = place < 2 ? document.getElementById("num_awards_row") : document.getElementById(placeRowIdentifier(place - 1));
 
         const row = document.createElement("div");
         row.classList.add("rTableRow");
-        body.appendChild(row);
+        body.insertBefore(row, prevRow.nextSibling)
         row.setAttribute("id", placeRowIdentifier(place));
 
         const placeCell = document.createElement("div");
@@ -262,10 +432,11 @@ const deliberationModule = {};
         placeCell.classList.add("rTableCell");
         placeCell.innerText = place;
 
-        for (let i = 0; i < sortedCategories.length; ++i) {
+        for (const category of sortedCategories) {
             const cell = document.createElement("div");
             row.appendChild(cell);
             cell.classList.add("rTableCell");
+            cell.setAttribute("id", placeCellIdentifier(category, place));
         }
     }
 
@@ -321,6 +492,10 @@ const deliberationModule = {};
             input1.setAttribute("id", writing1Identifier(category));
             input1.setAttribute("name", writing1Identifier(category));
             input1.setAttribute("size", "10");
+            input1.addEventListener("change", () => {
+                category.setWriter1(input1.value);
+                _save();
+            });
 
             const cell2 = document.createElement("div");
             row2.appendChild(cell2);
@@ -331,6 +506,11 @@ const deliberationModule = {};
             input2.setAttribute("id", writing2Identifier(category));
             input2.setAttribute("name", writing2Identifier(category));
             input2.setAttribute("size", "10");
+            input2.addEventListener("change", () => {
+                category.setWriter2(input1.value);
+                _save();
+            });
+
         }
     }
 
@@ -342,6 +522,7 @@ const deliberationModule = {};
         const row = document.createElement("div");
         row.classList.add("rTableRow");
         body.appendChild(row);
+        row.setAttribute("id", "num_awards_row");
 
         const numAwardsCell = document.createElement("div");
         row.appendChild(numAwardsCell);
@@ -360,13 +541,99 @@ const deliberationModule = {};
             input.setAttribute("min", "1");
             input.setAttribute("size", "3");
             input.setAttribute("required", "true")
-            input.value = 1;
+            input.value = category.getNumAwards();
+            input.addEventListener("change", () => {
+                const prevMaxNumAwards = computeMaxNumAwards();
+                const newNumAwards = parseInt(input.value, 10);
+                const valid = validateNumAwardsChange(category, newNumAwards);
+                if (!valid) {
+                    input.value = category.getNumAwards();
+                } else {
+                    category.setNumAwards(newNumAwards);
+                    changeNumAwards(category, prevMaxNumAwards);
+                }
+            });
         }
     }
 
-    function updatePage() {
-        createSortedCategories();
+    function computeMaxNumAwards() {
+        let maxNumAwards = 0;
+        for (const category of sortedCategories) {
+            maxNumAwards = Math.max(maxNumAwards, category.getNumAwards());
+        }
+        return maxNumAwards;
+    }
 
+    /**
+     * Update the number of rows and active cells based on the current value of numAwards.
+     * 
+     * @param {Category} category the category that just had it's number of awards changed
+     * @param {int} prevMaxNumAwards previous maximum number of awards  
+     */
+    function changeNumAwards(category, prevMaxNumAwards) {
+        // ensure a row exists for all awards in this category
+        const body = document.getElementById("deliberation_body");
+        const curMaxNumAwards = computeMaxNumAwards();
+        if (curMaxNumAwards > prevMaxNumAwards) {
+            for (let place = prevMaxNumAwards + 1; place <= curMaxNumAwards; ++place) {
+                addPlaceRow(body, place);
+                for (const c of sortedCategories) {
+                    if (c.catId != category.catId) {
+                        // no other category is going to have this many awards
+                        const cellId = placeCellIdentifier(c, place);
+                        const cell = document.getElementById(cellId);
+                        cell.classList.add("unavailable");
+                    }
+                }
+            }
+        }
+
+        // disable/enable place cells as needed
+        const categoryNumAwards = category.getNumAwards();
+        for (let place = 1; place <= curMaxNumAwards; ++place) {
+            const cellId = placeCellIdentifier(category, place);
+            const cell = document.getElementById(cellId);
+            if (place <= categoryNumAwards) {
+                cell.classList.remove("unavailable");
+            } else {
+                cell.classList.add("unavailable");
+            }
+        }
+
+
+        // remove extra rows
+        if (curMaxNumAwards < prevMaxNumAwards) {
+            for (let place = prevMaxNumAwards; place > curMaxNumAwards; --place) {
+                const rowId = placeRowIdentifier(place);
+                const row = document.getElementById(rowId);
+                body.removeChild(row);
+            }
+        }
+    }
+
+
+    /**
+     * Check that we won't remove cells with teams currently in them.
+     * @param {Category} category the category that is changing
+     * @param {int} newNumAwards the new number of awards
+     * @returns false if there are issues (will also alert the user), true otherwise 
+     */
+    function validateNumAwardsChange(category, newNumAwards) {
+        const curNumAwards = category.getNumAwards();
+        if (newNumAwards < curNumAwards) {
+            for (let place = curNumAwards; place >= curNumAwards; --place) {
+                const cellId = placeCellIdentifier(category, place);
+                const cell = document.getElementById(cellId);
+                if (cell.children.length > 0) {
+                    alert("Cannot lower the number of awards below the current number of winners. Remove the last winner and try again.");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    function updatePage() {
         // output header
         updateHeader();
 
@@ -383,7 +650,9 @@ const deliberationModule = {};
     }
 
     document.addEventListener("DOMContentLoaded", function() {
+        //FIXME will need to determine when to load from finalist data and when to just load from local storage
         finalist_module.loadFromLocalStorage();
+        loadFromFinalist();
 
         const awardGroupsElement = document.getElementById("award_groups");
         removeChildren(awardGroupsElement);
@@ -408,4 +677,7 @@ const deliberationModule = {};
             uploadData();
         });
     });
+
+    // always need to initialize variables
+    _init_variables();
 }
