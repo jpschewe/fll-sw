@@ -65,8 +65,8 @@ const deliberationModule = {};
 
             this.name = name;
             this.catId = category_id;
-            this.teams = []; // all teams regardless of division
-            this.winners = new Map(); // award group -> list of teams, null for empty cells
+            this.nominees = new Map(); // award group -> list of team numbers
+            this.winners = new Map(); // award group -> list of team numbers, null for empty cells
             this.scheduled = scheduled;
             this.writer1 = new Map(); // award group -> string
             this.writer2 = new Map(); // award group -> string
@@ -86,6 +86,28 @@ const deliberationModule = {};
         }
         setWriter2(v) {
             this.writer2.set(finalist_module.getCurrentDivision(), v);
+        }
+
+        getNominees() {
+            const value = this.nominees.get(finalist_module.getCurrentDivision());
+            if (null == value) {
+                return [];
+            } else {
+                return value;
+            }
+        }
+        setNominees(v) {
+            this.nominees.set(finalist_module.getCurrentDivision(), v);
+        }
+        addNominee(teamNumber) {
+            const value = this.getNominees();
+            value.push(teamNumber);
+            this.setNominees(value);
+        }
+        removeNominee(teamNumber) {
+            const value = this.getNominees();
+            removeFromArray(value, teamNumber);
+            this.setNominees(value);
         }
 
         getWinners() {
@@ -164,7 +186,92 @@ const deliberationModule = {};
      */
     let sortedCategories = [];
 
+    /**
+     * teamNumber -> list of div elements.
+     */
+    let teamDivs = new Map();
 
+    /**
+     * teamNumber -> count of categories team is a winner for.
+     */
+    let teamWinnersCount = new Map();
+
+    /**
+     * teamNumber -> CSS class name
+     */
+    let teamColors = new Map();
+
+    let nextTeamColor = 1;
+
+    /**
+     * @return the CSS class name to use for the next team color, returns an empty string if there are no more styles left.
+     */
+    function getNextTeamColor() {
+        if (nextTeamColor > 25) {
+            return "";
+        } else {
+            const value = "team-" + nextTeamColor;
+            ++nextTeamColor;
+            return value;
+        }
+    }
+
+    /**
+     * @param {int} teamNumber team number to set style for
+     * @param {HTMLElement} ele HTML element that should have the style set 
+     */
+    function setTeamColorStyle(teamNumber, ele) {
+        let teamColor = teamColors.get(teamNumber);
+        if (null == teamColor) {
+            teamColor = getNextTeamColor();
+            teamColors.set(teamNumber, teamColor);
+        }
+
+        if (teamColor.length > 0) {
+            ele.classList.add(teamColor);
+        }
+    }
+
+    function getTeamWinnersCount(teamNumber) {
+        const value = teamWinnersCount.get(teamNumber);
+        if (null == value) {
+            return 0;
+        } else {
+            return value;
+        }
+    }
+
+    function addTeamToWinners(teamNumber) {
+        let count = getTeamWinnersCount(teamNumber);
+        ++count;
+        teamWinnersCount.set(count);
+
+        updateTeamDivForWinners(teamNumber);
+    }
+
+    function removeTeamFromWinners(teamNumber) {
+        let count = getTeamWinnersCount(teamNumber);
+        --count;
+        count = Math.max(0, count); // just in case
+        teamWinnersCount.set(count);
+
+        updateTeamDivForWinners(teamNumber);
+    }
+
+    function updateTeamDivForWinners(teamNumber) {
+        const count = getTeamWinnersCount(teamNumber);
+
+        const divs = teamDivs.get(teamNumber);
+        if (null != divs) {
+            for (const div of divs) {
+                if (count > 0) {
+                    div.classList.add("winner");
+                } else {
+                    div.classList.remove("winner");
+                }
+            }
+        }
+    }
 
     /**
       * Get a category by name
@@ -228,28 +335,17 @@ const deliberationModule = {};
     /**
      * Create the div element for a team in a particular category.
      * 
-     * @param team
+     * @param {finalist_module.Team} team
      *          a Team object
-     * @param category
+     * @param {Category} category
      *          a Category object
      * @returns an HTML div element for the team
      */
     function createTeamDiv(team, category) {
-        const teamCategories = finalistsCount.get(team.num);
-        const numCategories = teamCategories.length;
         const group = team.judgingGroup;
         const teamDiv = document.createElement("div");
         teamDiv.setAttribute("draggable", "true");
-        teamDiv.innerText = team.num + " - " + team.name + " (" + group + ", " + numCategories + ")";
-
-        // determine the class for the cell. We have 25 colors defined in schedule.css.
-        const sortedTeamIndex = sortedTeams.indexOf(team.num);
-        if (sortedTeamIndex < 0) {
-            _log("Warning: can't find team " + team.num + " in sortedTeams")
-        } else if (sortedTeamIndex < 25) {
-            const className = "team-" + (sortedTeamIndex + 1);
-            teamDiv.classList.add(className);
-        }
+        teamDiv.innerText = team.num + " - " + team.name + " (" + group + ")";
 
         teamDiv.addEventListener('dragstart', function(e) {
             let rawEvent;
@@ -260,7 +356,7 @@ const deliberationModule = {};
             }
             // rawEvent.target is the source node.
 
-            teamDiv.style.opacity = 0.4;
+            teamDiv.classList.add("dragging");
 
             const dataTransfer = rawEvent.dataTransfer;
 
@@ -276,7 +372,7 @@ const deliberationModule = {};
 
         teamDiv.addEventListener('dragend', function(_) {
             // rawEvent.target is the source node.
-            teamDiv.style.opacity = 1;
+            teamDiv.classList.remove("dragging");
         });
 
         return teamDiv;
@@ -371,7 +467,9 @@ const deliberationModule = {};
 
         for (const category of finalist_module.getAllCategories()) {
             const dCategory = new Category(category.name, category.scheduled);
-            dCategory.teams = [...category.teams];
+            for (const teamNumber of category.teams) {
+                dCategory.addNominee(teamNumber);
+            }
             sortedCategories.push(dCategory);
         }
         let performanceCategory = getCategoryByName(deliberationModule.PERFORMANCE_CATEGORY_NAME);
@@ -467,10 +565,12 @@ const deliberationModule = {};
         const row1 = document.createElement("div");
         row1.classList.add("rTableRow");
         body.appendChild(row1);
+        row1.setAttribute("id", "writing1_row");
 
         const row2 = document.createElement("div");
         row2.classList.add("rTableRow");
         body.appendChild(row2);
+        row2.setAttribute("id", "writing2_row");
 
         const judgeCell = document.createElement("div");
         row1.appendChild(judgeCell);
@@ -633,20 +733,100 @@ const deliberationModule = {};
         return true;
     }
 
+    /**
+     * @param {Category} category category to find the cell for
+     * @param {int} index zero-based nominee index
+     */
+    function nomineeCellIdentifier(category, index) {
+        return "nominee_cell_" + category.catId + "_" + index;
+    }
+
+    /**
+     * @param {int} index zero-based nominee index
+     */
+    function nomineeRowIdentifier(index) {
+        return "nominee_row_" + index;
+    }
+
+    /**
+     * Ensure that a row exists for the nominee with the specified index.
+     * 
+     * @param {int} index zero-based nominee index
+     */
+    function ensureNomineeRowExists(index) {
+        const body = document.getElementById("deliberation_body");
+
+        let prevRow = document.getElementById("writing2_row").nextSibling;
+        for (let i = 0; i <= index; ++i) {
+            const rowId = nomineeRowIdentifier(i);
+            let row = document.getElementById(rowId);
+            if (null == row) {
+                row = document.createElement("div");
+                body.insertBefore(row, prevRow.nextSibling);
+                row.setAttribute("id", rowId);
+                row.classList.add("rTableRow");
+                row.classList.add("nominee_row");
+
+                //  cell for place column
+                const placeCell = document.createElement("div");
+                row.appendChild(placeCell);
+                placeCell.classList.add("rTableCell");
+
+                // add cells for all categories                
+                for (const category of sortedCategories) {
+                    const cell = document.createElement("div");
+                    row.appendChild(cell);
+                    cell.classList.add("rTableCell");
+                    cell.setAttribute("id", nomineeCellIdentifier(category, i));
+                }
+            }
+            prevRow = row;
+        }
+    }
+
+    function populateNomineeTeams() {
+        teamDivs = new Map();
+        teamWinnersCount = new Map();
+        teamColors = new Map();
+
+        for (const category of sortedCategories) {
+            const nominees = category.getNominees();
+            for (const [index, teamNumber] of nominees.entries()) {
+                const team = finalist_module.lookupTeam(teamNumber);
+                ensureNomineeRowExists(index);
+
+                const cellId = nomineeCellIdentifier(category, index);
+                const cell = document.getElementById(cellId);
+                const teamDiv = createTeamDiv(team, category);
+                cell.appendChild(teamDiv);
+                setTeamColorStyle(teamNumber, teamDiv);
+            }
+        }
+    }
+
     function updatePage() {
         // output header
         updateHeader();
 
         const currentDivision = finalist_module.getCurrentDivision()
         const body = document.getElementById("deliberation_body");
-        // FIXME add row for number of awards given
         removeChildren(body);
+
         addNumAwardsRow(body);
-        addPlaceRow(body, 1);
+
+        const maxPlace = computeMaxNumAwards();
+        for (let place = 1; place <= maxPlace; ++place) {
+            addPlaceRow(body, place);
+        }
+
         addSeparator(body);
         addWriters(body);
+
         addSeparator(body);
-        // FIXME add teams
+        populateNomineeTeams();
+
+        addSeparator(body);
+        // FIXME add section for teams by judging group
     }
 
     document.addEventListener("DOMContentLoaded", function() {

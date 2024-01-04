@@ -11,6 +11,10 @@ and mark draggable things as movable. */
     cursor: move;
 }
 
+.dragging {
+    opacity: 0.4;
+}
+
 #deliberation_header .performance {
     background: #00ff00;
     color: black;
@@ -32,4 +36,8 @@ and mark draggable things as movable. */
 
 .rTableCell.unavailable {
     background: #bfbfbf;
+}
+
+.nominee_row .winner {
+    text-decoration: line-through;
 }
