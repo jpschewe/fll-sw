@@ -99,15 +99,33 @@ const deliberationModule = {};
         setNominees(v) {
             this.nominees.set(finalist_module.getCurrentDivision(), v);
         }
+        /**
+         * @param {int} teamNumber team to add to the list of nominees
+         * @return true if this team wasn't in the list of nominees (list was modified)
+         */
         addNominee(teamNumber) {
             const value = this.getNominees();
-            value.push(teamNumber);
-            this.setNominees(value);
+            if (!value.includes(teamNumber)) {
+                value.push(teamNumber);
+                this.setNominees(value);
+                return true;
+            } else {
+                return false;
+            }
         }
+        /**
+         * @param {int} teamNumber team to remove from the list of nominees
+         * @return true if this team was in the list of nominees (list was modified)
+         */
         removeNominee(teamNumber) {
             const value = this.getNominees();
-            removeFromArray(value, teamNumber);
-            this.setNominees(value);
+            if (value.includes(teamNumber)) {
+                removeFromArray(value, teamNumber);
+                this.setNominees(value);
+                return true;
+            } else {
+                return false;
+            }
         }
 
         getWinners() {
