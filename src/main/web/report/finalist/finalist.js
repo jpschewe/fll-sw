@@ -539,6 +539,9 @@ const finalist_module = {}
 
     /**
      * Find a team by number.
+     * 
+     * @param {int} teamNum the team number
+     * @return the team or null if not found
      */
     finalist_module.lookupTeam = function(teamNum) {
         return _teams[teamNum];
