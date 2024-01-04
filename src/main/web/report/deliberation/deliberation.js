@@ -66,6 +66,7 @@ const deliberationModule = {};
             this.name = name;
             this.catId = category_id;
             this.nominees = new Map(); // award group -> list of team numbers
+            this.potentialWinners = new Map() // award group -> list of team numbers
             this.winners = new Map(); // award group -> list of team numbers, null for empty cells
             this.scheduled = scheduled;
             this.writer1 = new Map(); // award group -> string
@@ -113,19 +114,17 @@ const deliberationModule = {};
                 return false;
             }
         }
-        /**
-         * @param {int} teamNumber team to remove from the list of nominees
-         * @return true if this team was in the list of nominees (list was modified)
-         */
-        removeNominee(teamNumber) {
-            const value = this.getNominees();
-            if (value.includes(teamNumber)) {
-                removeFromArray(value, teamNumber);
-                this.setNominees(value);
-                return true;
+
+        getPotentialWinners() {
+            const value = this.potentialWinners.get(finalist_module.getCurrentDivision());
+            if (null == value) {
+                return [];
             } else {
-                return false;
+                return value;
             }
+        }
+        setPotentialWinners(v) {
+            this.potentialWinners.set(finalist_module.getCurrentDivision(), v);
         }
 
         getWinners() {
@@ -393,6 +392,8 @@ const deliberationModule = {};
             teamDiv.classList.remove("dragging");
         });
 
+        setTeamColorStyle(team.num, teamDiv);
+
         return teamDiv;
     }
 
@@ -556,6 +557,9 @@ const deliberationModule = {};
         }
     }
 
+    /**
+     * @returns the row that was added
+     */
     function addSeparator(body) {
         const row = document.createElement("div");
         row.classList.add("rTableRow");
@@ -569,6 +573,8 @@ const deliberationModule = {};
             cell.classList.add("rTableCell");
             cell.classList.add("separator");
         }
+
+        return row;
     }
 
     function writing1Identifier(category) {
@@ -802,27 +808,188 @@ const deliberationModule = {};
         }
     }
 
+    function findAllJudgingGroups() {
+        const judgingGroups = [];
+        for (const team of finalist_module.getAllTeams()) {
+            if (!judgingGroups.includes(team.judgingGroup)) {
+                judgingGroups.push(team.judgingGroup);
+            }
+        }
+        judgingGroups.sort();
+        return judgingGroups;
+    }
+
+    function addInitialNomineeRows() {
+        let prevRow = document.getElementById("after_potential_winners");
+
+        const judgingGroups = findAllJudgingGroups();
+        for (const judgingGroup of judgingGroups) {
+            prevRow = addNomineeRow(judgingGroup, prevRow);
+        }
+    }
+
+    /**
+     * @param {string} judgingGroup the judging group
+     * @param {HTMLELement} prevRow the row to add after
+     * @return the created row {HTMLElement}
+     */
+    function addNomineeRow(judgingGroup, prevRow) {
+        const body = document.getElementById("deliberation_body");
+        const row = document.createElement("div");
+        row.classList.add("rTableRow");
+        body.insertBefore(row, prevRow.nextSibling)
+        row.setAttribute("data-judgingGroup", judgingGroup);
+        row.classList.add("nominee_row");
+
+        const placeCell = document.createElement("div");
+        row.appendChild(placeCell);
+        placeCell.classList.add("rTableCell");
+        placeCell.innerText = judgingGroup;
+
+        for (const category of sortedCategories) {
+            const cell = document.createElement("div");
+            row.appendChild(cell);
+            cell.classList.add("rTableCell");
+            cell.setAttribute("data-categoryId", category.catId);
+        }
+        return row;
+    }
+
+    /**
+     * Find the cell in row that is used for the specified category.
+     * @param {HTMLElement} row the row element
+     * @param {Category} category the category we are interested in
+     * @return the cell or null if no cell is found
+     */
+    function findCategoryCell(row, category) {
+        const rowChildren = row.children;
+        for (let j = 0; j < rowChildren.length; ++j) {
+            const cell = rowChildren[j];
+            const catId = cell.getAttribute("data-categoryId");
+            if (catId == category.catId) {
+                return cell;
+            }
+        }
+        console.log("Could not find cell for category " + category.catId + " in row: " + row);
+        return null;
+    }
+
+    function findOrCreateEmptyNomineeCell(judgingGroup, category) {
+        const body = document.getElementById("deliberation_body");
+        const children = body.children;
+        let prevJsRow = null;
+        for (let i = 0; i < children.length; ++i) {
+            const row = children[i];
+            const js = row.getAttribute("data-judgingGroup");
+            if (js == judgingGroup) {
+                const cell = findCategoryCell(row, category);
+                if (cell.children.length == 0) {
+                    return cell;
+                }
+                prevJsRow = row;
+            } else if (prevJsRow != null) {
+                // moved to the next judging group and didn't find a cell, need to add a new row
+                const newRow = addNomineeRow(judgingGroup, prevJsRow);
+                const cell = findCategoryCell(newRow, category);
+                return cell;
+            }
+        }
+        // handle last judging group
+        if (prevJsRow != null) {
+            // moved to the next judging group and didn't find a cell, need to add a new row
+            const newRow = addNomineeRow(judgingGroup, prevJsRow);
+            const cell = findCategoryCell(newRow, category);
+            return cell;
+        }
+        throw new Error("Unable to find place to add row");
+    }
+
+    function addNominee(category, team) {
+        const judgingGroup = team.judgingGroup;
+        const cell = findOrCreateEmptyNomineeCell(judgingGroup, category);
+        const teamDiv = createTeamDiv(team, category);
+        cell.appendChild(teamDiv);
+        cell.setAttribute("data-teamNumber", team.num);
+    }
+
+    function ensurePotentialWinnersRowExists(place) {
+        place = parseInt(place, 10);
+
+        let prevRow = null;
+        if (place > 1) {
+            // make sure the rows are created in order
+            prevRow = ensurePotentialWinnersRowExists(place - 1);
+        } else {
+            prevRow = document.getElementById("after_writers");
+        }
+
+        const body = document.getElementById("deliberation_body");
+        const rows = body.children;
+        for (let i = 0; i < rows.length; ++i) {
+            const row = rows[i];
+            if (row.classList.contains("potentialWinner_row")) {
+                const rowPlace = row.getAttribute("data-place");
+                if (null != rowPlace && place == parseInt(rowPlace, 10)) {
+                    return row;
+                }
+            }
+        }
+        return addPotentialWinnersRow(place, prevRow);
+    }
+
+    /**
+     * @param {int} place place for the potential winners row
+     * @param {HTMLElement} prevRow the row to add after
+     * @returns the row {HTMLElement} 
+     */
+    function addPotentialWinnersRow(place, prevRow) {
+        const body = document.getElementById("deliberation_body");
+        const row = document.createElement("div");
+        row.classList.add("rTableRow");
+        row.classList.add("potentialWinner_row");
+        row.setAttribute("data-place", place);
+        body.insertBefore(row, prevRow.nextSibling)
+
+        const placeCell = document.createElement("div");
+        row.appendChild(placeCell);
+        placeCell.classList.add("rTableCell");
+        placeCell.innerText = place;
+
+        for (const category of sortedCategories) {
+            const cell = document.createElement("div");
+            row.appendChild(cell);
+            cell.classList.add("rTableCell");
+            cell.setAttribute("data-categoryId", category.catId);
+        }
+        return row;
+    }
+
+    function populatePotentialWinners() {
+        ensurePotentialWinnersRowExists(1);
+        //FIXME read from category objects
+    }
+
+    /**
+     * Group teams by judging group.
+     */
     function populateNomineeTeams() {
-        teamDivs = new Map();
-        teamWinnersCount = new Map();
-        teamColors = new Map();
+        addInitialNomineeRows();
 
         for (const category of sortedCategories) {
             const nominees = category.getNominees();
-            for (const [index, teamNumber] of nominees.entries()) {
+            for (const teamNumber of nominees) {
                 const team = finalist_module.lookupTeam(teamNumber);
-                ensureNomineeRowExists(index);
-
-                const cellId = nomineeCellIdentifier(category, index);
-                const cell = document.getElementById(cellId);
-                const teamDiv = createTeamDiv(team, category);
-                cell.appendChild(teamDiv);
-                setTeamColorStyle(teamNumber, teamDiv);
+                addNominee(category, team);
             }
         }
     }
 
     function updatePage() {
+        teamDivs = new Map();
+        teamWinnersCount = new Map();
+        teamColors = new Map();
+
+
         // output header
         updateHeader();
 
@@ -837,14 +1004,25 @@ const deliberationModule = {};
             addPlaceRow(body, place);
         }
 
-        addSeparator(body);
+        const afterWinners = addSeparator(body);
+        afterWinners.setAttribute("id", "after_winners");
+
         addWriters(body);
 
-        addSeparator(body);
-        populateNomineeTeams();
+        const afterWriters = addSeparator(body);
+        afterWriters.setAttribute("id", "after_writers");
 
-        addSeparator(body);
+        populatePotentialWinners();
+
+        const afterPotentialWinners = addSeparator(body);
+        afterPotentialWinners.setAttribute("id", "after_potential_winners");
+
+        populateNomineeTeams();
         // FIXME add section for teams by judging group
+
+        // FIXME add "Add Team" buttons to each category at the bottom
+
+        // FIXME populate winners in table
     }
 
     document.addEventListener("DOMContentLoaded", function() {
