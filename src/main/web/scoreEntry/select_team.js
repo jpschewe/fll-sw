@@ -24,7 +24,9 @@ function editFlagBoxClicked() {
 function messageReceived(event) {
     const message = JSON.parse(event.data);
 
-    populateUnverifiedSelect(message.unverified);
+    if (!scoreEntrySelectedTable) {
+        populateUnverifiedSelect(message.unverified);
+    }
 
     teamSelectData = message.teamSelectData;
     teamSelectData.sort(sort);
@@ -288,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
             teamSelectData.sort(compareByPerformanceTime);
             populateTeamsSelect();
         });
-
-        openSocket();
     }
+    openSocket();
+
 });
