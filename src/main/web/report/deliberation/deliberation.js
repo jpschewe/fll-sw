@@ -236,6 +236,15 @@ const deliberationModule = {};
         }
     }
 
+    function getTeamDivs(teamNumber) {
+        let divs = teamDivs.get(teamNumber);
+        if (null == divs) {
+            return [];
+        } else {
+            return divs;
+        }
+    }
+
     /**
      * teamNumber -> count of categories team is a winner for.
      */
@@ -400,7 +409,7 @@ const deliberationModule = {};
             const dataTransfer = e.dataTransfer;
 
             draggingTeamDiv = teamDiv;
-            
+
             // need something to transfer, otherwise the browser won't let us drag
             dataTransfer.setData(TRANSFER_TEAM_NUMBER, team.num);
             dataTransfer.setData(TRANSFER_CATEGORY_ID, category.catId);
@@ -500,7 +509,7 @@ const deliberationModule = {};
 
     }
 
-    function dragLeave(e) {
+    function dragLeave(_) {
         const body = document.getElementById("deliberation_body");
         for (const c of body.querySelectorAll(".dropzone").values()) {
             c.classList.remove("dropzone");
@@ -520,17 +529,40 @@ const deliberationModule = {};
         const destSection = destCell.parentNode.getAttribute(DATA_SECTION);
 
         if (sourceCategoryId == destCategoryId) {
-            if (sourceSection == SECTION_NOMINEES && destSection == SECTION_POTENTIAL_WINNERS) {
-                const team = finalist_module.lookupTeam(teamNum);
-                const category = _categories.get(sourceCategoryId);
-                dropNomineeToPotentialWinners(destCell, category, team);
+            if (sourceSection == SECTION_NOMINEES) {
+                if (destSection == SECTION_POTENTIAL_WINNERS) {
+                    const team = finalist_module.lookupTeam(teamNum);
+                    const category = _categories.get(sourceCategoryId);
+                    dropNomineeToPotentialWinners(destCell, category, team);
 
-                // disable dragging team up again  
-                draggingTeamDiv.setAttribute("draggable", "false");
-                draggingTeamDiv.classList.add("potential_winner");
-                // FIXME make sure to reset when dragging from potential winners down to nominees
-            } else {
-                console.log(`No drop - wrong section source: ${sourceSection} dest: ${destSection}`);
+                    // disable dragging team up again  
+                    draggingTeamDiv.setAttribute("draggable", "false");
+                    draggingTeamDiv.classList.add("potential_winner");
+                } else {
+                    console.log(`section nominee source - wrong section dest: ${destSection}`);
+                }
+            } else if (sourceSection == SECTION_POTENTIAL_WINNERS) {
+                if (destSection == SECTION_NOMINEES) {
+                    draggingTeamDiv.remove();
+                    removeFromTeamDivs(teamNum, draggingTeamDiv)
+
+                    // find teamDiv in nominees section and allow drag again
+                    for (const teamDiv of getTeamDivs(teamNum)) {
+                        const cell = teamDiv.parentNode;
+                        if (cell) {
+                            const row = cell.parentNode;
+                            if (row) {
+                                const section = row.getAttribute(DATA_SECTION);
+                                if (section == SECTION_NOMINEES) {
+                                    teamDiv.setAttribute("draggable", "true");
+                                    teamDiv.classList.remove("potential_winner");
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    console.log(`section potential winners source - wrong section dest: ${destSection}`);
+                }
             }
         } else {
             console.log(`No drop - wrong category source: ${sourceCategoryId} dest: ${destCategoryId}`);
@@ -896,6 +928,10 @@ const deliberationModule = {};
             row.appendChild(cell);
             cell.classList.add("rTableCell");
             cell.setAttribute(DATA_CATEGORY_ID, category.catId);
+
+            cell.addEventListener('dragover', dragOver);
+            cell.addEventListener('dragleave', dragLeave);
+            cell.addEventListener('drop', drop);
         }
         return row;
     }
