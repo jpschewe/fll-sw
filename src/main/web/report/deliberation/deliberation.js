@@ -569,7 +569,7 @@ const deliberationModule = {};
                 }
             } else if (sourceSection == SECTION_WINNERS) {
                 if (destSection == SECTION_POTENTIAL_WINNERS) {
-                    console.log("FIXME support removing winner");
+                    dropRemoveFromWinners(draggingTeamDiv);
                 } else if (destSection == SECTION_WINNERS) {
                     dropReorderWinners(destCell, draggingTeamDiv, category);
                 } else {
@@ -619,6 +619,12 @@ const deliberationModule = {};
         updateTeamDivForWinners(team.num);
     }
 
+    function dropRemoveFromWinners(teamDiv) {
+        const teamNumberToRemove = parseInt(teamDiv.getAttribute(DATA_TEAM_NUMBER), 10);
+        removeFromTeamDivs(teamNumberToRemove, teamDiv);
+        removeTeamFromWinners(teamNumberToRemove);
+    }
+
     function dropReorderWinners(destCell, teamDiv, category) {
         if (destCell == teamDiv.parentNode) {
             // nothing to do
@@ -632,9 +638,7 @@ const deliberationModule = {};
             const rowPlace = parseInt(destCell.parentNode.getAttribute(DATA_PLACE), 10);
             const nextCell = document.getElementById(placeCellIdentifier(category, rowPlace + 1));
             if (null == nextCell || nextCell.classList.contains("unavailable")) {
-                const teamNumberToRemove = parseInt(divToMove.getAttribute(DATA_TEAM_NUMBER), 10);
-                removeFromTeamDivs(teamNumberToRemove, divToMove);
-                removeTeamFromWinners(teamNumberToRemove);
+                dropRemoveFromWinners(divToMove);
             } else {
                 dropReorderWinners(nextCell, divToMove, category);
             }
