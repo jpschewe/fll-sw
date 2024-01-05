@@ -190,8 +190,6 @@ const deliberationModule = {};
 
     }
 
-    let draggingTeam = null;
-    let draggingCategory = null;
     let draggingTeamDiv = null;
 
     const SECTION_NOMINEES = "nominees";
@@ -394,30 +392,15 @@ const deliberationModule = {};
         const teamDiv = document.createElement("div");
         teamDiv.setAttribute("draggable", "true");
         teamDiv.innerText = team.num + " - " + team.name + " (" + group + ")";
+        teamDiv.setAttribute(DATA_TEAM_NUMBER, team.num);
 
         teamDiv.addEventListener('dragstart', function(e) {
-            let rawEvent;
-            if (e.originalEvent) {
-                rawEvent = e.originalEvent;
-            } else {
-                rawEvent = e;
-            }
-            // rawEvent.target is the source node.
-
             teamDiv.classList.add("dragging");
 
-            const dataTransfer = rawEvent.dataTransfer;
+            const dataTransfer = e.dataTransfer;
 
-            draggingTeam = team;
-            draggingCategory = category;
             draggingTeamDiv = teamDiv;
-
-            if (section == SECTION_NOMINEES) {
-                dataTransfer.effectAllowed = 'copy';
-            } else {
-                dataTransfer.effectAllowed = 'copyMove';
-            }
-
+            
             // need something to transfer, otherwise the browser won't let us drag
             dataTransfer.setData(TRANSFER_TEAM_NUMBER, team.num);
             dataTransfer.setData(TRANSFER_CATEGORY_ID, category.catId);
@@ -425,7 +408,6 @@ const deliberationModule = {};
         });
 
         teamDiv.addEventListener('dragend', function(_) {
-            // rawEvent.target is the source node.
             teamDiv.classList.remove("dragging");
         });
 
@@ -435,18 +417,33 @@ const deliberationModule = {};
         return teamDiv;
     }
 
+    /**
+     * Given a drag and drop event, find the table cell.
+     */
+    function dndFindCell(e) {
+        let potentialCell = e.target;
+        while (potentialCell != null) {
+            if (potentialCell.getAttribute && null != potentialCell.getAttribute(DATA_CATEGORY_ID)) {
+                return potentialCell;
+            }
+            potentialCell = potentialCell.parentNode;
+        }
+        throw new Error("Unable to find table cell in " + e);
+    }
+
     function dragEnter(e) {
         const sourceCategoryId = parseInt(e.dataTransfer.getData(TRANSFER_CATEGORY_ID), 10);
         const sourceSection = e.dataTransfer.getData(TRANSFER_SECTION);
 
-        const destCategoryId = parseInt(e.target.getAttribute(DATA_CATEGORY_ID), 10);
-        const destSection = e.target.getAttribute(DATA_SECTION);
+        let destCell = dndFindCell(e);
+        const destCategoryId = parseInt(destCell.getAttribute(DATA_CATEGORY_ID), 10);
+        const destSection = destCell.parentNode.getAttribute(DATA_SECTION);
 
         console.log(`DEBUG: sourceCategory: ${sourceCategoryId} sourceSection: ${sourceSection} destCategory: ${destCategoryId} destSection: ${destSection}`);
 
         if (sourceCategoryId == destCategoryId) {
             if (sourceSection == SECTION_NOMINEES && destSection == SECTION_POTENTIAL_WINNERS) {
-                e.target.classList.add("dropzone");
+                destCell.classList.add("dropzone");
             }
         }
     }
@@ -454,30 +451,79 @@ const deliberationModule = {};
     function dragOver(e) {
         // prevent default to allow drop
         e.preventDefault();
+
+        const sourceCategoryId = parseInt(e.dataTransfer.getData(TRANSFER_CATEGORY_ID), 10);
+        const sourceSection = e.dataTransfer.getData(TRANSFER_SECTION);
+
+        let destCell = dndFindCell(e);
+        const destCategoryId = parseInt(destCell.getAttribute(DATA_CATEGORY_ID), 10);
+        const destSection = destCell.parentNode.getAttribute(DATA_SECTION);
+
+        console.log(`DEBUG: dragOver: sourceCategory: ${sourceCategoryId} sourceSection: ${sourceSection} destCategory: ${destCategoryId} destSection: ${destSection}`);
+
+        let dropzoneCell = null;
+        if (sourceCategoryId == destCategoryId) {
+            if (sourceSection == SECTION_NOMINEES && destSection == SECTION_POTENTIAL_WINNERS) {
+                dropzoneCell = destCell;
+            } else if (sourceSection == SECTION_POTENTIAL_WINNERS && destSection == SECTION_NOMINEES) {
+                dropzoneCell = destCell;
+            } else if (sourceSection == SECTION_POTENTIAL_WINNERS && destSection == SECTION_POTENTIAL_WINNERS) {
+                dropzoneCell = destCell;
+            } else if (sourceSection == SECTION_POTENTIAL_WINNERS && destSection == SECTION_WINNERS) {
+                dropzoneCell = destCell;
+            } else if (sourceSection == SECTION_WINNERS && destSection == SECTION_WINNERS) {
+                dropzoneCell = destCell;
+            } else if (sourceSection == SECTION_WINNERS && destSection == SECTION_POTENTIAL_WINNERS) {
+                dropzoneCell = destCell;
+            }
+        }
+
+        // Using dragover rather than dragenter and dragleave due to race conditions
+        //   with the order that enter/leave are executed.
+
+        // clear dropzone from all other cells and add to the current cell
+        const body = document.getElementById("deliberation_body");
+        for (const c of body.querySelectorAll(".dropzone").values()) {
+            if (c != destCell) {
+                c.classList.remove("dropzone");
+            }
+        }
+        if (null != dropzoneCell) {
+            // dropEffect must be one of the allowedEffects set in dragstart, otherwise the drop won't work
+            // if allowedEffects isn't set in dragstart, then all effects are allowed
+            destCell.classList.add("dropzone");
+            // using copy adds a plus icon to the cursor, this should help let the user know they can drop
+            e.dataTransfer.dropEffect = "copy";
+        } else {
+            e.dataTransfer.dropEffect = "none";
+        }
+
     }
 
     function dragLeave(e) {
-        if (e.target && e.target.classList) {
-            // handle cases where the drag event is on a text node
-            e.target.classList.remove("dropzone");
+        const body = document.getElementById("deliberation_body");
+        for (const c of body.querySelectorAll(".dropzone").values()) {
+            c.classList.remove("dropzone");
         }
     }
 
     function drop(e) {
         e.preventDefault();
 
+        let destCell = dndFindCell(e);
+
         const sourceCategoryId = parseInt(e.dataTransfer.getData(TRANSFER_CATEGORY_ID), 10);
         const sourceSection = e.dataTransfer.getData(TRANSFER_SECTION);
         const teamNum = parseInt(e.dataTransfer.getData(TRANSFER_TEAM_NUMBER), 10);
 
-        const destCategoryId = parseInt(e.target.getAttribute(DATA_CATEGORY_ID), 10);
-        const destSection = e.target.getAttribute(DATA_SECTION);
+        const destCategoryId = parseInt(destCell.getAttribute(DATA_CATEGORY_ID), 10);
+        const destSection = destCell.parentNode.getAttribute(DATA_SECTION);
 
         if (sourceCategoryId == destCategoryId) {
             if (sourceSection == SECTION_NOMINEES && destSection == SECTION_POTENTIAL_WINNERS) {
                 const team = finalist_module.lookupTeam(teamNum);
                 const category = _categories.get(sourceCategoryId);
-                dropNomineeToPotentialWinners(e.target, category, team);
+                dropNomineeToPotentialWinners(destCell, category, team);
 
                 // disable dragging team up again  
                 draggingTeamDiv.setAttribute("draggable", "false");
@@ -490,10 +536,11 @@ const deliberationModule = {};
             console.log(`No drop - wrong category source: ${sourceCategoryId} dest: ${destCategoryId}`);
         }
 
-        e.target.classList.remove("dropzone");
+        const body = document.getElementById("deliberation_body");
+        for (const c of body.querySelectorAll(".dropzone").values()) {
+            c.classList.remove("dropzone");
+        }
 
-        draggingTeam = null;
-        draggingCategory = null;
         draggingTeamDiv = null;
     }
 
@@ -860,9 +907,7 @@ const deliberationModule = {};
      * @return the cell or null if no cell is found
      */
     function findCategoryCell(row, category) {
-        const rowChildren = row.children;
-        for (let j = 0; j < rowChildren.length; ++j) {
-            const cell = rowChildren[j];
+        for (const cell of row.children) {
             const catId = cell.getAttribute(DATA_CATEGORY_ID);
             if (catId == category.catId) {
                 return cell;
@@ -874,10 +919,8 @@ const deliberationModule = {};
 
     function findOrCreateEmptyNomineeCell(judgingGroup, category) {
         const body = document.getElementById("deliberation_body");
-        const children = body.children;
         let prevJsRow = null;
-        for (let i = 0; i < children.length; ++i) {
-            const row = children[i];
+        for (const row of body.children) {
             const js = row.getAttribute(DATA_JUDGING_GROUP);
             if (js == judgingGroup) {
                 const cell = findCategoryCell(row, category);
@@ -907,7 +950,6 @@ const deliberationModule = {};
         const cell = findOrCreateEmptyNomineeCell(judgingGroup, category);
         const teamDiv = createTeamDiv(team, category, SECTION_NOMINEES);
         cell.appendChild(teamDiv);
-        cell.setAttribute(DATA_TEAM_NUMBER, team.num);
         cell.setAttribute(DATA_CATEGORY_ID, category.catId);
         cell.classList.add("nominee");
     }
@@ -919,9 +961,7 @@ const deliberationModule = {};
     */
     function findOrCreatePotentiallWinnerCell(category, place) {
         const row = ensurePotentialWinnersRowExists(place);
-        const rowChildren = row.children;
-        for (let i = 0; i < rowChildren.length; ++i) {
-            const cell = rowChildren[i];
+        for (const cell of row.children) {
             const categoryId = parseInt(cell.getAttribute(DATA_CATEGORY_ID), 10);
             if (categoryId == category.catId) {
                 return cell;
@@ -942,9 +982,7 @@ const deliberationModule = {};
         }
 
         const body = document.getElementById("deliberation_body");
-        const rows = body.children;
-        for (let i = 0; i < rows.length; ++i) {
-            const row = rows[i];
+        for (const row of body.children) {
             const rowSection = row.getAttribute(DATA_SECTION);
             if (rowSection == SECTION_POTENTIAL_WINNERS) {
                 const rowPlace = row.getAttribute(DATA_PLACE);
@@ -979,9 +1017,7 @@ const deliberationModule = {};
             row.appendChild(cell);
             cell.classList.add("rTableCell");
             cell.setAttribute(DATA_CATEGORY_ID, category.catId);
-            cell.setAttribute(DATA_SECTION, SECTION_POTENTIAL_WINNERS);
 
-            cell.addEventListener('dragenter', dragEnter);
             cell.addEventListener('dragover', dragOver);
             cell.addEventListener('dragleave', dragLeave);
             cell.addEventListener('drop', drop);

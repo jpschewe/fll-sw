@@ -39,7 +39,7 @@ and mark draggable things as movable. */
 }
 
 .rTableCell.dropzone {
-    background: red;
+    background: #00ff00;
 }
 
 .potential_winner_row .winner {
