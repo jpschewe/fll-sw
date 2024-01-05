@@ -39,11 +39,14 @@ if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(request, response
             <button id='clear'>Yes, load from the database</button>
             This is the most common choice. This will clear any locally
             stored data and reload from the database.
+            <i>Note that this will also clear any local finalist
+                scheduling data. Make sure you have saved the finalist
+                schedule before choosing this options.</i>
         </div>
 
         <div>
             <button id='keep'>No, just refresh the list of
-                teams and their scores</button>
+                teams and the performance scores</button>
             Choose this if you have made changes to deliberations and
             have not saved this information to the database.
         </div>

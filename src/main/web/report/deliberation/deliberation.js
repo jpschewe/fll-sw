@@ -359,14 +359,6 @@ const deliberationModule = {};
         _save();
     }
 
-    function handleAwardGroupChange() {
-        const divIndex = document.getElementById("award_groups").value;
-        const div = finalist_module.getDivisionByIndex(divIndex);
-        finalist_module.setCurrentDivision(div);
-        updatePage();
-        finalist_module.saveToLocalStorage();
-    }
-
     function updateHeader() {
         const headerRow = document.getElementById("deliberation_header");
         removeChildren(headerRow);
@@ -1195,28 +1187,13 @@ const deliberationModule = {};
         finalist_module.loadFromLocalStorage();
         loadFromFinalist();
 
-        const awardGroupsElement = document.getElementById("award_groups");
-        removeChildren(awardGroupsElement);
-        const divisions = finalist_module.getDivisions();
-        for (const [i, division] of enumerate(divisions)) {
-            const divisionOption = document.createElement("option");
-            divisionOption.setAttribute("value", i);
-            divisionOption.innerText = division;
-            if (division == finalist_module.getCurrentDivision()) {
-                divisionOption.setAttribute("selected", "true");
-            }
-            awardGroupsElement.appendChild(divisionOption);
-        }
-        awardGroupsElement.addEventListener("change", function() {
-            handleAwardGroupChange();
-        });
-
-        // force an update to generate the initial page
-        handleAwardGroupChange();
-
+        document.getElementById("award_group").innerText = finalist_module.getCurrentDivision();
+        
         document.getElementById("upload").addEventListener("click", function() {
             uploadData();
         });
+
+        updatePage();
     });
 
     // always need to initialize variables

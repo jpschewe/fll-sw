@@ -22,7 +22,7 @@ const deliberationLoad = {}
                     // success
                     waitDialog.classList.add("fll-sw-ui-inactive");
                     finalist_module.saveToLocalStorage();
-                    window.location.assign("deliberation.html");
+                    window.location.assign("choose_award_group.html");
                 }, function(msg) {
                     // error
                     waitDialog.classList.add("fll-sw-ui-inactive");
@@ -48,7 +48,7 @@ const deliberationLoad = {}
             // success
             waitDialog.classList.add("fll-sw-ui-inactive");
             finalist_module.saveToLocalStorage();
-            window.location.assign("deliberation.html");
+            window.location.assign("choose_award_group.html");
         }, function(msg) {
             // error
             waitDialog.classList.add("fll-sw-ui-inactive");
