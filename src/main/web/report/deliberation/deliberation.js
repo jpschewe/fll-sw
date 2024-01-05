@@ -18,6 +18,7 @@ const deliberationModule = {};
 
     const STORAGE_PREFIX = "fll.deliberation";
 
+    // id -> Category
     let _categories;
 
     function _init_variables() {
@@ -56,7 +57,7 @@ const deliberationModule = {};
             let category_id;
             // find the next available id
             for (category_id = 0; category_id < Number.MAX_VALUE
-                && _categories[category_id]; category_id = category_id + 1)
+                && _categories.get(category_id); category_id = category_id + 1)
                 ;
 
             if (category_id == Number.MAX_VALUE || category_id + 1 == Number.MAX_VALUE) {
@@ -72,7 +73,7 @@ const deliberationModule = {};
             this.writer1 = new Map(); // award group -> string
             this.writer2 = new Map(); // award group -> string
 
-            _categories[this.catId] = this;
+            _categories.set(this.catId, this);
         }
 
         getWriter1() {
@@ -193,6 +194,20 @@ const deliberationModule = {};
     let draggingCategory = null;
     let draggingTeamDiv = null;
 
+    const SECTION_NOMINEES = "nominees";
+    const SECTION_POTENTIAL_WINNERS = "potential_winners";
+    const SECTION_WINNERS = "winners";
+
+    const DATA_CATEGORY_ID = "data-categoryId";
+    const DATA_SECTION = "data-section";
+    const DATA_JUDGING_GROUP = "data-judgingGroup";
+    const DATA_TEAM_NUMBER = "data-teamNumber";
+    const DATA_PLACE = "data-place";
+
+    const TRANSFER_TEAM_NUMBER = 'text/x-fllsw-teamNumber';
+    const TRANSFER_CATEGORY_ID = 'text/x-fllsw-categoryId';
+    const TRANSFER_SECTION = 'text/x-fllsw-section';
+
     /**
      * Name of the performance category. Used to display in the table header and to reference teams. Should not need to match the category name in the challenge description.
      */
@@ -207,6 +222,21 @@ const deliberationModule = {};
      * teamNumber -> list of div elements.
      */
     let teamDivs = new Map();
+    function addToTeamDivs(teamNumber, teamDiv) {
+        let divs = teamDivs.get(teamNumber);
+        if (null == divs) {
+            divs = [];
+        }
+        divs.push(teamDiv);
+        teamDivs.set(teamNumber, divs);
+    }
+
+    function removeFromTeamDivs(teamNumber, teamDiv) {
+        let divs = teamDivs.get(teamNumber);
+        if (null != divs) {
+            removeFromArray(divs, teamDiv);
+        }
+    }
 
     /**
      * teamNumber -> count of categories team is a winner for.
@@ -305,7 +335,7 @@ const deliberationModule = {};
             }
         }
         return category;
-    };
+    }
 
     function loadFromFinalist() {
         createSortedCategories();
@@ -356,9 +386,10 @@ const deliberationModule = {};
      *          a Team object
      * @param {Category} category
      *          a Category object
+     * @param {string} section which section of the page this div belongs to (SECTION_NOMINEES, SECTION_POTENTIAL_WINNERS, SECTION_WINNERS)
      * @returns an HTML div element for the team
      */
-    function createTeamDiv(team, category) {
+    function createTeamDiv(team, category, section) {
         const group = team.judgingGroup;
         const teamDiv = document.createElement("div");
         teamDiv.setAttribute("draggable", "true");
@@ -381,10 +412,16 @@ const deliberationModule = {};
             draggingCategory = category;
             draggingTeamDiv = teamDiv;
 
-            dataTransfer.effectAllowed = 'move';
+            if (section == SECTION_NOMINEES) {
+                dataTransfer.effectAllowed = 'copy';
+            } else {
+                dataTransfer.effectAllowed = 'copyMove';
+            }
 
             // need something to transfer, otherwise the browser won't let us drag
-            dataTransfer.setData('text/text', "true");
+            dataTransfer.setData(TRANSFER_TEAM_NUMBER, team.num);
+            dataTransfer.setData(TRANSFER_CATEGORY_ID, category.catId);
+            dataTransfer.setData(TRANSFER_SECTION, section);
         });
 
         teamDiv.addEventListener('dragend', function(_) {
@@ -393,81 +430,93 @@ const deliberationModule = {};
         });
 
         setTeamColorStyle(team.num, teamDiv);
+        addToTeamDivs(team.num, teamDiv);
 
         return teamDiv;
     }
 
-    //FIXME needs new implementation
-    /**
-     * 
-     * @param slot
-     *          Timeslot object
-     * @param category
-     *          Category object
-     * @returns HTML div element
-     */
-    function createTimeslotCell(slot, category) {
-        const cell = document.createElement("div");
-        cell.classList.add("rTableCell");
+    function dragEnter(e) {
+        const sourceCategoryId = parseInt(e.dataTransfer.getData(TRANSFER_CATEGORY_ID), 10);
+        const sourceSection = e.dataTransfer.getData(TRANSFER_SECTION);
 
-        cell.addEventListener('dragover', function(e) {
-            let rawEvent;
-            if (e.originalEvent) {
-                rawEvent = e.originalEvent;
-            } else {
-                rawEvent = e;
+        const destCategoryId = parseInt(e.target.getAttribute(DATA_CATEGORY_ID), 10);
+        const destSection = e.target.getAttribute(DATA_SECTION);
+
+        console.log(`DEBUG: sourceCategory: ${sourceCategoryId} sourceSection: ${sourceSection} destCategory: ${destCategoryId} destSection: ${destSection}`);
+
+        if (sourceCategoryId == destCategoryId) {
+            if (sourceSection == SECTION_NOMINEES && destSection == SECTION_POTENTIAL_WINNERS) {
+                e.target.classList.add("dropzone");
             }
+        }
+    }
 
-            if (category == draggingCategory) {
-                if (rawEvent.preventDefault) {
-                    rawEvent.preventDefault(); // Necessary. Allows us to drop.
+    function dragOver(e) {
+        // prevent default to allow drop
+        e.preventDefault();
+    }
+
+    function dragLeave(e) {
+        if (e.target && e.target.classList) {
+            // handle cases where the drag event is on a text node
+            e.target.classList.remove("dropzone");
+        }
+    }
+
+    function drop(e) {
+        e.preventDefault();
+
+        const sourceCategoryId = parseInt(e.dataTransfer.getData(TRANSFER_CATEGORY_ID), 10);
+        const sourceSection = e.dataTransfer.getData(TRANSFER_SECTION);
+        const teamNum = parseInt(e.dataTransfer.getData(TRANSFER_TEAM_NUMBER), 10);
+
+        const destCategoryId = parseInt(e.target.getAttribute(DATA_CATEGORY_ID), 10);
+        const destSection = e.target.getAttribute(DATA_SECTION);
+
+        if (sourceCategoryId == destCategoryId) {
+            if (sourceSection == SECTION_NOMINEES && destSection == SECTION_POTENTIAL_WINNERS) {
+                const team = finalist_module.lookupTeam(teamNum);
+                const category = _categories.get(sourceCategoryId);
+                dropNomineeToPotentialWinners(e.target, category, team);
+
+                // disable dragging team up again  
+                draggingTeamDiv.setAttribute("draggable", "false");
+                draggingTeamDiv.classList.add("potential_winner");
+                // FIXME make sure to reset when dragging from potential winners down to nominees
+            } else {
+                console.log(`No drop - wrong section source: ${sourceSection} dest: ${destSection}`);
+            }
+        } else {
+            console.log(`No drop - wrong category source: ${sourceCategoryId} dest: ${destCategoryId}`);
+        }
+
+        e.target.classList.remove("dropzone");
+
+        draggingTeam = null;
+        draggingCategory = null;
+        draggingTeamDiv = null;
+    }
+
+    function dropNomineeToPotentialWinners(cell, category, team) {
+        if (cell.children.length > 0) {
+            let divToMove = cell.children[0];
+
+            // move elements down until there is a free place
+            let rowPlace = parseInt(cell.parentNode.getAttribute(DATA_PLACE), 10);
+            while (divToMove != null) {
+                const nextCell = findOrCreatePotentiallWinnerCell(category, rowPlace + 1);
+                nextCell.appendChild(divToMove);
+                if (nextCell.children.length > 1) {
+                    const nextDivToMove = nextCell.children[0];
+                    divToMove = nextDivToMove;
+                } else {
+                    divToMove = null;
                 }
-
-                rawEvent.dataTransfer.dropEffect = 'move'; // See the section on the
-                // DataTransfer object.
-
-                //const transferObj = rawEvent.dataTransfer
-                //    .getData('application/x-fll-finalist');
-
-                return false;
-            } else {
-                return true;
+                ++rowPlace;
             }
-        });
-
-        cell.addEventListener('drop', function(e) {
-            let rawEvent;
-            if (e.originalEvent) {
-                rawEvent = e.originalEvent;
-            } else {
-                rawEvent = e;
-            }
-
-            // rawEvent.target is current target element.
-
-            if (rawEvent.stopPropagation) {
-                rawEvent.stopPropagation(); // Stops some browsers from redirecting.
-            }
-
-            if (cell.children.length > 0) {
-                // move current team to old parent
-                const oldTeamDiv = cell.children.item(0);
-                const draggingParent = draggingTeamDiv.parentElement;
-                draggingParent.appendChild(oldTeamDiv);
-            }
-
-            // Add team to the current cell
-            cell.appendChild(draggingTeamDiv);
-
-            // updates the schedule
-            moveTeam(draggingTeam, draggingCategory, slot);
-
-            draggingTeam = null;
-            draggingCategory = null;
-            draggingTeamDiv = null;
-        });
-
-        return cell;
+        }
+        const teamDiv = createTeamDiv(team, category, SECTION_POTENTIAL_WINNERS);
+        cell.appendChild(teamDiv);
     }
 
     function uploadData() {
@@ -735,7 +784,6 @@ const deliberationModule = {};
         }
     }
 
-
     /**
      * Check that we won't remove cells with teams currently in them.
      * @param {Category} category the category that is changing
@@ -755,57 +803,6 @@ const deliberationModule = {};
             }
         }
         return true;
-    }
-
-    /**
-     * @param {Category} category category to find the cell for
-     * @param {int} index zero-based nominee index
-     */
-    function nomineeCellIdentifier(category, index) {
-        return "nominee_cell_" + category.catId + "_" + index;
-    }
-
-    /**
-     * @param {int} index zero-based nominee index
-     */
-    function nomineeRowIdentifier(index) {
-        return "nominee_row_" + index;
-    }
-
-    /**
-     * Ensure that a row exists for the nominee with the specified index.
-     * 
-     * @param {int} index zero-based nominee index
-     */
-    function ensureNomineeRowExists(index) {
-        const body = document.getElementById("deliberation_body");
-
-        let prevRow = document.getElementById("writing2_row").nextSibling;
-        for (let i = 0; i <= index; ++i) {
-            const rowId = nomineeRowIdentifier(i);
-            let row = document.getElementById(rowId);
-            if (null == row) {
-                row = document.createElement("div");
-                body.insertBefore(row, prevRow.nextSibling);
-                row.setAttribute("id", rowId);
-                row.classList.add("rTableRow");
-                row.classList.add("nominee_row");
-
-                //  cell for place column
-                const placeCell = document.createElement("div");
-                row.appendChild(placeCell);
-                placeCell.classList.add("rTableCell");
-
-                // add cells for all categories                
-                for (const category of sortedCategories) {
-                    const cell = document.createElement("div");
-                    row.appendChild(cell);
-                    cell.classList.add("rTableCell");
-                    cell.setAttribute("id", nomineeCellIdentifier(category, i));
-                }
-            }
-            prevRow = row;
-        }
     }
 
     function findAllJudgingGroups() {
@@ -838,7 +835,8 @@ const deliberationModule = {};
         const row = document.createElement("div");
         row.classList.add("rTableRow");
         body.insertBefore(row, prevRow.nextSibling)
-        row.setAttribute("data-judgingGroup", judgingGroup);
+        row.setAttribute(DATA_JUDGING_GROUP, judgingGroup);
+        row.setAttribute(DATA_SECTION, SECTION_NOMINEES);
         row.classList.add("nominee_row");
 
         const placeCell = document.createElement("div");
@@ -850,7 +848,7 @@ const deliberationModule = {};
             const cell = document.createElement("div");
             row.appendChild(cell);
             cell.classList.add("rTableCell");
-            cell.setAttribute("data-categoryId", category.catId);
+            cell.setAttribute(DATA_CATEGORY_ID, category.catId);
         }
         return row;
     }
@@ -865,7 +863,7 @@ const deliberationModule = {};
         const rowChildren = row.children;
         for (let j = 0; j < rowChildren.length; ++j) {
             const cell = rowChildren[j];
-            const catId = cell.getAttribute("data-categoryId");
+            const catId = cell.getAttribute(DATA_CATEGORY_ID);
             if (catId == category.catId) {
                 return cell;
             }
@@ -880,7 +878,7 @@ const deliberationModule = {};
         let prevJsRow = null;
         for (let i = 0; i < children.length; ++i) {
             const row = children[i];
-            const js = row.getAttribute("data-judgingGroup");
+            const js = row.getAttribute(DATA_JUDGING_GROUP);
             if (js == judgingGroup) {
                 const cell = findCategoryCell(row, category);
                 if (cell.children.length == 0) {
@@ -907,9 +905,29 @@ const deliberationModule = {};
     function addNominee(category, team) {
         const judgingGroup = team.judgingGroup;
         const cell = findOrCreateEmptyNomineeCell(judgingGroup, category);
-        const teamDiv = createTeamDiv(team, category);
+        const teamDiv = createTeamDiv(team, category, SECTION_NOMINEES);
         cell.appendChild(teamDiv);
-        cell.setAttribute("data-teamNumber", team.num);
+        cell.setAttribute(DATA_TEAM_NUMBER, team.num);
+        cell.setAttribute(DATA_CATEGORY_ID, category.catId);
+        cell.classList.add("nominee");
+    }
+
+    /** 
+     * @param {Category} category the category that we are interested in
+     * @param {int} place the place that we are inerested in 
+     * @returns potential winner cell for the specified category and place
+    */
+    function findOrCreatePotentiallWinnerCell(category, place) {
+        const row = ensurePotentialWinnersRowExists(place);
+        const rowChildren = row.children;
+        for (let i = 0; i < rowChildren.length; ++i) {
+            const cell = rowChildren[i];
+            const categoryId = parseInt(cell.getAttribute(DATA_CATEGORY_ID), 10);
+            if (categoryId == category.catId) {
+                return cell;
+            }
+        }
+        throw new Error(`Internal error, unable to find cell for ${category.catId}`);
     }
 
     function ensurePotentialWinnersRowExists(place) {
@@ -927,8 +945,9 @@ const deliberationModule = {};
         const rows = body.children;
         for (let i = 0; i < rows.length; ++i) {
             const row = rows[i];
-            if (row.classList.contains("potentialWinner_row")) {
-                const rowPlace = row.getAttribute("data-place");
+            const rowSection = row.getAttribute(DATA_SECTION);
+            if (rowSection == SECTION_POTENTIAL_WINNERS) {
+                const rowPlace = row.getAttribute(DATA_PLACE);
                 if (null != rowPlace && place == parseInt(rowPlace, 10)) {
                     return row;
                 }
@@ -946,8 +965,8 @@ const deliberationModule = {};
         const body = document.getElementById("deliberation_body");
         const row = document.createElement("div");
         row.classList.add("rTableRow");
-        row.classList.add("potentialWinner_row");
-        row.setAttribute("data-place", place);
+        row.setAttribute(DATA_SECTION, SECTION_POTENTIAL_WINNERS);
+        row.setAttribute(DATA_PLACE, place);
         body.insertBefore(row, prevRow.nextSibling)
 
         const placeCell = document.createElement("div");
@@ -959,14 +978,19 @@ const deliberationModule = {};
             const cell = document.createElement("div");
             row.appendChild(cell);
             cell.classList.add("rTableCell");
-            cell.setAttribute("data-categoryId", category.catId);
+            cell.setAttribute(DATA_CATEGORY_ID, category.catId);
+            cell.setAttribute(DATA_SECTION, SECTION_POTENTIAL_WINNERS);
+
+            cell.addEventListener('dragenter', dragEnter);
+            cell.addEventListener('dragover', dragOver);
+            cell.addEventListener('dragleave', dragLeave);
+            cell.addEventListener('drop', drop);
         }
         return row;
     }
 
     function populatePotentialWinners() {
         ensurePotentialWinnersRowExists(1);
-        //FIXME read from category objects
     }
 
     /**

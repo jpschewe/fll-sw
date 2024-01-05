@@ -38,6 +38,14 @@ and mark draggable things as movable. */
     background: #bfbfbf;
 }
 
-.nominee_row .winner {
+.rTableCell.dropzone {
+    background: red;
+}
+
+.potential_winner_row .winner {
+    text-decoration: line-through;
+}
+
+.nominee_row .potential_winner {
     text-decoration: line-through;
 }
