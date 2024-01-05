@@ -230,14 +230,15 @@ const deliberationModule = {};
     }
 
     function removeFromTeamDivs(teamNumber, teamDiv) {
-        let divs = teamDivs.get(teamNumber);
+        const divs = teamDivs.get(teamNumber);
         if (null != divs) {
             removeFromArray(divs, teamDiv);
         }
+        teamDiv.remove();
     }
 
     function getTeamDivs(teamNumber) {
-        let divs = teamDivs.get(teamNumber);
+        const divs = teamDivs.get(teamNumber);
         if (null == divs) {
             return [];
         } else {
@@ -298,7 +299,7 @@ const deliberationModule = {};
     function addTeamToWinners(teamNumber) {
         let count = getTeamWinnersCount(teamNumber);
         ++count;
-        teamWinnersCount.set(count);
+        teamWinnersCount.set(teamNumber, count);
 
         updateTeamDivForWinners(teamNumber);
     }
@@ -307,7 +308,7 @@ const deliberationModule = {};
         let count = getTeamWinnersCount(teamNumber);
         --count;
         count = Math.max(0, count); // just in case
-        teamWinnersCount.set(count);
+        teamWinnersCount.set(teamNumber, count);
 
         updateTeamDivForWinners(teamNumber);
     }
@@ -318,10 +319,19 @@ const deliberationModule = {};
         const divs = teamDivs.get(teamNumber);
         if (null != divs) {
             for (const div of divs) {
-                if (count > 0) {
-                    div.classList.add("winner");
-                } else {
-                    div.classList.remove("winner");
+                const cell = div.parentNode;
+                if (cell) {
+                    const row = cell.parentNode;
+                    if (row) {
+                        const section = row.getAttribute(DATA_SECTION);
+                        if (section == SECTION_POTENTIAL_WINNERS) {
+                            if (count > 0) {
+                                div.classList.add("winner");
+                            } else {
+                                div.classList.remove("winner");
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -440,23 +450,6 @@ const deliberationModule = {};
         throw new Error("Unable to find table cell in " + e);
     }
 
-    function dragEnter(e) {
-        const sourceCategoryId = parseInt(e.dataTransfer.getData(TRANSFER_CATEGORY_ID), 10);
-        const sourceSection = e.dataTransfer.getData(TRANSFER_SECTION);
-
-        const destCell = dndFindCell(e);
-        const destCategoryId = parseInt(destCell.getAttribute(DATA_CATEGORY_ID), 10);
-        const destSection = destCell.parentNode.getAttribute(DATA_SECTION);
-
-        console.log(`DEBUG: sourceCategory: ${sourceCategoryId} sourceSection: ${sourceSection} destCategory: ${destCategoryId} destSection: ${destSection}`);
-
-        if (sourceCategoryId == destCategoryId) {
-            if (sourceSection == SECTION_NOMINEES && destSection == SECTION_POTENTIAL_WINNERS) {
-                destCell.classList.add("dropzone");
-            }
-        }
-    }
-
     function dragOver(e) {
         // prevent default to allow drop
         e.preventDefault();
@@ -479,7 +472,10 @@ const deliberationModule = {};
             } else if (sourceSection == SECTION_POTENTIAL_WINNERS && destSection == SECTION_POTENTIAL_WINNERS) {
                 dropzoneCell = destCell;
             } else if (sourceSection == SECTION_POTENTIAL_WINNERS && destSection == SECTION_WINNERS) {
-                dropzoneCell = destCell;
+                // ensure that we don't make a team a winner twice
+                if (!draggingTeamDiv.classList.contains("winner")) {
+                    dropzoneCell = destCell;
+                }
             } else if (sourceSection == SECTION_WINNERS && destSection == SECTION_WINNERS) {
                 dropzoneCell = destCell;
             } else if (sourceSection == SECTION_WINNERS && destSection == SECTION_POTENTIAL_WINNERS) {
@@ -530,10 +526,10 @@ const deliberationModule = {};
 
         if (sourceCategoryId == destCategoryId) {
             const category = _categories.get(sourceCategoryId);
+            const team = finalist_module.lookupTeam(teamNum);
 
             if (sourceSection == SECTION_NOMINEES) {
                 if (destSection == SECTION_POTENTIAL_WINNERS) {
-                    const team = finalist_module.lookupTeam(teamNum);
                     dropNomineeToPotentialWinners(destCell, category, team);
 
                     // disable dragging team up again  
@@ -544,7 +540,6 @@ const deliberationModule = {};
                 }
             } else if (sourceSection == SECTION_POTENTIAL_WINNERS) {
                 if (destSection == SECTION_NOMINEES) {
-                    draggingTeamDiv.remove();
                     removeFromTeamDivs(teamNum, draggingTeamDiv)
 
                     // find teamDiv in nominees section and allow drag again
@@ -563,6 +558,12 @@ const deliberationModule = {};
                     }
                 } else if (destSection == SECTION_POTENTIAL_WINNERS) {
                     dropReorderPotentialWinners(destCell, draggingTeamDiv, category);
+                } else if (destSection == SECTION_WINNERS) {
+                    if (draggingTeamDiv.classList.contains("winner")) {
+                        console.log(`No drop - team is already a winner: ${teamNum}`);
+                    } else {
+                        dropPotentialWinnerToWinners(destCell, category, team);
+                    }
                 } else {
                     console.log(`No drop - section potential winners wrong section dest: ${destSection}`);
                 }
@@ -570,7 +571,7 @@ const deliberationModule = {};
                 if (destSection == SECTION_POTENTIAL_WINNERS) {
                     console.log("FIXME support removing winner");
                 } else if (destSection == SECTION_WINNERS) {
-                    console.log("FIXME support reordering winners");
+                    dropReorderWinners(destCell, draggingTeamDiv, category);
                 } else {
                     console.log(`No drop - section winners wrong section dest: ${destSection}`);
                 }
@@ -588,6 +589,11 @@ const deliberationModule = {};
     }
 
     function dropReorderPotentialWinners(destCell, teamDiv, category) {
+        if (destCell == teamDiv.parentNode) {
+            // nothing to do
+            return;
+        }
+
         if (destCell.children.length > 0) {
             const divToMove = destCell.children[0];
 
@@ -609,6 +615,44 @@ const deliberationModule = {};
     function dropNomineeToPotentialWinners(destCell, category, team) {
         const teamDiv = createTeamDiv(team, category, SECTION_POTENTIAL_WINNERS);
         dropReorderPotentialWinners(destCell, teamDiv, category);
+        // the new div may need a strike through
+        updateTeamDivForWinners(team.num);
+    }
+
+    function dropReorderWinners(destCell, teamDiv, category) {
+        if (destCell == teamDiv.parentNode) {
+            // nothing to do
+            return;
+        }
+
+        if (destCell.children.length > 0) {
+            const divToMove = destCell.children[0];
+
+            // move divToMove down one
+            const rowPlace = parseInt(destCell.parentNode.getAttribute(DATA_PLACE), 10);
+            const nextCell = document.getElementById(placeCellIdentifier(category, rowPlace + 1));
+            if (null == nextCell || nextCell.classList.contains("unavailable")) {
+                const teamNumberToRemove = parseInt(divToMove.getAttribute(DATA_TEAM_NUMBER), 10);
+                removeFromTeamDivs(teamNumberToRemove, divToMove);
+                removeTeamFromWinners(teamNumberToRemove);
+            } else {
+                dropReorderWinners(nextCell, divToMove, category);
+            }
+        }
+        destCell.appendChild(teamDiv);
+    }
+
+    /**
+     * Handle drop for moving a potential winner to winners.
+     * 
+     * @param {HTMLElement} destCell the table cell to put the team into
+     * @param {Category} category the category
+     * @param {finalist_module.Team} team the team being moved
+     */
+    function dropPotentialWinnerToWinners(destCell, category, team) {
+        const teamDiv = createTeamDiv(team, category, SECTION_WINNERS);
+        dropReorderWinners(destCell, teamDiv, category);
+        addTeamToWinners(team.num);
     }
 
     function uploadData() {
@@ -1059,6 +1103,7 @@ const deliberationModule = {};
         const body = document.getElementById("deliberation_body");
         const row = document.createElement("div");
         row.classList.add("rTableRow");
+        row.classList.add("potential_winner_row");
         row.setAttribute(DATA_SECTION, SECTION_POTENTIAL_WINNERS);
         row.setAttribute(DATA_PLACE, place);
         body.insertBefore(row, prevRow.nextSibling)
