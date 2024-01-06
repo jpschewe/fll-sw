@@ -147,13 +147,13 @@ const finalist_module = {}
     /**
      * Constructor for a Team.
      */
-    function Team(num, name, org, judgingGroup) {
+    function Team(num, name, org, judgingGroup, awardGroup) {
         if (typeof (_teams[num]) != 'undefined') {
             throw new Error("Team already exists with number: " + num);
         }
 
         this.num = num;
-        this.divisions = [];
+        this.awardGroup = awardGroup;
         this.name = name;
         this.org = org;
         this.judgingGroup = judgingGroup;
@@ -486,22 +486,8 @@ const finalist_module = {}
     /**
      * Create a new team.
      */
-    finalist_module.addTeam = function(num, name, org, judgingStation) {
-        return new Team(num, name, org, judgingStation);
-    };
-
-    /**
-     * Add a team to a division. A team may be in multiple divisions.
-     * 
-     * @param team
-     *          a team object
-     * @param division
-     *          a string
-     */
-    finalist_module.addTeamToDivision = function(team, division) {
-        if (-1 == team.divisions.indexOf(division)) {
-            team.divisions.push(division);
-        }
+    finalist_module.addTeam = function(num, name, org, judgingStation, awardGroup) {
+        return new Team(num, name, org, judgingStation, awardGroup);
     };
 
     /**
@@ -515,25 +501,6 @@ const finalist_module = {}
     finalist_module.addTeamToPlayoffDivision = function(team, division) {
         if (-1 == team.playoffDivisions.indexOf(division)) {
             team.playoffDivisions.push(division);
-        }
-    };
-
-    /**
-     * Check if a team is in a division.
-     * 
-     * @param team
-     *          a team object
-     * @param division
-     *          a string
-     * @return true/false
-     */
-    finalist_module.isTeamInDivision = function(team, division) {
-        if (!team) {
-            return false;
-        } else if (-1 == team.divisions.indexOf(division)) {
-            return false;
-        } else {
-            return true;
         }
     };
 
@@ -576,7 +543,7 @@ const finalist_module = {}
     finalist_module.getScoreGroups = function(teams, currentDivision) {
         const scoreGroups = {};
         for (const team of teams) {
-            if (finalist_module.isTeamInDivision(team, currentDivision)) {
+            if (team.awardGroup == currentDivision) {
                 const group = team.judgingGroup;
                 scoreGroups[group] = finalist_module.getNumTeamsAutoSelected();
             }
@@ -642,7 +609,7 @@ const finalist_module = {}
         finalist_module.sortTeamsByCategory(teams, currentCategory);
         for (const team of teams) {
             if (currentCategory.overall
-                || finalist_module.isTeamInDivision(team, currentDivision)) {
+                || currentDivision == team.awardGroup) {
                 const group = team.judgingGroup;
                 const prevScore = prevScores[group];
                 const curScore = finalist_module.getCategoryScore(team, currentCategory);
@@ -836,7 +803,7 @@ const finalist_module = {}
                     _schedules[finalist_module.getCurrentDivision()] = null;
                 }
             }
-            
+
             category.teams.push(teamNum);
         }
     };
@@ -854,7 +821,7 @@ const finalist_module = {}
         const toRemove = [];
         for (const teamNum of category.teams) {
             const team = finalist_module.lookupTeam(teamNum);
-            if (category.overall || finalist_module.isTeamInDivision(team, division)) {
+            if (category.overall || division == team.awardGroup) {
                 toRemove.push(teamNum);
             }
         }
@@ -914,7 +881,7 @@ const finalist_module = {}
         for (const category of finalist_module.getAllScheduledCategories()) {
             for (const teamNum of category.teams) {
                 const team = finalist_module.lookupTeam(teamNum);
-                if (category.overall || finalist_module.isTeamInDivision(team, division)) {
+                if (category.overall || division == team.awardGroup) {
                     if (!finalistsCount.has(teamNum)) {
                         finalistsCount.set(teamNum, []);
                     }
@@ -1582,9 +1549,8 @@ const finalist_module = {}
             for (const tournamentTeam of data) {
                 let team = finalist_module.lookupTeam(tournamentTeam.teamNumber);
                 if (null == team) {
-                    team = finalist_module.addTeam(tournamentTeam.teamNumber, tournamentTeam.teamName, tournamentTeam.organization, tournamentTeam.judgingGroup);
+                    team = finalist_module.addTeam(tournamentTeam.teamNumber, tournamentTeam.teamName, tournamentTeam.organization, tournamentTeam.judgingGroup, tournamentTeam.awardGroup);
                 }
-                finalist_module.addTeamToDivision(team, tournamentTeam.awardGroup);
             } // teams
         });
     };
