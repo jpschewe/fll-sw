@@ -1760,6 +1760,50 @@ const finalist_module = {}
         _load();
     };
 
+    /**
+     * Clear all local data and reload from the server.
+     * Local storage is saved when this method completes with success.
+     * 
+     * @param doneCallback
+     *          called with no arguments on success
+     * @param failCallback
+     *          called with message on failure
+     */
+    finalist_module.clearAndLoad = function(doneCallback, failCallback) {
+        finalist_module.clearAllData();
+
+        // need to load the tournament again since everything was just cleared
+        finalist_module.loadTournament(function() {
+            // success            
+
+            finalist_module.loadCategoriesAndScores(function() {
+                // success
+                finalist_module.loadNominieesAndSchedules(function() {
+                    // success
+                    finalist_module.saveToLocalStorage();
+                    doneCallback();
+                }, failCallback);
+            }, failCallback);
+        }, failCallback);
+    };
+
+    /**
+     * Refresh category and score data from the server.
+     * Local storage is saved when this method completes with success.
+     * 
+     * @param doneCallback
+     *          called with no arguments on success
+     * @param failCallback
+     *          called with message on failure
+     */
+    finalist_module.refreshData = function(doneCallback, failCallback) {
+        finalist_module.loadCategoriesAndScores(function() {
+            // success
+            finalist_module.saveToLocalStorage();
+            doneCallback();
+        }, failCallback);
+    };
+
     // always need to initialize variables
     _init_variables();
 

@@ -7,53 +7,26 @@
 const deliberationLoad = {}
 
 {
-    function clearAndLoad() {
+
+    function loadSuccess() {
         const waitDialog = document.getElementById("wait-dialog");
-
-        finalist_module.clearAllData();
-
-        // need to load the tournament again since everything was just cleared
-        finalist_module.loadTournament(function() {
-            // success            
-
-            finalist_module.loadCategoriesAndScores(function() {
-                // success
-                finalist_module.loadNominieesAndSchedules(function() {
-                    // success
-                    waitDialog.classList.add("fll-sw-ui-inactive");
-                    finalist_module.saveToLocalStorage();
-                    window.location.assign("choose_award_group.html");
-                }, function(msg) {
-                    // error
-                    waitDialog.classList.add("fll-sw-ui-inactive");
-                    alert("Failure loading nominees and schedules: " + msg);
-                });
-            }, function(msg) {
-                // error
-                waitDialog.classList.add("fll-sw-ui-inactive");
-                alert("Failure loading categories and scores: " + msg);
-            });
-        }, function(msg) {
-            // failure
-            waitDialog.classList.add("fll-sw-ui-inactive");
-            alert("Failure loading current tournament: " + msg);
-        });
-
+        waitDialog.classList.add("fll-sw-ui-inactive");
+        window.location.assign("choose_award_group.html");
     }
 
-    function refreshData() {
+    function loadError(msg) {
         const waitDialog = document.getElementById("wait-dialog");
+        waitDialog.classList.add("fll-sw-ui-inactive");
+        alert("Failure data: " + msg);
+    }
 
-        finalist_module.loadCategoriesAndScores(function() {
-            // success
-            waitDialog.classList.add("fll-sw-ui-inactive");
-            finalist_module.saveToLocalStorage();
-            window.location.assign("choose_award_group.html");
-        }, function(msg) {
-            // error
-            waitDialog.classList.add("fll-sw-ui-inactive");
-            alert("Failure loading categories and scores: " + msg);
-        });
+    function clearAndLoad() {
+        finalist_module.clearAndLoad(loadSuccess, loadError);
+    }
+
+
+    function refreshData() {
+        finalist_module.refreshData(loadSuccess, loadError);
     }
 
     document.addEventListener('DOMContentLoaded', function() {
