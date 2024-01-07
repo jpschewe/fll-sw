@@ -27,6 +27,7 @@ if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(request, response
 <script type='text/javascript'
     src="<c:url value='/report/finalist/finalist.js'/>"></script>
 <script type='text/javascript' src='deliberation_load.js'></script>
+<script type='text/javascript' src='deliberation.js'></script>
 
 </head>
 
