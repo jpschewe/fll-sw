@@ -260,18 +260,7 @@ function changeNumAwards(category, prevMaxNumAwards) {
         }
     }
 
-    // disable/enable place cells as needed
-    const categoryNumAwards = category.getNumAwards();
-    for (let place = 1; place <= curMaxNumAwards; ++place) {
-        const cellId = placeCellIdentifier(category, place);
-        const cell = document.getElementById(cellId);
-        if (place <= categoryNumAwards) {
-            cell.classList.remove("unavailable");
-        } else {
-            cell.classList.add("unavailable");
-        }
-    }
-
+    enableDisableWinnerCells(curMaxNumAwards);
 
     // remove extra rows
     if (curMaxNumAwards < prevMaxNumAwards) {
@@ -279,6 +268,26 @@ function changeNumAwards(category, prevMaxNumAwards) {
             const rowId = placeRowIdentifier(place);
             const row = document.getElementById(rowId);
             body.removeChild(row);
+        }
+    }
+}
+
+/**
+ * Disable/enable place cells as needed.
+ * 
+ * @param {number} curMaxNumAwards maximum number of awards across all categories
+ */
+function enableDisableWinnerCells(curMaxNumAwards) {
+    for (const category of sortedCategories) {
+        const categoryNumAwards = category.getNumAwards();
+        for (let place = 1; place <= curMaxNumAwards; ++place) {
+            const cellId = placeCellIdentifier(category, place);
+            const cell = document.getElementById(cellId);
+            if (place <= categoryNumAwards) {
+                cell.classList.remove("unavailable");
+            } else {
+                cell.classList.add("unavailable");
+            }
         }
     }
 }
@@ -962,6 +971,10 @@ function updatePage() {
     // FIXME add "Add Team" buttons to each category at the bottom
 
     // FIXME populate winners in table
+    
+    // sync UI up with data
+    
+    enableDisableWinnerCells(computeMaxNumAwards());
 }
 
 function uploadData() {
