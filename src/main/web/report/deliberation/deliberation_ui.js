@@ -212,7 +212,12 @@ function addNumAwardsRow(body) {
         input.setAttribute("min", "1");
         input.setAttribute("size", "3");
         input.setAttribute("required", "true")
-        input.value = category.getNumAwards();
+
+        //  make sure that the number of awards is always at least 1 
+        const numAwards = Math.max(1, category.getNumAwards());
+        category.setNumAwards(numAwards);
+        input.value = numAwards;
+        
         input.addEventListener("change", () => {
             const prevMaxNumAwards = computeMaxNumAwards();
             const newNumAwards = parseInt(input.value, 10);
@@ -971,9 +976,9 @@ function updatePage() {
     // FIXME add "Add Team" buttons to each category at the bottom
 
     // FIXME populate winners in table
-    
+
     // sync UI up with data
-    
+
     enableDisableWinnerCells(computeMaxNumAwards());
 }
 
