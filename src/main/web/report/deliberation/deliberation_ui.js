@@ -827,7 +827,7 @@ function drop(e) {
             }
         } else if (sourceSection == SECTION_WINNERS) {
             if (destSection == SECTION_POTENTIAL_WINNERS) {
-                dropRemoveFromWinners(draggingTeamDiv);
+                dropRemoveFromWinners(draggingTeamDiv, category);
             } else if (destSection == SECTION_WINNERS) {
                 dropReorderWinners(destCell, draggingTeamDiv, category);
             } else {
@@ -877,10 +877,13 @@ function dropNomineeToPotentialWinners(destCell, category, team) {
     updateTeamDivForWinners(team.num);
 }
 
-function dropRemoveFromWinners(teamDiv) {
+function dropRemoveFromWinners(teamDiv, category) {
     const teamNumberToRemove = parseInt(teamDiv.getAttribute(DATA_TEAM_NUMBER), 10);
     removeFromTeamDivs(teamNumberToRemove, teamDiv);
     removeTeamFromWinners(teamNumberToRemove);
+
+    const teamNum = parseInt(teamDiv.getAttribute(DATA_TEAM_NUMBER), 10);
+    category.removeWinner(teamNum);
 }
 
 function dropReorderWinners(destCell, teamDiv, category) {
@@ -888,20 +891,23 @@ function dropReorderWinners(destCell, teamDiv, category) {
         // nothing to do
         return;
     }
+    const place = parseInt(destCell.parentNode.getAttribute(DATA_PLACE), 10);
 
     if (destCell.children.length > 0) {
         const divToMove = destCell.children[0];
 
         // move divToMove down one
-        const rowPlace = parseInt(destCell.parentNode.getAttribute(DATA_PLACE), 10);
-        const nextCell = document.getElementById(placeCellIdentifier(category, rowPlace + 1));
+        const nextCell = document.getElementById(placeCellIdentifier(category, place + 1));
         if (null == nextCell || nextCell.classList.contains("unavailable")) {
-            dropRemoveFromWinners(divToMove);
+            dropRemoveFromWinners(divToMove, category);
         } else {
             dropReorderWinners(nextCell, divToMove, category);
         }
     }
     destCell.appendChild(teamDiv);
+
+    const teamNum = parseInt(teamDiv.getAttribute(DATA_TEAM_NUMBER), 10);
+    category.setWinner(place, teamNum);
 }
 
 /**

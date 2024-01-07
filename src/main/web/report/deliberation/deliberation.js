@@ -208,7 +208,7 @@ const deliberationModule = {};
          * @param place the place (1-based) of the team
          */
         unsetWinner(place) {
-            const winners = getWinners();
+            const winners = this.getWinners();
             if (place < 1) {
                 throw new Error("Place must be greater than 0");
             }
@@ -218,6 +218,18 @@ const deliberationModule = {};
 
             const placeIndex = place - 1;
             winners[placeIndex] = null;
+        }
+        /**
+         * Remove all instances of teamNum from winners.
+         */
+        removeWinner(teamNum) {
+            const winners = this.getWinners();
+            let idx = winners.indexOf(teamNum);
+            while (idx != -1) {
+                winners[idx] = null;
+                idx = winners.indexOf(teamNum);
+            }
+            this.setWinners(winners);
         }
 
         getNumAwards() {
