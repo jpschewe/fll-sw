@@ -217,7 +217,7 @@ function addNumAwardsRow(body) {
         const numAwards = Math.max(1, category.getNumAwards());
         category.setNumAwards(numAwards);
         input.value = numAwards;
-        
+
         input.addEventListener("change", () => {
             const prevMaxNumAwards = computeMaxNumAwards();
             const newNumAwards = parseInt(input.value, 10);
@@ -828,6 +828,8 @@ function drop(e) {
                         }
                     }
                 }
+
+                category.removePotentialWinner(teamNum);
             } else if (destSection == SECTION_POTENTIAL_WINNERS) {
                 dropReorderPotentialWinners(destCell, draggingTeamDiv, category);
             } else if (destSection == SECTION_WINNERS) {
@@ -857,6 +859,8 @@ function drop(e) {
         c.classList.remove("dropzone");
     }
 
+    deliberationModule.saveToLocalStorage();
+    
     draggingTeamDiv = null;
 }
 
@@ -865,16 +869,19 @@ function dropReorderPotentialWinners(destCell, teamDiv, category) {
         // nothing to do
         return;
     }
+    const place = parseInt(destCell.parentNode.getAttribute(DATA_PLACE), 10);
 
     if (destCell.children.length > 0) {
         const divToMove = destCell.children[0];
 
         // move divToMove down one
-        const rowPlace = parseInt(destCell.parentNode.getAttribute(DATA_PLACE), 10);
-        const nextCell = findOrCreatePotentiallWinnerCell(category, rowPlace + 1);
+        const nextCell = findOrCreatePotentiallWinnerCell(category, place + 1);
         dropReorderPotentialWinners(nextCell, divToMove, category);
     }
     destCell.appendChild(teamDiv);
+
+    const teamNum = parseInt(teamDiv.getAttribute(DATA_TEAM_NUMBER), 10);
+    category.setPotentialWinner(place, teamNum);
 }
 
 /**

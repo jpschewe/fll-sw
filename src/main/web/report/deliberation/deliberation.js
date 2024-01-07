@@ -160,19 +160,41 @@ const deliberationModule = {};
             this.potentialWinners.set(finalist_module.getCurrentDivision(), v);
         }
         /**
-         * @param {int} teamNumber team to add to the list of potential winners
-         * @return true if this team wasn't in the list of potential winners (list was modified)
+         * Set the potential winner at the specified place. The array is automatically resized to fit.
+         * 
+         * @param place the place (1-based) of the team
+         * @param teamNumber the team number in this place
          */
-        addPotentialWinner(teamNum) {
-            const value = this.getPotentialWinners();
-            if (!value.includes(teamNum)) {
-                value.push(teamNum);
-                this.setPotentialWinners(value);
-                return true;
-            } else {
-                return false;
+        setPotentialWinner(place, teamNumber) {
+            const potentialWinners = this.getPotentialWinners();
+            const placeIndex = place - 1;
+
+            // grow as needed
+            while (potentialWinners.length <= placeIndex) {
+                potentialWinners.push(null);
             }
+
+            potentialWinners[placeIndex] = teamNumber;
+            this.setPotentialWinners(potentialWinners);
         }
+        /**
+         * Remove all instances of teamNum from winners.
+         */
+        removePotentialWinner(teamNum) {
+            const potentialWinners = this.getPotentialWinners();
+            let idx = potentialWinners.indexOf(teamNum);
+            while (idx != -1) {
+                potentialWinners[idx] = null;
+                idx = potentialWinners.indexOf(teamNum);
+            }
+
+            // clean up extra rows in the array
+            while (potentialWinners[potentialWinners.length - 1] == null) {
+                potentialWinners.pop();
+            }
+            this.setPotentialWinners(potentialWinners);
+        }
+
 
         getWinners() {
             const value = this.winners.get(finalist_module.getCurrentDivision());
@@ -186,8 +208,10 @@ const deliberationModule = {};
             this.winners.set(finalist_module.getCurrentDivision(), v);
         }
         /**
+         * Set the specified team as a winner with the specified place. 
          * @param place the place (1-based) of the team
          * @param teamNumber the team number in this place
+         * @throws Error If the place is outside the bounds of the number of awards
          */
         setWinner(place, teamNumber) {
             const winners = this.getWinners();
