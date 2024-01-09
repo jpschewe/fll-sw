@@ -189,7 +189,7 @@ const deliberationModule = {};
             }
 
             // clean up extra rows in the array
-            while (potentialWinners[potentialWinners.length - 1] == null) {
+            while (potentialWinners.length > 0 && potentialWinners[potentialWinners.length - 1] == null) {
                 potentialWinners.pop();
             }
             this.setPotentialWinners(potentialWinners);
