@@ -20,12 +20,12 @@ const finalistScheduleLoad = {}
     }
 
     function clearAndLoad() {
-        finalist_module.clearAndLoad(loadSuccess, loadError);
+        deliberationModule.clearAndLoad(loadSuccess, loadError);
     }
 
 
     function refreshData() {
-        finalist_module.refreshData(loadSuccess, loadError);
+        deliberationModule.refreshData(loadSuccess, loadError);
     }
 
     document.addEventListener('DOMContentLoaded', function() {

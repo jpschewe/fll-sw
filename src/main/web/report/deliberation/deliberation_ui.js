@@ -68,21 +68,21 @@ function createSortedCategories() {
 }
 
 
-function placeRowIdentifier(place) {
-    return "place_row_" + place;
+function winnerRowIdentifier(place) {
+    return "winner_row_" + place;
 }
 
-function placeCellIdentifier(category, place) {
-    return "place_cell_" + category.catId + "_" + place;
+function winnerCellIdentifier(category, place) {
+    return "winner_cell_" + category.catId + "_" + place;
 }
 
-function addPlaceRow(body, place) {
-    const prevRow = place < 2 ? document.getElementById("num_awards_row") : document.getElementById(placeRowIdentifier(place - 1));
+function addWinnerRow(body, place) {
+    const prevRow = place < 2 ? document.getElementById("num_awards_row") : document.getElementById(winnerRowIdentifier(place - 1));
 
     const row = document.createElement("div");
     row.classList.add("rTableRow");
     body.insertBefore(row, prevRow.nextSibling)
-    row.setAttribute("id", placeRowIdentifier(place));
+    row.setAttribute("id", winnerRowIdentifier(place));
     row.setAttribute(DATA_SECTION, SECTION_WINNERS);
     row.setAttribute(DATA_PLACE, place);
 
@@ -95,7 +95,7 @@ function addPlaceRow(body, place) {
         const cell = document.createElement("div");
         row.appendChild(cell);
         cell.classList.add("rTableCell");
-        cell.setAttribute("id", placeCellIdentifier(category, place));
+        cell.setAttribute("id", winnerCellIdentifier(category, place));
         cell.setAttribute(DATA_CATEGORY_ID, category.catId);
 
         cell.addEventListener('dragover', dragOver);
@@ -253,11 +253,11 @@ function changeNumAwards(category, prevMaxNumAwards) {
     const curMaxNumAwards = computeMaxNumAwards();
     if (curMaxNumAwards > prevMaxNumAwards) {
         for (let place = prevMaxNumAwards + 1; place <= curMaxNumAwards; ++place) {
-            addPlaceRow(body, place);
+            addWinnerRow(body, place);
             for (const c of sortedCategories) {
                 if (c.catId != category.catId) {
                     // no other category is going to have this many awards
-                    const cellId = placeCellIdentifier(c, place);
+                    const cellId = winnerCellIdentifier(c, place);
                     const cell = document.getElementById(cellId);
                     cell.classList.add("unavailable");
                 }
@@ -270,7 +270,7 @@ function changeNumAwards(category, prevMaxNumAwards) {
     // remove extra rows
     if (curMaxNumAwards < prevMaxNumAwards) {
         for (let place = prevMaxNumAwards; place > curMaxNumAwards; --place) {
-            const rowId = placeRowIdentifier(place);
+            const rowId = winnerRowIdentifier(place);
             const row = document.getElementById(rowId);
             body.removeChild(row);
         }
@@ -286,7 +286,7 @@ function enableDisableWinnerCells(curMaxNumAwards) {
     for (const category of sortedCategories) {
         const categoryNumAwards = category.getNumAwards();
         for (let place = 1; place <= curMaxNumAwards; ++place) {
-            const cellId = placeCellIdentifier(category, place);
+            const cellId = winnerCellIdentifier(category, place);
             const cell = document.getElementById(cellId);
             if (place <= categoryNumAwards) {
                 cell.classList.remove("unavailable");
@@ -307,7 +307,7 @@ function validateNumAwardsChange(category, newNumAwards) {
     const curNumAwards = category.getNumAwards();
     if (newNumAwards < curNumAwards) {
         for (let place = curNumAwards; place >= curNumAwards; --place) {
-            const cellId = placeCellIdentifier(category, place);
+            const cellId = winnerCellIdentifier(category, place);
             const cell = document.getElementById(cellId);
             if (cell.children.length > 0) {
                 alert("Cannot lower the number of awards below the current number of winners. Remove the last winner and try again.");
@@ -467,6 +467,14 @@ function ensurePotentialWinnersRowExists(place) {
     return addPotentialWinnersRow(place, prevRow);
 }
 
+function potentialWinnerRowIdentifier(place) {
+    return "potentialWinner_row_" + place;
+}
+
+function potentialWinnerCellIdentifier(category, place) {
+    return "potentialWinner_cell_" + category.catId + "_" + place;
+}
+
 /**
  * @param {int} place place for the potential winners row
  * @param {HTMLElement} prevRow the row to add after
@@ -480,6 +488,7 @@ function addPotentialWinnersRow(place, prevRow) {
     row.setAttribute(DATA_SECTION, SECTION_POTENTIAL_WINNERS);
     row.setAttribute(DATA_PLACE, place);
     body.insertBefore(row, prevRow.nextSibling)
+    row.setAttribute("id", potentialWinnerRowIdentifier(place));
 
     const placeCell = document.createElement("div");
     row.appendChild(placeCell);
@@ -491,6 +500,7 @@ function addPotentialWinnersRow(place, prevRow) {
         row.appendChild(cell);
         cell.classList.add("rTableCell");
         cell.setAttribute(DATA_CATEGORY_ID, category.catId);
+        cell.setAttribute("id", potentialWinnerCellIdentifier(category, place));
 
         cell.addEventListener('dragover', dragOver);
         cell.addEventListener('dragleave', dragLeave);
@@ -802,11 +812,7 @@ function drop(e) {
 
         if (sourceSection == SECTION_NOMINEES) {
             if (destSection == SECTION_POTENTIAL_WINNERS) {
-                dropNomineeToPotentialWinners(destCell, category, team);
-
-                // disable dragging team up again  
-                draggingTeamDiv.setAttribute("draggable", "false");
-                draggingTeamDiv.classList.add("potential_winner");
+                dropNomineeToPotentialWinners(draggingTeamDiv, destCell, category, team);
             } else {
                 console.log(`No drop - section nominees wrong section dest: ${destSection}`);
             }
@@ -860,7 +866,7 @@ function drop(e) {
     }
 
     deliberationModule.saveToLocalStorage();
-    
+
     draggingTeamDiv = null;
 }
 
@@ -887,15 +893,20 @@ function dropReorderPotentialWinners(destCell, teamDiv, category) {
 /**
  * Handle drop for moving a nominee to potential winners.
  * 
+ * @param {HTMLElement} sourceCell the table cell for the nominee being added to potential winners
  * @param {HTMLElement} destCell the table cell to put the team into
  * @param {Category} category the category
  * @param {finalist_module.Team} team the team being moved
  */
-function dropNomineeToPotentialWinners(destCell, category, team) {
+function dropNomineeToPotentialWinners(sourceCell, destCell, category, team) {
     const teamDiv = createTeamDiv(team, category, SECTION_POTENTIAL_WINNERS);
     dropReorderPotentialWinners(destCell, teamDiv, category);
     // the new div may need a strike through
     updateTeamDivForWinners(team.num);
+
+    // disable dragging team up again  
+    sourceCell.setAttribute("draggable", "false");
+    sourceCell.classList.add("potential_winner");
 }
 
 function dropRemoveFromWinners(teamDiv, category) {
@@ -918,7 +929,7 @@ function dropReorderWinners(destCell, teamDiv, category) {
         const divToMove = destCell.children[0];
 
         // move divToMove down one
-        const nextCell = document.getElementById(placeCellIdentifier(category, place + 1));
+        const nextCell = document.getElementById(winnerCellIdentifier(category, place + 1));
         if (null == nextCell || nextCell.classList.contains("unavailable")) {
             dropRemoveFromWinners(divToMove, category);
         } else {
@@ -961,7 +972,7 @@ function updatePage() {
 
     const maxPlace = computeMaxNumAwards();
     for (let place = 1; place <= maxPlace; ++place) {
-        addPlaceRow(body, place);
+        addWinnerRow(body, place);
     }
 
     const afterWinners = addSeparator(body);
