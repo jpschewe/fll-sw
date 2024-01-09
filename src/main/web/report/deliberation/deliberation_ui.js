@@ -755,11 +755,13 @@ function dragOver(e) {
             dropzoneCell = destCell;
         } else if (sourceSection == SECTION_POTENTIAL_WINNERS && destSection == SECTION_WINNERS) {
             // ensure that we don't make a team a winner twice
-            if (!draggingTeamDiv.classList.contains("winner")) {
+            if (!draggingTeamDiv.classList.contains("winner") && !destCell.classList.contains("unavailable")) {
                 dropzoneCell = destCell;
             }
         } else if (sourceSection == SECTION_WINNERS && destSection == SECTION_WINNERS) {
-            dropzoneCell = destCell;
+            if (!destCell.classList.contains("unavailable")) {
+                dropzoneCell = destCell;
+            }
         } else if (sourceSection == SECTION_WINNERS && destSection == SECTION_POTENTIAL_WINNERS) {
             dropzoneCell = destCell;
         }
