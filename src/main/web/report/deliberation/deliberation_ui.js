@@ -806,7 +806,9 @@ function dragOver(e) {
             dropzoneCell = destCell;
         } else if (sourceSection == SECTION_POTENTIAL_WINNERS && destSection == SECTION_WINNERS) {
             // ensure that we don't make a team a winner twice
-            if (!draggingTeamDiv.classList.contains("winner") && !destCell.classList.contains("unavailable")) {
+            const category = deliberationModule.getCategoryById(sourceCategoryId);
+            const teamNum = parseInt(draggingTeamDiv.getAttribute(DATA_TEAM_NUMBER), 10);
+            if (!category.getWinners().includes(teamNum) && !destCell.classList.contains("unavailable")) {
                 dropzoneCell = destCell;
             }
         } else if (sourceSection == SECTION_WINNERS && destSection == SECTION_WINNERS) {
@@ -892,11 +894,7 @@ function drop(e) {
             } else if (destSection == SECTION_POTENTIAL_WINNERS) {
                 dropReorderPotentialWinners(destCell, draggingTeamDiv, category);
             } else if (destSection == SECTION_WINNERS) {
-                if (draggingTeamDiv.classList.contains("winner")) {
-                    console.log(`No drop - team is already a winner: ${teamNum}`);
-                } else {
-                    dropPotentialWinnerToWinners(destCell, category, team);
-                }
+                dropPotentialWinnerToWinners(destCell, category, team);
             } else {
                 console.log(`No drop - section potential winners wrong section dest: ${destSection}`);
             }
