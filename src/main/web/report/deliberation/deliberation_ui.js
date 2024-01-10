@@ -514,9 +514,34 @@ function populatePotentialWinners() {
 }
 
 /**
- * Group teams by judging group.
+ * Find the team div for the specified team number in the list of nominees.
+ * 
+ * @param {Category} category the category the team is a nominee in
+ * @param {number} teamNumber the team number
+ * @returns the div or null if not found
  */
-function populateNomineeTeams() {
+function findNomineeTeamDiv(category, teamNumber) {
+    const body = document.getElementById("deliberation_body");
+    for (const row of body.querySelectorAll(".nominee_row").values()) {
+        for (const cell of row.children) {
+            const catId = cell.getAttribute(DATA_CATEGORY_ID);
+            if (catId == category.catId) {
+                for (const teamDiv of cell.children) {
+                    const teamNumCompare = parseInt(teamDiv.getAttribute(DATA_TEAM_NUMBER), 10);
+                    if (teamNumber == teamNumCompare) {
+                        return teamDiv;
+                    }
+                }
+            }
+        }
+    }
+    return null;
+}
+
+/**
+ * Populate the UI with stored teams.
+ */
+function populateTeams() {
     addInitialNomineeRows();
 
     for (const category of sortedCategories) {
@@ -525,6 +550,32 @@ function populateNomineeTeams() {
             const team = finalist_module.lookupTeam(teamNumber);
             addNomineeToUi(category, team);
         }
+
+        for (const [index, teamNumber] of category.getPotentialWinners().entries()) {
+            if (null != teamNumber) {
+                const team = finalist_module.lookupTeam(teamNumber);
+                const place = index + 1;
+
+                const destCell = document.getElementById(potentialWinnerCellIdentifier(category, place));
+                const nomineeTeamDiv = findNomineeTeamDiv(category, teamNumber);
+                if (null == nomineeTeamDiv) {
+                    alert(`Cannot find team {teamNumber} in nominees for {category.name} while loading`);
+                } else {
+                    dropNomineeToPotentialWinners(nomineeTeamDiv, destCell, category, team);
+                }
+            }
+        }
+
+        for (const [index, teamNumber] of category.getWinners().entries()) {
+            if (null != teamNumber) {
+                const team = finalist_module.lookupTeam(teamNumber);
+                const place = index + 1;
+
+                const destCell = document.getElementById(winnerCellIdentifier(category, place));
+                dropPotentialWinnerToWinners(destCell, category, team);
+            }
+        }
+
     }
 }
 
@@ -895,20 +946,20 @@ function dropReorderPotentialWinners(destCell, teamDiv, category) {
 /**
  * Handle drop for moving a nominee to potential winners.
  * 
- * @param {HTMLElement} sourceCell the table cell for the nominee being added to potential winners
+ * @param {HTMLElement} sourceTeamDiv the teamDiv in the nominees section
  * @param {HTMLElement} destCell the table cell to put the team into
  * @param {Category} category the category
  * @param {finalist_module.Team} team the team being moved
  */
-function dropNomineeToPotentialWinners(sourceCell, destCell, category, team) {
+function dropNomineeToPotentialWinners(sourceTeamDiv, destCell, category, team) {
     const teamDiv = createTeamDiv(team, category, SECTION_POTENTIAL_WINNERS);
     dropReorderPotentialWinners(destCell, teamDiv, category);
     // the new div may need a strike through
     updateTeamDivForWinners(team.num);
 
     // disable dragging team up again  
-    sourceCell.setAttribute("draggable", "false");
-    sourceCell.classList.add("potential_winner");
+    sourceTeamDiv.setAttribute("draggable", "false");
+    sourceTeamDiv.classList.add("potential_winner");
 }
 
 function dropRemoveFromWinners(teamDiv, category) {
@@ -990,14 +1041,9 @@ function updatePage() {
     const afterPotentialWinners = addSeparator(body);
     afterPotentialWinners.setAttribute("id", "after_potential_winners");
 
-    populateNomineeTeams();
-    // FIXME add section for teams by judging group
+    populateTeams();
 
     // FIXME add "Add Team" buttons to each category at the bottom
-
-    // FIXME populate winners in table
-
-    // sync UI up with data
 
     enableDisableWinnerCells(computeMaxNumAwards());
 }
