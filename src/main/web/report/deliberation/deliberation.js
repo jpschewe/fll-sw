@@ -339,7 +339,7 @@ const deliberationModule = {};
      */
     function createCategories(clearNominees) {
         for (const category of finalist_module.getAllCategories()) {
-            const dCategory = findOrCreateCategory(category.name, category.scheduled);
+            const dCategory = deliberationModule.findOrCreateCategory(category.name, category.scheduled);
 
             if (clearNominees) {
                 dCategory.clearNominees();
@@ -355,7 +355,7 @@ const deliberationModule = {};
                 dCategory.addNominee(teamNumber);
             }
         }
-        let performanceCategory = getCategoryByName(deliberationModule.PERFORMANCE_CATEGORY_NAME);
+        let performanceCategory = deliberationModule.getCategoryByName(deliberationModule.PERFORMANCE_CATEGORY_NAME);
         if (null == performanceCategory) {
             performanceCategory = Category.create(deliberationModule.PERFORMANCE_CATEGORY_NAME, true);
             //FIXME need to load performance winners from somewhere
@@ -376,6 +376,35 @@ const deliberationModule = {};
     deliberationModule.saveToLocalStorage = function() {
         finalist_module.saveToLocalStorage();
         _save();
+    };
+
+    function loadTopPerformanceScores() {
+        return fetch("../../api/TopPerformanceScores").then(checkJsonResponse).then((result) => {
+            console.log(result);
+        });
+    }
+
+    // FIXME Needs a name
+    function foo(doneCallback, failCallback) {
+        const waitList = [];
+
+        const topPerformanceScoresPromise = loadTopPerformanceScores();
+        topPerformanceScoresPromise.catch((error) => {
+            failCallback("Top performance scores failed to load: " + error);
+        })
+        waitList.push(topPerformanceScoresPromise);
+
+        Promise.all(waitList).then((_) => {
+            doneCallback();
+        });
+    }
+
+    function postFinalistLoad(doneCallback, failCallback) {
+        foo(() => {
+            createCategories(true);
+            _save();
+            doneCallback();
+        }, failCallback);
     }
 
     /**
@@ -390,10 +419,9 @@ const deliberationModule = {};
     deliberationModule.clearAndLoad = function(doneCallback, failCallback) {
         _clear_local_storage();
 
-        finalist_module.clearAndLoad(doneCallback, failCallback);
-        createCategories(true);
-
-        _save();
+        finalist_module.clearAndLoad(() => {
+            postFinalistLoad(doneCallback, failCallback);
+        }, failCallback);
     };
 
     /**
@@ -406,9 +434,9 @@ const deliberationModule = {};
      *          called with message on failure
      */
     deliberationModule.refreshData = function(doneCallback, failCallback) {
-        finalist_module.refreshData(doneCallback, failCallback);
-        createCategories(false);
-        _save();
+        finalist_module.refreshData(() => {
+            postFinalistLoad(doneCallback, failCallback);
+        }, failCallback);
     };
 
     /**
