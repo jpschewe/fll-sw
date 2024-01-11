@@ -1034,13 +1034,18 @@ function addAdditionalTeamButtons(body) {
 
             button.addEventListener("click", () => {
                 const addTeamDialog = document.getElementById("add-team-dialog");
+                document.getElementById("add-team-dialog_category-id").value = category.catId;
+
                 const select = document.getElementById("add-team-dialog_teams");
+                const currentNominees = category.getNominees();
                 removeChildren(select);
                 for (const team of deliberationModule.getAllTeams()) {
-                    const option = document.createElement("option");
-                    select.appendChild(option);
-                    option.value = team.num;
-                    option.innerText = `${team.num} ${team.name}`;
+                    if (!currentNominees.includes(team.num)) {
+                        const option = document.createElement("option");
+                        select.appendChild(option);
+                        option.value = team.num;
+                        option.innerText = `${team.num} ${team.name}`;
+                    }
                 }
 
                 addTeamDialog.classList.remove("fll-sw-ui-inactive");
@@ -1115,6 +1120,30 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     document.getElementById("add-team-dialog_cancel").addEventListener("click", () => {
+        document.getElementById("add-team-dialog").classList.add("fll-sw-ui-inactive");
+        addTeamsCategory = null;
+        addTeamsTeam = null;
+    });
+
+
+    document.getElementById("add-team-dialog_ok").addEventListener("click", () => {
+        const select = document.getElementById("add-team-dialog_teams");
+        const teamNumber = parseInt(select.value, 10);
+        const team = finalist_module.lookupTeam(teamNumber);
+        if (null == team) {
+            alert(`Cannot find team ${teamNumber}`);
+            return;
+        }
+
+        const catId = parseInt(document.getElementById("add-team-dialog_category-id").value, 10);
+        const category = deliberationModule.getCategoryById(catId);
+        if (null == team) {
+            alert(`Cannot find category ${catId}`);
+            return;
+        }
+
+        addNomineeToUi(category, team);
+
         document.getElementById("add-team-dialog").classList.add("fll-sw-ui-inactive");
     });
 

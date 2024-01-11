@@ -50,6 +50,6 @@ and mark draggable things as movable. */
     text-decoration: line-through;
 }
 
-#add-teams-dialog_container {
+#add-team-dialog_container {
     width: fit-content;
 }
