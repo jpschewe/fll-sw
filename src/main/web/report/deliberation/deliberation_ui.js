@@ -1007,6 +1007,50 @@ function dropPotentialWinnerToWinners(destCell, category, team) {
 }
 
 
+/**
+ * Add a row of buttons to the table that is used to add teams to each category, excluding performance.
+ * 
+ * @param {HTMLElment} body the table
+ */
+function addAdditionalTeamButtons(body) {
+
+    const row = document.createElement("div");
+    row.classList.add("rTableRow");
+    body.appendChild(row)
+
+    const placeCell = document.createElement("div");
+    row.appendChild(placeCell);
+    placeCell.classList.add("rTableCell");
+
+    for (const category of sortedCategories) {
+        const cell = document.createElement("div");
+        row.appendChild(cell);
+        cell.classList.add("rTableCell");
+        if (category.name != deliberationModule.PERFORMANCE_CATEGORY_NAME) {
+            const button = document.createElement("button");
+            cell.appendChild(button);
+            button.setAttribute("type", "button");
+            button.innerHTML = "Add Team";
+
+            button.addEventListener("click", () => {
+                const addTeamDialog = document.getElementById("add-team-dialog");
+                const select = document.getElementById("add-team-dialog_teams");
+                removeChildren(select);
+                for (const team of deliberationModule.getAllTeams()) {
+                    const option = document.createElement("option");
+                    select.appendChild(option);
+                    option.value = team.num;
+                    option.innerText = `${team.num} ${team.name}`;
+                }
+
+                addTeamDialog.classList.remove("fll-sw-ui-inactive");
+            });
+        }
+    }
+    return row;
+}
+
+
 function updatePage() {
     teamDivs = new Map();
     teamWinnersCount = new Map();
@@ -1041,7 +1085,7 @@ function updatePage() {
 
     populateTeams();
 
-    // FIXME add "Add Team" buttons to each category at the bottom
+    addAdditionalTeamButtons(body);
 
     enableDisableWinnerCells(computeMaxNumAwards());
 }
@@ -1066,8 +1110,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.getElementById("award_group").innerText = finalist_module.getCurrentDivision();
 
-    document.getElementById("upload").addEventListener("click", function() {
+    document.getElementById("upload").addEventListener("click", () => {
         uploadData();
+    });
+
+    document.getElementById("add-team-dialog_cancel").addEventListener("click", () => {
+        document.getElementById("add-team-dialog").classList.add("fll-sw-ui-inactive");
     });
 
     updatePage();

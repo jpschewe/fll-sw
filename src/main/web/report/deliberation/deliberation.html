@@ -25,7 +25,8 @@
 
 <body>
     <h2>
-        Deliberation for Award Group: <span id='award_group'></span>
+        Deliberation for Award Group:
+        <span id='award_group'></span>
     </h2>
 
     <div class='rTable' id='deliberation'>
@@ -45,6 +46,17 @@
     <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="wait-dialog">
         <div>
             <p id='wait-dialog_text'>Uploading data. Please wait...</p>
+        </div>
+    </div>
+
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive"
+        id="add-team-dialog">
+        <div id='add-teams-dialog_container'>
+            <select id='add-team-dialog_teams'></select>
+
+            <button id='add-team-dialog_ok' type='button'>Select
+                Team</button>
+            <button id='add-team-dialog_cancel' type='button'>Cancel</button>
         </div>
     </div>
 

@@ -49,3 +49,7 @@ and mark draggable things as movable. */
 .nominee_row .potential_winner {
     text-decoration: line-through;
 }
+
+#add-teams-dialog_container {
+    width: fit-content;
+}

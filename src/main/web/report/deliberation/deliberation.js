@@ -411,6 +411,21 @@ const deliberationModule = {};
         _save();
     };
 
+    /**
+     * Get all teams in the current award group.
+     *
+     * @return Array of teams
+     */
+    deliberationModule.getAllTeams = function() {
+        const teams = [];
+        for (const team of finalist_module.getAllTeams()) {
+            if (team.awardGroup == finalist_module.getCurrentDivision()) {
+                teams.push(team);
+            }
+        }
+        return teams;
+    };
+
     // always need to initialize variables
     _init_variables();
 }
