@@ -384,8 +384,7 @@ const deliberationModule = {};
         });
     }
 
-    // FIXME Needs a name
-    function foo(doneCallback, failCallback) {
+    function postFinalistLoad(clearNominees, doneCallback, failCallback) {
         const waitList = [];
 
         const topPerformanceScoresPromise = loadTopPerformanceScores();
@@ -395,16 +394,10 @@ const deliberationModule = {};
         waitList.push(topPerformanceScoresPromise);
 
         Promise.all(waitList).then((_) => {
-            doneCallback();
-        });
-    }
-
-    function postFinalistLoad(doneCallback, failCallback) {
-        foo(() => {
-            createCategories(true);
+            createCategories(clearNominees);
             _save();
             doneCallback();
-        }, failCallback);
+        });
     }
 
     /**
@@ -420,7 +413,8 @@ const deliberationModule = {};
         _clear_local_storage();
 
         finalist_module.clearAndLoad(() => {
-            postFinalistLoad(doneCallback, failCallback);
+            //FIXME will need to load more data from the database, perhaps change method called...
+            postFinalistLoad(true, doneCallback, failCallback);
         }, failCallback);
     };
 
@@ -435,7 +429,7 @@ const deliberationModule = {};
      */
     deliberationModule.refreshData = function(doneCallback, failCallback) {
         finalist_module.refreshData(() => {
-            postFinalistLoad(doneCallback, failCallback);
+            postFinalistLoad(false, doneCallback, failCallback);
         }, failCallback);
     };
 
