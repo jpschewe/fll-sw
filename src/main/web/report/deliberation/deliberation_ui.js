@@ -1071,13 +1071,19 @@ function populatePerformanceCategory() {
     const rankedPerformanceTeams = deliberationModule.getRankedPerformanceTeams();
     for (let place = 1; place <= maxPlace; ++place) {
         const cell = document.getElementById(winnerCellIdentifier(category, place));
-        removeChildren(cell);
+
+        for (const teamDiv of cell.children) {
+            const teamNumber = parseInt(teamDiv.getAttribute(DATA_TEAM_NUMBER), 10);
+            removeFromTeamDivs(teamNumber, teamDiv);
+        }
+
         if (place <= numAwards) {
             const teamNumbers = rankedPerformanceTeams[place - 1];
             for (const teamNumber of teamNumbers) {
                 const team = finalist_module.lookupTeam(teamNumber);
                 if (null != team) {
                     const teamDiv = createTeamDiv(team, category, SECTION_WINNERS);
+                    teamDiv.setAttribute("draggable", "false");
                     cell.appendChild(teamDiv);
                 }
             }
