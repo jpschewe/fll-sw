@@ -267,6 +267,11 @@ function changeNumAwards(category, prevMaxNumAwards) {
 
     enableDisableWinnerCells(curMaxNumAwards);
 
+    // update performance category before removing rows to make sure that teamDivs get cleaned up
+    if (category.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
+        populatePerformanceCategory();
+    }
+
     // remove extra rows
     if (curMaxNumAwards < prevMaxNumAwards) {
         for (let place = prevMaxNumAwards; place > curMaxNumAwards; --place) {
@@ -274,10 +279,6 @@ function changeNumAwards(category, prevMaxNumAwards) {
             const row = document.getElementById(rowId);
             body.removeChild(row);
         }
-    }
-
-    if (category.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
-        populatePerformanceCategory();
     }
 }
 
@@ -309,7 +310,7 @@ function enableDisableWinnerCells(curMaxNumAwards) {
  */
 function validateNumAwardsChange(category, newNumAwards) {
     const curNumAwards = category.getNumAwards();
-    if (newNumAwards < curNumAwards) {
+    if (newNumAwards < curNumAwards && category.name != deliberationModule.PERFORMANCE_CATEGORY_NAME) {
         for (let place = curNumAwards; place >= curNumAwards; --place) {
             const cellId = winnerCellIdentifier(category, place);
             const cell = document.getElementById(cellId);
@@ -1074,8 +1075,9 @@ function populatePerformanceCategory() {
 
         for (const teamDiv of cell.children) {
             const teamNumber = parseInt(teamDiv.getAttribute(DATA_TEAM_NUMBER), 10);
-            removeFromTeamDivs(teamNumber, teamDiv);
+            removeFromTeamDivs(teamNumber, teamDiv);            
         }
+        removeChildren(cell);
 
         if (place <= numAwards) {
             const teamNumbers = rankedPerformanceTeams[place - 1];
