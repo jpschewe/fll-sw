@@ -275,6 +275,10 @@ function changeNumAwards(category, prevMaxNumAwards) {
             body.removeChild(row);
         }
     }
+
+    if (category.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
+        populatePerformanceCategory();
+    }
 }
 
 /**
@@ -1055,6 +1059,31 @@ function addAdditionalTeamButtons(body) {
     return row;
 }
 
+/**
+ * Make sure all of the right teams are in the performance winners column.
+ * This will remove ay teams that are there and recreate any that need to be there.
+ */
+function populatePerformanceCategory() {
+    const category = deliberationModule.getCategoryByName(deliberationModule.PERFORMANCE_CATEGORY_NAME);
+    const numAwardsInput = document.getElementById(numAwardsIdentifier(category));
+    const numAwards = Math.max(1, parseInt(numAwardsInput.value, 10));
+    const maxPlace = computeMaxNumAwards();
+    const rankedPerformanceTeams = deliberationModule.getRankedPerformanceTeams();
+    for (let place = 1; place <= maxPlace; ++place) {
+        const cell = document.getElementById(winnerCellIdentifier(category, place));
+        removeChildren(cell);
+        if (place <= numAwards) {
+            const teamNumbers = rankedPerformanceTeams[place - 1];
+            for (const teamNumber of teamNumbers) {
+                const team = finalist_module.lookupTeam(teamNumber);
+                if (null != team) {
+                    const teamDiv = createTeamDiv(team, category, SECTION_WINNERS);
+                    cell.appendChild(teamDiv);
+                }
+            }
+        }
+    }
+}
 
 function updatePage() {
     teamDivs = new Map();
@@ -1093,6 +1122,7 @@ function updatePage() {
     addAdditionalTeamButtons(body);
 
     enableDisableWinnerCells(computeMaxNumAwards());
+    populatePerformanceCategory();
 }
 
 function uploadData() {
