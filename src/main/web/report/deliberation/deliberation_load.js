@@ -7,11 +7,13 @@
 const deliberationLoad = {}
 
 {
+    
+    let clear = false;
 
     function loadSuccess() {
         const waitDialog = document.getElementById("wait-dialog");
         waitDialog.classList.add("fll-sw-ui-inactive");
-        window.location.assign("choose_award_group.html");
+        window.location.assign(`choose_award_group.html?clear=${clear}`);
     }
 
     function loadError(msg) {
@@ -21,12 +23,14 @@ const deliberationLoad = {}
     }
 
     function clearAndLoad() {
-        deliberationModule.clearAndLoad(loadSuccess, loadError);
+        clear = true;
+        finalist_module.clearAndLoad(loadSuccess, loadError);
     }
 
 
     function refreshData() {
-        deliberationModule.refreshData(loadSuccess, loadError);
+        clear = false;
+        finalist_module.refreshData(loadSuccess, loadError);
     }
 
     document.addEventListener('DOMContentLoaded', function() {

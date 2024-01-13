@@ -6,8 +6,24 @@
 
 "use strict";
 
+function loadSuccess() {
+    const waitDialog = document.getElementById("wait-dialog");
+    waitDialog.classList.add("fll-sw-ui-inactive");
+
+    window.location.assign("deliberation.html");
+}
+
+function loadError(msg) {
+    const waitDialog = document.getElementById("wait-dialog");
+    waitDialog.classList.add("fll-sw-ui-inactive");
+    alert("Failure data: " + msg);
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     finalist_module.loadFromLocalStorage();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const clearData = urlParams.get('clear');
 
     const awardGroupsElement = document.getElementById("award_groups");
     removeChildren(awardGroupsElement);
@@ -27,7 +43,11 @@ document.addEventListener("DOMContentLoaded", function() {
         finalist_module.setCurrentDivision(div);
         finalist_module.saveToLocalStorage();
 
-        window.location.assign("deliberation.html");
+        if (clearData) {
+            deliberationModule.clearAndLoad(loadSuccess, loadError);
+        } else {
+            deliberationModule.refreshData(loadSuccess, loadError);
+        }
     });
 
 });

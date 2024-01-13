@@ -144,9 +144,6 @@ const deliberationModule = {};
                 return false;
             }
         }
-        clearNominees() {
-            this.setNominees([]);
-        }
 
         getPotentialWinners() {
             const value = this.potentialWinners.get(finalist_module.getCurrentDivision());
@@ -331,28 +328,21 @@ const deliberationModule = {};
      * The teams from the finalist category become nominees in the deliberation category.
      * Any nominees stored are replaced with those from the finalist data. Any stored potential 
      * winners and winners are added as nominees as well.
-     * 
-     * @param {boolean} clearNominees if true, then clear the nominees and load from finalists, 
-     * if false load from finalist without clearing. The key difference here is for teams
-     * that were added as nominees inside deliberation. If true, these teams will be removed,
-     * if false they will stay.
      */
-    function createCategories(clearNominees) {
+    function createCategories() {
         for (const category of finalist_module.getAllCategories()) {
             const dCategory = deliberationModule.findOrCreateCategory(category.name, category.scheduled);
-
-            if (clearNominees) {
-                dCategory.clearNominees();
-            }
 
             for (const teamNumber of category.teams) {
                 dCategory.addNominee(teamNumber);
             }
-            for (const teamNumber of dCategory.getPotentialWinners()) {
-                dCategory.addNominee(teamNumber);
+            for (const [index, teamNumber] of dCategory.getPotentialWinners().entries()) {
+                const place = index + 1;
+                dCategory.setPotentialWinner(place, teamNumber);
             }
-            for (const teamNumber of dCategory.getWinners()) {
-                dCategory.addNominee(teamNumber);
+            for (const [index, teamNumber] of dCategory.getWinners().entries()) {
+                const place = index + 1;
+                dCategory.setWinner(place, teamNumber);
             }
         }
         let performanceCategory = deliberationModule.getCategoryByName(deliberationModule.PERFORMANCE_CATEGORY_NAME);
@@ -384,7 +374,7 @@ const deliberationModule = {};
         });
     }
 
-    function postFinalistLoad(clearNominees, doneCallback, failCallback) {
+    function postFinalistLoad(doneCallback, failCallback) {
         const waitList = [];
 
         const topPerformanceScoresPromise = loadTopPerformanceScores();
@@ -394,8 +384,8 @@ const deliberationModule = {};
         waitList.push(topPerformanceScoresPromise);
 
         Promise.all(waitList).then((_) => {
-            createCategories(clearNominees);
-            _save();
+            createCategories();
+            deliberationModule.saveToLocalStorage();
             doneCallback();
         });
     }
@@ -412,10 +402,8 @@ const deliberationModule = {};
     deliberationModule.clearAndLoad = function(doneCallback, failCallback) {
         _clear_local_storage();
 
-        finalist_module.clearAndLoad(() => {
-            //FIXME will need to load more data from the database, perhaps change method called...
-            postFinalistLoad(true, doneCallback, failCallback);
-        }, failCallback);
+        //FIXME will need to load more data from the database, perhaps change method called...
+        postFinalistLoad(doneCallback, failCallback);
     };
 
     /**
@@ -428,9 +416,7 @@ const deliberationModule = {};
      *          called with message on failure
      */
     deliberationModule.refreshData = function(doneCallback, failCallback) {
-        finalist_module.refreshData(() => {
-            postFinalistLoad(false, doneCallback, failCallback);
-        }, failCallback);
+        postFinalistLoad(doneCallback, failCallback);
     };
 
     /**
