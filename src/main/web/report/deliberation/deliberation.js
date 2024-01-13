@@ -20,13 +20,17 @@ const deliberationModule = {};
 
     // id -> Category
     let _categories;
+    // awardGroup -> [ [teamNumber, ...], ...]
+    let _rankedPerformanceTeams;
 
     function _init_variables() {
         _categories = new Map();
+        _rankedPerformanceTeams = new Map();
     }
 
     function _save() {
         fllStorage.set(STORAGE_PREFIX, "_categories", _categories);
+        fllStorage.set(STORAGE_PREFIX, "_rankedPerformanceTeams", _rankedPerformanceTeams);
     }
 
     function _load() {
@@ -38,6 +42,12 @@ const deliberationModule = {};
                 Category.deserialize(obj);
             }
         }
+
+        value = fllStorage.get(STORAGE_PREFIX, "_rankedPerformanceTeams");
+        if (null != value) {
+            _rankedPerformanceTeams = value;
+        }
+
     }
 
     function _clear_local_storage() {
@@ -370,7 +380,28 @@ const deliberationModule = {};
 
     function loadTopPerformanceScores() {
         return fetch("../../api/TopPerformanceScores").then(checkJsonResponse).then((result) => {
-            console.log(result);
+            _rankedPerformanceTeams = new Map();
+
+            for (const [awardGroup, entries] of Object.entries(result)) {
+                let index = -1; // start at -1 to simplify increment logic in loop
+                let prevPlace = null;
+                let rankedPerformanceTeams = [];
+                for (const [_, scoreEntry] of Object.entries(entries)) {
+                    const place = parseInt(scoreEntry.rank, 10);
+
+                    if (prevPlace != place) {
+                        rankedPerformanceTeams.push([]);
+                        ++index;
+                    }
+
+                    const teamNumbers = rankedPerformanceTeams[index];
+                    teamNumbers.push(parseInt(scoreEntry.teamNumber, 10));
+                    rankedPerformanceTeams[index] = teamNumbers;
+
+                    prevPlace = parseInt(scoreEntry.rank, 10);
+                }
+                _rankedPerformanceTeams.set(awardGroup, rankedPerformanceTeams);
+            }
         });
     }
 
@@ -433,6 +464,18 @@ const deliberationModule = {};
         }
         return teams;
     };
+
+    /**
+     * @return array of arrays of teams in each place in the performance category. Includes an array at each index to handle ties.
+     */
+    deliberationModule.getRankedPerformanceTeams = function() {
+        const value = _rankedPerformanceTeams.get(finalist_module.getCurrentDivision());
+        if (null == value) {
+            return [];
+        } else {
+            return value;
+        }
+    }
 
     // always need to initialize variables
     _init_variables();
