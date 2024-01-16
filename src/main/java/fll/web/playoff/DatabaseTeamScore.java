@@ -109,7 +109,7 @@ public class DatabaseTeamScore extends TeamScore {
     }
   }
 
-  public double getDouble(final String goalName) {
+  private double getDouble(final String goalName) {
     final Object value = data.get(goalName);
     if (null == value) {
       return Double.NaN;
@@ -120,7 +120,7 @@ public class DatabaseTeamScore extends TeamScore {
     }
   }
 
-  public boolean getBoolean(final String goalName) {
+  private boolean getBoolean(final String goalName) {
     final Object value = data.get(goalName);
     if (null == value) {
       return false;
