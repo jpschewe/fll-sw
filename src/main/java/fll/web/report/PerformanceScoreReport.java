@@ -14,12 +14,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
 
@@ -51,6 +45,12 @@ import fll.xml.EnumeratedValue;
 import fll.xml.GoalElement;
 import fll.xml.GoalGroup;
 import fll.xml.PerformanceScoreCategory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -247,7 +247,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
 
     final PerformanceScoreCategory performance = challenge.getPerformance();
 
-    final DatabaseTeamScore[] scores = getScores(connection, tournament, team, numSeedingRounds);
+    final TeamScore[] scores = getScores(connection, tournament, team, numSeedingRounds);
     for (final GoalElement goalEle : performance.getGoalElements()) {
       if (goalEle.isGoalGroup()) {
         outputGoalGroup(document, tableBody, performance, scores, (GoalGroup) goalEle);
@@ -303,7 +303,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
   private static void outputGoalGroup(final Document document,
                                       final Element tableBody,
                                       final PerformanceScoreCategory performance,
-                                      final DatabaseTeamScore[] scores,
+                                      final TeamScore[] scores,
                                       final GoalGroup group) {
     final int numCols = scores.length
         + 1;
@@ -330,7 +330,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
   private static void outputGoal(final Document document,
                                  final Element tableBody,
                                  final PerformanceScoreCategory performance,
-                                 final DatabaseTeamScore[] scores,
+                                 final TeamScore[] scores,
                                  final AbstractGoal goal) {
     final double bestScore = bestScoreForGoal(scores, goal);
 
@@ -429,16 +429,15 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     return bestScore;
   }
 
-  private static DatabaseTeamScore[] getScores(final Connection connection,
-                                               final Tournament tournament,
-                                               final TournamentTeam team,
-                                               final int numSeedingRounds)
+  private static TeamScore[] getScores(final Connection connection,
+                                       final Tournament tournament,
+                                       final TournamentTeam team,
+                                       final int numSeedingRounds)
       throws SQLException {
-    final DatabaseTeamScore[] scores = new DatabaseTeamScore[numSeedingRounds];
+    final TeamScore[] scores = new TeamScore[numSeedingRounds];
     for (int runNumber = 1; runNumber <= numSeedingRounds; ++runNumber) {
       scores[runNumber
-          - 1] = new DatabaseTeamScore(tournament.getTournamentID(), team.getTeamNumber(),
-                                       runNumber, connection);
+          - 1] = new DatabaseTeamScore(tournament.getTournamentID(), team.getTeamNumber(), runNumber, connection);
     }
     return scores;
   }
