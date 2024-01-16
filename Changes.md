@@ -1,3 +1,5 @@
+* #1141 - Handle missing scores when generating team results
+
 Release 18.3.0
 ==============
 * #1138 - Add timestamp of when report generated to final computed scores
