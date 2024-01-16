@@ -409,8 +409,12 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     double bestScore = Double.MAX_VALUE
         * -1;
     for (final TeamScore score : scores) {
-      final double computedValue = performance.evaluate(score);
-      bestScore = Math.max(bestScore, computedValue);
+      if (score.scoreExists()) {
+        final double computedValue = performance.evaluate(score);
+        bestScore = Math.max(bestScore, computedValue);
+      } else {
+        bestScore = Math.max(bestScore, 0);
+      }
     }
     return bestScore;
   }
@@ -423,8 +427,12 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     double bestScore = Double.MAX_VALUE
         * -1;
     for (final TeamScore score : scores) {
-      final double computedValue = goal.evaluate(score);
-      bestScore = Math.max(bestScore, computedValue);
+      if (score.scoreExists()) {
+        final double computedValue = goal.evaluate(score);
+        bestScore = Math.max(bestScore, computedValue);
+      } else {
+        bestScore = Math.max(bestScore, 0);
+      }
     }
     return bestScore;
   }
