@@ -1,4 +1,5 @@
 * #1141 - Handle missing scores when generating team results
+* #1148 - Rename reports link on main index to match head judge page
 
 Release 18.3.0
 ==============

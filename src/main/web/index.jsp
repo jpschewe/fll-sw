@@ -70,7 +70,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     </c:if>
     <c:if
         test="${authentication.admin or authentication.reportGenerator or authentication.headJudge}">
-        <a class="wide" href="report/index.jsp">Tournament reporting</a>
+        <a class="wide" href="report/index.jsp">Generate reports</a>
         <a class="wide" href='challenge.xml'>Challenge Descriptor.
             One can use this to see the scoring and the tie breaker.</a>
         <a class="wide" href='BlankScoresheet' target="_blankScoresheet">Blank
