@@ -792,8 +792,10 @@ function dragOver(e) {
     // prevent default to allow drop
     e.preventDefault();
 
-    const sourceCategoryId = parseInt(e.dataTransfer.getData(TRANSFER_CATEGORY_ID), 10);
-    const sourceSection = e.dataTransfer.getData(TRANSFER_SECTION);
+    // Chrome won't let us access the data during drag, only on drop so need to use the div and it's cell
+    const sourceCell = draggingTeamDiv.parentNode;
+    const sourceCategoryId = parseInt(sourceCell.getAttribute(DATA_CATEGORY_ID), 10);
+    const sourceSection = sourceCell.parentNode.getAttribute(DATA_SECTION);
 
     const destCell = dndFindCell(e);
     const destCategoryId = parseInt(destCell.getAttribute(DATA_CATEGORY_ID), 10);
