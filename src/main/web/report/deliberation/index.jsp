@@ -4,7 +4,7 @@
 
 <%
 if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
-		"/report/deliberation/deliberation_load.jsp")) {
+		"/report/deliberation/index.jsp")) {
 	return;
 }
 %>
