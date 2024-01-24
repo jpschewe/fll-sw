@@ -1,5 +1,6 @@
 * #1141 - Handle missing scores when generating team results
 * #1148 - Rename reports link on main index to match head judge page
+* #1144 - Make duplicate teams in a schedule a hard error
 
 Release 18.3.0
 ==============

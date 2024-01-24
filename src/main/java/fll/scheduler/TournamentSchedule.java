@@ -699,7 +699,7 @@ public class TournamentSchedule implements Serializable {
     if (!schedule.contains(ti)) {
       schedule.add(ti);
     } else {
-      LOGGER.warn("Attempting to add the same team to the schedule twice: "
+      throw new FLLRuntimeException("Attempting to add the same team to the schedule twice: "
           + ti.getTeamNumber());
     }
   }
