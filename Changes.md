@@ -1,3 +1,4 @@
+* #1142 - Add presented by to awards script header
 * #1141 - Handle missing scores when generating team results
 * #1148 - Rename reports link on main index to match head judge page
 * #1144 - Make duplicate teams in a schedule a hard error

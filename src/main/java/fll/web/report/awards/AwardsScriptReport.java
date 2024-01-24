@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
@@ -181,7 +182,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final Element pageSequenceStart = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequenceStart);
 
-    final Element headerStart = createHeader(document, description, tournament, null);
+    final Element headerStart = createHeader(document, description, tournament, null, null);
     pageSequenceStart.appendChild(headerStart);
 
     final Element footerStart = createFooter(document, null);
@@ -208,7 +209,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final Element pageSequenceEnd = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequenceEnd);
 
-    final Element headerEnd = createHeader(document, description, tournament, null);
+    final Element headerEnd = createHeader(document, description, tournament, null, null);
     pageSequenceEnd.appendChild(headerEnd);
 
     final Element footerEnd = createFooter(document, null);
@@ -439,8 +440,10 @@ public class AwardsScriptReport extends BaseFLLServlet {
         final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
         rootElement.appendChild(pageSequence);
 
+        final String presenter = getCategoryPresenter(connection, tournament, category);
+
         final Element header = createHeader(document, description, tournament,
-                                            null == prevCategory ? null : prevCategory.getTitle());
+                                            null == prevCategory ? null : prevCategory.getTitle(), presenter);
         pageSequence.appendChild(header);
 
         final @Nullable String beforeText;
@@ -1053,22 +1056,31 @@ public class AwardsScriptReport extends BaseFLLServlet {
   }
 
   /**
-   * @param afterText used to specify the award that this is after
+   * @param afterText used to specify the award that this is after, may be null
+   * @param presenter who is presenting the award, may be null
    */
   private Element createHeader(final Document document,
                                final ChallengeDescription description,
                                final Tournament tournament,
-                               final @Nullable String afterText) {
+                               final @Nullable String afterText,
+                               final @Nullable String presenter) {
     final Element staticContent = FOPUtils.createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
     staticContent.setAttribute("flow-name", "xsl-region-before");
     staticContent.setAttribute("font-size", "10pt");
 
-    if (null != afterText) {
-      final Element afterBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-      staticContent.appendChild(afterBlock);
+    if (null != afterText
+        || !StringUtils.isBlank(presenter)) {
+      final Element afterPresenterBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      staticContent.appendChild(afterPresenterBlock);
+      afterPresenterBlock.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_LEFT);
 
-      afterBlock.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_LEFT);
-      afterBlock.appendChild(document.createTextNode(String.format("After %s", afterText)));
+      if (null != afterText) {
+        afterPresenterBlock.appendChild(document.createTextNode(String.format("After %s", afterText)));
+      }
+
+      if (!StringUtils.isBlank(presenter)) {
+        afterPresenterBlock.appendChild(document.createTextNode(String.format(" Presented By: %s", presenter)));
+      }
     }
 
     final Element titleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
