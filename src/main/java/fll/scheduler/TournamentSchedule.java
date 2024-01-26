@@ -406,8 +406,11 @@ public class TournamentSchedule implements Serializable {
     }
 
     try (PreparedStatement getSched = connection.prepareStatement("SELECT team_number, judging_station"
-        + " FROM schedule"//
-        + " WHERE tournament = ?");
+        + " FROM schedule, TournamentTeams" //
+        + " WHERE schedule.tournament = ?" //
+        + "   AND schedule.tournament = TournamentTeams.tournament" //
+        + "   AND schedule.team_number = TournamentTeams.TeamNumber" //
+    );
 
         PreparedStatement getPerfRounds = connection.prepareStatement("SELECT perf_time, table_color, table_side, practice" //
             + " FROM sched_perf_rounds" //

@@ -1,3 +1,4 @@
+* #1149 - handle changes to judging station in the schedule reports
 * #1142 - Add presented by to awards script header
 * #1141 - Handle missing scores when generating team results
 * #1148 - Rename reports link on main index to match head judge page

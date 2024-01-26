@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 36;
+  public static final int DATABASE_VERSION = 37;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -832,7 +832,6 @@ public final class GenerateDB {
       sql.append("CREATE TABLE schedule (");
       sql.append("  tournament INTEGER NOT NULL");
       sql.append(" ,team_number INTEGER NOT NULL");
-      sql.append(" ,judging_station LONGVARCHAR NOT NULL");
       sql.append(" ,CONSTRAINT schedule_pk PRIMARY KEY (tournament, team_number)");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT schedule_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
