@@ -1077,7 +1077,7 @@ function populatePerformanceCategory() {
 
         for (const teamDiv of cell.children) {
             const teamNumber = parseInt(teamDiv.getAttribute(DATA_TEAM_NUMBER), 10);
-            removeFromTeamDivs(teamNumber, teamDiv);            
+            removeFromTeamDivs(teamNumber, teamDiv);
         }
         removeChildren(cell);
 
@@ -1124,12 +1124,12 @@ function updatePage() {
 
     populatePotentialWinners();
 
+    addAdditionalTeamButtons(body);
+
     const afterPotentialWinners = addSeparator(body);
     afterPotentialWinners.setAttribute("id", "after_potential_winners");
 
     populateTeams();
-
-    addAdditionalTeamButtons(body);
 
     enableDisableWinnerCells(computeMaxNumAwards());
     populatePerformanceCategory();
