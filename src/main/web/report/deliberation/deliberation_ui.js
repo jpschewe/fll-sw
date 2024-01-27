@@ -422,6 +422,8 @@ function findOrCreateEmptyNomineeCell(judgingGroup, category) {
 
 /**
  * Adds a nominee to the UI without modifying the category. Used for loading.
+ * 
+ * @returns the team div
  */
 function addNomineeToUi(category, team) {
     const judgingGroup = team.judgingGroup;
@@ -430,6 +432,7 @@ function addNomineeToUi(category, team) {
     cell.appendChild(teamDiv);
     cell.setAttribute(DATA_CATEGORY_ID, category.catId);
     cell.classList.add("nominee");
+    return teamDiv;
 }
 
 /** 
@@ -550,10 +553,12 @@ function populateTeams() {
     addInitialNomineeRows();
 
     for (const category of sortedCategories) {
-        const nominees = category.getNominees();
-        for (const teamNumber of nominees) {
-            const team = finalist_module.lookupTeam(teamNumber);
-            addNomineeToUi(category, team);
+        if (category.scheduled) {
+            const nominees = category.getNominees();
+            for (const teamNumber of nominees) {
+                const team = finalist_module.lookupTeam(teamNumber);
+                addNomineeToUi(category, team);
+            }
         }
 
         for (const [index, teamNumber] of category.getPotentialWinners().entries()) {
@@ -562,12 +567,12 @@ function populateTeams() {
                 const place = index + 1;
 
                 const destCell = document.getElementById(potentialWinnerCellIdentifier(category, place));
-                const nomineeTeamDiv = findNomineeTeamDiv(category, teamNumber);
+                let nomineeTeamDiv = findNomineeTeamDiv(category, teamNumber);
                 if (null == nomineeTeamDiv) {
-                    alert(`Cannot find team {teamNumber} in nominees for {category.name} while loading`);
-                } else {
-                    dropNomineeToPotentialWinners(nomineeTeamDiv, destCell, category, team);
+                    nomineeTeamDiv = addNomineeToUi(category, team);
                 }
+
+                dropNomineeToPotentialWinners(nomineeTeamDiv, destCell, category, team);
             }
         }
 
