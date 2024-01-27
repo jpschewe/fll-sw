@@ -37,7 +37,12 @@ let sortedCategories = [];
 function createSortedCategories() {
     sortedCategories = [...deliberationModule.getAllCategories()];
 
+    const presentationOrder = deliberationModule.getAwardOrder();
+
     sortedCategories.sort(function(a, b) {
+        const aPresentationIndex = presentationOrder.indexOf(a.name);
+        const bPresentationIndex = presentationOrder.indexOf(b.name);
+
         if (a.name == finalist_module.CHAMPIONSHIP_NAME && b.name != finalist_module.CHAMPIONSHIP_NAME) {
             return -1;
         } else if (a.name == finalist_module.CHAMPIONSHIP_NAME && b.name == finalist_module.CHAMPIONSHIP_NAME) {
@@ -59,6 +64,10 @@ function createSortedCategories() {
         } else if (a.scheduled && !b.scheduled) {
             return -1;
         } else if (!a.scheduled && b.scheduled) {
+            return 1;
+        } else if (aPresentationIndex < bPresentationIndex) {
+            return -1;
+        } else if (aPresentationIndex > bPresentationIndex) {
             return 1;
         } else {
             // sort by name

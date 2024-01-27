@@ -23,14 +23,19 @@ const deliberationModule = {};
     // awardGroup -> [ [teamNumber, ...], ...]
     let _rankedPerformanceTeams;
 
+    // [categoryTitle, categoryTitle, ...]
+    let _awardOrder;
+
     function _init_variables() {
         _categories = new Map();
         _rankedPerformanceTeams = new Map();
+        _awardOrder = []
     }
 
     function _save() {
         fllStorage.set(STORAGE_PREFIX, "_categories", _categories);
         fllStorage.set(STORAGE_PREFIX, "_rankedPerformanceTeams", _rankedPerformanceTeams);
+        fllStorage.set(STORAGE_PREFIX, "_awardOrder", _awardOrder);
     }
 
     function _load() {
@@ -46,6 +51,11 @@ const deliberationModule = {};
         value = fllStorage.get(STORAGE_PREFIX, "_rankedPerformanceTeams");
         if (null != value) {
             _rankedPerformanceTeams = value;
+        }
+
+        value = fllStorage.get(STORAGE_PREFIX, "_awardOrder");
+        if (null != value) {
+            _awardOrder = value;
         }
 
     }
@@ -378,6 +388,12 @@ const deliberationModule = {};
         _save();
     };
 
+    function loadAwardOrder() {
+        return fetch("../../api/AwardsScript/AwardOrder").then(checkJsonResponse).then((result) => {
+            _awardOrder = result;
+        });
+    }
+
     function loadTopPerformanceScores() {
         return fetch("../../api/TopPerformanceScores").then(checkJsonResponse).then((result) => {
             _rankedPerformanceTeams = new Map();
@@ -413,6 +429,12 @@ const deliberationModule = {};
             failCallback("Top performance scores failed to load: " + error);
         })
         waitList.push(topPerformanceScoresPromise);
+
+        const awardOrderPromise = loadAwardOrder();
+        awardOrderPromise.catch((error) => {
+            failCallback("Award order failed to load: " + error);
+        })
+        waitList.push(awardOrderPromise);
 
         Promise.all(waitList).then((_) => {
             createCategories();
@@ -475,7 +497,14 @@ const deliberationModule = {};
         } else {
             return value;
         }
-    }
+    };
+
+    /**
+     * @returns list of category titles in the order that they will be presented
+     */
+    deliberationModule.getAwardOrder = function() {
+        return _awardOrder;
+    };
 
     // always need to initialize variables
     _init_variables();
