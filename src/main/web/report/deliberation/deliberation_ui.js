@@ -344,7 +344,7 @@ function findAllJudgingGroups() {
 }
 
 function addInitialNomineeRows() {
-    let prevRow = document.getElementById("after_potential_winners");
+    let prevRow = document.getElementById("add_team_buttons");
 
     const judgingGroups = findAllJudgingGroups();
     for (const judgingGroup of judgingGroups) {
@@ -527,7 +527,11 @@ function addPotentialWinnersRow(place, prevRow) {
 }
 
 function populatePotentialWinners() {
-    ensurePotentialWinnersRowExists(1);
+    const judgingGroups = findAllJudgingGroups();
+    for (let i = 0; i < judgingGroups.length; ++i) {
+        const place = i + 1;
+        ensurePotentialWinnersRowExists(place);
+    }
 }
 
 /**
@@ -1037,7 +1041,8 @@ function addAdditionalTeamButtons(body) {
 
     const row = document.createElement("div");
     row.classList.add("rTableRow");
-    body.appendChild(row)
+    body.appendChild(row);
+    row.setAttribute("id", "add_team_buttons");
 
     const placeCell = document.createElement("div");
     row.appendChild(placeCell);
@@ -1138,10 +1143,10 @@ function updatePage() {
 
     populatePotentialWinners();
 
-    addAdditionalTeamButtons(body);
-
     const afterPotentialWinners = addSeparator(body);
     afterPotentialWinners.setAttribute("id", "after_potential_winners");
+
+    addAdditionalTeamButtons(body);
 
     populateTeams();
 
