@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function() {
     init();
 
     // if set, return true to submit, false to skip submit
-    var yesCallback = null;
+    let yesCallback = null;
 
     document.getElementById("verification-warning").classList.add("fll-sw-ui-inactive");
 
@@ -21,7 +21,14 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         if (dosubmit) {
-            document.getElementById("scoreEntry").submit();
+            const storageData = score_entry_module.newStorageData(teamNumber, runNumber, roundText);
+            const form = document.getElementById("scoreEntry");
+            const formData = new FormData(form);
+            for (const pair of formData.entries()) {
+                storageData.formValues.set(pair[0], pair[1]);
+            }
+            score_entry_module.saveStorageData(storageData);
+            score_entry_module.uploadScore(storageData);
         }
     });
 
@@ -34,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function() {
         submitScoreButton.addEventListener("click", function() {
             yesCallback = null;
 
-            var text = "";
+            let text = "";
             if (EditFlag) {
                 if (Verified == 1) {
                     if (savedTotalScore != document.scoreEntry.totalScore.value) {

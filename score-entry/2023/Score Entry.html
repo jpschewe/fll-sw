@@ -1,10 +1,10 @@
 <html><head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 
-  
-  
-    <title>Score Entry</title>
-  
+    
+    
+        <title>Score Entry</title>
+    
 
 
 <!-- is practice true -->
@@ -15,25 +15,33 @@
 <!-- a couple of things come from the JSP, so need to be inline -->
 <style type="text/css">
 table#top_info {
-    background-color: #e0e0e0;
+    background-color: #e0e0e0
 
+;
 }
 body {
-    background-color: transparent;
-}
+    background-color: transparent
 
+;
+}
 .restriction-error {
     background-color: red;
 }
 </style>
-    
+
 <script type="text/javascript" src="Score%20Entry_files/fll-functions.js"></script>
 <script type="text/javascript" src="Score%20Entry_files/fll-objects.js"></script>
-    
+<script type="text/javascript" src="Score%20Entry_files/fll-storage.js"></script>
+<script type="text/javascript" src="Score%20Entry_files/scoreEntryModule.js"></script>
+
 
 
 
 <script type="text/javascript">
+const roundText = "";
+const teamNumber = "";
+const runNumber = "";
+
 var EditFlag = false;
 
 
@@ -169,19 +177,19 @@ document.scoreEntry.score_m02_scene_change.value = m02_scene_change_computed;
 // m02_b_other_team_scene_change
 if(m02_b_other_team_scene_change_raw == "zeroother") {
   document.scoreEntry.m02_b_other_team_scene_change[0].checked = true;
-  m02_b_other_team_scene_change_computed = 0.000000 * 1.0;
+  m02_b_other_team_scene_change_computed = 0.000000 * 0.0;
   document.scoreEntry.m02_b_other_team_scene_change_radioValue.value = 'ZEROOTHER'
 } else if(m02_b_other_team_scene_change_raw == "orangeother") {
   document.scoreEntry.m02_b_other_team_scene_change[1].checked = true;
-  m02_b_other_team_scene_change_computed = 10.000000 * 1.0;
+  m02_b_other_team_scene_change_computed = 1.000000 * 0.0;
   document.scoreEntry.m02_b_other_team_scene_change_radioValue.value = 'ORANGEOTHER'
 } else if(m02_b_other_team_scene_change_raw == "blueother") {
   document.scoreEntry.m02_b_other_team_scene_change[2].checked = true;
-  m02_b_other_team_scene_change_computed = 20.000000 * 1.0;
+  m02_b_other_team_scene_change_computed = 2.000000 * 0.0;
   document.scoreEntry.m02_b_other_team_scene_change_radioValue.value = 'BLUEOTHER'
 } else if(m02_b_other_team_scene_change_raw == "pinkother") {
   document.scoreEntry.m02_b_other_team_scene_change[3].checked = true;
-  m02_b_other_team_scene_change_computed = 30.000000 * 1.0;
+  m02_b_other_team_scene_change_computed = 3.000000 * 0.0;
   document.scoreEntry.m02_b_other_team_scene_change_radioValue.value = 'PINKOTHER'
 }
 score += m02_b_other_team_scene_change_computed;
@@ -551,10 +559,15 @@ score += count_audience_movie_set_computed;
 compute_count_audience_light_show();
 score += count_audience_light_show_computed;
 
+const verifiedLabel = document.getElementById('verify-score-label');
 if(Verified == 0) {
-  document.scoreEntry.Verified[0].checked = true
+  document.scoreEntry.Verified[0].checked = true;
+  verifiedLabel.classList.add('verify-score-unverified');
+  verifiedLabel.classList.remove('verify-score-verified');
 } else {
-  document.scoreEntry.Verified[1].checked = true
+  document.scoreEntry.Verified[1].checked = true;
+  verifiedLabel.classList.remove('verify-score-unverified');
+  verifiedLabel.classList.add('verify-score-verified');
 }
 
 
@@ -2060,87 +2073,111 @@ document.addEventListener('DOMContentLoaded', function() {
 <body>
 
   <form action="SubmitScoreEntry" method="POST" name="scoreEntry" id="scoreEntry" class="fll-sw-ui-body">
-    <input type="hidden" id="NoShow" name="NoShow" value="false">
+        
+            
+            
+                <input type="hidden" name="tablename" value="ALL">
+            
+        
+
+        <input type="hidden" id="NoShow" name="NoShow" value="false">
     <input type="hidden" id="delete" name="delete" value="false">
 
-      <input type="hidden" name="EditFlag" id="EditFlag" value="false" readonly="readonly">
-    
-    <input type="hidden" name="RunNumber" value="" readonly="readonly"> <input type="hidden" name="TeamNumber" value="" readonly="readonly">
+        <input type="hidden" name="EditFlag" id="EditFlag" value="false" readonly="readonly">
 
-<header>
-  <div id="floating-messages">
-    <div id="score-errors" class="fll-sw-ui-inactive"></div>
-    <div id="verification-warning" class="fll-sw-ui-inactive">Are you sure this score has
-      been Verified? Normally scores are not verified on the initial
-      entry.</div>
-  </div>
+        <input type="hidden" name="RunNumber" value="" readonly="readonly">
+        <input type="hidden" name="TeamNumber" value="" readonly="readonly">
 
-          <!-- top info bar (team name etc) -->
-          <table id="top_info" border="1" cellpadding="0" cellspacing="0" width="100%">
-            <tbody><tr align="center" valign="middle">
-              <td>
+        <header>
+            <div id="floating-messages">
+                <div id="score-errors" class="fll-sw-ui-inactive"></div>
+                <div id="verification-warning" class="fll-sw-ui-inactive">Are you sure this
+                    score has been Verified? Normally scores are not
+                    verified on the initial entry.</div>
+            </div>
 
-                <table border="0" cellpadding="5" cellspacing="0" width="90%">
-                  <!--  inner box on title -->
-                  <tbody><tr>
-                    <td valign="middle" align="center">
-                        
-                        
-                          <font face="Arial" size="4">Score Entry</font>
-                        
-                      </td>
-                  </tr>
-                  <tr align="center">
-                    <td><font face="Arial" size="4" color="#0000ff">
+            <!-- top info bar (team name etc) -->
+            <table id="top_info" border="1" cellpadding="0" cellspacing="0" width="100%">
+                <tbody><tr align="center" valign="middle">
+                    <td>
 
-                                                
-                                                    
+                        <table border="0" cellpadding="5" cellspacing="0" width="90%">
+                            <!--  inner box on title -->
+                            <tbody><tr>
+                                <td valign="middle" align="center">
+                                    
+                                        
+                                        
+                                            <font face="Arial" size="4">Score
+                                                Entry</font>
+                                        
+                                    
+                                </td>
+                            </tr>
+                            <tr align="center">
+                                <td>
+                                    <font face="Arial" size="4" color="#0000ff">
+
+                                        
+                                            
                       Practice
                       
-                                                    
-                                                
-                                            </font>
+                                            
+                                        
+                                    </font>
+                                </td>
+                            </tr>
+                        </tbody></table>
+                        <!--  end inner box on title -->
+
                     </td>
-                  </tr>
-                </tbody></table> <!--  end inner box on title -->
+                </tr>
+                <!-- team info -->
 
-              </td>
-            </tr>
-            <!-- team info -->
-
-            
-
-          </tbody></table> <!--  end info bar -->
-</header>
-
-<main id="review-mode_container">
-                <div id="review-mode_glasspane"></div>
-
-      <!-- score entry -->
-          <table class="score-entry">
-            <colgroup>
-              <!--  goal -->
-              <col width="50%">
-              <!-- buttons -->
-              <col width="30%">
-              <!-- count -->
-              <col width="10%">
-              <!--  score -->
-              <col width="10%">
-            </colgroup>
-            <tbody><tr>
-              <td colspan="2"><font size="4"><u>Goal</u></font></td>
-              <td align="right"><font size="4"><u>Count</u></font>
-              </td>
-              <td align="right" class="score-cell"><font size="4"><u>Score</u></font>
-              </td>
-            </tr>
-
-            
-              
-              
                 
-                <tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+
+            </tbody></table>
+            <!--  end info bar -->
+        </header>
+
+        <main id="review-mode_container">
+            <div id="review-mode_glasspane"></div>
+
+            <!-- score entry -->
+            <table class="score-entry">
+                <colgroup>
+                    <!--  goal -->
+                    <col width="50%">
+                    <!-- buttons -->
+                    <col width="30%">
+                    <!-- count -->
+                    <col width="10%">
+                    <!--  score -->
+                    <col width="10%">
+                </colgroup>
+                <tbody><tr>
+                    <td colspan="2">
+                        <font size="4">
+                            <u>Goal</u>
+                        </font>
+                    </td>
+                    <td align="right">
+                        <font size="4">
+                            <u>Count</u>
+                        </font>
+                    </td>
+                    <td align="right" class="score-cell">
+                        <font size="4">
+                            <u>Score</u>
+                        </font>
+                    </td>
+                </tr>
+
+                
+                    
+                    
+                        
+                        <tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
 <tr>
 <td colspan="4" class="center truncate"><b>M00 - EQUIPMENT INSPECTION BONUS</b></td>
 </tr>
@@ -3239,18 +3276,21 @@ Target Area (Art on Pedestal Not Touching Equipment at end):
 
 
 
-                <!-- Total Score -->
-                <tr class="total-score-container">
-                  <td colspan="3" class="total-score-label">Total
-                        Score:</td>
-                  <td align="right" class="score-cell"><input type="text" name="totalScore" size="3" readonly="readonly" tabindex="-1" value="50"></td>
-                </tr>
-              
-            
-            <!-- end check for bye -->
+                        <!-- Total Score -->
+                        <tr class="total-score-container">
+                            <td colspan="3" class="total-score-label">Total
+                                Score:</td>
+                            <td align="right" class="score-cell">
+                                <input type="text" name="totalScore" size="3" readonly="readonly" tabindex="-1" value="50">
+                            </td>
+                        </tr>
+                    
+                
+                <!-- end check for bye -->
 
-           </tbody></table> <!-- end score entry table  -->
-</main>
+            </tbody></table>
+            <!-- end score entry table  -->
+        </main>
 
         <footer>
             <div class="score-entry buttonbox">
@@ -3259,7 +3299,7 @@ Target Area (Art on Pedestal Not Touching Equipment at end):
                     Toggle</button>
 
                 <!-- Score Verification -->
-      <span class="verify-score-label float_right">
+      <span id="verify-score-label" class="float_right verify-score-unverified">
 Team Agrees with the above entries:
 </span>
       <span class="verify-score-buttonbox">
@@ -3276,19 +3316,18 @@ Team Agrees with the above entries:
             </div>
 
             <div class="buttonbox score-entry-buttons">
-            
-            
+
+
                 <span id="challenge_revision">Challenge revision:
-                    08</span>
+                    10</span>
                 <span id="software_version">
                     Software version:
-                    18.1.0</span>
-                    
-                    <span class="float_right">&nbsp;</span>
+                    18.3.1</span>
+
+                <span class="float_right">&nbsp;</span>
                 
                     
-                        <button type="button" id="reset_score" class="fll-sw-button">Reset
-                            Form</button>
+                        <button type="button" id="reset_score" class="fll-sw-button">Reset Form</button>
                     
                     
                 
@@ -3296,7 +3335,7 @@ Team Agrees with the above entries:
         </footer>
 
     </form>
-  <!-- end score entry form -->
+    <!-- end score entry form -->
 
 
     <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="yesno-dialog">
@@ -3306,7 +3345,7 @@ Team Agrees with the above entries:
             <button type="button" id="yesno-dialog_no">No</button>
         </div>
     </div>
-    
+
 
 
 </body></html>
