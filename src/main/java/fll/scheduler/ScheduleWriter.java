@@ -551,7 +551,7 @@ public final class ScheduleWriter {
       // check if team is missing an opponent
       if (null == schedule.findOpponent(si, performance)) {
         teamsMissingOpponents.add(si);
-        row.setAttribute("background-color", "magenta");
+        row.setAttribute("background-color", "lightgrey");
       }
 
       final LocalTime performanceTime = performance.getTime();

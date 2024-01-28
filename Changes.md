@@ -1,3 +1,4 @@
+* #1150 - Change background color of missing team cell on performance schedule to be compatible with black & white printing
 * #1142 - Add presented by to awards script header
 * #1141 - Handle missing scores when generating team results
 * #1148 - Rename reports link on main index to match head judge page
