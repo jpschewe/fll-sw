@@ -53,3 +53,14 @@ and mark draggable things as movable. */
 #add-team-dialog_container {
     width: fit-content;
 }
+
+#header_row .rTableHead {
+    z-index: 10;
+}
+
+#header_row .rTableHead, .rTableRow .rTableCell:first-child {
+    position: sticky;
+    background: #ddd;
+    top: 0px;
+    left: 0px;
+}
