@@ -108,10 +108,12 @@ public final class AuthenticationContext implements Serializable {
   }
 
   /**
-   * @return is this user a report generator
+   * @return is this user a report generator, includes admin and head judge
    */
   public boolean isReportGenerator() {
-    return roles.contains(UserRole.REPORT_GENERATOR);
+    return roles.contains(UserRole.REPORT_GENERATOR)
+        || roles.contains(UserRole.HEAD_JUDGE)
+        || roles.contains(UserRole.ADMIN);
   }
 
   /**
