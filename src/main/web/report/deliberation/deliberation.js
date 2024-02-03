@@ -244,23 +244,6 @@ const deliberationModule = {};
             this.setWinners(winners);
         }
         /**
-         * Remove a winner. Sets the winner to null.
-         * 
-         * @param place the place (1-based) of the team
-         */
-        unsetWinner(place) {
-            const winners = this.getWinners();
-            if (place < 1) {
-                throw new Error("Place must be greater than 0");
-            }
-            if (place > winners.length) {
-                throw new Error("Place must less than or equal to the number of awards");
-            }
-
-            const placeIndex = place - 1;
-            winners[placeIndex] = null;
-        }
-        /**
          * Remove all instances of teamNum from winners.
          */
         removeWinner(teamNum) {
@@ -368,7 +351,6 @@ const deliberationModule = {};
         let performanceCategory = deliberationModule.getCategoryByName(deliberationModule.PERFORMANCE_CATEGORY_NAME);
         if (null == performanceCategory) {
             performanceCategory = Category.create(deliberationModule.PERFORMANCE_CATEGORY_NAME, true);
-            //FIXME need to load performance winners from somewhere
         }
     }
 
@@ -421,7 +403,85 @@ const deliberationModule = {};
         });
     }
 
+    /**
+     * Common processing of winners across non-numeric, non-numeric overall and subjective.
+     * For this code they can all be handled the same way.
+     */
+    function processAwardWinners(result) {
+        // data comes in sorted by category, then place
+
+        // group the winners per category and only capture those for the current award group
+        // note that winner.awardGroup won't be set for overall winners, they are considered part of any award group
+
+        // category name -> [winner, winner]
+        const perCategory = new Map();
+        for (const winner of result) {
+            const categoryName = winner.name;
+            if (!winner.awardGroup || winner.awardGroup == finalist_module.getCurrentDivision()) {
+                let winners = perCategory.get(categoryName);
+                if (null == winners) {
+                    winners = [];
+                }
+                winners.push(winner);
+                perCategory.set(categoryName, winners);
+            }
+        }
+
+        // break down the information into what is needed and restructure to handle 1 winner per place and nulls to skip places
+        for (const [categoryName, winners] of perCategory) {
+            const category = deliberationModule.getCategoryByName(categoryName);
+            if (null == category) {
+                alert(`Unable to find category with name "${categoryName}"`);
+                continue;
+            }
+
+            const categoryWinners = [];
+            for (const winner of winners) {
+                const winnerPlace = parseInt(winner.place, 10);
+                const teamNumber = parseInt(winner.teamNumber, 10);
+                while (winnerPlace > categoryWinners.length + 1) {
+                    // handle skipping places
+                    categoryWinners.push(null);
+                }
+
+                // make sure they are a nominee
+                category.addNominee(teamNumber);
+
+                // make sure they are a potential winner
+                const potentialWinners = category.getPotentialWinners();
+                if (!potentialWinners.includes(teamNumber)) {
+                    potentialWinners.push(teamNumber);
+                    category.setPotentialWinners(potentialWinners);
+                }
+
+                categoryWinners.push(teamNumber);
+            }
+            category.setWinners(categoryWinners);
+        }
+    }
+
+    function loadNonNumericAwardWinners() {
+        return fetch("../../api/AwardsScript/NonNumericAwardWinners").then(checkJsonResponse).then((result) => {
+            processAwardWinners(result);
+        });
+    }
+
+    function loadNonNumericOverallAwardWinners() {
+        return fetch("../../api/AwardsScript/NonNumericOverallAwardWinners").then(checkJsonResponse).then((result) => {
+            processAwardWinners(result);
+        });
+    }
+
+    function loadSubjectiveAwardWinners() {
+        return fetch("../../api/AwardsScript/SubjectiveAwardWinners").then(checkJsonResponse).then((result) => {
+            processAwardWinners(result);
+        });
+    }
+
+
     function postFinalistLoad(doneCallback, failCallback) {
+        createCategories();
+
         const waitList = [];
 
         const topPerformanceScoresPromise = loadTopPerformanceScores();
@@ -436,8 +496,25 @@ const deliberationModule = {};
         })
         waitList.push(awardOrderPromise);
 
+        const nonNumericAwardWinners = loadNonNumericAwardWinners();
+        nonNumericAwardWinners.catch((error) => {
+            failCallback("Non-numeric award winners failed to load: " + error);
+        })
+        waitList.push(nonNumericAwardWinners);
+
+        const nonNumericOverallAwardWinners = loadNonNumericOverallAwardWinners();
+        nonNumericOverallAwardWinners.catch((error) => {
+            failCallback("Non-numeric overall award winners failed to load: " + error);
+        })
+        waitList.push(nonNumericOverallAwardWinners);
+
+        const subjectiveAwardWinners = loadSubjectiveAwardWinners();
+        subjectiveAwardWinners.catch((error) => {
+            failCallback("Subjective award winners failed to load: " + error);
+        })
+        waitList.push(subjectiveAwardWinners);
+
         Promise.all(waitList).then((_) => {
-            createCategories();
             deliberationModule.saveToLocalStorage();
             doneCallback();
         });
