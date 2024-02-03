@@ -108,6 +108,13 @@ public final class AuthenticationContext implements Serializable {
   }
 
   /**
+   * @return is this user a report generator
+   */
+  public boolean isReportGenerator() {
+    return roles.contains(UserRole.REPORT_GENERATOR);
+  }
+
+  /**
    * @return is this user a public user, currently everyone is public
    */
   public boolean isPublic() {

@@ -1,6 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="JUDGE,REF" allowSetup="false" />
+<fll-sw:required-roles roles="JUDGE,REF,REPORT_GENERATOR" allowSetup="false" />
 
 <%
 fll.web.report.TopScoreReport.populateContextPerAwardGroup(application, pageContext);

@@ -54,7 +54,8 @@ public class PlayoffSchedulesServlet extends HttpServlet {
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
     if (!auth.isJudge()
-        && !auth.isRef()) {
+        && !auth.isRef()
+        && !auth.isReportGenerator()) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
@@ -87,7 +88,8 @@ public class PlayoffSchedulesServlet extends HttpServlet {
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
     if (!auth.isJudge()
-        && !auth.isRef()) {
+        && !auth.isRef()
+        && !auth.isReportGenerator()) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }

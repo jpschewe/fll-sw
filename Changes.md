@@ -1,3 +1,13 @@
+* #1150 - Change background color of missing team cell on performance schedule to be compatible with black & white printing
+* #1142 - Add presented by to awards script header
+* #1141 - Handle missing scores when generating team results
+* #1148 - Rename reports link on main index to match head judge page
+* #1144 - Make duplicate teams in a schedule a hard error
+
+Release 18.3.0
+==============
+* #1138 - Add timestamp of when report generated to final computed scores
+* #1136 - Add role for report generators
 * #1120 - Add support for changing the FLL logo on the subjective rubrics
 * #1119 - Add support for changing the FLL logo on the welcome page
 * #1121 - Add support for changing the partner logo on the welcome page
