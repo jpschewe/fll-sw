@@ -638,8 +638,6 @@ public final class ScheduleWriter {
         final Element stayingTableRow = FOPUtils.createTableRow(document);
         stayingTableBody.appendChild(stayingTableRow);
 
-        stayingTableRow.setAttribute("background-color", "magenta");
-
         final Element stayingTableCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                   String.format(formatString, si.getTeamNumber()));
         stayingTableRow.appendChild(stayingTableCell);
