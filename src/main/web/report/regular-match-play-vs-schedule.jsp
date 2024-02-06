@@ -1,6 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="REF" allowSetup="false" />
+<fll-sw:required-roles roles="REF,HEAD_JUDGE" allowSetup="false" />
 
 <%
 fll.web.report.RegularMatchPlayVsSchedule.populateContext(application, pageContext);
