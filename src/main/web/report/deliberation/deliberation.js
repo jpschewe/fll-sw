@@ -414,10 +414,18 @@ const deliberationModule = {};
         // note that winner.awardGroup won't be set for overall winners, they are considered part of any award group
 
         // category name -> [winner, winner]
+        // filter down to teams in the current award group
         const perCategory = new Map();
         for (const winner of result) {
             const categoryName = winner.name;
-            if (!winner.awardGroup || winner.awardGroup == finalist_module.getCurrentDivision()) {
+            const teamNumber = parseInt(winner.teamNumber, 10);
+            const team = finalist_module.lookupTeam(teamNumber);
+            if(!team) {
+                alert(`Cannot find team with number ${teamNumber}`);
+                continue;
+            }
+            
+            if (team.awardGroup == finalist_module.getCurrentDivision()) {
                 let winners = perCategory.get(categoryName);
                 if (null == winners) {
                     winners = [];
