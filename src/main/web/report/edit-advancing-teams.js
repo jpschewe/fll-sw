@@ -90,15 +90,8 @@ function storeAdvancingTeams() {
     if (advancing.length) {
         // send to server
 
-        return fetch("/api/AdvancingTeams",
-            {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(advancing)
-            }
-        ).then(checkJsonResponse)
+        return uploadJsonData("/api/AdvancingTeams", "POST", advancing)
+            .then(checkJsonResponse)
             .catch(error => { throw new Error("Error sending group advancing teams: " + error) });
 
     } else {

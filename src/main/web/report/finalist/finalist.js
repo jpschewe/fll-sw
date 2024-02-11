@@ -1283,20 +1283,16 @@ const finalist_module = {}
             allNonNumericNominees.push(nominees);
         } // foreach category
 
-        const dataToUpload = JSON.stringify(allNonNumericNominees);
-        return fetch("../../api/NonNumericNominees", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: dataToUpload
-        }).then(checkJsonResponse).then(function(result) {
-            if (result.success) {
-                successCallback(result);
-            } else {
+        return uploadJsonData("../../api/NonNumericNominees", "POST", allNonNumericNominees)
+            .then(checkJsonResponse).then(function(result) {
+                if (result.success) {
+                    successCallback(result);
+                } else {
+                    failCallback(result);
+                }
+            }).catch(function(result) {
                 failCallback(result);
-            }
-        }).catch(function(result) {
-            failCallback(result);
-        });
+            });
     };
 
     /**
@@ -1328,20 +1324,16 @@ const finalist_module = {}
             }
         }
 
-        const dataToUpload = JSON.stringify(schedulesToUpload);
-        return fetch("../../api/PlayoffSchedules", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: dataToUpload
-        }).then(checkJsonResponse).then(function(result) {
-            if (result.success) {
-                successCallback(result);
-            } else {
+        return uploadJsonData("../../api/PlayoffSchedules", "POST", schedulesToUpload)
+            .then(checkJsonResponse).then(function(result) {
+                if (result.success) {
+                    successCallback(result);
+                } else {
+                    failCallback(result);
+                }
+            }).catch(function(result) {
                 failCallback(result);
-            }
-        }).catch(function(result) {
-            failCallback(result);
-        });
+            });
     };
 
     /**
@@ -1373,20 +1365,16 @@ const finalist_module = {}
             }
         }
 
-        const dataToUpload = JSON.stringify(paramsToUpload);
-        return fetch("../../api/FinalistScheduleParameters", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: dataToUpload
-        }).then(checkJsonResponse).then(function(result) {
-            if (result.success) {
-                successCallback(result);
-            } else {
+        return uploadJsonData("../../api/FinalistScheduleParameters", "POST", paramsToUpload)
+            .then(checkJsonResponse).then(function(result) {
+                if (result.success) {
+                    successCallback(result);
+                } else {
+                    failCallback(result);
+                }
+            }).catch(function(result) {
                 failCallback(result);
-            }
-        }).catch(function(result) {
-            failCallback(result);
-        });
+            });
     };
 
     /**
@@ -1453,20 +1441,16 @@ const finalist_module = {}
             }
         }
 
-        const dataToUpload = JSON.stringify(scheduleMap);
-        return fetch("../../api/FinalistSchedule", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: dataToUpload
-        }).then(checkJsonResponse).then(function(result) {
-            if (result.success) {
-                successCallback(result);
-            } else {
+        return uploadJsonData("../../api/FinalistSchedule", "POST", scheduleMap)
+            .then(checkJsonResponse).then(function(result) {
+                if (result.success) {
+                    successCallback(result);
+                } else {
+                    failCallback(result);
+                }
+            }).catch(function(result) {
                 failCallback(result);
-            }
-        }).catch(function(result) {
-            failCallback(result);
-        });
+            });
     };
 
     /**
