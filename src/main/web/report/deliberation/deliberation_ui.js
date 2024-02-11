@@ -566,12 +566,10 @@ function populateTeams() {
     addInitialNomineeRows();
 
     for (const category of sortedCategories) {
-        if (category.scheduled) {
-            const nominees = category.getNominees();
-            for (const teamNumber of nominees) {
-                const team = finalist_module.lookupTeam(teamNumber);
-                addNomineeToUi(category, team);
-            }
+        const nominees = category.getNominees();
+        for (const teamNumber of nominees) {
+            const team = finalist_module.lookupTeam(teamNumber);
+            addNomineeToUi(category, team);
         }
 
         for (const [index, teamNumber] of category.getPotentialWinners().entries()) {
