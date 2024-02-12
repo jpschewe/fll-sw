@@ -31,7 +31,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
-import fll.web.api.PostResult;
+import fll.web.api.ApiResult;
 import fll.web.playoff.MapTeamScore;
 import fll.web.playoff.Playoff;
 import fll.web.playoff.TeamScore;
@@ -110,7 +110,7 @@ public class SubmitScoreEntry extends HttpServlet {
 
         final String message = String.format("<div class='success'>Deleted score for team %d run %d</div>", teamNumber,
                                              runNumber);
-        final PostResult result = new PostResult(true, Optional.of(message));
+        final ApiResult result = new ApiResult(true, Optional.of(message));
         jsonMapper.writeValue(writer, result);
       } else if (Boolean.valueOf(formData.get("EditFlag"))) {
         final TeamScore teamScore = new MapTeamScore(teamNumber, runNumber, formData);
@@ -123,7 +123,7 @@ public class SubmitScoreEntry extends HttpServlet {
 
         final String message = String.format("<div class='success'>Edited score for team %d run %d</div>", teamNumber,
                                              runNumber);
-        final PostResult result = new PostResult(true, Optional.of(message));
+        final ApiResult result = new ApiResult(true, Optional.of(message));
         jsonMapper.writeValue(writer, result);
       } else {
         final String noShow = formData.get("NoShow");
@@ -137,7 +137,7 @@ public class SubmitScoreEntry extends HttpServlet {
           final String message = String.format("<div class='error'>Someone else has already entered a score for team %s run %d. Check that you selected the correct team and enter the score again.</div>",
                                                teamNumber, runNumber);
 
-          final PostResult result = new PostResult(false, Optional.of(message));
+          final ApiResult result = new ApiResult(false, Optional.of(message));
           jsonMapper.writeValue(writer, result);
         } else {
           final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
@@ -165,7 +165,7 @@ public class SubmitScoreEntry extends HttpServlet {
 
           final String message = String.format("<div class='success'>Entered score for team number %d %s</div>",
                                                teamNumber, roundText);
-          final PostResult result = new PostResult(true, Optional.of(message));
+          final ApiResult result = new ApiResult(true, Optional.of(message));
           jsonMapper.writeValue(writer, result);
         }
       }

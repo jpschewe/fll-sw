@@ -11,8 +11,11 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 import javax.sql.DataSource;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -20,9 +23,13 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.AwardWinner;
 import fll.db.AwardWinners;
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
+import fll.web.api.ApiResult;
+import fll.web.api.awardsScript.AwardWinnerApiUtils.PutData;
+import fll.web.api.awardsScript.AwardWinnerApiUtils.PutPathInfo;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -34,8 +41,10 @@ import jakarta.servlet.http.HttpSession;
 /**
  * @see AwardWinners#getNonNumericAwardWinners(java.sql.Connection, int)
  */
-@WebServlet("/api/AwardsScript/NonNumericAwardWinners")
+@WebServlet("/api/AwardsScript/NonNumericAwardWinners/*")
 public class NonNumericAwardWinners extends HttpServlet {
+
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Override
   protected final void doGet(final HttpServletRequest request,
@@ -46,7 +55,7 @@ public class NonNumericAwardWinners extends HttpServlet {
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
     if (!auth.isReportGenerator()) {
-      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+      response.sendError(HttpServletResponse.SC_FORBIDDEN, "Must be ReportGenereator");
       return;
     }
 
@@ -65,6 +74,108 @@ public class NonNumericAwardWinners extends HttpServlet {
       jsonMapper.writeValue(writer, winners);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Add a new or modify an existing winner. This technically should be PATCH,
+   * but Apache Tomcat doesn't support PATCH at this time, so PUT is being used
+   * instead.
+   * Expecting url "{category.name}/{winnerTeamNumber}" and payload
+   * of {@link PutData}.
+   */
+  @Override
+  protected final void doPut(final HttpServletRequest request,
+                             final HttpServletResponse response)
+      throws IOException, ServletException {
+    final ServletContext application = getServletContext();
+    final HttpSession session = request.getSession();
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.isReportGenerator()) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN, "Must be ReportGenereator");
+      return;
+    }
+
+    final Optional<AwardWinnerApiUtils.PutPathInfo> putPathInfo = AwardWinnerApiUtils.parsePutPathInfo(LOGGER, "doPut",
+                                                                                                       request,
+                                                                                                       response);
+    if (putPathInfo.isEmpty()) {
+      return;
+    }
+
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
+    final PutData data = jsonMapper.readValue(request.getReader(), PutData.class);
+
+    final String awardGroup = data.awardGroup;
+    if (null == awardGroup) {
+      LOGGER.error("doPut: awardGroup cannot be null");
+      response.sendError(HttpServletResponse.SC_FORBIDDEN, "Must be ReportGenereator");
+      return;
+    }
+
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
+      final Tournament tournament = Tournament.getCurrentTournament(connection);
+
+      final @Nullable AwardWinner existingWinner = AwardWinners.getNonNumericAwardWinner(connection,
+                                                                                         tournament.getTournamentID(),
+                                                                                         putPathInfo.get()
+                                                                                                    .getCategoryName(),
+                                                                                         putPathInfo.get()
+                                                                                                    .getTeamNumber());
+      if (null == existingWinner) {
+        final AwardWinner winner = new AwardWinner(putPathInfo.get().getCategoryName(), awardGroup,
+                                                   putPathInfo.get().getTeamNumber(), data.description, data.place);
+        AwardWinners.addNonNumericAwardWinner(connection, tournament.getTournamentID(), winner);
+      } else {
+        final AwardWinner winner = new AwardWinner(putPathInfo.get().getCategoryName(), awardGroup,
+                                                   putPathInfo.get().getTeamNumber(),
+                                                   data.descriptionSpecified ? data.description
+                                                       : existingWinner.getDescription(),
+                                                   data.place);
+        AwardWinners.updateNonNumericAwardWinner(connection, tournament.getTournamentID(), winner);
+      }
+
+      jsonMapper.writeValue(response.getWriter(), new ApiResult(true, Optional.empty()));
+    } catch (final SQLException e) {
+      throw new FLLRuntimeException("Error talking to the database", e);
+    }
+  }
+
+  /**
+   * Delete a winner.
+   * Expecting url "{category.name}/{winnerTeamNumber}"
+   */
+  @Override
+  protected final void doDelete(final HttpServletRequest request,
+                                final HttpServletResponse response)
+      throws IOException, ServletException {
+    final ServletContext application = getServletContext();
+    final HttpSession session = request.getSession();
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+
+    if (!auth.isReportGenerator()) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN, "Must be ReportGenereator");
+      return;
+    }
+
+    final Optional<PutPathInfo> putPathInfo = AwardWinnerApiUtils.parsePutPathInfo(LOGGER, "doPut", request, response);
+    if (putPathInfo.isEmpty()) {
+      return;
+    }
+
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
+      final Tournament tournament = Tournament.getCurrentTournament(connection);
+
+      AwardWinners.deleteNonNumericAwardWinner(connection, tournament.getTournamentID(),
+                                               putPathInfo.get().getCategoryName(), putPathInfo.get().getTeamNumber());
+
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
+      jsonMapper.writeValue(response.getWriter(), new ApiResult(true, Optional.empty()));
+    } catch (final SQLException e) {
+      throw new FLLRuntimeException("Error talking to the database", e);
     }
   }
 

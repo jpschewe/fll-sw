@@ -1153,17 +1153,14 @@ function updatePage() {
 }
 
 function uploadData() {
-    //FIXME
-    alert("Not implemented");
-
-    /*
-        const waitList = [];
-    
-        document.getElementById("wait-dialog").classList.remove("fll-sw-ui-inactive");
-        Promise.all(waitList).then(function() {
-            document.getElementById("wait-dialog").classList.add("fll-sw-ui-inactive");
-        });
-        */
+    document.getElementById("wait-dialog").classList.remove("fll-sw-ui-inactive");
+    deliberationModule.uploadData(() => {
+        // success
+        document.getElementById("wait-dialog").classList.add("fll-sw-ui-inactive");
+    }, (error) => {
+        document.getElementById("wait-dialog").classList.add("fll-sw-ui-inactive");
+        alert("Failure data: " + error);
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function() {

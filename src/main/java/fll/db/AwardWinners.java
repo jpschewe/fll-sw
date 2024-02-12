@@ -215,7 +215,7 @@ public final class AwardWinners {
         if (rs.next()) {
           final String description = rs.getString(1);
           final int place = rs.getInt(2);
-          final String awardGroup = rs.getString(3);
+          final String awardGroup = castNonNull(rs.getString(3));
 
           final AwardWinner winner = new AwardWinner(name, awardGroup, teamNumber, description, place);
           return winner;
@@ -407,8 +407,7 @@ public final class AwardWinners {
     try (PreparedStatement prep = connection.prepareStatement("SELECT description, place FROM subjective_overall_award"
         + " WHERE tournament_id = ?" //
         + " AND team_number = ?" //
-        + " AND name = ?"
-    )) {
+        + " AND name = ?")) {
       prep.setInt(1, tournamentId);
       prep.setInt(2, teamNumber);
       prep.setString(3, name);

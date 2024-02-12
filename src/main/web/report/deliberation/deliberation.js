@@ -69,13 +69,19 @@ const deliberationModule = {};
         /**
          * Constructor for a category.
          * 
-         * @param name
+         * @param {String} name
          *          the name of the category
-         * @param scheduled
+         * @param {boolean} scheduled
          *          boolean stating if this is a scheduled category
+         * @param {boolean} overall
+         *          true if a category that is awarded for the tournament rather than
+         *          an award group
+         * @param {boolean} numeric if true, the rank is based on scores and is a subjective category in the challenge description
          */
-        constructor(name, scheduled, catId) {
+        constructor(name, scheduled, overall, numeric, catId) {
             this.name = name;
+            this.overall = overall;
+            this.numeric = numeric;
             this.catId = catId;
             this.nominees = new Map(); // award group -> list of team numbers
             this.potentialWinners = new Map() // award group -> list of team numbers
@@ -83,6 +89,7 @@ const deliberationModule = {};
             this.scheduled = scheduled;
             this.writer1 = new Map(); // award group -> string
             this.writer2 = new Map(); // award group -> string
+            this.serverWinningTeams = new Map(); // award group -> list of team numbers
         }
 
         /**
@@ -91,7 +98,7 @@ const deliberationModule = {};
          * 
          * Arguments are passed to the constructor.
          */
-        static create(name, scheduled) {
+        static create(name, scheduled, overall, numeric) {
             let category_id;
             // find the next available id
             for (category_id = 0; category_id < Number.MAX_VALUE
@@ -102,7 +109,7 @@ const deliberationModule = {};
                 throw new Error("No free category IDs");
             }
 
-            const category = new Category(name, scheduled, category_id);
+            const category = new Category(name, scheduled, overall, numeric, category_id);
             _categories.set(category.catId, category);
             return category;
         }
@@ -114,12 +121,13 @@ const deliberationModule = {};
          * @param {Object} obj an Category object that was converted to JSON and back using fll-storage
          */
         static deserialize(obj) {
-            const category = new Category(obj.name, obj.scheduled, obj.catId);
+            const category = new Category(obj.name, obj.scheduled, obj.overall, obj.numeric, obj.catId);
             category.nominees = obj.nominees;
             category.potentialWinners = obj.potentialWinners;
             category.winners = obj.winners;
             category.writer1 = obj.writer1;
             category.writer2 = obj.writer2;
+            category.serverWinningTeams = obj.serverWinningTeams;
 
             _categories.set(category.catId, category);
             return category;
@@ -256,6 +264,22 @@ const deliberationModule = {};
             this.setWinners(winners);
         }
 
+
+        /**
+         * Teams that were listed as winners in this category when data was last loaded from the server.
+         */
+        getServerWinningTeams() {
+            const value = this.serverWinningTeams.get(finalist_module.getCurrentDivision());
+            if (null == value) {
+                return [null];
+            } else {
+                return value;
+            }
+        }
+        setServerWinningTeams(v) {
+            this.serverWinningTeams.set(finalist_module.getCurrentDivision(), v);
+        }
+
         getNumAwards() {
             return this.getWinners().length;
         }
@@ -311,10 +335,10 @@ const deliberationModule = {};
      * @param {boolean} scheduled if this is a category scheduled in finalist scheduling
      * @returns {Category} object 
      */
-    deliberationModule.findOrCreateCategory = function(name, scheduled) {
+    deliberationModule.findOrCreateCategory = function(name, scheduled, overall, numeric) {
         let category = deliberationModule.getCategoryByName(name);
         if (null == category) {
-            category = Category.create(name, scheduled);
+            category = Category.create(name, scheduled, overall, numeric);
         }
         return category;
     };
@@ -334,7 +358,7 @@ const deliberationModule = {};
      */
     function createCategories() {
         for (const category of finalist_module.getAllCategories()) {
-            const dCategory = deliberationModule.findOrCreateCategory(category.name, category.scheduled);
+            const dCategory = deliberationModule.findOrCreateCategory(category.name, category.scheduled, category.overall, category.numeric);
 
             if (category.scheduled) {
                 // only load the nominees for scheduled categories
@@ -417,17 +441,29 @@ const deliberationModule = {};
         // note that winner.awardGroup won't be set for overall winners, they are considered part of any award group
 
         // category name -> [winner, winner]
-        // filter down to teams in the current award group
+        // filtered down to teams in the current award group
         const perCategory = new Map();
+
+        // category name -> [winner.teamNumber, winner.teamNumber ]
+        const perCategoryAllWinningTeams = new Map();
+
         for (const winner of result) {
             const categoryName = winner.name;
             const teamNumber = parseInt(winner.teamNumber, 10);
+
+            let winningTeams = perCategoryAllWinningTeams.get(categoryName);
+            if (null == winningTeams) {
+                winningTeams = [];
+            }
+            winningTeams.push(teamNumber);
+            perCategoryAllWinningTeams.set(categoryName, winningTeams);
+
             const team = finalist_module.lookupTeam(teamNumber);
-            if(!team) {
+            if (!team) {
                 alert(`Cannot find team with number ${teamNumber}`);
                 continue;
             }
-            
+
             if (team.awardGroup == finalist_module.getCurrentDivision()) {
                 let winners = perCategory.get(categoryName);
                 if (null == winners) {
@@ -445,6 +481,9 @@ const deliberationModule = {};
                 alert(`Unable to find category with name "${categoryName}"`);
                 continue;
             }
+
+            const winningTeams = perCategoryAllWinningTeams.get(categoryName);
+            category.setServerWinningTeams(winningTeams);
 
             const categoryWinners = [];
             for (const winner of winners) {
@@ -482,6 +521,82 @@ const deliberationModule = {};
             processAwardWinners(result);
         });
     }
+
+    /**
+     * @param {Array} waitList list to add the promises to for AJAX calls 
+     */
+    function uploadAwardGroupWinners(waitList) {
+        for (const [_, category] of _categories) {
+            if (category.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
+                // these are only read from the server, never written
+                continue;
+            }
+
+            let awardUrl = null;
+            let awardGroup = null;
+            if (category.overall) {
+                awardUrl = "NonNumericOverallAwardWinners";
+                awardGroup = null;
+            } else if (category.numeric) {
+                awardUrl = "SubjectiveAwardWinners";
+                awardGroup = finalist_module.getCurrentDivision();
+            } else {
+                awardUrl = "NonNumericAwardWinners";
+                awardGroup = finalist_module.getCurrentDivision();
+            }
+
+            const winnersTeamNumbers = [];
+            const winners = category.getWinners();
+            for (const [index, winnerTeamNumber] of winners.entries()) {
+                if(null == winnerTeamNumber) {
+                    // skip over blank winners
+                    continue;
+                }
+                
+                winnersTeamNumbers.push(winnerTeamNumber);
+
+                const putData = new Object();
+                putData.place = index + 1;
+                putData.awardGroup = awardGroup;
+                putData.descriptionSpecified = false;
+                const promise = uploadJsonData(`../../api/AwardsScript/${awardUrl}/${category.name}/${winnerTeamNumber}`, "PUT", putData).then(checkJsonResponse);
+                waitList.push(promise);
+            }
+
+            const serverWinners = category.getServerWinningTeams();
+            for (const serverTeamNumber of serverWinners) {
+                const idx = winnersTeamNumbers.indexOf(serverTeamNumber);
+                if (-1 == idx) {
+                    const promise = fetch(`../../api/AwardsScript/${awardUrl}/${category.name}/${serverTeamNumber}`, {
+                        method: "DELETE",
+                    }).then(checkJsonResponse);
+                    waitList.push(promise);
+                }
+            }
+        }
+    }
+
+    /**
+      * Upload data to the server.
+      * 
+      * @param doneCallback
+      *          called with no arguments on success
+      * @param failCallback
+      *          called with message on failure
+      */
+    deliberationModule.uploadData = function(doneCallback, failCallback) {
+        const waitList = [];
+
+        uploadAwardGroupWinners(waitList);
+
+        Promise.all(waitList)
+            .catch((error) => {
+                failCallback(`Error uploading data: ${error}`);
+            })
+            .then((_) => {
+                doneCallback();
+            });
+    };
 
     function loadSubjectiveAwardWinners() {
         return fetch("../../api/AwardsScript/SubjectiveAwardWinners").then(checkJsonResponse).then((result) => {
