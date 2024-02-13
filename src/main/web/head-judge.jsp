@@ -56,6 +56,10 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         - this is done once all of the subjective scores are in.</a>
 
     <a class="wide"
+        href="<c:url value='/report/regular-match-play-runs.jsp' />">Regular
+        Match Play performance scores</a>
+
+    <a class="wide"
         href="<c:url value='/report/edit-award-winners.jsp' />"
         target="_blank">Enter the winners of awards for use in the
         awards report</a>

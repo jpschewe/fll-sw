@@ -159,7 +159,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         the teams advancing to the next level of tournament</a>
 
     <a class="wide" href="<c:url value='/report/awards/index.jsp'/>">Edit
-        awards report and rewards script properties.</a>
+        awards report and awards script properties.</a>
 
     <a class="wide" href="AwardsReport" target="_blank">Report of
         winners for the tournament. This can be published on the web.</a>

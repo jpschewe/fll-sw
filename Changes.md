@@ -1,3 +1,4 @@
+* #1152 - Allow head judge to see regular match play vs. schedule report
 * #1150 - Change background color of missing team cell on performance schedule to be compatible with black & white printing
 * #1142 - Add presented by to awards script header
 * #1141 - Handle missing scores when generating team results
