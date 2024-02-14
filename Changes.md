@@ -1,3 +1,5 @@
+Release 18.4.0
+==============
 * #1137 - Initial support for deliberations
 * #1152 - Allow head judge to see regular match play vs. schedule report
 * #1150 - Change background color of missing team cell on performance schedule to be compatible with black & white printing
