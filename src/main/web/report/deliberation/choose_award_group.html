@@ -1,0 +1,36 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>Deliberation: choose award group</title>
+
+<script type='text/javascript'
+    src='../../extlib/js-joda/packages/core/dist/js-joda.min.js'></script>
+
+<script type='text/javascript' src='../../js/fll-functions.js'></script>
+<script type='text/javascript' src='../../js/fll-storage.js'></script>
+<script type='text/javascript' src='../../js/fll-objects.js'></script>
+<script type='text/javascript' src='../finalist/finalist.js'></script>
+<script type='text/javascript' src='choose_award_group.js'></script>
+<script type='text/javascript' src='deliberation.js'></script>
+
+<link rel="stylesheet" type="text/css" href="../../style/fll-sw.css" />
+
+
+</head>
+
+<body>
+    <p>
+        Select the award group you are doing deliberations for
+        <select id='award_groups'></select>
+    </p>
+
+    <button id='select_award_group'>Save chosen award group</button>
+
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="wait-dialog">
+        <div>
+            <div id='wait-dialog_text'>Loading data. Please
+                wait...</div>
+        </div>
+    </div>

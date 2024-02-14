@@ -90,7 +90,7 @@ public class AddAwardWinner extends BaseFLLServlet {
           }
 
           winner = AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
-                                                         awardGroup, teamNumber);
+                                                         teamNumber);
         } else if (EditAwardWinners.NON_NUMERIC_AWARD_TYPE.equals(awardType)) {
           final @Nullable NonNumericCategory category = challengeDescription.getNonNumericCategoryByTitle(categoryTitle);
           if (null == category) {
@@ -104,7 +104,7 @@ public class AddAwardWinner extends BaseFLLServlet {
               throw new FLLInternalException("Award group cannot be null for non-numeric award that is per award group");
             }
             winner = AwardWinners.getNonNumericAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
-                                                           awardGroup, teamNumber);
+                                                           teamNumber);
           } else {
             winner = AwardWinners.getNonNumericOverallAwardWinner(connection, tournament.getTournamentID(),
                                                                   categoryTitle, teamNumber);
@@ -115,7 +115,7 @@ public class AddAwardWinner extends BaseFLLServlet {
           }
 
           winner = AwardWinners.getNonNumericAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
-                                                         awardGroup, teamNumber);
+                                                         teamNumber);
         } else {
           throw new FLLInternalException("Unknown award type: '"
               + awardType
@@ -188,7 +188,7 @@ public class AddAwardWinner extends BaseFLLServlet {
                                                           winner.getTeamNumber(), winner.getName()));
         } else {
           if (null != AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
-                                                            awardGroup, teamNumber)) {
+                                                            teamNumber)) {
             LOGGER.warn("Attempting duplicate add of team {} to category {} place {}", winner.getTeamNumber(),
                         winner.getName(), winner.getPlace());
             SessionAttributes.appendToMessage(session,
@@ -225,7 +225,7 @@ public class AddAwardWinner extends BaseFLLServlet {
                                                             winner.getTeamNumber(), winner.getName()));
           } else {
             if (null != AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
-                                                              awardGroup, teamNumber)) {
+                                                              teamNumber)) {
               LOGGER.warn("Attempting duplicate add of team {} to category {} place {}", winner.getTeamNumber(),
                           winner.getName(), winner.getPlace());
               SessionAttributes.appendToMessage(session,
@@ -283,7 +283,7 @@ public class AddAwardWinner extends BaseFLLServlet {
                                                           winner.getTeamNumber(), winner.getName()));
         } else {
           if (null != AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
-                                                            awardGroup, teamNumber)) {
+                                                            teamNumber)) {
             LOGGER.warn("Attempting duplicate add of team {} to category {} place {}", winner.getTeamNumber(),
                         winner.getName(), winner.getPlace());
             SessionAttributes.appendToMessage(session,

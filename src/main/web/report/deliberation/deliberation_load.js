@@ -4,13 +4,16 @@
 
 "use strict";
 
-const finalistScheduleLoad = {}
+const deliberationLoad = {}
 
 {
+    
+    let clear = false;
+
     function loadSuccess() {
         const waitDialog = document.getElementById("wait-dialog");
         waitDialog.classList.add("fll-sw-ui-inactive");
-        window.location.assign("params.html");
+        window.location.assign(`choose_award_group.html?clear=${clear}`);
     }
 
     function loadError(msg) {
@@ -20,11 +23,13 @@ const finalistScheduleLoad = {}
     }
 
     function clearAndLoad() {
+        clear = true;
         finalist_module.clearAndLoad(loadSuccess, loadError);
     }
 
 
     function refreshData() {
+        clear = false;
         finalist_module.refreshData(loadSuccess, loadError);
     }
 
