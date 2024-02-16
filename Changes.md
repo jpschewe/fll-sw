@@ -1,3 +1,5 @@
+* Fix missing head to head in awards script report
+
 Release 18.4.0
 ==============
 * #1137 - Initial support for deliberations
