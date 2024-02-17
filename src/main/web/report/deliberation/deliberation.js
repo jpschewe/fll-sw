@@ -403,6 +403,13 @@ const deliberationModule = {};
         });
     }
 
+    function loadNumPerformanceAwards() {
+        return fetch("../../api/AwardsScript/NumPerformanceAwards").then(checkJsonResponse).then((result) => {
+            const category = deliberationModule.getCategoryByName(deliberationModule.PERFORMANCE_CATEGORY_NAME);
+            category.setNumAwards(parseInt(result, 10));
+        });
+    }
+
     function loadTopPerformanceScores() {
         return fetch("../../api/TopPerformanceScores").then(checkJsonResponse).then((result) => {
             _rankedPerformanceTeams = new Map();
@@ -646,6 +653,12 @@ const deliberationModule = {};
             failCallback("Subjective award winners failed to load: " + error);
         })
         waitList.push(subjectiveAwardWinners);
+
+        const numPerformanceAwards = loadNumPerformanceAwards();
+        numPerformanceAwards.catch((error) => {
+            failCallback("Number of performance awards failed to load: " + error);
+        })
+        waitList.push(numPerformanceAwards);
 
         Promise.all(waitList).then((_) => {
             deliberationModule.saveToLocalStorage();

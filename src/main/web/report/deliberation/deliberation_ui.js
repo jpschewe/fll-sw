@@ -226,6 +226,11 @@ function addNumAwardsRow(body) {
         const numAwards = Math.max(1, category.getNumAwards());
         category.setNumAwards(numAwards);
         input.value = numAwards;
+        
+        if(category.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
+            input.readOnly = true;
+            input.disabled = true;
+        }
 
         input.addEventListener("change", () => {
             const prevMaxNumAwards = computeMaxNumAwards();
