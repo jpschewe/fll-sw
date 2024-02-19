@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.AwardsScript;
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
@@ -60,7 +61,7 @@ public class NumPerformanceAwards extends HttpServlet {
       final int numPerformanceAwards = AwardsScript.getNumPerformanceAwardsForTournament(connection, tournament);
       jsonMapper.writeValue(writer, numPerformanceAwards);
     } catch (final SQLException e) {
-      throw new RuntimeException(e);
+      throw new FLLRuntimeException(e);
     }
 
   }

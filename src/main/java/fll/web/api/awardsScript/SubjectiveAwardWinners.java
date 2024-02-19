@@ -73,7 +73,7 @@ public class SubjectiveAwardWinners extends HttpServlet {
                                                                                tournament.getTournamentID());
       jsonMapper.writeValue(writer, winners);
     } catch (final SQLException e) {
-      throw new RuntimeException(e);
+      throw new FLLRuntimeException(e);
     }
   }
 

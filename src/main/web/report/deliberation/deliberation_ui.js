@@ -176,6 +176,10 @@ function addWriters(body) {
             category.setWriter1(input1.value);
             deliberationModule.saveToLocalStorage();
         });
+        const writer1 = category.getWriter1();
+        if (writer1) {
+            input1.value = writer1;
+        }
 
         const cell2 = document.createElement("div");
         row2.appendChild(cell2);
@@ -187,9 +191,13 @@ function addWriters(body) {
         input2.setAttribute("name", writing2Identifier(category));
         input2.setAttribute("size", "10");
         input2.addEventListener("change", () => {
-            category.setWriter2(input1.value);
+            category.setWriter2(input2.value);
             deliberationModule.saveToLocalStorage();
         });
+        const writer2 = category.getWriter2();
+        if (writer2) {
+            input2.value = writer2;
+        }
 
     }
 }
@@ -226,8 +234,8 @@ function addNumAwardsRow(body) {
         const numAwards = Math.max(1, category.getNumAwards());
         category.setNumAwards(numAwards);
         input.value = numAwards;
-        
-        if(category.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
+
+        if (category.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
             input.readOnly = true;
             input.disabled = true;
         }

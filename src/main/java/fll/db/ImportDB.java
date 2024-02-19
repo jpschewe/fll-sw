@@ -703,6 +703,11 @@ public final class ImportDB {
       upgrade36To37(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 38) {
+      upgrade37To38(connection);
+    }
+
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -1391,6 +1396,19 @@ public final class ImportDB {
   }
 
   /**
+   * Add deliberation tables
+   */
+  private static void upgrade37To38(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 37 to 38");
+
+    try (Statement stmt = connection.createStatement()) {
+      GenerateDB.createDeliberationTables(connection, false);
+    }
+
+    setDBVersion(connection, 38);
+  }
+
+  /**
    * Check for a column in a table. This checks table names both upper and lower
    * case.
    * This also checks column names ignoring case.
@@ -1821,6 +1839,7 @@ public final class ImportDB {
 
     if (importFinalist) {
       importFinalistSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+      importDeliberation(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     }
 
     // update score totals
@@ -2602,6 +2621,90 @@ public final class ImportDB {
     }
   }
 
+  private static void importDeliberation(final Connection sourceConnection,
+                                         final Connection destinationConnection,
+                                         final int sourceTournamentID,
+                                         final int destTournamentID)
+      throws SQLException {
+    LOGGER.debug("Importing deliberation data");
+
+    // do deletes first
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM deliberation_writers WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM deliberation_potential_winners WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM deliberation_num_awards WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    // writers
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO deliberation_writers (tournament_id, award_group, category_name, writer_number, writer_name) VALUES(?, ?, ?, ?, ?)");
+
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT award_group, category_name, writer_number, writer_name FROM deliberation_writers WHERE tournament_id = ?")) {
+
+      destPrep.setInt(1, destTournamentID);
+      sourcePrep.setInt(1, sourceTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString(1));
+          destPrep.setString(3, sourceRS.getString(2));
+          destPrep.setInt(4, sourceRS.getInt(3));
+          destPrep.setString(5, sourceRS.getString(4));
+          destPrep.executeUpdate();
+        }
+      }
+    }
+
+    // potential winners
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO deliberation_potential_winners(tournament_id, award_group, category_name, place, team_number) VALUES(?, ?, ?, ?, ?)");
+
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT award_group, category_name, place, team_number FROM deliberation_potential_winners WHERE tournament_id = ?")) {
+
+      destPrep.setInt(1, destTournamentID);
+      sourcePrep.setInt(1, sourceTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString(1));
+          destPrep.setString(3, sourceRS.getString(2));
+          destPrep.setInt(4, sourceRS.getInt(3));
+          destPrep.setInt(5, sourceRS.getInt(4));
+          destPrep.executeUpdate();
+        }
+      }
+    }
+
+    // num awards
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO deliberation_num_awards(tournament_id, award_group, category_name, num_awards) VALUES(?, ?, ?, ?)");
+
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT award_group, category_name, num_awards FROM deliberation_num_awards WHERE tournament_id = ?")) {
+
+      destPrep.setInt(1, destTournamentID);
+      sourcePrep.setInt(1, sourceTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString(1));
+          destPrep.setString(3, sourceRS.getString(2));
+          destPrep.setInt(4, sourceRS.getInt(3));
+          destPrep.executeUpdate();
+        }
+      }
+    }
+
+  }
+
   /**
    * Check for differences in a tournament between two databases.
    *
@@ -3102,14 +3205,14 @@ public final class ImportDB {
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
                                 "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Generate columns based upon file loaded")
   private static void loadCSVFile(final Connection connection,
-                                 final String tablename,
-                                 final Map<String, String> types,
-                                 final Reader reader,
-                                 final int dumpVersion)
+                                  final String tablename,
+                                  final Map<String, String> types,
+                                  final Reader reader,
+                                  final int dumpVersion)
       throws IOException, SQLException {
     try {
       final CSVReader csvreader = new CSVReader(reader);
-  
+
       // read the header and create the table and create the
       final StringBuilder insertPrepSQL = new StringBuilder();
       insertPrepSQL.append("INSERT INTO ");
@@ -3117,7 +3220,7 @@ public final class ImportDB {
       insertPrepSQL.append(" ( ");
       final StringBuilder valuesSQL = new StringBuilder();
       valuesSQL.append(" VALUES (");
-  
+
       final StringBuilder createTable = new StringBuilder();
       createTable.append("CREATE TABLE ");
       createTable.append(tablename);
@@ -3126,7 +3229,7 @@ public final class ImportDB {
       if (null == line) {
         throw new RuntimeException("Cannot find the header line");
       }
-  
+
       final String[] columnTypes = new String[line.length];
       try (Statement stmt = connection.createStatement()) {
         for (int columnIndex = 0; columnIndex < line.length; ++columnIndex) {
@@ -3160,7 +3263,7 @@ public final class ImportDB {
         valuesSQL.append(")");
         stmt.executeUpdate(createTable.toString());
       } // statement
-  
+
       // load each line into a row in the table
       try (PreparedStatement prep = connection.prepareStatement(insertPrepSQL.append(valuesSQL).toString())) {
         while (null != (line = csvreader.readNext())) {
@@ -3212,7 +3315,7 @@ public final class ImportDB {
     } else {
       throw new FLLRuntimeException(String.format("Dump version %d is unknown", dumpVersion));
     }
-  
+
     final String typeLower = type.toLowerCase();
     if ("longvarchar".equals(typeLower)
         || typeLower.startsWith("varchar")) {
