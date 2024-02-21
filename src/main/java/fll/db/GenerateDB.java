@@ -1242,7 +1242,8 @@ public final class GenerateDB {
                                               final boolean createConstraints,
                                               final String tableName,
                                               final String keyColumn,
-                                              final String valueColumn)
+                                              final String valueColumn,
+                                              final boolean valueAllowNull)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
       final Formatter sql = new Formatter();
@@ -1252,7 +1253,11 @@ public final class GenerateDB {
       sql.format(" ,tournament_id INTEGER NOT NULL");
       sql.format(" ,layer_rank INTEGER NOT NULL");
       sql.format(" ,%s VARCHAR(64) NOT NULL", keyColumn);
-      sql.format(" ,%s LONGVARCHAR NOT NULL", valueColumn);
+      if (valueAllowNull) {
+        sql.format(" ,%s LONGVARCHAR", valueColumn);
+      } else {
+        sql.format(" ,%s LONGVARCHAR NOT NULL", valueColumn);
+      }
       if (createConstraints) {
         sql.format(" ,CONSTRAINT %s_pk PRIMARY KEY (%s, tournament_level_id, tournament_id, layer_rank)", tableName,
                    keyColumn);
@@ -1300,7 +1305,7 @@ public final class GenerateDB {
     try (Statement stmt = connection.createStatement()) {
 
       // store text for sections
-      createAwardsScriptTable(connection, createConstraints, "awards_script_text", "section_name", "text");
+      createAwardsScriptTable(connection, createConstraints, "awards_script_text", "section_name", "text", true);
 
       try (PreparedStatement insert = connection.prepareStatement("INSERT INTO awards_script_text"
           + " (section_name, tournament_level_id, tournament_id, layer_rank, text)"//
@@ -1328,15 +1333,18 @@ public final class GenerateDB {
       }
 
       // store values for macros
-      createAwardsScriptTable(connection, createConstraints, "awards_script_parameters", "param_name", "param_value");
+      createAwardsScriptTable(connection, createConstraints, "awards_script_parameters", "param_name", "param_value",
+                              true);
 
       // store descriptions for categories and presenters
-      createAwardsScriptTable(connection, createConstraints, "awards_script_subjective_text", "category_name", "text");
+      createAwardsScriptTable(connection, createConstraints, "awards_script_subjective_text", "category_name", "text",
+                              true);
       createAwardsScriptTable(connection, createConstraints, "awards_script_subjective_presenter", "category_name",
-                              "presenter");
-      createAwardsScriptTable(connection, createConstraints, "awards_script_nonnumeric_text", "category_title", "text");
+                              "presenter", true);
+      createAwardsScriptTable(connection, createConstraints, "awards_script_nonnumeric_text", "category_title", "text",
+                              true);
       createAwardsScriptTable(connection, createConstraints, "awards_script_nonnumeric_presenter", "category_title",
-                              "presenter");
+                              "presenter", true);
 
       // store awards order
       createAwardsScriptRankTable(connection, createConstraints, "awards_script_award_order", "award", "award_rank");
