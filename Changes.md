@@ -1,3 +1,5 @@
+* #1158 - Fix consistency issue with how Champion's award is stored
+
 Release 18.4.1
 ==============
 * Fix missing head to head in awards script report
