@@ -259,7 +259,12 @@ public final class AwardsScript {
 
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
-          return castNonNull(rs.getString(1));
+          final @Nullable String value = rs.getString(1);
+          if (null == value) {
+            return defaultValue;
+          } else {
+            return value;
+          }
         } else {
           return defaultValue;
         }
@@ -416,7 +421,12 @@ public final class AwardsScript {
       prep.setInt(3, tournamentId);
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
-          return castNonNull(rs.getString(1));
+          final @Nullable String value = rs.getString(1);
+          if (null == value) {
+            return defaultValue;
+          } else {
+            return value;
+          }
         } else {
           return defaultValue;
         }

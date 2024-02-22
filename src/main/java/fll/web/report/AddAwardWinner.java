@@ -282,7 +282,7 @@ public class AddAwardWinner extends BaseFLLServlet {
                                             String.format("<div class='success'>Modified team %d in award %s</div>",
                                                           winner.getTeamNumber(), winner.getName()));
         } else {
-          if (null != AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
+          if (null != AwardWinners.getNonNumericAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
                                                             teamNumber)) {
             LOGGER.warn("Attempting duplicate add of team {} to category {} place {}", winner.getTeamNumber(),
                         winner.getName(), winner.getPlace());
