@@ -1,3 +1,4 @@
+* #1162 - Allow awards script text to be null in the database
 * #1158 - Fix consistency issue with how Champion's award is stored
 
 Release 18.4.1
