@@ -534,7 +534,12 @@ const deliberationModule = {};
 
             let awardUrl = null;
             let awardGroup = null;
-            if (category.overall) {
+            if (category.name == finalist_module.CHAMPIONSHIP_NAME) {
+                // Championship is special, it's kind of numeric and kind of not.
+                // It's stored in the database with the non-numeric winners.
+                awardUrl = "NonNumericAwardWinners";
+                awardGroup = finalist_module.getCurrentDivision();
+            } else if (category.overall) {
                 awardUrl = "NonNumericOverallAwardWinners";
                 awardGroup = null;
             } else if (category.numeric) {
@@ -548,11 +553,11 @@ const deliberationModule = {};
             const winnersTeamNumbers = [];
             const winners = category.getWinners();
             for (const [index, winnerTeamNumber] of winners.entries()) {
-                if(null == winnerTeamNumber) {
+                if (null == winnerTeamNumber) {
                     // skip over blank winners
                     continue;
                 }
-                
+
                 winnersTeamNumbers.push(winnerTeamNumber);
 
                 const putData = new Object();
