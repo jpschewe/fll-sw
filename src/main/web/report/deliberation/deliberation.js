@@ -570,12 +570,14 @@ const deliberationModule = {};
 
             const serverWinners = category.getServerWinningTeams();
             for (const serverTeamNumber of serverWinners) {
-                const idx = winnersTeamNumbers.indexOf(serverTeamNumber);
-                if (-1 == idx) {
-                    const promise = fetch(`../../api/AwardsScript/${awardUrl}/${category.name}/${serverTeamNumber}`, {
-                        method: "DELETE",
-                    }).then(checkJsonResponse);
-                    waitList.push(promise);
+                if (null != serverTeamNumber) {
+                    const idx = winnersTeamNumbers.indexOf(serverTeamNumber);
+                    if (-1 == idx) {
+                        const promise = fetch(`../../api/AwardsScript/${awardUrl}/${category.name}/${serverTeamNumber}`, {
+                            method: "DELETE",
+                        }).then(checkJsonResponse);
+                        waitList.push(promise);
+                    }
                 }
             }
         }
