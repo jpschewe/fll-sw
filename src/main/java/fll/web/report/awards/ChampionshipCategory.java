@@ -8,8 +8,12 @@ package fll.web.report.awards;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.db.AwardWinners;
+
 /**
  * Store information about the championship.
+ * This is a non-numeric category.
+ * @see AwardWinners#getNonNumericAwardWinner(java.sql.Connection, int, String, int)
  */
 public final class ChampionshipCategory implements AwardCategory {
 
