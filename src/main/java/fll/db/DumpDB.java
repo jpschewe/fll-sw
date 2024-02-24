@@ -47,7 +47,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -283,10 +282,8 @@ public final class DumpDB extends BaseFLLServlet {
                                         final OutputStreamWriter outputWriter)
       throws SQLException, IOException {
     boolean retval = false;
-    ResultSet rs = null;
-    try {
-      final CSVWriter csvwriter = new CSVWriter(outputWriter);
-      rs = metadata.getColumns(null, null, tableName, "%");
+    try (CSVWriter csvwriter = new CSVWriter(outputWriter);
+        ResultSet rs = metadata.getColumns(null, null, tableName, "%")) {
       while (rs.next()) {
         retval = true;
 
@@ -310,8 +307,6 @@ public final class DumpDB extends BaseFLLServlet {
         }
       }
       csvwriter.flush();
-    } finally {
-      SQLFunctions.close(rs);
     }
     return retval;
   }
@@ -323,12 +318,7 @@ public final class DumpDB extends BaseFLLServlet {
                                 final OutputStreamWriter outputWriter,
                                 final String tableName)
       throws IOException, SQLException {
-    ResultSet rs = null;
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
-      CSVWriter csvwriter;
-
+    try (Statement stmt = connection.createStatement()) {
       // write table type information
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Dumping type information for "
@@ -347,18 +337,14 @@ public final class DumpDB extends BaseFLLServlet {
 
       output.putNextEntry(new ZipEntry(tableName
           + ".csv"));
-      csvwriter = new CSVWriter(outputWriter);
-      rs = stmt.executeQuery("SELECT * FROM "
-          + tableName);
-      csvwriter.writeAll(rs, true);
-      csvwriter.flush();
-      output.closeEntry();
-      SQLFunctions.close(rs);
-      rs = null;
 
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
+      try (CSVWriter csvwriter = new CSVWriter(outputWriter);
+          ResultSet rs = stmt.executeQuery("SELECT * FROM "
+              + tableName)) {
+        csvwriter.writeAll(rs, true);
+        csvwriter.flush();
+        output.closeEntry();
+      }
     }
   }
 
