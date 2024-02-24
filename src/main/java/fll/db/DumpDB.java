@@ -306,7 +306,6 @@ public final class DumpDB extends BaseFLLServlet {
           }
         }
       }
-      csvwriter.flush();
     }
     return retval;
   }
