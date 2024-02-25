@@ -282,8 +282,10 @@ public final class DumpDB extends BaseFLLServlet {
                                         final OutputStreamWriter outputWriter)
       throws SQLException, IOException {
     boolean retval = false;
-    try (CSVWriter csvwriter = new CSVWriter(outputWriter);
-        ResultSet rs = metadata.getColumns(null, null, tableName, "%")) {
+    // can't close the CSVwriter because that will close outputWriter, which is
+    // actually the zip output stream
+    final CSVWriter csvwriter = new CSVWriter(outputWriter);
+    try (ResultSet rs = metadata.getColumns(null, null, tableName, "%")) {
       while (rs.next()) {
         retval = true;
 
@@ -307,6 +309,7 @@ public final class DumpDB extends BaseFLLServlet {
         }
       }
     }
+    csvwriter.flush();
     return retval;
   }
 
@@ -337,9 +340,11 @@ public final class DumpDB extends BaseFLLServlet {
       output.putNextEntry(new ZipEntry(tableName
           + ".csv"));
 
-      try (CSVWriter csvwriter = new CSVWriter(outputWriter);
-          ResultSet rs = stmt.executeQuery("SELECT * FROM "
-              + tableName)) {
+      // can't close the CSVwriter because that will close outputWriter, which is
+      // actually the zip output stream
+      final CSVWriter csvwriter = new CSVWriter(outputWriter);
+      try (ResultSet rs = stmt.executeQuery("SELECT * FROM "
+          + tableName)) {
         csvwriter.writeAll(rs, true);
         csvwriter.flush();
         output.closeEntry();
