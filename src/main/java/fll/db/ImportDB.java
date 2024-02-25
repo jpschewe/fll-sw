@@ -5,6 +5,7 @@
  */
 package fll.db;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -90,6 +91,11 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 public final class ImportDB {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
+  /**
+   * Version of the dump format created by this code.
+   */
+  public static final int DUMP_VERSION = 2;
 
   private ImportDB() {
     // no instances
@@ -312,6 +318,7 @@ public final class ImportDB {
     final Path importDirectory = Paths.get("import_"
         + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")));
     boolean hasBugs = false;
+    int dumpVersion = 1;
 
     final Map<String, Map<String, String>> typeInfo = new HashMap<>();
     ZipEntry entry;
@@ -321,6 +328,15 @@ public final class ImportDB {
       if ("challenge.xml".equals(name)) {
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
         description = ChallengeParser.parse(reader);
+      } else if ("dump_version.txt".equals(name)) {
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET));
+        final String versionInfo = reader.readLine();
+        try {
+          dumpVersion = Integer.parseInt(versionInfo);
+        } catch (final NumberFormatException e) {
+          throw new FLLInternalException(String.format("Error reading dump version information from '%s': %s",
+                                                       versionInfo, e.getMessage()));
+        }
       } else if (name.endsWith(".csv")) {
         final String tablename = name.substring(0, name.indexOf(".csv")).toLowerCase();
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
@@ -383,7 +399,7 @@ public final class ImportDB {
         final String content = tableEntry.getValue();
         final Map<String, String> tableTypes = typeInfo.getOrDefault(tablename, Collections.emptyMap());
 
-        Utilities.loadCSVFile(connection, tablename, tableTypes, new StringReader(content));
+        Utilities.loadCSVFile(connection, tablename, tableTypes, new StringReader(content), dumpVersion);
       }
     }
 
@@ -673,6 +689,11 @@ public final class ImportDB {
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 36) {
       upgrade35To36(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 37) {
+      upgrade36To37(connection);
     }
 
     // NOTE: when adding new tournament parameters they need to be explicitly set in
@@ -1349,8 +1370,17 @@ public final class ImportDB {
           + GenerateDB.PERFORMANCE_TABLE_NAME
           + " SET tablename = 'UNKNOWN'");
     }
-    
+
     setDBVersion(connection, 36);
+  }
+
+  /**
+   * Don't do anything just ensure that one needs newer code to handle database
+   * exports with this code.
+   */
+  private static void upgrade36To37(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 36 to 37");
+    setDBVersion(connection, 37);
   }
 
   /**

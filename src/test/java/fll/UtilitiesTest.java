@@ -66,7 +66,7 @@ public class UtilitiesTest {
       types.put("column2", "longvarchar");
 
       // load the csv file
-      Utilities.loadCSVFile(connection, "testtable", types, new StringReader(writer.toString()));
+      Utilities.loadCSVFile(connection, "testtable", types, new StringReader(writer.toString()), 1);
 
       // check the databsae
       try (Statement stmt = connection.createStatement()) {

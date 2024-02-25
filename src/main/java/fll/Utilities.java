@@ -174,6 +174,7 @@ public final class Utilities {
    * @param reader where to read the data from, a {@link CSVReader} will be
    *          created from this
    * @param types column name to sql type mapping
+   * @param dumpVersion the version of the CSV fiel dump
    * @throws SQLException if there is an error putting data in the database
    * @throws IOException if there is an error reading the data
    * @throws RuntimeException if the first line cannot be read
@@ -183,7 +184,8 @@ public final class Utilities {
   public static void loadCSVFile(final Connection connection,
                                  final String tablename,
                                  final Map<String, String> types,
-                                 final Reader reader)
+                                 final Reader reader,
+                                 final int dumpVersion)
       throws IOException, SQLException {
     try {
       final CSVReader csvreader = new CSVReader(reader);
@@ -244,7 +246,7 @@ public final class Utilities {
         while (null != (line = csvreader.readNext())) {
           for (int columnIndex = 0; columnIndex < line.length; ++columnIndex) {
             coerceData(line[columnIndex], columnTypes[columnIndex], prep, columnIndex
-                + 1);
+                + 1, dumpVersion);
           }
           prep.executeUpdate();
         }
@@ -267,15 +269,27 @@ public final class Utilities {
   private static void coerceData(final String rawData,
                                  final String type,
                                  final PreparedStatement prep,
-                                 final int index)
+                                 final int index,
+                                 final int dumpVersion)
       throws SQLException {
     final @Nullable String data;
-    if (DumpDB.FLL_SW_NULL_STRING.equals(rawData)) {
-      data = null;
-    } else if (rawData.startsWith(DumpDB.FLL_SW_NULL_STRING)) {
-      data = rawData.substring(DumpDB.FLL_SW_NULL_STRING.length());
+    if (dumpVersion == 1) {
+      if (null == rawData
+          || rawData.trim().equals("")) {
+        data = null;
+      } else {
+        data = rawData;
+      }
+    } else if (dumpVersion == 2) {
+      if (DumpDB.FLL_SW_NULL_STRING.equals(rawData)) {
+        data = null;
+      } else if (rawData.startsWith(DumpDB.FLL_SW_NULL_STRING)) {
+        data = rawData.substring(DumpDB.FLL_SW_NULL_STRING.length());
+      } else {
+        data = rawData;
+      }
     } else {
-      data = rawData;
+      throw new FLLRuntimeException(String.format("Dump version %d is unknown", dumpVersion));
     }
 
     final String typeLower = type.toLowerCase();

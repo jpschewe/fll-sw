@@ -215,6 +215,10 @@ public final class DumpDB extends BaseFLLServlet {
       output.putNextEntry(new ZipEntry("challenge.xml"));
       XMLUtils.writeXML(description.toXml(), outputWriter, Utilities.DEFAULT_CHARSET.name());
       output.closeEntry();
+      
+      output.putNextEntry(new ZipEntry("dump_version.txt"));
+      outputWriter.write(String.valueOf(ImportDB.DUMP_VERSION));
+      output.closeEntry();
 
       // can't use Queries.getTablesInDB because it lowercases names and we need
       // all names to be the same as the database is expecting them
