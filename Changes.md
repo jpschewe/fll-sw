@@ -1,3 +1,4 @@
+* #1164 - modify database dump to explicitly handle NULL values
 * #1163 - Handle no show and bye when gathering team results
 * #1162 - Allow awards script text to be null in the database
 * #1158 - Fix consistency issue with how Champion's award is stored

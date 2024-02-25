@@ -56,6 +56,12 @@ import net.mtu.eggplant.xml.XMLUtils;
 public final class DumpDB extends BaseFLLServlet {
 
   /**
+   * Used as as replacement for null in the CSV files. See
+   * {@link NullResultSetHelperService}.
+   */
+  public static final String FLL_SW_NULL_STRING = "FLL-SW-NULL";
+
+  /**
    * Prefix used in the zip files for bugs. Has trailing Unix slash, which is also
    * appropriate for zip files.
    */
@@ -343,6 +349,7 @@ public final class DumpDB extends BaseFLLServlet {
       // can't close the CSVwriter because that will close outputWriter, which is
       // actually the zip output stream
       final CSVWriter csvwriter = new CSVWriter(outputWriter);
+      csvwriter.setResultService(new NullResultSetHelperService(FLL_SW_NULL_STRING));
       try (ResultSet rs = stmt.executeQuery("SELECT * FROM "
           + tableName)) {
         csvwriter.writeAll(rs, true);

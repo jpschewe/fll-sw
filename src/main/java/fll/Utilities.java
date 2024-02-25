@@ -58,6 +58,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.db.DumpDB;
 import fll.db.ImportDB;
 import fll.util.FLLRuntimeException;
 import fll.xml.ScoreType;
@@ -256,23 +257,31 @@ public final class Utilities {
   /**
    * Convert data to type and put in prepared statement at index.
    *
-   * @param data the data as a string
+   * @param rawData the data as a string
    * @param type the sql type that the data is to be converted to
    * @param prep the prepared statement to insert into
    * @param index which index in the prepared statement to put the data in
    * @throws SQLException
    * @throws ParseException
    */
-  private static void coerceData(final @Nullable String data,
+  private static void coerceData(final String rawData,
                                  final String type,
                                  final PreparedStatement prep,
                                  final int index)
       throws SQLException {
+    final @Nullable String data;
+    if (DumpDB.FLL_SW_NULL_STRING.equals(rawData)) {
+      data = null;
+    } else if (rawData.startsWith(DumpDB.FLL_SW_NULL_STRING)) {
+      data = rawData.substring(DumpDB.FLL_SW_NULL_STRING.length());
+    } else {
+      data = rawData;
+    }
+
     final String typeLower = type.toLowerCase();
     if ("longvarchar".equals(typeLower)
         || typeLower.startsWith("varchar")) {
-      if (null == data
-          || "".equals(data.trim())) {
+      if (null == data) {
         prep.setNull(index, Types.VARCHAR);
       } else {
         prep.setString(index, data.trim());
@@ -285,8 +294,7 @@ public final class Utilities {
         prep.setString(index, data.trim());
       }
     } else if ("integer".equals(typeLower)) {
-      if (null == data
-          || "".equals(data.trim())) {
+      if (null == data) {
         prep.setNull(index, Types.INTEGER);
       } else {
         final long value = Long.parseLong(data);
@@ -294,24 +302,21 @@ public final class Utilities {
       }
     } else if ("float".equals(typeLower)
         || "double".equals(typeLower)) {
-      if (null == data
-          || "".equals(data.trim())) {
+      if (null == data) {
         prep.setNull(index, Types.DOUBLE);
       } else {
         final double value = Double.parseDouble(data);
         prep.setDouble(index, value);
       }
     } else if ("boolean".equals(typeLower)) {
-      if (null == data
-          || "".equals(data.trim())) {
+      if (null == data) {
         prep.setNull(index, Types.BOOLEAN);
       } else {
         final boolean value = Boolean.parseBoolean(data);
         prep.setBoolean(index, value);
       }
     } else if ("time".equals(typeLower)) {
-      if (null == data
-          || "".equals(data.trim())) {
+      if (null == data) {
         prep.setNull(index, Types.TIME);
       } else {
         try {
@@ -323,8 +328,7 @@ public final class Utilities {
         }
       }
     } else if ("timestamp".equals(typeLower)) {
-      if (null == data
-          || "".equals(data.trim())) {
+      if (null == data) {
         prep.setNull(index, Types.TIMESTAMP);
       } else {
         try {
@@ -336,8 +340,7 @@ public final class Utilities {
         }
       }
     } else if ("date".equals(typeLower)) {
-      if (null == data
-          || "".equals(data.trim())) {
+      if (null == data) {
         prep.setNull(index, Types.DATE);
       } else {
         try {
