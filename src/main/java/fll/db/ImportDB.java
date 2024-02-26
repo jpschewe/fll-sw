@@ -5,6 +5,7 @@
  */
 package fll.db;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -21,13 +22,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -90,6 +94,11 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 public final class ImportDB {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
+  /**
+   * Version of the dump format created by this code.
+   */
+  public static final int DUMP_VERSION = 2;
 
   private ImportDB() {
     // no instances
@@ -312,6 +321,7 @@ public final class ImportDB {
     final Path importDirectory = Paths.get("import_"
         + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")));
     boolean hasBugs = false;
+    int dumpVersion = 1;
 
     final Map<String, Map<String, String>> typeInfo = new HashMap<>();
     ZipEntry entry;
@@ -321,6 +331,19 @@ public final class ImportDB {
       if ("challenge.xml".equals(name)) {
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
         description = ChallengeParser.parse(reader);
+      } else if ("dump_version.txt".equals(name)) {
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET));
+        final String versionInfo = reader.readLine();
+        if (null != versionInfo) {
+          try {
+            dumpVersion = Integer.parseInt(versionInfo);
+          } catch (final NumberFormatException e) {
+            throw new FLLRuntimeException(String.format("Error reading dump version information from '%s': %s",
+                                                        versionInfo, e.getMessage()));
+          }
+        } else {
+          throw new FLLRuntimeException("db_version.txt file is empty");
+        }
       } else if (name.endsWith(".csv")) {
         final String tablename = name.substring(0, name.indexOf(".csv")).toLowerCase();
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
@@ -383,7 +406,7 @@ public final class ImportDB {
         final String content = tableEntry.getValue();
         final Map<String, String> tableTypes = typeInfo.getOrDefault(tablename, Collections.emptyMap());
 
-        Utilities.loadCSVFile(connection, tablename, tableTypes, new StringReader(content));
+        ImportDB.loadCSVFile(connection, tablename, tableTypes, new StringReader(content), dumpVersion);
       }
     }
 
@@ -673,6 +696,11 @@ public final class ImportDB {
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 36) {
       upgrade35To36(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 37) {
+      upgrade36To37(connection);
     }
 
     // NOTE: when adding new tournament parameters they need to be explicitly set in
@@ -1349,8 +1377,17 @@ public final class ImportDB {
           + GenerateDB.PERFORMANCE_TABLE_NAME
           + " SET tablename = 'UNKNOWN'");
     }
-    
+
     setDBVersion(connection, 36);
+  }
+
+  /**
+   * Don't do anything just ensure that one needs newer code to handle database
+   * exports with this code.
+   */
+  private static void upgrade36To37(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 36 to 37");
+    setDBVersion(connection, 37);
   }
 
   /**
@@ -3043,6 +3080,216 @@ public final class ImportDB {
       return hasBugs;
     }
 
+  }
+
+  /**
+   * Load a CSV file into an SQL table. Assumes that the first line in the CSV
+   * file specifies the column names. This method is meant as the inverse of
+   * {@link com.opencsv.CSVWriter#writeAll(ResultSet, boolean)} with
+   * includeColumnNames set to true. This method assumes that the table to be
+   * created does not exist, an error will be reported if it does.
+   *
+   * @param connection the database connection to create the table within
+   * @param tablename name of the table to create
+   * @param reader where to read the data from, a {@link CSVReader} will be
+   *          created from this
+   * @param types column name to sql type mapping
+   * @param dumpVersion the version of the CSV fiel dump
+   * @throws SQLException if there is an error putting data in the database
+   * @throws IOException if there is an error reading the data
+   * @throws RuntimeException if the first line cannot be read
+   */
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
+                                "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Generate columns based upon file loaded")
+  private static void loadCSVFile(final Connection connection,
+                                 final String tablename,
+                                 final Map<String, String> types,
+                                 final Reader reader,
+                                 final int dumpVersion)
+      throws IOException, SQLException {
+    try {
+      final CSVReader csvreader = new CSVReader(reader);
+  
+      // read the header and create the table and create the
+      final StringBuilder insertPrepSQL = new StringBuilder();
+      insertPrepSQL.append("INSERT INTO ");
+      insertPrepSQL.append(tablename);
+      insertPrepSQL.append(" ( ");
+      final StringBuilder valuesSQL = new StringBuilder();
+      valuesSQL.append(" VALUES (");
+  
+      final StringBuilder createTable = new StringBuilder();
+      createTable.append("CREATE TABLE ");
+      createTable.append(tablename);
+      createTable.append(" (");
+      String[] line = csvreader.readNext();
+      if (null == line) {
+        throw new RuntimeException("Cannot find the header line");
+      }
+  
+      final String[] columnTypes = new String[line.length];
+      try (Statement stmt = connection.createStatement()) {
+        for (int columnIndex = 0; columnIndex < line.length; ++columnIndex) {
+          final String columnName = line[columnIndex].toLowerCase();
+          if (columnIndex > 0) {
+            createTable.append(", ");
+            insertPrepSQL.append(", ");
+            valuesSQL.append(", ");
+          }
+          String type = types.get(columnName);
+          if (null == type) {
+            type = "longvarchar";
+          }
+          // handle old dumps with no size
+          if (type.equalsIgnoreCase("varchar")) {
+            type = "varchar(255)";
+          }
+          // handle old dumps with no size
+          if (type.equalsIgnoreCase("char")) {
+            type = "char(255)";
+          }
+          columnTypes[columnIndex] = type;
+          createTable.append(columnName);
+          createTable.append(" "
+              + type);
+          insertPrepSQL.append(columnName);
+          valuesSQL.append("?");
+        }
+        createTable.append(")");
+        insertPrepSQL.append(")");
+        valuesSQL.append(")");
+        stmt.executeUpdate(createTable.toString());
+      } // statement
+  
+      // load each line into a row in the table
+      try (PreparedStatement prep = connection.prepareStatement(insertPrepSQL.append(valuesSQL).toString())) {
+        while (null != (line = csvreader.readNext())) {
+          for (int columnIndex = 0; columnIndex < line.length; ++columnIndex) {
+            ImportDB.coerceData(line[columnIndex], columnTypes[columnIndex], prep, columnIndex
+                + 1, dumpVersion);
+          }
+          prep.executeUpdate();
+        }
+      } // prepared statement
+    } catch (final CsvValidationException e) {
+      throw new IOException("Error reading line of file", e);
+    }
+  }
+
+  /**
+   * Convert data to type and put in prepared statement at index.
+   *
+   * @param rawData the data as a string
+   * @param type the sql type that the data is to be converted to
+   * @param prep the prepared statement to insert into
+   * @param index which index in the prepared statement to put the data in
+   * @param dumpVersion used to determine how to parse the data
+   * @throws SQLException
+   * @throws ParseException
+   */
+  private static void coerceData(final String rawData,
+                                 final String type,
+                                 final PreparedStatement prep,
+                                 final int index,
+                                 final int dumpVersion)
+      throws SQLException {
+    final @Nullable String data;
+    if (dumpVersion == 1) {
+      if (null == rawData
+          || rawData.trim().equals("")) {
+        data = null;
+      } else {
+        data = rawData;
+      }
+    } else if (dumpVersion == 2) {
+      if (DumpDB.FLL_SW_NULL_STRING.equals(rawData)) {
+        data = null;
+      } else if (rawData.startsWith(DumpDB.FLL_SW_NULL_STRING)) {
+        data = rawData.substring(DumpDB.FLL_SW_NULL_STRING.length());
+      } else {
+        data = rawData;
+      }
+    } else {
+      throw new FLLRuntimeException(String.format("Dump version %d is unknown", dumpVersion));
+    }
+  
+    final String typeLower = type.toLowerCase();
+    if ("longvarchar".equals(typeLower)
+        || typeLower.startsWith("varchar")) {
+      if (null == data) {
+        prep.setNull(index, Types.VARCHAR);
+      } else {
+        prep.setString(index, data.trim());
+      }
+    } else if (typeLower.startsWith("char")) {
+      if (null == data
+          || "".equals(data.trim())) {
+        prep.setNull(index, Types.CHAR);
+      } else {
+        prep.setString(index, data.trim());
+      }
+    } else if ("integer".equals(typeLower)) {
+      if (null == data) {
+        prep.setNull(index, Types.INTEGER);
+      } else {
+        final long value = Long.parseLong(data);
+        prep.setLong(index, value);
+      }
+    } else if ("float".equals(typeLower)
+        || "double".equals(typeLower)) {
+      if (null == data) {
+        prep.setNull(index, Types.DOUBLE);
+      } else {
+        final double value = Double.parseDouble(data);
+        prep.setDouble(index, value);
+      }
+    } else if ("boolean".equals(typeLower)) {
+      if (null == data) {
+        prep.setNull(index, Types.BOOLEAN);
+      } else {
+        final boolean value = Boolean.parseBoolean(data);
+        prep.setBoolean(index, value);
+      }
+    } else if ("time".equals(typeLower)) {
+      if (null == data) {
+        prep.setNull(index, Types.TIME);
+      } else {
+        try {
+          final Date value = CSV_TIME_FORMATTER.get().parse(data);
+          final Time time = new Time(value.getTime());
+          prep.setTime(index, time);
+        } catch (final ParseException e) {
+          throw new FLLRuntimeException("Problem parsing time in database dump", e);
+        }
+      }
+    } else if ("timestamp".equals(typeLower)) {
+      if (null == data) {
+        prep.setNull(index, Types.TIMESTAMP);
+      } else {
+        try {
+          final Date value = CSV_TIMESTAMP_FORMATTER.get().parse(data);
+          final Timestamp time = new Timestamp(value.getTime());
+          prep.setTimestamp(index, time);
+        } catch (final ParseException e) {
+          throw new FLLRuntimeException("Problem parsing timestamp in database dump", e);
+        }
+      }
+    } else if ("date".equals(typeLower)) {
+      if (null == data) {
+        prep.setNull(index, Types.DATE);
+      } else {
+        try {
+          final java.util.Date value = CSV_DATE_FORMATTER.get().parse(data);
+          prep.setDate(index, new java.sql.Date(value.getTime()));
+        } catch (final ParseException e) {
+          throw new FLLRuntimeException("Problem parsing date in database dump", e);
+        }
+      }
+    } else {
+      throw new FLLRuntimeException("Unhandled SQL data type '"
+          + type
+          + "'");
+    }
   }
 
 }
