@@ -214,10 +214,12 @@ public final class DumpDB extends BaseFLLServlet {
       // output the challenge descriptor
       output.putNextEntry(new ZipEntry("challenge.xml"));
       XMLUtils.writeXML(description.toXml(), outputWriter, Utilities.DEFAULT_CHARSET.name());
+      outputWriter.flush();
       output.closeEntry();
-      
+
       output.putNextEntry(new ZipEntry("dump_version.txt"));
-      outputWriter.write(String.valueOf(ImportDB.DUMP_VERSION));
+      outputWriter.write(String.format("%d%n", ImportDB.DUMP_VERSION));
+      outputWriter.flush();
       output.closeEntry();
 
       // can't use Queries.getTablesInDB because it lowercases names and we need
