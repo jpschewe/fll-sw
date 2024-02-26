@@ -38,9 +38,9 @@ public class NullResultSetHelperService implements ResultSetHelper {
 
   private String dateTimeFormat = DEFAULT_TIMESTAMP_FORMAT;
 
-  private NumberFormat integerFormat;
+  private @Nullable NumberFormat integerFormat = null;
 
-  private NumberFormat floatingPointFormat;
+  private @Nullable NumberFormat floatingPointFormat = null;
 
   private final String nullString;
 
@@ -138,8 +138,8 @@ public class NullResultSetHelperService implements ResultSetHelper {
    * @param timestampFormatString Format string
    * @return Formatted time stamp.
    */
-  protected String handleTimestamp(final Timestamp timestamp,
-                                   final String timestampFormatString) {
+  protected @Nullable String handleTimestamp(final @Nullable Timestamp timestamp,
+                                             final String timestampFormatString) {
     SimpleDateFormat timeFormat = new SimpleDateFormat(timestampFormatString);
     return timestamp == null ? null : timeFormat.format(timestamp);
   }
@@ -221,8 +221,8 @@ public class NullResultSetHelperService implements ResultSetHelper {
     return value;
   }
 
-  private @Nullable String applyFormatter(final NumberFormat formatter,
-                                          final Number value) {
+  private @Nullable String applyFormatter(final @Nullable NumberFormat formatter,
+                                          final @Nullable Number value) {
     if (value != null
         && formatter != null) {
       return formatter.format(value);

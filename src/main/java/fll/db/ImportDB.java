@@ -331,11 +331,15 @@ public final class ImportDB {
       } else if ("dump_version.txt".equals(name)) {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET));
         final String versionInfo = reader.readLine();
-        try {
-          dumpVersion = Integer.parseInt(versionInfo);
-        } catch (final NumberFormatException e) {
-          throw new FLLInternalException(String.format("Error reading dump version information from '%s': %s",
-                                                       versionInfo, e.getMessage()));
+        if (null != versionInfo) {
+          try {
+            dumpVersion = Integer.parseInt(versionInfo);
+          } catch (final NumberFormatException e) {
+            throw new FLLRuntimeException(String.format("Error reading dump version information from '%s': %s",
+                                                        versionInfo, e.getMessage()));
+          }
+        } else {
+          throw new FLLRuntimeException("db_version.txt file is empty");
         }
       } else if (name.endsWith(".csv")) {
         final String tablename = name.substring(0, name.indexOf(".csv")).toLowerCase();
