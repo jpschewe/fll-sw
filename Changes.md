@@ -1,3 +1,5 @@
+Release 18.5.0
+==============
 * #1164 - modify database dump to explicitly handle NULL values
 * #1163 - Handle no show and bye when gathering team results
 * #1162 - Allow awards script text to be null in the database
