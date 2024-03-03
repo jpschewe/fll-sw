@@ -573,6 +573,31 @@ function findNomineeTeamDiv(category, teamNumber) {
 }
 
 /**
+ * Find the team div for the specified team number in the list of potential winners.
+ * 
+ * @param {Category} category the category the team is a potential winner in
+ * @param {number} teamNumber the team number
+ * @returns the div or null if not found
+ */
+function findPotentialWinnerTeamDiv(category, teamNumber) {
+    const body = document.getElementById("deliberation_body");
+    for (const row of body.querySelectorAll(".potential_winner_row").values()) {
+        for (const cell of row.children) {
+            const catId = cell.getAttribute(DATA_CATEGORY_ID);
+            if (catId == category.catId) {
+                for (const teamDiv of cell.children) {
+                    const teamNumCompare = parseInt(teamDiv.getAttribute(DATA_TEAM_NUMBER), 10);
+                    if (teamNumber == teamNumCompare) {
+                        return teamDiv;
+                    }
+                }
+            }
+        }
+    }
+    return null;
+}
+
+/**
  * Populate the UI with stored teams.
  */
 function populateTeams() {
@@ -580,6 +605,18 @@ function populateTeams() {
 
     for (const category of sortedCategories) {
         const nominees = category.getNominees();
+        // ensure that all potential winners and winners are nominees
+        for (const teamNumber of category.getPotentialWinners()) {
+            if (null != teamNumber && !nominees.includes(teamNumber)) {
+                nominees.push(teamNumber);
+            }
+        }
+        for (const teamNumber of category.getWinners()) {
+            if (null != teamNumber && !nominees.includes(teamNumber)) {
+                nominees.push(teamNumber);
+            }
+        }
+
         for (const teamNumber of nominees) {
             const team = finalist_module.lookupTeam(teamNumber);
             addNomineeToUi(category, team);
@@ -591,10 +628,7 @@ function populateTeams() {
                 const place = index + 1;
 
                 const destCell = document.getElementById(potentialWinnerCellIdentifier(category, place));
-                let nomineeTeamDiv = findNomineeTeamDiv(category, teamNumber);
-                if (null == nomineeTeamDiv) {
-                    nomineeTeamDiv = addNomineeToUi(category, team);
-                }
+                const nomineeTeamDiv = findNomineeTeamDiv(category, teamNumber);
 
                 dropNomineeToPotentialWinners(nomineeTeamDiv, destCell, category, team);
             }
@@ -606,7 +640,16 @@ function populateTeams() {
                 const place = index + 1;
 
                 const destCell = document.getElementById(winnerCellIdentifier(category, place));
-                dropPotentialWinnerToWinners(destCell, category, team);
+                let potentialWinnerDiv = findPotentialWinnerTeamDiv(category, teamNumber);
+                if (null == potentialWinnerDiv) {
+                    // add at place
+                    const pwdestCell = document.getElementById(potentialWinnerCellIdentifier(category, place));
+                    const nomineeTeamDiv = findNomineeTeamDiv(category, teamNumber);
+                    dropNomineeToPotentialWinners(nomineeTeamDiv, pwdestCell, category, team);
+                    potentialWinnerDiv = findPotentialWinnerTeamDiv(category, teamNumber);
+                }
+
+                dropPotentialWinnerToWinners(potentialWinnerDiv, destCell, category, team);
             }
         }
 
@@ -930,13 +973,28 @@ function drop(e) {
             } else if (destSection == SECTION_POTENTIAL_WINNERS) {
                 dropReorderPotentialWinners(destCell, draggingTeamDiv, category);
             } else if (destSection == SECTION_WINNERS) {
-                dropPotentialWinnerToWinners(destCell, category, team);
+                dropPotentialWinnerToWinners(draggingTeamDiv, destCell, category, team);
             } else {
                 console.log(`No drop - section potential winners wrong section dest: ${destSection}`);
             }
         } else if (sourceSection == SECTION_WINNERS) {
             if (destSection == SECTION_POTENTIAL_WINNERS) {
                 dropRemoveFromWinners(draggingTeamDiv, category);
+
+                // find teamDiv in potential winners section and allow drag again
+                for (const teamDiv of getTeamDivs(teamNum)) {
+                    const cell = teamDiv.parentNode;
+                    if (cell) {
+                        const row = cell.parentNode;
+                        if (row) {
+                            const section = row.getAttribute(DATA_SECTION);
+                            if (section == SECTION_POTENTIAL_WINNERS) {
+                                teamDiv.setAttribute("draggable", "true");
+                            }
+                        }
+                    }
+                }
+
             } else if (destSection == SECTION_WINNERS) {
                 dropReorderWinners(destCell, draggingTeamDiv, category);
             } else {
@@ -1032,14 +1090,18 @@ function dropReorderWinners(destCell, teamDiv, category) {
 /**
  * Handle drop for moving a potential winner to winners.
  * 
+ * @param {HTMLElement} sourceTeamDiv the teamDiv in the potential winners section
  * @param {HTMLElement} destCell the table cell to put the team into
  * @param {Category} category the category
  * @param {finalist_module.Team} team the team being moved
  */
-function dropPotentialWinnerToWinners(destCell, category, team) {
+function dropPotentialWinnerToWinners(sourceTeamDiv, destCell, category, team) {
     const teamDiv = createTeamDiv(team, category, SECTION_WINNERS);
     dropReorderWinners(destCell, teamDiv, category);
     addTeamToWinners(team.num);
+
+    // disable dragging team up again  
+    sourceTeamDiv.setAttribute("draggable", "false");
 }
 
 
