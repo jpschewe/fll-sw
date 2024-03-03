@@ -17,7 +17,7 @@ public class CommonBase {
 
   /**
    * @param awardGroup {@link #getAwardGroup()}
-   * @param categoryName {@link #getCategoryname()}
+   * @param categoryName {@link #getCategoryName()}
    */
   public CommonBase(@JsonProperty("awardGroup") final String awardGroup,
                     @JsonProperty("categoryName") final String categoryName) {
