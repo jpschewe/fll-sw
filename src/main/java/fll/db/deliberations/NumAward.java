@@ -26,7 +26,7 @@ public final class NumAward extends CommonBase {
   /**
    * @param awardGroup {@link CommonBase#getAwardGroup()}
    * @param categoryName {@link CommonBase#getCategoryName()}
-   * @param numAwards {@link #geNumAward()}
+   * @param numAwards {@link #geNumAwards()}
    */
   public NumAward(@JsonProperty("awardGroup") final String awardGroup,
                   @JsonProperty("categoryName") final String categoryName,

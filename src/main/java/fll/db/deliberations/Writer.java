@@ -25,7 +25,7 @@ import fll.Tournament;
 public final class Writer extends CommonBase {
   /**
    * @param awardGroup {@link CommonBase#getAwardGroup()}
-   * @param categoryName {@link CommmonBase#getCategoryName()}
+   * @param categoryName {@link CommonBase#getCategoryName()}
    * @param number {@link #getNumber()}
    * @param name {@link #getName()}
    */

@@ -8,6 +8,8 @@ package fll.db.deliberations;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import fll.db.OverallAwardWinner;
+
 /**
  * Data common to all classes for deliberations.
  */
