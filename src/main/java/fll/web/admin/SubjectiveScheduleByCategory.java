@@ -11,23 +11,24 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.db.Queries;
 import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TournamentSchedule;
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * @see ScheduleWriter#outputSubjectiveSchedulesByCategory(TournamentSchedule,
@@ -70,7 +71,7 @@ public class SubjectiveScheduleByCategory extends BaseFLLServlet {
       ScheduleWriter.outputSubjectiveSchedulesByCategory(schedule, response.getOutputStream());
     } catch (final SQLException sqle) {
       LOGGER.error(sqle.getMessage(), sqle);
-      throw new RuntimeException("Error saving team data into the database", sqle);
+      throw new FLLRuntimeException(sqle);
     }
   }
 

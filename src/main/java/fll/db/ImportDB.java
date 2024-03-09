@@ -713,6 +713,11 @@ public final class ImportDB {
       upgrade38To39(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 40) {
+      upgrade39To40(connection);
+    }
+    
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -1426,6 +1431,21 @@ public final class ImportDB {
     setDBVersion(connection, 39);
   }
 
+ /**
+   * Remove judging_station from schedule table.
+   */
+  private static void upgrade39To40(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 36 to 37");
+
+    try (Statement stmt = connection.createStatement()) {
+      if (checkForColumnInTable(connection, "schedule", "judging_station")) {
+        stmt.executeUpdate("ALTER TABLE schedule DROP COLUMN judging_station");
+      }
+    }
+    setDBVersion(connection, 40);
+  }
+
+
   /**
    * Check for a column in a table. This checks table names both upper and lower
    * case.
@@ -2036,11 +2056,11 @@ public final class ImportDB {
       destPrep.executeUpdate();
     }
 
-    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number, judging_station" //
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number" //
         + " FROM schedule WHERE tournament=?");
         PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO schedule" //
-            + " (tournament, team_number, judging_station)" //
-            + " VALUES (?, ?, ?)")) {
+            + " (tournament, team_number)" //
+            + " VALUES (?, ?)")) {
 
       sourcePrep.setInt(1, sourceTournamentID);
 
