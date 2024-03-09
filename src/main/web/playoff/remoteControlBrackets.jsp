@@ -15,7 +15,7 @@ RemoteControlBrackets.populateContext(application, session, request, pageContext
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 <link rel="stylesheet" type="text/css"
-    href="<c:url value='/scoreboard/score_style.css'/>" />
+    href="<c:url value='/style/big_screen.css'/>" />
 
 <style type='text/css'>
 TD.Leaf {

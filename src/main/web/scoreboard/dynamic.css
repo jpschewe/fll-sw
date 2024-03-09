@@ -1,9 +1,3 @@
-body {
-    font-family: 'Arial', 'Helvetica', 'sans-serif';
-    /*font-size: 1.5625vw;*/
-    /*transform: scale()*/
-    font-weight: bold;
-}
 
 body.scoreboard {
     background: #000080;
@@ -21,6 +15,18 @@ th.scoreboard {
 
 td.scoreboard {
     padding: 4;
+}
+
+table.spacer {
+    width: 99%;
+    border: 0px;
+    padding: 0px;
+    border-spacing: 0px;
+}
+
+table.spacer img {
+    width: 1px;
+    height: 15px;
 }
 
 #left,
@@ -119,17 +125,6 @@ td.scoreboard {
     background-color: #0000d0
 }
 
-table.spacer {
-    width: 99%;
-    border: 0px;
-    padding: 0px;
-    border-spacing: 0px;
-}
-
-table.spacer img {
-    width: 1px;
-    height: 15px;
-}
 
 #top_scores {
     top: 0;

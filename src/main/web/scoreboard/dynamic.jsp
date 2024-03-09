@@ -13,7 +13,10 @@ fll.web.scoreboard.Dynamic.populateContext(request, application, pageContext);
 
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
-<link rel='stylesheet' type='text/css' href='score_style.css' />
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/style/big_screen.css'/>" />
+
+<link rel='stylesheet' type='text/css' href='dynamic.css' />
 
 <script type="text/javascript">
   var secondsBetweenScrolls = parseFloat("${scrollRate}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
