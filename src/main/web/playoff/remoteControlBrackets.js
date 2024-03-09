@@ -12,11 +12,11 @@ function isDisplayInfoDifferent(newAllBracketData) {
         return true;
     }
 
-    var length = allBracketData.length
-    for (var i = 0; i < length; i++) {
+    const length = allBracketData.length
+    for (let i = 0; i < length; i++) {
         // Check if we have nested arrays
-        var oldBracketInfo = allBracketData[i];
-        var newBracketInfo = newAllBracketData[i];
+        const oldBracketInfo = allBracketData[i];
+        const newBracketInfo = newAllBracketData[i];
 
         if (oldBracketInfo.bracketName != newBracketInfo.bracketName) {
             return true;
