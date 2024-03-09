@@ -56,8 +56,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         - Judging group (HTML)</a>
 
     <a class="wide" target="_topScoreReportPerJudgingStation"
-        href="TopScoreReportPerJudgingStationPdf"> Top performance
-        - Judging group (PDF)</a>
+        href="TopScoreReportPerJudgingStationPdf"> Top performance -
+        Judging group (PDF)</a>
 
     <div class="wide">
         Summarized numeric scores - by judging group aka "Final Computed
@@ -159,7 +159,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         the teams advancing to the next level of tournament</a>
 
     <a class="wide" href="<c:url value='/report/awards/index.jsp'/>">Edit
-        awards report and rewards script properties.</a>
+        awards report and awards script properties.</a>
 
     <a class="wide" href="AwardsReport" target="_blank">Report of
         winners for the tournament. This can be published on the web.</a>
@@ -238,6 +238,11 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
     <a class="wide" href="finalist/TeamFinalistSchedule" target="_blank">Finalist
         Schedule for each team</a>
+
+    <a class="wide" href="deliberation/specify_category_order.jsp"
+        target="_blank">Specify Deliberation Category Order</a>
+
+    <a class="wide" href="deliberation/index.jsp" target="_blank">Deliberations</a>
 
     <h2>Cross-tournament reports</h2>
     <p>Reports that use data across multiple tournaments.</p>

@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>Deliberation</title>
+
+<script type='text/javascript'
+    src='../../extlib/js-joda/packages/core/dist/js-joda.min.js'></script>
+
+<script type='text/javascript' src='../../js/fll-functions.js'></script>
+<script type='text/javascript' src='../../js/fll-storage.js'></script>
+<script type='text/javascript' src='../../js/fll-objects.js'></script>
+<script type='text/javascript' src='../finalist/finalist.js'></script>
+<script type='text/javascript' src='deliberation.js'></script>
+<script type='text/javascript' src='deliberation_ui.js'></script>
+
+<link rel="stylesheet" type="text/css" href="../../style/fll-sw.css" />
+<link rel="stylesheet" type="text/css"
+    href="../../style/team-colors.css" />
+
+<link rel="stylesheet" type="text/css" href="deliberation.css" />
+
+</head>
+
+<body>
+    <h2>
+        Deliberation for Award Group:
+        <span id='award_group'></span>
+
+        <button id='upload'>Send Data To Server</button>
+    </h2>
+
+    <div class='rTable' id='deliberation'>
+
+        <div class='rTableHeading' id='deliberation_header'></div>
+
+        <div class='rTableBody' id='deliberation_body'></div>
+
+    </div>
+
+    <br />
+
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="wait-dialog">
+        <div>
+            <p id='wait-dialog_text'>Uploading data. Please wait...</p>
+        </div>
+    </div>
+
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive"
+        id="add-team-dialog">
+        <div id='add-team-dialog_container'>
+            <input type='hidden' id='add-team-dialog_category-id' />
+            <select id='add-team-dialog_teams'></select>
+
+            <button id='add-team-dialog_ok' type='button'>Select
+                Team</button>
+            <button id='add-team-dialog_cancel' type='button'>Cancel</button>
+        </div>
+    </div>
+
+</body>
+</html>

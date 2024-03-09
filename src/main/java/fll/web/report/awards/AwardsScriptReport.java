@@ -329,7 +329,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     final List<AwardCategory> filteredAwardOrder = new LinkedList<>();
     for (final AwardCategory category : fullAwardOrder) {
-      LOGGER.trace("Processing category {}", category.getTitle());
+      LOGGER.trace("filterAwardOrder: Processing category {}", category.getTitle());
 
       if (category instanceof NonNumericCategory
           && CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournament.getLevel(),
@@ -337,8 +337,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
         LOGGER.debug("Ignoring category {}", category.getTitle());
         continue;
       } else if (category instanceof HeadToHeadCategory) {
-        if (!TournamentParameters.getRunningHeadToHead(connection, tournament.getTournamentID())) {
-          continue;
+        if (TournamentParameters.getRunningHeadToHead(connection, tournament.getTournamentID())) {
+          filteredAwardOrder.add(category);
         }
       } else {
         filteredAwardOrder.add(category);
@@ -388,7 +388,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
     while (iter.hasNext()) {
       final AwardCategory category = iter.next();
 
-      LOGGER.trace("Processing category {}", category.getTitle());
+      LOGGER.trace("addAwards: Processing category {}", category.getTitle());
 
       if (category instanceof NonNumericCategory
           && CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournament.getLevel(),

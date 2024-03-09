@@ -82,8 +82,7 @@ const nonNumericUi = {}
             for (const teamNum of category.teams) {
                 const team = finalist_module.lookupTeam(teamNum);
                 if (category.overall
-                    || finalist_module.isTeamInDivision(team, finalist_module
-                        .getCurrentDivision())) {
+                    || team.awardGroup == finalist_module.getCurrentDivision()) {
                     addedTeam = true;
                     const teamIdx = addTeam(category);
                     populateTeamInformation(category, teamIdx, team);
@@ -144,7 +143,7 @@ const nonNumericUi = {}
             }
         });
         const room = finalist_module.getRoom(category, finalist_module.getCurrentDivision());
-        if(room) {
+        if (room) {
             roomEle.value = room;
         } else {
             roomEle.value = "";

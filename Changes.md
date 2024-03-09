@@ -1,4 +1,23 @@
 * #1149 - handle changes to judging station in the schedule reports
+* #1137 - add pages to facilitate deliberations
+* #1157 - remove text about going to information desk for finalist schedule
+
+Release 18.5.0
+==============
+* #1164 - modify database dump to explicitly handle NULL values
+* #1163 - Handle no show and bye when gathering team results
+* #1162 - Allow awards script text to be null in the database
+* #1158 - Fix consistency issue with how Champion's award is stored
+
+Release 18.4.1
+==============
+* Fix missing head to head in awards script report
+
+Release 18.4.0
+==============
+* #1137 - Initial support for deliberations
+* #1152 - Allow head judge to see regular match play vs. schedule report
+* #1150 - Change background color of missing team cell on performance schedule to be compatible with black & white printing
 * #1142 - Add presented by to awards script header
 * #1141 - Handle missing scores when generating team results
 * #1148 - Rename reports link on main index to match head judge page

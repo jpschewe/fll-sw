@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 37;
+  public static final int DATABASE_VERSION = 40;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -338,6 +338,9 @@ public final class GenerateDB {
       createCategoriesIgnored(connection, true);
 
       createAwardsScriptTables(connection, true);
+
+      createDeliberationTables(connection, true);
+      createDeliberationCategoryOrder(connection, true);
 
       // --------------- create views ---------------
 
@@ -1116,6 +1119,76 @@ public final class GenerateDB {
     }
   }
 
+  /* package */ static void createDeliberationTables(final Connection connection,
+                                                     final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+
+      final StringBuilder writers = new StringBuilder();
+      writers.append("CREATE TABLE deliberation_writers (");
+      writers.append("  tournament_id INTEGER NOT NULL");
+      writers.append(" ,award_group LONGVARCHAR NOT NULL");
+      writers.append(" ,category_name LONGVARCHAR NOT NULL");
+      writers.append(" ,writer_number INTEGER NOT NULL");
+      writers.append(" ,writer_name LONGVARCHAR NOT NULL");
+      if (createConstraints) {
+        writers.append(" ,CONSTRAINT deliberation_writers_pk PRIMARY KEY (tournament_id, award_group, category_name, writer_number)");
+        writers.append(" ,CONSTRAINT deliberation_writers_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+      }
+      writers.append(")");
+      stmt.executeUpdate(writers.toString());
+
+      final StringBuilder potentialWinners = new StringBuilder();
+      potentialWinners.append("CREATE TABLE deliberation_potential_winners (");
+      potentialWinners.append("  tournament_id INTEGER NOT NULL");
+      potentialWinners.append(" ,award_group LONGVARCHAR NOT NULL");
+      potentialWinners.append(" ,category_name LONGVARCHAR NOT NULL");
+      potentialWinners.append(" ,place INTEGER NOT NULL");
+      potentialWinners.append(" ,team_number INTEGER NOT NULL");
+      if (createConstraints) {
+        potentialWinners.append(" ,CONSTRAINT deliberation_potential_winners_pk PRIMARY KEY (tournament_id, award_group, category_name, team_number)");
+        potentialWinners.append(" ,CONSTRAINT deliberation_potential_winners_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        potentialWinners.append(" ,CONSTRAINT deliberation_potential_winners_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+      }
+      potentialWinners.append(")");
+      stmt.executeUpdate(potentialWinners.toString());
+
+      final StringBuilder numAwards = new StringBuilder();
+      numAwards.append("CREATE TABLE deliberation_num_awards (");
+      numAwards.append("  tournament_id INTEGER NOT NULL");
+      numAwards.append(" ,award_group LONGVARCHAR NOT NULL");
+      numAwards.append(" ,category_name LONGVARCHAR NOT NULL");
+      numAwards.append(" ,num_awards INTEGER NOT NULL");
+      if (createConstraints) {
+        numAwards.append(" ,CONSTRAINT deliberation_num_awards_pk PRIMARY KEY (tournament_id, award_group, category_name)");
+        numAwards.append(" ,CONSTRAINT deliberation_num_awards_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+      }
+      numAwards.append(")");
+      stmt.executeUpdate(numAwards.toString());
+    }
+
+  }
+
+  /* package */ static void createDeliberationCategoryOrder(final Connection connection,
+                                                            final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE deliberation_category_order (");
+      sql.append("  tournament_id INTEGER NOT NULL");
+      sql.append(" ,award_group LONGVARCHAR NOT NULL");
+      sql.append(" ,category_name LONGVARCHAR NOT NULL");
+      sql.append(" ,sort_order INTEGER NOT NULL");
+      if (createConstraints) {
+        sql.append(" ,CONSTRAINT deliberation_category_order_pk PRIMARY KEY (tournament_id, award_group, category_name)");
+        sql.append(" ,CONSTRAINT deliberation_category_order_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+      }
+      sql.append(")");
+      stmt.executeUpdate(sql.toString());
+    }
+  }
+
   /* package */ static void createDelayedPerformanceTable(final Connection connection,
                                                           final boolean createConstraints)
       throws SQLException {
@@ -1241,7 +1314,8 @@ public final class GenerateDB {
                                               final boolean createConstraints,
                                               final String tableName,
                                               final String keyColumn,
-                                              final String valueColumn)
+                                              final String valueColumn,
+                                              final boolean valueAllowNull)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
       final Formatter sql = new Formatter();
@@ -1251,7 +1325,11 @@ public final class GenerateDB {
       sql.format(" ,tournament_id INTEGER NOT NULL");
       sql.format(" ,layer_rank INTEGER NOT NULL");
       sql.format(" ,%s VARCHAR(64) NOT NULL", keyColumn);
-      sql.format(" ,%s LONGVARCHAR NOT NULL", valueColumn);
+      if (valueAllowNull) {
+        sql.format(" ,%s LONGVARCHAR", valueColumn);
+      } else {
+        sql.format(" ,%s LONGVARCHAR NOT NULL", valueColumn);
+      }
       if (createConstraints) {
         sql.format(" ,CONSTRAINT %s_pk PRIMARY KEY (%s, tournament_level_id, tournament_id, layer_rank)", tableName,
                    keyColumn);
@@ -1299,7 +1377,7 @@ public final class GenerateDB {
     try (Statement stmt = connection.createStatement()) {
 
       // store text for sections
-      createAwardsScriptTable(connection, createConstraints, "awards_script_text", "section_name", "text");
+      createAwardsScriptTable(connection, createConstraints, "awards_script_text", "section_name", "text", true);
 
       try (PreparedStatement insert = connection.prepareStatement("INSERT INTO awards_script_text"
           + " (section_name, tournament_level_id, tournament_id, layer_rank, text)"//
@@ -1327,15 +1405,18 @@ public final class GenerateDB {
       }
 
       // store values for macros
-      createAwardsScriptTable(connection, createConstraints, "awards_script_parameters", "param_name", "param_value");
+      createAwardsScriptTable(connection, createConstraints, "awards_script_parameters", "param_name", "param_value",
+                              true);
 
       // store descriptions for categories and presenters
-      createAwardsScriptTable(connection, createConstraints, "awards_script_subjective_text", "category_name", "text");
+      createAwardsScriptTable(connection, createConstraints, "awards_script_subjective_text", "category_name", "text",
+                              true);
       createAwardsScriptTable(connection, createConstraints, "awards_script_subjective_presenter", "category_name",
-                              "presenter");
-      createAwardsScriptTable(connection, createConstraints, "awards_script_nonnumeric_text", "category_title", "text");
+                              "presenter", true);
+      createAwardsScriptTable(connection, createConstraints, "awards_script_nonnumeric_text", "category_title", "text",
+                              true);
       createAwardsScriptTable(connection, createConstraints, "awards_script_nonnumeric_presenter", "category_title",
-                              "presenter");
+                              "presenter", true);
 
       // store awards order
       createAwardsScriptRankTable(connection, createConstraints, "awards_script_award_order", "award", "award_rank");

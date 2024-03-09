@@ -409,7 +409,9 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     double bestScore = Double.MAX_VALUE
         * -1;
     for (final TeamScore score : scores) {
-      if (score.scoreExists()) {
+      if (score.scoreExists()
+          && !score.isBye()
+          && !score.isNoShow()) {
         final double computedValue = performance.evaluate(score);
         bestScore = Math.max(bestScore, computedValue);
       } else {
@@ -427,7 +429,9 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     double bestScore = Double.MAX_VALUE
         * -1;
     for (final TeamScore score : scores) {
-      if (score.scoreExists()) {
+      if (score.scoreExists()
+          && !score.isBye()
+          && !score.isNoShow()) {
         final double computedValue = goal.evaluate(score);
         bestScore = Math.max(bestScore, computedValue);
       } else {

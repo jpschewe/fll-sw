@@ -85,25 +85,21 @@ const score_entry_module = {}
         document.body.appendChild(dialog);
 
         // make the map look like an object so that it parses into a Java Map
-        const dataToUpload = JSON.stringify(Object.fromEntries(storageData.formValues));
-        fetch("SubmitScoreEntry", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: dataToUpload
-        }).then(checkJsonResponse).then(function(result) {
-            if (result.success) {
-                textElement.innerHTML = result.message;
+        return uploadJsonData("SubmitScoreEntry", "POST", Object.fromEntries(storageData.formValues))
+            .then(checkJsonResponse).then(function(result) {
+                if (result.success) {
+                    textElement.innerHTML = result.message;
 
-                // clear the data as it was successfully submitted
-                score_entry_module.deleteStorageData(storageData);
-            } else {
-                textElement.innerHTML = result.message;
-            }
-        }).catch(function(result) {
-            textElement.innerHTML = "<div class='error'>Error talking to the server. The score data is stored locally. Error: " + result.message + "</div>";
-        }).then(function() {
-            closeButton.classList.remove("fll-sw-ui-inactive");
-        });
+                    // clear the data as it was successfully submitted
+                    score_entry_module.deleteStorageData(storageData);
+                } else {
+                    textElement.innerHTML = result.message;
+                }
+            }).catch(function(result) {
+                textElement.innerHTML = "<div class='error'>Error talking to the server. The score data is stored locally. Error: " + result.message + "</div>";
+            }).then(function() {
+                closeButton.classList.remove("fll-sw-ui-inactive");
+            });
     };
 
 }

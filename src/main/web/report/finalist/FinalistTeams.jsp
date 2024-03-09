@@ -62,9 +62,6 @@ fll.web.report.finalist.FinalistTeams.populateContext(application, pageContext);
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <h1>Teams in finalist judging</h1>
 
-    <p>Please send a coach to the information desk to pickup your
-        finalist schedule.</p>
-
     <table border='1'>
         <tr>
             <th>Team #</th>

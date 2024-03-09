@@ -50,7 +50,7 @@ const finalistNumericModule = {};
         const dataElement = document.getElementById("data");
         for (const team of teams) {
             if (currentCategory.overall
-                || finalist_module.isTeamInDivision(team, currentDivision)) {
+                || team.awardGroup == currentDivision) {
                 const row = document.createElement("tr");
                 dataElement.appendChild(row);
 

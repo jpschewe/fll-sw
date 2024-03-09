@@ -2,8 +2,6 @@
 
 <fll-sw:required-roles roles="HEAD_JUDGE" allowSetup="false" />
 
-<%@ page import="fll.web.report.finalist.FinalistLoad"%>
-
 <!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
 <html>
 <head>

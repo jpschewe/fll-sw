@@ -51,7 +51,7 @@ function isBlank(str) {
  */
 function checkJsonResponse(response) {
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.statusText} (${response.status}) from ${response.url}`);
     }
     return response.json();
 }
@@ -176,10 +176,27 @@ function parseBoolean(str) {
  * If value matches an option in select, select it, otherwise do nothing.
  */
 function setSelectValue(select, value) {
-    for(const option of select.options) {
-        if(option.value == value) {
+    for (const option of select.options) {
+        if (option.value == value) {
             select.value = option.value;
             return;
         }
     }
+}
+
+/**
+ * Send a JSON payload to the specified URL.
+ * 
+ * @param {String} url the URL to send the data to
+ * @param {String} method the HTTP method to use
+ * @param {Object} payloadObject the object to send, will be converted to JSON
+ * @returns promise from fetch
+ */
+function uploadJsonData(url, method, payloadObject) {
+    const dataToUpload = JSON.stringify(payloadObject);
+    return fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: dataToUpload
+    });
 }
