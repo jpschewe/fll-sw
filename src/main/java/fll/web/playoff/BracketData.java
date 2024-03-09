@@ -1188,7 +1188,9 @@ public class BracketData extends BracketInfo {
 
   /**
    * Adds labels for the bracket numbers to the specified playoff round number.
-   * If this function is used, addBracketLabelsAndScoreGenFormElements must not
+   * If this function is used,
+   * {@link #addBracketLabelsAndScoreGenFormElements(Connection, int, String)}
+   * must not
    * be used.
    * 
    * @param roundNumber the round number to set the labels for
@@ -1307,7 +1309,7 @@ public class BracketData extends BracketInfo {
   /**
    * Populates all rounds of the bracket with labels and HTML form elements for
    * table assignment and scoresheet generation. If this function is used,
-   * addBracketLabels must not be used.
+   * {@link #addBracketLabels(int)} must not be used.
    * 
    * @return The number of matches for which form elements were generated.
    * @throws SQLException if database connection is broken.
