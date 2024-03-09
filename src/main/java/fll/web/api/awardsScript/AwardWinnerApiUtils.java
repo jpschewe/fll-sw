@@ -48,7 +48,7 @@ final class AwardWinnerApiUtils {
     logger.debug("{}: pathInfo: {}", method, pathInfo);
     final String[] pathPieces = pathInfo.split("/");
     if (pathPieces.length != 3) {
-      final String msg = String.format("wrong number of pieces in path info '%s'. Expecting 2, but found %d", pathInfo,
+      final String msg = String.format("wrong number of pieces in path info '%s'. Expecting 3, but found %d", pathInfo,
                                        pathPieces.length);
       logger.error("{}: {}", method, msg);
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, msg);

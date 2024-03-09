@@ -239,6 +239,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <a class="wide" href="finalist/TeamFinalistSchedule" target="_blank">Finalist
         Schedule for each team</a>
 
+    <a class="wide" href="deliberation/specify_category_order.jsp"
+        target="_blank">Specify Deliberation Category Order</a>
+
     <a class="wide" href="deliberation/index.jsp" target="_blank">Deliberations</a>
 
     <h2>Cross-tournament reports</h2>

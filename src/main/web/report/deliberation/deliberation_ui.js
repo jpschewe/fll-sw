@@ -37,40 +37,25 @@ let sortedCategories = [];
 function createSortedCategories() {
     sortedCategories = [...deliberationModule.getAllCategories()];
 
-    const presentationOrder = deliberationModule.getAwardOrder();
+    const categoryOrder = deliberationModule.getCategoryOrder();
 
     sortedCategories.sort(function(a, b) {
-        const aPresentationIndex = presentationOrder.indexOf(a.name);
-        const bPresentationIndex = presentationOrder.indexOf(b.name);
+        const aCategoryOrderIndex = categoryOrder.indexOf(a.name);
+        const bCategoryOrderIndex = categoryOrder.indexOf(b.name);
 
-        if (a.name == finalist_module.CHAMPIONSHIP_NAME && b.name != finalist_module.CHAMPIONSHIP_NAME) {
-            return -1;
-        } else if (a.name == finalist_module.CHAMPIONSHIP_NAME && b.name == finalist_module.CHAMPIONSHIP_NAME) {
-            // shouldn't happen
-            return 0;
-        } else if (a.name != finalist_module.CHAMPIONSHIP_NAME && b.name == finalist_module.CHAMPIONSHIP_NAME) {
+        if (aCategoryOrderIndex < 0 && bCategoryOrderIndex < 0) {
+            // sort by name
+            return a.name.localeCompare(b.name);
+        } else if (aCategoryOrderIndex < 0 && bCategoryOrderIndex >= 0) {
             return 1;
-        } else if (a.name == deliberationModule.PERFORMANCE_CATEGORY_NAME && b.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
-            // shouldn't happen
-            return 0;
-        } else if (a.name == deliberationModule.PERFORMANCE_CATEGORY_NAME && b.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && !b.scheduled) {
+        } else if (aCategoryOrderIndex >= 0 && bCategoryOrderIndex < 0) {
             return -1;
-        } else if (a.name == deliberationModule.PERFORMANCE_CATEGORY_NAME && b.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && b.scheduled) {
-            return 1;
-        } else if (a.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && a.scheduled && b.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
+        } else if (aCategoryOrderIndex < bCategoryOrderIndex) {
             return -1;
-        } else if (a.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && !a.scheduled && b.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
-            return 1;
-        } else if (a.scheduled && !b.scheduled) {
-            return -1;
-        } else if (!a.scheduled && b.scheduled) {
-            return 1;
-        } else if (aPresentationIndex < bPresentationIndex) {
-            return -1;
-        } else if (aPresentationIndex > bPresentationIndex) {
+        } else if (aCategoryOrderIndex > bCategoryOrderIndex) {
             return 1;
         } else {
-            // sort by name
+            // same index sort by name
             return a.name.localeCompare(b.name);
         }
     });
@@ -176,6 +161,10 @@ function addWriters(body) {
             category.setWriter1(input1.value);
             deliberationModule.saveToLocalStorage();
         });
+        const writer1 = category.getWriter1();
+        if (writer1) {
+            input1.value = writer1;
+        }
 
         const cell2 = document.createElement("div");
         row2.appendChild(cell2);
@@ -187,9 +176,13 @@ function addWriters(body) {
         input2.setAttribute("name", writing2Identifier(category));
         input2.setAttribute("size", "10");
         input2.addEventListener("change", () => {
-            category.setWriter2(input1.value);
+            category.setWriter2(input2.value);
             deliberationModule.saveToLocalStorage();
         });
+        const writer2 = category.getWriter2();
+        if (writer2) {
+            input2.value = writer2;
+        }
 
     }
 }
@@ -226,6 +219,11 @@ function addNumAwardsRow(body) {
         const numAwards = Math.max(1, category.getNumAwards());
         category.setNumAwards(numAwards);
         input.value = numAwards;
+
+        if (category.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
+            input.readOnly = true;
+            input.disabled = true;
+        }
 
         input.addEventListener("change", () => {
             const prevMaxNumAwards = computeMaxNumAwards();
@@ -560,6 +558,31 @@ function findNomineeTeamDiv(category, teamNumber) {
 }
 
 /**
+ * Find the team div for the specified team number in the list of potential winners.
+ * 
+ * @param {Category} category the category the team is a potential winner in
+ * @param {number} teamNumber the team number
+ * @returns the div or null if not found
+ */
+function findPotentialWinnerTeamDiv(category, teamNumber) {
+    const body = document.getElementById("deliberation_body");
+    for (const row of body.querySelectorAll(".potential_winner_row").values()) {
+        for (const cell of row.children) {
+            const catId = cell.getAttribute(DATA_CATEGORY_ID);
+            if (catId == category.catId) {
+                for (const teamDiv of cell.children) {
+                    const teamNumCompare = parseInt(teamDiv.getAttribute(DATA_TEAM_NUMBER), 10);
+                    if (teamNumber == teamNumCompare) {
+                        return teamDiv;
+                    }
+                }
+            }
+        }
+    }
+    return null;
+}
+
+/**
  * Populate the UI with stored teams.
  */
 function populateTeams() {
@@ -567,6 +590,18 @@ function populateTeams() {
 
     for (const category of sortedCategories) {
         const nominees = category.getNominees();
+        // ensure that all potential winners and winners are nominees
+        for (const teamNumber of category.getPotentialWinners()) {
+            if (null != teamNumber && !nominees.includes(teamNumber)) {
+                nominees.push(teamNumber);
+            }
+        }
+        for (const teamNumber of category.getWinners()) {
+            if (null != teamNumber && !nominees.includes(teamNumber)) {
+                nominees.push(teamNumber);
+            }
+        }
+
         for (const teamNumber of nominees) {
             const team = finalist_module.lookupTeam(teamNumber);
             addNomineeToUi(category, team);
@@ -578,10 +613,7 @@ function populateTeams() {
                 const place = index + 1;
 
                 const destCell = document.getElementById(potentialWinnerCellIdentifier(category, place));
-                let nomineeTeamDiv = findNomineeTeamDiv(category, teamNumber);
-                if (null == nomineeTeamDiv) {
-                    nomineeTeamDiv = addNomineeToUi(category, team);
-                }
+                const nomineeTeamDiv = findNomineeTeamDiv(category, teamNumber);
 
                 dropNomineeToPotentialWinners(nomineeTeamDiv, destCell, category, team);
             }
@@ -593,7 +625,16 @@ function populateTeams() {
                 const place = index + 1;
 
                 const destCell = document.getElementById(winnerCellIdentifier(category, place));
-                dropPotentialWinnerToWinners(destCell, category, team);
+                let potentialWinnerDiv = findPotentialWinnerTeamDiv(category, teamNumber);
+                if (null == potentialWinnerDiv) {
+                    // add at place
+                    const pwdestCell = document.getElementById(potentialWinnerCellIdentifier(category, place));
+                    const nomineeTeamDiv = findNomineeTeamDiv(category, teamNumber);
+                    dropNomineeToPotentialWinners(nomineeTeamDiv, pwdestCell, category, team);
+                    potentialWinnerDiv = findPotentialWinnerTeamDiv(category, teamNumber);
+                }
+
+                dropPotentialWinnerToWinners(potentialWinnerDiv, destCell, category, team);
             }
         }
 
@@ -917,13 +958,28 @@ function drop(e) {
             } else if (destSection == SECTION_POTENTIAL_WINNERS) {
                 dropReorderPotentialWinners(destCell, draggingTeamDiv, category);
             } else if (destSection == SECTION_WINNERS) {
-                dropPotentialWinnerToWinners(destCell, category, team);
+                dropPotentialWinnerToWinners(draggingTeamDiv, destCell, category, team);
             } else {
                 console.log(`No drop - section potential winners wrong section dest: ${destSection}`);
             }
         } else if (sourceSection == SECTION_WINNERS) {
             if (destSection == SECTION_POTENTIAL_WINNERS) {
                 dropRemoveFromWinners(draggingTeamDiv, category);
+
+                // find teamDiv in potential winners section and allow drag again
+                for (const teamDiv of getTeamDivs(teamNum)) {
+                    const cell = teamDiv.parentNode;
+                    if (cell) {
+                        const row = cell.parentNode;
+                        if (row) {
+                            const section = row.getAttribute(DATA_SECTION);
+                            if (section == SECTION_POTENTIAL_WINNERS) {
+                                teamDiv.setAttribute("draggable", "true");
+                            }
+                        }
+                    }
+                }
+
             } else if (destSection == SECTION_WINNERS) {
                 dropReorderWinners(destCell, draggingTeamDiv, category);
             } else {
@@ -1019,14 +1075,18 @@ function dropReorderWinners(destCell, teamDiv, category) {
 /**
  * Handle drop for moving a potential winner to winners.
  * 
+ * @param {HTMLElement} sourceTeamDiv the teamDiv in the potential winners section
  * @param {HTMLElement} destCell the table cell to put the team into
  * @param {Category} category the category
  * @param {finalist_module.Team} team the team being moved
  */
-function dropPotentialWinnerToWinners(destCell, category, team) {
+function dropPotentialWinnerToWinners(sourceTeamDiv, destCell, category, team) {
     const teamDiv = createTeamDiv(team, category, SECTION_WINNERS);
     dropReorderWinners(destCell, teamDiv, category);
     addTeamToWinners(team.num);
+
+    // disable dragging team up again  
+    sourceTeamDiv.setAttribute("draggable", "false");
 }
 
 
