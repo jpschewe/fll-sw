@@ -1,3 +1,5 @@
+* #1137 - add pages to facilitate deliberations
+
 Release 18.5.0
 ==============
 * #1164 - modify database dump to explicitly handle NULL values
