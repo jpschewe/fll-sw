@@ -1,4 +1,5 @@
 * #1137 - add pages to facilitate deliberations
+* #1157 - remove text about going to information desk for finalist schedule
 
 Release 18.5.0
 ==============
