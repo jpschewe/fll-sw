@@ -17,42 +17,7 @@ RemoteControlBrackets.populateContext(application, session, request, pageContext
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/big_screen.css'/>" />
 
-<style type='text/css'>
-TD.Leaf {
-    color: #ffffff;
-    background-color: #000000
-}
-
-TD.Bridge {
-    background-color: #808080
-}
-
-SPAN.TeamNumber {
-    color: #ff8080;
-    padding-right: 5px;
-}
-
-SPAN.TeamName {
-    color: #ffffff;
-}
-
-SPAN.TeamScore {
-    color: #ffffff;
-    font-weight: bold;
-}
-
-SPAN.TIE {
-    color: #ff0000;
-}
-
-.TABLE_ASSIGNMENT {
-    font-family: monospace;
-    font-size: small;
-    background-color: white;
-    padding-left: 5%;
-    padding-right: 5%;
-}
-</style>
+<link rel="stylesheet" type="text/css" href="remoteControlBrackets.css" />
 
 <script type="text/javascript"
     src="<c:url value='/js/fll-functions.js'/>"></script>
@@ -102,26 +67,37 @@ SPAN.TIE {
 </script>
 </head>
 <body>
-    <span id="top">&nbsp;</span>
+    <div id='left'>
 
-    <br />
-    <c:forEach items="${allBracketData}" var="bracketData">
+        <span id="top">&nbsp;</span>
 
-        <div class='center'>Head to Head Round
-            ${bracketData.firstRound}, Head to Head Bracket
-            ${bracketData.bracketName}</div>
         <br />
+        <c:forEach items="${allBracketData}" var="bracketData">
+
+            <div class='center'>Head to Head Round
+                ${bracketData.firstRound}, Head to Head Bracket
+                ${bracketData.bracketName}</div>
+            <br />
                         
    ${bracketData.bracketOutput}
      <c:if test="${allBracketData.size() > 1}">
-            <br />
-            <br />
-            <hr />
-            <br />
-            <br />
-        </c:if>
-    </c:forEach>
-    <span id="bottom">&nbsp;</span>
+                <br />
+                <br />
+                <hr />
+                <br />
+                <br />
+            </c:if>
+        </c:forEach>
+        <span id="bottom">&nbsp;</span>
+    </div>
 
+    <div id='right'>
+        <div id="on-deck">
+            <h1>On deck teams</h1>
+            <table id='on-deck-table'>
+
+            </table>
+        </div>
+    </div>
 </body>
 </html>

@@ -40,7 +40,7 @@ public final class RemoteControlBrackets {
   /**
    * Number of rounds to display on the remote control brackets page.
    */
-  public static final int NUM_ROUNDS_TO_DISPLAY = 2;
+  public static final int NUM_ROUNDS_TO_DISPLAY = 3;
 
   private RemoteControlBrackets() {
   }
