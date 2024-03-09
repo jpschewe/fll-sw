@@ -38,6 +38,11 @@ public final class RemoteControlBrackets {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  /**
+   * Number of rounds to display on the remote control brackets page.
+   */
+  public static final int NUM_ROUNDS_TO_DISPLAY = 3;
+
   private RemoteControlBrackets() {
   }
 
@@ -75,7 +80,8 @@ public final class RemoteControlBrackets {
       for (final DisplayInfo.H2HBracketDisplay h2hBracket : displayInfo.getBrackets()) {
         final BracketData bracketData = new BracketData(connection, h2hBracket.getBracket(), h2hBracket.getFirstRound(),
                                                         h2hBracket.getFirstRound()
-                                                            + 2,
+                                                            + NUM_ROUNDS_TO_DISPLAY
+                                                            - 1,
                                                         BracketData.DEFAULT_ROWS_PER_TEAM, false, true,
                                                         h2hBracket.getIndex(), false);
 

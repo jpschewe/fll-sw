@@ -286,7 +286,8 @@ public class H2HUpdateWebSocket {
         for (final DisplayInfo.H2HBracketDisplay h2hBracket : displayInfo.getBrackets()) {
           final BracketInfo bracketInfo = new BracketInfo(h2hBracket.getBracket(), h2hBracket.getFirstRound(),
                                                           h2hBracket.getFirstRound()
-                                                              + 2);
+                                                              + RemoteControlBrackets.NUM_ROUNDS_TO_DISPLAY
+                                                              - 1);
 
           message.allBracketInfo.add(bracketInfo);
         } // foreach h2h bracket
