@@ -37,40 +37,25 @@ let sortedCategories = [];
 function createSortedCategories() {
     sortedCategories = [...deliberationModule.getAllCategories()];
 
-    const presentationOrder = deliberationModule.getAwardOrder();
+    const categoryOrder = deliberationModule.getCategoryOrder();
 
     sortedCategories.sort(function(a, b) {
-        const aPresentationIndex = presentationOrder.indexOf(a.name);
-        const bPresentationIndex = presentationOrder.indexOf(b.name);
+        const aCategoryOrderIndex = categoryOrder.indexOf(a.name);
+        const bCategoryOrderIndex = categoryOrder.indexOf(b.name);
 
-        if (a.name == finalist_module.CHAMPIONSHIP_NAME && b.name != finalist_module.CHAMPIONSHIP_NAME) {
-            return -1;
-        } else if (a.name == finalist_module.CHAMPIONSHIP_NAME && b.name == finalist_module.CHAMPIONSHIP_NAME) {
-            // shouldn't happen
-            return 0;
-        } else if (a.name != finalist_module.CHAMPIONSHIP_NAME && b.name == finalist_module.CHAMPIONSHIP_NAME) {
+        if (aCategoryOrderIndex < 0 && bCategoryOrderIndex < 0) {
+            // sort by name
+            return a.name.localeCompare(b.name);
+        } else if (aCategoryOrderIndex < 0 && bCategoryOrderIndex >= 0) {
             return 1;
-        } else if (a.name == deliberationModule.PERFORMANCE_CATEGORY_NAME && b.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
-            // shouldn't happen
-            return 0;
-        } else if (a.name == deliberationModule.PERFORMANCE_CATEGORY_NAME && b.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && !b.scheduled) {
+        } else if (aCategoryOrderIndex >= 0 && bCategoryOrderIndex < 0) {
             return -1;
-        } else if (a.name == deliberationModule.PERFORMANCE_CATEGORY_NAME && b.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && b.scheduled) {
-            return 1;
-        } else if (a.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && a.scheduled && b.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
+        } else if (aCategoryOrderIndex < bCategoryOrderIndex) {
             return -1;
-        } else if (a.name != deliberationModule.PERFORMANCE_CATEGORY_NAME && !a.scheduled && b.name == deliberationModule.PERFORMANCE_CATEGORY_NAME) {
-            return 1;
-        } else if (a.scheduled && !b.scheduled) {
-            return -1;
-        } else if (!a.scheduled && b.scheduled) {
-            return 1;
-        } else if (aPresentationIndex < bPresentationIndex) {
-            return -1;
-        } else if (aPresentationIndex > bPresentationIndex) {
+        } else if (aCategoryOrderIndex > bCategoryOrderIndex) {
             return 1;
         } else {
-            // sort by name
+            // same index sort by name
             return a.name.localeCompare(b.name);
         }
     });

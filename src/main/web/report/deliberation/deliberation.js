@@ -418,8 +418,9 @@ const deliberationModule = {};
         _save();
     };
 
-    function loadAwardOrder() {
-        return fetch("../../api/AwardsScript/AwardOrder").then(checkJsonResponse).then((result) => {
+    function loadCategoryOrder() {
+        const awardGroup = finalist_module.getCurrentDivision();
+        return fetch(`../../api/deliberation/CategoryOrder/${awardGroup}`).then(checkJsonResponse).then((result) => {
             _awardOrder = result;
         });
     }
@@ -764,7 +765,7 @@ const deliberationModule = {};
             failCallback("Category writers failed to load: " + error);
         });
         waitList.push(writers);
-        
+
         Promise.all(waitList).then((_) => {
             loadDeliberationData2(doneCallback, failCallback);
         });
@@ -822,11 +823,11 @@ const deliberationModule = {};
         })
         waitList.push(topPerformanceScoresPromise);
 
-        const awardOrderPromise = loadAwardOrder();
-        awardOrderPromise.catch((error) => {
-            failCallback("Award order failed to load: " + error);
+        const categoryOrderPromise = loadCategoryOrder();
+        categoryOrderPromise.catch((error) => {
+            failCallback("Category order failed to load: " + error);
         })
-        waitList.push(awardOrderPromise);
+        waitList.push(categoryOrderPromise);
 
         const numPerformanceAwards = loadNumPerformanceAwards();
         numPerformanceAwards.catch((error) => {
@@ -898,9 +899,9 @@ const deliberationModule = {};
     };
 
     /**
-     * @returns list of category titles in the order that they will be presented
+     * @returns list of category titles in the order that they should be displayed
      */
-    deliberationModule.getAwardOrder = function() {
+    deliberationModule.getCategoryOrder = function() {
         return _awardOrder;
     };
 

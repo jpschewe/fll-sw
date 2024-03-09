@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 38;
+  public static final int DATABASE_VERSION = 39;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -340,6 +340,7 @@ public final class GenerateDB {
       createAwardsScriptTables(connection, true);
 
       createDeliberationTables(connection, true);
+      createDeliberationCategoryOrder(connection, true);
 
       // --------------- create views ---------------
 
@@ -1167,6 +1168,26 @@ public final class GenerateDB {
       stmt.executeUpdate(numAwards.toString());
     }
 
+  }
+
+  /* package */ static void createDeliberationCategoryOrder(final Connection connection,
+                                                            final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE deliberation_category_order (");
+      sql.append("  tournament_id INTEGER NOT NULL");
+      sql.append(" ,award_group LONGVARCHAR NOT NULL");
+      sql.append(" ,category_name LONGVARCHAR NOT NULL");
+      sql.append(" ,sort_order INTEGER NOT NULL");
+      if (createConstraints) {
+        sql.append(" ,CONSTRAINT deliberation_category_order_pk PRIMARY KEY (tournament_id, award_group, category_name)");
+        sql.append(" ,CONSTRAINT deliberation_category_order_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+      }
+      sql.append(")");
+      stmt.executeUpdate(sql.toString());
+    }
   }
 
   /* package */ static void createDelayedPerformanceTable(final Connection connection,

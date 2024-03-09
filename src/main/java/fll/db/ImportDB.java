@@ -708,6 +708,11 @@ public final class ImportDB {
       upgrade37To38(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 39) {
+      upgrade38To39(connection);
+    }
+
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -1396,7 +1401,7 @@ public final class ImportDB {
   }
 
   /**
-   * Add deliberation tables
+   * Add deliberation tables.
    */
   private static void upgrade37To38(final Connection connection) throws SQLException {
     LOGGER.debug("Upgrading database from 37 to 38");
@@ -1406,6 +1411,19 @@ public final class ImportDB {
     }
 
     setDBVersion(connection, 38);
+  }
+
+  /**
+   * Add deliberation category order table.
+   */
+  private static void upgrade38To39(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 38 to 39");
+
+    try (Statement stmt = connection.createStatement()) {
+      GenerateDB.createDeliberationCategoryOrder(connection, false);
+    }
+
+    setDBVersion(connection, 39);
   }
 
   /**
