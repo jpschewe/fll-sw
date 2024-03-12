@@ -604,7 +604,6 @@ public class BracketData extends BracketInfo {
    * @param bracketName name of bracket
    * @param firstRound first round to display
    * @param lastRound last round to display
-   * @param rowsPerTeam {@link #getNumRows()}
    * @param bracketIndex {@link #getBracketIndex()}
    * @return the BracketData for display
    * @throws SQLException on a database error
@@ -613,12 +612,12 @@ public class BracketData extends BracketInfo {
                                                            final String bracketName,
                                                            final int firstRound,
                                                            final int lastRound,
-                                                           final int rowsPerTeam,
                                                            final int bracketIndex)
       throws SQLException {
 
-    final BracketData bracketData = new BracketData(connection, bracketName, firstRound, lastRound, rowsPerTeam, false,
-                                                    true, bracketIndex, false);
+    final BracketData bracketData = new BracketData(connection, bracketName, firstRound, lastRound,
+                                                    BracketData.DEFAULT_ROWS_PER_TEAM, false, true, bracketIndex,
+                                                    false);
 
     bracketData.addBracketLabels(firstRound);
     bracketData.addStaticTableLabels(connection);
@@ -626,6 +625,35 @@ public class BracketData extends BracketInfo {
     bracketData.generateBracketOutput(connection, TopRightCornerStyle.MEET_TOP_OF_CELL);
 
     return bracketData;
+  }
+
+  /**
+   * Construct and populate the HTML for the scoresheet generation brackets.
+   * 
+   * @param connection database connection
+   * @param bracketName name of bracket
+   * @param firstRound first round to display
+   * @param lastRound last round to display
+   * @param print if checkboxes should be displayed for printing scoresheets
+   * @param tournamentId ID of the tournament
+   * @return the BracketData for display
+   * @throws SQLException on a database error
+   */
+  public static BracketData constructScoregenBrackets(final Connection connection,
+                                                      final int tournamentId,
+                                                      final String bracketName,
+                                                      final int firstRound,
+                                                      final int lastRound,
+                                                      final boolean print)
+      throws SQLException {
+    final BracketData bracketInfo = new BracketData(connection, bracketName, firstRound, lastRound,
+                                                    BracketData.DEFAULT_ROWS_PER_TEAM, true, false, print);
+
+    bracketInfo.addBracketLabelsAndScoreGenFormElements(connection, tournamentId, bracketName);
+
+    bracketInfo.generateBracketOutput(connection, TopRightCornerStyle.MEET_BOTTOM_OF_CELL);
+
+    return bracketInfo;
   }
 
   /**
@@ -1341,7 +1369,6 @@ public class BracketData extends BracketInfo {
    * table assignment and scoresheet generation. If this function is used,
    * {@link #addBracketLabels(int)} must not be used.
    * 
-   * @return The number of matches for which form elements were generated.
    * @throws SQLException if database connection is broken.
    * @throws RuntimeException if playoffData table has mismatched teams in the
    *           brackets.
@@ -1349,9 +1376,9 @@ public class BracketData extends BracketInfo {
    * @param tournament the tournament to work with
    * @param division the bracket name
    */
-  public int addBracketLabelsAndScoreGenFormElements(final Connection pConnection,
-                                                     final int tournament,
-                                                     final String division)
+  private void addBracketLabelsAndScoreGenFormElements(final Connection pConnection,
+                                                      final int tournament,
+                                                      final String division)
       throws SQLException {
     // Get the list of tournament tables
     final List<TableInformation> tournamentTables = TableInformation.getTournamentTableInformation(pConnection,
@@ -1485,9 +1512,6 @@ public class BracketData extends BracketInfo {
         } // foreach row
       } // roundData not null
     } // foreach round
-
-    return matchNum
-        - 1;
   }
 
   /**

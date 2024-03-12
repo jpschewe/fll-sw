@@ -82,7 +82,6 @@ public final class RemoteControlBrackets {
                                                                                    h2hBracket.getFirstRound()
                                                                                        + NUM_ROUNDS_TO_DISPLAY
                                                                                        - 1,
-                                                                                   BracketData.DEFAULT_ROWS_PER_TEAM,
                                                                                    h2hBracket.getIndex());
         allBracketData.add(bracketData);
       }

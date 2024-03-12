@@ -10,9 +10,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -20,7 +17,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import fll.db.Queries;
 import fll.db.TableInformation;
 import fll.web.ApplicationAttributes;
-import fll.web.playoff.BracketData.TopRightCornerStyle;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Helpers for scoregenbrackets.jsp.
@@ -110,15 +109,8 @@ public final class ScoregenBrackets {
 
       final int currentTournament = Queries.getCurrentTournament(connection);
 
-      final BracketData bracketInfo = new BracketData(connection, division, firstRound, lastRound,
-                                                      BracketData.DEFAULT_ROWS_PER_TEAM, true, false, print);
-
-      final int numMatches = bracketInfo.addBracketLabelsAndScoreGenFormElements(connection, currentTournament,
-                                                                                 division);
-      pageContext.setAttribute("numMatches", numMatches);
-
-      bracketInfo.generateBracketOutput(connection, TopRightCornerStyle.MEET_BOTTOM_OF_CELL);
-
+      final BracketData bracketInfo = BracketData.constructScoregenBrackets(connection, currentTournament, division,
+                                                                            firstRound, lastRound, print);
       pageContext.setAttribute("bracketInfo", bracketInfo);
 
       final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection,
