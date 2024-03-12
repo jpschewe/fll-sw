@@ -25,7 +25,6 @@ import fll.web.WebUtils;
 import fll.web.display.DisplayHandler;
 import fll.web.display.DisplayInfo;
 import fll.web.display.UnknownDisplayException;
-import fll.web.playoff.BracketData.TopRightCornerStyle;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -78,18 +77,13 @@ public final class RemoteControlBrackets {
       final List<BracketData> allBracketData = new LinkedList<>();
 
       for (final DisplayInfo.H2HBracketDisplay h2hBracket : displayInfo.getBrackets()) {
-        final BracketData bracketData = new BracketData(connection, h2hBracket.getBracket(), h2hBracket.getFirstRound(),
-                                                        h2hBracket.getFirstRound()
-                                                            + NUM_ROUNDS_TO_DISPLAY
-                                                            - 1,
-                                                        BracketData.DEFAULT_ROWS_PER_TEAM, false, true,
-                                                        h2hBracket.getIndex(), false);
-
-        bracketData.addBracketLabels(h2hBracket.getFirstRound());
-        bracketData.addStaticTableLabels(connection);
-
-        bracketData.generateBracketOutput(connection, TopRightCornerStyle.MEET_TOP_OF_CELL);
-
+        final BracketData bracketData = BracketData.constructRemoteControlBrackets(connection, h2hBracket.getBracket(),
+                                                                                   h2hBracket.getFirstRound(),
+                                                                                   h2hBracket.getFirstRound()
+                                                                                       + NUM_ROUNDS_TO_DISPLAY
+                                                                                       - 1,
+                                                                                   BracketData.DEFAULT_ROWS_PER_TEAM,
+                                                                                   h2hBracket.getIndex());
         allBracketData.add(bracketData);
       }
 

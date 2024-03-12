@@ -490,15 +490,15 @@ public class BracketData extends BracketInfo {
    * @param print if true, then display checkboxes to select score sheets to print
    * @throws SQLException on a database error
    */
-  public BracketData(final Connection pConnection,
-                     final String pDivision,
-                     final int pFirstRound,
-                     final int pLastRound,
-                     final int pRowsPerTeam,
-                     final boolean pShowFinals,
-                     final boolean pShowOnlyVerifiedScores,
-                     final int bracketIndex,
-                     final boolean print)
+  private BracketData(final Connection pConnection,
+                      final String pDivision,
+                      final int pFirstRound,
+                      final int pLastRound,
+                      final int pRowsPerTeam,
+                      final boolean pShowFinals,
+                      final boolean pShowOnlyVerifiedScores,
+                      final int bracketIndex,
+                      final boolean print)
       throws SQLException {
     super(pDivision, Math.max(1, pFirstRound), pLastRound);
     this.showFinalScores = pShowFinals;
@@ -595,6 +595,37 @@ public class BracketData extends BracketInfo {
         } // allocate rs
       } // allocate stmt
     }
+  }
+
+  /**
+   * Construct and populate the HTML for the remote conrol display brackets.
+   * 
+   * @param connection database connection
+   * @param bracketName name of bracket
+   * @param firstRound first round to display
+   * @param lastRound last round to display
+   * @param rowsPerTeam {@link #getNumRows()}
+   * @param bracketIndex {@link #getBracketIndex()}
+   * @return the BracketData for display
+   * @throws SQLException on a database error
+   */
+  public static BracketData constructRemoteControlBrackets(final Connection connection,
+                                                           final String bracketName,
+                                                           final int firstRound,
+                                                           final int lastRound,
+                                                           final int rowsPerTeam,
+                                                           final int bracketIndex)
+      throws SQLException {
+
+    final BracketData bracketData = new BracketData(connection, bracketName, firstRound, lastRound, rowsPerTeam, false,
+                                                    true, bracketIndex, false);
+
+    bracketData.addBracketLabels(firstRound);
+    bracketData.addStaticTableLabels(connection);
+
+    bracketData.generateBracketOutput(connection, TopRightCornerStyle.MEET_TOP_OF_CELL);
+
+    return bracketData;
   }
 
   /**
