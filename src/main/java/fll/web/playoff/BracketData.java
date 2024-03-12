@@ -370,8 +370,7 @@ public class BracketData extends BracketInfo {
   }
 
   // Map of round number to map of row number (of the conceptual HTML table -
-  // not
-  // the column of the PlayoffData table) to playoff meta data for that
+  // not the column of the PlayoffData table) to playoff meta data for that
   // round number and line number.
   private final RoundData[] bracketData;
 
