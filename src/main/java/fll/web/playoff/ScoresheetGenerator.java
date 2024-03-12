@@ -178,7 +178,7 @@ public class ScoresheetGenerator {
     final boolean[] checkedMatches = new boolean[numMatches
         + 1];
     int checkedMatchCount = 0;
-    // Build array of out how many matches we are printing
+    // Build array of how many matches we are printing
     for (int i = 1; i <= numMatches; i++) {
       final String checkX = "print"
           + i;
