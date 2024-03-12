@@ -123,7 +123,7 @@ public final class ScoregenBrackets {
 
       final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection,
                                                                                               currentTournament,
-                                                                                              bracketInfo.getBracketName());
+                                                                                              division);
       pageContext.setAttribute("tableInfo", tableInfo);
 
     } catch (final SQLException e) {
