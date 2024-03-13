@@ -15,8 +15,8 @@ fll.web.report.finalist.FinalistTeams.populateContext(application, pageContext);
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/base.css'/>" />
 
-<link rel='stylesheet' type='text/css'
-    href='<c:url value="/scoreboard/score_style.css"/>' />
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/style/big_screen.css'/>" />
 
 <link rel='stylesheet' type='text/css' href="finalist_teams.css" />
 

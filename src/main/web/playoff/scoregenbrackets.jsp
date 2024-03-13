@@ -131,7 +131,6 @@ FONT.TIE {
     <form name='printScoreSheets' method='post'
         action='ScoresheetServlet' target='${form_target}'>
         <input type='hidden' name='division' value='${division}' />
-        <input type='hidden' name='numMatches' value='${numMatches}' />
         <input type='hidden' name='editTables'
             value='${param.editTables}' />
 

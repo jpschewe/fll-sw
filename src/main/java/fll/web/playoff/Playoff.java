@@ -174,45 +174,8 @@ public final class Playoff {
                                           final TeamScore teamBScore,
                                           final int runNumber)
       throws SQLException {
-    final DatabaseTeamScore teamAScore = new DatabaseTeamScore(tournament, teamA.getTeamNumber(),
-                                                               runNumber, connection);
-    final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
-                                   teamBScore);
-    return retval;
-  }
-
-  /**
-   * Decide who is the winner of runNumber. Calls Queries.updateScoreTotals() to
-   * ensure the ComputedScore column is up to date
-   *
-   * @param connection database connection with write access to Performance
-   *          table
-   * @param performanceElement the XML element representing the performance
-   *          scoring
-   * @param tiebreakerElement the XML element representing the tiebreaker
-   * @param winnerCriteria the criteria for picking a winner
-   * @param teamA first team to check
-   * @param teamB second team to check
-   * @param runNumber what run to compare scores for
-   * @return the team that is the winner. Team.TIE is returned in the case of a
-   *         tie and null when the scores have not yet been entered
-   * @see Team#TIE
-   * @throws SQLException on a database error
-   * @param tournament the tournament to work with
-   */
-  public static @Nullable Team pickWinner(final Connection connection,
-                                          final int tournament,
-                                          final PerformanceScoreCategory performanceElement,
-                                          final List<TiebreakerTest> tiebreakerElement,
-                                          final WinnerType winnerCriteria,
-                                          final Team teamA,
-                                          final Team teamB,
-                                          final int runNumber)
-      throws SQLException {
-    final DatabaseTeamScore teamAScore = new DatabaseTeamScore(tournament, teamA.getTeamNumber(),
-                                                               runNumber, connection);
-    final DatabaseTeamScore teamBScore = new DatabaseTeamScore(tournament, teamB.getTeamNumber(),
-                                                               runNumber, connection);
+    final DatabaseTeamScore teamAScore = new DatabaseTeamScore(tournament, teamA.getTeamNumber(), runNumber,
+                                                               connection);
     final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
                                    teamBScore);
     return retval;
