@@ -12,7 +12,6 @@ import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.KeyFor;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -26,7 +25,6 @@ import fll.db.Queries;
 import fll.db.TableInformation;
 import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
-import fll.web.playoff.BracketData.TopRightCornerStyle;
 import net.mtu.eggplant.util.StringUtils;
 
 /**
@@ -43,7 +41,7 @@ import net.mtu.eggplant.util.StringUtils;
  * 
  * @author Dan Churchill
  */
-public class BracketData extends BracketInfo {
+public final class BracketData extends BracketInfo {
 
   private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
 
