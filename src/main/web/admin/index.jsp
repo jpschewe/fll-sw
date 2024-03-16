@@ -275,6 +275,12 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                     </c:forEach>
                     <!-- end subjective sheets -->
 
+                    <li>
+                        <a
+                            href="<c:url value='/admin/TeamSchedules' />"
+                            target="_new">Team Schedules</a>
+                    </li>
+
                 </ul>
             </c:if>
         </li>
