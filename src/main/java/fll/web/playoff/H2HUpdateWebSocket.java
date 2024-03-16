@@ -92,7 +92,7 @@ public class H2HUpdateWebSocket {
 
   private @MonotonicNonNull Session session;
 
-  private @MonotonicNonNull String displayUuid;
+  private @MonotonicNonNull String h2hUuid;
 
   @OnOpen
   public void start(final Session session) {
@@ -107,14 +107,15 @@ public class H2HUpdateWebSocket {
    *          display is associated with this web socket
    * @param session the session to add
    * @param allBracketInfo the brackets that the session is interested in
-   * @throws IOException
-   * @throws SQLException
+   * @throws IOException on an error writing to the websocket
+   * @throws SQLException on a database error
+   * @return UUID for head to head updates
    */
-  private void addSession(final @Nullable String displayUuid,
-                          final Session session,
-                          final Collection<BracketInfo> allBracketInfo,
-                          final Connection connection,
-                          final int currentTournament)
+  private String addSession(final @Nullable String displayUuid,
+                            final Session session,
+                            final Collection<BracketInfo> allBracketInfo,
+                            final Connection connection,
+                            final int currentTournament)
       throws SQLException {
     synchronized (SESSIONS_LOCK) {
 
@@ -131,7 +132,7 @@ public class H2HUpdateWebSocket {
           LOGGER.warn("Got error writing to new session, dropping display {}", displayUuid, e);
           removeH2HDisplay(h2hUuid);
           DisplayHandler.removeDisplay(displayUuid);
-          return;
+          return h2hUuid;
         }
       } else {
         // not associated with a display
@@ -170,6 +171,8 @@ public class H2HUpdateWebSocket {
         } // foreach update
 
       } // foreach bracket
+
+      return h2hUuid;
     } // session lock
   }
 
@@ -233,18 +236,18 @@ public class H2HUpdateWebSocket {
         final DataSource datasource = ApplicationAttributes.getDataSource(httpApplication);
         try (Connection connection = datasource.getConnection()) {
           final int currentTournament = Queries.getCurrentTournament(connection);
-          addSession(registerMessage.getDisplayUuid(), session, registerMessage.getBracketInfo(), connection,
-                     currentTournament);
+          h2hUuid = addSession(registerMessage.getDisplayUuid(), session, registerMessage.getBracketInfo(), connection,
+                               currentTournament);
         }
         break;
       case BRACKET_UPDATE:
-        LOGGER.warn("Received BRACKET_UPDATE message from client, ignoring");
+        LOGGER.warn("{}: Received BRACKET_UPDATE message from client, ignoring", h2hUuid);
         break;
       case DISPLAY_UPDATE:
-        LOGGER.warn("Received DISPLAY_UPDATE message from client, ignoring");
+        LOGGER.warn("{}: Received DISPLAY_UPDATE message from client, ignoring", h2hUuid);
         break;
       default:
-        LOGGER.error("{}: Received unknown message type from client: {}", displayUuid, message.getType());
+        LOGGER.error("{}: Received unknown message type from client: {}", h2hUuid, message.getType());
       }
     } catch (final JsonProcessingException e) {
       throw new FLLRuntimeException("Error parsing bracket info from #"
@@ -296,9 +299,6 @@ public class H2HUpdateWebSocket {
 
   /**
    * Notify a head to head display what brackets it should be displaying.
-   * 
-   * @param h2hUuid
-   * @param session
    */
   private static void updateDisplayedBracket(final DisplayInfo displayInfo,
                                              final Session session)
@@ -430,17 +430,17 @@ public class H2HUpdateWebSocket {
 
   @OnClose
   public void end() {
-    if (null != displayUuid) {
-      removeH2HDisplay(displayUuid);
+    if (null != h2hUuid) {
+      removeH2HDisplay(h2hUuid);
     }
   }
 
   @OnError
   public void onError(final Throwable t) throws Throwable {
     if (t instanceof EOFException) {
-      LOGGER.debug("{}: Socket closed.", displayUuid);
+      LOGGER.debug("{}: Socket closed.", h2hUuid);
     } else {
-      LOGGER.error("{}: Display socket error", displayUuid, t);
+      LOGGER.error("{}: Display socket error", h2hUuid, t);
     }
   }
 
