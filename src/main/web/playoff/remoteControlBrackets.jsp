@@ -92,7 +92,7 @@ RemoteControlBrackets.populateContext(application, session, request, pageContext
     </div>
 
     <div id='right'>
-        <div id="on-deck">
+        <div id="on-deck" class='fll-sw-ui-inactive'>
             <h1>On deck teams</h1>
             <table id='on-deck-table'>
 
