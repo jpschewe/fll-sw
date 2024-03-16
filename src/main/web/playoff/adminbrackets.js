@@ -45,41 +45,39 @@ function placeTableLabel(lid, table) {
 }
 
 function messageReceived(event) {
-
-    console.log("received: " + event.data);
-    const bracketMessage = JSON.parse(event.data);
-    if (bracketMessage.isBracketUpdate) {
-        if (bracketMessage.bracketUpdate.bracketName != bracketInfo.bracketName) {
+    const message = JSON.parse(event.data);
+    if (message.type == DISPLAY_UPDATE_MESSAGE_TYPE) {
+        // currently ignored, but may be useful in the future
+        //console.log("Display update: " + bracketMessage.allBracketInfo);
+    } else if (message.type == BRACKET_UPDATE_MESSAGE_TYPE) {
+        if (message.bracketUpdate.bracketName != bracketInfo.bracketName) {
             // not for us
             return;
         }
 
         const leafId = constructLeafId(bracketInfo.bracketIndex,
-            bracketMessage.bracketUpdate.dbLine,
-            bracketMessage.bracketUpdate.playoffRound);
+            message.bracketUpdate.dbLine,
+            message.bracketUpdate.playoffRound);
 
-        populateLeaf(leafId, bracketMessage.bracketUpdate.teamNumber,
-            bracketMessage.bracketUpdate.teamName,
-            bracketMessage.bracketUpdate.score,
-            bracketMessage.bracketUpdate.verified);
+        populateLeaf(leafId, message.bracketUpdate.teamNumber,
+            message.bracketUpdate.teamName,
+            message.bracketUpdate.score,
+            message.bracketUpdate.verified);
 
         placeTableLabel(leafId, bracketMessage.bracketUpdate.table);
-
-    }
-    if (bracketMessage.isDisplayUpdate) {
-        // currently ignored, but may be useful in the future
-        //console.log("Display update: " + bracketMessage.allBracketInfo);
+    } else {
+        console.log("Ignoring unexpected message type: " + message.type);
+        console.log("Full message: " + event.data);
     }
 }
 
 function socketOpened(_) {
     console.log("Socket opened");
 
-    const allBracketInfo = [bracketInfo];
-
     const message = new Object();
+    message.type = REGISTER_MESSAGE_TYPE;
     message.displayUuid = ""; // no display associated
-    message.brackInfo = allBracketInfo;
+    message.bracketInfo = [bracketInfo];
 
     const str = JSON.stringify(message);
     this.send(str);
