@@ -6,18 +6,17 @@
 
 package fll.web.playoff;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
 import fll.db.Queries;
-import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
 import jakarta.servlet.ServletContext;
@@ -96,18 +95,15 @@ public final class AdminBrackets {
 
       // expose all bracketInfo to the javascript
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
-      final StringWriter writer = new StringWriter();
-      try {
-        jsonMapper.writeValue(writer, bracketInfo);
-      } catch (final IOException e) {
-        throw new FLLInternalException("Error writing JSON for bracketInfo", e);
-      }
-      final String bracketInfoJson = writer.toString();
+      final String bracketInfoJson = WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(bracketInfo));
       pageContext.setAttribute("bracketInfoJson", bracketInfoJson);
 
+      Message.setPageVariables(pageContext);
     } catch (final SQLException sqle) {
       LOGGER.error("Error talking to the database", sqle);
       throw new RuntimeException("Error talking to the database", sqle);
+    } catch (final JsonProcessingException e) {
+      throw new FLLRuntimeException("Error converting data to JSON", e);
     }
 
   }

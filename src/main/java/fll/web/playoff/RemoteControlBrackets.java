@@ -95,6 +95,8 @@ public final class RemoteControlBrackets {
 
       final double scrollRate = GlobalParameters.getHeadToHeadScrollRate(connection);
       pageContext.setAttribute("scrollRate", scrollRate);
+
+      Message.setPageVariables(pageContext);
     } catch (final SQLException sqle) {
       throw new FLLRuntimeException("Error talking to the database", sqle);
     } catch (final JsonProcessingException e) {

@@ -162,17 +162,17 @@ function handleBracketUpdate(bracketUpdate) {
 }
 
 function messageReceived(event) {
-
-    console.log("received: " + event.data);
-    const bracketMessage = JSON.parse(event.data);
-    if (bracketMessage.isDisplayUpdate) {
-        if (isDisplayInfoDifferent(bracketMessage.allBracketInfo)) {
+    const message = JSON.parse(event.data);
+    if (message.type == DISPLAY_UPDATE_MESSAGE_TYPE) {
+        if (isDisplayInfoDifferent(message.allBracketInfo)) {
             // reload
             location.reload();
         }
-    }
-    if (bracketMessage.isBracketUpdate) {
-        handleBracketUpdate(bracketMessage.bracketUpdate);
+    } else if (message.type == BRACKET_UPDATE_MESSAGE_TYPE) {
+        handleBracketUpdate(message.bracketUpdate);
+    } else {
+        console.log("Ignoring unexpected message type: " + message.type);
+        console.log("Full message: " + event.data);
     }
 }
 
@@ -181,8 +181,9 @@ function socketOpened(_event) {
 
 
     const message = new Object();
+    message.type = REGISTER_MESSAGE_TYPE;
     message.displayUuid = displayUuid;
-    message.brackInfo = allBracketData;
+    message.bracketInfo = allBracketData;
 
     const str = JSON.stringify(message);
     this.send(str);
