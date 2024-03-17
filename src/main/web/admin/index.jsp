@@ -275,11 +275,33 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                     </c:forEach>
                     <!-- end subjective sheets -->
 
+                    <!-- Team schedules -->
                     <li>
-                        <a
-                            href="<c:url value='/admin/TeamSchedules' />"
+                        <a href="<c:url value='/admin/TeamSchedules' />"
                             target="_new">Team Schedules</a>
                     </li>
+
+                    <li>
+                        <form
+                            action="<c:url value='/admin/TeamSchedules' />"
+                            method='post' target="_new">
+                            Team schedule for
+                            <select name='TeamNumber'>
+                                <c:forEach items="${tournamentTeams}"
+                                    var="team">
+                                    <option
+                                        value='<c:out value="${team.teamNumber}"/>'>
+                                        <c:out
+                                            value="${team.teamNumber}" />
+                                        -
+                                        <c:out value="${team.teamName}" />
+                                    </option>
+                                </c:forEach>
+                            </select>
+                            <input type='submit' value='Output Schedule' />
+                        </form>
+                    </li>
+                    <!-- end Team schedules -->
 
                 </ul>
             </c:if>

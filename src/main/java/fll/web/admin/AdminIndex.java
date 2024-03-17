@@ -90,6 +90,9 @@ public final class AdminIndex {
                             .add(mapping.getScheduleColumn());
       }
       pageContext.setAttribute("categoryNameToColumn", categoryNameToColumn);
+
+      pageContext.setAttribute("tournamentTeams", Queries.getTournamentTeams(connection).values());
+
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
           + sqle.getMessage()

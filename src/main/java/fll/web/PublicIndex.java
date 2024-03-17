@@ -47,6 +47,8 @@ public final class PublicIndex {
       final Collection<String> finalistDivisions = FinalistSchedule.getAllDivisions(connection, tournament);
       pageContext.setAttribute("finalistDivisions", finalistDivisions);
 
+      pageContext.setAttribute("tournamentTeams", Queries.getTournamentTeams(connection).values());
+
     } catch (final SQLException e) {
       LOGGER.error(e, e);
       throw new RuntimeException(e);
