@@ -180,7 +180,8 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
   public double evaluate(final TeamScore teamScore) {
     if (!teamScore.scoreExists()) {
       return Double.NaN;
-    } else if (teamScore.isNoShow()) {
+    } else if (teamScore.isNoShow()
+        || teamScore.isBye()) {
       return 0D;
     }
 
@@ -199,7 +200,8 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
 
     if (!teamScore.scoreExists()) {
       return goalGroupScores;
-    } else if (teamScore.isNoShow()) {
+    } else if (teamScore.isNoShow()
+        || teamScore.isBye()) {
       return goalGroupScores;
     }
 

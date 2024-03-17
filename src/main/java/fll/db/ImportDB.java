@@ -717,7 +717,12 @@ public final class ImportDB {
     if (dbVersion < 40) {
       upgrade39To40(connection);
     }
-    
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 41) {
+      upgrade40To41(connection);
+    }
+
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -1431,11 +1436,11 @@ public final class ImportDB {
     setDBVersion(connection, 39);
   }
 
- /**
+  /**
    * Remove judging_station from schedule table.
    */
   private static void upgrade39To40(final Connection connection) throws SQLException {
-    LOGGER.debug("Upgrading database from 36 to 37");
+    LOGGER.debug("Upgrading database from 39 to 40");
 
     try (Statement stmt = connection.createStatement()) {
       if (checkForColumnInTable(connection, "schedule", "judging_station")) {
@@ -1445,6 +1450,16 @@ public final class ImportDB {
     setDBVersion(connection, 40);
   }
 
+  /**
+   * Add schedule duration table.
+   */
+  private static void upgrade40To41(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 40 to 41");
+
+    GenerateDB.createScheduleDurationTable(connection, false);
+
+    setDBVersion(connection, 41);
+  }
 
   /**
    * Check for a column in a table. This checks table names both upper and lower
@@ -2051,6 +2066,12 @@ public final class ImportDB {
     }
 
     try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM sched_durations WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (
         PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM schedule WHERE Tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
@@ -2089,6 +2110,18 @@ public final class ImportDB {
       destPrep.setInt(1, destTournamentID);
       copyData(sourcePrep, destPrep);
     }
+
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT key, duration_minutes" //
+        + " FROM sched_durations WHERE tournament_id=?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO sched_durations" //
+            + " (tournament_id, key, duration_minutes)" //
+            + " VALUES (?, ?, ?)")) {
+
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+      copyData(sourcePrep, destPrep);
+    }
+
   }
 
   private static void importAwardsScriptData(final Connection sourceConnection,

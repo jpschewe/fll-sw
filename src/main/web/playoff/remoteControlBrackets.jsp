@@ -62,6 +62,9 @@ SPAN.TIE {
   const secondsBetweenScrolls = parseInt("${scrollRate}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
   const maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
   const displayUuid = "${param.display_uuid}";
+  const REGISTER_MESSAGE_TYPE = "${REGISTER_MESSAGE_TYPE}";
+  const BRACKET_UPDATE_MESSAGE_TYPE = "${BRACKET_UPDATE_MESSAGE_TYPE}";
+  const DISPLAY_UPDATE_MESSAGE_TYPE = "${DISPLAY_UPDATE_MESSAGE_TYPE}";
 </script>
 
 <script type='text/javascript'

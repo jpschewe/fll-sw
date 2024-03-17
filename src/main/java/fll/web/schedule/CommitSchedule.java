@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import fll.Tournament;
 import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
 import fll.scheduler.TeamScheduleInfo;
@@ -66,20 +67,21 @@ public class CommitSchedule extends BaseFLLServlet {
                                                                                         UploadScheduleData.class);
 
     try (Connection connection = datasource.getConnection()) {
-      final int tournamentID = Queries.getCurrentTournament(connection);
+      final Tournament tournament = Tournament.getCurrentTournament(connection);
 
       final TournamentSchedule schedule = uploadScheduleData.getSchedule();
       if (null == schedule) {
         throw new FLLInternalException("Schedule is not set");
       }
 
-      schedule.storeSchedule(connection, tournamentID);
+      schedule.storeSchedule(connection, tournament.getTournamentID());
+      uploadScheduleData.getSchedParams().save(connection, tournament);
 
-      assignJudgingGroups(connection, tournamentID, schedule);
+      assignJudgingGroups(connection, tournament.getTournamentID(), schedule);
 
       final Collection<CategoryColumnMapping> categoryColumnMappings = uploadScheduleData.getCategoryColumnMappings();
 
-      CategoryColumnMapping.store(connection, tournamentID, categoryColumnMappings);
+      CategoryColumnMapping.store(connection, tournament.getTournamentID(), categoryColumnMappings);
 
       // store table names
       final List<ImmutablePair<String, String>> tables = new LinkedList<>();
@@ -88,7 +90,7 @@ public class CommitSchedule extends BaseFLLServlet {
             + " 1", color
                 + " 2"));
       }
-      Tables.replaceTablesForTournament(connection, tournamentID, tables);
+      Tables.replaceTablesForTournament(connection, tournament.getTournamentID(), tables);
 
       SessionAttributes.appendToMessage(session,
                                         "<p id='success' class='success'>Schedule successfully stored in the database</p>");
