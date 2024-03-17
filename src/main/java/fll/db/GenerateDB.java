@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 40;
+  public static final int DATABASE_VERSION = 41;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -212,6 +212,7 @@ public final class GenerateDB {
       tournamentParameters(connection);
 
       createScheduleTables(connection, true);
+      createScheduleDurationTable(connection, true);
 
       createSubjectiveCategoryScheduleColumnMappingTables(connection);
 
@@ -870,6 +871,32 @@ public final class GenerateDB {
       }
       subjectiveSql.append(")");
       stmt.executeUpdate(subjectiveSql.toString());
+    }
+  }
+
+  /**
+   * Create the table used to store schedule durations.
+   * 
+   * @param connection database connection
+   * @param createConstraints if true create constraints
+   * @throws SQLException on a database error
+   */
+  /* package */static void createScheduleDurationTable(final Connection connection,
+                                                       final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      final StringBuilder createSql = new StringBuilder();
+      createSql.append("CREATE TABLE sched_durations (");
+      createSql.append("  tournament_id INTEGER NOT NULL");
+      createSql.append(" ,key LONGVARCHAR NOT NULL");
+      createSql.append(" ,duration_minutes INTEGER NOT NULL");
+      createSql.append(" ,CONSTRAINT sched_durations_pk PRIMARY KEY (tournament_id, key)");
+      if (createConstraints) {
+        createSql.append(" ,CONSTRAINT sched_durations_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+      }
+      createSql.append(")");
+      stmt.executeUpdate(createSql.toString());
+
     }
   }
 

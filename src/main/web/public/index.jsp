@@ -44,6 +44,24 @@ fll.web.PublicIndex.populateContext(application, pageContext);
 
     <a class="wide" href='<c:url value="/playoff/remoteMain.jsp"/>'>Head
         to head brackets that are currently on the big screen</a>
+
+    <div class="wide">
+
+        <form action="<c:url value='/admin/TeamSchedules' />"
+            method='post' target="_new">
+            Team schedule for
+            <select name='TeamNumber'>
+                <c:forEach items="${tournamentTeams}" var="team">
+                    <option value='<c:out value="${team.teamNumber}"/>'>
+                        <c:out value="${team.teamNumber}" /> -
+                        <c:out value="${team.teamName}" />
+                    </option>
+                </c:forEach>
+            </select>
+            <input type='submit' value='Output Schedule' />
+        </form>
+    </div>
+    
     <a class="wide"
         href='<c:url value="/report/finalist/FinalistTeams.jsp"/>'>
         Finalist Teams (State only)</a>
