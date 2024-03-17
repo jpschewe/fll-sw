@@ -336,7 +336,8 @@ public final class Queries {
         + tournament.getTournamentID());
 
     columns.append(", ComputedTotal");
-    if (teamScore.isNoShow()) {
+    if (teamScore.isNoShow()
+        || teamScore.isBye()) {
       values.append(", NULL");
     } else {
       values.append(", "
@@ -478,7 +479,8 @@ public final class Queries {
 
     sql.append(", TIMESTAMP = CURRENT_TIMESTAMP");
 
-    if (teamScore.isNoShow()) {
+    if (teamScore.isNoShow()
+        || teamScore.isBye()) {
       sql.append(", ComputedTotal = NULL");
     } else {
       sql.append(", ComputedTotal = "

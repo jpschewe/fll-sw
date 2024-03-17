@@ -219,7 +219,8 @@ public class PerformanceScoreCategory extends ScoreCategory implements AwardCate
   public double evaluate(final TeamScore teamScore) {
     final double score = super.evaluate(teamScore);
     if (score < mMinimumScore
-        && !teamScore.isNoShow()) {
+        && !teamScore.isNoShow()
+        && !teamScore.isBye()) {
       return mMinimumScore;
     } else {
       return score;
