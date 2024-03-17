@@ -1,3 +1,4 @@
+* #1166 - handle Bye scores everywhere that No Show scores are handled
 * #1149 - handle changes to judging station in the schedule reports
 * #1137 - add pages to facilitate deliberations
 * #1157 - remove text about going to information desk for finalist schedule
