@@ -474,6 +474,11 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
             <a href='database.flldb'>Download database</a>
         </li>
 
+        <li>
+            <a href='<c:url value="/report/AwardsCsv"/>'>Awards CSV
+                file</a>
+        </li>
+
     </ul>
 
     <h2>User Management</h2>
