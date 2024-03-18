@@ -2257,6 +2257,21 @@ public final class ImportDB {
       copyData(sourcePrep, destPrep);
     }
 
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM automatic_finished_playoff WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT bracket_name "
+        + "FROM automatic_finished_playoff WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO automatic_finished_playoff (tournament_id, bracket_name)"
+            + " VALUES (?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+      copyData(sourcePrep, destPrep);
+    }
+
   }
 
   private static void importPlayoffTeams(final Connection sourceConnection,
