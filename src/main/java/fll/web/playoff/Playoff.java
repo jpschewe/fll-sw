@@ -2013,4 +2013,42 @@ public final class Playoff {
     }
   }
 
+  /**
+   * Find the team number that is at a particular position in a playoff bracket.
+   * 
+   * @param connection database connection
+   * @param tournament tournament
+   * @param bracketName name of the playoff bracket
+   * @param playoffRound round in the playoff bracket
+   * @param lineNumber the line number in the round
+   * @return the team number on this line, {@link Team#NULL_TEAM_NUMBER} if not
+   *         found
+   * @throws SQLException on a database error
+   */
+  public static int getPlayoffTeamNumber(final Connection connection,
+                                         final Tournament tournament,
+                                         final String bracketName,
+                                         final int playoffRound,
+                                         final int lineNumber)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT team FROM PlayoffData" //
+        + "  WHERE tournament = ?" //
+        + "    AND event_division = ?" //
+        + "    AND playoffround = ?" //
+        + "    AND linenumber = ?" //
+    )) {
+      prep.setInt(1, tournament.getTournamentID());
+      prep.setString(2, bracketName);
+      prep.setInt(3, playoffRound);
+      prep.setInt(4, lineNumber);
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          final int teamNumber = rs.getInt(1);
+          return teamNumber;
+        } else {
+          return Team.NULL_TEAM_NUMBER;
+        }
+      }
+    }
+  }
 }
