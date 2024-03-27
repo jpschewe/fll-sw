@@ -153,8 +153,10 @@ public class JudgesServlet extends HttpServlet {
     LOGGER.trace("Current judges: {}", currentJudges);
 
     try (
-        PreparedStatement insertJudge = connection.prepareStatement("INSERT INTO Judges (id, category, Tournament, station) VALUES (?, ?, ?, ?)")) {
+        PreparedStatement insertJudge = connection.prepareStatement("INSERT INTO Judges (id, category, Tournament, station, final_scores) VALUES (?, ?, ?, ?, ?)");
+        PreparedStatement updateJudge = connection.prepareStatement("UPDATE Judges SET final_scores = ? WHERE id = ? AND category = ? AND Tournament = ? AND station = ?")) {
       insertJudge.setInt(3, currentTournament);
+      updateJudge.setInt(4, currentTournament);
 
       for (final JudgeInformation judge : judges) {
         if (null != judge) {
@@ -164,9 +166,16 @@ public class JudgesServlet extends HttpServlet {
             insertJudge.setString(1, judge.getId());
             insertJudge.setString(2, judge.getCategory());
             insertJudge.setString(4, judge.getGroup());
+            insertJudge.setBoolean(5, judge.isFinalScores());
             insertJudge.executeUpdate();
             ++numNewJudges;
-          } // add judge
+          } else {
+            updateJudge.setBoolean(1, judge.isFinalScores());
+            updateJudge.setString(2, judge.getId());
+            updateJudge.setString(3, judge.getCategory());
+            updateJudge.setString(5, judge.getGroup());
+            updateJudge.executeUpdate();
+          }
         } // non-null judge
       } // foreach judge sent
     } // prepared statement

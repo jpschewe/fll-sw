@@ -12,14 +12,9 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.PolyNull;
@@ -35,6 +30,12 @@ import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Verify the judges information.
@@ -82,6 +83,7 @@ public class VerifyJudges extends BaseFLLServlet {
             + numRows);
       }
 
+      final Collection<JudgeInformation> dbJudges = JudgeInformation.getJudges(connection, tournament);
       final Collection<JudgeInformation> judges = new LinkedList<>();
 
       // walk request and push judge id into the Set, if not null or empty,
@@ -96,8 +98,16 @@ public class VerifyJudges extends BaseFLLServlet {
         if (null != id) {
           id = sanitizeJudgeId(id);
           if (id.length() > 0) {
-            final JudgeInformation judge = new JudgeInformation(id, category, station);
-            judges.add(judge);
+            final JudgeInformation judge = new JudgeInformation(id, category, station, false);
+
+            // if the judge is in the database already, use that object so that the
+            // scoresFinal property is set
+            final Optional<JudgeInformation> dbJudge = dbJudges.stream().filter(j -> j.equals(judge)).findAny();
+            if (dbJudge.isPresent()) {
+              judges.add(dbJudge.get());
+            } else {
+              judges.add(judge);
+            }
           }
         }
       }
