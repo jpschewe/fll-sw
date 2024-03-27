@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 41;
+  public static final int DATABASE_VERSION = 42;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -226,6 +226,7 @@ public final class GenerateDB {
           + "  category longvarchar NOT NULL," //
           + "  Tournament INTEGER NOT NULL," //
           + "  station varchar(64) NOT NULL," //
+          + "  final_scores boolean DEFAULT FALSE NOT NULL,"
           + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,station)"//
           + " ,CONSTRAINT judges_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
           + ")");

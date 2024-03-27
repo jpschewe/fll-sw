@@ -723,6 +723,11 @@ public final class ImportDB {
       upgrade40To41(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 42) {
+      upgrade41To42(connection);
+    }
+
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -1459,6 +1464,21 @@ public final class ImportDB {
     GenerateDB.createScheduleDurationTable(connection, false);
 
     setDBVersion(connection, 41);
+  }
+
+  /**
+   * Add final_scores column to judges table.
+   */
+  private static void upgrade41To42(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 41 to 42");
+
+    try (Statement stmt = connection.createStatement()) {
+      if (!checkForColumnInTable(connection, "judges", "final_scores")) {
+        stmt.executeUpdate("ALTER TABLE judges ADD COLUMN final_scores boolean DEFAULT FALSE");
+      }
+    }
+
+    setDBVersion(connection, 42);
   }
 
   /**
@@ -2573,9 +2593,9 @@ public final class ImportDB {
     }
 
     try (
-        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES (?, ?, ?, ?)");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament, final_scores) VALUES (?, ?, ?, ?, ?)");
 
-        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?")) {
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT id, category, station, final_scores FROM Judges WHERE Tournament = ?")) {
 
       destPrep.setInt(4, destTournamentID);
       sourcePrep.setInt(1, sourceTournamentID);
@@ -2584,6 +2604,7 @@ public final class ImportDB {
           destPrep.setString(1, sourceRS.getString(1));
           destPrep.setString(2, sourceRS.getString(2));
           destPrep.setString(3, sourceRS.getString(3));
+          destPrep.setBoolean(5, sourceRS.getBoolean(4));
           destPrep.executeUpdate();
         }
       }
