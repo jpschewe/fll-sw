@@ -1,3 +1,4 @@
+* #1172 - Add support for judges stating that their scores are final
 * #1182 - Add CSV for award winners of the tournament
 * #1181 - Allow team schedules to be output from the web
 * #1166 - handle Bye scores everywhere that No Show scores are handled

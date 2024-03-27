@@ -26,7 +26,7 @@ const subjective_module = {}
     let _currentCategory;
     let _currentCategoryColumn;
     let _judges;
-    let _currentJudge;
+    let _currentJudgeId;
     let _allScores;
     let _teamTimeCache;
     let _currentTeam;
@@ -44,7 +44,7 @@ const subjective_module = {}
         _currentCategory = null;
         _currentCategoryColumn = null;
         _judges = [];
-        _currentJudge = null;
+        _currentJudgeId = null;
         _allScores = {};
         _teamTimeCache = {};
         _currentTeam = null;
@@ -99,9 +99,9 @@ const subjective_module = {}
             _judges = value;
         }
 
-        value = fllStorage.get(STORAGE_PREFIX, "_currentJudge");
+        value = fllStorage.get(STORAGE_PREFIX, "_currentJudgeId");
         if (null != value) {
-            _currentJudge = value;
+            _currentJudgeId = value;
         }
 
         value = fllStorage.get(STORAGE_PREFIX, "_allScores");
@@ -143,7 +143,7 @@ const subjective_module = {}
         fllStorage.set(STORAGE_PREFIX, "_currentCategory", _currentCategory);
         fllStorage.set(STORAGE_PREFIX, "_currentCategoryColumn", _currentCategoryColumn);
         fllStorage.set(STORAGE_PREFIX, "_judges", _judges);
-        fllStorage.set(STORAGE_PREFIX, "_currentJudge", _currentJudge);
+        fllStorage.set(STORAGE_PREFIX, "_currentJudgeId", _currentJudgeId);
         fllStorage.set(STORAGE_PREFIX, "_allScores", _allScores);
         fllStorage.set(STORAGE_PREFIX, "_teamTimeCache", _teamTimeCache);
         fllStorage.set(STORAGE_PREFIX, "_currentTeam", _currentTeam);
@@ -263,6 +263,13 @@ const subjective_module = {}
         _clear_local_storage();
         _init_variables();
     },
+
+        /**
+         * Save data to local storage. In most cases this isn't necessary as most modification functions take care of this.
+         */
+        subjective_module.save = function() {
+            _save();
+        },
 
         /**
          * Load all data from server.
@@ -481,35 +488,62 @@ const subjective_module = {}
             }
         },
 
-        subjective_module.setCurrentJudge = function(judgeId) {
-            var foundJudge = null;
-            if (null != _judges) {
-                for (const judge of _judges) {
-                    if (judge.group == _currentJudgingGroup
-                        && judge.category == _currentCategory.name
-                        && judge.id == judgeId) {
-                        foundJudge = judge;
-                    }
+        /**
+         * Get the judge with the specified Id in the current category and station.
+         * 
+         * @param judgeId ID of the judge to find
+         * @return the Judge or null if not found
+         */
+        subjective_module.getJudge = function(judgeId) {
+            for (const judge of subjective_module.getPossibleJudges()) {
+                if (judge.id == judgeId) {
+                    return judge;
                 }
             }
-            if (null == foundJudge) {
-                foundJudge = new Object();
-                foundJudge.id = judgeId;
-                foundJudge.category = _currentCategory.name;
-                foundJudge.group = _currentJudgingGroup;
-                _judges.push(foundJudge);
+            return null;
+        },
+
+        /**
+         * Store the ID of the current judge. When not null, check that the judge
+         * exists and create the judge if it doesn't exist.
+         * 
+         * @param judgeId the ID of the current judge, may be null
+         */
+        subjective_module.setCurrentJudgeId = function(judgeId) {
+            if (null != judgeId) {
+                let foundJudge = null;
+                if (null != _judges) {
+                    for (const judge of _judges) {
+                        if (judge.group == _currentJudgingGroup
+                            && judge.category == _currentCategory.name
+                            && judge.id == judgeId) {
+                            foundJudge = judge;
+                        }
+                    }
+                }
+                if (null == foundJudge) {
+                    foundJudge = new Object();
+                    foundJudge.id = judgeId;
+                    foundJudge.category = _currentCategory.name;
+                    foundJudge.group = _currentJudgingGroup;
+                    foundJudge.finalScores = false;
+                    _judges.push(foundJudge);
+                }
             }
 
-            _currentJudge = foundJudge;
+            _currentJudgeId = judgeId;
             _save();
         },
 
-        subjective_module.getCurrentJudge = function() {
-            return _currentJudge;
+        /**
+         * @return the ID of the current judge, may be null
+         */
+        subjective_module.getCurrentJudgeId = function() {
+            return _currentJudgeId;
         },
 
         subjective_module.addJudge = function(judgeID) {
-            var foundJudge = null;
+            let foundJudge = null;
             if (null != _judges) {
                 for (const judge of _judges) {
                     if (judge.group == _currentJudgingGroup
@@ -520,12 +554,13 @@ const subjective_module = {}
                 }
             }
             if (null == foundJudge) {
-                var judge = new Object();
+                const judge = new Object();
                 judge.id = judgeID;
                 judge.category = _currentCategory.name;
                 judge.group = _currentJudgingGroup;
+                judge.finalScores = false;
+                _judges.push(judge);
             }
-            _judges.push(judge);
             _save();
         },
 
@@ -610,12 +645,15 @@ const subjective_module = {}
          * @return the score object or null if not yet scored
          */
         subjective_module.getScore = function(teamNumber) {
-            var categoryScores = _allScores[_currentCategory.name];
+            const categoryScores = _allScores[_currentCategory.name];
             if (null == categoryScores) {
                 return null;
             }
 
-            var judgeScores = categoryScores[_currentJudge.id];
+            if (null == _currentJudgeId) {
+                return null;
+            }
+            const judgeScores = categoryScores[_currentJudgeId];
             if (null == judgeScores) {
                 return null;
             }
@@ -624,6 +662,10 @@ const subjective_module = {}
         },
 
         subjective_module.saveScore = function(score) {
+            if (null == _currentJudgeId) {
+                return;
+            }
+
             if (score.deleted && !score.scoreOnServer) {
                 // don't bother saving scores not on the server that are deleted
                 // This should keep one judge from deleting another judge's
@@ -632,16 +674,16 @@ const subjective_module = {}
                 return;
             }
 
-            var categoryScores = _allScores[_currentCategory.name];
+            let categoryScores = _allScores[_currentCategory.name];
             if (null == categoryScores) {
                 categoryScores = {}
                 _allScores[_currentCategory.name] = categoryScores;
             }
 
-            var judgeScores = categoryScores[_currentJudge.id];
+            let judgeScores = categoryScores[_currentJudgeId];
             if (null == judgeScores) {
                 judgeScores = {}
-                categoryScores[_currentJudge.id] = judgeScores;
+                categoryScores[_currentJudgeId] = judgeScores;
             }
 
             judgeScores[score.teamNumber] = score;
