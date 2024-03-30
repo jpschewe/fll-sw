@@ -46,8 +46,9 @@ semver {
         branch {
             regex = ".+"
             incrementer = "PATCH_INCREMENTER"
-            // desired format 18.0.1-beta.3+g4cfdea8-dirty, this gets close
-            formatter = { "${semver.info.version.major}.${semver.info.version.minor}.${semver.info.version.patch}+build.${semver.info.count}.sha.${semver.info.shortCommit}" }
+            // desired format 18.0.1-beta.3+g4cfdea8-dirty
+            // this gets      18.5.1+816911d6f-dirty-beta
+            formatter = { "${semver.info.version.major}.${semver.info.version.minor}.${semver.info.version.patch}+${semver.info.shortCommit}" }
         }
     }
 }
