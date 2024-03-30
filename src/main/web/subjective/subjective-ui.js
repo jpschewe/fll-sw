@@ -175,6 +175,7 @@ function setJudge() {
 
         subjective_module.addJudge(judgeID);
         document.getElementById("sync-final-question_cb").checked = false;
+        document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
     } else {
         // sync final checkbox with current state of the judge
         const judge = subjective_module.getJudge(judgeID);
@@ -182,9 +183,15 @@ function setJudge() {
             throw new Error(`ERROR: Unable to find existing judge with ID ${judgeID}.`)
         }
         document.getElementById("sync-final-question_cb").checked = judge.finalScores;
+        if (judge.finalScores) {
+            document.getElementById("side-panel_final-scores").classList.add("fll-sw-button-pressed");
+        } else {
+            document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
+        }
     }
 
     subjective_module.setCurrentJudgeId(judgeID);
+    document.getElementById("side-panel_final-scores").classList.remove("fll-sw-ui-inactive");
 
     location.href = '#teams-list';
 }
@@ -1018,6 +1025,9 @@ function displayPage(header, content, footer) {
 function displayPageTop() {
     subjective_module.setCurrentJudgeId(null);
     document.getElementById("sync-final-question_cb").checked = false;
+    document.getElementById("side-panel_final-scores").classList.add("fll-sw-ui-inactive");
+    document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
+
 
     if (!server_online) {
         document.getElementById('alert-dialog_text').innerText = "Server is offline, cannot reload the application.";
@@ -1055,6 +1065,8 @@ function displayPageTop() {
 function displayPageChooseJudgingGroup() {
     subjective_module.setCurrentJudgeId(null);
     document.getElementById("sync-final-question_cb").checked = false;
+    document.getElementById("side-panel_final-scores").classList.add("fll-sw-ui-inactive");
+    document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
 
     document.getElementById("header-main_title").innerText = "Choose judging group";
 
@@ -1079,6 +1091,9 @@ function displayPageChooseJudgingGroup() {
 function displayPageChooseCategory() {
     subjective_module.setCurrentJudgeId(null);
     document.getElementById("sync-final-question_cb").checked = false;
+    document.getElementById("side-panel_final-scores").classList.add("fll-sw-ui-inactive");
+    document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
+
 
     document.getElementById("header-main_title").innerText = "Choose category";
 
@@ -1103,6 +1118,8 @@ function displayPageChooseCategory() {
 function displayPageChooseJudge() {
     subjective_module.setCurrentJudgeId(null);
     document.getElementById("sync-final-question_cb").checked = false;
+    document.getElementById("side-panel_final-scores").classList.add("fll-sw-ui-inactive");
+    document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
 
     document.getElementById("header-main_title").innerText = "Choose judge";
 
@@ -1349,6 +1366,17 @@ document.addEventListener("DOMContentLoaded", () => {
         sidePanel.classList.remove('open');
     });
 
+    const sidePanelFinalScores = document.getElementById("side-panel_final-scores");
+    sidePanelFinalScores.addEventListener('click', () => {
+        if (sidePanelFinalScores.classList.contains("fll-sw-button-pressed")) {
+            sidePanelFinalScores.classList.remove("fll-sw-button-pressed");
+            document.getElementById("sync-final-question_cb").checked = false;
+        } else {
+            sidePanelFinalScores.classList.add("fll-sw-button-pressed");
+            document.getElementById("sync-final-question_cb").checked = true;
+        }
+    });
+
     document.getElementById("sync-final-question_go").addEventListener('click', () => {
         const syncFinalDialog = document.getElementById("sync-final-question");
         syncFinalDialog.classList.add("fll-sw-ui-inactive");
@@ -1362,6 +1390,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const judge = subjective_module.getJudge(judgeId);
             if (judge) {
                 judge.finalScores = document.getElementById("sync-final-question_cb").checked;
+                if (judge.finalScores) {
+                    sidePanelFinalScores.classList.add("fll-sw-button-pressed");
+                } else {
+                    sidePanelFinalScores.classList.remove("fll-sw-button-pressed");
+                }
                 subjective_module.save();
             } else {
                 throw new Error(`ERROR: Cannot find judge with id ${judgeId} while saving finalScores flag.`);
