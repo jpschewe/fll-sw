@@ -5,25 +5,25 @@
  */
 package fll.web.playoff;
 
-import jakarta.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * A team score in an HTTP request.
+ * A team score in a Map containing strings from form data.
  */
-public final class HttpTeamScore extends TeamScore {
+public final class MapTeamScore extends TeamScore {
 
   /**
    * @param teamNumber {@link #getTeamNumber()}
    * @param runNumber {@link #getRunNumber()}
-   * @param request used to read the goal scores
+   * @param map used to read the goal scores
    */
-  public HttpTeamScore(final int teamNumber,
-                       final int runNumber,
-                       final HttpServletRequest request) {
+  public MapTeamScore(final int teamNumber,
+                      final int runNumber,
+                      final Map<String, String> map) {
     super(teamNumber, runNumber);
-    this.request = request;
+    this.map = map;
   }
 
   @Override
@@ -31,7 +31,7 @@ public final class HttpTeamScore extends TeamScore {
     if (!scoreExists()) {
       return null;
     } else {
-      return request.getParameter(goalName);
+      return map.get(goalName);
     }
   }
 
@@ -40,7 +40,7 @@ public final class HttpTeamScore extends TeamScore {
     if (!scoreExists()) {
       return Double.NaN;
     } else {
-      final String value = request.getParameter(goalName);
+      final String value = map.get(goalName);
       if (null == value) {
         return Double.NaN;
       } else {
@@ -57,7 +57,7 @@ public final class HttpTeamScore extends TeamScore {
     if (!scoreExists()) {
       return false;
     } else {
-      final String noShow = request.getParameter("NoShow");
+      final String noShow = map.get("NoShow");
       if (null == noShow) {
         throw new RuntimeException("Missing parameter: NoShow");
       }
@@ -80,7 +80,7 @@ public final class HttpTeamScore extends TeamScore {
     } else if (!scoreExists()) {
       return false;
     } else {
-      final String verified = request.getParameter("Verified");
+      final String verified = map.get("Verified");
       if (null == verified) {
         throw new RuntimeException("Missing parameter: Verified");
       }
@@ -95,5 +95,15 @@ public final class HttpTeamScore extends TeamScore {
     return true;
   }
 
-  private final HttpServletRequest request;
+  private final Map<String, String> map;
+
+  @Override
+  public String getTable() {
+    final String table = map.get("tablename");
+    if (null == table) {
+      return "UNKNOWN";
+    } else {
+      return table;
+    }
+  }
 }

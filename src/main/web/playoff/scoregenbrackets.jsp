@@ -123,10 +123,7 @@ FONT.TIE {
         </c:otherwise>
     </c:choose>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <p>
         <a href="index.jsp">Return to Head to head menu</a>
     </p>
@@ -134,7 +131,6 @@ FONT.TIE {
     <form name='printScoreSheets' method='post'
         action='ScoresheetServlet' target='${form_target}'>
         <input type='hidden' name='division' value='${division}' />
-        <input type='hidden' name='numMatches' value='${numMatches}' />
         <input type='hidden' name='editTables'
             value='${param.editTables}' />
 

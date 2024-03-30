@@ -63,10 +63,7 @@ fll.web.admin.Tournaments.populateContext(application, pageContext);
 <body>
     <h1>Edit Tournaments</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <p>Enter the details for the tournaments.</p>
     <ul>
         <li>Date - this field is displayed on some reports and is

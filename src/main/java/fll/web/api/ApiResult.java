@@ -9,12 +9,12 @@ package fll.web.api;
 import java.util.Optional;
 
 /**
- * Generic result of a post.
+ * Generic result of an API call.
  */
-/* package */ class PostResult {
+public class ApiResult {
 
-  /* package */ PostResult(final boolean success,
-                           final Optional<String> message) {
+  public ApiResult(final boolean success,
+                   final Optional<String> message) {
     mSuccess = success;
     mMessage = message;
   }

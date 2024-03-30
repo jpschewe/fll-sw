@@ -32,10 +32,7 @@ table#perf-data th, table#perf-data td {
 <body>
     <h1>Regular Match Play Runs</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <table id="perf-data" class="center">
 
         <tr>

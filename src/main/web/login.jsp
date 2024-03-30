@@ -22,10 +22,7 @@ input {
 <body>
     <h1>Login to FLL-SW</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <form method="POST" action="<c:url value='/DoLogin'/>" name="login"
         data-ajax="false">
 

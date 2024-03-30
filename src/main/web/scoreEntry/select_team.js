@@ -7,6 +7,9 @@
 "use strict";
 
 
+var teamSelectData = [];
+var sort = compareByPerformanceTime;
+
 function editFlagBoxClicked() {
     const text = document.getElementById('select_number_text');
     if (document.selectTeam.EditFlag.checked) {
@@ -18,21 +21,16 @@ function editFlagBoxClicked() {
     }
 }
 
-function reloadRuns() {
-    document.body.removeChild(document.getElementById('reloadruns'));
-    document.verify.TeamNumber.length = 0;
-    const s = document.createElement('script');
-    s.type = 'text/javascript';
-    s.id = 'reloadruns';
-    s.src = 'UpdateUnverifiedRuns?' + Math.random();
-    document.body.appendChild(s);
-}
-
 function messageReceived(event) {
-    console.log("received: " + event.data);
+    const message = JSON.parse(event.data);
 
-    // data doesn't matter, just reload runs on any message
-    reloadRuns();
+    if (!scoreEntrySelectedTable) {
+        populateUnverifiedSelect(message.unverified);
+    }
+
+    teamSelectData = message.teamSelectData;
+    teamSelectData.sort(sort);
+    populateTeamsSelect();
 }
 
 function socketOpened(event) {
@@ -52,12 +50,24 @@ function openSocket() {
     const url = window.location.pathname;
     const directory = url.substring(0, url.lastIndexOf('/'));
     const webSocketAddress = getWebsocketProtocol() + "//" + window.location.host
-        + directory + "/UnverifiedRunsWebSocket";
+        + directory + "/PerformanceRunsEndpoint";
 
     const socket = new WebSocket(webSocketAddress);
     socket.onmessage = messageReceived;
     socket.onopen = socketOpened;
     socket.onclose = socketClosed;
+}
+
+function populateUnverifiedSelect(unverifiedData) {
+    const selectBox = document.getElementById("select-verify-teamnumber");
+    removeChildren(selectBox);
+
+    for (const unverifiedTeamData of unverifiedData) {
+        const option = document.createElement("option");
+        option.value = unverifiedTeamData.teamNumber + "-" + unverifiedTeamData.runNumber;
+        option.innerText = unverifiedTeamData.display;
+        selectBox.appendChild(option);
+    }
 }
 
 function populateTeamsSelect() {
@@ -214,24 +224,65 @@ function compareByOrganization(teamDataA, teamDataB) {
     }
 }
 
+function displayStoredData() {
+    const storedData = score_entry_module.getAllStorageData();
+
+    const container = document.getElementById("stored-values");
+    removeChildren(container);
+    if (storedData.length > 0) {
+        const message = document.createElement("div");
+        container.appendChild(message);
+        message.classList.add("warning");
+        message.innerText = "There are scores that have not been sent to the server.";
+
+        for (const data of storedData) {
+            const dataContainer = document.createElement("div");
+            container.appendChild(dataContainer);
+
+            const dataButton = document.createElement("button");
+            dataContainer.appendChild(dataButton);
+            dataButton.innerHTML = "Submit score data for Team " + data.teamNumber + " " + data.roundText;
+            dataButton.addEventListener("click", () => {
+                score_entry_module.uploadScore(data);
+            });
+
+            const deleteButton = document.createElement("button");
+            deleteButton.classList.add("delete_button");
+            dataContainer.appendChild(deleteButton);
+            deleteButton.innerHTML = "Delete score data for Team " + data.teamNumber + " " + data.roundText;
+            deleteButton.addEventListener("click", () => {
+                score_entry_module.deleteStorageData(data);
+
+                // refresh the local data displayed
+                displayStoredData();
+            })
+        }
+    }
+}
+
 
 document.addEventListener('DOMContentLoaded', function() {
     if (!tabletMode) {
+        // only support edit when not on a tablet
         editFlagBoxClicked();
     }
-    teamSelectData.sort(compareByPerformanceTime);
+    teamSelectData.sort(sort);
     populateTeamsSelect();
+    displayStoredData();
 
     if (!scoreEntrySelectedTable) {
         document.getElementById("sort-team-name").addEventListener('click', () => {
+            sort = compareByTeamName;
             teamSelectData.sort(compareByTeamName);
             populateTeamsSelect();
         });
         document.getElementById("sort-team-number").addEventListener('click', () => {
+            sort = compareByTeamNumber;
             teamSelectData.sort(compareByTeamNumber);
             populateTeamsSelect();
         });
         document.getElementById("sort-organization").addEventListener('click', () => {
+            sort = compareByOrganization;
             teamSelectData.sort(compareByOrganization);
             populateTeamsSelect();
         });
@@ -239,10 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
             teamSelectData.sort(compareByPerformanceTime);
             populateTeamsSelect();
         });
-
-        // only use unverified code when not using the tablets 
-
-        reloadRuns();
-        openSocket();
     }
+    openSocket();
+
 });

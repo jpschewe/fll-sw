@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,8 +37,9 @@ import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
-import fll.web.DisplayInfo;
 import fll.web.display.DisplayHandler;
+import fll.web.display.DisplayInfo;
+import fll.web.display.UnknownDisplayException;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.TeamScore;
 import fll.xml.ChallengeDescription;
@@ -77,7 +77,7 @@ public final class ScoreboardUpdates {
                                  final HttpSession httpSession) {
     final String uuid;
     if (StringUtils.isBlank(displayUuid)) {
-      uuid = UUID.randomUUID().toString();
+      uuid = DisplayHandler.registerStandaloneScoreboard(client);
     } else {
       uuid = displayUuid;
     }
@@ -86,7 +86,11 @@ public final class ScoreboardUpdates {
     ALL_CLIENTS.put(uuid, client);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-    sendAllScores(datasource, challengeDescription, uuid, client);
+    try {
+      sendAllScores(datasource, challengeDescription, uuid, client);
+    } catch (final UnknownDisplayException e) {
+      LOGGER.error("Cannot find display {} that was just added as a new client", uuid);
+    }
 
     return uuid;
   }
@@ -94,7 +98,8 @@ public final class ScoreboardUpdates {
   private static void sendAllScores(final DataSource datasource,
                                     final ChallengeDescription challengeDescription,
                                     final String displayUuid,
-                                    final Session client) {
+                                    final Session client)
+      throws UnknownDisplayException {
     final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
     final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
@@ -211,10 +216,10 @@ public final class ScoreboardUpdates {
   }
 
   /**
-   * Notify the display to reload because the award groups being displayed have
-   * changed. Executed asynchronously.
+   * Notify the display to reload due to some change in the scores that can't be
+   * handled by incremental score updates.
    */
-  public static void awardGroupChange() {
+  public static void reload() {
     final ReloadMessage message = new ReloadMessage();
     try {
       final String msg = Utilities.createJsonMapper().writeValueAsString(message);
@@ -243,6 +248,14 @@ public final class ScoreboardUpdates {
     } catch (final JsonProcessingException e) {
       throw new FLLInternalException("Error converting ReloadMessage to JSON", e);
     }
+  }
+
+  /**
+   * Notify the display to reload because the award groups being displayed have
+   * changed. Executed asynchronously.
+   */
+  public static void awardGroupChange() {
+    reload();
   }
 
   /**
@@ -286,7 +299,7 @@ public final class ScoreboardUpdates {
             try {
               newScore(numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay, allAwardGroups, entry.getKey(),
                        entry.getValue(), update.getTeam(), update.getRunNumber(), updateStr);
-            } catch (final IOException e) {
+            } catch (final IOException | UnknownDisplayException e) {
               LOGGER.warn("Got error writing to client, dropping: {}", entry.getKey(), e);
               toRemove.add(entry.getKey());
             }
@@ -315,7 +328,7 @@ public final class ScoreboardUpdates {
                                final TournamentTeam team,
                                final int runNumber,
                                final String data)
-      throws IOException, SQLException {
+      throws IOException, SQLException, UnknownDisplayException {
     final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
     final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
 

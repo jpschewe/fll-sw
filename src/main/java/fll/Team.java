@@ -221,6 +221,7 @@ public class Team implements Serializable {
 
   /**
    * @return if this is an internal team
+   * @see #isInternalTeamNumber(int)
    */
   @JsonIgnore
   public boolean isInternal() {
@@ -229,7 +230,10 @@ public class Team implements Serializable {
 
   /**
    * @param number team number to check
-   * @return true if this an internal team number.
+   * @return true if this an internal team number. This includes
+   *         {@link #BYE_TEAM_NUMBER}, {@link #NULL_TEAM_NUMBER},
+   *         {@link #TIE_TEAM_NUMBER},
+   *         etc.
    */
   public static boolean isInternalTeamNumber(final int number) {
     return number < 0;

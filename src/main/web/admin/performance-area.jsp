@@ -44,10 +44,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 <body>
     <h1>Scoring Coordinator - ${challengeDescription.title }</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <p>This page contains links to the pages used in the performance
         area when a 2 server setup is used. This page assumes that you
         have been given a pre-populated database to load. Most links

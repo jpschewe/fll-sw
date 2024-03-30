@@ -32,7 +32,6 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
-import fll.scheduler.ScheduleWriter;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
@@ -67,7 +66,7 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
 
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE), false)) {
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE, UserRole.REPORT_GENERATOR), false)) {
       return;
     }
 
@@ -199,25 +198,25 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
 
       headerRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                          String.format("Team #")),
-                                                ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                                FOPUtils.STANDARD_BORDER_WIDTH));
       headerRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                          String.format("Team Name")),
-                                                ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                                FOPUtils.STANDARD_BORDER_WIDTH));
       headerRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                          String.format("Organization")),
-                                                ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                                FOPUtils.STANDARD_BORDER_WIDTH));
       headerRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                          String.format("Judging Group")),
-                                                ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                                FOPUtils.STANDARD_BORDER_WIDTH));
       headerRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                          String.format("Rank")),
-                                                ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                                FOPUtils.STANDARD_BORDER_WIDTH));
       headerRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                          String.format("Scaled Score")),
-                                                ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                                FOPUtils.STANDARD_BORDER_WIDTH));
       headerRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                          String.format("Raw Score(s)")),
-                                                ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                                FOPUtils.STANDARD_BORDER_WIDTH));
 
       table.appendChild(tableHeader);
 
@@ -277,31 +276,31 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
 
           teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                            String.valueOf(data.team.getTeamNumber())),
-                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                                  FOPUtils.STANDARD_BORDER_WIDTH));
           teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                            data.team.getTeamName()),
-                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                                  FOPUtils.STANDARD_BORDER_WIDTH));
 
           final @Nullable String organization = data.team.getOrganization();
           teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                            null == organization ? "" : organization),
-                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                                  FOPUtils.STANDARD_BORDER_WIDTH));
           teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                            data.team.getJudgingGroup()),
-                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                                  FOPUtils.STANDARD_BORDER_WIDTH));
 
           teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                            String.valueOf(data.rank)),
-                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                                  FOPUtils.STANDARD_BORDER_WIDTH));
 
           teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                            Utilities.getFloatingPointNumberFormat()
                                                                                     .format(data.scaledScore)),
-                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                                  FOPUtils.STANDARD_BORDER_WIDTH));
 
           teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                            data.rawScore),
-                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                                  FOPUtils.STANDARD_BORDER_WIDTH));
         } // foreach team
       }
 

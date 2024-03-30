@@ -56,7 +56,8 @@ public class AwardsReportSortedGroupsServlet extends HttpServlet {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.isHeadJudge()) {
+    if (!auth.isHeadJudge()
+        && !auth.isReportGenerator()) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
@@ -93,7 +94,8 @@ public class AwardsReportSortedGroupsServlet extends HttpServlet {
       throws IOException, ServletException {
     final HttpSession session = request.getSession();
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
-    if (!auth.isHeadJudge()) {
+    if (!auth.isHeadJudge()
+        && !auth.isReportGenerator()) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
@@ -124,16 +126,16 @@ public class AwardsReportSortedGroupsServlet extends HttpServlet {
 
       setAwardGroupsSort(connection, tournamentId, groups);
 
-      final PostResult result = new PostResult(true, Optional.empty());
+      final ApiResult result = new ApiResult(true, Optional.empty());
       jsonMapper.writeValue(writer, result);
 
     } catch (final SQLException e) {
-      final PostResult result = new PostResult(false, Optional.ofNullable(e.getMessage()));
+      final ApiResult result = new ApiResult(false, Optional.ofNullable(e.getMessage()));
       jsonMapper.writeValue(writer, result);
 
       throw new FLLRuntimeException(e);
     } catch (final JsonProcessingException e) {
-      final PostResult result = new PostResult(false, Optional.ofNullable(e.getMessage()));
+      final ApiResult result = new ApiResult(false, Optional.ofNullable(e.getMessage()));
       jsonMapper.writeValue(writer, result);
 
       throw new FLLRuntimeException(e);

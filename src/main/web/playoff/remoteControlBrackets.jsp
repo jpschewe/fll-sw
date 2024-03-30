@@ -1,5 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
@@ -16,7 +15,7 @@ RemoteControlBrackets.populateContext(application, session, request, pageContext
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 <link rel="stylesheet" type="text/css"
-    href="<c:url value='/scoreboard/score_style.css'/>" />
+    href="<c:url value='/style/big_screen.css'/>" />
 
 <style type='text/css'>
 TD.Leaf {
@@ -59,10 +58,13 @@ SPAN.TIE {
     src="<c:url value='/js/fll-functions.js'/>"></script>
 
 <script type="text/javascript">
-  let allBracketData = JSON.parse('${allBracketDataJson}');
-  let secondsBetweenScrolls = parseInt("${scrollRate}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
+  const allBracketData = JSON.parse('${allBracketDataJson}');
+  const secondsBetweenScrolls = parseInt("${scrollRate}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
   const maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
   const displayUuid = "${param.display_uuid}";
+  const REGISTER_MESSAGE_TYPE = "${REGISTER_MESSAGE_TYPE}";
+  const BRACKET_UPDATE_MESSAGE_TYPE = "${BRACKET_UPDATE_MESSAGE_TYPE}";
+  const DISPLAY_UPDATE_MESSAGE_TYPE = "${DISPLAY_UPDATE_MESSAGE_TYPE}";
 </script>
 
 <script type='text/javascript'

@@ -18,10 +18,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 <body>
     <h1>${challengeDescription.title }</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
 
     <p>
         The current tournament is
@@ -70,20 +67,20 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         <a class="wide" href="admin/index.jsp">Administration</a>
 
         <a class="wide" href="playoff/index.jsp">Head to head</a>
-
-        <a class="wide" href="report/index.jsp">Tournament reporting</a>
-
+    </c:if>
+    <c:if
+        test="${authentication.admin or authentication.reportGenerator or authentication.headJudge}">
+        <a class="wide" href="report/index.jsp">Generate reports</a>
         <a class="wide" href='challenge.xml'>Challenge Descriptor.
             One can use this to see the scoring and the tie breaker.</a>
-
         <a class="wide" href='BlankScoresheet' target="_blankScoresheet">Blank
             performance score sheet, one regular match play and one
             practice (PDF)</a>
-
         <c:forEach items="${challengeDescription.subjectiveCategories}"
             var="category">
-            <a class="wide" href="BlankSubjectiveSheet/${category.name}" target="_new">Blank
-                subjective sheet - ${category.title} (PDF)</a>
+            <a class="wide" href="BlankSubjectiveSheet/${category.name}"
+                target="_new">Blank subjective sheet -
+                ${category.title} (PDF)</a>
         </c:forEach>
     </c:if>
 

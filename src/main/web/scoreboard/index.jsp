@@ -19,12 +19,12 @@
         <li>
             <a
                 href='<c:url value="/scoreboard/dynamic.jsp"><c:param name="layout" value="all_teams_auto_scroll"/></c:url>'
-                target="_blank">All Teams, All Runs</a>
+                target="_blank">All Teams, All Runs (scrolling)</a>
         </li>
         <li>
             <a
                 href='<c:url value="/scoreboard/dynamic.jsp"><c:param name="layout" value="all_teams_no_scroll"/></c:url>'
-                target="_blank">All Teams, All Runs (scrolling)</a>
+                target="_blank">All Teams, All Runs (no scrolling)</a>
         </li>
         <li>
             <a

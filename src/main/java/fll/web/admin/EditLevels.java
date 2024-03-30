@@ -152,6 +152,7 @@ public class EditLevels extends BaseFLLServlet {
           final TournamentLevel nextLevel = webIdToInfo.get(nextLevelWebId).getLevel();
           TournamentLevel.updateTournamentLevel(connection, level.getId(), info.getNewName(), nextLevel);
         } else {
+          TournamentLevel.updateTournamentLevel(connection, level.getId(), info.getNewName());
           LOGGER.debug("Not setting next tournament for '{}' as it is the none value '{}'", level.getName(),
                        nextLevelWebId);
         }

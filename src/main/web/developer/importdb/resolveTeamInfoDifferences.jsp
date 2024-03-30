@@ -11,10 +11,7 @@
 
 <body>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <form name="resolveTeamDifferences" action="CommitTeamChanges">
         <p>There are differences in the team information between the
             source (imported) database and the destination database. You

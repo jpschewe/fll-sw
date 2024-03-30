@@ -6,7 +6,7 @@
 <%@ page import="fll.web.ApplicationAttributes"%>
 <%@ page import="javax.sql.DataSource"%>
 
-<fll-sw:required-roles roles="REF,HEAD_JUDGE" allowSetup="false" />
+<fll-sw:required-roles roles="REF,HEAD_JUDGE,REPORT_GENERATOR" allowSetup="false" />
 
 <%
 final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -35,12 +35,14 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
         <tr>
             <th>Team #</th>
             <th>Run Number</th>
+            <th>Table</th>
             <th>Edit</th>
         </tr>
         <sql:query var="result" dataSource="${datasource}">
    SELECT
      TeamNumber
     ,RunNumber
+    ,tablename
      FROM Performance
      WHERE Verified <> TRUE 
        AND Tournament = <c:out value="${currentTournament}" />
@@ -53,6 +55,9 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
                 </td>
                 <td>
                     <c:out value="${row[1]}" />
+                </td>
+                <td>
+                    <c:out value="${row[2]}" />
                 </td>
                 <td>
                     <a

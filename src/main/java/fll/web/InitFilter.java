@@ -124,7 +124,8 @@ public class InitFilter implements Filter {
         || path.startsWith(contextPath
             + "/images") //
         || path.startsWith(contextPath
-            + "/sponsor_logos") //
+            + "/"
+            + WebUtils.SPONSOR_LOGOS_PATH) //
         || path.startsWith(contextPath
             + "/wiki") //
         || path.endsWith(".jpg") //

@@ -31,7 +31,6 @@ import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
-import fll.scheduler.ScheduleWriter;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
@@ -81,7 +80,7 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
       throws IOException, ServletException {
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.HEAD_JUDGE), false)) {
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.HEAD_JUDGE, UserRole.REPORT_GENERATOR), false)) {
       return;
     }
 
@@ -150,14 +149,14 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
 
     final Element title = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, "Finalist Schedule");
     row2.appendChild(title);
-    FOPUtils.addBottomBorder(title, ScheduleWriter.THICK_BORDER_WIDTH);
+    FOPUtils.addBottomBorder(title, FOPUtils.THICK_BORDER_WIDTH);
 
     final LocalDate tournamentDate = tournament.getDate();
     if (null != tournamentDate) {
       final Element date = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
                                                     tournamentDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)));
       row2.appendChild(date);
-      FOPUtils.addBottomBorder(date, ScheduleWriter.THICK_BORDER_WIDTH);
+      FOPUtils.addBottomBorder(date, FOPUtils.THICK_BORDER_WIDTH);
     }
 
     return staticContent;
@@ -247,14 +246,14 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
 
     final Element timeCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Time");
     mainTableHeaderRow.appendChild(timeCell);
-    FOPUtils.addBorders(timeCell, ScheduleWriter.STANDARD_BORDER_WIDTH);
+    FOPUtils.addBorders(timeCell, FOPUtils.STANDARD_BORDER_WIDTH);
     FOPUtils.addPadding(timeCell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
                         FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
     categories.stream().forEach((categoryTitle) -> {
       final Element cell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
       mainTableHeaderRow.appendChild(cell);
-      FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH);
+      FOPUtils.addBorders(cell, FOPUtils.STANDARD_BORDER_WIDTH);
       FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
                           FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
@@ -284,7 +283,7 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
       final Element tCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                      TIME_FORMAT.format(row.getTime()));
       tableRow.appendChild(tCell);
-      FOPUtils.addBorders(tCell, ScheduleWriter.STANDARD_BORDER_WIDTH);
+      FOPUtils.addBorders(tCell, FOPUtils.STANDARD_BORDER_WIDTH);
       FOPUtils.addPadding(tCell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
                           FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
@@ -334,7 +333,7 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
       e.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE)));
     }
 
-    FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH);
+    FOPUtils.addBorders(cell, FOPUtils.STANDARD_BORDER_WIDTH);
     FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
                         FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 

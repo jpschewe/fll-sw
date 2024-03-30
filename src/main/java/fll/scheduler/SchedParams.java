@@ -6,6 +6,10 @@
 package fll.scheduler;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +20,7 @@ import java.util.Properties;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.Tournament;
 import fll.Utilities;
 
 /**
@@ -46,13 +51,13 @@ public class SchedParams implements Serializable {
   /**
    * Default number of minutes for a team to get from one session to another.
    */
-  public static final int MINIMUM_CHANGETIME_MINUTES = 15;
+  public static final int DEFAULT_CHANGETIME_MINUTES = 15;
 
   /**
    * Default number of minutes that a team should have between performance
    * sessions.
    */
-  public static final int MINIMUM_PERFORMANCE_CHANGETIME_MINUTES = 30;
+  public static final int DEFAULT_PERFORMANCE_CHANGETIME_MINUTES = 30;
 
   /**
    * Thrown when the parameters are not valid.
@@ -108,9 +113,9 @@ public class SchedParams implements Serializable {
     final String[] subjectiveNames = Utilities.parseListOfStrings(subjectiveNamesStr);
 
     mPerformanceMinutes = Utilities.readIntProperty(properties, ALPHA_PERF_MINUTES_KEY, DEFAULT_PERFORMANCE_MINUTES);
-    mChangetimeMinutes = Utilities.readIntProperty(properties, CT_MINUTES_KEY, MINIMUM_CHANGETIME_MINUTES);
+    mChangetimeMinutes = Utilities.readIntProperty(properties, CT_MINUTES_KEY, DEFAULT_CHANGETIME_MINUTES);
     mPerformanceChangetimeMinutes = Utilities.readIntProperty(properties, PCT_MINUTES_KEY,
-                                                              MINIMUM_PERFORMANCE_CHANGETIME_MINUTES);
+                                                              DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
 
     mSubjectiveStations = new ArrayList<>();
     for (int i = 0; i < subjectiveDurations.length; ++i) {
@@ -165,11 +170,11 @@ public class SchedParams implements Serializable {
     mPerformanceMinutes = v;
   }
 
-  private int mChangetimeMinutes = MINIMUM_CHANGETIME_MINUTES;
+  private int mChangetimeMinutes = DEFAULT_CHANGETIME_MINUTES;
 
   /**
    * @return Number of minutes between judging stations for each team.
-   *         Default is {@link #MINIMUM_CHANGETIME_MINUTES}
+   *         Default is {@link #DEFAULT_CHANGETIME_MINUTES}
    */
   public final int getChangetimeMinutes() {
     return mChangetimeMinutes;
@@ -182,11 +187,11 @@ public class SchedParams implements Serializable {
     mChangetimeMinutes = v;
   }
 
-  private int mPerformanceChangetimeMinutes = MINIMUM_PERFORMANCE_CHANGETIME_MINUTES;
+  private int mPerformanceChangetimeMinutes = DEFAULT_PERFORMANCE_CHANGETIME_MINUTES;
 
   /**
    * @return Number of minutes between performance rounds for a team.
-   *         Default value is {@link #MINIMUM_PERFORMANCE_CHANGETIME_MINUTES}.
+   *         Default value is {@link #DEFAULT_PERFORMANCE_CHANGETIME_MINUTES}.
    */
   public final int getPerformanceChangetimeMinutes() {
     return mPerformanceChangetimeMinutes;
@@ -277,19 +282,115 @@ public class SchedParams implements Serializable {
   public List<String> isValid() {
     final List<String> errors = new LinkedList<>();
 
-    if (getChangetimeMinutes() < SchedParams.MINIMUM_CHANGETIME_MINUTES) {
-      errors.add("Change time between events is too short, cannot be less than "
-          + SchedParams.MINIMUM_CHANGETIME_MINUTES
-          + " minutes");
+    if (getChangetimeMinutes() < 0) {
+      errors.add("Change time between events must be a non-negative value");
     }
 
-    if (getPerformanceChangetimeMinutes() < SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES) {
-      errors.add("Change time between performance rounds is too short, cannot be less than "
-          + SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES
-          + " minutes");
+    if (getPerformanceChangetimeMinutes() < 0) {
+      errors.add("Change time between performance rounds must be a non-negative value");
     }
 
     return errors;
   }
 
+  /**
+   * Store the schedule parameters to the database.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament to store the parameters for
+   * @throws SQLException on a database error
+   */
+  public void save(final Connection connection,
+                   final Tournament tournament)
+      throws SQLException {
+    try (
+        PreparedStatement delete = connection.prepareStatement("DELETE FROM sched_durations WHERE tournament_id = ?")) {
+      delete.setInt(1, tournament.getTournamentID());
+      delete.executeUpdate();
+    }
+
+    try (
+        PreparedStatement insert = connection.prepareStatement("INSERT INTO sched_durations (tournament_id, key, duration_minutes) VALUES(?, ?, ?)")) {
+      insert.setInt(1, tournament.getTournamentID());
+
+      insert.setString(2, ALPHA_PERF_MINUTES_KEY);
+      insert.setInt(3, mPerformanceMinutes);
+      insert.executeUpdate();
+
+      insert.setString(2, CT_MINUTES_KEY);
+      insert.setInt(3, mChangetimeMinutes);
+      insert.executeUpdate();
+
+      insert.setString(2, PCT_MINUTES_KEY);
+      insert.setInt(3, mPerformanceChangetimeMinutes);
+      insert.executeUpdate();
+
+      for (final SubjectiveStation station : mSubjectiveStations) {
+        insert.setString(2, station.getName());
+        insert.setInt(3, station.getDurationMinutes());
+        insert.executeUpdate();
+      }
+    }
+  }
+
+  /**
+   * Load the schedule parameters from the database.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament that the parameters are for
+   * @param schedule used to get the subjective station names
+   * @throws SQLException on a database error
+   */
+  public void load(final Connection connection,
+                   final Tournament tournament,
+                   final TournamentSchedule schedule)
+      throws SQLException {
+    try (
+        PreparedStatement select = connection.prepareStatement("SELECT duration_minutes FROM sched_durations WHERE tournament_id = ? and key = ?")) {
+      select.setInt(1, tournament.getTournamentID());
+
+      select.setString(2, ALPHA_PERF_MINUTES_KEY);
+      try (ResultSet rs = select.executeQuery()) {
+        if (rs.next()) {
+          mPerformanceMinutes = rs.getInt(1);
+        } else {
+          mPerformanceMinutes = DEFAULT_PERFORMANCE_MINUTES;
+        }
+      }
+
+      select.setString(2, CT_MINUTES_KEY);
+      try (ResultSet rs = select.executeQuery()) {
+        if (rs.next()) {
+          mChangetimeMinutes = rs.getInt(1);
+        } else {
+          mChangetimeMinutes = DEFAULT_CHANGETIME_MINUTES;
+        }
+      }
+
+      select.setString(2, PCT_MINUTES_KEY);
+      try (ResultSet rs = select.executeQuery()) {
+        if (rs.next()) {
+          mPerformanceChangetimeMinutes = rs.getInt(1);
+        } else {
+          mPerformanceChangetimeMinutes = DEFAULT_PERFORMANCE_CHANGETIME_MINUTES;
+        }
+      }
+
+      // how to get the list of subjective stations?
+      mSubjectiveStations = new ArrayList<>();
+      for (final String stationName : schedule.getSubjectiveStations()) {
+        select.setString(2, stationName);
+        try (ResultSet rs = select.executeQuery()) {
+          final int duration;
+          if (rs.next()) {
+            duration = rs.getInt(1);
+          } else {
+            duration = DEFAULT_SUBJECTIVE_MINUTES;
+          }
+          final SubjectiveStation station = new SubjectiveStation(stationName, duration);
+          mSubjectiveStations.add(station);
+        }
+      }
+    }
+  }
 }

@@ -5,6 +5,7 @@
  */
 package fll.db;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -21,13 +22,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -90,6 +94,11 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 public final class ImportDB {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
+  /**
+   * Version of the dump format created by this code.
+   */
+  public static final int DUMP_VERSION = 2;
 
   private ImportDB() {
     // no instances
@@ -312,6 +321,7 @@ public final class ImportDB {
     final Path importDirectory = Paths.get("import_"
         + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")));
     boolean hasBugs = false;
+    int dumpVersion = 1;
 
     final Map<String, Map<String, String>> typeInfo = new HashMap<>();
     ZipEntry entry;
@@ -321,6 +331,19 @@ public final class ImportDB {
       if ("challenge.xml".equals(name)) {
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
         description = ChallengeParser.parse(reader);
+      } else if ("dump_version.txt".equals(name)) {
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET));
+        final String versionInfo = reader.readLine();
+        if (null != versionInfo) {
+          try {
+            dumpVersion = Integer.parseInt(versionInfo);
+          } catch (final NumberFormatException e) {
+            throw new FLLRuntimeException(String.format("Error reading dump version information from '%s': %s",
+                                                        versionInfo, e.getMessage()));
+          }
+        } else {
+          throw new FLLRuntimeException("db_version.txt file is empty");
+        }
       } else if (name.endsWith(".csv")) {
         final String tablename = name.substring(0, name.indexOf(".csv")).toLowerCase();
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
@@ -383,7 +406,7 @@ public final class ImportDB {
         final String content = tableEntry.getValue();
         final Map<String, String> tableTypes = typeInfo.getOrDefault(tablename, Collections.emptyMap());
 
-        Utilities.loadCSVFile(connection, tablename, tableTypes, new StringReader(content));
+        ImportDB.loadCSVFile(connection, tablename, tableTypes, new StringReader(content), dumpVersion);
       }
     }
 
@@ -668,6 +691,36 @@ public final class ImportDB {
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 35) {
       upgrade34To35(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 36) {
+      upgrade35To36(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 37) {
+      upgrade36To37(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 38) {
+      upgrade37To38(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 39) {
+      upgrade38To39(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 40) {
+      upgrade39To40(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 41) {
+      upgrade40To41(connection);
     }
 
     // NOTE: when adding new tournament parameters they need to be explicitly set in
@@ -1330,6 +1383,85 @@ public final class ImportDB {
   }
 
   /**
+   * Add tablename to performance table.
+   */
+  private static void upgrade35To36(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 35 to 36");
+
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("ALTER TABLE "
+          + GenerateDB.PERFORMANCE_TABLE_NAME
+          + " ADD COLUMN tablename varchar(64)");
+
+      stmt.executeUpdate("UPDATE "
+          + GenerateDB.PERFORMANCE_TABLE_NAME
+          + " SET tablename = 'UNKNOWN'");
+    }
+
+    setDBVersion(connection, 36);
+  }
+
+  /**
+   * Don't do anything just ensure that one needs newer code to handle database
+   * exports with this code.
+   */
+  private static void upgrade36To37(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 36 to 37");
+    setDBVersion(connection, 37);
+  }
+
+  /**
+   * Add deliberation tables.
+   */
+  private static void upgrade37To38(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 37 to 38");
+
+    try (Statement stmt = connection.createStatement()) {
+      GenerateDB.createDeliberationTables(connection, false);
+    }
+
+    setDBVersion(connection, 38);
+  }
+
+  /**
+   * Add deliberation category order table.
+   */
+  private static void upgrade38To39(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 38 to 39");
+
+    try (Statement stmt = connection.createStatement()) {
+      GenerateDB.createDeliberationCategoryOrder(connection, false);
+    }
+
+    setDBVersion(connection, 39);
+  }
+
+  /**
+   * Remove judging_station from schedule table.
+   */
+  private static void upgrade39To40(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 39 to 40");
+
+    try (Statement stmt = connection.createStatement()) {
+      if (checkForColumnInTable(connection, "schedule", "judging_station")) {
+        stmt.executeUpdate("ALTER TABLE schedule DROP COLUMN judging_station");
+      }
+    }
+    setDBVersion(connection, 40);
+  }
+
+  /**
+   * Add schedule duration table.
+   */
+  private static void upgrade40To41(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 40 to 41");
+
+    GenerateDB.createScheduleDurationTable(connection, false);
+
+    setDBVersion(connection, 41);
+  }
+
+  /**
    * Check for a column in a table. This checks table names both upper and lower
    * case.
    * This also checks column names ignoring case.
@@ -1760,6 +1892,7 @@ public final class ImportDB {
 
     if (importFinalist) {
       importFinalistSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+      importDeliberation(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     }
 
     // update score totals
@@ -1933,16 +2066,22 @@ public final class ImportDB {
     }
 
     try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM sched_durations WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (
         PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM schedule WHERE Tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
     }
 
-    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number, judging_station" //
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number" //
         + " FROM schedule WHERE tournament=?");
         PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO schedule" //
-            + " (tournament, team_number, judging_station)" //
-            + " VALUES (?, ?, ?)")) {
+            + " (tournament, team_number)" //
+            + " VALUES (?, ?)")) {
 
       sourcePrep.setInt(1, sourceTournamentID);
 
@@ -1971,6 +2110,18 @@ public final class ImportDB {
       destPrep.setInt(1, destTournamentID);
       copyData(sourcePrep, destPrep);
     }
+
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT key, duration_minutes" //
+        + " FROM sched_durations WHERE tournament_id=?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO sched_durations" //
+            + " (tournament_id, key, duration_minutes)" //
+            + " VALUES (?, ?, ?)")) {
+
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+      copyData(sourcePrep, destPrep);
+    }
+
   }
 
   private static void importAwardsScriptData(final Connection sourceConnection,
@@ -2101,6 +2252,21 @@ public final class ImportDB {
             + "FROM PlayoffTableData WHERE Tournament=?");
         PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO PlayoffTableData (Tournament, event_division, PlayoffRound,"
             + "LineNumber, AssignedTable) VALUES (?, ?, ?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+      copyData(sourcePrep, destPrep);
+    }
+
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM automatic_finished_playoff WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT bracket_name "
+        + "FROM automatic_finished_playoff WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO automatic_finished_playoff (tournament_id, bracket_name)"
+            + " VALUES (?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
       copyData(sourcePrep, destPrep);
@@ -2539,6 +2705,90 @@ public final class ImportDB {
       }
 
     }
+  }
+
+  private static void importDeliberation(final Connection sourceConnection,
+                                         final Connection destinationConnection,
+                                         final int sourceTournamentID,
+                                         final int destTournamentID)
+      throws SQLException {
+    LOGGER.debug("Importing deliberation data");
+
+    // do deletes first
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM deliberation_writers WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM deliberation_potential_winners WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM deliberation_num_awards WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    // writers
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO deliberation_writers (tournament_id, award_group, category_name, writer_number, writer_name) VALUES(?, ?, ?, ?, ?)");
+
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT award_group, category_name, writer_number, writer_name FROM deliberation_writers WHERE tournament_id = ?")) {
+
+      destPrep.setInt(1, destTournamentID);
+      sourcePrep.setInt(1, sourceTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString(1));
+          destPrep.setString(3, sourceRS.getString(2));
+          destPrep.setInt(4, sourceRS.getInt(3));
+          destPrep.setString(5, sourceRS.getString(4));
+          destPrep.executeUpdate();
+        }
+      }
+    }
+
+    // potential winners
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO deliberation_potential_winners(tournament_id, award_group, category_name, place, team_number) VALUES(?, ?, ?, ?, ?)");
+
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT award_group, category_name, place, team_number FROM deliberation_potential_winners WHERE tournament_id = ?")) {
+
+      destPrep.setInt(1, destTournamentID);
+      sourcePrep.setInt(1, sourceTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString(1));
+          destPrep.setString(3, sourceRS.getString(2));
+          destPrep.setInt(4, sourceRS.getInt(3));
+          destPrep.setInt(5, sourceRS.getInt(4));
+          destPrep.executeUpdate();
+        }
+      }
+    }
+
+    // num awards
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO deliberation_num_awards(tournament_id, award_group, category_name, num_awards) VALUES(?, ?, ?, ?)");
+
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT award_group, category_name, num_awards FROM deliberation_num_awards WHERE tournament_id = ?")) {
+
+      destPrep.setInt(1, destTournamentID);
+      sourcePrep.setInt(1, sourceTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString(1));
+          destPrep.setString(3, sourceRS.getString(2));
+          destPrep.setInt(4, sourceRS.getInt(3));
+          destPrep.executeUpdate();
+        }
+      }
+    }
+
   }
 
   /**
@@ -3019,6 +3269,216 @@ public final class ImportDB {
       return hasBugs;
     }
 
+  }
+
+  /**
+   * Load a CSV file into an SQL table. Assumes that the first line in the CSV
+   * file specifies the column names. This method is meant as the inverse of
+   * {@link com.opencsv.CSVWriter#writeAll(ResultSet, boolean)} with
+   * includeColumnNames set to true. This method assumes that the table to be
+   * created does not exist, an error will be reported if it does.
+   *
+   * @param connection the database connection to create the table within
+   * @param tablename name of the table to create
+   * @param reader where to read the data from, a {@link CSVReader} will be
+   *          created from this
+   * @param types column name to sql type mapping
+   * @param dumpVersion the version of the CSV fiel dump
+   * @throws SQLException if there is an error putting data in the database
+   * @throws IOException if there is an error reading the data
+   * @throws RuntimeException if the first line cannot be read
+   */
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
+                                "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Generate columns based upon file loaded")
+  private static void loadCSVFile(final Connection connection,
+                                  final String tablename,
+                                  final Map<String, String> types,
+                                  final Reader reader,
+                                  final int dumpVersion)
+      throws IOException, SQLException {
+    try {
+      final CSVReader csvreader = new CSVReader(reader);
+
+      // read the header and create the table and create the
+      final StringBuilder insertPrepSQL = new StringBuilder();
+      insertPrepSQL.append("INSERT INTO ");
+      insertPrepSQL.append(tablename);
+      insertPrepSQL.append(" ( ");
+      final StringBuilder valuesSQL = new StringBuilder();
+      valuesSQL.append(" VALUES (");
+
+      final StringBuilder createTable = new StringBuilder();
+      createTable.append("CREATE TABLE ");
+      createTable.append(tablename);
+      createTable.append(" (");
+      String[] line = csvreader.readNext();
+      if (null == line) {
+        throw new RuntimeException("Cannot find the header line");
+      }
+
+      final String[] columnTypes = new String[line.length];
+      try (Statement stmt = connection.createStatement()) {
+        for (int columnIndex = 0; columnIndex < line.length; ++columnIndex) {
+          final String columnName = line[columnIndex].toLowerCase();
+          if (columnIndex > 0) {
+            createTable.append(", ");
+            insertPrepSQL.append(", ");
+            valuesSQL.append(", ");
+          }
+          String type = types.get(columnName);
+          if (null == type) {
+            type = "longvarchar";
+          }
+          // handle old dumps with no size
+          if (type.equalsIgnoreCase("varchar")) {
+            type = "varchar(255)";
+          }
+          // handle old dumps with no size
+          if (type.equalsIgnoreCase("char")) {
+            type = "char(255)";
+          }
+          columnTypes[columnIndex] = type;
+          createTable.append(columnName);
+          createTable.append(" "
+              + type);
+          insertPrepSQL.append(columnName);
+          valuesSQL.append("?");
+        }
+        createTable.append(")");
+        insertPrepSQL.append(")");
+        valuesSQL.append(")");
+        stmt.executeUpdate(createTable.toString());
+      } // statement
+
+      // load each line into a row in the table
+      try (PreparedStatement prep = connection.prepareStatement(insertPrepSQL.append(valuesSQL).toString())) {
+        while (null != (line = csvreader.readNext())) {
+          for (int columnIndex = 0; columnIndex < line.length; ++columnIndex) {
+            ImportDB.coerceData(line[columnIndex], columnTypes[columnIndex], prep, columnIndex
+                + 1, dumpVersion);
+          }
+          prep.executeUpdate();
+        }
+      } // prepared statement
+    } catch (final CsvValidationException e) {
+      throw new IOException("Error reading line of file", e);
+    }
+  }
+
+  /**
+   * Convert data to type and put in prepared statement at index.
+   *
+   * @param rawData the data as a string
+   * @param type the sql type that the data is to be converted to
+   * @param prep the prepared statement to insert into
+   * @param index which index in the prepared statement to put the data in
+   * @param dumpVersion used to determine how to parse the data
+   * @throws SQLException
+   * @throws ParseException
+   */
+  private static void coerceData(final String rawData,
+                                 final String type,
+                                 final PreparedStatement prep,
+                                 final int index,
+                                 final int dumpVersion)
+      throws SQLException {
+    final @Nullable String data;
+    if (dumpVersion == 1) {
+      if (null == rawData
+          || rawData.trim().equals("")) {
+        data = null;
+      } else {
+        data = rawData;
+      }
+    } else if (dumpVersion == 2) {
+      if (DumpDB.FLL_SW_NULL_STRING.equals(rawData)) {
+        data = null;
+      } else if (rawData.startsWith(DumpDB.FLL_SW_NULL_STRING)) {
+        data = rawData.substring(DumpDB.FLL_SW_NULL_STRING.length());
+      } else {
+        data = rawData;
+      }
+    } else {
+      throw new FLLRuntimeException(String.format("Dump version %d is unknown", dumpVersion));
+    }
+
+    final String typeLower = type.toLowerCase();
+    if ("longvarchar".equals(typeLower)
+        || typeLower.startsWith("varchar")) {
+      if (null == data) {
+        prep.setNull(index, Types.VARCHAR);
+      } else {
+        prep.setString(index, data.trim());
+      }
+    } else if (typeLower.startsWith("char")) {
+      if (null == data
+          || "".equals(data.trim())) {
+        prep.setNull(index, Types.CHAR);
+      } else {
+        prep.setString(index, data.trim());
+      }
+    } else if ("integer".equals(typeLower)) {
+      if (null == data) {
+        prep.setNull(index, Types.INTEGER);
+      } else {
+        final long value = Long.parseLong(data);
+        prep.setLong(index, value);
+      }
+    } else if ("float".equals(typeLower)
+        || "double".equals(typeLower)) {
+      if (null == data) {
+        prep.setNull(index, Types.DOUBLE);
+      } else {
+        final double value = Double.parseDouble(data);
+        prep.setDouble(index, value);
+      }
+    } else if ("boolean".equals(typeLower)) {
+      if (null == data) {
+        prep.setNull(index, Types.BOOLEAN);
+      } else {
+        final boolean value = Boolean.parseBoolean(data);
+        prep.setBoolean(index, value);
+      }
+    } else if ("time".equals(typeLower)) {
+      if (null == data) {
+        prep.setNull(index, Types.TIME);
+      } else {
+        try {
+          final Date value = CSV_TIME_FORMATTER.get().parse(data);
+          final Time time = new Time(value.getTime());
+          prep.setTime(index, time);
+        } catch (final ParseException e) {
+          throw new FLLRuntimeException("Problem parsing time in database dump", e);
+        }
+      }
+    } else if ("timestamp".equals(typeLower)) {
+      if (null == data) {
+        prep.setNull(index, Types.TIMESTAMP);
+      } else {
+        try {
+          final Date value = CSV_TIMESTAMP_FORMATTER.get().parse(data);
+          final Timestamp time = new Timestamp(value.getTime());
+          prep.setTimestamp(index, time);
+        } catch (final ParseException e) {
+          throw new FLLRuntimeException("Problem parsing timestamp in database dump", e);
+        }
+      }
+    } else if ("date".equals(typeLower)) {
+      if (null == data) {
+        prep.setNull(index, Types.DATE);
+      } else {
+        try {
+          final java.util.Date value = CSV_DATE_FORMATTER.get().parse(data);
+          prep.setDate(index, new java.sql.Date(value.getTime()));
+        } catch (final ParseException e) {
+          throw new FLLRuntimeException("Problem parsing date in database dump", e);
+        }
+      }
+    } else {
+      throw new FLLRuntimeException("Unhandled SQL data type '"
+          + type
+          + "'");
+    }
   }
 
 }

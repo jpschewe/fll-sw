@@ -6,14 +6,13 @@
 
 package fll.web;
 
-import java.io.File;
 import java.util.Formatter;
 import java.util.List;
 
+import fll.UserImages;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.jsp.JspWriter;
-
-import fll.Utilities;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Helpers for welcome.jsp.
@@ -21,6 +20,26 @@ import fll.Utilities;
 public final class Welcome {
 
   private Welcome() {
+  }
+
+  /**
+   * Name of file in {@link UserImages#getImagesPath()} with the logo for the
+   * partner.
+   */
+  public static final String PARTNER_LOGO_FILENAME = "partner_logo.jpg";
+
+  /**
+   * Name of file in {@link UserImages#getImagesPath()} with the logo for FLL.
+   */
+  public static final String FLL_LOGO_FILENAME = "fll_logo.jpg";
+
+  /**
+   * @param page used to set variables for the page
+   */
+  public static void populateContext(final PageContext page) {
+    page.setAttribute("partner_logo",
+                      String.format("%s/%s", UserImages.getImagesPath().getFileName(), PARTNER_LOGO_FILENAME));
+    page.setAttribute("fll_logo", String.format("%s/%s", UserImages.getImagesPath().getFileName(), FLL_LOGO_FILENAME));
   }
 
   // private static final int MAX_NUM_LOGOS_PER_COLUMN = 6;
@@ -31,10 +50,7 @@ public final class Welcome {
    */
   public static void outputLogos(final ServletContext application,
                                  final JspWriter out) {
-    // All logos shall be located under sponsor_logos in the fll web folder.
-    final String imagePath = application.getRealPath("/sponsor_logos");
-
-    final List<String> logoFiles = Utilities.getGraphicFiles(new File(imagePath));
+    final List<String> logoFiles = WebUtils.getSponsorLogos(application);
 
     // final int numColumns = (int) Math.ceil((double) logoFiles.size()
     // / (double) MAX_NUM_LOGOS_PER_COLUMN);

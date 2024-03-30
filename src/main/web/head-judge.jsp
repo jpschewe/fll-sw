@@ -22,10 +22,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 <body>
     <h1>Head Judge links</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <p>This page contains links to the pages used in the judges
         room. Most links open new tabs so that you can continue to
         follow the workflow on this page.</p>
@@ -57,6 +54,10 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <a class="wide" target="_report"
         href="<c:url value='/report/index.jsp' />">Generate reports
         - this is done once all of the subjective scores are in.</a>
+
+    <a class="wide"
+        href="<c:url value='/report/regular-match-play-runs.jsp' />">Regular
+        Match Play performance scores</a>
 
     <a class="wide"
         href="<c:url value='/report/edit-award-winners.jsp' />"

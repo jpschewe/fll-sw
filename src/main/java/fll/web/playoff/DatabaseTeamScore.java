@@ -15,6 +15,7 @@ import java.util.Map;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Utilities;
+import fll.db.GenerateDB;
 
 /**
  * TeamScore implementation for a performance score in the database.
@@ -43,16 +44,14 @@ public class DatabaseTeamScore extends TeamScore {
 
   /**
    * Create a database team score object for a performance score.
-   *
-   * @param categoryName the category to delete the score from
+   * 
    * @param tournament the tournament
-   * @param connection the connection to get the data from
    * @param teamNumber passed to superclass
    * @param runNumber passed to superclass
+   * @param connection the connection to get the data from
    * @throws SQLException if there is an error getting the data
    */
-  public DatabaseTeamScore(final String categoryName,
-                           final int tournament,
+  public DatabaseTeamScore(final int tournament,
                            final int teamNumber,
                            final int runNumber,
                            final Connection connection)
@@ -60,7 +59,7 @@ public class DatabaseTeamScore extends TeamScore {
     super(teamNumber, runNumber);
 
     try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
-        + categoryName
+        + GenerateDB.PERFORMANCE_TABLE_NAME
         + " WHERE TeamNumber = ? AND Tournament = ?"
         + (NON_PERFORMANCE_RUN_NUMBER == getRunNumber() ? "" : " AND RunNumber = ?"))) {
       if (NON_PERFORMANCE_RUN_NUMBER != getRunNumber()) {
@@ -110,7 +109,7 @@ public class DatabaseTeamScore extends TeamScore {
     }
   }
 
-  public double getDouble(final String goalName) {
+  private double getDouble(final String goalName) {
     final Object value = data.get(goalName);
     if (null == value) {
       return Double.NaN;
@@ -121,7 +120,7 @@ public class DatabaseTeamScore extends TeamScore {
     }
   }
 
-  public boolean getBoolean(final String goalName) {
+  private boolean getBoolean(final String goalName) {
     final Object value = data.get(goalName);
     if (null == value) {
       return false;
@@ -183,5 +182,15 @@ public class DatabaseTeamScore extends TeamScore {
   }
 
   private final boolean scoreExists;
+
+  @Override
+  public String getTable() {
+    final @Nullable String table = getString("tablename");
+    if (null == table) {
+      return "UNKNOWN";
+    } else {
+      return table;
+    }
+  }
 
 }

@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <fll-sw:required-roles roles="REF" allowSetup="false" />
@@ -14,45 +16,27 @@ fll.web.scoreEntry.SelectTeam.populateContext(application, pageContext);
 
 <c:choose>
     <c:when test="${not empty scoreEntrySelectedTable}">
-        <style title='select_style' type='text/css'>
+        <style type='text/css'>
 SELECT {
     font-size: x-large;
-    font-weight: bold;
-    background: black;
-    color: #e0e0e0;
-    font-weight: bold;
+}
+
+#enter_submit {
+    font-size: xx-large;
 }
 </style>
     </c:when>
-    <c:otherwise>
-        <style title='select_style' type='text/css'>
-SELECT {
-    font-weight: bold;
-    background: black;
-    color: #e0e0e0;
-}
-</style>
-    </c:otherwise>
 </c:choose>
-<style title='local_style' type='text/css'>
-OPTION {
-    color: #e0e0e0;
-}
-
-.dark_bg {
-    font-weight: bold;
-    background-color: black;
-    color: #e0e0e0;
-}
-</style>
+<link rel="stylesheet" type='text/css' href="select_team.css" />
 
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js' />"></script>
+<script type='text/javascript' src="<c:url value='/js/fll-storage.js'/>"></script>
+<script type='text/javascript' src="scoreEntryModule.js"></script>
 
 <script type='text/javascript'>
   // use var instead of const so that the variables are available globally
   var scoreEntrySelectedTable = "${scoreEntrySelectedTable}";
-  var teamSelectData = JSON.parse('${teamSelectDataJson}');
   var tabletMode = Boolean(scoreEntrySelectedTable);
 </script>
 
@@ -92,10 +76,7 @@ OPTION {
 
 
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <a class="wide" href="choose-table.jsp"> <c:choose>
             <c:when test="${not empty scoreEntrySelectedTable}">
 Entering scores for table ${scoreEntrySelectedTable}. Teams are sorted in schedule order with this table first.
@@ -112,6 +93,8 @@ Entering scores for all tables. Teams are sorted in schedule order.
             href="<c:url value='/scoreEntry/scoreEntry.jsp?tablet=true&practice=true&showScores=false'/>">Practice
             round score entry</a>
     </div>
+
+    <div id='stored-values'></div>
 
     <c:if test="${empty scoreEntrySelectedTable}">
         <p>Use the browser search, ctrl-f, to find teams by name,
@@ -229,7 +212,6 @@ Entering scores for all tables. Teams are sorted in schedule order.
                         <tr>
                             <!-- submit button -->
                             <td align='left'>
-                                <!--<font face='arial' size='4'><b>Submit</b></font>-->
                                 <input class='dark_bg' type="submit"
                                     value="Enter score"
                                     id='enter_submit'>
@@ -285,11 +267,6 @@ Entering scores for all tables. Teams are sorted in schedule order.
 
     </table>
     <!-- outer table -->
-
-    <c:if test="${empty scoreEntrySelectedTable}">
-        <script type="text/javascript" id="reloadruns"
-            src="UpdateUnverifiedRuns"></script>
-    </c:if>
 
 </body>
 </html>

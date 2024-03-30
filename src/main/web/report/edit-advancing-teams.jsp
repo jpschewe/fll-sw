@@ -1,6 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="HEAD_JUDGE" allowSetup="false" />
+<fll-sw:required-roles roles="HEAD_JUDGE,REPORT_GENERATOR" allowSetup="false" />
 
 <!DOCTYPE HTML>
 <html>
@@ -30,10 +30,7 @@
 
     <h1>Edit Advancing Teams</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <p>Specify the teams advancing to the next tournament. The group
         names will be used in the awards report.</p>
     <button id="advancing-teams_add-group">Add Group</button>

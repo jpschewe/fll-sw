@@ -35,10 +35,7 @@ fll.web.playoff.BracketParameters.populateContext(application, session, pageCont
 <body>
 
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <form method="POST" action="BracketParameters">
 
         <p>

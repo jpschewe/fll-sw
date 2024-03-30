@@ -90,15 +90,8 @@ function storeAdvancingTeams() {
     if (advancing.length) {
         // send to server
 
-        return fetch("/api/AdvancingTeams",
-            {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(advancing)
-            }
-        ).then(checkJsonResponse)
+        return uploadJsonData("/api/AdvancingTeams", "POST", advancing)
+            .then(checkJsonResponse)
             .catch(error => { throw new Error("Error sending group advancing teams: " + error) });
 
     } else {
@@ -217,10 +210,8 @@ function initPage() {
         addAdvancingGroup(group, true);
     });
 
-    var awardGroupOrder = document.getElementById("award-group-order");
-    while (awardGroupOrder.firstChild) {
-        awardGroupOrder.removeChild(awardGroupOrder.firstChild);
-    }
+    const awardGroupOrder = document.getElementById("award-group-order");
+    removeChildren(awardGroupOrder);
 
     if (_initialSortedGroups) {
         _initialSortedGroups.forEach(function(group) {

@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -120,7 +122,9 @@ public class TestPlayoffs {
     IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
         + "scoreEntry/select_team.jsp");
 
-    final Select teamSelect = new Select(selenium.findElement(By.id("select-teamnumber")));
+    final WebElement teamSelectElement = selenium.findElement(By.id("select-teamnumber"));
+    seleniumWait.until(ExpectedConditions.presenceOfNestedElementLocatedBy(teamSelectElement, By.tagName("option")));
+    final Select teamSelect = new Select(teamSelectElement);
     teamSelect.selectByValue(String.valueOf(teamNumber));
 
     selenium.findElement(By.id("enter_submit")).click();

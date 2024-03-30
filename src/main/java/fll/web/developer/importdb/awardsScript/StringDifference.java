@@ -35,7 +35,7 @@ import fll.Tournament;
   @Override
   public final String getDescription() {
     final StringBuilder description = new StringBuilder();
-    description.append(String.format("<div>The % is different between the source database and the destination database.</div>",
+    description.append(String.format("<div>The %s is different between the source database and the destination database.</div>",
                                      getTextDescription()));
     description.append(String.format("<div>Source: %s</div>", getSourceValue()));
     description.append(String.format("<div>Destination:%s </div>", getDestValue()));

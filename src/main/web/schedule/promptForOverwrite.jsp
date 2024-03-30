@@ -12,10 +12,7 @@
 <body>
     <h1>Upload Schedule</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <p>
         A schedule already exists for the current tournament, should it
         be overwritten?

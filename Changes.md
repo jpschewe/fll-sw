@@ -1,3 +1,68 @@
+* #1182 - Add CSV for award winners of the tournament
+* #1181 - Allow team schedules to be output from the web
+* #1166 - handle Bye scores everywhere that No Show scores are handled
+* #1149 - handle changes to judging station in the schedule reports
+* #1137 - add pages to facilitate deliberations
+* #1157 - remove text about going to information desk for finalist schedule
+
+Release 18.5.0
+==============
+* #1164 - modify database dump to explicitly handle NULL values
+* #1163 - Handle no show and bye when gathering team results
+* #1162 - Allow awards script text to be null in the database
+* #1158 - Fix consistency issue with how Champion's award is stored
+
+Release 18.4.1
+==============
+* Fix missing head to head in awards script report
+
+Release 18.4.0
+==============
+* #1137 - Initial support for deliberations
+* #1152 - Allow head judge to see regular match play vs. schedule report
+* #1150 - Change background color of missing team cell on performance schedule to be compatible with black & white printing
+* #1142 - Add presented by to awards script header
+* #1141 - Handle missing scores when generating team results
+* #1148 - Rename reports link on main index to match head judge page
+* #1144 - Make duplicate teams in a schedule a hard error
+
+Release 18.3.0
+==============
+* #1138 - Add timestamp of when report generated to final computed scores
+* #1136 - Add role for report generators
+* #1120 - Add support for changing the FLL logo on the subjective rubrics
+* #1119 - Add support for changing the FLL logo on the welcome page
+* #1121 - Add support for changing the partner logo on the welcome page
+* #1128 - Refresh the performance score team selection page when scores are entered
+* #1135 - Allow editing of the award group order on the awards script editor page
+* #1126 - Reload scoreboard if a score is edited to be lower than it was previously
+* #1127 - Add PDF reports for top performance scores
+* #1122 - Add scheduled time to subjective score entry page
+* #1125 - Make performance enter score button larger on tablet
+* #1124 - Add a border to the top of the buttons on score entry
+* #1130 - make it clear when a score needs to be verified on the score entry form
+* Make database backups accessible via the web
+* #1110 - Allow one to set change time to be 0 minutes when creating new schedules
+* #1112 - Add save as for schedule description to the scheduler UI
+* #161 - color teams in the finalist schedule
+
+Release 18.2.0
+==============
+* #1116 - fix error creating database from internal challenge description
+* #1115 - Store performance data locally in case there is an error talking to the server
+* #1114 - Add table name to performance data
+* 105 - Highlight ties in the finalist in the numeric awards
+
+Release 18.1.0
+==============
+* #1108 - allow one to manipulate slideshow images from the web
+* Copy slideshow and sponsor logs during migration from an older version of the software
+* #1107 - allow one to manipulate sponsor logos from the web
+* Fix bug in schedule UI where the default value of a time is a string
+* #1106 - Ensure no duplicate rows in most recent scores scoreboard display
+* #1105 - Rework dynamic display to properly work with stand alone scoreboard pages
+* Better handling of unknown displays
+
 Release 18.0.0
 ==============
 * Automatically select short practice round columns when loading a schedule

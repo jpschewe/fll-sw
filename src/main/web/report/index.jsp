@@ -33,10 +33,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 <body>
     <h1>Reporting</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <h2>All Tournaments</h2>
     <a class="wide" href="summarizePhase1.jsp">Compute summarized
         scores. This needs to be executed before any reports can be
@@ -46,11 +43,21 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <a class="wide" href="NonNumericNomineesReport" target="_blank">Optional
         award nominations</a>
 
-    <a class="wide" href="topScoreReportPerAwardGroup.jsp">Top
-        performance - Award group </a>
+    <a class="wide" target="_topScoreReportPerAwardGroup"
+        href="topScoreReportPerAwardGroup.jsp">Top performance -
+        Award group (HTML)</a>
 
-    <a class="wide" href="topScoreReportPerJudgingStation.jsp"> Top
-        performance - Judging group </a>
+    <a class="wide" target="_topScoreReportPerAwardGroup"
+        href="TopScoreReportPerAwardGroupPdf">Top performance -
+        Award group (PDF)</a>
+
+    <a class="wide" target="_topScoreReportPerJudgingStation"
+        href="topScoreReportPerJudgingStation.jsp"> Top performance
+        - Judging group (HTML)</a>
+
+    <a class="wide" target="_topScoreReportPerJudgingStation"
+        href="TopScoreReportPerJudgingStationPdf"> Top performance -
+        Judging group (PDF)</a>
 
     <div class="wide">
         Summarized numeric scores - by judging group aka "Final Computed
@@ -152,7 +159,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         the teams advancing to the next level of tournament</a>
 
     <a class="wide" href="<c:url value='/report/awards/index.jsp'/>">Edit
-        awards report and rewards script properties.</a>
+        awards report and awards script properties.</a>
 
     <a class="wide" href="AwardsReport" target="_blank">Report of
         winners for the tournament. This can be published on the web.</a>
@@ -231,6 +238,11 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
     <a class="wide" href="finalist/TeamFinalistSchedule" target="_blank">Finalist
         Schedule for each team</a>
+
+    <a class="wide" href="deliberation/specify_category_order.jsp"
+        target="_blank">Specify Deliberation Category Order</a>
+
+    <a class="wide" href="deliberation/index.jsp" target="_blank">Deliberations</a>
 
     <h2>Cross-tournament reports</h2>
     <p>Reports that use data across multiple tournaments.</p>

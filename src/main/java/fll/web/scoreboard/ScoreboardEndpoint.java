@@ -6,6 +6,8 @@
 
 package fll.web.scoreboard;
 
+import java.io.EOFException;
+
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,10 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
-import fll.util.FLLInternalException;
-import fll.util.FLLRuntimeException;
 import fll.web.GetHttpSessionConfigurator;
-import jakarta.servlet.http.HttpSession;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnError;
 import jakarta.websocket.OnMessage;
@@ -50,10 +49,11 @@ public class ScoreboardEndpoint {
   @OnMessage
   public void onMessage(final String text) {
     if (null == this.session) {
-      throw new FLLInternalException("Received websocket message before receiving the session from start");
+      LOGGER.error("Received websocket message before receiving the session from start, ignoring");
+      return;
     }
 
-    LOGGER.trace("Received message: {}", text);
+    LOGGER.trace("{}: Received message: {}", session, text);
 
     try {
       final JsonNode raw = mapper.readTree(text);
@@ -62,22 +62,22 @@ public class ScoreboardEndpoint {
       switch (message.getType()) {
       case REGISTER:
         final RegisterMessage registerMessage = (RegisterMessage) message;
-        this.uuid = ScoreboardUpdates.addClient(registerMessage.getDisplayUuid(), session, getHttpSession(session));
+        this.uuid = ScoreboardUpdates.addClient(registerMessage.getDisplayUuid(), session, GetHttpSessionConfigurator.getHttpSession(session));
         break;
       case UPDATE:
-        LOGGER.warn("Received UPDATE message from client, ignoring");
+        LOGGER.warn("{}: Received UPDATE message from client, ignoring", uuid);
         break;
       case DELETE:
-        LOGGER.warn("Received DELETE message from client, ignoring");
+        LOGGER.warn("{}: Received DELETE message from client, ignoring", uuid);
         break;
       case RELOAD:
-        LOGGER.warn("Received RELOAD message from client, ignoring");
+        LOGGER.warn("{}: Received RELOAD message from client, ignoring", uuid);
         break;
       default:
-        LOGGER.error("Received unknown message type from client: {}", message.getType());
+        LOGGER.error("{}: Received unknown message type from client: {}", uuid, message.getType());
       }
     } catch (final JsonProcessingException e) {
-      throw new FLLInternalException(String.format("Error reading json data from string: %s", text), e);
+      LOGGER.error("Error reading json data from string: {}, ignoring", text, e);
     }
   }
 
@@ -90,18 +90,11 @@ public class ScoreboardEndpoint {
 
   @OnError
   public void onError(final Throwable t) throws Throwable {
-    LOGGER.warn("Display socket error", t);
-  }
-
-  private static HttpSession getHttpSession(final Session session) {
-    final HttpSession httpSession = (HttpSession) session.getUserProperties()
-                                                         .get(GetHttpSessionConfigurator.HTTP_SESSION_KEY);
-
-    if (null == httpSession) {
-      throw new FLLRuntimeException("Unable to find httpSession in the userProperties");
+    if (t instanceof EOFException) {
+      LOGGER.debug("{}: Socket closed.", uuid);
+    } else {
+      LOGGER.error("{}: Display socket error", uuid, t);
     }
-
-    return httpSession;
   }
 
 }

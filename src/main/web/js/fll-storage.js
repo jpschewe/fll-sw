@@ -25,7 +25,7 @@ const fllStorage = {};
         } else if (typeof value === 'object') {
             if (value.dataType === 'Map') {
                 return new Map(value.value);
-            } else if (typeof JSJoda != undefined) {
+            } else if (typeof JSJoda != "undefined") {
                 switch (value.dataType) {
                     case 'LocalDate':
                         return JSJoda.LocalDate.parse(value.value);
@@ -51,7 +51,7 @@ const fllStorage = {};
                 dataType: 'Map',
                 value: Array.from(originalObject.entries()),
             };
-        } else if (typeof JSJoda != undefined) {
+        } else if (typeof JSJoda != "undefined") {
             if (originalObject instanceof JSJoda.LocalDate) {
                 return {
                     dataType: 'LocalDate',
@@ -133,6 +133,25 @@ const fllStorage = {};
             }
         }
         toDelete.forEach(key => localStorage.removeItem(key));
+    }
+
+    /**
+     * Get all values in the specified namespace as a Map.
+     */
+    fllStorage.allValues = function(namespace) {
+        const prefix = namespace + ".";
+
+        const result = new Map();
+        for (let i = 0; i < localStorage.length; ++i) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith(prefix)) {
+                const relativeKey = key.substring(prefix.length);
+                const value = fllStorage.get(namespace, relativeKey);
+                result.set(relativeKey, value);
+            }
+        }
+
+        return result;
     }
 
 }

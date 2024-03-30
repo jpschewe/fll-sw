@@ -147,13 +147,13 @@ const finalist_module = {}
     /**
      * Constructor for a Team.
      */
-    function Team(num, name, org, judgingGroup) {
+    function Team(num, name, org, judgingGroup, awardGroup) {
         if (typeof (_teams[num]) != 'undefined') {
             throw new Error("Team already exists with number: " + num);
         }
 
         this.num = num;
-        this.divisions = [];
+        this.awardGroup = awardGroup;
         this.name = name;
         this.org = org;
         this.judgingGroup = judgingGroup;
@@ -486,22 +486,8 @@ const finalist_module = {}
     /**
      * Create a new team.
      */
-    finalist_module.addTeam = function(num, name, org, judgingStation) {
-        return new Team(num, name, org, judgingStation);
-    };
-
-    /**
-     * Add a team to a division. A team may be in multiple divisions.
-     * 
-     * @param team
-     *          a team object
-     * @param division
-     *          a string
-     */
-    finalist_module.addTeamToDivision = function(team, division) {
-        if (-1 == team.divisions.indexOf(division)) {
-            team.divisions.push(division);
-        }
+    finalist_module.addTeam = function(num, name, org, judgingStation, awardGroup) {
+        return new Team(num, name, org, judgingStation, awardGroup);
     };
 
     /**
@@ -519,26 +505,10 @@ const finalist_module = {}
     };
 
     /**
-     * Check if a team is in a division.
-     * 
-     * @param team
-     *          a team object
-     * @param division
-     *          a string
-     * @return true/false
-     */
-    finalist_module.isTeamInDivision = function(team, division) {
-        if (!team) {
-            return false;
-        } else if (-1 == team.divisions.indexOf(division)) {
-            return false;
-        } else {
-            return true;
-        }
-    };
-
-    /**
      * Find a team by number.
+     * 
+     * @param {int} teamNum the team number
+     * @return the team or null if not found
      */
     finalist_module.lookupTeam = function(teamNum) {
         return _teams[teamNum];
@@ -573,7 +543,7 @@ const finalist_module = {}
     finalist_module.getScoreGroups = function(teams, currentDivision) {
         const scoreGroups = {};
         for (const team of teams) {
-            if (finalist_module.isTeamInDivision(team, currentDivision)) {
+            if (team.awardGroup == currentDivision) {
                 const group = team.judgingGroup;
                 scoreGroups[group] = finalist_module.getNumTeamsAutoSelected();
             }
@@ -639,7 +609,7 @@ const finalist_module = {}
         finalist_module.sortTeamsByCategory(teams, currentCategory);
         for (const team of teams) {
             if (currentCategory.overall
-                || finalist_module.isTeamInDivision(team, currentDivision)) {
+                || currentDivision == team.awardGroup) {
                 const group = team.judgingGroup;
                 const prevScore = prevScores[group];
                 const curScore = finalist_module.getCategoryScore(team, currentCategory);
@@ -822,14 +792,16 @@ const finalist_module = {}
         teamNum = parseInt(teamNum, 10);
         const index = category.teams.indexOf(teamNum);
         if (-1 == index) {
-            if (category.overall) {
-                // clear schedule for all categories
-                for (const division of finalist_module.getDivisions()) {
-                    _schedules[division] = null;
+            if (finalist_module.isCategoryScheduled(category)) {
+                if (category.overall) {
+                    // clear schedule for all categories
+                    for (const division of finalist_module.getDivisions()) {
+                        _schedules[division] = null;
+                    }
+                } else {
+                    // clear the schedule for the current division
+                    _schedules[finalist_module.getCurrentDivision()] = null;
                 }
-            } else {
-                // clear the schedule for the current division
-                _schedules[finalist_module.getCurrentDivision()] = null;
             }
 
             category.teams.push(teamNum);
@@ -849,7 +821,7 @@ const finalist_module = {}
         const toRemove = [];
         for (const teamNum of category.teams) {
             const team = finalist_module.lookupTeam(teamNum);
-            if (category.overall || finalist_module.isTeamInDivision(team, division)) {
+            if (category.overall || division == team.awardGroup) {
                 toRemove.push(teamNum);
             }
         }
@@ -901,19 +873,19 @@ const finalist_module = {}
     /**
      * @param division
      *          the division to work with
-     * @return map (object) with key of team number and value is an array of scheduled
+     * @return Map with key of team number and value is an array of scheduled
      *         categories that the team is being judged in
      */
     finalist_module.getTeamToCategoryMap = function(division) {
-        const finalistsCount = {};
+        const finalistsCount = new Map();
         for (const category of finalist_module.getAllScheduledCategories()) {
             for (const teamNum of category.teams) {
                 const team = finalist_module.lookupTeam(teamNum);
-                if (category.overall || finalist_module.isTeamInDivision(team, division)) {
-                    if (null == finalistsCount[teamNum]) {
-                        finalistsCount[teamNum] = [];
+                if (category.overall || division == team.awardGroup) {
+                    if (!finalistsCount.has(teamNum)) {
+                        finalistsCount.set(teamNum, []);
                     }
-                    finalistsCount[teamNum].push(category);
+                    finalistsCount.get(teamNum).push(category);
                 }
             }
         }
@@ -922,28 +894,18 @@ const finalist_module = {}
     };
 
     /**
-     * Create the finalist schedule for the specified division.
-     * 
-     * @param currentDivision
-     *          the division to create the schedule for
-     * @return array of timeslots in order from earliest to latest
+     * @param finalistsCount the output of getTeamToCategoryMap
+     * @return array of teams sorted so that the team in the most categories is first
      */
-    finalist_module.scheduleFinalists = function(currentDivision) {
-        _log("Creating schedule for " + currentDivision);
-
-        let finalistsCount = finalist_module.getTeamToCategoryMap(currentDivision);
-
-        // sort the map so that the team in the most categories is first,
-        // this
-        // should ensure the minimum amount of time to do the finalist
-        // judging
+    finalist_module.sortTeamsByCategoryCount = function(finalistsCount) {
         const sortedTeams = [];
-        for (const [teamNum, _] of Object.entries(finalistsCount)) {
+
+        for (const [teamNum, _] of finalistsCount) {
             sortedTeams.push(teamNum);
         }
         sortedTeams.sort(function(a, b) {
-            const aCategories = finalistsCount[a];
-            const bCategories = finalistsCount[b];
+            const aCategories = finalistsCount.get(a);
+            const bCategories = finalistsCount.get(b);
 
             const aCount = aCategories.length;
             const bCount = bCategories.length;
@@ -956,6 +918,27 @@ const finalist_module = {}
             }
         });
 
+        return sortedTeams;
+    };
+
+    /**
+     * Create the finalist schedule for the specified division.
+     * 
+     * @param currentDivision
+     *          the division to create the schedule for
+     * @return array of timeslots in order from earliest to latest
+     */
+    finalist_module.scheduleFinalists = function(currentDivision) {
+        _log("Creating schedule for " + currentDivision);
+
+        const finalistsCount = finalist_module.getTeamToCategoryMap(currentDivision);
+
+        // sort the map so that the team in the most categories is first,
+        // this
+        // should ensure the minimum amount of time to do the finalist
+        // judging
+        const sortedTeams = finalist_module.sortTeamsByCategoryCount(finalistsCount);
+
         // list of Timeslots in time order
         const schedule = [];
         let nextTime = finalist_module.getStartTime(currentDivision);
@@ -964,7 +947,7 @@ const finalist_module = {}
         finalist_module.log("Next timeslot starts at " + nextTime + " duration is " + slotDuration);
         for (const teamNum of sortedTeams) {
             const team = finalist_module.lookupTeam(teamNum);
-            const teamCategories = finalistsCount[teamNum];
+            const teamCategories = finalistsCount.get(teamNum);
             for (const category of teamCategories) {
                 if (finalist_module.isCategoryScheduled(category)) {
 
@@ -1300,20 +1283,16 @@ const finalist_module = {}
             allNonNumericNominees.push(nominees);
         } // foreach category
 
-        const dataToUpload = JSON.stringify(allNonNumericNominees);
-        return fetch("../../api/NonNumericNominees", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: dataToUpload
-        }).then(checkJsonResponse).then(function(result) {
-            if (result.success) {
-                successCallback(result);
-            } else {
+        return uploadJsonData("../../api/NonNumericNominees", "POST", allNonNumericNominees)
+            .then(checkJsonResponse).then(function(result) {
+                if (result.success) {
+                    successCallback(result);
+                } else {
+                    failCallback(result);
+                }
+            }).catch(function(result) {
                 failCallback(result);
-            }
-        }).catch(function(result) {
-            failCallback(result);
-        });
+            });
     };
 
     /**
@@ -1345,20 +1324,16 @@ const finalist_module = {}
             }
         }
 
-        const dataToUpload = JSON.stringify(schedulesToUpload);
-        return fetch("../../api/PlayoffSchedules", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: dataToUpload
-        }).then(checkJsonResponse).then(function(result) {
-            if (result.success) {
-                successCallback(result);
-            } else {
+        return uploadJsonData("../../api/PlayoffSchedules", "POST", schedulesToUpload)
+            .then(checkJsonResponse).then(function(result) {
+                if (result.success) {
+                    successCallback(result);
+                } else {
+                    failCallback(result);
+                }
+            }).catch(function(result) {
                 failCallback(result);
-            }
-        }).catch(function(result) {
-            failCallback(result);
-        });
+            });
     };
 
     /**
@@ -1390,20 +1365,16 @@ const finalist_module = {}
             }
         }
 
-        const dataToUpload = JSON.stringify(paramsToUpload);
-        return fetch("../../api/FinalistScheduleParameters", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: dataToUpload
-        }).then(checkJsonResponse).then(function(result) {
-            if (result.success) {
-                successCallback(result);
-            } else {
+        return uploadJsonData("../../api/FinalistScheduleParameters", "POST", paramsToUpload)
+            .then(checkJsonResponse).then(function(result) {
+                if (result.success) {
+                    successCallback(result);
+                } else {
+                    failCallback(result);
+                }
+            }).catch(function(result) {
                 failCallback(result);
-            }
-        }).catch(function(result) {
-            failCallback(result);
-        });
+            });
     };
 
     /**
@@ -1470,20 +1441,16 @@ const finalist_module = {}
             }
         }
 
-        const dataToUpload = JSON.stringify(scheduleMap);
-        return fetch("../../api/FinalistSchedule", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: dataToUpload
-        }).then(checkJsonResponse).then(function(result) {
-            if (result.success) {
-                successCallback(result);
-            } else {
+        return uploadJsonData("../../api/FinalistSchedule", "POST", scheduleMap)
+            .then(checkJsonResponse).then(function(result) {
+                if (result.success) {
+                    successCallback(result);
+                } else {
+                    failCallback(result);
+                }
+            }).catch(function(result) {
                 failCallback(result);
-            }
-        }).catch(function(result) {
-            failCallback(result);
-        });
+            });
     };
 
     /**
@@ -1566,9 +1533,8 @@ const finalist_module = {}
             for (const tournamentTeam of data) {
                 let team = finalist_module.lookupTeam(tournamentTeam.teamNumber);
                 if (null == team) {
-                    team = finalist_module.addTeam(tournamentTeam.teamNumber, tournamentTeam.teamName, tournamentTeam.organization, tournamentTeam.judgingGroup);
+                    team = finalist_module.addTeam(tournamentTeam.teamNumber, tournamentTeam.teamName, tournamentTeam.organization, tournamentTeam.judgingGroup, tournamentTeam.awardGroup);
                 }
-                finalist_module.addTeamToDivision(team, tournamentTeam.awardGroup);
             } // teams
         });
     };
@@ -1776,6 +1742,50 @@ const finalist_module = {}
 
     finalist_module.loadFromLocalStorage = function() {
         _load();
+    };
+
+    /**
+     * Clear all local data and reload from the server.
+     * Local storage is saved when this method completes with success.
+     * 
+     * @param doneCallback
+     *          called with no arguments on success
+     * @param failCallback
+     *          called with message on failure
+     */
+    finalist_module.clearAndLoad = function(doneCallback, failCallback) {
+        finalist_module.clearAllData();
+
+        // need to load the tournament again since everything was just cleared
+        finalist_module.loadTournament(function() {
+            // success            
+
+            finalist_module.loadCategoriesAndScores(function() {
+                // success
+                finalist_module.loadNominieesAndSchedules(function() {
+                    // success
+                    finalist_module.saveToLocalStorage();
+                    doneCallback();
+                }, failCallback);
+            }, failCallback);
+        }, failCallback);
+    };
+
+    /**
+     * Refresh category and score data from the server.
+     * Local storage is saved when this method completes with success.
+     * 
+     * @param doneCallback
+     *          called with no arguments on success
+     * @param failCallback
+     *          called with message on failure
+     */
+    finalist_module.refreshData = function(doneCallback, failCallback) {
+        finalist_module.loadCategoriesAndScores(function() {
+            // success
+            finalist_module.saveToLocalStorage();
+            doneCallback();
+        }, failCallback);
     };
 
     // always need to initialize variables

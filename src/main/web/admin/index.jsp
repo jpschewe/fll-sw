@@ -33,10 +33,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
 <body>
     <h1>${challengeDescription.title }(Administration)</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <h2>Before tournament day</h2>
     <ol>
         <li>
@@ -278,6 +275,34 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                     </c:forEach>
                     <!-- end subjective sheets -->
 
+                    <!-- Team schedules -->
+                    <li>
+                        <a href="<c:url value='/admin/TeamSchedules' />"
+                            target="_new">Team Schedules</a>
+                    </li>
+
+                    <li>
+                        <form
+                            action="<c:url value='/admin/TeamSchedules' />"
+                            method='post' target="_new">
+                            Team schedule for
+                            <select name='TeamNumber'>
+                                <c:forEach items="${tournamentTeams}"
+                                    var="team">
+                                    <option
+                                        value='<c:out value="${team.teamNumber}"/>'>
+                                        <c:out
+                                            value="${team.teamNumber}" />
+                                        -
+                                        <c:out value="${team.teamName}" />
+                                    </option>
+                                </c:forEach>
+                            </select>
+                            <input type='submit' value='Output Schedule' />
+                        </form>
+                    </li>
+                    <!-- end Team schedules -->
+
                 </ul>
             </c:if>
         </li>
@@ -317,6 +342,26 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
         <li>
             <a href="<c:url value='/admin/delayed_performance.jsp'/>">Setup
                 delay of displaying performance scores</a>
+        </li>
+
+        <li>
+            <a href="manage-user-images.jsp" target="_blank">Modify
+                the partner and FLL logos used</a>
+        </li>
+
+        <li>
+            <a href="manage-sponsor-logos.jsp" target="_blank">Add
+                or delete sponsor logos</a>
+        </li>
+
+        <li>
+            <a href="manage-slideshow.jsp" target="_blank">Add or
+                delete slideshow images</a>
+        </li>
+
+        <li>
+            <a href="database-backups.jsp" target="_blank">Access to
+                database backups</a>
         </li>
 
     </ol>
@@ -427,6 +472,11 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
     <ul>
         <li>
             <a href='database.flldb'>Download database</a>
+        </li>
+
+        <li>
+            <a href='<c:url value="/report/AwardsCsv"/>'>Awards CSV
+                file</a>
         </li>
 
     </ul>

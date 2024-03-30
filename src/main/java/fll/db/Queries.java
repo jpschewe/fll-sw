@@ -41,10 +41,9 @@ import fll.util.FLLRuntimeException;
 import fll.web.playoff.BracketUpdate;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.H2HUpdateWebSocket;
-import fll.web.playoff.HttpTeamScore;
 import fll.web.playoff.Playoff;
 import fll.web.playoff.TeamScore;
-import fll.web.scoreEntry.UnverifiedRunsWebSocket;
+import fll.web.scoreEntry.PerformanceRunsEndpoint;
 import fll.web.scoreboard.ScoreboardUpdates;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -53,7 +52,6 @@ import fll.xml.ScoreType;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.TiebreakerTest;
 import fll.xml.WinnerType;
-import jakarta.servlet.http.HttpServletRequest;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -338,7 +336,8 @@ public final class Queries {
         + tournament.getTournamentID());
 
     columns.append(", ComputedTotal");
-    if (teamScore.isNoShow()) {
+    if (teamScore.isNoShow()
+        || teamScore.isBye()) {
       values.append(", NULL");
     } else {
       values.append(", "
@@ -348,6 +347,11 @@ public final class Queries {
     columns.append(", RunNumber");
     values.append(", "
         + teamScore.getRunNumber());
+
+    columns.append(", tablename");
+    values.append(", '"
+        + teamScore.getTable()
+        + "'");
 
     // TODO: this should be reworked to use ? in the prepared statement
 
@@ -425,7 +429,7 @@ public final class Queries {
     }
 
     // notify that there may be more runs to verify
-    UnverifiedRunsWebSocket.notifyToUpdate();
+    PerformanceRunsEndpoint.notifyToUpdate(connection);
   }
 
   /**
@@ -436,7 +440,7 @@ public final class Queries {
    *          description of the challenge
    * @param connection database connection
    * @param datasource used to create background database connections
-   * @param request HTTP request that contains the expected values
+   * @param teamScore the score data
    * @return the number of rows updated, should be 0 or 1
    * @throws SQLException on a database error.
    * @throws ParseException if the XML document is invalid.
@@ -446,7 +450,7 @@ public final class Queries {
   public static int updatePerformanceScore(final ChallengeDescription description,
                                            final Connection connection,
                                            final DataSource datasource,
-                                           final HttpServletRequest request)
+                                           final TeamScore teamScore)
       throws SQLException, ParseException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
     final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
@@ -455,24 +459,15 @@ public final class Queries {
     final PerformanceScoreCategory performanceElement = description.getPerformance();
     final List<TiebreakerTest> tiebreakerElement = performanceElement.getTiebreaker();
 
-    final String teamNumberStr = request.getParameter("TeamNumber");
-    if (null == teamNumberStr) {
-      throw new FLLRuntimeException("Missing parameter: TeamNumber");
-    }
-    final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumberStr).intValue();
+    final TeamScore prevTeamScore = new DatabaseTeamScore(currentTournament, teamScore.getTeamNumber(),
+                                                          teamScore.getRunNumber(), connection);
+    final boolean prevNoShow = prevTeamScore.isNoShow();
+    final double prevScore = performanceElement.evaluate(prevTeamScore);
+    final boolean prevVerified = prevTeamScore.isVerified();
 
-    final String runNumberStr = request.getParameter("RunNumber");
-    if (null == runNumberStr) {
-      throw new FLLRuntimeException("Missing parameter: RunNumber");
-    }
-    final int runNumber = Utilities.getIntegerNumberFormat().parse(runNumberStr).intValue();
+    final int teamNumber = teamScore.getTeamNumber();
+    final int runNumber = teamScore.getRunNumber();
 
-    final String noShow = request.getParameter("NoShow");
-    if (null == noShow) {
-      throw new FLLRuntimeException("Missing parameter: NoShow");
-    }
-
-    final TeamScore teamScore = new HttpTeamScore(teamNumber, runNumber, request);
     final double score = performanceElement.evaluate(teamScore);
 
     final StringBuffer sql = new StringBuffer();
@@ -480,11 +475,12 @@ public final class Queries {
     sql.append("UPDATE Performance SET ");
 
     sql.append("NoShow = "
-        + noShow);
+        + teamScore.isNoShow());
 
     sql.append(", TIMESTAMP = CURRENT_TIMESTAMP");
 
-    if (teamScore.isNoShow()) {
+    if (teamScore.isNoShow()
+        || teamScore.isBye()) {
       sql.append(", ComputedTotal = NULL");
     } else {
       sql.append(", ComputedTotal = "
@@ -496,12 +492,8 @@ public final class Queries {
       if (!element.isComputed()) {
         final String name = element.getName();
 
-        final String value = request.getParameter(name);
-        if (null == value) {
-          throw new FLLRuntimeException("Missing parameter: "
-              + name);
-        }
         if (element.isEnumerated()) {
+          final String value = teamScore.getEnumRawScore(name);
           // enumerated
           sql.append(", "
               + name
@@ -509,6 +501,7 @@ public final class Queries {
               + value
               + "'");
         } else {
+          final double value = teamScore.getRawScore(name);
           sql.append(", "
               + name
               + " = "
@@ -518,13 +511,13 @@ public final class Queries {
     } // foreach goal
 
     sql.append(", Verified = "
-        + request.getParameter("Verified"));
+        + teamScore.isVerified());
 
     sql.append(" WHERE TeamNumber = "
         + teamNumber);
 
     sql.append(" AND RunNumber = "
-        + runNumberStr);
+        + teamScore.getRunNumber());
     sql.append(" AND Tournament = "
         + currentTournament);
 
@@ -535,11 +528,23 @@ public final class Queries {
 
     if (numRowsUpdated > 0) {
       if (teamScore.isVerified()) {
-        final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, tournament,
-                                                                                 teamScore.getTeamNumber());
-        final ScoreType performanceScoreType = description.getPerformance().getScoreType();
-        final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-        ScoreboardUpdates.newScore(datasource, team, score, formattedScore, teamScore);
+        if (prevVerified
+            && ((!prevNoShow
+                && teamScore.isNoShow())
+                || (prevScore > score))) {
+          // The top scores portion of the scoreboard depends on scores never going down,
+          // if that happens the scoreboard needs a reload so that the top scores can be
+          // properly computed.
+          // TODO: if this happens alot and slows things down we can look into having a
+          // reload message for a single team
+          ScoreboardUpdates.reload();
+        } else {
+          final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, tournament,
+                                                                                   teamScore.getTeamNumber());
+          final ScoreType performanceScoreType = description.getPerformance().getScoreType();
+          final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
+          ScoreboardUpdates.newScore(datasource, team, score, formattedScore, teamScore);
+        }
       }
 
       // Check if we need to update the PlayoffData table
@@ -560,7 +565,7 @@ public final class Queries {
     }
 
     // notify that there may be more runs to verify
-    UnverifiedRunsWebSocket.notifyToUpdate();
+    PerformanceRunsEndpoint.notifyToUpdate(connection);
 
     return numRowsUpdated;
   }
@@ -685,7 +690,7 @@ public final class Queries {
     }
 
     // notify that the list of unverified runs may have changed
-    UnverifiedRunsWebSocket.notifyToUpdate();
+    PerformanceRunsEndpoint.notifyToUpdate(connection);
     ScoreboardUpdates.deleteScore();
   }
 

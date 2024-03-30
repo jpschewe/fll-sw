@@ -47,7 +47,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -55,6 +54,12 @@ import net.mtu.eggplant.xml.XMLUtils;
  */
 @WebServlet("/admin/database.flldb")
 public final class DumpDB extends BaseFLLServlet {
+
+  /**
+   * Used as as replacement for null in the CSV files. See
+   * {@link NullResultSetHelperService}.
+   */
+  public static final String FLL_SW_NULL_STRING = "FLL-SW-NULL";
 
   /**
    * Prefix used in the zip files for bugs. Has trailing Unix slash, which is also
@@ -128,6 +133,13 @@ public final class DumpDB extends BaseFLLServlet {
   private static final String AUTOMATIC_BACKUP_DIRECTORY_NAME = "database-backups";
 
   /**
+   * @return path to the database backups directory
+   */
+  public static Path getDatabaseBackupPath() {
+    return Paths.get(AUTOMATIC_BACKUP_DIRECTORY_NAME);
+  }
+
+  /**
    * Create an automatic backup of the specified database. Create the file in the
    * directory "database-backups" relative to the current directory. The file is
    * named based on the current date and time and the specified label.
@@ -150,7 +162,7 @@ public final class DumpDB extends BaseFLLServlet {
                    e);
     }
 
-    final Path backupDirectory = Paths.get(AUTOMATIC_BACKUP_DIRECTORY_NAME);
+    final Path backupDirectory = getDatabaseBackupPath();
 
     try {
       Files.createDirectories(backupDirectory);
@@ -202,6 +214,12 @@ public final class DumpDB extends BaseFLLServlet {
       // output the challenge descriptor
       output.putNextEntry(new ZipEntry("challenge.xml"));
       XMLUtils.writeXML(description.toXml(), outputWriter, Utilities.DEFAULT_CHARSET.name());
+      outputWriter.flush();
+      output.closeEntry();
+
+      output.putNextEntry(new ZipEntry("dump_version.txt"));
+      outputWriter.write(String.format("%d%n", ImportDB.DUMP_VERSION));
+      outputWriter.flush();
       output.closeEntry();
 
       // can't use Queries.getTablesInDB because it lowercases names and we need
@@ -276,10 +294,10 @@ public final class DumpDB extends BaseFLLServlet {
                                         final OutputStreamWriter outputWriter)
       throws SQLException, IOException {
     boolean retval = false;
-    ResultSet rs = null;
-    try {
-      final CSVWriter csvwriter = new CSVWriter(outputWriter);
-      rs = metadata.getColumns(null, null, tableName, "%");
+    // can't close the CSVwriter because that will close outputWriter, which is
+    // actually the zip output stream
+    final CSVWriter csvwriter = new CSVWriter(outputWriter);
+    try (ResultSet rs = metadata.getColumns(null, null, tableName, "%")) {
       while (rs.next()) {
         retval = true;
 
@@ -302,10 +320,8 @@ public final class DumpDB extends BaseFLLServlet {
           }
         }
       }
-      csvwriter.flush();
-    } finally {
-      SQLFunctions.close(rs);
     }
+    csvwriter.flush();
     return retval;
   }
 
@@ -316,12 +332,7 @@ public final class DumpDB extends BaseFLLServlet {
                                 final OutputStreamWriter outputWriter,
                                 final String tableName)
       throws IOException, SQLException {
-    ResultSet rs = null;
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
-      CSVWriter csvwriter;
-
+    try (Statement stmt = connection.createStatement()) {
       // write table type information
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Dumping type information for "
@@ -340,18 +351,17 @@ public final class DumpDB extends BaseFLLServlet {
 
       output.putNextEntry(new ZipEntry(tableName
           + ".csv"));
-      csvwriter = new CSVWriter(outputWriter);
-      rs = stmt.executeQuery("SELECT * FROM "
-          + tableName);
-      csvwriter.writeAll(rs, true);
-      csvwriter.flush();
-      output.closeEntry();
-      SQLFunctions.close(rs);
-      rs = null;
 
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
+      // can't close the CSVwriter because that will close outputWriter, which is
+      // actually the zip output stream
+      final CSVWriter csvwriter = new CSVWriter(outputWriter);
+      csvwriter.setResultService(new NullResultSetHelperService(FLL_SW_NULL_STRING));
+      try (ResultSet rs = stmt.executeQuery("SELECT * FROM "
+          + tableName)) {
+        csvwriter.writeAll(rs, true);
+        csvwriter.flush();
+        output.closeEntry();
+      }
     }
   }
 

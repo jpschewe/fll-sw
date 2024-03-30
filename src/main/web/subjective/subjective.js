@@ -13,7 +13,7 @@ const subjective_module = {}
         throw new Error("fllStorage needs to be loaded!");
     }
 
-    const STORAGE_PREFIX = "fll.subjective.";
+    const STORAGE_PREFIX = "fll.subjective";
 
     // //////////////////////// PRIVATE INTERFACE ////////////////////////
 
@@ -754,20 +754,16 @@ const subjective_module = {}
          * @return the promise from the AJAX function
          */
         subjective_module.uploadScores = function(doneCallback, failCallback) {
-            const dataToUpload = JSON.stringify(_allScores);
-            return fetch("../api/SubjectiveScores", {
-                method: "POST",
-                headers: { 'Content-Type': 'application/json' },
-                body: dataToUpload
-            }).then(checkJsonResponse).then(function(result) {
-                if (result.success) {
-                    doneCallback(result);
-                } else {
+            return uploadJsonData("../api/SubjectiveScores", "POST", _allScores)
+                .then(checkJsonResponse).then(function(result) {
+                    if (result.success) {
+                        doneCallback(result);
+                    } else {
+                        failCallback(result);
+                    }
+                }).catch(function(result) {
                     failCallback(result);
-                }
-            }).catch(function(result) {
-                failCallback(result);
-            });
+                });
         },
 
         /**
@@ -781,21 +777,17 @@ const subjective_module = {}
          * @return the promise from the AJAX function
          */
         subjective_module.uploadJudges = function(doneCallback, failCallback) {
-            const dataToUpload = JSON.stringify(_judges);
-            return fetch("../api/Judges", {
-                method: "POST",
-                headers: { 'Content-Type': 'application/json' },
-                body: dataToUpload
-            }).then(checkJsonResponse).then(function(result) {
-                subjective_module.log("uploading judges success");
-                if (result.success) {
-                    doneCallback(result);
-                } else {
+            return uploadJsonData("../api/Judges", "POST", _judges)
+                .then(checkJsonResponse).then(function(result) {
+                    subjective_module.log("uploading judges success");
+                    if (result.success) {
+                        doneCallback(result);
+                    } else {
+                        failCallback(result);
+                    }
+                }).catch(function(result) {
                     failCallback(result);
-                }
-            }).catch(function(result) {
-                failCallback(result);
-            });
+                });
         },
 
         /**

@@ -28,8 +28,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -68,6 +70,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -87,6 +90,8 @@ import fll.util.FLLRuntimeException;
 import fll.util.FormatterUtils;
 import fll.util.GuiExceptionHandler;
 import fll.web.UserRole;
+import fll.web.WebUtils;
+import fll.web.Welcome;
 import fll.web.setup.CreateDB.UserAccount;
 import fll.xml.ChallengeDescription;
 import fll.xml.ui.ChallengeDescriptionEditor;
@@ -163,7 +168,7 @@ public class Launcher extends JFrame {
   private static Options buildOptions() {
     final Options options = new Options();
     options.addOption(null, OPT_START_WEB, false, "Immediately start the webserver");
-    options.addOption(null, OPT_PORT, true, "The port to use for the web server. Deafult is "
+    options.addOption(null, OPT_PORT, true, "The port to use for the web server. Default is "
         + DEFAULT_WEB_PORT);
     options.addOption(null, OPT_HEADLESS, false, "Run without the GUI and immediately start the webserver");
     options.addOption(null, OPT_CREATE_ADMIN, false, "Create an admin user");
@@ -252,6 +257,8 @@ public class Launcher extends JFrame {
       System.exit(1);
     }
 
+    setupDataDirectories();
+
     if (headless) {
       runHeadless(port);
     } else {
@@ -276,6 +283,46 @@ public class Launcher extends JFrame {
         System.exit(1);
       }
     }
+  }
+
+  /**
+   * Setup data directories that the user can put files in.
+   */
+  public static void setupDataDirectories() {
+    // make sure the database backup directory exists
+    try {
+      Files.createDirectories(DumpDB.getDatabaseBackupPath());
+    } catch (final FileAlreadyExistsException e) {
+      LOGGER.error("Unable to create automatic database backup because the output directory %s exists and is not a directory");
+    } catch (final IOException e) {
+      LOGGER.error("Unable to create database backup directories, web server will likely fail to start", e);
+    }
+
+    // make sure the user images directory exists
+    try {
+      Files.createDirectories(UserImages.getImagesPath());
+    } catch (final FileAlreadyExistsException e) {
+      LOGGER.error("Unable to create user imgaes directory because the directory %s exists and is not a directory");
+    } catch (final IOException e) {
+      LOGGER.error("Unable to user images directory", e);
+    }
+
+    // make sure the default images are there
+    final Path partnerLogo = UserImages.getImagesPath().resolve(Welcome.PARTNER_LOGO_FILENAME);
+    if (!Files.exists(partnerLogo)) {
+      UserImages.useDefaultPartnerLogo();
+    }
+
+    final Path fllLogo = UserImages.getImagesPath().resolve(Welcome.FLL_LOGO_FILENAME);
+    if (!Files.exists(fllLogo)) {
+      UserImages.useDefaultFllLogo();
+    }
+
+    final Path fllSubjectiveLogo = UserImages.getImagesPath().resolve(UserImages.FLL_SUBJECTIVE_LOGO_FILENAME);
+    if (!Files.exists(fllSubjectiveLogo)) {
+      UserImages.useDefaultFllSubjectiveLogo();
+    }
+
   }
 
   private static final Pattern USERNAME_PATTERN = Pattern.compile("^\\w+$");
@@ -646,13 +693,13 @@ public class Launcher extends JFrame {
         try {
           Desktop.getDesktop().open(dir.toFile());
         } catch (final IOException e) {
-          final String message = "Error opening sponsor_logos directory: "
+          final String message = "Error opening sponsor logos directory: "
               + e.getMessage();
           LOGGER.error(message, e);
           JOptionPane.showMessageDialog(this, message, "ERROR", JOptionPane.ERROR_MESSAGE);
         }
       } else {
-        JOptionPane.showMessageDialog(this, "Cannot find sponsor_logos directory.", "ERROR", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Cannot find sponsor logos directory.", "ERROR", JOptionPane.ERROR_MESSAGE);
       }
     });
 
@@ -945,13 +992,13 @@ public class Launcher extends JFrame {
   /**
    * @return the directory or null if not found
    */
-  private @Nullable Path getSponsorLogosDirectory(@UnknownInitialization(Launcher.class) Launcher this) {
+  private static @Nullable Path getSponsorLogosDirectory() {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
     if (null == webroot) {
       return null;
     } else {
-      final Path check = webroot.resolve("sponsor_logos");
+      final Path check = webroot.resolve(WebUtils.SPONSOR_LOGOS_PATH);
       if (Files.exists(check)
           && Files.isDirectory(check)) {
         return check.normalize();
@@ -964,13 +1011,13 @@ public class Launcher extends JFrame {
   /**
    * @return the directory or null if not found
    */
-  private @Nullable Path getSlideshowDirectory(@UnknownInitialization(Launcher.class) Launcher this) {
+  private static @Nullable Path getSlideshowDirectory() {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
     if (null == webroot) {
       return null;
     } else {
-      final Path check = webroot.resolve("slideshow");
+      final Path check = webroot.resolve(WebUtils.SLIDESHOW_PATH);
       if (Files.exists(check)
           && Files.isDirectory(check)) {
         return check.normalize();
@@ -1236,6 +1283,45 @@ public class Launcher extends JFrame {
     } catch (final IOException e) {
       throw new FLLRuntimeException("Error creating temporary file", e);
     }
+
+    final Path oldBaseDir = Paths.get(oldInstallationDirectory);
+    final Path oldWebDir = oldBaseDir.resolve("web");
+
+    // copy sponsor logos
+    final Path oldSponsorLogos = oldWebDir.resolve(WebUtils.SPONSOR_LOGOS_PATH);
+    final Path newSponsorLogos = getSponsorLogosDirectory();
+    if (null == newSponsorLogos) {
+      throw new FLLRuntimeException("Unable to find current sponsor logos directory");
+    }
+    try {
+      FileUtils.copyDirectory(oldSponsorLogos.toFile(), newSponsorLogos.toFile());
+    } catch (final IOException e) {
+      throw new FLLRuntimeException("Error copying sponsor logos", e);
+    }
+
+    // copy slideshow
+    final Path oldSlideshow = oldWebDir.resolve(WebUtils.SLIDESHOW_PATH);
+    final Path newSlideshow = getSlideshowDirectory();
+    if (null == newSlideshow) {
+      throw new FLLRuntimeException("Unable to find current slideshow directory");
+    }
+    try {
+      FileUtils.copyDirectory(oldSlideshow.toFile(), newSlideshow.toFile());
+    } catch (final IOException e) {
+      throw new FLLRuntimeException("Error copying slideshow", e);
+    }
+
+    // copy user images
+    final Path oldUserImages = oldBaseDir.resolve(UserImages.getImagesPath());
+    if (Files.exists(oldUserImages)) {
+      final Path newUserImages = UserImages.getImagesPath();
+      try {
+        FileUtils.copyDirectory(oldUserImages.toFile(), newUserImages.toFile());
+      } catch (final IOException e) {
+        throw new FLLRuntimeException("Error copying user images", e);
+      }
+    }
+
   }
 
 }

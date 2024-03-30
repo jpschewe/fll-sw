@@ -6,7 +6,6 @@
 
 package fll.web.scoreboard;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -29,8 +28,10 @@ import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
-import fll.web.DisplayInfo;
+import fll.web.WebUtils;
 import fll.web.display.DisplayHandler;
+import fll.web.display.DisplayInfo;
+import fll.web.display.UnknownDisplayException;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.jsp.PageContext;
@@ -64,9 +65,14 @@ public final class Dynamic {
       final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection,
                                                                                       tournament.getTournamentID());
       final String displayUuid = request.getParameter(DisplayHandler.DISPLAY_UUID_PARAMETER_NAME);
-      final DisplayInfo displayInfo;
+      DisplayInfo displayInfo;
       if (!StringUtils.isBlank(displayUuid)) {
-        displayInfo = DisplayHandler.resolveDisplay(displayUuid);
+        try {
+          displayInfo = DisplayHandler.resolveDisplay(displayUuid);
+        } catch (final UnknownDisplayException e) {
+          LOGGER.warn("Unable to find display {}, using default display", displayUuid);
+          displayInfo = DisplayHandler.getDefaultDisplay();
+        }
       } else {
         displayInfo = DisplayHandler.getDefaultDisplay();
       }
@@ -136,7 +142,7 @@ public final class Dynamic {
       final double scrollRate = GlobalParameters.getAllTeamScrollRate(connection);
       page.setAttribute("scrollRate", scrollRate);
 
-      final List<String> sponsorLogos = getSponsorLogos(application);
+      final List<String> sponsorLogos = WebUtils.getSponsorLogos(application);
       page.setAttribute("sponsorLogos", sponsorLogos);
 
       page.setAttribute("teamsBetweenLogos", Integer.valueOf(TEAMS_BETWEEN_LOGOS));
@@ -201,19 +207,6 @@ public final class Dynamic {
         throw new FLLInternalException("Internal error, cannot choose color");
       }
     }
-  }
-
-  /**
-   * Get the URsponsor logo filenames relative to "/sponsor_logos".
-   *
-   * @return sorted sponsor logos list
-   */
-  private static List<String> getSponsorLogos(final ServletContext application) {
-    final String imagePath = application.getRealPath("/sponsor_logos");
-
-    final List<String> logoFiles = Utilities.getGraphicFiles(new File(imagePath));
-
-    return logoFiles;
   }
 
 }

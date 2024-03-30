@@ -9,7 +9,6 @@ package fll.web.display;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import fll.web.DisplayInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.jsp.PageContext;
 
@@ -17,6 +16,8 @@ import jakarta.servlet.jsp.PageContext;
  * Helper for display/index.jsp.
  */
 public final class DisplayIndex {
+
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private DisplayIndex() {
   }
@@ -29,11 +30,16 @@ public final class DisplayIndex {
     page.setAttribute("DISPLAY_URL_MESSAGE_TYPE", Message.MessageType.DISPLAY_URL.toString());
     page.setAttribute("DISPLAY_UUID_PARAMETER_NAME", DisplayHandler.DISPLAY_UUID_PARAMETER_NAME);
 
-    final String name;
+    String name;
     final @Nullable String uuidParam = request.getParameter("display_uuid");
     if (!StringUtils.isBlank(uuidParam)) {
-      final DisplayInfo info = DisplayHandler.getDisplay(uuidParam);
-      name = info.getName();
+      try {
+        final DisplayInfo info = DisplayHandler.getDisplay(uuidParam);
+        name = info.getName();
+      } catch (final UnknownDisplayException e) {
+        LOGGER.warn("Display {} is unknown, resetting to new display", uuidParam);
+        name = "";
+      }
     } else {
       name = "";
     }

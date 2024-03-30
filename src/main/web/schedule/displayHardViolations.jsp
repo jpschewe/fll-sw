@@ -12,10 +12,7 @@
 <body>
     <h1>Violations (Upload Schedule)</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <p>There are some errors with this schedule, please correct them
         and try again.</p>
 

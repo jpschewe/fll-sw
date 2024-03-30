@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -31,12 +32,16 @@ import fll.db.AwardsScript;
 import fll.db.AwardsScript.Layer;
 import fll.db.CategoriesIgnored;
 import fll.db.GenerateDB;
+import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UserRole;
 import fll.web.WebUtils;
+import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import fll.xml.PerformanceScoreCategory;
@@ -54,6 +59,8 @@ import jakarta.servlet.jsp.PageContext;
  */
 @WebServlet("/report/awards/EditAwardsScript")
 public class EditAwardsScript extends BaseFLLServlet {
+
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * @param request read the parameters passed in
@@ -81,14 +88,16 @@ public class EditAwardsScript extends BaseFLLServlet {
         tournamentLevel = TournamentLevel.getById(connection, id);
         tournament = Tournament.findTournamentByID(connection, GenerateDB.INTERNAL_TOURNAMENT_ID);
         page.setAttribute("descriptionText", String.format("tournament level %s", tournamentLevel.getName()));
-        page.setAttribute("tournamentLevel", tournamentLevel);
       } else if (null != tournamentId) {
         final int id = Integer.parseInt(tournamentId);
         tournament = Tournament.findTournamentByID(connection, id);
         tournamentLevel = tournament.getLevel();
         page.setAttribute("descriptionText",
                           String.format("tournament %s - %s", tournament.getName(), tournament.getDescription()));
-        page.setAttribute("tournament", tournament);
+
+        final List<String> awardGroups = AwardsReportSortedGroupsServlet.getAwardGroupsSorted(connection,
+                                                                                              tournament.getTournamentID());
+        page.setAttribute("awardGroups", awardGroups);
       } else {
         page.setAttribute("descriptionText", "season");
         tournament = Tournament.findTournamentByID(connection, GenerateDB.INTERNAL_TOURNAMENT_ID);
@@ -97,6 +106,7 @@ public class EditAwardsScript extends BaseFLLServlet {
 
       final AwardsScript.Layer layer = determineAwardsScriptLayer(tournamentLevel, tournament);
 
+      page.setAttribute("INTERNAL_TOURNAMENT_ID", GenerateDB.INTERNAL_TOURNAMENT_ID);
       page.setAttribute("tournamentLevel", tournamentLevel);
       page.setAttribute("tournament", tournament);
 
@@ -394,6 +404,10 @@ public class EditAwardsScript extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+      return;
+    }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
@@ -430,6 +444,7 @@ public class EditAwardsScript extends BaseFLLServlet {
         break;
       case TOURNAMENT:
         layerText = String.format("tournament %s", tournament.getName());
+        storeAwardGroupOrder(request, connection, tournament);
         break;
       case TOURNAMENT_LEVEL:
         layerText = String.format("tournament level %s", tournamentLevel.getName());
@@ -447,6 +462,42 @@ public class EditAwardsScript extends BaseFLLServlet {
       throw new FLLInternalException("Error storing values for award script", e);
     }
 
+  }
+
+  private void storeAwardGroupOrder(final HttpServletRequest request,
+                                    final Connection connection,
+                                    final Tournament tournament)
+      throws SQLException {
+    final Map<String, Integer> awardGroupOrderMap = new HashMap<>();
+    final List<String> awardGroups = Queries.getAwardGroups(connection, tournament.getTournamentID());
+    for (final String awardGroup : awardGroups) {
+      final String paramName = "awardGroupOrder_"
+          + awardGroup;
+      final @Nullable String paramValue = request.getParameter(paramName);
+      if (null != paramValue) {
+        try {
+          final Integer order = Integer.valueOf(paramValue);
+          awardGroupOrderMap.put(awardGroup, order);
+        } catch (final NumberFormatException e) {
+          LOGGER.warn("Problem parsing award group order for '{}': {}. Skipping.", awardGroup, paramValue);
+        }
+      }
+    }
+
+    // sort awardGroups by the values in the map
+    awardGroups.sort((String ag1,
+                      String ag2) -> {
+      final Integer ag1Value = awardGroupOrderMap.getOrDefault(ag1, Integer.MAX_VALUE);
+      final Integer ag2Value = awardGroupOrderMap.getOrDefault(ag2, Integer.MAX_VALUE);
+      final int valueCompare = ag1Value.compareTo(ag2Value);
+      if (0 == valueCompare) {
+        return ag1.compareTo(ag2);
+      } else {
+        return valueCompare;
+      }
+    });
+
+    AwardsReportSortedGroupsServlet.setAwardGroupsSort(connection, tournament.getTournamentID(), awardGroups);
   }
 
   private void storeSectionText(final HttpServletRequest request,

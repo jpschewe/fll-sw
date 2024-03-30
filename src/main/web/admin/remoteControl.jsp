@@ -1,4 +1,4 @@
-<%@page import="fll.web.DisplayInfo"%>
+<%@page import="fll.web.display.DisplayInfo"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <fll-sw:required-roles roles="ADMIN" allowSetup="false" />
@@ -51,10 +51,7 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
 
 
     <%-- NOTE: The values of the radio buttons need to match up with the strings in DisplayInfo --%>
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <form name='remote' action='RemoteControlPost' method='post'>
 
         <table border='1'>

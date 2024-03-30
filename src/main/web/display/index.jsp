@@ -2,7 +2,7 @@
 
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.web.DisplayInfo"%>
+<%@ page import="fll.web.display.DisplayInfo"%>
 
 <%
 fll.web.display.DisplayIndex.populateContext(request, pageContext);

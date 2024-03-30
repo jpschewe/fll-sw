@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<fll copyright="" revision="08" revisionComment="" schemaVersion="3" title="2023 Minnesota FIRST LEGO League - MASTERPIECE" winner="HIGH">
+<fll copyright="" revision="10" revisionComment="MN Programming is overall" schemaVersion="3" title="2023 Minnesota FIRST LEGO League - MASTERPIECE" winner="HIGH">
   <Performance minimumScore="0.00" weight="1.00">
     <goalGroup title="M00">
       <description>EQUIPMENT INSPECTION BONUS</description>
@@ -22,10 +22,10 @@
     </goalGroup>
     <goalGroup title="M02B">
       <description>Theater Scene Change Other Team</description>
-      <goal initialValue="3.00" multiplier="0.00" name="m02_b_other_team_scene_change" required="false" scoreType="INTEGER" title="OTHER Team Theater RED Flag Down">
-        <value score="3.00" title="Other Team Flag NOT Down" value="zeroother"/>
-        <value score="0.00" title="Other Team Blue" value="blueother"/>
-        <value score="2.00" title="Other Team Pink" value="pinkother"/>
+      <goal initialValue="0.00" multiplier="0.00" name="m02_b_other_team_scene_change" required="false" scoreType="INTEGER" title="OTHER Team Theater RED Flag Down">
+        <value score="0.00" title="Other Team Flag NOT Down" value="zeroother"/>
+        <value score="2.00" title="Other Team Blue" value="blueother"/>
+        <value score="3.00" title="Other Team Pink" value="pinkother"/>
         <value score="1.00" title="Other Team Orange" value="orangeother"/>
       </goal>
       <computedGoal name="computer_other_theater_color" title="Compute Other Team Theater Color">
@@ -866,7 +866,7 @@
   <nonNumericCategory perAwardGroup="false" title="Engineering Excellence">
     <description>This award celebrates a team with an efficiently designed robot, an innovative project solution that effectively addresses the season challenge, and Core Values evident in all they do.</description>
   </nonNumericCategory>
-  <nonNumericCategory perAwardGroup="true" title="MN Programming Award">
+  <nonNumericCategory perAwardGroup="false" title="MN Programming Award">
     <description>The Minnesota Programming Award is presented to the team best demonstrating an in-depth understanding of sound programming principles, as observed during the Robot Design judging.</description>
   </nonNumericCategory>
   <nonNumericCategory perAwardGroup="false" title="Breakthrough Award">

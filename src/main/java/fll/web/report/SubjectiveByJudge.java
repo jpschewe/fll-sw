@@ -34,7 +34,6 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
-import fll.scheduler.ScheduleWriter;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
@@ -71,7 +70,7 @@ public class SubjectiveByJudge extends BaseFLLServlet {
 
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE), false)) {
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE, UserRole.REPORT_GENERATOR), false)) {
       return;
     }
 
@@ -306,17 +305,17 @@ public class SubjectiveByJudge extends BaseFLLServlet {
 
     headerRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                        String.format("Team #")),
-                                              ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                              FOPUtils.STANDARD_BORDER_WIDTH));
     headerRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                        String.format("Team Name")),
-                                              ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                              FOPUtils.STANDARD_BORDER_WIDTH));
     judgesPerCategory.forEach((category,
                                judges) -> {
       judges.forEach(judge -> {
         final String header = String.format("%s - %s", category.getTitle(), judge);
         headerRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                            header),
-                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                                  FOPUtils.STANDARD_BORDER_WIDTH));
       });
     });
 
@@ -336,10 +335,10 @@ public class SubjectiveByJudge extends BaseFLLServlet {
 
       teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                        String.valueOf(team.getTeamNumber())),
-                                              ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                              FOPUtils.STANDARD_BORDER_WIDTH));
       teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                        team.getTeamName()),
-                                              ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                              FOPUtils.STANDARD_BORDER_WIDTH));
 
       for (Map.Entry<SubjectiveScoreCategory, List<String>> e : judgesPerCategory.entrySet()) {
         final SubjectiveScoreCategory category = e.getKey();
@@ -357,7 +356,7 @@ public class SubjectiveByJudge extends BaseFLLServlet {
             text = String.valueOf(Utilities.NON_BREAKING_SPACE);
           }
           teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, text),
-                                                  ScheduleWriter.STANDARD_BORDER_WIDTH));
+                                                  FOPUtils.STANDARD_BORDER_WIDTH));
         } // foreach judge
       } // foreach category
     } // foreach team

@@ -15,13 +15,13 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import fll.util.FLLRuntimeException;
-import fll.web.DisplayInfo;
+import fll.util.FLLInternalException;
 import jakarta.websocket.Session;
 
 /**
@@ -48,7 +48,7 @@ public final class DisplayHandler {
   private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
 
   static {
-    final DisplayInfo defaultDisplay = new DisplayInfo(DEFAULT_DISPLAY_UUID, DisplayInfo.DEFAULT_DISPLAY_NAME);
+    final DisplayInfo defaultDisplay = new DisplayInfo(DEFAULT_DISPLAY_UUID, DisplayInfo.DEFAULT_DISPLAY_NAME, true);
     defaultDisplay.setRemotePage(DisplayInfo.WELCOME_REMOTE_PAGE);
     DISPLAYS.put(DEFAULT_DISPLAY_UUID, new DisplayData(defaultDisplay, new DisplaySocket()));
   }
@@ -62,14 +62,15 @@ public final class DisplayHandler {
    * 
    * @param uuid from {@link #registerDisplay(String, String, Session)}
    * @return the display information
-   * @throws FLLRuntimeException if a display with the specified uuid isn't found
+   * @throws UnknownDisplayException if a display with the specified uuid isn't
+   *           found
    */
-  public static DisplayInfo getDisplay(final String uuid) {
+  public static DisplayInfo getDisplay(final String uuid) throws UnknownDisplayException {
     synchronized (LOCK) {
       if (DISPLAYS.containsKey(uuid)) {
         return DISPLAYS.get(uuid).getInfo();
       } else {
-        throw new FLLRuntimeException(String.format("Display with the ID '%s' is not known", uuid));
+        throw new UnknownDisplayException(uuid);
       }
     }
   }
@@ -83,9 +84,10 @@ public final class DisplayHandler {
    * @return the display information
    * @see DisplayHandler#getDisplay(String)
    * @see #getDefaultDisplay()
-   * @throws FLLRuntimeException if a display with the specified uuid isn't found
+   * @throws UnknownDisplayException if a display with the specified uuid isn't
+   *           found
    */
-  public static DisplayInfo resolveDisplay(final @Nullable String uuid) {
+  public static DisplayInfo resolveDisplay(final @Nullable String uuid) throws UnknownDisplayException {
     if (!StringUtils.isBlank(uuid)) {
       final DisplayInfo di = DisplayHandler.getDisplay(uuid);
       if (di.isFollowDefault()) {
@@ -103,18 +105,38 @@ public final class DisplayHandler {
    * @return the default display
    */
   public static DisplayInfo getDefaultDisplay() {
-    return getDisplay(DEFAULT_DISPLAY_UUID);
+    try {
+      return getDisplay(DEFAULT_DISPLAY_UUID);
+    } catch (final UnknownDisplayException e) {
+      throw new FLLInternalException("Unable to find default display");
+    }
   }
 
   /**
-   * @return all {@link DisplayInfo} objects sorted with default first.
+   * @return all {@link DisplayInfo} objects that use the remote control sorted
+   *         with default first.
    *         Unmodifiable.
+   * @see DisplayInfo#isUseRemoteControl()
    */
-  public static List<DisplayInfo> getAllDisplays() {
+  public static List<DisplayInfo> getAllRemoteControlDisplays() {
     synchronized (LOCK) {
       return Collections.unmodifiableList(DISPLAYS.values().stream().map(DisplayData::getInfo)
+                                                  .filter(DisplayInfo::isUseRemoteControl)
                                                   .collect(Collectors.toList()));
     }
+  }
+
+  private static final AtomicInteger STANDALONE_SCOREBOARDS = new AtomicInteger(0);
+
+  /**
+   * @param session the websocket
+   * @return the uuid of the display
+   */
+  public static String registerStandaloneScoreboard(final Session session) {
+    final String name = String.format("standalone-%d", STANDALONE_SCOREBOARDS.incrementAndGet());
+    final DisplayData data = internalRegisterDisplay(null, name, session, false);
+    data.getInfo().setRemotePage(DisplayInfo.SCOREBOARD_REMOTE_PAGE);
+    return data.getInfo().getUuid();
   }
 
   /**
@@ -128,6 +150,13 @@ public final class DisplayHandler {
   public static String registerDisplay(final @Nullable String providedUuid,
                                        final String name,
                                        final Session session) {
+    return internalRegisterDisplay(providedUuid, name, session, true).getInfo().getUuid();
+  }
+
+  private static DisplayData internalRegisterDisplay(final @Nullable String providedUuid,
+                                                     final String name,
+                                                     final Session session,
+                                                     final boolean useRemoteControl) {
     final String uuid;
     if (StringUtils.isBlank(providedUuid)) {
       uuid = UUID.randomUUID().toString();
@@ -141,7 +170,7 @@ public final class DisplayHandler {
       data = DISPLAYS.get(uuid);
       if (null == data) {
         final DisplaySocket socket = new DisplaySocket(session);
-        final DisplayInfo info = new DisplayInfo(uuid, name);
+        final DisplayInfo info = new DisplayInfo(uuid, name, useRemoteControl);
         data = new DisplayData(info, socket);
         DISPLAYS.put(uuid, data);
       } else {
@@ -152,7 +181,7 @@ public final class DisplayHandler {
     send(uuid, data.getSocket(), new AssignUuidMessage(uuid));
     sendCurrentUrl(data);
 
-    return uuid;
+    return data;
   }
 
   /**
@@ -171,9 +200,13 @@ public final class DisplayHandler {
   }
 
   private static void sendCurrentUrl(final DisplayData data) {
-    final DisplayInfo resolved = resolveDisplay(data.getInfo().getUuid());
-    final String url = resolved.getUrl();
-    send(data.getInfo().getUuid(), data.getSocket(), new DisplayUrlMessage(url));
+    try {
+      final DisplayInfo resolved = resolveDisplay(data.getInfo().getUuid());
+      final String url = resolved.getUrl();
+      send(data.getInfo().getUuid(), data.getSocket(), new DisplayUrlMessage(url));
+    } catch (final UnknownDisplayException e) {
+      LOGGER.warn("Unable to find display with UUID: {}. Not sending URL.", data.getInfo().getUuid());
+    }
   }
 
   /**

@@ -30,10 +30,7 @@
         Verification)</h1>
 
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <p>Please verify that these judges look correct and then commit
         the changes. If changes need to be made to the judges, press the
         back button.</p>

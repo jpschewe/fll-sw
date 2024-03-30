@@ -1,6 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="REF" allowSetup="false" />
+<fll-sw:required-roles roles="REF,HEAD_JUDGE" allowSetup="false" />
 
 <%
 fll.web.report.RegularMatchPlayVsSchedule.populateContext(application, pageContext);
@@ -32,10 +32,7 @@ table#perf-data th, table#perf-data td {
 <body>
     <h1>Regular Match Play Runs vs. Schedule</h1>
 
-    <div class='status-message'>${message}</div>
-    <%-- clear out the message, so that we don't see it again --%>
-    <c:remove var="message" />
-
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <table id="perf-data" class="center">
 
         <tr>
@@ -48,6 +45,7 @@ table#perf-data th, table#perf-data td {
             <th>Scheduled Time</th>
             <th>Last edited Time</th>
             <th>Score</th>
+            <th>Table</th>
         </tr>
 
         <c:forEach items="${data}" var="entry">
@@ -79,13 +77,14 @@ table#perf-data th, table#perf-data td {
                             <javatime:format value="${entry.lastEdited}"
                                 pattern="h:mm " />
                         </td>
-                        <td>${entry.formattedScore}</td>
                     </c:when>
                     <c:otherwise>
                         <td>&nbsp;</td>
-                        <td>&nbsp;</td>
                     </c:otherwise>
                 </c:choose>
+                
+                <td>${entry.formattedScore}</td>
+                <td>${entry.table}</td>
 
             </tr>
         </c:forEach>
