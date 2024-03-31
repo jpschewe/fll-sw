@@ -28,7 +28,6 @@ plugins {
     id "com.github.spotbugs" version "5.0.13"
     id "de.aaschmid.cpd" version "3.3"
     id "edu.sc.seis.launch4j" version "2.5.4"
-    id "com.gorylenko.gradle-git-properties" version "2.4.1"
     id "com.github.ben-manes.versions" version "0.46.0" // adds dependencyUpdates task
     id "de.undercouch.download" version "5.3.1" // file download
     id "checkstyle"
@@ -617,9 +616,11 @@ tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
 }
 
 
-gitProperties {
-    gitPropertiesResourceDir = file("${buildDir}/resources/main/fll/resources")
+tasks.register("writeVersion", WriteProperties) {
+    outputFile = file("${buildDir}/resources/main/fll/resources/git.properties")
+    property "git.build.version", project.version
 }
+tasks.named("classes") { finalizedBy("writeVersion") }
 
 tasks.register("writeLaunchJar", Jar) {
     destinationDirectory = project.buildDir
