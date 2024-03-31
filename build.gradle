@@ -620,7 +620,7 @@ tasks.register("writeVersion", WriteProperties) {
     outputFile = file("${buildDir}/resources/main/fll/resources/git.properties")
     property "git.build.version", project.version
 }
-tasks.named("classes") { finalizedBy("writeVersion") }
+classes.dependsOn(writeVersion)
 
 tasks.register("writeLaunchJar", Jar) {
     destinationDirectory = project.buildDir
