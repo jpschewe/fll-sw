@@ -614,11 +614,18 @@ tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
     }
   }
 }
-
-
+  
 tasks.register("writeVersion", WriteProperties) {
     outputFile = file("${buildDir}/resources/main/fll/resources/git.properties")
-    property "git.build.version", project.version
+    property("git.build.version", project.version)
+
+    // TODO: read environment variables from CI systems
+    // https://github.com/n0mer/gradle-git-properties/blob/master/src/main/groovy/com/gorylenko/properties/BranchProperty.groovy
+    def gitBranch = providers.exec {
+        commandLine("git", "rev-parse", "--abbrev-ref", "HEAD")
+    }.standardOutput.asText.get().trim()
+    
+    property("git.branch", gitBranch)
 }
 classes.dependsOn(writeVersion)
 
