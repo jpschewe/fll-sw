@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setSelectValue(document.getElementById("practiceTable" + roundNumber), practiceTableHeaders[i]);
     }
 
-    for (let i = 0; i < numSeedingRounds; ++i) {
+    for (let i = 0; i < numPerformanceRuns; ++i) {
         const roundNumber = i + 1;
         setSelectValue(document.getElementById("perf" + roundNumber), perfHeaders[i]);
         setSelectValue(document.getElementById("perfTable" + roundNumber), perfTableHeaders[i]);

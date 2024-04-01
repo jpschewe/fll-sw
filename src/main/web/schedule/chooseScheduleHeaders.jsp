@@ -5,7 +5,7 @@
 <fll-sw:required-roles roles="ADMIN" allowSetup="false" />
 
 <%
-fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext);
+fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pageContext);
 %>
 
 <html>
@@ -27,7 +27,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
   const ORGANIZATION_HEADER = "${ORGANIZATION_HEADER}";
   const AWARD_GROUP_HEADER = "${AWARD_GROUP_HEADER}";
   const JUDGE_GROUP_HEADER = "${JUDGE_GROUP_HEADER}";
-  const numSeedingRounds = parseInt("${numSeedingRounds}");
+  const numPerformanceRuns = parseInt("${uploadScheduleData.numPerformanceRuns}");
   const numPracticeRounds = parseInt("${numPracticeRounds}");
   const perfHeaders = JSON.parse('${perfHeaders}');
   const perfTableHeaders = JSON.parse('${perfTableHeaders}');
@@ -164,7 +164,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, pageContext)
 
             </c:forEach>
 
-            <c:forEach begin="1" end="${numSeedingRounds}"
+            <c:forEach begin="1" end="${uploadScheduleData.numPerformanceRuns}"
                 varStatus="perfLoopStatus">
                 <tr>
                     <td bgcolor='yellow'>Performance

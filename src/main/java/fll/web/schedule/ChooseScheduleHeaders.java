@@ -57,21 +57,23 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
 
   /**
    * Setup page variables used by the JSP.
-   * 
+   *
+   * @param session session attributes
    * @param application application attributes
    * @param pageContext set page variables
    */
   public static void populateContext(final ServletContext application,
+                                     final HttpSession session,
                                      final PageContext pageContext) {
     pageContext.setAttribute("default_duration", SchedParams.DEFAULT_SUBJECTIVE_MINUTES);
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
+    final UploadScheduleData uploadScheduleData = SessionAttributes.getNonNullAttribute(session, UploadScheduleData.KEY,
+                                                                                        UploadScheduleData.class);
+    
     try (Connection connection = datasource.getConnection()) {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
-
-      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
-      pageContext.setAttribute("numSeedingRounds", numSeedingRounds);
 
       final int numPracticeRounds = TournamentParameters.getNumPracticeRounds(connection, tournament.getTournamentID());
       pageContext.setAttribute("numPracticeRounds", numPracticeRounds);
@@ -86,7 +88,7 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
 
       final List<String> perfHeaders = new LinkedList<>();
       final List<String> perfTableHeaders = new LinkedList<>();
-      for (int i = 0; i < numSeedingRounds; ++i) {
+      for (int i = 0; i < uploadScheduleData.getNumPerformanceRuns(); ++i) {
         final int roundNumber = i
             + 1;
         perfHeaders.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, roundNumber));
@@ -137,7 +139,6 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
-      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
       final int numPracticeRounds = TournamentParameters.getNumPracticeRounds(connection, tournament.getTournamentID());
 
       final ChallengeDescription challenge = ApplicationAttributes.getChallengeDescription(application);
@@ -159,9 +160,9 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
         practiceTableColumn[i] = WebUtils.getNonNullRequestParameter(request, String.format("practiceTable%d", round));
       }
 
-      final String[] perfColumn = new String[numSeedingRounds];
-      final String[] perfTableColumn = new String[numSeedingRounds];
-      for (int i = 0; i < numSeedingRounds; ++i) {
+      final String[] perfColumn = new String[uploadScheduleData.getNumPerformanceRuns()];
+      final String[] perfTableColumn = new String[uploadScheduleData.getNumPerformanceRuns()];
+      for (int i = 0; i < uploadScheduleData.getNumPerformanceRuns(); ++i) {
         final int round = i
             + 1;
         perfColumn[i] = WebUtils.getNonNullRequestParameter(request, String.format("perf%d", round));
