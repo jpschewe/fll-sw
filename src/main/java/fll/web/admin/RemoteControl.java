@@ -20,6 +20,7 @@ import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.display.DisplayHandler;
 import fll.web.playoff.Playoff;
+import fll.web.report.awards.AwardsScriptReport;
 import fll.web.report.finalist.FinalistSchedule;
 
 /**
@@ -67,7 +68,7 @@ public final class RemoteControl {
       pageContext.setAttribute("finalistDivisions", finalistDivisions);
 
       pageContext.setAttribute("allAwardGroups",
-                               Queries.getAwardGroups(connection, currentTournament.getTournamentID()));
+                               AwardsScriptReport.getAwardGroupOrder(connection, currentTournament));
 
       pageContext.setAttribute("displayInformation", DisplayHandler.getAllRemoteControlDisplays());
 

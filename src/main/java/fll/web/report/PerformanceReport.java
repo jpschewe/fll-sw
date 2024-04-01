@@ -5,6 +5,8 @@
  */
 package fll.web.report;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import java.io.IOException;
 import java.sql.Array;
 import java.sql.Connection;
@@ -14,14 +16,9 @@ import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
 
@@ -29,8 +26,6 @@ import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
@@ -44,9 +39,16 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.report.awards.AwardsScriptReport;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
 import fll.xml.WinnerType;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -136,7 +138,7 @@ public class PerformanceReport extends BaseFLLServlet {
     final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
     final NumberFormat rawScoreFormat = Utilities.getFormatForScoreType(performanceScoreType);
 
-    final Collection<String> awardGroups = Queries.getAwardGroups(connection);
+    final List<String> awardGroups = AwardsScriptReport.getAwardGroupOrder(connection, tournament);
 
     // 1 - tournament
     // 2 - tournament
