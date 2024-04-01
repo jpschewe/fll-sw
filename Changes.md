@@ -1,3 +1,4 @@
+* #1145 - Allow the web schedule upload to handle performance runs beyond the seeding rounds
 * #1161 - Don't assign tables to BYE runs
 * #1182 - Add CSV for award winners of the tournament
 * #1181 - Allow team schedules to be output from the web
