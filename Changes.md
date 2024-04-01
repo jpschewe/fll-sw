@@ -1,3 +1,4 @@
+* #1146 - Sort award groups on the edit awards page
 * #1145 - Allow the web schedule upload to handle performance runs beyond the seeding rounds
 * #1161 - Don't assign tables to BYE runs
 * #1182 - Add CSV for award winners of the tournament
