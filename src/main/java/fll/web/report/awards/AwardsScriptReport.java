@@ -303,8 +303,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
    * Get the award groups in order, this does not contain groups created for
    * advancing teams.
    */
-  private List<String> getAwardGroupOrder(final Connection connection,
-                                          final Tournament tournament)
+  public static List<String> getAwardGroupOrder(final Connection connection,
+                                                final Tournament tournament)
       throws SQLException {
     final Collection<String> allAwardGroups = Queries.getAwardGroups(connection, tournament.getTournamentID());
     final List<String> sortedAwardGroups = AwardsReportSortedGroupsServlet.getAwardGroupsSorted(connection,
