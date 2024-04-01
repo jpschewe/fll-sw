@@ -275,7 +275,7 @@ public class UploadScheduleData implements Serializable {
   }
 
   /**
-   * @param v {@link #getNumPerformanceRounds}
+   * @param v {@link #getNumPerformanceRuns}
    */
   public void setNumPerformanceRuns(final int v) {
     numPerformanceRuns = v;
