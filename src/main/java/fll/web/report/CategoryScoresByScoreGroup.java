@@ -39,6 +39,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.report.awards.AwardsScriptReport;
 import fll.xml.ChallengeDescription;
 import fll.xml.GoalElement;
 import fll.xml.SubjectiveScoreCategory;
@@ -127,7 +128,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
     final WinnerType winnerCriteria = challengeDescription.getWinner();
 
     final List<SubjectiveScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
-    final Collection<String> eventDivisions = Queries.getAwardGroups(connection);
+    final List<String> eventDivisions = AwardsScriptReport.getAwardGroupOrder(connection, tournament);
     final Collection<String> judgingGroups = Queries.getJudgingStations(connection, tournament.getTournamentID());
 
     final Iterator<SubjectiveScoreCategory> iter = subjectiveCategories.iterator();

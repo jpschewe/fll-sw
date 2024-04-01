@@ -35,6 +35,7 @@ import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import fll.web.report.awards.AwardsScriptReport;
 
 /**
  * Create a new playoff division.
@@ -55,12 +56,13 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
-      final int currentTournamentID = Queries.getCurrentTournament(connection);
+      final Tournament tournament = Tournament.getCurrentTournament(connection);
+      final int currentTournamentID = tournament.getTournamentID();
 
       final List<String> judgingStations = Queries.getJudgingStations(connection, currentTournamentID);
       pageContext.setAttribute("judgingStations", judgingStations);
 
-      final List<String> awardGroups = Queries.getAwardGroups(connection, currentTournamentID);
+      final List<String> awardGroups = AwardsScriptReport.getAwardGroupOrder(connection, tournament);
       pageContext.setAttribute("awardGroups", awardGroups);
 
       pageContext.setAttribute("runningHeadToHead",

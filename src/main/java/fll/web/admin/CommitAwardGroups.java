@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
+import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
@@ -28,6 +29,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.report.awards.AwardsScriptReport;
 
 /**
  * Commit the changes from edit_event_division.jsp.
@@ -51,9 +53,10 @@ public class CommitAwardGroups extends BaseFLLServlet {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-      final int currentTournamentID = Queries.getCurrentTournament(connection);
+      final Tournament tournament = Tournament.getCurrentTournament(connection);
+      final int currentTournamentID = tournament.getTournamentID();
 
-      pageContext.setAttribute("divisions", Queries.getAwardGroups(connection, currentTournamentID));
+      pageContext.setAttribute("divisions", AwardsScriptReport.getAwardGroupOrder(connection, tournament));
 
       final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, currentTournamentID);
       pageContext.setAttribute("teams", teams.values());
