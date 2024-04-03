@@ -1,3 +1,4 @@
+* Highlight place cells in the awards script
 * #1143 - Sort award groups in all reports to match the awards script
 * #1147 - Sort performance report award groups to match the awards script
 * #1146 - Sort award groups on the edit awards page

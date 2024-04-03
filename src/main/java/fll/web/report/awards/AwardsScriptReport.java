@@ -646,9 +646,9 @@ public class AwardsScriptReport extends BaseFLLServlet {
           final boolean tie = teamsInPlace.size() > 1;
           final String placeTitle = String.format("%d%s Place Winner%s", place, suffixForPlace(place), tie ? "s" : "");
 
-          // TODO: make this cell yellow background?
           final Element placeCell = FOPUtils.createTableCell(document, null, placeTitle);
           row.appendChild(placeCell);
+          placeCell.setAttribute("background-color", "yellow");
 
           final Element teamCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
           row.appendChild(teamCell);
@@ -828,9 +828,9 @@ public class AwardsScriptReport extends BaseFLLServlet {
       final boolean tie = winnersInPlace.size() > 1;
       final String placeTitle = String.format("%d%s Place Winner%s", place, suffixForPlace(place), tie ? "s" : "");
 
-      // TODO: make this cell yellow background?
       final Element placeCell = FOPUtils.createTableCell(document, null, placeTitle);
       row.appendChild(placeCell);
+      placeCell.setAttribute("background-color", "yellow");
 
       final Element teamCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
       row.appendChild(teamCell);
@@ -911,9 +911,9 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final Element row = FOPUtils.createTableRow(document);
     tableBody.appendChild(row);
 
-    // TODO: make this cell yellow background?
     final Element placeCell = FOPUtils.createTableCell(document, null, "The finalists are:");
     row.appendChild(placeCell);
+    placeCell.setAttribute("background-color", "yellow");
 
     final Element teamCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
     row.appendChild(teamCell);
