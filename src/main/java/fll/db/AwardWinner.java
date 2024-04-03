@@ -7,13 +7,11 @@
 package fll.db;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Objects;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.type.TypeReference;
 
 /**
  * Represents the winner of an award in an award group. Needs to match the
@@ -21,14 +19,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
  * js/fll-objects.js.
  */
 public class AwardWinner extends OverallAwardWinner implements Serializable {
-
-  /**
-   * Used for JSON deserialization.
-   */
-  public static final class AwardWinnerCollectionTypeInformation extends TypeReference<Collection<AwardWinner>> {
-    /** single instance. */
-    public static final AwardWinnerCollectionTypeInformation INSTANCE = new AwardWinnerCollectionTypeInformation();
-  }
 
   /**
    * @param name see {@link #getName()}

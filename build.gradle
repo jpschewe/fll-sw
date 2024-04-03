@@ -28,7 +28,6 @@ plugins {
     id "com.github.spotbugs" version "5.0.13"
     id "de.aaschmid.cpd" version "3.3"
     id "edu.sc.seis.launch4j" version "2.5.4"
-    id "com.gorylenko.gradle-git-properties" version "2.4.1"
     id "com.github.ben-manes.versions" version "0.46.0" // adds dependencyUpdates task
     id "de.undercouch.download" version "5.3.1" // file download
     id "checkstyle"
@@ -616,10 +615,35 @@ tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
   }
 }
 
+tasks.register("writeVersion", WriteProperties) {
+    outputFile = file("${buildDir}/resources/main/fll/resources/git.properties")
+    property("git.build.version", project.version)
 
-gitProperties {
-    gitPropertiesResourceDir = file("${buildDir}/resources/main/fll/resources")
+    def gitBranchName
+    if(System.getenv("JOB_NAME")) {
+        // Jenkins
+        if(!gitBranchName) {
+            gitBranchName = System.getenv("GIT_LOCAL_BRANCH")
+        }
+        if(!gitBranchName) {
+            gitBranchName = System.getenv("GIT_BRANCH")
+        }
+        if(!gitBranchName) {
+            gitBranchName = System.getenv("BRANCH_NAME")
+        }
+    }
+
+    if(!gitBranchName){
+        // use command if needed
+        def gitVersion = providers.exec {
+            commandLine("git", "rev-parse", "--abbrev-ref", "HEAD")
+        }.standardOutput.asText.get().trim()
+        gitBranchName = gitVersion
+    }
+    
+    property("git.branch", gitBranchName)
 }
+classes.dependsOn(writeVersion)
 
 tasks.register("writeLaunchJar", Jar) {
     destinationDirectory = project.buildDir

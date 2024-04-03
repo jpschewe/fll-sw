@@ -2,6 +2,8 @@
 
 <fll-sw:required-roles roles="ADMIN" allowSetup="false" />
 
+<% fll.web.schedule.ProcessScheduleConstraints.populateContext(application, pageContext);  %>
+
 <html>
 <head>
 <title>Specify schedule constraints (Upload Schedule)</title>
@@ -24,7 +26,7 @@
             <input type="number" name="changeTimeDuration"
                 id="changeTimeDuration"
                 value="${uploadScheduleData.schedParams.changetimeMinutes }"
-                min="0" required>
+                min="0" required />
             minutes
         </div>
 
@@ -33,7 +35,7 @@
             <input name="performanceChangeTimeDuration"
                 id="performanceChangeTimeDuration"
                 value="${uploadScheduleData.schedParams.performanceChangetimeMinutes }"
-                type="number" min="0" required>
+                type="number" min="0" required />
             minutes
         </div>
 
@@ -41,9 +43,15 @@
             Performance duration:
             <input name="performanceDuration" id="performanceDuration"
                 value="${uploadScheduleData.schedParams.performanceMinutes }"
-                type="number" min="0" required>
+                type="number" min="0" required />
             minutes
         </div>
+
+        <div>
+            Number of non-practice performance runs:
+            <input name="numPerformanceRuns" id="numPerformanceRuns"
+                   type="number" min="${numSeedingRounds}" value="${numSeedingRounds}" required /><br />
+        <div>
 
 
         <input type="submit" id='submit_data' value='Submit' />

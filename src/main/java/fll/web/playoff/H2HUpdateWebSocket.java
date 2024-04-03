@@ -6,12 +6,12 @@
 
 package fll.web.playoff;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -25,13 +25,14 @@ import java.util.concurrent.Executors;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
@@ -45,8 +46,10 @@ import fll.web.display.UnknownDisplayException;
 import fll.xml.ScoreType;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
+import jakarta.websocket.OnClose;
 import jakarta.websocket.OnError;
 import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 
@@ -87,6 +90,15 @@ public class H2HUpdateWebSocket {
 
   private static final Object SESSIONS_LOCK = new Object();
 
+  private @MonotonicNonNull Session session;
+
+  private @MonotonicNonNull String h2hUuid;
+
+  @OnOpen
+  public void start(final Session session) {
+    this.session = session;
+  }
+
   /**
    * Add the session and send out messages for all bracket information for the
    * specified brackets.
@@ -95,17 +107,17 @@ public class H2HUpdateWebSocket {
    *          display is associated with this web socket
    * @param session the session to add
    * @param allBracketInfo the brackets that the session is interested in
-   * @throws IOException
-   * @throws SQLException
+   * @throws IOException on an error writing to the websocket
+   * @throws SQLException on a database error
+   * @return UUID for head to head updates
    */
-  private static void addSession(final @Nullable String displayUuid,
-                                 final Session session,
-                                 final Collection<BracketInfo> allBracketInfo,
-                                 final Connection connection,
-                                 final int currentTournament)
+  private String addSession(final @Nullable String displayUuid,
+                            final Session session,
+                            final Collection<BracketInfo> allBracketInfo,
+                            final Connection connection,
+                            final int currentTournament)
       throws SQLException {
     synchronized (SESSIONS_LOCK) {
-      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
       final String h2hUuid;
       if (!StringUtils.isBlank(displayUuid)) {
@@ -120,7 +132,7 @@ public class H2HUpdateWebSocket {
           LOGGER.warn("Got error writing to new session, dropping display {}", displayUuid, e);
           removeH2HDisplay(h2hUuid);
           DisplayHandler.removeDisplay(displayUuid);
-          return;
+          return h2hUuid;
         }
       } else {
         // not associated with a display
@@ -129,6 +141,7 @@ public class H2HUpdateWebSocket {
 
       ALL_SESSIONS.put(h2hUuid, session);
 
+      final ObjectMapper mapper = Utilities.createJsonMapper();
       for (final BracketInfo bracketInfo : allBracketInfo) {
 
         SESSIONS.computeIfAbsent(bracketInfo.getBracketName(), k -> new HashSet<>()).add(h2hUuid);
@@ -141,28 +154,25 @@ public class H2HUpdateWebSocket {
                                                                             bracketInfo.getLastRound());
         for (final BracketUpdate update : updates) {
 
-          final BracketMessage message = new BracketMessage();
-          message.isBracketUpdate = true;
-          message.bracketUpdate = update;
+          final BracketUpdateMessage message = new BracketUpdateMessage(update);
 
-          final StringWriter writer = new StringWriter();
           try {
-            jsonMapper.writeValue(writer, message);
-          } catch (final IOException e) {
-            throw new FLLInternalException("Error writing JSON for brackets", e);
-          }
-          try {
+            final String messageText = mapper.writeValueAsString(message);
             if (session.isOpen()) {
-              session.getBasicRemote().sendText(writer.toString());
+              session.getBasicRemote().sendText(messageText);
             } else {
               throw new IOException("Session is closed");
             }
+          } catch (final JsonProcessingException e) {
+            throw new FLLRuntimeException("Error converting bracket update to JSON", e);
           } catch (final IOException e) {
             removeH2HDisplay(h2hUuid);
           }
         } // foreach update
 
       } // foreach bracket
+
+      return h2hUuid;
     } // session lock
   }
 
@@ -187,12 +197,15 @@ public class H2HUpdateWebSocket {
   }
 
   /**
-   * @param session the session
    * @param msg the message received
    */
   @OnMessage
-  public void receiveTextMessage(final Session session,
-                                 final String msg) {
+  public void receiveTextMessage(final String msg) {
+    if (null == this.session) {
+      LOGGER.error("Received websocket message before receiving the session from start, ignoring");
+      return;
+    }
+
     LOGGER.trace("Received message '{}'", msg);
 
     final ObjectMapper jsonMapper = Utilities.createJsonMapper();
@@ -201,36 +214,52 @@ public class H2HUpdateWebSocket {
     // this happens when BracketInfo is subclassed and the subclass is passed
     // in
     jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
     try {
-      final RegisterMessage message = jsonMapper.readValue(msg, RegisterMessage.class);
+      final JsonNode raw = jsonMapper.readTree(msg);
+      final Message message = Message.parseMessage(jsonMapper, raw);
 
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Display UUID: '{}'", message.displayUuid);
-        for (final BracketInfo bracketInfo : message.brackInfo) {
-          LOGGER.trace("Bracket name: {} first: {} last: {}", bracketInfo.getBracketName(), bracketInfo.getFirstRound(),
-                       bracketInfo.getLastRound());
+      switch (message.getType()) {
+      case REGISTER:
+        final RegisterMessage registerMessage = (RegisterMessage) message;
+
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Display UUID: '{}'", registerMessage.getDisplayUuid());
+          for (final BracketInfo bracketInfo : registerMessage.getBracketInfo()) {
+            LOGGER.trace("Bracket name: {} first: {} last: {}", bracketInfo.getBracketName(),
+                         bracketInfo.getFirstRound(), bracketInfo.getLastRound());
+          }
         }
-      }
 
-      final HttpSession httpSession = GetHttpSessionConfigurator.getHttpSession(session);
-      final ServletContext httpApplication = httpSession.getServletContext();
-      final DataSource datasource = ApplicationAttributes.getDataSource(httpApplication);
-      try (Connection connection = datasource.getConnection()) {
-        final int currentTournament = Queries.getCurrentTournament(connection);
-        addSession(message.displayUuid, session, message.brackInfo, connection, currentTournament);
+        final HttpSession httpSession = GetHttpSessionConfigurator.getHttpSession(session);
+        final ServletContext httpApplication = httpSession.getServletContext();
+        final DataSource datasource = ApplicationAttributes.getDataSource(httpApplication);
+        try (Connection connection = datasource.getConnection()) {
+          final int currentTournament = Queries.getCurrentTournament(connection);
+          h2hUuid = addSession(registerMessage.getDisplayUuid(), session, registerMessage.getBracketInfo(), connection,
+                               currentTournament);
+        }
+        break;
+      case BRACKET_UPDATE:
+        LOGGER.warn("{}: Received BRACKET_UPDATE message from client, ignoring", h2hUuid);
+        break;
+      case DISPLAY_UPDATE:
+        LOGGER.warn("{}: Received DISPLAY_UPDATE message from client, ignoring", h2hUuid);
+        break;
+      default:
+        LOGGER.error("{}: Received unknown message type from client: {}", h2hUuid, message.getType());
       }
-
     } catch (final JsonProcessingException e) {
       throw new FLLRuntimeException("Error parsing bracket info from #"
           + msg
           + "#", e);
     } catch (final SQLException e) {
-      throw new FLLRuntimeException("Error getting playoff data from the database", e);
+      throw new FLLRuntimeException("Error talking to the database", e);
     }
   }
 
   /**
-   * Notify a specify display to update the brackets it's showing.
+   * Notify a specific display to update the brackets it's showing.
    * If the {@link DisplayInfo} isn't showing the brackets, nothing is sent to the
    * display. This is executed asynchronously.
    * 
@@ -270,9 +299,6 @@ public class H2HUpdateWebSocket {
 
   /**
    * Notify a head to head display what brackets it should be displaying.
-   * 
-   * @param h2hUuid
-   * @param session
    */
   private static void updateDisplayedBracket(final DisplayInfo displayInfo,
                                              final Session session)
@@ -280,16 +306,18 @@ public class H2HUpdateWebSocket {
 
     if (session.isOpen()) {
       try {
-        final BracketMessage message = new BracketMessage();
-        message.isDisplayUpdate = true;
+        final List<BracketInfo> allBracketInfo = new LinkedList<>();
 
         for (final DisplayInfo.H2HBracketDisplay h2hBracket : displayInfo.getBrackets()) {
           final BracketInfo bracketInfo = new BracketInfo(h2hBracket.getBracket(), h2hBracket.getFirstRound(),
                                                           h2hBracket.getFirstRound()
-                                                              + 2);
+                                                              + RemoteControlBrackets.NUM_ROUNDS_TO_DISPLAY
+                                                              - 1);
 
-          message.allBracketInfo.add(bracketInfo);
+          allBracketInfo.add(bracketInfo);
         } // foreach h2h bracket
+
+        final DisplayUpdateMessage message = new DisplayUpdateMessage(allBracketInfo);
 
         // expose all bracketInfo to the javascript
         final ObjectMapper jsonMapper = Utilities.createJsonMapper();
@@ -343,10 +371,10 @@ public class H2HUpdateWebSocket {
     LOGGER.trace("Sending H2H update team: {} bracket: {} dbLine: {} playoffRound: {} score: {} table: {}", teamNumber,
                  bracketName, dbLine, playoffRound, score, table);
 
-    final BracketMessage message = new BracketMessage();
-    message.isBracketUpdate = true;
-    message.bracketUpdate = new BracketUpdate(bracketName, dbLine, playoffRound, maxPlayoffRound, teamNumber, teamName,
-                                              score, performanceScoreType, noShow, verified, table);
+    final BracketUpdate bracketUpdate = new BracketUpdate(bracketName, dbLine, playoffRound, maxPlayoffRound,
+                                                          teamNumber, teamName, score, performanceScoreType, noShow,
+                                                          verified, table);
+    final BracketUpdateMessage message = new BracketUpdateMessage(bracketUpdate);
 
     synchronized (SESSIONS_LOCK) {
       if (!SESSIONS.containsKey(bracketName)) {
@@ -400,14 +428,20 @@ public class H2HUpdateWebSocket {
 
   }
 
-  /**
-   * @param session session that has an error
-   * @param t the exception
-   */
+  @OnClose
+  public void end() {
+    if (null != h2hUuid) {
+      removeH2HDisplay(h2hUuid);
+    }
+  }
+
   @OnError
-  public void error(@SuppressWarnings("unused") final Session session,
-                    final Throwable t) {
-    LOGGER.error("Caught websocket error, ignoring", t);
+  public void onError(final Throwable t) throws Throwable {
+    if (t instanceof EOFException) {
+      LOGGER.debug("{}: Socket closed.", h2hUuid);
+    } else {
+      LOGGER.error("{}: Display socket error", h2hUuid, t);
+    }
   }
 
   /**
@@ -444,7 +478,7 @@ public class H2HUpdateWebSocket {
 
   /**
    * Update the display for the information in this bracket. This function queries
-   * the database for the the information to display. This is executed
+   * the database for the the information to display. The update is sent
    * asynchronously.
    * 
    * @param connection the database connection
@@ -480,47 +514,5 @@ public class H2HUpdateWebSocket {
                     performanceScoreType, noShow, verified, table);
     });
   }
-
-  // CHECKSTYLE:OFF - data class for websocket
-
-  public static final class RegisterMessage {
-    /**
-     * Uuid of the display, may be empty.
-     */
-    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
-    public String displayUuid = "";
-
-    /**
-     * Bracket information.
-     */
-    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
-    public Collection<BracketInfo> brackInfo = Collections.emptyList();
-  }
-
-  /**
-   * Message sent on the WebSocket.
-   */
-  public static final class BracketMessage {
-
-    /**
-     * If true, then {@link #bracketUpdate} must be populated.
-     */
-    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
-    public boolean isBracketUpdate = false;
-
-    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
-    public @Nullable BracketUpdate bracketUpdate = null;
-
-    /**
-     * If true then {@link #allBracketInfo} must be populated.
-     */
-    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
-    public boolean isDisplayUpdate = false;
-
-    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
-    public List<BracketInfo> allBracketInfo = new LinkedList<>();
-
-  }
-  // CHECKSTYLE:ON
 
 }

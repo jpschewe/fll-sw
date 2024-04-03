@@ -39,6 +39,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.report.awards.AwardsScriptReport;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
@@ -128,7 +129,7 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
 
     final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, tournament.getTournamentID());
 
-    for (final String awardGroup : Queries.getAwardGroups(connection, tournament.getTournamentID())) {
+    for (final String awardGroup : AwardsScriptReport.getAwardGroupOrder(connection, tournament)) {
       final Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> teamSubjectiveRanks = FinalComputedScores.gatherRankedSubjectiveTeams(connection,
                                                                                                                                                                 challengeDescription.getSubjectiveCategories(),
                                                                                                                                                                 challengeDescription.getWinner(),

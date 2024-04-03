@@ -406,8 +406,11 @@ public class TournamentSchedule implements Serializable {
     }
 
     try (PreparedStatement getSched = connection.prepareStatement("SELECT team_number, judging_station"
-        + " FROM schedule"//
-        + " WHERE tournament = ?");
+        + " FROM schedule, TournamentTeams" //
+        + " WHERE schedule.tournament = ?" //
+        + "   AND schedule.tournament = TournamentTeams.tournament" //
+        + "   AND schedule.team_number = TournamentTeams.TeamNumber" //
+    );
 
         PreparedStatement getPerfRounds = connection.prepareStatement("SELECT perf_time, table_color, table_side, practice" //
             + " FROM sched_perf_rounds" //
@@ -1333,8 +1336,8 @@ public class TournamentSchedule implements Serializable {
 
     // insert new tournament schedule
     try (PreparedStatement insertSchedule = connection.prepareStatement("INSERT INTO schedule"//
-        + " (tournament, team_number, judging_station)"//
-        + " VALUES(?, ?, ?)");
+        + " (tournament, team_number)"//
+        + " VALUES(?, ?)");
         PreparedStatement insertPerfRounds = connection.prepareStatement("INSERT INTO sched_perf_rounds"//
             + " (tournament, team_number, practice, perf_time, table_color, table_side)"//
             + " VALUES(?, ?, ?, ?, ?, ?)");
@@ -1350,7 +1353,6 @@ public class TournamentSchedule implements Serializable {
 
       for (final TeamScheduleInfo si : getSchedule()) {
         insertSchedule.setInt(2, si.getTeamNumber());
-        insertSchedule.setString(3, si.getJudgingGroup());
         insertSchedule.executeUpdate();
 
         insertPerfRounds.setInt(2, si.getTeamNumber());

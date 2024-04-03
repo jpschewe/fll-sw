@@ -21,11 +21,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.JudgeInformation;
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
+import fll.web.report.awards.AwardsScriptReport;
 import fll.web.report.finalist.FinalistSchedule;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
@@ -57,7 +59,8 @@ public final class ReportIndex {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
-      final int tournament = Queries.getCurrentTournament(connection);
+      final Tournament tournament = Tournament.getCurrentTournament(connection);
+      final int tournamentId = tournament.getTournamentID();
 
       try (
           PreparedStatement prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?")) {
@@ -76,11 +79,11 @@ public final class ReportIndex {
 
       pageContext.setAttribute("tournamentTeams", Queries.getTournamentTeams(connection).values());
 
-      final Collection<String> finalistDivisions = FinalistSchedule.getAllDivisions(connection, tournament);
+      final Collection<String> finalistDivisions = FinalistSchedule.getAllDivisions(connection, tournamentId);
       pageContext.setAttribute("finalistDivisions", finalistDivisions);
 
       // gather up judges per category
-      final Collection<JudgeInformation> judges = JudgeInformation.getJudges(connection, tournament);
+      final Collection<JudgeInformation> judges = JudgeInformation.getJudges(connection, tournamentId);
       final Map<String, List<String>> categoryJudges = new HashMap<>();
       for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
         final List<String> judgesInCategory = judges.stream().filter(ji -> ji.getCategory().equals(category.getName()))
@@ -94,8 +97,8 @@ public final class ReportIndex {
       final String categoryJudgesJson = WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(categoryJudges));
       pageContext.setAttribute("categoryJudgesJson", categoryJudgesJson);
 
-      pageContext.setAttribute("awardGroups", Queries.getAwardGroups(connection, tournament));
-      pageContext.setAttribute("judgingStations", Queries.getJudgingStations(connection, tournament));
+      pageContext.setAttribute("awardGroups", AwardsScriptReport.getAwardGroupOrder(connection, tournament));
+      pageContext.setAttribute("judgingStations", Queries.getJudgingStations(connection, tournamentId));
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     } catch (final JsonProcessingException e) {

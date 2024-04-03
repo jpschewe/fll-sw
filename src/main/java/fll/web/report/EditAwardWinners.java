@@ -29,6 +29,8 @@ import fll.db.OverallAwardWinner;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.report.awards.AwardsReport;
+import fll.web.report.awards.AwardsScriptReport;
 import fll.web.report.awards.ChampionshipCategory;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
@@ -83,7 +85,7 @@ public final class EditAwardWinners {
                                                                        .collect(Collectors.toList());
       page.setAttribute("nonNumericCategories", nonNumericCategories);
 
-      final Collection<String> awardGroups = Queries.getAwardGroups(connection, tournament.getTournamentID());
+      final List<String> awardGroups = AwardsScriptReport.getAwardGroupOrder(connection, tournament);
       page.setAttribute("awardGroups", awardGroups);
 
       final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, tournament.getTournamentID());

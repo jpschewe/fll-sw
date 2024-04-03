@@ -1,4 +1,15 @@
 * Highlight place cells in the awards script
+* #1143 - Sort award groups in all reports to match the awards script
+* #1147 - Sort performance report award groups to match the awards script
+* #1146 - Sort award groups on the edit awards page
+* #1145 - Allow the web schedule upload to handle performance runs beyond the seeding rounds
+* #1161 - Don't assign tables to BYE runs
+* #1182 - Add CSV for award winners of the tournament
+* #1181 - Allow team schedules to be output from the web
+* #1166 - handle Bye scores everywhere that No Show scores are handled
+* #1149 - handle changes to judging station in the schedule reports
+* #1137 - add pages to facilitate deliberations
+* #1157 - remove text about going to information desk for finalist schedule
 
 Release 18.5.0
 ==============

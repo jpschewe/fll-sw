@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
+import fll.web.report.awards.AwardsScriptReport;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.jsp.PageContext;
@@ -64,7 +66,9 @@ public final class GatherTeamData {
       final Map<Integer, Boolean> playoffsInitialized = new HashMap<>();
       for (final Tournament tournament : tournaments) {
 
-        final Collection<String> allEventDivisions = Queries.getAwardGroups(connection, tournament.getTournamentID());
+        // createa new list so that I can be sure that I can add to it
+        final List<String> allEventDivisions = new LinkedList<>(AwardsScriptReport.getAwardGroupOrder(connection,
+                                                                                                      tournament));
         if (allEventDivisions.isEmpty()) {
           // special case for empty, always allow 1
           allEventDivisions.add("1");

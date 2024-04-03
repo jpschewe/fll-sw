@@ -6,25 +6,22 @@
 
 package fll.web.playoff;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
 import fll.db.Queries;
-import fll.util.FLLInternalException;
-
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
-import fll.web.playoff.BracketData.TopRightCornerStyle;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Data for adminbrackets.jsp.
@@ -92,32 +89,21 @@ public final class AdminBrackets {
             - 1; // force the display of at least 2 rounds
       }
 
-      final BracketData bracketInfo = new BracketData(connection, divisionStr, firstRound, lastRound,
-                                                      BracketData.DEFAULT_ROWS_PER_TEAM, true, false, false);
-
-      for (int i = 1; i < lastColumn; i++) {
-        bracketInfo.addBracketLabels(i);
-      }
-      bracketInfo.addStaticTableLabels(connection);
-
-      bracketInfo.generateBracketOutput(connection, TopRightCornerStyle.MEET_BOTTOM_OF_CELL);
-
+      final BracketData bracketInfo = BracketData.constructPrintableBrackets(connection, divisionStr, firstRound,
+                                                                             lastRound);
       pageContext.setAttribute("bracketInfo", bracketInfo);
 
       // expose all bracketInfo to the javascript
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
-      final StringWriter writer = new StringWriter();
-      try {
-        jsonMapper.writeValue(writer, bracketInfo);
-      } catch (final IOException e) {
-        throw new FLLInternalException("Error writing JSON for bracketInfo", e);
-      }
-      final String bracketInfoJson = writer.toString();
+      final String bracketInfoJson = WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(bracketInfo));
       pageContext.setAttribute("bracketInfoJson", bracketInfoJson);
 
+      Message.setPageVariables(pageContext);
     } catch (final SQLException sqle) {
       LOGGER.error("Error talking to the database", sqle);
       throw new RuntimeException("Error talking to the database", sqle);
+    } catch (final JsonProcessingException e) {
+      throw new FLLRuntimeException("Error converting data to JSON", e);
     }
 
   }

@@ -10,15 +10,19 @@ fll.web.playoff.AdminBrackets.populateContext(request, application, pageContext)
 <head>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
-<title>${bracketInfo.bracketName}- PrintablePlayoff Bracket</title>
+<title>${bracketInfo.bracketName}-PrintablePlayoffBracket</title>
 </head>
 
 <script type="text/javascript">
-  const bracketInfo = ${bracketInfoJson};
+  const bracketInfo = JSON.parse('${bracketInfoJson}')';
+  const REGISTER_MESSAGE_TYPE = "${REGISTER_MESSAGE_TYPE}";
+  const BRACKET_UPDATE_MESSAGE_TYPE = "${BRACKET_UPDATE_MESSAGE_TYPE}";
+  const DISPLAY_UPDATE_MESSAGE_TYPE = "${DISPLAY_UPDATE_MESSAGE_TYPE}";
 </script>
 
 
-<script type='text/javascript' src="<c:url value='/js/fll-functions.js' />"></script>
+<script type='text/javascript'
+    src="<c:url value='/js/fll-functions.js' />"></script>
 <script type='text/javascript' src='h2hutils.js'></script>
 <script type='text/javascript' src='adminbrackets.js'></script>
 

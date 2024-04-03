@@ -16,6 +16,7 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -70,21 +71,22 @@ public class CheckScheduleExists extends BaseFLLServlet {
     final String fileName = SessionAttributes.getNonNullAttribute(session, UploadSpreadsheet.SPREADSHEET_FILE_KEY,
                                                                   String.class);
 
-    final UploadScheduleData uploadScheduleData = new UploadScheduleData(new File(fileName), headerRowIndex,
-                                                                         headerNames);
-
-    final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
-    if (null != sheetName) {
-      uploadScheduleData.setSelectedSheet(sheetName);
-    }
-
-    LOGGER.debug("File: {} Sheet: {}", uploadScheduleData.getScheduleFile(), uploadScheduleData.getSelectedSheet());
-
-    session.setAttribute(UploadScheduleData.KEY, uploadScheduleData);
-
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
       final int tournamentID = Queries.getCurrentTournament(connection);
+
+      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournamentID);
+      final UploadScheduleData uploadScheduleData = new UploadScheduleData(new File(fileName), headerRowIndex,
+                                                                           headerNames, numSeedingRounds);
+
+      final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
+      if (null != sheetName) {
+        uploadScheduleData.setSelectedSheet(sheetName);
+      }
+
+      LOGGER.debug("File: {} Sheet: {}", uploadScheduleData.getScheduleFile(), uploadScheduleData.getSelectedSheet());
+
+      session.setAttribute(UploadScheduleData.KEY, uploadScheduleData);
 
       if (TournamentSchedule.scheduleExistsInDatabase(connection, tournamentID)) {
         // redirect to prompt page

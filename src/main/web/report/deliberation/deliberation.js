@@ -191,6 +191,9 @@ const deliberationModule = {};
          * @param teamNumber the team number in this place
          */
         setPotentialWinner(place, teamNumber) {
+            // ensure the team isn't in 2 places
+            this.removePotentialWinner(teamNumber);
+
             const potentialWinners = this.getPotentialWinners();
             const placeIndex = place - 1;
 
@@ -206,6 +209,10 @@ const deliberationModule = {};
          * Remove all instances of teamNum from winners.
          */
         removePotentialWinner(teamNum) {
+            if (null == teamNum) {
+                return;
+            }
+
             const potentialWinners = this.getPotentialWinners();
             let idx = potentialWinners.indexOf(teamNum);
             while (idx != -1) {
@@ -236,15 +243,25 @@ const deliberationModule = {};
          * Set the specified team as a winner with the specified place. 
          * @param place the place (1-based) of the team
          * @param teamNumber the team number in this place
+         * @param grow if true, then allow the number of winners to grow
          * @throws Error If the place is outside the bounds of the number of awards
          */
-        setWinner(place, teamNumber) {
+        setWinner(place, teamNumber, grow) {
+            // ensure the team isn't in 2 places
+            this.removeWinner(teamNumber);
+
             const winners = this.getWinners();
             if (place < 1) {
                 throw new Error("Place must be greater than 0");
             }
-            if (place > winners.length) {
-                throw new Error("Place must less than or equal to the number of awards");
+            if (grow) {
+                while (winners.length < place) {
+                    winners.push(null);
+                }
+            } else {
+                if (place > winners.length) {
+                    throw new Error("Place must less than or equal to the number of awards");
+                }
             }
 
             const placeIndex = place - 1;
@@ -255,6 +272,10 @@ const deliberationModule = {};
          * Remove all instances of teamNum from winners.
          */
         removeWinner(teamNum) {
+            if (null == teamNum) {
+                return;
+            }
+
             const winners = this.getWinners();
             let idx = winners.indexOf(teamNum);
             while (idx != -1) {
@@ -397,9 +418,17 @@ const deliberationModule = {};
         _save();
     };
 
-    function loadAwardOrder() {
-        return fetch("../../api/AwardsScript/AwardOrder").then(checkJsonResponse).then((result) => {
+    function loadCategoryOrder() {
+        const awardGroup = finalist_module.getCurrentDivision();
+        return fetch(`../../api/deliberation/CategoryOrder/${awardGroup}`).then(checkJsonResponse).then((result) => {
             _awardOrder = result;
+        });
+    }
+
+    function loadNumPerformanceAwards() {
+        return fetch("../../api/AwardsScript/NumPerformanceAwards").then(checkJsonResponse).then((result) => {
+            const category = deliberationModule.getCategoryByName(deliberationModule.PERFORMANCE_CATEGORY_NAME);
+            category.setNumAwards(parseInt(result, 10));
         });
     }
 
@@ -485,14 +514,10 @@ const deliberationModule = {};
             const winningTeams = perCategoryAllWinningTeams.get(categoryName);
             category.setServerWinningTeams(winningTeams);
 
-            const categoryWinners = [];
             for (const winner of winners) {
                 const winnerPlace = parseInt(winner.place, 10);
                 const teamNumber = parseInt(winner.teamNumber, 10);
-                while (winnerPlace > categoryWinners.length + 1) {
-                    // handle skipping places
-                    categoryWinners.push(null);
-                }
+                category.setWinner(winnerPlace, teamNumber, true);
 
                 // make sure they are a nominee
                 category.addNominee(teamNumber);
@@ -503,10 +528,7 @@ const deliberationModule = {};
                     potentialWinners.push(teamNumber);
                     category.setPotentialWinners(potentialWinners);
                 }
-
-                categoryWinners.push(teamNumber);
             }
-            category.setWinners(categoryWinners);
         }
     }
 
@@ -596,6 +618,10 @@ const deliberationModule = {};
 
         uploadAwardGroupWinners(waitList);
 
+        waitList.push(uploadNumAwards());
+        waitList.push(uploadWriters());
+        waitList.push(uploadPotentialWinners());
+
         Promise.all(waitList)
             .catch((error) => {
                 failCallback(`Error uploading data: ${error}`);
@@ -611,23 +637,156 @@ const deliberationModule = {};
         });
     }
 
+    function loadNumAwards() {
+        return fetch("../../api/deliberation/NumAwards").then(checkJsonResponse).then((result) => {
+            for (const numAward of result) {
+                if (numAward.awardGroup == finalist_module.getCurrentDivision()) {
+                    const category = deliberationModule.getCategoryByName(numAward.categoryName);
+                    if (null == category) {
+                        alert(`Unable to find category with name "${numAward.categoryName}"`);
+                        continue;
+                    }
+                    const num = parseInt(numAward.numAwards, 10);
+                    category.setNumAwards(num);
+                }
+            }
+        });
+    }
 
-    function postFinalistLoad(doneCallback, failCallback) {
-        createCategories();
+    function uploadNumAwards() {
+        const data = [];
+        for (const category of deliberationModule.getAllCategories()) {
+            const categoryData = new Object();
+            categoryData.awardGroup = finalist_module.getCurrentDivision();
+            categoryData.categoryName = category.name;
+            categoryData.numAwards = category.getNumAwards();
+            data.push(categoryData);
+        }
+        return uploadJsonData(`../../api/deliberation/NumAwards`, "POST", data).then(checkJsonResponse);
+    }
 
+    function loadWriters() {
+        return fetch("../../api/deliberation/Writers").then(checkJsonResponse).then((result) => {
+            for (const writer of result) {
+                if (writer.awardGroup == finalist_module.getCurrentDivision()) {
+                    const category = deliberationModule.getCategoryByName(writer.categoryName);
+                    if (null == category) {
+                        alert(`Unable to find category with name "${writer.categoryName}"`);
+                        continue;
+                    }
+                    const writerNum = parseInt(writer.number, 10);
+                    if (writerNum == 1) {
+                        category.setWriter1(writer.name)
+                    } else if (writerNum == 2) {
+                        category.setWriter2(writer.name)
+                    } else {
+                        alert(`Writers 1 and 2 are supported, but found ${writerNum}`);
+                    }
+                }
+            }
+        });
+    }
+
+    function uploadWriters() {
+        const data = [];
+        for (const category of deliberationModule.getAllCategories()) {
+            const writer1Name = category.getWriter1();
+            if (writer1Name) {
+                const writer1 = new Object();
+                writer1.awardGroup = finalist_module.getCurrentDivision();
+                writer1.categoryName = category.name;
+                writer1.number = 1;
+                writer1.name = writer1Name;
+                data.push(writer1);
+            }
+
+            const writer2Name = category.getWriter2();
+            if (writer2Name) {
+                const writer2 = new Object();
+                writer2.awardGroup = finalist_module.getCurrentDivision();
+                writer2.categoryName = category.name;
+                writer2.number = 2;
+                writer2.name = writer2Name;
+                data.push(writer2);
+            }
+        }
+        return uploadJsonData(`../../api/deliberation/Writers`, "POST", data).then(checkJsonResponse);
+    }
+
+    function loadPotentialWinners() {
+        return fetch("../../api/deliberation/PotentialWinners").then(checkJsonResponse).then((result) => {
+            for (const pWinner of result) {
+                if (pWinner.awardGroup == finalist_module.getCurrentDivision()) {
+                    const category = deliberationModule.getCategoryByName(pWinner.categoryName);
+                    if (null == category) {
+                        alert(`Unable to find category with name "${pWinner.categoryName}"`);
+                        continue;
+                    }
+                    const place = parseInt(pWinner.place, 10);
+                    const teamNumber = parseInt(pWinner.teamNumber, 10);
+                    category.setPotentialWinner(place, teamNumber);
+                }
+            }
+        });
+    }
+
+    function uploadPotentialWinners() {
+        const data = [];
+        for (const category of deliberationModule.getAllCategories()) {
+            for (const [index, teamNumber] of category.getPotentialWinners().entries()) {
+                if (teamNumber != null) {
+                    const potentialWinner = new Object();
+                    potentialWinner.awardGroup = finalist_module.getCurrentDivision();
+                    potentialWinner.categoryName = category.name;
+                    potentialWinner.place = index + 1;
+                    potentialWinner.teamNumber = teamNumber;
+                    data.push(potentialWinner);
+                }
+            }
+        }
+        return uploadJsonData(`../../api/deliberation/PotentialWinners`, "POST", data).then(checkJsonResponse);
+    }
+
+    function loadDeliberationData(doneCallback, failCallback) {
+        loadDeliberationData1(doneCallback, failCallback);
+    }
+
+    function loadDeliberationData1(doneCallback, failCallback) {
         const waitList = [];
 
-        const topPerformanceScoresPromise = loadTopPerformanceScores();
-        topPerformanceScoresPromise.catch((error) => {
-            failCallback("Top performance scores failed to load: " + error);
-        })
-        waitList.push(topPerformanceScoresPromise);
+        const numAwards = loadNumAwards();
+        numAwards.catch((error) => {
+            failCallback("Category num awards failed to load: " + error);
+        });
+        waitList.push(numAwards);
 
-        const awardOrderPromise = loadAwardOrder();
-        awardOrderPromise.catch((error) => {
-            failCallback("Award order failed to load: " + error);
-        })
-        waitList.push(awardOrderPromise);
+        const writers = loadWriters();
+        writers.catch((error) => {
+            failCallback("Category writers failed to load: " + error);
+        });
+        waitList.push(writers);
+
+        Promise.all(waitList).then((_) => {
+            loadDeliberationData2(doneCallback, failCallback);
+        });
+    }
+
+    function loadDeliberationData2(doneCallback, failCallback) {
+        const waitList = [];
+
+        const potentialWinners = loadPotentialWinners();
+        potentialWinners.catch((error) => {
+            failCallback("Potential winners failed to load: " + error);
+        });
+        waitList.push(potentialWinners);
+
+        Promise.all(waitList).then((_) => {
+            loadDeliberationData3(doneCallback, failCallback);
+        });
+    }
+
+    function loadDeliberationData3(doneCallback, failCallback) {
+        const waitList = [];
 
         const nonNumericAwardWinners = loadNonNumericAwardWinners();
         nonNumericAwardWinners.catch((error) => {
@@ -653,6 +812,35 @@ const deliberationModule = {};
         });
     }
 
+    function postFinalistLoad(doneCallback, failCallback) {
+        createCategories();
+
+        const waitList = [];
+
+        const topPerformanceScoresPromise = loadTopPerformanceScores();
+        topPerformanceScoresPromise.catch((error) => {
+            failCallback("Top performance scores failed to load: " + error);
+        })
+        waitList.push(topPerformanceScoresPromise);
+
+        const categoryOrderPromise = loadCategoryOrder();
+        categoryOrderPromise.catch((error) => {
+            failCallback("Category order failed to load: " + error);
+        })
+        waitList.push(categoryOrderPromise);
+
+        const numPerformanceAwards = loadNumPerformanceAwards();
+        numPerformanceAwards.catch((error) => {
+            failCallback("Number of performance awards failed to load: " + error);
+        })
+        waitList.push(numPerformanceAwards);
+
+        Promise.all(waitList).then((_) => {
+            deliberationModule.saveToLocalStorage();
+            doneCallback();
+        });
+    }
+
     /**
      * Clear all local data and reload from the server.
      * Local storage is saved when this method completes with success.
@@ -665,8 +853,9 @@ const deliberationModule = {};
     deliberationModule.clearAndLoad = function(doneCallback, failCallback) {
         _clear_local_storage();
 
-        //FIXME will need to load more data from the database, perhaps change method called...
-        postFinalistLoad(doneCallback, failCallback);
+        postFinalistLoad(() => {
+            loadDeliberationData(doneCallback, failCallback)
+        }, failCallback);
     };
 
     /**
@@ -710,9 +899,9 @@ const deliberationModule = {};
     };
 
     /**
-     * @returns list of category titles in the order that they will be presented
+     * @returns list of category titles in the order that they should be displayed
      */
-    deliberationModule.getAwardOrder = function() {
+    deliberationModule.getCategoryOrder = function() {
         return _awardOrder;
     };
 
