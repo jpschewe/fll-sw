@@ -54,7 +54,6 @@ import com.opencsv.CSVWriter;
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
@@ -405,12 +404,9 @@ public class TournamentSchedule implements Serializable {
       }
     }
 
-    try (PreparedStatement getSched = connection.prepareStatement("SELECT team_number, judging_station"
-        + " FROM schedule, TournamentTeams" //
-        + " WHERE schedule.tournament = ?" //
-        + "   AND schedule.tournament = TournamentTeams.tournament" //
-        + "   AND schedule.team_number = TournamentTeams.TeamNumber" //
-    );
+    try (PreparedStatement getSched = connection.prepareStatement("SELECT team_number"
+        + " FROM schedule" //
+        + " WHERE schedule.tournament = ?");
 
         PreparedStatement getPerfRounds = connection.prepareStatement("SELECT perf_time, table_color, table_side, practice" //
             + " FROM sched_perf_rounds" //
@@ -428,10 +424,9 @@ public class TournamentSchedule implements Serializable {
       try (ResultSet sched = getSched.executeQuery()) {
         while (sched.next()) {
           final int teamNumber = sched.getInt(1);
-          final String judgingStation = castNonNull(sched.getString(2));
-
-          final TeamScheduleInfo ti = new TeamScheduleInfo(teamNumber);
-          ti.setJudgingGroup(judgingStation);
+          final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, currentTournament,
+                                                                                   teamNumber);
+          final TeamScheduleInfo ti = new TeamScheduleInfo(team);
 
           getSubjective.setInt(2, teamNumber);
           try (ResultSet subjective = getSubjective.executeQuery()) {
@@ -460,18 +455,6 @@ public class TournamentSchedule implements Serializable {
               ti.addPerformance(performance);
             } // foreach performance round
           } // allocate performance ResultSet
-
-          final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournamentID);
-          if (null == eventDivision) {
-            throw new FLLRuntimeException("Unable to find event division for "
-                + teamNumber);
-          }
-
-          ti.setDivision(eventDivision);
-
-          final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-          ti.setOrganization(team.getOrganization());
-          ti.setTeamName(team.getTeamName());
 
           cacheTeamScheduleInformation(ti);
         } // foreach sched result
@@ -1179,10 +1162,15 @@ public class TournamentSchedule implements Serializable {
       }
 
       final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumberStr).intValue();
-      final TeamScheduleInfo ti = new TeamScheduleInfo(teamNumber);
-      ti.setTeamName(ci.getTeamName(line));
-      ti.setOrganization(ci.getOrganization(line));
-      ti.setDivision(ci.getAwardGroup(line));
+      final @Nullable String org = ci.getOrganization(line);
+      final @Nullable String name = ci.getTeamName(line);
+      final @Nullable String awardGroup = ci.getAwardGroup(line);
+      final @Nullable String judgingGroup = ci.getJudgingGroup(line);
+      final TournamentTeam team = new TournamentTeam(teamNumber, null == org ? "" : org,
+                                                     null == name ? "" : ci.getTeamName(line),
+                                                     null == awardGroup ? "" : awardGroup,
+                                                     null == judgingGroup ? "" : judgingGroup);
+      final TeamScheduleInfo ti = new TeamScheduleInfo(team);
 
       for (final CategoryColumnMapping mapping : ci.getSubjectiveColumnMappings()) {
         final String station = mapping.getScheduleColumn();
@@ -1196,8 +1184,6 @@ public class TournamentSchedule implements Serializable {
         final LocalTime time = castNonNull(parseTime(str));
         ti.addSubjectiveTime(new SubjectiveTime(station, time));
       }
-
-      ti.setJudgingGroup(ci.getJudgingGroup(line));
 
       // parse regular match play rounds
       for (int perfIndex = 0; perfIndex < ci.getNumPerfs(); ++perfIndex) {

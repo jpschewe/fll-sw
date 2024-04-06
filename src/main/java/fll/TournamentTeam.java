@@ -138,4 +138,11 @@ public class TournamentTeam extends Team {
     }
   }
 
+  /**
+   * Useful for populating blank score sheets.
+   * Each field has a non-empty value.
+   */
+  public static final TournamentTeam SAMPLE_TEAM = new TournamentTeam(1, "Some Org", "Some name", "Some award group",
+                                                                     "A judging group");
+
 }

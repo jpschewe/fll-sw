@@ -12,6 +12,16 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Set;
 
+import javax.sql.DataSource;
+
+import fll.Tournament;
+import fll.TournamentTeam;
+import fll.db.Queries;
+import fll.documents.writers.SubjectivePdfWriter;
+import fll.scheduler.TeamScheduleInfo;
+import fll.util.FLLRuntimeException;
+import fll.xml.ChallengeDescription;
+import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -19,16 +29,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import javax.sql.DataSource;
-
-import fll.Team;
-import fll.Tournament;
-import fll.db.Queries;
-import fll.documents.writers.SubjectivePdfWriter;
-import fll.scheduler.TeamScheduleInfo;
-import fll.util.FLLRuntimeException;
-import fll.xml.ChallengeDescription;
-import fll.xml.SubjectiveScoreCategory;
 
 /**
  * Generate blank subjective sheets for the specified subjective category.
@@ -70,11 +70,7 @@ public class BlankSubjectiveSheet extends HttpServlet {
               + "' does not exist");
         }
 
-        final TeamScheduleInfo dummy = new TeamScheduleInfo(Team.NULL_TEAM_NUMBER);
-        dummy.setTeamName("");
-        dummy.setOrganization("");
-        dummy.setDivision("");
-        dummy.setJudgingGroup("");
+        final TeamScheduleInfo dummy = new TeamScheduleInfo(TournamentTeam.SAMPLE_TEAM);
 
         final Tournament tournament = Tournament.findTournamentByID(connection,
                                                                     Queries.getCurrentTournament(connection));

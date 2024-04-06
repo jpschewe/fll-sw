@@ -17,20 +17,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.google.common.collect.Streams;
 
+import fll.TournamentTeam;
+
 /**
  * Holds data about the schedule for a team.
  */
 public final class TeamScheduleInfo implements Serializable {
 
-  private final int teamNumber;
-
-  private @Nullable String teamName;
-
-  private @Nullable String organization;
-
-  private @Nullable String awardGroup;
-
-  private @Nullable String judgingGroup;
+  private final TournamentTeam team;
 
   private final SortedSet<PerformanceTime> performances = new TreeSet<>();
 
@@ -113,10 +107,10 @@ public final class TeamScheduleInfo implements Serializable {
   }
 
   /**
-   * @param teamNumber {@link #getTeamNumber()}
+   * @param team the team that this schedule info is for
    */
-  public TeamScheduleInfo(final int teamNumber) {
-    this.teamNumber = teamNumber;
+  public TeamScheduleInfo(final TournamentTeam team) {
+    this.team = team;
   }
 
   @Override
@@ -145,81 +139,41 @@ public final class TeamScheduleInfo implements Serializable {
 
   /**
    * @return the teamNumber
+   * @see TournamentTeam#getTeamNumber()
    */
   public int getTeamNumber() {
-    return teamNumber;
+    return team.getTeamNumber();
   }
 
   /**
-   * @param teamName the teamName to set
-   */
-  public void setTeamName(final @Nullable String teamName) {
-    this.teamName = teamName;
-  }
-
-  /**
-   * @return the teamName, never null
+   * @return the teamName
    */
   public String getTeamName() {
-    if (null == teamName) {
-      return "";
-    } else {
-      return teamName;
-    }
+    return team.getTeamName();
   }
 
   /**
-   * @param organization the organization to set
-   */
-  public void setOrganization(final @Nullable String organization) {
-    this.organization = organization;
-  }
-
-  /**
-   * @return the organization, never null
+   * @return the organization
+   * @see TournamentTeam#getOrganization()
    */
   public String getOrganization() {
-    if (null == organization) {
-      return "";
-    } else {
-      return organization;
-    }
+    return team.getOrganization();
   }
 
   /**
-   * @param division award group to set
-   */
-  public void setDivision(final @Nullable String division) {
-    this.awardGroup = division;
-  }
-
-  /**
-   * @return the award group, never null
+   * @return the award group
+   * @see TournamentTeam#getAwardGroup()
    */
   public String getAwardGroup() {
-    if (null == awardGroup) {
-      return "";
-    } else {
-      return awardGroup;
-    }
+    return team.getAwardGroup();
   }
 
   /**
-   * @param judge the judging group
-   */
-  public void setJudgingGroup(final @Nullable String judge) {
-    this.judgingGroup = judge;
-  }
-
-  /**
-   * @return the judging group, never null
+   * @return the judging group
+   * @see TournamentTeam#getJudgingGroup()
    */
   public String getJudgingGroup() {
-    if (null == judgingGroup) {
-      return "";
-    } else {
-      return judgingGroup;
-    }
+    return team.getJudgingGroup();
   }
 
   private final HashMap<String, SubjectiveTime> subjectiveTimes = new HashMap<>();
