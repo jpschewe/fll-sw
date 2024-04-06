@@ -174,7 +174,6 @@ function setJudge() {
         judgeID = judgeID.trim().toUpperCase();
 
         subjective_module.addJudge(judgeID);
-        document.getElementById("sync-final-question_cb").checked = false;
         document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
     } else {
         // sync final checkbox with current state of the judge
@@ -182,7 +181,6 @@ function setJudge() {
         if (!judge) {
             throw new Error(`ERROR: Unable to find existing judge with ID ${judgeID}.`)
         }
-        document.getElementById("sync-final-question_cb").checked = judge.finalScores;
         if (judge.finalScores) {
             document.getElementById("side-panel_final-scores").classList.add("fll-sw-button-pressed");
         } else {
@@ -1024,7 +1022,6 @@ function displayPage(header, content, footer) {
 
 function displayPageTop() {
     subjective_module.setCurrentJudgeId(null);
-    document.getElementById("sync-final-question_cb").checked = false;
     document.getElementById("side-panel_final-scores").classList.add("fll-sw-ui-inactive");
     document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
 
@@ -1064,7 +1061,6 @@ function displayPageTop() {
 
 function displayPageChooseJudgingGroup() {
     subjective_module.setCurrentJudgeId(null);
-    document.getElementById("sync-final-question_cb").checked = false;
     document.getElementById("side-panel_final-scores").classList.add("fll-sw-ui-inactive");
     document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
 
@@ -1090,7 +1086,6 @@ function displayPageChooseJudgingGroup() {
 
 function displayPageChooseCategory() {
     subjective_module.setCurrentJudgeId(null);
-    document.getElementById("sync-final-question_cb").checked = false;
     document.getElementById("side-panel_final-scores").classList.add("fll-sw-ui-inactive");
     document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
 
@@ -1117,7 +1112,6 @@ function displayPageChooseCategory() {
 
 function displayPageChooseJudge() {
     subjective_module.setCurrentJudgeId(null);
-    document.getElementById("sync-final-question_cb").checked = false;
     document.getElementById("side-panel_final-scores").classList.add("fll-sw-ui-inactive");
     document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
 
@@ -1368,16 +1362,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const sidePanelFinalScores = document.getElementById("side-panel_final-scores");
     sidePanelFinalScores.addEventListener('click', () => {
-        if (sidePanelFinalScores.classList.contains("fll-sw-button-pressed")) {
-            sidePanelFinalScores.classList.remove("fll-sw-button-pressed");
-            document.getElementById("sync-final-question_cb").checked = false;
-        } else {
-            sidePanelFinalScores.classList.add("fll-sw-button-pressed");
-            document.getElementById("sync-final-question_cb").checked = true;
-        }
+        const syncFinalDialog = document.getElementById("sync-final-question");
+        syncFinalDialog.classList.remove("fll-sw-ui-inactive");
+        sidePanel.classList.remove('open');
     });
 
-    document.getElementById("sync-final-question_go").addEventListener('click', () => {
+    document.getElementById("sync-final-question_yes").addEventListener('click', () => {
         const syncFinalDialog = document.getElementById("sync-final-question");
         syncFinalDialog.classList.add("fll-sw-ui-inactive");
 
@@ -1389,12 +1379,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (judgeId) {
             const judge = subjective_module.getJudge(judgeId);
             if (judge) {
-                judge.finalScores = document.getElementById("sync-final-question_cb").checked;
-                if (judge.finalScores) {
-                    sidePanelFinalScores.classList.add("fll-sw-button-pressed");
-                } else {
-                    sidePanelFinalScores.classList.remove("fll-sw-button-pressed");
-                }
+                judge.finalScores = true;
+                sidePanelFinalScores.classList.add("fll-sw-button-pressed");
                 subjective_module.save();
             } else {
                 throw new Error(`ERROR: Cannot find judge with id ${judgeId} while saving finalScores flag.`);
@@ -1406,6 +1392,12 @@ document.addEventListener("DOMContentLoaded", () => {
         synchronizeData();
     });
 
+    document.getElementById("sync-final-question_no").addEventListener('click', () => {
+        const syncFinalDialog = document.getElementById("sync-final-question");
+        syncFinalDialog.classList.add("fll-sw-ui-inactive");
+    });
+    
+    
     document.getElementById("side-panel_synchronize").addEventListener('click', () => {
         sidePanel.classList.remove('open');
 
@@ -1413,18 +1405,10 @@ document.addEventListener("DOMContentLoaded", () => {
             server_online = true;
             postServerStatusCallback();
 
-            if (subjective_module.getCurrentJudgeId()) {
-                // prompt if scores are final
-                const syncFinalDialog = document.getElementById("sync-final-question");
-                syncFinalDialog.classList.remove("fll-sw-ui-inactive");
-            } else {
-                // no current judge
-
-                // block the user while uploading
-                const waitDialog = document.getElementById("wait-dialog");
-                waitDialog.classList.remove("fll-sw-ui-inactive");
-                synchronizeData();
-            }
+            // block the user while uploading
+            const waitDialog = document.getElementById("wait-dialog");
+            waitDialog.classList.remove("fll-sw-ui-inactive");
+            synchronizeData();
         },
             function() {
                 server_online = false;
