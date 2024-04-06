@@ -57,6 +57,9 @@
                 href='#teams-list'>Enter Scores</a>
         </div>
         <div>
+            <a class='wide fll-sw-button' id='side-panel_final-scores'>Scores are final</a>
+        </div>
+        <div>
             <a class='wide fll-sw-button' id='side-panel_synchronize'>Synchronize</a>
         </div>
         <div>
@@ -408,6 +411,22 @@
     </div>
 
     <!--  end enter score dialogs -->
+
+    <!-- synchronize scores dialogs -->
+    
+    <div class='fll-sw-ui-dialog fll-sw-ui-inactive'
+         id='sync-final-question'>
+      <div>
+        <p>Are all scores final?</p>
+        <p>Comments can still be modified after final scores are
+          submitted, however please notify the head judge if you
+          change scores after submitting final scores.</p>
+        <button type='button' id='sync-final-question_yes'>Yes</button>
+        <button type='button' id='sync-final-question_no'>No</button>
+      </div>
+    </div>
+    
+    <!-- end synchronize scores dialogs -->
 
     <!--  end dialogs -->
 </body>

@@ -59,18 +59,30 @@ public final class JudgeInformation implements Serializable {
     return group;
   }
 
+  private final boolean finalScores;
+
+  /**
+   * @return true if the scores for this judge are final
+   */
+  public boolean isFinalScores() {
+    return finalScores;
+  }
+
   /**
    * @param id {@link #getId()}
    * @param category {@link #getCategory()}
    * @param group {@link #getGroup()}
+   * @param finalScores {@link #isFinalScores()}
    */
   @JsonCreator
   public JudgeInformation(@JsonProperty("id") final String id,
                           @JsonProperty("category") final String category,
-                          @JsonProperty("group") final String group) {
+                          @JsonProperty("group") final String group,
+                          @JsonProperty("finalScores") final boolean finalScores) {
     this.id = id;
     this.category = category;
     this.group = group;
+    this.finalScores = finalScores;
   }
 
   @Override
@@ -109,14 +121,15 @@ public final class JudgeInformation implements Serializable {
     final Collection<JudgeInformation> judges = new LinkedList<JudgeInformation>();
 
     try (
-        PreparedStatement stmt = connection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?")) {
+        PreparedStatement stmt = connection.prepareStatement("SELECT id, category, station, final_scores FROM Judges WHERE Tournament = ?")) {
       stmt.setInt(1, tournament);
       try (ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
           final String id = castNonNull(rs.getString(1));
           final String category = castNonNull(rs.getString(2));
           final String station = castNonNull(rs.getString(3));
-          final JudgeInformation judge = new JudgeInformation(id, category, station);
+          final boolean finalScores = rs.getBoolean(4);
+          final JudgeInformation judge = new JudgeInformation(id, category, station, finalScores);
           judges.add(judge);
         }
       }

@@ -1,10 +1,11 @@
 <%@page import="fll.web.report.SummarizePhase1"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="HEAD_JUDGE, REPORT_GENERATOR" allowSetup="false" />
+<fll-sw:required-roles roles="HEAD_JUDGE, REPORT_GENERATOR"
+    allowSetup="false" />
 
 <%
-    SummarizePhase1.populateContext(request, application, session, pageContext);
+SummarizePhase1.populateContext(request, application, session, pageContext);
 %>
 
 <html>
@@ -54,10 +55,11 @@ div.content table, div.content th, div.content td {
 
                 <p>
                     Below is a list of judges found and what categories
-                    they scored.<b>Note:</b> If there is no schedule
-                    loaded and there are multiple judging groups for an
-                    award group, then the number of teams expected will
-                    be too high.
+                    they scored.
+                    <b>Note:</b>
+                    If there is no schedule loaded and there are
+                    multiple judging groups for an award group, then the
+                    number of teams expected will be too high.
                 </p>
 
                 <c:forEach items="${judgeSummary}" var="entry">
@@ -69,6 +71,7 @@ div.content table, div.content th, div.content td {
                             <th>Judge</th>
                             <th>Num Teams Expected</th>
                             <th>Num Teams Scored</th>
+                            <th>Final Scores</th>
                         </tr>
 
                         <c:forEach items="${entry.value}"
@@ -98,6 +101,15 @@ div.content table, div.content th, div.content td {
                                         <td class='missing-score'>${judgeInfo.numActual}</td>
                                     </c:otherwise>
                                 </c:choose>
+                                <c:choose>
+                                    <c:when
+                                        test="${judgeInfo.finalScores}">
+                                        <td class='good'>YES</td>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <td>NO</td>
+                                    </c:otherwise>
+                                </c:choose>
                             </tr>
                         </c:forEach>
                     </table>
@@ -108,8 +120,8 @@ div.content table, div.content th, div.content td {
                     <p>
                         If this does not look correct, go back to the <a
                             href="../index.jsp">main page and
-                            correct the scores</a>. Otherwise <input
-                            type='submit' value="finish" id='finish' />
+                            correct the scores</a>. Otherwise
+                        <input type='submit' value="finish" id='finish' />
                         the score summarization.
                     </p>
                 </form>

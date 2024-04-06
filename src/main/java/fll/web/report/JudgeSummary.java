@@ -12,6 +12,8 @@ import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.JudgeInformation;
+
 /**
  * Information about how many teams a judge has seen. Used for display when
  * summarizing scores.
@@ -28,6 +30,8 @@ public final class JudgeSummary implements Serializable, Comparable<JudgeSummary
 
   private final int mNumActual;
 
+  private final boolean finalScores;
+
   /**
    * @return the judge, may be null
    */
@@ -43,7 +47,7 @@ public final class JudgeSummary implements Serializable, Comparable<JudgeSummary
   }
 
   /**
-   * @return the judging group name
+   * @return {@link JudgeInformation#getGroup()}
    */
   public String getGroup() {
     return mGroup;
@@ -64,22 +68,32 @@ public final class JudgeSummary implements Serializable, Comparable<JudgeSummary
   }
 
   /**
+   * @return {@link JudgeInformation#isFinalScores()}
+   */
+  public boolean isFinalScores() {
+    return finalScores;
+  }
+
+  /**
    * @param judge {@link #getJudge()}
    * @param category {@link #getCategory()}
    * @param group {@link #getGroup()}
    * @param numExpected {@link #getNumExpected()}
    * @param numActual {@link #getNumActual()}
+   * @param finalScores {@link #isFinalScores()}
    */
   public JudgeSummary(final @Nullable String judge,
                       final String category,
                       final String group,
                       final int numExpected,
-                      final int numActual) {
+                      final int numActual,
+                      final boolean finalScores) {
     mJudge = judge;
     mCategory = category;
     mGroup = group;
     mNumExpected = numExpected;
     mNumActual = numActual;
+    this.finalScores = finalScores;
   }
 
   @Override

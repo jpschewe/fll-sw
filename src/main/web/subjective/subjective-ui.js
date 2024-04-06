@@ -111,7 +111,7 @@ function populateChooseJudge() {
     });
 
 
-    let currentJudge = subjective_module.getCurrentJudge();
+    let currentJudgeId = subjective_module.getCurrentJudgeId();
     let currentJudgeValid = false;
     const seenJudges = [];
     const judges = subjective_module.getPossibleJudges();
@@ -134,7 +134,7 @@ function populateChooseJudge() {
             judgeLabel.appendChild(judgeSpan);
             judgeSpan.innerText = judge.id;
 
-            if (null != currentJudge && currentJudge.id == judge.id) {
+            if (currentJudgeId == judge.id) {
                 currentJudgeValid = true;
                 judgeInput.checked = true;
             }
@@ -160,6 +160,9 @@ function setJudge() {
             judgeID = radio.value;
         }
     }
+    if (null == judgeID) {
+        return;
+    }
 
     if ('new-judge' == judgeID) {
         judgeID = document.getElementById("choose-judge_new-judge-name").value;
@@ -171,9 +174,22 @@ function setJudge() {
         judgeID = judgeID.trim().toUpperCase();
 
         subjective_module.addJudge(judgeID);
+        document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
+    } else {
+        // sync final checkbox with current state of the judge
+        const judge = subjective_module.getJudge(judgeID);
+        if (!judge) {
+            throw new Error(`ERROR: Unable to find existing judge with ID ${judgeID}.`)
+        }
+        if (judge.finalScores) {
+            document.getElementById("side-panel_final-scores").classList.add("fll-sw-button-pressed");
+        } else {
+            document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
+        }
     }
 
-    subjective_module.setCurrentJudge(judgeID);
+    subjective_module.setCurrentJudgeId(judgeID);
+    document.getElementById("side-panel_final-scores").classList.remove("fll-sw-ui-inactive");
 
     location.href = '#teams-list';
 }
@@ -254,7 +270,7 @@ function createNewScore() {
     score.noShow = false;
     score.standardSubScores = {};
     score.enumSubScores = {};
-    score.judge = subjective_module.getCurrentJudge().id;
+    score.judge = subjective_module.getCurrentJudgeId;
     score.teamNumber = subjective_module.getCurrentTeam().teamNumber;
     score.note = null;
     score.goalComments = {};
@@ -915,12 +931,12 @@ function updateMainHeader() {
     }
     document.getElementById("header-main_category-name").innerText = categoryTitle;
 
-    const judge = subjective_module.getCurrentJudge();
+    const judgeId = subjective_module.getCurrentJudgeId();
     let judgeName;
-    if (null == judge) {
-        judgeName = "No Judge";
+    if (judgeId) {
+        judgeName = judgeId;
     } else {
-        judgeName = judge.id;
+        judgeName = "No Judge";
     }
     document.getElementById("header-main_judge-name").innerText = judgeName;
 }
@@ -1005,6 +1021,11 @@ function displayPage(header, content, footer) {
 }
 
 function displayPageTop() {
+    subjective_module.setCurrentJudgeId(null);
+    document.getElementById("side-panel_final-scores").classList.add("fll-sw-ui-inactive");
+    document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
+
+
     if (!server_online) {
         document.getElementById('alert-dialog_text').innerText = "Server is offline, cannot reload the application.";
         document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
@@ -1039,6 +1060,10 @@ function displayPageTop() {
 }
 
 function displayPageChooseJudgingGroup() {
+    subjective_module.setCurrentJudgeId(null);
+    document.getElementById("side-panel_final-scores").classList.add("fll-sw-ui-inactive");
+    document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
+
     document.getElementById("header-main_title").innerText = "Choose judging group";
 
     displayPage(document.getElementById("header-main"), document.getElementById("content-choose-judging-group"), document.getElementById("footer-main"));
@@ -1060,6 +1085,11 @@ function displayPageChooseJudgingGroup() {
 }
 
 function displayPageChooseCategory() {
+    subjective_module.setCurrentJudgeId(null);
+    document.getElementById("side-panel_final-scores").classList.add("fll-sw-ui-inactive");
+    document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
+
+
     document.getElementById("header-main_title").innerText = "Choose category";
 
     displayPage(document.getElementById("header-main"), document.getElementById("content-choose-category"), document.getElementById("footer-main"));
@@ -1081,6 +1111,10 @@ function displayPageChooseCategory() {
 }
 
 function displayPageChooseJudge() {
+    subjective_module.setCurrentJudgeId(null);
+    document.getElementById("side-panel_final-scores").classList.add("fll-sw-ui-inactive");
+    document.getElementById("side-panel_final-scores").classList.remove("fll-sw-button-pressed");
+
     document.getElementById("header-main_title").innerText = "Choose judge";
 
     displayPage(document.getElementById("header-main"), document.getElementById("content-choose-judge"), document.getElementById("footer-main"));
@@ -1253,6 +1287,62 @@ function displayPageEnterScore() {
     installWarnOnReload();
 }
 
+function synchronizeData() {
+    const waitDialog = document.getElementById("wait-dialog");
+
+    subjective_module.uploadData(function(result) {
+        // scoresSuccess
+        document.getElementById('alert-dialog_text').innerText = "Uploaded " + result.numModified + " scores."
+            + result.message;
+        document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+    }, //
+        function(result) {
+            // scoresFail
+
+            let message;
+            if (null == result) {
+                message = "Unknown server error";
+            } else {
+                message = result.message;
+            }
+
+            document.getElementById('alert-dialog_text').innerText = "Failed to upload scores: " + message;
+            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+        }, //
+        function(result) {
+            // judgesSuccess
+            subjective_module.log("Judges modified: " + result.numModifiedJudges
+                + " new: " + result.numNewJudges);
+        }
+
+        ,//
+        function(result) {
+            // judgesFail
+            let message;
+            if (null == result) {
+                message = "Unknown server error";
+            } else {
+                message = result.message;
+            }
+
+            document.getElementById('alert-dialog_text').innerText = "Failed to upload judges: " + message
+            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+        }, //
+        function() {
+            // loadSuccess
+            populateChooseJudgingGroup();
+            waitDialog.classList.add("fll-sw-ui-inactive");
+        }, //
+        function(message) {
+            // loadFail
+            populateChooseJudgingGroup();
+
+            waitDialog.classList.add("fll-sw-ui-inactive");
+
+            document.getElementById('alert-dialog_text').innerText = "Failed to load scores from server: " + message
+            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+        });
+}
 
 document.addEventListener("DOMContentLoaded", () => {
     const sidePanel = document.getElementById("side-panel");
@@ -1270,75 +1360,55 @@ document.addEventListener("DOMContentLoaded", () => {
         sidePanel.classList.remove('open');
     });
 
-    document.getElementById("side-panel_synchronize").addEventListener('click', () => {
+    const sidePanelFinalScores = document.getElementById("side-panel_final-scores");
+    sidePanelFinalScores.addEventListener('click', () => {
+        const syncFinalDialog = document.getElementById("sync-final-question");
+        syncFinalDialog.classList.remove("fll-sw-ui-inactive");
         sidePanel.classList.remove('open');
+    });
 
-        if (!server_online) {
-            document.getElementById('alert-dialog_text').innerText = "Server is offline, cannot synchronize.";
-            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
-            return;
-        }
+    document.getElementById("sync-final-question_yes").addEventListener('click', () => {
+        const syncFinalDialog = document.getElementById("sync-final-question");
+        syncFinalDialog.classList.add("fll-sw-ui-inactive");
 
-
+        // block the user while uploading
         const waitDialog = document.getElementById("wait-dialog");
         waitDialog.classList.remove("fll-sw-ui-inactive");
+
+        const judgeId = subjective_module.getCurrentJudgeId();
+        if (judgeId) {
+            const judge = subjective_module.getJudge(judgeId);
+            if (judge) {
+                judge.finalScores = true;
+                sidePanelFinalScores.classList.add("fll-sw-button-pressed");
+                subjective_module.save();
+            } else {
+                throw new Error(`ERROR: Cannot find judge with id ${judgeId} while saving finalScores flag.`);
+            }
+        } else {
+            throw new Error("ERROR: No current judge found, cannot save finalScores flag.");
+        }
+
+        synchronizeData();
+    });
+
+    document.getElementById("sync-final-question_no").addEventListener('click', () => {
+        const syncFinalDialog = document.getElementById("sync-final-question");
+        syncFinalDialog.classList.add("fll-sw-ui-inactive");
+    });
+    
+    
+    document.getElementById("side-panel_synchronize").addEventListener('click', () => {
+        sidePanel.classList.remove('open');
 
         subjective_module.checkServerStatus(true, function() {
             server_online = true;
             postServerStatusCallback();
 
-            subjective_module.uploadData(function(result) {
-                // scoresSuccess
-                document.getElementById('alert-dialog_text').innerText = "Uploaded " + result.numModified + " scores."
-                    + result.message;
-                document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
-            }, //
-                function(result) {
-                    // scoresFail
-
-                    let message;
-                    if (null == result) {
-                        message = "Unknown server error";
-                    } else {
-                        message = result.message;
-                    }
-
-                    document.getElementById('alert-dialog_text').innerText = "Failed to upload scores: " + message;
-                    document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
-                }, //
-                function(result) {
-                    // judgesSuccess
-                    subjective_module.log("Judges modified: " + result.numModifiedJudges
-                        + " new: " + result.numNewJudges);
-                }
-
-                ,//
-                function(result) {
-                    // judgesFail
-                    let message;
-                    if (null == result) {
-                        message = "Unknown server error";
-                    } else {
-                        message = result.message;
-                    }
-
-                    document.getElementById('alert-dialog_text').innerText = "Failed to upload judges: " + message
-                    document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
-                }, //
-                function() {
-                    // loadSuccess
-                    populateChooseJudgingGroup();
-                    waitDialog.classList.add("fll-sw-ui-inactive");
-                }, //
-                function(message) {
-                    // loadFail
-                    populateChooseJudgingGroup();
-
-                    waitDialog.classList.add("fll-sw-ui-inactive");
-
-                    document.getElementById('alert-dialog_text').innerText = "Failed to load scores from server: " + message
-                    document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
-                });
+            // block the user while uploading
+            const waitDialog = document.getElementById("wait-dialog");
+            waitDialog.classList.remove("fll-sw-ui-inactive");
+            synchronizeData();
         },
             function() {
                 server_online = false;

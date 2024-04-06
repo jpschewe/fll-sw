@@ -14,12 +14,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -30,7 +24,12 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
-import net.mtu.eggplant.util.sql.SQLFunctions;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Commit judges information.
@@ -57,9 +56,7 @@ public class CommitJudges extends BaseFLLServlet {
     }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       commitData(session, connection, Queries.getCurrentTournament(connection));
 
@@ -70,8 +67,6 @@ public class CommitJudges extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }
@@ -87,22 +82,21 @@ public class CommitJudges extends BaseFLLServlet {
                                  final Connection connection,
                                  final int tournament)
       throws SQLException, IOException {
-    PreparedStatement prep = null;
-    try {
-      // save old judge information
-      final Collection<JudgeInformation> oldJudges = JudgeInformation.getJudges(connection, tournament);
-      final Set<JudgeInformation> oldJudgeInfo = new HashSet<>();
-      oldJudgeInfo.addAll(oldJudges);
+    // save old judge information
+    final Collection<JudgeInformation> oldJudges = JudgeInformation.getJudges(connection, tournament);
+    final Set<JudgeInformation> oldJudgeInfo = new HashSet<>();
+    oldJudgeInfo.addAll(oldJudges);
 
-      // delete old data in judges
-      prep = connection.prepareStatement("DELETE FROM Judges where Tournament = ?");
-      prep.setInt(1, tournament);
-      prep.executeUpdate();
-      SQLFunctions.close(prep);
-      prep = null;
+    // delete old data in judges
+    try (PreparedStatement deleteJudges = connection.prepareStatement("DELETE FROM Judges where Tournament = ?")) {
+      deleteJudges.setInt(1, tournament);
+      deleteJudges.executeUpdate();
+    }
 
-      prep = connection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES(?, ?, ?, ?)");
-      prep.setInt(4, tournament);
+    final Set<JudgeInformation> newJudgeInfo = new HashSet<>();
+    try (
+        PreparedStatement insertJudge = connection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES(?, ?, ?, ?)")) {
+      insertJudge.setInt(4, tournament);
 
       // can't put types inside a session
       @SuppressWarnings("unchecked")
@@ -110,7 +104,6 @@ public class CommitJudges extends BaseFLLServlet {
                                                                                         GatherJudgeInformation.JUDGES_KEY,
                                                                                         Collection.class);
 
-      final Set<JudgeInformation> newJudgeInfo = new HashSet<>();
       for (final JudgeInformation info : judges) {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Doing insert for id: "
@@ -123,25 +116,24 @@ public class CommitJudges extends BaseFLLServlet {
 
         newJudgeInfo.add(info);
 
-        prep.setString(1, info.getId());
-        prep.setString(2, info.getCategory());
-        prep.setString(3, info.getGroup());
-        prep.executeUpdate();
+        insertJudge.setString(1, info.getId());
+        insertJudge.setString(2, info.getCategory());
+        insertJudge.setString(3, info.getGroup());
+        insertJudge.executeUpdate();
       }
+    }
 
-      // figure out which ones are no longer there and remove all of their old
-      // scores
-      oldJudgeInfo.removeAll(newJudgeInfo);
-      for (final JudgeInformation oldInfo : oldJudgeInfo) {
-        prep = connection.prepareStatement(String.format("DELETE FROM %s WHERE Judge = ? AND Tournament = ?",
-                                                         oldInfo.getCategory()));
-        prep.setString(1, oldInfo.getId());
-        prep.setInt(2, tournament);
-        prep.executeUpdate();
+    // figure out which ones are no longer there and remove all of their old
+    // scores
+    oldJudgeInfo.removeAll(newJudgeInfo);
+    for (final JudgeInformation oldInfo : oldJudgeInfo) {
+      try (
+          PreparedStatement deleteScores = connection.prepareStatement(String.format("DELETE FROM %s WHERE Judge = ? AND Tournament = ?",
+                                                                                     oldInfo.getCategory()))) {
+        deleteScores.setInt(2, tournament);
+        deleteScores.setString(1, oldInfo.getId());
+        deleteScores.executeUpdate();
       }
-
-    } finally {
-      SQLFunctions.close(prep);
     }
   }
 }
