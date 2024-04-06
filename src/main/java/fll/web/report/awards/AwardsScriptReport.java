@@ -302,9 +302,13 @@ public class AwardsScriptReport extends BaseFLLServlet {
   /**
    * Get the award groups in order, this does not contain groups created for
    * advancing teams.
+   *
+   * @param connection database connection
+   * @param tournament the tournament to get the order or
+   * @return unmodifiable list of the award groups in sorted order
    */
-  private List<String> getAwardGroupOrder(final Connection connection,
-                                          final Tournament tournament)
+  public static List<String> getAwardGroupOrder(final Connection connection,
+                                                final Tournament tournament)
       throws SQLException {
     final Collection<String> allAwardGroups = Queries.getAwardGroups(connection, tournament.getTournamentID());
     final List<String> sortedAwardGroups = AwardsReportSortedGroupsServlet.getAwardGroupsSorted(connection,
@@ -642,9 +646,9 @@ public class AwardsScriptReport extends BaseFLLServlet {
           final boolean tie = teamsInPlace.size() > 1;
           final String placeTitle = String.format("%d%s Place Winner%s", place, suffixForPlace(place), tie ? "s" : "");
 
-          // TODO: make this cell yellow background?
           final Element placeCell = FOPUtils.createTableCell(document, null, placeTitle);
           row.appendChild(placeCell);
+          placeCell.setAttribute("background-color", "yellow");
 
           final Element teamCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
           row.appendChild(teamCell);
@@ -824,9 +828,9 @@ public class AwardsScriptReport extends BaseFLLServlet {
       final boolean tie = winnersInPlace.size() > 1;
       final String placeTitle = String.format("%d%s Place Winner%s", place, suffixForPlace(place), tie ? "s" : "");
 
-      // TODO: make this cell yellow background?
       final Element placeCell = FOPUtils.createTableCell(document, null, placeTitle);
       row.appendChild(placeCell);
+      placeCell.setAttribute("background-color", "yellow");
 
       final Element teamCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
       row.appendChild(teamCell);
@@ -907,9 +911,9 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final Element row = FOPUtils.createTableRow(document);
     tableBody.appendChild(row);
 
-    // TODO: make this cell yellow background?
     final Element placeCell = FOPUtils.createTableCell(document, null, "The finalists are:");
     row.appendChild(placeCell);
+    placeCell.setAttribute("background-color", "yellow");
 
     final Element teamCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
     row.appendChild(teamCell);

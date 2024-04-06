@@ -25,7 +25,6 @@ import fll.web.Welcome;
 public final class UserImages {
 
   private UserImages() {
-    // TODO Auto-generated constructor stub
   }
 
   private static final String DIRECTORY_NAME = "user-images";

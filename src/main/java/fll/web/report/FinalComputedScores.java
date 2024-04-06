@@ -53,6 +53,7 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.web.playoff.DatabaseTeamScore;
+import fll.web.report.awards.AwardsScriptReport;
 import fll.xml.ChallengeDescription;
 import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
@@ -315,7 +316,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     if (ALL_GROUP_NAME.equals(groupName)) {
       final Collection<String> groups;
       if (ReportSelector.AWARD_GROUP.equals(selector)) {
-        groups = Queries.getAwardGroups(connection, tournament.getTournamentID());
+        groups = AwardsScriptReport.getAwardGroupOrder(connection, tournament);
       } else if (ReportSelector.JUDGING_STATION.equals(selector)) {
         groups = Queries.getJudgingStations(connection, tournament.getTournamentID());
       } else {

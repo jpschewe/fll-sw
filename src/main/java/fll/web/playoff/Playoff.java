@@ -1881,8 +1881,20 @@ public final class Playoff {
                                          final int playoffRound,
                                          final int dbLine)
       throws SQLException {
+    final Tournament tournament = Tournament.findTournamentByID(connection, tournamentId);
+    
     LOGGER.trace("Assigning table label for bracket: {} tournament: {} playoffRound: {} dbLine: {}", bracketName,
                  tournamentId, playoffRound, dbLine);
+
+    // check for Bye and skip table assignment if this is a bye
+    // get the 2 teams involved in the playoffRound
+    if (Team.BYE_TEAM_NUMBER == getPlayoffTeamNumber(connection, tournament, bracketName, playoffRound, dbLine)) {
+      LOGGER.trace("Not assigning table to bye round (this team).");
+      return;
+    } else if(Team.BYE_TEAM_NUMBER == getPlayoffTeamNumber(connection, tournament, bracketName, playoffRound, getSiblingDbLine(dbLine))) {
+      LOGGER.trace("Not assigning table to bye round (sibling team).");
+      return;
+    }
 
     final boolean oldAutoCommit = connection.getAutoCommit();
 

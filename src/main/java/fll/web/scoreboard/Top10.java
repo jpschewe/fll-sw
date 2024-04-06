@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.util.FP;
 import fll.web.report.FinalComputedScores;
+import fll.web.report.awards.AwardsScriptReport;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
 import fll.xml.WinnerType;
@@ -69,8 +71,12 @@ public final class Top10 {
   public static Map<String, List<ScoreEntry>> getTableAsMapByAwardGroup(final Connection connection,
                                                                         final ChallengeDescription description)
       throws SQLException {
-    final Map<String, List<ScoreEntry>> data = new HashMap<>();
-    final List<String> awardGroups = Queries.getAwardGroups(connection);
+    final Tournament tournament = Tournament.getCurrentTournament(connection);
+
+    // use a LinkedHashMap so that the iteration order matches the sorted order of
+    // the award groups
+    final Map<String, List<ScoreEntry>> data = new LinkedHashMap<>();
+    final List<String> awardGroups = AwardsScriptReport.getAwardGroupOrder(connection, tournament);
     for (final String ag : awardGroups) {
       final List<ScoreEntry> scores = new LinkedList<>();
       processScoresForAwardGroup(connection, description, ag, (teamName,
