@@ -728,6 +728,11 @@ public final class ImportDB {
       upgrade41To42(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 43) {
+      upgrade42To43(connection);
+    }
+
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -1479,6 +1484,21 @@ public final class ImportDB {
     }
 
     setDBVersion(connection, 42);
+  }
+
+  /**
+   * Add wave column to TournamentTeams table.
+   */
+  private static void upgrade42To43(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 42 to 43");
+
+    try (Statement stmt = connection.createStatement()) {
+      if (!checkForColumnInTable(connection, "TournamentTeams", "wave")) {
+        stmt.executeUpdate("ALTER TABLE TournamentTeams ADD COLUMN wave varchar(32) DEFAULT NULL");
+      }
+    }
+
+    setDBVersion(connection, 43);
   }
 
   /**
@@ -2533,8 +2553,8 @@ public final class ImportDB {
     }
 
     try (
-        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT TeamNumber, event_division, judging_station FROM TournamentTeams WHERE Tournament = ?");
-        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station) VALUES (?, ?, ?, ?)")) {
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT TeamNumber, event_division, judging_station, wave FROM TournamentTeams WHERE Tournament = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station, wave) VALUES (?, ?, ?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
       try (ResultSet sourceRS = sourcePrep.executeQuery()) {
@@ -2545,9 +2565,11 @@ public final class ImportDB {
             final String judgingStation = sourceRS.getString(3);
             final String actualEventDivision = eventDivision == null ? GenerateDB.DEFAULT_TEAM_DIVISION : eventDivision;
             final String actualJudgingStation = judgingStation == null ? actualEventDivision : judgingStation;
+            final @Nullable String wave = sourceRS.getString(4);
             destPrep.setInt(2, teamNumber);
             destPrep.setString(3, actualEventDivision);
             destPrep.setString(4, actualJudgingStation);
+            destPrep.setString(5, wave);
             destPrep.executeUpdate();
           }
         }
