@@ -94,6 +94,7 @@ public final class Queries {
         + ", Teams.TeamName"//
         + ", TournamentTeams.event_division" //
         + ", TournamentTeams.judging_station" //
+        + ", TournamentTeams.wave" //
         + " FROM Teams, TournamentTeams" //
         + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber"//
         + " AND TournamentTeams.Tournament = ?")) {
@@ -105,8 +106,9 @@ public final class Queries {
           final String name = castNonNull(rs.getString("TeamName"));
           final String eventDivision = castNonNull(rs.getString("event_division"));
           final String judgingStation = castNonNull(rs.getString("judging_station"));
+          final @Nullable String wave = rs.getString("wave");
 
-          final TournamentTeam team = new TournamentTeam(teamNumber, org, name, eventDivision, judgingStation);
+          final TournamentTeam team = new TournamentTeam(teamNumber, org, name, eventDivision, judgingStation, wave);
           tournamentTeams.put(teamNumber, team);
         }
       }

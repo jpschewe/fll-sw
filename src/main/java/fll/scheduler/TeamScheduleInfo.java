@@ -176,6 +176,13 @@ public final class TeamScheduleInfo implements Serializable {
     return team.getJudgingGroup();
   }
 
+  /**
+   * @return {@link TournamentTeam#getWave()}
+   */
+  public @Nullable String getWave() {
+    return team.getWave();
+  }
+
   private final HashMap<String, SubjectiveTime> subjectiveTimes = new HashMap<>();
 
   /**

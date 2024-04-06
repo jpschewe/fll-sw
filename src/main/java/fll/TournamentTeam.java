@@ -33,15 +33,18 @@ public class TournamentTeam extends Team {
    * @param name {@link #getTeamName()}
    * @param awardGroup {@link #getAwardGroup()}
    * @param judgingGroup {@link #getJudgingGroup()}
+   * @param wave {@link #getWave()}
    */
   public TournamentTeam(@JsonProperty("teamNumber") final int teamNumber,
                         @JsonProperty("organization") final @Nullable String org,
                         @JsonProperty("teamName") final String name,
                         @JsonProperty("awardGroup") final String awardGroup,
-                        @JsonProperty("judgingGroup") final String judgingGroup) {
+                        @JsonProperty("judgingGroup") final String judgingGroup,
+                        @JsonProperty("wave") final @Nullable String wave) {
     super(teamNumber, org, name);
     this.awardGroup = awardGroup;
     this.judgingGroup = judgingGroup;
+    this.wave = wave;
   }
 
   private final String awardGroup;
@@ -60,6 +63,15 @@ public class TournamentTeam extends Team {
    */
   public String getJudgingGroup() {
     return judgingGroup;
+  }
+
+  private final @Nullable String wave;
+
+  /**
+   * @return the wave for the team
+   */
+  public @Nullable String getWave() {
+    return wave;
   }
 
   /**
@@ -114,6 +126,7 @@ public class TournamentTeam extends Team {
         + ", Teams.TeamName"//
         + ", TournamentTeams.event_division" //
         + ", TournamentTeams.judging_station" //
+        + ", TournamentTeams.wave" //
         + " FROM Teams, TournamentTeams" //
         + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber"//
         + " AND TournamentTeams.Tournament = ?" //
@@ -126,8 +139,9 @@ public class TournamentTeam extends Team {
           final String name = castNonNull(rs.getString(2));
           final String awardGroup = castNonNull(rs.getString(3));
           final String judgingGroup = castNonNull(rs.getString(4));
+          final @Nullable String wave = rs.getString(5);
 
-          final TournamentTeam x = new TournamentTeam(teamNumber, org, name, awardGroup, judgingGroup);
+          final TournamentTeam x = new TournamentTeam(teamNumber, org, name, awardGroup, judgingGroup, wave);
           return x;
         } else {
           throw new IllegalArgumentException("Team "
@@ -143,6 +157,6 @@ public class TournamentTeam extends Team {
    * Each field has a non-empty value.
    */
   public static final TournamentTeam SAMPLE_TEAM = new TournamentTeam(1, "Some Org", "Some name", "Some award group",
-                                                                     "A judging group");
+                                                                      "A judging group", "wave 1");
 
 }

@@ -1169,7 +1169,7 @@ public class TournamentSchedule implements Serializable {
       final TournamentTeam team = new TournamentTeam(teamNumber, null == org ? "" : org,
                                                      null == name ? "" : ci.getTeamName(line),
                                                      null == awardGroup ? "" : awardGroup,
-                                                     null == judgingGroup ? "" : judgingGroup);
+                                                     null == judgingGroup ? "" : judgingGroup, null);
       final TeamScheduleInfo ti = new TeamScheduleInfo(team);
 
       for (final CategoryColumnMapping mapping : ci.getSubjectiveColumnMappings()) {
