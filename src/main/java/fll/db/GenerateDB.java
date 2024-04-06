@@ -841,7 +841,7 @@ public final class GenerateDB {
       if (createConstraints) {
         sql.append(" ,CONSTRAINT schedule_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
         sql.append(" ,CONSTRAINT schedule_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
-        sql.append(" ,CONSTRAINT schedule_fk3 FOREITN KEY(tournament, team_number) REFERENCES TournamentTeams(tournament, team_number)");
+        sql.append(" ,CONSTRAINT schedule_fk3 FOREIGN KEY(tournament, team_number) REFERENCES TournamentTeams(tournament, team_number)");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
