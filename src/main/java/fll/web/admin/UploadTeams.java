@@ -534,7 +534,8 @@ public final class UploadTeams extends BaseFLLServlet {
           + eventDivisionColumn);
       sql.append(", "
           + judgingStationColumn);
-      if (null != waveColumn) {
+
+      if (!StringUtils.isBlank(waveColumn)) {
         sql.append(", "
             + waveColumn);
       }
@@ -564,7 +565,7 @@ public final class UploadTeams extends BaseFLLServlet {
           }
 
           final @Nullable String wave;
-          if (null != waveColumn) {
+          if (!StringUtils.isBlank(waveColumn)) {
             wave = rs.getString(5);
           } else {
             wave = null;
