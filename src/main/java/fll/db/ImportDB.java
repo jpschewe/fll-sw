@@ -2034,11 +2034,8 @@ public final class ImportDB {
       boolean needsExecute = false;
       while (sourceRS.next()) {
         for (int i = 1; i <= columnCount; i++) {
-          Object sourceObj = sourceRS.getObject(i
+          final Object sourceObj = sourceRS.getObject(i
               + sourceOffset);
-          if ("".equals(sourceObj)) {
-            sourceObj = null;
-          }
           destPrep.setObject(i
               + destOffset, sourceObj);
         }
