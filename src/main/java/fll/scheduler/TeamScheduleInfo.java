@@ -157,7 +157,12 @@ public final class TeamScheduleInfo implements Serializable {
    * @see TournamentTeam#getOrganization()
    */
   public String getOrganization() {
-    return team.getOrganization();
+    final String org = team.getOrganization();
+    if (null == org) {
+      return "";
+    } else {
+      return org;
+    }
   }
 
   /**

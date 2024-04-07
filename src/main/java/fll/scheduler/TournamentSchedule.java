@@ -1166,8 +1166,7 @@ public class TournamentSchedule implements Serializable {
       final @Nullable String name = ci.getTeamName(line);
       final @Nullable String awardGroup = ci.getAwardGroup(line);
       final @Nullable String judgingGroup = ci.getJudgingGroup(line);
-      final TournamentTeam team = new TournamentTeam(teamNumber, null == org ? "" : org,
-                                                     null == name ? "" : ci.getTeamName(line),
+      final TournamentTeam team = new TournamentTeam(teamNumber, null == org ? "" : org, null == name ? "" : name,
                                                      null == awardGroup ? "" : awardGroup,
                                                      null == judgingGroup ? "" : judgingGroup, null);
       final TeamScheduleInfo ti = new TeamScheduleInfo(team);
