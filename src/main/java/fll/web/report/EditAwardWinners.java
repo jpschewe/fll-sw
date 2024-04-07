@@ -8,7 +8,6 @@ package fll.web.report;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,7 +28,6 @@ import fll.db.OverallAwardWinner;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
-import fll.web.report.awards.AwardsReport;
 import fll.web.report.awards.AwardsScriptReport;
 import fll.web.report.awards.ChampionshipCategory;
 import fll.xml.ChallengeDescription;
