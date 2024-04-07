@@ -1506,7 +1506,8 @@ public class GreedySolver {
           + 1);
     }
 
-    // TODO 12/27/2021 JPS - This assumes that the subjective category names match the
+    // TODO 12/27/2021 JPS - This assumes that the subjective category names match
+    // the
     // columns. There is a good chance this isn't going to be true and something
     // smarter should be done using a challenge description
     final Collection<CategoryColumnMapping> subjectiveColumnMappings = solverParameters.getSubjectiveStations().stream() //
@@ -1517,7 +1518,8 @@ public class GreedySolver {
     return new TournamentSchedule.ColumnInformation(0, createHeaderRow(), TournamentSchedule.TEAM_NUMBER_HEADER,
                                                     TournamentSchedule.ORGANIZATION_HEADER,
                                                     TournamentSchedule.TEAM_NAME_HEADER, null,
-                                                    TournamentSchedule.JUDGE_GROUP_HEADER, subjectiveColumnMappings,
+                                                    TournamentSchedule.JUDGE_GROUP_HEADER,
+                                                    /* solver doesn't handle wave */null, subjectiveColumnMappings,
                                                     perfColumn, perfTableColumn, new String[0], new String[0]);
   }
 

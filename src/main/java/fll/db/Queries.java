@@ -214,6 +214,35 @@ public final class Queries {
   }
 
   /**
+   * Get the list of waves for the specified tournament as a List of
+   * Strings.
+   *
+   * @param connection database connection
+   * @param tournament the tournament to get the waves for
+   * @return the waves
+   * @throws SQLException on a database error
+   */
+  public static List<String> getWaves(final Connection connection,
+                                      final int tournament)
+      throws SQLException {
+    final List<String> result = new LinkedList<>();
+
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT DISTINCT wave FROM TournamentTeams WHERE tournament = ? ORDER BY wave")) {
+      prep.setInt(1, tournament);
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final @Nullable String wave = rs.getString(1);
+          if (null != wave) {
+            result.add(wave);
+          }
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
    * Figure out the next run number for teamNumber. Does not ignore unverified
    * scores.
    * 
@@ -1503,6 +1532,7 @@ public final class Queries {
    * @param tournament the tournament id of the tournament to be added to
    * @param eventDivision the event division the team is in for this tournament
    * @param judgingStation the judging station for the team in this tournament
+   * @param wave the wave for the team in this tournament
    * @throws SQLException if a database problem occurs, including the team
    *           already being in the tournament
    */
@@ -1510,14 +1540,16 @@ public final class Queries {
                                          final int teamNumber,
                                          final int tournament,
                                          final String eventDivision,
-                                         final String judgingStation)
+                                         final String judgingStation,
+                                         final @Nullable String wave)
       throws SQLException {
     try (
-        PreparedStatement prep = connection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station) VALUES (?, ?, ?, ?)")) {
+        PreparedStatement prep = connection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station, wave) VALUES (?, ?, ?, ?, ?)")) {
       prep.setInt(1, tournament);
       prep.setInt(2, teamNumber);
       prep.setString(3, eventDivision);
       prep.setString(4, judgingStation);
+      prep.setString(5, wave);
       prep.executeUpdate();
     }
 

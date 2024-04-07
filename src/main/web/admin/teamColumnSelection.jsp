@@ -29,6 +29,7 @@ fll.web.admin.TeamColumnSelection.populateContext(session, pageContext);
   const ORGANIZATION_HEADER = "${ORGANIZATION_HEADER}";
   const AWARD_GROUP_HEADER = "${AWARD_GROUP_HEADER}";
   const JUDGE_GROUP_HEADER = "${JUDGE_GROUP_HEADER}";
+  const WAVE_HEADER = "${WAVE_HEADER}";
 </script>
 
 </head>
@@ -130,6 +131,17 @@ fll.web.admin.TeamColumnSelection.populateContext(session, pageContext);
                 <td>Text - 32 characters</td>
                 <td>
                     <select id='judgingGroup' name='judging_station'>
+                        <option value='' selected>None</option>
+                        ${columnSelectOptions}
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Wave</td>
+                <td>Text - 32 characters</td>
+                <td>
+                    <select id='wave' name='wave'>
                         <option value='' selected>None</option>
                         ${columnSelectOptions}
                     </select>

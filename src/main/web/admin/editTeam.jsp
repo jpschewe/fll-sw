@@ -193,6 +193,7 @@ document.getElementById("judging_station_${tournament.tournamentID}").addEventLi
                             <th>Tournament</th>
                             <th>Award Group</th>
                             <th>Judging Group</th>
+                            <th>Wave</th>
                         </tr>
 
                         <c:forEach items='${tournaments}'
@@ -262,6 +263,31 @@ document.getElementById("judging_station_${tournament.tournamentID}").addEventLi
                                     </select>
                                 </td>
 
+                                <td>
+                                    <!--  wave -->
+                                    <select
+                                        name="wave_${tournament.tournamentID }"
+                                        id="wave_${tournament.tournamentID }">
+                                        <c:forEach
+                                            items="${tournamentWaves[tournament.tournamentID] }"
+                                            var="wave">
+
+                                            <c:choose>
+                                                <c:when
+                                                    test="${currentWaves[tournament.tournamentID] eq wave}">
+                                                    <option
+                                                        value="${wave}"
+                                                        selected>${wave}</option>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <option
+                                                        value="${wave}">${wave}</option>
+                                                </c:otherwise>
+                                            </c:choose>
+
+                                        </c:forEach>
+                                    </select>
+                                </td>
 
                             </tr>
 

@@ -155,6 +155,8 @@ public class CommitTeam extends BaseFLLServlet {
                   + tournament.getTournamentID());
               final String judgingGroup = WebUtils.getNonNullRequestParameter(request, "judging_station_"
                   + tournament.getTournamentID());
+              final String wave = WebUtils.getNonNullRequestParameter(request, "wave_"
+                  + tournament.getTournamentID());
 
               if (!previouslyAssignedTournaments.contains(tournament.getTournamentID())) {
                 if (LOGGER.isDebugEnabled()) {
@@ -166,7 +168,7 @@ public class CommitTeam extends BaseFLLServlet {
 
                 // add to tournament
                 Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
-                                            judgingGroup);
+                                            judgingGroup, StringUtils.isBlank(wave) ? null : wave);
               } else {
                 // just update the division and judging station information
 

@@ -1171,9 +1171,10 @@ public class TournamentSchedule implements Serializable {
       final @Nullable String name = ci.getTeamName(line);
       final @Nullable String awardGroup = ci.getAwardGroup(line);
       final @Nullable String judgingGroup = ci.getJudgingGroup(line);
+      final @Nullable String wave = ci.getWave(line);
       final TournamentTeam team = new TournamentTeam(teamNumber, null == org ? "" : org, null == name ? "" : name,
                                                      null == awardGroup ? "" : awardGroup,
-                                                     null == judgingGroup ? "" : judgingGroup, null);
+                                                     null == judgingGroup ? "" : judgingGroup, wave);
       final TeamScheduleInfo ti = new TeamScheduleInfo(team);
 
       for (final CategoryColumnMapping mapping : ci.getSubjectiveColumnMappings()) {
@@ -1539,6 +1540,16 @@ public class TournamentSchedule implements Serializable {
       return getValue(line, judgeGroupColumn);
     }
 
+    private final int waveColumn;
+
+    /**
+     * @param line the line to parse
+     * @return the wave column value, null if column cannot be found
+     */
+    public @Nullable String getWave(final @Nullable String[] line) {
+      return getValue(line, waveColumn);
+    }
+
     private final int[] perfColumn;
 
     /**
@@ -1646,6 +1657,7 @@ public class TournamentSchedule implements Serializable {
       this.teamNameColumn = -1;
       this.awardGroupColumn = -1;
       this.judgeGroupColumn = -1;
+      this.waveColumn = -1;
       this.perfColumn = new int[0];
       this.perfTableColumn = new int[0];
       this.practiceColumn = new int[0];
@@ -1663,6 +1675,7 @@ public class TournamentSchedule implements Serializable {
      * @param awardGroupColumn {@link #getAwardGroup(String[])}
      * @param subjectiveColumnMappings {@link #getSubjectiveColumnMappings()}
      * @param judgeGroupColumn {@link #getJudgingGroup(String[])}
+     * @param waveColumn {@link #getWave(String[])}
      * @param perfColumn {@link #getPerf(String[], int)}
      * @param perfTableColumn {@link #getPerfTable(String[], int)}
      * @param practiceColumn {@link #getPractice(String[], int)}
@@ -1680,6 +1693,7 @@ public class TournamentSchedule implements Serializable {
                              final @Nullable String teamNameColumn,
                              final @Nullable String awardGroupColumn,
                              final @Nullable String judgeGroupColumn,
+                             final @Nullable String waveColumn,
                              final Collection<CategoryColumnMapping> subjectiveColumnMappings,
                              final String[] perfColumn,
                              final String[] perfTableColumn,
@@ -1700,6 +1714,7 @@ public class TournamentSchedule implements Serializable {
       this.teamNameColumn = findColumnIndex(headerLine, teamNameColumn);
       this.awardGroupColumn = findColumnIndex(headerLine, awardGroupColumn);
       this.judgeGroupColumn = findColumnIndex(headerLine, judgeGroupColumn);
+      this.waveColumn = findColumnIndex(headerLine, waveColumn);
 
       this.perfColumn = new int[perfColumn.length];
       for (int i = 0; i < this.perfColumn.length; ++i) {

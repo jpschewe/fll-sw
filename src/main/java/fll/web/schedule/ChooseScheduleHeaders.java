@@ -71,7 +71,7 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
 
     final UploadScheduleData uploadScheduleData = SessionAttributes.getNonNullAttribute(session, UploadScheduleData.KEY,
                                                                                         UploadScheduleData.class);
-    
+
     try (Connection connection = datasource.getConnection()) {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
 
@@ -83,6 +83,7 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
       pageContext.setAttribute("ORGANIZATION_HEADER", TournamentSchedule.ORGANIZATION_HEADER);
       pageContext.setAttribute("AWARD_GROUP_HEADER", TournamentSchedule.AWARD_GROUP_HEADER);
       pageContext.setAttribute("JUDGE_GROUP_HEADER", TournamentSchedule.JUDGE_GROUP_HEADER);
+      pageContext.setAttribute("WAVE_HEADER", TournamentSchedule.WAVE_HEADER);
 
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
@@ -150,6 +151,7 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
       final String organization = WebUtils.getNonNullRequestParameter(request, "organization");
       final String awardGroup = WebUtils.getNonNullRequestParameter(request, "awardGroup");
       final String judgingGroup = WebUtils.getNonNullRequestParameter(request, "judgingGroup");
+      final String wave = WebUtils.getNonNullRequestParameter(request, "wave");
 
       final String[] practiceColumn = new String[numPracticeRounds];
       final String[] practiceTableColumn = new String[numPracticeRounds];
@@ -192,6 +194,7 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
                                                                  StringUtils.isBlank(awardGroup) ? null : awardGroup,
                                                                  StringUtils.isBlank(judgingGroup) ? null
                                                                      : judgingGroup,
+                                                                 StringUtils.isBlank(wave) ? null : wave,
                                                                  subjectiveColumnMappings, perfColumn, perfTableColumn,
                                                                  practiceColumn, practiceTableColumn);
 
