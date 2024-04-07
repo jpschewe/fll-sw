@@ -13,14 +13,9 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -35,6 +30,12 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Determine what changes there are in the schedule vs. the team information in
@@ -83,7 +84,7 @@ public class GatherTeamInformationChanges extends BaseFLLServlet {
                                                      schedInfo.getTeamName()));
         }
 
-        if (!schedInfo.getOrganization().equals(dbTeam.getOrganization())) {
+        if (!Objects.equals(schedInfo.getOrganization(), dbTeam.getOrganization())) {
           organizationDifferences.add(new TeamOrganizationDifference(schedInfo.getTeamNumber(),
                                                                      dbTeam.getOrganization(),
                                                                      schedInfo.getOrganization()));

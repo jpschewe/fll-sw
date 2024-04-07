@@ -1802,7 +1802,7 @@ public class TournamentSchedule implements Serializable {
         line.add(String.valueOf(si.getTeamNumber()));
         line.add(si.getAwardGroup());
         line.add(si.getTeamName());
-        line.add(si.getOrganization());
+        line.add(Utilities.stringValueOrEmpty(si.getOrganization()));
         line.add(si.getJudgingGroup());
         for (final String category : categories) {
           final SubjectiveTime stime = si.getSubjectiveTimeByName(category);
