@@ -49,6 +49,8 @@ class ChooseScheduleHeadersDialog extends JDialog {
 
   private final JComboBox<String> judgingGroup;
 
+  private final JComboBox<String> wave;
+
   private final List<JComboBox<String>> practiceRounds;
 
   private final List<JComboBox<String>> practiceRoundTables;
@@ -114,6 +116,11 @@ class ChooseScheduleHeadersDialog extends JDialog {
     judgingGroup = new JComboBox<>(notRequiredHeaderNames);
     panel.add(judgingGroup);
     judgingGroup.setSelectedItem(TournamentSchedule.JUDGE_GROUP_HEADER);
+
+    panel.add(new JLabel("Wave"));
+    wave = new JComboBox<>(notRequiredHeaderNames);
+    panel.add(wave);
+    wave.setSelectedItem(TournamentSchedule.WAVE_HEADER);
 
     practiceRounds = new ArrayList<>(numPracticeRounds);
     practiceRoundTables = new ArrayList<>(numPracticeRounds);
@@ -238,8 +245,9 @@ class ChooseScheduleHeadersDialog extends JDialog {
                                  organization.getItemAt(organization.getSelectedIndex()),
                                  teamName.getItemAt(teamName.getSelectedIndex()),
                                  awardGroup.getItemAt(awardGroup.getSelectedIndex()),
-                                 judgingGroup.getItemAt(judgingGroup.getSelectedIndex()), subjectiveColumnMappings,
-                                 perfColumn, perfTableColumn, practiceColumn, practiceTableColumn);
+                                 judgingGroup.getItemAt(judgingGroup.getSelectedIndex()),
+                                 wave.getItemAt(wave.getSelectedIndex()), subjectiveColumnMappings, perfColumn,
+                                 perfTableColumn, practiceColumn, practiceTableColumn);
   }
 
 }

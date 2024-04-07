@@ -129,6 +129,7 @@ public final class ScheduleWriter {
     table.appendChild(FOPUtils.createTableColumn(document, 3)); // organization
     table.appendChild(FOPUtils.createTableColumn(document, 2)); // judging group
     table.appendChild(FOPUtils.createTableColumn(document, 2)); // award group
+    table.appendChild(FOPUtils.createTableColumn(document, 2)); // wave
     for (int i = 0; i < subjectiveStations.size(); ++i) {
       table.appendChild(FOPUtils.createTableColumn(document, 2)); // time
     }
@@ -174,6 +175,11 @@ public final class ScheduleWriter {
                                                                   TournamentSchedule.AWARD_GROUP_HEADER);
     headerRow.appendChild(awardGroupHeaderCell);
     FOPUtils.addBorders(awardGroupHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
+                        FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
+
+    final Element waveHeaderCell = FOPUtils.createTableCell(document, null, TournamentSchedule.WAVE_HEADER);
+    headerRow.appendChild(waveHeaderCell);
+    FOPUtils.addBorders(waveHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                         FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
 
     for (final String subjectiveStation : subjectiveStations) {
@@ -234,7 +240,8 @@ public final class ScheduleWriter {
       FOPUtils.addBorders(teamNameCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
 
-      final Element organizationCell = FOPUtils.createTableCell(document, null, si.getOrganization());
+      final Element organizationCell = FOPUtils.createTableCell(document, null,
+                                                                Utilities.stringValueOrEmpty(si.getOrganization()));
       row.appendChild(organizationCell);
       FOPUtils.addBorders(organizationCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
@@ -247,6 +254,11 @@ public final class ScheduleWriter {
       final Element awardGroupCell = FOPUtils.createTableCell(document, null, si.getAwardGroup());
       row.appendChild(awardGroupCell);
       FOPUtils.addBorders(awardGroupCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
+                          FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
+
+      final Element waveCell = FOPUtils.createTableCell(document, null, Utilities.stringValueOrEmpty(si.getWave()));
+      row.appendChild(waveCell);
+      FOPUtils.addBorders(waveCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
 
       for (final String subjectiveStation : subjectiveStations) {
@@ -581,7 +593,7 @@ public final class ScheduleWriter {
       }
 
       final Element organizationCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                                String.valueOf(si.getOrganization()));
+                                                                Utilities.stringValueOrEmpty(si.getOrganization()));
       row.appendChild(organizationCell);
       FOPUtils.addBorders(organizationCell, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
@@ -799,7 +811,8 @@ public final class ScheduleWriter {
     container.appendChild(header2);
     header2.setAttribute("font-size", "12pt");
     header2.setAttribute("font-weight", "bold");
-    header2.appendChild(document.createTextNode(String.format("Organization: %s", si.getOrganization())));
+    header2.appendChild(document.createTextNode(String.format("Organization: %s",
+                                                              Utilities.stringValueOrEmpty(si.getOrganization()))));
 
     final Element division = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(division);
@@ -1029,7 +1042,8 @@ public final class ScheduleWriter {
       FOPUtils.addRightBorder(cell, FOPUtils.STANDARD_BORDER_WIDTH);
       FOPUtils.addTopBorder(cell, topBorderWidth);
 
-      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, si.getOrganization());
+      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                      Utilities.stringValueOrEmpty(si.getOrganization()));
       row.appendChild(cell);
       FOPUtils.addBottomBorder(cell, FOPUtils.STANDARD_BORDER_WIDTH);
       FOPUtils.addLeftBorder(cell, FOPUtils.STANDARD_BORDER_WIDTH);
@@ -1198,7 +1212,8 @@ public final class ScheduleWriter {
       FOPUtils.addRightBorder(cell, FOPUtils.STANDARD_BORDER_WIDTH);
       FOPUtils.addTopBorder(cell, topBorderWidth);
 
-      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, teamAtTime.getTeamInfo().getOrganization());
+      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                      Utilities.stringValueOrEmpty(teamAtTime.getTeamInfo().getOrganization()));
       row.appendChild(cell);
       FOPUtils.addBottomBorder(cell, FOPUtils.STANDARD_BORDER_WIDTH);
       FOPUtils.addLeftBorder(cell, FOPUtils.STANDARD_BORDER_WIDTH);
@@ -1377,7 +1392,8 @@ public final class ScheduleWriter {
       FOPUtils.addRightBorder(cell, FOPUtils.STANDARD_BORDER_WIDTH);
       FOPUtils.addTopBorder(cell, topBorderWidth);
 
-      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, si.getOrganization());
+      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                      Utilities.stringValueOrEmpty(si.getOrganization()));
       row.appendChild(cell);
       FOPUtils.addBottomBorder(cell, FOPUtils.STANDARD_BORDER_WIDTH);
       FOPUtils.addLeftBorder(cell, FOPUtils.STANDARD_BORDER_WIDTH);

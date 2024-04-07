@@ -105,8 +105,9 @@ public class TournamentScheduleTest {
     return new TournamentSchedule.ColumnInformation(headerRowIndex, headerRow, TournamentSchedule.TEAM_NUMBER_HEADER,
                                                     TournamentSchedule.ORGANIZATION_HEADER,
                                                     TournamentSchedule.TEAM_NAME_HEADER, "Div",
-                                                    TournamentSchedule.JUDGE_GROUP_HEADER, subjectiveColumnMappings,
-                                                    perfColumn, perfTableColumn, new String[0], new String[0]);
+                                                    TournamentSchedule.JUDGE_GROUP_HEADER, null,
+                                                    subjectiveColumnMappings, perfColumn, perfTableColumn,
+                                                    new String[0], new String[0]);
   }
 
   /**
@@ -150,7 +151,7 @@ public class TournamentScheduleTest {
                 + " School");
         assertNull(dup);
         Queries.addTeamToTournament(memConnection, teamNumber, tournament.getTournamentID(),
-                                    GenerateDB.DEFAULT_TEAM_DIVISION, GenerateDB.DEFAULT_TEAM_DIVISION);
+                                    GenerateDB.DEFAULT_TEAM_DIVISION, GenerateDB.DEFAULT_TEAM_DIVISION, null);
       }
 
       // load schedule with matching team numbers
@@ -211,8 +212,9 @@ public class TournamentScheduleTest {
     return new TournamentSchedule.ColumnInformation(headerRowIndex, headerRow, TournamentSchedule.TEAM_NUMBER_HEADER,
                                                     TournamentSchedule.ORGANIZATION_HEADER,
                                                     TournamentSchedule.TEAM_NAME_HEADER, "Div",
-                                                    TournamentSchedule.JUDGE_GROUP_HEADER, subjectiveColumnMappings,
-                                                    perfColumn, perfTableColumn, new String[0], new String[0]);
+                                                    TournamentSchedule.JUDGE_GROUP_HEADER, null,
+                                                    subjectiveColumnMappings, perfColumn, perfTableColumn,
+                                                    new String[0], new String[0]);
   }
 
   /**

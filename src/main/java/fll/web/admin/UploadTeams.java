@@ -50,7 +50,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.JspWriter;
 
 /**
- * Java code for uploading team data to the database. Called from
+ * Java code for uploading team data to the database. Redirects to
  * teamColumnSelection.jsp.
  */
 @WebServlet("/admin/UploadTeams")
@@ -304,6 +304,7 @@ public final class UploadTeams extends BaseFLLServlet {
     final String tournamentColumn = request.getParameter("tournament");
     final String eventDivisionColumn = request.getParameter("event_division");
     final String judgingStationColumn = request.getParameter("judging_station");
+    final String waveColumn = request.getParameter("wave");
 
     if (!StringUtils.isBlank(tournamentColumn)
         && StringUtils.isBlank(eventDivisionColumn)) {
@@ -447,7 +448,8 @@ public final class UploadTeams extends BaseFLLServlet {
     if (!StringUtils.isBlank(tournamentColumn)
         && !StringUtils.isBlank(eventDivisionColumn)
         && !StringUtils.isBlank(judgingStationColumn)) {
-      updateTournamentTeams(connection, teamNumberColumn, tournamentColumn, eventDivisionColumn, judgingStationColumn);
+      updateTournamentTeams(connection, teamNumberColumn, tournamentColumn, eventDivisionColumn, judgingStationColumn,
+                            waveColumn);
     }
 
     return true;
@@ -518,7 +520,8 @@ public final class UploadTeams extends BaseFLLServlet {
                                             final String teamNumberColumn,
                                             final String tournamentColumn,
                                             final String eventDivisionColumn,
-                                            final String judgingStationColumn)
+                                            final String judgingStationColumn,
+                                            final @Nullable String waveColumn)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
       final StringBuilder sql = new StringBuilder();
@@ -531,6 +534,11 @@ public final class UploadTeams extends BaseFLLServlet {
           + eventDivisionColumn);
       sql.append(", "
           + judgingStationColumn);
+
+      if (!StringUtils.isBlank(waveColumn)) {
+        sql.append(", "
+            + waveColumn);
+      }
 
       sql.append(" FROM AllTeams");
 
@@ -556,6 +564,13 @@ public final class UploadTeams extends BaseFLLServlet {
             continue;
           }
 
+          final @Nullable String wave;
+          if (!StringUtils.isBlank(waveColumn)) {
+            wave = rs.getString(5);
+          } else {
+            wave = null;
+          }
+
           final Tournament tournament;
           if (!Tournament.doesTournamentExist(connection, tournamentName)) {
             Tournament.createTournament(connection, tournamentName, tournamentName, null,
@@ -567,7 +582,7 @@ public final class UploadTeams extends BaseFLLServlet {
           }
 
           Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
-                                      judgingStation);
+                                      judgingStation, wave);
         } // foreach result
       }
     } // stmt

@@ -74,18 +74,19 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
             + advanceFile);
       }
 
-      final String teamNumberColumnName = WebUtils.getParameterOrNull(request, "teamNumber");
+      final @Nullable String teamNumberColumnName = WebUtils.getParameterOrNull(request, "teamNumber");
       if (null == teamNumberColumnName) {
         throw new FLLRuntimeException("Cannot find 'teamNumber' request parameter");
       }
 
-      final String tournamentColumnName = WebUtils.getParameterOrNull(request, "tournament");
+      final @Nullable String tournamentColumnName = WebUtils.getParameterOrNull(request, "tournament");
       if (null == tournamentColumnName) {
         throw new FLLRuntimeException("Cannot find 'tournament' request parameter");
       }
 
-      final String eventDivisionColumnName = WebUtils.getParameterOrNull(request, "event_division");
-      final String judgingStationColumnName = WebUtils.getParameterOrNull(request, "judging_station");
+      final @Nullable String eventDivisionColumnName = WebUtils.getParameterOrNull(request, "event_division");
+      final @Nullable String judgingStationColumnName = WebUtils.getParameterOrNull(request, "judging_station");
+      final @Nullable String waveColumnName = WebUtils.getParameterOrNull(request, "wave");
 
       final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
 
@@ -94,7 +95,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
                                                   .intValue();
 
       processFile(connection, message, file, sheetName, headerRowIndex, teamNumberColumnName, tournamentColumnName,
-                  eventDivisionColumnName, judgingStationColumnName);
+                  eventDivisionColumnName, judgingStationColumnName, waveColumnName);
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error saving team assignments into the database: "
@@ -140,7 +141,8 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
                                   final String teamNumberColumnName,
                                   final String tournamentColumnName,
                                   final @Nullable String eventDivisionColumnName,
-                                  final @Nullable String judgingStationColumnName)
+                                  final @Nullable String judgingStationColumnName,
+                                  final @Nullable String waveColumnName)
       throws SQLException, IOException, ParseException, InvalidFormatException {
 
     if (LOGGER.isTraceEnabled()) {
@@ -167,6 +169,8 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
             + eventDivisionColumnName //
             + " judgingStationColumnName: "
             + judgingStationColumnName //
+            + " waveColumnName: "
+            + waveColumnName //
         );
         LOGGER.trace("Column names size: "
             + columnNames.length //
@@ -180,6 +184,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
       int tournamentColumnIdx = -1;
       int eventDivisionColumnIdx = -1;
       int judgingStationColumnIdx = -1;
+      int waveColumnIdx = -1;
       int index = 0;
       while (index < columnNames.length
           && (-1 == teamNumColumnIdx
@@ -206,6 +211,12 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
           judgingStationColumnIdx = index;
         }
 
+        if (null != waveColumnName
+            && -1 == waveColumnIdx
+            && waveColumnName.equals(columnNames[index])) {
+          waveColumnIdx = index;
+        }
+
         ++index;
       }
 
@@ -218,6 +229,8 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
             + eventDivisionColumnIdx //
             + " judgingStationColumnIdx: "
             + judgingStationColumnIdx //
+            + " waveColumnIdx: "
+            + waveColumnIdx //
         );
 
       }
@@ -276,6 +289,13 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
             }
             final String judgingStation = data[judgingStationColumnIdx];
 
+            final @Nullable String wave;
+            if (waveColumnIdx < 0) {
+              wave = null;
+            } else {
+              wave = data[waveColumnIdx];
+            }
+
             if (LOGGER.isTraceEnabled()) {
               LOGGER.trace("Adding team "
                   + teamNumber
@@ -285,7 +305,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
 
             if (!Queries.isTeamInTournament(connection, teamNumber, tournament.getTournamentID())) {
               Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
-                                          judgingStation);
+                                          judgingStation, wave);
             }
             ++rowsProcessed;
           }
