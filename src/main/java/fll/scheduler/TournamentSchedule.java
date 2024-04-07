@@ -114,6 +114,11 @@ public class TournamentSchedule implements Serializable {
   public static final String JUDGE_GROUP_HEADER = "Judging Group";
 
   /**
+   * Table header for wave.
+   */
+  public static final String WAVE_HEADER = "Wave";
+
+  /**
    * Performance round header without the number.
    */
   public static final String BASE_PERF_HEADER = "Perf #";
@@ -1777,6 +1782,7 @@ public class TournamentSchedule implements Serializable {
       line.add(TournamentSchedule.TEAM_NAME_HEADER);
       line.add(TournamentSchedule.ORGANIZATION_HEADER);
       line.add(TournamentSchedule.JUDGE_GROUP_HEADER);
+      line.add(TournamentSchedule.WAVE_HEADER);
       final List<String> categories = Collections.unmodifiableList(new LinkedList<>(getSubjectiveStations()));
       for (final String category : categories) {
         line.add(category);
@@ -1804,6 +1810,7 @@ public class TournamentSchedule implements Serializable {
         line.add(si.getTeamName());
         line.add(Utilities.stringValueOrEmpty(si.getOrganization()));
         line.add(si.getJudgingGroup());
+        line.add(Utilities.stringValueOrEmpty(si.getWave()));
         for (final String category : categories) {
           final SubjectiveTime stime = si.getSubjectiveTimeByName(category);
           if (null != stime) {

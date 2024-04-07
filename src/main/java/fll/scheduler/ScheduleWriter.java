@@ -129,6 +129,7 @@ public final class ScheduleWriter {
     table.appendChild(FOPUtils.createTableColumn(document, 3)); // organization
     table.appendChild(FOPUtils.createTableColumn(document, 2)); // judging group
     table.appendChild(FOPUtils.createTableColumn(document, 2)); // award group
+    table.appendChild(FOPUtils.createTableColumn(document, 2)); // wave
     for (int i = 0; i < subjectiveStations.size(); ++i) {
       table.appendChild(FOPUtils.createTableColumn(document, 2)); // time
     }
@@ -174,6 +175,11 @@ public final class ScheduleWriter {
                                                                   TournamentSchedule.AWARD_GROUP_HEADER);
     headerRow.appendChild(awardGroupHeaderCell);
     FOPUtils.addBorders(awardGroupHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
+                        FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
+
+    final Element waveHeaderCell = FOPUtils.createTableCell(document, null, TournamentSchedule.WAVE_HEADER);
+    headerRow.appendChild(waveHeaderCell);
+    FOPUtils.addBorders(waveHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                         FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
 
     for (final String subjectiveStation : subjectiveStations) {
@@ -248,6 +254,11 @@ public final class ScheduleWriter {
       final Element awardGroupCell = FOPUtils.createTableCell(document, null, si.getAwardGroup());
       row.appendChild(awardGroupCell);
       FOPUtils.addBorders(awardGroupCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
+                          FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
+
+      final Element waveCell = FOPUtils.createTableCell(document, null, Utilities.stringValueOrEmpty(si.getWave()));
+      row.appendChild(waveCell);
+      FOPUtils.addBorders(waveCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
 
       for (final String subjectiveStation : subjectiveStations) {
