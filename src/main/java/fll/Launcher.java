@@ -323,6 +323,11 @@ public class Launcher extends JFrame {
       UserImages.useDefaultFllSubjectiveLogo();
     }
 
+    final Path challengeLogo = UserImages.getImagesPath().resolve(UserImages.CHALLENGE_LOGO_FILENAME);
+    if (!Files.exists(challengeLogo)) {
+      UserImages.useDefaultChallengeLogo();
+    }
+
   }
 
   private static final Pattern USERNAME_PATTERN = Pattern.compile("^\\w+$");

@@ -106,4 +106,33 @@ public final class UserImages {
     }
   }
 
+  /**
+   * Name of file in user images that contains the challenge logo.
+   */
+  public static final String CHALLENGE_LOGO_FILENAME = "challenge_logo.jpg";
+
+  /**
+   * Replace any user provided challenge logo with the default one in the
+   * software.
+   */
+  public static void useDefaultChallengeLogo() {
+    final Path classesPath = TomcatLauncher.getClassesPath();
+    final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
+    if (null == webroot) {
+      throw new FLLInternalException("Unable to find web server root directory");
+    }
+
+    final Path challengeLogo = UserImages.getImagesPath().resolve(CHALLENGE_LOGO_FILENAME);
+    final Path challengeDefaultLogo = webroot.resolve("images").resolve("default_challenge_logo.jpg");
+    if (!Files.exists(challengeDefaultLogo)) {
+      throw new FLLInternalException("Unable to find default challenge logo: "
+          + challengeDefaultLogo.toAbsolutePath().toString());
+    }
+    try {
+      Files.copy(challengeDefaultLogo, challengeLogo, StandardCopyOption.REPLACE_EXISTING);
+    } catch (final IOException e) {
+      throw new FLLInternalException("Error copying default challenge logo", e);
+    }
+  }
+
 }

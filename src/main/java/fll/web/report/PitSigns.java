@@ -95,7 +95,7 @@ public class PitSigns extends BaseFLLServlet {
       final String pageMasterName = "simple";
       final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName,
                                                                  FOPUtils.PAGE_LANDSCAPE_LETTER_SIZE,
-                                                                 new Margins(1, 0.2, 0.5, 0.5), 0, 0);
+                                                                 new Margins(0.2, 0.2, 0.5, 0.5), 0, 0);
       layoutMasterSet.appendChild(pageMaster);
 
       final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
@@ -105,6 +105,12 @@ public class PitSigns extends BaseFLLServlet {
       final Element documentBody = FOPUtils.createBody(document);
       pageSequence.appendChild(documentBody);
 
+      final @Nullable String challengeImageBase64 = getImageAsBase64(UserImages.CHALLENGE_LOGO_FILENAME);
+      LOGGER.warn("Image logo found? {}", null != challengeImageBase64);
+
+      final @Nullable String partnerImageBase64 = getImageAsBase64(Welcome.PARTNER_LOGO_FILENAME);
+      final @Nullable String firstImageBase64 = getImageAsBase64(Welcome.FLL_LOGO_FILENAME);
+
       // Allow the user to specify a team number, if the parameter isn't found,
       // then render all pit signs
       final @Nullable String teamNumberStr = request.getParameter("team_number");
@@ -113,7 +119,8 @@ public class PitSigns extends BaseFLLServlet {
 
         for (final TournamentTeam team : Queries.getTournamentTeams(connection, tournament.getTournamentID())
                                                 .values()) {
-          final Element page = renderTeam(document, schedule, team);
+          final Element page = renderTeam(document, schedule, challengeImageBase64, partnerImageBase64,
+                                          firstImageBase64, team);
           documentBody.appendChild(page);
           page.setAttribute("page-break-after", "always");
         }
@@ -123,7 +130,8 @@ public class PitSigns extends BaseFLLServlet {
 
         final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, tournament, teamNumber);
 
-        final Element page = renderTeam(document, schedule, team);
+        final Element page = renderTeam(document, schedule, challengeImageBase64, partnerImageBase64, firstImageBase64,
+                                        team);
         documentBody.appendChild(page);
       }
 
@@ -142,14 +150,26 @@ public class PitSigns extends BaseFLLServlet {
 
   private Element renderTeam(final Document document,
                              final @Nullable TournamentSchedule schedule,
+                             final @Nullable String challengeImageBase64,
+                             final @Nullable String partnerImageBase64,
+                             final @Nullable String firstImageBase64,
                              final TournamentTeam team) {
 
     final Element page = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     page.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_CENTER);
     page.setAttribute("font-size", "28pt");
 
-    // logo
-    // FIXME
+    // challenge logo
+    if (null != challengeImageBase64) {
+      final Element imageBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      page.appendChild(imageBlock);
+
+      final Element challengeImageGraphic = FOPUtils.createXslFoElement(document, "external-graphic");
+      imageBlock.appendChild(challengeImageGraphic);
+      challengeImageGraphic.setAttribute("content-height", "150px");
+      challengeImageGraphic.setAttribute("scaling", "uniform");
+      challengeImageGraphic.setAttribute("src", String.format("url('data:image/png;base64,%s')", challengeImageBase64));
+    }
 
     // organization
     final @Nullable String organization = team.getOrganization();
@@ -222,9 +242,6 @@ public class PitSigns extends BaseFLLServlet {
     bottomBlock.appendChild(document.createTextNode("FIXME bottom text"));
 
     // partner and FIRST logos
-    final @Nullable String partnerImageBase64 = getImageAsBase64(Welcome.PARTNER_LOGO_FILENAME);
-    final @Nullable String firstImageBase64 = getImageAsBase64(Welcome.FLL_LOGO_FILENAME);
-
     if (null != partnerImageBase64
         || null != firstImageBase64) {
       final Element imageBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
@@ -236,6 +253,7 @@ public class PitSigns extends BaseFLLServlet {
         final Element partnerImageGraphic = FOPUtils.createXslFoElement(document, "external-graphic");
         imageBlock.appendChild(partnerImageGraphic);
         partnerImageGraphic.setAttribute("content-width", "300px");
+        partnerImageGraphic.setAttribute("content-height", "60px");
         partnerImageGraphic.setAttribute("scaling", "uniform");
         partnerImageGraphic.setAttribute("src", String.format("url('data:image/png;base64,%s')", partnerImageBase64));
       }
@@ -248,6 +266,7 @@ public class PitSigns extends BaseFLLServlet {
         final Element firstImageGraphic = FOPUtils.createXslFoElement(document, "external-graphic");
         imageBlock.appendChild(firstImageGraphic);
         firstImageGraphic.setAttribute("content-width", "300px");
+        firstImageGraphic.setAttribute("content-height", "60px");
         firstImageGraphic.setAttribute("scaling", "uniform");
         firstImageGraphic.setAttribute("src", String.format("url('data:image/png;base64,%s')", firstImageBase64));
       }
@@ -265,14 +284,14 @@ public class PitSigns extends BaseFLLServlet {
 
     final Base64.Encoder encoder = Base64.getEncoder();
 
-    final Path fllSubjectiveLogo = UserImages.getImagesPath().resolve(userImagesFilename);
+    final Path imagePath = UserImages.getImagesPath().resolve(userImagesFilename);
     try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-      if (!Files.exists(fllSubjectiveLogo)) {
-        LOGGER.debug("Cannot find image: {}", fllSubjectiveLogo.toAbsolutePath().toString());
+      if (!Files.exists(imagePath)) {
+        LOGGER.debug("Cannot find image: {}", imagePath.toAbsolutePath().toString());
         return null;
       }
 
-      Files.copy(fllSubjectiveLogo, output);
+      Files.copy(imagePath, output);
 
       final String encoded = encoder.encodeToString(output.toByteArray());
       return encoded;
