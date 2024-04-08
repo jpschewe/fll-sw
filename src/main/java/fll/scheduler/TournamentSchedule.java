@@ -716,16 +716,14 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Output the detailed schedule.
-   *
-   * @param params schedule parameters
    * @param directory the directory to put the files in
    * @param baseFilename the base filename
+   *
    * @throws IOException if there is an error writing the schedules
    * @throws IllegalArgumentException if directory doesn't exist and can't be
    *           created or exists and isn't a directory
    */
-  public void outputDetailedSchedules(final SchedParams params,
-                                      final File directory,
+  public void outputDetailedSchedules(final File directory,
                                       final String baseFilename)
       throws IOException, IllegalArgumentException {
     if (!directory.exists()) {
@@ -771,7 +769,7 @@ public class TournamentSchedule implements Serializable {
     final File teamSchedules = new File(directory, baseFilename
         + "-team-schedules.pdf");
     try (OutputStream pdfFos = new FileOutputStream(teamSchedules)) {
-      ScheduleWriter.outputTeamSchedules(this, params, pdfFos);
+      ScheduleWriter.outputTeamSchedules(this, pdfFos);
     }
   }
 

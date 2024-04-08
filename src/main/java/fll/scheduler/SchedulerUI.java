@@ -345,7 +345,7 @@ public class SchedulerUI extends JFrame {
     pack();
   }
 
-  private class CheckSchedule implements PropertyChangeListener {
+  private final class CheckSchedule implements PropertyChangeListener {
 
     @Override
     public void propertyChange(final PropertyChangeEvent ignored) {
@@ -988,7 +988,7 @@ public class SchedulerUI extends JFrame {
                 getScheduleData().outputScheduleAsCSV(os);
               }
 
-              getScheduleData().outputDetailedSchedules(getSchedParams(), directory, baseFilename);
+              getScheduleData().outputDetailedSchedules(directory, baseFilename);
               return true;
             } catch (final IOException e) {
               final Formatter errorFormatter = new Formatter();

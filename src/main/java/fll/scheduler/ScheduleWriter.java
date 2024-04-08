@@ -9,7 +9,6 @@ package fll.scheduler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -670,17 +669,15 @@ public final class ScheduleWriter {
    * Output the schedule for each team.
    *
    * @param schedule the tournament schedule
-   * @param params schedule parameters
    * @param stream where to write the schedule
    * @throws IOException if there is an error writing to the stream
    */
   public static void outputTeamSchedules(final TournamentSchedule schedule,
-                                         final SchedParams params,
                                          final OutputStream stream)
       throws IOException {
 
     try {
-      final Document document = createTeamSchedules(schedule, params);
+      final Document document = createTeamSchedules(schedule);
 
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
@@ -690,8 +687,7 @@ public final class ScheduleWriter {
     }
   }
 
-  private static Document createTeamSchedules(final TournamentSchedule schedule,
-                                              final SchedParams params) {
+  private static Document createTeamSchedules(final TournamentSchedule schedule) {
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
     final Element rootElement = FOPUtils.createRoot(document);
@@ -717,7 +713,7 @@ public final class ScheduleWriter {
     final List<TeamScheduleInfo> scheduleEntries = new ArrayList<>(schedule.getSchedule());
     Collections.sort(scheduleEntries, TournamentSchedule.ComparatorByTeam.INSTANCE);
     for (final TeamScheduleInfo si : scheduleEntries) {
-      final Element teamSchedule = outputTeamSchedule(document, schedule, params, si);
+      final Element teamSchedule = outputTeamSchedule(document, schedule, si);
       documentBody.appendChild(teamSchedule);
     }
 
@@ -728,19 +724,17 @@ public final class ScheduleWriter {
    * Output the schedule for the specified team.
    *
    * @param schedule the tournament schedule
-   * @param params schedule parameters
-   * @param teamNumber the team to output the schedule for
    * @param stream where to write the schedule
+   * @param teamNumber the team to output the schedule for
    * @throws IOException if there is an error writing to the stream
    */
   public static void outputTeamSchedule(final TournamentSchedule schedule,
-                                        final SchedParams params,
                                         final OutputStream stream,
                                         final int teamNumber)
       throws IOException {
 
     try {
-      final Document document = createTeamSchedule(schedule, params, teamNumber);
+      final Document document = createTeamSchedule(schedule, teamNumber);
 
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
@@ -751,7 +745,6 @@ public final class ScheduleWriter {
   }
 
   private static Document createTeamSchedule(final TournamentSchedule schedule,
-                                             final SchedParams params,
                                              final int teamNumber) {
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
@@ -777,7 +770,7 @@ public final class ScheduleWriter {
 
     final @Nullable TeamScheduleInfo si = schedule.getSchedInfoForTeam(teamNumber);
     if (null != si) {
-      final Element teamSchedule = outputTeamSchedule(document, schedule, params, si);
+      final Element teamSchedule = outputTeamSchedule(document, schedule, si);
       documentBody.appendChild(teamSchedule);
     } else {
       final Element emptyBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
@@ -794,23 +787,21 @@ public final class ScheduleWriter {
    */
   private static Element outputTeamSchedule(final Document document,
                                             final TournamentSchedule schedule,
-                                            final SchedParams params,
                                             final TeamScheduleInfo si) {
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     container.setAttribute("keep-together.within-page", "always");
     container.setAttribute("font-size", "10pt");
+    container.setAttribute("font-weight", "bold");
 
     final Element header1 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(header1);
     header1.setAttribute("font-size", "12pt");
-    header1.setAttribute("font-weight", "bold");
     header1.appendChild(document.createTextNode(String.format("Detailed schedule for Team #%d - %s", si.getTeamNumber(),
                                                               si.getTeamName())));
 
     final Element header2 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(header2);
     header2.setAttribute("font-size", "12pt");
-    header2.setAttribute("font-weight", "bold");
     header2.appendChild(document.createTextNode(String.format("Organization: %s",
                                                               Utilities.stringValueOrEmpty(si.getOrganization()))));
 
@@ -819,7 +810,6 @@ public final class ScheduleWriter {
 
     final Element divisionHeader = FOPUtils.createXslFoElement(document, "inline");
     division.appendChild(divisionHeader);
-    divisionHeader.setAttribute("font-weight", "bold");
     divisionHeader.appendChild(document.createTextNode("Award Group: "));
 
     final Element divisionValue = FOPUtils.createXslFoElement(document, "inline");
@@ -828,62 +818,7 @@ public final class ScheduleWriter {
 
     container.appendChild(FOPUtils.createBlankLine(document));
 
-    // build all of the elements to display and then add them to the document in
-    // time order
-    final SortedMap<LocalTime, Element> scheduleElements = new TreeMap<>();
-
-    for (final String subjectiveStation : schedule.getSubjectiveStations()) {
-      final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-
-      final Element header = FOPUtils.createXslFoElement(document, "inline");
-      block.appendChild(header);
-      header.setAttribute("font-weight", "bold");
-      header.appendChild(document.createTextNode(subjectiveStation
-          + ": "));
-
-      final Element value = FOPUtils.createXslFoElement(document, "inline");
-      block.appendChild(value);
-      final SubjectiveTime stime = si.getSubjectiveTimeByName(subjectiveStation);
-      if (null == stime) {
-        throw new RuntimeException("Cannot find time for "
-            + subjectiveStation);
-      }
-      final LocalTime start = stime.getTime();
-      final SubjectiveStation station = params.getStationByName(subjectiveStation);
-      if (null == station) {
-        throw new FLLInternalException("Could not find subjective station object for '"
-            + subjectiveStation
-            + "'");
-      }
-      final LocalTime end = start.plus(station.getDuration());
-      value.appendChild(document.createTextNode(String.format("%s - %s", TournamentSchedule.formatTime(start),
-                                                              TournamentSchedule.formatTime(end))));
-
-      scheduleElements.put(start, block);
-    }
-
-    for (final PerformanceTime performance : si.getAllPerformances()) {
-      final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-
-      final String roundName = si.getRoundName(performance);
-      final Element header = FOPUtils.createXslFoElement(document, "inline");
-      block.appendChild(header);
-      header.setAttribute("font-weight", "bold");
-      header.appendChild(document.createTextNode(String.format("Performance %s: ", roundName)));
-
-      final Element value = FOPUtils.createXslFoElement(document, "inline");
-      block.appendChild(value);
-      final LocalTime start = performance.getTime();
-      final LocalTime end = start.plus(Duration.ofMinutes(params.getPerformanceMinutes()));
-      value.appendChild(document.createTextNode(String.format("%s - %s %s %d", TournamentSchedule.formatTime(start),
-                                                              TournamentSchedule.formatTime(end),
-                                                              performance.getTable(), performance.getSide())));
-
-      scheduleElements.put(start, block);
-    }
-
-    // add the elements in time order
-    scheduleElements.values().forEach(container::appendChild);
+    appendTeamSchedule(document, schedule, si, container);
 
     container.appendChild(FOPUtils.createBlankLine(document));
 
@@ -901,6 +836,59 @@ public final class ScheduleWriter {
     container.appendChild(FOPUtils.createBlankLine(document));
 
     return container;
+  }
+
+  /**
+   * Append the elements for the team schedule in time order to the specified
+   * container. All styling is set at the container level.
+   * 
+   * @param document used to create elements
+   * @param schedule tournament schedule
+   * @param si schedule information for the team
+   * @param container the container for all of the elements
+   */
+  public static void appendTeamSchedule(final Document document,
+                                        final TournamentSchedule schedule,
+                                        final TeamScheduleInfo si,
+                                        final Element container) {
+    // build all of the elements to display and then add them to the document in
+    // time order
+    final SortedMap<LocalTime, Element> scheduleElements = new TreeMap<>();
+
+    for (final String subjectiveStation : schedule.getSubjectiveStations()) {
+      final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+
+      final SubjectiveTime stime = si.getSubjectiveTimeByName(subjectiveStation);
+      if (null == stime) {
+        throw new RuntimeException("Cannot find time for "
+            + subjectiveStation);
+      }
+      final LocalTime start = stime.getTime();
+
+      final String text = String.format("%s%s%s", TournamentSchedule.formatTime(start),
+                                        String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(2), subjectiveStation);
+      block.appendChild(document.createTextNode(text));
+
+      scheduleElements.put(start, block);
+    }
+
+    for (final PerformanceTime performance : si.getAllPerformances()) {
+      final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+
+      final String roundName = si.getRoundName(performance);
+
+      final LocalTime start = performance.getTime();
+
+      final String text = String.format("%s%sPerformance %s %s %d", TournamentSchedule.formatTime(start),
+                                        String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(2), roundName,
+                                        performance.getTable(), performance.getSide());
+      block.appendChild(document.createTextNode(text));
+
+      scheduleElements.put(start, block);
+    }
+
+    // add the elements in time order
+    scheduleElements.values().forEach(container::appendChild);
   }
 
   /**
