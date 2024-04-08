@@ -92,6 +92,30 @@ fll.web.Welcome.populateContext(pageContext);
             <label for='fll_subjective_logo_default'>Use default
                 image</label>
         </div>
+
+        <h1>Challenge logo</h1>
+        <p>Logo used at the top of the pit signs.</p>
+        <table class="center">
+            <tr>
+                <td>
+                    <img
+                        src="<c:url value='/${challenge_logo}'/>?${uuid}" />
+                </td>
+            </tr>
+        </table>
+        <div>
+            Upload image:
+            <input type='file' name='challenge_logo' />
+        </div>
+        <div>
+            <input type="checkbox" name='challenge_logo_default'
+                id='challenge_default' />
+            <label for='challenge_logo_default'>Use default
+                image</label>
+        </div>
+
+
+        <!--  end of form -->
         <input type='submit' value='Submit Changes' />
     </form>
 

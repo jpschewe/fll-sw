@@ -43,6 +43,10 @@ public class ManageUserImages extends BaseFLLServlet {
     page.setAttribute("uuid", UUID.randomUUID().toString());
     page.setAttribute("fll_subjective_logo", String.format("%s/%s", UserImages.getImagesPath().getFileName(),
                                                            UserImages.FLL_SUBJECTIVE_LOGO_FILENAME));
+
+    page.setAttribute("challenge_logo", String.format("%s/%s", UserImages.getImagesPath().getFileName(),
+                                                      UserImages.CHALLENGE_LOGO_FILENAME));
+
   }
 
   @Override

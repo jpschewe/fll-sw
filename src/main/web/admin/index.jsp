@@ -346,7 +346,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
 
         <li>
             <a href="manage-user-images.jsp" target="_blank">Modify
-                the partner and FLL logos used</a>
+                the various images used in the software</a>
         </li>
 
         <li>
