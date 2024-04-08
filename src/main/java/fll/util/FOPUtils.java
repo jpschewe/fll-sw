@@ -146,6 +146,12 @@ public final class FOPUtils {
   public static final Dimension2D PAGE_LETTER_SIZE = new Dimension2DDouble(8.5, 11);
 
   /**
+   * {@link #PAGE_LETTER_SIZE} landscape.
+   */
+  public static final Dimension2D PAGE_LANDSCAPE_LETTER_SIZE = new Dimension2DDouble(PAGE_LETTER_SIZE.getHeight(),
+                                                                                     PAGE_LETTER_SIZE.getWidth());
+
+  /**
    * 0.5" on each side, 0.2" on top and bottom.
    */
   public static final Margins STANDARD_MARGINS = new Margins(0.2, 0.2, 0.5, 0.5);
@@ -171,6 +177,27 @@ public final class FOPUtils {
                                                final String name)
       throws IllegalArgumentException {
     return createSimplePageMaster(document, name, PAGE_LETTER_SIZE, STANDARD_MARGINS, 0, STANDARD_FOOTER_HEIGHT);
+  }
+
+  /**
+   * Landscape version of {@link #createSimplePageMaster(Document, String)}.
+   * 
+   * @param document used to create the elements
+   * @param name the name of the page master
+   * @see #createSimplePageMaster(Document, String, Dimension2D, Margins, double,
+   *      double)
+   * @throws IllegalArgumentException see
+   *           {@link #createSimplePageMaster(Document, String, Dimension2D, Margins, double, double)}
+   * @see #STANDARD_MARGINS
+   * @see #PAGE_LETTER_SIZE
+   * @see #STANDARD_FOOTER_HEIGHT
+   * @return the page master element
+   */
+  public static Element createSimpleLandscapePageMaster(final Document document,
+                                                        final String name)
+      throws IllegalArgumentException {
+    return createSimplePageMaster(document, name, PAGE_LANDSCAPE_LETTER_SIZE, STANDARD_MARGINS, 0,
+                                  STANDARD_FOOTER_HEIGHT);
   }
 
   /**

@@ -853,11 +853,9 @@ public final class ScheduleWriter {
                                         final Element container) {
     // build all of the elements to display and then add them to the document in
     // time order
-    final SortedMap<LocalTime, Element> scheduleElements = new TreeMap<>();
+    final SortedMap<LocalTime, String> scheduleElements = new TreeMap<>();
 
     for (final String subjectiveStation : schedule.getSubjectiveStations()) {
-      final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-
       final SubjectiveTime stime = si.getSubjectiveTimeByName(subjectiveStation);
       if (null == stime) {
         throw new RuntimeException("Cannot find time for "
@@ -865,30 +863,40 @@ public final class ScheduleWriter {
       }
       final LocalTime start = stime.getTime();
 
-      final String text = String.format("%s%s%s", TournamentSchedule.formatTime(start),
-                                        String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(2), subjectiveStation);
-      block.appendChild(document.createTextNode(text));
-
-      scheduleElements.put(start, block);
+      scheduleElements.put(start, subjectiveStation);
     }
 
     for (final PerformanceTime performance : si.getAllPerformances()) {
-      final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-
       final String roundName = si.getRoundName(performance);
 
       final LocalTime start = performance.getTime();
 
-      final String text = String.format("%s%sPerformance %s %s %d", TournamentSchedule.formatTime(start),
-                                        String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(2), roundName,
-                                        performance.getTable(), performance.getSide());
-      block.appendChild(document.createTextNode(text));
-
-      scheduleElements.put(start, block);
+      final String text = String.format("Performance %s %s %d", roundName, performance.getTable(),
+                                        performance.getSide());
+      scheduleElements.put(start, text);
     }
 
     // add the elements in time order
-    scheduleElements.values().forEach(container::appendChild);
+    final Element table = FOPUtils.createBasicTable(document);
+    container.appendChild(table);
+    table.appendChild(FOPUtils.createTableColumn(document, 1));
+    table.appendChild(FOPUtils.createTableColumn(document, 1));
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+    table.appendChild(tableBody);
+    for (final Map.Entry<LocalTime, String> entry : scheduleElements.entrySet()) {
+      final Element row = FOPUtils.createTableRow(document);
+      tableBody.appendChild(row);
+
+      final Element timeCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
+                                                        TournamentSchedule.formatTime(entry.getKey()));
+      row.appendChild(timeCell);
+      timeCell.setAttribute("padding-right", "2em");
+
+      final Element eventCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, entry.getValue());
+      row.appendChild(eventCell);
+    }
+
   }
 
   /**
