@@ -307,6 +307,27 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
             </c:if>
         </li>
 
+        <li>
+            <a href="<c:url value='/report/PitSigns' />" target="_new">All
+                Pit Signs</a>
+        </li>
+
+        <li>
+            <form action="<c:url value='/report/PitSigns' />"
+                method='post' target="_new">
+                Pit sign for
+                <select name='team_number'>
+                    <c:forEach items="${tournamentTeams}" var="team">
+                        <option
+                            value='<c:out value="${team.teamNumber}"/>'>
+                            <c:out value="${team.teamNumber}" /> -
+                            <c:out value="${team.teamName}" />
+                        </option>
+                    </c:forEach>
+                </select>
+                <input type='submit' value='Output Pit Sign' />
+            </form>
+        </li>
 
         <li>
             <a id='change-award-groups' href='edit_event_division.jsp'>Change
