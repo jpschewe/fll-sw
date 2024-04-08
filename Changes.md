@@ -1,3 +1,4 @@
+* #1174 - Add support for generating pit signs
 * #1172 - Add support for judges stating that their scores are final
 * Highlight place cells in the awards script
 * #1143 - Sort award groups in all reports to match the awards script
