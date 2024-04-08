@@ -1126,4 +1126,34 @@ public final class FOPUtils {
 
     return cell;
   }
+
+  /**
+   * Split text on line breaks and create separate blocks for each paragraph.
+   * 
+   * @param document used to create elements
+   * @param text the text
+   * @param container where to put all of the paragraphs
+   * @param spaceAfter true if there should be a blank line after each paragraph
+   */
+  public static void appendTextAsParagraphs(final Document document,
+                                            final String text,
+                                            final Element container,
+                                            final boolean spaceAfter) {
+    for (final String paragraph : text.split("\\R+")) {
+      final String t;
+      if (paragraph.isEmpty()) {
+        t = String.valueOf(Utilities.NON_BREAKING_SPACE);
+      } else {
+        t = paragraph;
+      }
+
+      final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      container.appendChild(block);
+      if (spaceAfter) {
+        block.setAttribute("space-after", "1em");
+      }
+      block.appendChild(document.createTextNode(t));
+    }
+
+  }
 }

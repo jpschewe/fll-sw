@@ -29,6 +29,7 @@ import fll.TournamentTeam;
 import fll.UserImages;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
@@ -111,6 +112,9 @@ public class PitSigns extends BaseFLLServlet {
       final @Nullable String partnerImageBase64 = getImageAsBase64(Welcome.PARTNER_LOGO_FILENAME);
       final @Nullable String firstImageBase64 = getImageAsBase64(Welcome.FLL_LOGO_FILENAME);
 
+      final String topText = TournamentParameters.getPitSignTopText(connection, tournament.getTournamentID());
+      final String bottomText = TournamentParameters.getPitSignBottomText(connection, tournament.getTournamentID());
+
       // Allow the user to specify a team number, if the parameter isn't found,
       // then render all pit signs
       final @Nullable String teamNumberStr = request.getParameter("team_number");
@@ -120,7 +124,7 @@ public class PitSigns extends BaseFLLServlet {
         for (final TournamentTeam team : Queries.getTournamentTeams(connection, tournament.getTournamentID())
                                                 .values()) {
           final Element page = renderTeam(document, schedule, challengeImageBase64, partnerImageBase64,
-                                          firstImageBase64, team);
+                                          firstImageBase64, team, topText, bottomText);
           documentBody.appendChild(page);
           page.setAttribute("page-break-after", "always");
         }
@@ -131,7 +135,7 @@ public class PitSigns extends BaseFLLServlet {
         final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, tournament, teamNumber);
 
         final Element page = renderTeam(document, schedule, challengeImageBase64, partnerImageBase64, firstImageBase64,
-                                        team);
+                                        team, topText, bottomText);
         documentBody.appendChild(page);
       }
 
@@ -153,7 +157,9 @@ public class PitSigns extends BaseFLLServlet {
                              final @Nullable String challengeImageBase64,
                              final @Nullable String partnerImageBase64,
                              final @Nullable String firstImageBase64,
-                             final TournamentTeam team) {
+                             final TournamentTeam team,
+                             final String topText,
+                             final String bottomText) {
 
     final Element page = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     page.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_CENTER);
@@ -206,15 +212,13 @@ public class PitSigns extends BaseFLLServlet {
     }
 
     // top text
-    // FIXME read from tournament parameters and create a block for each carriage
+    // read from tournament parameters and create a block for each carriage
     // return separated pice
     final Element topTextContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     page.appendChild(topTextContainer);
     topTextContainer.setAttribute("font-size", "14pt");
     topTextContainer.setAttribute("font-weight", "bold");
-    final Element topBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    topTextContainer.appendChild(topBlock);
-    topBlock.appendChild(document.createTextNode("FIXME top text"));
+    FOPUtils.appendTextAsParagraphs(document, topText, topTextContainer, false);
 
     // schedule
     if (null != schedule) {
@@ -230,16 +234,14 @@ public class PitSigns extends BaseFLLServlet {
     }
 
     // bottom text
-    // FIXME read from tournament parameters and create a block for each carriage
+    // read from tournament parameters and create a block for each carriage
     // return separated pice
     final Element bottomTextContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     page.appendChild(bottomTextContainer);
     bottomTextContainer.setAttribute("font-size", "14pt");
     bottomTextContainer.setAttribute("font-weight", "bold");
     bottomTextContainer.setAttribute("margin-top", "2em");
-    final Element bottomBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    bottomTextContainer.appendChild(bottomBlock);
-    bottomBlock.appendChild(document.createTextNode("FIXME bottom text"));
+    FOPUtils.appendTextAsParagraphs(document, bottomText, bottomTextContainer, false);
 
     // partner and FIRST logos
     if (null != partnerImageBase64

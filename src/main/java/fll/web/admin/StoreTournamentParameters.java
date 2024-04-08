@@ -11,13 +11,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Tournament;
 import fll.db.TournamentParameters;
@@ -27,6 +23,12 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Submit action for edit_tournament_parameters.jsp.
@@ -67,6 +69,14 @@ public class StoreTournamentParameters extends BaseFLLServlet {
                                                                                    "performance_advancement_percentage");
       TournamentParameters.setPerformanceAdvancementPercentage(connection, tournament.getTournamentID(),
                                                                performanceAdvancementPercentage);
+
+      final @Nullable String pitSignTopText = request.getParameter("pit_sign_top_text");
+      TournamentParameters.setPitSignTopText(connection, tournament.getTournamentID(),
+                                             null == pitSignTopText ? "" : pitSignTopText);
+
+      final @Nullable String pitSignBottomText = request.getParameter("pit_sign_bottom_text");
+      TournamentParameters.setPitSignBottomText(connection, tournament.getTournamentID(),
+                                                null == pitSignBottomText ? "" : pitSignBottomText);
 
       if (message.length() == 0) {
         message.append("<p id='success'>Tournament parameters saved</p>");

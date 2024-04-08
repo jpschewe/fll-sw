@@ -705,6 +705,15 @@ public final class GenerateDB {
         TournamentParameters.setDefaultNumPracticeRounds(connection, TournamentParameters.PRACTICE_ROUNDS_DEFAULT);
       }
 
+      if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.PIT_SIGN_TOP_TEXT)) {
+        TournamentParameters.setDefaultPitSignTopText(connection,
+                                                      "Please arrive at check-in 5 minutes before your scheduled Judging and Robot Performance Time");
+      }
+      if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.PIT_SIGN_BOTTOM_TEXT)) {
+        TournamentParameters.setDefaultPitSignBottomText(connection,
+                                                         "Please join us at the end of the day for the awards ceremony");
+      }
+
     }
   }
 
