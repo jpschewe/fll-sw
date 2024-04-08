@@ -240,7 +240,6 @@ public class PitSigns extends BaseFLLServlet {
     page.appendChild(bottomTextContainer);
     bottomTextContainer.setAttribute("font-size", "14pt");
     bottomTextContainer.setAttribute("font-weight", "bold");
-    bottomTextContainer.setAttribute("margin-top", "2em");
     FOPUtils.appendTextAsParagraphs(document, bottomText, bottomTextContainer, false);
 
     // partner and FIRST logos
