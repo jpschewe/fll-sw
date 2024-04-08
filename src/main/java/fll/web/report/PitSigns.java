@@ -6,9 +6,13 @@
 
 package fll.web.report;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Base64;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -22,6 +26,7 @@ import org.w3c.dom.Element;
 
 import fll.Tournament;
 import fll.TournamentTeam;
+import fll.UserImages;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.scheduler.ScheduleWriter;
@@ -36,6 +41,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.Welcome;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -49,6 +55,8 @@ import net.mtu.eggplant.xml.XMLUtils;
  */
 @WebServlet("/report/PitSigns")
 public class PitSigns extends BaseFLLServlet {
+
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -177,10 +185,16 @@ public class PitSigns extends BaseFLLServlet {
                                                                  wave)));
     }
 
-    // header text 1
-    // header text 2 - ? do two lines or allow carriage return in the text?
-    // FIXME
-    // 14pt
+    // top text
+    // FIXME read from tournament parameters and create a block for each carriage
+    // return separated pice
+    final Element topTextContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+    page.appendChild(topTextContainer);
+    topTextContainer.setAttribute("font-size", "14pt");
+    topTextContainer.setAttribute("font-weight", "bold");
+    final Element topBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    topTextContainer.appendChild(topBlock);
+    topBlock.appendChild(document.createTextNode("FIXME top text"));
 
     // schedule
     if (null != schedule) {
@@ -195,17 +209,77 @@ public class PitSigns extends BaseFLLServlet {
       }
     }
 
-    // FIXME
-    // 18pt
+    // bottom text
+    // FIXME read from tournament parameters and create a block for each carriage
+    // return separated pice
+    final Element bottomTextContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+    page.appendChild(bottomTextContainer);
+    bottomTextContainer.setAttribute("font-size", "14pt");
+    bottomTextContainer.setAttribute("font-weight", "bold");
+    bottomTextContainer.setAttribute("margin-top", "2em");
+    final Element bottomBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    bottomTextContainer.appendChild(bottomBlock);
+    bottomBlock.appendChild(document.createTextNode("FIXME bottom text"));
 
-    // footer text
-    // FIXME
-    // 14pt
+    // partner and FIRST logos
+    final @Nullable String partnerImageBase64 = getImageAsBase64(Welcome.PARTNER_LOGO_FILENAME);
+    final @Nullable String firstImageBase64 = getImageAsBase64(Welcome.FLL_LOGO_FILENAME);
 
-    // HTK logo - FIRST logo
-    // FIXME
+    if (null != partnerImageBase64
+        || null != firstImageBase64) {
+      final Element imageBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      page.appendChild(imageBlock);
+      imageBlock.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_LEFT);
+      imageBlock.setAttribute("text-align-last", "justify");
+
+      if (null != partnerImageBase64) {
+        final Element partnerImageGraphic = FOPUtils.createXslFoElement(document, "external-graphic");
+        imageBlock.appendChild(partnerImageGraphic);
+        partnerImageGraphic.setAttribute("content-width", "300px");
+        partnerImageGraphic.setAttribute("scaling", "uniform");
+        partnerImageGraphic.setAttribute("src", String.format("url('data:image/png;base64,%s')", partnerImageBase64));
+      }
+
+      final Element spacer = FOPUtils.createXslFoElement(document, FOPUtils.LEADER_TAG);
+      imageBlock.appendChild(spacer);
+      spacer.setAttribute("leader-pattern", "space");
+
+      if (null != firstImageBase64) {
+        final Element firstImageGraphic = FOPUtils.createXslFoElement(document, "external-graphic");
+        imageBlock.appendChild(firstImageGraphic);
+        firstImageGraphic.setAttribute("content-width", "300px");
+        firstImageGraphic.setAttribute("scaling", "uniform");
+        firstImageGraphic.setAttribute("src", String.format("url('data:image/png;base64,%s')", firstImageBase64));
+      }
+    }
 
     return page;
+  }
+
+  /**
+   * @param userImagesFilename the file to find relative to
+   *          {@link UserImages#getImagesPath()}
+   * @return the image as base64 or null if not found
+   */
+  private static @Nullable String getImageAsBase64(final String userImagesFilename) {
+
+    final Base64.Encoder encoder = Base64.getEncoder();
+
+    final Path fllSubjectiveLogo = UserImages.getImagesPath().resolve(userImagesFilename);
+    try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+      if (!Files.exists(fllSubjectiveLogo)) {
+        LOGGER.debug("Cannot find image: {}", fllSubjectiveLogo.toAbsolutePath().toString());
+        return null;
+      }
+
+      Files.copy(fllSubjectiveLogo, output);
+
+      final String encoded = encoder.encodeToString(output.toByteArray());
+      return encoded;
+    } catch (final IOException e) {
+      throw new FLLInternalException("Unable to read image", e);
+    }
+
   }
 
 }
