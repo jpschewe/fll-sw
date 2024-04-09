@@ -1668,7 +1668,7 @@ public class SchedulerUI extends JFrame {
       }
 
       if (value instanceof LocalTime) {
-        final String strValue = TournamentSchedule.formatTime((LocalTime) value);
+        final String strValue = TournamentSchedule.humanFormatTime((LocalTime) value);
         return super.getTableCellRendererComponent(table, strValue, isSelected, hasFocus, row, column);
       } else {
         return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);

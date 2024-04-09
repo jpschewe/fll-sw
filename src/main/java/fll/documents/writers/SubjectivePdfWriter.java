@@ -285,7 +285,7 @@ public class SubjectivePdfWriter {
     } else if (null == scheduledTime) {
       scheduledTimeStr = "N/A";
     } else {
-      scheduledTimeStr = TournamentSchedule.formatTime(scheduledTime);
+      scheduledTimeStr = TournamentSchedule.humanFormatTime(scheduledTime);
     }
     final Element timeCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
                                                             String.format("Time: %s",

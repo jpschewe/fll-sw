@@ -952,7 +952,7 @@ public class ScoresheetGenerator {
   public void setTime(final int i,
                       final LocalTime time)
       throws IllegalArgumentException {
-    setTime(i, TournamentSchedule.formatTime(time));
+    setTime(i, TournamentSchedule.humanFormatTime(time));
   }
 
   /**

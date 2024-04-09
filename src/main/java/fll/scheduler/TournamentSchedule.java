@@ -198,6 +198,11 @@ public class TournamentSchedule implements Serializable {
   private static final DateTimeFormatter OUTPUT_TIME_FORMAT = DateTimeFormatter.ofPattern("h:mm");
 
   /**
+   * Use AM/PM for human readable dates.
+   */
+  private static final DateTimeFormatter HUMAN_OUTPUT_TIME_FORMAT = DateTimeFormatter.ofPattern("hh:mm a");
+
+  /**
    * Parse times as 24-hour and then use
    * {@link TournamentSchedule#EARLIEST_HOUR} to decide if it's really
    * AM or PM.
@@ -256,7 +261,7 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * Conver the time to a string that will be parsed by
+   * Convert the time to a string that will be parsed by
    * {@link #parseTime(String)}.
    *
    * @param time the time to format, may be null
@@ -267,6 +272,20 @@ public class TournamentSchedule implements Serializable {
       return "";
     } else {
       return time.format(OUTPUT_TIME_FORMAT);
+    }
+  }
+
+  /**
+   * Format a time for humans to read using hours, minutes and AM/PM.
+   * 
+   * @param time the time to format
+   * @return the formatted time, null converts to ""
+   */
+  public static String humanFormatTime(final @Nullable LocalTime time) {
+    if (null == time) {
+      return "";
+    } else {
+      return time.format(HUMAN_OUTPUT_TIME_FORMAT);
     }
   }
 
@@ -716,9 +735,9 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Output the detailed schedule.
+   * 
    * @param directory the directory to put the files in
    * @param baseFilename the base filename
-   *
    * @throws IOException if there is an error writing the schedules
    * @throws IllegalArgumentException if directory doesn't exist and can't be
    *           created or exists and isn't a directory
@@ -1048,7 +1067,8 @@ public class TournamentSchedule implements Serializable {
       final LocalTime latestEnd = null == latestStart ? null : latestStart.plus(subjectiveDuration);
 
       output.format("Subjective times for judging station %s: %s - %s (assumes default subjective time of %d minutes)%n",
-                    station, formatTime(earliestStart), formatTime(latestEnd), SolverParams.DEFAULT_SUBJECTIVE_MINUTES);
+                    station, humanFormatTime(earliestStart), humanFormatTime(latestEnd),
+                    SolverParams.DEFAULT_SUBJECTIVE_MINUTES);
     }
     if (null != minPerf
         && null != maxPerf) {
@@ -1056,7 +1076,8 @@ public class TournamentSchedule implements Serializable {
       final LocalTime performanceEnd = maxPerf.plus(performanceDuration);
 
       output.format("Performance times: %s - %s (assumes default performance time of %d minutes)%n",
-                    formatTime(minPerf), formatTime(performanceEnd), SolverParams.DEFAULT_PERFORMANCE_MINUTES);
+                    humanFormatTime(minPerf), humanFormatTime(performanceEnd),
+                    SolverParams.DEFAULT_PERFORMANCE_MINUTES);
     }
     return output.toString();
   }
