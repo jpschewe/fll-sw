@@ -88,6 +88,16 @@ public class ManageUserImages extends BaseFLLServlet {
                                         .toAbsolutePath().toString());
     }
 
+    final @Nullable Part challengeLogoDefault = request.getPart("challenge_logo_default");
+    final @Nullable Part challengeLogo = request.getPart("challenge_logo");
+    if (null != challengeLogoDefault) {
+      UserImages.useDefaultChallengeLogo();
+    } else if (null != challengeLogo
+        && challengeLogo.getSize() > 0) {
+      challengeLogo.write(UserImages.getImagesPath().resolve(UserImages.CHALLENGE_LOGO_FILENAME).toAbsolutePath()
+                                    .toString());
+    }
+
     final String referrer = request.getHeader("Referer");
     response.sendRedirect(response.encodeRedirectURL(StringUtils.isEmpty(referrer) ? "index.jsp" : referrer));
   }
