@@ -18,6 +18,8 @@ fll.web.Welcome.populateContext(pageContext);
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/welcome.css'/>" />
 
+<link rel="stylesheet" type="text/css" href="manage-user-images.css" />
+
 <title>Manage Images</title>
 
 </head>
@@ -98,7 +100,7 @@ fll.web.Welcome.populateContext(pageContext);
         <table class="center">
             <tr>
                 <td>
-                    <img
+                    <img id="challenge_logo_image"
                         src="<c:url value='/${challenge_logo}'/>?${uuid}" />
                 </td>
             </tr>
