@@ -105,6 +105,7 @@ public class PitSigns extends BaseFLLServlet {
 
       final Element documentBody = FOPUtils.createBody(document);
       pageSequence.appendChild(documentBody);
+      documentBody.setAttribute("font-family", "Helvetica");
 
       final @Nullable String challengeImageBase64 = getImageAsBase64(UserImages.CHALLENGE_LOGO_FILENAME);
       LOGGER.warn("Image logo found? {}", null != challengeImageBase64);
