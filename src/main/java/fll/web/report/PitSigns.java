@@ -173,7 +173,7 @@ public class PitSigns extends BaseFLLServlet {
 
       final Element challengeImageGraphic = FOPUtils.createXslFoElement(document, "external-graphic");
       imageBlock.appendChild(challengeImageGraphic);
-      challengeImageGraphic.setAttribute("content-width", "700px");
+      challengeImageGraphic.setAttribute("content-width", "500px");
       challengeImageGraphic.setAttribute("content-height", "150px");
       challengeImageGraphic.setAttribute("scaling", "uniform");
       challengeImageGraphic.setAttribute("src", String.format("url('data:image/png;base64,%s')", challengeImageBase64));
