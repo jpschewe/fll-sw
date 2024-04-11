@@ -221,12 +221,14 @@ public class PitSigns extends BaseFLLServlet {
     topTextContainer.setAttribute("font-size", "14pt");
     topTextContainer.setAttribute("font-weight", "bold");
     FOPUtils.appendTextAsParagraphs(document, topText, topTextContainer, false);
+    topTextContainer.setAttribute("padding-bottom", "10px");
 
     // schedule
     if (null != schedule) {
       final Element scheduleContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
       page.appendChild(scheduleContainer);
       scheduleContainer.setAttribute("font-size", "18pt");
+
       final @Nullable TeamScheduleInfo si = schedule.getSchedInfoForTeam(team.getTeamNumber());
       if (null == si) {
         scheduleContainer.appendChild(document.createTextNode("No schedule"));
