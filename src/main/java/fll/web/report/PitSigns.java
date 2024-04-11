@@ -253,6 +253,7 @@ public class PitSigns extends BaseFLLServlet {
       page.appendChild(imageBlock);
       imageBlock.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_LEFT);
       imageBlock.setAttribute("text-align-last", "justify");
+      imageBlock.setAttribute("padding-top", "10px");
 
       if (null != partnerImageBase64) {
         final Element partnerImageGraphic = FOPUtils.createXslFoElement(document, "external-graphic");
