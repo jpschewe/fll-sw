@@ -200,7 +200,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Use AM/PM for human readable dates.
    */
-  private static final DateTimeFormatter HUMAN_OUTPUT_TIME_FORMAT = DateTimeFormatter.ofPattern("hh:mm a");
+  private static final DateTimeFormatter HUMAN_OUTPUT_TIME_FORMAT = DateTimeFormatter.ofPattern("h:mm a");
 
   /**
    * Parse times as 24-hour and then use
