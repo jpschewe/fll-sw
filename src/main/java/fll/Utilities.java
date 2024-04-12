@@ -740,4 +740,16 @@ public final class Utilities {
     return row;
   }
 
+  /**
+   * @param value the string
+   * @return if the value is null, the empty string otherwise the value
+   */
+  public static String stringValueOrEmpty(final @Nullable String value) {
+    if (null == value) {
+      return "";
+    } else {
+      return value;
+    }
+  }
+
 }

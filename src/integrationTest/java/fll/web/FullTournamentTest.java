@@ -453,6 +453,7 @@ public class FullTournamentTest {
       new Select(selenium.findElement(By.name("organization"))).selectByVisibleText(TournamentSchedule.ORGANIZATION_HEADER);
       new Select(selenium.findElement(By.name("awardGroup"))).selectByVisibleText(TournamentSchedule.AWARD_GROUP_HEADER);
       new Select(selenium.findElement(By.name("judgingGroup"))).selectByVisibleText(TournamentSchedule.JUDGE_GROUP_HEADER);
+      new Select(selenium.findElement(By.name("wave"))).selectByVisibleText(TournamentSchedule.WAVE_HEADER);
 
       for (int i = 0; i < schedule.getNumberOfPracticeRounds(); ++i) {
         final int round = i

@@ -27,6 +27,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
   const ORGANIZATION_HEADER = "${ORGANIZATION_HEADER}";
   const AWARD_GROUP_HEADER = "${AWARD_GROUP_HEADER}";
   const JUDGE_GROUP_HEADER = "${JUDGE_GROUP_HEADER}";
+  const WAVE_HEADER = "${WAVE_HEADER}";
   const numPerformanceRuns = parseInt("${uploadScheduleData.numPerformanceRuns}");
   const numPracticeRounds = parseInt("${numPracticeRounds}");
   const perfHeaders = JSON.parse('${perfHeaders}');
@@ -132,6 +133,20 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
                 </td>
             </tr>
 
+            <tr>
+                <td>Wave</td>
+                <td>
+                    <select id='wave' name='wave'>
+                        <option value='' selected>None</option>
+
+                        <c:forEach items="${spreadsheetHeaderNames}"
+                            var="fileHeader">
+                            <option value="${fileHeader}">${fileHeader}</option>
+                        </c:forEach>
+                    </select>
+                </td>
+            </tr>
+
             <c:forEach begin="1" end="${numPracticeRounds}"
                 varStatus="practiceLoopStatus">
                 <tr>
@@ -164,7 +179,8 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
 
             </c:forEach>
 
-            <c:forEach begin="1" end="${uploadScheduleData.numPerformanceRuns}"
+            <c:forEach begin="1"
+                end="${uploadScheduleData.numPerformanceRuns}"
                 varStatus="perfLoopStatus">
                 <tr>
                     <td bgcolor='yellow'>Performance

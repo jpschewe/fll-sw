@@ -19,8 +19,11 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.Team;
 import fll.Tournament;
+import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
@@ -63,10 +66,11 @@ public final class GatherTeamData {
 
       final Map<Integer, Collection<String>> tournamentEventDivisions = new HashMap<>();
       final Map<Integer, Collection<String>> tournamentJudgingStations = new HashMap<>();
+      final Map<Integer, Collection<String>> tournamentWaves = new HashMap<>();
       final Map<Integer, Boolean> playoffsInitialized = new HashMap<>();
       for (final Tournament tournament : tournaments) {
 
-        // createa new list so that I can be sure that I can add to it
+        // create a new list so that I can be sure that I can add to it
         final List<String> allEventDivisions = new LinkedList<>(AwardsScriptReport.getAwardGroupOrder(connection,
                                                                                                       tournament));
         if (allEventDivisions.isEmpty()) {
@@ -83,11 +87,19 @@ public final class GatherTeamData {
         }
         tournamentJudgingStations.put(tournament.getTournamentID(), allJudgingStations);
 
+        final Collection<String> allWaves = Queries.getWaves(connection, tournament.getTournamentID());
+        if (allWaves.isEmpty()) {
+          // special case for empty, always allow empty value
+          allWaves.add("");
+        }
+        tournamentWaves.put(tournament.getTournamentID(), allWaves);
+
         playoffsInitialized.put(tournament.getTournamentID(),
                                 Queries.isPlayoffDataInitialized(connection, tournament.getTournamentID()));
       }
       page.setAttribute("tournamentEventDivisions", tournamentEventDivisions);
       page.setAttribute("tournamentJudgingStations", tournamentJudgingStations);
+      page.setAttribute("tournamentWaves", tournamentWaves);
       page.setAttribute("playoffsInitialized", playoffsInitialized);
 
       final String teamNumberStr = request.getParameter("teamNumber");
@@ -105,6 +117,7 @@ public final class GatherTeamData {
         page.setAttribute("inPlayoffs", false);
         page.setAttribute("currentEventDivisions", Collections.emptyMap());
         page.setAttribute("currentJudgingStations", Collections.emptyMap());
+        page.setAttribute("currentWaves", Collections.emptyMap());
       } else {
         page.setAttribute("addTeam", false);
 
@@ -115,19 +128,21 @@ public final class GatherTeamData {
         // selected
         final Map<Integer, String> currentEventDivisions = new HashMap<>();
         final Map<Integer, String> currentJudgingStations = new HashMap<>();
+        final Map<Integer, @Nullable String> currentWaves = new HashMap<>();
         for (final Tournament tournament : tournaments) {
-          final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournament.getTournamentID());
-          final String judgingStation = Queries.getJudgingGroup(connection, teamNumber, tournament.getTournamentID());
-          if (null == eventDivision
-              || null == judgingStation) {
+          try {
+            final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, tournament,
+                                                                                     teamNumber);
+            currentEventDivisions.put(tournament.getTournamentID(), team.getAwardGroup());
+            currentJudgingStations.put(tournament.getTournamentID(), team.getJudgingGroup());
+            currentWaves.put(tournament.getTournamentID(), team.getWave());
+          } catch (final IllegalArgumentException e) {
             LOGGER.debug("Team {} is not in tournament {}", teamNumber, tournament.getName());
-          } else {
-            currentEventDivisions.put(tournament.getTournamentID(), eventDivision);
-            currentJudgingStations.put(tournament.getTournamentID(), judgingStation);
           }
         }
         page.setAttribute("currentEventDivisions", currentEventDivisions);
         page.setAttribute("currentJudgingStations", currentJudgingStations);
+        page.setAttribute("currentWaves", currentWaves);
 
         // check if team is listed in any playoff data
         PreparedStatement prep = null;

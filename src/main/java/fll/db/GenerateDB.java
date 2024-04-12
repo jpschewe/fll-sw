@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 42;
+  public static final int DATABASE_VERSION = 43;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -200,9 +200,10 @@ public final class GenerateDB {
       stmt.executeUpdate("CREATE TABLE TournamentTeams ("
           + "  TeamNumber integer NOT NULL" //
           + " ,Tournament INTEGER NOT NULL" //
-          + " ,event_division varchar(32) default '"
+          + " ,event_division varchar(32) DEFAULT '"
           + DEFAULT_TEAM_DIVISION
           + "' NOT NULL" //
+          + " ,wave varchar(32) DEFAULT NULL" //
           + " ,judging_station varchar(64) NOT NULL"
           + " ,CONSTRAINT tournament_teams_pk PRIMARY KEY (TeamNumber, Tournament)" //
           + " ,CONSTRAINT tournament_teams_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)" //
@@ -702,6 +703,15 @@ public final class GenerateDB {
 
       if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.PRACTICE_ROUNDS)) {
         TournamentParameters.setDefaultNumPracticeRounds(connection, TournamentParameters.PRACTICE_ROUNDS_DEFAULT);
+      }
+
+      if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.PIT_SIGN_TOP_TEXT)) {
+        TournamentParameters.setDefaultPitSignTopText(connection,
+                                                      "Please arrive at check-in 5 minutes before your scheduled Judging and Robot Performance Time");
+      }
+      if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.PIT_SIGN_BOTTOM_TEXT)) {
+        TournamentParameters.setDefaultPitSignBottomText(connection,
+                                                         "Please join us at the end of the day for the awards ceremony");
       }
 
     }

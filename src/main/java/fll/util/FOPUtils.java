@@ -146,6 +146,12 @@ public final class FOPUtils {
   public static final Dimension2D PAGE_LETTER_SIZE = new Dimension2DDouble(8.5, 11);
 
   /**
+   * {@link #PAGE_LETTER_SIZE} landscape.
+   */
+  public static final Dimension2D PAGE_LANDSCAPE_LETTER_SIZE = new Dimension2DDouble(PAGE_LETTER_SIZE.getHeight(),
+                                                                                     PAGE_LETTER_SIZE.getWidth());
+
+  /**
    * 0.5" on each side, 0.2" on top and bottom.
    */
   public static final Margins STANDARD_MARGINS = new Margins(0.2, 0.2, 0.5, 0.5);
@@ -171,6 +177,27 @@ public final class FOPUtils {
                                                final String name)
       throws IllegalArgumentException {
     return createSimplePageMaster(document, name, PAGE_LETTER_SIZE, STANDARD_MARGINS, 0, STANDARD_FOOTER_HEIGHT);
+  }
+
+  /**
+   * Landscape version of {@link #createSimplePageMaster(Document, String)}.
+   * 
+   * @param document used to create the elements
+   * @param name the name of the page master
+   * @see #createSimplePageMaster(Document, String, Dimension2D, Margins, double,
+   *      double)
+   * @throws IllegalArgumentException see
+   *           {@link #createSimplePageMaster(Document, String, Dimension2D, Margins, double, double)}
+   * @see #STANDARD_MARGINS
+   * @see #PAGE_LETTER_SIZE
+   * @see #STANDARD_FOOTER_HEIGHT
+   * @return the page master element
+   */
+  public static Element createSimpleLandscapePageMaster(final Document document,
+                                                        final String name)
+      throws IllegalArgumentException {
+    return createSimplePageMaster(document, name, PAGE_LANDSCAPE_LETTER_SIZE, STANDARD_MARGINS, 0,
+                                  STANDARD_FOOTER_HEIGHT);
   }
 
   /**
@@ -1098,5 +1125,35 @@ public final class FOPUtils {
                TABLE_CELL_STANDARD_PADDING);
 
     return cell;
+  }
+
+  /**
+   * Split text on line breaks and create separate blocks for each paragraph.
+   * 
+   * @param document used to create elements
+   * @param text the text
+   * @param container where to put all of the paragraphs
+   * @param spaceAfter true if there should be a blank line after each paragraph
+   */
+  public static void appendTextAsParagraphs(final Document document,
+                                            final String text,
+                                            final Element container,
+                                            final boolean spaceAfter) {
+    for (final String paragraph : text.split("\\R+")) {
+      final String t;
+      if (paragraph.isEmpty()) {
+        t = String.valueOf(Utilities.NON_BREAKING_SPACE);
+      } else {
+        t = paragraph;
+      }
+
+      final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      container.appendChild(block);
+      if (spaceAfter) {
+        block.setAttribute("space-after", "1em");
+      }
+      block.appendChild(document.createTextNode(t));
+    }
+
   }
 }

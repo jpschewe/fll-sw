@@ -66,6 +66,12 @@ public final class GatherTournamentParameterInformation {
                                TournamentParameters.getPerformanceAdvancementPercentage(connection,
                                                                                         tournament.getTournamentID()));
 
+      pageContext.setAttribute("pitSignTopText",
+                               TournamentParameters.getPitSignTopText(connection, tournament.getTournamentID()));
+
+      pageContext.setAttribute("pitSignBottomText",
+                               TournamentParameters.getPitSignBottomText(connection, tournament.getTournamentID()));
+
     }
   }
 }

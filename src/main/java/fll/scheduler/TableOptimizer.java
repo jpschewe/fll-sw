@@ -666,11 +666,11 @@ public class TableOptimizer {
       final List<String> tables = perfTables.get(time);
       if (null == tables) {
         throw new FLLInternalException("Cannot find tables at time: "
-            + TournamentSchedule.formatTime(time));
+            + TournamentSchedule.humanFormatTime(time));
       }
       if (tables.isEmpty()) {
         throw new FLLInternalException("No tables found at time: "
-            + TournamentSchedule.formatTime(time));
+            + TournamentSchedule.humanFormatTime(time));
       }
 
       // 2 teams on each table at a given time

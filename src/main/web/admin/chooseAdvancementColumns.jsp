@@ -10,7 +10,7 @@
 </head>
 
 <body>
-    <h1>${challengeDescription.title}(AssignTeams to Tournament)</h1>
+    <h1>${challengeDescription.title}(AssignTeamsto Tournament)</h1>
 
     <p>Select the column that specifies the team numbers and the
         column for the tournament. Highlighted columns are required, all
@@ -70,6 +70,18 @@
                 </td>
             </tr>
 
+            <tr>
+                <td>Wave</td>
+                <td>
+                    <select name='wave'>
+                        <option value='' selected>None</option>
+                        <c:forEach items="${spreadsheetHeaderNames}"
+                            var="fileHeader">
+                            <option value="${fileHeader}">${fileHeader}</option>
+                        </c:forEach>
+                    </select>
+                </td>
+            </tr>
 
             <tr>
                 <td colspan='2'>

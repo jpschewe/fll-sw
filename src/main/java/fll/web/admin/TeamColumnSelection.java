@@ -24,10 +24,10 @@ public final class TeamColumnSelection {
    * @param session session variables
    * @param page set page variables
    */
-  public static void populateContext(final HttpSession session, final PageContext page) {
+  public static void populateContext(final HttpSession session,
+                                     final PageContext page) {
     if (null == session.getAttribute("columnSelectOptions")) {
-      throw new RuntimeException(
-      "Error columnSelectOptions not set.  Please start back at administration page and go forward.");
+      throw new RuntimeException("Error columnSelectOptions not set.  Please start back at administration page and go forward.");
     }
 
     page.setAttribute("TEAM_NUMBER_HEADER", UploadTeams.sanitizeColumnName(TournamentSchedule.TEAM_NUMBER_HEADER));
@@ -35,6 +35,7 @@ public final class TeamColumnSelection {
     page.setAttribute("ORGANIZATION_HEADER", UploadTeams.sanitizeColumnName(TournamentSchedule.ORGANIZATION_HEADER));
     page.setAttribute("AWARD_GROUP_HEADER", UploadTeams.sanitizeColumnName(TournamentSchedule.AWARD_GROUP_HEADER));
     page.setAttribute("JUDGE_GROUP_HEADER", UploadTeams.sanitizeColumnName(TournamentSchedule.JUDGE_GROUP_HEADER));
+    page.setAttribute("WAVEHEADER", UploadTeams.sanitizeColumnName(TournamentSchedule.WAVE_HEADER));
   }
 
 }

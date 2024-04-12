@@ -581,6 +581,12 @@ public final class Tournament implements Serializable {
       deleteScheduleSubj.setInt(1, tournamentID);
       deleteScheduleSubj.executeUpdate();
     }
+    
+    try (
+        PreparedStatement deleteScheduleSubj = connection.prepareStatement("DELETE FROM sched_durations WHERE tournament_id = ?")) {
+      deleteScheduleSubj.setInt(1, tournamentID);
+      deleteScheduleSubj.executeUpdate();
+    }
 
     try (PreparedStatement deleteSchedule = connection.prepareStatement("DELETE FROM schedule WHERE tournament = ?")) {
       deleteSchedule.setInt(1, tournamentID);

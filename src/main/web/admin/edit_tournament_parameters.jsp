@@ -149,6 +149,34 @@ GatherTournamentParameterInformation.populateContext(application, pageContext);
 
             </div>
 
+            <!-- pit sign top text -->
+            <div>
+                <b>Pit sign top text</b>
+                <a href='javascript:display("PitSignTopTextHelp")'>[help]</a>
+                <div id='PitSignTopTextHelp' class='help'
+                    style='display: none'>
+                    Text displayed above the schedule on the pit signs.
+                    <a href='javascript:hide("PitSignTopTextHelp")'>[hide]</a>
+                </div>
+
+                <textarea name="pit_sign_top_text"
+                    id="pit_sign_top_text" rows="5" cols="80">${pitSignTopText}</textarea>
+            </div>
+
+            <!-- pit sign bottom text -->
+            <div>
+                <b>Pit sign bottom text</b>
+                <a href='javascript:display("PitSignBottomTextHelp")'>[help]</a>
+                <div id='PitSignBottomTextHelp' class='help'
+                    style='display: none'>
+                    Text displayed below the schedule on the pit signs.
+                    <a href='javascript:hide("PitSignBottomTextHelp")'>[hide]</a>
+                </div>
+
+                <textarea name="pit_sign_bottom_text"
+                    id="pit_sign_bottom_text" rows="5" cols="80">${pitSignBottomText}</textarea>
+            </div>
+
             <input type="submit" id='submit_data' name='submit_data'
                 value='Submit' />
 

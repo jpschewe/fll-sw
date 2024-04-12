@@ -54,7 +54,6 @@ import com.opencsv.CSVWriter;
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
@@ -113,6 +112,11 @@ public class TournamentSchedule implements Serializable {
    * Table header for judging group.
    */
   public static final String JUDGE_GROUP_HEADER = "Judging Group";
+
+  /**
+   * Table header for wave.
+   */
+  public static final String WAVE_HEADER = "Wave";
 
   /**
    * Performance round header without the number.
@@ -194,6 +198,11 @@ public class TournamentSchedule implements Serializable {
   private static final DateTimeFormatter OUTPUT_TIME_FORMAT = DateTimeFormatter.ofPattern("h:mm");
 
   /**
+   * Use AM/PM for human readable dates.
+   */
+  private static final DateTimeFormatter HUMAN_OUTPUT_TIME_FORMAT = DateTimeFormatter.ofPattern("h:mm a");
+
+  /**
    * Parse times as 24-hour and then use
    * {@link TournamentSchedule#EARLIEST_HOUR} to decide if it's really
    * AM or PM.
@@ -252,7 +261,7 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * Conver the time to a string that will be parsed by
+   * Convert the time to a string that will be parsed by
    * {@link #parseTime(String)}.
    *
    * @param time the time to format, may be null
@@ -263,6 +272,20 @@ public class TournamentSchedule implements Serializable {
       return "";
     } else {
       return time.format(OUTPUT_TIME_FORMAT);
+    }
+  }
+
+  /**
+   * Format a time for humans to read using hours, minutes and AM/PM.
+   * 
+   * @param time the time to format
+   * @return the formatted time, null converts to ""
+   */
+  public static String humanFormatTime(final @Nullable LocalTime time) {
+    if (null == time) {
+      return "";
+    } else {
+      return time.format(HUMAN_OUTPUT_TIME_FORMAT);
     }
   }
 
@@ -405,12 +428,9 @@ public class TournamentSchedule implements Serializable {
       }
     }
 
-    try (PreparedStatement getSched = connection.prepareStatement("SELECT team_number, judging_station"
-        + " FROM schedule, TournamentTeams" //
-        + " WHERE schedule.tournament = ?" //
-        + "   AND schedule.tournament = TournamentTeams.tournament" //
-        + "   AND schedule.team_number = TournamentTeams.TeamNumber" //
-    );
+    try (PreparedStatement getSched = connection.prepareStatement("SELECT team_number"
+        + " FROM schedule" //
+        + " WHERE schedule.tournament = ?");
 
         PreparedStatement getPerfRounds = connection.prepareStatement("SELECT perf_time, table_color, table_side, practice" //
             + " FROM sched_perf_rounds" //
@@ -428,10 +448,9 @@ public class TournamentSchedule implements Serializable {
       try (ResultSet sched = getSched.executeQuery()) {
         while (sched.next()) {
           final int teamNumber = sched.getInt(1);
-          final String judgingStation = castNonNull(sched.getString(2));
-
-          final TeamScheduleInfo ti = new TeamScheduleInfo(teamNumber);
-          ti.setJudgingGroup(judgingStation);
+          final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, currentTournament,
+                                                                                   teamNumber);
+          final TeamScheduleInfo ti = new TeamScheduleInfo(team);
 
           getSubjective.setInt(2, teamNumber);
           try (ResultSet subjective = getSubjective.executeQuery()) {
@@ -460,18 +479,6 @@ public class TournamentSchedule implements Serializable {
               ti.addPerformance(performance);
             } // foreach performance round
           } // allocate performance ResultSet
-
-          final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournamentID);
-          if (null == eventDivision) {
-            throw new FLLRuntimeException("Unable to find event division for "
-                + teamNumber);
-          }
-
-          ti.setDivision(eventDivision);
-
-          final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-          ti.setOrganization(team.getOrganization());
-          ti.setTeamName(team.getTeamName());
 
           cacheTeamScheduleInformation(ti);
         } // foreach sched result
@@ -728,16 +735,14 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Output the detailed schedule.
-   *
-   * @param params schedule parameters
+   * 
    * @param directory the directory to put the files in
    * @param baseFilename the base filename
    * @throws IOException if there is an error writing the schedules
    * @throws IllegalArgumentException if directory doesn't exist and can't be
    *           created or exists and isn't a directory
    */
-  public void outputDetailedSchedules(final SchedParams params,
-                                      final File directory,
+  public void outputDetailedSchedules(final File directory,
                                       final String baseFilename)
       throws IOException, IllegalArgumentException {
     if (!directory.exists()) {
@@ -783,7 +788,7 @@ public class TournamentSchedule implements Serializable {
     final File teamSchedules = new File(directory, baseFilename
         + "-team-schedules.pdf");
     try (OutputStream pdfFos = new FileOutputStream(teamSchedules)) {
-      ScheduleWriter.outputTeamSchedules(this, params, pdfFos);
+      ScheduleWriter.outputTeamSchedules(this, pdfFos);
     }
   }
 
@@ -1062,7 +1067,8 @@ public class TournamentSchedule implements Serializable {
       final LocalTime latestEnd = null == latestStart ? null : latestStart.plus(subjectiveDuration);
 
       output.format("Subjective times for judging station %s: %s - %s (assumes default subjective time of %d minutes)%n",
-                    station, formatTime(earliestStart), formatTime(latestEnd), SolverParams.DEFAULT_SUBJECTIVE_MINUTES);
+                    station, humanFormatTime(earliestStart), humanFormatTime(latestEnd),
+                    SolverParams.DEFAULT_SUBJECTIVE_MINUTES);
     }
     if (null != minPerf
         && null != maxPerf) {
@@ -1070,7 +1076,8 @@ public class TournamentSchedule implements Serializable {
       final LocalTime performanceEnd = maxPerf.plus(performanceDuration);
 
       output.format("Performance times: %s - %s (assumes default performance time of %d minutes)%n",
-                    formatTime(minPerf), formatTime(performanceEnd), SolverParams.DEFAULT_PERFORMANCE_MINUTES);
+                    humanFormatTime(minPerf), humanFormatTime(performanceEnd),
+                    SolverParams.DEFAULT_PERFORMANCE_MINUTES);
     }
     return output.toString();
   }
@@ -1179,10 +1186,15 @@ public class TournamentSchedule implements Serializable {
       }
 
       final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumberStr).intValue();
-      final TeamScheduleInfo ti = new TeamScheduleInfo(teamNumber);
-      ti.setTeamName(ci.getTeamName(line));
-      ti.setOrganization(ci.getOrganization(line));
-      ti.setDivision(ci.getAwardGroup(line));
+      final @Nullable String org = ci.getOrganization(line);
+      final @Nullable String name = ci.getTeamName(line);
+      final @Nullable String awardGroup = ci.getAwardGroup(line);
+      final @Nullable String judgingGroup = ci.getJudgingGroup(line);
+      final @Nullable String wave = ci.getWave(line);
+      final TournamentTeam team = new TournamentTeam(teamNumber, null == org ? "" : org, null == name ? "" : name,
+                                                     null == awardGroup ? "" : awardGroup,
+                                                     null == judgingGroup ? "" : judgingGroup, wave);
+      final TeamScheduleInfo ti = new TeamScheduleInfo(team);
 
       for (final CategoryColumnMapping mapping : ci.getSubjectiveColumnMappings()) {
         final String station = mapping.getScheduleColumn();
@@ -1196,8 +1208,6 @@ public class TournamentSchedule implements Serializable {
         final LocalTime time = castNonNull(parseTime(str));
         ti.addSubjectiveTime(new SubjectiveTime(station, time));
       }
-
-      ti.setJudgingGroup(ci.getJudgingGroup(line));
 
       // parse regular match play rounds
       for (int perfIndex = 0; perfIndex < ci.getNumPerfs(); ++perfIndex) {
@@ -1549,6 +1559,16 @@ public class TournamentSchedule implements Serializable {
       return getValue(line, judgeGroupColumn);
     }
 
+    private final int waveColumn;
+
+    /**
+     * @param line the line to parse
+     * @return the wave column value, null if column cannot be found
+     */
+    public @Nullable String getWave(final @Nullable String[] line) {
+      return getValue(line, waveColumn);
+    }
+
     private final int[] perfColumn;
 
     /**
@@ -1656,6 +1676,7 @@ public class TournamentSchedule implements Serializable {
       this.teamNameColumn = -1;
       this.awardGroupColumn = -1;
       this.judgeGroupColumn = -1;
+      this.waveColumn = -1;
       this.perfColumn = new int[0];
       this.perfTableColumn = new int[0];
       this.practiceColumn = new int[0];
@@ -1673,6 +1694,7 @@ public class TournamentSchedule implements Serializable {
      * @param awardGroupColumn {@link #getAwardGroup(String[])}
      * @param subjectiveColumnMappings {@link #getSubjectiveColumnMappings()}
      * @param judgeGroupColumn {@link #getJudgingGroup(String[])}
+     * @param waveColumn {@link #getWave(String[])}
      * @param perfColumn {@link #getPerf(String[], int)}
      * @param perfTableColumn {@link #getPerfTable(String[], int)}
      * @param practiceColumn {@link #getPractice(String[], int)}
@@ -1690,6 +1712,7 @@ public class TournamentSchedule implements Serializable {
                              final @Nullable String teamNameColumn,
                              final @Nullable String awardGroupColumn,
                              final @Nullable String judgeGroupColumn,
+                             final @Nullable String waveColumn,
                              final Collection<CategoryColumnMapping> subjectiveColumnMappings,
                              final String[] perfColumn,
                              final String[] perfTableColumn,
@@ -1710,6 +1733,7 @@ public class TournamentSchedule implements Serializable {
       this.teamNameColumn = findColumnIndex(headerLine, teamNameColumn);
       this.awardGroupColumn = findColumnIndex(headerLine, awardGroupColumn);
       this.judgeGroupColumn = findColumnIndex(headerLine, judgeGroupColumn);
+      this.waveColumn = findColumnIndex(headerLine, waveColumn);
 
       this.perfColumn = new int[perfColumn.length];
       for (int i = 0; i < this.perfColumn.length; ++i) {
@@ -1792,6 +1816,7 @@ public class TournamentSchedule implements Serializable {
       line.add(TournamentSchedule.TEAM_NAME_HEADER);
       line.add(TournamentSchedule.ORGANIZATION_HEADER);
       line.add(TournamentSchedule.JUDGE_GROUP_HEADER);
+      line.add(TournamentSchedule.WAVE_HEADER);
       final List<String> categories = Collections.unmodifiableList(new LinkedList<>(getSubjectiveStations()));
       for (final String category : categories) {
         line.add(category);
@@ -1817,8 +1842,9 @@ public class TournamentSchedule implements Serializable {
         line.add(String.valueOf(si.getTeamNumber()));
         line.add(si.getAwardGroup());
         line.add(si.getTeamName());
-        line.add(si.getOrganization());
+        line.add(Utilities.stringValueOrEmpty(si.getOrganization()));
         line.add(si.getJudgingGroup());
+        line.add(Utilities.stringValueOrEmpty(si.getWave()));
         for (final String category : categories) {
           final SubjectiveTime stime = si.getSubjectiveTimeByName(category);
           if (null != stime) {

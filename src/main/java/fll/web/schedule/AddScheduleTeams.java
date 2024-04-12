@@ -63,7 +63,7 @@ public class AddScheduleTeams extends BaseFLLServlet {
           Queries.addTeam(connection, ti.getTeamNumber(), ti.getTeamName(), ti.getOrganization());
 
           Queries.addTeamToTournament(connection, ti.getTeamNumber(), tournamentID, ti.getAwardGroup(),
-                                      ti.getJudgingGroup());
+                                      ti.getJudgingGroup(), ti.getWave());
         } catch (final SQLException e) {
           final String message = "Error talking to the database";
           LOGGER.error(message, e);

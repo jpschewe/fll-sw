@@ -94,6 +94,7 @@ public final class Queries {
         + ", Teams.TeamName"//
         + ", TournamentTeams.event_division" //
         + ", TournamentTeams.judging_station" //
+        + ", TournamentTeams.wave" //
         + " FROM Teams, TournamentTeams" //
         + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber"//
         + " AND TournamentTeams.Tournament = ?")) {
@@ -105,8 +106,9 @@ public final class Queries {
           final String name = castNonNull(rs.getString("TeamName"));
           final String eventDivision = castNonNull(rs.getString("event_division"));
           final String judgingStation = castNonNull(rs.getString("judging_station"));
+          final @Nullable String wave = rs.getString("wave");
 
-          final TournamentTeam team = new TournamentTeam(teamNumber, org, name, eventDivision, judgingStation);
+          final TournamentTeam team = new TournamentTeam(teamNumber, org, name, eventDivision, judgingStation, wave);
           tournamentTeams.put(teamNumber, team);
         }
       }
@@ -205,6 +207,35 @@ public final class Queries {
         while (rs.next()) {
           final String station = castNonNull(rs.getString(1));
           result.add(station);
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Get the list of waves for the specified tournament as a List of
+   * Strings.
+   *
+   * @param connection database connection
+   * @param tournament the tournament to get the waves for
+   * @return the waves
+   * @throws SQLException on a database error
+   */
+  public static List<String> getWaves(final Connection connection,
+                                      final int tournament)
+      throws SQLException {
+    final List<String> result = new LinkedList<>();
+
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT DISTINCT wave FROM TournamentTeams WHERE tournament = ? ORDER BY wave")) {
+      prep.setInt(1, tournament);
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final @Nullable String wave = rs.getString(1);
+          if (null != wave) {
+            result.add(wave);
+          }
         }
       }
     }
@@ -1501,6 +1532,7 @@ public final class Queries {
    * @param tournament the tournament id of the tournament to be added to
    * @param eventDivision the event division the team is in for this tournament
    * @param judgingStation the judging station for the team in this tournament
+   * @param wave the wave for the team in this tournament
    * @throws SQLException if a database problem occurs, including the team
    *           already being in the tournament
    */
@@ -1508,14 +1540,16 @@ public final class Queries {
                                          final int teamNumber,
                                          final int tournament,
                                          final String eventDivision,
-                                         final String judgingStation)
+                                         final String judgingStation,
+                                         final @Nullable String wave)
       throws SQLException {
     try (
-        PreparedStatement prep = connection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station) VALUES (?, ?, ?, ?)")) {
+        PreparedStatement prep = connection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station, wave) VALUES (?, ?, ?, ?, ?)")) {
       prep.setInt(1, tournament);
       prep.setInt(2, teamNumber);
       prep.setString(3, eventDivision);
       prep.setString(4, judgingStation);
+      prep.setString(5, wave);
       prep.executeUpdate();
     }
 

@@ -345,7 +345,7 @@ public class SchedulerUI extends JFrame {
     pack();
   }
 
-  private class CheckSchedule implements PropertyChangeListener {
+  private final class CheckSchedule implements PropertyChangeListener {
 
     @Override
     public void propertyChange(final PropertyChangeEvent ignored) {
@@ -988,7 +988,7 @@ public class SchedulerUI extends JFrame {
                 getScheduleData().outputScheduleAsCSV(os);
               }
 
-              getScheduleData().outputDetailedSchedules(getSchedParams(), directory, baseFilename);
+              getScheduleData().outputDetailedSchedules(directory, baseFilename);
               return true;
             } catch (final IOException e) {
               final Formatter errorFormatter = new Formatter();
@@ -1668,7 +1668,7 @@ public class SchedulerUI extends JFrame {
       }
 
       if (value instanceof LocalTime) {
-        final String strValue = TournamentSchedule.formatTime((LocalTime) value);
+        final String strValue = TournamentSchedule.humanFormatTime((LocalTime) value);
         return super.getTableCellRendererComponent(table, strValue, isSelected, hasFocus, row, column);
       } else {
         return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);

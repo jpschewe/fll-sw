@@ -11,6 +11,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.FLLInternalException;
 
@@ -62,6 +64,16 @@ public final class TournamentParameters {
    * Default value for {@link #RUNNING_HEAD_2_HEAD}.
    */
   public static final boolean RUNNING_HEAD_2_HEAD_DEFAULT = false;
+
+  /**
+   * Parameter name for {@link #getPitSignTopText(Connection, int)}.
+   */
+  public static final String PIT_SIGN_TOP_TEXT = "PitSignTopText";
+
+  /**
+   * Parameter name for {@link #getPitSignBottomText(Connection, int)}.
+   */
+  public static final String PIT_SIGN_BOTTOM_TEXT = "PitSignBottomText";
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -134,6 +146,33 @@ public final class TournamentParameters {
         final int value = rs.getInt(1);
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("getIntTournamentParameterDefault"
+              + " param: "
+              + paramName
+              + " value: "
+              + value);
+        }
+        return value;
+      } else {
+        throw new FLLInternalException("There is no default value for tournament parameter: "
+            + paramName);
+      }
+    }
+  }
+
+  /**
+   * Get the value of a tournament parameter
+   */
+  private static String getStringTournamentParameter(final Connection connection,
+                                                     final int tournament,
+                                                     final String paramName)
+      throws SQLException {
+    try (PreparedStatement prep = TournamentParameters.getTournamentParameterStmt(connection, tournament, paramName);
+        ResultSet rs = prep.executeQuery()) {
+      if (rs.next()) {
+        final String value = castNonNull(rs.getString(1));
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("getStringTournamentParameter tournament: "
+              + tournament
               + " param: "
               + paramName
               + " value: "
@@ -227,6 +266,13 @@ public final class TournamentParameters {
     setIntParameter(connection, GenerateDB.INTERNAL_TOURNAMENT_ID, paramName, paramValue);
   }
 
+  private static void setStringParameterDefault(final Connection connection,
+                                                final String paramName,
+                                                final String paramValue)
+      throws SQLException {
+    setStringParameter(connection, GenerateDB.INTERNAL_TOURNAMENT_ID, paramName, paramValue);
+  }
+
   private static void setBooleanParameterDefault(final Connection connection,
                                                  final String paramName,
                                                  final boolean paramValue)
@@ -270,6 +316,49 @@ public final class TournamentParameters {
     try (
         PreparedStatement prep = connection.prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?")) {
       prep.setInt(1, paramValue);
+      prep.setString(2, paramName);
+      prep.setInt(3, tournament);
+
+      prep.executeUpdate();
+    }
+  }
+
+  private static void setStringParameter(final Connection connection,
+                                         final int tournament,
+                                         final String paramName,
+                                         final String paramValue)
+      throws SQLException {
+    final boolean paramExists = tournamentParameterValueExists(connection, tournament, paramName);
+    if (!paramExists) {
+      insertStringParameter(connection, tournament, paramName, paramValue);
+    } else {
+      updateStringParameter(connection, tournament, paramName, paramValue);
+    }
+  }
+
+  private static void insertStringParameter(final Connection connection,
+                                            final int tournament,
+                                            final String paramName,
+                                            final String paramValue)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("INSERT INTO tournament_parameters (param_value, param, tournament) VALUES (?, ?, ?)")) {
+      prep.setString(1, paramValue);
+      prep.setString(2, paramName);
+      prep.setInt(3, tournament);
+
+      prep.executeUpdate();
+    }
+  }
+
+  private static void updateStringParameter(final Connection connection,
+                                            final int tournament,
+                                            final String paramName,
+                                            final String paramValue)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?")) {
+      prep.setString(1, paramValue);
       prep.setString(2, paramName);
       prep.setInt(3, tournament);
 
@@ -639,6 +728,80 @@ public final class TournamentParameters {
                                                  final boolean value)
       throws SQLException {
     setBooleanParameterDefault(connection, RUNNING_HEAD_2_HEAD, value);
+  }
+
+  /**
+   * @param connection the database connection
+   * @param tournament the tournament ID
+   * @return the text for the top portion of the pit signs
+   * @throws SQLException on a database error
+   */
+  public static String getPitSignTopText(final Connection connection,
+                                         final int tournament)
+      throws SQLException {
+    return getStringTournamentParameter(connection, tournament, PIT_SIGN_TOP_TEXT);
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournament tournament ID
+   * @param v new value
+   * @throws SQLException on a database error
+   * @see #getPitSignTopText(Connection, int)
+   */
+  public static void setPitSignTopText(final Connection connection,
+                                       final int tournament,
+                                       final String v)
+      throws SQLException {
+    setStringParameter(connection, tournament, PIT_SIGN_TOP_TEXT, v);
+  }
+
+  /**
+   * @param connection the database connection
+   * @param tournament the tournament ID
+   * @return the text for the bottom portion of the pit signs
+   * @throws SQLException on a database error
+   */
+  public static String getPitSignBottomText(final Connection connection,
+                                            final int tournament)
+      throws SQLException {
+    return getStringTournamentParameter(connection, tournament, PIT_SIGN_BOTTOM_TEXT);
+  }
+
+  /**
+   * @param connection database connection
+   * @param v new default value
+   * @see #getPitSignTopText(Connection, int)
+   */
+  public static void setDefaultPitSignTopText(final Connection connection,
+                                              final String v)
+      throws SQLException {
+    setStringParameterDefault(connection, PIT_SIGN_TOP_TEXT, v);
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournament tournament ID
+   * @param v new value
+   * @throws SQLException on a database error
+   * @see #getPitSignTopText(Connection, int)
+   */
+  public static void setPitSignBottomText(final Connection connection,
+                                          final int tournament,
+                                          final String v)
+      throws SQLException {
+    setStringParameter(connection, tournament, PIT_SIGN_BOTTOM_TEXT, v);
+  }
+
+  /**
+   * @param connection database connection
+   * @param v new default value
+   * @see #getPitSignBottomText(Connection, int)
+   */
+  public static void setDefaultPitSignBottomText(final Connection connection,
+                                                 final String v)
+      throws SQLException {
+    setStringParameterDefault(connection, PIT_SIGN_BOTTOM_TEXT, v);
   }
 
 }

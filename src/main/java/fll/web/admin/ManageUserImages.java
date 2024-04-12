@@ -43,6 +43,10 @@ public class ManageUserImages extends BaseFLLServlet {
     page.setAttribute("uuid", UUID.randomUUID().toString());
     page.setAttribute("fll_subjective_logo", String.format("%s/%s", UserImages.getImagesPath().getFileName(),
                                                            UserImages.FLL_SUBJECTIVE_LOGO_FILENAME));
+
+    page.setAttribute("challenge_logo", String.format("%s/%s", UserImages.getImagesPath().getFileName(),
+                                                      UserImages.CHALLENGE_LOGO_FILENAME));
+
   }
 
   @Override
@@ -82,6 +86,16 @@ public class ManageUserImages extends BaseFLLServlet {
         && fllSubjectiveLogo.getSize() > 0) {
       fllSubjectiveLogo.write(UserImages.getImagesPath().resolve(UserImages.FLL_SUBJECTIVE_LOGO_FILENAME)
                                         .toAbsolutePath().toString());
+    }
+
+    final @Nullable Part challengeLogoDefault = request.getPart("challenge_logo_default");
+    final @Nullable Part challengeLogo = request.getPart("challenge_logo");
+    if (null != challengeLogoDefault) {
+      UserImages.useDefaultChallengeLogo();
+    } else if (null != challengeLogo
+        && challengeLogo.getSize() > 0) {
+      challengeLogo.write(UserImages.getImagesPath().resolve(UserImages.CHALLENGE_LOGO_FILENAME).toAbsolutePath()
+                                    .toString());
     }
 
     final String referrer = request.getHeader("Referer");

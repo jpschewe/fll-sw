@@ -285,7 +285,7 @@ public class SubjectivePdfWriter {
     } else if (null == scheduledTime) {
       scheduledTimeStr = "N/A";
     } else {
-      scheduledTimeStr = TournamentSchedule.formatTime(scheduledTime);
+      scheduledTimeStr = TournamentSchedule.humanFormatTime(scheduledTime);
     }
     final Element timeCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
                                                             String.format("Time: %s",
@@ -531,11 +531,7 @@ public class SubjectivePdfWriter {
                                                            final String tournamentName,
                                                            final SubjectiveScoreCategory category) {
 
-    final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1);
-    teamInfo.setDivision("dummy");
-    teamInfo.setJudgingGroup("Dummy");
-    teamInfo.setOrganization("Dummy");
-    teamInfo.setTeamName("Dummy");
+    final TeamScheduleInfo teamInfo = new TeamScheduleInfo(TournamentTeam.SAMPLE_TEAM);
 
     final List<TeamScheduleInfo> schedule = Collections.singletonList(teamInfo);
 

@@ -52,6 +52,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.TournamentTeam;
 import fll.Utilities;
 import fll.documents.writers.SubjectivePdfWriter;
 import fll.scheduler.TeamScheduleInfo;
@@ -507,11 +508,7 @@ public class ChallengeDescriptionFrame extends JFrame {
       }
 
       for (SubjectiveScoreCategory category : challengeDescription.getSubjectiveCategories()) {
-        final TeamScheduleInfo dummy = new TeamScheduleInfo(111111);
-        dummy.setTeamName("Really long team name, something that is really really long");
-        dummy.setOrganization("Some organization");
-        dummy.setDivision("State");
-        dummy.setJudgingGroup("Lakes");
+        final TeamScheduleInfo dummy = new TeamScheduleInfo(TournamentTeam.SAMPLE_TEAM);
 
         final String filename = "subjective-"
             + category.getName()

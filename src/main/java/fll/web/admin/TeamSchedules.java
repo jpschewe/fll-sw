@@ -15,7 +15,6 @@ import javax.sql.DataSource;
 
 import fll.Team;
 import fll.Tournament;
-import fll.scheduler.SchedParams;
 import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
@@ -33,9 +32,10 @@ import jakarta.servlet.http.HttpSession;
 
 /**
  * @see ScheduleWriter#outputTeamSchedules(TournamentSchedule,
- *      fll.scheduler.SchedParams, java.io.OutputStream)
- * @see ScheduleWriter#outputTeamSchedule(TournamentSchedule, SchedParams,
- *      java.io.OutputStream, int)
+ *      java.io.OutputStream)
+ * @see ScheduleWriter#outputTeamSchedule(TournamentSchedule,
+ *      java.io.OutputStream,
+ *      int)
  */
 @WebServlet("/admin/TeamSchedules")
 public class TeamSchedules extends BaseFLLServlet {
@@ -65,8 +65,6 @@ public class TeamSchedules extends BaseFLLServlet {
       }
 
       final TournamentSchedule schedule = new TournamentSchedule(connection, tournament.getTournamentID());
-      final SchedParams schedParams = new SchedParams();
-      schedParams.load(connection, tournament, schedule);
 
       response.reset();
       response.setContentType("application/pdf");
@@ -74,10 +72,10 @@ public class TeamSchedules extends BaseFLLServlet {
       final int teamNumber = WebUtils.getIntRequestParameter(request, "TeamNumber", Team.NULL_TEAM_NUMBER);
       if (Team.NULL_TEAM_NUMBER == teamNumber) {
         response.setHeader("Content-Disposition", "filename=teamSchedules.pdf");
-        ScheduleWriter.outputTeamSchedules(schedule, schedParams, response.getOutputStream());
+        ScheduleWriter.outputTeamSchedules(schedule, response.getOutputStream());
       } else {
         response.setHeader("Content-Disposition", String.format("filename=teamSchedule-%d.pdf", teamNumber));
-        ScheduleWriter.outputTeamSchedule(schedule, schedParams, response.getOutputStream(), teamNumber);
+        ScheduleWriter.outputTeamSchedule(schedule, response.getOutputStream(), teamNumber);
       }
 
     } catch (final SQLException sqle) {

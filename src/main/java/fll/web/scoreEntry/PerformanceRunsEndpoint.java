@@ -513,7 +513,7 @@ public class PerformanceRunsEndpoint {
     public String getDisplayString() {
       final String scheduleInfo;
       if (null != nextPerformance) {
-        scheduleInfo = String.format(" @ %s", TournamentSchedule.formatTime(nextPerformance.getTime()));
+        scheduleInfo = String.format(" @ %s", TournamentSchedule.humanFormatTime(nextPerformance.getTime()));
       } else {
         scheduleInfo = "";
       }
