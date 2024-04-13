@@ -42,11 +42,19 @@ fll.web.report.AddAwardWinner.populateContext(request, response, application, se
         <input type="hidden" name="awardType" value="${param.awardType}" />
         <input type="hidden" name="edit" value="${param.edit}" />
 
-        <div>
-            <label for="place">Place:</label>
-            <input type="number" min="1" required name="place"
-                id="place" value="${winner.place}" autofocus="autofocus" />
-        </div>
+        <c:choose>
+            <c:when test="${ranked}">
+                <div>
+                    <label for="place">Place:</label>
+                    <input type="number" min="1" required name="place"
+                        id="place" value="${winner.place}"
+                        autofocus="autofocus" />
+                </div>
+            </c:when>
+            <c:otherwise>
+                <input type='hidden' name='place' value='1' />
+            </c:otherwise>
+        </c:choose>
 
         <div>
             <label for="teamNumber">Team Number:</label>
@@ -92,7 +100,6 @@ fll.web.report.AddAwardWinner.populateContext(request, response, application, se
         <div>
             <button id="cancel">Cancel</button>
         </div>
-
     </form>
 
 </body>

@@ -1,3 +1,4 @@
+* #1173 - Allow one to specify individual non-numeric categories as ranked or not ranked
 * Don't display the award group on the awards report if there is only one award group
 * #1174 - Add support for generating pit signs
 * #1172 - Add support for judges stating that their scores are final

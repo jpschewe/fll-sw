@@ -42,6 +42,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                     value="${subjectiveAwardWinners[category.title][awardGroup]}" />
                 <c:set var="categoryTitle" value="${category.title}" />
                 <c:set var="awardType" value="${subjectiveAwardType}" />
+                <c:set var="ranked" value="true" />
 
                 <%@ include file="edit-award-winners-table.jspf"%>
 
@@ -69,6 +70,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                             value="${category.title}" />
                         <c:set var="awardType"
                             value="${nonNumericAwardType}" />
+                        <c:set var="ranked" value="${category.ranked}" />
 
                         <%@ include file="edit-award-winners-table.jspf"%>
 
@@ -83,6 +85,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                     <c:set var="categoryTitle" value="${category.title}" />
                     <c:set var="awardType"
                         value="${nonNumericAwardType}" />
+                    <c:set var="ranked" value="${category.ranked}" />
 
                     <%@ include file="edit-award-winners-table.jspf"%>
 
@@ -102,6 +105,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                 value="${extraAwardWinners[categoryTitle][awardGroup]}" />
 
             <c:set var="awardType" value="${championshipAwardType}" />
+            <c:set var="ranked" value="true" />
 
             <%@ include file="edit-award-winners-table.jspf"%>
 
