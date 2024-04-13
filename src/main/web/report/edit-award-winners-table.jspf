@@ -25,7 +25,9 @@
     </colgroup>
     <tr>
         <th></th>
-        <th>Place</th>
+        <c:if test="${ranked}">
+            <th>Place</th>
+        </c:if>
         <th>Number</th>
         <th>Name</th>
         <th>Organization</th>
@@ -76,7 +78,9 @@
                     <c:set var="placeClass" value="" />
                 </c:otherwise>
             </c:choose>
-            <td class="${placeClass}">${winner.place}</td>
+            <c:if test="${ranked}">
+                <td class="${placeClass}">${winner.place}</td>
+            </c:if>
             <td>${winner.teamNumber}</td>
             <td>${teams[winner.teamNumber].teamName}</td>
             <td>${teams[winner.teamNumber].organization}</td>

@@ -30,6 +30,8 @@ public class NonNumericCategory implements AwardCategory, Serializable {
 
   private static final String PER_AWARD_GROUP_ATTRIBUTE = "perAwardGroup";
 
+  private static final String RANKED_ATTRIBUTE = "ranked";
+
   private final @NotOnlyInitialized PropertyChangeSupport propChangeSupport;
 
   /**
@@ -70,6 +72,7 @@ public class NonNumericCategory implements AwardCategory, Serializable {
     propChangeSupport = new PropertyChangeSupport(this);
     title = ele.getAttribute(ChallengeDescription.TITLE_ATTRIBUTE);
     perAwardGroup = Boolean.valueOf(ele.getAttribute(PER_AWARD_GROUP_ATTRIBUTE));
+    ranked = Boolean.valueOf(ele.getAttribute(RANKED_ATTRIBUTE));
 
     final NodelistElementCollectionAdapter elements = new NodelistElementCollectionAdapter(ele.getElementsByTagName(GoalElement.DESCRIPTION_TAG_NAME));
     if (elements.hasNext()) {
@@ -144,6 +147,22 @@ public class NonNumericCategory implements AwardCategory, Serializable {
     description = ChallengeDescription.removeExtraWhitespace(v);
   }
 
+  private boolean ranked;
+
+  /**
+   * @return true if this category orders teams by place
+   */
+  public boolean isRanked() {
+    return ranked;
+  }
+
+  /**
+   * @param v {@link #isRanked()}
+   */
+  public void setRanked(final boolean v) {
+    this.ranked = v;
+  }
+
   /**
    * @param doc the XML document used to create elements
    * @return an XML element representing the current state of this object
@@ -152,6 +171,7 @@ public class NonNumericCategory implements AwardCategory, Serializable {
     final Element ele = doc.createElement(TAG_NAME);
     ele.setAttribute(PER_AWARD_GROUP_ATTRIBUTE, Boolean.toString(perAwardGroup));
     ele.setAttribute(ChallengeDescription.TITLE_ATTRIBUTE, title);
+    ele.setAttribute(RANKED_ATTRIBUTE, Boolean.toString(ranked));
 
     if (!description.isEmpty()) {
       final Element descriptionEle = doc.createElement(RubricRange.DESCRIPTION_TAG_NAME);

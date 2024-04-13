@@ -76,6 +76,7 @@ public class AddAwardWinner extends BaseFLLServlet {
 
         final Tournament tournament = Tournament.getCurrentTournament(connection);
 
+        final boolean ranked;
         final @Nullable OverallAwardWinner winner;
         if (EditAwardWinners.SUBJECTIVE_AWARD_TYPE.equals(awardType)) {
           if (null == awardGroup) {
@@ -91,6 +92,7 @@ public class AddAwardWinner extends BaseFLLServlet {
 
           winner = AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
                                                          teamNumber);
+          ranked = true;
         } else if (EditAwardWinners.NON_NUMERIC_AWARD_TYPE.equals(awardType)) {
           final @Nullable NonNumericCategory category = challengeDescription.getNonNumericCategoryByTitle(categoryTitle);
           if (null == category) {
@@ -109,6 +111,7 @@ public class AddAwardWinner extends BaseFLLServlet {
             winner = AwardWinners.getNonNumericOverallAwardWinner(connection, tournament.getTournamentID(),
                                                                   categoryTitle, teamNumber);
           }
+          ranked = category.isRanked();
         } else if (EditAwardWinners.CHAMPIONSHIP_AWARD_TYPE.equals(awardType)) {
           if (null == awardGroup) {
             throw new FLLInternalException("Award group cannot be null for Championship award");
@@ -116,11 +119,14 @@ public class AddAwardWinner extends BaseFLLServlet {
 
           winner = AwardWinners.getNonNumericAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
                                                          teamNumber);
+          ranked = true;
         } else {
           throw new FLLInternalException("Unknown award type: '"
               + awardType
               + "'");
         }
+
+        page.setAttribute("ranked", ranked);
 
         if (null == winner) {
           SessionAttributes.appendToMessage(session,

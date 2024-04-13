@@ -408,22 +408,23 @@ public class AwardsScriptReport extends BaseFLLServlet {
       } else if (category instanceof NonNumericCategory) {
         final NonNumericCategory nonNumericCategory = (NonNumericCategory) category;
         if (category.getPerAwardGroup()) {
-          categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, document, templateContext,
-                                                              awardGroupOrder, nonNumericCategory,
+          categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, description, document,
+                                                              templateContext, awardGroupOrder, nonNumericCategory,
                                                               organizedNonNumericPerAwardGroupWinners,
                                                               finalistSchedulesPerAwardGroup);
         } else {
-          categoryPage = createNonNumericOverallCategory(connection, tournament, document, templateContext,
+          categoryPage = createNonNumericOverallCategory(connection, description, tournament, document, templateContext,
                                                          nonNumericCategory, nonNumericOverallWinners,
                                                          finalistSchedulesPerAwardGroup);
         }
       } else if (category instanceof SubjectiveScoreCategory) {
-        categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, document, templateContext,
-                                                            awardGroupOrder, (SubjectiveScoreCategory) category,
+        categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, description, document,
+                                                            templateContext, awardGroupOrder,
+                                                            (SubjectiveScoreCategory) category,
                                                             organizedSubjectiveWinners, finalistSchedulesPerAwardGroup);
       } else if (category instanceof ChampionshipCategory) {
-        categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, document, templateContext,
-                                                            awardGroupOrder, category,
+        categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, description, document,
+                                                            templateContext, awardGroupOrder, category,
                                                             organizedNonNumericPerAwardGroupWinners,
                                                             finalistSchedulesPerAwardGroup);
       } else if (category instanceof HeadToHeadCategory) {
@@ -728,6 +729,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
   private Element createNonNumericOrSubjectiveCategory(final Connection connection,
                                                        final Tournament tournament,
+                                                       final ChallengeDescription description,
                                                        final Document document,
                                                        final VelocityContext templateContext,
                                                        final List<String> awardGroupOrder,
@@ -773,7 +775,9 @@ public class AwardsScriptReport extends BaseFLLServlet {
             finalistContainer.setAttribute("space-after", BLOCK_SPACING);
           }
 
-          outputWinners(connection, document, container, agWinners);
+          final boolean displayPlace = AwardsReport.displayPlace(description, category.getTitle());
+
+          outputWinners(connection, displayPlace, document, container, agWinners);
 
         } else {
           final Element emptyBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
@@ -795,6 +799,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
   }
 
   private static void outputWinners(final Connection connection,
+                                    final boolean displayPlace,
                                     final Document document,
                                     final Element container,
                                     final List<? extends OverallAwardWinner> winners) {
@@ -826,7 +831,12 @@ public class AwardsScriptReport extends BaseFLLServlet {
       tableBody.appendChild(row);
 
       final boolean tie = winnersInPlace.size() > 1;
-      final String placeTitle = String.format("%d%s Place Winner%s", place, suffixForPlace(place), tie ? "s" : "");
+      final String placeTitle;
+      if (displayPlace) {
+        placeTitle = String.format("%d%s Place Winner%s", place, suffixForPlace(place), tie ? "s" : "");
+      } else {
+        placeTitle = String.format("Winner%s", tie ? "s" : "");
+      }
 
       final Element placeCell = FOPUtils.createTableCell(document, null, placeTitle);
       row.appendChild(placeCell);
@@ -852,6 +862,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
   }
 
   private Element createNonNumericOverallCategory(final Connection connection,
+                                                  ChallengeDescription description,
                                                   final Tournament tournament,
                                                   final Document document,
                                                   final VelocityContext templateContext,
@@ -883,7 +894,9 @@ public class AwardsScriptReport extends BaseFLLServlet {
         finalistContainer.setAttribute("space-after", BLOCK_SPACING);
       }
 
-      outputWinners(connection, document, container, categoryWinners);
+      final boolean displayPlace = AwardsReport.displayPlace(description, category.getTitle());
+
+      outputWinners(connection, displayPlace, document, container, categoryWinners);
 
     } else {
       final Element emptyBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
