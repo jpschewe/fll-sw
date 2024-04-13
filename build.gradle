@@ -25,7 +25,7 @@ plugins {
     id "org.unbroken-dome.test-sets" version "4.1.0"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
-    id "com.github.spotbugs" version "5.0.13"
+    id "com.github.spotbugs" version "6.0.12"
     id "de.aaschmid.cpd" version "3.3"
     id "edu.sc.seis.launch4j" version "3.0.5"
     id "com.github.ben-manes.versions" version "0.51.0" // adds dependencyUpdates task
@@ -134,7 +134,7 @@ ext {
     tomcat_version = "10.1.20"
     junit_version = "5.10.2"
     log4j_version = "2.23.1"
-    spotbugs_version = "4.7.3"
+    spotbugs_version = "4.8.4"
     checker_framework_version = "3.42.0"
 
     web_build_dir = new File(project.buildDir, "web")
@@ -591,8 +591,8 @@ spotbugs {
     
     // allow the build to continue, catch this in CI as warnings
     ignoreFailures = true
-    effort = "max"
-    reportLevel = "low"
+    effort = com.github.spotbugs.snom.Effort.valueOf("MAX")
+    reportLevel = com.github.spotbugs.snom.Confidence.valueOf("LOW")
     excludeFilter = file("spotbugs-filters.xml")
 }
 
