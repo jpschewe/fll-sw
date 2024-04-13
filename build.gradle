@@ -11,7 +11,7 @@ buildscript {
     }
     dependencies {
       // needs to use old plugin mechanism otherwise I can't set the extra properties   
-      classpath(group: "com.cinnober.gradle", name: "semver-git", version: "2.3.1")
+      classpath(group: "com.cinnober.gradle", name: "semver-git", version: "3.0.0")
     }
     configurations.classpath {
       exclude(group: "com.google.guava", module: "guava")
