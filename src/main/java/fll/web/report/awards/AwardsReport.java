@@ -29,6 +29,7 @@ import javax.xml.transform.TransformerException;
 
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -218,7 +219,8 @@ public class AwardsReport extends BaseFLLServlet {
     final List<String> categoryOrder = description.getSubjectiveCategories().stream() //
                                                   .map(SubjectiveScoreCategory::getTitle) //
                                                   .collect(Collectors.toList());
-    addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups, categoryOrder, true, false);
+    addSubjectiveWinners(connection, description, document, documentBody, winners, sortedAwardGroups, categoryOrder,
+                         false);
   }
 
   /**
@@ -240,6 +242,28 @@ public class AwardsReport extends BaseFLLServlet {
       return true;
     } else {
       return !CategoriesIgnored.isNonNumericCategoryIgnored(connection, level, category);
+    }
+  }
+
+  /**
+   * @param description challenge description
+   * @param categoryTitle the title of the category
+   * @return if this category is ranked
+   * @see NonNumericCategory#isRanked()
+   */
+  public static boolean displayPlace(final ChallengeDescription description,
+                                     final String categoryTitle) {
+    final @Nullable NonNumericCategory category = description.getNonNumericCategoryByTitle(categoryTitle);
+    if (null != category) {
+      return category.isRanked();
+    } else if (null != description.getSubjectiveCategoryByTitle(categoryTitle)) {
+      return true;
+    } else if (ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE.equals(categoryTitle)) {
+      return true;
+    } else {
+      // should not come up, but is some award that isn't in the challenge description
+      LOGGER.warn("displayPlace: Found unexpected category name: '{}'", categoryTitle);
+      return false;
     }
   }
 
@@ -266,8 +290,8 @@ public class AwardsReport extends BaseFLLServlet {
                                                   .collect(Collectors.toList());
 
     // show places when showing championship
-    addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups, categoryOrder,
-                         displayChampionship, displayChampionship);
+    addSubjectiveWinners(connection, description, document, documentBody, winners, sortedAwardGroups, categoryOrder,
+                         displayChampionship);
   }
 
   /**
@@ -291,12 +315,12 @@ public class AwardsReport extends BaseFLLServlet {
    *          otherwise skip the championship award
    */
   private void addSubjectiveWinners(final Connection connection,
+                                    final ChallengeDescription description,
                                     final Document document,
                                     final Element documentBody,
                                     final List<AwardWinner> winners,
                                     final List<String> sortedAwardGroups,
                                     final List<String> categoryOrder,
-                                    final boolean displayPlace,
                                     final boolean displayChampionship)
       throws SQLException {
     final Map<String, Map<String, List<AwardWinner>>> organizedWinners = organizeAwardWinners(winners);
@@ -314,8 +338,8 @@ public class AwardsReport extends BaseFLLServlet {
               && !ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE.equals(categoryName))) {
         if (organizedWinners.containsKey(categoryName)) {
           final Map<String, List<AwardWinner>> categoryWinners = organizedWinners.get(categoryName);
-          final Element container = addSubjectiveAwardGroupWinners(connection, document, categoryName, categoryWinners,
-                                                                   sortedAwardGroups, displayPlace);
+          final Element container = addSubjectiveAwardGroupWinners(connection, description, document, categoryName,
+                                                                   categoryWinners, sortedAwardGroups);
           documentBody.appendChild(container);
         }
       }
@@ -345,7 +369,8 @@ public class AwardsReport extends BaseFLLServlet {
       final List<OverallAwardWinner> categoryWinners = organizedWinners.getOrDefault(categoryName,
                                                                                      Collections.emptyList());
       if (!categoryWinners.isEmpty()) {
-        final Element container = addSubjectiveOverallWinners(connection, document, categoryName, categoryWinners);
+        final Element container = addSubjectiveOverallWinners(connection, description, document, categoryName,
+                                                              categoryWinners);
         documentBody.appendChild(container);
       }
     }
@@ -355,10 +380,13 @@ public class AwardsReport extends BaseFLLServlet {
    * @param categoryWinners awardGroup to list of winners
    */
   private Element addSubjectiveOverallWinners(final Connection connection,
+                                              final ChallengeDescription description,
                                               final Document document,
                                               final String categoryName,
                                               final List<OverallAwardWinner> categoryWinners)
       throws SQLException {
+    final boolean displayPlace = displayPlace(description, categoryName);
+
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     container.setAttribute("keep-together.within-page", "always");
 
@@ -391,7 +419,13 @@ public class AwardsReport extends BaseFLLServlet {
         FOPUtils.addTopBorder(row, WINNER_SEPARATOR_WIDTH);
       }
 
-      row.appendChild(FOPUtils.createTableCell(document, null, "Winner:"));
+      final String placeText;
+      if (displayPlace) {
+        placeText = String.format("#%d:", winner.getPlace());
+      } else {
+        placeText = "Winner:";
+      }
+      row.appendChild(FOPUtils.createTableCell(document, null, placeText));
 
       row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.getTeamNumber())));
 
@@ -421,12 +455,15 @@ public class AwardsReport extends BaseFLLServlet {
    * @param categoryWinners awardGroup to list of winners
    */
   private Element addSubjectiveAwardGroupWinners(final Connection connection,
+                                                 final ChallengeDescription description,
                                                  final Document document,
                                                  final String categoryName,
                                                  final Map<String, List<AwardWinner>> categoryWinners,
-                                                 final List<String> sortedGroups,
-                                                 final boolean displayPlace)
+                                                 final List<String> sortedGroups)
       throws SQLException {
+
+    final boolean displayPlace = displayPlace(description, categoryName);
+
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     container.setAttribute("keep-together.within-page", "always");
 
@@ -454,6 +491,13 @@ public class AwardsReport extends BaseFLLServlet {
 
     boolean firstAwardGroup = true;
     for (final String group : localSortedGroups) {
+      final String groupText;
+      if (localSortedGroups.size() > 1) {
+        groupText = String.format("%s ", group);
+      } else {
+        groupText = "";
+      }
+
       if (categoryWinners.containsKey(group)) {
         final List<AwardWinner> agWinners = categoryWinners.get(group);
 
@@ -475,13 +519,13 @@ public class AwardsReport extends BaseFLLServlet {
               FOPUtils.addTopBorder(row, WINNER_SEPARATOR_WIDTH);
             }
 
-            final String groupText;
+            final String placeText;
             if (displayPlace) {
-              groupText = String.format("%s #%d:", group, winner.getPlace());
+              placeText = String.format("%s#%d:", groupText, winner.getPlace());
             } else {
-              groupText = group;
+              placeText = group;
             }
-            row.appendChild(FOPUtils.createTableCell(document, null, groupText));
+            row.appendChild(FOPUtils.createTableCell(document, null, placeText));
 
             row.appendChild(FOPUtils.createTableCell(document, null, String.format("%d", winner.getTeamNumber())));
 
