@@ -30,9 +30,6 @@ import fll.web.playoff.DatabaseTeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 
-/**
- *
- */
 @ExtendWith(TestUtils.InitializeLogging.class)
 public class TestComputedScores {
 
