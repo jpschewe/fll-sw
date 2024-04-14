@@ -409,7 +409,7 @@ distributionDependencies.dependsOn(markdownToHtml)
 
 // write log4j config for JspC
 tasks.register("writeJspcProperties", WriteProperties) {
-    outputFile = new File(project.buildDir, "log4j.jspc.properties")
+    destinationFile = new File(project.buildDir, "log4j.jspc.properties")
     property("log4j.rootLogger", "WARN, jspout")
     property("log4j.logger.org.apache", "INFO, jspout")
     property("log4j.appender.jspout", "org.apache.log4j.ConsoleAppender")
@@ -608,7 +608,7 @@ tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
 }
 
 tasks.register("writeVersion", WriteProperties) {
-    outputFile = file("${buildDir}/resources/main/fll/resources/git.properties")
+    destinationFile = file("${buildDir}/resources/main/fll/resources/git.properties")
     property("git.build.version", project.version)
 
     def gitBranchName
