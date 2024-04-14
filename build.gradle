@@ -11,7 +11,7 @@ buildscript {
     }
     dependencies {
       // needs to use old plugin mechanism otherwise I can't set the extra properties   
-      classpath(group: "com.cinnober.gradle", name: "semver-git", version: "2.3.1")
+      classpath(group: "com.cinnober.gradle", name: "semver-git", version: "3.0.0")
     }
     configurations.classpath {
       exclude(group: "com.google.guava", module: "guava")
@@ -21,19 +21,19 @@ buildscript {
 plugins {
     id "java"
     id "distribution"
-    id "com.dorongold.task-tree" version "2.1.1" // gradle <task> taskTree
-    id "org.unbroken-dome.test-sets" version "4.0.0"
+    id "com.dorongold.task-tree" version "3.0.0" // gradle <task> taskTree
+    id "org.unbroken-dome.test-sets" version "4.1.0"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
-    id "com.github.spotbugs" version "5.0.13"
+    id "com.github.spotbugs" version "6.0.12"
     id "de.aaschmid.cpd" version "3.3"
-    id "edu.sc.seis.launch4j" version "2.5.4"
-    id "com.github.ben-manes.versions" version "0.46.0" // adds dependencyUpdates task
-    id "de.undercouch.download" version "5.3.1" // file download
+    id "edu.sc.seis.launch4j" version "3.0.5"
+    id "com.github.ben-manes.versions" version "0.51.0" // adds dependencyUpdates task
+    id "de.undercouch.download" version "5.6.0" // file download
     id "checkstyle"
         
     // Checker Framework pluggable type-checking
-    id "org.checkerframework" version "0.6.31"
+    id "org.checkerframework" version "0.6.37"
     
     // code coverage
     id "jacoco"
@@ -79,7 +79,7 @@ eclipse {
 }
 
 dependencies {
-  jspc("org.apache.ant:ant:1.10.13")
+  jspc("org.apache.ant:ant:1.10.14")
 }
 
 testSets {
@@ -129,14 +129,13 @@ integrationTest {
 }
 
 ext {
-    jackson_version = "2.14.2"
-    slf4j_version = "2.0.6"
-    tomcat_version = "10.1.7"
-    poi_version = "5.2.3"
+    jackson_version = "2.17.0"
+    slf4j_version = "2.0.13"
+    tomcat_version = "10.1.20"
     junit_version = "5.10.2"
-    log4j_version = "2.20.0"
-    spotbugs_version = "4.7.3"
-    checker_framework_version = "3.37.0"
+    log4j_version = "2.23.1"
+    spotbugs_version = "4.8.4"
+    checker_framework_version = "3.42.0"
 
     web_build_dir = new File(project.buildDir, "web")
     documentation_build_dir = new File(project.buildDir, "gen-documentation")    
@@ -186,15 +185,15 @@ dependencies {
   // use explicit reference to servlet api to ensure that all libraries that depend on it are up to the current version
   implementation(group: "jakarta.servlet", name: "jakarta.servlet-api", version: "6.0.0")
   
-  //missing TLD files implementation(group: "jakarta.servlet.jsp.jstl", name: "jakarta.servlet.jsp.jstl-api", version: "2.0.0")
-  implementation(group: "org.glassfish.web", name: "jakarta.servlet.jsp.jstl", version: "2.0.0")
+  implementation(group: "jakarta.servlet.jsp.jstl", name: "jakarta.servlet.jsp.jstl-api", version: "3.0.0")
+  implementation(group: "org.glassfish.web", name: "jakarta.servlet.jsp.jstl", version: "3.0.1")
   
   // JSP tags for formatting java.time objects
-  implementation(group: "net.sargue", name: "java-time-jsptags", version: "2.0.0")
+  implementation(group: "net.sargue", name: "java-time-jsptags", version: "2.0.2")
 
-  implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.12.0")
-  implementation(group: "commons-cli", name: "commons-cli", version: "1.5.0")
-  implementation(group: "org.hsqldb", name: "hsqldb", version: "2.7.1")
+  implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.14.0")
+  implementation(group: "commons-cli", name: "commons-cli", version: "1.6.0")
+  implementation(group: "org.hsqldb", name: "hsqldb", version: "2.7.2")
   implementation(group: "org.apache.commons", name: "commons-collections4", version: "4.4")
     
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-slf4j2-impl", version: project.log4j_version)
@@ -205,7 +204,7 @@ dependencies {
     
   implementation(group: "org.slf4j", name: "slf4j-api", version: project.slf4j_version)
     
-  implementation(group: "org.apache.poi", name: "poi-ooxml", version: project.poi_version) {
+  implementation(group: "org.apache.poi", name: "poi-ooxml", version: "5.2.5") {
     // xml APIs are part of the JDK
     exclude(group: "xml-apis", module: "xml-apis")
     exclude(group: "xml-apis", module: "xml-apis-ext")
@@ -221,9 +220,9 @@ dependencies {
 
   implementation(group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0")
             
-  implementation(group: "dnsjava", name: "dnsjava", version: "3.5.2")
+  implementation(group: "dnsjava", name: "dnsjava", version: "3.5.3")
        
-  implementation(group: "org.apache.tika", name: "tika-core", version: "2.7.0")
+  implementation(group: "org.apache.tika", name: "tika-core", version: "2.9.2")
     
   implementation(group: "com.diffplug.durian", name: "durian-core", version: "1.2.0")
         
@@ -233,7 +232,7 @@ dependencies {
     
   implementation(group: "net.java.linoleum", name: "jlfgr", version: "1_0")
         
-  implementation(group: "com.opencsv", name: "opencsv", version: "5.7.1")
+  implementation(group: "com.opencsv", name: "opencsv", version: "5.9")
     
   implementation(group: "net.mtu.eggplant", name: "JonsInfra", version: "3.2.0"   )
     
@@ -256,7 +255,7 @@ dependencies {
   implementation(group: "org.checkerframework", name: "checker-util", version: project.checker_framework_version)
   checkerFramework(group: "org.checkerframework", name: "checker", version: project.checker_framework_version)
     
-  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.27")
+  implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "3.0.2")
   
   // for templating reports
   implementation(group: "org.apache.velocity", name: "velocity-engine-core", version: "2.3")
@@ -277,7 +276,7 @@ dependencies {
     exclude(group: "xml-apis", module: "xml-apis")
   }
   integrationTestImplementation(group: "org.seleniumhq.selenium", name: "selenium-server", version: "3.141.59")
-  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "5.3.2")
+  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "5.8.0")
   
   // make selenium log to log4j
   integrationTestImplementation(group: "org.apache.logging.log4j", name: "log4j-jul", version: project.log4j_version)
@@ -410,7 +409,7 @@ distributionDependencies.dependsOn(markdownToHtml)
 
 // write log4j config for JspC
 tasks.register("writeJspcProperties", WriteProperties) {
-    outputFile = new File(project.buildDir, "log4j.jspc.properties")
+    destinationFile = new File(project.buildDir, "log4j.jspc.properties")
     property("log4j.rootLogger", "WARN, jspout")
     property("log4j.logger.org.apache", "INFO, jspout")
     property("log4j.appender.jspout", "org.apache.log4j.ConsoleAppender")
@@ -553,9 +552,6 @@ createExe {
     dontWrapJar = true
     errTitle = "FLL-SW"
     classpath = ["%EXEDIR%/classes", "%EXEDIR%/lib/*.jar"]
-    // need to specify a jar file that we know will exist as a dependency, 
-    // otherwise launch4j will look for the jar file created from the build
-    jar = "lib/log4j-core-" + project.log4j_version + ".jar"
     
     maxHeapPercent = 75        
     
@@ -564,12 +560,8 @@ createExe {
     copyright = "GPL"
     
     bundledJrePath = "jdk"
-    bundledJre64Bit = true
-    bundledJreAsFallback = false
+    requires64Bit = true
 
-    // should not need to specify this https://github.com/TheBoegl/gradle-launch4j/issues/88        
-    jreMinVersion = project.targetCompatibility
-    
     // for debugging classpath information        
     //headerType = "console"
     jvmOptions = [
@@ -599,8 +591,8 @@ spotbugs {
     
     // allow the build to continue, catch this in CI as warnings
     ignoreFailures = true
-    effort = "max"
-    reportLevel = "low"
+    effort = com.github.spotbugs.snom.Effort.valueOf("MAX")
+    reportLevel = com.github.spotbugs.snom.Confidence.valueOf("LOW")
     excludeFilter = file("spotbugs-filters.xml")
 }
 
@@ -616,7 +608,7 @@ tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
 }
 
 tasks.register("writeVersion", WriteProperties) {
-    outputFile = file("${buildDir}/resources/main/fll/resources/git.properties")
+    destinationFile = file("${buildDir}/resources/main/fll/resources/git.properties")
     property("git.build.version", project.version)
 
     def gitBranchName

@@ -6,6 +6,7 @@
 
 package fll.web.developer.importdb;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -25,7 +26,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * Information needed for importing a database. This object is stored in the
  * HTTP session.
  */
-public final class ImportDbSessionInfo {
+public final class ImportDbSessionInfo implements Serializable {
 
   /**
    * @param dbimport {@link #getImportDataSource()}
@@ -105,7 +106,7 @@ public final class ImportDbSessionInfo {
     return Collections.unmodifiableList(teamDifferences);
   }
 
-  private final List<AwardsScriptDifference> awardsScriptDifferences = new LinkedList<>();
+  private final LinkedList<AwardsScriptDifference> awardsScriptDifferences = new LinkedList<>();
 
   /**
    * @param v the awards script differences between the source and destination
