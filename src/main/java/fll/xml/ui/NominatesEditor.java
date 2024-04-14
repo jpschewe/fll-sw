@@ -81,7 +81,7 @@ import fll.xml.SubjectiveScoreCategory;
 
   private final TitleChangeListener titleListener = new TitleChangeListener();
 
-  private class TitleChangeListener implements PropertyChangeListener {
+  private final class TitleChangeListener implements PropertyChangeListener {
 
     @Override
     public void propertyChange(final PropertyChangeEvent evt) {
