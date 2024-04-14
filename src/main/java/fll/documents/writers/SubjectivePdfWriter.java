@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
@@ -512,7 +513,7 @@ public class SubjectivePdfWriter {
         throw new FLLInternalException("Error creating the subjective schedule PDF", e);
       }
 
-      try (PDDocument testPdf = PDDocument.load(out.toByteArray())) {
+      try (PDDocument testPdf = Loader.loadPDF(out.toByteArray())) {
         return testPdf.getNumberOfPages() == 1;
       }
     } catch (final IOException e) {
