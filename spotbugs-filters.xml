@@ -1,47 +1,51 @@
 <FindBugsFilter>
 
-  <!-- ignore errors about missing serial version ids -->
-  <Match>
-    <Bug pattern="SE_NO_SERIALVERSIONID" />
-  </Match>
+    <!-- ignore errors about missing serial version ids -->
+    <Match>
+        <Bug pattern="SE_NO_SERIALVERSIONID" />
+    </Match>
 
-  <!--  not internationalized at this point -->
-  <Match>
-    <Bug pattern="DM_CONVERT_CASE" />
-  </Match>
+    <!-- not internationalized at this point -->
+    <Match>
+        <Bug pattern="DM_CONVERT_CASE" />
+    </Match>
 
 
-  <!-- spotbugs issue with JDK 11+
-       https://github.com/spotbugs/spotbugs/issues/756 -->
-  <Match>
-    <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE" />
-  </Match>
+    <!-- spotbugs issue with JDK 11+ https://github.com/spotbugs/spotbugs/issues/756 -->
+    <Match>
+        <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE" />
+    </Match>
 
-  <!-- spotbugs issue with JDK 11+
-       https://github.com/spotbugs/spotbugs/issues/868 -->
-  <Match>
-    <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE" />
-  </Match>
-  
-  
-  <!-- spotbugs issue https://github.com/spotbugs/spotbugs/issues/811
-  -->
-  <Match>
-    <Bug pattern="UPM_UNCALLED_PRIVATE_METHOD" />
-  </Match>
+    <!-- spotbugs issue with JDK 11+ https://github.com/spotbugs/spotbugs/issues/868 -->
+    <Match>
+        <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE" />
+    </Match>
 
-  <!--  TODO: ignore exposing of internal state for now, but may want to change this later -->
-  <Match>
-    <Bug pattern="EI_EXPOSE_REP" />
-  </Match>
-  <Match>
-    <Bug pattern="EI_EXPOSE_REP2" />
-  </Match>
 
-  <!-- This was introduced in SpotBugs 4.5.0 and isn't something I'm really worried about. The checker framework catches most of my concerns here. -->
-  <Match>
-    <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" />
-  </Match>
-  
+    <!-- spotbugs issue https://github.com/spotbugs/spotbugs/issues/811 -->
+    <Match>
+        <Bug pattern="UPM_UNCALLED_PRIVATE_METHOD" />
+    </Match>
+
+    <!-- TODO: ignore exposing of internal state for now, but may want to 
+        change this later -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP" />
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2" />
+    </Match>
+
+    <!-- This was introduced in SpotBugs 4.5.0 and isn't something I'm really 
+        worried about. The checker framework catches most of my concerns here. -->
+    <Match>
+        <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" />
+    </Match>
+
+    <!-- This is more of a concern in a high security application or API -->
+    <Match>
+        <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    </Match>
+
 </FindBugsFilter>
 
