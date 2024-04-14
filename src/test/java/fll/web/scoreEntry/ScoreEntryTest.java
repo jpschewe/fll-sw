@@ -35,7 +35,7 @@ public class ScoreEntryTest {
    * Just returns the document when asked.
    * TODO use a mocking library to do this.
    */
-  private static class TestServletContext extends DummyServletContext {
+  private static final class TestServletContext extends DummyServletContext {
     @Override
     public Object getAttribute(final String attr) {
       try {

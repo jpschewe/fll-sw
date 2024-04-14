@@ -65,7 +65,7 @@ class VariableRefEditor extends Box {
 
   private final NameChangeListener nameListener = new NameChangeListener();
 
-  private class NameChangeListener implements PropertyChangeListener {
+  private final class NameChangeListener implements PropertyChangeListener {
 
     @Override
     public void propertyChange(final PropertyChangeEvent evt) {

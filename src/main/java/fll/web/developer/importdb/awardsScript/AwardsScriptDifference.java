@@ -6,6 +6,7 @@
 
 package fll.web.developer.importdb.awardsScript;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -14,7 +15,7 @@ import fll.Tournament;
 /**
  * Base class for differences in the awards script between two databases.
  */
-public abstract class AwardsScriptDifference {
+public abstract class AwardsScriptDifference implements Serializable {
 
   /**
    * @return human readable description of the difference. This value can contain

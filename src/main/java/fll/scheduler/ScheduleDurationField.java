@@ -136,7 +136,7 @@ import fll.util.FLLInternalException;
     }
   }
 
-  private static class TimeVerifier extends InputVerifier {
+  private static final class TimeVerifier extends InputVerifier {
 
     private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
