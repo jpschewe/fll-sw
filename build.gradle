@@ -150,14 +150,14 @@ ext {
     // java download urls
     java_download_base = project.buildDir.toPath().resolve("bundled-java")
     
-    java_windows_url = "https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_windows-x64_bin.zip"
-    java_windows_checksum = "b2208206bda47f2e0c971a39e057a5ec32c40b503d71e486790cb728d926b615"
+    java_windows_url = "https://download.java.net/java/GA/jdk21.0.2/f2283984656d49d69e91c558476027ac/13/GPL/openjdk-21.0.2_windows-x64_bin.zip"
+    java_windows_checksum = "b6c17e747ae78cdd6de4d7532b3164b277daee97c007d3eaa2b39cca99882664"
     
-    java_mac_url = "https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_macos-x64_bin.tar.gz"
-    java_mac_checksum = "b85c4aaf7b141825ad3a0ea34b965e45c15d5963677e9b27235aa05f65c6df06"
+    java_mac_url = "https://download.java.net/java/GA/jdk21.0.2/f2283984656d49d69e91c558476027ac/13/GPL/openjdk-21.0.2_macos-x64_bin.tar.gz"
+    java_mac_checksum = "8fd09e15dc406387a0aba70bf5d99692874e999bf9cd9208b452b5d76ac922d3"
     
-    java_linux_url = "https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz"
-    java_linux_checksum = "0022753d0cceecacdd3a795dd4cea2bd7ffdf9dc06e22ffd1be98411742fbb44"
+    java_linux_url = "https://download.java.net/java/GA/jdk21.0.2/f2283984656d49d69e91c558476027ac/13/GPL/openjdk-21.0.2_linux-x64_bin.tar.gz"
+    java_linux_checksum = "a2def047a73941e01a73739f92755f86b895811afb1f91243db214cff5bdac3f"
 }
 
 
@@ -166,7 +166,7 @@ group = "fll"
 java {
     // set version of Java that the source confirms to. 
     // The bytecode will be for this version of Java as well, unless targetCompatibility is specified.
-    sourceCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
 }
 
 configurations {

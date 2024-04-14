@@ -8,7 +8,8 @@ package fll.web.setup;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.sql.Connection;
@@ -100,7 +101,7 @@ public class CreateDB extends BaseFLLServlet {
         final String description = WebUtils.getNonNullRequestParameter(request, "description");
 
         try {
-          final URL descriptionURL = new URL(description);
+          final URL descriptionURL = new URI(description).toURL();
           final ChallengeDescription challengeDescription = ChallengeParser.parse(new InputStreamReader(descriptionURL.openStream(),
                                                                                                         Utilities.DEFAULT_CHARSET));
 
@@ -111,7 +112,7 @@ public class CreateDB extends BaseFLLServlet {
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
 
           success = true;
-        } catch (final MalformedURLException e) {
+        } catch (final URISyntaxException e) {
           throw new FLLInternalException("Could not parse URL from choosen description: "
               + description, e);
         }

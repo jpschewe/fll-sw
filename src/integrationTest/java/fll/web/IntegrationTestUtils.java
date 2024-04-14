@@ -24,10 +24,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
 import java.net.CookieManager;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -535,8 +533,8 @@ public final class IntegrationTestUtils {
     return sb.toString();
   }
 
-  private static String readJSON(final String url) throws MalformedURLException, IOException {
-    final InputStream is = new URL(url).openStream();
+  private static String readJSON(final String url) throws IOException, URISyntaxException {
+    final InputStream is = new URI(url).toURL().openStream();
     try {
       final BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
       final String jsonText = readAll(rd);
@@ -554,28 +552,32 @@ public final class IntegrationTestUtils {
    * @throws IOException if there is an error talking to the server
    */
   public static Tournament getTournamentByName(final String tournamentName) throws IOException {
-    final String json = readJSON(TestUtils.URL_ROOT
-        + "api/Tournaments");
+    try {
+      final String json = readJSON(TestUtils.URL_ROOT
+          + "api/Tournaments");
 
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Tournaments json: "
-          + json);
-    }
-
-    // get the JSON
-    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
-    final Reader reader = new StringReader(json);
-
-    final Collection<Tournament> tournaments = jsonMapper.readValue(reader,
-                                                                    TournamentsServlet.TournamentsTypeInformation.INSTANCE);
-
-    for (final Tournament tournament : tournaments) {
-      if (tournament.getName().equals(tournamentName)) {
-        return tournament;
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Tournaments json: "
+            + json);
       }
-    }
 
-    return null;
+      // get the JSON
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
+      final Reader reader = new StringReader(json);
+
+      final Collection<Tournament> tournaments = jsonMapper.readValue(reader,
+                                                                      TournamentsServlet.TournamentsTypeInformation.INSTANCE);
+
+      for (final Tournament tournament : tournaments) {
+        if (tournament.getName().equals(tournamentName)) {
+          return tournament;
+        }
+      }
+
+      return null;
+    } catch (final URISyntaxException e) {
+      throw new FLLInternalException("Error parsing URL", e);
+    }
   }
 
   /**
