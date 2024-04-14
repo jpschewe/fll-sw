@@ -185,8 +185,8 @@ dependencies {
   // use explicit reference to servlet api to ensure that all libraries that depend on it are up to the current version
   implementation(group: "jakarta.servlet", name: "jakarta.servlet-api", version: "6.0.0")
   
-  //missing TLD files implementation(group: "jakarta.servlet.jsp.jstl", name: "jakarta.servlet.jsp.jstl-api", version: "2.0.0")
-  implementation(group: "org.glassfish.web", name: "jakarta.servlet.jsp.jstl", version: "2.0.0")
+  implementation(group: "jakarta.servlet.jsp.jstl", name: "jakarta.servlet.jsp.jstl-api", version: "3.0.0")
+  implementation(group: "org.glassfish.web", name: "jakarta.servlet.jsp.jstl", version: "3.0.1")
   
   // JSP tags for formatting java.time objects
   implementation(group: "net.sargue", name: "java-time-jsptags", version: "2.0.2")
