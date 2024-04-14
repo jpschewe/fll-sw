@@ -135,7 +135,7 @@ import fll.xml.VariableScope;
   }
 
   /**
-   * Called by {@link #checkValidity(Collection)}. If the list is empty after the
+   * Called by {code}checkValidity{code}. If the list is empty after the
    * call, then
    * the goal is valid, otherwise the goal is invalid and the messages will be
    * displayed to the user.
