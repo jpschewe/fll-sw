@@ -13,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +36,7 @@ import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
 import fll.TestUtils;
 import fll.Utilities;
+import fll.util.FLLInternalException;
 import fll.web.developer.QueryHandler;
 
 /**
@@ -171,37 +174,41 @@ public final class WebTestUtils {
    * @throws IOException if there is an error talking to the server
    */
   public static QueryHandler.ResultData executeServerQuery(final String query) throws IOException {
-    final WebClient conversation = getConversation();
+    try {
+      final WebClient conversation = getConversation();
 
-    final URL url = new URL(TestUtils.URL_ROOT
-        + "developer/QueryHandler");
-    final WebRequest request = new WebRequest(url);
-    request.setRequestParameters(Collections.singletonList(new NameValuePair(QueryHandler.QUERY_PARAMETER, query)));
+      final URL url = new URI(TestUtils.URL_ROOT
+          + "developer/QueryHandler").toURL();
+      final WebRequest request = new WebRequest(url);
+      request.setRequestParameters(Collections.singletonList(new NameValuePair(QueryHandler.QUERY_PARAMETER, query)));
 
-    final Page response = loadPage(conversation, request);
-    final String contentType = response.getWebResponse().getContentType();
-    if (!"application/json".equals(contentType)) {
-      final Path screenshots = IntegrationTestUtils.ensureScreenshotDirectoryExists();
+      final Page response = loadPage(conversation, request);
+      final String contentType = response.getWebResponse().getContentType();
+      if (!"application/json".equals(contentType)) {
+        final Path screenshots = IntegrationTestUtils.ensureScreenshotDirectoryExists();
 
-      final String text = getPageSource(response);
-      final Path output = Files.createTempFile(screenshots, "json-error", ".html");
-      try (Writer writer = Files.newBufferedWriter(output, Utilities.DEFAULT_CHARSET)) {
-        writer.write(text);
+        final String text = getPageSource(response);
+        final Path output = Files.createTempFile(screenshots, "json-error", ".html");
+        try (Writer writer = Files.newBufferedWriter(output, Utilities.DEFAULT_CHARSET)) {
+          writer.write(text);
+        }
+        fail("Error JSON from QueryHandler: "
+            + response.getUrl()
+            + " Contents of error page written to: "
+            + output.toAbsolutePath());
       }
-      fail("Error JSON from QueryHandler: "
-          + response.getUrl()
-          + " Contents of error page written to: "
-          + output.toAbsolutePath());
+
+      final String responseData = getPageSource(response);
+
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
+      final QueryHandler.ResultData result = jsonMapper.readValue(responseData, QueryHandler.ResultData.class);
+      assertNull(result.getError(), "SQL Error: "
+          + result.getError());
+
+      return result;
+    } catch (final URISyntaxException e) {
+      throw new FLLInternalException("Error parsing URL", e);
     }
-
-    final String responseData = getPageSource(response);
-
-    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
-    final QueryHandler.ResultData result = jsonMapper.readValue(responseData, QueryHandler.ResultData.class);
-    assertNull(result.getError(), "SQL Error: "
-        + result.getError());
-
-    return result;
   }
 
 }

@@ -794,12 +794,14 @@ public class FullTournamentTest {
   /**
    * Visit the printable brackets for the bracket specified and print the
    * brackets.
+   * 
+   * @throws URISyntaxException test error
    */
-  private static void printPlayoffScoresheets(final String division) throws MalformedURLException, IOException {
+  private static void printPlayoffScoresheets(final String division) throws IOException, URISyntaxException {
     final WebClient conversation = WebTestUtils.getConversation();
 
-    final Page indexResponse = WebTestUtils.loadPage(conversation, new WebRequest(new URL(TestUtils.URL_ROOT
-        + "playoff/index.jsp")));
+    final Page indexResponse = WebTestUtils.loadPage(conversation, new WebRequest(new URI(TestUtils.URL_ROOT
+        + "playoff/index.jsp").toURL()));
     assertTrue(indexResponse.isHtmlPage());
     final HtmlPage indexHtml = (HtmlPage) indexResponse;
 
@@ -845,7 +847,7 @@ public class FullTournamentTest {
   private void enterSubjectiveScores(final Connection testDataConn,
                                      final ChallengeDescription description,
                                      final Tournament sourceTournament)
-      throws IOException, SQLException {
+      throws IOException, SQLException, URISyntaxException {
     // category->judge->teamNumber->score
     final Map<String, Map<String, Map<Integer, SubjectiveScore>>> allScores = new HashMap<>();
 
@@ -881,8 +883,8 @@ public class FullTournamentTest {
 
     // send data as HTTP post
     final WebClient conversation = WebTestUtils.getConversation();
-    final URL url = new URL(TestUtils.URL_ROOT
-        + "api/SubjectiveScores");
+    final URL url = new URI(TestUtils.URL_ROOT
+        + "api/SubjectiveScores").toURL();
     final WebRequest request = new WebRequest(url, HttpMethod.POST);
     request.setAdditionalHeader("Accept", "*/*");
     request.setAdditionalHeader("Content-Type", "application/json");
