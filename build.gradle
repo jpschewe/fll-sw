@@ -33,7 +33,7 @@ plugins {
     id "checkstyle"
         
     // Checker Framework pluggable type-checking
-    id "org.checkerframework" version "0.6.31"
+    id "org.checkerframework" version "0.6.37"
     
     // code coverage
     id "jacoco"
