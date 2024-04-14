@@ -13,6 +13,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -99,8 +100,10 @@ final class AwardWinnerApiUtils {
      */
     public boolean descriptionSpecified = false;
 
+    @SuppressFBWarnings(value = "UWF_NULL_FIELD", justification = "This is set by the client submitting the data")
     public @Nullable String description = null;
 
+    @SuppressFBWarnings(value = "UWF_NULL_FIELD", justification = "This is set by the client submitting the data")
     public @Nullable String awardGroup = null;
   }
   // CHECKSTYLE:ON
