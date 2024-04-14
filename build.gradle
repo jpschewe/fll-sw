@@ -560,7 +560,7 @@ createExe {
     copyright = "GPL"
     
     bundledJrePath = "jdk"
-    bundledJre64Bit = true
+    requires64Bit = true
 
     // for debugging classpath information        
     //headerType = "console"
