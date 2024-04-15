@@ -128,6 +128,8 @@ public class H2HUpdateWebSocket {
         } catch (final UnknownDisplayException e) {
           LOGGER.warn("Cannot find display {}, dropping from head to head", displayUuid);
           removeH2HDisplay(h2hUuid);
+        } catch (final EOFException e) {
+          LOGGER.debug("Socket closed writing to new session, dropping display {}", displayUuid, e);
         } catch (final IOException e) {
           LOGGER.warn("Got error writing to new session, dropping display {}", displayUuid, e);
           removeH2HDisplay(h2hUuid);
@@ -280,6 +282,9 @@ public class H2HUpdateWebSocket {
             THREAD_POOL.execute(() -> {
               try {
                 updateDisplayedBracket(resolved, session);
+              } catch (final EOFException e) {
+                LOGGER.debug("Received EOF writing to {}, dropping", h2hUuid, e);
+                removeH2HDisplay(h2hUuid);
               } catch (final IOException e) {
                 LOGGER.warn("Error writing to {}, dropping", h2hUuid, e);
                 removeH2HDisplay(h2hUuid);
@@ -405,10 +410,11 @@ public class H2HUpdateWebSocket {
         if (session.isOpen()) {
           try {
             session.getBasicRemote().sendText(messageText);
+          } catch (final EOFException e) {
+            LOGGER.debug("Caught EOF sending message to {}, dropping session", session.getId(), e);
+            toRemove.add(uuid);
           } catch (final IOException ioe) {
-            LOGGER.error("Got error sending message to session ("
-                + session.getId()
-                + "), dropping session", ioe);
+            LOGGER.error("Got error sending message to session ({}), dropping session", session.getId(), ioe);
             toRemove.add(uuid);
           } catch (final IllegalStateException e) {
             LOGGER.warn("Illegal state exception writing to client, dropping: {}", session.getId(), e);
@@ -438,7 +444,7 @@ public class H2HUpdateWebSocket {
   @OnError
   public void onError(final Throwable t) throws Throwable {
     if (t instanceof EOFException) {
-      LOGGER.debug("{}: Socket closed.", h2hUuid);
+      LOGGER.debug("{}: Socket closed.", h2hUuid, t);
     } else {
       LOGGER.error("{}: Display socket error", h2hUuid, t);
     }

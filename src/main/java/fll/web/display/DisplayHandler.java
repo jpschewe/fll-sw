@@ -6,6 +6,7 @@
 
 package fll.web.display;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -217,8 +218,11 @@ public final class DisplayHandler {
                            final Message message) {
     try {
       socket.sendMessage(message);
+    } catch (final EOFException e) {
+      LOGGER.debug("Caught EOF writing to {}", uuid, e);
+      removeDisplay(uuid);
     } catch (final IOException e) {
-      LOGGER.warn("Error sending message, dropping display with uuid: {}", uuid);
+      LOGGER.warn("Error sending message, dropping display with uuid: {}", uuid, e);
       removeDisplay(uuid);
     }
 

@@ -97,6 +97,8 @@ public class PerformanceRunsEndpoint {
 
       this.uuid = UUID.randomUUID().toString();
       ALL_SESSIONS.put(uuid, session);
+    } catch (final EOFException e) {
+      LOGGER.debug("Got EOF sending intial message to client, not adding", e);
     } catch (final IOException e) {
       LOGGER.warn("Got error sending intial message to client, not adding", e);
     }
@@ -166,9 +168,11 @@ public class PerformanceRunsEndpoint {
           final Session session = entry.getValue();
           try {
             sendToClient(session, msg);
+          } catch (final EOFException e) {
+            LOGGER.debug("Caught EOF sending to client: {}", e.getMessage(), e);
+            toRemove.add(entry.getKey());
           } catch (final IOException e) {
-            LOGGER.warn("Error sending to client: "
-                + e.getMessage(), e);
+            LOGGER.warn("Error sending to client: {}", e.getMessage(), e);
             toRemove.add(entry.getKey());
           }
         } // foreach session
