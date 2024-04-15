@@ -6,6 +6,7 @@
 
 package fll.web.scoreboard;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -160,6 +161,9 @@ public final class ScoreboardUpdates {
       } catch (final SQLException e) {
         throw new FLLRuntimeException("Error getting initial scores for display", e);
       }
+    } catch (final EOFException e) {
+      LOGGER.debug("Caught EOF  sending initial scores to client, dropping: {}", displayUuid, e);
+      removeClient(displayUuid);
     } catch (final IOException e) {
       LOGGER.error("Got error sending initial scores to client, dropping: {}", displayUuid, e);
       removeClient(displayUuid);
@@ -196,6 +200,9 @@ public final class ScoreboardUpdates {
           try {
             final Session client = entry.getValue();
             client.getBasicRemote().sendText(msg);
+          } catch (final EOFException e) {
+            LOGGER.debug("Caught EOF writing to client, dropping: {}", entry.getKey(), e);
+            toRemove.add(entry.getKey());
           } catch (final IOException e) {
             LOGGER.warn("Got error writing to client, dropping: {}", entry.getKey(), e);
             toRemove.add(entry.getKey());
@@ -231,6 +238,9 @@ public final class ScoreboardUpdates {
           try {
             final Session client = entry.getValue();
             client.getBasicRemote().sendText(msg);
+          } catch (final EOFException e) {
+            LOGGER.debug("Caught EOF writing to client, dropping: {}", entry.getKey(), e);
+            toRemove.add(entry.getKey());
           } catch (final IOException e) {
             LOGGER.warn("Got error writing to client, dropping: {}", entry.getKey(), e);
             toRemove.add(entry.getKey());
@@ -299,6 +309,9 @@ public final class ScoreboardUpdates {
             try {
               newScore(numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay, allAwardGroups, entry.getKey(),
                        entry.getValue(), update.getTeam(), update.getRunNumber(), updateStr);
+            } catch (final EOFException e) {
+              LOGGER.debug("Caught EOF writing to client, dropping: {}", entry.getKey(), e);
+              toRemove.add(entry.getKey());
             } catch (final IOException | UnknownDisplayException e) {
               LOGGER.warn("Got error writing to client, dropping: {}", entry.getKey(), e);
               toRemove.add(entry.getKey());
