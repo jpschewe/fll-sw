@@ -574,8 +574,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     final Element categoryDescription = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(categoryDescription);
-    categoryDescription.appendChild(document.createTextNode(getCategoryDescription(connection, tournament,
-                                                                                   templateContext, category)));
+    final String rawDescription = getCategoryDescription(connection, tournament, templateContext, category);
+    FOPUtils.appendTextAsParagraphs(document, rawDescription, categoryDescription, true);
 
     final Element categoryPresenter = createPresenter(document, connection, tournament, category);
     container.appendChild(categoryPresenter);
@@ -716,8 +716,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     final Element categoryDescription = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(categoryDescription);
-    categoryDescription.appendChild(document.createTextNode(getCategoryDescription(connection, tournament,
-                                                                                   templateContext, category)));
+    final String rawDescription = getCategoryDescription(connection, tournament, templateContext, category);
+    FOPUtils.appendTextAsParagraphs(document, rawDescription, categoryDescription, true);
 
     final Element categoryPresenter = createPresenter(document, connection, tournament, category);
     container.appendChild(categoryPresenter);
@@ -744,8 +744,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     final Element categoryDescription = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(categoryDescription);
-    categoryDescription.appendChild(document.createTextNode(getCategoryDescription(connection, tournament,
-                                                                                   templateContext, category)));
+    final String rawDescription = getCategoryDescription(connection, tournament, templateContext, category);
+    FOPUtils.appendTextAsParagraphs(document, rawDescription, categoryDescription, true);
 
     final Element categoryPresenter = createPresenter(document, connection, tournament, category);
     container.appendChild(categoryPresenter);
@@ -881,8 +881,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
       final Element categoryDescription = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
       container.appendChild(categoryDescription);
-      categoryDescription.appendChild(document.createTextNode(getCategoryDescription(connection, tournament,
-                                                                                     templateContext, category)));
+      final String rawDescription = getCategoryDescription(connection, tournament, templateContext, category);
+      FOPUtils.appendTextAsParagraphs(document, rawDescription, categoryDescription, true);
 
       final Element categoryPresenter = createPresenter(document, connection, tournament, category);
       container.appendChild(categoryPresenter);
