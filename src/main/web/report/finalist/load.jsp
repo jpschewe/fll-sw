@@ -15,7 +15,7 @@ if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(request, response
 <title>Finalist Schedule Load</title>
 
 <script type='text/javascript'
-    src='../../extlib/js-joda/packages/core/dist/js-joda.min.js'></script>
+    src='../../extlib/js-joda/js-joda.min.js'></script>
 
 <script type='text/javascript' src='../../js/fll-functions.js'></script>
 <script type='text/javascript' src='../../js/fll-objects.js'></script>
