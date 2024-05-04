@@ -6,3 +6,5 @@ To update to a newer version:
 1. Download the file to js-joda.min.js
 1. Update the link at the top of this file
 1. commit changes
+
+The documentation for this library is at https://js-joda.github.io/js-joda/
