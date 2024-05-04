@@ -18,6 +18,8 @@ fll.report.awards.EditCategoriesAwarded.populateContext(application, pageContext
         each level.</p>
     <form action="EditCategoriesAwarded" method="POST">
 
+        <input type="hidden" name="referer" value="${header. referer}" />
+
         <table border="1">
             <tr>
                 <th>Category</th>

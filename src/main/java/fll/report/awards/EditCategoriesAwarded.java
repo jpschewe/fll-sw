@@ -101,7 +101,13 @@ public class EditCategoriesAwarded extends BaseFLLServlet {
       }
 
       SessionAttributes.appendToMessage(session, "<div class=\"success\">Stored changes to categories awarded</div>");
-      response.sendRedirect(response.encodeRedirectURL("/report/awards/index.jsp"));
+
+      final @Nullable String referer = request.getParameter("referer");
+      if (null != referer) {
+        response.sendRedirect(response.encodeRedirectURL(referer));
+      } else {
+        response.sendRedirect(response.encodeRedirectURL("/report/awards/index.jsp"));
+      }
     } catch (final SQLException e) {
       throw new FLLInternalException("Error storing categories awarded", e);
     }

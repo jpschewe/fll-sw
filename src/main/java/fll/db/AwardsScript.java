@@ -2146,7 +2146,7 @@ public final class AwardsScript {
       } // allocate ResultSet
     } // allocate PreparedStatement
 
-    addMissingAwardCategories(description, awardOrder);
+    addMissingAwardCategories(description, connection, tournament.getTournamentID(), awardOrder);
     return awardOrder;
   }
 
@@ -2156,14 +2156,24 @@ public final class AwardsScript {
    * initially specified. The parameter <code>awardOrder</code> is modified.
    */
   private static void addMissingAwardCategories(final ChallengeDescription description,
-                                                final List<AwardCategory> awardOrder) {
+                                                final Connection connection,
+                                                final int tournamentId,
+                                                final List<AwardCategory> awardOrder)
+      throws SQLException {
 
     for (final AwardCategory ac : description.getSubjectiveCategories()) {
       if (!awardOrder.contains(ac)) {
         awardOrder.add(ac);
       }
     }
-    for (final AwardCategory ac : description.getNonNumericCategories()) {
+    final List<NonNumericCategory> nonNumericCategories;
+    if (GenerateDB.INTERNAL_TOURNAMENT_ID == tournamentId) {
+      nonNumericCategories = description.getNonNumericCategories();
+    } else {
+      final Tournament tournament = Tournament.findTournamentByID(connection, tournamentId);
+      nonNumericCategories = CategoriesIgnored.getNonNumericCategories(description, connection, tournament);
+    }
+    for (final AwardCategory ac : nonNumericCategories) {
       if (!awardOrder.contains(ac)) {
         awardOrder.add(ac);
       }
@@ -2611,7 +2621,7 @@ public final class AwardsScript {
                                                                                                            .map(s -> getCategoryByTitle(description,
                                                                                                                                         s)) //
                                                                                                            .collect(Collectors.toList());
-    addMissingAwardCategories(description, awardOrder);
+    addMissingAwardCategories(description, connection, tournamentId, awardOrder);
     return awardOrder;
   }
 

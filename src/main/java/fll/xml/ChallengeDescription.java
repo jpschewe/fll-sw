@@ -15,6 +15,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.db.CategoriesIgnored;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -294,6 +295,8 @@ public class ChallengeDescription implements Serializable {
 
   /**
    * @return unmodifiable list
+   * @see CategoriesIgnored#getNonNumericCategories(ChallengeDescription,
+   *      java.sql.Connection, fll.Tournament)
    */
   public List<NonNumericCategory> getNonNumericCategories() {
     return nonNumericCategories;

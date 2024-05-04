@@ -170,6 +170,12 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
         </li>
 
         <li>
+            <a
+                href="<c:url value='/report/awards/edit-categories-awarded.jsp'/>">Specify
+                which categories are awarded by tournament level</a>
+        </li>
+
+        <li>
             <c:if test="${scheduleUploaded }">
                 <span class='completed'>DONE </span>
             </c:if>
@@ -311,31 +317,21 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                     <!-- Team schedules -->
                     <li>
                         <a href="<c:url value='/admin/TeamSchedules' />"
-                            target="_new">Team Schedules</a>
-                    </li>
-
-                    <li>
-                        <form
-                            action="<c:url value='/admin/TeamSchedules' />"
-                            method='post' target="_new">
-                            Team schedule for
-                            <select name='TeamNumber'>
-                                <c:forEach items="${tournamentTeams}"
-                                    var="team">
-                                    <option
-                                        value='<c:out value="${team.teamNumber}"/>'>
-                                        <c:out
-                                            value="${team.teamNumber}" />
-                                        -
-                                        <c:out value="${team.teamName}" />
-                                    </option>
-                                </c:forEach>
-                            </select>
-                            <input type='submit' value='Output Schedule' />
-                        </form>
-                    </li>
-                    <!-- end Team schedules -->
-
+                            target="_new">Team Schedules</a> Team
+                        schedule for
+                        <select name='TeamNumber'>
+                            <c:forEach items="${tournamentTeams}"
+                                var="team">
+                                <option
+                                    value='<c:out value="${team.teamNumber}"/>'>
+                                    <c:out value="${team.teamNumber}" />
+                                    -
+                                    <c:out value="${team.teamName}" />
+                                </option>
+                            </c:forEach>
+                        </select>
+                        <input type='submit' value='Output Schedule' />
+                        <!-- end Team schedules -->
                 </ul>
             </c:if>
         </li>
@@ -364,7 +360,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
 
         <li>
             <a id='change-award-groups' href='edit_event_division.jsp'>Change
-                award group assignments for the current tournament</a> . <a
+                award group assignments for the current tournament</a><a
                 href='javascript:display("EventDivisionHelp")'>[help]</a>
             <div id='EventDivisionHelp' class='help'
                 style='display: none'>
@@ -377,10 +373,9 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
             </div>
         </li>
 
-
         <li>
             <a href='edit_judging_groups.jsp'>Change judging groups
-                assignments for the current tournament</a> . <a
+                assignments for the current tournament</a><a
                 href='javascript:display("JudgingGroupHelp")'>[help]</a>
             <div id='JudgingGroupHelp' class='help'
                 style='display: none'>
@@ -417,7 +412,6 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
             <a href="database-backups.jsp" target="_blank">Access to
                 database backups</a>
         </li>
-
     </ol>
 
     <h2>Tournament day</h2>

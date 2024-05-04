@@ -12,14 +12,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
-import com.diffplug.common.base.Errors;
-
 import fll.Tournament;
-import fll.TournamentLevel;
 import fll.TournamentTeam;
 import fll.db.AwardWinner;
 import fll.db.AwardWinners;
@@ -73,14 +69,10 @@ public final class EditAwardWinners {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
-      final TournamentLevel level = tournament.getLevel();
 
-      final List<NonNumericCategory> nonNumericCategories = description.getNonNumericCategories().stream() //
-                                                                       .filter(Errors.rethrow()
-                                                                                     .wrapPredicate(c -> !CategoriesIgnored.isNonNumericCategoryIgnored(connection,
-                                                                                                                                                        level,
-                                                                                                                                                        c))) //
-                                                                       .collect(Collectors.toList());
+      final List<NonNumericCategory> nonNumericCategories = CategoriesIgnored.getNonNumericCategories(description,
+                                                                                                      connection,
+                                                                                                      tournament);
       page.setAttribute("nonNumericCategories", nonNumericCategories);
 
       final List<String> awardGroups = AwardsScriptReport.getAwardGroupOrder(connection, tournament);
