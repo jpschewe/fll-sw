@@ -9,7 +9,7 @@
     href="<c:url value='/style/fll-sw.css'/>" />
 
 <script type='text/javascript'
-    src="<c:url value='/extlib/js-joda/packages/core/dist/js-joda.min.js'/>"></script>
+    src="<c:url value='/extlib/js-joda/js-joda.min.js'/>"></script>
 
 
 <script type='text/javascript' src="<c:url value='/js/fll-objects.js'/>"></script>
