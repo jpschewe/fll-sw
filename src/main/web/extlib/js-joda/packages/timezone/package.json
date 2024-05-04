@@ -64,7 +64,7 @@
     "karma-phantomjs-launcher": "^1.0.4",
     "karma-sauce-launcher": "^2.0.2",
     "karma-sourcemap-loader": "^0.3.7",
-    "karma-webpack": "^4.0.2",
+    "karma-webpack": "^5.0.1",
     "mocha": "^6.2.2",
     "moment-timezone": "^0.5.27",
     "phantomjs-prebuilt": "^2.1.16",
