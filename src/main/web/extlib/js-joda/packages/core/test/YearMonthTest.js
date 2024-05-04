@@ -2,20 +2,20 @@
  * @copyright (c) 2016, Philipp Thürwächter & Pattrick Hüper
  * @license BSD-3-Clause (see LICENSE.md in the root directory of this source tree)
  */
-import {expect} from 'chai';
-import {assertEquals} from './testUtils';
+import { expect } from 'chai';
+import { assertEquals } from './testUtils';
 
 import './_init';
 
-import {ChronoField} from '../src/temporal/ChronoField';
-import {ChronoUnit} from '../src/temporal/ChronoUnit';
-import {IllegalArgumentException, NullPointerException, UnsupportedTemporalTypeException} from '../src/errors';
-import {LocalDate} from '../src/LocalDate';
-import {Period} from '../src/Period';
-import {TemporalField} from '../src/temporal/TemporalField';
-import {TemporalQuery} from '../src/temporal/TemporalQuery';
-import {TemporalUnit} from '../src/temporal/TemporalUnit';
-import {YearMonth} from '../src/YearMonth';
+import { ChronoField } from '../src/temporal/ChronoField';
+import { ChronoUnit } from '../src/temporal/ChronoUnit';
+import { IllegalArgumentException, NullPointerException, UnsupportedTemporalTypeException } from '../src/errors';
+import { LocalDate } from '../src/LocalDate';
+import { Period } from '../src/Period';
+import { TemporalField } from '../src/temporal/TemporalField';
+import { TemporalQuery } from '../src/temporal/TemporalQuery';
+import { TemporalUnit } from '../src/temporal/TemporalUnit';
+import { YearMonth } from '../src/YearMonth';
 
 /* these are not covered by the threetenbp ported tests */
 describe('js-joda YearMonth', () => {
@@ -208,9 +208,9 @@ describe('js-joda YearMonth', () => {
             const end = YearMonth.of(2016, 12);
             assertEquals(test.until(end, ChronoUnit.YEARS), 1);
             assertEquals(test.until(end, ChronoUnit.MONTHS), 12);
-            assertEquals(test.until(end, ChronoUnit.DECADES), 0.1);
-            assertEquals(test.until(end, ChronoUnit.CENTURIES), 0.01);
-            assertEquals(test.until(end, ChronoUnit.MILLENNIA), 0.001);
+            assertEquals(test.until(end, ChronoUnit.DECADES), 0);
+            assertEquals(test.until(end, ChronoUnit.CENTURIES), 0);
+            assertEquals(test.until(end, ChronoUnit.MILLENNIA), 0);
             assertEquals(test.until(end, ChronoUnit.ERAS), 0);
         });
         

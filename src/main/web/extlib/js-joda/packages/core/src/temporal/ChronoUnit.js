@@ -4,11 +4,11 @@
  * @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
  */
 
-import {MathUtil} from '../MathUtil';
+import { MathUtil } from '../MathUtil';
 
-import {Duration} from '../Duration';
-import {YearConstants} from '../YearConstants';
-import {TemporalUnit} from './TemporalUnit';
+import { Duration } from '../Duration';
+import { YearConstants } from '../YearConstants';
+import { TemporalUnit } from './TemporalUnit';
 
 /**
  * A standard set of date periods units.
@@ -153,8 +153,8 @@ export class ChronoUnit extends TemporalUnit {
     }
 
     /**
-     * @param {!Temporal} dateTime the temporal object to adjust.
-     * @param {number} periodToAdd the period of this unit to add, positive or negative.
+     * @param {!Temporal} temporal the temporal object to adjust.
+     * @param {number} amount the period of this unit to add, positive or negative.
      * @return {Temporal} the adjusted temporal object.
      * @throws DateTimeException if the period cannot be added.
      */

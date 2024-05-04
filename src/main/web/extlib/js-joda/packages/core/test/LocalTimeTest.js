@@ -3,19 +3,21 @@
  * @license BSD-3-Clause (see LICENSE.md in the root directory of this source tree)
  */
 
-import {expect} from 'chai';
-import {assertEquals} from './testUtils';
+import { expect } from 'chai';
+import { assertEquals } from './testUtils';
 
 import './_init';
 
-import {ChronoField} from '../src/temporal/ChronoField';
-import {ChronoUnit} from '../src/temporal/ChronoUnit';
-import {LocalTime} from '../src/LocalTime';
-import {TemporalAdjuster} from '../src/temporal/TemporalAdjuster';
-import {TemporalField} from '../src/temporal/TemporalField';
-import {TemporalQuery} from '../src/temporal/TemporalQuery';
-import {TemporalUnit} from '../src/temporal/TemporalUnit';
-import {IllegalArgumentException, NullPointerException, UnsupportedTemporalTypeException} from '../src/errors';
+import { ChronoField } from '../src/temporal/ChronoField';
+import { ChronoUnit } from '../src/temporal/ChronoUnit';
+import { LocalTime } from '../src/LocalTime';
+import { ZoneOffset } from '../src/ZoneOffset';
+import { OffsetTime } from '../src/OffsetTime';
+import { TemporalAdjuster } from '../src/temporal/TemporalAdjuster';
+import { TemporalField } from '../src/temporal/TemporalField';
+import { TemporalQuery } from '../src/temporal/TemporalQuery';
+import { TemporalUnit } from '../src/temporal/TemporalUnit';
+import { IllegalArgumentException, NullPointerException, UnsupportedTemporalTypeException } from '../src/errors';
 
 /* these are not covered by the threetenbp ported tests */
 describe('js-joda LocalTime', () => {
@@ -298,5 +300,18 @@ describe('js-joda LocalTime', () => {
             expect(testTime.adjustInto(adjuster)).to.eql('Test Value');
         });
     });
-    
+
+    describe('atOffset', () => {
+        it('should return OffsetTime for valid offset', () => {
+            expect(
+                testTime.atOffset(ZoneOffset.UTC)
+            ).to.eql(OffsetTime.of(1, 1, 1, 1, ZoneOffset.UTC));
+        });
+
+        it('should fail if offset is null', () => {
+            expect(() => {
+                testTime.atOffset(null);
+            }).to.throw(NullPointerException);
+        });
+    });
 });

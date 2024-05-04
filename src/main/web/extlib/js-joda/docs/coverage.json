@@ -1,34 +1,34 @@
 {
-  "coverage": "69.5%",
-  "expectCount": 1702,
-  "actualCount": 1183,
+  "coverage": "73.54%",
+  "expectCount": 2147,
+  "actualCount": 1579,
   "files": {
     "packages/core/src/Clock.js": {
       "expectCount": 39,
       "actualCount": 17,
       "undocumentLines": [
         162,
-        195,
-        222,
-        229,
-        252,
+        194,
+        221,
+        228,
+        251,
+        253,
         254,
-        255,
-        258,
-        262,
-        266,
-        270,
-        274,
-        281,
-        295,
+        257,
+        261,
+        265,
+        269,
+        273,
+        280,
+        294,
+        296,
         297,
-        298,
-        301,
-        305,
-        312,
-        316,
-        320,
-        327
+        300,
+        304,
+        311,
+        315,
+        319,
+        326
       ]
     },
     "packages/core/src/DayOfWeek.js": {
@@ -64,45 +64,45 @@
       ]
     },
     "packages/core/src/Instant.js": {
-      "expectCount": 47,
-      "actualCount": 43,
+      "expectCount": 49,
+      "actualCount": 45,
       "undocumentLines": [
-        23,
-        254,
-        255,
-        1002
+        24,
+        269,
+        270,
+        1010
       ]
     },
     "packages/core/src/LocalDate.js": {
-      "expectCount": 74,
-      "actualCount": 69,
+      "expectCount": 73,
+      "actualCount": 68,
       "undocumentLines": [
-        289,
-        290,
         291,
-        1106,
-        1676
+        292,
+        293,
+        1069,
+        1662
       ]
     },
     "packages/core/src/LocalDateTime.js": {
-      "expectCount": 78,
-      "actualCount": 75,
+      "expectCount": 77,
+      "actualCount": 74,
       "undocumentLines": [
-        306,
         307,
-        1667
+        308,
+        1623
       ]
     },
     "packages/core/src/LocalTime.js": {
-      "expectCount": 58,
-      "actualCount": 52,
+      "expectCount": 57,
+      "actualCount": 51,
       "undocumentLines": [
-        285,
         286,
         287,
         288,
-        299,
-        1335
+        289,
+        300,
+        1290
       ]
     },
     "packages/core/src/MathUtil.js": {
@@ -134,6 +134,48 @@
         719
       ]
     },
+    "packages/core/src/OffsetDateTime.js": {
+      "expectCount": 83,
+      "actualCount": 62,
+      "undocumentLines": [
+        89,
+        93,
+        98,
+        146,
+        147,
+        162,
+        187,
+        205,
+        216,
+        356,
+        366,
+        376,
+        391,
+        406,
+        508,
+        513,
+        584,
+        589,
+        657,
+        726,
+        749
+      ]
+    },
+    "packages/core/src/OffsetTime.js": {
+      "expectCount": 59,
+      "actualCount": 50,
+      "undocumentLines": [
+        148,
+        149,
+        321,
+        326,
+        330,
+        512,
+        518,
+        531,
+        613
+      ]
+    },
     "packages/core/src/Period.js": {
       "expectCount": 47,
       "actualCount": 42,
@@ -151,12 +193,12 @@
       "undocumentLines": []
     },
     "packages/core/src/Year.js": {
-      "expectCount": 47,
-      "actualCount": 44,
+      "expectCount": 43,
+      "actualCount": 40,
       "undocumentLines": [
-        79,
-        342,
-        1003
+        78,
+        341,
+        921
       ]
     },
     "packages/core/src/YearConstants.js": {
@@ -167,14 +209,14 @@
       ]
     },
     "packages/core/src/YearMonth.js": {
-      "expectCount": 56,
-      "actualCount": 51,
+      "expectCount": 51,
+      "actualCount": 46,
       "undocumentLines": [
+        265,
         266,
-        267,
-        323,
-        427,
-        1107
+        322,
+        426,
+        1004
       ]
     },
     "packages/core/src/ZoneId.js": {
@@ -208,36 +250,31 @@
       "expectCount": 7,
       "actualCount": 5,
       "undocumentLines": [
-        51,
-        52
+        50,
+        51
       ]
     },
     "packages/core/src/ZonedDateTime.js": {
-      "expectCount": 87,
-      "actualCount": 84,
+      "expectCount": 86,
+      "actualCount": 83,
       "undocumentLines": [
-        454,
-        463,
-        2005
+        455,
+        464,
+        1960
       ]
     },
     "packages/core/src/_init.js": {
       "expectCount": 2,
       "actualCount": 0,
       "undocumentLines": [
-        30,
-        32
+        32,
+        34
       ]
     },
     "packages/core/src/assert.js": {
       "expectCount": 4,
-      "actualCount": 0,
-      "undocumentLines": [
-        7,
-        17,
-        24,
-        31
-      ]
+      "actualCount": 4,
+      "undocumentLines": []
     },
     "packages/core/src/chrono/ChronoLocalDate.js": {
       "expectCount": 5,
@@ -277,8 +314,8 @@
       "expectCount": 6,
       "actualCount": 4,
       "undocumentLines": [
-        13,
-        38
+        14,
+        24
       ]
     },
     "packages/core/src/errors.js": {
@@ -317,25 +354,27 @@
       ]
     },
     "packages/core/src/format/DateTimeFormatterBuilder.js": {
-      "expectCount": 54,
-      "actualCount": 38,
+      "expectCount": 61,
+      "actualCount": 43,
       "undocumentLines": [
         35,
         37,
-        815,
-        819,
-        823,
-        827,
-        833,
-        988,
-        1394,
-        1395,
-        1402,
-        1403,
-        1406,
-        1478,
-        1525,
-        1531
+        848,
+        852,
+        856,
+        860,
+        866,
+        1021,
+        1427,
+        1428,
+        1435,
+        1436,
+        1439,
+        1511,
+        1558,
+        1574,
+        1575,
+        1602
       ]
     },
     "packages/core/src/format/DateTimeParseContext.js": {
@@ -604,69 +643,54 @@
     },
     "packages/core/src/js-joda.js": {
       "expectCount": 3,
-      "actualCount": 0,
+      "actualCount": 1,
       "undocumentLines": [
-        90,
-        80,
-        146
+        93,
+        83
       ]
     },
+    "packages/core/src/nativeJs.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
     "packages/core/src/temporal/ChronoField.js": {
-      "expectCount": 21,
-      "actualCount": 16,
+      "expectCount": 23,
+      "actualCount": 18,
       "undocumentLines": [
-        116,
-        117,
-        118,
-        119,
-        299
+        238,
+        239,
+        240,
+        241,
+        408
       ]
     },
     "packages/core/src/temporal/ChronoUnit.js": {
       "expectCount": 14,
       "actualCount": 10,
       "undocumentLines": [
-        149,
-        150,
-        336,
-        354
-      ]
-    },
-    "packages/core/src/temporal/DefaultInterfaceTemporal.js": {
-      "expectCount": 5,
-      "actualCount": 4,
-      "undocumentLines": [
-        8
+        88,
+        89,
+        179,
+        197
       ]
     },
     "packages/core/src/temporal/IsoFields.js": {
-      "expectCount": 71,
-      "actualCount": 55,
+      "expectCount": 70,
+      "actualCount": 58,
       "undocumentLines": [
-        146,
-        267,
-        274,
-        410,
-        491,
-        624,
-        729,
-        730,
-        811,
-        816,
-        817,
-        818,
+        136,
+        258,
+        732,
+        733,
+        814,
         819,
         820,
         821,
-        823
-      ]
-    },
-    "packages/core/src/temporal/NativeJsTemporal.js": {
-      "expectCount": 9,
-      "actualCount": 7,
-      "undocumentLines": [
-        32,
-        34
+        822,
+        823,
+        824,
+        826
       ]
     },
     "packages/core/src/temporal/Temporal.js": {
@@ -675,10 +699,12 @@
       "undocumentLines": []
     },
     "packages/core/src/temporal/TemporalAccessor.js": {
-      "expectCount": 4,
+      "expectCount": 6,
       "actualCount": 3,
       "undocumentLines": [
-        12
+        13,
+        88,
+        132
       ]
     },
     "packages/core/src/temporal/TemporalAdjuster.js": {
@@ -704,8 +730,8 @@
       "undocumentLines": []
     },
     "packages/core/src/temporal/TemporalField.js": {
-      "expectCount": 1,
-      "actualCount": 1,
+      "expectCount": 13,
+      "actualCount": 13,
       "undocumentLines": []
     },
     "packages/core/src/temporal/TemporalQueries.js": {
@@ -738,16 +764,14 @@
         45,
         46,
         47,
-        207,
-        245
+        208,
+        246
       ]
     },
     "packages/core/src/use.js": {
       "expectCount": 1,
-      "actualCount": 0,
-      "undocumentLines": [
-        2
-      ]
+      "actualCount": 1,
+      "undocumentLines": []
     },
     "packages/core/src/zone/SystemDefaultZoneId.js": {
       "expectCount": 6,
@@ -808,32 +832,107 @@
         9
       ]
     },
+    "packages/extra/src/DayOfMonth.js": {
+      "expectCount": 25,
+      "actualCount": 22,
+      "undocumentLines": [
+        13,
+        168,
+        479
+      ]
+    },
+    "packages/extra/src/DayOfYear.js": {
+      "expectCount": 24,
+      "actualCount": 21,
+      "undocumentLines": [
+        13,
+        170,
+        463
+      ]
+    },
     "packages/extra/src/Interval.js": {
       "expectCount": 34,
       "actualCount": 31,
       "undocumentLines": [
+        153,
+        154,
+        545
+      ]
+    },
+    "packages/extra/src/LocalDateRange.js": {
+      "expectCount": 43,
+      "actualCount": 40,
+      "undocumentLines": [
+        291,
+        292,
+        745
+      ]
+    },
+    "packages/extra/src/OffsetDate.js": {
+      "expectCount": 63,
+      "actualCount": 58,
+      "undocumentLines": [
+        13,
+        240,
+        241,
+        1249,
+        1273
+      ]
+    },
+    "packages/extra/src/Quarter.js": {
+      "expectCount": 30,
+      "actualCount": 25,
+      "undocumentLines": [
+        11,
         156,
         157,
-        552
+        546,
+        581
+      ]
+    },
+    "packages/extra/src/Temporals.js": {
+      "expectCount": 14,
+      "actualCount": 11,
+      "undocumentLines": [
+        12,
+        234,
+        236
+      ]
+    },
+    "packages/extra/src/YearQuarter.js": {
+      "expectCount": 54,
+      "actualCount": 49,
+      "undocumentLines": [
+        14,
+        262,
+        263,
+        1156,
+        1171
+      ]
+    },
+    "packages/extra/src/YearWeek.js": {
+      "expectCount": 50,
+      "actualCount": 45,
+      "undocumentLines": [
+        13,
+        264,
+        265,
+        1006,
+        1020
       ]
     },
     "packages/extra/src/_init.js": {
       "expectCount": 2,
       "actualCount": 0,
       "undocumentLines": [
-        8,
-        10
+        16,
+        18
       ]
     },
     "packages/extra/src/assert.js": {
       "expectCount": 4,
-      "actualCount": 0,
-      "undocumentLines": [
-        7,
-        18,
-        25,
-        32
-      ]
+      "actualCount": 4,
+      "undocumentLines": []
     },
     "packages/extra/src/plug.js": {
       "expectCount": 1,
@@ -862,33 +961,35 @@
       "expectCount": 2,
       "actualCount": 0,
       "undocumentLines": [
-        9,
-        11
+        10,
+        12
       ]
     },
     "packages/locale/src/format/LocaleDateTimeFormatter.js": {
-      "expectCount": 3,
+      "expectCount": 4,
       "actualCount": 1,
       "undocumentLines": [
-        10,
-        12
+        17,
+        19,
+        41
       ]
     },
     "packages/locale/src/format/LocaleStore.js": {
       "expectCount": 8,
       "actualCount": 5,
       "undocumentLines": [
-        24,
-        43,
-        61
+        26,
+        45,
+        64
       ]
     },
-    "packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js": {
-      "expectCount": 9,
-      "actualCount": 7,
+    "packages/locale/src/format/cldr/CldrCache.js": {
+      "expectCount": 6,
+      "actualCount": 3,
       "undocumentLines": [
-        23,
-        151
+        9,
+        22,
+        37
       ]
     },
     "packages/locale/src/format/cldr/CldrDateTimeTextProvider.js": {
@@ -898,24 +999,27 @@
         22,
         23,
         28,
-        39,
-        47,
-        56,
-        66,
-        222
+        33,
+        41,
+        50,
+        60,
+        216
       ]
     },
     "packages/locale/src/format/cldr/CldrZoneTextPrinterParser.js": {
-      "expectCount": 9,
-      "actualCount": 2,
+      "expectCount": 13,
+      "actualCount": 3,
       "undocumentLines": [
-        18,
-        21,
-        37,
-        42,
-        84,
-        131,
-        173
+        17,
+        20,
+        48,
+        49,
+        54,
+        77,
+        120,
+        157,
+        190,
+        207
       ]
     },
     "packages/locale/src/format/parser/LocalizedOffsetPrinterParser.js": {
@@ -1049,35 +1153,27 @@
     },
     "packages/timezone/src/auto-plug.js": {
       "expectCount": 1,
-      "actualCount": 0,
-      "undocumentLines": [
-        10
-      ]
+      "actualCount": 1,
+      "undocumentLines": []
     },
     "packages/timezone/src/plug.js": {
       "expectCount": 1,
-      "actualCount": 0,
-      "undocumentLines": [
-        9
-      ]
+      "actualCount": 1,
+      "undocumentLines": []
     },
     "packages/timezone/src/system-default-zone.js": {
       "expectCount": 2,
-      "actualCount": 0,
-      "undocumentLines": [
-        2,
-        12
-      ]
+      "actualCount": 2,
+      "undocumentLines": []
     },
     "packages/timezone/src/unpack.js": {
       "expectCount": 6,
-      "actualCount": 1,
+      "actualCount": 2,
       "undocumentLines": [
-        22,
-        54,
+        28,
         60,
-        68,
-        78
+        66,
+        74
       ]
     }
   }

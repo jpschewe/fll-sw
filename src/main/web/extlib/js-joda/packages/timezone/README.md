@@ -1,11 +1,12 @@
 # @js-joda/timezone
 
 [![npm version](https://badge.fury.io/js/%40js-joda%2Ftimezone.svg)](https://badge.fury.io/js/%40js-joda%2Ftimezone)
-[![Travis Build Status](https://travis-ci.org/js-joda/js-joda.svg)](https://travis-ci.org/js-joda/js-joda)
+[![GH Actions Build Status](https://github.com/js-joda/js-joda/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/js-joda/js-joda/actions)
 [![Sauce Test Status](https://saucelabs.com/buildstatus/js-joda)](https://saucelabs.com/u/js-joda)
-[![Coverage Status](https://coveralls.io/repos/js-joda/js-joda/badge.svg?branch=master&service=github)](https://coveralls.io/github/js-joda/js-joda?branch=master)
-[![Tested node version](https://img.shields.io/badge/tested_with-current_node_LTS-blue.svg?style=flat)]()
-[![Sauce Test Status](https://saucelabs.com/browser-matrix/js-joda.svg)](https://saucelabs.com/u/js-joda)
+[![Coverage Status](https://coveralls.io/repos/js-joda/js-joda/badge.svg?branch=main&service=github)](https://coveralls.io/github/js-joda/js-joda?branch=main)
+[![Downloads/Month](https://img.shields.io/npm/dm/%40js-joda%2Ftimezone.svg)](https://img.shields.io/npm/dm/%40js-joda%2Ftimezone.svg)
+
+[![Sauce Browser Matrix](https://saucelabs.com/browser-matrix/js-joda.svg?branch=main&421)](https://saucelabs.com/u/js-joda)
 
 ## Motivation
 
@@ -52,8 +53,8 @@ Install joda using npm
 
 ### Browser
 
-    <script src="../dist/js-joda.js"></script>
-    <script src="../dist/js-joda-timezone.js"></script>
+    <script src="./packages/core/dist/js-joda.js"></script>
+    <script src="./packages/timezone/dist/js-joda-timezone.js"></script>
     <script>
         // copy all js-joda classes to the global scope
         for(let key in JSJoda) { this[key] = JSJoda[key]; }
@@ -75,15 +76,16 @@ Install joda using npm
     </script>
 
 ## Reducing js-joda-timezone file size
-If you don't need all the historical data that js-joda-timezone provides, you can instead use one of the reduced files ize builds:
+If you don't need all the historical data that @js-joda/timezone provides, you can instead use one of the reduced files ize builds:
 
 * `js-joda-timezone-10-year-range.js` covers +- five years from the current version's release
 * `js-joda-timezone-1970-2030.js` covers from 1970 to 2030
-* `js-joda-timezone-2012-2022.js` covers from 2012 to 2022
+* `js-joda-timezone-2012-2022.js` covers from 2012 to 2022 // deprecated, will be removed in future releases
+* `js-joda-timezone-2017-2027.js` covers from 2017 to 2027 
 
 To use one of these, just change your import path to the following format:
 
-    import 'js-joda-timezone/dist/js-joda-timezone-1970-2030'
+    import '@js-joda/timezone/dist/js-joda-timezone-1970-2030'
 
 ## Implementation details
 
@@ -92,7 +94,7 @@ To use one of these, just change your import path to the following format:
 
 ## License
 
-* js-joda-timezone is released under the [BSD 3-clause license](LICENSE):
+* @js-joda/timezone is released under the [BSD 3-clause license](LICENSE):
 
 * The author of joda time and the lead architect of the JSR-310 is Stephen Colebourne.
 

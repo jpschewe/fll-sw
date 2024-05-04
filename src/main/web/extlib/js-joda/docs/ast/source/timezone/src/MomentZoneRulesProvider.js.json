@@ -1063,7 +1063,7 @@
                               },
                               "arguments": [
                                 {
-                                  "type": "BinaryExpression",
+                                  "type": "TemplateLiteral",
                                   "start": 1012,
                                   "end": 1045,
                                   "loc": {
@@ -1076,44 +1076,67 @@
                                       "column": 73
                                     }
                                   },
-                                  "left": {
-                                    "type": "StringLiteral",
-                                    "start": 1012,
-                                    "end": 1036,
-                                    "loc": {
-                                      "start": {
-                                        "line": 37,
-                                        "column": 40
+                                  "expressions": [
+                                    {
+                                      "type": "Identifier",
+                                      "start": 1037,
+                                      "end": 1043,
+                                      "loc": {
+                                        "start": {
+                                          "line": 37,
+                                          "column": 65
+                                        },
+                                        "end": {
+                                          "line": 37,
+                                          "column": 71
+                                        },
+                                        "identifierName": "zoneId"
                                       },
-                                      "end": {
-                                        "line": 37,
-                                        "column": 64
-                                      }
-                                    },
-                                    "extra": {
-                                      "rawValue": "Unknown time-zone ID: ",
-                                      "raw": "'Unknown time-zone ID: '"
-                                    },
-                                    "value": "Unknown time-zone ID: "
-                                  },
-                                  "operator": "+",
-                                  "right": {
-                                    "type": "Identifier",
-                                    "start": 1039,
-                                    "end": 1045,
-                                    "loc": {
-                                      "start": {
-                                        "line": 37,
-                                        "column": 67
+                                      "name": "zoneId"
+                                    }
+                                  ],
+                                  "quasis": [
+                                    {
+                                      "type": "TemplateElement",
+                                      "start": 1013,
+                                      "end": 1035,
+                                      "loc": {
+                                        "start": {
+                                          "line": 37,
+                                          "column": 41
+                                        },
+                                        "end": {
+                                          "line": 37,
+                                          "column": 63
+                                        }
                                       },
-                                      "end": {
-                                        "line": 37,
-                                        "column": 73
+                                      "value": {
+                                        "raw": "Unknown time-zone ID: ",
+                                        "cooked": "Unknown time-zone ID: "
                                       },
-                                      "identifierName": "zoneId"
+                                      "tail": false
                                     },
-                                    "name": "zoneId"
-                                  }
+                                    {
+                                      "type": "TemplateElement",
+                                      "start": 1044,
+                                      "end": 1044,
+                                      "loc": {
+                                        "start": {
+                                          "line": 37,
+                                          "column": 72
+                                        },
+                                        "end": {
+                                          "line": 37,
+                                          "column": 72
+                                        }
+                                      },
+                                      "value": {
+                                        "raw": "",
+                                        "cooked": ""
+                                      },
+                                      "tail": true
+                                    }
+                                  ]
                                 }
                               ]
                             }
@@ -5402,9 +5425,34 @@
     },
     {
       "type": {
-        "label": "string",
+        "label": "`",
         "beforeExpr": false,
         "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 1012,
+      "end": 1013,
+      "loc": {
+        "start": {
+          "line": 37,
+          "column": 40
+        },
+        "end": {
+          "line": 37,
+          "column": 41
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "template",
+        "beforeExpr": false,
+        "startsExpr": false,
         "rightAssociative": false,
         "isLoop": false,
         "isAssign": false,
@@ -5414,43 +5462,41 @@
         "updateContext": null
       },
       "value": "Unknown time-zone ID: ",
-      "start": 1012,
-      "end": 1036,
+      "start": 1013,
+      "end": 1035,
       "loc": {
         "start": {
           "line": 37,
-          "column": 40
+          "column": 41
         },
         "end": {
           "line": 37,
-          "column": 64
+          "column": 63
         }
       }
     },
     {
       "type": {
-        "label": "+/-",
+        "label": "${",
         "beforeExpr": true,
         "startsExpr": true,
         "rightAssociative": false,
         "isLoop": false,
         "isAssign": false,
-        "prefix": true,
+        "prefix": false,
         "postfix": false,
-        "binop": 9,
-        "updateContext": null
+        "binop": null
       },
-      "value": "+",
-      "start": 1037,
-      "end": 1038,
+      "start": 1035,
+      "end": 1037,
       "loc": {
         "start": {
           "line": 37,
-          "column": 65
+          "column": 63
         },
         "end": {
           "line": 37,
-          "column": 66
+          "column": 65
         }
       }
     },
@@ -5467,12 +5513,89 @@
         "binop": null
       },
       "value": "zoneId",
-      "start": 1039,
+      "start": 1037,
+      "end": 1043,
+      "loc": {
+        "start": {
+          "line": 37,
+          "column": 65
+        },
+        "end": {
+          "line": 37,
+          "column": 71
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "}",
+        "beforeExpr": false,
+        "startsExpr": false,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 1043,
+      "end": 1044,
+      "loc": {
+        "start": {
+          "line": 37,
+          "column": 71
+        },
+        "end": {
+          "line": 37,
+          "column": 72
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "template",
+        "beforeExpr": false,
+        "startsExpr": false,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null,
+        "updateContext": null
+      },
+      "value": "",
+      "start": 1044,
+      "end": 1044,
+      "loc": {
+        "start": {
+          "line": 37,
+          "column": 72
+        },
+        "end": {
+          "line": 37,
+          "column": 72
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "`",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 1044,
       "end": 1045,
       "loc": {
         "start": {
           "line": 37,
-          "column": 67
+          "column": 72
         },
         "end": {
           "line": 37,

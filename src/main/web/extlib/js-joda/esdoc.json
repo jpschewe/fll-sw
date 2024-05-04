@@ -8,7 +8,7 @@
       "name": "esdoc-standard-plugin",
       "option": {
         "accessor": {
-          "access": ["public"],
+          "access": ["public", "protected"],
           "autoPrivate": true
         },
         "brand": {
@@ -17,7 +17,7 @@
           "repository": "https://github.com/js-joda/js-joda"
         },
         "manual": {
-          "index": "./esdoc/manual/index.md",
+          "index": "./README.md",
           "globalIndex": true,
           "files": [
             "./esdoc/manual/getting-started.md",
@@ -28,10 +28,26 @@
             "./esdoc/manual/ZonedDateTime.md",
             "./esdoc/manual/Period.md",
             "./esdoc/manual/Duration.md",
+            "./esdoc/manual/Instant.md",
             "./esdoc/manual/formatting.md",
-            "./esdoc/manual/customizing.md"
+            "./esdoc/manual/Locale.md",
+            "./esdoc/manual/customizing.md",
+            "./esdoc/manual/convert-native.md"
           ]
         }
+      }
+    },
+    {
+      "name": "esdoc-inject-script-plugin",
+      "option": {
+        "enable": true,
+        "scripts": [
+          "./packages/core/dist/js-joda.min.js",
+          "./packages/extra/dist/js-joda-extra.min.js",
+          "./packages/timezone/dist/js-joda-timezone.min.js",
+          "./packages/locale/dist/prebuilt/en-us/index.js",
+          "./esdoc/yato.js"
+        ]
       }
     }
   ]

@@ -4,10 +4,11 @@
  * @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
  */
 
-import {UnsupportedTemporalTypeException} from '../errors';
+import { UnsupportedTemporalTypeException } from '../errors';
+import { abstractMethodFail } from '../assert';
 
-import {ChronoField} from './ChronoField';
-import {TemporalQueries} from './TemporalQueries';
+import { ChronoField } from './ChronoField';
+import { TemporalQueries } from './TemporalQueries';
 
 export class TemporalAccessor {
     /**
@@ -83,6 +84,11 @@ export class TemporalAccessor {
         return this.range(field).checkValidIntValue(this.getLong(field), field);
     }
 
+    // eslint-disable-next-line no-unused-vars
+    getLong(field) {
+        abstractMethodFail('getLong');
+    }
+
     /**
      * Gets the range of valid values for the specified field.
      *
@@ -117,9 +123,13 @@ export class TemporalAccessor {
             if (this.isSupported(field)) {
                 return field.range();
             }
-            throw new UnsupportedTemporalTypeException('Unsupported field: ' + field);
+            throw new UnsupportedTemporalTypeException(`Unsupported field: ${field}`);
         }
         return field.rangeRefinedBy(this);
     }
 
+    // eslint-disable-next-line no-unused-vars
+    isSupported(field) {
+        abstractMethodFail('isSupported');
+    }
 }

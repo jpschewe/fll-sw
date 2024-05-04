@@ -36,12 +36,6 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "@js-joda/root/packages/locale/src/format/cldr/cldrdatetimeformatterbuilder.js~cldrdatetimeformatterbuilder",
-    "class/packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder.html",
-    "<span>CldrDateTimeFormatterBuilder</span> <span class=\"search-result-import-path\">@js-joda/root/packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js</span>",
-    "class"
-  ],
-  [
     "@js-joda/root/packages/locale/src/format/cldr/cldrzonetextprinterparser.js~cldrzonetextprinterparser",
     "class/packages/locale/src/format/cldr/CldrZoneTextPrinterParser.js~CldrZoneTextPrinterParser.html",
     "<span>CldrZoneTextPrinterParser</span> <span class=\"search-result-import-path\">@js-joda/root/packages/locale/src/format/cldr/CldrZoneTextPrinterParser.js</span>",
@@ -84,21 +78,27 @@ window.esdocSearchIndex = [
     "variable"
   ],
   [
+    "@js-joda/root/packages/extra/src/dayofmonth.js~dayofmonth",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html",
+    "<span>DayOfMonth</span> <span class=\"search-result-import-path\">@js-joda/root/packages/extra/src/DayOfMonth.js</span>",
+    "class"
+  ],
+  [
     "@js-joda/root/packages/core/src/dayofweek.js~dayofweek",
     "class/packages/core/src/DayOfWeek.js~DayOfWeek.html",
     "<span>DayOfWeek</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/DayOfWeek.js</span>",
     "class"
   ],
   [
-    "@js-joda/root/packages/core/src/format/decimalstyle.js~decimalstyle",
-    "class/packages/core/src/format/DecimalStyle.js~DecimalStyle.html",
-    "<span>DecimalStyle</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/format/DecimalStyle.js</span>",
+    "@js-joda/root/packages/extra/src/dayofyear.js~dayofyear",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html",
+    "<span>DayOfYear</span> <span class=\"search-result-import-path\">@js-joda/root/packages/extra/src/DayOfYear.js</span>",
     "class"
   ],
   [
-    "@js-joda/root/packages/core/src/temporal/defaultinterfacetemporal.js~defaultinterfacetemporal",
-    "class/packages/core/src/temporal/DefaultInterfaceTemporal.js~DefaultInterfaceTemporal.html",
-    "<span>DefaultInterfaceTemporal</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/temporal/DefaultInterfaceTemporal.js</span>",
+    "@js-joda/root/packages/core/src/format/decimalstyle.js~decimalstyle",
+    "class/packages/core/src/format/DecimalStyle.js~DecimalStyle.html",
+    "<span>DecimalStyle</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/format/DecimalStyle.js</span>",
     "class"
   ],
   [
@@ -144,15 +144,15 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "@js-joda/root/packages/core/src/temporal/isofields.js~isofields",
-    "class/packages/core/src/temporal/IsoFields.js~IsoFields.html",
-    "<span>IsoFields</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/temporal/IsoFields.js</span>",
-    "class"
-  ],
-  [
     "@js-joda/root/packages/core/src/localdate.js~localdate",
     "class/packages/core/src/LocalDate.js~LocalDate.html",
     "<span>LocalDate</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/LocalDate.js</span>",
+    "class"
+  ],
+  [
+    "@js-joda/root/packages/extra/src/localdaterange.js~localdaterange",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html",
+    "<span>LocalDateRange</span> <span class=\"search-result-import-path\">@js-joda/root/packages/extra/src/LocalDateRange.js</span>",
     "class"
   ],
   [
@@ -234,9 +234,33 @@ window.esdocSearchIndex = [
     "variable"
   ],
   [
+    "@js-joda/root/packages/extra/src/offsetdate.js~offsetdate",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html",
+    "<span>OffsetDate</span> <span class=\"search-result-import-path\">@js-joda/root/packages/extra/src/OffsetDate.js</span>",
+    "class"
+  ],
+  [
+    "@js-joda/root/packages/core/src/offsetdatetime.js~offsetdatetime",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html",
+    "<span>OffsetDateTime</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/OffsetDateTime.js</span>",
+    "class"
+  ],
+  [
+    "@js-joda/root/packages/core/src/offsettime.js~offsettime",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html",
+    "<span>OffsetTime</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/OffsetTime.js</span>",
+    "class"
+  ],
+  [
     "@js-joda/root/packages/core/src/period.js~period",
     "class/packages/core/src/Period.js~Period.html",
     "<span>Period</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/Period.js</span>",
+    "class"
+  ],
+  [
+    "@js-joda/root/packages/extra/src/quarter.js~quarter",
+    "class/packages/extra/src/Quarter.js~Quarter.html",
+    "<span>Quarter</span> <span class=\"search-result-import-path\">@js-joda/root/packages/extra/src/Quarter.js</span>",
     "class"
   ],
   [
@@ -318,6 +342,12 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "@js-joda/root/packages/extra/src/temporals.js~temporals",
+    "class/packages/extra/src/Temporals.js~Temporals.html",
+    "<span>Temporals</span> <span class=\"search-result-import-path\">@js-joda/root/packages/extra/src/Temporals.js</span>",
+    "class"
+  ],
+  [
     "@js-joda/root/packages/core/src/format/textstyle.js~textstyle",
     "class/packages/core/src/format/TextStyle.js~TextStyle.html",
     "<span>TextStyle</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/format/TextStyle.js</span>",
@@ -366,6 +396,18 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "@js-joda/root/packages/extra/src/yearquarter.js~yearquarter",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html",
+    "<span>YearQuarter</span> <span class=\"search-result-import-path\">@js-joda/root/packages/extra/src/YearQuarter.js</span>",
+    "class"
+  ],
+  [
+    "@js-joda/root/packages/extra/src/yearweek.js~yearweek",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html",
+    "<span>YearWeek</span> <span class=\"search-result-import-path\">@js-joda/root/packages/extra/src/YearWeek.js</span>",
+    "class"
+  ],
+  [
     "@js-joda/root/packages/core/src/zoneid.js~zoneid",
     "class/packages/core/src/ZoneId.js~ZoneId.html",
     "<span>ZoneId</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/ZoneId.js</span>",
@@ -408,124 +450,16 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "@js-joda/root/packages/core/src/assert.js~abstractmethodfail",
-    "function/index.html#static-function-abstractMethodFail",
-    "<span>abstractMethodFail</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/assert.js</span>",
-    "function"
-  ],
-  [
-    "@js-joda/root/packages/extra/src/assert.js~abstractmethodfail",
-    "function/index.html#static-function-abstractMethodFail",
-    "<span>abstractMethodFail</span> <span class=\"search-result-import-path\">@js-joda/root/packages/extra/src/assert.js</span>",
-    "function"
-  ],
-  [
-    "@js-joda/root/packages/core/src/assert.js~assert",
-    "function/index.html#static-function-assert",
-    "<span>assert</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/assert.js</span>",
-    "function"
-  ],
-  [
-    "@js-joda/root/packages/extra/src/assert.js~assert",
-    "function/index.html#static-function-assert",
-    "<span>assert</span> <span class=\"search-result-import-path\">@js-joda/root/packages/extra/src/assert.js</span>",
-    "function"
-  ],
-  [
-    "@js-joda/root/packages/timezone/src/auto-plug.js~autoplug",
-    "function/index.html#static-function-autoPlug",
-    "<span>autoPlug</span> <span class=\"search-result-import-path\">@js-joda/root/packages/timezone/src/auto-plug.js</span>",
-    "function"
-  ],
-  [
-    "@js-joda/root/packages/core/src/use.js~binduse",
-    "function/index.html#static-function-bindUse",
-    "<span>bindUse</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/use.js</span>",
-    "function"
-  ],
-  [
     "@js-joda/root/packages/core/src/convert.js~convert",
     "function/index.html#static-function-convert",
     "<span>convert</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/convert.js</span>",
     "function"
   ],
   [
-    "@js-joda/root/packages/locale/src/format/localestore.js~createentry",
-    "function/index.html#static-function-createEntry",
-    "<span>createEntry</span> <span class=\"search-result-import-path\">@js-joda/root/packages/locale/src/format/LocaleStore.js</span>",
-    "function"
-  ],
-  [
-    "@js-joda/root/packages/core/src/temporal/temporalquery.js~createtemporalquery",
-    "function/index.html#static-function-createTemporalQuery",
-    "<span>createTemporalQuery</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/temporal/TemporalQuery.js</span>",
-    "function"
-  ],
-  [
-    "@js-joda/root/packages/timezone/src/system-default-zone.js~extendsystemdefaultzoneid",
-    "function/index.html#static-function-extendSystemDefaultZoneId",
-    "<span>extendSystemDefaultZoneId</span> <span class=\"search-result-import-path\">@js-joda/root/packages/timezone/src/system-default-zone.js</span>",
-    "function"
-  ],
-  [
-    "@js-joda/root/packages/core/src/temporal/nativejstemporal.js~nativejs",
+    "@js-joda/root/packages/core/src/nativejs.js~nativejs",
     "function/index.html#static-function-nativeJs",
-    "<span>nativeJs</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/temporal/NativeJsTemporal.js</span>",
+    "<span>nativeJs</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/nativeJs.js</span>",
     "function"
-  ],
-  [
-    "@js-joda/root/packages/extra/src/plug.js~plug",
-    "function/index.html#static-function-plug",
-    "<span>plug</span> <span class=\"search-result-import-path\">@js-joda/root/packages/extra/src/plug.js</span>",
-    "function"
-  ],
-  [
-    "@js-joda/root/packages/locale/src/plug.js~plug",
-    "function/index.html#static-function-plug",
-    "<span>plug</span> <span class=\"search-result-import-path\">@js-joda/root/packages/locale/src/plug.js</span>",
-    "function"
-  ],
-  [
-    "@js-joda/root/packages/timezone/src/plug.js~plug",
-    "function/index.html#static-function-plug",
-    "<span>plug</span> <span class=\"search-result-import-path\">@js-joda/root/packages/timezone/src/plug.js</span>",
-    "function"
-  ],
-  [
-    "@js-joda/root/packages/core/src/assert.js~requireinstance",
-    "function/index.html#static-function-requireInstance",
-    "<span>requireInstance</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/assert.js</span>",
-    "function"
-  ],
-  [
-    "@js-joda/root/packages/extra/src/assert.js~requireinstance",
-    "function/index.html#static-function-requireInstance",
-    "<span>requireInstance</span> <span class=\"search-result-import-path\">@js-joda/root/packages/extra/src/assert.js</span>",
-    "function"
-  ],
-  [
-    "@js-joda/root/packages/core/src/assert.js~requirenonnull",
-    "function/index.html#static-function-requireNonNull",
-    "<span>requireNonNull</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/assert.js</span>",
-    "function"
-  ],
-  [
-    "@js-joda/root/packages/extra/src/assert.js~requirenonnull",
-    "function/index.html#static-function-requireNonNull",
-    "<span>requireNonNull</span> <span class=\"search-result-import-path\">@js-joda/root/packages/extra/src/assert.js</span>",
-    "function"
-  ],
-  [
-    "@js-joda/root/packages/timezone/src/unpack.js~unpack",
-    "function/index.html#static-function-unpack",
-    "<span>unpack</span> <span class=\"search-result-import-path\">@js-joda/root/packages/timezone/src/unpack.js</span>",
-    "function"
-  ],
-  [
-    "@js-joda/root/packages/core/src/js-joda.js~use",
-    "variable/index.html#static-variable-use",
-    "<span>use</span> <span class=\"search-result-import-path\">@js-joda/root/packages/core/src/js-joda.js</span>",
-    "variable"
   ],
   [
     "packages/core/src/clock.js",
@@ -606,6 +540,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "packages/core/src/dayofweek.js~dayofweek#displayname",
+    "class/packages/core/src/DayOfWeek.js~DayOfWeek.html#instance-method-displayName",
+    "packages/core/src/DayOfWeek.js~DayOfWeek#displayName",
+    "method"
+  ],
+  [
     "packages/core/src/dayofweek.js~dayofweek#equals",
     "class/packages/core/src/DayOfWeek.js~DayOfWeek.html#instance-method-equals",
     "packages/core/src/DayOfWeek.js~DayOfWeek#equals",
@@ -615,12 +555,6 @@ window.esdocSearchIndex = [
     "packages/core/src/dayofweek.js~dayofweek#get",
     "class/packages/core/src/DayOfWeek.js~DayOfWeek.html#instance-method-get",
     "packages/core/src/DayOfWeek.js~DayOfWeek#get",
-    "method"
-  ],
-  [
-    "packages/core/src/dayofweek.js~dayofweek#getdisplayname",
-    "class/packages/core/src/DayOfWeek.js~DayOfWeek.html#instance-method-getDisplayName",
-    "packages/core/src/DayOfWeek.js~DayOfWeek#getDisplayName",
     "method"
   ],
   [
@@ -1074,6 +1008,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "packages/core/src/instant.js~instant#atoffset",
+    "class/packages/core/src/Instant.js~Instant.html#instance-method-atOffset",
+    "packages/core/src/Instant.js~Instant#atOffset",
+    "method"
+  ],
+  [
     "packages/core/src/instant.js~instant#atzone",
     "class/packages/core/src/Instant.js~Instant.html#instance-method-atZone",
     "packages/core/src/Instant.js~Instant#atZone",
@@ -1134,15 +1074,9 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/core/src/instant.js~instant#minusamount",
-    "class/packages/core/src/Instant.js~Instant.html#instance-method-minusAmount",
-    "packages/core/src/Instant.js~Instant#minusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/instant.js~instant#minusamountunit",
-    "class/packages/core/src/Instant.js~Instant.html#instance-method-minusAmountUnit",
-    "packages/core/src/Instant.js~Instant#minusAmountUnit",
+    "packages/core/src/instant.js~instant#minusmicros",
+    "class/packages/core/src/Instant.js~Instant.html#instance-method-minusMicros",
+    "packages/core/src/Instant.js~Instant#minusMicros",
     "method"
   ],
   [
@@ -1170,15 +1104,9 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/core/src/instant.js~instant#plusamount",
-    "class/packages/core/src/Instant.js~Instant.html#instance-method-plusAmount",
-    "packages/core/src/Instant.js~Instant#plusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/instant.js~instant#plusamountunit",
-    "class/packages/core/src/Instant.js~Instant.html#instance-method-plusAmountUnit",
-    "packages/core/src/Instant.js~Instant#plusAmountUnit",
+    "packages/core/src/instant.js~instant#plusmicros",
+    "class/packages/core/src/Instant.js~Instant.html#instance-method-plusMicros",
+    "packages/core/src/Instant.js~Instant#plusMicros",
     "method"
   ],
   [
@@ -1242,18 +1170,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/core/src/instant.js~instant#withadjuster",
-    "class/packages/core/src/Instant.js~Instant.html#instance-method-withAdjuster",
-    "packages/core/src/Instant.js~Instant#withAdjuster",
-    "method"
-  ],
-  [
-    "packages/core/src/instant.js~instant#withfieldvalue",
-    "class/packages/core/src/Instant.js~Instant.html#instance-method-withFieldValue",
-    "packages/core/src/Instant.js~Instant#withFieldValue",
-    "method"
-  ],
-  [
     "packages/core/src/instant.js~instant.from",
     "class/packages/core/src/Instant.js~Instant.html#static-method-from",
     "packages/core/src/Instant.js~Instant.from",
@@ -1263,6 +1179,12 @@ window.esdocSearchIndex = [
     "packages/core/src/instant.js~instant.now",
     "class/packages/core/src/Instant.js~Instant.html#static-method-now",
     "packages/core/src/Instant.js~Instant.now",
+    "method"
+  ],
+  [
+    "packages/core/src/instant.js~instant.ofepochmicro",
+    "class/packages/core/src/Instant.js~Instant.html#static-method-ofEpochMicro",
+    "packages/core/src/Instant.js~Instant.ofEpochMicro",
     "method"
   ],
   [
@@ -1299,12 +1221,6 @@ window.esdocSearchIndex = [
     "packages/core/src/localdate.js~localdate#atstartofday",
     "class/packages/core/src/LocalDate.js~LocalDate.html#instance-method-atStartOfDay",
     "packages/core/src/LocalDate.js~LocalDate#atStartOfDay",
-    "method"
-  ],
-  [
-    "packages/core/src/localdate.js~localdate#atstartofdaywithzone",
-    "class/packages/core/src/LocalDate.js~LocalDate.html#instance-method-atStartOfDayWithZone",
-    "packages/core/src/LocalDate.js~LocalDate#atStartOfDayWithZone",
     "method"
   ],
   [
@@ -1353,6 +1269,12 @@ window.esdocSearchIndex = [
     "packages/core/src/localdate.js~localdate#dayofyear",
     "class/packages/core/src/LocalDate.js~LocalDate.html#instance-method-dayOfYear",
     "packages/core/src/LocalDate.js~LocalDate#dayOfYear",
+    "method"
+  ],
+  [
+    "packages/core/src/localdate.js~localdate#daysuntil",
+    "class/packages/core/src/LocalDate.js~LocalDate.html#instance-method-daysUntil",
+    "packages/core/src/LocalDate.js~LocalDate#daysUntil",
     "method"
   ],
   [
@@ -1428,18 +1350,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/core/src/localdate.js~localdate#minusamount",
-    "class/packages/core/src/LocalDate.js~LocalDate.html#instance-method-minusAmount",
-    "packages/core/src/LocalDate.js~LocalDate#minusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/localdate.js~localdate#minusamountunit",
-    "class/packages/core/src/LocalDate.js~LocalDate.html#instance-method-minusAmountUnit",
-    "packages/core/src/LocalDate.js~LocalDate#minusAmountUnit",
-    "method"
-  ],
-  [
     "packages/core/src/localdate.js~localdate#minusdays",
     "class/packages/core/src/LocalDate.js~LocalDate.html#instance-method-minusDays",
     "packages/core/src/LocalDate.js~LocalDate#minusDays",
@@ -1473,18 +1383,6 @@ window.esdocSearchIndex = [
     "packages/core/src/localdate.js~localdate#monthvalue",
     "class/packages/core/src/LocalDate.js~LocalDate.html#instance-method-monthValue",
     "packages/core/src/LocalDate.js~LocalDate#monthValue",
-    "method"
-  ],
-  [
-    "packages/core/src/localdate.js~localdate#plusamount",
-    "class/packages/core/src/LocalDate.js~LocalDate.html#instance-method-plusAmount",
-    "packages/core/src/LocalDate.js~LocalDate#plusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/localdate.js~localdate#plusamountunit",
-    "class/packages/core/src/LocalDate.js~LocalDate.html#instance-method-plusAmountUnit",
-    "packages/core/src/LocalDate.js~LocalDate#plusAmountUnit",
     "method"
   ],
   [
@@ -1560,12 +1458,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/core/src/localdate.js~localdate#withadjuster",
-    "class/packages/core/src/LocalDate.js~LocalDate.html#instance-method-withAdjuster",
-    "packages/core/src/LocalDate.js~LocalDate#withAdjuster",
-    "method"
-  ],
-  [
     "packages/core/src/localdate.js~localdate#withdayofmonth",
     "class/packages/core/src/LocalDate.js~LocalDate.html#instance-method-withDayOfMonth",
     "packages/core/src/LocalDate.js~LocalDate#withDayOfMonth",
@@ -1575,12 +1467,6 @@ window.esdocSearchIndex = [
     "packages/core/src/localdate.js~localdate#withdayofyear",
     "class/packages/core/src/LocalDate.js~LocalDate.html#instance-method-withDayOfYear",
     "packages/core/src/LocalDate.js~LocalDate#withDayOfYear",
-    "method"
-  ],
-  [
-    "packages/core/src/localdate.js~localdate#withfieldvalue",
-    "class/packages/core/src/LocalDate.js~LocalDate.html#instance-method-withFieldValue",
-    "packages/core/src/LocalDate.js~LocalDate#withFieldValue",
     "method"
   ],
   [
@@ -1653,6 +1539,12 @@ window.esdocSearchIndex = [
     "packages/core/src/localdatetime.js~localdatetime#adjustinto",
     "class/packages/core/src/LocalDateTime.js~LocalDateTime.html#instance-method-adjustInto",
     "packages/core/src/LocalDateTime.js~LocalDateTime#adjustInto",
+    "method"
+  ],
+  [
+    "packages/core/src/localdatetime.js~localdatetime#atoffset",
+    "class/packages/core/src/LocalDateTime.js~LocalDateTime.html#instance-method-atOffset",
+    "packages/core/src/LocalDateTime.js~LocalDateTime#atOffset",
     "method"
   ],
   [
@@ -1746,18 +1638,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/core/src/localdatetime.js~localdatetime#minusamount",
-    "class/packages/core/src/LocalDateTime.js~LocalDateTime.html#instance-method-minusAmount",
-    "packages/core/src/LocalDateTime.js~LocalDateTime#minusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/localdatetime.js~localdatetime#minusamountunit",
-    "class/packages/core/src/LocalDateTime.js~LocalDateTime.html#instance-method-minusAmountUnit",
-    "packages/core/src/LocalDateTime.js~LocalDateTime#minusAmountUnit",
-    "method"
-  ],
-  [
     "packages/core/src/localdatetime.js~localdatetime#minusdays",
     "class/packages/core/src/LocalDateTime.js~LocalDateTime.html#instance-method-minusDays",
     "packages/core/src/LocalDateTime.js~LocalDateTime#minusDays",
@@ -1827,18 +1707,6 @@ window.esdocSearchIndex = [
     "packages/core/src/localdatetime.js~localdatetime#nano",
     "class/packages/core/src/LocalDateTime.js~LocalDateTime.html#instance-method-nano",
     "packages/core/src/LocalDateTime.js~LocalDateTime#nano",
-    "method"
-  ],
-  [
-    "packages/core/src/localdatetime.js~localdatetime#plusamount",
-    "class/packages/core/src/LocalDateTime.js~LocalDateTime.html#instance-method-plusAmount",
-    "packages/core/src/LocalDateTime.js~LocalDateTime#plusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/localdatetime.js~localdatetime#plusamountunit",
-    "class/packages/core/src/LocalDateTime.js~LocalDateTime.html#instance-method-plusAmountUnit",
-    "packages/core/src/LocalDateTime.js~LocalDateTime#plusAmountUnit",
     "method"
   ],
   [
@@ -1944,12 +1812,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/core/src/localdatetime.js~localdatetime#withadjuster",
-    "class/packages/core/src/LocalDateTime.js~LocalDateTime.html#instance-method-withAdjuster",
-    "packages/core/src/LocalDateTime.js~LocalDateTime#withAdjuster",
-    "method"
-  ],
-  [
     "packages/core/src/localdatetime.js~localdatetime#withdayofmonth",
     "class/packages/core/src/LocalDateTime.js~LocalDateTime.html#instance-method-withDayOfMonth",
     "packages/core/src/LocalDateTime.js~LocalDateTime#withDayOfMonth",
@@ -1959,12 +1821,6 @@ window.esdocSearchIndex = [
     "packages/core/src/localdatetime.js~localdatetime#withdayofyear",
     "class/packages/core/src/LocalDateTime.js~LocalDateTime.html#instance-method-withDayOfYear",
     "packages/core/src/LocalDateTime.js~LocalDateTime#withDayOfYear",
-    "method"
-  ],
-  [
-    "packages/core/src/localdatetime.js~localdatetime#withfieldvalue",
-    "class/packages/core/src/LocalDateTime.js~LocalDateTime.html#instance-method-withFieldValue",
-    "packages/core/src/LocalDateTime.js~LocalDateTime#withFieldValue",
     "method"
   ],
   [
@@ -2076,6 +1932,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "packages/core/src/localtime.js~localtime#atoffset",
+    "class/packages/core/src/LocalTime.js~LocalTime.html#instance-method-atOffset",
+    "packages/core/src/LocalTime.js~LocalTime#atOffset",
+    "method"
+  ],
+  [
     "packages/core/src/localtime.js~localtime#compareto",
     "class/packages/core/src/LocalTime.js~LocalTime.html#instance-method-compareTo",
     "packages/core/src/LocalTime.js~LocalTime#compareTo",
@@ -2136,18 +1998,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/core/src/localtime.js~localtime#minusamount",
-    "class/packages/core/src/LocalTime.js~LocalTime.html#instance-method-minusAmount",
-    "packages/core/src/LocalTime.js~LocalTime#minusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/localtime.js~localtime#minusamountunit",
-    "class/packages/core/src/LocalTime.js~LocalTime.html#instance-method-minusAmountUnit",
-    "packages/core/src/LocalTime.js~LocalTime#minusAmountUnit",
-    "method"
-  ],
-  [
     "packages/core/src/localtime.js~localtime#minushours",
     "class/packages/core/src/LocalTime.js~LocalTime.html#instance-method-minusHours",
     "packages/core/src/LocalTime.js~LocalTime#minusHours",
@@ -2181,18 +2031,6 @@ window.esdocSearchIndex = [
     "packages/core/src/localtime.js~localtime#nano",
     "class/packages/core/src/LocalTime.js~LocalTime.html#instance-method-nano",
     "packages/core/src/LocalTime.js~LocalTime#nano",
-    "method"
-  ],
-  [
-    "packages/core/src/localtime.js~localtime#plusamount",
-    "class/packages/core/src/LocalTime.js~LocalTime.html#instance-method-plusAmount",
-    "packages/core/src/LocalTime.js~LocalTime#plusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/localtime.js~localtime#plusamountunit",
-    "class/packages/core/src/LocalTime.js~LocalTime.html#instance-method-plusAmountUnit",
-    "packages/core/src/LocalTime.js~LocalTime#plusAmountUnit",
     "method"
   ],
   [
@@ -2271,18 +2109,6 @@ window.esdocSearchIndex = [
     "packages/core/src/localtime.js~localtime#until",
     "class/packages/core/src/LocalTime.js~LocalTime.html#instance-method-until",
     "packages/core/src/LocalTime.js~LocalTime#until",
-    "method"
-  ],
-  [
-    "packages/core/src/localtime.js~localtime#withadjuster",
-    "class/packages/core/src/LocalTime.js~LocalTime.html#instance-method-withAdjuster",
-    "packages/core/src/LocalTime.js~LocalTime#withAdjuster",
-    "method"
-  ],
-  [
-    "packages/core/src/localtime.js~localtime#withfieldvalue",
-    "class/packages/core/src/LocalTime.js~LocalTime.html#instance-method-withFieldValue",
-    "packages/core/src/LocalTime.js~LocalTime#withFieldValue",
     "method"
   ],
   [
@@ -2472,6 +2298,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "packages/core/src/month.js~month#displayname",
+    "class/packages/core/src/Month.js~Month.html#instance-method-displayName",
+    "packages/core/src/Month.js~Month#displayName",
+    "method"
+  ],
+  [
     "packages/core/src/month.js~month#equals",
     "class/packages/core/src/Month.js~Month.html#instance-method-equals",
     "packages/core/src/Month.js~Month#equals",
@@ -2493,12 +2325,6 @@ window.esdocSearchIndex = [
     "packages/core/src/month.js~month#get",
     "class/packages/core/src/Month.js~Month.html#instance-method-get",
     "packages/core/src/Month.js~Month#get",
-    "method"
-  ],
-  [
-    "packages/core/src/month.js~month#getdisplayname",
-    "class/packages/core/src/Month.js~Month.html#instance-method-getDisplayName",
-    "packages/core/src/Month.js~Month#getDisplayName",
     "method"
   ],
   [
@@ -2799,6 +2625,714 @@ window.esdocSearchIndex = [
     "packages/core/src/monthday.js~monthday.parsestringformatter",
     "class/packages/core/src/MonthDay.js~MonthDay.html#static-method-parseStringFormatter",
     "packages/core/src/MonthDay.js~MonthDay.parseStringFormatter",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js",
+    "file/packages/core/src/OffsetDateTime.js.html",
+    "packages/core/src/OffsetDateTime.js",
+    "file"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#adjustinto",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-adjustInto",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#adjustInto",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#atzonesameinstant",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-atZoneSameInstant",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#atZoneSameInstant",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#atzonesimilarlocal",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-atZoneSimilarLocal",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#atZoneSimilarLocal",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#compareto",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-compareTo",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#compareTo",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#dayofmonth",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-dayOfMonth",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#dayOfMonth",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#dayofweek",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-dayOfWeek",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#dayOfWeek",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#dayofyear",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-dayOfYear",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#dayOfYear",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#equals",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-equals",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#equals",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#format",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-format",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#format",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#get",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-get",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#get",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#getlong",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-getLong",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#getLong",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#hashcode",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-hashCode",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#hashCode",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#hour",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-hour",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#hour",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#isafter",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-isAfter",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#isAfter",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#isbefore",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-isBefore",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#isBefore",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#isequal",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-isEqual",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#isEqual",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#issupported",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-isSupported",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#isSupported",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#minusdays",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-minusDays",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#minusDays",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#minushours",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-minusHours",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#minusHours",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#minusminutes",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-minusMinutes",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#minusMinutes",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#minusmonths",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-minusMonths",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#minusMonths",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#minusnanos",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-minusNanos",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#minusNanos",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#minusseconds",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-minusSeconds",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#minusSeconds",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#minusweeks",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-minusWeeks",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#minusWeeks",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#minusyears",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-minusYears",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#minusYears",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#minute",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-minute",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#minute",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#month",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-month",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#month",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#monthvalue",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-monthValue",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#monthValue",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#nano",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-nano",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#nano",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#offset",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-offset",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#offset",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#plusdays",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-plusDays",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#plusDays",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#plushours",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-plusHours",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#plusHours",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#plusminutes",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-plusMinutes",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#plusMinutes",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#plusmonths",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-plusMonths",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#plusMonths",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#plusnanos",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-plusNanos",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#plusNanos",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#plusseconds",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-plusSeconds",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#plusSeconds",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#plusweeks",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-plusWeeks",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#plusWeeks",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#plusyears",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-plusYears",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#plusYears",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#query",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-query",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#query",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#range",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-range",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#range",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#second",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-second",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#second",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#toepochsecond",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-toEpochSecond",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#toEpochSecond",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#toinstant",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-toInstant",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#toInstant",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#tojson",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-toJSON",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#toJSON",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#tolocaldate",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-toLocalDate",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#toLocalDate",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#tolocaldatetime",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-toLocalDateTime",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#toLocalDateTime",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#tolocaltime",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-toLocalTime",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#toLocalTime",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#tooffsettime",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-toOffsetTime",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#toOffsetTime",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#tostring",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-toString",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#toString",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#tozoneddatetime",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-toZonedDateTime",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#toZonedDateTime",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#truncatedto",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-truncatedTo",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#truncatedTo",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#until",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-until",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#until",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#withdayofmonth",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-withDayOfMonth",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#withDayOfMonth",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#withdayofyear",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-withDayOfYear",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#withDayOfYear",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#withhour",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-withHour",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#withHour",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#withminute",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-withMinute",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#withMinute",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#withmonth",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-withMonth",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#withMonth",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#withnano",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-withNano",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#withNano",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#withoffsetsameinstant",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-withOffsetSameInstant",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#withOffsetSameInstant",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#withoffsetsamelocal",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-withOffsetSameLocal",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#withOffsetSameLocal",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#withsecond",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-withSecond",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#withSecond",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#withyear",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-withYear",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#withYear",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime#year",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#instance-method-year",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime#year",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime.from",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#static-method-from",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime.from",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime.now",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#static-method-now",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime.now",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime.of",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#static-method-of",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime.of",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime.ofdateandtime",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#static-method-ofDateAndTime",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime.ofDateAndTime",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime.ofdatetime",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#static-method-ofDateTime",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime.ofDateTime",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime.ofinstant",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#static-method-ofInstant",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime.ofInstant",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime.ofnumbers",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#static-method-ofNumbers",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime.ofNumbers",
+    "method"
+  ],
+  [
+    "packages/core/src/offsetdatetime.js~offsetdatetime.parse",
+    "class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html#static-method-parse",
+    "packages/core/src/OffsetDateTime.js~OffsetDateTime.parse",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js",
+    "file/packages/core/src/OffsetTime.js.html",
+    "packages/core/src/OffsetTime.js",
+    "file"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#adjustinto",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-adjustInto",
+    "packages/core/src/OffsetTime.js~OffsetTime#adjustInto",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#atdate",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-atDate",
+    "packages/core/src/OffsetTime.js~OffsetTime#atDate",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#compareto",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-compareTo",
+    "packages/core/src/OffsetTime.js~OffsetTime#compareTo",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#equals",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-equals",
+    "packages/core/src/OffsetTime.js~OffsetTime#equals",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#format",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-format",
+    "packages/core/src/OffsetTime.js~OffsetTime#format",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#get",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-get",
+    "packages/core/src/OffsetTime.js~OffsetTime#get",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#getlong",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-getLong",
+    "packages/core/src/OffsetTime.js~OffsetTime#getLong",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#hashcode",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-hashCode",
+    "packages/core/src/OffsetTime.js~OffsetTime#hashCode",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#hour",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-hour",
+    "packages/core/src/OffsetTime.js~OffsetTime#hour",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#isafter",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-isAfter",
+    "packages/core/src/OffsetTime.js~OffsetTime#isAfter",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#isbefore",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-isBefore",
+    "packages/core/src/OffsetTime.js~OffsetTime#isBefore",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#isequal",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-isEqual",
+    "packages/core/src/OffsetTime.js~OffsetTime#isEqual",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#issupported",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-isSupported",
+    "packages/core/src/OffsetTime.js~OffsetTime#isSupported",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#minushours",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-minusHours",
+    "packages/core/src/OffsetTime.js~OffsetTime#minusHours",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#minusminutes",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-minusMinutes",
+    "packages/core/src/OffsetTime.js~OffsetTime#minusMinutes",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#minusnanos",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-minusNanos",
+    "packages/core/src/OffsetTime.js~OffsetTime#minusNanos",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#minusseconds",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-minusSeconds",
+    "packages/core/src/OffsetTime.js~OffsetTime#minusSeconds",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#minute",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-minute",
+    "packages/core/src/OffsetTime.js~OffsetTime#minute",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#nano",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-nano",
+    "packages/core/src/OffsetTime.js~OffsetTime#nano",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#offset",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-offset",
+    "packages/core/src/OffsetTime.js~OffsetTime#offset",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#plushours",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-plusHours",
+    "packages/core/src/OffsetTime.js~OffsetTime#plusHours",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#plusminutes",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-plusMinutes",
+    "packages/core/src/OffsetTime.js~OffsetTime#plusMinutes",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#plusnanos",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-plusNanos",
+    "packages/core/src/OffsetTime.js~OffsetTime#plusNanos",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#plusseconds",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-plusSeconds",
+    "packages/core/src/OffsetTime.js~OffsetTime#plusSeconds",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#query",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-query",
+    "packages/core/src/OffsetTime.js~OffsetTime#query",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#range",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-range",
+    "packages/core/src/OffsetTime.js~OffsetTime#range",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#second",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-second",
+    "packages/core/src/OffsetTime.js~OffsetTime#second",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#tojson",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-toJSON",
+    "packages/core/src/OffsetTime.js~OffsetTime#toJSON",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#tolocaltime",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-toLocalTime",
+    "packages/core/src/OffsetTime.js~OffsetTime#toLocalTime",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#tostring",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-toString",
+    "packages/core/src/OffsetTime.js~OffsetTime#toString",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#truncatedto",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-truncatedTo",
+    "packages/core/src/OffsetTime.js~OffsetTime#truncatedTo",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#until",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-until",
+    "packages/core/src/OffsetTime.js~OffsetTime#until",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#withhour",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-withHour",
+    "packages/core/src/OffsetTime.js~OffsetTime#withHour",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#withminute",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-withMinute",
+    "packages/core/src/OffsetTime.js~OffsetTime#withMinute",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#withnano",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-withNano",
+    "packages/core/src/OffsetTime.js~OffsetTime#withNano",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#withoffsetsameinstant",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-withOffsetSameInstant",
+    "packages/core/src/OffsetTime.js~OffsetTime#withOffsetSameInstant",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#withoffsetsamelocal",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-withOffsetSameLocal",
+    "packages/core/src/OffsetTime.js~OffsetTime#withOffsetSameLocal",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime#withsecond",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#instance-method-withSecond",
+    "packages/core/src/OffsetTime.js~OffsetTime#withSecond",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime.from",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#static-method-from",
+    "packages/core/src/OffsetTime.js~OffsetTime.from",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime.now",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#static-method-now",
+    "packages/core/src/OffsetTime.js~OffsetTime.now",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime.of",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#static-method-of",
+    "packages/core/src/OffsetTime.js~OffsetTime.of",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime.ofinstant",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#static-method-ofInstant",
+    "packages/core/src/OffsetTime.js~OffsetTime.ofInstant",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime.ofnumbers",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#static-method-ofNumbers",
+    "packages/core/src/OffsetTime.js~OffsetTime.ofNumbers",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime.oftimeandoffset",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#static-method-ofTimeAndOffset",
+    "packages/core/src/OffsetTime.js~OffsetTime.ofTimeAndOffset",
+    "method"
+  ],
+  [
+    "packages/core/src/offsettime.js~offsettime.parse",
+    "class/packages/core/src/OffsetTime.js~OffsetTime.html#static-method-parse",
+    "packages/core/src/OffsetTime.js~OffsetTime.parse",
     "method"
   ],
   [
@@ -3162,33 +3696,9 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/core/src/year.js~year#minusamount",
-    "class/packages/core/src/Year.js~Year.html#instance-method-minusAmount",
-    "packages/core/src/Year.js~Year#minusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/year.js~year#minusamountunit",
-    "class/packages/core/src/Year.js~Year.html#instance-method-minusAmountUnit",
-    "packages/core/src/Year.js~Year#minusAmountUnit",
-    "method"
-  ],
-  [
     "packages/core/src/year.js~year#minusyears",
     "class/packages/core/src/Year.js~Year.html#instance-method-minusYears",
     "packages/core/src/Year.js~Year#minusYears",
-    "method"
-  ],
-  [
-    "packages/core/src/year.js~year#plusamount",
-    "class/packages/core/src/Year.js~Year.html#instance-method-plusAmount",
-    "packages/core/src/Year.js~Year#plusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/year.js~year#plusamountunit",
-    "class/packages/core/src/Year.js~Year.html#instance-method-plusAmountUnit",
-    "packages/core/src/Year.js~Year#plusAmountUnit",
     "method"
   ],
   [
@@ -3231,18 +3741,6 @@ window.esdocSearchIndex = [
     "packages/core/src/year.js~year#value",
     "class/packages/core/src/Year.js~Year.html#instance-method-value",
     "packages/core/src/Year.js~Year#value",
-    "method"
-  ],
-  [
-    "packages/core/src/year.js~year#withadjuster",
-    "class/packages/core/src/Year.js~Year.html#instance-method-withAdjuster",
-    "packages/core/src/Year.js~Year#withAdjuster",
-    "method"
-  ],
-  [
-    "packages/core/src/year.js~year#withfieldvalue",
-    "class/packages/core/src/Year.js~Year.html#instance-method-withFieldValue",
-    "packages/core/src/Year.js~Year#withFieldValue",
     "method"
   ],
   [
@@ -3420,18 +3918,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/core/src/yearmonth.js~yearmonth#minusamount",
-    "class/packages/core/src/YearMonth.js~YearMonth.html#instance-method-minusAmount",
-    "packages/core/src/YearMonth.js~YearMonth#minusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/yearmonth.js~yearmonth#minusamountunit",
-    "class/packages/core/src/YearMonth.js~YearMonth.html#instance-method-minusAmountUnit",
-    "packages/core/src/YearMonth.js~YearMonth#minusAmountUnit",
-    "method"
-  ],
-  [
     "packages/core/src/yearmonth.js~yearmonth#minusmonths",
     "class/packages/core/src/YearMonth.js~YearMonth.html#instance-method-minusMonths",
     "packages/core/src/YearMonth.js~YearMonth#minusMonths",
@@ -3453,18 +3939,6 @@ window.esdocSearchIndex = [
     "packages/core/src/yearmonth.js~yearmonth#monthvalue",
     "class/packages/core/src/YearMonth.js~YearMonth.html#instance-method-monthValue",
     "packages/core/src/YearMonth.js~YearMonth#monthValue",
-    "method"
-  ],
-  [
-    "packages/core/src/yearmonth.js~yearmonth#plusamount",
-    "class/packages/core/src/YearMonth.js~YearMonth.html#instance-method-plusAmount",
-    "packages/core/src/YearMonth.js~YearMonth#plusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/yearmonth.js~yearmonth#plusamountunit",
-    "class/packages/core/src/YearMonth.js~YearMonth.html#instance-method-plusAmountUnit",
-    "packages/core/src/YearMonth.js~YearMonth#plusAmountUnit",
     "method"
   ],
   [
@@ -3516,18 +3990,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/core/src/yearmonth.js~yearmonth#withadjuster",
-    "class/packages/core/src/YearMonth.js~YearMonth.html#instance-method-withAdjuster",
-    "packages/core/src/YearMonth.js~YearMonth#withAdjuster",
-    "method"
-  ],
-  [
-    "packages/core/src/yearmonth.js~yearmonth#withfieldvalue",
-    "class/packages/core/src/YearMonth.js~YearMonth.html#instance-method-withFieldValue",
-    "packages/core/src/YearMonth.js~YearMonth#withFieldValue",
-    "method"
-  ],
-  [
     "packages/core/src/yearmonth.js~yearmonth#withmonth",
     "class/packages/core/src/YearMonth.js~YearMonth.html#instance-method-withMonth",
     "packages/core/src/YearMonth.js~YearMonth#withMonth",
@@ -3537,12 +3999,6 @@ window.esdocSearchIndex = [
     "packages/core/src/yearmonth.js~yearmonth#withyear",
     "class/packages/core/src/YearMonth.js~YearMonth.html#instance-method-withYear",
     "packages/core/src/YearMonth.js~YearMonth#withYear",
-    "method"
-  ],
-  [
-    "packages/core/src/yearmonth.js~yearmonth#withyearmonth",
-    "class/packages/core/src/YearMonth.js~YearMonth.html#instance-method-withYearMonth",
-    "packages/core/src/YearMonth.js~YearMonth#withYearMonth",
     "method"
   ],
   [
@@ -3900,18 +4356,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/core/src/zoneddatetime.js~zoneddatetime#minusamount",
-    "class/packages/core/src/ZonedDateTime.js~ZonedDateTime.html#instance-method-minusAmount",
-    "packages/core/src/ZonedDateTime.js~ZonedDateTime#minusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/zoneddatetime.js~zoneddatetime#minusamountunit",
-    "class/packages/core/src/ZonedDateTime.js~ZonedDateTime.html#instance-method-minusAmountUnit",
-    "packages/core/src/ZonedDateTime.js~ZonedDateTime#minusAmountUnit",
-    "method"
-  ],
-  [
     "packages/core/src/zoneddatetime.js~zoneddatetime#minusdays",
     "class/packages/core/src/ZonedDateTime.js~ZonedDateTime.html#instance-method-minusDays",
     "packages/core/src/ZonedDateTime.js~ZonedDateTime#minusDays",
@@ -3987,18 +4431,6 @@ window.esdocSearchIndex = [
     "packages/core/src/zoneddatetime.js~zoneddatetime#offset",
     "class/packages/core/src/ZonedDateTime.js~ZonedDateTime.html#instance-method-offset",
     "packages/core/src/ZonedDateTime.js~ZonedDateTime#offset",
-    "method"
-  ],
-  [
-    "packages/core/src/zoneddatetime.js~zoneddatetime#plusamount",
-    "class/packages/core/src/ZonedDateTime.js~ZonedDateTime.html#instance-method-plusAmount",
-    "packages/core/src/ZonedDateTime.js~ZonedDateTime#plusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/zoneddatetime.js~zoneddatetime#plusamountunit",
-    "class/packages/core/src/ZonedDateTime.js~ZonedDateTime.html#instance-method-plusAmountUnit",
-    "packages/core/src/ZonedDateTime.js~ZonedDateTime#plusAmountUnit",
     "method"
   ],
   [
@@ -4092,6 +4524,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "packages/core/src/zoneddatetime.js~zoneddatetime#tooffsetdatetime",
+    "class/packages/core/src/ZonedDateTime.js~ZonedDateTime.html#instance-method-toOffsetDateTime",
+    "packages/core/src/ZonedDateTime.js~ZonedDateTime#toOffsetDateTime",
+    "method"
+  ],
+  [
     "packages/core/src/zoneddatetime.js~zoneddatetime#tostring",
     "class/packages/core/src/ZonedDateTime.js~ZonedDateTime.html#instance-method-toString",
     "packages/core/src/ZonedDateTime.js~ZonedDateTime#toString",
@@ -4110,12 +4548,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/core/src/zoneddatetime.js~zoneddatetime#withadjuster",
-    "class/packages/core/src/ZonedDateTime.js~ZonedDateTime.html#instance-method-withAdjuster",
-    "packages/core/src/ZonedDateTime.js~ZonedDateTime#withAdjuster",
-    "method"
-  ],
-  [
     "packages/core/src/zoneddatetime.js~zoneddatetime#withdayofmonth",
     "class/packages/core/src/ZonedDateTime.js~ZonedDateTime.html#instance-method-withDayOfMonth",
     "packages/core/src/ZonedDateTime.js~ZonedDateTime#withDayOfMonth",
@@ -4131,12 +4563,6 @@ window.esdocSearchIndex = [
     "packages/core/src/zoneddatetime.js~zoneddatetime#withearlieroffsetatoverlap",
     "class/packages/core/src/ZonedDateTime.js~ZonedDateTime.html#instance-method-withEarlierOffsetAtOverlap",
     "packages/core/src/ZonedDateTime.js~ZonedDateTime#withEarlierOffsetAtOverlap",
-    "method"
-  ],
-  [
-    "packages/core/src/zoneddatetime.js~zoneddatetime#withfieldvalue",
-    "class/packages/core/src/ZonedDateTime.js~ZonedDateTime.html#instance-method-withFieldValue",
-    "packages/core/src/ZonedDateTime.js~ZonedDateTime#withFieldValue",
     "method"
   ],
   [
@@ -4692,6 +5118,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "packages/core/src/format/datetimeformatterbuilder.js~datetimeformatterbuilder#parsedefaulting",
+    "class/packages/core/src/format/DateTimeFormatterBuilder.js~DateTimeFormatterBuilder.html#instance-method-parseDefaulting",
+    "packages/core/src/format/DateTimeFormatterBuilder.js~DateTimeFormatterBuilder#parseDefaulting",
+    "method"
+  ],
+  [
     "packages/core/src/format/datetimeformatterbuilder.js~datetimeformatterbuilder#parselenient",
     "class/packages/core/src/format/DateTimeFormatterBuilder.js~DateTimeFormatterBuilder.html#instance-method-parseLenient",
     "packages/core/src/format/DateTimeFormatterBuilder.js~DateTimeFormatterBuilder#parseLenient",
@@ -4938,9 +5370,9 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "packages/core/src/license-preamble.js",
-    "file/packages/core/src/license-preamble.js.html",
-    "packages/core/src/license-preamble.js",
+    "packages/core/src/nativejs.js",
+    "file/packages/core/src/nativeJs.js.html",
+    "packages/core/src/nativeJs.js",
     "file"
   ],
   [
@@ -4948,6 +5380,12 @@ window.esdocSearchIndex = [
     "file/packages/core/src/temporal/ChronoField.js.html",
     "packages/core/src/temporal/ChronoField.js",
     "file"
+  ],
+  [
+    "packages/core/src/temporal/chronofield.js~chronofield#adjustinto",
+    "class/packages/core/src/temporal/ChronoField.js~ChronoField.html#instance-method-adjustInto",
+    "packages/core/src/temporal/ChronoField.js~ChronoField#adjustInto",
+    "method"
   ],
   [
     "packages/core/src/temporal/chronofield.js~chronofield#baseunit",
@@ -4992,6 +5430,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "packages/core/src/temporal/chronofield.js~chronofield#issupportedby",
+    "class/packages/core/src/temporal/ChronoField.js~ChronoField.html#instance-method-isSupportedBy",
+    "packages/core/src/temporal/ChronoField.js~ChronoField#isSupportedBy",
+    "method"
+  ],
+  [
     "packages/core/src/temporal/chronofield.js~chronofield#istimebased",
     "class/packages/core/src/temporal/ChronoField.js~ChronoField.html#instance-method-isTimeBased",
     "packages/core/src/temporal/ChronoField.js~ChronoField#isTimeBased",
@@ -5025,12 +5469,6 @@ window.esdocSearchIndex = [
     "packages/core/src/temporal/chronofield.js~chronofield#tostring",
     "class/packages/core/src/temporal/ChronoField.js~ChronoField.html#instance-method-toString",
     "packages/core/src/temporal/ChronoField.js~ChronoField#toString",
-    "method"
-  ],
-  [
-    "packages/core/src/temporal/chronofield.js~chronofield.byname",
-    "class/packages/core/src/temporal/ChronoField.js~ChronoField.html#static-method-byName",
-    "packages/core/src/temporal/ChronoField.js~ChronoField.byName",
     "method"
   ],
   [
@@ -5094,46 +5532,16 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/core/src/temporal/defaultinterfacetemporal.js",
-    "file/packages/core/src/temporal/DefaultInterfaceTemporal.js.html",
-    "packages/core/src/temporal/DefaultInterfaceTemporal.js",
-    "file"
-  ],
-  [
-    "packages/core/src/temporal/defaultinterfacetemporal.js~defaultinterfacetemporal#minusamount",
-    "class/packages/core/src/temporal/DefaultInterfaceTemporal.js~DefaultInterfaceTemporal.html#instance-method-minusAmount",
-    "packages/core/src/temporal/DefaultInterfaceTemporal.js~DefaultInterfaceTemporal#minusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/temporal/defaultinterfacetemporal.js~defaultinterfacetemporal#minusamountunit",
-    "class/packages/core/src/temporal/DefaultInterfaceTemporal.js~DefaultInterfaceTemporal.html#instance-method-minusAmountUnit",
-    "packages/core/src/temporal/DefaultInterfaceTemporal.js~DefaultInterfaceTemporal#minusAmountUnit",
-    "method"
-  ],
-  [
-    "packages/core/src/temporal/defaultinterfacetemporal.js~defaultinterfacetemporal#plusamount",
-    "class/packages/core/src/temporal/DefaultInterfaceTemporal.js~DefaultInterfaceTemporal.html#instance-method-plusAmount",
-    "packages/core/src/temporal/DefaultInterfaceTemporal.js~DefaultInterfaceTemporal#plusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/temporal/defaultinterfacetemporal.js~defaultinterfacetemporal#withadjuster",
-    "class/packages/core/src/temporal/DefaultInterfaceTemporal.js~DefaultInterfaceTemporal.html#instance-method-withAdjuster",
-    "packages/core/src/temporal/DefaultInterfaceTemporal.js~DefaultInterfaceTemporal#withAdjuster",
-    "method"
-  ],
-  [
     "packages/core/src/temporal/isofields.js",
     "file/packages/core/src/temporal/IsoFields.js.html",
     "packages/core/src/temporal/IsoFields.js",
     "file"
   ],
   [
-    "packages/core/src/temporal/nativejstemporal.js",
-    "file/packages/core/src/temporal/NativeJsTemporal.js.html",
-    "packages/core/src/temporal/NativeJsTemporal.js",
-    "file"
+    "packages/core/src/temporal/isofields.js~isofields",
+    "typedef/index.html#static-typedef-IsoFields",
+    "packages/core/src/temporal/IsoFields.js~IsoFields",
+    "typedef"
   ],
   [
     "packages/core/src/temporal/temporal.js",
@@ -5154,33 +5562,9 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/core/src/temporal/temporal.js~temporal#minusamount",
-    "class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-minusAmount",
-    "packages/core/src/temporal/Temporal.js~Temporal#minusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/temporal/temporal.js~temporal#minusamountunit",
-    "class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-minusAmountUnit",
-    "packages/core/src/temporal/Temporal.js~Temporal#minusAmountUnit",
-    "method"
-  ],
-  [
     "packages/core/src/temporal/temporal.js~temporal#plus",
     "class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-plus",
     "packages/core/src/temporal/Temporal.js~Temporal#plus",
-    "method"
-  ],
-  [
-    "packages/core/src/temporal/temporal.js~temporal#plusamount",
-    "class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-plusAmount",
-    "packages/core/src/temporal/Temporal.js~Temporal#plusAmount",
-    "method"
-  ],
-  [
-    "packages/core/src/temporal/temporal.js~temporal#plusamountunit",
-    "class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-plusAmountUnit",
-    "packages/core/src/temporal/Temporal.js~Temporal#plusAmountUnit",
     "method"
   ],
   [
@@ -5196,18 +5580,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/core/src/temporal/temporal.js~temporal#withadjuster",
-    "class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-withAdjuster",
-    "packages/core/src/temporal/Temporal.js~Temporal#withAdjuster",
-    "method"
-  ],
-  [
-    "packages/core/src/temporal/temporal.js~temporal#withfieldvalue",
-    "class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-withFieldValue",
-    "packages/core/src/temporal/Temporal.js~Temporal#withFieldValue",
-    "method"
-  ],
-  [
     "packages/core/src/temporal/temporalaccessor.js",
     "file/packages/core/src/temporal/TemporalAccessor.js.html",
     "packages/core/src/temporal/TemporalAccessor.js",
@@ -5217,6 +5589,18 @@ window.esdocSearchIndex = [
     "packages/core/src/temporal/temporalaccessor.js~temporalaccessor#get",
     "class/packages/core/src/temporal/TemporalAccessor.js~TemporalAccessor.html#instance-method-get",
     "packages/core/src/temporal/TemporalAccessor.js~TemporalAccessor#get",
+    "method"
+  ],
+  [
+    "packages/core/src/temporal/temporalaccessor.js~temporalaccessor#getlong",
+    "class/packages/core/src/temporal/TemporalAccessor.js~TemporalAccessor.html#instance-method-getLong",
+    "packages/core/src/temporal/TemporalAccessor.js~TemporalAccessor#getLong",
+    "method"
+  ],
+  [
+    "packages/core/src/temporal/temporalaccessor.js~temporalaccessor#issupported",
+    "class/packages/core/src/temporal/TemporalAccessor.js~TemporalAccessor.html#instance-method-isSupported",
+    "packages/core/src/temporal/TemporalAccessor.js~TemporalAccessor#isSupported",
     "method"
   ],
   [
@@ -5362,6 +5746,78 @@ window.esdocSearchIndex = [
     "file/packages/core/src/temporal/TemporalField.js.html",
     "packages/core/src/temporal/TemporalField.js",
     "file"
+  ],
+  [
+    "packages/core/src/temporal/temporalfield.js~temporalfield#adjustinto",
+    "class/packages/core/src/temporal/TemporalField.js~TemporalField.html#instance-method-adjustInto",
+    "packages/core/src/temporal/TemporalField.js~TemporalField#adjustInto",
+    "method"
+  ],
+  [
+    "packages/core/src/temporal/temporalfield.js~temporalfield#baseunit",
+    "class/packages/core/src/temporal/TemporalField.js~TemporalField.html#instance-method-baseUnit",
+    "packages/core/src/temporal/TemporalField.js~TemporalField#baseUnit",
+    "method"
+  ],
+  [
+    "packages/core/src/temporal/temporalfield.js~temporalfield#displayname",
+    "class/packages/core/src/temporal/TemporalField.js~TemporalField.html#instance-method-displayName",
+    "packages/core/src/temporal/TemporalField.js~TemporalField#displayName",
+    "method"
+  ],
+  [
+    "packages/core/src/temporal/temporalfield.js~temporalfield#equals",
+    "class/packages/core/src/temporal/TemporalField.js~TemporalField.html#instance-method-equals",
+    "packages/core/src/temporal/TemporalField.js~TemporalField#equals",
+    "method"
+  ],
+  [
+    "packages/core/src/temporal/temporalfield.js~temporalfield#getfrom",
+    "class/packages/core/src/temporal/TemporalField.js~TemporalField.html#instance-method-getFrom",
+    "packages/core/src/temporal/TemporalField.js~TemporalField#getFrom",
+    "method"
+  ],
+  [
+    "packages/core/src/temporal/temporalfield.js~temporalfield#isdatebased",
+    "class/packages/core/src/temporal/TemporalField.js~TemporalField.html#instance-method-isDateBased",
+    "packages/core/src/temporal/TemporalField.js~TemporalField#isDateBased",
+    "method"
+  ],
+  [
+    "packages/core/src/temporal/temporalfield.js~temporalfield#issupportedby",
+    "class/packages/core/src/temporal/TemporalField.js~TemporalField.html#instance-method-isSupportedBy",
+    "packages/core/src/temporal/TemporalField.js~TemporalField#isSupportedBy",
+    "method"
+  ],
+  [
+    "packages/core/src/temporal/temporalfield.js~temporalfield#istimebased",
+    "class/packages/core/src/temporal/TemporalField.js~TemporalField.html#instance-method-isTimeBased",
+    "packages/core/src/temporal/TemporalField.js~TemporalField#isTimeBased",
+    "method"
+  ],
+  [
+    "packages/core/src/temporal/temporalfield.js~temporalfield#name",
+    "class/packages/core/src/temporal/TemporalField.js~TemporalField.html#instance-method-name",
+    "packages/core/src/temporal/TemporalField.js~TemporalField#name",
+    "method"
+  ],
+  [
+    "packages/core/src/temporal/temporalfield.js~temporalfield#range",
+    "class/packages/core/src/temporal/TemporalField.js~TemporalField.html#instance-method-range",
+    "packages/core/src/temporal/TemporalField.js~TemporalField#range",
+    "method"
+  ],
+  [
+    "packages/core/src/temporal/temporalfield.js~temporalfield#rangerefinedby",
+    "class/packages/core/src/temporal/TemporalField.js~TemporalField.html#instance-method-rangeRefinedBy",
+    "packages/core/src/temporal/TemporalField.js~TemporalField#rangeRefinedBy",
+    "method"
+  ],
+  [
+    "packages/core/src/temporal/temporalfield.js~temporalfield#rangeunit",
+    "class/packages/core/src/temporal/TemporalField.js~TemporalField.html#instance-method-rangeUnit",
+    "packages/core/src/temporal/TemporalField.js~TemporalField#rangeUnit",
+    "method"
   ],
   [
     "packages/core/src/temporal/temporalqueries.js",
@@ -5946,6 +6402,252 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "packages/extra/src/dayofmonth.js",
+    "file/packages/extra/src/DayOfMonth.js.html",
+    "packages/extra/src/DayOfMonth.js",
+    "file"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth#adjustinto",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#instance-method-adjustInto",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth#adjustInto",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth#atmonth",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#instance-method-atMonth",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth#atMonth",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth#atyearmonth",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#instance-method-atYearMonth",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth#atYearMonth",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth#compareto",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#instance-method-compareTo",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth#compareTo",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth#equals",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#instance-method-equals",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth#equals",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth#get",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#instance-method-get",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth#get",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth#getlong",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#instance-method-getLong",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth#getLong",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth#hashcode",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#instance-method-hashCode",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth#hashCode",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth#issupported",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#instance-method-isSupported",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth#isSupported",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth#isvalidyearmonth",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#instance-method-isValidYearMonth",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth#isValidYearMonth",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth#query",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#instance-method-query",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth#query",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth#range",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#instance-method-range",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth#range",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth#tostring",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#instance-method-toString",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth#toString",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth#value",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#instance-method-value",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth#value",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth._now0",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#static-method-_now0",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth._now0",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth._nowclock",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#static-method-_nowClock",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth._nowClock",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth._nowzoneid",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#static-method-_nowZoneId",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth._nowZoneId",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth.from",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#static-method-from",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth.from",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth.now",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#static-method-now",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth.now",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofmonth.js~dayofmonth.of",
+    "class/packages/extra/src/DayOfMonth.js~DayOfMonth.html#static-method-of",
+    "packages/extra/src/DayOfMonth.js~DayOfMonth.of",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js",
+    "file/packages/extra/src/DayOfYear.js.html",
+    "packages/extra/src/DayOfYear.js",
+    "file"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear#adjustinto",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#instance-method-adjustInto",
+    "packages/extra/src/DayOfYear.js~DayOfYear#adjustInto",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear#atyear",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#instance-method-atYear",
+    "packages/extra/src/DayOfYear.js~DayOfYear#atYear",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear#compareto",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#instance-method-compareTo",
+    "packages/extra/src/DayOfYear.js~DayOfYear#compareTo",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear#equals",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#instance-method-equals",
+    "packages/extra/src/DayOfYear.js~DayOfYear#equals",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear#get",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#instance-method-get",
+    "packages/extra/src/DayOfYear.js~DayOfYear#get",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear#getlong",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#instance-method-getLong",
+    "packages/extra/src/DayOfYear.js~DayOfYear#getLong",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear#hashcode",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#instance-method-hashCode",
+    "packages/extra/src/DayOfYear.js~DayOfYear#hashCode",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear#issupported",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#instance-method-isSupported",
+    "packages/extra/src/DayOfYear.js~DayOfYear#isSupported",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear#isvalidyear",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#instance-method-isValidYear",
+    "packages/extra/src/DayOfYear.js~DayOfYear#isValidYear",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear#query",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#instance-method-query",
+    "packages/extra/src/DayOfYear.js~DayOfYear#query",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear#range",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#instance-method-range",
+    "packages/extra/src/DayOfYear.js~DayOfYear#range",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear#tostring",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#instance-method-toString",
+    "packages/extra/src/DayOfYear.js~DayOfYear#toString",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear#value",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#instance-method-value",
+    "packages/extra/src/DayOfYear.js~DayOfYear#value",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear._now0",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#static-method-_now0",
+    "packages/extra/src/DayOfYear.js~DayOfYear._now0",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear._nowclock",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#static-method-_nowClock",
+    "packages/extra/src/DayOfYear.js~DayOfYear._nowClock",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear._nowzoneid",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#static-method-_nowZoneId",
+    "packages/extra/src/DayOfYear.js~DayOfYear._nowZoneId",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear.from",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#static-method-from",
+    "packages/extra/src/DayOfYear.js~DayOfYear.from",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear.now",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#static-method-now",
+    "packages/extra/src/DayOfYear.js~DayOfYear.now",
+    "method"
+  ],
+  [
+    "packages/extra/src/dayofyear.js~dayofyear.of",
+    "class/packages/extra/src/DayOfYear.js~DayOfYear.html#static-method-of",
+    "packages/extra/src/DayOfYear.js~DayOfYear.of",
+    "method"
+  ],
+  [
     "packages/extra/src/interval.js",
     "file/packages/extra/src/Interval.js.html",
     "packages/extra/src/Interval.js",
@@ -5955,12 +6657,6 @@ window.esdocSearchIndex = [
     "packages/extra/src/interval.js~interval#abuts",
     "class/packages/extra/src/Interval.js~Interval.html#instance-method-abuts",
     "packages/extra/src/Interval.js~Interval#abuts",
-    "method"
-  ],
-  [
-    "packages/extra/src/interval.js~interval#constructor",
-    "class/packages/extra/src/Interval.js~Interval.html#instance-constructor-constructor",
-    "packages/extra/src/Interval.js~Interval#constructor",
     "method"
   ],
   [
@@ -6132,6 +6828,1194 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "packages/extra/src/localdaterange.js",
+    "file/packages/extra/src/LocalDateRange.js.html",
+    "packages/extra/src/LocalDateRange.js",
+    "file"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#_isafterlocaldate",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-_isAfterLocalDate",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#_isAfterLocalDate",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#_isafterlocaldaterange",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-_isAfterLocalDateRange",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#_isAfterLocalDateRange",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#_isbeforelocaldate",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-_isBeforeLocalDate",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#_isBeforeLocalDate",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#_isbeforelocaldaterange",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-_isBeforeLocalDateRange",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#_isBeforeLocalDateRange",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#abuts",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-abuts",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#abuts",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#contains",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-contains",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#contains",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#encloses",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-encloses",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#encloses",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#end",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-end",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#end",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#endinclusive",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-endInclusive",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#endInclusive",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#equals",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-equals",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#equals",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#hashcode",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-hashCode",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#hashCode",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#intersection",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-intersection",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#intersection",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#isafter",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-isAfter",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#isAfter",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#isbefore",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-isBefore",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#isBefore",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#isconnected",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-isConnected",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#isConnected",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#isempty",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-isEmpty",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#isEmpty",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#isunboundedend",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-isUnboundedEnd",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#isUnboundedEnd",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#isunboundedstart",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-isUnboundedStart",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#isUnboundedStart",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#lengthindays",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-lengthInDays",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#lengthInDays",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#overlaps",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-overlaps",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#overlaps",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#span",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-span",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#span",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#start",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-start",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#start",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#toperiod",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-toPeriod",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#toPeriod",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#tostring",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-toString",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#toString",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#union",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-union",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#union",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#withend",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-withEnd",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#withEnd",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange#withstart",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#instance-method-withStart",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange#withStart",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange._oflocaldatelocaldate",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#static-method-_ofLocalDateLocalDate",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange._ofLocalDateLocalDate",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange._oflocaldateperiod",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#static-method-_ofLocalDatePeriod",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange._ofLocalDatePeriod",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange.of",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#static-method-of",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange.of",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange.ofclosed",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#static-method-ofClosed",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange.ofClosed",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange.ofempty",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#static-method-ofEmpty",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange.ofEmpty",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange.ofunbounded",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#static-method-ofUnbounded",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange.ofUnbounded",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange.ofunboundedend",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#static-method-ofUnboundedEnd",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange.ofUnboundedEnd",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange.ofunboundedstart",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#static-method-ofUnboundedStart",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange.ofUnboundedStart",
+    "method"
+  ],
+  [
+    "packages/extra/src/localdaterange.js~localdaterange.parse",
+    "class/packages/extra/src/LocalDateRange.js~LocalDateRange.html#static-method-parse",
+    "packages/extra/src/LocalDateRange.js~LocalDateRange.parse",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js",
+    "file/packages/extra/src/OffsetDate.js.html",
+    "packages/extra/src/OffsetDate.js",
+    "file"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#_issupportedfield",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-_isSupportedField",
+    "packages/extra/src/OffsetDate.js~OffsetDate#_isSupportedField",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#_issupportedunit",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-_isSupportedUnit",
+    "packages/extra/src/OffsetDate.js~OffsetDate#_isSupportedUnit",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#adjustinto",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-adjustInto",
+    "packages/extra/src/OffsetDate.js~OffsetDate#adjustInto",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#attime",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-atTime",
+    "packages/extra/src/OffsetDate.js~OffsetDate#atTime",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#compareto",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-compareTo",
+    "packages/extra/src/OffsetDate.js~OffsetDate#compareTo",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#dayofmonth",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-dayOfMonth",
+    "packages/extra/src/OffsetDate.js~OffsetDate#dayOfMonth",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#dayofweek",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-dayOfWeek",
+    "packages/extra/src/OffsetDate.js~OffsetDate#dayOfWeek",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#dayofyear",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-dayOfYear",
+    "packages/extra/src/OffsetDate.js~OffsetDate#dayOfYear",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#equals",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-equals",
+    "packages/extra/src/OffsetDate.js~OffsetDate#equals",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#format",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-format",
+    "packages/extra/src/OffsetDate.js~OffsetDate#format",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#get",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-get",
+    "packages/extra/src/OffsetDate.js~OffsetDate#get",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#getlong",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-getLong",
+    "packages/extra/src/OffsetDate.js~OffsetDate#getLong",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#hashcode",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-hashCode",
+    "packages/extra/src/OffsetDate.js~OffsetDate#hashCode",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#isafter",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-isAfter",
+    "packages/extra/src/OffsetDate.js~OffsetDate#isAfter",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#isbefore",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-isBefore",
+    "packages/extra/src/OffsetDate.js~OffsetDate#isBefore",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#isequal",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-isEqual",
+    "packages/extra/src/OffsetDate.js~OffsetDate#isEqual",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#issupported",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-isSupported",
+    "packages/extra/src/OffsetDate.js~OffsetDate#isSupported",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#minusdays",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-minusDays",
+    "packages/extra/src/OffsetDate.js~OffsetDate#minusDays",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#minusmonths",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-minusMonths",
+    "packages/extra/src/OffsetDate.js~OffsetDate#minusMonths",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#minusweeks",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-minusWeeks",
+    "packages/extra/src/OffsetDate.js~OffsetDate#minusWeeks",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#minusyears",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-minusYears",
+    "packages/extra/src/OffsetDate.js~OffsetDate#minusYears",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#month",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-month",
+    "packages/extra/src/OffsetDate.js~OffsetDate#month",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#monthvalue",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-monthValue",
+    "packages/extra/src/OffsetDate.js~OffsetDate#monthValue",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#offset",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-offset",
+    "packages/extra/src/OffsetDate.js~OffsetDate#offset",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#plusdays",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-plusDays",
+    "packages/extra/src/OffsetDate.js~OffsetDate#plusDays",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#plusmonths",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-plusMonths",
+    "packages/extra/src/OffsetDate.js~OffsetDate#plusMonths",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#plusweeks",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-plusWeeks",
+    "packages/extra/src/OffsetDate.js~OffsetDate#plusWeeks",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#plusyears",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-plusYears",
+    "packages/extra/src/OffsetDate.js~OffsetDate#plusYears",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#query",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-query",
+    "packages/extra/src/OffsetDate.js~OffsetDate#query",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#range",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-range",
+    "packages/extra/src/OffsetDate.js~OffsetDate#range",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#toepochsecond",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-toEpochSecond",
+    "packages/extra/src/OffsetDate.js~OffsetDate#toEpochSecond",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#tolocaldate",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-toLocalDate",
+    "packages/extra/src/OffsetDate.js~OffsetDate#toLocalDate",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#tostring",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-toString",
+    "packages/extra/src/OffsetDate.js~OffsetDate#toString",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#until",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-until",
+    "packages/extra/src/OffsetDate.js~OffsetDate#until",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#withdayofmonth",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-withDayOfMonth",
+    "packages/extra/src/OffsetDate.js~OffsetDate#withDayOfMonth",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#withdayofyear",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-withDayOfYear",
+    "packages/extra/src/OffsetDate.js~OffsetDate#withDayOfYear",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#withmonth",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-withMonth",
+    "packages/extra/src/OffsetDate.js~OffsetDate#withMonth",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#withoffsetsamelocal",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-withOffsetSameLocal",
+    "packages/extra/src/OffsetDate.js~OffsetDate#withOffsetSameLocal",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#withyear",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-withYear",
+    "packages/extra/src/OffsetDate.js~OffsetDate#withYear",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate#year",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#instance-method-year",
+    "packages/extra/src/OffsetDate.js~OffsetDate#year",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate._now0",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#static-method-_now0",
+    "packages/extra/src/OffsetDate.js~OffsetDate._now0",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate._nowclock",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#static-method-_nowClock",
+    "packages/extra/src/OffsetDate.js~OffsetDate._nowClock",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate._nowzoneid",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#static-method-_nowZoneId",
+    "packages/extra/src/OffsetDate.js~OffsetDate._nowZoneId",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate._ofintintintzoneoffset",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#static-method-_ofIntIntIntZoneOffset",
+    "packages/extra/src/OffsetDate.js~OffsetDate._ofIntIntIntZoneOffset",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate._oflocaldatezoneoffset",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#static-method-_ofLocalDateZoneOffset",
+    "packages/extra/src/OffsetDate.js~OffsetDate._ofLocalDateZoneOffset",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate.from",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#static-method-from",
+    "packages/extra/src/OffsetDate.js~OffsetDate.from",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate.now",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#static-method-now",
+    "packages/extra/src/OffsetDate.js~OffsetDate.now",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate.of",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#static-method-of",
+    "packages/extra/src/OffsetDate.js~OffsetDate.of",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate.ofinstant",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#static-method-ofInstant",
+    "packages/extra/src/OffsetDate.js~OffsetDate.ofInstant",
+    "method"
+  ],
+  [
+    "packages/extra/src/offsetdate.js~offsetdate.parse",
+    "class/packages/extra/src/OffsetDate.js~OffsetDate.html#static-method-parse",
+    "packages/extra/src/OffsetDate.js~OffsetDate.parse",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js",
+    "file/packages/extra/src/Quarter.js.html",
+    "packages/extra/src/Quarter.js",
+    "file"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#adjustinto",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-adjustInto",
+    "packages/extra/src/Quarter.js~Quarter#adjustInto",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#compareto",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-compareTo",
+    "packages/extra/src/Quarter.js~Quarter#compareTo",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#displayname",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-displayName",
+    "packages/extra/src/Quarter.js~Quarter#displayName",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#equals",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-equals",
+    "packages/extra/src/Quarter.js~Quarter#equals",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#firstmonth",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-firstMonth",
+    "packages/extra/src/Quarter.js~Quarter#firstMonth",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#get",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-get",
+    "packages/extra/src/Quarter.js~Quarter#get",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#getlong",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-getLong",
+    "packages/extra/src/Quarter.js~Quarter#getLong",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#hashcode",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-hashCode",
+    "packages/extra/src/Quarter.js~Quarter#hashCode",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#issupported",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-isSupported",
+    "packages/extra/src/Quarter.js~Quarter#isSupported",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#length",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-length",
+    "packages/extra/src/Quarter.js~Quarter#length",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#minus",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-minus",
+    "packages/extra/src/Quarter.js~Quarter#minus",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#name",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-name",
+    "packages/extra/src/Quarter.js~Quarter#name",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#ordinal",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-ordinal",
+    "packages/extra/src/Quarter.js~Quarter#ordinal",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#plus",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-plus",
+    "packages/extra/src/Quarter.js~Quarter#plus",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#query",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-query",
+    "packages/extra/src/Quarter.js~Quarter#query",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#range",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-range",
+    "packages/extra/src/Quarter.js~Quarter#range",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#tostring",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-toString",
+    "packages/extra/src/Quarter.js~Quarter#toString",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter#value",
+    "class/packages/extra/src/Quarter.js~Quarter.html#instance-method-value",
+    "packages/extra/src/Quarter.js~Quarter#value",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter.from",
+    "class/packages/extra/src/Quarter.js~Quarter.html#static-method-from",
+    "packages/extra/src/Quarter.js~Quarter.from",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter.of",
+    "class/packages/extra/src/Quarter.js~Quarter.html#static-method-of",
+    "packages/extra/src/Quarter.js~Quarter.of",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter.ofmonth",
+    "class/packages/extra/src/Quarter.js~Quarter.html#static-method-ofMonth",
+    "packages/extra/src/Quarter.js~Quarter.ofMonth",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter.valueof",
+    "class/packages/extra/src/Quarter.js~Quarter.html#static-method-valueOf",
+    "packages/extra/src/Quarter.js~Quarter.valueOf",
+    "method"
+  ],
+  [
+    "packages/extra/src/quarter.js~quarter.values",
+    "class/packages/extra/src/Quarter.js~Quarter.html#static-method-values",
+    "packages/extra/src/Quarter.js~Quarter.values",
+    "method"
+  ],
+  [
+    "packages/extra/src/temporals.js",
+    "file/packages/extra/src/Temporals.js.html",
+    "packages/extra/src/Temporals.js",
+    "file"
+  ],
+  [
+    "packages/extra/src/temporals.js~temporals.convertamount",
+    "class/packages/extra/src/Temporals.js~Temporals.html#static-method-convertAmount",
+    "packages/extra/src/Temporals.js~Temporals.convertAmount",
+    "method"
+  ],
+  [
+    "packages/extra/src/temporals.js~temporals.nextworkingday",
+    "class/packages/extra/src/Temporals.js~Temporals.html#static-method-nextWorkingDay",
+    "packages/extra/src/Temporals.js~Temporals.nextWorkingDay",
+    "method"
+  ],
+  [
+    "packages/extra/src/temporals.js~temporals.nextworkingdayorsame",
+    "class/packages/extra/src/Temporals.js~Temporals.html#static-method-nextWorkingDayOrSame",
+    "packages/extra/src/Temporals.js~Temporals.nextWorkingDayOrSame",
+    "method"
+  ],
+  [
+    "packages/extra/src/temporals.js~temporals.parsefirstmatching",
+    "class/packages/extra/src/Temporals.js~Temporals.html#static-method-parseFirstMatching",
+    "packages/extra/src/Temporals.js~Temporals.parseFirstMatching",
+    "method"
+  ],
+  [
+    "packages/extra/src/temporals.js~temporals.previousworkingday",
+    "class/packages/extra/src/Temporals.js~Temporals.html#static-method-previousWorkingDay",
+    "packages/extra/src/Temporals.js~Temporals.previousWorkingDay",
+    "method"
+  ],
+  [
+    "packages/extra/src/temporals.js~temporals.previousworkingdayorsame",
+    "class/packages/extra/src/Temporals.js~Temporals.html#static-method-previousWorkingDayOrSame",
+    "packages/extra/src/Temporals.js~Temporals.previousWorkingDayOrSame",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js",
+    "file/packages/extra/src/YearQuarter.js.html",
+    "packages/extra/src/YearQuarter.js",
+    "file"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#_issupportedfield",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-_isSupportedField",
+    "packages/extra/src/YearQuarter.js~YearQuarter#_isSupportedField",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#_issupportedunit",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-_isSupportedUnit",
+    "packages/extra/src/YearQuarter.js~YearQuarter#_isSupportedUnit",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#adjustinto",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-adjustInto",
+    "packages/extra/src/YearQuarter.js~YearQuarter#adjustInto",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#atday",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-atDay",
+    "packages/extra/src/YearQuarter.js~YearQuarter#atDay",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#atendofquarter",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-atEndOfQuarter",
+    "packages/extra/src/YearQuarter.js~YearQuarter#atEndOfQuarter",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#compareto",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-compareTo",
+    "packages/extra/src/YearQuarter.js~YearQuarter#compareTo",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#equals",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-equals",
+    "packages/extra/src/YearQuarter.js~YearQuarter#equals",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#format",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-format",
+    "packages/extra/src/YearQuarter.js~YearQuarter#format",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#get",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-get",
+    "packages/extra/src/YearQuarter.js~YearQuarter#get",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#getlong",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-getLong",
+    "packages/extra/src/YearQuarter.js~YearQuarter#getLong",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#hashcode",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-hashCode",
+    "packages/extra/src/YearQuarter.js~YearQuarter#hashCode",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#isafter",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-isAfter",
+    "packages/extra/src/YearQuarter.js~YearQuarter#isAfter",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#isbefore",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-isBefore",
+    "packages/extra/src/YearQuarter.js~YearQuarter#isBefore",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#isleapyear",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-isLeapYear",
+    "packages/extra/src/YearQuarter.js~YearQuarter#isLeapYear",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#issupported",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-isSupported",
+    "packages/extra/src/YearQuarter.js~YearQuarter#isSupported",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#isvalidday",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-isValidDay",
+    "packages/extra/src/YearQuarter.js~YearQuarter#isValidDay",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#lengthofquarter",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-lengthOfQuarter",
+    "packages/extra/src/YearQuarter.js~YearQuarter#lengthOfQuarter",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#lengthofyear",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-lengthOfYear",
+    "packages/extra/src/YearQuarter.js~YearQuarter#lengthOfYear",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#minusquarters",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-minusQuarters",
+    "packages/extra/src/YearQuarter.js~YearQuarter#minusQuarters",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#minusyears",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-minusYears",
+    "packages/extra/src/YearQuarter.js~YearQuarter#minusYears",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#plusquarters",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-plusQuarters",
+    "packages/extra/src/YearQuarter.js~YearQuarter#plusQuarters",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#plusyears",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-plusYears",
+    "packages/extra/src/YearQuarter.js~YearQuarter#plusYears",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#quarter",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-quarter",
+    "packages/extra/src/YearQuarter.js~YearQuarter#quarter",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#quartervalue",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-quarterValue",
+    "packages/extra/src/YearQuarter.js~YearQuarter#quarterValue",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#query",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-query",
+    "packages/extra/src/YearQuarter.js~YearQuarter#query",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#range",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-range",
+    "packages/extra/src/YearQuarter.js~YearQuarter#range",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#tostring",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-toString",
+    "packages/extra/src/YearQuarter.js~YearQuarter#toString",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#until",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-until",
+    "packages/extra/src/YearQuarter.js~YearQuarter#until",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#withquarter",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-withQuarter",
+    "packages/extra/src/YearQuarter.js~YearQuarter#withQuarter",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#withyear",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-withYear",
+    "packages/extra/src/YearQuarter.js~YearQuarter#withYear",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter#year",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#instance-method-year",
+    "packages/extra/src/YearQuarter.js~YearQuarter#year",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter._now0",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#static-method-_now0",
+    "packages/extra/src/YearQuarter.js~YearQuarter._now0",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter._nowzoneid",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#static-method-_nowZoneId",
+    "packages/extra/src/YearQuarter.js~YearQuarter._nowZoneId",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter._ofintint",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#static-method-_ofIntInt",
+    "packages/extra/src/YearQuarter.js~YearQuarter._ofIntInt",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter._ofintquarter",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#static-method-_ofIntQuarter",
+    "packages/extra/src/YearQuarter.js~YearQuarter._ofIntQuarter",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter._ofyearint",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#static-method-_ofYearInt",
+    "packages/extra/src/YearQuarter.js~YearQuarter._ofYearInt",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter._ofyearquarter",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#static-method-_ofYearQuarter",
+    "packages/extra/src/YearQuarter.js~YearQuarter._ofYearQuarter",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter.from",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#static-method-from",
+    "packages/extra/src/YearQuarter.js~YearQuarter.from",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter.now",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#static-method-now",
+    "packages/extra/src/YearQuarter.js~YearQuarter.now",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter.of",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#static-method-of",
+    "packages/extra/src/YearQuarter.js~YearQuarter.of",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearquarter.js~yearquarter.parse",
+    "class/packages/extra/src/YearQuarter.js~YearQuarter.html#static-method-parse",
+    "packages/extra/src/YearQuarter.js~YearQuarter.parse",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js",
+    "file/packages/extra/src/YearWeek.js.html",
+    "packages/extra/src/YearWeek.js",
+    "file"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#_issupportedfield",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-_isSupportedField",
+    "packages/extra/src/YearWeek.js~YearWeek#_isSupportedField",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#_issupportedunit",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-_isSupportedUnit",
+    "packages/extra/src/YearWeek.js~YearWeek#_isSupportedUnit",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#adjustinto",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-adjustInto",
+    "packages/extra/src/YearWeek.js~YearWeek#adjustInto",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#atday",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-atDay",
+    "packages/extra/src/YearWeek.js~YearWeek#atDay",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#compareto",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-compareTo",
+    "packages/extra/src/YearWeek.js~YearWeek#compareTo",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#equals",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-equals",
+    "packages/extra/src/YearWeek.js~YearWeek#equals",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#format",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-format",
+    "packages/extra/src/YearWeek.js~YearWeek#format",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#get",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-get",
+    "packages/extra/src/YearWeek.js~YearWeek#get",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#getlong",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-getLong",
+    "packages/extra/src/YearWeek.js~YearWeek#getLong",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#hashcode",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-hashCode",
+    "packages/extra/src/YearWeek.js~YearWeek#hashCode",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#is53weekyear",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-is53WeekYear",
+    "packages/extra/src/YearWeek.js~YearWeek#is53WeekYear",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#isafter",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-isAfter",
+    "packages/extra/src/YearWeek.js~YearWeek#isAfter",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#isbefore",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-isBefore",
+    "packages/extra/src/YearWeek.js~YearWeek#isBefore",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#issupported",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-isSupported",
+    "packages/extra/src/YearWeek.js~YearWeek#isSupported",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#lengthofyear",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-lengthOfYear",
+    "packages/extra/src/YearWeek.js~YearWeek#lengthOfYear",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#minusweeks",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-minusWeeks",
+    "packages/extra/src/YearWeek.js~YearWeek#minusWeeks",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#minusyears",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-minusYears",
+    "packages/extra/src/YearWeek.js~YearWeek#minusYears",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#plusweeks",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-plusWeeks",
+    "packages/extra/src/YearWeek.js~YearWeek#plusWeeks",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#plusyears",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-plusYears",
+    "packages/extra/src/YearWeek.js~YearWeek#plusYears",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#query",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-query",
+    "packages/extra/src/YearWeek.js~YearWeek#query",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#range",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-range",
+    "packages/extra/src/YearWeek.js~YearWeek#range",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#tostring",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-toString",
+    "packages/extra/src/YearWeek.js~YearWeek#toString",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#until",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-until",
+    "packages/extra/src/YearWeek.js~YearWeek#until",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#week",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-week",
+    "packages/extra/src/YearWeek.js~YearWeek#week",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#withweek",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-withWeek",
+    "packages/extra/src/YearWeek.js~YearWeek#withWeek",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#withyear",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-withYear",
+    "packages/extra/src/YearWeek.js~YearWeek#withYear",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek#year",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#instance-method-year",
+    "packages/extra/src/YearWeek.js~YearWeek#year",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek._now0",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#static-method-_now0",
+    "packages/extra/src/YearWeek.js~YearWeek._now0",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek._nowclock",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#static-method-_nowClock",
+    "packages/extra/src/YearWeek.js~YearWeek._nowClock",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek._nowzoneid",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#static-method-_nowZoneId",
+    "packages/extra/src/YearWeek.js~YearWeek._nowZoneId",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek._ofweekbasedyear",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#static-method-_ofWeekBasedYear",
+    "packages/extra/src/YearWeek.js~YearWeek._ofWeekBasedYear",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek._ofyearweek",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#static-method-_ofYearWeek",
+    "packages/extra/src/YearWeek.js~YearWeek._ofYearWeek",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek.from",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#static-method-from",
+    "packages/extra/src/YearWeek.js~YearWeek.from",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek.now",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#static-method-now",
+    "packages/extra/src/YearWeek.js~YearWeek.now",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek.of",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#static-method-of",
+    "packages/extra/src/YearWeek.js~YearWeek.of",
+    "method"
+  ],
+  [
+    "packages/extra/src/yearweek.js~yearweek.parse",
+    "class/packages/extra/src/YearWeek.js~YearWeek.html#static-method-parse",
+    "packages/extra/src/YearWeek.js~YearWeek.parse",
+    "method"
+  ],
+  [
     "packages/extra/src/_init.js",
     "file/packages/extra/src/_init.js.html",
     "packages/extra/src/_init.js",
@@ -6147,12 +8031,6 @@ window.esdocSearchIndex = [
     "packages/extra/src/js-joda-extra.js",
     "file/packages/extra/src/js-joda-extra.js.html",
     "packages/extra/src/js-joda-extra.js",
-    "file"
-  ],
-  [
-    "packages/extra/src/license-preamble.js",
-    "file/packages/extra/src/license-preamble.js.html",
-    "packages/extra/src/license-preamble.js",
     "file"
   ],
   [
@@ -6252,52 +8130,10 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/locale/src/format/cldr/cldrdatetimeformatterbuilder.js",
-    "file/packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js.html",
-    "packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js",
+    "packages/locale/src/format/cldr/cldrcache.js",
+    "file/packages/locale/src/format/cldr/CldrCache.js.html",
+    "packages/locale/src/format/cldr/CldrCache.js",
     "file"
-  ],
-  [
-    "packages/locale/src/format/cldr/cldrdatetimeformatterbuilder.js~cldrdatetimeformatterbuilder#appendlocalizedoffset",
-    "class/packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder.html#instance-method-appendLocalizedOffset",
-    "packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder#appendLocalizedOffset",
-    "method"
-  ],
-  [
-    "packages/locale/src/format/cldr/cldrdatetimeformatterbuilder.js~cldrdatetimeformatterbuilder#appendtext",
-    "class/packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder.html#instance-method-appendText",
-    "packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder#appendText",
-    "method"
-  ],
-  [
-    "packages/locale/src/format/cldr/cldrdatetimeformatterbuilder.js~cldrdatetimeformatterbuilder#appendtextfield",
-    "class/packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder.html#instance-method-appendTextField",
-    "packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder#appendTextField",
-    "method"
-  ],
-  [
-    "packages/locale/src/format/cldr/cldrdatetimeformatterbuilder.js~cldrdatetimeformatterbuilder#appendtextfieldmap",
-    "class/packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder.html#instance-method-appendTextFieldMap",
-    "packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder#appendTextFieldMap",
-    "method"
-  ],
-  [
-    "packages/locale/src/format/cldr/cldrdatetimeformatterbuilder.js~cldrdatetimeformatterbuilder#appendtextfieldstyle",
-    "class/packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder.html#instance-method-appendTextFieldStyle",
-    "packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder#appendTextFieldStyle",
-    "method"
-  ],
-  [
-    "packages/locale/src/format/cldr/cldrdatetimeformatterbuilder.js~cldrdatetimeformatterbuilder#appendweekfield",
-    "class/packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder.html#instance-method-appendWeekField",
-    "packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder#appendWeekField",
-    "method"
-  ],
-  [
-    "packages/locale/src/format/cldr/cldrdatetimeformatterbuilder.js~cldrdatetimeformatterbuilder#appendzonetext",
-    "class/packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder.html#instance-method-appendZoneText",
-    "packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder#appendZoneText",
-    "method"
   ],
   [
     "packages/locale/src/format/cldr/cldrdatetimetextprovider.js",
@@ -6414,9 +8250,9 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "packages/locale/src/temporal/weekfields.js~computeddayoffield#getdisplayname",
-    "class/packages/locale/src/temporal/WeekFields.js~ComputedDayOfField.html#instance-method-getDisplayName",
-    "packages/locale/src/temporal/WeekFields.js~ComputedDayOfField#getDisplayName",
+    "packages/locale/src/temporal/weekfields.js~computeddayoffield#displayname",
+    "class/packages/locale/src/temporal/WeekFields.js~ComputedDayOfField.html#instance-method-displayName",
+    "packages/locale/src/temporal/WeekFields.js~ComputedDayOfField#displayName",
     "method"
   ],
   [
@@ -6747,12 +8583,6 @@ window.esdocSearchIndex = [
     "packages/timezone/src/js-joda-timezone.js",
     "file/packages/timezone/src/js-joda-timezone.js.html",
     "packages/timezone/src/js-joda-timezone.js",
-    "file"
-  ],
-  [
-    "packages/timezone/src/license-preamble.js",
-    "file/packages/timezone/src/license-preamble.js.html",
-    "packages/timezone/src/license-preamble.js",
     "file"
   ],
   [

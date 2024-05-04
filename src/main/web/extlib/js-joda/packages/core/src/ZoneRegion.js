@@ -5,8 +5,8 @@
  */
 
 
-import {ZoneId} from './ZoneId';
-import {ZoneRulesProvider} from './zone/ZoneRulesProvider';
+import { ZoneId } from './ZoneId';
+import { ZoneRulesProvider } from './zone/ZoneRulesProvider';
 
 /**
  * A geographical region where the same time-zone rules apply.
@@ -29,7 +29,6 @@ import {ZoneRulesProvider} from './zone/ZoneRulesProvider';
  */
 export class ZoneRegion extends ZoneId {
     /**
-     * not yet implemented
      * @param {string} zoneId
      * @return {ZoneId}
      */

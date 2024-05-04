@@ -8,7 +8,7 @@
   <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
   <script src="script/prettify/prettify.js"></script>
   <script src="script/manual.js"></script>
-<meta name="description" content="Immutable date and time library for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="js-joda"><meta property="twitter:description" content="Immutable date and time library for JavaScript"></head>
+<script src="./inject/script/0-js-joda.min.js"></script><script src="./inject/script/0-js-joda-extra.min.js"></script><script src="./inject/script/0-js-joda-timezone.min.js"></script><script src="./inject/script/0-index.js"></script><script src="./inject/script/0-yato.js"></script><meta name="description" content="Immutable date and time library for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="js-joda"><meta property="twitter:description" content="Immutable date and time library for JavaScript"></head>
 <body class="layout-container" data-ice="rootContainer">
 
 <header>
@@ -40,6 +40,8 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/MathUtil.js~MathUtil.html">MathUtil</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/Month.js~Month.html">Month</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/MonthDay.js~MonthDay.html">MonthDay</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html">OffsetDateTime</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/OffsetTime.js~OffsetTime.html">OffsetTime</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/Period.js~Period.html">Period</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/YearConstants.js~YearConstants.html">YearConstants</a></span></span></li>
@@ -48,12 +50,8 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/ZoneOffset.js~ZoneOffset.html">ZoneOffset</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/ZoneRegion.js~ZoneRegion.html">ZoneRegion</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/ZonedDateTime.js~ZonedDateTime.html">ZonedDateTime</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-abstractMethodFail">abstractMethodFail</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-assert">assert</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-requireInstance">requireInstance</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-requireNonNull">requireNonNull</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convert">convert</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-bindUse">bindUse</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-nativeJs">nativeJs</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-MAX_SAFE_INTEGER">MAX_SAFE_INTEGER</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-MIN_SAFE_INTEGER">MIN_SAFE_INTEGER</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-ArithmeticException">ArithmeticException</a></span></span></li>
@@ -63,7 +61,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-IllegalStateException">IllegalStateException</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-NullPointerException">NullPointerException</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-UnsupportedTemporalTypeException">UnsupportedTemporalTypeException</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-use">use</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core-src-chrono">core/src/chrono</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/chrono/ChronoLocalDate.js~ChronoLocalDate.html">ChronoLocalDate</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/chrono/ChronoLocalDateTime.js~ChronoLocalDateTime.html">ChronoLocalDateTime</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/chrono/ChronoZonedDateTime.js~ChronoZonedDateTime.html">ChronoZonedDateTime</a></span></span></li>
@@ -76,8 +73,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/format/TextStyle.js~TextStyle.html">TextStyle</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core-src-temporal">core/src/temporal</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/ChronoUnit.js~ChronoUnit.html">ChronoUnit</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/DefaultInterfaceTemporal.js~DefaultInterfaceTemporal.html">DefaultInterfaceTemporal</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/IsoFields.js~IsoFields.html">IsoFields</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalAccessor.js~TemporalAccessor.html">TemporalAccessor</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalAdjusters.js~TemporalAdjusters.html">TemporalAdjusters</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalQueries.js~TemporalQueries.html">TemporalQueries</a></span></span></li>
@@ -88,47 +83,42 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-interface">I</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalField.js~TemporalField.html">TemporalField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-interface">I</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalQuery.js~TemporalQuery.html">TemporalQuery</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-interface">I</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-nativeJs">nativeJs</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-createTemporalQuery">createTemporalQuery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-IsoFields">IsoFields</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core-src-zone">core/src/zone</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/SystemDefaultZoneId.js~SystemDefaultZoneId.html">SystemDefaultZoneId</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/SystemDefaultZoneRules.js~SystemDefaultZoneRules.html">SystemDefaultZoneRules</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/ZoneOffsetTransition.js~ZoneOffsetTransition.html">ZoneOffsetTransition</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/ZoneRules.js~ZoneRules.html">ZoneRules</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/ZoneRulesProvider.js~ZoneRulesProvider.html">ZoneRulesProvider</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#extra-src">extra/src</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/Interval.js~Interval.html">Interval</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-abstractMethodFail">abstractMethodFail</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-assert">assert</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-requireInstance">requireInstance</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-requireNonNull">requireNonNull</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plug">plug</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#extra-src">extra/src</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/DayOfMonth.js~DayOfMonth.html">DayOfMonth</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/DayOfYear.js~DayOfYear.html">DayOfYear</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/Interval.js~Interval.html">Interval</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/LocalDateRange.js~LocalDateRange.html">LocalDateRange</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/OffsetDate.js~OffsetDate.html">OffsetDate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/Quarter.js~Quarter.html">Quarter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/Temporals.js~Temporals.html">Temporals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/YearQuarter.js~YearQuarter.html">YearQuarter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/YearWeek.js~YearWeek.html">YearWeek</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src">locale/src</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/Locale.js~Locale.html">Locale</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plug">plug</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-format">locale/src/format</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/LocaleDateTimeFormatter.js~LocaleDateTimeFormatter.html">LocaleDateTimeFormatter</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/LocaleStore.js~LocaleStore.html">LocaleStore</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-createEntry">createEntry</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-format-cldr">locale/src/format/cldr</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder.html">CldrDateTimeFormatterBuilder</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/cldr/CldrZoneTextPrinterParser.js~CldrZoneTextPrinterParser.html">CldrZoneTextPrinterParser</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-format-cldr">locale/src/format/cldr</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/cldr/CldrZoneTextPrinterParser.js~CldrZoneTextPrinterParser.html">CldrZoneTextPrinterParser</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-format-parser">locale/src/format/parser</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/parser/WeekFieldsPrinterParser.js~WeekFieldsPrinterParser.html">WeekFieldsPrinterParser</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-temporal">locale/src/temporal</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/temporal/WeekFields.js~ComputedDayOfField.html">ComputedDayOfField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/temporal/WeekFields.js~WeekFields.html">WeekFields</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#timezone-src">timezone/src</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/timezone/src/MomentZoneRules.js~MomentZoneRules.html">MomentZoneRules</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/timezone/src/MomentZoneRulesProvider.js~MomentZoneRulesProvider.html">MomentZoneRulesProvider</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-autoPlug">autoPlug</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plug">plug</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extendSystemDefaultZoneId">extendSystemDefaultZoneId</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-unpack">unpack</a></span></span></li>
 </ul>
 </div>
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {Year} from &apos;<span><a href="file/packages/core/src/Year.js.html#lineNumber70">@js-joda/root/packages/core/src/Year.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {Year} from &apos;<span><a href="file/packages/core/src/Year.js.html#lineNumber69">@js-joda/root/packages/core/src/Year.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/packages/core/src/Year.js.html#lineNumber70">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/packages/core/src/Year.js.html#lineNumber69">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -1053,63 +1043,6 @@ calendar system rules.</p>
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/packages/core/src/Year.js~Year.html#instance-method-minusAmount">minusAmount</a></span></span><span class="code" data-ice="signature">(amount: <span><a href="class/packages/core/src/temporal/TemporalAmount.js~TemporalAmount.html">TemporalAmount</a></span>): <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Returns a copy of this year with the specified period subtracted.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/packages/core/src/Year.js~Year.html#instance-method-minusAmountUnit">minusAmountUnit</a></span></span><span class="code" data-ice="signature">(amountToSubtract: <span>number</span>, unit: <span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span>): <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
           <span class="code" data-ice="name"><span><a href="class/packages/core/src/Year.js~Year.html#instance-method-minusYears">minusYears</a></span></span><span class="code" data-ice="signature">(yearsToSubtract: <span>number</span>): <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span>
         </p>
       </div>
@@ -1118,63 +1051,6 @@ calendar system rules.</p>
         
         <div data-ice="description"><p>Returns a copy of this year with the specified number of years subtracted.</p>
 </div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/packages/core/src/Year.js~Year.html#instance-method-plusAmount">plusAmount</a></span></span><span class="code" data-ice="signature">(amount: <span><a href="class/packages/core/src/temporal/TemporalAmount.js~TemporalAmount.html">TemporalAmount</a></span>): <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Returns a copy of this year with the specified period added.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/packages/core/src/Year.js~Year.html#instance-method-plusAmountUnit">plusAmountUnit</a></span></span><span class="code" data-ice="signature">(amountToAdd: <span>number</span>, unit: <span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span>): <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        
       </div>
     </td>
     <td>
@@ -1385,64 +1261,6 @@ delegates to toString()</p>
       
     </td>
   </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/packages/core/src/Year.js~Year.html#instance-method-withAdjuster">withAdjuster</a></span></span><span class="code" data-ice="signature">(adjuster: <span><a href="class/packages/core/src/temporal/TemporalAdjuster.js~TemporalAdjuster.html">TemporalAdjuster</a></span>): <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Returns an adjusted copy of this year.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/packages/core/src/Year.js~Year.html#instance-method-withFieldValue">withFieldValue</a></span></span><span class="code" data-ice="signature">(field: <span><a href="class/packages/core/src/temporal/TemporalField.js~TemporalField.html">TemporalField</a></span>, newValue: <span>number</span>): <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Returns a copy of this year with the specified field set to a new value.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
 </tbody>
 </table>
 </div>
@@ -1473,6 +1291,62 @@ delegates to toString()</p>
         
         <div data-ice="description"><p>Gets the value of the specified field as an <code>int</code>.</p>
 </div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalAccessor.js~TemporalAccessor.html#instance-method-getLong">getLong</a></span></span><span class="code" data-ice="signature">(field: <span>*</span>)</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalAccessor.js~TemporalAccessor.html#instance-method-isSupported">isSupported</a></span></span><span class="code" data-ice="signature">(field: <span>*</span>)</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        
       </div>
     </td>
     <td>
@@ -1559,7 +1433,7 @@ delegates to toString()</p>
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-isSupported">isSupported</a></span></span><span class="code" data-ice="signature">(unit: <span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span>): <span>boolean</span></span>
+          <span class="code" data-ice="name"><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-isSupported">isSupported</a></span></span><span class="code" data-ice="signature">(fieldOrUnit: <span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span>): <span>boolean</span></span>
         </p>
       </div>
       <div>
@@ -1588,7 +1462,7 @@ delegates to toString()</p>
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-minus">minus</a></span></span><span class="code" data-ice="signature">(p1: <span><a href="class/packages/core/src/temporal/TemporalAmount.js~TemporalAmount.html">TemporalAmount</a></span> | <span>number</span>, p2: <span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span>): <span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html">Temporal</a></span></span>
+          <span class="code" data-ice="name"><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-minus">minus</a></span></span><span class="code" data-ice="signature">(amount: <span><a href="class/packages/core/src/temporal/TemporalAmount.js~TemporalAmount.html">TemporalAmount</a></span> | <span>number</span>, unit: <span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span>): <span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html">Temporal</a></span></span>
         </p>
       </div>
       <div>
@@ -1617,129 +1491,13 @@ delegates to toString()</p>
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-minusAmount">minusAmount</a></span></span><span class="code" data-ice="signature">(amount: <span><a href="class/packages/core/src/temporal/TemporalAmount.js~TemporalAmount.html">TemporalAmount</a></span>): <span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html">Temporal</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Returns an object of the same type as this object with an amount subtracted.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-minusAmountUnit">minusAmountUnit</a></span></span><span class="code" data-ice="signature">(amountToSubtract: <span>number</span>, unit: <span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span>): <span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html">Temporal</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Returns an object of the same type as this object with the specified period subtracted.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-plus">plus</a></span></span><span class="code" data-ice="signature">(p1: <span><a href="class/packages/core/src/temporal/TemporalAmount.js~TemporalAmount.html">TemporalAmount</a></span> | <span>number</span>, p2: <span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span>): <span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html">Temporal</a></span></span>
+          <span class="code" data-ice="name"><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-plus">plus</a></span></span><span class="code" data-ice="signature">(amount: <span><a href="class/packages/core/src/temporal/TemporalAmount.js~TemporalAmount.html">TemporalAmount</a></span> | <span>number</span>, unit: <span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span>): <span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html">Temporal</a></span></span>
         </p>
       </div>
       <div>
         
         
         <div data-ice="description"><p>function overloading for <span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-plus">Temporal.plus</a></span></p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-plusAmount">plusAmount</a></span></span><span class="code" data-ice="signature">(amount: <span><a href="class/packages/core/src/temporal/TemporalAmount.js~TemporalAmount.html">TemporalAmount</a></span>): <span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html">Temporal</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Returns an object of the same type as this object with an amount added.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-plusAmountUnit">plusAmountUnit</a></span></span><span class="code" data-ice="signature">(amountToAdd: <span>number</span>, unit: <span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span>): <span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html">Temporal</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Returns an object of the same type as this object with the specified period added.</p>
 </div>
       </div>
     </td>
@@ -1791,71 +1549,13 @@ delegates to toString()</p>
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-with">with</a></span></span><span class="code" data-ice="signature">(p1: <span><a href="class/packages/core/src/temporal/TemporalAdjuster.js~TemporalAdjuster.html">TemporalAdjuster</a></span> | <span><a href="class/packages/core/src/temporal/TemporalField.js~TemporalField.html">TemporalField</a></span>, p2: <span>number</span>): <span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html">Temporal</a></span></span>
+          <span class="code" data-ice="name"><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-with">with</a></span></span><span class="code" data-ice="signature">(adjusterOrField: <span><a href="class/packages/core/src/temporal/TemporalAdjuster.js~TemporalAdjuster.html">TemporalAdjuster</a></span> | <span><a href="class/packages/core/src/temporal/TemporalField.js~TemporalField.html">TemporalField</a></span>, newValue: <span>number</span>): <span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html">Temporal</a></span></span>
         </p>
       </div>
       <div>
         
         
         <div data-ice="description"><p>function overloading for <span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-with">Temporal.with</a></span></p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-withAdjuster">withAdjuster</a></span></span><span class="code" data-ice="signature">(adjuster: <span><a href="class/packages/core/src/temporal/TemporalAdjuster.js~TemporalAdjuster.html">TemporalAdjuster</a></span>): <span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html">Temporal</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Returns an adjusted object of the same type as this object with the adjustment made.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-withFieldValue">withFieldValue</a></span></span><span class="code" data-ice="signature">(field: <span><a href="class/packages/core/src/temporal/TemporalField.js~TemporalField.html">TemporalField</a></span>, newValue: <span>number</span>): <span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html">Temporal</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Returns an object of the same type as this object with the specified field altered.</p>
 </div>
       </div>
     </td>
@@ -1883,7 +1583,7 @@ delegates to toString()</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber199">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber198">source</a></span></span>
     </span>
   </h3>
 
@@ -1976,7 +1676,7 @@ allowing it to be used in queries via method reference, <span>Year::from</span>.
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber288">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber287">source</a></span></span>
     </span>
   </h3>
 
@@ -2060,7 +1760,7 @@ This is historically inaccurate, but is correct for the ISO-8601 standard.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber102">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber101">source</a></span></span>
     </span>
   </h3>
 
@@ -2135,7 +1835,7 @@ This is historically inaccurate, but is correct for the ISO-8601 standard.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber123">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber122">source</a></span></span>
     </span>
   </h3>
 
@@ -2196,7 +1896,7 @@ because the clock is hard-coded.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber155">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber154">source</a></span></span>
     </span>
   </h3>
 
@@ -2273,7 +1973,7 @@ The alternate clock may be introduced using dependency injection.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber139">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber138">source</a></span></span>
     </span>
   </h3>
 
@@ -2351,7 +2051,7 @@ because the clock is hard-coded.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber175">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber174">source</a></span></span>
     </span>
   </h3>
 
@@ -2444,7 +2144,7 @@ because the clock is hard-coded.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber228">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber227">source</a></span></span>
     </span>
   </h3>
 
@@ -2524,7 +2224,7 @@ because the clock is hard-coded.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber246">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber245">source</a></span></span>
     </span>
   </h3>
 
@@ -2612,7 +2312,7 @@ Years outside the range 0000 to 9999 must be prefixed by the plus or minus symbo
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber261">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber260">source</a></span></span>
     </span>
   </h3>
 
@@ -2711,7 +2411,7 @@ Years outside the range 0000 to 9999 must be prefixed by the plus or minus symbo
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber686">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber604">source</a></span></span>
     </span>
   </h3>
 
@@ -2818,7 +2518,7 @@ a <span><a href="variable/index.html#static-variable-DateTimeException">DateTime
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber730">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber648">source</a></span></span>
     </span>
   </h3>
 
@@ -2907,7 +2607,7 @@ a <span><a href="variable/index.html#static-variable-DateTimeException">DateTime
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber744">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber662">source</a></span></span>
     </span>
   </h3>
 
@@ -2981,7 +2681,7 @@ a <span><a href="variable/index.html#static-variable-DateTimeException">DateTime
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber803">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber721">source</a></span></span>
     </span>
   </h3>
 
@@ -3058,7 +2758,7 @@ date if the year is not a leap year.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber766">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber684">source</a></span></span>
     </span>
   </h3>
 
@@ -3138,7 +2838,7 @@ All possible combinations of year and month are valid.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber787">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber705">source</a></span></span>
     </span>
   </h3>
 
@@ -3230,7 +2930,7 @@ All possible combinations of year and month are valid.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber851">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber769">source</a></span></span>
     </span>
   </h3>
 
@@ -3306,7 +3006,7 @@ It is &quot;consistent with equals&quot;, as defined by <span>Comparable</span>.
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber901">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber819">source</a></span></span>
     </span>
   </h3>
 
@@ -3381,7 +3081,7 @@ It is &quot;consistent with equals&quot;, as defined by <span>Comparable</span>.
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber887">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber805">source</a></span></span>
     </span>
   </h3>
 
@@ -3467,7 +3167,7 @@ It is &quot;consistent with equals&quot;, as defined by <span>Comparable</span>.
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber403">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber402">source</a></span></span>
     </span>
   </h3>
 
@@ -3480,11 +3180,11 @@ The returned value will always be within the valid range of values for the field
 If it is not possible to return the value, because the field is not supported
 or for some other reason, an exception is thrown.</p>
 <p>If the field is a <span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span> then the query is implemented here.
-The supported fields (see <span><a href="class/packages/core/src/MonthDay.js~MonthDay.html#instance-method-isSupported">isSupported</a></span>) will return valid
+The supported fields (see <span><a href="class/packages/core/src/DayOfWeek.js~DayOfWeek.html#instance-method-isSupported">isSupported</a></span>) will return valid
 values based on this year.
 All other <span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span> instances will throw a <span><a href="variable/index.html#static-variable-DateTimeException">DateTimeException</a></span>.</p>
 <p>If the field is not a <span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span>, then the result of this method
-is obtained by invoking <span>TemporalField.getFrom</span>
+is obtained by invoking <span><a href="class/packages/core/src/temporal/TemporalField.js~TemporalField.html#instance-method-getFrom">TemporalField.getFrom</a></span>
 passing <code>this</code> as the argument. Whether the value can be obtained,
 and what the value represents, is determined by the field.</p>
 </div>
@@ -3570,7 +3270,7 @@ and what the value represents, is determined by the field.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber429">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber428">source</a></span></span>
     </span>
   </h3>
 
@@ -3582,16 +3282,16 @@ and what the value represents, is determined by the field.</p>
 If it is not possible to return the value, because the field is not supported
 or for some other reason, an exception is thrown.</p>
 <p>If the field is a <span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span> then the query is implemented here.
-The supported fields (see <span><a href="class/packages/core/src/MonthDay.js~MonthDay.html#instance-method-isSupported">isSupported</a></span>) will return valid
+The supported fields (see <span><a href="class/packages/core/src/DayOfWeek.js~DayOfWeek.html#instance-method-isSupported">isSupported</a></span>) will return valid
 values based on this year.
 All other <span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span> instances will throw a <span><a href="variable/index.html#static-variable-DateTimeException">DateTimeException</a></span>.</p>
 <p>If the field is not a <span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span>, then the result of this method
-is obtained by invoking <span>TemporalField.getFrom</span>
+is obtained by invoking <span><a href="class/packages/core/src/temporal/TemporalField.js~TemporalField.html#instance-method-getFrom">TemporalField.getFrom</a></span>
 passing <code>this</code> as the argument. Whether the value can be obtained,
 and what the value represents, is determined by the field.</p>
 </div>
 
-  
+  <div data-ice="override"><h4>Override:</h4><span><a href="class/packages/core/src/temporal/TemporalAccessor.js~TemporalAccessor.html#instance-method-getLong">TemporalAccessor#getLong</a></span></div>
 
   <div data-ice="properties"><div data-ice="properties">
   <h4 data-ice="title">Params:</h4>
@@ -3672,7 +3372,7 @@ and what the value represents, is determined by the field.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber863">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber781">source</a></span></span>
     </span>
   </h3>
 
@@ -3746,7 +3446,7 @@ and what the value represents, is determined by the field.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber875">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber793">source</a></span></span>
     </span>
   </h3>
 
@@ -3820,7 +3520,7 @@ and what the value represents, is determined by the field.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber461">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber460">source</a></span></span>
     </span>
   </h3>
 
@@ -3887,7 +3587,7 @@ This is historically inaccurate, but is correct for the ISO-8601 standard.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber302">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber301">source</a></span></span>
     </span>
   </h3>
 
@@ -3961,7 +3661,7 @@ This is historically inaccurate, but is correct for the ISO-8601 standard.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber335">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber334">source</a></span></span>
     </span>
   </h3>
 
@@ -3970,9 +3670,9 @@ This is historically inaccurate, but is correct for the ISO-8601 standard.</p>
   
   <div data-ice="description"><p>Checks if the specified field is supported.</p>
 <p>This checks if this year can be queried for the specified field.
-If false, then calling <span><a href="class/packages/core/src/Year.js~Year.html#instance-method-range">range</a></span> and <span><a href="class/packages/core/src/MonthDay.js~MonthDay.html#instance-method-get">get</a></span> will throw an exception.</p>
+If false, then calling <span><a href="class/packages/core/src/DayOfWeek.js~DayOfWeek.html#instance-method-range">range</a></span> and <span><a href="class/packages/core/src/DayOfWeek.js~DayOfWeek.html#instance-method-get">get</a></span> will throw an exception.</p>
 <p>If the field is a <span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span> then the query is implemented here.
-The supported fields (see <span><a href="class/packages/core/src/MonthDay.js~MonthDay.html#instance-method-isSupported">isSupported</a></span>) will return valid
+The supported fields (see <span><a href="class/packages/core/src/DayOfWeek.js~DayOfWeek.html#instance-method-isSupported">isSupported</a></span>) will return valid
 values based on this date-time.
 The supported fields are:</p>
 <ul>
@@ -3982,7 +3682,7 @@ The supported fields are:</p>
 </ul>
 <p>All other <span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span> instances will return false.</p>
 <p>If the field is not a <span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span>, then the result of this method
-is obtained by invoking <span>TemporalField.isSupportedBy</span>
+is obtained by invoking <span><a href="class/packages/core/src/temporal/TemporalField.js~TemporalField.html#instance-method-isSupportedBy">TemporalField.isSupportedBy</a></span>
 passing <code>this</code> as the argument.
 Whether the field is supported is determined by the field.</p>
 </div>
@@ -4051,7 +3751,7 @@ Whether the field is supported is determined by the field.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber342">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber341">source</a></span></span>
     </span>
   </h3>
 
@@ -4122,7 +3822,7 @@ Whether the field is supported is determined by the field.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber704">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber622">source</a></span></span>
     </span>
   </h3>
 
@@ -4198,7 +3898,7 @@ a valid date.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber713">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber631">source</a></span></span>
     </span>
   </h3>
 
@@ -4244,205 +3944,6 @@ a valid date.</p>
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-minusAmount">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">minusAmount</span><span class="code" data-ice="signature">(amount: <span><a href="class/packages/core/src/temporal/TemporalAmount.js~TemporalAmount.html">TemporalAmount</a></span>): <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber627">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Returns a copy of this year with the specified period subtracted.</p>
-<p>This method returns a new year based on this year with the specified period subtracted.
-The subtractor is typically <span><a href="class/packages/core/src/Period.js~Period.html">Period</a></span> but may be any other type implementing
-the <span><a href="class/packages/core/src/temporal/TemporalAmount.js~TemporalAmount.html">TemporalAmount</a></span> interface.
-The calculation is delegated to the specified adjuster, which typically calls
-back to <span><a href="class/packages/core/src/DayOfWeek.js~DayOfWeek.html#instance-method-minus">minus</a></span>.</p>
-<p>This instance is immutable and unaffected by this method call.</p>
-</div>
-
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-minusAmount">Temporal#minusAmount</a></span></div>
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">amount</td>
-      <td data-ice="type" class="code"><span><a href="class/packages/core/src/temporal/TemporalAmount.js~TemporalAmount.html">TemporalAmount</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>the amount to subtract, not null</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tbody>
-        <tr>
-          <td class="return-type code" data-ice="returnType"><span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></td>
-          <td class="return-desc" data-ice="returnDescription"><p>based on this year with the subtraction made, not null</p>
-</td>
-        </tr>
-      </tbody>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  <div data-ice="throwWrap">
-    <h4>Throw:</h4>
-    <table>
-      <tbody>
-      
-      <tr class="throw" data-ice="throw">
-        <td><p data-ice="throwName"><span>*</span></p></td>
-        <td data-ice="throwDesc"><p>DateTimeException if the subtraction cannot be made</p>
-</td>
-      </tr>
-<tr class="throw" data-ice="throw">
-        <td><p data-ice="throwName"><span>*</span></p></td>
-        <td data-ice="throwDesc"><p>ArithmeticException if numeric overflow occurs</p>
-</td>
-      </tr>
-</tbody>
-    </table>
-  </div>
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-minusAmountUnit">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">minusAmountUnit</span><span class="code" data-ice="signature">(amountToSubtract: <span>number</span>, unit: <span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span>): <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber640">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Returns an object of the same type as this object with the specified period subtracted.
-This method returns a new object based on this one with the specified period subtracted. For example, on a <span><a href="class/packages/core/src/LocalDate.js~LocalDate.html">LocalDate</a></span>, this could be used to subtract a number of years, months or days. The returned object will have the same observable type as this object.</p>
-<p>In some cases, changing a field is not fully defined. For example, if the target object is a date representing the 31st March, then subtracting one month would be unclear. In cases like this, the field is responsible for resolving the result. Typically it will choose the previous valid date, which would be the last valid day of February in this example.</p>
-<p>If the implementation represents a date-time that has boundaries, such <span>as</span> LocalTime, then the permitted units must include the boundary unit, but no multiples of the boundary unit. For example, <span><a href="class/packages/core/src/LocalTime.js~LocalTime.html">LocalTime</a></span> must accept <code>DAYS</code> but not <code>WEEKS</code> or <code>MONTHS</code>.</p>
-<h3 id="specification-for-implementors">Specification for implementors</h3><p>Implementations must behave in a manor equivalent to the default method behavior.
-Implementations must not alter either this object or the specified temporal object. Instead, an adjusted copy of the original must be returned. This provides equivalent, safe behavior for immutable and mutable implementations.</p>
-</div>
-
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-minusAmountUnit">Temporal#minusAmountUnit</a></span></div>
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">amountToSubtract</td>
-      <td data-ice="type" class="code"><span>number</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>the amount to subtract, not null</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">unit</td>
-      <td data-ice="type" class="code"><span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tbody>
-        <tr>
-          <td class="return-type code" data-ice="returnType"><span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></td>
-          <td class="return-desc" data-ice="returnDescription"><p>based on this year with the subtraction made, not null</p>
-</td>
-        </tr>
-      </tbody>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  <div data-ice="throwWrap">
-    <h4>Throw:</h4>
-    <table>
-      <tbody>
-      
-      <tr class="throw" data-ice="throw">
-        <td><p data-ice="throwName"><span>*</span></p></td>
-        <td data-ice="throwDesc"><p>DateTimeException if the subtraction cannot be made</p>
-</td>
-      </tr>
-<tr class="throw" data-ice="throw">
-        <td><p data-ice="throwName"><span>*</span></p></td>
-        <td data-ice="throwDesc"><p>ArithmeticException if numeric overflow occurs</p>
-</td>
-      </tr>
-</tbody>
-    </table>
-  </div>
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-minusYears">
     <span class="access" data-ice="access">public</span>
     
@@ -4454,7 +3955,7 @@ Implementations must not alter either this object or the specified temporal obje
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber656">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber574">source</a></span></span>
     </span>
   </h3>
 
@@ -4530,205 +4031,6 @@ Implementations must not alter either this object or the specified temporal obje
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-plusAmount">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">plusAmount</span><span class="code" data-ice="signature">(amount: <span><a href="class/packages/core/src/temporal/TemporalAmount.js~TemporalAmount.html">TemporalAmount</a></span>): <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber563">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Returns a copy of this year with the specified period added.</p>
-<p>This method returns a new year based on this year with the specified period added.
-The adder is typically <span><a href="class/packages/core/src/Period.js~Period.html">Period</a></span> but may be any other type implementing
-the <span><a href="class/packages/core/src/temporal/TemporalAmount.js~TemporalAmount.html">TemporalAmount</a></span> interface.
-The calculation is delegated to the specified adjuster, which typically calls
-back to <span><a href="class/packages/core/src/DayOfWeek.js~DayOfWeek.html#instance-method-plus">plus</a></span>.</p>
-<p>This instance is immutable and unaffected by this method call.</p>
-</div>
-
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-plusAmount">Temporal#plusAmount</a></span></div>
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">amount</td>
-      <td data-ice="type" class="code"><span><a href="class/packages/core/src/temporal/TemporalAmount.js~TemporalAmount.html">TemporalAmount</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>the amount to add, not null</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tbody>
-        <tr>
-          <td class="return-type code" data-ice="returnType"><span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></td>
-          <td class="return-desc" data-ice="returnDescription"><p>based on this year with the addition made, not null</p>
-</td>
-        </tr>
-      </tbody>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  <div data-ice="throwWrap">
-    <h4>Throw:</h4>
-    <table>
-      <tbody>
-      
-      <tr class="throw" data-ice="throw">
-        <td><p data-ice="throwName"><span>*</span></p></td>
-        <td data-ice="throwDesc"><p>DateTimeException if the addition cannot be made</p>
-</td>
-      </tr>
-<tr class="throw" data-ice="throw">
-        <td><p data-ice="throwName"><span>*</span></p></td>
-        <td data-ice="throwDesc"><p>ArithmeticException if numeric overflow occurs</p>
-</td>
-      </tr>
-</tbody>
-    </table>
-  </div>
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-plusAmountUnit">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">plusAmountUnit</span><span class="code" data-ice="signature">(amountToAdd: <span>number</span>, unit: <span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span>): <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber576">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Returns an object of the same type as this object with the specified period added.
-This method returns a new object based on this one with the specified period added. For example, on a <span><a href="class/packages/core/src/LocalDate.js~LocalDate.html">LocalDate</a></span>, this could be used to add a number of years, months or days. The returned object will have the same observable type as this object.</p>
-<p>In some cases, changing a field is not fully defined. For example, if the target object is a date representing the 31st January, then adding one month would be unclear. In cases like this, the field is responsible for resolving the result. Typically it will choose the previous valid date, which would be the last valid day of February in this example.</p>
-<p>If the implementation represents a date-time that has boundaries, such as <span><a href="class/packages/core/src/LocalTime.js~LocalTime.html">LocalTime</a></span>, then the permitted units must include the boundary unit, but no multiples of the boundary unit. For example, <span><a href="class/packages/core/src/LocalTime.js~LocalTime.html">LocalTime</a></span> must accept <code>DAYS</code> but not <code>WEEKS</code> or <code>MONTHS</code>.</p>
-<h3 id="specification-for-implementors">Specification for implementors</h3><p>Implementations must check and handle all units defined in <span><a href="class/packages/core/src/temporal/ChronoUnit.js~ChronoUnit.html">ChronoUnit</a></span>. If the unit is supported, then the addition must be performed. If unsupported, then a <span><a href="variable/index.html#static-variable-DateTimeException">DateTimeException</a></span> must be thrown.
-If the unit is not a <span><a href="class/packages/core/src/temporal/ChronoUnit.js~ChronoUnit.html">ChronoUnit</a></span>, then the result of this method is obtained by invoking <code>TemporalUnit.addTo(Temporal, long)</code> passing this as the first argument.</p>
-<p>Implementations must not alter either this object or the specified temporal object. Instead, an adjusted copy of the original must be returned. This provides equivalent, safe behavior for immutable and mutable implementations.</p>
-</div>
-
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-plusAmountUnit">Temporal#plusAmountUnit</a></span></div>
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">amountToAdd</td>
-      <td data-ice="type" class="code"><span>number</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">unit</td>
-      <td data-ice="type" class="code"><span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tbody>
-        <tr>
-          <td class="return-type code" data-ice="returnType"><span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></td>
-          <td class="return-desc" data-ice="returnDescription"><p>based on this year with the addition made, not null</p>
-</td>
-        </tr>
-      </tbody>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  <div data-ice="throwWrap">
-    <h4>Throw:</h4>
-    <table>
-      <tbody>
-      
-      <tr class="throw" data-ice="throw">
-        <td><p data-ice="throwName"><span>*</span></p></td>
-        <td data-ice="throwDesc"><p>DateTimeException if the addition cannot be made</p>
-</td>
-      </tr>
-<tr class="throw" data-ice="throw">
-        <td><p data-ice="throwName"><span>*</span></p></td>
-        <td data-ice="throwDesc"><p>ArithmeticException if numeric overflow occurs</p>
-</td>
-      </tr>
-</tbody>
-    </table>
-  </div>
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-plusYears">
     <span class="access" data-ice="access">public</span>
     
@@ -4740,7 +4042,7 @@ If the unit is not a <span><a href="class/packages/core/src/temporal/ChronoUnit.
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber602">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber556">source</a></span></span>
     </span>
   </h3>
 
@@ -4827,7 +4129,7 @@ If the unit is not a <span><a href="class/packages/core/src/temporal/ChronoUnit.
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber828">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber746">source</a></span></span>
     </span>
   </h3>
 
@@ -4925,7 +4227,7 @@ specified query passing <code>this</code> as the argument.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber371">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber370">source</a></span></span>
     </span>
   </h3>
 
@@ -4938,11 +4240,11 @@ This year is used to enhance the accuracy of the returned range.
 If it is not possible to return the range, because the field is not supported
 or for some other reason, an exception is thrown.</p>
 <p>If the field is a <span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span> then the query is implemented here.
-The supported fields (see <span><a href="class/packages/core/src/MonthDay.js~MonthDay.html#instance-method-isSupported">isSupported</a></span>) will return
+The supported fields (see <span><a href="class/packages/core/src/DayOfWeek.js~DayOfWeek.html#instance-method-isSupported">isSupported</a></span>) will return
 appropriate range instances.
 All other <span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span> instances will throw a <span><a href="variable/index.html#static-variable-DateTimeException">DateTimeException</a></span>.</p>
 <p>If the field is not a <span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span>, then the result of this method
-is obtained by invoking <span>TemporalField.rangeRefinedBy</span>
+is obtained by invoking <span><a href="class/packages/core/src/temporal/TemporalField.js~TemporalField.html#instance-method-rangeRefinedBy">TemporalField.rangeRefinedBy</a></span>
 passing <code>this</code> as the argument.
 Whether the range can be obtained is determined by the field.</p>
 </div>
@@ -5023,7 +4325,7 @@ Whether the range can be obtained is determined by the field.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber925">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber843">source</a></span></span>
     </span>
   </h3>
 
@@ -5080,7 +4382,7 @@ delegates to toString()</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber915">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber833">source</a></span></span>
     </span>
   </h3>
 
@@ -5137,7 +4439,7 @@ delegates to toString()</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber978">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber896">source</a></span></span>
     </span>
   </h3>
 
@@ -5274,7 +4576,7 @@ If the unit is not a <span><a href="class/packages/core/src/temporal/ChronoUnit.
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber86">source</a></span></span>
+      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber85">source</a></span></span>
     </span>
   </h3>
 
@@ -5308,227 +4610,6 @@ If the unit is not a <span><a href="class/packages/core/src/temporal/ChronoUnit.
   
 
   
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-withAdjuster">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">withAdjuster</span><span class="code" data-ice="signature">(adjuster: <span><a href="class/packages/core/src/temporal/TemporalAdjuster.js~TemporalAdjuster.html">TemporalAdjuster</a></span>): <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber485">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Returns an adjusted copy of this year.</p>
-<p>This returns a new <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span>, based on this one, with the year adjusted.
-The adjustment takes place using the specified adjuster strategy object.
-Read the documentation of the adjuster to understand what adjustment will be made.</p>
-<p>The result of this method is obtained by invoking the
-<span><a href="class/packages/core/src/temporal/TemporalAdjuster.js~TemporalAdjuster.html#instance-method-adjustInto">TemporalAdjuster#adjustInto</a></span> method on the
-specified adjuster passing <code>this</code> as the argument.</p>
-<p>This instance is immutable and unaffected by this method call.</p>
-</div>
-
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-withAdjuster">Temporal#withAdjuster</a></span></div>
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">adjuster</td>
-      <td data-ice="type" class="code"><span><a href="class/packages/core/src/temporal/TemporalAdjuster.js~TemporalAdjuster.html">TemporalAdjuster</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>the adjuster to use, not null</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tbody>
-        <tr>
-          <td class="return-type code" data-ice="returnType"><span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></td>
-          <td class="return-desc" data-ice="returnDescription"><p>based on <code>this</code> with the adjustment made, not null</p>
-</td>
-        </tr>
-      </tbody>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  <div data-ice="throwWrap">
-    <h4>Throw:</h4>
-    <table>
-      <tbody>
-      
-      <tr class="throw" data-ice="throw">
-        <td><p data-ice="throwName"><span>*</span></p></td>
-        <td data-ice="throwDesc"><p>DateTimeException if the adjustment cannot be made</p>
-</td>
-      </tr>
-<tr class="throw" data-ice="throw">
-        <td><p data-ice="throwName"><span>*</span></p></td>
-        <td data-ice="throwDesc"><p>ArithmeticException if numeric overflow occurs</p>
-</td>
-      </tr>
-</tbody>
-    </table>
-  </div>
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-withFieldValue">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">withFieldValue</span><span class="code" data-ice="signature">(field: <span><a href="class/packages/core/src/temporal/TemporalField.js~TemporalField.html">TemporalField</a></span>, newValue: <span>number</span>): <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/packages/core/src/Year.js.html#lineNumber529">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Returns a copy of this year with the specified field set to a new value.</p>
-<p>This returns a new <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span>, based on this one, with the value
-for the specified field changed.
-If it is not possible to set the value, because the field is not supported or for
-some other reason, an exception is thrown.</p>
-<p>If the field is a <span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span> then the adjustment is implemented here.
-The supported fields behave as follows:</p>
-<ul>
-<li><span>YEAR_OF_ERA</span> -
-Returns a <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span> with the specified year-of-era
-The era will be unchanged.</li>
-<li><span>YEAR</span> -
-Returns a <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span> with the specified year.
-This completely replaces the date and is equivalent to <span><a href="class/packages/core/src/YearMonth.js~YearMonth.html#static-method-of">of</a></span>.</li>
-<li><span>ERA</span> -
-Returns a <span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span> with the specified era.
-The year-of-era will be unchanged.</li>
-</ul>
-<p>In all cases, if the new value is outside the valid range of values for the field
-then a <span><a href="variable/index.html#static-variable-DateTimeException">DateTimeException</a></span> will be thrown.</p>
-<p>All other <span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span> instances will throw a <span><a href="variable/index.html#static-variable-DateTimeException">DateTimeException</a></span>.</p>
-<p>If the field is not a <span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span>, then the result of this method
-is obtained by invoking <span>TemporalField.adjustInto</span>
-passing <code>this</code> as the argument. In this case, the field determines
-whether and how to adjust the instant.</p>
-<p>This instance is immutable and unaffected by this method call.</p>
-</div>
-
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/packages/core/src/temporal/Temporal.js~Temporal.html#instance-method-withFieldValue">Temporal#withFieldValue</a></span></div>
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">field</td>
-      <td data-ice="type" class="code"><span><a href="class/packages/core/src/temporal/TemporalField.js~TemporalField.html">TemporalField</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>the field to set in the result, not null</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">newValue</td>
-      <td data-ice="type" class="code"><span>number</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>the new value of the field in the result</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tbody>
-        <tr>
-          <td class="return-type code" data-ice="returnType"><span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></td>
-          <td class="return-desc" data-ice="returnDescription"><p>based on <code>this</code> with the specified field set, not null</p>
-</td>
-        </tr>
-      </tbody>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  <div data-ice="throwWrap">
-    <h4>Throw:</h4>
-    <table>
-      <tbody>
-      
-      <tr class="throw" data-ice="throw">
-        <td><p data-ice="throwName"><span>*</span></p></td>
-        <td data-ice="throwDesc"><p>DateTimeException if the field cannot be set</p>
-</td>
-      </tr>
-<tr class="throw" data-ice="throw">
-        <td><p data-ice="throwName"><span>*</span></p></td>
-        <td data-ice="throwDesc"><p>ArithmeticException if numeric overflow occurs</p>
-</td>
-      </tr>
-</tbody>
-    </table>
-  </div>
 
   
 

@@ -8,7 +8,7 @@
   <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
   <script src="script/prettify/prettify.js"></script>
   <script src="script/manual.js"></script>
-<meta name="description" content="Immutable date and time library for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="js-joda"><meta property="twitter:description" content="Immutable date and time library for JavaScript"></head>
+<script src="./inject/script/0-js-joda.min.js"></script><script src="./inject/script/0-js-joda-extra.min.js"></script><script src="./inject/script/0-js-joda-timezone.min.js"></script><script src="./inject/script/0-index.js"></script><script src="./inject/script/0-yato.js"></script><meta name="description" content="Immutable date and time library for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="js-joda"><meta property="twitter:description" content="Immutable date and time library for JavaScript"></head>
 <body class="layout-container" data-ice="rootContainer">
 
 <header>
@@ -40,6 +40,8 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/MathUtil.js~MathUtil.html">MathUtil</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/Month.js~Month.html">Month</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/MonthDay.js~MonthDay.html">MonthDay</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html">OffsetDateTime</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/OffsetTime.js~OffsetTime.html">OffsetTime</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/Period.js~Period.html">Period</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/YearConstants.js~YearConstants.html">YearConstants</a></span></span></li>
@@ -48,12 +50,8 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/ZoneOffset.js~ZoneOffset.html">ZoneOffset</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/ZoneRegion.js~ZoneRegion.html">ZoneRegion</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/ZonedDateTime.js~ZonedDateTime.html">ZonedDateTime</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-abstractMethodFail">abstractMethodFail</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-assert">assert</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-requireInstance">requireInstance</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-requireNonNull">requireNonNull</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convert">convert</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-bindUse">bindUse</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-nativeJs">nativeJs</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-MAX_SAFE_INTEGER">MAX_SAFE_INTEGER</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-MIN_SAFE_INTEGER">MIN_SAFE_INTEGER</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-ArithmeticException">ArithmeticException</a></span></span></li>
@@ -63,7 +61,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-IllegalStateException">IllegalStateException</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-NullPointerException">NullPointerException</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-UnsupportedTemporalTypeException">UnsupportedTemporalTypeException</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-use">use</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core-src-chrono">core/src/chrono</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/chrono/ChronoLocalDate.js~ChronoLocalDate.html">ChronoLocalDate</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/chrono/ChronoLocalDateTime.js~ChronoLocalDateTime.html">ChronoLocalDateTime</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/chrono/ChronoZonedDateTime.js~ChronoZonedDateTime.html">ChronoZonedDateTime</a></span></span></li>
@@ -76,8 +73,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/format/TextStyle.js~TextStyle.html">TextStyle</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core-src-temporal">core/src/temporal</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/ChronoUnit.js~ChronoUnit.html">ChronoUnit</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/DefaultInterfaceTemporal.js~DefaultInterfaceTemporal.html">DefaultInterfaceTemporal</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/IsoFields.js~IsoFields.html">IsoFields</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalAccessor.js~TemporalAccessor.html">TemporalAccessor</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalAdjusters.js~TemporalAdjusters.html">TemporalAdjusters</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalQueries.js~TemporalQueries.html">TemporalQueries</a></span></span></li>
@@ -88,35 +83,30 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-interface">I</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalField.js~TemporalField.html">TemporalField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-interface">I</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalQuery.js~TemporalQuery.html">TemporalQuery</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-interface">I</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-nativeJs">nativeJs</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-createTemporalQuery">createTemporalQuery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-IsoFields">IsoFields</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core-src-zone">core/src/zone</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/SystemDefaultZoneId.js~SystemDefaultZoneId.html">SystemDefaultZoneId</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/SystemDefaultZoneRules.js~SystemDefaultZoneRules.html">SystemDefaultZoneRules</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/ZoneOffsetTransition.js~ZoneOffsetTransition.html">ZoneOffsetTransition</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/ZoneRules.js~ZoneRules.html">ZoneRules</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/ZoneRulesProvider.js~ZoneRulesProvider.html">ZoneRulesProvider</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#extra-src">extra/src</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/Interval.js~Interval.html">Interval</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-abstractMethodFail">abstractMethodFail</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-assert">assert</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-requireInstance">requireInstance</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-requireNonNull">requireNonNull</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plug">plug</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#extra-src">extra/src</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/DayOfMonth.js~DayOfMonth.html">DayOfMonth</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/DayOfYear.js~DayOfYear.html">DayOfYear</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/Interval.js~Interval.html">Interval</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/LocalDateRange.js~LocalDateRange.html">LocalDateRange</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/OffsetDate.js~OffsetDate.html">OffsetDate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/Quarter.js~Quarter.html">Quarter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/Temporals.js~Temporals.html">Temporals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/YearQuarter.js~YearQuarter.html">YearQuarter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/YearWeek.js~YearWeek.html">YearWeek</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src">locale/src</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/Locale.js~Locale.html">Locale</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plug">plug</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-format">locale/src/format</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/LocaleDateTimeFormatter.js~LocaleDateTimeFormatter.html">LocaleDateTimeFormatter</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/LocaleStore.js~LocaleStore.html">LocaleStore</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-createEntry">createEntry</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-format-cldr">locale/src/format/cldr</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder.html">CldrDateTimeFormatterBuilder</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/cldr/CldrZoneTextPrinterParser.js~CldrZoneTextPrinterParser.html">CldrZoneTextPrinterParser</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-format-cldr">locale/src/format/cldr</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/cldr/CldrZoneTextPrinterParser.js~CldrZoneTextPrinterParser.html">CldrZoneTextPrinterParser</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-format-parser">locale/src/format/parser</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/parser/WeekFieldsPrinterParser.js~WeekFieldsPrinterParser.html">WeekFieldsPrinterParser</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-temporal">locale/src/temporal</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/temporal/WeekFields.js~ComputedDayOfField.html">ComputedDayOfField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/temporal/WeekFields.js~WeekFields.html">WeekFields</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#timezone-src">timezone/src</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/timezone/src/MomentZoneRules.js~MomentZoneRules.html">MomentZoneRules</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/timezone/src/MomentZoneRulesProvider.js~MomentZoneRulesProvider.html">MomentZoneRulesProvider</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-autoPlug">autoPlug</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plug">plug</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extendSystemDefaultZoneId">extendSystemDefaultZoneId</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-unpack">unpack</a></span></span></li>
 </ul>
 </div>
 </nav>
@@ -128,31 +118,33 @@
  * @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
  */
 
-import {assert, requireNonNull, requireInstance} from &apos;./assert&apos;;
+import { assert, requireNonNull, requireInstance } from &apos;./assert&apos;;
 
-import {MathUtil} from &apos;./MathUtil&apos;;
-import {DateTimeException, UnsupportedTemporalTypeException, NullPointerException, IllegalArgumentException} from &apos;./errors&apos;;
+import { MathUtil } from &apos;./MathUtil&apos;;
+import { DateTimeException, UnsupportedTemporalTypeException, NullPointerException, IllegalArgumentException } from &apos;./errors&apos;;
 
-import {IsoChronology} from &apos;./chrono/IsoChronology&apos;;
-import {ChronoField} from &apos;./temporal/ChronoField&apos;;
-import {ChronoUnit} from &apos;./temporal/ChronoUnit&apos;;
-import {ChronoLocalDate} from &apos;./chrono/ChronoLocalDate&apos;;
-import {TemporalQueries} from &apos;./temporal/TemporalQueries&apos;;
-import {createTemporalQuery} from &apos;./temporal/TemporalQuery&apos;;
-import {ValueRange} from &apos;./temporal/ValueRange&apos;;
-import {DateTimeFormatter} from &apos;./format/DateTimeFormatter&apos;;
+import { IsoChronology } from &apos;./chrono/IsoChronology&apos;;
+import { ChronoField } from &apos;./temporal/ChronoField&apos;;
+import { ChronoUnit } from &apos;./temporal/ChronoUnit&apos;;
+import { ChronoLocalDate } from &apos;./chrono/ChronoLocalDate&apos;;
+import { TemporalQueries } from &apos;./temporal/TemporalQueries&apos;;
+import { createTemporalQuery } from &apos;./temporal/TemporalQuery&apos;;
+import { ValueRange } from &apos;./temporal/ValueRange&apos;;
+import { DateTimeFormatter } from &apos;./format/DateTimeFormatter&apos;;
 
-import {Clock} from &apos;./Clock&apos;;
-import {DayOfWeek} from &apos;./DayOfWeek&apos;;
-import {Month} from &apos;./Month&apos;;
-import {Period} from &apos;./Period&apos;;
-import {YearConstants} from &apos;./YearConstants&apos;;
-import {LocalTime} from &apos;./LocalTime&apos;;
-import {LocalDateTime} from &apos;./LocalDateTime&apos;;
-import {Year} from &apos;./Year&apos;;
-import {ZoneId} from &apos;./ZoneId&apos;;
-import {ZoneOffset} from &apos;./ZoneOffset&apos;;
-import {ZonedDateTime} from &apos;./ZonedDateTime&apos;;
+import { Clock } from &apos;./Clock&apos;;
+import { DayOfWeek } from &apos;./DayOfWeek&apos;;
+import { OffsetDateTime } from &apos;./OffsetDateTime&apos;;
+import { OffsetTime } from &apos;./OffsetTime&apos;;
+import { Month } from &apos;./Month&apos;;
+import { Period } from &apos;./Period&apos;;
+import { YearConstants } from &apos;./YearConstants&apos;;
+import { LocalTime } from &apos;./LocalTime&apos;;
+import { LocalDateTime } from &apos;./LocalDateTime&apos;;
+import { Year } from &apos;./Year&apos;;
+import { ZoneId } from &apos;./ZoneId&apos;;
+import { ZoneOffset } from &apos;./ZoneOffset&apos;;
+import { ZonedDateTime } from &apos;./ZonedDateTime&apos;;
 
 /**
  * The number of days in a 400 year cycle.
@@ -280,7 +272,7 @@ export class LocalDate extends ChronoLocalDate{
         //TODO: ChronoField.DAY_OF_YEAR.checkValidValue(dayOfYear);
         const leap = IsoChronology.isLeapYear(year);
         if (dayOfYear === 366 &amp;&amp; leap === false) {
-            assert(false, &apos;Invalid date \&apos;DayOfYear 366\&apos; as \&apos;&apos; + year + &apos;\&apos; is not a leap year&apos;, DateTimeException);
+            assert(false, `Invalid date &apos;DayOfYear 366&apos; as &apos;${year}&apos; is not a leap year`, DateTimeException);
         }
         let moy = Month.of(Math.floor((dayOfYear - 1) / 31 + 1));
         const monthEnd = moy.firstDayOfYear(leap) + moy.length(leap) - 1;
@@ -445,9 +437,9 @@ export class LocalDate extends ChronoLocalDate{
             }
             if (dayOfMonth &gt; dom) {
                 if (dayOfMonth === 29) {
-                    assert(false, &apos;Invalid date \&apos;February 29\&apos; as \&apos;&apos; + year + &apos;\&apos; is not a leap year&apos;, DateTimeException);
+                    assert(false, `Invalid date &apos;February 29&apos; as &apos;${year}&apos; is not a leap year`, DateTimeException);
                 } else {
-                    assert(false, &apos;Invalid date \&apos;&apos; + year + &apos;\&apos; \&apos;&apos; + month + &apos;\&apos; \&apos;&apos; + dayOfMonth + &apos;\&apos;&apos;, DateTimeException);
+                    assert(false, `Invalid date &apos;${year}&apos; &apos;${month}&apos; &apos;${dayOfMonth}&apos;`, DateTimeException);
                 }
             }
         }
@@ -527,7 +519,7 @@ export class LocalDate extends ChronoLocalDate{
                 }
                 return field.range();
             }
-            throw new UnsupportedTemporalTypeException(&apos;Unsupported field: &apos; + field);
+            throw new UnsupportedTemporalTypeException(`Unsupported field: ${field}`);
         }
         return field.rangeRefinedBy(this);
     }
@@ -598,7 +590,7 @@ export class LocalDate extends ChronoLocalDate{
             case ChronoField.YEAR: return this._year;
             case ChronoField.ERA: return (this._year &gt;= 1 ? 1 : 0);
         }
-        throw new UnsupportedTemporalTypeException(&apos;Unsupported field: &apos; + field);
+        throw new UnsupportedTemporalTypeException(`Unsupported field: ${field}`);
     }
 
     /**
@@ -773,14 +765,13 @@ export class LocalDate extends ChronoLocalDate{
      * @throws {DateTimeException} if the adjustment cannot be made
      * @throws {ArithmeticException} if numeric overflow occurs
      */
-    withAdjuster(adjuster) {
+    _withAdjuster(adjuster) {
         requireNonNull(adjuster, &apos;adjuster&apos;);
         // optimizations
         if (adjuster instanceof LocalDate) {
             return adjuster;
         }
-        assert(typeof adjuster.adjustInto === &apos;function&apos;, &apos;adjuster&apos;, IllegalArgumentException);
-        return adjuster.adjustInto(this);
+        return super._withAdjuster(adjuster);
     }
 
     /**
@@ -883,7 +874,7 @@ export class LocalDate extends ChronoLocalDate{
      * @throws {DateTimeException} if the field cannot be set
      * @throws {ArithmeticException} if numeric overflow occurs
      */
-    withFieldValue(field, newValue) {
+    _withField(field, newValue) {
         assert(field != null, &apos;field&apos;, NullPointerException);
         if (field instanceof ChronoField) {
             const f = field;
@@ -903,7 +894,7 @@ export class LocalDate extends ChronoLocalDate{
                 case ChronoField.YEAR: return this.withYear(newValue);
                 case ChronoField.ERA: return (this.getLong(ChronoField.ERA) === newValue ? this : this.withYear(1 - this._year));
             }
-            throw new UnsupportedTemporalTypeException(&apos;Unsupported field: &apos; + field);
+            throw new UnsupportedTemporalTypeException(`Unsupported field: ${field}`);
         }
         return field.adjustInto(this, newValue);
     }
@@ -978,25 +969,6 @@ export class LocalDate extends ChronoLocalDate{
      * Returns a copy of this date with the specified period added.
      *
      * This method returns a new date based on this date with the specified period added.
-     * The amount is typically {@link Period} but may be any other type implementing
-     * the {@link TemporalAmount} interface.
-     * The calculation is delegated to the specified adjuster, which typically calls
-     * back to {@link LocalDate.plusAmountUnit}.
-     *
-     * @param {!TemporalAmount} amount - the amount to add, not null
-     * @return {LocalDate} a {@link LocalDate} based on this date with the addition made, not null
-     * @throws {DateTimeException} if the addition cannot be made
-     * @throws {ArithmeticException} if numeric overflow occurs
-     */
-    plusAmount(amount) {
-        requireNonNull(amount, &apos;amount&apos;);
-        return amount.addTo(this);
-    }
-
-    /**
-     * Returns a copy of this date with the specified period added.
-     *
-     * This method returns a new date based on this date with the specified period added.
      * This can be used to add any period that is defined by a unit, for example to add years, months or days.
      * The unit is responsible for the details of the calculation, including the resolution
      * of any edge cases in the calculation.
@@ -1006,7 +978,7 @@ export class LocalDate extends ChronoLocalDate{
      * @return {LocalDate} a {@link LocalDate} based on this date with the specified period added, not null
      * @throws {DateTimeException} if the unit cannot be added to this type
      */
-    plusAmountUnit(amountToAdd, unit) {
+    _plusUnit(amountToAdd, unit) {
         requireNonNull(amountToAdd, &apos;amountToAdd&apos;);
         requireNonNull(unit, &apos;unit&apos;);
         if (unit instanceof ChronoUnit) {
@@ -1020,7 +992,7 @@ export class LocalDate extends ChronoLocalDate{
                 case ChronoUnit.MILLENNIA: return this.plusYears(MathUtil.safeMultiply(amountToAdd, 1000));
                 case ChronoUnit.ERAS: return this.with(ChronoField.ERA, MathUtil.safeAdd(this.getLong(ChronoField.ERA), amountToAdd));
             }
-            throw new UnsupportedTemporalTypeException(&apos;Unsupported unit: &apos; + unit);
+            throw new UnsupportedTemporalTypeException(`Unsupported unit: ${unit}`);
         }
         return unit.addTo(this, amountToAdd);
     }
@@ -1121,25 +1093,6 @@ export class LocalDate extends ChronoLocalDate{
      * Returns a copy of this date with the specified period subtracted.
      *
      * This method returns a new date based on this date with the specified period subtracted.
-     * The amount is typically {@link Period} but may be any other type implementing
-     * the {@link TemporalAmount} interface.
-     * The calculation is delegated to the specified adjuster, which typically calls
-     * back to {@link minus}.
-     *
-     * @param {!TemporalAmount} amount - the amount to subtract, not null
-     * @return {LocalDate} a {@link LocalDate} based on this date with the subtraction made, not null
-     * @throws {DateTimeException} if the subtraction cannot be made
-     * @throws {ArithmeticException} if numeric overflow occurs
-     */
-    minusAmount(amount) {
-        requireNonNull(amount, &apos;amount&apos;);
-        return amount.subtractFrom(this);
-    }
-
-    /**
-     * Returns a copy of this date with the specified period subtracted.
-     *
-     * This method returns a new date based on this date with the specified period subtracted.
      * This can be used to subtract any period that is defined by a unit, for example to subtract years, months or days.
      * The unit is responsible for the details of the calculation, including the resolution
      * of any edge cases in the calculation.
@@ -1149,10 +1102,10 @@ export class LocalDate extends ChronoLocalDate{
      * @return {LocalDate} a {@link LocalDate} based on this date with the specified period subtracted, not null
      * @throws {DateTimeException} if the unit cannot be added to this type
      */
-    minusAmountUnit(amountToSubtract, unit) {
+    _minusUnit(amountToSubtract, unit) {
         requireNonNull(amountToSubtract, &apos;amountToSubtract&apos;);
         requireNonNull(unit, &apos;unit&apos;);
-        return this.plusAmountUnit(-1 * amountToSubtract, unit);
+        return this._plusUnit(-1 * amountToSubtract, unit);
     }
 
     /**
@@ -1354,7 +1307,7 @@ export class LocalDate extends ChronoLocalDate{
                 case ChronoUnit.MILLENNIA: return MathUtil.intDiv(this._monthsUntil(end), 12000);
                 case ChronoUnit.ERAS: return end.getLong(ChronoField.ERA) - this.getLong(ChronoField.ERA);
             }
-            throw new UnsupportedTemporalTypeException(&apos;Unsupported unit: &apos; + unit);
+            throw new UnsupportedTemporalTypeException(`Unsupported unit: ${unit}`);
         }
         return unit.between(this, end);
     }
@@ -1440,7 +1393,7 @@ export class LocalDate extends ChronoLocalDate{
      * if called with 1 argument {@link LocalDate.atTime1} is called
      * otherwise {@link LocalDate.atTime4}
      *
-     * @return {LocalDateTime} the local date-time formed from this date and the specified params
+     * @return {LocalDateTime|OffsetDateTime} the local date-time formed from this date and the specified params
      */
     atTime(){
         if(arguments.length===1){
@@ -1457,10 +1410,18 @@ export class LocalDate extends ChronoLocalDate{
      * All possible combinations of date and time are valid.
      *
      * @param {LocalTime} time - the time to combine with, not null
-     * @return {LocalDateTime} the local date-time formed from this date and the specified time, not null
+     * @return {LocalDateTime|OffsetDateTime} the date-time formed from this date and the specified time, not null
      */
     atTime1(time) {
-        return LocalDateTime.of(this, time);
+        requireNonNull(time, &apos;time&apos;);
+        if (time instanceof LocalTime) {
+            return LocalDateTime.of(this, time);
+        } else if (time instanceof OffsetTime) {
+            return this._atTimeOffsetTime(time);
+        } else {
+            throw new IllegalArgumentException(`time must be an instance of LocalTime or OffsetTime${ 
+                time &amp;&amp; time.constructor &amp;&amp; time.constructor.name ? `, but is ${time.constructor.name}` : &apos;&apos;}`);
+        }
     }
 
     /**
@@ -1491,11 +1452,9 @@ export class LocalDate extends ChronoLocalDate{
      * @param {OffsetTime} time - the time to combine with, not null
      * @return {OffsetDateTime} the offset date-time formed from this date and the specified time, not null
      */
-    /*
     _atTimeOffsetTime(time) { // atTime(offsetTime)
-        return OffsetDateTime.of(LocalDateTime.of(this, time.toLocalTime()), time.getOffset());
+        return OffsetDateTime.of(LocalDateTime.of(this, time.toLocalTime()), time.offset());
     }
-*/
 
     /**
      * Combines this date with the time of midnight to create a {@link LocalDateTime}
@@ -1504,12 +1463,29 @@ export class LocalDate extends ChronoLocalDate{
      * This returns a {@link LocalDateTime} formed from this date at the time of
      * midnight, 00:00, at the start of this date.
      *
-     * @param {ZoneId} zone - if zone is not null @see {@link LocalDate.atStartOfDayWithZone}
+     * If zone is not null, this returns a {@link ZonedDateTime} formed from this date at the
+     * specified zone, with the time set to be the earliest valid time according
+     * to the rules in the time-zone.
+     *
+     * Time-zone rules, such as daylight savings, mean that not every local date-time
+     * is valid for the specified zone, thus the local date-time may not be midnight.
+     *
+     * In most cases, there is only one valid offset for a local date-time.
+     * In the case of an overlap, there are two valid offsets, and the earlier one is used,
+     * corresponding to the first occurrence of midnight on the date.
+     * In the case of a gap, the zoned date-time will represent the instant just after the gap.
+     *
+     * If the zone ID is a {@link ZoneOffset}, then the result always has a time of midnight.
+     *
+     * To convert to a specific time in a given time-zone call {@link atTime}
+     * followed by {@link LocalDateTime#atZone}.
+     *
+     * @param {ZoneId} zone - optional ZoneId or ZoneOffset
      * @return {LocalDateTime|ZonedDateTime} the local date-time of midnight at the start of this date, not null
      */
     atStartOfDay(zone) {
         if(zone != null){
-            return this.atStartOfDayWithZone(zone);
+            return this._atStartOfDayWithZone(zone);
         } else {
             return LocalDateTime.of(this, LocalTime.MIDNIGHT);
         }
@@ -1539,7 +1515,7 @@ export class LocalDate extends ChronoLocalDate{
      * @param {!ZoneId} zone - the zone ID to use, not null
      * @return {ZonedDateTime} the zoned date-time formed from this date and the earliest valid time for the zone, not null
      */
-    atStartOfDayWithZone(zone) {
+    _atStartOfDayWithZone(zone) {
         requireNonNull(zone, &apos;zone&apos;);
         let ldt = this.atTime(LocalTime.MIDNIGHT);
         // need to handle case where there is a gap from 11:30 to 00:30
@@ -1748,28 +1724,28 @@ export class LocalDate extends ChronoLocalDate{
 
         if (absYear &lt; 1000) {
             if (yearValue &lt; 0) {
-                yearString = &apos;-&apos; + (&apos;&apos; + (yearValue - 10000)).slice(-4);
+                yearString = `-${(`${yearValue - 10000}`).slice(-4)}`;
             } else {
-                yearString = (&apos;&apos; + (yearValue + 10000)).slice(-4);
+                yearString = (`${yearValue + 10000}`).slice(-4);
             }
         } else {
             if (yearValue &gt; 9999) {
-                yearString = &apos;+&apos; + yearValue;
+                yearString = `+${yearValue}`;
             } else {
-                yearString = &apos;&apos; + yearValue;
+                yearString = `${yearValue}`;
             }
         }
 
         if (monthValue &lt; 10) {
-            monthString = &apos;-0&apos; + monthValue;
+            monthString = `-0${monthValue}`;
         } else {
-            monthString = &apos;-&apos; + monthValue;
+            monthString = `-${monthValue}`;
         }
 
         if (dayValue &lt; 10) {
-            dayString = &apos;-0&apos; + dayValue;
+            dayString = `-0${dayValue}`;
         } else {
-            dayString = &apos;-&apos; + dayValue;
+            dayString = `-${dayValue}`;
         }
 
         return yearString + monthString + dayString;

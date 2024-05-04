@@ -11,9 +11,8 @@ Documentation on the database schema, API, workflows, etc. for the [current rele
   1. Get the source code from git
     * git clone git@github.com:jpschewe/fll-sw (read-only)
     * Or you can create a fork and then submit a pull request when you have changes to merge in
-  1. Setup submodules by executing `./setup`
   1. setup eclipse classpath with `./gradlew eclipseClasspath`
-    * When library versions change, it's good to remove the .classpath file and then have gradle recreate it
+    * When library versions change, it's good to execute `./gradlew cleanEclipseClasspath eclipseClasspath`
   1. Build by executing `./gradlew classes`
   1. Start the application with `./gradlew run`
     * Start the webserver right away with `./rgadlew run --args="--start-web"`
@@ -42,10 +41,10 @@ To see how what other tasks depend on a task, for example `assemble`, execute `.
 
 # Copyright
 
-All of the code is currently Copyrighted by HighTechKids.
+All of the code is currently Copyrighted by High Tech Kids.
 Please make sure anything you add has the following sort of header:
 
-    Copyright (c) ${year} INSciTE.  All rights reserved
+    Copyright (c) ${year}  High Tech Kids.  All rights reserved
     HighTechKids is on the web at: http://www.hightechkids.org
     This code is released under GPL; see LICENSE.txt for details.
 
@@ -107,7 +106,7 @@ http://mtu.net/~jpschewe/java/CodingStandards.html
 
 # References to Documentation
 
-  * [Java](https://docs.oracle.com/en/java/javase/17/docs/api/index.html)
+  * [Java](https://docs.oracle.com/en/java/javase/21/docs/api/index.html)
   * [Tomcat API - 10](http://tomcat.apache.org/tomcat-10.0-doc/api/index.html)
   * [EL - 4.0](http://docs.oracle.com/javaee/7/api/javax/el/package-summary.html)
   * [Servlet - 5.0](http://docs.oracle.com/javaee/7/api/javax/servlet/package-summary.html)

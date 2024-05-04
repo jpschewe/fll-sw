@@ -16,6 +16,8 @@ import {
     Month,
     MonthDay,
     nativeJs,
+    OffsetDateTime,
+    OffsetTime,
     Period,
     ResolverStyle,
     SignStyle,
@@ -33,6 +35,7 @@ import {
     ValueRange,
     TextStyle,
     TemporalAccessor,
+    TemporalAmount,
 } from '../../'
 
 it('ZonedDateTime', () => {
@@ -68,6 +71,8 @@ it('ZonedDateTime', () => {
     zdt.plusWeeks(2);
     zdt.plusHours(2 * 7 * 24);
 
+    zdt.toOffsetDateTime().equals(OffsetDateTime.parse('2016-03-18T12:00:00.000-05:00'));
+
     expectType<number>(zdt.get(ChronoField.YEAR));
     expectType<number>(zdt.get(IsoFields.DAY_OF_QUARTER));
     expectType<boolean>(zdt.isSupported(ChronoField.YEAR));
@@ -89,6 +94,176 @@ it('ZonedDateTime', () => {
 
     expectType<string>(zdt.toString());
     expectType<string>(zdt.toJSON());
+
+    // .equals is not a type predicate
+    const temp = ZonedDateTime.now();
+    if (!zdt.equals(temp)) {
+        expectType<boolean>(temp.equals(zdt));
+    }
+});
+
+it('OffsetDateTime', () => {
+    OffsetDateTime.now().toString();
+
+    OffsetDateTime.now().atZoneSameInstant(ZoneId.of('UTC-05:00')).toString();
+    OffsetDateTime.now().atZoneSimilarLocal(ZoneId.of('UTC-05:00')).toString();
+    OffsetDateTime.now().toString();
+
+    OffsetDateTime.now(ZoneOffset.UTC).toString();
+
+    OffsetDateTime.now(ZoneId.of('UTC-05:00')).toString();
+
+    OffsetDateTime.parse('2016-03-18T12:38:23.561+01:00');
+    OffsetDateTime.parse('2016-03-18T12:38:23.561+01:00');
+    OffsetDateTime.parse('2016-03-18T11:38:23.561Z');
+    OffsetDateTime.parse('2016-03-18T06:38:23.561-05:00');
+    LocalDate.parse('2012-06-06').atStartOfDay().atZone(ZoneId.SYSTEM);
+    OffsetDateTime.of(LocalDateTime.parse('2012-06-06T00:00'), ZoneOffset.UTC);
+    OffsetDateTime.of(LocalDate.parse('2012-06-06'), LocalTime.MIDNIGHT, ZoneOffset.UTC);
+
+    OffsetDateTime.ofInstant(Instant.now(), ZoneId.SYSTEM);
+
+    var odt = LocalDate.of(2016, 3, 18)
+        .atTime(LocalTime.NOON)
+        .atOffset(ZoneOffset.UTC);
+
+    odt.year();
+    odt.month();
+    odt.monthValue();
+    odt.dayOfYear();
+    odt.dayOfMonth();
+    odt.dayOfWeek();
+    odt.hour();
+    odt.minute();
+    odt.second();
+    odt.nano();
+
+    odt.withOffsetSameInstant(ZoneOffset.UTC);
+    odt.withOffsetSameLocal(ZoneOffset.UTC);
+
+    odt.plusWeeks(2);
+    odt.plusHours(2 * 7 * 24);
+
+    expectType<number>(odt.get(ChronoField.YEAR));
+    expectType<number>(odt.get(IsoFields.DAY_OF_QUARTER));
+    expectType<boolean>(odt.isSupported(ChronoField.YEAR));
+    expectType<boolean>(odt.isSupported(ChronoUnit.SECONDS));
+    expectType<ValueRange>(odt.range(ChronoField.MICRO_OF_SECOND));
+    expectType<OffsetDateTime>(odt.minus(5, ChronoUnit.DAYS));
+    expectType<OffsetDateTime>(odt.plus(5, ChronoUnit.DAYS));
+    expectType<OffsetDateTime>(odt.minus(Duration.ofHours(3)));
+    expectType<OffsetDateTime>(odt.plus(Duration.ofHours(3)));
+    expectType<OffsetDateTime>(odt.with(TemporalAdjusters.firstDayOfMonth()));
+    expectType<OffsetDateTime>(odt.with(IsoFields.DAY_OF_QUARTER, 10));
+    expectType<number>(odt.until(OffsetDateTime.now(), ChronoUnit.SECONDS));
+
+    expectType<OffsetDateTime | null>(odt.query(OffsetDateTime.FROM));
+    expectType<LocalDate | null>(odt.query(TemporalQueries.localDate()));
+
+    expectType<string>(odt.toString());
+    expectType<string>(odt.toJSON());
+
+    // .equals is not a type predicate
+    const temp = OffsetDateTime.now();
+    if (!odt.equals(temp)) {
+        expectType<boolean>(temp.equals(odt));
+    }
+});
+
+it('OffsetTime', () => {
+    OffsetTime.now();
+    OffsetTime.now(ZoneOffset.UTC);
+    OffsetTime.parse('09:42Z');
+    OffsetTime.parse('09:42:42Z');
+    OffsetTime.parse('09:42:42.123Z');
+    OffsetTime.parse('09:42:42.123456789Z');
+    OffsetTime.of(23, 55, 42, 123000000, ZoneOffset.UTC);
+
+    OffsetDateTime.ofInstant(Instant.now(), ZoneId.SYSTEM);
+
+    let ot = OffsetTime.parse('23:55:42.123Z');
+
+    ot.hour();
+    ot.minute();
+    ot.second();
+    ot.nano();
+
+    expectType<string>(ot.toString());
+    expectType<string>(ot.toJSON());
+
+    ot = OffsetTime.parse('11:55:42Z');
+    expectType<OffsetTime>(ot.plusHours(12));
+    expectType<OffsetTime>(ot.minusHours(12));
+    expectType<OffsetTime>(ot.plusMinutes(30));
+    expectType<OffsetTime>(ot.minusMinutes(30));
+    expectType<OffsetTime>(ot.plusSeconds(30));
+    expectType<OffsetTime>(ot.minusSeconds(30));
+    expectType<OffsetTime>(ot.plusNanos(1000000));
+    expectType<OffsetTime>(ot.minusNanos(1000000));
+
+    expectType<number>(ot.get(ChronoField.MINUTE_OF_DAY));
+    expectType<boolean>(ot.isSupported(ChronoField.HOUR_OF_DAY));
+    expectType<boolean>(ot.isSupported(ChronoUnit.SECONDS));
+    expectType<ValueRange>(ot.range(ChronoField.MICRO_OF_SECOND));
+    expectType<OffsetTime>(ot.minus(5, ChronoUnit.HOURS));
+    expectType<OffsetTime>(ot.plus(5, ChronoUnit.HOURS));
+    expectType<OffsetTime>(ot.minus(Duration.ofHours(3)));
+    expectType<OffsetTime>(ot.plus(Duration.ofHours(3)));
+    expectType<OffsetTime>(ot.with(ChronoField.SECOND_OF_DAY, 10));
+    expectType<number>(ot.until(OffsetTime.now(), ChronoUnit.SECONDS));
+
+    ot = OffsetTime.parse('11:55:42Z');
+    ot.withHour(1);
+    ot.withMinute(1);
+    ot.withSecond(1);
+    ot.with(ChronoField.MILLI_OF_SECOND, 51);
+    let nextEvenSecond = {
+        adjustInto: function (t: OffsetTime) {
+            return t.second() % 2 === 0 ? t.plusSeconds(2) : t.plusSeconds(1);
+        }
+    };
+    ot.with(nextEvenSecond);
+    ot.plusSeconds(1).with(nextEvenSecond);
+
+    ot = OffsetTime.parse('23:55:42.123Z');
+
+    ot.truncatedTo(ChronoUnit.SECONDS);
+    ot.truncatedTo(ChronoUnit.MINUTES);
+    ot.truncatedTo(ChronoUnit.HOURS);
+    ot.truncatedTo(ChronoUnit.HALF_DAYS);
+    ot.truncatedTo(ChronoUnit.DAYS);
+
+    let t1 = OffsetTime.parse('11:55:42Z');
+    let t2 = t1.plusHours(2);
+
+    t1.isAfter(t2);
+    t1.isBefore(t2);
+
+    t1.equals(t1.plusHours(0));
+    t1.equals(t1.plusHours(1));
+
+    t1.compareTo(t1) === 0;
+    t1.compareTo(t2) < 0;
+    t2.compareTo(t1) > 0;
+
+    t1.hashCode();
+    t2.hashCode();
+    t1.hashCode() !== t2.hashCode();
+
+    t1 = OffsetTime.parse('11:00Z');
+    t2 = t1.plusHours(2).plusMinutes(42).plusSeconds(12);
+    t1.until(t2, ChronoUnit.HOURS);
+    t1.until(t2, ChronoUnit.MINUTES);
+    t1.until(t2, ChronoUnit.SECONDS);
+
+    expectType<OffsetTime | null>(t1.query(OffsetTime.FROM));
+    expectType<LocalDate | null>(t1.query(TemporalQueries.localDate()));
+
+    // .equals is not a type predicate
+    const temp = OffsetTime.now();
+    if (!ot.equals(temp)) {
+        expectType<boolean>(temp.equals(ot));
+    }
 });
 
 it('LocalDate', () => {
@@ -199,6 +374,15 @@ it('LocalDate', () => {
 
     expectType<LocalDate | null>(d1.query(LocalDate.FROM));
     expectType<LocalTime | null>(d1.query(TemporalQueries.localTime()));
+
+    expectType<LocalDateTime>(d1.atTime(LocalTime.now()));
+    expectType<OffsetDateTime>(d1.atTime(OffsetTime.now()));
+
+    // .equals is not a type predicate
+    const temp = LocalDate.now();
+    if (!d.equals(temp)) {
+        expectType<boolean>(temp.equals(d));
+    }
 });
 
 it('LocalTime', () => {
@@ -294,6 +478,15 @@ it('LocalTime', () => {
 
     expectType<LocalTime | null>(t1.query(LocalTime.FROM));
     expectType<LocalDate | null>(t1.query(TemporalQueries.localDate()));
+
+    expectType<OffsetTime>(t.atOffset(ZoneOffset.MIN));
+    expectType<LocalDateTime>(t.atDate(LocalDate.now()));
+
+    // .equals is not a type predicate
+    const temp = LocalTime.now();
+    if (!t.equals(temp)) {
+        expectType<boolean>(temp.equals(t));
+    }
 });
 
 it('LocalDateTime', () => {
@@ -442,10 +635,23 @@ it('LocalDateTime', () => {
 
     expectType<LocalDateTime | null>(dt.query(LocalDateTime.FROM));
     expectType<LocalDate | null>(dt.query(TemporalQueries.localDate()));
+
+    expectType<OffsetDateTime>(dt.atOffset(ZoneOffset.MIN));
+    expectType<ZonedDateTime>(dt.atZone(ZoneId.UTC));
+
+    // .equals is not a type predicate
+    const temp = LocalDateTime.now();
+    if (!dt.equals(temp)) {
+        expectType<boolean>(temp.equals(dt));
+    }
 });
 
 it('Instant', () => {
-    let i = Instant.parse('2019-03-24T23:32:46.488Z');
+    let i = Instant.ofEpochMicro(new Date().getTime() * 1000)
+    i.plusMicros(100)
+    i.minusMicros(200)
+
+    i = Instant.parse('2019-03-24T23:32:46.488Z');
 
     i.toString();
     i.toJSON();
@@ -464,6 +670,15 @@ it('Instant', () => {
 
     expectType<Instant | null>(i.query(Instant.FROM));
     expectType<LocalDate | null>(i.query(TemporalQueries.localDate()));
+
+    expectType<OffsetDateTime>(i.atOffset(ZoneOffset.MAX));
+    expectType<ZonedDateTime>(i.atZone(ZoneId.UTC));
+
+    // .equals is not a type predicate
+    const temp = Instant.now();
+    if (!i.equals(temp)) {
+        expectType<boolean>(temp.equals(i));
+    }
 });
 
 it('Year', () => {
@@ -508,6 +723,12 @@ it('Year', () => {
 
     expectType<Year | null>(year.query(Year.FROM));
     expectType<LocalDate | null>(year.query(TemporalQueries.localDate()));
+
+    // .equals is not a type predicate
+    const temp = Year.now();
+    if (!year.equals(temp)) {
+        expectType<boolean>(temp.equals(year));
+    }
 });
 
 it('YearMonth', () => {
@@ -571,6 +792,12 @@ it('YearMonth', () => {
 
     expectType<YearMonth | null>(ym.query(YearMonth.FROM));
     expectType<LocalDate | null>(ym.query(TemporalQueries.localDate()));
+
+    // .equals is not a type predicate
+    const temp = YearMonth.now();
+    if (!ym.equals(temp)) {
+        expectType<boolean>(temp.equals(ym));
+    }
 });
 
 it('DayOfWeek', () => {
@@ -616,6 +843,12 @@ it('MonthDay', () => {
 
     expectType<MonthDay | null>(md.query(MonthDay.FROM));
     expectType<LocalDate | null>(md.query(TemporalQueries.localDate()));
+
+    // .equals is not a type predicate
+    const temp = MonthDay.now();
+    if (!md.equals(temp)) {
+        expectType<boolean>(temp.equals(md));
+    }
 });
 
 it('Period', () => {
@@ -640,6 +873,12 @@ it('Period', () => {
     expectType<string>(p.toJSON());
 
     Period.between(LocalDate.parse('2012-06-30'), LocalDate.parse('2012-08-31'));
+
+    // .equals is not a type predicate
+    const temp = Period.ZERO;
+    if (!p.equals(temp)) {
+        expectType<boolean>(temp.equals(p));
+    }
 });
 
 it('Duration', () => {
@@ -664,6 +903,12 @@ it('Duration', () => {
     expectType<Duration>(dur.minus(1, ChronoUnit.NANOS));
     expectType<Duration>(dur.plus(Duration.ofNanos(1)));
     expectType<Duration>(dur.plus(1, ChronoUnit.NANOS));
+
+    // .equals is not a type predicate
+    const temp = Duration.ZERO;
+    if (!dur.equals(temp)) {
+        expectType<boolean>(temp.equals(dur));
+    }
 });
 
 it('DateTimeFormatter', () => {

@@ -3,7 +3,7 @@
  * @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
  */
 
-import {expect, assert} from 'chai';
+import { expect, assert } from 'chai';
 
 export function dataProviderTest(dataProvider, test, log){
     const data = typeof dataProvider === 'function' ? dataProvider() : dataProvider;
@@ -52,8 +52,10 @@ export function fail(message=''){
     assert(false, message);
 }
 
-export function isCoverageTestRunner(){
-    return (process.env.COVERAGE != null) && process.env.COVERAGE !== 0 && process.env.COVERAGE !== '';
+export function isCoverageTestRunner() {
+    return typeof process !== 'undefined'
+        && process.env.COVERAGE != null
+        && process.env.COVERAGE !== '';
 }
 
 export function isBrowserTestRunner(){

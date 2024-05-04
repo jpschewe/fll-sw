@@ -1,28 +1,28 @@
 {
   "type": "File",
   "start": 0,
-  "end": 466,
+  "end": 1133,
   "loc": {
     "start": {
       "line": 1,
       "column": 0
     },
     "end": {
-      "line": 19,
+      "line": 35,
       "column": 0
     }
   },
   "program": {
     "type": "Program",
     "start": 0,
-    "end": 466,
+    "end": 1133,
     "loc": {
       "start": {
         "line": 1,
         "column": 0
       },
       "end": {
-        "line": 19,
+        "line": 35,
         "column": 0
       }
     },
@@ -30,30 +30,30 @@
     "body": [
       {
         "type": "ImportDeclaration",
-        "start": 199,
-        "end": 216,
+        "start": 563,
+        "end": 580,
         "loc": {
           "start": {
-            "line": 8,
+            "line": 16,
             "column": 0
           },
           "end": {
-            "line": 8,
+            "line": 16,
             "column": 17
           }
         },
         "specifiers": [],
         "source": {
           "type": "StringLiteral",
-          "start": 206,
-          "end": 215,
+          "start": 570,
+          "end": 579,
           "loc": {
             "start": {
-              "line": 8,
+              "line": 16,
               "column": 7
             },
             "end": {
-              "line": 8,
+              "line": 16,
               "column": 16
             }
           },
@@ -83,9 +83,9 @@
           },
           {
             "type": "CommentLine",
-            "value": " import { Interval } from './Interval';",
+            "value": " import { DayOfMonth } from './DayOfMonth';",
             "start": 156,
-            "end": 197,
+            "end": 201,
             "loc": {
               "start": {
                 "line": 6,
@@ -93,6 +93,134 @@
               },
               "end": {
                 "line": 6,
+                "column": 45
+              }
+            }
+          },
+          {
+            "type": "CommentLine",
+            "value": " import { DayOfYear } from './DayOfYear';",
+            "start": 202,
+            "end": 245,
+            "loc": {
+              "start": {
+                "line": 7,
+                "column": 0
+              },
+              "end": {
+                "line": 7,
+                "column": 43
+              }
+            }
+          },
+          {
+            "type": "CommentLine",
+            "value": " import { Interval } from './Interval';",
+            "start": 246,
+            "end": 287,
+            "loc": {
+              "start": {
+                "line": 8,
+                "column": 0
+              },
+              "end": {
+                "line": 8,
+                "column": 41
+              }
+            }
+          },
+          {
+            "type": "CommentLine",
+            "value": " import { LocalDateRange } from './LocalDateRange';",
+            "start": 288,
+            "end": 341,
+            "loc": {
+              "start": {
+                "line": 9,
+                "column": 0
+              },
+              "end": {
+                "line": 9,
+                "column": 53
+              }
+            }
+          },
+          {
+            "type": "CommentLine",
+            "value": " import { OffsetDate } from './OffsetDate';",
+            "start": 342,
+            "end": 387,
+            "loc": {
+              "start": {
+                "line": 10,
+                "column": 0
+              },
+              "end": {
+                "line": 10,
+                "column": 45
+              }
+            }
+          },
+          {
+            "type": "CommentLine",
+            "value": " import { Quarter } from './Quarter';",
+            "start": 388,
+            "end": 427,
+            "loc": {
+              "start": {
+                "line": 11,
+                "column": 0
+              },
+              "end": {
+                "line": 11,
+                "column": 39
+              }
+            }
+          },
+          {
+            "type": "CommentLine",
+            "value": " import { Temporals } from './Temporals';",
+            "start": 428,
+            "end": 471,
+            "loc": {
+              "start": {
+                "line": 12,
+                "column": 0
+              },
+              "end": {
+                "line": 12,
+                "column": 43
+              }
+            }
+          },
+          {
+            "type": "CommentLine",
+            "value": " import { YearQuarter } from './YearQuarter';",
+            "start": 472,
+            "end": 519,
+            "loc": {
+              "start": {
+                "line": 13,
+                "column": 0
+              },
+              "end": {
+                "line": 13,
+                "column": 47
+              }
+            }
+          },
+          {
+            "type": "CommentLine",
+            "value": " import { YearWeek } from './YearWeek';",
+            "start": 520,
+            "end": 561,
+            "loc": {
+              "start": {
+                "line": 14,
+                "column": 0
+              },
+              "end": {
+                "line": 14,
                 "column": 41
               }
             }
@@ -101,16 +229,16 @@
         "trailingComments": [
           {
             "type": "CommentBlock",
-            "value": "*\n * plugin Function, call using js-jodas use()\n *\n * @param jsJoda\n ",
-            "start": 218,
-            "end": 291,
+            "value": "*\n * @private\n *\n * plugin Function, call using js-jodas use()\n ",
+            "start": 582,
+            "end": 650,
             "loc": {
               "start": {
-                "line": 10,
+                "line": 18,
                 "column": 0
               },
               "end": {
-                "line": 14,
+                "line": 22,
                 "column": 3
               }
             }
@@ -119,29 +247,29 @@
       },
       {
         "type": "ExportDefaultDeclaration",
-        "start": 292,
-        "end": 465,
+        "start": 651,
+        "end": 1132,
         "loc": {
           "start": {
-            "line": 15,
+            "line": 23,
             "column": 0
           },
           "end": {
-            "line": 18,
+            "line": 34,
             "column": 1
           }
         },
         "declaration": {
           "type": "FunctionDeclaration",
-          "start": 307,
-          "end": 465,
+          "start": 666,
+          "end": 1132,
           "loc": {
             "start": {
-              "line": 15,
+              "line": 23,
               "column": 15
             },
             "end": {
-              "line": 18,
+              "line": 34,
               "column": 1
             }
           },
@@ -152,15 +280,15 @@
           "params": [],
           "body": {
             "type": "BlockStatement",
-            "start": 331,
-            "end": 465,
+            "start": 690,
+            "end": 1132,
             "loc": {
               "start": {
-                "line": 15,
+                "line": 23,
                 "column": 39
               },
               "end": {
-                "line": 18,
+                "line": 34,
                 "column": 1
               }
             },
@@ -170,15 +298,15 @@
               {
                 "type": "CommentBlock",
                 "value": " jsJoda ",
-                "start": 317,
-                "end": 329,
+                "start": 676,
+                "end": 688,
                 "loc": {
                   "start": {
-                    "line": 15,
+                    "line": 23,
                     "column": 25
                   },
                   "end": {
-                    "line": 15,
+                    "line": 23,
                     "column": 37
                   }
                 }
@@ -188,31 +316,159 @@
               {
                 "type": "CommentLine",
                 "value": " assign new prop to jsJoda context is useless, because it lives only in the local context",
-                "start": 337,
-                "end": 428,
+                "start": 696,
+                "end": 787,
                 "loc": {
                   "start": {
-                    "line": 16,
+                    "line": 24,
                     "column": 4
                   },
                   "end": {
-                    "line": 16,
+                    "line": 24,
                     "column": 95
                   }
                 }
               },
               {
                 "type": "CommentLine",
-                "value": " jsJoda.Interval = Interval;",
-                "start": 433,
-                "end": 463,
+                "value": " jsJoda.DayOfMonth = DayOfMonth;",
+                "start": 792,
+                "end": 826,
                 "loc": {
                   "start": {
-                    "line": 17,
+                    "line": 25,
                     "column": 4
                   },
                   "end": {
-                    "line": 17,
+                    "line": 25,
+                    "column": 38
+                  }
+                }
+              },
+              {
+                "type": "CommentLine",
+                "value": " jsJoda.DayOfYear = DayOfYear;",
+                "start": 831,
+                "end": 863,
+                "loc": {
+                  "start": {
+                    "line": 26,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 26,
+                    "column": 36
+                  }
+                }
+              },
+              {
+                "type": "CommentLine",
+                "value": " jsJoda.Interval = Interval;",
+                "start": 868,
+                "end": 898,
+                "loc": {
+                  "start": {
+                    "line": 27,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 27,
+                    "column": 34
+                  }
+                }
+              },
+              {
+                "type": "CommentLine",
+                "value": " jsJoda.LocalDateRange = LocalDateRange;",
+                "start": 903,
+                "end": 945,
+                "loc": {
+                  "start": {
+                    "line": 28,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 28,
+                    "column": 46
+                  }
+                }
+              },
+              {
+                "type": "CommentLine",
+                "value": " jsJoda.OffsetDate = OffsetDate;",
+                "start": 950,
+                "end": 984,
+                "loc": {
+                  "start": {
+                    "line": 29,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 29,
+                    "column": 38
+                  }
+                }
+              },
+              {
+                "type": "CommentLine",
+                "value": " jsJoda.Quarter = Quarter;",
+                "start": 989,
+                "end": 1017,
+                "loc": {
+                  "start": {
+                    "line": 30,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 30,
+                    "column": 32
+                  }
+                }
+              },
+              {
+                "type": "CommentLine",
+                "value": " jsJoda.Temporals = Temporals;",
+                "start": 1022,
+                "end": 1054,
+                "loc": {
+                  "start": {
+                    "line": 31,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 31,
+                    "column": 36
+                  }
+                }
+              },
+              {
+                "type": "CommentLine",
+                "value": " jsJoda.YearQuarter = YearQuarter;",
+                "start": 1059,
+                "end": 1095,
+                "loc": {
+                  "start": {
+                    "line": 32,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 32,
+                    "column": 40
+                  }
+                }
+              },
+              {
+                "type": "CommentLine",
+                "value": " jsJoda.YearWeek = YearWeek;",
+                "start": 1100,
+                "end": 1130,
+                "loc": {
+                  "start": {
+                    "line": 33,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 33,
                     "column": 34
                   }
                 }
@@ -222,16 +478,16 @@
           "leadingComments": [
             {
               "type": "CommentBlock",
-              "value": "*\n * plugin Function, call using js-jodas use()\n *\n * @param jsJoda\n ",
-              "start": 218,
-              "end": 291,
+              "value": "*\n * @private\n *\n * plugin Function, call using js-jodas use()\n ",
+              "start": 582,
+              "end": 650,
               "loc": {
                 "start": {
-                  "line": 10,
+                  "line": 18,
                   "column": 0
                 },
                 "end": {
-                  "line": 14,
+                  "line": 22,
                   "column": 3
                 }
               }
@@ -242,16 +498,16 @@
         "leadingComments": [
           {
             "type": "CommentBlock",
-            "value": "*\n * plugin Function, call using js-jodas use()\n *\n * @param jsJoda\n ",
-            "start": 218,
-            "end": 291,
+            "value": "*\n * @private\n *\n * plugin Function, call using js-jodas use()\n ",
+            "start": 582,
+            "end": 650,
             "loc": {
               "start": {
-                "line": 10,
+                "line": 18,
                 "column": 0
               },
               "end": {
-                "line": 14,
+                "line": 22,
                 "column": 3
               }
             }
@@ -280,9 +536,9 @@
     },
     {
       "type": "CommentLine",
-      "value": " import { Interval } from './Interval';",
+      "value": " import { DayOfMonth } from './DayOfMonth';",
       "start": 156,
-      "end": 197,
+      "end": 201,
       "loc": {
         "start": {
           "line": 6,
@@ -290,22 +546,150 @@
         },
         "end": {
           "line": 6,
+          "column": 45
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " import { DayOfYear } from './DayOfYear';",
+      "start": 202,
+      "end": 245,
+      "loc": {
+        "start": {
+          "line": 7,
+          "column": 0
+        },
+        "end": {
+          "line": 7,
+          "column": 43
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " import { Interval } from './Interval';",
+      "start": 246,
+      "end": 287,
+      "loc": {
+        "start": {
+          "line": 8,
+          "column": 0
+        },
+        "end": {
+          "line": 8,
           "column": 41
         }
       }
     },
     {
-      "type": "CommentBlock",
-      "value": "*\n * plugin Function, call using js-jodas use()\n *\n * @param jsJoda\n ",
-      "start": 218,
-      "end": 291,
+      "type": "CommentLine",
+      "value": " import { LocalDateRange } from './LocalDateRange';",
+      "start": 288,
+      "end": 341,
+      "loc": {
+        "start": {
+          "line": 9,
+          "column": 0
+        },
+        "end": {
+          "line": 9,
+          "column": 53
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " import { OffsetDate } from './OffsetDate';",
+      "start": 342,
+      "end": 387,
       "loc": {
         "start": {
           "line": 10,
           "column": 0
         },
         "end": {
+          "line": 10,
+          "column": 45
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " import { Quarter } from './Quarter';",
+      "start": 388,
+      "end": 427,
+      "loc": {
+        "start": {
+          "line": 11,
+          "column": 0
+        },
+        "end": {
+          "line": 11,
+          "column": 39
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " import { Temporals } from './Temporals';",
+      "start": 428,
+      "end": 471,
+      "loc": {
+        "start": {
+          "line": 12,
+          "column": 0
+        },
+        "end": {
+          "line": 12,
+          "column": 43
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " import { YearQuarter } from './YearQuarter';",
+      "start": 472,
+      "end": 519,
+      "loc": {
+        "start": {
+          "line": 13,
+          "column": 0
+        },
+        "end": {
+          "line": 13,
+          "column": 47
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " import { YearWeek } from './YearWeek';",
+      "start": 520,
+      "end": 561,
+      "loc": {
+        "start": {
           "line": 14,
+          "column": 0
+        },
+        "end": {
+          "line": 14,
+          "column": 41
+        }
+      }
+    },
+    {
+      "type": "CommentBlock",
+      "value": "*\n * @private\n *\n * plugin Function, call using js-jodas use()\n ",
+      "start": 582,
+      "end": 650,
+      "loc": {
+        "start": {
+          "line": 18,
+          "column": 0
+        },
+        "end": {
+          "line": 22,
           "column": 3
         }
       }
@@ -313,15 +697,15 @@
     {
       "type": "CommentBlock",
       "value": " jsJoda ",
-      "start": 317,
-      "end": 329,
+      "start": 676,
+      "end": 688,
       "loc": {
         "start": {
-          "line": 15,
+          "line": 23,
           "column": 25
         },
         "end": {
-          "line": 15,
+          "line": 23,
           "column": 37
         }
       }
@@ -329,31 +713,159 @@
     {
       "type": "CommentLine",
       "value": " assign new prop to jsJoda context is useless, because it lives only in the local context",
-      "start": 337,
-      "end": 428,
+      "start": 696,
+      "end": 787,
       "loc": {
         "start": {
-          "line": 16,
+          "line": 24,
           "column": 4
         },
         "end": {
-          "line": 16,
+          "line": 24,
           "column": 95
         }
       }
     },
     {
       "type": "CommentLine",
-      "value": " jsJoda.Interval = Interval;",
-      "start": 433,
-      "end": 463,
+      "value": " jsJoda.DayOfMonth = DayOfMonth;",
+      "start": 792,
+      "end": 826,
       "loc": {
         "start": {
-          "line": 17,
+          "line": 25,
           "column": 4
         },
         "end": {
-          "line": 17,
+          "line": 25,
+          "column": 38
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " jsJoda.DayOfYear = DayOfYear;",
+      "start": 831,
+      "end": 863,
+      "loc": {
+        "start": {
+          "line": 26,
+          "column": 4
+        },
+        "end": {
+          "line": 26,
+          "column": 36
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " jsJoda.Interval = Interval;",
+      "start": 868,
+      "end": 898,
+      "loc": {
+        "start": {
+          "line": 27,
+          "column": 4
+        },
+        "end": {
+          "line": 27,
+          "column": 34
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " jsJoda.LocalDateRange = LocalDateRange;",
+      "start": 903,
+      "end": 945,
+      "loc": {
+        "start": {
+          "line": 28,
+          "column": 4
+        },
+        "end": {
+          "line": 28,
+          "column": 46
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " jsJoda.OffsetDate = OffsetDate;",
+      "start": 950,
+      "end": 984,
+      "loc": {
+        "start": {
+          "line": 29,
+          "column": 4
+        },
+        "end": {
+          "line": 29,
+          "column": 38
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " jsJoda.Quarter = Quarter;",
+      "start": 989,
+      "end": 1017,
+      "loc": {
+        "start": {
+          "line": 30,
+          "column": 4
+        },
+        "end": {
+          "line": 30,
+          "column": 32
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " jsJoda.Temporals = Temporals;",
+      "start": 1022,
+      "end": 1054,
+      "loc": {
+        "start": {
+          "line": 31,
+          "column": 4
+        },
+        "end": {
+          "line": 31,
+          "column": 36
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " jsJoda.YearQuarter = YearQuarter;",
+      "start": 1059,
+      "end": 1095,
+      "loc": {
+        "start": {
+          "line": 32,
+          "column": 4
+        },
+        "end": {
+          "line": 32,
+          "column": 40
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " jsJoda.YearWeek = YearWeek;",
+      "start": 1100,
+      "end": 1130,
+      "loc": {
+        "start": {
+          "line": 33,
+          "column": 4
+        },
+        "end": {
+          "line": 33,
           "column": 34
         }
       }
@@ -378,9 +890,9 @@
     },
     {
       "type": "CommentLine",
-      "value": " import { Interval } from './Interval';",
+      "value": " import { DayOfMonth } from './DayOfMonth';",
       "start": 156,
-      "end": 197,
+      "end": 201,
       "loc": {
         "start": {
           "line": 6,
@@ -388,6 +900,134 @@
         },
         "end": {
           "line": 6,
+          "column": 45
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " import { DayOfYear } from './DayOfYear';",
+      "start": 202,
+      "end": 245,
+      "loc": {
+        "start": {
+          "line": 7,
+          "column": 0
+        },
+        "end": {
+          "line": 7,
+          "column": 43
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " import { Interval } from './Interval';",
+      "start": 246,
+      "end": 287,
+      "loc": {
+        "start": {
+          "line": 8,
+          "column": 0
+        },
+        "end": {
+          "line": 8,
+          "column": 41
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " import { LocalDateRange } from './LocalDateRange';",
+      "start": 288,
+      "end": 341,
+      "loc": {
+        "start": {
+          "line": 9,
+          "column": 0
+        },
+        "end": {
+          "line": 9,
+          "column": 53
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " import { OffsetDate } from './OffsetDate';",
+      "start": 342,
+      "end": 387,
+      "loc": {
+        "start": {
+          "line": 10,
+          "column": 0
+        },
+        "end": {
+          "line": 10,
+          "column": 45
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " import { Quarter } from './Quarter';",
+      "start": 388,
+      "end": 427,
+      "loc": {
+        "start": {
+          "line": 11,
+          "column": 0
+        },
+        "end": {
+          "line": 11,
+          "column": 39
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " import { Temporals } from './Temporals';",
+      "start": 428,
+      "end": 471,
+      "loc": {
+        "start": {
+          "line": 12,
+          "column": 0
+        },
+        "end": {
+          "line": 12,
+          "column": 43
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " import { YearQuarter } from './YearQuarter';",
+      "start": 472,
+      "end": 519,
+      "loc": {
+        "start": {
+          "line": 13,
+          "column": 0
+        },
+        "end": {
+          "line": 13,
+          "column": 47
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " import { YearWeek } from './YearWeek';",
+      "start": 520,
+      "end": 561,
+      "loc": {
+        "start": {
+          "line": 14,
+          "column": 0
+        },
+        "end": {
+          "line": 14,
           "column": 41
         }
       }
@@ -407,15 +1047,15 @@
         "updateContext": null
       },
       "value": "import",
-      "start": 199,
-      "end": 205,
+      "start": 563,
+      "end": 569,
       "loc": {
         "start": {
-          "line": 8,
+          "line": 16,
           "column": 0
         },
         "end": {
-          "line": 8,
+          "line": 16,
           "column": 6
         }
       }
@@ -434,15 +1074,15 @@
         "updateContext": null
       },
       "value": "./_init",
-      "start": 206,
-      "end": 215,
+      "start": 570,
+      "end": 579,
       "loc": {
         "start": {
-          "line": 8,
+          "line": 16,
           "column": 7
         },
         "end": {
-          "line": 8,
+          "line": 16,
           "column": 16
         }
       }
@@ -460,31 +1100,31 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 215,
-      "end": 216,
+      "start": 579,
+      "end": 580,
       "loc": {
         "start": {
-          "line": 8,
+          "line": 16,
           "column": 16
         },
         "end": {
-          "line": 8,
+          "line": 16,
           "column": 17
         }
       }
     },
     {
       "type": "CommentBlock",
-      "value": "*\n * plugin Function, call using js-jodas use()\n *\n * @param jsJoda\n ",
-      "start": 218,
-      "end": 291,
+      "value": "*\n * @private\n *\n * plugin Function, call using js-jodas use()\n ",
+      "start": 582,
+      "end": 650,
       "loc": {
         "start": {
-          "line": 10,
+          "line": 18,
           "column": 0
         },
         "end": {
-          "line": 14,
+          "line": 22,
           "column": 3
         }
       }
@@ -504,15 +1144,15 @@
         "updateContext": null
       },
       "value": "export",
-      "start": 292,
-      "end": 298,
+      "start": 651,
+      "end": 657,
       "loc": {
         "start": {
-          "line": 15,
+          "line": 23,
           "column": 0
         },
         "end": {
-          "line": 15,
+          "line": 23,
           "column": 6
         }
       }
@@ -532,15 +1172,15 @@
         "updateContext": null
       },
       "value": "default",
-      "start": 299,
-      "end": 306,
+      "start": 658,
+      "end": 665,
       "loc": {
         "start": {
-          "line": 15,
+          "line": 23,
           "column": 7
         },
         "end": {
-          "line": 15,
+          "line": 23,
           "column": 14
         }
       }
@@ -559,15 +1199,15 @@
         "binop": null
       },
       "value": "function",
-      "start": 307,
-      "end": 315,
+      "start": 666,
+      "end": 674,
       "loc": {
         "start": {
-          "line": 15,
+          "line": 23,
           "column": 15
         },
         "end": {
-          "line": 15,
+          "line": 23,
           "column": 23
         }
       }
@@ -584,15 +1224,15 @@
         "postfix": false,
         "binop": null
       },
-      "start": 316,
-      "end": 317,
+      "start": 675,
+      "end": 676,
       "loc": {
         "start": {
-          "line": 15,
+          "line": 23,
           "column": 24
         },
         "end": {
-          "line": 15,
+          "line": 23,
           "column": 25
         }
       }
@@ -600,15 +1240,15 @@
     {
       "type": "CommentBlock",
       "value": " jsJoda ",
-      "start": 317,
-      "end": 329,
+      "start": 676,
+      "end": 688,
       "loc": {
         "start": {
-          "line": 15,
+          "line": 23,
           "column": 25
         },
         "end": {
-          "line": 15,
+          "line": 23,
           "column": 37
         }
       }
@@ -625,15 +1265,15 @@
         "postfix": false,
         "binop": null
       },
-      "start": 329,
-      "end": 330,
+      "start": 688,
+      "end": 689,
       "loc": {
         "start": {
-          "line": 15,
+          "line": 23,
           "column": 37
         },
         "end": {
-          "line": 15,
+          "line": 23,
           "column": 38
         }
       }
@@ -650,15 +1290,15 @@
         "postfix": false,
         "binop": null
       },
-      "start": 331,
-      "end": 332,
+      "start": 690,
+      "end": 691,
       "loc": {
         "start": {
-          "line": 15,
+          "line": 23,
           "column": 39
         },
         "end": {
-          "line": 15,
+          "line": 23,
           "column": 40
         }
       }
@@ -666,31 +1306,159 @@
     {
       "type": "CommentLine",
       "value": " assign new prop to jsJoda context is useless, because it lives only in the local context",
-      "start": 337,
-      "end": 428,
+      "start": 696,
+      "end": 787,
       "loc": {
         "start": {
-          "line": 16,
+          "line": 24,
           "column": 4
         },
         "end": {
-          "line": 16,
+          "line": 24,
           "column": 95
         }
       }
     },
     {
       "type": "CommentLine",
-      "value": " jsJoda.Interval = Interval;",
-      "start": 433,
-      "end": 463,
+      "value": " jsJoda.DayOfMonth = DayOfMonth;",
+      "start": 792,
+      "end": 826,
       "loc": {
         "start": {
-          "line": 17,
+          "line": 25,
           "column": 4
         },
         "end": {
-          "line": 17,
+          "line": 25,
+          "column": 38
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " jsJoda.DayOfYear = DayOfYear;",
+      "start": 831,
+      "end": 863,
+      "loc": {
+        "start": {
+          "line": 26,
+          "column": 4
+        },
+        "end": {
+          "line": 26,
+          "column": 36
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " jsJoda.Interval = Interval;",
+      "start": 868,
+      "end": 898,
+      "loc": {
+        "start": {
+          "line": 27,
+          "column": 4
+        },
+        "end": {
+          "line": 27,
+          "column": 34
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " jsJoda.LocalDateRange = LocalDateRange;",
+      "start": 903,
+      "end": 945,
+      "loc": {
+        "start": {
+          "line": 28,
+          "column": 4
+        },
+        "end": {
+          "line": 28,
+          "column": 46
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " jsJoda.OffsetDate = OffsetDate;",
+      "start": 950,
+      "end": 984,
+      "loc": {
+        "start": {
+          "line": 29,
+          "column": 4
+        },
+        "end": {
+          "line": 29,
+          "column": 38
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " jsJoda.Quarter = Quarter;",
+      "start": 989,
+      "end": 1017,
+      "loc": {
+        "start": {
+          "line": 30,
+          "column": 4
+        },
+        "end": {
+          "line": 30,
+          "column": 32
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " jsJoda.Temporals = Temporals;",
+      "start": 1022,
+      "end": 1054,
+      "loc": {
+        "start": {
+          "line": 31,
+          "column": 4
+        },
+        "end": {
+          "line": 31,
+          "column": 36
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " jsJoda.YearQuarter = YearQuarter;",
+      "start": 1059,
+      "end": 1095,
+      "loc": {
+        "start": {
+          "line": 32,
+          "column": 4
+        },
+        "end": {
+          "line": 32,
+          "column": 40
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " jsJoda.YearWeek = YearWeek;",
+      "start": 1100,
+      "end": 1130,
+      "loc": {
+        "start": {
+          "line": 33,
+          "column": 4
+        },
+        "end": {
+          "line": 33,
           "column": 34
         }
       }
@@ -707,15 +1475,15 @@
         "postfix": false,
         "binop": null
       },
-      "start": 464,
-      "end": 465,
+      "start": 1131,
+      "end": 1132,
       "loc": {
         "start": {
-          "line": 18,
+          "line": 34,
           "column": 0
         },
         "end": {
-          "line": 18,
+          "line": 34,
           "column": 1
         }
       }
@@ -733,15 +1501,15 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 466,
-      "end": 466,
+      "start": 1133,
+      "end": 1133,
       "loc": {
         "start": {
-          "line": 19,
+          "line": 35,
           "column": 0
         },
         "end": {
-          "line": 19,
+          "line": 35,
           "column": 0
         }
       }

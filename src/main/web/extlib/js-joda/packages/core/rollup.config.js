@@ -1,48 +1,62 @@
-import fs from 'fs';
-import babel from 'rollup-plugin-babel';
-import { uglify } from 'rollup-plugin-uglify';
+const { babel } = require('@rollup/plugin-babel');
+const { terser } = require('rollup-plugin-minification');
+const { mergeDeepRight } = require('ramda');
+const { createBanner } = require('../../shared/rollup-utils');
+const packageJson = require('./package.json');
 
-function createBanner(){
-    const packageJson = require('./package.json');
-    const version = '//! @version ' + packageJson.name + ' - ' + packageJson.version + '\n';
-    const preamble = fs.readFileSync('./src/license-preamble.js', 'utf8');
-    return version + preamble;
-}
+const plugins = {
+    babel: babel({ babelHelpers: 'bundled' }),
+    uglify: terser({ output: { comments: /^!/ } }),
+};
 
-const banner = createBanner();
-
-export default [{
+const defaultConfig = {
     input: './src/js-joda.js',
     plugins: [
-        babel()
+        plugins.babel,
     ],
     output: {
-        banner,
-        file: 'dist/js-joda.esm.js',
-        format: 'es'
-    }
-}, {
-    input: './src/js-joda.js',
-    plugins: [
-        babel()
-    ],
-    output: {
-        banner,
-        file: 'dist/js-joda.js',
-        format: 'umd',
+        banner: createBanner({ name: packageJson.name, version: packageJson.version }),
         name: 'JSJoda',
-        sourcemap: true,
     }
-}, {
-    input: './src/js-joda.js',
-    plugins: [
-        babel(),
-        uglify({ output: { comments: /^!/ } }),
-    ],
-    output: {
-        banner,
-        file: 'dist/js-joda.min.js',
-        format: 'iife',
-        name: 'JSJoda'
-    }
-}];
+
+};
+
+module.exports = [
+    mergeDeepRight(defaultConfig, {
+        output: {
+            file: 'dist/js-joda.esm.js',
+            format: 'es',
+            sourcemap: true,
+        },
+    }),
+    mergeDeepRight(defaultConfig, {
+        output: {
+            file: 'dist/js-joda.cjs.js',
+            format: 'cjs',
+            sourcemap: true,
+        },
+    }),
+    mergeDeepRight(defaultConfig, {
+        output: {
+            file: 'dist/js-joda.js',
+            format: 'umd',
+            name: 'JSJoda',
+            sourcemap: true,
+        },
+    }),
+    mergeDeepRight(defaultConfig, {
+        plugins: [
+            plugins.babel,
+            plugins.uglify,
+        ],
+        output: {
+            file: 'dist/js-joda.min.js',
+            format: 'iife',
+            name: 'JSJoda',
+            sourcemap: false,
+        },
+    }),
+];
+
+module.exports.plugins = plugins;
+module.exports.defaultConfig = defaultConfig;

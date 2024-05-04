@@ -59,6 +59,7 @@ import { ValueRange } from './temporal/ValueRange';
 import { DateTimeFormatter } from './format/DateTimeFormatter';
 import { DateTimeFormatterBuilder } from './format/DateTimeFormatterBuilder';
 import { DecimalStyle } from './format/DecimalStyle';
+import { ParsePosition } from './format/ParsePosition';
 import { ResolverStyle } from './format/ResolverStyle';
 import { SignStyle } from './format/SignStyle';
 import { TextStyle } from './format/TextStyle';
@@ -76,7 +77,7 @@ import { StringBuilder } from './format/StringBuilder';
 import * as assert from './assert';
 
 import { convert } from './convert';
-import { nativeJs } from './temporal/NativeJsTemporal';
+import { nativeJs } from './nativeJs';
 import { bindUse } from './use';
 
 const _ = {
@@ -111,6 +112,7 @@ const jsJodaExports = {
     OffsetDateTime,
     Month,
     MonthDay,
+    ParsePosition,
     Period,
     Year,
     YearConstants,
@@ -147,6 +149,11 @@ const jsJodaExports = {
     TextStyle,
 };
 
+/**
+ * @private
+ *
+ * @type { function(function(jsJoda: JsJoda) }
+ */
 const use = bindUse(jsJodaExports);
 jsJodaExports.use = use;
 
@@ -174,6 +181,7 @@ export {
     OffsetTime,
     OffsetDateTime,
     Period,
+    ParsePosition,
     Year,
     YearConstants,
     YearMonth,

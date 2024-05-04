@@ -1,12 +1,13 @@
 {
     "name": "@js-joda/locale_zh",
-    "version": "3.2.0+36.0.0",
+    "version": "4.11.0",
     "description": "prebuilt js-joda locale package for locales: zh.*",
     "repository": {
         "type": "git",
-        "url": "https://github.com/js-joda/js-joda-locale.git"
+        "url": "https://github.com/js-joda/js-joda.git"
     },
     "main": "dist/index.js",
+    "typings": "dist/js-joda-locale.d.ts",
     "keywords": [
         "date",
         "time",
@@ -19,13 +20,14 @@
     ],
     "license": "BSD-3-Clause",
     "bugs": {
-        "url": "https://github.com/js-joda/js-joda-locale/issues"
+        "url": "https://github.com/js-joda/js-joda/issues"
     },
-    "homepage": "https://github.com/js-joda/js-joda-locale#readme",
+    "homepage": "https://js-joda.github.io/js-joda",
     "peerDependencies": {
-        "@js-joda/core": ">=1.11.0",
-        "@js-joda/timezone": "^2.2.0"
+        "@js-joda/core": ">=3.2.0",
+        "@js-joda/timezone": "^2.3.0"
     },
-    "dependencies": {},
-    "devDependencies": {}
+    "publishConfig": {
+        "access": "public"
+    }
 }

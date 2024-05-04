@@ -5,6 +5,8 @@
 
 
 /**
+ * @private
+ *
  * Helper method to create an immutable entry.
  *
  * @param text  the text, not null
@@ -16,7 +18,7 @@ export const createEntry = (text, field) => {
         key: text,
         value: field,
         toString: function () {
-            return text + '->' + field;
+            return `${text}->${field}`;
         }
     };
 };
@@ -45,13 +47,14 @@ export class LocaleStore {
         let allList = [];
         Object.keys(valueTextMap).forEach((style) => {
             const reverse = {};
+            const list = [];
             Object.keys(valueTextMap[style]).forEach((key) => {
                 const value = valueTextMap[style][key];
                 if (reverse[value] === undefined) {
-                    reverse[value] = createEntry(value, Number.parseInt(key));
+                    reverse[value] = createEntry(value, parseInt(key));
+                    list.push(reverse[value]);
                 }
             });
-            const list = Object.values(reverse);
             list.sort(_comparator);
             map[style] = list;
             allList = allList.concat(list);
