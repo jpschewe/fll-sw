@@ -285,9 +285,11 @@ public class AwardsReport extends BaseFLLServlet {
                                                                                                         level, w))) //
                                                   .collect(Collectors.toList());
 
-    final List<String> categoryOrder = description.getNonNumericCategories().stream() //
-                                                  .map(NonNumericCategory::getTitle) //
-                                                  .collect(Collectors.toList());
+    final List<String> categoryOrder = CategoriesIgnored.getNonNumericCategories(description, connection,
+                                                                                          tournament)
+                                                                 .stream() //
+                                                                 .map(NonNumericCategory::getTitle) //
+                                                                 .collect(Collectors.toList());
 
     // show places when showing championship
     addSubjectiveWinners(connection, description, document, documentBody, winners, sortedAwardGroups, categoryOrder,
@@ -356,9 +358,11 @@ public class AwardsReport extends BaseFLLServlet {
     final Map<String, List<OverallAwardWinner>> organizedWinners = getNonNumericOverallWinners(description, connection,
                                                                                                tournament);
 
-    final List<String> categoryOrder = description.getNonNumericCategories().stream() //
-                                                  .map(NonNumericCategory::getTitle) //
-                                                  .collect(Collectors.toList());
+    final List<String> categoryOrder = CategoriesIgnored.getNonNumericCategories(description, connection,
+                                                                                          tournament)
+                                                                 .stream() //
+                                                                 .map(NonNumericCategory::getTitle) //
+                                                                 .collect(Collectors.toList());
     final List<String> fullOrder = new LinkedList<String>(categoryOrder);
     organizedWinners.keySet().forEach(c -> {
       if (!fullOrder.contains(c)) {

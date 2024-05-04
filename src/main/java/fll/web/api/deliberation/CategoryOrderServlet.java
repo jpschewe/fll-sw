@@ -29,6 +29,7 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 
 import fll.Tournament;
 import fll.Utilities;
+import fll.db.CategoriesIgnored;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -201,7 +202,7 @@ public class CategoryOrderServlet extends HttpServlet {
     }
 
     // ensure all category names are in the return value
-    for (final String name : getAllCategoryNames(description, scheduledCategoryNames)) {
+    for (final String name : getAllCategoryNames(description, connection, tournament, scheduledCategoryNames)) {
       if (!categoryOrder.contains(name)) {
         categoryOrder.add(name);
       }
@@ -216,21 +217,26 @@ public class CategoryOrderServlet extends HttpServlet {
    * performance, non-scheduled non-numeric categories.
    */
   private static List<String> getAllCategoryNames(final ChallengeDescription description,
-                                                  final Set<String> scheduledCategoryNames) {
+                                                  final Connection connection,
+                                                  final Tournament tournament,
+                                                  final Set<String> scheduledCategoryNames)
+      throws SQLException {
     final List<String> categoryNames = new LinkedList<>();
     categoryNames.add(ChampionshipCategory.INSTANCE.getTitle());
 
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
       categoryNames.add(category.getTitle());
     }
-    for (final NonNumericCategory category : description.getNonNumericCategories()) {
+    for (final NonNumericCategory category : CategoriesIgnored.getNonNumericCategories(description, connection,
+                                                                                       tournament)) {
       if (scheduledCategoryNames.contains(category.getTitle())) {
         categoryNames.add(category.getTitle());
       }
     }
     categoryNames.add(PerformanceScoreCategory.CATEGORY_TITLE);
 
-    for (final NonNumericCategory category : description.getNonNumericCategories()) {
+    for (final NonNumericCategory category : CategoriesIgnored.getNonNumericCategories(description, connection,
+                                                                                       tournament)) {
       if (!scheduledCategoryNames.contains(category.getTitle())) {
         categoryNames.add(category.getTitle());
       }

@@ -1,3 +1,4 @@
+* #1176 - Expand ignored categories functionality to all places where non-numeric awards are handled
 * #1178 - handle paragraph breaks in award descriptions in the Awards Script
 * #1171 - quiet websocket EOF errors
 * #1173 - Allow one to specify individual non-numeric categories as ranked or not ranked

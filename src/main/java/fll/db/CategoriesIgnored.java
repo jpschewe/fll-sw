@@ -11,8 +11,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
+import fll.Tournament;
 import fll.TournamentLevel;
+import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 
 /**
@@ -54,6 +60,26 @@ public final class CategoriesIgnored {
     }
   }
 
+  private static Collection<String> getIgnoredCategoryTitles(final Connection connection,
+                                                             final TournamentLevel level)
+      throws SQLException {
+    final Collection<String> titles = new LinkedList<>();
+    try (PreparedStatement prep = connection.prepareStatement("SELECT category_identifier" //
+        + " FROM categories_ignored" //
+        + " WHERE level_id = ?" //
+        + "  AND category_type = ?")) {
+      prep.setInt(1, level.getId());
+      prep.setString(2, CategoryType.NON_NUMERIC.name());
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final String title = castNonNull(rs.getString(1));
+          titles.add(title);
+        }
+      }
+    }
+    return titles;
+  }
+
   /**
    * @param connection database connection
    * @param level tournament level
@@ -84,6 +110,23 @@ public final class CategoriesIgnored {
         insert.executeBatch();
       }
     }
+  }
+
+  /**
+   * @param description challenge description
+   * @param connection database connection
+   * @param tournament tournament to get non-numeric categories for
+   * @return filter the list of non-numeric categories based on those masked for
+   *         this tournament
+   * @throws SQLException on a database error
+   * @see ChallengeDescription#getNonNumericCategories()
+   */
+  public static List<NonNumericCategory> getNonNumericCategories(final ChallengeDescription description,
+                                                                 final Connection connection,
+                                                                 final Tournament tournament)
+      throws SQLException {
+    final Collection<String> masked = getIgnoredCategoryTitles(connection, tournament.getLevel());
+    return description.getNonNumericCategories().stream().filter(c -> !masked.contains(c.getTitle())).toList();
   }
 
 }

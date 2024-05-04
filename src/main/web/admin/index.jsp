@@ -170,6 +170,10 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
         </li>
 
         <li>
+            <a
+                href="<c:url value='/report/awards/edit-categories-awarded.jsp'/>">Specify
+                which categories are awarded by tournament level</a>
+        <li>
             <c:if test="${scheduleUploaded }">
                 <span class='completed'>DONE </span>
             </c:if>
@@ -212,114 +216,20 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                         judging groups and award groups aren't assigned
                         when the teams were uploaded, these columns may
                         be specified in the schedule</li>
-                </ul>
-                <a href='javascript:hide("ScheduleHelp")'>[hide]</a>
-            </div>
 
-            <form id='uploadSchedule'
-                action='<c:url value="/UploadSpreadsheet"/>'
-                METHOD="POST" ENCTYPE="multipart/form-data">
-                <input type="file" size="32" id='scheduleFile'
-                    name="file" />
-                <input type='hidden' name='uploadRedirect'
-                    value="<c:url value='/schedule/CheckScheduleExists'/>" />
-                <input id="upload-schedule" type="submit"
-                    value="Upload Schedule" />
-            </form>
 
-            <c:if test="${scheduleUploaded }">
-                <!--  downloads for the schedule -->
-                <ul>
-                    <li>
-                        <a href="ScheduleByTeam" target="_new">Full
-                            schedule sorted by team</a>
-                    </li>
-                    <li>
-                        <a href="SubjectiveScheduleByJudgingStation"
-                            target="_new">Subjective schedule split
-                            by category and sorted by judging group,
-                            then time</a>
-                    </li>
-                    <li>
-                        <a href="SubjectiveScheduleByCategory"
-                            target="_new">Subjective schedule split
-                            by category and sorted by time</a>
-                    </li>
-                    <li>
-                        <a href="SubjectiveScheduleByTime" target="_new">Subjective
-                            schedule sorted by time</a>
-                    </li>
-                    <li>
-                        <a href="PerformanceSchedule" target="_new">Performance
-                            Schedule</a>
-                    </li>
-                    <li>
-                        <a href="PerformanceSchedulePerTable"
-                            target="_new">Performance Schedule per
-                            table</a>
-                    </li>
-                    <li>
-                        <a href="PerformanceNotes" target="_new">Performance
-                            Schedule per table for notes</a>
-                    </li>
-                    <li>
-                        <a href="<c:url value='/admin/ScheduleAsCsv' />"
-                            target="_new">Full Schedule as CSV</a> - for
-                        use with scheduling tools
-                    </li>
 
                     <li>
-                        <a
-                            href="<c:url value='/admin/PerformanceSheets' />"
-                            target="_new">Performance sheets for
-                            regular match play</a>
-                    </li>
-
-                    <!-- subjective sheets -->
-                    <c:forEach
-                        items="${challengeDescription.subjectiveCategories}"
-                        var="category">
-
-                        <c:set var="columns"
-                            value="${categoryNameToColumn[category.name]}" />
-
-                        <c:forEach items="${columns}" var="columnName">
-
-                            <c:choose>
-                                <c:when test="${columns.size() gt 1}">
-                                    <li>
-                                        <a
-                                            target="_${category.name}-${columnName}"
-                                            href="<c:url value='SubjectiveSheets/${category.name}/${columnName}'/>">Subjective
-                                            sheets for ${category.title}
-                                            schedule ${columnName}</a>
-                                    </li>
-                                </c:when>
-                                <c:otherwise>
-                                    <li>
-                                        <a target="_${category.name}"
-                                            href="<c:url value='SubjectiveSheets/${category.name}/${columnName}'/>">Subjective
-                                            sheets for ${category.title}</a>
-                                    </li>
-                                </c:otherwise>
-                            </c:choose>
-                        </c:forEach>
-
-                    </c:forEach>
-                    <!-- end subjective sheets -->
-
-                    <!-- Team schedules -->
-                    <li>
-                        <a href="<c:url value='/admin/TeamSchedules' />"
-                            target="_new">Team Schedules</a>
+                        <a href="<c:url value='/report/PitSigns' />"
+                            target="_new">All Pit Signs</a>
                     </li>
 
                     <li>
                         <form
-                            action="<c:url value='/admin/TeamSchedules' />"
+                            action="<c:url value='/report/PitSigns' />"
                             method='post' target="_new">
-                            Team schedule for
-                            <select name='TeamNumber'>
+                            Pit sign for
+                            <select name='team_number'>
                                 <c:forEach items="${tournamentTeams}"
                                     var="team">
                                     <option
@@ -331,93 +241,74 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                                     </option>
                                 </c:forEach>
                             </select>
-                            <input type='submit' value='Output Schedule' />
+                            <input type='submit' value='Output Pit Sign' />
                         </form>
                     </li>
-                    <!-- end Team schedules -->
 
-                </ul>
-            </c:if>
-        </li>
-
-        <li>
-            <a href="<c:url value='/report/PitSigns' />" target="_new">All
-                Pit Signs</a>
-        </li>
-
-        <li>
-            <form action="<c:url value='/report/PitSigns' />"
-                method='post' target="_new">
-                Pit sign for
-                <select name='team_number'>
-                    <c:forEach items="${tournamentTeams}" var="team">
-                        <option
-                            value='<c:out value="${team.teamNumber}"/>'>
-                            <c:out value="${team.teamNumber}" /> -
-                            <c:out value="${team.teamName}" />
-                        </option>
-                    </c:forEach>
-                </select>
-                <input type='submit' value='Output Pit Sign' />
-            </form>
-        </li>
-
-        <li>
-            <a id='change-award-groups' href='edit_event_division.jsp'>Change
-                award group assignments for the current tournament</a> . <a
-                href='javascript:display("EventDivisionHelp")'>[help]</a>
-            <div id='EventDivisionHelp' class='help'
-                style='display: none'>
-                This information is typically specified in the schedule
-                data file. If it needs to be modified you can use this
-                page to change the award groups for teams in the current
-                tournament.
-                <br>
-                <a href='javascript:hide("EventDivisionHelp")'>[hide]</a>
-            </div>
-        </li>
+                    <li>
+                        <a id='change-award-groups'
+                            href='edit_event_division.jsp'>Change
+                            award group assignments for the current
+                            tournament</a> . <a
+                            href='javascript:display("EventDivisionHelp")'>[help]</a>
+                        <div id='EventDivisionHelp' class='help'
+                            style='display: none'>
+                            This information is typically specified in
+                            the schedule data file. If it needs to be
+                            modified you can use this page to change the
+                            award groups for teams in the current
+                            tournament.
+                            <br>
+                            <a
+                                href='javascript:hide("EventDivisionHelp")'>[hide]</a>
+                        </div>
+                    </li>
 
 
-        <li>
-            <a href='edit_judging_groups.jsp'>Change judging groups
-                assignments for the current tournament</a> . <a
-                href='javascript:display("JudgingGroupHelp")'>[help]</a>
-            <div id='JudgingGroupHelp' class='help'
-                style='display: none'>
-                This information is typically specified in the schedule
-                data file. If it needs to be modified you can use this
-                page to change the judging groups for teams in the
-                current tournament.
-                <br>
-                <a href='javascript:hide("JudgingGroupHelp")'>[hide]</a>
-            </div>
-        </li>
+                    <li>
+                        <a href='edit_judging_groups.jsp'>Change
+                            judging groups assignments for the current
+                            tournament</a> . <a
+                            href='javascript:display("JudgingGroupHelp")'>[help]</a>
+                        <div id='JudgingGroupHelp' class='help'
+                            style='display: none'>
+                            This information is typically specified in
+                            the schedule data file. If it needs to be
+                            modified you can use this page to change the
+                            judging groups for teams in the current
+                            tournament.
+                            <br>
+                            <a
+                                href='javascript:hide("JudgingGroupHelp")'>[hide]</a>
+                        </div>
+                    </li>
 
-        <li>
-            <a href="<c:url value='/admin/delayed_performance.jsp'/>">Setup
-                delay of displaying performance scores</a>
-        </li>
+                    <li>
+                        <a
+                            href="<c:url value='/admin/delayed_performance.jsp'/>">Setup
+                            delay of displaying performance scores</a>
+                    </li>
 
-        <li>
-            <a href="manage-user-images.jsp" target="_blank">Modify
-                the various images used in the software</a>
-        </li>
+                    <li>
+                        <a href="manage-user-images.jsp" target="_blank">Modify
+                            the various images used in the software</a>
+                    </li>
 
-        <li>
-            <a href="manage-sponsor-logos.jsp" target="_blank">Add
-                or delete sponsor logos</a>
-        </li>
+                    <li>
+                        <a href="manage-sponsor-logos.jsp"
+                            target="_blank">Add or delete sponsor
+                            logos</a>
+                    </li>
 
-        <li>
-            <a href="manage-slideshow.jsp" target="_blank">Add or
-                delete slideshow images</a>
-        </li>
+                    <li>
+                        <a href="manage-slideshow.jsp" target="_blank">Add
+                            or delete slideshow images</a>
+                    </li>
 
-        <li>
-            <a href="database-backups.jsp" target="_blank">Access to
-                database backups</a>
-        </li>
-
+                    <li>
+                        <a href="database-backups.jsp" target="_blank">Access
+                            to database backups</a>
+                    </li>
     </ol>
 
     <h2>Tournament day</h2>

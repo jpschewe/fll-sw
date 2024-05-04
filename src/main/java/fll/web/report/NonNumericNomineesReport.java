@@ -17,12 +17,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
 
@@ -33,6 +27,7 @@ import org.w3c.dom.Element;
 
 import fll.Tournament;
 import fll.TournamentTeam;
+import fll.db.CategoriesIgnored;
 import fll.db.NonNumericNominees;
 import fll.db.NonNumericNominees.Nominee;
 import fll.util.FLLInternalException;
@@ -45,6 +40,12 @@ import fll.web.UserRole;
 import fll.web.report.awards.AwardsReport;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -134,7 +135,8 @@ public class NonNumericNomineesReport extends BaseFLLServlet {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    for (final NonNumericCategory category : description.getNonNumericCategories()) {
+    for (final NonNumericCategory category : CategoriesIgnored.getNonNumericCategories(description, connection,
+                                                                                                tournament)) {
       final Element element = addCategory(connection, tournament, document, category);
       documentBody.appendChild(element);
     }

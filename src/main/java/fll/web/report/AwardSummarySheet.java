@@ -25,6 +25,7 @@ import org.w3c.dom.Element;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
+import fll.db.CategoriesIgnored;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -77,7 +78,8 @@ public class AwardSummarySheet extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session, "/report/AwardSummarySheet")) {
+    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
+                                                    "/report/AwardSummarySheet")) {
       return;
     }
 
@@ -180,7 +182,9 @@ public class AwardSummarySheet extends BaseFLLServlet {
       }
     }
 
-    for (final AwardCategory awardCategory : challengeDescription.getNonNumericCategories()) {
+    for (final AwardCategory awardCategory : CategoriesIgnored.getNonNumericCategories(challengeDescription,
+                                                                                                connection,
+                                                                                                tournament)) {
       report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
       final Element element = createNonNumericBlock(document, awardCategory);
       report.appendChild(element);
