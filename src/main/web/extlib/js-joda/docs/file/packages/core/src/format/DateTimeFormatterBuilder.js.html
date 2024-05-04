@@ -8,7 +8,7 @@
   <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
   <script src="script/prettify/prettify.js"></script>
   <script src="script/manual.js"></script>
-<meta name="description" content="Immutable date and time library for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="js-joda"><meta property="twitter:description" content="Immutable date and time library for JavaScript"></head>
+<script src="./inject/script/0-js-joda.min.js"></script><script src="./inject/script/0-js-joda-extra.min.js"></script><script src="./inject/script/0-js-joda-timezone.min.js"></script><script src="./inject/script/0-index.js"></script><script src="./inject/script/0-yato.js"></script><meta name="description" content="Immutable date and time library for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="js-joda"><meta property="twitter:description" content="Immutable date and time library for JavaScript"></head>
 <body class="layout-container" data-ice="rootContainer">
 
 <header>
@@ -40,6 +40,8 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/MathUtil.js~MathUtil.html">MathUtil</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/Month.js~Month.html">Month</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/MonthDay.js~MonthDay.html">MonthDay</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html">OffsetDateTime</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/OffsetTime.js~OffsetTime.html">OffsetTime</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/Period.js~Period.html">Period</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/YearConstants.js~YearConstants.html">YearConstants</a></span></span></li>
@@ -48,12 +50,8 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/ZoneOffset.js~ZoneOffset.html">ZoneOffset</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/ZoneRegion.js~ZoneRegion.html">ZoneRegion</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/ZonedDateTime.js~ZonedDateTime.html">ZonedDateTime</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-abstractMethodFail">abstractMethodFail</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-assert">assert</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-requireInstance">requireInstance</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-requireNonNull">requireNonNull</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convert">convert</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-bindUse">bindUse</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-nativeJs">nativeJs</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-MAX_SAFE_INTEGER">MAX_SAFE_INTEGER</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-MIN_SAFE_INTEGER">MIN_SAFE_INTEGER</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-ArithmeticException">ArithmeticException</a></span></span></li>
@@ -63,7 +61,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-IllegalStateException">IllegalStateException</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-NullPointerException">NullPointerException</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-UnsupportedTemporalTypeException">UnsupportedTemporalTypeException</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-use">use</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core-src-chrono">core/src/chrono</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/chrono/ChronoLocalDate.js~ChronoLocalDate.html">ChronoLocalDate</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/chrono/ChronoLocalDateTime.js~ChronoLocalDateTime.html">ChronoLocalDateTime</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/chrono/ChronoZonedDateTime.js~ChronoZonedDateTime.html">ChronoZonedDateTime</a></span></span></li>
@@ -76,8 +73,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/format/TextStyle.js~TextStyle.html">TextStyle</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core-src-temporal">core/src/temporal</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/ChronoUnit.js~ChronoUnit.html">ChronoUnit</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/DefaultInterfaceTemporal.js~DefaultInterfaceTemporal.html">DefaultInterfaceTemporal</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/IsoFields.js~IsoFields.html">IsoFields</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalAccessor.js~TemporalAccessor.html">TemporalAccessor</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalAdjusters.js~TemporalAdjusters.html">TemporalAdjusters</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalQueries.js~TemporalQueries.html">TemporalQueries</a></span></span></li>
@@ -88,35 +83,30 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-interface">I</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalField.js~TemporalField.html">TemporalField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-interface">I</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalQuery.js~TemporalQuery.html">TemporalQuery</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-interface">I</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-nativeJs">nativeJs</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-createTemporalQuery">createTemporalQuery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-IsoFields">IsoFields</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core-src-zone">core/src/zone</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/SystemDefaultZoneId.js~SystemDefaultZoneId.html">SystemDefaultZoneId</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/SystemDefaultZoneRules.js~SystemDefaultZoneRules.html">SystemDefaultZoneRules</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/ZoneOffsetTransition.js~ZoneOffsetTransition.html">ZoneOffsetTransition</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/ZoneRules.js~ZoneRules.html">ZoneRules</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/ZoneRulesProvider.js~ZoneRulesProvider.html">ZoneRulesProvider</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#extra-src">extra/src</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/Interval.js~Interval.html">Interval</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-abstractMethodFail">abstractMethodFail</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-assert">assert</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-requireInstance">requireInstance</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-requireNonNull">requireNonNull</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plug">plug</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#extra-src">extra/src</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/DayOfMonth.js~DayOfMonth.html">DayOfMonth</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/DayOfYear.js~DayOfYear.html">DayOfYear</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/Interval.js~Interval.html">Interval</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/LocalDateRange.js~LocalDateRange.html">LocalDateRange</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/OffsetDate.js~OffsetDate.html">OffsetDate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/Quarter.js~Quarter.html">Quarter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/Temporals.js~Temporals.html">Temporals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/YearQuarter.js~YearQuarter.html">YearQuarter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/YearWeek.js~YearWeek.html">YearWeek</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src">locale/src</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/Locale.js~Locale.html">Locale</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plug">plug</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-format">locale/src/format</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/LocaleDateTimeFormatter.js~LocaleDateTimeFormatter.html">LocaleDateTimeFormatter</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/LocaleStore.js~LocaleStore.html">LocaleStore</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-createEntry">createEntry</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-format-cldr">locale/src/format/cldr</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder.html">CldrDateTimeFormatterBuilder</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/cldr/CldrZoneTextPrinterParser.js~CldrZoneTextPrinterParser.html">CldrZoneTextPrinterParser</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-format-cldr">locale/src/format/cldr</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/cldr/CldrZoneTextPrinterParser.js~CldrZoneTextPrinterParser.html">CldrZoneTextPrinterParser</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-format-parser">locale/src/format/parser</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/parser/WeekFieldsPrinterParser.js~WeekFieldsPrinterParser.html">WeekFieldsPrinterParser</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-temporal">locale/src/temporal</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/temporal/WeekFields.js~ComputedDayOfField.html">ComputedDayOfField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/temporal/WeekFields.js~WeekFields.html">WeekFields</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#timezone-src">timezone/src</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/timezone/src/MomentZoneRules.js~MomentZoneRules.html">MomentZoneRules</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/timezone/src/MomentZoneRulesProvider.js~MomentZoneRulesProvider.html">MomentZoneRulesProvider</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-autoPlug">autoPlug</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plug">plug</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extendSystemDefaultZoneId">extendSystemDefaultZoneId</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-unpack">unpack</a></span></span></li>
 </ul>
 </div>
 </nav>
@@ -128,33 +118,33 @@
  * @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
  */
 
-import {assert, requireNonNull, requireInstance} from &apos;../assert&apos;;
-import {IllegalArgumentException, IllegalStateException} from &apos;../errors&apos;;
-import {MathUtil} from &apos;../MathUtil&apos;;
+import { assert, requireNonNull, requireInstance } from &apos;../assert&apos;;
+import { IllegalArgumentException, IllegalStateException } from &apos;../errors&apos;;
+import { MathUtil } from &apos;../MathUtil&apos;;
 
-import {LocalDate} from &apos;../LocalDate&apos;;
-import {LocalDateTime} from &apos;../LocalDateTime&apos;;
-import {ZoneOffset} from &apos;../ZoneOffset&apos;;
-import {ChronoLocalDate} from &apos;../chrono/ChronoLocalDate&apos;;
-import {ChronoField} from &apos;../temporal/ChronoField&apos;;
-import {IsoFields} from &apos;../temporal/IsoFields&apos;;
-import {TemporalQueries} from &apos;../temporal/TemporalQueries&apos;;
+import { LocalDate } from &apos;../LocalDate&apos;;
+import { LocalDateTime } from &apos;../LocalDateTime&apos;;
+import { ZoneOffset } from &apos;../ZoneOffset&apos;;
+import { ChronoLocalDate } from &apos;../chrono/ChronoLocalDate&apos;;
+import { ChronoField } from &apos;../temporal/ChronoField&apos;;
+import { IsoFields } from &apos;../temporal/IsoFields&apos;;
+import { TemporalQueries } from &apos;../temporal/TemporalQueries&apos;;
 
-import {DateTimeFormatter} from &apos;./DateTimeFormatter&apos;;
-import {DecimalStyle} from &apos;./DecimalStyle&apos;;
-import {SignStyle} from &apos;./SignStyle&apos;;
-import {TextStyle} from &apos;./TextStyle&apos;;
-import {ResolverStyle} from &apos;./ResolverStyle&apos;;
+import { DateTimeFormatter } from &apos;./DateTimeFormatter&apos;;
+import { DecimalStyle } from &apos;./DecimalStyle&apos;;
+import { SignStyle } from &apos;./SignStyle&apos;;
+import { TextStyle } from &apos;./TextStyle&apos;;
+import { ResolverStyle } from &apos;./ResolverStyle&apos;;
 
-import {CharLiteralPrinterParser} from &apos;./parser/CharLiteralPrinterParser&apos;;
-import {CompositePrinterParser} from &apos;./parser/CompositePrinterParser&apos;;
-import {FractionPrinterParser} from &apos;./parser/FractionPrinterParser&apos;;
-import {NumberPrinterParser, ReducedPrinterParser} from &apos;./parser/NumberPrinterParser&apos;;
-import {OffsetIdPrinterParser} from &apos;./parser/OffsetIdPrinterParser&apos;;
-import {PadPrinterParserDecorator} from &apos;./parser/PadPrinterParserDecorator&apos;;
-import {SettingsParser} from &apos;./parser/SettingsParser&apos;;
-import {StringLiteralPrinterParser} from &apos;./parser/StringLiteralPrinterParser&apos;;
-import {ZoneIdPrinterParser} from &apos;./parser/ZoneIdPrinterParser&apos;;
+import { CharLiteralPrinterParser } from &apos;./parser/CharLiteralPrinterParser&apos;;
+import { CompositePrinterParser } from &apos;./parser/CompositePrinterParser&apos;;
+import { FractionPrinterParser } from &apos;./parser/FractionPrinterParser&apos;;
+import { NumberPrinterParser, ReducedPrinterParser } from &apos;./parser/NumberPrinterParser&apos;;
+import { OffsetIdPrinterParser } from &apos;./parser/OffsetIdPrinterParser&apos;;
+import { PadPrinterParserDecorator } from &apos;./parser/PadPrinterParserDecorator&apos;;
+import { SettingsParser } from &apos;./parser/SettingsParser&apos;;
+import { StringLiteralPrinterParser } from &apos;./parser/StringLiteralPrinterParser&apos;;
+import { ZoneIdPrinterParser } from &apos;./parser/ZoneIdPrinterParser&apos;;
 
 const MAX_WIDTH = 15; // can&apos;t parse all numbers with more then 15 digits in javascript
 
@@ -295,6 +285,39 @@ export class DateTimeFormatterBuilder {
      */
     parseLenient() {
         this._appendInternalPrinterParser(SettingsParser.LENIENT);
+        return this;
+    }
+
+    /**
+     * Appends a default value for a field to the formatter for use in parsing.
+     * &lt;p&gt;
+     * This appends an instruction to the builder to inject a default value
+     * into the parsed result. This is especially useful in conjunction with
+     * optional parts of the formatter.
+     * &lt;p&gt;
+     * For example, consider a formatter that parses the year, followed by
+     * an optional month, with a further optional day-of-month. Using such a
+     * formatter would require the calling code to check whether a full date,
+     * year-month or just a year had been parsed. This method can be used to
+     * default the month and day-of-month to a sensible value, such as the
+     * first of the month, allowing the calling code to always get a date.
+     * &lt;p&gt;
+     * During formatting, this method has no effect.
+     * &lt;p&gt;
+     * During parsing, the current state of the parse is inspected.
+     * If the specified field has no associated value, because it has not been
+     * parsed successfully at that point, then the specified value is injected
+     * into the parse result. Injection is immediate, thus the field-value pair
+     * will be visible to any subsequent elements in the formatter.
+     * As such, this method is normally called at the end of the builder.
+     *
+     * @param {TemporalField} field  the field to default the value of, not null
+     * @param {number} value  the value to default the field to
+     * @return {DateTimeFormatterBuilder} this, for chaining, not null
+     */
+    parseDefaulting(field, value) {
+        requireNonNull(field);
+        this._appendInternal(new DefaultingParser(field, value));
         return this;
     }
 
@@ -670,7 +693,7 @@ export class DateTimeFormatterBuilder {
      */
     appendInstant(fractionalDigits=-2) {
         if (fractionalDigits &lt; -2 || fractionalDigits &gt; 9) {
-            throw new IllegalArgumentException(&apos;Invalid fractional digits: &apos; + fractionalDigits);
+            throw new IllegalArgumentException(`Invalid fractional digits: ${fractionalDigits}`);
         }
         this._appendInternal(new InstantPrinterParser(fractionalDigits));
         return this;
@@ -937,19 +960,19 @@ export class DateTimeFormatterBuilder {
     // empty implementations of locale functionality, be implemented/overridden by js-joda-locale
 
     appendZoneText() {
-        throw new IllegalArgumentException(&apos;Pattern using (localized) text not implemented, use js-joda-locale plugin!&apos;);
+        throw new IllegalArgumentException(&apos;Pattern using (localized) text not implemented, use @js-joda/locale plugin!&apos;);
     }
 
     appendText() {
-        throw new IllegalArgumentException(&apos;Pattern using (localized) text not implemented, use js-joda-locale plugin!&apos;);
+        throw new IllegalArgumentException(&apos;Pattern using (localized) text not implemented, use @js-joda/locale plugin!&apos;);
     }
 
     appendLocalizedOffset() {
-        throw new IllegalArgumentException(&apos;Pattern using (localized) text not implemented, use js-joda-locale plugin!&apos;);
+        throw new IllegalArgumentException(&apos;Pattern using (localized) text not implemented, use @js-joda/locale plugin!&apos;);
     }
 
     appendWeekField() {
-        throw new IllegalArgumentException(&apos;Pattern using (localized) text not implemented, use js-joda-locale plugin!&apos;);
+        throw new IllegalArgumentException(&apos;Pattern using (localized) text not implemented, use @js-joda/locale plugin!&apos;);
     }
 
     //-----------------------------------------------------------------------
@@ -1003,7 +1026,7 @@ export class DateTimeFormatterBuilder {
                     }
                     if (pad === 0) {
                         throw new IllegalArgumentException(
-                            &apos;Pad letter \&apos;p\&apos; must be followed by valid pad pattern: &apos; + pattern);
+                            `Pad letter &apos;p&apos; must be followed by valid pad pattern: ${pattern}`);
                     }
                     this.padNext(pad); // pad and continue parsing
                 }
@@ -1013,7 +1036,7 @@ export class DateTimeFormatterBuilder {
                     this._parseField(cur, count, field);
                 } else if (cur === &apos;z&apos;) {
                     if (count &gt; 4) {
-                        throw new IllegalArgumentException(&apos;Too many pattern letters: &apos; + cur);
+                        throw new IllegalArgumentException(`Too many pattern letters: ${cur}`);
                     } else if (count === 4) {
                         this.appendZoneText(TextStyle.FULL);
                     } else {
@@ -1021,7 +1044,7 @@ export class DateTimeFormatterBuilder {
                     }
                 } else if (cur === &apos;V&apos;) {
                     if (count !== 2) {
-                        throw new IllegalArgumentException(&apos;Pattern letter count must be 2: &apos; + cur);
+                        throw new IllegalArgumentException(`Pattern letter count must be 2: ${cur}`);
                     }
                     this.appendZoneId();
                 } else if (cur === &apos;Z&apos;) {
@@ -1032,7 +1055,7 @@ export class DateTimeFormatterBuilder {
                     } else if (count === 5) {
                         this.appendOffset(&apos;+HH:MM:ss&apos;, &apos;Z&apos;);
                     } else {
-                        throw new IllegalArgumentException(&apos;Too many pattern letters: &apos; + cur);
+                        throw new IllegalArgumentException(`Too many pattern letters: ${cur}`);
                     }
                 } else if (cur === &apos;O&apos;) {
                     if (count === 1) {
@@ -1040,33 +1063,33 @@ export class DateTimeFormatterBuilder {
                     } else if (count === 4) {
                         this.appendLocalizedOffset(TextStyle.FULL);
                     } else {
-                        throw new IllegalArgumentException(&apos;Pattern letter count must be 1 or 4: &apos; + cur);
+                        throw new IllegalArgumentException(`Pattern letter count must be 1 or 4: ${cur}`);
                     }
                 } else if (cur === &apos;X&apos;) {
                     if (count &gt; 5) {
-                        throw new IllegalArgumentException(&apos;Too many pattern letters: &apos; + cur);
+                        throw new IllegalArgumentException(`Too many pattern letters: ${cur}`);
                     }
                     this.appendOffset(OffsetIdPrinterParser.PATTERNS[count + (count === 1 ? 0 : 1)], &apos;Z&apos;);
                 } else if (cur === &apos;x&apos;) {
                     if (count &gt; 5) {
-                        throw new IllegalArgumentException(&apos;Too many pattern letters: &apos; + cur);
+                        throw new IllegalArgumentException(`Too many pattern letters: ${cur}`);
                     }
                     const zero = (count === 1 ? &apos;+00&apos; : (count % 2 === 0 ? &apos;+0000&apos; : &apos;+00:00&apos;));
                     this.appendOffset(OffsetIdPrinterParser.PATTERNS[count + (count === 1 ? 0 : 1)], zero);
                 } else if (cur === &apos;W&apos;) {
                     if (count &gt; 1) {
-                        throw new IllegalArgumentException(&apos;Too many pattern letters: &apos; + cur);
+                        throw new IllegalArgumentException(`Too many pattern letters: ${cur}`);
                     }
                     this.appendWeekField(&apos;W&apos;, count);
                 } else if (cur === &apos;w&apos;) {
                     if (count &gt; 2) {
-                        throw new IllegalArgumentException(&apos;Too many pattern letters: &apos; + cur);
+                        throw new IllegalArgumentException(`Too many pattern letters: ${cur}`);
                     }
                     this.appendWeekField(&apos;w&apos;, count);
                 } else if (cur === &apos;Y&apos;) {
                     this.appendWeekField(&apos;Y&apos;, count);
                 } else {
-                    throw new IllegalArgumentException(&apos;Unknown pattern letter: &apos; + cur);
+                    throw new IllegalArgumentException(`Unknown pattern letter: ${cur}`);
                 }
                 pos--;
 
@@ -1083,7 +1106,7 @@ export class DateTimeFormatterBuilder {
                     }
                 }
                 if (pos &gt;= pattern.length) {
-                    throw new IllegalArgumentException(&apos;Pattern ends with an incomplete string literal: &apos; + pattern);
+                    throw new IllegalArgumentException(`Pattern ends with an incomplete string literal: ${pattern}`);
                 }
                 const str = pattern.substring(start + 1, pos);
                 if (str.length === 0) {
@@ -1102,7 +1125,7 @@ export class DateTimeFormatterBuilder {
                 this.optionalEnd();
 
             } else if (cur === &apos;{&apos; || cur === &apos;}&apos; || cur === &apos;#&apos;) {
-                throw new IllegalArgumentException(&apos;Pattern includes reserved character: \&apos;&apos; + cur + &apos;\&apos;&apos;);
+                throw new IllegalArgumentException(`Pattern includes reserved character: &apos;${cur}&apos;`);
             } else {
                 this.appendLiteral(cur);
             }
@@ -1140,7 +1163,7 @@ export class DateTimeFormatterBuilder {
                         this.appendText(field, TextStyle.NARROW);
                         break;
                     default:
-                        throw new IllegalArgumentException(&apos;Too many pattern letters: &apos; + cur);
+                        throw new IllegalArgumentException(`Too many pattern letters: ${cur}`);
                 }
                 break;
             case &apos;L&apos;:
@@ -1162,7 +1185,7 @@ export class DateTimeFormatterBuilder {
                         this.appendText(field, TextStyle.NARROW_STANDALONE);
                         break;
                     default:
-                        throw new IllegalArgumentException(&apos;Too many pattern letters: &apos; + cur);
+                        throw new IllegalArgumentException(`Too many pattern letters: ${cur}`);
                 }
                 break;
             case &apos;e&apos;:
@@ -1181,7 +1204,7 @@ export class DateTimeFormatterBuilder {
                         this.appendText(field, TextStyle.NARROW);
                         break;
                     default:
-                        throw new IllegalArgumentException(&apos;Too many pattern letters: &apos; + cur);
+                        throw new IllegalArgumentException(`Too many pattern letters: ${cur}`);
                 }
                 // eslint-disable-next-line no-unreachable
                 break;
@@ -1191,7 +1214,7 @@ export class DateTimeFormatterBuilder {
                         this.appendWeekField(&apos;c&apos;, count);
                         break;
                     case 2:
-                        throw new IllegalArgumentException(&apos;Invalid number of pattern letters: &apos; + cur);
+                        throw new IllegalArgumentException(`Invalid number of pattern letters: ${cur}`);
                     case 3:
                         this.appendText(field, TextStyle.SHORT_STANDALONE);
                         break;
@@ -1202,7 +1225,7 @@ export class DateTimeFormatterBuilder {
                         this.appendText(field, TextStyle.NARROW_STANDALONE);
                         break;
                     default:
-                        throw new IllegalArgumentException(&apos;Too many pattern letters: &apos; + cur);
+                        throw new IllegalArgumentException(`Too many pattern letters: ${cur}`);
                 }
                 // eslint-disable-next-line no-unreachable
                 break;
@@ -1210,7 +1233,7 @@ export class DateTimeFormatterBuilder {
                 if (count === 1) {
                     this.appendText(field, TextStyle.SHORT);
                 } else {
-                    throw new IllegalArgumentException(&apos;Too many pattern letters: &apos; + cur);
+                    throw new IllegalArgumentException(`Too many pattern letters: ${cur}`);
                 }
                 // eslint-disable-next-line no-unreachable
                 break;
@@ -1229,7 +1252,7 @@ export class DateTimeFormatterBuilder {
                         this.appendText(field, TextStyle.NARROW);
                         break;
                     default:
-                        throw new IllegalArgumentException(&apos;Too many pattern letters: &apos; + cur);
+                        throw new IllegalArgumentException(`Too many pattern letters: ${cur}`);
                 }
                 // eslint-disable-next-line no-unreachable
                 break;
@@ -1240,7 +1263,7 @@ export class DateTimeFormatterBuilder {
                 if (count === 1) {
                     this.appendValue(field);
                 } else {
-                    throw new IllegalArgumentException(&apos;Too many pattern letters: &apos; + cur);
+                    throw new IllegalArgumentException(`Too many pattern letters: ${cur}`);
                 }
                 break;
             case &apos;d&apos;:
@@ -1255,7 +1278,7 @@ export class DateTimeFormatterBuilder {
                 } else if (count === 2) {
                     this.appendValue(field, count);
                 } else {
-                    throw new IllegalArgumentException(&apos;Too many pattern letters: &apos; + cur);
+                    throw new IllegalArgumentException(`Too many pattern letters: ${cur}`);
                 }
                 break;
             case &apos;D&apos;:
@@ -1264,7 +1287,7 @@ export class DateTimeFormatterBuilder {
                 } else if (count &lt;= 3) {
                     this.appendValue(field, count);
                 } else {
-                    throw new IllegalArgumentException(&apos;Too many pattern letters: &apos; + cur);
+                    throw new IllegalArgumentException(`Too many pattern letters: ${cur}`);
                 }
                 break;
             default:
@@ -1334,7 +1357,7 @@ export class DateTimeFormatterBuilder {
      */
     _padNext2(padWidth, padChar) {
         if (padWidth &lt; 1) {
-            throw new IllegalArgumentException(&apos;The pad width must be at least one but was &apos; + padWidth);
+            throw new IllegalArgumentException(`The pad width must be at least one but was ${padWidth}`);
         }
         this._active._padNextWidth = padWidth;
         this._active._padNextChar = padChar;
@@ -1548,7 +1571,7 @@ class InstantPrinterParser  {
             if (hi &gt; 0) {
                 buf.append(&apos;+&apos;).append(hi);
             }
-            buf.append(ldt);
+            buf.append(ldt.toString());
             if (ldt.second() === 0) {
                 buf.append(&apos;:00&apos;);
             }
@@ -1559,13 +1582,13 @@ class InstantPrinterParser  {
             const lo = MathUtil.intMod(zeroSecs, SECONDS_PER_10000_YEARS);
             const ldt = LocalDateTime.ofEpochSecond(lo - SECONDS_0000_TO_1970, 0, ZoneOffset.UTC);
             const pos = buf.length();
-            buf.append(ldt);
+            buf.append(ldt.toString());
             if (ldt.second() === 0) {
                 buf.append(&apos;:00&apos;);
             }
             if (hi &lt; 0) {
                 if (ldt.year() === -10000) {
-                    buf.replace(pos, pos + 2, &apos;&apos; + (hi - 1));
+                    buf.replace(pos, pos + 2, `${hi - 1}`);
                 } else if (lo === 0) {
                     buf.insert(pos, hi);
                 } else {
@@ -1578,11 +1601,11 @@ class InstantPrinterParser  {
             if (inNano !== 0) {
                 buf.append(&apos;.&apos;);
                 if (MathUtil.intMod(inNano, 1000000) === 0) {
-                    buf.append((&apos;&apos; + (MathUtil.intDiv(inNano, 1000000) + 1000)).substring(1));
+                    buf.append((`${MathUtil.intDiv(inNano, 1000000) + 1000}`).substring(1));
                 } else if (MathUtil.intMod(inNano, 1000) === 0) {
-                    buf.append((&apos;&apos; + (MathUtil.intDiv(inNano, 1000) + 1000000)).substring(1));
+                    buf.append((`${MathUtil.intDiv(inNano, 1000) + 1000000}`).substring(1));
                 } else {
-                    buf.append((&apos;&apos; + ((inNano) + 1000000000)).substring(1));
+                    buf.append((`${(inNano) + 1000000000}`).substring(1));
                 }
             }
         } else if (this.fractionalDigits &gt; 0 || (this.fractionalDigits === -1 &amp;&amp; inNano &gt; 0)) {
@@ -1651,6 +1674,44 @@ class InstantPrinterParser  {
     }
 }
 
+/**
+ * Used by parseDefaulting().
+ * @implements {DateTimePrinterParser}
+ * @private
+ */
+class DefaultingParser {
+    /**
+     * @param {TemporalField} field 
+     * @param {number} value 
+     */
+    constructor(field, value) {
+        this._field = field;
+        this._value = value;
+    }
+
+    /**
+     * @param {DateTimePrintContext} context
+     * @param {StringBuilder} buf
+     * @return {boolean}
+     */
+    print() {
+        return true;
+    }
+
+
+    /** 
+     * @param {DateTimeParseContext} context 
+     * @param {string} text
+     * @param {number} position 
+     * @returns {number}
+     */
+    parse(context, text, position) {
+        if (context.getParsed(this._field) == null) {
+            context.setParsedField(this._field, this._value, position, position);
+        }
+        return position;
+    }
+}
 
 export function _init() {
     ReducedPrinterParser.BASE_DATE = LocalDate.of(2000, 1, 1);

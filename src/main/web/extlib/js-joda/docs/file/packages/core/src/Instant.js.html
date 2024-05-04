@@ -8,7 +8,7 @@
   <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
   <script src="script/prettify/prettify.js"></script>
   <script src="script/manual.js"></script>
-<meta name="description" content="Immutable date and time library for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="js-joda"><meta property="twitter:description" content="Immutable date and time library for JavaScript"></head>
+<script src="./inject/script/0-js-joda.min.js"></script><script src="./inject/script/0-js-joda-extra.min.js"></script><script src="./inject/script/0-js-joda-timezone.min.js"></script><script src="./inject/script/0-index.js"></script><script src="./inject/script/0-yato.js"></script><meta name="description" content="Immutable date and time library for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="js-joda"><meta property="twitter:description" content="Immutable date and time library for JavaScript"></head>
 <body class="layout-container" data-ice="rootContainer">
 
 <header>
@@ -40,6 +40,8 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/MathUtil.js~MathUtil.html">MathUtil</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/Month.js~Month.html">Month</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/MonthDay.js~MonthDay.html">MonthDay</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/OffsetDateTime.js~OffsetDateTime.html">OffsetDateTime</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/OffsetTime.js~OffsetTime.html">OffsetTime</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/Period.js~Period.html">Period</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/Year.js~Year.html">Year</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/YearConstants.js~YearConstants.html">YearConstants</a></span></span></li>
@@ -48,12 +50,8 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/ZoneOffset.js~ZoneOffset.html">ZoneOffset</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/ZoneRegion.js~ZoneRegion.html">ZoneRegion</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/ZonedDateTime.js~ZonedDateTime.html">ZonedDateTime</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-abstractMethodFail">abstractMethodFail</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-assert">assert</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-requireInstance">requireInstance</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-requireNonNull">requireNonNull</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convert">convert</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-bindUse">bindUse</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-nativeJs">nativeJs</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-MAX_SAFE_INTEGER">MAX_SAFE_INTEGER</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-MIN_SAFE_INTEGER">MIN_SAFE_INTEGER</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-ArithmeticException">ArithmeticException</a></span></span></li>
@@ -63,7 +61,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-IllegalStateException">IllegalStateException</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-NullPointerException">NullPointerException</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-UnsupportedTemporalTypeException">UnsupportedTemporalTypeException</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-use">use</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core-src-chrono">core/src/chrono</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/chrono/ChronoLocalDate.js~ChronoLocalDate.html">ChronoLocalDate</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/chrono/ChronoLocalDateTime.js~ChronoLocalDateTime.html">ChronoLocalDateTime</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/chrono/ChronoZonedDateTime.js~ChronoZonedDateTime.html">ChronoZonedDateTime</a></span></span></li>
@@ -76,8 +73,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/format/TextStyle.js~TextStyle.html">TextStyle</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core-src-temporal">core/src/temporal</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/ChronoField.js~ChronoField.html">ChronoField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/ChronoUnit.js~ChronoUnit.html">ChronoUnit</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/DefaultInterfaceTemporal.js~DefaultInterfaceTemporal.html">DefaultInterfaceTemporal</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/IsoFields.js~IsoFields.html">IsoFields</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalAccessor.js~TemporalAccessor.html">TemporalAccessor</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalAdjusters.js~TemporalAdjusters.html">TemporalAdjusters</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalQueries.js~TemporalQueries.html">TemporalQueries</a></span></span></li>
@@ -88,35 +83,30 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-interface">I</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalField.js~TemporalField.html">TemporalField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-interface">I</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalQuery.js~TemporalQuery.html">TemporalQuery</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-interface">I</span><span data-ice="name"><span><a href="class/packages/core/src/temporal/TemporalUnit.js~TemporalUnit.html">TemporalUnit</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-nativeJs">nativeJs</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-createTemporalQuery">createTemporalQuery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-IsoFields">IsoFields</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core-src-zone">core/src/zone</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/SystemDefaultZoneId.js~SystemDefaultZoneId.html">SystemDefaultZoneId</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/SystemDefaultZoneRules.js~SystemDefaultZoneRules.html">SystemDefaultZoneRules</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/ZoneOffsetTransition.js~ZoneOffsetTransition.html">ZoneOffsetTransition</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/ZoneRules.js~ZoneRules.html">ZoneRules</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/core/src/zone/ZoneRulesProvider.js~ZoneRulesProvider.html">ZoneRulesProvider</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#extra-src">extra/src</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/Interval.js~Interval.html">Interval</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-abstractMethodFail">abstractMethodFail</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-assert">assert</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-requireInstance">requireInstance</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-requireNonNull">requireNonNull</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plug">plug</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#extra-src">extra/src</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/DayOfMonth.js~DayOfMonth.html">DayOfMonth</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/DayOfYear.js~DayOfYear.html">DayOfYear</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/Interval.js~Interval.html">Interval</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/LocalDateRange.js~LocalDateRange.html">LocalDateRange</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/OffsetDate.js~OffsetDate.html">OffsetDate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/Quarter.js~Quarter.html">Quarter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/Temporals.js~Temporals.html">Temporals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/YearQuarter.js~YearQuarter.html">YearQuarter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/extra/src/YearWeek.js~YearWeek.html">YearWeek</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src">locale/src</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/Locale.js~Locale.html">Locale</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plug">plug</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-format">locale/src/format</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/LocaleDateTimeFormatter.js~LocaleDateTimeFormatter.html">LocaleDateTimeFormatter</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/LocaleStore.js~LocaleStore.html">LocaleStore</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-createEntry">createEntry</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-format-cldr">locale/src/format/cldr</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/cldr/CldrDateTimeFormatterBuilder.js~CldrDateTimeFormatterBuilder.html">CldrDateTimeFormatterBuilder</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/cldr/CldrZoneTextPrinterParser.js~CldrZoneTextPrinterParser.html">CldrZoneTextPrinterParser</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-format-cldr">locale/src/format/cldr</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/cldr/CldrZoneTextPrinterParser.js~CldrZoneTextPrinterParser.html">CldrZoneTextPrinterParser</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-format-parser">locale/src/format/parser</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/format/parser/WeekFieldsPrinterParser.js~WeekFieldsPrinterParser.html">WeekFieldsPrinterParser</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#locale-src-temporal">locale/src/temporal</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/temporal/WeekFields.js~ComputedDayOfField.html">ComputedDayOfField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/locale/src/temporal/WeekFields.js~WeekFields.html">WeekFields</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#timezone-src">timezone/src</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/timezone/src/MomentZoneRules.js~MomentZoneRules.html">MomentZoneRules</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/packages/timezone/src/MomentZoneRulesProvider.js~MomentZoneRulesProvider.html">MomentZoneRulesProvider</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-autoPlug">autoPlug</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plug">plug</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extendSystemDefaultZoneId">extendSystemDefaultZoneId</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-unpack">unpack</a></span></span></li>
 </ul>
 </div>
 </nav>
@@ -128,21 +118,22 @@
  * @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
  */
 
-import {requireNonNull, requireInstance} from &apos;./assert&apos;;
-import {DateTimeException, UnsupportedTemporalTypeException} from &apos;./errors&apos;;
+import { requireNonNull, requireInstance } from &apos;./assert&apos;;
+import { DateTimeException, UnsupportedTemporalTypeException } from &apos;./errors&apos;;
 
-import {Clock} from &apos;./Clock&apos;;
-import {LocalTime} from &apos;./LocalTime&apos;;
-import {ZonedDateTime} from &apos;./ZonedDateTime&apos;;
-import {MathUtil} from &apos;./MathUtil&apos;;
+import { Clock } from &apos;./Clock&apos;;
+import { LocalTime } from &apos;./LocalTime&apos;;
+import { ZonedDateTime } from &apos;./ZonedDateTime&apos;;
+import { MathUtil } from &apos;./MathUtil&apos;;
+import { OffsetDateTime } from &apos;./OffsetDateTime&apos;;
 
-import {Temporal} from &apos;./temporal/Temporal&apos;;
-import {ChronoField} from &apos;./temporal/ChronoField&apos;;
-import {ChronoUnit} from &apos;./temporal/ChronoUnit&apos;;
-import {TemporalQueries} from &apos;./temporal/TemporalQueries&apos;;
-import {TemporalUnit} from &apos;./temporal/TemporalUnit&apos;;
-import {createTemporalQuery} from &apos;./temporal/TemporalQuery&apos;;
-import {DateTimeFormatter} from &apos;./format/DateTimeFormatter&apos;;
+import { Temporal } from &apos;./temporal/Temporal&apos;;
+import { ChronoField } from &apos;./temporal/ChronoField&apos;;
+import { ChronoUnit } from &apos;./temporal/ChronoUnit&apos;;
+import { TemporalQueries } from &apos;./temporal/TemporalQueries&apos;;
+import { TemporalUnit } from &apos;./temporal/TemporalUnit&apos;;
+import { createTemporalQuery } from &apos;./temporal/TemporalQuery&apos;;
+import { DateTimeFormatter } from &apos;./format/DateTimeFormatter&apos;;
 
 const NANOS_PER_MILLI = 1000000;
 
@@ -296,6 +287,20 @@ export class Instant extends Temporal {
     }
 
     /**
+     * Obtains an instance of {@link Instant} using microseconds from the
+     * epoch of 1970-01-01T00:00:00Z.
+     *
+     * @param {number} epochMicro - the number of microseconds from 1970-01-01T00:00:00Z
+     * @return {Instant} an instant, not null
+     * @throws DateTimeException if the instant exceeds the maximum or minimum instant
+     */
+    static ofEpochMicro(epochMicro) {
+        const secs = MathUtil.floorDiv(epochMicro, 1000000);
+        const mos = MathUtil.floorMod(epochMicro, 1000000);
+        return Instant._create(secs, mos * 1000);
+    }
+
+    /**
      * Obtains an instance of {@link Instant} from a temporal object.
      *
      * A {@link TemporalAccessor} represents some form of date and time information.
@@ -317,8 +322,8 @@ export class Instant extends Temporal {
             const nanoOfSecond = temporal.get(ChronoField.NANO_OF_SECOND);
             return Instant.ofEpochSecond(instantSecs, nanoOfSecond);
         } catch (ex) {
-            throw new DateTimeException(&apos;Unable to obtain Instant from TemporalAccessor: &apos; +
-                    temporal + &apos;, type &apos; + typeof temporal, ex);
+            throw new DateTimeException(`Unable to obtain Instant from TemporalAccessor: ${ 
+                temporal}, type ${typeof temporal}`, ex);
         }
     }
 
@@ -497,7 +502,7 @@ export class Instant extends Temporal {
                 case ChronoField.MILLI_OF_SECOND: return MathUtil.intDiv(this._nanos, NANOS_PER_MILLI);
                 case ChronoField.INSTANT_SECONDS: return this._seconds;
             }
-            throw new UnsupportedTemporalTypeException(&apos;Unsupported field: &apos; + field);
+            throw new UnsupportedTemporalTypeException(`Unsupported field: ${field}`);
         }
         return field.getFrom(this);
     }
@@ -528,30 +533,7 @@ export class Instant extends Temporal {
         return this._nanos;
     }
 
-    //-------------------------------------------------------------------------
-    /**
-     * Returns an adjusted copy of this instant.
-     *
-     * This returns a new {@link Instant}, based on this one, with the date adjusted.
-     * The adjustment takes place using the specified adjuster strategy object.
-     * Read the documentation of the adjuster to understand what adjustment will be made.
-     *
-     * The result of this method is obtained by invoking the
-     * {@link TemporalAdjuster#adjustInto} method on the
-     * specified adjuster passing `this` as the argument.
-     *
-     * This instance is immutable and unaffected by this method call.
-     *
-     * @param {!TemporalAdjuster} adjuster - the adjuster to use, not null
-     * @return {Instant} an {@link Instant} based on `this` with the adjustment made, not null
-     * @throws DateTimeException if the adjustment cannot be made
-     * @throws ArithmeticException if numeric overflow occurs
-     */
-    withAdjuster(adjuster) {
-        requireNonNull(adjuster, &apos;adjuster&apos;);
-        return adjuster.adjustInto(this);
-    }
-
+    //-----------------------------------------------------------------------
     /**
      * Returns a copy of this instant with the specified field set to a new value.
      *
@@ -595,7 +577,7 @@ export class Instant extends Temporal {
      * @throws DateTimeException if the field cannot be set
      * @throws ArithmeticException if numeric overflow occurs
      */
-    withFieldValue(field, newValue) {
+    _withField(field, newValue) {
         requireNonNull(field, &apos;field&apos;);
         if (field instanceof ChronoField) {
             field.checkValidValue(newValue);
@@ -611,7 +593,7 @@ export class Instant extends Temporal {
                 case ChronoField.NANO_OF_SECOND: return (newValue !== this._nanos? Instant._create(this._seconds, newValue) : this);
                 case ChronoField.INSTANT_SECONDS: return (newValue !== this._seconds ? Instant._create(newValue, this._nanos) : this);
             }
-            throw new UnsupportedTemporalTypeException(&apos;Unsupported field: &apos; + field);
+            throw new UnsupportedTemporalTypeException(`Unsupported field: ${field}`);
         }
         return field.adjustInto(this, newValue);
     }
@@ -657,18 +639,6 @@ export class Instant extends Temporal {
     }
 
     //-----------------------------------------------------------------------
-
-    /**
-     * @param {!TemporalAmount} amount
-     * @return {Instant}
-     * @throws DateTimeException
-     * @throws ArithmeticException
-     */
-    plusAmount(amount) {
-        requireNonNull(amount, &apos;amount&apos;);
-        return amount.addTo(this);
-    }
-
     /**
      * @param {!number} amountToAdd
      * @param {!TemporalUnit} unit
@@ -676,14 +646,14 @@ export class Instant extends Temporal {
      * @throws DateTimeException
      * @throws ArithmeticException
      */
-    plusAmountUnit(amountToAdd, unit) {
+    _plusUnit(amountToAdd, unit) {
         requireNonNull(amountToAdd, &apos;amountToAdd&apos;);
         requireNonNull(unit, &apos;unit&apos;);
         requireInstance(unit, TemporalUnit);
         if (unit instanceof ChronoUnit) {
             switch (unit) {
                 case ChronoUnit.NANOS: return this.plusNanos(amountToAdd);
-                case ChronoUnit.MICROS: return this._plus(MathUtil.intDiv(amountToAdd, 1000000), MathUtil.intMod(amountToAdd, 1000000) * 1000);
+                case ChronoUnit.MICROS: return this.plusMicros(amountToAdd);
                 case ChronoUnit.MILLIS: return this.plusMillis(amountToAdd);
                 case ChronoUnit.SECONDS: return this.plusSeconds(amountToAdd);
                 case ChronoUnit.MINUTES: return this.plusSeconds(MathUtil.safeMultiply(amountToAdd, LocalTime.SECONDS_PER_MINUTE));
@@ -691,7 +661,7 @@ export class Instant extends Temporal {
                 case ChronoUnit.HALF_DAYS: return this.plusSeconds(MathUtil.safeMultiply(amountToAdd, LocalTime.SECONDS_PER_DAY / 2));
                 case ChronoUnit.DAYS: return this.plusSeconds(MathUtil.safeMultiply(amountToAdd, LocalTime.SECONDS_PER_DAY));
             }
-            throw new UnsupportedTemporalTypeException(&apos;Unsupported unit: &apos; + unit);
+            throw new UnsupportedTemporalTypeException(`Unsupported unit: ${unit}`);
         }
         return unit.addTo(this, amountToAdd);
     }
@@ -737,6 +707,19 @@ export class Instant extends Temporal {
     }
 
     /**
+     * Returns a copy of this instant with the specified duration in microseconds added.
+     *
+     * This instance is immutable and unaffected by this method call.
+     *
+     * @param {number} microsToAdd - the microseconds to add, positive or negative
+     * @return {Instant} an {@link Instant} based on this instant with the specified microseconds added, not null
+     * @throws DateTimeException if the result exceeds the maximum or minimum instant
+     */
+    plusMicros(microsToAdd) {
+        return this._plus(MathUtil.intDiv(microsToAdd, 1000000), MathUtil.intMod(microsToAdd, 1000000) * 1000);
+    }
+
+    /**
      * Returns a copy of this instant with the specified duration added.
      *
      * This instance is immutable and unaffected by this method call.
@@ -747,7 +730,7 @@ export class Instant extends Temporal {
      * @throws DateTimeException if the result exceeds the maximum or minimum instant
      */
     _plus(secondsToAdd, nanosToAdd) {
-        if ((secondsToAdd | nanosToAdd) === 0) {
+        if (secondsToAdd === 0 &amp;&amp; nanosToAdd === 0) {
             return this;
         }
         let epochSec = this._seconds + secondsToAdd;
@@ -759,25 +742,14 @@ export class Instant extends Temporal {
     //-----------------------------------------------------------------------
 
     /**
-     * @param {!TemporalAmount} amount
-     * @return {Instant}
-     * @throws DateTimeException
-     * @throws ArithmeticException
-     */
-    minusAmount(amount) {
-        requireNonNull(amount, &apos;amount&apos;);
-        return amount.subtractFrom(this);
-    }
-
-    /**
      * @param {!number} amountToSubtract
      * @param {!TemporalUnit} unit
      * @return {Instant}
      * @throws DateTimeException
      * @throws ArithmeticException
      */
-    minusAmountUnit(amountToSubtract, unit) {
-        return this.plusAmountUnit(-1 * amountToSubtract, unit);
+    _minusUnit(amountToSubtract, unit) {
+        return this._plusUnit(-1 * amountToSubtract, unit);
     }
 
     /**
@@ -819,6 +791,20 @@ export class Instant extends Temporal {
      */
     minusNanos(nanosToSubtract) {
         return this.plusNanos(-1 * nanosToSubtract);
+    }
+
+    /**
+     * Returns a copy of this instant with the specified duration in microseconds subtracted.
+     *
+     * This instance is immutable and unaffected by this method call.
+     *
+     * @param {number} microsToSubtract  the microseconds to subtract, positive or negative
+     * @return {Instant} an {@link Instant} based on this instant with the specified microseconds subtracted, not null
+     * @throws DateTimeException if the result exceeds the maximum or minimum instant
+     * @throws ArithmeticException if numeric overflow occurs
+     */
+    minusMicros(microsToSubtract) {
+        return this.plusMicros(-1 * microsToSubtract);
     }
 
     //-------------------------------------------------------------------------
@@ -931,7 +917,7 @@ export class Instant extends Temporal {
         if (unit instanceof ChronoUnit) {
             switch (unit) {
                 case ChronoUnit.NANOS: return this._nanosUntil(end);
-                case ChronoUnit.MICROS: return MathUtil.intDiv(this._nanosUntil(end), 1000);
+                case ChronoUnit.MICROS: return this._microsUntil(end);
                 case ChronoUnit.MILLIS: return MathUtil.safeSubtract(end.toEpochMilli(), this.toEpochMilli());
                 case ChronoUnit.SECONDS: return this._secondsUntil(end);
                 case ChronoUnit.MINUTES: return MathUtil.intDiv(this._secondsUntil(end), LocalTime.SECONDS_PER_MINUTE);
@@ -939,9 +925,21 @@ export class Instant extends Temporal {
                 case ChronoUnit.HALF_DAYS: return MathUtil.intDiv(this._secondsUntil(end), (12 * LocalTime.SECONDS_PER_HOUR));
                 case ChronoUnit.DAYS: return MathUtil.intDiv(this._secondsUntil(end), LocalTime.SECONDS_PER_DAY);
             }
-            throw new UnsupportedTemporalTypeException(&apos;Unsupported unit: &apos; + unit);
+            throw new UnsupportedTemporalTypeException(`Unsupported unit: ${unit}`);
         }
         return unit.between(this, end);
+    }
+
+    /**
+     *
+     * @param {Temporal} end
+     * @returns {number}
+     * @private
+     */
+    _microsUntil(end) {
+        const secsDiff = MathUtil.safeSubtract(end.epochSecond(), this.epochSecond());
+        const totalMicros = MathUtil.safeMultiply(secsDiff, 1000000);
+        return MathUtil.safeAdd(totalMicros, MathUtil.intDiv(end.nano() - this.nano(), 1000));
     }
 
     /**
@@ -987,9 +985,9 @@ export class Instant extends Temporal {
      * @return {OffsetDateTime} the offset date-time formed from this instant and the specified offset, not null
      * @throws DateTimeException if the result exceeds the supported range
      */
-    //atOffset(offset) {
-    //    return OffsetDateTime.ofInstant(this, offset);
-    //}
+    atOffset(offset) {
+        return OffsetDateTime.ofInstant(this, offset);
+    }
 
     /**
      * Combines this instant with a time-zone to create a {@link ZonedDateTime}.

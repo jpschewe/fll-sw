@@ -4,10 +4,12 @@
  * @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
  */
 
-import {ChronoUnit} from '../../src/temporal/ChronoUnit';
+import { ChronoUnit } from '../../src/temporal/ChronoUnit';
+import { TemporalAmount } from '../../src/temporal/TemporalAmount';
 
-export class MockSimplePeriod{
+export class MockSimplePeriod extends TemporalAmount {
     constructor(amount, unit) {
+        super();
         this._amount = amount;
         this._unit = unit;
     }
@@ -29,5 +31,3 @@ export class MockSimplePeriod{
  * A constant for a period of zero, measured in days.
  */
 MockSimplePeriod.ZERO_DAYS = new MockSimplePeriod(0, ChronoUnit.DAYS);
-
-

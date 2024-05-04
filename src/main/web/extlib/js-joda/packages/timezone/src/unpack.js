@@ -10,6 +10,12 @@
  Unpacking
  ************************************/
 
+/**
+ * @private
+ *
+ * @param charCode
+ * @returns {number}
+ */
 function charCodeToInt(charCode) {
     if (charCode > 96) {
         return charCode - 87;
@@ -75,6 +81,12 @@ function mapIndices (source, indices) {
     return out;
 }
 
+/**
+ * @private
+ *
+ * @param string
+ * @returns {{offsets: *[], abbrs: *[], name, untils: *, population: number}}
+ */
 export function unpack (string) {
     var data = string.split('|'),
         offsets = data[2].split(' '),

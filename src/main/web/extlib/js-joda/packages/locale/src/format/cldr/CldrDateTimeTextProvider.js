@@ -7,8 +7,8 @@ import { ChronoField, IsoFields, TextStyle } from '@js-joda/core';
 
 import cldrData from 'cldr-data';
 
-import {LocaleStore, createEntry} from '../LocaleStore';
-import {getOrCreateCldrInstance, loadCldrData} from './CldrCache';
+import { LocaleStore, createEntry } from '../LocaleStore';
+import { getOrCreateCldrInstance, loadCldrData } from './CldrCache';
 
 /**
  * The Service Provider Implementation to obtain date-time text for a field.
@@ -26,12 +26,6 @@ export default class CldrDateTimeTextProvider {
 
     //-----------------------------------------------------------------------
     getAvailableLocales() {
-        /* eslint-disable no-undef */
-        // JS_JODA_LOCALE_AVAILABLE_LOCALS may be defined using webpack DefinePlugin
-        if (typeof(JS_JODA_LOCALE_AVAILABLE_LOCALES) !== 'undefined') {
-            return JS_JODA_LOCALE_AVAILABLE_LOCALES;
-        }
-        /* eslint-enable no-undef */
         return cldrData('availableLocales.json').availableLocales;
     }
 
@@ -223,7 +217,8 @@ export default class CldrDateTimeTextProvider {
         valueTextMap[TextStyle.FULL_STANDALONE] = valueTextMap[TextStyle.FULL];
         valueTextMap[TextStyle.SHORT_STANDALONE] = valueTextMap[TextStyle.SHORT];
         /* istanbul ignore if */ // this doesn't seem to happen?
-        if (Object.keys(valueTextMap).includes(TextStyle.NARROW) && !Object.keys(valueTextMap).includes(TextStyle.NARROW_STANDALONE)) {
+        if (Object.keys(valueTextMap).indexOf(TextStyle.NARROW) > -1
+                && Object.keys(valueTextMap).indexOf(TextStyle.NARROW_STANDALONE) === -1) {
             valueTextMap[TextStyle.NARROW_STANDALONE] = valueTextMap[TextStyle.NARROW];
         }
         return new LocaleStore(valueTextMap);

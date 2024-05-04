@@ -1,25 +1,35 @@
-import {ChronoField} from './temporal/ChronoField';
-import {ChronoUnit} from './temporal/ChronoUnit';
-import {Clock} from './Clock';
-import {DateTimeFormatter} from './format/DateTimeFormatter';
-import {DefaultInterfaceTemporal} from './temporal/DefaultInterfaceTemporal';
-import {Instant} from './Instant';
-import {IsoChronology} from './chrono/IsoChronology';
-import {LocalDateTime} from './LocalDateTime';
-import {LocalDate} from './LocalDate';
-import {LocalTime} from './LocalTime';
-import {MathUtil} from './MathUtil';
-import {OffsetTime} from './OffsetTime';
-import {TemporalQueries} from './temporal/TemporalQueries';
-import {ZonedDateTime} from './ZonedDateTime';
-import {ZoneId} from './ZoneId';
-import {ZoneOffset} from './ZoneOffset';
-import {DateTimeException, IllegalArgumentException} from './errors';
+/**
+ * @copyright (c) 2016-present, Philipp Thürwächter & Pattrick Hüper  & js-joda contributors
+ * @copyright (c) 2007-present, Stephen Colebourne & Michael Nascimento Santos
+ * @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
+ */
 
-import {createTemporalQuery} from './temporal/TemporalQuery';
-import {requireInstance, requireNonNull} from './assert';
+import { ChronoField } from './temporal/ChronoField';
+import { ChronoUnit } from './temporal/ChronoUnit';
+import { Temporal } from './temporal/Temporal';
+import { Clock } from './Clock';
+import { DateTimeFormatter } from './format/DateTimeFormatter';
+import { Instant } from './Instant';
+import { IsoChronology } from './chrono/IsoChronology';
+import { LocalDateTime } from './LocalDateTime';
+import { LocalDate } from './LocalDate';
+import { LocalTime } from './LocalTime';
+import { MathUtil } from './MathUtil';
+import { OffsetTime } from './OffsetTime';
+import { TemporalQueries } from './temporal/TemporalQueries';
+import { ZonedDateTime } from './ZonedDateTime';
+import { ZoneId } from './ZoneId';
+import { ZoneOffset } from './ZoneOffset';
+import { DateTimeException, IllegalArgumentException } from './errors';
 
-export class OffsetDateTime extends DefaultInterfaceTemporal{
+import { createTemporalQuery } from './temporal/TemporalQuery';
+import { requireInstance, requireNonNull } from './assert';
+
+/**
+ * A date-time with an offset from UTC/Greenwich in the ISO-8601 calendar system,
+ * such as 2007-12-23T10:15:30+01:00.
+ */
+export class OffsetDateTime extends Temporal {
     /**
      * @param {TemporaroAccessor} temporal
      * @return {OffsetDateTime}
@@ -159,7 +169,7 @@ export class OffsetDateTime extends DefaultInterfaceTemporal{
     }
 
     /**
-     * @param {ZoneId}zone
+     * @param {ZoneId} zone
      * @return {ZonedDateTime}
      */
     atZoneSameInstant(zone) {
@@ -195,7 +205,7 @@ export class OffsetDateTime extends DefaultInterfaceTemporal{
     get(field) {
         if (field instanceof ChronoField) {
             switch (field) {
-                case ChronoField.INSTANT_SECONDS: throw new DateTimeException('Field too large for an int: ' + field);
+                case ChronoField.INSTANT_SECONDS: throw new DateTimeException(`Field too large for an int: ${field}`);
                 case ChronoField.OFFSET_SECONDS: return this.offset().totalSeconds();
             }
             return this._dateTime.get(field);
@@ -363,7 +373,7 @@ export class OffsetDateTime extends DefaultInterfaceTemporal{
         return field.rangeRefinedBy(this);
     }
 
-    withAdjuster(adjuster) {
+    _withAdjuster(adjuster) {
         requireNonNull(adjuster);
         // optimizations
         if (adjuster instanceof LocalDate || adjuster instanceof LocalTime || adjuster instanceof LocalDateTime) {
@@ -378,7 +388,7 @@ export class OffsetDateTime extends DefaultInterfaceTemporal{
         return adjuster.adjustInto(this);
     }
 
-    withFieldValue(field, newValue) {
+    _withField(field, newValue) {
         requireNonNull(field);
         if (field instanceof ChronoField) {
             const f = field;
@@ -495,12 +505,12 @@ export class OffsetDateTime extends DefaultInterfaceTemporal{
         return this._withDateTimeOffset(this._dateTime.truncatedTo(unit), this._offset);
     }
 
-    plusAmount(amount) {
+    _plusAmount(amount) {
         requireNonNull(amount, 'amount');
         return amount.addTo(this);
     }
 
-    plusAmountUnit(amountToAdd, unit) {
+    _plusUnit(amountToAdd, unit) {
         if (unit instanceof ChronoUnit) {
             return this._withDateTimeOffset(this._dateTime.plus(amountToAdd, unit), this._offset);
         }
@@ -571,12 +581,12 @@ export class OffsetDateTime extends DefaultInterfaceTemporal{
         return this._withDateTimeOffset(this._dateTime.plusNanos(nanos), this._offset);
     }
 
-    minusAmount(amount) {
+    _minusAmount(amount) {
         requireNonNull(amount);
         return amount.subtractFrom(this);
     }
 
-    minusAmountUnit(amountToSubtract, unit) {
+    _minusUnit(amountToSubtract, unit) {
         return this.plus(-1 * amountToSubtract, unit);
     }
 
@@ -715,6 +725,14 @@ export class OffsetDateTime extends DefaultInterfaceTemporal{
 
     toString() {
         return this._dateTime.toString() + this._offset.toString();
+    }
+
+    /**
+     *
+     * @return {string} same as {@link LocalDateTime.toString}
+     */
+    toJSON() {
+        return this.toString();
     }
 
     /**

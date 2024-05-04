@@ -4,12 +4,12 @@
  * @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
  */
 
-import {MAX_SAFE_INTEGER, MIN_SAFE_INTEGER} from '../MathUtil';
+import { MAX_SAFE_INTEGER, MIN_SAFE_INTEGER } from '../MathUtil';
 
-import {ChronoUnit} from './ChronoUnit';
-import {TemporalField} from './TemporalField';
-import {ValueRange} from './ValueRange';
-import {YearConstants} from '../YearConstants';
+import { ChronoUnit } from './ChronoUnit';
+import { TemporalField } from './TemporalField';
+import { ValueRange } from './ValueRange';
+import { YearConstants } from '../YearConstants';
 
 /**
  * A standard set of fields.
@@ -321,7 +321,7 @@ export class ChronoField extends TemporalField {
             this === ChronoField.ALIGNED_WEEK_OF_MONTH ||
             this === ChronoField.ALIGNED_WEEK_OF_YEAR ||
             this === ChronoField.MONTH_OF_YEAR ||
-            //this === ChronoField.EPOCH_MONTH ||
+            this === ChronoField.PROLEPTIC_MONTH ||
             this === ChronoField.YEAR_OF_ERA ||
             this === ChronoField.YEAR ||
             this === ChronoField.ERA;
@@ -447,7 +447,7 @@ export function _init() {
 
     ChronoField.DAY_OF_YEAR = new ChronoField('DayOfYear', ChronoUnit.DAYS, ChronoUnit.YEARS, ValueRange.of(1, 365, 366));
 
-    ChronoField.EPOCH_DAY = new ChronoField('EpochDay', ChronoUnit.DAYS, ChronoUnit.FOREVER, ValueRange.of(Math.floor(YearConstants.MIN_VALUE * 365.25), Math.floor(YearConstants.MAX_VALUE * 365.25)));
+    ChronoField.EPOCH_DAY = new ChronoField('EpochDay', ChronoUnit.DAYS, ChronoUnit.FOREVER, ValueRange.of(-365961662, 364522971)); // [LocalDate.MIN.toEpochDay() .. LocalDate.MAX.toEpochDay()]
 
     ChronoField.ALIGNED_WEEK_OF_MONTH = new ChronoField('AlignedWeekOfMonth', ChronoUnit.WEEKS, ChronoUnit.MONTHS, ValueRange.of(1, 4, 5));
 

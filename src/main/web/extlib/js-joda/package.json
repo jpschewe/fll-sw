@@ -1,19 +1,86 @@
 {
   "name": "@js-joda/root",
-  "private": true,
+  "description": "a date and time library for javascript",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/js-joda/js-joda.git"
+  },
+  "author": "pithu",
+  "contributors": [
+    "pithu",
+    "phueper"
+  ],
+  "homepage": "https://js-joda.github.io/js-joda",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/js-joda/js-joda/issues"
+  },
+  "changelog": {
+    "labels": {
+      "breaking": ":boom: Breaking Change",
+      "enhancement": ":rocket: Enhancement",
+      "bug": ":bug: Bug Fix",
+      "documentation": ":memo: Documentation",
+      "internal": ":house: Internal",
+      "dependencies": ":house: Dependency update"
+    }
+  },
   "scripts": {
+    "postpublish": "npm run build-esdoc && ./shared/git-push-docs-on-change.sh",
     "build-esdoc": "./node_modules/.bin/esdoc -c esdoc.json",
-    "build-test-coverage-report": "./build-test-coverage-report.sh"
+    "build-test-coverage-report": "./shared/build-test-coverage-report.sh"
   },
   "devDependencies": {
-    "coveralls": "^3.0.8",
+    "@babel/cli": "^7.20.7",
+    "@babel/core": "^7.20.7",
+    "@babel/polyfill": "^7.12.1",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/register": "^7.18.9",
+    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-commonjs": "^24.0.0",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-replace": "^5.0.2",
+    "@rollup/plugin-virtual": "^3.0.1",
+    "@types/chai": "^4.3.4",
+    "@types/mocha": "^10.0.1",
+    "babel-loader": "^9.1.0",
+    "babel-plugin-add-module-exports": "^1.0.4",
+    "babel-plugin-istanbul": "^6.1.1",
+    "chai": "^4.3.7",
+    "cldr-data": "^36.0.1",
+    "cldrjs": "^0.5.5",
+    "coveralls": "^3.1.1",
+    "ejs": "^3.1.8",
     "esdoc": "^1.1.0",
+    "esdoc-inject-script-plugin": "^1.0.0",
     "esdoc-standard-plugin": "^1.0.0",
-    "eslint": "^6.7.0",
-    "eslint-config-js-joda": "^1.0.0",
-    "lerna": "^3.19.0",
-    "npm-check-updates": "^3.2.1",
-    "nyc": "^14.1.1"
+    "eslint": "^8.30.0",
+    "eslint-config-js-joda": "^1.1.0",
+    "json-loader": "^0.5.7",
+    "karma": "^6.4.1",
+    "karma-chai-plugins": "^0.9.0",
+    "karma-chrome-launcher": "^3.1.1",
+    "karma-firefox-launcher": "^2.1.2",
+    "karma-mocha": "^2.0.1",
+    "karma-rollup-preprocessor": "^7.0.8",
+    "karma-sauce-launcher": "^4.3.6",
+    "karma-sourcemap-loader": "^0.3.8",
+    "lerna": "^6.1.0",
+    "lerna-changelog": "^2.2.0",
+    "markdown-toc": "^1.2.0",
+    "mocha": "^9.2.2",
+    "moment-timezone": "^0.5.40",
+    "npm-check-updates": "^16.6.2",
+    "nyc": "^15.1.0",
+    "ramda": "^0.28.0",
+    "rollup": "^3.8.1",
+    "rollup-plugin-minification": "^0.2.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4",
+    "yargs": "^17.6.2"
   },
-  "dependencies": {}
+  "resolutions": {
+    "webdriverio": "^7.19.5"
+  }
 }

@@ -2,13 +2,13 @@
  * @copyright (c) 2016, Philipp Thürwächter & Pattrick Hüper
  * @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
  */
-import {expect} from 'chai';
+import { expect } from 'chai';
 
 import './_init';
 
-import {Clock} from '../src/Clock';
-import {LocalDate} from '../src/LocalDate';
-import {isCoverageTestRunner} from './testUtils';
+import { Clock } from '../src/Clock';
+import { LocalDate } from '../src/LocalDate';
+import { isCoverageTestRunner, isIE11Browser } from './testUtils';
 
 /**
  * most of this tests are obsolete, because the test cases are covered by the reference tests
@@ -19,7 +19,7 @@ describe('Creating a LocalDate instance', () => {
         expect(LocalDate.of(1970, 1, 1)).to.be.an.instanceOf(LocalDate);
         expect(LocalDate.of(2016, 2, 29)).to.be.an.instanceOf(LocalDate);
     });
-    
+
 
     it('should fail with an AssertionError for invalid dates', () => {
         expect(() => {LocalDate.of(1970, 1, -1);}).to.throw(Error);
@@ -37,13 +37,13 @@ describe('Creating a LocalDate instance', () => {
             expect(LocalDate.of('1970', '1', '1')).to.deep.equal(LocalDate.of(1970, 1, 1));
             expect(LocalDate.of('2016', '2', '29')).to.deep.equal(LocalDate.of(2016, 2, 29));
         });
-        
+
         it('should fail with an AssertionError for unparseable dates', () => {
             expect(() => {LocalDate.of('xxxx', '4', '31');}).to.throw(Error);
             expect(() => {LocalDate.of('1970', 'x', '30');}).to.throw(Error);
             expect(() => {LocalDate.of('1970', '4', 'xx');}).to.throw(Error);
         });
-        
+
         it('should fail with an AssertionError for invalid dates', () => {
             expect(() => {LocalDate.of('1970', '4', '31');}).to.throw(Error);
         });
@@ -245,4 +245,24 @@ describe('Using a LocalDate instance', () => {
         });
     });
 
+    describe('when coercing to a primitive', () => {
+        const itNotIE11 = isIE11Browser() ? it.skip : it;
+
+        itNotIE11('should throw an exception if used numerically', () => {
+            const oneDay = LocalDate.now(Clock.systemUTC());
+            const otherDay = oneDay.plusDays(1);
+
+            expect(() => +oneDay).to.throw(TypeError);
+            expect(() => -oneDay).to.throw(TypeError);
+            expect(() => oneDay < otherDay).to.throw(TypeError);
+        });
+
+        itNotIE11('should not throw if used in string concatenation', () => {
+            const oneDay = LocalDate.now(Clock.systemUTC());
+            const otherDay = oneDay.plusDays(1);
+
+            // eslint-disable-next-line prefer-template
+            expect(() => '' + oneDay + otherDay).not.to.throw(TypeError);
+        });
+    });
 });

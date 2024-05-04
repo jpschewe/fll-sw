@@ -1,8 +1,44 @@
 Changelog
 =========
 
-### next
+### Later version
 
+For later versions check the global [`CHANGELOG.md`](../../CHANGELOG.md) file in the root folder.
+
+### 2.11.0
+
+* [#574](https://github.com/js-joda/js-joda/pull/574) Reverting babel targets for UMD ([@pithu](https://github.com/pithu))
+
+### 2.10.0
+
+* [#569](https://github.com/js-joda/js-joda/pull/569) tzdb timzone update to 2021e ([@pithu](https://github.com/pithu))
+
+### 2.9.0
+
+* [#567](https://github.com/js-joda/js-joda/pull/567) Remove generated distributions files from git ([@pithu](https://github.com/pithu))
+* [#564](https://github.com/js-joda/js-joda/pull/564) Fix travis for PR's from forks ([@pithu](https://github.com/pithu))
+
+### 2.8.0
+
+* [#561](https://github.com/js-joda/js-joda/pull/561) Update @js-joda/timezone to tzdb 2021c ([@pithu](https://github.com/pithu))
+
+### 2.7.0
+
+* Upgrade dependencies #555 by @pithu
+* Change @babel/preset-env targets, fix IE11 issues #555 by @pithu
+
+### 2.6.0
+
+ * updated to iana tzdb 2021a
+
+### 2.5.0
+
+ * updated to iana tzdb 2020d 
+ 
+### 2.4.0
+
+ * updated to iana tzdb 2020c 
+ 
 ### 2.3.0
 
  * updated to iana tzdb 2020a 
@@ -40,7 +76,7 @@ Changelog
 (re) introduced new plugin concept
  * Hide `use(plug)` concept from public api.
    The function for extending js-joda is not exported anymore (the default export of this module is removed).
-   The code for extending js-joda `use(plug)` is not required anymore, because js-joda-timezone automaticaly extends
+   The code for extending js-joda `use(plug)` is not required anymore, because @js-joda/timezone automaticaly extends
    js-joda when imported.
 
 #### dependendency updates

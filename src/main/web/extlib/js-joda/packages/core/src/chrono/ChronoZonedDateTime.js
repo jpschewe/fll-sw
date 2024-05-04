@@ -4,16 +4,16 @@
  * @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
  */
 
-import {requireNonNull} from '../assert';
-import {Instant} from '../Instant';
-import {LocalDate} from '../LocalDate';
-import {MathUtil} from '../MathUtil';
+import { requireNonNull } from '../assert';
+import { Instant } from '../Instant';
+import { LocalDate } from '../LocalDate';
+import { MathUtil } from '../MathUtil';
 
-import {ChronoUnit} from '../temporal/ChronoUnit';
-import {DefaultInterfaceTemporal} from '../temporal/DefaultInterfaceTemporal';
-import {TemporalQueries} from '../temporal/TemporalQueries';
+import { ChronoUnit } from '../temporal/ChronoUnit';
+import { Temporal } from '../temporal/Temporal';
+import { TemporalQueries } from '../temporal/TemporalQueries';
 
-export class ChronoZonedDateTime  extends DefaultInterfaceTemporal {
+export class ChronoZonedDateTime extends Temporal {
     query(query) {
         if (query === TemporalQueries.zoneId() || query === TemporalQueries.zone()) {
             return this.zone();

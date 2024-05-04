@@ -1,20 +1,29 @@
-import {ChronoField} from './temporal/ChronoField';
-import {ChronoUnit} from './temporal/ChronoUnit';
-import {Clock} from './Clock';
-import {DateTimeException, UnsupportedTemporalTypeException} from './errors';
-import {DateTimeFormatter} from './format/DateTimeFormatter';
-import {DefaultInterfaceTemporal} from './temporal/DefaultInterfaceTemporal';
-import {Instant, LocalTime} from './js-joda';
-import {MathUtil} from './MathUtil';
-import {OffsetDateTime} from './OffsetDateTime';
-import {TemporalQueries} from './temporal/TemporalQueries';
-import {ZoneId} from './ZoneId';
-import {ZoneOffset} from './ZoneOffset';
+/**
+ * @copyright (c) 2016-present, Philipp Thürwächter & Pattrick Hüper  & js-joda contributors
+ * @copyright (c) 2007-present, Stephen Colebourne & Michael Nascimento Santos
+ * @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
+ */
 
-import {createTemporalQuery} from './temporal/TemporalQuery';
-import {requireInstance, requireNonNull} from './assert';
+import { ChronoField } from './temporal/ChronoField';
+import { ChronoUnit } from './temporal/ChronoUnit';
+import { Temporal } from './temporal/Temporal';
+import { Clock } from './Clock';
+import { DateTimeException, UnsupportedTemporalTypeException } from './errors';
+import { DateTimeFormatter } from './format/DateTimeFormatter';
+import { Instant, LocalTime } from './js-joda';
+import { MathUtil } from './MathUtil';
+import { OffsetDateTime } from './OffsetDateTime';
+import { TemporalQueries } from './temporal/TemporalQueries';
+import { ZoneId } from './ZoneId';
+import { ZoneOffset } from './ZoneOffset';
 
-export class OffsetTime extends DefaultInterfaceTemporal {
+import { createTemporalQuery } from './temporal/TemporalQuery';
+import { requireInstance, requireNonNull } from './assert';
+
+/**
+ * A time with an offset from UTC/Greenwich in the ISO-8601 calendar system, such as 10:15:30+01:00.
+ */
+export class OffsetTime extends Temporal {
     /**
      * @param {!TemporalAccessor} temporal
      * @return {OffsetTime}
@@ -71,11 +80,11 @@ export class OffsetTime extends DefaultInterfaceTemporal {
     }
 
     /**
-     * @param {int}hour
-     * @param {int}minute
-     * @param {int}second
-     * @param {int}nanoOfSecond
-     * @param {ZoneOffset}offset
+     * @param {int} hour
+     * @param {int} minute
+     * @param {int} second
+     * @param {int} nanoOfSecond
+     * @param {ZoneOffset} offset
      * @return {OffsetTime}
      */
     static ofNumbers(hour, minute, second, nanoOfSecond, offset) {
@@ -84,8 +93,8 @@ export class OffsetTime extends DefaultInterfaceTemporal {
     }
 
     /**
-     * @param {LocalTime}time
-     * @param {ZoneOffset}offset
+     * @param {LocalTime} time
+     * @param {ZoneOffset} offset
      * @return {OffsetTime}
      */
     static ofTimeAndOffset(time, offset) {
@@ -309,16 +318,16 @@ export class OffsetTime extends DefaultInterfaceTemporal {
         return this._withLocalTimeOffset(this._time.minusNanos(nanos), this._offset);
     }
 
-    minusAmount(amount) {
+    _minusAmount(amount) {
         requireNonNull(amount);
         return amount.subtractFrom(this);
     }
 
-    minusAmountUnit(amountToSubtract, unit) {
+    _minusUnit(amountToSubtract, unit) {
         return this.plus(-1 * amountToSubtract, unit);
     }
 
-    plusAmount(amount) {
+    _plusAmount(amount) {
         requireNonNull(amount);
         return amount.addTo(this);
     }
@@ -329,7 +338,7 @@ export class OffsetTime extends DefaultInterfaceTemporal {
      * @param unit
      * @return {Temporal}
      */
-    plusAmountUnit(amountToAdd, unit) {
+    _plusUnit(amountToAdd, unit) {
         if (unit instanceof ChronoUnit) {
             return this._withLocalTimeOffset(this._time.plus(amountToAdd, unit), this._offset);
         }
@@ -434,14 +443,14 @@ export class OffsetTime extends DefaultInterfaceTemporal {
             const nanosUntil = end._toEpochNano() - this._toEpochNano(); // no overflow
             switch (unit) {
                 case ChronoUnit.NANOS: return nanosUntil;
-                case ChronoUnit.MICROS: return Math.floor(nanosUntil / 1000);
-                case ChronoUnit.MILLIS: return Math.floor(nanosUntil / 1000000);
-                case ChronoUnit.SECONDS: return Math.floor(nanosUntil / LocalTime.NANOS_PER_SECOND);
-                case ChronoUnit.MINUTES: return Math.floor(nanosUntil / LocalTime.NANOS_PER_MINUTE);
-                case ChronoUnit.HOURS: return Math.floor(nanosUntil / LocalTime.NANOS_PER_HOUR);
-                case ChronoUnit.HALF_DAYS: return Math.floor(nanosUntil / (12 * LocalTime.NANOS_PER_HOUR));
+                case ChronoUnit.MICROS: return MathUtil.intDiv(nanosUntil, 1000);
+                case ChronoUnit.MILLIS: return MathUtil.intDiv(nanosUntil, 1000000);
+                case ChronoUnit.SECONDS: return MathUtil.intDiv(nanosUntil, LocalTime.NANOS_PER_SECOND);
+                case ChronoUnit.MINUTES: return MathUtil.intDiv(nanosUntil, LocalTime.NANOS_PER_MINUTE);
+                case ChronoUnit.HOURS: return MathUtil.intDiv(nanosUntil, LocalTime.NANOS_PER_HOUR);
+                case ChronoUnit.HALF_DAYS: return MathUtil.intDiv(nanosUntil, (12 * LocalTime.NANOS_PER_HOUR));
             }
-            throw new UnsupportedTemporalTypeException('Unsupported unit: ' + unit);
+            throw new UnsupportedTemporalTypeException(`Unsupported unit: ${unit}`);
         }
         return unit.between(this, end);
     }
@@ -506,7 +515,7 @@ export class OffsetTime extends DefaultInterfaceTemporal {
         return nod - offsetNanos;
     }
 
-    withAdjuster(adjuster) {
+    _withAdjuster(adjuster) {
         requireNonNull(adjuster, 'adjuster');
         // optimizations
         if (adjuster instanceof LocalTime) {
@@ -519,7 +528,7 @@ export class OffsetTime extends DefaultInterfaceTemporal {
         return adjuster.adjustInto(this);
     }
 
-    withFieldValue(field, newValue) {
+    _withField(field, newValue) {
         requireNonNull(field, 'field');
         if (field instanceof ChronoField) {
             if (field === ChronoField.OFFSET_SECONDS) {
@@ -532,8 +541,8 @@ export class OffsetTime extends DefaultInterfaceTemporal {
 
     /**
      * @private
-     * @param {LocalTime}time
-     * @param {ZoneOffset}offset
+     * @param {LocalTime} time
+     * @param {ZoneOffset} offset
      * @return {OffsetTime}
      */
     _withLocalTimeOffset(time, offset) {
@@ -589,6 +598,14 @@ export class OffsetTime extends DefaultInterfaceTemporal {
      */
     toString() {
         return this._time.toString() + this._offset.toString();
+    }
+
+    /**
+     *
+     * @return {string} same as {@link LocalDateTime.toString}
+     */
+    toJSON() {
+        return this.toString();
     }
 }
 

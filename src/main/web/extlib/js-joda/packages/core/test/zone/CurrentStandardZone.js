@@ -3,15 +3,15 @@
  * @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
  */
 
-import {LocalDate} from '../../src/LocalDate';
-import {DayOfWeek} from '../../src/DayOfWeek';
-import {Month} from '../../src/Month';
-import {ZoneId} from '../../src/ZoneId';
-import {ZoneOffset} from '../../src/ZoneOffset';
-import {Instant} from '../../src/Instant';
-import {TemporalAdjusters} from '../../src/temporal/TemporalAdjusters';
-import {ZoneOffsetTransition} from '../../src/zone/ZoneOffsetTransition';
-import {ZoneRules} from '../../src/zone/ZoneRules';
+import { LocalDate } from '../../src/LocalDate';
+import { DayOfWeek } from '../../src/DayOfWeek';
+import { Month } from '../../src/Month';
+import { ZoneId } from '../../src/ZoneId';
+import { ZoneOffset } from '../../src/ZoneOffset';
+import { Instant } from '../../src/Instant';
+import { TemporalAdjusters } from '../../src/temporal/TemporalAdjusters';
+import { ZoneOffsetTransition } from '../../src/zone/ZoneOffsetTransition';
+import { ZoneRules } from '../../src/zone/ZoneRules';
 
 class CurrentStandardZone extends ZoneId {
 
@@ -174,9 +174,9 @@ class CurrentStandardZoneRules extends ZoneRules {
      * @returns {string}
      */
     toString() {
-        return 'CurrentStandardZoneRules[' +
-            this._winterOffset.toString() + ':' +
-            this._summerOffset.toString() + ']';
+        return `CurrentStandardZoneRules[${ 
+            this._winterOffset.toString()}:${ 
+            this._summerOffset.toString()}]`;
     }
 
 }

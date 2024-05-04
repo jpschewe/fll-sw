@@ -3,23 +3,23 @@
  * @license BSD-3-Clause (see LICENSE.md in the root directory of this source tree)
  */
 
-import {expect} from 'chai';
+import { expect } from 'chai';
 
-import {ChronoField} from '../src/temporal/ChronoField';
-import {ChronoUnit} from '../src/temporal/ChronoUnit';
-import {createTemporalQuery} from '../src/temporal/TemporalQuery';
-import {DateTimeFormatter} from '../src/format/DateTimeFormatter';
-import {Instant} from '../src/Instant';
-import {IsoFields} from '../src/temporal/IsoFields';
-import {LocalDateTime} from '../src/LocalDateTime';
-import {LocalTime} from '../src/LocalTime';
-import {OffsetDateTime} from '../src/OffsetDateTime';
-import {TemporalField} from '../src/temporal/TemporalField';
-import {TemporalUnit} from '../src/temporal/TemporalUnit';
-import {Temporal} from '../src/temporal/Temporal';
-import {ZonedDateTime} from '../src/ZonedDateTime';
-import {ZoneId} from '../src/ZoneId';
-import {ZoneOffset} from '../src/ZoneOffset';
+import { ChronoField } from '../src/temporal/ChronoField';
+import { ChronoUnit } from '../src/temporal/ChronoUnit';
+import { createTemporalQuery } from '../src/temporal/TemporalQuery';
+import { DateTimeFormatter } from '../src/format/DateTimeFormatter';
+import { Instant } from '../src/Instant';
+import { IsoFields } from '../src/temporal/IsoFields';
+import { LocalDateTime } from '../src/LocalDateTime';
+import { LocalTime } from '../src/LocalTime';
+import { OffsetDateTime } from '../src/OffsetDateTime';
+import { TemporalField } from '../src/temporal/TemporalField';
+import { TemporalUnit } from '../src/temporal/TemporalUnit';
+import { Temporal } from '../src/temporal/Temporal';
+import { ZonedDateTime } from '../src/ZonedDateTime';
+import { ZoneId } from '../src/ZoneId';
+import { ZoneOffset } from '../src/ZoneOffset';
 import {
     DateTimeException,
     IllegalArgumentException,
@@ -190,7 +190,7 @@ describe('js-joda OffsetDateTime', () => {
         });
     });
 
-    describe('plusAmountUnit', () => {
+    describe('plus(amount,unit)', () => {
         it('should support custom unit', () => {
             class CustomUnit extends TemporalUnit {
                 addTo(dateTime, periodToAdd) {
@@ -198,7 +198,7 @@ describe('js-joda OffsetDateTime', () => {
                 }
             }
             const odt = OffsetDateTime.parse('2025-01-02T03:04:06.7+08:00');
-            expect(odt.plusAmountUnit(1, new CustomUnit()).dayOfMonth()).to.equal(3);
+            expect(odt.plus(1, new CustomUnit()).dayOfMonth()).to.equal(3);
         });
     });
 

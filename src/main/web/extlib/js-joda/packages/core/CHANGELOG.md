@@ -1,8 +1,59 @@
 Changelog
 =========
 
-### next (upcoming)
+### Later version 
 
+For later versions check the global [`CHANGELOG.md`](../../CHANGELOG.md) file in the root folder.
+
+### 5.1.0
+
+* [#578](https://github.com/js-joda/js-joda/pull/578) Cleanup typings ([@StrayAlien](https://github.com/StrayAlien))
+
+### 5.0.0
+
+* [#574](https://github.com/js-joda/js-joda/pull/574) Reverting babel targets for UMD ([@pithu](https://github.com/pithu))
+* [#548](https://github.com/js-joda/js-joda/pull/548) Disallowing implicit conversion of Temporal/TemporalAmount to numeric values ([@InExtremaRes](https://github.com/InExtremaRes))
+
+### 4.3.0
+
+* [#567](https://github.com/js-joda/js-joda/pull/567) Remove generated distributions files from git ([@pithu](https://github.com/pithu))
+* [#564](https://github.com/js-joda/js-joda/pull/564) Fix travis for PR's from forks ([@pithu](https://github.com/pithu))
+
+### 4.2.1
+
+* [#559](https://github.com/js-joda/js-joda/pull/559) Fix references to deprecated single repos ([@pithu](https://github.com/pithu))
+
+### 4.2.0
+
+* Upgrade dependencies #555 by @pithu
+* Change @babel/preset-env targets, fix IE11 issues #555 by @pithu
+* Improve documentation  #556 by @pithu
+
+### 4.1.0
+
+* Remove edge case handling for Temporal.minus #542 by @pithu
+* Improve docu #550 by @pithu
+
+### 4.0.0 
+
+Even this is a major release, there are no real breaking changes.
+The release contains typescript definition cleanup and some 
+"private" methods have been prefixed with "_". These methods are intended for internal use only.
+
+If you used the threeten API in the intended way, there shouldn't be any breaking changes. 
+If you used internal methods before, there is an replacement eg instead of `minusAmountUnit` use `minus`.
+
+* cleanup TS Typings in #456 by @InExtremaRes
+* cleanup private methods and Temporal class in #460 by @InExtremaRes
+* remove TS definitions from core, moved to locale TS definitions in #389 by @InExtremaRes
+* make .equals a type predicate in the TS typings in #457 by @InExtremaRes
+* add some ISO formatters in #455 by @akonior
+* several dependabot updates
+
+### 3.2.0
+
+* add typescript definitions for OffsetDateTime and OffsetTime #448 by jonfreedman
+ 
 ### 3.1.0
 
 * Fix bitwise or #439 by @pithu
@@ -286,7 +337,7 @@ Resolve those conflicts by using the 'public shorthand' methods, like instead of
 
 #### Add ZoneRulesProvider stub
 
-Add the ZoneRulesProvider. This should be the last step to enable js-joda for an external js-joda-timezone plugin.
+Add the ZoneRulesProvider. This should be the last step to enable js-joda for an external @js-joda/timezone plugin.
 
 #### Provide a way to extend js-joda
 

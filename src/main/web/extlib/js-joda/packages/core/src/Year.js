@@ -4,30 +4,29 @@
  * @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
  */
 
-import {DateTimeException, UnsupportedTemporalTypeException} from './errors';
-import {requireNonNull, requireInstance} from './assert';
-import {MathUtil} from './MathUtil';
+import { DateTimeException, UnsupportedTemporalTypeException } from './errors';
+import { requireNonNull, requireInstance } from './assert';
+import { MathUtil } from './MathUtil';
 
-import {ChronoField} from './temporal/ChronoField';
-import {ChronoUnit} from './temporal/ChronoUnit';
-import {Clock} from './Clock';
-import {DateTimeFormatter} from './format/DateTimeFormatter';
-import {DateTimeFormatterBuilder} from './format/DateTimeFormatterBuilder';
-import {IsoChronology} from './chrono/IsoChronology';
-import {LocalDate} from './LocalDate';
-import {Month} from './Month';
-import {MonthDay} from './MonthDay';
-import {SignStyle} from './format/SignStyle';
-import {Temporal} from './temporal/Temporal';
-import {TemporalAccessor} from './temporal/TemporalAccessor';
-import {TemporalAmount} from './temporal/TemporalAmount';
-import {TemporalField} from './temporal/TemporalField';
-import {TemporalQueries} from './temporal/TemporalQueries';
-import {TemporalQuery, createTemporalQuery} from './temporal/TemporalQuery';
-import {TemporalUnit} from './temporal/TemporalUnit';
-import {YearConstants} from './YearConstants';
-import {YearMonth} from './YearMonth';
-import {ZoneId} from './ZoneId';
+import { ChronoField } from './temporal/ChronoField';
+import { ChronoUnit } from './temporal/ChronoUnit';
+import { Clock } from './Clock';
+import { DateTimeFormatter } from './format/DateTimeFormatter';
+import { DateTimeFormatterBuilder } from './format/DateTimeFormatterBuilder';
+import { IsoChronology } from './chrono/IsoChronology';
+import { LocalDate } from './LocalDate';
+import { Month } from './Month';
+import { MonthDay } from './MonthDay';
+import { SignStyle } from './format/SignStyle';
+import { Temporal } from './temporal/Temporal';
+import { TemporalAccessor } from './temporal/TemporalAccessor';
+import { TemporalField } from './temporal/TemporalField';
+import { TemporalQueries } from './temporal/TemporalQueries';
+import { TemporalQuery, createTemporalQuery } from './temporal/TemporalQuery';
+import { TemporalUnit } from './temporal/TemporalUnit';
+import { YearConstants } from './YearConstants';
+import { YearMonth } from './YearMonth';
+import { ZoneId } from './ZoneId';
 
 
 /**
@@ -209,8 +208,8 @@ export class Year extends Temporal {
             }*/
             return Year.of(temporal.get(ChronoField.YEAR));
         } catch (ex) {
-            throw new DateTimeException('Unable to obtain Year from TemporalAccessor: ' +
-                    temporal + ', type ' + (temporal && temporal.constructor != null ? temporal.constructor.name : ''));
+            throw new DateTimeException(`Unable to obtain Year from TemporalAccessor: ${ 
+                temporal}, type ${temporal && temporal.constructor != null ? temporal.constructor.name : ''}`);
         }
     }
     //-----------------------------------------------------------------------
@@ -372,7 +371,7 @@ export class Year extends Temporal {
         if (this.isSupported(field)) {
             return field.range();
         } else if (field instanceof ChronoField) {
-            throw new UnsupportedTemporalTypeException('Unsupported field: ' + field);
+            throw new UnsupportedTemporalTypeException(`Unsupported field: ${field}`);
         }
         return super.range(field);
     }
@@ -434,7 +433,7 @@ export class Year extends Temporal {
                 case ChronoField.YEAR: return this._year;
                 case ChronoField.ERA: return (this._year < 1 ? 0 : 1);
             }
-            throw new UnsupportedTemporalTypeException('Unsupported field: ' + field);
+            throw new UnsupportedTemporalTypeException(`Unsupported field: ${field}`);
         }
         return field.getFrom(this);
     }
@@ -463,29 +462,6 @@ export class Year extends Temporal {
     }
 
     //-----------------------------------------------------------------------
-
-    /**
-     * Returns an adjusted copy of this year.
-     *
-     * This returns a new {@link Year}, based on this one, with the year adjusted.
-     * The adjustment takes place using the specified adjuster strategy object.
-     * Read the documentation of the adjuster to understand what adjustment will be made.
-     *
-     * The result of this method is obtained by invoking the
-     * {@link TemporalAdjuster#adjustInto} method on the
-     * specified adjuster passing `this` as the argument.
-     *
-     * This instance is immutable and unaffected by this method call.
-     *
-     * @param {TemporalAdjuster} adjuster the adjuster to use, not null
-     * @returns {Year} based on `this` with the adjustment made, not null
-     * @throws DateTimeException if the adjustment cannot be made
-     * @throws ArithmeticException if numeric overflow occurs
-     */
-    withAdjuster(adjuster) {
-        requireNonNull(adjuster, 'adjuster');
-        return adjuster.adjustInto(this);
-    }
 
     /**
      * Returns a copy of this year with the specified field set to a new value.
@@ -526,7 +502,7 @@ export class Year extends Temporal {
      * @throws DateTimeException if the field cannot be set
      * @throws ArithmeticException if numeric overflow occurs
      */
-    withFieldValue(field, newValue) {
+    _withField(field, newValue) {
         requireNonNull(field, 'field');
         requireInstance(field, TemporalField, 'field');
         if (field instanceof ChronoField) {
@@ -539,31 +515,9 @@ export class Year extends Temporal {
                 case ChronoField.ERA:
                     return (this.getLong(ChronoField.ERA) === newValue ? this : Year.of(1 - this._year));
             }
-            throw new UnsupportedTemporalTypeException('Unsupported field: ' + field);
+            throw new UnsupportedTemporalTypeException(`Unsupported field: ${field}`);
         }
         return field.adjustInto(this, newValue);
-    }
-
-    /**
-     * Returns a copy of this year with the specified period added.
-     *
-     * This method returns a new year based on this year with the specified period added.
-     * The adder is typically {@link Period} but may be any other type implementing
-     * the {@link TemporalAmount} interface.
-     * The calculation is delegated to the specified adjuster, which typically calls
-     * back to {@link plus}.
-     *
-     * This instance is immutable and unaffected by this method call.
-     *
-     * @param {TemporalAmount} amount  the amount to add, not null
-     * @return {Year} based on this year with the addition made, not null
-     * @throws DateTimeException if the addition cannot be made
-     * @throws ArithmeticException if numeric overflow occurs
-     */
-    plusAmount(amount) {
-        requireNonNull(amount, 'amount');
-        requireInstance(amount, TemporalAmount, 'amount');
-        return amount.addTo(this);
     }
 
     /**
@@ -573,7 +527,7 @@ export class Year extends Temporal {
      * @throws DateTimeException if the addition cannot be made
      * @throws ArithmeticException if numeric overflow occurs
      */
-    plusAmountUnit(amountToAdd, unit) {
+    _plusUnit(amountToAdd, unit) {
         requireNonNull(amountToAdd, 'amountToAdd');
         requireNonNull(unit, 'unit');
         requireInstance(unit, TemporalUnit, 'unit');
@@ -585,7 +539,7 @@ export class Year extends Temporal {
                 case ChronoUnit.MILLENNIA: return this.plusYears(MathUtil.safeMultiply(amountToAdd, 1000));
                 case ChronoUnit.ERAS: return this.with(ChronoField.ERA, MathUtil.safeAdd(this.getLong(ChronoField.ERA), amountToAdd));
             }
-            throw new UnsupportedTemporalTypeException('Unsupported unit: ' + unit);
+            throw new UnsupportedTemporalTypeException(`Unsupported unit: ${unit}`);
         }
         return unit.addTo(this, amountToAdd);
     }
@@ -607,42 +561,6 @@ export class Year extends Temporal {
     }
 
     //-----------------------------------------------------------------------
-
-    /**
-     * Returns a copy of this year with the specified period subtracted.
-     *
-     * This method returns a new year based on this year with the specified period subtracted.
-     * The subtractor is typically {@link Period} but may be any other type implementing
-     * the {@link TemporalAmount} interface.
-     * The calculation is delegated to the specified adjuster, which typically calls
-     * back to {@link minus}.
-     *
-     * This instance is immutable and unaffected by this method call.
-     *
-     * @param {TemporalAmount} amount  the amount to subtract, not null
-     * @return {Year} based on this year with the subtraction made, not null
-     * @throws DateTimeException if the subtraction cannot be made
-     * @throws ArithmeticException if numeric overflow occurs
-     */
-    minusAmount(amount) {
-        requireNonNull(amount, 'amount');
-        requireInstance(amount, TemporalAmount, 'amount');
-        return amount.subtractFrom(this);
-    }
-
-    /**
-     * @param {number} amountToSubtract  the amount to subtract, not null
-     * @param {TemporalUnit} unit
-     * @return {Year} based on this year with the subtraction made, not null
-     * @throws DateTimeException if the subtraction cannot be made
-     * @throws ArithmeticException if numeric overflow occurs
-     */
-    minusAmountUnit(amountToSubtract, unit) {
-        requireNonNull(amountToSubtract, 'amountToSubtract');
-        requireNonNull(unit, 'unit');
-        requireInstance(unit, TemporalUnit, 'unit');
-        return (amountToSubtract === MathUtil.MIN_SAFE_INTEGER ? this.plus(MathUtil.MAX_SAFE_INTEGER, unit).plus(1, unit) : this.plus(-amountToSubtract, unit));
-    }
 
     /**
      * Returns a copy of this year with the specified number of years subtracted.
@@ -913,7 +831,7 @@ export class Year extends Temporal {
      * @return {String} a string representation of this year, not null
      */
     toString() {
-        return '' + this._year;
+        return `${this._year}`;
     }
 
     /**
@@ -992,7 +910,7 @@ export class Year extends Temporal {
                 case ChronoUnit.ERAS:
                     return end.getLong(ChronoField.ERA) - this.getLong(ChronoField.ERA);
             }
-            throw new UnsupportedTemporalTypeException('Unsupported unit: ' + unit);
+            throw new UnsupportedTemporalTypeException(`Unsupported unit: ${unit}`);
         }
         return unit.between(this, end);
     }

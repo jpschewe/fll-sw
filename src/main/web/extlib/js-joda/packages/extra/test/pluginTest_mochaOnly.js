@@ -5,10 +5,22 @@
 
 import { expect } from 'chai';
 
-import { Interval } from '../src/js-joda-extra';
+import { DayOfMonth, DayOfYear, Interval, Quarter, YearWeek } from '../src/js-joda-extra';
 
 describe('plugin test', () => {
-    it('should export Intervall', () => {
+    it('should export DayOfMonth', () => {
+        expect(DayOfMonth).to.exist;
+    });
+    it('should export DayOfYear', () => {
+        expect(DayOfYear).to.exist;
+    });
+    it('should export Interval', () => {
         expect(Interval).to.exist;
+    });
+    it('should export Quarter', () => {
+        expect(Quarter).to.exist;
+    });
+    it('should export YearWeek', () => {
+        expect(YearWeek).to.exist;
     });
 });

@@ -3,24 +3,24 @@
  * @license BSD-3-Clause (see LICENSE.md in the root directory of this source tree)
  */
 
-import {expect} from 'chai';
-import {assertEquals} from './testUtils';
+import { expect } from 'chai';
+import { assertEquals, isIE11Browser } from './testUtils';
 
 import './_init';
 
-import {ChronoUnit} from '../src/temporal/ChronoUnit';
-import {ArithmeticException, DateTimeException, DateTimeParseException, NullPointerException, UnsupportedTemporalTypeException} from '../src/errors';
-import {IsoChronology} from '../src/chrono/IsoChronology';
-import {MathUtil} from '../src/MathUtil';
-import {Period} from '../src/Period';
-import {TemporalAmount} from '../src/temporal/TemporalAmount';
+import { ChronoUnit } from '../src/temporal/ChronoUnit';
+import { ArithmeticException, DateTimeException, DateTimeParseException, NullPointerException, UnsupportedTemporalTypeException } from '../src/errors';
+import { IsoChronology } from '../src/chrono/IsoChronology';
+import { MathUtil } from '../src/MathUtil';
+import { Period } from '../src/Period';
+import { TemporalAmount } from '../src/temporal/TemporalAmount';
 
 /* these are not covered by the threetenbp ported tests */
 describe('js-joda Period', () => {
     const testPeriod = new Period(123, 456, 789);
-    
+
     describe('from(TemporalAmount)', () => {
-        
+
         it('should return a Period with values from the TemporalAmount it has been called with', () => {
             const temporalAmount = new TemporalAmount();
             temporalAmount.units = () => {
@@ -48,7 +48,7 @@ describe('js-joda Period', () => {
             };
             assertPeriod(Period.from(temporalAmount), 123, 123, 123);
         });
-        
+
         it('should fail if TemporalAmount has unsupported units', () => {
             const temporalAmount = new TemporalAmount();
             temporalAmount.units = () => {
@@ -66,11 +66,11 @@ describe('js-joda Period', () => {
                 Period.from(temporalAmount);
             }).to.throw(DateTimeException);
         });
-        
+
     });
-    
+
     describe('parse(text)', () => {
-        
+
         it('should fail for invalid text', () => {
             expect(() => {
                 Period.parse('Invalid');
@@ -87,23 +87,23 @@ describe('js-joda Period', () => {
             }).to.throw(NullPointerException);
         });
     });
-    
+
     describe('units()', () => {
-        
+
         it('should return the correct units', () => {
             assertEquals(testPeriod.units(), [ChronoUnit.YEARS, ChronoUnit.MONTHS, ChronoUnit.DAYS]);
         });
     });
-    
+
     describe('chronology()', () => {
-        
+
         it('should return the correct chronology', () => {
             assertEquals(testPeriod.chronology(), IsoChronology.INSTANCE);
         });
     });
-    
+
     describe('get(unit)', () => {
-        
+
         it('should return the correct value for valid units', () => {
             assertEquals(testPeriod.get(ChronoUnit.YEARS), 123);
             assertEquals(testPeriod.get(ChronoUnit.MONTHS), 456);
@@ -115,9 +115,9 @@ describe('js-joda Period', () => {
             }).to.throw(UnsupportedTemporalTypeException);
         });
     });
-    
+
     describe('ofWeeks()', () => {
-        
+
         it('should return the correct value', () => {
             assertPeriod(Period.ofWeeks(1), 0, 0, 7);
             assertPeriod(Period.ofWeeks(2), 0, 0, 14);
@@ -140,7 +140,7 @@ describe('js-joda Period', () => {
             }).to.throw(ArithmeticException);
         });
     });
-    
+
     describe('ofDays()', () => {
         it('should return the correct value', () => {
             assertPeriod(Period.ofDays(1), 0, 0, 1);
@@ -167,10 +167,31 @@ describe('js-joda Period', () => {
         });
     });
 
+    describe('when coercing to a primitive', () => {
+        const itNotIE11 = isIE11Browser() ? it.skip : it;
+
+        itNotIE11('should throw an exception if used numerically', () => {
+            const per1 = Period.ofDays(1);
+            const per2 = Period.ofMonths(1);
+
+            expect(() => +per1).to.throw(TypeError);
+            expect(() => -per1).to.throw(TypeError);
+            expect(() => per1 < per2).to.throw(TypeError);
+        });
+
+        itNotIE11('should not throw if used in string concatenation', () => {
+            const per1 = Period.ofDays(1);
+            const per2 = Period.ofMonths(1);
+
+            // eslint-disable-next-line prefer-template
+            expect(() => '' + per1 + per2).not.to.throw(TypeError);
+        });
+    });
+
     function assertPeriod(test, y, mo, d) {
         assertEquals(test.years(), y, 'years');
         assertEquals(test.months(), mo, 'months');
         assertEquals(test.days(), d, 'days');
     }
-    
+
 });

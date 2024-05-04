@@ -1,6 +1,11 @@
-# Formatting
+# Formatting / Parsing
+
+## Formatting
 
 To format a date and/or time, create a [`DateTimeFormatter`](../../class/src/format/DateTimeFormatter.js~DateTimeFormatter.html) and pass it to the `.format` method of a `LocalDate`, `LocalTime`, `LocalDateTime`, or `ZonedDateTime` instance.
+
+js-joda built-in DateTimeFormatter parses and formats dates and times from /to ISO 8601 as specified in RFC 3339.
+
 
 ```javascript
 const d = LocalDateTime.parse('2018-04-28T12:34')
@@ -9,21 +14,23 @@ d.format(DateTimeFormatter.ofPattern('M/d/yyyy')) // 4/28/2018
 d.format(DateTimeFormatter.ofPattern('HH:mm')) // 12:34
 ```
 
-## Formatting with locales
+### Formatting with locales
 
 Non-numeric date and time formats need to know what language to use, for things like names of months and days of the week. For example, the format `eeee (d MMMM)` might return `Saturday (28 April)` in English, and `samedi (28 avril)` in French. If you try to use a locale-dependent format pattern without specifying the locale, you'll get this error message: 
 
 ```
-ERROR: Pattern using (localized) text not implemented, use js-joda-locale plugin!
+ERROR: Pattern using (localized) text not implemented, use @js-joda/locale plugin!
 ```
 
-To specify a locale, you'll need to import the [`js-joda-timezone`](/js-joda/js-joda-timezone) and [`js-joda-locale`](/js-joda/js-joda-locale) plugins. The simplest way to use `js-joda-locale` is to install one of the locale-specific builds from npm:
+To specify a locale, you'll need to import the [`@js-joda/timezone`](//github.com/js-joda/js-joda/tree/main/packages/timezone) and [`@js-joda/locale`](//github.com/js-joda/js-joda/tree/main/packages/locale) plugins. The simplest way to use `@js-joda/locale` is to install one of the locale-specific builds from npm:
 
 - [@js-joda/locale_de](https://www.npmjs.com/package/@js-joda/locale_de)
 - [@js-joda/locale_de-de](https://www.npmjs.com/package/@js-joda/locale_de-de)
 - [@js-joda/locale_en](https://www.npmjs.com/package/@js-joda/locale_en)
 - [@js-joda/locale_en-us](https://www.npmjs.com/package/@js-joda/locale_en-us)
 - [@js-joda/locale_es](https://www.npmjs.com/package/@js-joda/locale_es)
+- [@js-joda/locale_fi](https://www.npmjs.com/package/@js-joda/locale_fi)
+- [@js-joda/locale_fi-fi](https://www.npmjs.com/package/@js-joda/locale_fi-fi)
 - [@js-joda/locale_fr](https://www.npmjs.com/package/@js-joda/locale_fr)
 - [@js-joda/locale_hi](https://www.npmjs.com/package/@js-joda/locale_hi)
 - [@js-joda/locale_it](https://www.npmjs.com/package/@js-joda/locale_it)
@@ -33,7 +40,7 @@ To specify a locale, you'll need to import the [`js-joda-timezone`](/js-joda/js-
 You can then use localized format strings as follows.
 
 ```javascript
-import 'js-joda-timezone' // Just needs to be imported; registers itself automatically
+import '@js-joda/timezone' // Just needs to be imported; registers itself automatically
 import { Locale } from '@js-joda/locale_fr' // Get `Locale` from the prebuilt package of your choice
 import { DateTimeFormatter, LocalDateTime } from 'js-joda'
 
@@ -67,7 +74,7 @@ jsDate.toLocaleDateString('ko-KR', options) // 2018년 4월 28일 토요일 오�
 ```
 
 
-## Format patterns
+### Format patterns
 
 
 Date and time formats are specified by date and time pattern strings using [Java SimpleDateFormat](https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html) codes.
@@ -109,3 +116,72 @@ Date and time formats are specified by date and time pattern strings using [Java
 | [      | optional section start     |              |
 | ]      | optional section end       |              |
 | {}     | reserved for future use    |              |
+
+## Parsing
+
+Parsing is similar to formatting, the same DateTimeFormatter pattern are used as for formatting.
+
+Customized parser can be build with the `DateTimeFormatter`.
+
+### Simple parser example
+
+```javascript
+import { DateTimeFormatter, LocalDate } from '@js-joda/core';
+
+const formatter = DateTimeFormatter.ofPattern('M/d/yyyy');
+const date = LocalDate.parse('4/28/2018', formatter);
+console.log(date.toString()); // 2018-04-28
+```
+
+### http date parser example
+
+Example for an HTTP dates formatter as specified in RFC 7321, 
+like returned by javascript native `Date` `toUTCString` method.
+
+This formatter requires the `@js-joda/locale` package.
+This formatter is built-in since @js-joda/locale@4.2.0 -> RFC_1123_DATE_TIME
+
+```javascript
+import { DateTimeFormatter, ZonedDateTime } from '@js-joda/core';
+import '@js-joda/timezone'
+import { Locale } from '@js-joda/locale';
+
+const df = DateTimeFormatter.ofPattern('EEE, dd MMM yyyy HH:mm:ss z').withLocale(Locale.ENGLISH);
+const z = ZonedDateTime.parse('Tue, 05 Oct 2021 17:08:24 GMT', df);
+console.log(z.toString()); // 2021-10-05T17:08:24+01:00[GMT]
+```
+
+## Built-in DateTimeFormatter
+
+| Formatter             | Example                                   |
+| --------------------- |------------------------------------------ |
+| ISO_LOCAL_DATE        |  '2011-12-03' |
+| ISO_LOCAL_TIME        | '10:15:30' |
+| ISO_LOCAL_DATE_TIME   | '2011-12-03T10:15:30' |
+| ISO_INSTANT           | '2011-12-03T10:15:30Z' |
+| ISO_OFFSET_DATE_TIME  | '2011-12-03T10:15:30+01:00' |
+| ISO_ZONED_DATE_TIME   | '2011-12-03T10:15:30+01:00[Europe/Paris]' |
+| BASIC_ISO_DATE        | '20111203' |
+| ISO_OFFSET_DATE       | '2011-12-03+01:00' |
+| ISO_OFFSET_TIME       | '10:15:30+01:00' |
+| ISO_ORDINAL_DATE      | '2012-337' |   
+| ISO_WEEK_DATE         | '2012-W48-6' |
+| ISO_DATE              | '2011-12-03+01:00', '2011-12-03' |
+| ISO_TIME              | '10:15:30+01:00', '10:15:30' |
+| ISO_DATE_TIME         | '2011-12-03T10:15:30+01:00[Europe/Paris]' |
+| RFC_1123_DATE_TIME    | 'Tue, 05 Oct 2021 17:08:24 GMT'<br />requires @js-joda/locale |
+
+Usage example for a built-in DateTimeFormatter
+
+````javascript
+const localDate = LocalDate.parse('2012-12-12', DateTimeFormatter.ISO_LOCAL_DATE);
+const dateAsString = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+````
+
+## Hint
+
+Whenever you stumble over a `Cannot read property 'localeString' of null` error, 
+its probably because the locale of the formatter is not set. 
+
+In that case add the `@js-joda/locale` package to your project and set the locale
+of the formatter, eg `DateTimeFormatter.ofPattern('eeee (d MMMM)').withLocale(Locale.FRANCE)`.

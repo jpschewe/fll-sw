@@ -5,22 +5,23 @@
  */
 
 
-import {MathUtil} from './MathUtil';
-import {assert, requireNonNull, requireInstance} from './assert';
-import {DateTimeException, UnsupportedTemporalTypeException, IllegalArgumentException} from './errors';
+import { MathUtil } from './MathUtil';
+import { requireNonNull, requireInstance } from './assert';
+import { DateTimeException, UnsupportedTemporalTypeException } from './errors';
 
-import {Clock} from './Clock';
-import {LocalDateTime} from './LocalDateTime';
-import {ZoneId} from './ZoneId';
+import { Clock } from './Clock';
+import { LocalDateTime } from './LocalDateTime';
+import { ZoneId } from './ZoneId';
+import { OffsetTime } from './OffsetTime';
 
-import {DateTimeFormatter} from './format/DateTimeFormatter';
+import { DateTimeFormatter } from './format/DateTimeFormatter';
 
-import {ChronoField} from './temporal/ChronoField';
-import {ChronoUnit} from './temporal/ChronoUnit';
-import {Temporal} from './temporal/Temporal';
-import {TemporalField} from './temporal/TemporalField';
-import {TemporalQueries} from './temporal/TemporalQueries';
-import {createTemporalQuery} from './temporal/TemporalQuery';
+import { ChronoField } from './temporal/ChronoField';
+import { ChronoUnit } from './temporal/ChronoUnit';
+import { Temporal } from './temporal/Temporal';
+import { TemporalField } from './temporal/TemporalField';
+import { TemporalQueries } from './temporal/TemporalQueries';
+import { createTemporalQuery } from './temporal/TemporalQuery';
 
 /**
  * A time without time-zone in the ISO-8601 calendar system,
@@ -460,7 +461,7 @@ export class LocalTime extends Temporal /** implements Temporal, TemporalAdjuste
             case ChronoField.CLOCK_HOUR_OF_DAY: return (this._hour === 0 ? 24 : this._hour);
             case ChronoField.AMPM_OF_DAY: return MathUtil.intDiv(this._hour, 12);
         }
-        throw new UnsupportedTemporalTypeException('Unsupported field: ' + field);
+        throw new UnsupportedTemporalTypeException(`Unsupported field: ${field}`);
     }
 
     //-----------------------------------------------------------------------
@@ -521,14 +522,13 @@ export class LocalTime extends Temporal /** implements Temporal, TemporalAdjuste
      * @throws {DateTimeException} if the adjustment cannot be made
      * @throws {ArithmeticException} if numeric overflow occurs
      */
-    withAdjuster(adjuster) {
+    _withAdjuster(adjuster) {
         requireNonNull(adjuster, 'adjuster');
         // optimizations
         if (adjuster instanceof LocalTime) {
             return adjuster;
         }
-        assert(typeof adjuster.adjustInto === 'function', 'adjuster', IllegalArgumentException);
-        return adjuster.adjustInto(this);
+        return super._withAdjuster(adjuster);
     }
 
     /**
@@ -611,7 +611,7 @@ export class LocalTime extends Temporal /** implements Temporal, TemporalAdjuste
      * @throws {DateTimeException} if the field cannot be set
      * @throws {ArithmeticException} if numeric overflow occurs
      */
-    withFieldValue(field, newValue) {
+    _withField(field, newValue) {
         requireNonNull(field, 'field');
         requireInstance(field, TemporalField, 'field');
         if (field instanceof ChronoField) {
@@ -633,7 +633,7 @@ export class LocalTime extends Temporal /** implements Temporal, TemporalAdjuste
                 case ChronoField.CLOCK_HOUR_OF_DAY: return this.withHour((newValue === 24 ? 0 : newValue));
                 case ChronoField.AMPM_OF_DAY: return this.plusHours((newValue - MathUtil.intDiv(this._hour, 12)) * 12);
             }
-            throw new UnsupportedTemporalTypeException('Unsupported field: ' + field);
+            throw new UnsupportedTemporalTypeException(`Unsupported field: ${field}`);
         }
         return field.adjustInto(this, newValue);
     }
@@ -743,27 +743,6 @@ export class LocalTime extends Temporal /** implements Temporal, TemporalAdjuste
     //-----------------------------------------------------------------------
 
     /**
-     * Returns a copy of this date with the specified period added.
-     *
-     * This method returns a new time based on this time with the specified period added.
-     * The amount is typically {@link Period} but may be any other type implementing
-     * the {@link TemporalAmount} interface.
-     * The calculation is delegated to the specified adjuster, which typically calls
-     * back to {@link plus}.
-     *
-     * This instance is immutable and unaffected by this method call.
-     *
-     * @param {TemporalAmount} amount - the amount to add, not null
-     * @return {LocalTime} a {@link LocalTime} based on this time with the addition made, not null
-     * @throws {DateTimeException} if the addition cannot be made
-     * @throws {ArithmeticException} if numeric overflow occurs
-     */
-    plusAmount(amount) {
-        requireNonNull(amount, 'amount');
-        return amount.addTo(this);
-    }
-
-    /**
      * Returns a copy of this time with the specified period added.
      *
      * This method returns a new time based on this time with the specified period added.
@@ -778,7 +757,7 @@ export class LocalTime extends Temporal /** implements Temporal, TemporalAdjuste
      * @return {LocalTime} a {@link LocalTime} based on this time with the specified period added, not null
      * @throws {DateTimeException} if the unit cannot be added to this type
      */
-    plusAmountUnit(amountToAdd, unit) {
+    _plusUnit(amountToAdd, unit) {
         requireNonNull(unit, 'unit');
         if (unit instanceof ChronoUnit) {
             switch (unit) {
@@ -790,7 +769,7 @@ export class LocalTime extends Temporal /** implements Temporal, TemporalAdjuste
                 case ChronoUnit.HOURS: return this.plusHours(amountToAdd);
                 case ChronoUnit.HALF_DAYS: return this.plusHours(MathUtil.intMod(amountToAdd, 2) * 12);
             }
-            throw new UnsupportedTemporalTypeException('Unsupported unit: ' + unit);
+            throw new UnsupportedTemporalTypeException(`Unsupported unit: ${unit}`);
         }
         return unit.addTo(this, amountToAdd);
     }
@@ -901,28 +880,6 @@ export class LocalTime extends Temporal /** implements Temporal, TemporalAdjuste
      * Returns a copy of this time with the specified period subtracted.
      *
      * This method returns a new time based on this time with the specified period subtracted.
-     * The amount is typically {@link Period} but may be any other type implementing
-     * the {@link TemporalAmount} interface.
-     * The calculation is delegated to the specified adjuster, which typically calls
-     * back to {@link minus}.
-     *
-     * This instance is immutable and unaffected by this method call.
-     *
-     * @param {TemporalAmount} amount - the amount to subtract, not null
-     * @return {LocalTime} a {@link LocalTime} based on this time with the subtraction made, not null
-     * @throws {DateTimeException} if the subtraction cannot be made
-     * @throws {ArithmeticException} if numeric overflow occurs
-     */
-
-    minusAmount(amount) {
-        requireNonNull(amount, 'amount');
-        return amount.subtractFrom(this);
-    }
-
-    /**
-     * Returns a copy of this time with the specified period subtracted.
-     *
-     * This method returns a new time based on this time with the specified period subtracted.
      * This can be used to subtract any period that is defined by a unit, for example to subtract hours, minutes or seconds.
      * The unit is responsible for the details of the calculation, including the resolution
      * of any edge cases in the calculation.
@@ -934,9 +891,9 @@ export class LocalTime extends Temporal /** implements Temporal, TemporalAdjuste
      * @return {LocalTime} a {@link LocalTime} based on this time with the specified period subtracted, not null
      * @throws {DateTimeException} if the unit cannot be added to this type
      */
-    minusAmountUnit(amountToSubtract, unit) {
+    _minusUnit(amountToSubtract, unit) {
         requireNonNull(unit, 'unit');
-        return this.plusAmountUnit(-1 * amountToSubtract, unit);
+        return this._plusUnit(-1 * amountToSubtract, unit);
     }
 
     //-----------------------------------------------------------------------
@@ -1120,7 +1077,7 @@ export class LocalTime extends Temporal /** implements Temporal, TemporalAdjuste
                 case ChronoUnit.HOURS: return MathUtil.intDiv(nanosUntil, LocalTime.NANOS_PER_HOUR);
                 case ChronoUnit.HALF_DAYS: return MathUtil.intDiv(nanosUntil, (12 * LocalTime.NANOS_PER_HOUR));
             }
-            throw new UnsupportedTemporalTypeException('Unsupported unit: ' + unit);
+            throw new UnsupportedTemporalTypeException(`Unsupported unit: ${unit}`);
         }
         return unit.between(this, end);
     }
@@ -1148,11 +1105,9 @@ export class LocalTime extends Temporal /** implements Temporal, TemporalAdjuste
      * @param {OffsetTime} offset - the offset to combine with, not null
      * @return {OffsetTime} the offset time formed from this time and the specified offset, not null
      */
-    /*
     atOffset(offset) {
         return OffsetTime.of(this, offset);
     }
-*/
 
     //-----------------------------------------------------------------------
     /**
@@ -1300,11 +1255,11 @@ export class LocalTime extends Temporal /** implements Temporal, TemporalAdjuste
             if (nanoValue > 0) {
                 buf += '.';
                 if(MathUtil.intMod(nanoValue, 1000000) === 0) {
-                    buf += ('' + (MathUtil.intDiv(nanoValue, 1000000) + 1000)).substring(1);
+                    buf += (`${MathUtil.intDiv(nanoValue, 1000000) + 1000}`).substring(1);
                 } else if (MathUtil.intMod(nanoValue, 1000) === 0) {
-                    buf += ('' + (MathUtil.intDiv(nanoValue, 1000) + 1000000)).substring(1);
+                    buf += (`${MathUtil.intDiv(nanoValue, 1000) + 1000000}`).substring(1);
                 } else {
-                    buf += ('' + (nanoValue + 1000000000)).substring(1);
+                    buf += (`${nanoValue + 1000000000}`).substring(1);
                 }
             }
         }
