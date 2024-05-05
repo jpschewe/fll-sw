@@ -1,3 +1,4 @@
+* #1190 - Fix support for subjective judging without a schedule
 * #1176 - Expand ignored categories functionality to all places where non-numeric awards are handled
 * #1178 - handle paragraph breaks in award descriptions in the Awards Script
 * #1171 - quiet websocket EOF errors

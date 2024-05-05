@@ -58,8 +58,13 @@ function populateChooseCategory() {
 
     const categories = subjective_module.getSubjectiveCategories();
     for (const category of categories) {
-        const columns = subjective_module
+        let columns = subjective_module
             .getScheduleColumnsForCategory(category.name);
+
+        if (columns.length < 1) {
+            // in case there isn't a schedule we need columns to have at least 1 element
+            columns = [null];
+        }
 
         for (const column of columns) {
             const button = document.createElement("a");
@@ -1396,8 +1401,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const syncFinalDialog = document.getElementById("sync-final-question");
         syncFinalDialog.classList.add("fll-sw-ui-inactive");
     });
-    
-    
+
+
     document.getElementById("side-panel_synchronize").addEventListener('click', () => {
         sidePanel.classList.remove('open');
 
