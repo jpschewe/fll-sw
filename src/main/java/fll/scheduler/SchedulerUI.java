@@ -267,12 +267,16 @@ public class SchedulerUI extends JFrame {
     schedulePanel.add(constraintsPanel, BorderLayout.SOUTH);
 
     changeDuration = FormatterUtils.createIntegerField(0, 1000);
-    changeDuration.setToolTipText("The number of minutes that a team has between any 2 activities");
+    changeDuration.setToolTipText("The number of minutes that a team has between any performance and subjective events");
     addRow(constraintsPanel, new JLabel("Change time duration:"), changeDuration);
 
     performanceChangeDuration = FormatterUtils.createIntegerField(0, 1000);
-    performanceChangeDuration.setToolTipText("The number of minutes that a team has between any 2 performance runs");
+    performanceChangeDuration.setToolTipText("The number of minutes that a team has between any 2 performance events");
     addRow(constraintsPanel, new JLabel("Performance change time duration:"), performanceChangeDuration);
+
+    subjectiveChangeDuration = FormatterUtils.createIntegerField(0, 1000);
+    subjectiveChangeDuration.setToolTipText("The number of minutes that a team has between any 2 subjective events");
+    addRow(constraintsPanel, new JLabel("Subjective change time duration:"), subjectiveChangeDuration);
 
     performanceDuration = FormatterUtils.createIntegerField(1, 1000);
     performanceDuration.setToolTipText("The amount of time that the team is expected to be at the table");
@@ -286,6 +290,7 @@ public class SchedulerUI extends JFrame {
     final CheckSchedule durationChangeListener = new CheckSchedule();
     changeDuration.addPropertyChangeListener("value", durationChangeListener);
     performanceChangeDuration.addPropertyChangeListener("value", durationChangeListener);
+    subjectiveChangeDuration.addPropertyChangeListener("value", durationChangeListener);
     performanceDuration.addPropertyChangeListener("value", durationChangeListener);
 
     // Work around https://github.com/typetools/checker-framework/issues/4667 by
@@ -338,6 +343,7 @@ public class SchedulerUI extends JFrame {
     // setSchedParams(mSchedParams);
     changeDuration.setValue(mSchedParams.getChangetimeMinutes());
     performanceChangeDuration.setValue(mSchedParams.getPerformanceChangetimeMinutes());
+    subjectiveChangeDuration.setValue(mSchedParams.getSubjectiveChangetimeMinutes());
     performanceDuration.setValue(mSchedParams.getPerformanceMinutes());
 
     setChallengeDescriptionTitle();
@@ -1508,6 +1514,7 @@ public class SchedulerUI extends JFrame {
     mSchedParams = params;
     changeDuration.setValue(mSchedParams.getChangetimeMinutes());
     performanceChangeDuration.setValue(mSchedParams.getPerformanceChangetimeMinutes());
+    subjectiveChangeDuration.setValue(mSchedParams.getSubjectiveChangetimeMinutes());
     performanceDuration.setValue(mSchedParams.getPerformanceMinutes());
   }
 
@@ -1552,6 +1559,7 @@ public class SchedulerUI extends JFrame {
     params.setPerformanceMinutes((Integer) performanceDuration.getValue());
     params.setChangetimeMinutes((Integer) changeDuration.getValue());
     params.setPerformanceChangetimeMinutes((Integer) performanceChangeDuration.getValue());
+    params.setSubjectiveChangetimeMinutes((Integer) subjectiveChangeDuration.getValue());
 
     final ScheduleChecker checker = new ScheduleChecker(params, getScheduleData());
     mViolationsModel = new ViolationTableModel(checker.verifySchedule());
@@ -1784,6 +1792,8 @@ public class SchedulerUI extends JFrame {
   private final JFormattedTextField changeDuration;
 
   private final JFormattedTextField performanceChangeDuration;
+
+  private final JFormattedTextField subjectiveChangeDuration;
 
   private final JFormattedTextField performanceDuration;
 
