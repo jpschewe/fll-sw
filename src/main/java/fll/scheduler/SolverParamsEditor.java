@@ -41,6 +41,8 @@ public class SolverParamsEditor extends JPanel {
 
   private final JFormattedTextField performanceChangeDuration;
 
+  private final JFormattedTextField subjectiveChangeDuration;
+
   private final JCheckBox subjectiveFirst;
 
   private final DurationListEditor perfAttemptOffsetMinutes;
@@ -76,11 +78,15 @@ public class SolverParamsEditor extends JPanel {
     addRow(new JLabel("Maximum length of the tournament"), maxTime);
 
     changeDuration = FormatterUtils.createIntegerField(0, 1000);
-    changeDuration.setToolTipText("The number of minutes that a team has between any 2 activities");
+    changeDuration.setToolTipText("The number of minutes that a team has between performance and subjective events");
     addRow(new JLabel("Change time duration:"), changeDuration);
 
+    subjectiveChangeDuration = FormatterUtils.createIntegerField(0, 1000);
+    subjectiveChangeDuration.setToolTipText("The number of minutes that a team has between any 2 subjective events");
+    addRow(new JLabel("Subjective change time duration:"), subjectiveChangeDuration);
+
     performanceChangeDuration = FormatterUtils.createIntegerField(0, 1000);
-    performanceChangeDuration.setToolTipText("The number of minutes that a team has between any 2 performance runs");
+    performanceChangeDuration.setToolTipText("The number of minutes that a team has between any 2 performance events");
     addRow(new JLabel("Performance change time duration:"), performanceChangeDuration);
 
     addRow(new JSeparator());
@@ -180,6 +186,7 @@ public class SolverParamsEditor extends JPanel {
     performanceDuration.setValue(params.getPerformanceMinutes());
     changeDuration.setValue(params.getChangetimeMinutes());
     performanceChangeDuration.setValue(params.getPerformanceChangetimeMinutes());
+    subjectiveChangeDuration.setValue(params.getSubjectiveChangetimeMinutes());
 
     subjectiveStations.setStations(params.getSubjectiveStations());
 
@@ -202,7 +209,7 @@ public class SolverParamsEditor extends JPanel {
   /**
    * The values from the editors are pushed into the parameters object and that
    * object is returned.
-   * The caller should call {@link SchedParams#isValid()} called on it and
+   * The caller should have {@link SchedParams#isValid()} called on it and
    * display the errors to the user.
    * 
    * @return a non-null parameters object
@@ -217,6 +224,7 @@ public class SolverParamsEditor extends JPanel {
     params.setAlternateTables(alternateTables.isSelected());
     params.setPerformanceMinutes((Integer) performanceDuration.getValue());
     params.setChangetimeMinutes((Integer) changeDuration.getValue());
+    params.setSubjectiveChangetimeMinutes((Integer) subjectiveChangeDuration.getValue());
     params.setPerformanceChangetimeMinutes((Integer) performanceChangeDuration.getValue());
 
     params.setSubjectiveStations(subjectiveStations.getStations());

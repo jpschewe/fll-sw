@@ -47,7 +47,7 @@ public class ProcessScheduleConstraints extends BaseFLLServlet {
       throw new FLLInternalException("Error reading from the database", e);
     }
   }
-  
+
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -69,6 +69,9 @@ public class ProcessScheduleConstraints extends BaseFLLServlet {
       final int performanceChangeTimeDuration = WebUtils.getIntRequestParameter(request,
                                                                                 "performanceChangeTimeDuration");
       uploadScheduleData.getSchedParams().setPerformanceChangetimeMinutes(performanceChangeTimeDuration);
+
+      final int subjectiveChangeTimeDuration = WebUtils.getIntRequestParameter(request, "subjectiveChangeTimeDuration");
+      uploadScheduleData.getSchedParams().setSubjectiveChangetimeMinutes(subjectiveChangeTimeDuration);
 
       final int performanceDuration = WebUtils.getIntRequestParameter(request, "performanceDuration");
       uploadScheduleData.getSchedParams().setPerformanceMinutes(performanceDuration);

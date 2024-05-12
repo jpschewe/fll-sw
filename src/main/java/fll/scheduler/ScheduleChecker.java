@@ -149,6 +149,7 @@ public class ScheduleChecker {
   @SuppressFBWarnings(value = "IM_BAD_CHECK_FOR_ODD", justification = "The size of a container cannot be negative")
   private void verifyTeam(final Collection<ConstraintViolation> violations,
                           final TeamScheduleInfo ti) {
+    final Duration subjectiveChangetime = getSubjectiveChangetime();
     // Relationship between each subjective category
     for (final SubjectiveTime category1 : ti.getSubjectiveTimes()) {
       for (final SubjectiveTime category2 : ti.getSubjectiveTimes()) {
@@ -164,10 +165,10 @@ public class ScheduleChecker {
               violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), category1,
                                                      category2, null, message));
               return;
-            } else if (cat1End.plus(getChangetime()).isAfter(cat2Start)) {
+            } else if (cat1End.plus(subjectiveChangetime).isAfter(cat2Start)) {
               final String message = String.format("Team %d has doesn't have enough time between %s and %s (need %d)",
                                                    ti.getTeamNumber(), category1.getName(), category2.getName(),
-                                                   getChangetime().toMinutes());
+                                                   subjectiveChangetime.toMinutes());
               violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), category1,
                                                      category2, null, message));
               return;
@@ -180,10 +181,10 @@ public class ScheduleChecker {
               violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), category1,
                                                      category2, null, message));
               return;
-            } else if (cat2End.plus(getChangetime()).isAfter(cat1Start)) {
+            } else if (cat2End.plus(subjectiveChangetime).isAfter(cat1Start)) {
               final String message = String.format("Team %d has doesn't have enough time between %s and %s (need %d)",
                                                    ti.getTeamNumber(), category1.getName(), category2.getName(),
-                                                   getChangetime().toMinutes());
+                                                   subjectiveChangetime.toMinutes());
               violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), category1,
                                                      category2, null, message));
               return;
@@ -331,6 +332,7 @@ public class ScheduleChecker {
                                              final TeamScheduleInfo ti,
                                              final String performanceName,
                                              final LocalTime performanceStart) {
+    final Duration changetime = getChangetime();
     for (final SubjectiveTime subj : ti.getSubjectiveTimes()) {
       final LocalTime subjStart = subj.getTime();
       final LocalTime subjEnd = subjStart.plus(getSubjectiveDuration(subj.getName()));
@@ -341,10 +343,10 @@ public class ScheduleChecker {
                                                ti.getTeamNumber(), subj.getName(), performanceName);
           violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), null, subj,
                                                  performanceStart, message));
-        } else if (subjEnd.plus(getChangetime()).isAfter(performanceStart)) {
+        } else if (subjEnd.plus(changetime).isAfter(performanceStart)) {
           final String message = String.format("Team %d has doesn't have enough time between %s and performance round %s (need %d)",
                                                ti.getTeamNumber(), TournamentSchedule.formatTime(subj.getTime()),
-                                               performanceName, getChangetime().toMinutes());
+                                               performanceName, changetime.toMinutes());
           violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), null, subj,
                                                  performanceStart, message));
         }
@@ -355,10 +357,10 @@ public class ScheduleChecker {
                                                ti.getTeamNumber(), subj.getName(), performanceName);
           violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), null, subj,
                                                  performanceStart, message));
-        } else if (performanceEnd.plus(getChangetime()).isAfter(subjStart)) {
+        } else if (performanceEnd.plus(changetime).isAfter(subjStart)) {
           final String message = String.format("Team %d has doesn't have enough time between %s and performance round %s (need %d)",
                                                ti.getTeamNumber(), subj.getName(), performanceName,
-                                               getChangetime().toMinutes());
+                                               changetime.toMinutes());
           violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), null, subj,
                                                  performanceStart, message));
         }
@@ -498,12 +500,17 @@ public class ScheduleChecker {
   }
 
   /**
-   * This is the time required between events.
-   *
-   * @return the changetime
+   * @return the time required between performance events and subjective events
    */
   private Duration getChangetime() {
     return Duration.ofMinutes(params.getChangetimeMinutes());
+  }
+
+  /**
+   * @return the time required between subjective events
+   */
+  private Duration getSubjectiveChangetime() {
+    return Duration.ofMinutes(params.getSubjectiveChangetimeMinutes());
   }
 
   /**

@@ -38,6 +38,8 @@ public class SchedParams implements Serializable {
 
   private static final String PCT_MINUTES_KEY = "pct_minutes";
 
+  private static final String SUBJECTIVE_CHANGETIME_MINUTES_KEY = "subjective_changetime_minutes";
+
   /**
    * Default number of minutes for a subjective judging session.
    */
@@ -49,9 +51,14 @@ public class SchedParams implements Serializable {
   public static final int DEFAULT_PERFORMANCE_MINUTES = 5;
 
   /**
-   * Default number of minutes for a team to get from one session to another.
+   * Default number of minutes for a team to get subjective to performance.
    */
   public static final int DEFAULT_CHANGETIME_MINUTES = 15;
+
+  /**
+   * Default number of minutes for a team between subjective stations.
+   */
+  public static final int DEFAULT_SUBJECTIVE_CHANGETIME_MINUTES = 15;
 
   /**
    * Default number of minutes that a team should have between performance
@@ -70,26 +77,6 @@ public class SchedParams implements Serializable {
       super("Parameters are invalid:\n"
           + String.join("\n", errors));
     }
-  }
-
-  /**
-   * @param subjectiveParams the parameters for the subjective categories, one
-   *          entry for each subjective category
-   * @param performanceMinutes the number of minutes that the performance
-   *          judging takes
-   * @param changetimeMinutes the number of minutes between judging stations for
-   *          a team
-   * @param performanceChangetimeMinutes the number of minutes between runs on
-   *          the performance table for a team
-   */
-  public SchedParams(final List<SubjectiveStation> subjectiveParams,
-                     final int performanceMinutes,
-                     final int changetimeMinutes,
-                     final int performanceChangetimeMinutes) {
-    mSubjectiveStations = new ArrayList<SubjectiveStation>(subjectiveParams);
-    mPerformanceMinutes = performanceMinutes;
-    mChangetimeMinutes = changetimeMinutes;
-    mPerformanceChangetimeMinutes = performanceChangetimeMinutes;
   }
 
   /**
@@ -116,6 +103,8 @@ public class SchedParams implements Serializable {
     mChangetimeMinutes = Utilities.readIntProperty(properties, CT_MINUTES_KEY, DEFAULT_CHANGETIME_MINUTES);
     mPerformanceChangetimeMinutes = Utilities.readIntProperty(properties, PCT_MINUTES_KEY,
                                                               DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
+    mSubjectiveChangetimeMinutes = Utilities.readIntProperty(properties, SUBJECTIVE_CHANGETIME_MINUTES_KEY,
+                                                             DEFAULT_SUBJECTIVE_CHANGETIME_MINUTES);
 
     mSubjectiveStations = new ArrayList<>();
     for (int i = 0; i < subjectiveDurations.length; ++i) {
@@ -150,6 +139,7 @@ public class SchedParams implements Serializable {
 
     properties.setProperty(CT_MINUTES_KEY, Integer.toString(mChangetimeMinutes));
     properties.setProperty(PCT_MINUTES_KEY, Integer.toString(mPerformanceChangetimeMinutes));
+    properties.setProperty(SUBJECTIVE_CHANGETIME_MINUTES_KEY, Integer.toString(mSubjectiveChangetimeMinutes));
   }
 
   private int mPerformanceMinutes = DEFAULT_PERFORMANCE_MINUTES;
@@ -173,7 +163,8 @@ public class SchedParams implements Serializable {
   private int mChangetimeMinutes = DEFAULT_CHANGETIME_MINUTES;
 
   /**
-   * @return Number of minutes between judging stations for each team.
+   * @return Number of minutes between performance and subjective events for each
+   *         team.
    *         Default is {@link #DEFAULT_CHANGETIME_MINUTES}
    */
   public final int getChangetimeMinutes() {
@@ -185,6 +176,23 @@ public class SchedParams implements Serializable {
    */
   public final void setChangetimeMinutes(final int v) {
     mChangetimeMinutes = v;
+  }
+
+  private int mSubjectiveChangetimeMinutes = DEFAULT_SUBJECTIVE_CHANGETIME_MINUTES;
+
+  /**
+   * @return Number of minutes between subjective events for each team.
+   *         Default is {@link #DEFAULT_CHANGETIME_MINUTES}
+   */
+  public final int getSubjectiveChangetimeMinutes() {
+    return mSubjectiveChangetimeMinutes;
+  }
+
+  /**
+   * @param v see {@link #getChangetimeMinutes()}
+   */
+  public final void setSubjectiveChangetimeMinutes(final int v) {
+    mSubjectiveChangetimeMinutes = v;
   }
 
   private int mPerformanceChangetimeMinutes = DEFAULT_PERFORMANCE_CHANGETIME_MINUTES;
@@ -325,6 +333,10 @@ public class SchedParams implements Serializable {
       insert.setInt(3, mPerformanceChangetimeMinutes);
       insert.executeUpdate();
 
+      insert.setString(2, SUBJECTIVE_CHANGETIME_MINUTES_KEY);
+      insert.setInt(3, mSubjectiveChangetimeMinutes);
+      insert.executeUpdate();
+
       for (final SubjectiveStation station : mSubjectiveStations) {
         insert.setString(2, station.getName());
         insert.setInt(3, station.getDurationMinutes());
@@ -373,6 +385,15 @@ public class SchedParams implements Serializable {
           mPerformanceChangetimeMinutes = rs.getInt(1);
         } else {
           mPerformanceChangetimeMinutes = DEFAULT_PERFORMANCE_CHANGETIME_MINUTES;
+        }
+      }
+
+      select.setString(2, SUBJECTIVE_CHANGETIME_MINUTES_KEY);
+      try (ResultSet rs = select.executeQuery()) {
+        if (rs.next()) {
+          mSubjectiveChangetimeMinutes = rs.getInt(1);
+        } else {
+          mSubjectiveChangetimeMinutes = DEFAULT_SUBJECTIVE_CHANGETIME_MINUTES;
         }
       }
 

@@ -2,7 +2,9 @@
 
 <fll-sw:required-roles roles="ADMIN" allowSetup="false" />
 
-<% fll.web.schedule.ProcessScheduleConstraints.populateContext(application, pageContext);  %>
+<%
+fll.web.schedule.ProcessScheduleConstraints.populateContext(application, pageContext);
+%>
 
 <html>
 <head>
@@ -22,7 +24,7 @@
             use, just use the defaults.</p>
 
         <div>
-            Change time duration:
+            Time between subjective and performance events:
             <input type="number" name="changeTimeDuration"
                 id="changeTimeDuration"
                 value="${uploadScheduleData.schedParams.changetimeMinutes }"
@@ -31,7 +33,16 @@
         </div>
 
         <div>
-            Performance change time duration:
+            Time between subjective events:
+            <input name="subjectiveChangeTimeDuration"
+                id="subjectiveChangeTimeDuration"
+                value="${uploadScheduleData.schedParams.subjectiveChangetimeMinutes }"
+                type="number" min="0" required />
+            minutes
+        </div>
+
+        <div>
+            Time between performance events:
             <input name="performanceChangeTimeDuration"
                 id="performanceChangeTimeDuration"
                 value="${uploadScheduleData.schedParams.performanceChangetimeMinutes }"
@@ -50,11 +61,13 @@
         <div>
             Number of non-practice performance runs:
             <input name="numPerformanceRuns" id="numPerformanceRuns"
-                   type="number" min="${numSeedingRounds}" value="${numSeedingRounds}" required /><br />
-        <div>
+                type="number" min="${numSeedingRounds}"
+                value="${numSeedingRounds}" required />
+            <br />
+            <div>
 
 
-        <input type="submit" id='submit_data' value='Submit' />
+                <input type="submit" id='submit_data' value='Submit' />
     </form>
 
 </body>
