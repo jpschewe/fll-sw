@@ -468,12 +468,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
             + String.format(" AND TournamentTeams.%s = ?", selector.getColumn()) //
             + " AND TournamentTeams.TeamNumber = final_scores.team_number"//
             + " AND final_scores.category = ?" //
-            + " AND final_scores.goal_group = ?" //
             + String.format(" ORDER BY final_scores.final_score %s", winnerCriteria.getSortString()))) {
       prep.setInt(1, tournament.getTournamentID());
       prep.setString(2, groupName);
       prep.setString(3, PerformanceScoreCategory.CATEGORY_NAME);
-      prep.setString(4, "");
 
       int numTied = 1;
       int rank = 0;
@@ -547,12 +545,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
             + " AND TournamentTeams.TeamNumber = final_scores.team_number"//
             + " AND TournamentTeams.judging_station = ?" //
             + " AND final_scores.category = ?" //
-            + " AND final_scores.goal_group = ?" //
             + String.format(" ORDER BY final_scores.final_score %s", winnerCriteria.getSortString()))) {
       prep.setInt(1, tournament.getTournamentID());
       prep.setString(2, judgingStation);
       prep.setString(3, category.getName());
-      prep.setString(4, "");
 
       int numTied = 1;
       int rank = 0;
@@ -986,9 +982,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
       throws SQLException {
     try (PreparedStatement prep = connection.prepareStatement("SELECT computed_total"
         + " FROM subjective_computed_scores"
-        + " WHERE team_number = ? AND tournament = ? AND category = ? AND goal_group = ? ORDER BY computed_total "
+        + " WHERE team_number = ? AND tournament = ? AND category = ? ORDER BY computed_total "
         + ascDesc)) {
-      prep.setString(4, ""); // goal group empty will give score for whole category
 
       // Next, one column containing the raw score for each subjective
       // category with weight > 0

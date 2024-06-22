@@ -110,7 +110,8 @@ public final class SummarizePhase1 {
           final String categoryTitle = category.getTitle();
 
           final SortedSet<JudgeSummary> value = summary.computeIfAbsent(judgeInfo.getGroup(), k -> new TreeSet<>());
-          value.add(new JudgeSummary(judgeInfo.getId(), categoryTitle, judgeInfo.getGroup(), numExpected, numActual, judgeInfo.isFinalScores()));
+          value.add(new JudgeSummary(judgeInfo.getId(), categoryTitle, judgeInfo.getGroup(), numExpected, numActual,
+                                     judgeInfo.isFinalScores()));
 
           seenCategoryNames.computeIfAbsent(judgeInfo.getGroup(), k -> new HashSet<>()).add(judgeInfo.getCategory());
         }
@@ -211,7 +212,6 @@ public final class SummarizePhase1 {
         + " WHERE tournament = ?" //
         + " AND judge = ?" //
         + " AND category = ?" //
-        + " AND goal_group = ?" //
         + " AND ( computed_total IS NOT NULL OR no_show = true )"//
         + " AND team_number IN (" //
         + "  SELECT TeamNumber FROM TournamentTeams" //
@@ -221,9 +221,8 @@ public final class SummarizePhase1 {
       getActual.setInt(1, tournamentID);
       getActual.setString(2, judge);
       getActual.setString(3, categoryName);
-      getActual.setString(4, "");
-      getActual.setInt(5, tournamentID);
-      getActual.setString(6, station);
+      getActual.setInt(4, tournamentID);
+      getActual.setString(5, station);
       try (ResultSet actual = getActual.executeQuery()) {
         if (actual.next()) {
           numActual = actual.getInt(1);

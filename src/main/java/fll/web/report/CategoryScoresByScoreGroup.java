@@ -145,7 +145,6 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
           + " WHERE final_scores.tournament = ?" //
           + " AND final_scores.team_number = Teams.TeamNumber" //
           + " AND final_scores.category = ?" //
-          + " AND final_scores.goal_group = ''"//
           + " AND final_scores.team_number IN (" //
           + "   SELECT TeamNumber FROM TournamentTeams"//
           + "   WHERE Tournament = ?" //

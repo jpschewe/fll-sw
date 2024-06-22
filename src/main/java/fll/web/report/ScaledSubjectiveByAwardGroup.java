@@ -165,12 +165,10 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
         + " FROM subjective_computed_scores"
         + " WHERE tournament = ?"
         + " AND category = ?"
-        + " AND goal_group = ?"
         + " AND team_number = ?"
         + " ORDER BY judge ASC")) {
       prep.setInt(1, tournament.getTournamentID());
       prep.setString(2, category.getName());
-      prep.setString(3, "");
 
       final Element agReport = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
@@ -242,7 +240,7 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
         final Data d = new Data(t);
 
         final List<String> rawScores = new LinkedList<>();
-        prep.setInt(4, t.getTeamNumber());
+        prep.setInt(3, t.getTeamNumber());
         try (ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
             final double raw = rs.getDouble(1);
