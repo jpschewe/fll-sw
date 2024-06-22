@@ -1,3 +1,4 @@
+* Remove goal group from category scores by judging group report
 * #1131 - Add schedule constraint for time between subjective events separate from the time between subjective and performance events
 * #1190 - Fix support for subjective judging without a schedule
 * #1176 - Expand ignored categories functionality to all places where non-numeric awards are handled
