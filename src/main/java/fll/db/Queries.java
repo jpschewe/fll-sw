@@ -1172,20 +1172,20 @@ public final class Queries {
       final String categoryName = subjectiveElement.getName();
 
       try (PreparedStatement insertPrep = connection.prepareStatement("INSERT INTO subjective_computed_scores"//
-          + " (category, goal_group, tournament, team_number, judge, computed_total, no_show) " //
-          + " VALUES(?, ?, ?, ?, ?, ?, ?)");
+          + " (category, tournament, team_number, judge, computed_total, no_show) " //
+          + " VALUES(?, ?, ?, ?, ?, ?)");
           PreparedStatement selectPrep = connection.prepareStatement("SELECT * FROM " //
               + categoryName //
               + " WHERE Tournament = ?")) {
         selectPrep.setInt(1, tournament);
 
         insertPrep.setString(1, categoryName);
-        insertPrep.setInt(3, tournament);
+        insertPrep.setInt(2, tournament);
 
         try (ResultSet rs = selectPrep.executeQuery()) {
           while (rs.next()) {
             final int teamNumber = rs.getInt("TeamNumber");
-            insertPrep.setInt(4, teamNumber);
+            insertPrep.setInt(3, teamNumber);
 
             final DatabaseTeamScore teamScore = new DatabaseTeamScore(teamNumber, rs);
             final double computedTotal;
@@ -1196,33 +1196,17 @@ public final class Queries {
             }
 
             final String judge = rs.getString("Judge");
-            insertPrep.setString(5, judge);
+            insertPrep.setString(4, judge);
 
-            insertPrep.setBoolean(7, teamScore.isNoShow());
+            insertPrep.setBoolean(6, teamScore.isNoShow());
 
             // insert category score
-            insertPrep.setString(2, "");
             if (Double.isNaN(computedTotal)) {
-              insertPrep.setNull(6, Types.DOUBLE);
+              insertPrep.setNull(5, Types.DOUBLE);
             } else {
-              insertPrep.setDouble(6, computedTotal);
+              insertPrep.setDouble(5, computedTotal);
             }
             insertPrep.executeUpdate();
-
-            // insert goal group scores
-            final Map<String, Double> goalGroupScores = subjectiveElement.getGoalGroupScores(teamScore);
-            for (final Map.Entry<String, Double> entry : goalGroupScores.entrySet()) {
-              final String group = entry.getKey();
-              final double score = entry.getValue();
-
-              insertPrep.setString(2, group);
-              if (Double.isNaN(score)) {
-                insertPrep.setNull(6, Types.DOUBLE);
-              } else {
-                insertPrep.setDouble(6, score);
-              }
-              insertPrep.executeUpdate();
-            }
           } // foreach result
         } // ResultSet
       } // prepared statements

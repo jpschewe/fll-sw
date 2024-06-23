@@ -203,7 +203,6 @@ public class SubjectiveByJudge extends BaseFLLServlet {
             + " FROM subjective_computed_scores"
             + " WHERE tournament = ? "
             + " AND category = ?"
-            + " AND goal_group = ''"
             + " AND judge = ?"//
             + " ORDER BY computed_total DESC")) {
       prep.setInt(1, tournament.getTournamentID());

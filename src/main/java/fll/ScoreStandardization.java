@@ -70,10 +70,9 @@ public final class ScoreStandardization {
 
             try (
                 PreparedStatement select = connection.prepareStatement("SELECT TeamNumber, ((Score - ?) * ?) + ? FROM performance_seeding_max WHERE performance_seeding_max.tournament = ?");
-                PreparedStatement insert = connection.prepareStatement("INSERT INTO final_scores (category, goal_group, tournament, team_number, final_score) VALUES(?, ?, ?, ?, ?)")) {
+                PreparedStatement insert = connection.prepareStatement("INSERT INTO final_scores (category, tournament, team_number, final_score) VALUES(?, ?, ?, ?)")) {
               insert.setString(1, PerformanceScoreCategory.CATEGORY_NAME);
-              insert.setString(2, "");
-              insert.setInt(3, tournament);
+              insert.setInt(2, tournament);
 
               select.setDouble(1, sgMean);
               select.setDouble(2, sigma
@@ -92,8 +91,8 @@ public final class ScoreStandardization {
                         + stdScore);
                   }
 
-                  insert.setInt(4, teamNumber);
-                  insert.setDouble(5, stdScore);
+                  insert.setInt(3, teamNumber);
+                  insert.setDouble(4, stdScore);
                   insert.executeUpdate();
                 } // foreach team's score
               } // select team scores
@@ -116,13 +115,13 @@ public final class ScoreStandardization {
     // number and score group as well as computing the average (across
     // judges)
     try (PreparedStatement updatePrep = connection.prepareStatement("INSERT INTO final_scores" //
-        + " (category, goal_group, tournament, team_number, final_score)"
+        + " (category, tournament, team_number, final_score)"
         + " ( SELECT " //
-        + "   category, goal_group, tournament, team_number, Avg(standardized_score)" //
+        + "   category, tournament, team_number, Avg(standardized_score)" //
         + "   FROM subjective_computed_scores"
         + "   WHERE standardized_score IS NOT NULL" //
         + "     AND tournament = ?" //
-        + "   GROUP BY category, goal_group, tournament, team_number)" //
+        + "   GROUP BY category, tournament, team_number)" //
     )) {
       updatePrep.setInt(1, tournament);
       updatePrep.executeUpdate();
@@ -167,7 +166,7 @@ public final class ScoreStandardization {
     final double mean = GlobalParameters.getStandardizedMean(connection);
     final double sigma = GlobalParameters.getStandardizedSigma(connection);
 
-    try (PreparedStatement selectPrep = connection.prepareStatement("SELECT category, goal_group, judge," //
+    try (PreparedStatement selectPrep = connection.prepareStatement("SELECT category, judge," //
         + " Avg(computed_total) AS sg_mean," //
         + " Count(computed_total) AS sg_count," //
         + " stddev_pop(computed_total) AS sg_stdev" //
@@ -175,7 +174,7 @@ public final class ScoreStandardization {
         + " WHERE tournament = ?" //
         + "   AND computed_total IS NOT NULL" //
         + "   AND no_show = false"//
-        + " GROUP BY category, goal_group, judge" //
+        + " GROUP BY category, judge" //
     );
         /*
          * Update StandardizedScore for each team in the ScoreGroup formula:
@@ -197,7 +196,6 @@ public final class ScoreStandardization {
             + " WHERE judge = ?" //
             + " AND tournament = ?" //
             + " AND category = ?" //
-            + " AND goal_group = ?" //
         )) {
       selectPrep.setInt(1, tournament);
 
@@ -207,24 +205,22 @@ public final class ScoreStandardization {
       try (ResultSet rs = selectPrep.executeQuery()) {
         while (rs.next()) {
           final String category = rs.getString(1);
-          final String goalGroup = rs.getString(2);
-          final String judge = rs.getString(3);
+          final String judge = rs.getString(2);
 
-          final int sgCount = rs.getInt(5);
+          final int sgCount = rs.getInt(4);
 
           if (sgCount > 1) {
-            final double sgMean = rs.getDouble(4);
-            final double sgStdev = rs.getDouble(6);
+            final double sgMean = rs.getDouble(3);
+            final double sgStdev = rs.getDouble(5);
 
             updatePrep.setDouble(1, sgMean);
             updatePrep.setDouble(2, sigma
                 / sgStdev);
             updatePrep.setString(4, judge);
             updatePrep.setString(6, category);
-            updatePrep.setString(7, goalGroup);
             updatePrep.executeUpdate();
           } else { // if(sgCount == 1) {
-            LOGGER.error("Not enough scores for Judge: {} in category: {} goal group: {}", judge, category, goalGroup);
+            LOGGER.error("Not enough scores for Judge: {} in category: {} goal group: {}", judge, category);
           } // ignore 0 in a judging group
 
         } // foreach result
@@ -264,17 +260,16 @@ public final class ScoreStandardization {
 
     // insert new values
     try (
-        PreparedStatement selectPrep = connection.prepareStatement("SELECT category, final_score FROM final_scores WHERE goal_group = ? AND tournament = ? AND team_number = ?");
+        PreparedStatement selectPrep = connection.prepareStatement("SELECT category, final_score FROM final_scores WHERE tournament = ? AND team_number = ?");
         PreparedStatement insertPrep = connection.prepareStatement("INSERT INTO overall_scores (tournament, team_number, overall_score) VALUES (?, ?, ?)")) {
-      selectPrep.setString(1, "");
-      selectPrep.setInt(2, currentTournament.getTournamentID());
+      selectPrep.setInt(1, currentTournament.getTournamentID());
       insertPrep.setInt(1, currentTournament.getTournamentID());
 
       // compute scores for all teams treating NULL as 0
       for (final int teamNumber : tournamentTeams.keySet()) {
         double overallScore = 0;
 
-        selectPrep.setInt(3, teamNumber);
+        selectPrep.setInt(2, teamNumber);
         try (ResultSet selectResult = selectPrep.executeQuery()) {
           while (selectResult.next()) {
             final String categoryName = castNonNull(selectResult.getString(1));

@@ -15,15 +15,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
 
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -41,7 +38,6 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.report.awards.AwardsScriptReport;
 import fll.xml.ChallengeDescription;
-import fll.xml.GoalElement;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
 import jakarta.servlet.ServletContext;
@@ -149,7 +145,6 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
           + " WHERE final_scores.tournament = ?" //
           + " AND final_scores.team_number = Teams.TeamNumber" //
           + " AND final_scores.category = ?" //
-          + " AND final_scores.goal_group = ?"//
           + " AND final_scores.team_number IN (" //
           + "   SELECT TeamNumber FROM TournamentTeams"//
           + "   WHERE Tournament = ?" //
@@ -161,113 +156,100 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
       )) {
         prep.setInt(1, tournament.getTournamentID());
         prep.setString(2, catName);
-        prep.setInt(4, tournament.getTournamentID());
+        prep.setInt(3, tournament.getTournamentID());
 
-        // the raw category is added in the stream pipeline because there is no
-        // guarantee that the resulting set is mutable
-        final Set<String> goalGroups = Stream.concat(Stream.of(""), // raw category
-                                                     catElement.getGoalElements().stream()
-                                                               .filter(GoalElement::isGoalGroup)
-                                                               .map(GoalElement::getTitle))
-                                             .distinct().collect(Collectors.toSet());
-        for (final String goalGroup : goalGroups) {
-          prep.setString(3, goalGroup);
+        for (final String division : eventDivisions) {
+          for (final String judgingGroup : judgingGroups) {
+            final Element table = FOPUtils.createBasicTable(document);
+            table.setAttribute("page-break-after", "always");
 
-          for (final String division : eventDivisions) {
-            for (final String judgingGroup : judgingGroups) {
-              final Element table = FOPUtils.createBasicTable(document);
-              table.setAttribute("page-break-after", "always");
+            table.appendChild(FOPUtils.createTableColumn(document, 1));
+            table.appendChild(FOPUtils.createTableColumn(document, 1));
+            table.appendChild(FOPUtils.createTableColumn(document, 1));
+            table.appendChild(FOPUtils.createTableColumn(document, 1));
 
-              table.appendChild(FOPUtils.createTableColumn(document, 1));
-              table.appendChild(FOPUtils.createTableColumn(document, 1));
-              table.appendChild(FOPUtils.createTableColumn(document, 1));
-              table.appendChild(FOPUtils.createTableColumn(document, 1));
+            final Element tableHeader = createTableHeader(document, challengeTitle, catTitle, division, judgingGroup,
+                                                          tournament);
+            table.appendChild(tableHeader);
 
-              final Element tableHeader = createTableHeader(document, challengeTitle, catTitle, goalGroup, division,
-                                                            judgingGroup, tournament);
-              table.appendChild(tableHeader);
+            final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+            table.appendChild(tableBody);
 
-              final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
-              table.appendChild(tableBody);
+            prep.setString(4, division);
+            prep.setString(5, judgingGroup);
 
-              prep.setString(5, division);
-              prep.setString(6, judgingGroup);
+            boolean haveData = false;
+            try (ResultSet rs = prep.executeQuery()) {
+              while (rs.next()) {
+                haveData = true;
 
-              boolean haveData = false;
-              try (ResultSet rs = prep.executeQuery()) {
-                while (rs.next()) {
-                  haveData = true;
+                final Element tableRow = FOPUtils.createTableRow(document);
+                tableBody.appendChild(tableRow);
+                FOPUtils.keepWithPrevious(tableRow);
 
-                  final Element tableRow = FOPUtils.createTableRow(document);
-                  tableBody.appendChild(tableRow);
-                  FOPUtils.keepWithPrevious(tableRow);
+                final int teamNumber = rs.getInt(1);
+                final String teamName = rs.getString(2);
+                final String organization = rs.getString(3);
 
-                  final int teamNumber = rs.getInt(1);
-                  final String teamName = rs.getString(2);
-                  final String organization = rs.getString(3);
+                Element cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                        String.valueOf(teamNumber));
+                tableRow.appendChild(cell);
+                FOPUtils.addBorders(cell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
+                                    FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
+                FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                                    FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
-                  Element cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                          String.valueOf(teamNumber));
-                  tableRow.appendChild(cell);
-                  FOPUtils.addBorders(cell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                                      FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
-                  FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                                      FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+                cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, null == teamName ? "" : teamName);
+                tableRow.appendChild(cell);
+                FOPUtils.addBorders(cell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
+                                    FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
+                FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                                    FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
-                  cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                  null == teamName ? "" : teamName);
-                  tableRow.appendChild(cell);
-                  FOPUtils.addBorders(cell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                                      FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
-                  FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                                      FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+                cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                null == organization ? "" : organization);
+                tableRow.appendChild(cell);
+                FOPUtils.addBorders(cell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
+                                    FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
+                FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                                    FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
-                  cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                  null == organization ? "" : organization);
-                  tableRow.appendChild(cell);
-                  FOPUtils.addBorders(cell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                                      FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
-                  FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                                      FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+                double score = rs.getDouble(4);
+                if (rs.wasNull()) {
+                  score = Double.NaN;
+                }
+                final StringBuilder scoreText = new StringBuilder();
+                if (Double.isNaN(score)) {
+                  scoreText.append("No Score");
 
-                  double score = rs.getDouble(4);
-                  if (rs.wasNull()) {
-                    score = Double.NaN;
+                } else {
+                  final boolean zeroInRequiredGoal = FinalComputedScores.checkZeroInRequiredGoal(connection, tournament,
+                                                                                                 catElement,
+                                                                                                 teamNumber);
+
+                  scoreText.append(Utilities.getFloatingPointNumberFormat().format(score));
+                  if (zeroInRequiredGoal) {
+                    scoreText.append(" @");
                   }
-                  final StringBuilder scoreText = new StringBuilder();
-                  if (Double.isNaN(score)) {
-                    scoreText.append("No Score");
+                }
 
-                  } else {
-                    final boolean zeroInRequiredGoal = FinalComputedScores.checkZeroInRequiredGoal(connection,
-                                                                                                   tournament,
-                                                                                                   catElement,
-                                                                                                   teamNumber);
+                cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, scoreText.toString());
+                tableRow.appendChild(cell);
+                FOPUtils.addBorders(cell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
+                                    FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
+                FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                                    FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
-                    scoreText.append(Utilities.getFloatingPointNumberFormat().format(score));
-                    if (zeroInRequiredGoal) {
-                      scoreText.append(" @");
-                    }
-                  }
+              } // foreach result
+            } // allocate rs
 
-                  cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, scoreText.toString());
-                  tableRow.appendChild(cell);
-                  FOPUtils.addBorders(cell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                                      FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
-                  FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
-                                      FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+            if (haveData) {
+              // only add the table if there is data
+              documentBody.appendChild(table);
+            }
 
-                } // foreach result
-              } // allocate rs
-
-              if (haveData) {
-                // only add the table if there is data
-                documentBody.appendChild(table);
-              }
-
-            } // foreach station
-          } // foreach division
-        } // foreach goal group
+          } // foreach station
+        } // foreach division
       } // allocate prep
     } // foreach category
 
@@ -307,7 +289,6 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
   private Element createTableHeader(final Document document,
                                     final String challengeTitle,
                                     final String catTitle,
-                                    final @Nullable String goalGroup,
                                     final String division,
                                     final String judgingGroup,
                                     final Tournament tournament) {
@@ -329,37 +310,10 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
     final Element row2 = FOPUtils.createTableRow(document);
     tableHeader.appendChild(row2);
 
-    if (null == goalGroup
-        || goalGroup.trim().isEmpty()) {
-      final String categoryText = String.format("Category: %s - Award Group: %s - JudgingGroup: %s", catTitle, division,
-                                                judgingGroup);
-      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, categoryText);
-    } else {
-      cell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+    final String categoryText = String.format("Category: %s - Award Group: %s - JudgingGroup: %s", catTitle, division,
+                                              judgingGroup);
+    cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, categoryText);
 
-      final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
-      cell.appendChild(container);
-      container.setAttribute("overflow", "hidden");
-      container.setAttribute("wrap-option", "no-wrap");
-
-      final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-      container.appendChild(block);
-      block.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_CENTER);
-
-      final Element inline1 = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
-      block.appendChild(inline1);
-      inline1.appendChild(document.createTextNode(String.format("Category: %s - ", catTitle)));
-
-      final Element inline2 = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
-      block.appendChild(inline2);
-      inline2.appendChild(document.createTextNode(String.format("Goal Group: %s", goalGroup)));
-      inline2.setAttribute("color", "red");
-
-      final Element inline3 = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
-      block.appendChild(inline3);
-      inline3.appendChild(document.createTextNode(String.format(" - Award Group: %s - JudgingGroup: %s", division,
-                                                                judgingGroup)));
-    }
     row2.appendChild(cell);
     cell.setAttribute("number-columns-spanned", "4");
     FOPUtils.addBorders(cell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
