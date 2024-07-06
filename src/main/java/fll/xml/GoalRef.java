@@ -130,11 +130,24 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
   }
 
   /**
-   * @param doc used to creates elements
+   * @param doc used to create elements
    * @return XML representation of this object
    */
   public Element toXml(final Document doc) {
-    final Element ele = doc.createElement(TAG_NAME);
+    return internalToXml(doc, TAG_NAME);
+  }
+
+  /**
+   * Subclasses should call this method to specify the tag for the element. The
+   * returned value can be modified to contain additional attributes and children.
+   * 
+   * @param doc used to create elements
+   * @param tagName tag for the element created
+   * @return XML reprepsentation of this object
+   */
+  protected Element internalToXml(final Document doc,
+                                  final String tagName) {
+    final Element ele = doc.createElement(tagName);
     ele.setAttribute(SCORE_TYPE_ATTRIBUTE, mScoreType.toXmlString());
     ele.setAttribute(GOAL_ATTRIBUTE, mGoalName);
     return ele;
