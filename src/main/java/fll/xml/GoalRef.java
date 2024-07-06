@@ -90,7 +90,7 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
    * @throws ScopeException if the goal cannot be found
    */
 
-  public AbstractGoal getGoal() {
+  public AbstractGoal getGoal() throws ScopeException {
     return mGoalScope.getGoal(mGoalName);
   }
 
