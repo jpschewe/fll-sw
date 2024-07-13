@@ -264,4 +264,31 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
    */
   public abstract String getName();
 
+  /**
+   * The size of the range of possible scores.
+   * This implementation does a simple computation over the
+   * {@link #getAllGoals()}, subclasses may override this if the category minimum
+   * and maximum
+   * scores are defined differently.
+   * 
+   * @return the size of the range of scores.
+   */
+  public double getScoreRangeSize() {
+    final double minimumScore = getAllGoals().stream().mapToDouble(AbstractGoal::getMinimumScore).sum();
+    final double maximumScore = getAllGoals().stream().mapToDouble(AbstractGoal::getMaximumScore).sum();
+    return maximumScore
+        - minimumScore;
+  }
+
+  /**
+   * This implementation does a simple computation over the
+   * {@link #getAllGoals()}, subclasses may override this if the category minimum
+   * score is defined differently.
+   * 
+   * @return the minimum score for the category, used for scaling scores
+   */
+  public double getMinimumScore() {
+    return getAllGoals().stream().mapToDouble(AbstractGoal::getMinimumScore).sum();
+  }
+
 }

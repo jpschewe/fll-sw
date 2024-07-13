@@ -139,6 +139,18 @@ public abstract class AbstractGoal extends GoalElement {
   public abstract double getMax();
 
   /**
+   * @return the lowest possible score for this goal
+   * @see AbstractGoal#getMin()
+   */
+  public abstract double getMinimumScore();
+
+  /**
+   * @return the lowest possible score for this goal
+   * @see #getMax()
+   */
+  public abstract double getMaximumScore();
+
+  /**
    * @return if this goal is a yes/no.
    */
   public boolean isYesNo() {

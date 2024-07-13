@@ -189,4 +189,20 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
     return goalScope;
   }
 
+  /**
+   * @return {@link Double#NaN} as the minimum score can't be computed
+   */
+  @Override
+  public double getMinimumScore() {
+    return Double.NaN;
+  }
+
+  /**
+   * @return {@link Double#NaN} as the maximum score can't be computed
+   */
+  @Override
+  public double getMaximumScore() {
+    return Double.NaN;
+  }
+
 }
