@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <fll copyright="" revision="10" revisionComment="MN Programming is overall" schemaVersion="3" title="2023 Minnesota FIRST LEGO League - MASTERPIECE" winner="HIGH">
-  <Performance minimumScore="0.00" weight="1.00">
+  <Performance minimumScore="0.00" maximumScore="550" weight="1.00">
     <goalGroup title="M00">
       <description>EQUIPMENT INSPECTION BONUS</description>
       <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m00_one_launch_area" required="false" scoreType="INTEGER" title="ALL Equipment Fits in ONE Launch area under 12&quot;"/>
