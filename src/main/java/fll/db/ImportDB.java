@@ -1507,19 +1507,12 @@ public final class ImportDB {
   }
 
   /**
-   * Add wave scaled column to subjective_computed_scores and final_scores and
-   * performance tables
+   * Add final_scale_scored column to final_scores table
    */
   private static void upgrade43To44(final Connection connection) throws SQLException {
     LOGGER.debug("Upgrading database from 43 to 44");
 
     try (Statement stmt = connection.createStatement()) {
-      if (!checkForColumnInTable(connection, "performance", "scaled_score")) {
-        stmt.executeUpdate("ALTER TABLE Performance ADD COLUMN scaled_score float DEFAULT NULL");
-      }
-      if (!checkForColumnInTable(connection, "subjective_computed_scores", "scaled_score")) {
-        stmt.executeUpdate("ALTER TABLE subjective_computed_scores ADD COLUMN scaled_score float DEFAULT NULL");
-      }
       if (!checkForColumnInTable(connection, "final_scores", "final_score_scaled")) {
         stmt.executeUpdate("ALTER TABLE final_scores ADD COLUMN final_score_scaled float DEFAULT NULL");
       }

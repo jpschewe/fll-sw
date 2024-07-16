@@ -270,10 +270,8 @@ public final class GenerateDB {
         }
         performanceColumns.append("ComputedTotal,");
         createStatement.append(" ComputedTotal float DEFAULT NULL,");
-        performanceColumns.append("StandardizedScore,");
+        performanceColumns.append("StandardizedScore"); // last column, no comma
         createStatement.append(" StandardizedScore float default NULL,");
-        performanceColumns.append("scaled_score");
-        createStatement.append(" scaled_score float default NULL,");
         createStatement.append(" CONSTRAINT "
             + tableName
             + "_pk PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
@@ -935,7 +933,6 @@ public final class GenerateDB {
       sql.append(" ,computed_total float");
       sql.append(" ,no_show BOOLEAN DEFAULT FALSE NOT NULL");
       sql.append(" ,standardized_score float");
-      sql.append(" ,scaled_score float");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT subjective_computed_scores_pk1 PRIMARY KEY (category, team_number, tournament, judge)");
         sql.append(" ,CONSTRAINT subjective_computed_scores_fk1 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");

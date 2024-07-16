@@ -89,7 +89,7 @@ public final class SummarizePhase1 {
 
       ScoreStandardization.standardizeSubjectiveScores(connection, tournamentID);
 
-      ScoreStandardization.summarizeScores(connection, tournamentID);
+      ScoreStandardization.summarizeScores(connection, challengeDescription, tournamentID);
 
       final Map<String, Set<String>> seenCategoryNames = new HashMap<>();
       final SortedMap<String, SortedSet<JudgeSummary>> summary = new TreeMap<>();

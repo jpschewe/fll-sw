@@ -19,6 +19,7 @@ import fll.db.Queries;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 
 /**
  * Does score standardization routines from the web.
@@ -32,11 +33,17 @@ public final class ScoreStandardization {
   }
 
   private static void summarizePerformanceScores(final Connection connection,
-                                                 final int tournament)
+                                                 final int tournament,
+                                                 final ChallengeDescription challengeDescription,
+                                                 final double maxScoreRangeSize)
       throws SQLException {
 
     final double mean = GlobalParameters.getStandardizedMean(connection);
     final double sigma = GlobalParameters.getStandardizedSigma(connection);
+
+    final PerformanceScoreCategory category = challengeDescription.getPerformance();
+    final double categoryMinimumScore = category.getMinimumScore();
+    final double categoryScoreRangeSize = category.getScoreRangeSize();
 
     try (PreparedStatement getParams = connection.prepareStatement("SELECT " //
         + " Avg(Score) AS sg_mean," //
@@ -69,8 +76,8 @@ public final class ScoreStandardization {
             }
 
             try (
-                PreparedStatement select = connection.prepareStatement("SELECT TeamNumber, ((Score - ?) * ?) + ? FROM performance_seeding_max WHERE performance_seeding_max.tournament = ?");
-                PreparedStatement insert = connection.prepareStatement("INSERT INTO final_scores (category, tournament, team_number, final_score) VALUES(?, ?, ?, ?)")) {
+                PreparedStatement select = connection.prepareStatement("SELECT TeamNumber, ((Score - ?) * ?) + ? as standardized, ((Score - ?) * ?) / ? as scaled FROM performance_seeding_max WHERE performance_seeding_max.tournament = ?");
+                PreparedStatement insert = connection.prepareStatement("INSERT INTO final_scores (category, tournament, team_number, final_score, final_score_scaled) VALUES(?, ?, ?, ?, ?)")) {
               insert.setString(1, PerformanceScoreCategory.CATEGORY_NAME);
               insert.setInt(2, tournament);
 
@@ -78,21 +85,30 @@ public final class ScoreStandardization {
               select.setDouble(2, sigma
                   / sgStdev);
               select.setDouble(3, mean);
-              select.setInt(4, tournament);
+
+              select.setDouble(4, categoryMinimumScore);
+              select.setDouble(5, maxScoreRangeSize);
+              select.setDouble(6, categoryScoreRangeSize);
+
+              select.setInt(7, tournament);
 
               try (ResultSet perfStdScores = select.executeQuery()) {
                 while (perfStdScores.next()) {
                   final int teamNumber = perfStdScores.getInt(1);
                   final double stdScore = perfStdScores.getDouble(2);
+                  final double scaledScore = perfStdScores.getDouble(3);
                   if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace("Team: "
                         + teamNumber
                         + " stdScore: "
-                        + stdScore);
+                        + stdScore
+                        + " scaledScore: "
+                        + scaledScore);
                   }
 
                   insert.setInt(3, teamNumber);
                   insert.setDouble(4, stdScore);
+                  insert.setDouble(5, scaledScore);
                   insert.executeUpdate();
                 } // foreach team's score
               } // select team scores
@@ -109,6 +125,8 @@ public final class ScoreStandardization {
   }
 
   private static void summarizeSubjectiveScores(final Connection connection,
+                                                final ChallengeDescription challengeDescription,
+                                                final double maxScoreRangeSize,
                                                 final int tournament)
       throws SQLException {
     // insert rows from the current tournament and category, keeping team
@@ -126,6 +144,48 @@ public final class ScoreStandardization {
       updatePrep.setInt(1, tournament);
       updatePrep.executeUpdate();
     }
+
+    // scaling of scores will need to change from an update to an insert when
+    // normalization is removed
+    try (PreparedStatement updatePrep = connection.prepareStatement("UPDATE final_scores" //
+        + " SET final_score_scaled = ((? - ?) * ?) / ? " //
+        + " WHERE category = ?"
+        + " AND tournament = ?" //
+        + " AND team_number = ?" //
+    );
+        PreparedStatement selectPrep = connection.prepareStatement("SELECT team_number, AVG(computed_total) FROM subjective_computed_scores" //
+            + " WHERE computed_total IS NOT NULL" //
+            + " AND tournament = ?" //
+            + " AND category = ?" //
+            + " GROUP BY team_number"
+        )) {
+      updatePrep.setDouble(3, maxScoreRangeSize);
+
+      for (final SubjectiveScoreCategory category : challengeDescription.getSubjectiveCategories()) {
+        final double categoryMinimumScore = category.getMinimumScore();
+        final double categoryScoreRangeSize = category.getScoreRangeSize();
+
+        selectPrep.setInt(1, tournament);
+        selectPrep.setString(2, category.getName());
+
+        updatePrep.setDouble(2, categoryMinimumScore);
+        updatePrep.setDouble(4, categoryScoreRangeSize);
+        updatePrep.setString(5, category.getName());
+        updatePrep.setInt(6, tournament);
+
+        try (ResultSet rs = selectPrep.executeQuery()) {
+          while (rs.next()) {
+            final int teamNumber = rs.getInt(1);
+            final double rawScore = rs.getDouble(2);
+
+            updatePrep.setDouble(1, rawScore);
+
+            updatePrep.setInt(7, teamNumber);
+            updatePrep.executeUpdate();
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -134,10 +194,12 @@ public final class ScoreStandardization {
    *
    * @param connection connection to the database with delete and insert
    *          privileges
+   * @param challengeDescription used to get scaling information
    * @param tournament which tournament to summarize scores for
    * @throws SQLException a database error
    */
   public static void summarizeScores(final Connection connection,
+                                     final ChallengeDescription challengeDescription,
                                      final int tournament)
       throws SQLException {
 
@@ -147,10 +209,11 @@ public final class ScoreStandardization {
       deletePrep.executeUpdate();
     }
 
-    // compute all final scores for the tournament
-    summarizePerformanceScores(connection, tournament);
+    final double maxScoreRangeSize = challengeDescription.getMaximumScoreRangeSize();
 
-    summarizeSubjectiveScores(connection, tournament);
+    summarizePerformanceScores(connection, tournament, challengeDescription, maxScoreRangeSize);
+
+    summarizeSubjectiveScores(connection, challengeDescription, maxScoreRangeSize, tournament);
   }
 
   /**
