@@ -52,12 +52,6 @@ public class StoreGlobalParameters extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
-      GlobalParameters.setDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_MEAN,
-                                                WebUtils.getDoubleRequestParameter(request, "gStandardizedMean"));
-
-      GlobalParameters.setDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_SIGMA,
-                                                WebUtils.getDoubleRequestParameter(request, "gStandardizedSigma"));
-
       GlobalParameters.setIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE,
                                              WebUtils.getIntRequestParameter(request, "gDivisionFlipRate"));
 

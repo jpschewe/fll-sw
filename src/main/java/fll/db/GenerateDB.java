@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 44;
+  public static final int DATABASE_VERSION = 43;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -665,20 +665,6 @@ public final class GenerateDB {
         }
       }
 
-      check = GlobalParameters.globalParameterExists(connection, GlobalParameters.STANDARDIZED_MEAN);
-      if (!check) {
-        globalInsert.setString(2, GlobalParameters.STANDARDIZED_MEAN);
-        globalInsert.setDouble(1, GlobalParameters.STANDARDIZED_MEAN_DEFAULT);
-        globalInsert.executeUpdate();
-      }
-
-      check = GlobalParameters.globalParameterExists(connection, GlobalParameters.STANDARDIZED_SIGMA);
-      if (!check) {
-        globalInsert.setString(2, GlobalParameters.STANDARDIZED_SIGMA);
-        globalInsert.setDouble(1, GlobalParameters.STANDARDIZED_SIGMA_DEFAULT);
-        globalInsert.executeUpdate();
-      }
-
       check = GlobalParameters.globalParameterExists(connection, GlobalParameters.DIVISION_FLIP_RATE);
       if (!check) {
         globalInsert.setString(2, GlobalParameters.DIVISION_FLIP_RATE);
@@ -932,7 +918,6 @@ public final class GenerateDB {
       sql.append(" ,judge VARCHAR(64) NOT NULL");
       sql.append(" ,computed_total float");
       sql.append(" ,no_show BOOLEAN DEFAULT FALSE NOT NULL");
-      sql.append(" ,standardized_score float");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT subjective_computed_scores_pk1 PRIMARY KEY (category, team_number, tournament, judge)");
         sql.append(" ,CONSTRAINT subjective_computed_scores_fk1 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
@@ -962,7 +947,6 @@ public final class GenerateDB {
       sql.append(" ,tournament INTEGER NOT NULL");
       sql.append(" ,team_number INTEGER NOT NULL");
       sql.append(" ,final_score float");
-      sql.append(" ,final_score_scaled float");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT final_scores_pk01 PRIMARY KEY (category, team_number, tournament)");
         sql.append(" ,CONSTRAINT final_scores_fk01 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");

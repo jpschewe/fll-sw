@@ -87,8 +87,6 @@ public final class SummarizePhase1 {
 
       Queries.updateScoreTotals(challengeDescription, connection, tournamentID);
 
-      ScoreStandardization.standardizeSubjectiveScores(connection, tournamentID);
-
       ScoreStandardization.summarizeScores(connection, challengeDescription, tournamentID);
 
       final Map<String, Set<String>> seenCategoryNames = new HashMap<>();
