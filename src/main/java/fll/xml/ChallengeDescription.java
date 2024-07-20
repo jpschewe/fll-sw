@@ -413,11 +413,11 @@ public class ChallengeDescription implements Serializable {
   }
 
   /**
-   * @return the largest score range size across all categories
-   * @see ScoreCategory#getScoreRangeSize()
+   * @return the highest maximum score all categories
+   * @see ScoreCategory#getMaximumScore()
    */
-  public double getMaximumScoreRangeSize() {
-    return Math.max(getPerformance().getScoreRangeSize(),
-                    getSubjectiveCategories().stream().mapToDouble(ScoreCategory::getScoreRangeSize).max().orElse(0D));
+  public double getMaximumScore() {
+    return Math.max(getPerformance().getMaximumScore(),
+                    getSubjectiveCategories().stream().mapToDouble(ScoreCategory::getMaximumScore).max().orElse(0D));
   }
 }

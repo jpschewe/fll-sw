@@ -42,8 +42,7 @@ public final class ScoreStandardization {
     final double sigma = GlobalParameters.getStandardizedSigma(connection);
 
     final PerformanceScoreCategory category = challengeDescription.getPerformance();
-    final double categoryMinimumScore = category.getMinimumScore();
-    final double categoryScoreRangeSize = category.getScoreRangeSize();
+    final double categoryMaximumScore = category.getMaximumScore();
 
     try (PreparedStatement getParams = connection.prepareStatement("SELECT " //
         + " Avg(Score) AS sg_mean," //
@@ -76,7 +75,7 @@ public final class ScoreStandardization {
             }
 
             try (
-                PreparedStatement select = connection.prepareStatement("SELECT TeamNumber, ((Score - ?) * ?) + ? as standardized, ((Score - ?) * ?) / ? as scaled FROM performance_seeding_max WHERE performance_seeding_max.tournament = ?");
+                PreparedStatement select = connection.prepareStatement("SELECT TeamNumber, ((Score - ?) * ?) + ? as standardized, (Score * ?) / ? as scaled FROM performance_seeding_max WHERE performance_seeding_max.tournament = ?");
                 PreparedStatement insert = connection.prepareStatement("INSERT INTO final_scores (category, tournament, team_number, final_score, final_score_scaled) VALUES(?, ?, ?, ?, ?)")) {
               insert.setString(1, PerformanceScoreCategory.CATEGORY_NAME);
               insert.setInt(2, tournament);
@@ -86,9 +85,8 @@ public final class ScoreStandardization {
                   / sgStdev);
               select.setDouble(3, mean);
 
-              select.setDouble(4, categoryMinimumScore);
-              select.setDouble(5, maxScoreRangeSize);
-              select.setDouble(6, categoryScoreRangeSize);
+              select.setDouble(4, maxScoreRangeSize);
+              select.setDouble(5, categoryMaximumScore);
 
               select.setInt(7, tournament);
 
@@ -148,7 +146,7 @@ public final class ScoreStandardization {
     // scaling of scores will need to change from an update to an insert when
     // normalization is removed
     try (PreparedStatement updatePrep = connection.prepareStatement("UPDATE final_scores" //
-        + " SET final_score_scaled = ((? - ?) * ?) / ? " //
+        + " SET final_score_scaled = (? * ?) / ? " //
         + " WHERE category = ?"
         + " AND tournament = ?" //
         + " AND team_number = ?" //
@@ -157,21 +155,18 @@ public final class ScoreStandardization {
             + " WHERE computed_total IS NOT NULL" //
             + " AND tournament = ?" //
             + " AND category = ?" //
-            + " GROUP BY team_number"
-        )) {
-      updatePrep.setDouble(3, maxScoreRangeSize);
+            + " GROUP BY team_number")) {
+      updatePrep.setDouble(2, maxScoreRangeSize);
 
       for (final SubjectiveScoreCategory category : challengeDescription.getSubjectiveCategories()) {
-        final double categoryMinimumScore = category.getMinimumScore();
-        final double categoryScoreRangeSize = category.getScoreRangeSize();
+        final double categoryMaximumScore = category.getMaximumScore();
 
         selectPrep.setInt(1, tournament);
         selectPrep.setString(2, category.getName());
 
-        updatePrep.setDouble(2, categoryMinimumScore);
-        updatePrep.setDouble(4, categoryScoreRangeSize);
-        updatePrep.setString(5, category.getName());
-        updatePrep.setInt(6, tournament);
+        updatePrep.setDouble(3, categoryMaximumScore);
+        updatePrep.setString(4, category.getName());
+        updatePrep.setInt(5, tournament);
 
         try (ResultSet rs = selectPrep.executeQuery()) {
           while (rs.next()) {
@@ -180,7 +175,7 @@ public final class ScoreStandardization {
 
             updatePrep.setDouble(1, rawScore);
 
-            updatePrep.setInt(7, teamNumber);
+            updatePrep.setInt(6, teamNumber);
             updatePrep.executeUpdate();
           }
         }
@@ -209,7 +204,7 @@ public final class ScoreStandardization {
       deletePrep.executeUpdate();
     }
 
-    final double maxScoreRangeSize = challengeDescription.getMaximumScoreRangeSize();
+    final double maxScoreRangeSize = challengeDescription.getMaximumScore();
 
     summarizePerformanceScores(connection, tournament, challengeDescription, maxScoreRangeSize);
 

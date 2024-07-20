@@ -255,22 +255,6 @@ public class Goal extends AbstractGoal {
   }
 
   /**
-   * This is different than {@link #getMin()} as it takes the
-   * {@link #getMultiplier()} into account and as well as the enumerated values.
-   * 
-   * @return the lowest possible score for this goal
-   */
-  @Override
-  public double getMinimumScore() {
-    if (isEnumerated()) {
-      return getValues().stream().mapToDouble(EnumeratedValue::getScore).min().orElse(0D);
-    } else {
-      return getMin()
-          * getMultiplier();
-    }
-  }
-
-  /**
    * This is different than {@link #getMax()} as it takes the
    * {@link #getMultiplier()} into account and as well as the enumerated values.
    * 

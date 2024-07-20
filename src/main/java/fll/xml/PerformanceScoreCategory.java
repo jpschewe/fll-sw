@@ -207,7 +207,6 @@ public class PerformanceScoreCategory extends ScoreCategory implements AwardCate
   /**
    * @return the minimum score to store
    */
-  @Override
   public double getMinimumScore() {
     return mMinimumScore;
   }
@@ -233,12 +232,6 @@ public class PerformanceScoreCategory extends ScoreCategory implements AwardCate
    */
   public void setMaximumScore(final double v) {
     mMaximumScore = v;
-  }
-
-  @Override
-  public double getScoreRangeSize() {
-    return getMaximumScore()
-        - getMinimumScore();
   }
 
   @Override
