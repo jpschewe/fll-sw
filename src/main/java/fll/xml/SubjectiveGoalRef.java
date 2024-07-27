@@ -6,6 +6,7 @@
 
 package fll.xml;
 
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -27,7 +28,7 @@ public class SubjectiveGoalRef extends GoalRef {
    * @param scope {@link #getCategory()}
    */
   public SubjectiveGoalRef(final Element ele,
-                           @UnknownInitialization final SubjectiveScoreCategory scope) {
+                           final @UnknownInitialization SubjectiveScoreCategory scope) {
     super(ele, scope);
     this.category = scope;
   }
@@ -38,13 +39,13 @@ public class SubjectiveGoalRef extends GoalRef {
    * @param scoreType {@Link #getScoreType()}
    */
   public SubjectiveGoalRef(final String goalName,
-                           @UnknownInitialization final SubjectiveScoreCategory scope,
+                           final @UnknownInitialization SubjectiveScoreCategory scope,
                            final GoalScoreType scoreType) {
     super(goalName, scope, scoreType);
     this.category = scope;
   }
 
-  private final SubjectiveScoreCategory category;
+  private final @NotOnlyInitialized SubjectiveScoreCategory category;
 
   /**
    * @return the subjective category the goal is in

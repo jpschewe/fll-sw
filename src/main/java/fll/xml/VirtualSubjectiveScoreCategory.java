@@ -17,7 +17,6 @@ import org.w3c.dom.Element;
 import fll.Utilities;
 import fll.web.playoff.TeamScore;
 import fll.web.report.awards.AwardCategory;
-import fll.xml.SubjectiveScoreCategory.Nominates;
 
 /**
  * A category made up of goals from other categories.
@@ -34,13 +33,22 @@ public class VirtualSubjectiveScoreCategory implements Serializable, Evaluatable
    */
   public VirtualSubjectiveScoreCategory(final Element ele) {
     weight = Double.parseDouble(ele.getAttribute(ScoreCategory.WEIGHT_ATTRIBUTE));
+    name = ele.getAttribute(SubjectiveScoreCategory.NAME_ATTRIBUTE);
+    title = ele.getAttribute(SubjectiveScoreCategory.TITLE_ATTRIBUTE);
+
   }
 
   /**
    * Creates a category with no {@link SubjectiveGoalRef}s and a weight of 1.
+   * 
+   * @param name see {@link #getName()}
+   * @param title see {@link #getTitle()}
    */
-  public VirtualSubjectiveScoreCategory() {
+  public VirtualSubjectiveScoreCategory(final String name,
+                                        final String title) {
     weight = 1;
+    this.name = name;
+    this.title = title;
   }
 
   @Override
@@ -68,7 +76,9 @@ public class VirtualSubjectiveScoreCategory implements Serializable, Evaluatable
 
   private String name;
 
-  @Override
+  /**
+   * @return the internal name of the category, used in the database
+   */
   public String getName() {
     return name;
   }
@@ -106,6 +116,19 @@ public class VirtualSubjectiveScoreCategory implements Serializable, Evaluatable
    */
   public double getWeight() {
     return weight;
+  }
+
+  /**
+   * The maximum score for the category.
+   * This implementation does a simple computation over
+   * {@link #getGoalReferences()}.
+   * 
+   * @return The maximum score
+   */
+  public double getMaximumScore() {
+    final double maximumScore = getGoalReferences().stream().map(GoalRef::getGoal)
+                                                   .mapToDouble(AbstractGoal::getMaximumScore).sum();
+    return maximumScore;
   }
 
   /**
