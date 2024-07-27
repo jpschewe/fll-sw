@@ -55,7 +55,7 @@ public class PerformanceEditor extends ScoreCategoryEditor {
       final Number value = (Number) maximumScore.getValue();
       if (null != value) {
         final double newMaximumScore = value.doubleValue();
-        category.setWeight(newMaximumScore);
+        category.setMaximumScore(newMaximumScore);
       }
     });
 

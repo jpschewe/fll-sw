@@ -256,6 +256,7 @@ public class PerformanceScoreCategory extends ScoreCategory implements AwardCate
     populateXml(doc, ele);
 
     ele.setAttribute(MINIMUM_SCORE_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mMinimumScore));
+    ele.setAttribute(MAXIMUM_SCORE_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mMaximumScore));
 
     for (final Restriction restrict : mRestrictions) {
       final Element restrictEle = restrict.toXml(doc);
