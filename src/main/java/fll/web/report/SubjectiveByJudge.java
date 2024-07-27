@@ -199,7 +199,7 @@ public class SubjectiveByJudge extends BaseFLLServlet {
     final Map<TournamentTeam, Map<SubjectiveScoreCategory, Map<String, Data>>> result = new HashMap<>();
 
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT category, team_number, judge, computed_total, no_show, standardized_score"
+        PreparedStatement prep = connection.prepareStatement("SELECT category, team_number, judge, computed_total, no_show"
             + " FROM subjective_computed_scores"
             + " WHERE tournament = ? "
             + " AND category = ?"
@@ -236,15 +236,12 @@ public class SubjectiveByJudge extends BaseFLLServlet {
                 }
 
                 rankData.rank = rank;
-                final double scaled = rs.getDouble("standardized_score");
                 rankData.rawScore = Utilities.getFormatForScoreType(category.getScoreType()).format(raw);
-                rankData.scaledScore = Utilities.getFloatingPointNumberFormat().format(scaled);
 
                 prevScore = raw;
               } else {
                 rankData.rank = rank;
                 rankData.rawScore = "No Show";
-                rankData.scaledScore = "No Show";
               }
 
               final TournamentTeam team = teams.get(teamNum);
@@ -350,7 +347,7 @@ public class SubjectiveByJudge extends BaseFLLServlet {
 
           final String text;
           if (null != rankData) {
-            text = String.format("%d - %s / %s", rankData.rank, rankData.rawScore, rankData.scaledScore);
+            text = String.format("%d - %s", rankData.rank, rankData.rawScore);
           } else {
             text = String.valueOf(Utilities.NON_BREAKING_SPACE);
           }
@@ -369,8 +366,6 @@ public class SubjectiveByJudge extends BaseFLLServlet {
     int rank = -1;
 
     String rawScore = "";
-
-    String scaledScore = "";
   }
   // CHECKSTYLE:ON
 

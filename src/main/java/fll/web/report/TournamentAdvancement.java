@@ -285,9 +285,7 @@ public class TournamentAdvancement extends BaseFLLServlet {
 
     Queries.updateScoreTotals(description, connection, tournament.getTournamentID());
 
-    ScoreStandardization.standardizeSubjectiveScores(connection, tournament.getTournamentID());
-
-    ScoreStandardization.summarizeScores(connection, tournament.getTournamentID());
+    ScoreStandardization.summarizeScores(connection, description, tournament.getTournamentID());
 
     ScoreStandardization.updateTeamTotalScores(connection, description, tournament.getTournamentID());
 

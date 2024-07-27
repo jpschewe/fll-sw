@@ -39,7 +39,6 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
-import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
@@ -185,9 +184,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
         performanceHurdle = 0;
       }
 
-      final double standardMean = GlobalParameters.getStandardizedMean(connection);
-      final double standardSigma = GlobalParameters.getStandardizedSigma(connection);
-
       final Set<Integer> bestTeams = determineTeamsMeetingPerformanceHurdle(performanceHurdle, connection, tournamentID,
                                                                             challengeDescription.getWinner());
 
@@ -199,8 +195,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
       try {
         final Document document = generateReport(connection, challengeDescription, challengeTitle, tournament,
-                                                 bestTeams, percentageHurdle, standardMean, standardSigma, groupName,
-                                                 selector);
+                                                 bestTeams, percentageHurdle, groupName, selector);
         final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
         FOPUtils.renderPdf(fopFactory, document, response.getOutputStream());
       } catch (FOPException | TransformerException e) {
@@ -286,8 +281,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                   final Tournament tournament,
                                   final Set<Integer> bestTeams,
                                   final int percentageHurdle,
-                                  final double standardMean,
-                                  final double standardSigma,
                                   final String groupName,
                                   final ReportSelector selector)
       throws SQLException, IOException {
@@ -311,7 +304,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                                FOOTER_MARGIN_INCHES);
     layoutMasterSet.appendChild(pageMaster);
 
-    final Element legend = createLegend(document, percentageHurdle, standardMean, standardSigma);
+    final Element legend = createLegend(document, percentageHurdle);
 
     if (ALL_GROUP_NAME.equals(groupName)) {
       final Collection<String> groups;
@@ -398,9 +391,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
   }
 
   private Element createLegend(Document document,
-                               final int percentageHurdle,
-                               final double standardMean,
-                               final double standardSigma) {
+                               final int percentageHurdle) {
     final Element staticContent = FOPUtils.createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
     staticContent.setAttribute("flow-name", "xsl-region-after");
 
@@ -418,11 +409,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
     final Element block1 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     staticContent.appendChild(block1);
     block1.appendChild(document.createTextNode("bold score - top team in a category & judging group (rank)"));
-
-    final Element block2 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    staticContent.appendChild(block2);
-    block2.appendChild(document.createTextNode(String.format("%.2f == average ; %.2f = 1 standard deviation",
-                                                             standardMean, standardSigma)));
 
     final Element block3 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     staticContent.appendChild(block3);

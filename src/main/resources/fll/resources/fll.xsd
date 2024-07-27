@@ -187,6 +187,16 @@
                 </xsd:annotation>
             </xsd:attribute>
 
+            <xsd:attribute name="maximumScore"
+                type="xsd:decimal" default="600">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Maximum possible score, used for scaling of scores.
+                        The default value is for handling old challenge descriptions and should be set for all challenge descriptions.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+
             <xsd:attribute name="weight" type="xsd:float"
                 default="1.0">
                 <xsd:annotation>

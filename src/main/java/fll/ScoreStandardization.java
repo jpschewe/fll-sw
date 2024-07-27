@@ -14,11 +14,11 @@ import java.util.Map;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
-import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 
 /**
  * Does score standardization routines from the web.
@@ -32,99 +32,80 @@ public final class ScoreStandardization {
   }
 
   private static void summarizePerformanceScores(final Connection connection,
-                                                 final int tournament)
+                                                 final int tournament,
+                                                 final ChallengeDescription challengeDescription,
+                                                 final double maximumScore)
       throws SQLException {
 
-    final double mean = GlobalParameters.getStandardizedMean(connection);
-    final double sigma = GlobalParameters.getStandardizedSigma(connection);
+    final PerformanceScoreCategory category = challengeDescription.getPerformance();
+    final double categoryMaximumScore = category.getMaximumScore();
 
-    try (PreparedStatement getParams = connection.prepareStatement("SELECT " //
-        + " Avg(Score) AS sg_mean," //
-        + " Count(Score) AS sg_count," //
-        + " stddev_pop(Score) AS sg_stdev" //
-        + " FROM performance_seeding_max" //
-        + " WHERE performance_seeding_max.tournament = ?")) {
-      getParams.setInt(1, tournament);
+    try (
+        PreparedStatement select = connection.prepareStatement("SELECT TeamNumber, Score FROM performance_seeding_max WHERE performance_seeding_max.tournament = ?");
+        PreparedStatement insert = connection.prepareStatement("INSERT INTO final_scores (category, tournament, team_number, final_score) VALUES(?, ?, ?, ?)")) {
+      insert.setString(1, PerformanceScoreCategory.CATEGORY_NAME);
+      insert.setInt(2, tournament);
 
-      try (ResultSet params = getParams.executeQuery()) {
-        if (params.next()) {
-          final int sgCount = params.getInt(2);
+      select.setInt(1, tournament);
+      try (ResultSet perfScores = select.executeQuery()) {
+        while (perfScores.next()) {
+          final int teamNumber = perfScores.getInt(1);
+          final double rawScore = perfScores.getDouble(2);
           if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("sgCount: "
-                + sgCount);
+            LOGGER.trace("Team: "
+                + teamNumber
+                + " rawScore: "
+                + rawScore);
           }
 
-          if (0 == sgCount) {
-            // nothing to do
-            LOGGER.error("sgCount is 0, cannot summarize scores");
-            return;
-          } else if (sgCount > 1) {
-            final double sgMean = params.getDouble(1);
-            final double sgStdev = params.getDouble(3);
-            if (LOGGER.isTraceEnabled()) {
-              LOGGER.trace("sgMean: "
-                  + sgMean
-                  + " sgStdev: "
-                  + sgStdev);
-            }
+          final double scaledScore = (rawScore
+              * maximumScore)
+              / categoryMaximumScore;
 
-            try (
-                PreparedStatement select = connection.prepareStatement("SELECT TeamNumber, ((Score - ?) * ?) + ? FROM performance_seeding_max WHERE performance_seeding_max.tournament = ?");
-                PreparedStatement insert = connection.prepareStatement("INSERT INTO final_scores (category, tournament, team_number, final_score) VALUES(?, ?, ?, ?)")) {
-              insert.setString(1, PerformanceScoreCategory.CATEGORY_NAME);
-              insert.setInt(2, tournament);
-
-              select.setDouble(1, sgMean);
-              select.setDouble(2, sigma
-                  / sgStdev);
-              select.setDouble(3, mean);
-              select.setInt(4, tournament);
-
-              try (ResultSet perfStdScores = select.executeQuery()) {
-                while (perfStdScores.next()) {
-                  final int teamNumber = perfStdScores.getInt(1);
-                  final double stdScore = perfStdScores.getDouble(2);
-                  if (LOGGER.isTraceEnabled()) {
-                    LOGGER.trace("Team: "
-                        + teamNumber
-                        + " stdScore: "
-                        + stdScore);
-                  }
-
-                  insert.setInt(3, teamNumber);
-                  insert.setDouble(4, stdScore);
-                  insert.executeUpdate();
-                } // foreach team's score
-              } // select team scores
-            } // allocate statements
-          } else {
-            LOGGER.error("Not enough scores for in category: Performance. Tournament: {}", tournament);
-          } // sgCount
-        } else {
-          LOGGER.error("No performances score for standardization. Tournament: {}", tournament);
-          return;
-        } // params check
-      } // select params
-    } // allocate params stmt
+          insert.setInt(3, teamNumber);
+          insert.setDouble(4, scaledScore);
+          insert.executeUpdate();
+        } // foreach team's score
+      } // select team scores
+    } // allocate statements
   }
 
   private static void summarizeSubjectiveScores(final Connection connection,
+                                                final ChallengeDescription challengeDescription,
+                                                final double maximumScore,
                                                 final int tournament)
       throws SQLException {
-    // insert rows from the current tournament and category, keeping team
-    // number and score group as well as computing the average (across
-    // judges)
-    try (PreparedStatement updatePrep = connection.prepareStatement("INSERT INTO final_scores" //
-        + " (category, tournament, team_number, final_score)"
-        + " ( SELECT " //
-        + "   category, tournament, team_number, Avg(standardized_score)" //
-        + "   FROM subjective_computed_scores"
-        + "   WHERE standardized_score IS NOT NULL" //
-        + "     AND tournament = ?" //
-        + "   GROUP BY category, tournament, team_number)" //
-    )) {
-      updatePrep.setInt(1, tournament);
-      updatePrep.executeUpdate();
+    try (
+        PreparedStatement updatePrep = connection.prepareStatement("INSERT INTO final_scores (category, tournament, team_number, final_score) VALUES(?, ?, ?, ?)");
+        PreparedStatement selectPrep = connection.prepareStatement("SELECT team_number, AVG(computed_total) FROM subjective_computed_scores" //
+            + " WHERE computed_total IS NOT NULL" //
+            + " AND tournament = ?" //
+            + " AND category = ?" //
+            + " GROUP BY team_number")) {
+      updatePrep.setInt(2, tournament);
+
+      for (final SubjectiveScoreCategory category : challengeDescription.getSubjectiveCategories()) {
+        final double categoryMaximumScore = category.getMaximumScore();
+
+        selectPrep.setInt(1, tournament);
+        selectPrep.setString(2, category.getName());
+
+        updatePrep.setString(1, category.getName());
+
+        try (ResultSet rs = selectPrep.executeQuery()) {
+          while (rs.next()) {
+            final int teamNumber = rs.getInt(1);
+            final double rawScore = rs.getDouble(2);
+
+            final double scaledScore = (rawScore
+                * maximumScore)
+                / categoryMaximumScore;
+            updatePrep.setInt(3, teamNumber);
+            updatePrep.setDouble(4, scaledScore);
+            updatePrep.executeUpdate();
+          }
+        }
+      }
     }
   }
 
@@ -134,10 +115,12 @@ public final class ScoreStandardization {
    *
    * @param connection connection to the database with delete and insert
    *          privileges
+   * @param challengeDescription used to get scaling information
    * @param tournament which tournament to summarize scores for
    * @throws SQLException a database error
    */
   public static void summarizeScores(final Connection connection,
+                                     final ChallengeDescription challengeDescription,
                                      final int tournament)
       throws SQLException {
 
@@ -147,85 +130,11 @@ public final class ScoreStandardization {
       deletePrep.executeUpdate();
     }
 
-    // compute all final scores for the tournament
-    summarizePerformanceScores(connection, tournament);
+    final double maxScoreRangeSize = challengeDescription.getMaximumScore();
 
-    summarizeSubjectiveScores(connection, tournament);
-  }
+    summarizePerformanceScores(connection, tournament, challengeDescription, maxScoreRangeSize);
 
-  /**
-   * Populate the standardized_score column of subjective_computed_scores.
-   * 
-   * @param connection database connection
-   * @param tournament ID of tournament to work on
-   * @throws SQLException on a database error
-   */
-  public static void standardizeSubjectiveScores(final Connection connection,
-                                                 final int tournament)
-      throws SQLException {
-    final double mean = GlobalParameters.getStandardizedMean(connection);
-    final double sigma = GlobalParameters.getStandardizedSigma(connection);
-
-    try (PreparedStatement selectPrep = connection.prepareStatement("SELECT category, judge," //
-        + " Avg(computed_total) AS sg_mean," //
-        + " Count(computed_total) AS sg_count," //
-        + " stddev_pop(computed_total) AS sg_stdev" //
-        + " FROM subjective_computed_scores" //
-        + " WHERE tournament = ?" //
-        + "   AND computed_total IS NOT NULL" //
-        + "   AND no_show = false"//
-        + " GROUP BY category, judge" //
-    );
-        /*
-         * Update StandardizedScore for each team in the ScoreGroup formula:
-         *
-         * SS = ( ( ComputedTotal - sgMean ) * ( sigma / sgStdev ) ) + mean
-         *
-         * sgMean = average(all scores from judge)
-         * sgStdev = stdev(all scores from judge)
-         */
-        // 1 - sg_mean
-        // 2 - sigma / stStdev
-        // 3 - mean
-        // 4 - judge
-        // 5 - tournament
-        // 6 - category
-        // 7 - goal group
-        PreparedStatement updatePrep = connection.prepareStatement("UPDATE subjective_computed_scores " //
-            + " SET standardized_score = ((computed_total - ?) * ? ) + ?"
-            + " WHERE judge = ?" //
-            + " AND tournament = ?" //
-            + " AND category = ?" //
-        )) {
-      selectPrep.setInt(1, tournament);
-
-      updatePrep.setDouble(3, mean);
-      updatePrep.setInt(5, tournament);
-
-      try (ResultSet rs = selectPrep.executeQuery()) {
-        while (rs.next()) {
-          final String category = rs.getString(1);
-          final String judge = rs.getString(2);
-
-          final int sgCount = rs.getInt(4);
-
-          if (sgCount > 1) {
-            final double sgMean = rs.getDouble(3);
-            final double sgStdev = rs.getDouble(5);
-
-            updatePrep.setDouble(1, sgMean);
-            updatePrep.setDouble(2, sigma
-                / sgStdev);
-            updatePrep.setString(4, judge);
-            updatePrep.setString(6, category);
-            updatePrep.executeUpdate();
-          } else { // if(sgCount == 1) {
-            LOGGER.error("Not enough scores for Judge: {} in category: {} goal group: {}", judge, category);
-          } // ignore 0 in a judging group
-
-        } // foreach result
-      } // result set
-    } // prepared statements
+    summarizeSubjectiveScores(connection, challengeDescription, maxScoreRangeSize, tournament);
   }
 
   /**
