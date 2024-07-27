@@ -264,4 +264,17 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
    */
   public abstract String getName();
 
+  /**
+   * The maximum score for the category.
+   * This implementation does a simple computation over the
+   * {@link #getAllGoals()}, subclasses may override this if the category maximum
+   * score is defined differently.
+   * 
+   * @return The maximum score
+   */
+  public double getMaximumScore() {
+    final double maximumScore = getAllGoals().stream().mapToDouble(AbstractGoal::getMaximumScore).sum();
+    return maximumScore;
+  }
+
 }

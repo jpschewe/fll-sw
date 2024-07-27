@@ -31,26 +31,6 @@ public final class GlobalParameters {
   public static final String CURRENT_TOURNAMENT = "CurrentTournament";
 
   /**
-   * Parameter name for {@link #getStandardizedMean(Connection)}.
-   */
-  public static final String STANDARDIZED_MEAN = "StandardizedMean";
-
-  /**
-   * Default value for {@link #getStandardizedMean(Connection)}.
-   */
-  public static final double STANDARDIZED_MEAN_DEFAULT = 100;
-
-  /**
-   * Parameter name for {@link #getStandardizedSigma(Connection)}.
-   */
-  public static final String STANDARDIZED_SIGMA = "StandardizedSigma";
-
-  /**
-   * Default value for {@link #getStandardizedSigma(Connection)}.
-   */
-  public static final double STANDARDIZED_SIGMA_DEFAULT = 20;
-
-  /**
    * Parameter name for {@link #getChallengeDescription(Connection)}.
    */
   public static final String CHALLENGE_DOCUMENT = "ChallengeDocument";
@@ -394,34 +374,6 @@ public final class GlobalParameters {
       prep.setString(2, paramName);
       prep.executeUpdate();
     }
-  }
-
-  /**
-   * Get the standardized mean used for normalization. All scores are normalized
-   * such that the mean of the scores is this value.
-   *
-   * @param connection the database connection
-   * @return the value (should be greater than 0)
-   * @throws SQLException if there is an error talking to the database
-   * @see #STANDARDIZED_MEAN
-   * @see #STANDARDIZED_MEAN_DEFAULT
-   */
-  public static double getStandardizedMean(final Connection connection) throws SQLException {
-    return getDoubleGlobalParameter(connection, STANDARDIZED_MEAN);
-  }
-
-  /**
-   * Get the standardized sigma. During normalization this value specifies how the
-   * number of points for 1 standard deviation from the mean.
-   *
-   * @param connection the database connection
-   * @return the value (should be greater than 0)
-   * @throws SQLException if there is an error talking to the database
-   * @see #STANDARDIZED_SIGMA
-   * @see #STANDARDIZED_SIGMA_DEFAULT
-   */
-  public static double getStandardizedSigma(final Connection connection) throws SQLException {
-    return getDoubleGlobalParameter(connection, STANDARDIZED_SIGMA);
   }
 
   /**

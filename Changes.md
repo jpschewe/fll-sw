@@ -1,3 +1,4 @@
+* #1200 - Remove normalization in favor of scaling
 * Remove goal group from category scores by judging group report
 * #1131 - Add schedule constraint for time between subjective events separate from the time between subjective and performance events
 * #1190 - Fix support for subjective judging without a schedule

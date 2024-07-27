@@ -746,8 +746,8 @@ public class FullTournamentTest {
         + " ORDER BY overall_scores.overall_score DESC";
 
     // division 1
-    final int[] division1ExpectedRank = { 2636, 3127, 3439, 4462, 3125, 2116, 2104, 2113 };
-    final double[] division1ExpectedScores = { 472.76, 423.58, 411.04, 378.04, 374.86, 346.63, 325.95, 310.61 };
+    final int[] division1ExpectedRank = { 2636, 3127, 3439, 3125, 4462, 2116, 2104, 2113 };
+    final double[] division1ExpectedScores = { 824, 776, 744, 671, 653, 618, 570, 518 };
     String division = "DivI/Gr4-6";
 
     final String div1Query = String.format(sqlTemplate, testTournamentName, division);
@@ -771,8 +771,8 @@ public class FullTournamentTest {
     }
 
     // division 2
-    final int[] division2ExpectedRank = { 3208, 3061, 2863, 2110, 3063, 353, 3129, 2043 };
-    final double[] division2ExpectedScores = { 546.78, 512.05, 426.02, 410.23, 407.15, 355.42, 350.14, 348.75 };
+    final int[] division2ExpectedRank = { 3208, 3061, 2863, 3063, 2110, 2043, 353, 3129 };
+    final double[] division2ExpectedScores = { 1078, 948, 787, 780, 691, 655, 645, 613 };
     division = "DivII/Gr7-9";
 
     final String div2Query = String.format(sqlTemplate, testTournamentName, division);

@@ -68,14 +68,6 @@ public final class GatherParameterInformation {
       }
       pageContext.setAttribute("performanceAdvancementPercentage", performanceAdvancementPercentage);
 
-      pageContext.setAttribute("gStandardizedMean",
-                               GlobalParameters.getDoubleGlobalParameter(connection,
-                                                                         GlobalParameters.STANDARDIZED_MEAN));
-
-      pageContext.setAttribute("gStandardizedSigma",
-                               GlobalParameters.getDoubleGlobalParameter(connection,
-                                                                         GlobalParameters.STANDARDIZED_SIGMA));
-
       pageContext.setAttribute("gDivisionFlipRate",
                                GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
 

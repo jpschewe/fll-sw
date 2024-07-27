@@ -254,6 +254,22 @@ public class Goal extends AbstractGoal {
     mMax = v;
   }
 
+  /**
+   * This is different than {@link #getMax()} as it takes the
+   * {@link #getMultiplier()} into account and as well as the enumerated values.
+   * 
+   * @return the lowest possible score for this goal
+   */
+  @Override
+  public double getMaximumScore() {
+    if (isEnumerated()) {
+      return getValues().stream().mapToDouble(EnumeratedValue::getScore).max().orElse(0D);
+    } else {
+      return getMax()
+          * getMultiplier();
+    }
+  }
+
   private double mMultiplier;
 
   /**

@@ -58,6 +58,8 @@ public class PerformanceScoreCategory extends ScoreCategory implements AwardCate
 
   private static final String MINIMUM_SCORE_ATTRIBUTE = "minimumScore";
 
+  private static final String MAXIMUM_SCORE_ATTRIBUTE = "maximumScore";
+
   /**
    * @param ele the element to parse
    */
@@ -65,6 +67,7 @@ public class PerformanceScoreCategory extends ScoreCategory implements AwardCate
     super(ele);
 
     mMinimumScore = Double.parseDouble(ele.getAttribute(MINIMUM_SCORE_ATTRIBUTE));
+    mMaximumScore = Double.parseDouble(ele.getAttribute(MAXIMUM_SCORE_ATTRIBUTE));
 
     mRestrictions = new LinkedList<>();
     for (final Element restrictEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(Restriction.TAG_NAME))) {
@@ -213,6 +216,22 @@ public class PerformanceScoreCategory extends ScoreCategory implements AwardCate
    */
   public void setMinimumScore(final double v) {
     mMinimumScore = v;
+  }
+
+  private double mMaximumScore;
+
+  /**
+   * @return the maximum possible performance score
+   */
+  public double getMaximumScore() {
+    return mMaximumScore;
+  }
+
+  /**
+   * @param v {@link #getMaximumScore()}
+   */
+  public void setMaximumScore(final double v) {
+    mMaximumScore = v;
   }
 
   @Override

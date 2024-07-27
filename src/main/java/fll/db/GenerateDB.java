@@ -270,7 +270,7 @@ public final class GenerateDB {
         }
         performanceColumns.append("ComputedTotal,");
         createStatement.append(" ComputedTotal float DEFAULT NULL,");
-        performanceColumns.append("StandardizedScore");
+        performanceColumns.append("StandardizedScore"); // last column, no comma
         createStatement.append(" StandardizedScore float default NULL,");
         createStatement.append(" CONSTRAINT "
             + tableName
@@ -665,20 +665,6 @@ public final class GenerateDB {
         }
       }
 
-      check = GlobalParameters.globalParameterExists(connection, GlobalParameters.STANDARDIZED_MEAN);
-      if (!check) {
-        globalInsert.setString(2, GlobalParameters.STANDARDIZED_MEAN);
-        globalInsert.setDouble(1, GlobalParameters.STANDARDIZED_MEAN_DEFAULT);
-        globalInsert.executeUpdate();
-      }
-
-      check = GlobalParameters.globalParameterExists(connection, GlobalParameters.STANDARDIZED_SIGMA);
-      if (!check) {
-        globalInsert.setString(2, GlobalParameters.STANDARDIZED_SIGMA);
-        globalInsert.setDouble(1, GlobalParameters.STANDARDIZED_SIGMA_DEFAULT);
-        globalInsert.executeUpdate();
-      }
-
       check = GlobalParameters.globalParameterExists(connection, GlobalParameters.DIVISION_FLIP_RATE);
       if (!check) {
         globalInsert.setString(2, GlobalParameters.DIVISION_FLIP_RATE);
@@ -932,7 +918,6 @@ public final class GenerateDB {
       sql.append(" ,judge VARCHAR(64) NOT NULL");
       sql.append(" ,computed_total float");
       sql.append(" ,no_show BOOLEAN DEFAULT FALSE NOT NULL");
-      sql.append(" ,standardized_score float");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT subjective_computed_scores_pk1 PRIMARY KEY (category, team_number, tournament, judge)");
         sql.append(" ,CONSTRAINT subjective_computed_scores_fk1 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");

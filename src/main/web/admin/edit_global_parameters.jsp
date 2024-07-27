@@ -70,47 +70,6 @@ GatherParameterInformation.populateContext(application, pageContext);
 
                 <tr>
                     <th>
-                        Standardized Mean <a
-                            href='javascript:display("StandardizedMeanHelp")'>[help]</a>
-                        <div id='StandardizedMeanHelp' class='help'
-                            style='display: none'>
-                            The mean that we scale the raw mean of all
-                            scores in a category for a judge to. <a
-                                href='javascript:hide("StandardizedMeanHelp")'>[hide]</a>
-                        </div>
-
-                    </th>
-                    <td>
-                        <input type='number'
-                            value="${gStandardizedMean }"
-                            id='gStandardizedMean'
-                            name='gStandardizedMean' step='any' required />
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>
-                        Standardized Sigma <a
-                            href='javascript:display("StandardizedSigmaHelp")'>[help]</a>
-                        <div id='StandardizedSigmaHelp' class='help'
-                            style='display: none'>
-                            The sigma to use when scaling scores for
-                            comparison. <a
-                                href='javascript:hide("StandardizedSigmaHelp")'>[hide]</a>
-                        </div>
-
-                    </th>
-                    <td>
-                        <input type='number'
-                            value="${gStandardizedSigma }"
-                            id='gStandardizedSigma'
-                            name='gStandardizedSigma' step='any'
-                            required />
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>
                         Award Group Flip Rate (seconds) <a
                             href='javascript:display("DivisionFlipRateHelp")'>[help]</a>
                         <div id='DivisionFlipRateHelp' class='help'
