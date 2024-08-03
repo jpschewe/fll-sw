@@ -6,6 +6,9 @@
 
 package fll.xml;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
@@ -24,13 +27,39 @@ public class SubjectiveGoalRef extends GoalRef {
   private static final String CATEGORY_NAME_ATTRIBUTE = "categoryName";
 
   /**
+   * Determine the subjective category that is referenced
+   */
+  private static SubjectiveScoreCategory findCategory(final Element element,
+                                                      final List<SubjectiveScoreCategory> subjectiveCategories)
+      throws ChallengeValidationException {
+    final String categoryName = element.getAttribute(CATEGORY_NAME_ATTRIBUTE);
+    final Optional<SubjectiveScoreCategory> category = subjectiveCategories.stream()
+                                                                           .filter(c -> categoryName.equals(c.getName()))
+                                                                           .findAny();
+    if (category.isEmpty()) {
+      throw new ChallengeValidationException(String.format("Unable to find subjective category with name '%s' referenced in virtual subjective category",
+                                                           categoryName));
+    }
+    return category.get();
+  }
+
+  /**
    * @param ele the XML element to parse to find the reference information
-   * @param scope {@link #getCategory()}
+   * @param subjectiveCategories list of the subjective categories, this is used
+   *          to find the category to use as the scope for the goal references
+   * @throws ChallengeValidationException if the referenced subjective category
+   *           cannot be found
    */
   public SubjectiveGoalRef(final Element ele,
-                           final @UnknownInitialization SubjectiveScoreCategory scope) {
-    super(ele, scope);
-    this.category = scope;
+                           final List<SubjectiveScoreCategory> subjectiveCategories)
+      throws ChallengeValidationException {
+    this(ele, findCategory(ele, subjectiveCategories));
+  }
+
+  private SubjectiveGoalRef(final Element ele,
+                            final SubjectiveScoreCategory category) {
+    super(ele, category);
+    this.category = category;
   }
 
   /**

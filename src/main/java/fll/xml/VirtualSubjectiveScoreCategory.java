@@ -11,12 +11,14 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.web.playoff.TeamScore;
 import fll.web.report.awards.AwardCategory;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * A category made up of goals from other categories.
@@ -30,11 +32,19 @@ public class VirtualSubjectiveScoreCategory implements Serializable, Evaluatable
 
   /**
    * @param ele the element to parse
+   * @param subjectiveCategories see
+   *          {@link SubjectiveGoalRef#SubjectiveGoalRef(Element, List)}
    */
-  public VirtualSubjectiveScoreCategory(final Element ele) {
+  public VirtualSubjectiveScoreCategory(final Element ele,
+                                        final List<SubjectiveScoreCategory> subjectiveCategories) {
     weight = Double.parseDouble(ele.getAttribute(ScoreCategory.WEIGHT_ATTRIBUTE));
     name = ele.getAttribute(SubjectiveScoreCategory.NAME_ATTRIBUTE);
     title = ele.getAttribute(SubjectiveScoreCategory.TITLE_ATTRIBUTE);
+
+    for (final Element ele2 : new NodelistElementCollectionAdapter(ele.getElementsByTagName(SubjectiveGoalRef.TAG_NAME))) {
+      final SubjectiveGoalRef ref = new SubjectiveGoalRef(ele2, subjectiveCategories);
+      goalReferences.add(ref);
+    }
 
   }
 
