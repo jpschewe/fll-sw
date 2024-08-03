@@ -9,7 +9,7 @@ package fll.xml;
 import fll.util.FLLRuntimeException;
 
 /**
- * Thrown in response to an error doign additional validation of the challenge.
+ * Thrown in response to an error doing additional validation of the challenge.
  */
 public class ChallengeValidationException extends FLLRuntimeException {
 
