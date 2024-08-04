@@ -211,6 +211,7 @@ public final class ScoreStandardization {
     categoryWeights.put(performanceCategory.getName(), performanceCategory.getWeight());
 
     description.getSubjectiveCategories().forEach(cat -> categoryWeights.put(cat.getName(), cat.getWeight()));
+    description.getVirtualSubjectiveCategories().forEach(cat -> categoryWeights.put(cat.getName(), cat.getWeight()));
 
     final Tournament currentTournament = Tournament.findTournamentByID(connection, tournament);
 
