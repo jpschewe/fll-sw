@@ -14,6 +14,7 @@ import java.util.Map;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.Queries;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
@@ -111,6 +112,7 @@ public final class ScoreStandardization {
     }
   }
 
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name and goal name need to be inserted as strings")
   private static void populateVirtualSubjectiveCategories(final Connection connection,
                                                           final ChallengeDescription description,
                                                           final int tournamentId)
