@@ -144,6 +144,20 @@ public final class ScoreStandardization {
     }
   }
 
+  private static void summarizeVirtualSubjectiveCategories(final Connection connection,
+                                                           final int tournament)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("INSERT INTO final_scores (tournament, category, team_number, final_score)"
+            + " SELECT tournament_id, category_name, team_number, sum(goal_score) as computed_total"
+            + "  FROM virtual_subjective_category"
+            + "    WHERE tournament_id = ?"
+            + "  GROUP BY team_number, tournament, category_name")) {
+      prep.setInt(1, tournament);
+      prep.executeUpdate();
+    }
+  }
+
   /**
    * Summarize the scores for the given tournament. This puts the standardized
    * scores in the final_scores table to be weighted and then summed.
@@ -172,6 +186,7 @@ public final class ScoreStandardization {
     summarizeSubjectiveScores(connection, challengeDescription, maxScoreRangeSize, tournament);
 
     populateVirtualSubjectiveCategories(connection, challengeDescription, tournament);
+    summarizeVirtualSubjectiveCategories(connection, tournament);
   }
 
   /**
