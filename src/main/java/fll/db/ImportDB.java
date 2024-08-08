@@ -54,6 +54,7 @@ import com.opencsv.exceptions.CsvValidationException;
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.ScoreStandardization;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
@@ -1954,7 +1955,7 @@ public final class ImportDB {
     }
 
     // update score totals
-    Queries.updateScoreTotals(description, destinationConnection, destTournamentID);
+    ScoreStandardization.updateScoreTotals(description, destinationConnection, destTournamentID);
   }
 
   private static void importSubjectiveData(final Connection sourceConnection,
