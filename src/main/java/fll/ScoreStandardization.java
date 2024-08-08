@@ -14,12 +14,10 @@ import java.util.Map;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.Queries;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
-import fll.xml.SubjectiveGoalRef;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.VirtualSubjectiveScoreCategory;
 
@@ -86,11 +84,11 @@ public final class ScoreStandardization {
             + " AND category = ?" //
             + " GROUP BY team_number")) {
       updatePrep.setInt(2, tournament);
+      selectPrep.setInt(1, tournament);
 
       for (final SubjectiveScoreCategory category : challengeDescription.getSubjectiveCategories()) {
         final double categoryMaximumScore = category.getMaximumScore();
 
-        selectPrep.setInt(1, tournament);
         selectPrep.setString(2, category.getName());
 
         updatePrep.setString(1, category.getName());
@@ -109,54 +107,27 @@ public final class ScoreStandardization {
           }
         }
       }
-    }
-  }
+      for (final VirtualSubjectiveScoreCategory category : challengeDescription.getVirtualSubjectiveCategories()) {
+        final double categoryMaximumScore = category.getMaximumScore();
 
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name and goal name need to be inserted as strings")
-  private static void populateVirtualSubjectiveCategories(final Connection connection,
-                                                          final ChallengeDescription description,
-                                                          final int tournamentId)
-      throws SQLException {
-    try (
-        PreparedStatement delete = connection.prepareStatement("DELETE FROM virtual_subjective_category WHERE tournament_id = ?")) {
-      delete.setInt(1, tournamentId);
-      delete.executeUpdate();
-    }
+        selectPrep.setString(2, category.getName());
 
-    for (VirtualSubjectiveScoreCategory category : description.getVirtualSubjectiveCategories()) {
-      for (SubjectiveGoalRef ref : category.getGoalReferences()) {
+        updatePrep.setString(1, category.getName());
 
-        try (
-            PreparedStatement insert = connection.prepareStatement("INSERT INTO virtual_subjective_category (tournament_id, category_name, source_category_name, goal_name, team_number, goal_score)"
-                + " SELECT CAST(? AS INTEGER), CAST(? AS LONGVARCHAR), CAST(? AS LONGVARCHAR), CAST(? AS LONGVARCHAR), TeamNumber, AVG("
-                + ref.getGoalName()
-                + ") FROM "
-                + ref.getCategory().getName()
-                + " WHERE Tournament = ?"
-                + " GROUP BY TeamNumber")) {
-          insert.setInt(1, tournamentId);
-          insert.setString(2, category.getName());
-          insert.setString(3, ref.getCategory().getName());
-          insert.setString(4, ref.getGoalName());
-          insert.setInt(5, tournamentId);
+        try (ResultSet rs = selectPrep.executeQuery()) {
+          while (rs.next()) {
+            final int teamNumber = rs.getInt(1);
+            final double rawScore = rs.getDouble(2);
 
-          insert.executeUpdate();
+            final double scaledScore = (rawScore
+                * maximumScore)
+                / categoryMaximumScore;
+            updatePrep.setInt(3, teamNumber);
+            updatePrep.setDouble(4, scaledScore);
+            updatePrep.executeUpdate();
+          }
         }
       }
-    }
-  }
-
-  private static void summarizeVirtualSubjectiveCategories(final Connection connection,
-                                                           final int tournament)
-      throws SQLException {
-    try (
-        PreparedStatement prep = connection.prepareStatement("INSERT INTO final_scores (tournament, category, team_number, final_score)"
-            + " SELECT tournament_id, category_name, team_number, sum(goal_score) as computed_total"
-            + "  FROM virtual_subjective_category"
-            + "    WHERE tournament_id = ?"
-            + "  GROUP BY team_number, tournament, category_name")) {
-      prep.setInt(1, tournament);
-      prep.executeUpdate();
     }
   }
 
@@ -186,9 +157,6 @@ public final class ScoreStandardization {
     summarizePerformanceScores(connection, tournament, challengeDescription, maxScoreRangeSize);
 
     summarizeSubjectiveScores(connection, challengeDescription, maxScoreRangeSize, tournament);
-
-    populateVirtualSubjectiveCategories(connection, challengeDescription, tournament);
-    summarizeVirtualSubjectiveCategories(connection, tournament);
   }
 
   /**

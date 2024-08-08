@@ -33,7 +33,9 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
+import fll.xml.SubjectiveGoalRef;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -87,6 +89,9 @@ public final class SummarizePhase1 {
 
       Queries.updateScoreTotals(challengeDescription, connection, tournamentID);
 
+      populateVirtualSubjectiveCategories(connection, challengeDescription, tournamentID);
+      summarizeVirtualSubjectiveCategories(connection, tournamentID);
+
       ScoreStandardization.summarizeScores(connection, challengeDescription, tournamentID);
 
       final Map<String, Set<String>> seenCategoryNames = new HashMap<>();
@@ -126,6 +131,54 @@ public final class SummarizePhase1 {
 
     final SQLException e) {
       throw new FLLRuntimeException("There was an error talking to the database", e);
+    }
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name and goal name need to be inserted as strings")
+  private static void populateVirtualSubjectiveCategories(final Connection connection,
+                                                          final ChallengeDescription description,
+                                                          final int tournamentId)
+      throws SQLException {
+    try (
+        PreparedStatement delete = connection.prepareStatement("DELETE FROM virtual_subjective_category WHERE tournament_id = ?")) {
+      delete.setInt(1, tournamentId);
+      delete.executeUpdate();
+    }
+
+    for (VirtualSubjectiveScoreCategory category : description.getVirtualSubjectiveCategories()) {
+      for (SubjectiveGoalRef ref : category.getGoalReferences()) {
+
+        try (
+            PreparedStatement insert = connection.prepareStatement("INSERT INTO virtual_subjective_category (tournament_id, category_name, source_category_name, goal_name, team_number, goal_score)"
+                + " SELECT CAST(? AS INTEGER), CAST(? AS LONGVARCHAR), CAST(? AS LONGVARCHAR), CAST(? AS LONGVARCHAR), TeamNumber, AVG("
+                + ref.getGoalName()
+                + ") FROM "
+                + ref.getCategory().getName()
+                + " WHERE Tournament = ?"
+                + " GROUP BY TeamNumber")) {
+          insert.setInt(1, tournamentId);
+          insert.setString(2, category.getName());
+          insert.setString(3, ref.getCategory().getName());
+          insert.setString(4, ref.getGoalName());
+          insert.setInt(5, tournamentId);
+
+          insert.executeUpdate();
+        }
+      }
+    }
+  }
+
+  private static void summarizeVirtualSubjectiveCategories(final Connection connection,
+                                                           final int tournament)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("INSERT INTO subjective_computed_scores (tournament, category, team_number, computed_total, judge)"
+            + " SELECT tournament_id, category_name, team_number, sum(goal_score), 'virtual'"
+            + "  FROM virtual_subjective_category"
+            + "    WHERE tournament_id = ?"
+            + "  GROUP BY team_number, tournament, category_name")) {
+      prep.setInt(1, tournament);
+      prep.executeUpdate();
     }
   }
 
