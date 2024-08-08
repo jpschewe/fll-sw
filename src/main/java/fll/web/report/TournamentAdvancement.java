@@ -45,7 +45,9 @@ import fll.web.UserRole;
 import fll.web.report.awards.AwardCategory;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
+import fll.xml.ScoreType;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -185,6 +187,23 @@ public class TournamentAdvancement extends BaseFLLServlet {
           csvData.add(""); // rank
         }
       }
+      for (final VirtualSubjectiveScoreCategory category : description.getVirtualSubjectiveCategories()) {
+        final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> cranks = subjectiveRanks.getOrDefault(category,
+                                                                                                              Collections.emptyMap());
+        final Map<Integer, ImmutablePair<Integer, Double>> jranks = cranks.getOrDefault(team.getJudgingGroup(),
+                                                                                        Collections.emptyMap());
+
+        if (jranks.containsKey(teamNumber)) {
+          final ImmutablePair<Integer, Double> pair = jranks.get(teamNumber);
+
+          final String formattedScore = Utilities.getFormatForScoreType(ScoreType.FLOAT).format(pair.getRight());
+          csvData.add(formattedScore);
+          csvData.add(String.valueOf(pair.getLeft()));
+        } else {
+          csvData.add(""); // score
+          csvData.add(""); // rank
+        }
+      }
 
       final Map<Integer, ImmutablePair<Integer, Double>> pAwardRanks = performanceRanks.getOrDefault(team.getAwardGroup(),
                                                                                                      Collections.emptyMap());
@@ -302,6 +321,10 @@ public class TournamentAdvancement extends BaseFLLServlet {
     headers.add("Award Group");
     headers.add("Judging Group");
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+      headers.add(String.format("Top %s score", category.getTitle()));
+      headers.add(String.format("%s Rank", category.getTitle()));
+    }
+    for (final VirtualSubjectiveScoreCategory category : description.getVirtualSubjectiveCategories()) {
       headers.add(String.format("Top %s score", category.getTitle()));
       headers.add(String.format("%s Rank", category.getTitle()));
     }
