@@ -42,9 +42,9 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.report.awards.AwardCategory;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
-import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -121,9 +121,8 @@ public class TournamentAdvancement extends BaseFLLServlet {
     // award group -> team -> {rank, score}
     final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> performanceRanks = new HashMap<>();
     // category -> Judging Group -> team number -> {rank, score}
-    final Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> subjectiveRanks = FinalComputedScores.gatherRankedSubjectiveTeams(connection,
-                                                                                                                                                          description.getSubjectiveCategories(),
-                                                                                                                                                          description.getWinner(),
+    final Map<AwardCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> subjectiveRanks = FinalComputedScores.gatherRankedSubjectiveTeams(connection,
+                                                                                                                                                          description,
                                                                                                                                                           tournament);
 
     final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> overallRanks = gatherOverallRanks(connection,

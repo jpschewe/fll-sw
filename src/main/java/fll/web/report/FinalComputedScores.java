@@ -52,6 +52,7 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.web.playoff.DatabaseTeamScore;
+import fll.web.report.awards.AwardCategory;
 import fll.web.report.awards.AwardsScriptReport;
 import fll.xml.ChallengeDescription;
 import fll.xml.Goal;
@@ -59,6 +60,7 @@ import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
 import fll.xml.ScoreType;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 import fll.xml.WinnerType;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -357,11 +359,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
-    final List<SubjectiveScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
 
     // Figure out how many subjective categories have weights > 0.
     final int nonZeroWeights = (int) challengeDescription.getSubjectiveCategories().stream()
-                                                         .filter(c -> c.getWeight() > 0).count();
+                                                         .filter(c -> c.getWeight() > 0).count()
+        + (int) challengeDescription.getVirtualSubjectiveCategories().stream().filter(c -> c.getWeight() > 0).count();
 
     final Element divTable = FOPUtils.createBasicTable(document);
     documentBody.appendChild(divTable);
@@ -379,12 +381,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
     divTable.appendChild(FOPUtils.createTableColumn(document, 10)); // weighted rank
     divTable.appendChild(FOPUtils.createTableColumn(document, 10)); // overall
 
-    final Element tableHeader = createTableHeader(document, subjectiveCategories, challengeDescription);
+    final Element tableHeader = createTableHeader(document, challengeDescription);
     divTable.appendChild(tableHeader);
 
-    final Element tableBody = writeScores(connection, document, subjectiveCategories,
-                                          challengeDescription.getPerformance(), groupName, selector, winnerCriteria,
-                                          tournament, bestTeams);
+    final Element tableBody = writeScores(connection, document, challengeDescription, groupName, selector,
+                                          winnerCriteria, tournament, bestTeams);
     divTable.appendChild(tableBody);
 
     return pageSequence;
@@ -507,7 +508,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * Iterate over the standardized scores for a subjective category.
    *
    * @param connection database connection
-   * @param category the category to select scores for
+   * @param categoryName the name of the category to select scores for
    * @param winnerCriteria who is the winner
    * @param tournament which tournament to get scores for
    * @param judgingStation which judging station
@@ -516,7 +517,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "winner criteria determines the sort")
   public static void iterateOverSubjectiveScores(final Connection connection,
-                                                 final SubjectiveScoreCategory category,
+                                                 final String categoryName,
                                                  final WinnerType winnerCriteria,
                                                  final Tournament tournament,
                                                  final String judgingStation,
@@ -534,7 +535,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
             + String.format(" ORDER BY final_scores.final_score %s", winnerCriteria.getSortString()))) {
       prep.setInt(1, tournament.getTournamentID());
       prep.setString(2, judgingStation);
-      prep.setString(3, category.getName());
+      prep.setString(3, categoryName);
 
       int numTied = 1;
       int rank = 0;
@@ -565,33 +566,54 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
   /**
    * @param connection the database connection
-   * @param subjectiveCategories from
-   *          {@link ChallengeDescription#getSubjectiveCategories()}
-   * @param winnerCriteria from {@link ChallengeDescription#getWinner()}
+   * @param description the challenge description
    * @param tournament the tournament to get scores for
-   * @return category, Judging Group, team number, {rank, scaled score}
+   * @return category, Judging Group, team number, {rank, scaled score} - includes
+   *         {@link SubjectiveScoreCategory} and
+   *         {@link VirtualSubjectiveScoreCategory}
    * @throws SQLException on a database error
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name and winner criteria determines the sort")
-  public static Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> gatherRankedSubjectiveTeams(final Connection connection,
-                                                                                                                          final List<SubjectiveScoreCategory> subjectiveCategories,
-                                                                                                                          final WinnerType winnerCriteria,
+  public static Map<AwardCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> gatherRankedSubjectiveTeams(final Connection connection,
+                                                                                                                          final ChallengeDescription description,
                                                                                                                           final Tournament tournament)
       throws SQLException {
-    final Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> retval = new HashMap<>();
+    final WinnerType winnerCriteria = description.getWinner();
+    final Map<AwardCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> retval = new HashMap<>();
     final List<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
 
-    for (final SubjectiveScoreCategory category : subjectiveCategories) {
+    for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
       final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> categoryRanks = new HashMap<>();
 
       for (final String judgingStation : judgingStations) {
         final Map<Integer, ImmutablePair<Integer, Double>> rankedTeams = new HashMap<>();
 
-        iterateOverSubjectiveScores(connection, category, winnerCriteria, tournament, judgingStation, (teamNumber,
-                                                                                                       score,
-                                                                                                       rank) -> {
-          rankedTeams.put(teamNumber, ImmutablePair.of(rank, score));
-        });
+        iterateOverSubjectiveScores(connection, category.getName(), winnerCriteria, tournament, judgingStation,
+                                    (teamNumber,
+                                     score,
+                                     rank) -> {
+                                      rankedTeams.put(teamNumber, ImmutablePair.of(rank, score));
+                                    });
+
+        categoryRanks.put(judgingStation, rankedTeams);
+      } // foreach judging station
+
+      retval.put(category, categoryRanks);
+
+    } // foreach category
+
+    for (final VirtualSubjectiveScoreCategory category : description.getVirtualSubjectiveCategories()) {
+      final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> categoryRanks = new HashMap<>();
+
+      for (final String judgingStation : judgingStations) {
+        final Map<Integer, ImmutablePair<Integer, Double>> rankedTeams = new HashMap<>();
+
+        iterateOverSubjectiveScores(connection, category.getName(), winnerCriteria, tournament, judgingStation,
+                                    (teamNumber,
+                                     score,
+                                     rank) -> {
+                                      rankedTeams.put(teamNumber, ImmutablePair.of(rank, score));
+                                    });
 
         categoryRanks.put(judgingStation, rankedTeams);
       } // foreach judging station
@@ -606,8 +628,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
   private Element writeScores(final Connection connection,
                               final Document document,
-                              final List<SubjectiveScoreCategory> subjectiveCategories,
-                              final PerformanceScoreCategory performanceCategory,
+                              final ChallengeDescription description,
                               final String groupName,
                               final ReportSelector selector,
                               final WinnerType winnerCriteria,
@@ -615,11 +636,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
                               final Set<Integer> bestTeams)
       throws SQLException {
 
+    final PerformanceScoreCategory performanceCategory = description.getPerformance();
     final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
 
-    final Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> teamSubjectiveRanks = gatherRankedSubjectiveTeams(connection,
-                                                                                                                                          subjectiveCategories,
-                                                                                                                                          winnerCriteria,
+    final Map<AwardCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> teamSubjectiveRanks = gatherRankedSubjectiveTeams(connection,
+                                                                                                                                          description,
                                                                                                                                           tournament);
 
     final Map<Integer, ImmutablePair<Integer, Double>> teamPerformanceRanks = gatherRankedPerformanceTeams(connection,
@@ -672,8 +693,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
           row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Raw:"));
 
-          insertRawSubjectiveScoreColumns(connection, tournament, winnerCriteria.getSortString(), document,
-                                          subjectiveCategories, teamNumber, row1);
+          insertRawSubjectiveScoreColumns(connection, tournament, winnerCriteria.getSortString(), document, description,
+                                          teamNumber, row1);
 
           insertRawPerformanceScore(connection, tournament, performanceCategory.getScoreType(), document, teamNumber,
                                     row1);
@@ -709,7 +730,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
           // Next, one column containing the scaled score for each subjective
           // category with weight > 0
-          for (final ScoreCategory category : subjectiveCategories) {
+          for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
             final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> catRanks = teamSubjectiveRanks.get(category);
             if (null == catRanks) {
               throw new FLLInternalException("team subjective rank data is not consistent with the subjective categories (catRanks). This suggests a bug in gatherRankedSubjectiveTeams.");
@@ -733,7 +754,32 @@ public final class FinalComputedScores extends BaseFLLServlet {
               ++elementsInWeightedRank;
 
             } // non-zero category weight
-          } // foreach category
+          } // foreach subjective category
+          for (final VirtualSubjectiveScoreCategory category : description.getVirtualSubjectiveCategories()) {
+            final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> catRanks = teamSubjectiveRanks.get(category);
+            if (null == catRanks) {
+              throw new FLLInternalException("team subjective rank data is not consistent with the subjective categories (catRanks). This suggests a bug in gatherRankedSubjectiveTeams.");
+            }
+
+            final Map<Integer, ImmutablePair<Integer, Double>> judgingRanks = catRanks.get(judgingGroup);
+            if (null == judgingRanks) {
+              throw new FLLInternalException("team subjective rank data is not consistent with the subjective categories (judgingRanks). This suggests a bug in gatherRankedSubjectiveTeams.");
+            }
+
+            final double catWeight = category.getWeight();
+            if (catWeight > 0.0) {
+              final int catRank = insertCategoryScaledScore(document, teamNumber, row2, row2BorderWidth,
+                                                            row2BorderColor, judgingRanks);
+              if (catRank > 0) {
+                weightedRank += catWeight
+                    * catRank;
+              } else {
+                weightedRank = Double.NaN;
+              }
+              ++elementsInWeightedRank;
+
+            } // non-zero category weight
+          } // foreach virtual subjective category
 
           // 2nd to last column has the scaled performance score
           final int perfRank = insertCategoryScaledScore(document, teamNumber, row2, row2BorderWidth, row2BorderColor,
@@ -882,7 +928,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
   }
 
   private Element createTableHeader(final Document document,
-                                    final List<SubjectiveScoreCategory> subjectiveCategories,
                                     final ChallengeDescription challengeDescription) {
 
     final Element tableHeader = FOPUtils.createXslFoElement(document, "table-header");
@@ -898,7 +943,15 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     row1.appendChild(FOPUtils.createTableCell(document, null, "")); // weight/raw&scaled
 
-    for (final SubjectiveScoreCategory category : subjectiveCategories) {
+    for (final SubjectiveScoreCategory category : challengeDescription.getSubjectiveCategories()) {
+      final double weight = category.getWeight();
+      if (weight > 0.0) {
+        final String catTitle = category.getTitle();
+
+        row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, catTitle));
+      }
+    }
+    for (final VirtualSubjectiveScoreCategory category : challengeDescription.getVirtualSubjectiveCategories()) {
       final double weight = category.getWeight();
       if (weight > 0.0) {
         final String catTitle = category.getTitle();
@@ -931,7 +984,15 @@ public final class FinalComputedScores extends BaseFLLServlet {
     FOPUtils.addBottomBorder(weightCell, 1);
     row2.appendChild(weightCell);
 
-    for (final ScoreCategory category : subjectiveCategories) {
+    for (final ScoreCategory category : challengeDescription.getSubjectiveCategories()) {
+      if (category.getWeight() > 0.0) {
+        final Element catCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                         Double.toString(category.getWeight()));
+        FOPUtils.addBottomBorder(catCell, 1);
+        row2.appendChild(catCell);
+      }
+    }
+    for (final VirtualSubjectiveScoreCategory category : challengeDescription.getVirtualSubjectiveCategories()) {
       if (category.getWeight() > 0.0) {
         final Element catCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                          Double.toString(category.getWeight()));
@@ -962,7 +1023,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                final Tournament tournament,
                                                final String ascDesc,
                                                final Document document,
-                                               final List<SubjectiveScoreCategory> subjectiveCategories,
+                                               final ChallengeDescription challengeDescription,
                                                final int teamNumber,
                                                final Element row)
       throws SQLException {
@@ -973,10 +1034,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
       // Next, one column containing the raw score for each subjective
       // category with weight > 0
-      for (final SubjectiveScoreCategory catElement : subjectiveCategories) {
-        final double catWeight = catElement.getWeight();
+      for (final SubjectiveScoreCategory category : challengeDescription.getSubjectiveCategories()) {
+        final double catWeight = category.getWeight();
         if (catWeight > 0.0) {
-          final String catName = catElement.getName();
+          final String catName = category.getName();
           prep.setInt(1, teamNumber);
           prep.setInt(2, tournament.getTournamentID());
           prep.setString(3, catName);
@@ -991,7 +1052,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                 } else {
                   scoreSeen = true;
                 }
-                rawScoreText.append(Utilities.getFormatForScoreType(catElement.getScoreType()).format(v));
+                rawScoreText.append(Utilities.getFormatForScoreType(category.getScoreType()).format(v));
               }
             }
 
@@ -999,8 +1060,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
             if (!scoreSeen) {
               scoreText = "No Score";
             } else {
-              final boolean zeroInRequiredGoal = checkZeroInRequiredGoal(connection, tournament, catElement,
-                                                                         teamNumber);
+              final boolean zeroInRequiredGoal = checkZeroInRequiredGoal(connection, tournament, category, teamNumber);
               if (zeroInRequiredGoal) {
                 rawScoreText.append(" @");
               }
@@ -1016,6 +1076,45 @@ public final class FinalComputedScores extends BaseFLLServlet {
           } // ResultSet
         } // category weight greater than 0
       } // foreach subjective category
+
+      for (final VirtualSubjectiveScoreCategory category : challengeDescription.getVirtualSubjectiveCategories()) {
+        final double catWeight = category.getWeight();
+        if (catWeight > 0.0) {
+          final String catName = category.getName();
+          prep.setInt(1, teamNumber);
+          prep.setInt(2, tournament.getTournamentID());
+          prep.setString(3, catName);
+          try (ResultSet rs = prep.executeQuery()) {
+            boolean scoreSeen = false;
+            final StringBuilder rawScoreText = new StringBuilder();
+            while (rs.next()) {
+              final double v = rs.getDouble(1);
+              if (!rs.wasNull()) {
+                if (scoreSeen) {
+                  rawScoreText.append(", ");
+                } else {
+                  scoreSeen = true;
+                }
+                rawScoreText.append(Utilities.getFormatForScoreType(ScoreType.FLOAT).format(v));
+              }
+            }
+
+            final String scoreText;
+            if (!scoreSeen) {
+              scoreText = "No Score";
+            } else {
+              scoreText = rawScoreText.toString();
+            }
+
+            final Element subjCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, scoreText);
+            if (!scoreSeen) {
+              subjCell.setAttribute("color", "red");
+            }
+            row.appendChild(subjCell);
+
+          } // ResultSet
+        } // category weight greater than 0
+      } // foreach virtual subjective category
     } // PreparedStatement
   }
 

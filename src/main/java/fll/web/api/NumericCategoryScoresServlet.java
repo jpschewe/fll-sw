@@ -77,7 +77,7 @@ public class NumericCategoryScoresServlet extends HttpServlet {
         final Map<Integer, Double> categoryScores = scores.computeIfAbsent(categoryTitle, k -> new HashMap<>());
 
         for (final String judgingStation : judgingStations) {
-          FinalComputedScores.iterateOverSubjectiveScores(connection, category, winnerCriteria, tournament,
+          FinalComputedScores.iterateOverSubjectiveScores(connection, category.getName(), winnerCriteria, tournament,
                                                           judgingStation, (teamNumber,
                                                                            score,
                                                                            rank) -> {

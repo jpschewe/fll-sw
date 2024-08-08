@@ -182,9 +182,8 @@ public class AwardSummarySheet extends BaseFLLServlet {
       }
     }
 
-    for (final AwardCategory awardCategory : CategoriesIgnored.getNonNumericCategories(challengeDescription,
-                                                                                                connection,
-                                                                                                tournament)) {
+    for (final AwardCategory awardCategory : CategoriesIgnored.getNonNumericCategories(challengeDescription, connection,
+                                                                                       tournament)) {
       report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
       final Element element = createNonNumericBlock(document, awardCategory);
       report.appendChild(element);
@@ -331,10 +330,10 @@ public class AwardSummarySheet extends BaseFLLServlet {
     final Element list = FOPUtils.createXslFoElement(document, "list-block");
     section.appendChild(list);
 
-    FinalComputedScores.iterateOverSubjectiveScores(connection, awardCategory, winnerCriteria, tournament, judgingGroup,
-                                                    (teamNumber,
-                                                     score,
-                                                     rank) -> {
+    FinalComputedScores.iterateOverSubjectiveScores(connection, awardCategory.getName(), winnerCriteria, tournament,
+                                                    judgingGroup, (teamNumber,
+                                                                   score,
+                                                                   rank) -> {
                                                       if (rank <= NUM_FINALISTS) {
                                                         try {
                                                           final Team team = Team.getTeamFromDatabase(connection,
