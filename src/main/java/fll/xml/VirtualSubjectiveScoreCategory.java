@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -164,6 +165,33 @@ public class VirtualSubjectiveScoreCategory implements Serializable, Evaluatable
     }
 
     return ele;
+  }
+
+  @Override
+  public String toString() {
+    return this.getClass().getSimpleName()
+        + " "
+        + this.getName();
+  }
+
+  @Override
+  public int hashCode() {
+    return getTitle().hashCode();
+  }
+
+  @Override
+  public boolean equals(final @Nullable Object o) {
+    if (null == o) {
+      return false;
+    } else if (this == o) {
+      return true;
+    } else if (!o.getClass().equals(this.getClass())) {
+      return false;
+    } else {
+      final VirtualSubjectiveScoreCategory other = (VirtualSubjectiveScoreCategory) o;
+      return getTitle().equals(other.getTitle())
+          && getPerAwardGroup() == other.getPerAwardGroup();
+    }
   }
 
 }
