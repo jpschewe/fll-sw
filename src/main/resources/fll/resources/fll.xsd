@@ -89,7 +89,7 @@
                 </xsd:documentation>
             </xsd:annotation>
             <xsd:selector
-                xpath="./subjectiveCategory|./Performance" />
+                xpath="./subjectiveCategory|./Performance|./virtualSubjectiveCategory" />
             <xsd:field xpath="@name" />
         </xsd:key>
         <xsd:key name="categoryTitleKey">
@@ -100,14 +100,14 @@
                 </xsd:documentation>
             </xsd:annotation>
             <xsd:selector
-                xpath="./subjectiveCategory|./Performance|./nonNumericCategory" />
+                xpath="./subjectiveCategory|./Performance|./nonNumericCategory|./virtualSubjectiveCategory" />
             <xsd:field xpath="@title" />
         </xsd:key>
         <xsd:keyref name="subjectiveNonNumericRef"
             refer="nonNumericCategoryKey">
             <xsd:annotation>
                 <xsd:documentation>
-                    Subjective categories may reference
+                    Subjective categories must reference
                     non-numeric categories.
                 </xsd:documentation>
             </xsd:annotation>
