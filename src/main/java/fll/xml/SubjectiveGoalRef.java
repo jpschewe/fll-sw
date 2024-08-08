@@ -65,7 +65,7 @@ public class SubjectiveGoalRef extends GoalRef {
   /**
    * @param goalName {@link #getGoalName()}
    * @param scope {@link #getCategory()}
-   * @param scoreType {@Link #getScoreType()}
+   * @param scoreType {@link #getScoreType()}
    */
   public SubjectiveGoalRef(final String goalName,
                            final @UnknownInitialization SubjectiveScoreCategory scope,
