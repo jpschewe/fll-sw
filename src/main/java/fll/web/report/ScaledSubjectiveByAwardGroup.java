@@ -157,7 +157,7 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
         }
 
         final Element ele = generateCategoryReport(connection, document, tournament, teams, awardGroup,
-                                                   category.getName(), category.getTitle(), ScoreType.FLOAT,
+                                                   category.getName(), category.getTitle(), category.getScoreType(),
                                                    categoryTeamRanks);
         documentBody.appendChild(ele);
         ele.setAttribute("page-break-after", "always");

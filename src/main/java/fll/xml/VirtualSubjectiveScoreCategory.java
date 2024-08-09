@@ -149,6 +149,24 @@ public class VirtualSubjectiveScoreCategory implements Serializable, Evaluatable
   }
 
   /**
+   * Determines the {@link ScoreType} for this category.
+   * This is done by walking all of the references and checking their score type.
+   * If any reference is floating point, then this category can have a floating
+   * point score.
+   *
+   * @return not null
+   */
+  public ScoreType getScoreType() {
+    for (final SubjectiveGoalRef ge : goalReferences) {
+      if (ge.getGoal().getScoreType() == ScoreType.FLOAT) {
+        return ScoreType.FLOAT;
+      }
+    }
+
+    return ScoreType.INTEGER;
+  }
+
+  /**
    * @param doc used to create elements
    * @return an XML element representing this subjective category
    */

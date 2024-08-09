@@ -45,7 +45,6 @@ import fll.web.UserRole;
 import fll.web.report.awards.AwardCategory;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
-import fll.xml.ScoreType;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.VirtualSubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
@@ -196,7 +195,8 @@ public class TournamentAdvancement extends BaseFLLServlet {
         if (jranks.containsKey(teamNumber)) {
           final ImmutablePair<Integer, Double> pair = jranks.get(teamNumber);
 
-          final String formattedScore = Utilities.getFormatForScoreType(ScoreType.FLOAT).format(pair.getRight());
+          final String formattedScore = Utilities.getFormatForScoreType(category.getScoreType())
+                                                 .format(pair.getRight());
           csvData.add(formattedScore);
           csvData.add(String.valueOf(pair.getLeft()));
         } else {
