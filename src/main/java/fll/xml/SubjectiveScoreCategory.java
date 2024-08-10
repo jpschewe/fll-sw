@@ -35,7 +35,7 @@ public class SubjectiveScoreCategory extends ScoreCategory implements AwardCateg
    */
   /* package */ static final String NAME_ATTRIBUTE = "name";
 
-  private static final String TITLE_ATTRIBUTE = ChallengeDescription.TITLE_ATTRIBUTE;
+  /*package*/ static final String TITLE_ATTRIBUTE = ChallengeDescription.TITLE_ATTRIBUTE;
 
   /**
    * The XML attribute to write the description to.

@@ -42,10 +42,11 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.report.awards.AwardCategory;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
-import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -121,9 +122,8 @@ public class TournamentAdvancement extends BaseFLLServlet {
     // award group -> team -> {rank, score}
     final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> performanceRanks = new HashMap<>();
     // category -> Judging Group -> team number -> {rank, score}
-    final Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> subjectiveRanks = FinalComputedScores.gatherRankedSubjectiveTeams(connection,
-                                                                                                                                                          description.getSubjectiveCategories(),
-                                                                                                                                                          description.getWinner(),
+    final Map<AwardCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> subjectiveRanks = FinalComputedScores.gatherRankedSubjectiveTeams(connection,
+                                                                                                                                                          description,
                                                                                                                                                           tournament);
 
     final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> overallRanks = gatherOverallRanks(connection,
@@ -169,6 +169,24 @@ public class TournamentAdvancement extends BaseFLLServlet {
       csvData.add(team.getJudgingGroup());
 
       for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+        final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> cranks = subjectiveRanks.getOrDefault(category,
+                                                                                                              Collections.emptyMap());
+        final Map<Integer, ImmutablePair<Integer, Double>> jranks = cranks.getOrDefault(team.getJudgingGroup(),
+                                                                                        Collections.emptyMap());
+
+        if (jranks.containsKey(teamNumber)) {
+          final ImmutablePair<Integer, Double> pair = jranks.get(teamNumber);
+
+          final String formattedScore = Utilities.getFormatForScoreType(category.getScoreType())
+                                                 .format(pair.getRight());
+          csvData.add(formattedScore);
+          csvData.add(String.valueOf(pair.getLeft()));
+        } else {
+          csvData.add(""); // score
+          csvData.add(""); // rank
+        }
+      }
+      for (final VirtualSubjectiveScoreCategory category : description.getVirtualSubjectiveCategories()) {
         final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> cranks = subjectiveRanks.getOrDefault(category,
                                                                                                               Collections.emptyMap());
         final Map<Integer, ImmutablePair<Integer, Double>> jranks = cranks.getOrDefault(team.getJudgingGroup(),
@@ -283,7 +301,7 @@ public class TournamentAdvancement extends BaseFLLServlet {
       throws SQLException {
     LOGGER.debug("Summarizing scores for {}", tournament.getDescription());
 
-    Queries.updateScoreTotals(description, connection, tournament.getTournamentID());
+    ScoreStandardization.updateScoreTotals(description, connection, tournament.getTournamentID());
 
     ScoreStandardization.summarizeScores(connection, description, tournament.getTournamentID());
 
@@ -303,6 +321,10 @@ public class TournamentAdvancement extends BaseFLLServlet {
     headers.add("Award Group");
     headers.add("Judging Group");
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+      headers.add(String.format("Top %s score", category.getTitle()));
+      headers.add(String.format("%s Rank", category.getTitle()));
+    }
+    for (final VirtualSubjectiveScoreCategory category : description.getVirtualSubjectiveCategories()) {
       headers.add(String.format("Top %s score", category.getTitle()));
       headers.add(String.format("%s Rank", category.getTitle()));
     }

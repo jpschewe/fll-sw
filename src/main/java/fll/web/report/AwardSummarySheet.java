@@ -41,6 +41,7 @@ import fll.web.report.awards.ChampionshipCategory;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 import fll.xml.WinnerType;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -173,7 +174,20 @@ public class AwardSummarySheet extends BaseFLLServlet {
     for (final SubjectiveScoreCategory awardCategory : challengeDescription.getSubjectiveCategories()) {
       final @Nullable Element subjectiveElement = createSubjectiveBlock(document, connection,
                                                                         challengeDescription.getWinner(), tournament,
-                                                                        groupName, awardCategory);
+                                                                        groupName, awardCategory.getName(),
+                                                                        awardCategory.getTitle());
+      if (null != subjectiveElement) {
+        report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+
+        report.appendChild(subjectiveElement);
+
+      }
+    }
+    for (final VirtualSubjectiveScoreCategory awardCategory : challengeDescription.getVirtualSubjectiveCategories()) {
+      final @Nullable Element subjectiveElement = createSubjectiveBlock(document, connection,
+                                                                        challengeDescription.getWinner(), tournament,
+                                                                        groupName, awardCategory.getName(),
+                                                                        awardCategory.getTitle());
       if (null != subjectiveElement) {
         report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
 
@@ -182,9 +196,8 @@ public class AwardSummarySheet extends BaseFLLServlet {
       }
     }
 
-    for (final AwardCategory awardCategory : CategoriesIgnored.getNonNumericCategories(challengeDescription,
-                                                                                                connection,
-                                                                                                tournament)) {
+    for (final AwardCategory awardCategory : CategoriesIgnored.getNonNumericCategories(challengeDescription, connection,
+                                                                                       tournament)) {
       report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
       final Element element = createNonNumericBlock(document, awardCategory);
       report.appendChild(element);
@@ -316,13 +329,14 @@ public class AwardSummarySheet extends BaseFLLServlet {
                                                   final WinnerType winnerCriteria,
                                                   final Tournament tournament,
                                                   final String judgingGroup,
-                                                  final SubjectiveScoreCategory awardCategory)
+                                                  final String awardCategoryName,
+                                                  final String awardCategoryTitle)
       throws SQLException {
     final Element section = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
     final Element title = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     section.appendChild(title);
-    title.appendChild(document.createTextNode(awardCategory.getTitle()));
+    title.appendChild(document.createTextNode(awardCategoryTitle));
     title.setAttribute("font-weight", "bold");
 
     final Element row1Block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
@@ -331,10 +345,10 @@ public class AwardSummarySheet extends BaseFLLServlet {
     final Element list = FOPUtils.createXslFoElement(document, "list-block");
     section.appendChild(list);
 
-    FinalComputedScores.iterateOverSubjectiveScores(connection, awardCategory, winnerCriteria, tournament, judgingGroup,
-                                                    (teamNumber,
-                                                     score,
-                                                     rank) -> {
+    FinalComputedScores.iterateOverSubjectiveScores(connection, awardCategoryName, winnerCriteria, tournament,
+                                                    judgingGroup, (teamNumber,
+                                                                   score,
+                                                                   rank) -> {
                                                       if (rank <= NUM_FINALISTS) {
                                                         try {
                                                           final Team team = Team.getTeamFromDatabase(connection,

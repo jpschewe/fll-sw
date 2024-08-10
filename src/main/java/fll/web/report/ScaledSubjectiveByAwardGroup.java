@@ -39,10 +39,12 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.report.awards.AwardCategory;
 import fll.web.report.awards.AwardsScriptReport;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
+import fll.xml.ScoreType;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -130,9 +132,8 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
     final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, tournament.getTournamentID());
 
     for (final String awardGroup : AwardsScriptReport.getAwardGroupOrder(connection, tournament)) {
-      final Map<ScoreCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> teamSubjectiveRanks = FinalComputedScores.gatherRankedSubjectiveTeams(connection,
-                                                                                                                                                                challengeDescription.getSubjectiveCategories(),
-                                                                                                                                                                challengeDescription.getWinner(),
+      final Map<AwardCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> teamSubjectiveRanks = FinalComputedScores.gatherRankedSubjectiveTeams(connection,
+                                                                                                                                                                challengeDescription,
                                                                                                                                                                 tournament);
 
       for (final SubjectiveScoreCategory category : challengeDescription.getSubjectiveCategories()) {
@@ -142,7 +143,21 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
               + category.getName());
         }
 
-        final Element ele = generateCategoryReport(connection, document, tournament, teams, awardGroup, category,
+        final Element ele = generateCategoryReport(connection, document, tournament, teams, awardGroup,
+                                                   category.getName(), category.getTitle(), category.getScoreType(),
+                                                   categoryTeamRanks);
+        documentBody.appendChild(ele);
+        ele.setAttribute("page-break-after", "always");
+      }
+      for (final VirtualSubjectiveScoreCategory category : challengeDescription.getVirtualSubjectiveCategories()) {
+        final @Nullable Map<String, Map<Integer, ImmutablePair<Integer, Double>>> categoryTeamRanks = teamSubjectiveRanks.get(category);
+        if (null == categoryTeamRanks) {
+          throw new FLLInternalException("Cannot find subjective ranks for "
+              + category.getName());
+        }
+
+        final Element ele = generateCategoryReport(connection, document, tournament, teams, awardGroup,
+                                                   category.getName(), category.getTitle(), category.getScoreType(),
                                                    categoryTeamRanks);
         documentBody.appendChild(ele);
         ele.setAttribute("page-break-after", "always");
@@ -157,7 +172,9 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
                                          final Tournament tournament,
                                          final Map<Integer, TournamentTeam> teams,
                                          final String awardGroup,
-                                         final SubjectiveScoreCategory category,
+                                         final String categoryName,
+                                         final String categoryTitle,
+                                         final ScoreType categoryScoreType,
                                          final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> categoryTeamRanks)
       throws SQLException {
 
@@ -168,13 +185,13 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
         + " AND team_number = ?"
         + " ORDER BY judge ASC")) {
       prep.setInt(1, tournament.getTournamentID());
-      prep.setString(2, category.getName());
+      prep.setString(2, categoryName);
 
       final Element agReport = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
       final Element agBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
       agReport.appendChild(agBlock);
-      agBlock.appendChild(document.createTextNode(String.format("Category: %s - Award Group: %s", category.getTitle(),
+      agBlock.appendChild(document.createTextNode(String.format("Category: %s - Award Group: %s", categoryTitle,
                                                                 awardGroup)));
       agBlock.setAttribute("font-weight", "bold");
       agBlock.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_CENTER);
@@ -244,7 +261,7 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
         try (ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
             final double raw = rs.getDouble(1);
-            final String rawStr = Utilities.getFormatForScoreType(category.getScoreType()).format(raw);
+            final String rawStr = Utilities.getFormatForScoreType(categoryScoreType).format(raw);
             rawScores.add(rawStr);
           }
         }

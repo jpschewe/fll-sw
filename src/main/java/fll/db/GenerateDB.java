@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 43;
+  public static final int DATABASE_VERSION = 44;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -344,6 +344,8 @@ public final class GenerateDB {
 
       createDeliberationTables(connection, true);
       createDeliberationCategoryOrder(connection, true);
+      
+      createVirtualSubjectiveCategoryTable(connection, true);
 
       // --------------- create views ---------------
 
@@ -404,6 +406,29 @@ public final class GenerateDB {
       }
       sql.append(")");
 
+      stmt.executeUpdate(sql.toString());
+    }
+  }
+
+  /* package */ static void createVirtualSubjectiveCategoryTable(final Connection connection,
+                                                                 final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE virtual_subjective_category (");
+      sql.append("  tournament_id INTEGER NOT NULL");
+      sql.append(" ,category_name LONGVARCHAR NOT NULL");
+      sql.append(" ,source_category_name LONGVARCHAR NOT NULL");
+      sql.append(" ,goal_name LONGVARCHAR NOT NULL");
+      sql.append(" ,team_number INTEGER NOT NULL");
+      sql.append(" ,goal_score FLOAT");
+      sql.append(" ,CONSTRAINT virtual_subjective_category_pk PRIMARY KEY(tournament_id, category_name, source_category_name, goal_name, team_number)");
+      if (createConstraints) {
+        sql.append(",CONSTRAINT virtual_subjective_category_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        sql.append(",CONSTRAINT virtual_subjective_category_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        sql.append(",CONSTRAINT virtual_subjective_category_fk3 FOREIGN KEY(tournament_id, team_number) REFERENCES TournamentTeams(Tournament, TeamNumber)");
+      }
+      sql.append(")");
       stmt.executeUpdate(sql.toString());
     }
   }

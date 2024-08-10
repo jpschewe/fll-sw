@@ -54,6 +54,7 @@ import com.opencsv.exceptions.CsvValidationException;
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.ScoreStandardization;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
@@ -731,6 +732,11 @@ public final class ImportDB {
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 43) {
       upgrade42To43(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 44) {
+      upgrade43To44(connection);
     }
 
     // NOTE: when adding new tournament parameters they need to be explicitly set in
@@ -1502,6 +1508,19 @@ public final class ImportDB {
   }
 
   /**
+   * Create virtual subjective category table.
+   */
+  private static void upgrade43To44(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 43 to 44");
+
+    try (Statement stmt = connection.createStatement()) {
+      GenerateDB.createVirtualSubjectiveCategoryTable(connection, false);
+    }
+
+    setDBVersion(connection, 44);
+  }
+
+  /**
    * Check for a column in a table. This checks table names both upper and lower
    * case.
    * This also checks column names ignoring case.
@@ -1936,7 +1955,7 @@ public final class ImportDB {
     }
 
     // update score totals
-    Queries.updateScoreTotals(description, destinationConnection, destTournamentID);
+    ScoreStandardization.updateScoreTotals(description, destinationConnection, destTournamentID);
   }
 
   private static void importSubjectiveData(final Connection sourceConnection,

@@ -85,7 +85,7 @@ public final class SummarizePhase1 {
     try (Connection connection = datasource.getConnection()) {
       final int tournamentID = Queries.getCurrentTournament(connection);
 
-      Queries.updateScoreTotals(challengeDescription, connection, tournamentID);
+      ScoreStandardization.updateScoreTotals(challengeDescription, connection, tournamentID);
 
       ScoreStandardization.summarizeScores(connection, challengeDescription, tournamentID);
 

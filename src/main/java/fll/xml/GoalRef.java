@@ -29,7 +29,10 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
 
   private static final String SCORE_TYPE_ATTRIBUTE = "scoreType";
 
-  private static final String GOAL_ATTRIBUTE = "goal";
+  /**
+   * Attribute for the goal referenced.
+   */
+  public static final String GOAL_ATTRIBUTE = "goal";
 
   /**
    * @param ele the element to parse
@@ -89,8 +92,7 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
    * @return the goal
    * @throws ScopeException if the goal cannot be found
    */
-
-  public AbstractGoal getGoal() {
+  public AbstractGoal getGoal() throws ScopeException {
     return mGoalScope.getGoal(mGoalName);
   }
 
@@ -130,11 +132,24 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
   }
 
   /**
-   * @param doc used to creates elements
+   * @param doc used to create elements
    * @return XML representation of this object
    */
   public Element toXml(final Document doc) {
-    final Element ele = doc.createElement(TAG_NAME);
+    return internalToXml(doc, TAG_NAME);
+  }
+
+  /**
+   * Subclasses should call this method to specify the tag for the element. The
+   * returned value can be modified to contain additional attributes and children.
+   * 
+   * @param doc used to create elements
+   * @param tagName tag for the element created
+   * @return XML reprepsentation of this object
+   */
+  protected Element internalToXml(final Document doc,
+                                  final String tagName) {
+    final Element ele = doc.createElement(tagName);
     ele.setAttribute(SCORE_TYPE_ATTRIBUTE, mScoreType.toXmlString());
     ele.setAttribute(GOAL_ATTRIBUTE, mGoalName);
     return ele;

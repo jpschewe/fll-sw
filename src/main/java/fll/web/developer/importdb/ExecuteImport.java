@@ -12,11 +12,11 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import fll.ScoreStandardization;
 import fll.Tournament;
 import fll.db.DumpDB;
 import fll.db.GlobalParameters;
 import fll.db.ImportDB;
-import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -87,7 +87,7 @@ public class ExecuteImport extends BaseFLLServlet {
         final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
         final int destTournamentID = destTournament.getTournamentID();
         final ChallengeDescription description = GlobalParameters.getChallengeDescription(destConnection);
-        Queries.updateScoreTotals(description, destConnection, destTournamentID);
+        ScoreStandardization.updateScoreTotals(description, destConnection, destTournamentID);
 
         message.append(String.format("<p>Import of tournament %s successful.</p>", tournament));
         session.setAttribute(SessionAttributes.REDIRECT_URL,

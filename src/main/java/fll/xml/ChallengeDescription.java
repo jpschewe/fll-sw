@@ -7,6 +7,7 @@
 package fll.xml;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -77,6 +78,12 @@ public class ChallengeDescription implements Serializable {
     for (final Element subjEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(SubjectiveScoreCategory.TAG_NAME))) {
       final SubjectiveScoreCategory subj = new SubjectiveScoreCategory(subjEle);
       mSubjectiveCategories.add(subj);
+    }
+
+    final List<SubjectiveScoreCategory> subjectiveCategoriesUnmodifiable = Collections.unmodifiableList(mSubjectiveCategories);
+    for (final Element subjEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(VirtualSubjectiveScoreCategory.TAG_NAME))) {
+      final VirtualSubjectiveScoreCategory subj = new VirtualSubjectiveScoreCategory(subjEle, subjectiveCategoriesUnmodifiable);
+      virtualSubjectiveCategories.add(subj);
     }
 
     for (final Element catEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(NonNumericCategory.TAG_NAME))) {
@@ -291,6 +298,84 @@ public class ChallengeDescription implements Serializable {
     return mSubjectiveCategories.stream().filter(c -> c.getTitle().equals(title)).findAny().orElse(null);
   }
 
+  private final List<VirtualSubjectiveScoreCategory> virtualSubjectiveCategories = new LinkedList<>();
+
+  /**
+   * @return unmodifiable list
+   */
+  public List<VirtualSubjectiveScoreCategory> getVirtualSubjectiveCategories() {
+    return virtualSubjectiveCategories;
+  }
+
+  /**
+   * Add a virtual subjective category to the end of the list.
+   * Since {@link VirtualSubjectiveScoreCategory} is mutable, this does not check
+   * that the names
+   * are unique. That needs to be done by a higher level class.
+   *
+   * @param v the category to add
+   */
+  public void addVirtualSubjectiveCategory(final VirtualSubjectiveScoreCategory v) {
+    virtualSubjectiveCategories.add(v);
+  }
+
+  /**
+   * Add a virtual subjective category at the specified index.
+   * Since {@link VirtualSubjectiveScoreCategory} is mutable, this does not check
+   * that the names
+   * are unique. That needs to be done by a higher level class.
+   *
+   * @param v the category to add
+   * @param index the index to add the category at
+   * @throws IndexOutOfBoundsException if {@code index} is outside the range of
+   *           subjective categories
+   */
+  public void addVirtualSubjectiveCategory(final int index,
+                                           final VirtualSubjectiveScoreCategory v)
+      throws IndexOutOfBoundsException {
+    virtualSubjectiveCategories.add(index, v);
+  }
+
+  /**
+   * Remove a virtual subjective category.
+   *
+   * @param v the category to remove
+   * @return if the category was removed
+   * @see List#remove(Object)
+   */
+  public boolean removeVirtualSubjectiveCategory(final VirtualSubjectiveScoreCategory v) {
+    return virtualSubjectiveCategories.remove(v);
+  }
+
+  /**
+   * Remove the virtual subjective category at the specified index.
+   *
+   * @param index the index to remove the element from
+   * @return the category that was removed
+   * @throws IndexOutOfBoundsException if {@code index} is outside the range of
+   *           subjective categories
+   */
+  public VirtualSubjectiveScoreCategory removeVirtualSubjectiveCategory(final int index)
+      throws IndexOutOfBoundsException {
+    return virtualSubjectiveCategories.remove(index);
+  }
+
+  /**
+   * @param name category name
+   * @return the category or null if not found
+   */
+  public @Nullable VirtualSubjectiveScoreCategory getVirtualSubjectiveCategoryByName(final String name) {
+    return virtualSubjectiveCategories.stream().filter(c -> c.getName().equals(name)).findAny().orElse(null);
+  }
+
+  /**
+   * @param title category title
+   * @return the category or null if not found
+   */
+  public @Nullable VirtualSubjectiveScoreCategory getVirtualSubjectiveCategoryByTitle(final String title) {
+    return virtualSubjectiveCategories.stream().filter(c -> c.getTitle().equals(title)).findAny().orElse(null);
+  }
+
   private final LinkedList<NonNumericCategory> nonNumericCategories = new LinkedList<>();
 
   /**
@@ -387,6 +472,11 @@ public class ChallengeDescription implements Serializable {
     }
 
     for (final SubjectiveScoreCategory cat : mSubjectiveCategories) {
+      final Element subjEle = cat.toXml(document);
+      fll.appendChild(subjEle);
+    }
+
+    for (final VirtualSubjectiveScoreCategory cat : virtualSubjectiveCategories) {
       final Element subjEle = cat.toXml(document);
       fll.appendChild(subjEle);
     }

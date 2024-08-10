@@ -7,6 +7,8 @@
                 <xsd:element ref="Performance" />
                 <xsd:element ref="subjectiveCategory"
                     minOccurs="0" maxOccurs="unbounded" />
+                <xsd:element ref="virtualSubjectiveCategory"
+                    minOccurs="0" maxOccurs="unbounded" />
                 <xsd:element ref="nonNumericCategory"
                     minOccurs="0" maxOccurs="unbounded" />
             </xsd:sequence>
@@ -18,7 +20,7 @@
                         See
                         fll.xml.ChallengeParser.CURRENT_SCHEMA_VERSION
                         for current
-                        expected version, currently 2
+                        expected version.
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:attribute>
@@ -87,7 +89,7 @@
                 </xsd:documentation>
             </xsd:annotation>
             <xsd:selector
-                xpath="./subjectiveCategory|./Performance" />
+                xpath="./subjectiveCategory|./Performance|./virtualSubjectiveCategory" />
             <xsd:field xpath="@name" />
         </xsd:key>
         <xsd:key name="categoryTitleKey">
@@ -98,14 +100,14 @@
                 </xsd:documentation>
             </xsd:annotation>
             <xsd:selector
-                xpath="./subjectiveCategory|./Performance|./nonNumericCategory" />
+                xpath="./subjectiveCategory|./Performance|./nonNumericCategory|./virtualSubjectiveCategory" />
             <xsd:field xpath="@title" />
         </xsd:key>
         <xsd:keyref name="subjectiveNonNumericRef"
             refer="nonNumericCategoryKey">
             <xsd:annotation>
                 <xsd:documentation>
-                    Subjective categories may reference
+                    Subjective categories must reference
                     non-numeric categories.
                 </xsd:documentation>
             </xsd:annotation>
@@ -189,8 +191,11 @@
                 type="xsd:decimal" default="600">
                 <xsd:annotation>
                     <xsd:documentation>
-                        Maximum possible score, used for scaling of scores.
-                        The default value is for handling old challenge descriptions and should be set for all challenge descriptions.
+                        Maximum possible score, used for
+                        scaling of scores.
+                        The default value is for
+                        handling old challenge descriptions and should
+                        be set for all challenge descriptions.
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:attribute>
@@ -403,6 +408,32 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="virtualSubjectiveCategory">
+        <xsd:complexType>
+            <xsd:sequence maxOccurs="1">
+                <xsd:sequence maxOccurs="unbounded">
+                    <xsd:element ref="subjectiveGoalRef"
+                        minOccurs="0" maxOccurs="unbounded" />
+                </xsd:sequence>
+            </xsd:sequence>
+            <xsd:attribute name="name" type="databaseName"
+                use="required" />
+            <xsd:attribute name="title" type="xsd:string"
+                use="required" />
+
+            <xsd:attribute name="weight" type="xsd:float"
+                default="1.0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Weight this category has. Should
+                        be a
+                        number
+                        between 0 and 1.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+        </xsd:complexType>
+    </xsd:element>
 
     <xsd:element name="goalGroup">
         <xsd:annotation>
@@ -700,6 +731,16 @@
         <xsd:attribute name="scoreType"
             type="goalScoreType" use="required" />
     </xsd:complexType>
+
+    <xsd:element name="subjectiveGoalRef">
+        <xsd:complexType>
+            <xsd:attribute name="categoryName"
+                type="xsd:string" use="required" />
+            <xsd:attribute name="goal" type="databaseName"
+                use="required" />
+        </xsd:complexType>
+    </xsd:element>
+
 
     <xsd:simpleType name="goalScoreType">
         <xsd:annotation>
