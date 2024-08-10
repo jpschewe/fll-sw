@@ -6,6 +6,8 @@
 
 package fll.xml.ui;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -18,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
@@ -136,12 +139,20 @@ public class VirtualSubjectiveCategoryEditor extends Box implements Validatable 
     final SubjectiveGoalRefEditor editor = new SubjectiveGoalRefEditor(description, category, goal);
     goalReferenceEditors.add(editor);
 
-    final Box panel = Box.createHorizontalBox();
-    panel.add(editor);
+    final JPanel panel = new JPanel(new GridBagLayout());
+    GridBagConstraints gbc;
+
+    gbc = new GridBagConstraints();
+    panel.add(editor, gbc);
     final JButton delete = new JButton("Delete");
-    panel.add(delete);
-    panel.add(Box.createHorizontalGlue());
-    
+    panel.add(delete, gbc);
+
+    gbc = new GridBagConstraints();
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.weightx = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    panel.add(new JPanel(), gbc);
+
     delete.addActionListener(l -> {
       final int confirm = JOptionPane.showConfirmDialog(VirtualSubjectiveCategoryEditor.this,
                                                         "Are you sure that you want to delete the goal reference?",
