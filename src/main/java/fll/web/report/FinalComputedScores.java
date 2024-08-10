@@ -1095,7 +1095,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                 } else {
                   scoreSeen = true;
                 }
-                rawScoreText.append(Utilities.getFormatForScoreType(ScoreType.FLOAT).format(v));
+                rawScoreText.append(Utilities.getFormatForScoreType(category.getScoreType()).format(v));
               }
             }
 

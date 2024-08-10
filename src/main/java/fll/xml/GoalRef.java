@@ -29,7 +29,10 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
 
   private static final String SCORE_TYPE_ATTRIBUTE = "scoreType";
 
-  private static final String GOAL_ATTRIBUTE = "goal";
+  /**
+   * Attribute for the goal referenced.
+   */
+  public static final String GOAL_ATTRIBUTE = "goal";
 
   /**
    * @param ele the element to parse

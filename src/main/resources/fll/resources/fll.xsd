@@ -191,8 +191,11 @@
                 type="xsd:decimal" default="600">
                 <xsd:annotation>
                     <xsd:documentation>
-                        Maximum possible score, used for scaling of scores.
-                        The default value is for handling old challenge descriptions and should be set for all challenge descriptions.
+                        Maximum possible score, used for
+                        scaling of scores.
+                        The default value is for
+                        handling old challenge descriptions and should
+                        be set for all challenge descriptions.
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:attribute>
@@ -731,12 +734,10 @@
 
     <xsd:element name="subjectiveGoalRef">
         <xsd:complexType>
-            <xsd:complexContent>
-                <xsd:extension base="goalRef">
-                    <xsd:attribute name="categoryName"
-                        type="xsd:string" use="required" />
-                </xsd:extension>
-            </xsd:complexContent>
+            <xsd:attribute name="categoryName"
+                type="xsd:string" use="required" />
+            <xsd:attribute name="goal" type="databaseName"
+                use="required" />
         </xsd:complexType>
     </xsd:element>
 

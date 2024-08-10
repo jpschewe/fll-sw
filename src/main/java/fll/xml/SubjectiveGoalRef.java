@@ -6,6 +6,7 @@
 
 package fll.xml;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,10 +15,12 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.web.playoff.TeamScore;
+
 /**
  * Reference to a goal in another score category.
  */
-public class SubjectiveGoalRef extends GoalRef {
+public class SubjectiveGoalRef implements Evaluatable, Serializable {
 
   /**
    * XML tag name used for this class.
@@ -53,25 +56,35 @@ public class SubjectiveGoalRef extends GoalRef {
   public SubjectiveGoalRef(final Element ele,
                            final List<SubjectiveScoreCategory> subjectiveCategories)
       throws ChallengeValidationException {
-    this(ele, findCategory(ele, subjectiveCategories));
-  }
-
-  private SubjectiveGoalRef(final Element ele,
-                            final SubjectiveScoreCategory category) {
-    super(ele, category);
-    this.category = category;
+    this.goalName = ele.getAttribute(GoalRef.GOAL_ATTRIBUTE);
+    this.category = findCategory(ele, subjectiveCategories);
   }
 
   /**
    * @param goalName {@link #getGoalName()}
    * @param scope {@link #getCategory()}
-   * @param scoreType {@link #getScoreType()}
    */
   public SubjectiveGoalRef(final String goalName,
-                           final @UnknownInitialization SubjectiveScoreCategory scope,
-                           final GoalScoreType scoreType) {
-    super(goalName, scope, scoreType);
+                           final @UnknownInitialization SubjectiveScoreCategory scope) {
+    this.goalName = goalName;
     this.category = scope;
+  }
+
+  private String goalName;
+
+  /**
+   * @return the name of the goal referenced
+   */
+
+  public String getGoalName() {
+    return goalName;
+  }
+
+  /**
+   * @param v see {@link #getGoalName()}
+   */
+  public void setGoalName(final String v) {
+    goalName = v;
   }
 
   private final @NotOnlyInitialized SubjectiveScoreCategory category;
@@ -84,8 +97,27 @@ public class SubjectiveGoalRef extends GoalRef {
   }
 
   @Override
+  public double evaluate(final TeamScore teamScore) {
+    return getGoal().evaluate(teamScore);
+  }
+
+  /**
+   * Resolve the goal name against the goal scope.
+   * 
+   * @return the goal
+   * @throws ScopeException if the goal cannot be found
+   */
+  public AbstractGoal getGoal() throws ScopeException {
+    return category.getGoal(goalName);
+  }
+
+  /**
+   * @param doc used to create elements
+   * @return XML version of this object
+   */
   public Element toXml(final Document doc) {
-    final Element ele = internalToXml(doc, TAG_NAME);
+    final Element ele = doc.createElement(TAG_NAME);
+    ele.setAttribute(GoalRef.GOAL_ATTRIBUTE, goalName);
     ele.setAttribute(CATEGORY_NAME_ATTRIBUTE, category.getName());
     return ele;
   }
