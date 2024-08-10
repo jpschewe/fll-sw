@@ -141,6 +141,7 @@ public class VirtualSubjectiveCategoryEditor extends Box implements Validatable 
     final JButton delete = new JButton("Delete");
     panel.add(delete);
     panel.add(Box.createHorizontalGlue());
+    
     delete.addActionListener(l -> {
       final int confirm = JOptionPane.showConfirmDialog(VirtualSubjectiveCategoryEditor.this,
                                                         "Are you sure that you want to delete the goal reference?",

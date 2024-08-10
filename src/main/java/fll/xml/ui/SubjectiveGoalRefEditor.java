@@ -6,13 +6,14 @@
 
 package fll.xml.ui;
 
+import java.awt.BorderLayout;
 import java.util.Collection;
 import java.util.LinkedList;
 
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.ChooseOptionDialog;
@@ -26,7 +27,7 @@ import fll.xml.SubjectiveScoreCategory;
  */
 @SuppressFBWarnings(value = { "SE_BAD_FIELD",
                               "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
-/* package */ class SubjectiveGoalRefEditor extends Box implements Validatable {
+/* package */ class SubjectiveGoalRefEditor extends JPanel implements Validatable {
 
   private final ValidityPanel validPanel;
 
@@ -56,16 +57,19 @@ import fll.xml.SubjectiveScoreCategory;
   /* package */ SubjectiveGoalRefEditor(final ChallengeDescription description,
                                         final SubjectiveScoreCategory category,
                                         final AbstractGoal goal) {
-    super(BoxLayout.LINE_AXIS);
+    super(new BorderLayout());
     this.description = description;
     this.category = category;
     this.goal = goal;
 
     validPanel = new ValidityPanel();
-    add(validPanel);
+    add(validPanel, BorderLayout.WEST);
+
+    final Box mainPanel = Box.createHorizontalBox();
+    add(mainPanel, BorderLayout.CENTER);
 
     categoryEditor = new JButton(category.getTitle());
-    add(categoryEditor);
+    mainPanel.add(categoryEditor);
     categoryEditor.setToolTipText("Click to change the category");
     categoryEditor.addActionListener(l -> {
       final Collection<SubjectiveScoreCategory> categories = description.getSubjectiveCategories();
@@ -87,7 +91,7 @@ import fll.xml.SubjectiveScoreCategory;
     });
 
     goalEditor = new JButton(goal.getTitle());
-    add(goalEditor);
+    mainPanel.add(goalEditor);
     goalEditor.setToolTipText("Click to change the goal");
     goalEditor.addActionListener(l -> {
       final Collection<AbstractGoal> goals = this.category.getAllGoals();
