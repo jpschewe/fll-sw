@@ -84,6 +84,14 @@ public class VirtualSubjectiveScoreCategory implements Serializable, Evaluatable
     return Collections.unmodifiableList(goalReferences);
   }
 
+  /**
+   * @param v replace all goal references
+   */
+  public void setGoalReferences(final List<SubjectiveGoalRef> v) {
+    goalReferences.clear();
+    goalReferences.addAll(v);
+  }
+
   private String name;
 
   /**
@@ -136,9 +144,52 @@ public class VirtualSubjectiveScoreCategory implements Serializable, Evaluatable
    * @return The maximum score
    */
   public double getMaximumScore() {
-    final double maximumScore = getGoalReferences().stream().map(GoalRef::getGoal)
+    final double maximumScore = getGoalReferences().stream().map(SubjectiveGoalRef::getGoal)
                                                    .mapToDouble(AbstractGoal::getMaximumScore).sum();
     return maximumScore;
+  }
+
+  /**
+   * Add the specified element to the end of the list.
+   *
+   * @param v the new reference
+   */
+  public void addGoalReference(final SubjectiveGoalRef v) {
+    goalReferences.add(v);
+  }
+
+  /**
+   * Add a reference at the specified index.
+   *
+   * @param index the index to add the reference at
+   * @param v the reference to add
+   * @throws IndexOutOfBoundsException if the index is out of range
+   */
+  public void addGoalReference(final int index,
+                               final SubjectiveGoalRef v)
+      throws IndexOutOfBoundsException {
+    goalReferences.add(index, v);
+  }
+
+  /**
+   * Remove the specified reference from the list.
+   *
+   * @param v the reference to remove
+   * @return if the reference was removed
+   */
+  public boolean removeGoalReference(final SubjectiveGoalRef v) {
+    return goalReferences.remove(v);
+  }
+
+  /**
+   * Remove the reference at the specified index.
+   *
+   * @param index the index of the reference to remove
+   * @return the removed reference
+   * @throws IndexOutOfBoundsException if the index is out of range
+   */
+  public SubjectiveGoalRef removeGoalReference(final int index) throws IndexOutOfBoundsException {
+    return goalReferences.remove(index);
   }
 
   /**

@@ -38,6 +38,7 @@ import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 import fll.xml.WinnerType;
 import fll.xml.ui.MovableExpandablePanel.DeleteEvent;
 import fll.xml.ui.MovableExpandablePanel.DeleteEventListener;
@@ -81,11 +82,19 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
 
   private final SubjectiveEventListener subjectiveEventListener;
 
+  private final List<VirtualSubjectiveCategoryEditor> virtualSubjectiveEditors = new LinkedList<>();
+
+  private final JComponent virtualSubjectiveContainer;
+
+  private final VirtualSubjectiveEventListener virtualSubjectiveEventListener;
+
   private final ValidityPanel titleValidity;
 
   private final ValidityPanel performanceValid;
 
   private final ValidityPanel subjectiveValid;
+
+  private final ValidityPanel virtualSubjectiveValid;
 
   private final List<NonNumericCategoryEditor> nonNumericCategoryEditors = new LinkedList<>();
 
@@ -288,6 +297,27 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
 
     subjectiveEventListener = new SubjectiveEventListener();
 
+    // virtual subjective categories
+    final Box virtualSubjectiveTopContainer = Box.createVerticalBox();
+    topPanel.add(virtualSubjectiveTopContainer);
+    virtualSubjectiveTopContainer.setBorder(BorderFactory.createTitledBorder("Virtual Categories"));
+    virtualSubjectiveValid = new ValidityPanel();
+    virtualSubjectiveTopContainer.add(virtualSubjectiveValid);
+
+    final Box virtualSubjectiveButtonBox = Box.createHorizontalBox();
+    virtualSubjectiveTopContainer.add(virtualSubjectiveButtonBox);
+
+    final JButton addVirtualSubjectiveCategory = new JButton("Add Virtual Subjective Category");
+    virtualSubjectiveButtonBox.add(addVirtualSubjectiveCategory);
+
+    virtualSubjectiveButtonBox.add(Box.createHorizontalGlue());
+
+    virtualSubjectiveContainer = Box.createVerticalBox();
+    virtualSubjectiveTopContainer.add(virtualSubjectiveContainer);
+
+    virtualSubjectiveEventListener = new VirtualSubjectiveEventListener();
+    // end virtual subjective categories
+
     // non-numeric categories
 
     final Box nonNumericCategoriesTopContainer = Box.createVerticalBox();
@@ -317,9 +347,11 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
 
     // object is initialized
     addSubjectiveCategory.addActionListener(l -> addNewSubjectiveCategory());
+    addVirtualSubjectiveCategory.addActionListener(l -> addNewVirtualSubjectiveCategory());
     addNonNumericCategory.addActionListener(l -> addNewNonNumericCategory());
 
     mDescription.getSubjectiveCategories().forEach(this::addSubjectiveCategory);
+    mDescription.getVirtualSubjectiveCategories().forEach(this::addVirtualSubjectiveCategory);
     mDescription.getNonNumericCategories().forEach(this::addNonNumericCategory);
   }
 
@@ -350,6 +382,35 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     GuiUtils.addToContainer(mSubjectiveContainer, container);
 
     mSubjectiveEditors.add(editor);
+  }
+
+  private void addNewVirtualSubjectiveCategory(@UnknownInitialization(ChallengeDescriptionEditor.class) ChallengeDescriptionEditor this) {
+    final String name = String.format("category_%d", virtualSubjectiveEditors.size());
+    final String title = String.format("Category %d", virtualSubjectiveEditors.size());
+
+    final VirtualSubjectiveScoreCategory cat = new VirtualSubjectiveScoreCategory(name, title);
+    mDescription.addVirtualSubjectiveCategory(cat);
+
+    addVirtualSubjectiveCategory(cat);
+  }
+
+  private void addVirtualSubjectiveCategory(@UnknownInitialization(ChallengeDescriptionEditor.class) ChallengeDescriptionEditor this,
+                                            final VirtualSubjectiveScoreCategory cat) {
+    final VirtualSubjectiveCategoryEditor editor = new VirtualSubjectiveCategoryEditor(mDescription, cat);
+    editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
+
+    final MovableExpandablePanel container = new MovableExpandablePanel(cat.getTitle(), editor, true, true);
+    container.addMoveEventListener(virtualSubjectiveEventListener);
+    container.addDeleteEventListener(virtualSubjectiveEventListener);
+
+    editor.addPropertyChangeListener("title", e -> {
+      final String newTitle = (String) e.getNewValue();
+      container.setTitle(newTitle);
+    });
+
+    GuiUtils.addToContainer(virtualSubjectiveContainer, container);
+
+    virtualSubjectiveEditors.add(editor);
   }
 
   private void addNewNonNumericCategory() {
@@ -409,6 +470,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
 
     mPerformanceEditor.commitChanges();
     mSubjectiveEditors.forEach(e -> e.commitChanges());
+    virtualSubjectiveEditors.forEach(e -> e.commitChanges());
     nonNumericCategoryEditors.forEach(e -> e.commitChanges());
   }
 
@@ -458,6 +520,30 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
       subjectiveValid.setInvalid(message);
     } else {
       subjectiveValid.setValid();
+    }
+
+    final Collection<String> virtualSubjectiveInvalidMessages = new LinkedList<>();
+    final Set<String> virtualSubjectiveCategoryNames = new HashSet<>();
+    for (final VirtualSubjectiveCategoryEditor editor : virtualSubjectiveEditors) {
+      final String name = editor.getVirtualSubjectiveScoreCategory().getName();
+
+      final boolean editorValid = editor.checkValidity(virtualSubjectiveInvalidMessages);
+      if (!editorValid) {
+        virtualSubjectiveInvalidMessages.add(String.format("Category \"%s\" has invalid elements", name));
+        valid = false;
+      }
+
+      final boolean newName = virtualSubjectiveCategoryNames.add(name);
+      if (!newName) {
+        virtualSubjectiveInvalidMessages.add(String.format("The subjective category name \"%s\" is used more than once",
+                                                           name));
+      }
+    }
+    if (!virtualSubjectiveInvalidMessages.isEmpty()) {
+      final String message = String.join("<br/>", virtualSubjectiveInvalidMessages);
+      virtualSubjectiveValid.setInvalid(message);
+    } else {
+      virtualSubjectiveValid.setValid();
     }
 
     final Collection<String> nonNumericCategoryInvalidMessages = new LinkedList<>();
@@ -563,6 +649,85 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
 
       // update the UI
       GuiUtils.removeFromContainer(mSubjectiveContainer, index);
+    }
+  }
+
+  private final class VirtualSubjectiveEventListener implements MoveEventListener, DeleteEventListener {
+
+    @Override
+    public void requestedMove(MoveEvent e) {
+
+      final JComponent container = e.getComponent();
+      if (!(container instanceof MovableExpandablePanel)) {
+        LOGGER.warn("Found something other than a MovableExpandablePanel in the virtual subjective list");
+      }
+
+      final int oldIndex = Utilities.getIndexOfComponent(virtualSubjectiveContainer, container);
+      if (oldIndex < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of move event in virtual subjective container");
+        }
+        return;
+      }
+
+      final int newIndex;
+      if (e.getDirection() == MoveDirection.DOWN) {
+        newIndex = oldIndex
+            + 1;
+      } else {
+        newIndex = oldIndex
+            - 1;
+      }
+
+      if (newIndex < 0
+          || newIndex >= virtualSubjectiveContainer.getComponentCount()) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Can't move component outside the container oldIndex: "
+              + oldIndex
+              + " newIndex: "
+              + newIndex);
+        }
+        return;
+      }
+
+      // update editor list
+      final VirtualSubjectiveCategoryEditor editor = virtualSubjectiveEditors.remove(oldIndex);
+      virtualSubjectiveEditors.add(newIndex, editor);
+
+      // update the UI
+      virtualSubjectiveContainer.add(container, newIndex);
+      virtualSubjectiveContainer.validate();
+
+      // update the order in the challenge description
+      final VirtualSubjectiveScoreCategory category = mDescription.removeVirtualSubjectiveCategory(oldIndex);
+      mDescription.addVirtualSubjectiveCategory(newIndex, category);
+    }
+
+    @Override
+    public void requestDelete(final DeleteEvent e) {
+      final int confirm = JOptionPane.showConfirmDialog(ChallengeDescriptionEditor.this,
+                                                        "Are you sure that you want to delete the virtual subjective category?",
+                                                        "Confirm Delete", JOptionPane.YES_NO_OPTION);
+      if (confirm != JOptionPane.YES_OPTION) {
+        return;
+      }
+
+      final int index = Utilities.getIndexOfComponent(virtualSubjectiveContainer, e.getComponent());
+      if (index < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of delete event in virtual subjective category container");
+        }
+        return;
+      }
+
+      // update editor list
+      virtualSubjectiveEditors.remove(index);
+
+      // update the challenge description
+      mDescription.removeVirtualSubjectiveCategory(index);
+
+      // update the UI
+      GuiUtils.removeFromContainer(virtualSubjectiveContainer, index);
     }
   }
 
