@@ -381,11 +381,8 @@ const deliberationModule = {};
         for (const category of finalist_module.getAllCategories()) {
             const dCategory = deliberationModule.findOrCreateCategory(category.name, category.scheduled, category.overall, category.numeric);
 
-            if (category.scheduled) {
-                // only load the nominees for scheduled categories
-                for (const teamNumber of category.teams) {
-                    dCategory.addNominee(teamNumber);
-                }
+            for (const teamNumber of category.teams) {
+                dCategory.addNominee(teamNumber);
             }
             for (const [index, teamNumber] of dCategory.getPotentialWinners().entries()) {
                 const place = index + 1;
