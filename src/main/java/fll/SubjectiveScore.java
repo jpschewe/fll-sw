@@ -276,7 +276,7 @@ public class SubjectiveScore {
   /**
    * @param v see {@link #getNonNumericNominations()}
    */
-  public void setNonNumericNominations(final Set<String> v) {
+  private void setNonNumericNominations(final Set<String> v) {
     nonNumericNominations.clear();
     nonNumericNominations.addAll(v);
   }
