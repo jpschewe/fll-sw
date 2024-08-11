@@ -1406,7 +1406,7 @@ const finalist_module = {}
                             alert("Unable to find category with name '" + categoryName + "' referenced in the schedule rows'");
                         } else {
                             finalist_module.addTeamToCategory(category, teamNumber);
-                            // mark category visited so that the numeric nominees don't get reset'
+                            // mark category visited so that the numeric nominees don't get reset   
                             finalist_module.setCategoryVisited(category, awardGroup);
                         }
                     }
