@@ -182,10 +182,6 @@ const nonNumericUi = {}
         return "judgingStation_" + category + "_" + teamIdx;
     }
 
-    function teamJudgesId(category, teamIdx) {
-        return "judges_" + category + "_" + teamIdx;
-    }
-
     function teamDeleteId(category, teamIdx) {
         return "delete_" + category + "_" + teamIdx;
     }
@@ -203,15 +199,6 @@ const nonNumericUi = {}
 
         const teamJudgingStationElement = document.getElementById(teamJudgingStationId(category.catId, teamIdx));
         teamJudgingStationElement.value = team.judgingGroup;
-
-        const judges = finalist_module.getNominatingJudges(category, team.num);
-        let judgesStr;
-        if (!judges) {
-            judgesStr = "";
-        } else {
-            judgesStr = judges.filter(x => x).join(", ");
-        }
-        document.getElementById(teamJudgesId(category.catId, teamIdx)).value = judgesStr;
     }
 
     /**
@@ -282,12 +269,6 @@ const nonNumericUi = {}
         judgingStationEle.setAttribute("id", teamJudgingStationId(category.catId, teamIdx));
         judgingStationEle.readonly = true;
         judgingStationEle.disabled = true;
-
-        const judgesEle = document.createElement("input");
-        teamEle.appendChild(judgesEle);
-        judgesEle.setAttribute("id", teamJudgesId(category.catId, teamIdx));
-        judgesEle.readonly = true;
-        judgesEle.disabled = true;
 
         const deleteButton = document.createElement("button");
         teamEle.appendChild(deleteButton);
