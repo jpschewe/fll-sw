@@ -62,22 +62,11 @@ function FinalistSchedule(categories, schedule) {
 }
 
 /**
- * Needs to match fll.db.NonNumericNominees.
+ * Needs to match fll.db.FinalistNonNumericNominees.
  */
-function NonNumericNominees(categoryName, nominees) {
+function FinalistNonNumericNominees(categoryName, nominees) {
     this.categoryName = categoryName;
     this.nominees = nominees;
-}
-
-/**
- * Needs to match fll.db.NonNumericNominees.Nominee
- */
-function Nominee(teamNumber, judges) {
-    this.teamNumber = teamNumber;
-    this.judges = judges;
-    if (typeof this.judges == 'undefined') {
-        this.judges = [null]
-    }
 }
 
 /**

@@ -41,7 +41,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         errors summarizing scores.</a>
 
     <a class="wide" href="NonNumericNomineesReport" target="_blank">Optional
-        award nominations</a>
+        award nominations (from subjective judging rubrics)</a>
 
     <a class="wide" target="_topScoreReportPerAwardGroup"
         href="topScoreReportPerAwardGroup.jsp">Top performance -
@@ -147,9 +147,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <a class="wide" href="non-numeric-nominees.jsp" target="_blank">Entry:
         Non-numeric nominations <br /> This is used to enter the teams
         that are up for consideration for the non-scored subjective
-        categories. This information can come from the subjective
-        judging application. The information entered here transfers over
-        to the finalist scheduling web application.
+        categories. The information entered here transfers over to the
+        finalist scheduling web application.
     </a>
 
     <a class="wide" href="edit-award-winners.jsp" target="_blank">Entry:

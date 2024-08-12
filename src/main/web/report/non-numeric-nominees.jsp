@@ -33,7 +33,9 @@
     <h1>Non Numeric Categories</h1>
 
     <p>This page allows you to select teams that are nominated for
-        awards that do not have scores in the database.</p>
+        awards that do not have scores in the database. This information
+        feeds into the finalist scheduling tool and the deliberations
+        tool.</p>
 
     <h2>Overall</h2>
     <p>These categories are awarded for the whole tournament rather

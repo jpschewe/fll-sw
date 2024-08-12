@@ -1,3 +1,4 @@
+* #1170 - Separate out finalist non-numeric nominees
 * #1198 - Add support for virtual subjective categories
 * #1200 - Remove normalization in favor of scaling
 * Remove goal group from category scores by judging group report

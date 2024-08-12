@@ -1227,23 +1227,12 @@ const finalist_module = {}
     };
 
     /**
-     * Get the judges that nominated a team for a category.
-     */
-    finalist_module.getNominatingJudges = function(category, teamNumber) {
-        return category.judges[teamNumber];
-    };
-
-    finalist_module.setNominatingJudges = function(category, teamNumber, judges) {
-        category.judges[teamNumber] = judges;
-    };
-
-    /**
       * Load the non-numeric nominees from the server.
       * 
       * @return promise to execute
       */
     finalist_module.loadNonNumericNominees = function() {
-        return fetch("../../api/NonNumericNominees").then(checkJsonResponse).then(function(data) {
+        return fetch("../../api/FinalistNonNumericNominees").then(checkJsonResponse).then(function(data) {
             for (const nonNumericNominee of data) {
                 let category = finalist_module.getCategoryByName(nonNumericNominee.categoryName);
                 if (null == category) {
@@ -1256,8 +1245,7 @@ const finalist_module = {}
                 }
 
                 for (const nominee of nonNumericNominee.nominees) {
-                    finalist_module.addTeamToCategory(category, nominee.teamNumber);
-                    finalist_module.setNominatingJudges(category, nominee.teamNumber, nominee.judges);
+                    finalist_module.addTeamToCategory(category, nominee);
                 } // category scores
             } // categories
         });
@@ -1265,7 +1253,7 @@ const finalist_module = {}
 
     /**
      * Convert the non-numeric nominee information into a list of
-     * NonNumericNominees objects and upload to the server.
+     * FinalistNonNumericNominees objects and upload to the server.
      * @param successCallback called with the server result on success
      * @param failCallback called with the server result on failure
      * @return promise to execute
@@ -1275,15 +1263,13 @@ const finalist_module = {}
         for (const category of finalist_module.getNonNumericCategories()) {
             var categoryNominees = [];
             for (const teamNumber of category.teams) {
-                const judges = finalist_module.getNominatingJudges(category, teamNumber);
-                const nominee = new Nominee(teamNumber, judges);
-                categoryNominees.push(nominee);
+                categoryNominees.push(teamNumber);
             } // foreach team
-            const nominees = new NonNumericNominees(category.name, categoryNominees);
+            const nominees = new FinalistNonNumericNominees(category.name, categoryNominees);
             allNonNumericNominees.push(nominees);
         } // foreach category
 
-        return uploadJsonData("../../api/NonNumericNominees", "POST", allNonNumericNominees)
+        return uploadJsonData("../../api/FinalistNonNumericNominees", "POST", allNonNumericNominees)
             .then(checkJsonResponse).then(function(result) {
                 if (result.success) {
                     successCallback(result);
@@ -1406,7 +1392,7 @@ const finalist_module = {}
                             alert("Unable to find category with name '" + categoryName + "' referenced in the schedule rows'");
                         } else {
                             finalist_module.addTeamToCategory(category, teamNumber);
-                            // mark category visited so that the numeric nominees don't get reset'
+                            // mark category visited so that the numeric nominees don't get reset   
                             finalist_module.setCategoryVisited(category, awardGroup);
                         }
                     }
