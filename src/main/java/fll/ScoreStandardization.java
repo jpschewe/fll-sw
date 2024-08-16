@@ -389,9 +389,9 @@ public final class ScoreStandardization {
 
         try (
             PreparedStatement insert = connection.prepareStatement("INSERT INTO virtual_subjective_category (tournament_id, category_name, source_category_name, goal_name, team_number, goal_score)"
-                + " SELECT CAST(? AS INTEGER), CAST(? AS LONGVARCHAR), CAST(? AS LONGVARCHAR), CAST(? AS LONGVARCHAR), TeamNumber, AVG("
+                + " SELECT CAST(? AS INTEGER), CAST(? AS LONGVARCHAR), CAST(? AS LONGVARCHAR), CAST(? AS LONGVARCHAR), TeamNumber, AVG(IFNULL("
                 + ref.getGoalName()
-                + ") FROM "
+                + ", 0)) FROM "
                 + ref.getCategory().getName()
                 + " WHERE Tournament = ?"
                 + " GROUP BY TeamNumber")) {
