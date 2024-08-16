@@ -3,6 +3,7 @@ package fll.documents.writers;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 
 import javax.xml.transform.TransformerException;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fop.apps.FOPException;
@@ -34,6 +36,8 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.SubjectiveScore;
@@ -64,7 +68,7 @@ import net.mtu.eggplant.xml.XMLUtils;
 /**
  * Write subjective sheets as PDFs.
  */
-public class SubjectivePdfWriter {
+public final class SubjectivePdfWriter {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private static final String CORNER_RADIUS = "5pt";
@@ -76,6 +80,8 @@ public class SubjectivePdfWriter {
   private final Color sheetColor;
 
   private final SubjectiveScoreCategory scoreCategory;
+
+  private final String gearEmptyBase64;
 
   private static final class RubricMetaData {
 
@@ -187,6 +193,7 @@ public class SubjectivePdfWriter {
       }
     }
     this.virtualReferences = Collections.unmodifiableSet(virtualReferences);
+    this.gearEmptyBase64 = getGearEmptyImageAsBase64();
 
     // uses hard coded constants to make the colors look like FIRST and default
     // to blue.
@@ -206,8 +213,23 @@ public class SubjectivePdfWriter {
 
   }
 
-  private String getHeaderImageAsBase64() {
+  private static String getGearEmptyImageAsBase64() {
+    final Base64.Encoder encoder = Base64.getEncoder();
 
+    final ClassLoader loader = castNonNull(UserImages.class.getClassLoader());
+    try (InputStream input = loader.getResourceAsStream("fll/resources/documents/gear-empty.png")) {
+      if (null == input) {
+        throw new FLLInternalException("Cannot find gear empty image");
+      }
+
+      final String encoded = encoder.encodeToString(IOUtils.toByteArray(input));
+      return encoded;
+    } catch (final IOException e) {
+      throw new FLLInternalException("Unable to read gear empty image", e);
+    }
+  }
+
+  private static String getHeaderImageAsBase64() {
     final Base64.Encoder encoder = Base64.getEncoder();
 
     final Path fllSubjectiveLogo = UserImages.getImagesPath().resolve(UserImages.FLL_SUBJECTIVE_LOGO_FILENAME);
@@ -224,7 +246,6 @@ public class SubjectivePdfWriter {
     } catch (final IOException e) {
       throw new FLLInternalException("Unable to read subjective header image", e);
     }
-
   }
 
   private Element createHeader(final Document document,
@@ -1230,6 +1251,36 @@ public class SubjectivePdfWriter {
       useBackCell.setAttribute("color", lightGray);
     }
 
+    if (!virtualReferences.isEmpty()) {
+      final Element blankRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+      tableBody.appendChild(blankRow);
+      final Element blankCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                         String.valueOf(Utilities.NON_BREAKING_SPACE));
+      blankRow.appendChild(blankCell);
+      blankCell.setAttribute("number-columns-spanned", "2");
+
+      final String legendText = String.format("%c Criteria on this page with this style of check box count dually toward %s and %s awards rankings",
+                                              Utilities.NON_BREAKING_SPACE, scoreCategory.getTitle(),
+                                              virtualCategoryNames);
+      final Element legendRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+      tableBody.appendChild(legendRow);
+
+      final Element legendCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+      legendRow.appendChild(legendCell);
+      legendCell.setAttribute("number-columns-spanned", "2");
+
+      final Element legendContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+      legendCell.appendChild(legendContainer);
+
+      final Element legendBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      legendContainer.appendChild(legendBlock);
+
+      final Element imageGraphic = FOPUtils.createXslFoElement(document, "external-graphic");
+      legendBlock.appendChild(imageGraphic);
+      imageGraphic.setAttribute("src", String.format("url('data:image/png;base64,%s')", gearEmptyBase64));
+
+      legendBlock.appendChild(document.createTextNode(legendText));
+    }
     return commentsTable;
   }
 
