@@ -13,11 +13,13 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -56,6 +58,7 @@ import fll.xml.GoalGroup;
 import fll.xml.NonNumericCategory;
 import fll.xml.RubricRange;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -104,6 +107,11 @@ public class SubjectivePdfWriter {
   }
 
   private final List<RubricMetaData> masterRubricRangeMetaData;
+
+  /**
+   * Virtual score categories that reference this category.
+   */
+  private final Set<VirtualSubjectiveScoreCategory> virtualReferences;
 
   private static List<RubricMetaData> computeRubricRangeTitles(final SubjectiveScoreCategory category) {
     List<RubricMetaData> masterRubricRangeMetaData = null;
@@ -163,13 +171,22 @@ public class SubjectivePdfWriter {
    * @throws FLLInternalException if the rubric titles are not consistent across
    *           the goals in the category
    */
-  public SubjectivePdfWriter(final ChallengeDescription description,
-                             final String tournamentName,
-                             final SubjectiveScoreCategory scoreCategory) {
+  private SubjectivePdfWriter(final ChallengeDescription description,
+                              final String tournamentName,
+                              final SubjectiveScoreCategory scoreCategory) {
     this.description = description;
     this.tournamentName = tournamentName;
     this.scoreCategory = scoreCategory;
     this.masterRubricRangeMetaData = computeRubricRangeTitles(scoreCategory);
+    final Set<VirtualSubjectiveScoreCategory> virtualReferences = new HashSet<>();
+    for (VirtualSubjectiveScoreCategory virt : description.getVirtualSubjectiveCategories()) {
+      final boolean referenced = virt.getGoalReferences().stream()
+                                     .anyMatch(ref -> ref.getCategory().equals(scoreCategory));
+      if (referenced) {
+        virtualReferences.add(virt);
+      }
+    }
+    this.virtualReferences = Collections.unmodifiableSet(virtualReferences);
 
     // uses hard coded constants to make the colors look like FIRST and default
     // to blue.
@@ -1101,6 +1118,8 @@ public class SubjectivePdfWriter {
   private Element createCommentsBlock(final Document document,
                                       final double height,
                                       final @Nullable SubjectiveScore score) {
+    final String virtualCategoryNames = virtualReferences.stream().map(VirtualSubjectiveScoreCategory::getTitle)
+                                                         .collect(Collectors.joining(","));
     final Element commentsTable = FOPUtils.createBasicTable(document);
 
     commentsTable.appendChild(FOPUtils.createTableColumn(document, 1));
@@ -1112,7 +1131,14 @@ public class SubjectivePdfWriter {
     final Element commentsLabelRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
     tableBody.appendChild(commentsLabelRow);
 
-    final Element commentsLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Feedback Comments");
+    final Element commentsLabel;
+    if (virtualReferences.isEmpty()) {
+      commentsLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Feedback Comments");
+    } else {
+      commentsLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                               String.format("Feedback Comments - also applies to %s",
+                                                             virtualCategoryNames));
+    }
     commentsLabelRow.appendChild(commentsLabel);
     commentsLabel.setAttribute("font-size", "10pt");
     commentsLabel.setAttribute("font-weight", "bold");
