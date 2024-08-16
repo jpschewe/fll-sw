@@ -61,6 +61,7 @@ import fll.xml.GoalElement;
 import fll.xml.GoalGroup;
 import fll.xml.NonNumericCategory;
 import fll.xml.RubricRange;
+import fll.xml.SubjectiveGoalRef;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.VirtualSubjectiveScoreCategory;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -82,6 +83,8 @@ public final class SubjectivePdfWriter {
   private final SubjectiveScoreCategory scoreCategory;
 
   private final String gearEmptyBase64;
+
+  private final String gearFilledBase64;
 
   private static final class RubricMetaData {
 
@@ -194,6 +197,7 @@ public final class SubjectivePdfWriter {
     }
     this.virtualReferences = Collections.unmodifiableSet(virtualReferences);
     this.gearEmptyBase64 = getGearEmptyImageAsBase64();
+    this.gearFilledBase64 = getGearFilledImageAsBase64();
 
     // uses hard coded constants to make the colors look like FIRST and default
     // to blue.
@@ -218,6 +222,22 @@ public final class SubjectivePdfWriter {
 
     final ClassLoader loader = castNonNull(UserImages.class.getClassLoader());
     try (InputStream input = loader.getResourceAsStream("fll/resources/documents/gear-empty.png")) {
+      if (null == input) {
+        throw new FLLInternalException("Cannot find gear empty image");
+      }
+
+      final String encoded = encoder.encodeToString(IOUtils.toByteArray(input));
+      return encoded;
+    } catch (final IOException e) {
+      throw new FLLInternalException("Unable to read gear empty image", e);
+    }
+  }
+
+  private static String getGearFilledImageAsBase64() {
+    final Base64.Encoder encoder = Base64.getEncoder();
+
+    final ClassLoader loader = castNonNull(UserImages.class.getClassLoader());
+    try (InputStream input = loader.getResourceAsStream("fll/resources/documents/gear-filled.png")) {
       if (null == input) {
         throw new FLLInternalException("Cannot find gear empty image");
       }
@@ -1000,7 +1020,20 @@ public final class SubjectivePdfWriter {
         goalComment = null;
       }
 
-      final Element rangeCell = createRubricRangeCell(document, rubricRange, checked, goalComment);
+      boolean virtualReferenced = false;
+      for (VirtualSubjectiveScoreCategory virt : description.getVirtualSubjectiveCategories()) {
+        for (SubjectiveGoalRef ref : virt.getGoalReferences()) {
+          if (ref.getCategory().equals(scoreCategory)
+              && ref.getGoal().equals(goal)) {
+            virtualReferenced = true;
+            break;
+          }
+          if (virtualReferenced) {
+            break;
+          }
+        }
+      }
+      final Element rangeCell = createRubricRangeCell(document, rubricRange, virtualReferenced, checked, goalComment);
 
       rubricRow.appendChild(rangeCell);
       rangeCell.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
@@ -1020,6 +1053,7 @@ public final class SubjectivePdfWriter {
 
   private Element createRubricRangeCell(final Document document,
                                         final RubricRange rubricRange,
+                                        final boolean virtualReferenced,
                                         final boolean checked,
                                         final @Nullable String goalComment) {
 
@@ -1030,15 +1064,22 @@ public final class SubjectivePdfWriter {
     block.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_LEFT);
 
     // add checkbox
-    final Element inlineCheckbox = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
-    block.appendChild(inlineCheckbox);
-    FOPUtils.addBorders(inlineCheckbox, 1, 1, 1, 1);
-    if (checked) {
-      inlineCheckbox.appendChild(document.createTextNode(String.format("%cX%c", Utilities.NON_BREAKING_SPACE,
-                                                                       Utilities.NON_BREAKING_SPACE)));
-
+    if (virtualReferenced) {
+      final Element imageGraphic = FOPUtils.createXslFoElement(document, "external-graphic");
+      block.appendChild(imageGraphic);
+      imageGraphic.setAttribute("src", String.format("url('data:image/png;base64,%s')",
+                                                     checked ? gearFilledBase64 : gearEmptyBase64));
     } else {
-      inlineCheckbox.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(4)));
+      final Element inlineCheckbox = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+      block.appendChild(inlineCheckbox);
+      FOPUtils.addBorders(inlineCheckbox, 1, 1, 1, 1);
+      if (checked) {
+        inlineCheckbox.appendChild(document.createTextNode(String.format("%cX%c", Utilities.NON_BREAKING_SPACE,
+                                                                         Utilities.NON_BREAKING_SPACE)));
+
+      } else {
+        inlineCheckbox.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(4)));
+      }
     }
 
     // add rubric description, if there is one
