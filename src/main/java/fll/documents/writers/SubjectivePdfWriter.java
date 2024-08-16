@@ -3,6 +3,7 @@ package fll.documents.writers;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,16 +14,19 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.xml.transform.TransformerException;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fop.apps.FOPException;
@@ -32,6 +36,8 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.SubjectiveScore;
@@ -55,13 +61,15 @@ import fll.xml.GoalElement;
 import fll.xml.GoalGroup;
 import fll.xml.NonNumericCategory;
 import fll.xml.RubricRange;
+import fll.xml.SubjectiveGoalRef;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Write subjective sheets as PDFs.
  */
-public class SubjectivePdfWriter {
+public final class SubjectivePdfWriter {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private static final String CORNER_RADIUS = "5pt";
@@ -73,6 +81,10 @@ public class SubjectivePdfWriter {
   private final Color sheetColor;
 
   private final SubjectiveScoreCategory scoreCategory;
+
+  private final String gearEmptyBase64;
+
+  private final String gearFilledBase64;
 
   private static final class RubricMetaData {
 
@@ -104,6 +116,11 @@ public class SubjectivePdfWriter {
   }
 
   private final List<RubricMetaData> masterRubricRangeMetaData;
+
+  /**
+   * Virtual score categories that reference this category.
+   */
+  private final Set<VirtualSubjectiveScoreCategory> virtualReferences;
 
   private static List<RubricMetaData> computeRubricRangeTitles(final SubjectiveScoreCategory category) {
     List<RubricMetaData> masterRubricRangeMetaData = null;
@@ -163,13 +180,24 @@ public class SubjectivePdfWriter {
    * @throws FLLInternalException if the rubric titles are not consistent across
    *           the goals in the category
    */
-  public SubjectivePdfWriter(final ChallengeDescription description,
-                             final String tournamentName,
-                             final SubjectiveScoreCategory scoreCategory) {
+  private SubjectivePdfWriter(final ChallengeDescription description,
+                              final String tournamentName,
+                              final SubjectiveScoreCategory scoreCategory) {
     this.description = description;
     this.tournamentName = tournamentName;
     this.scoreCategory = scoreCategory;
     this.masterRubricRangeMetaData = computeRubricRangeTitles(scoreCategory);
+    final Set<VirtualSubjectiveScoreCategory> virtualReferences = new HashSet<>();
+    for (VirtualSubjectiveScoreCategory virt : description.getVirtualSubjectiveCategories()) {
+      final boolean referenced = virt.getGoalReferences().stream()
+                                     .anyMatch(ref -> ref.getCategory().equals(scoreCategory));
+      if (referenced) {
+        virtualReferences.add(virt);
+      }
+    }
+    this.virtualReferences = Collections.unmodifiableSet(virtualReferences);
+    this.gearEmptyBase64 = getGearEmptyImageAsBase64();
+    this.gearFilledBase64 = getGearFilledImageAsBase64();
 
     // uses hard coded constants to make the colors look like FIRST and default
     // to blue.
@@ -189,8 +217,39 @@ public class SubjectivePdfWriter {
 
   }
 
-  private String getHeaderImageAsBase64() {
+  private static String getGearEmptyImageAsBase64() {
+    final Base64.Encoder encoder = Base64.getEncoder();
 
+    final ClassLoader loader = castNonNull(UserImages.class.getClassLoader());
+    try (InputStream input = loader.getResourceAsStream("fll/resources/documents/gear-empty.png")) {
+      if (null == input) {
+        throw new FLLInternalException("Cannot find gear empty image");
+      }
+
+      final String encoded = encoder.encodeToString(IOUtils.toByteArray(input));
+      return encoded;
+    } catch (final IOException e) {
+      throw new FLLInternalException("Unable to read gear empty image", e);
+    }
+  }
+
+  private static String getGearFilledImageAsBase64() {
+    final Base64.Encoder encoder = Base64.getEncoder();
+
+    final ClassLoader loader = castNonNull(UserImages.class.getClassLoader());
+    try (InputStream input = loader.getResourceAsStream("fll/resources/documents/gear-filled.png")) {
+      if (null == input) {
+        throw new FLLInternalException("Cannot find gear empty image");
+      }
+
+      final String encoded = encoder.encodeToString(IOUtils.toByteArray(input));
+      return encoded;
+    } catch (final IOException e) {
+      throw new FLLInternalException("Unable to read gear empty image", e);
+    }
+  }
+
+  private static String getHeaderImageAsBase64() {
     final Base64.Encoder encoder = Base64.getEncoder();
 
     final Path fllSubjectiveLogo = UserImages.getImagesPath().resolve(UserImages.FLL_SUBJECTIVE_LOGO_FILENAME);
@@ -207,7 +266,6 @@ public class SubjectivePdfWriter {
     } catch (final IOException e) {
       throw new FLLInternalException("Unable to read subjective header image", e);
     }
-
   }
 
   private Element createHeader(final Document document,
@@ -962,7 +1020,20 @@ public class SubjectivePdfWriter {
         goalComment = null;
       }
 
-      final Element rangeCell = createRubricRangeCell(document, rubricRange, checked, goalComment);
+      boolean virtualReferenced = false;
+      for (VirtualSubjectiveScoreCategory virt : description.getVirtualSubjectiveCategories()) {
+        for (SubjectiveGoalRef ref : virt.getGoalReferences()) {
+          if (ref.getCategory().equals(scoreCategory)
+              && ref.getGoal().equals(goal)) {
+            virtualReferenced = true;
+            break;
+          }
+          if (virtualReferenced) {
+            break;
+          }
+        }
+      }
+      final Element rangeCell = createRubricRangeCell(document, rubricRange, virtualReferenced, checked, goalComment);
 
       rubricRow.appendChild(rangeCell);
       rangeCell.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
@@ -982,6 +1053,7 @@ public class SubjectivePdfWriter {
 
   private Element createRubricRangeCell(final Document document,
                                         final RubricRange rubricRange,
+                                        final boolean virtualReferenced,
                                         final boolean checked,
                                         final @Nullable String goalComment) {
 
@@ -992,15 +1064,22 @@ public class SubjectivePdfWriter {
     block.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_LEFT);
 
     // add checkbox
-    final Element inlineCheckbox = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
-    block.appendChild(inlineCheckbox);
-    FOPUtils.addBorders(inlineCheckbox, 1, 1, 1, 1);
-    if (checked) {
-      inlineCheckbox.appendChild(document.createTextNode(String.format("%cX%c", Utilities.NON_BREAKING_SPACE,
-                                                                       Utilities.NON_BREAKING_SPACE)));
-
+    if (virtualReferenced) {
+      final Element imageGraphic = FOPUtils.createXslFoElement(document, "external-graphic");
+      block.appendChild(imageGraphic);
+      imageGraphic.setAttribute("src", String.format("url('data:image/png;base64,%s')",
+                                                     checked ? gearFilledBase64 : gearEmptyBase64));
     } else {
-      inlineCheckbox.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(4)));
+      final Element inlineCheckbox = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+      block.appendChild(inlineCheckbox);
+      FOPUtils.addBorders(inlineCheckbox, 1, 1, 1, 1);
+      if (checked) {
+        inlineCheckbox.appendChild(document.createTextNode(String.format("%cX%c", Utilities.NON_BREAKING_SPACE,
+                                                                         Utilities.NON_BREAKING_SPACE)));
+
+      } else {
+        inlineCheckbox.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(4)));
+      }
     }
 
     // add rubric description, if there is one
@@ -1101,6 +1180,8 @@ public class SubjectivePdfWriter {
   private Element createCommentsBlock(final Document document,
                                       final double height,
                                       final @Nullable SubjectiveScore score) {
+    final String virtualCategoryNames = virtualReferences.stream().map(VirtualSubjectiveScoreCategory::getTitle)
+                                                         .collect(Collectors.joining(","));
     final Element commentsTable = FOPUtils.createBasicTable(document);
 
     commentsTable.appendChild(FOPUtils.createTableColumn(document, 1));
@@ -1112,7 +1193,14 @@ public class SubjectivePdfWriter {
     final Element commentsLabelRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
     tableBody.appendChild(commentsLabelRow);
 
-    final Element commentsLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Feedback Comments");
+    final Element commentsLabel;
+    if (virtualReferences.isEmpty()) {
+      commentsLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Feedback Comments");
+    } else {
+      commentsLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                               String.format("Feedback Comments - also applies to %s",
+                                                             virtualCategoryNames));
+    }
     commentsLabelRow.appendChild(commentsLabel);
     commentsLabel.setAttribute("font-size", "10pt");
     commentsLabel.setAttribute("font-weight", "bold");
@@ -1204,6 +1292,36 @@ public class SubjectivePdfWriter {
       useBackCell.setAttribute("color", lightGray);
     }
 
+    if (!virtualReferences.isEmpty()) {
+      final Element blankRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+      tableBody.appendChild(blankRow);
+      final Element blankCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                         String.valueOf(Utilities.NON_BREAKING_SPACE));
+      blankRow.appendChild(blankCell);
+      blankCell.setAttribute("number-columns-spanned", "2");
+
+      final String legendText = String.format("%c Criteria on this page with this style of check box count dually toward %s and %s awards rankings",
+                                              Utilities.NON_BREAKING_SPACE, scoreCategory.getTitle(),
+                                              virtualCategoryNames);
+      final Element legendRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+      tableBody.appendChild(legendRow);
+
+      final Element legendCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+      legendRow.appendChild(legendCell);
+      legendCell.setAttribute("number-columns-spanned", "2");
+
+      final Element legendContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+      legendCell.appendChild(legendContainer);
+
+      final Element legendBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      legendContainer.appendChild(legendBlock);
+
+      final Element imageGraphic = FOPUtils.createXslFoElement(document, "external-graphic");
+      legendBlock.appendChild(imageGraphic);
+      imageGraphic.setAttribute("src", String.format("url('data:image/png;base64,%s')", gearEmptyBase64));
+
+      legendBlock.appendChild(document.createTextNode(legendText));
+    }
     return commentsTable;
   }
 
