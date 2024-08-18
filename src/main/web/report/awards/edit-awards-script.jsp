@@ -19,9 +19,10 @@ fll.web.report.awards.EditAwardsScript.populateContext(request, application, pag
 
 <script type="text/javascript" src="edit-awards-script.js"></script>
 
-<script type="text/javascript">
-awardsScriptModule.init = ( ) => {
+<script type="text/javascript" src="edit-awards-script-init.js"></script>
 
+<script type="text/javascript">
+function pageInit() {
   const macros = [];  
   <c:forEach items="${macros}" var="macro">
   const macro_${macro.text} = awardsScriptModule.createMacro("${macro.text}", "${macro.title}");
@@ -58,9 +59,7 @@ awardsScriptModule.init = ( ) => {
   <c:forEach items="${awardOrder}" var="category">
   awardsScriptModule.addToAwardOrder("${category.title}");
   </c:forEach>
-
-
-};
+}
 </script>
 <body>
 
@@ -81,7 +80,7 @@ awardsScriptModule.init = ( ) => {
         <hr />
 
         <h1>Parameter Values</h1>
-        <div>Some parameters need to be specifed as they do not
+        <div>Some parameters need to be specified as they do not
             exist elsewhere in the database. These values can be
             populated at any layer of the script.</div>
 

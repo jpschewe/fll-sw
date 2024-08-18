@@ -157,16 +157,21 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <a class="wide" href="edit-advancing-teams.jsp" target="_blank">Enter
         the teams advancing to the next level of tournament</a>
 
-    <a class="wide" href="<c:url value='/report/awards/index.jsp'/>">Edit
-        awards report and awards script properties.</a>
+    <a class="wide"
+        href="<c:url value='/report/awards/edit-awards-presenters.jsp'/>">Edit
+        presenters for the awards ceremony.</a>
+
+    <c:if test="${authentication.admin}">
+        <a class="wide" href="<c:url value='/report/awards/index.jsp'/>">Edit
+            awards report and awards script properties.</a>
+    </c:if>
 
     <a class="wide" href="AwardsReport" target="_blank">Report of
         winners for the tournament. This can be published on the web.</a>
 
     <a class="wide" target="_report"
-        href="<c:url value='/report/awards/AwardsScriptReport'/>" />Awards
-    Script PDF
-    </a>
+        href="<c:url value='/report/awards/AwardsScriptReport'/>">Awards
+        Script PDF </a>
 
     <a class="wide" href="TeamResults" target="_blank">Team Results.
         This is a zip file containing the results to return to the
