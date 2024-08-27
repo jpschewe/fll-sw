@@ -1566,6 +1566,10 @@ function setupAfterContentLoaded() {
 }
 
 function preventMultipleWindows(successFunction, failureFunction) {
+    // don't let the user interact with things
+    const waitDialog = document.getElementById("wait-dialog");
+    waitDialog.classList.remove("fll-sw-ui-inactive");
+
     const active_window_key = "fll-sw.subjective.active-window";
 
     const uid = (Math.random() * 0xffffffff >>> 0);
@@ -1598,12 +1602,17 @@ function preventMultipleWindows(successFunction, failureFunction) {
         bc.close();
     });
 
+    const success = function() {
+        localStorage.setItem(active_window_key, uid)
+        waitDialog.classList.add("fll-sw-ui-inactive");
+        successFunction();
+    }
+
 
     const otherUid = localStorage.getItem(active_window_key);
     if (typeof otherUid == 'undefined' || otherUid == 'undefined' || otherUid == null) {
         console.log("No other window found");
-        localStorage.setItem(active_window_key, uid)
-        successFunction();
+        success();
     } else {
         responseHandler = function() {
             // clear the handler
@@ -1623,7 +1632,7 @@ function preventMultipleWindows(successFunction, failureFunction) {
             if (responseHandler) {
                 responseHandler = null;
                 console.log("Timed out waiting for response from other window, continuing with this window");
-                successFunction();
+                success();
             }
         }, 5000);
 
@@ -1631,19 +1640,7 @@ function preventMultipleWindows(successFunction, failureFunction) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    preventMultipleWindows(() => {
-        setupAfterContentLoaded();
-    },
-        () => {
-            const message = "You already have the subjective application open in another window, this is not supported, please close this window!";
-            alert(message);
-            removeChildren(document.body);
-            const messageElement = document.createElement("div");
-            messageElement.innerText = message;
-            document.body.appendChild(messageElement);
-            window.close();
-        });
-
+    setupAfterContentLoaded();
 });
 
 function hideScoreEntryComments() {
@@ -1729,8 +1726,19 @@ function updateServerStatus() {
 
 // fires after DOMContentLoaded and all resources are loaded
 window.addEventListener('load', () => {
-    // initial state
-    updateMainHeader();
-    navigateToPage();
-    updateServerStatus();
+    preventMultipleWindows(() => {
+        // initial state
+        updateMainHeader();
+        navigateToPage();
+        updateServerStatus();
+    },
+        () => {
+            const message = "You already have the subjective application open in another window, this is not supported, please close this window!";
+            alert(message);
+            removeChildren(document.body);
+            const messageElement = document.createElement("div");
+            messageElement.innerText = message;
+            document.body.appendChild(messageElement);
+            window.close();
+        });
 });
