@@ -1,3 +1,4 @@
+* Make HTML dialogs easier to see
 * #1153 - Allow REPORT_GENERATOR to edit the awards presenters
 * #1202 - Add gear icons to rubrics when referenced by a virtual category
 * #1170 - Separate out finalist non-numeric nominees
