@@ -1,3 +1,4 @@
+* Add subjective schedule by time to the head judge page
 * Make HTML dialogs easier to see
 * #1153 - Allow REPORT_GENERATOR to edit the awards presenters
 * #1202 - Add gear icons to rubrics when referenced by a virtual category

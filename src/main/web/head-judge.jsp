@@ -55,6 +55,10 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         href="<c:url value='/report/index.jsp' />">Generate reports
         - this is done once all of the subjective scores are in.</a>
 
+    <a class="wide" target="_subjectiveSchedule"
+        href="<c:url value='/admin/SubjectiveScheduleByTime'/>">Subjective
+        schedule sorted by time</a>
+
     <a class="wide"
         href="<c:url value='/report/regular-match-play-runs.jsp' />">Regular
         Match Play performance scores</a>
