@@ -1,0 +1,2835 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    
+    
+        <title>Score Entry</title>
+    
+
+
+<!-- is practice true -->
+<link rel="stylesheet" type="text/css" href="Score%20Entry_files/fll-sw.css">
+
+<link rel="stylesheet" type="text/css" href="Score%20Entry_files/scoreEntry.css">
+
+<!-- a couple of things come from the JSP, so need to be inline -->
+<style type="text/css">
+table#top_info {
+    background-color: #e0e0e0
+
+;
+}
+body {
+    background-color: transparent
+
+;
+}
+.restriction-error {
+    background-color: red;
+}
+</style>
+
+<script type="text/javascript" src="Score%20Entry_files/fll-functions.js"></script>
+<script type="text/javascript" src="Score%20Entry_files/fll-objects.js"></script>
+<script type="text/javascript" src="Score%20Entry_files/fll-storage.js"></script>
+<script type="text/javascript" src="Score%20Entry_files/scoreEntryModule.js"></script>
+
+
+
+
+<script type="text/javascript">
+const roundText = "";
+const teamNumber = "";
+const runNumber = "";
+
+var EditFlag = false;
+
+
+function init() {
+    document.scoreEntry.m03_count_reef_segments_slider.oninput = function() {
+    document.scoreEntry.m03_count_reef_segments.innerHTML = this.value;
+    set_m03_count_reef_segments(this.value);
+  };
+  document.scoreEntry.m08_count_stack_segments_slider.oninput = function() {
+    document.scoreEntry.m08_count_stack_segments.innerHTML = this.value;
+    set_m08_count_stack_segments(this.value);
+  };
+  document.scoreEntry.m11_count_krill_slider.oninput = function() {
+    document.scoreEntry.m11_count_krill.innerHTML = this.value;
+    set_m11_count_krill(this.value);
+  };
+  document.scoreEntry.m14_one_trident_piece_slider.oninput = function() {
+    document.scoreEntry.m14_one_trident_piece.innerHTML = this.value;
+    set_m14_one_trident_piece(this.value);
+  };
+  document.scoreEntry.m15b_trident_slider.oninput = function() {
+    document.scoreEntry.m15b_trident.innerHTML = this.value;
+    set_m15b_trident(this.value);
+  };
+  document.scoreEntry.gp_score_slider.oninput = function() {
+    document.scoreEntry.gp_score.innerHTML = this.value;
+    set_gp_score(this.value);
+  };
+  m00_one_launch_area_raw = 0.0;
+  m01_coral_tree_hanging_raw = "zero";
+  goal_2_raw = 0.0;
+  m02_shark_not_touching_cave_raw = "Cave";
+  m03_coral_reef_flipped_up_raw = 0.0;
+  m03_count_reef_segments_raw = 0.0;
+  m04_scuba_diver_not_touching_nursery_raw = "touching";
+  m05_angler_fish_latched_raw = 0.0;
+  m06_shipwreck_mast_raised_raw = 0.0;
+  m07_treasure_chest_removed_raw = 0.0;
+  m08_count_stack_segments_raw = 0.0;
+  m09_creature_released_raw = "not";
+  m10_yellow_flag_down_raw = 0.0;
+  m10_sub_closer_opposing_field_raw = 0.0;
+  m11_count_whales_revealed_raw = "zero";
+  m11_count_krill_raw = 0.0;
+  m13_new_shipping_lane_raw = 0.0;
+  m14_water_sample_raw = 0.0;
+  m14_seabed_sample_raw = 0.0;
+  m14_plankton_sample_raw = 0.0;
+  m14_one_trident_piece_raw = 0.0;
+  m15b_water_sample_raw = 0.0;
+  m15b_seabed_sample_raw = 0.0;
+  m15b_plankton_sample_raw = 0.0;
+  m15b_treasure_raw = 0.0;
+  m15b_trident_raw = 0.0;
+  goal_5_raw = 0.0;
+  m16_precision_tokens_raw = "five";
+  m16_precision_tokens_raw = "six";
+  gp_score_raw = 3.0;
+  Verified = 0;
+
+
+  refresh();
+  
+  if(document.scoreEntry.totalScore) {
+      /* Saves total score for smarter notification popups */
+    savedTotalScore = document.scoreEntry.totalScore.value;
+  }
+}
+
+function refresh() { 
+  var score = 0;
+
+  // m00_one_launch_area
+if(m00_one_launch_area_raw == 0) {
+  document.scoreEntry.m00_one_launch_area[0].checked = true
+  document.scoreEntry.m00_one_launch_area_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m00_one_launch_area[1].checked = true
+  document.scoreEntry.m00_one_launch_area_radioValue.value = 'YES'
+}
+m00_one_launch_area_computed = m00_one_launch_area_raw * 20.0;
+score += m00_one_launch_area_computed;
+document.scoreEntry.score_m00_one_launch_area.value = m00_one_launch_area_computed;
+
+// m01_coral_tree_hanging
+if(m01_coral_tree_hanging_raw == "zero") {
+  document.scoreEntry.m01_coral_tree_hanging[0].checked = true;
+  m01_coral_tree_hanging_computed = 0.000000 * 1.0;
+  document.scoreEntry.m01_coral_tree_hanging_radioValue.value = 'ZERO'
+} else if(m01_coral_tree_hanging_raw == "Hanging") {
+  document.scoreEntry.m01_coral_tree_hanging[1].checked = true;
+  m01_coral_tree_hanging_computed = 20.000000 * 1.0;
+  document.scoreEntry.m01_coral_tree_hanging_radioValue.value = 'HANGING'
+} else if(m01_coral_tree_hanging_raw == "Holder") {
+  document.scoreEntry.m01_coral_tree_hanging[2].checked = true;
+  m01_coral_tree_hanging_computed = 30.000000 * 1.0;
+  document.scoreEntry.m01_coral_tree_hanging_radioValue.value = 'HOLDER'
+}
+score += m01_coral_tree_hanging_computed;
+document.scoreEntry.score_m01_coral_tree_hanging.value = m01_coral_tree_hanging_computed;
+
+// goal_2
+if(goal_2_raw == 0) {
+  document.scoreEntry.goal_2[0].checked = true
+  document.scoreEntry.goal_2_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.goal_2[1].checked = true
+  document.scoreEntry.goal_2_radioValue.value = 'YES'
+}
+goal_2_computed = goal_2_raw * 20.0;
+score += goal_2_computed;
+document.scoreEntry.score_goal_2.value = goal_2_computed;
+
+// m02_shark_not_touching_cave
+if(m02_shark_not_touching_cave_raw == "Cave") {
+  document.scoreEntry.m02_shark_not_touching_cave[0].checked = true;
+  m02_shark_not_touching_cave_computed = 0.000000 * 1.0;
+  document.scoreEntry.m02_shark_not_touching_cave_radioValue.value = 'CAVE'
+} else if(m02_shark_not_touching_cave_raw == "Removed") {
+  document.scoreEntry.m02_shark_not_touching_cave[1].checked = true;
+  m02_shark_not_touching_cave_computed = 20.000000 * 1.0;
+  document.scoreEntry.m02_shark_not_touching_cave_radioValue.value = 'REMOVED'
+} else if(m02_shark_not_touching_cave_raw == "Habitat") {
+  document.scoreEntry.m02_shark_not_touching_cave[2].checked = true;
+  m02_shark_not_touching_cave_computed = 30.000000 * 1.0;
+  document.scoreEntry.m02_shark_not_touching_cave_radioValue.value = 'HABITAT'
+}
+score += m02_shark_not_touching_cave_computed;
+document.scoreEntry.score_m02_shark_not_touching_cave.value = m02_shark_not_touching_cave_computed;
+
+// m03_coral_reef_flipped_up
+if(m03_coral_reef_flipped_up_raw == 0) {
+  document.scoreEntry.m03_coral_reef_flipped_up[0].checked = true
+  document.scoreEntry.m03_coral_reef_flipped_up_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m03_coral_reef_flipped_up[1].checked = true
+  document.scoreEntry.m03_coral_reef_flipped_up_radioValue.value = 'YES'
+}
+m03_coral_reef_flipped_up_computed = m03_coral_reef_flipped_up_raw * 20.0;
+score += m03_coral_reef_flipped_up_computed;
+document.scoreEntry.score_m03_coral_reef_flipped_up.value = m03_coral_reef_flipped_up_computed;
+
+// m03_count_reef_segments
+document.scoreEntry.m03_count_reef_segments.value = m03_count_reef_segments_raw;
+m03_count_reef_segments_computed = m03_count_reef_segments_raw * 5.0;
+document.scoreEntry.m03_count_reef_segments_slider.value = m03_count_reef_segments_raw;
+score += m03_count_reef_segments_computed;
+document.scoreEntry.score_m03_count_reef_segments.value = m03_count_reef_segments_computed;
+
+// m04_scuba_diver_not_touching_nursery
+if(m04_scuba_diver_not_touching_nursery_raw == "touching") {
+  document.scoreEntry.m04_scuba_diver_not_touching_nursery[0].checked = true;
+  m04_scuba_diver_not_touching_nursery_computed = 0.000000 * 1.0;
+  document.scoreEntry.m04_scuba_diver_not_touching_nursery_radioValue.value = 'TOUCHING'
+} else if(m04_scuba_diver_not_touching_nursery_raw == "released") {
+  document.scoreEntry.m04_scuba_diver_not_touching_nursery[1].checked = true;
+  m04_scuba_diver_not_touching_nursery_computed = 20.000000 * 1.0;
+  document.scoreEntry.m04_scuba_diver_not_touching_nursery_radioValue.value = 'RELEASED'
+} else if(m04_scuba_diver_not_touching_nursery_raw == "hanging") {
+  document.scoreEntry.m04_scuba_diver_not_touching_nursery[2].checked = true;
+  m04_scuba_diver_not_touching_nursery_computed = 40.000000 * 1.0;
+  document.scoreEntry.m04_scuba_diver_not_touching_nursery_radioValue.value = 'HANGING'
+}
+score += m04_scuba_diver_not_touching_nursery_computed;
+document.scoreEntry.score_m04_scuba_diver_not_touching_nursery.value = m04_scuba_diver_not_touching_nursery_computed;
+
+// m05_angler_fish_latched
+if(m05_angler_fish_latched_raw == 0) {
+  document.scoreEntry.m05_angler_fish_latched[0].checked = true
+  document.scoreEntry.m05_angler_fish_latched_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m05_angler_fish_latched[1].checked = true
+  document.scoreEntry.m05_angler_fish_latched_radioValue.value = 'YES'
+}
+m05_angler_fish_latched_computed = m05_angler_fish_latched_raw * 30.0;
+score += m05_angler_fish_latched_computed;
+document.scoreEntry.score_m05_angler_fish_latched.value = m05_angler_fish_latched_computed;
+
+// m06_shipwreck_mast_raised
+if(m06_shipwreck_mast_raised_raw == 0) {
+  document.scoreEntry.m06_shipwreck_mast_raised[0].checked = true
+  document.scoreEntry.m06_shipwreck_mast_raised_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m06_shipwreck_mast_raised[1].checked = true
+  document.scoreEntry.m06_shipwreck_mast_raised_radioValue.value = 'YES'
+}
+m06_shipwreck_mast_raised_computed = m06_shipwreck_mast_raised_raw * 30.0;
+score += m06_shipwreck_mast_raised_computed;
+document.scoreEntry.score_m06_shipwreck_mast_raised.value = m06_shipwreck_mast_raised_computed;
+
+// m07_treasure_chest_removed
+if(m07_treasure_chest_removed_raw == 0) {
+  document.scoreEntry.m07_treasure_chest_removed[0].checked = true
+  document.scoreEntry.m07_treasure_chest_removed_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m07_treasure_chest_removed[1].checked = true
+  document.scoreEntry.m07_treasure_chest_removed_radioValue.value = 'YES'
+}
+m07_treasure_chest_removed_computed = m07_treasure_chest_removed_raw * 20.0;
+score += m07_treasure_chest_removed_computed;
+document.scoreEntry.score_m07_treasure_chest_removed.value = m07_treasure_chest_removed_computed;
+
+// m08_count_stack_segments
+document.scoreEntry.m08_count_stack_segments.value = m08_count_stack_segments_raw;
+m08_count_stack_segments_computed = m08_count_stack_segments_raw * 10.0;
+document.scoreEntry.m08_count_stack_segments_slider.value = m08_count_stack_segments_raw;
+score += m08_count_stack_segments_computed;
+document.scoreEntry.score_m08_count_stack_segments.value = m08_count_stack_segments_computed;
+
+// m09_creature_released
+if(m09_creature_released_raw == "not") {
+  document.scoreEntry.m09_creature_released[0].checked = true;
+  m09_creature_released_computed = 0.000000 * 1.0;
+  document.scoreEntry.m09_creature_released_radioValue.value = 'NOT'
+} else if(m09_creature_released_raw == "released") {
+  document.scoreEntry.m09_creature_released[1].checked = true;
+  m09_creature_released_computed = 20.000000 * 1.0;
+  document.scoreEntry.m09_creature_released_radioValue.value = 'RELEASED'
+} else if(m09_creature_released_raw == "seep") {
+  document.scoreEntry.m09_creature_released[2].checked = true;
+  m09_creature_released_computed = 30.000000 * 1.0;
+  document.scoreEntry.m09_creature_released_radioValue.value = 'SEEP'
+}
+score += m09_creature_released_computed;
+document.scoreEntry.score_m09_creature_released.value = m09_creature_released_computed;
+
+// m10_yellow_flag_down
+if(m10_yellow_flag_down_raw == 0) {
+  document.scoreEntry.m10_yellow_flag_down[0].checked = true
+  document.scoreEntry.m10_yellow_flag_down_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m10_yellow_flag_down[1].checked = true
+  document.scoreEntry.m10_yellow_flag_down_radioValue.value = 'YES'
+}
+m10_yellow_flag_down_computed = m10_yellow_flag_down_raw * 30.0;
+score += m10_yellow_flag_down_computed;
+document.scoreEntry.score_m10_yellow_flag_down.value = m10_yellow_flag_down_computed;
+
+// m10_sub_closer_opposing_field
+if(m10_sub_closer_opposing_field_raw == 0) {
+  document.scoreEntry.m10_sub_closer_opposing_field[0].checked = true
+  document.scoreEntry.m10_sub_closer_opposing_field_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m10_sub_closer_opposing_field[1].checked = true
+  document.scoreEntry.m10_sub_closer_opposing_field_radioValue.value = 'YES'
+}
+m10_sub_closer_opposing_field_computed = m10_sub_closer_opposing_field_raw * 10.0;
+score += m10_sub_closer_opposing_field_computed;
+document.scoreEntry.score_m10_sub_closer_opposing_field.value = m10_sub_closer_opposing_field_computed;
+
+// m11_count_whales_revealed
+if(m11_count_whales_revealed_raw == "zero") {
+  document.scoreEntry.m11_count_whales_revealed[0].checked = true;
+  m11_count_whales_revealed_computed = 0.000000 * 1.0;
+  document.scoreEntry.m11_count_whales_revealed_radioValue.value = 'ZERO'
+} else if(m11_count_whales_revealed_raw == "one") {
+  document.scoreEntry.m11_count_whales_revealed[1].checked = true;
+  m11_count_whales_revealed_computed = 20.000000 * 1.0;
+  document.scoreEntry.m11_count_whales_revealed_radioValue.value = 'ONE'
+} else if(m11_count_whales_revealed_raw == "two") {
+  document.scoreEntry.m11_count_whales_revealed[2].checked = true;
+  m11_count_whales_revealed_computed = 30.000000 * 1.0;
+  document.scoreEntry.m11_count_whales_revealed_radioValue.value = 'TWO'
+}
+score += m11_count_whales_revealed_computed;
+document.scoreEntry.score_m11_count_whales_revealed.value = m11_count_whales_revealed_computed;
+
+// m11_count_krill
+document.scoreEntry.m11_count_krill.value = m11_count_krill_raw;
+m11_count_krill_computed = m11_count_krill_raw * 10.0;
+document.scoreEntry.m11_count_krill_slider.value = m11_count_krill_raw;
+score += m11_count_krill_computed;
+document.scoreEntry.score_m11_count_krill.value = m11_count_krill_computed;
+
+// m13_new_shipping_lane
+if(m13_new_shipping_lane_raw == 0) {
+  document.scoreEntry.m13_new_shipping_lane[0].checked = true
+  document.scoreEntry.m13_new_shipping_lane_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m13_new_shipping_lane[1].checked = true
+  document.scoreEntry.m13_new_shipping_lane_radioValue.value = 'YES'
+}
+m13_new_shipping_lane_computed = m13_new_shipping_lane_raw * 20.0;
+score += m13_new_shipping_lane_computed;
+document.scoreEntry.score_m13_new_shipping_lane.value = m13_new_shipping_lane_computed;
+
+// m14_water_sample
+if(m14_water_sample_raw == 0) {
+  document.scoreEntry.m14_water_sample[0].checked = true
+  document.scoreEntry.m14_water_sample_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m14_water_sample[1].checked = true
+  document.scoreEntry.m14_water_sample_radioValue.value = 'YES'
+}
+m14_water_sample_computed = m14_water_sample_raw * 5.0;
+score += m14_water_sample_computed;
+document.scoreEntry.score_m14_water_sample.value = m14_water_sample_computed;
+
+// m14_seabed_sample
+if(m14_seabed_sample_raw == 0) {
+  document.scoreEntry.m14_seabed_sample[0].checked = true
+  document.scoreEntry.m14_seabed_sample_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m14_seabed_sample[1].checked = true
+  document.scoreEntry.m14_seabed_sample_radioValue.value = 'YES'
+}
+m14_seabed_sample_computed = m14_seabed_sample_raw * 10.0;
+score += m14_seabed_sample_computed;
+document.scoreEntry.score_m14_seabed_sample.value = m14_seabed_sample_computed;
+
+// m14_plankton_sample
+if(m14_plankton_sample_raw == 0) {
+  document.scoreEntry.m14_plankton_sample[0].checked = true
+  document.scoreEntry.m14_plankton_sample_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m14_plankton_sample[1].checked = true
+  document.scoreEntry.m14_plankton_sample_radioValue.value = 'YES'
+}
+m14_plankton_sample_computed = m14_plankton_sample_raw * 10.0;
+score += m14_plankton_sample_computed;
+document.scoreEntry.score_m14_plankton_sample.value = m14_plankton_sample_computed;
+
+// m14_one_trident_piece
+document.scoreEntry.m14_one_trident_piece.value = m14_one_trident_piece_raw;
+m14_one_trident_piece_computed = m14_one_trident_piece_raw * 0.0;
+document.scoreEntry.m14_one_trident_piece_slider.value = m14_one_trident_piece_raw;
+score += m14_one_trident_piece_computed;
+document.scoreEntry.score_m14_one_trident_piece.value = m14_one_trident_piece_computed;
+
+compute_m14_calculate_trident();
+score += m14_calculate_trident_computed;
+
+// m15b_water_sample
+if(m15b_water_sample_raw == 0) {
+  document.scoreEntry.m15b_water_sample[0].checked = true
+  document.scoreEntry.m15b_water_sample_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m15b_water_sample[1].checked = true
+  document.scoreEntry.m15b_water_sample_radioValue.value = 'YES'
+}
+m15b_water_sample_computed = m15b_water_sample_raw * 5.0;
+score += m15b_water_sample_computed;
+document.scoreEntry.score_m15b_water_sample.value = m15b_water_sample_computed;
+
+// m15b_seabed_sample
+if(m15b_seabed_sample_raw == 0) {
+  document.scoreEntry.m15b_seabed_sample[0].checked = true
+  document.scoreEntry.m15b_seabed_sample_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m15b_seabed_sample[1].checked = true
+  document.scoreEntry.m15b_seabed_sample_radioValue.value = 'YES'
+}
+m15b_seabed_sample_computed = m15b_seabed_sample_raw * 5.0;
+score += m15b_seabed_sample_computed;
+document.scoreEntry.score_m15b_seabed_sample.value = m15b_seabed_sample_computed;
+
+// m15b_plankton_sample
+if(m15b_plankton_sample_raw == 0) {
+  document.scoreEntry.m15b_plankton_sample[0].checked = true
+  document.scoreEntry.m15b_plankton_sample_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m15b_plankton_sample[1].checked = true
+  document.scoreEntry.m15b_plankton_sample_radioValue.value = 'YES'
+}
+m15b_plankton_sample_computed = m15b_plankton_sample_raw * 5.0;
+score += m15b_plankton_sample_computed;
+document.scoreEntry.score_m15b_plankton_sample.value = m15b_plankton_sample_computed;
+
+// m15b_treasure
+if(m15b_treasure_raw == 0) {
+  document.scoreEntry.m15b_treasure[0].checked = true
+  document.scoreEntry.m15b_treasure_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m15b_treasure[1].checked = true
+  document.scoreEntry.m15b_treasure_radioValue.value = 'YES'
+}
+m15b_treasure_computed = m15b_treasure_raw * 5.0;
+score += m15b_treasure_computed;
+document.scoreEntry.score_m15b_treasure.value = m15b_treasure_computed;
+
+// m15b_trident
+document.scoreEntry.m15b_trident.value = m15b_trident_raw;
+m15b_trident_computed = m15b_trident_raw * 5.0;
+document.scoreEntry.m15b_trident_slider.value = m15b_trident_raw;
+score += m15b_trident_computed;
+document.scoreEntry.score_m15b_trident.value = m15b_trident_computed;
+
+// goal_5
+if(goal_5_raw == 0) {
+  document.scoreEntry.goal_5[0].checked = true
+  document.scoreEntry.goal_5_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.goal_5[1].checked = true
+  document.scoreEntry.goal_5_radioValue.value = 'YES'
+}
+goal_5_computed = goal_5_raw * 20.0;
+score += goal_5_computed;
+document.scoreEntry.score_goal_5.value = goal_5_computed;
+
+// m16_precision_tokens
+if(m16_precision_tokens_raw == "zero") {
+  document.scoreEntry.m16_precision_tokens[0].checked = true;
+  m16_precision_tokens_computed = 0.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'ZERO'
+} else if(m16_precision_tokens_raw == "one") {
+  document.scoreEntry.m16_precision_tokens[1].checked = true;
+  m16_precision_tokens_computed = 10.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'ONE'
+} else if(m16_precision_tokens_raw == "two") {
+  document.scoreEntry.m16_precision_tokens[2].checked = true;
+  m16_precision_tokens_computed = 15.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'TWO'
+} else if(m16_precision_tokens_raw == "three") {
+  document.scoreEntry.m16_precision_tokens[3].checked = true;
+  m16_precision_tokens_computed = 25.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'THREE'
+} else if(m16_precision_tokens_raw == "four") {
+  document.scoreEntry.m16_precision_tokens[4].checked = true;
+  m16_precision_tokens_computed = 35.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'FOUR'
+} else if(m16_precision_tokens_raw == "five") {
+  document.scoreEntry.m16_precision_tokens[5].checked = true;
+  m16_precision_tokens_computed = 50.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'FIVE'
+} else if(m16_precision_tokens_raw == "six") {
+  document.scoreEntry.m16_precision_tokens[6].checked = true;
+  m16_precision_tokens_computed = 50.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'SIX'
+}
+score += m16_precision_tokens_computed;
+document.scoreEntry.score_m16_precision_tokens.value = m16_precision_tokens_computed;
+
+// gp_score
+document.scoreEntry.gp_score.value = gp_score_raw;
+gp_score_computed = gp_score_raw * 0.0;
+document.scoreEntry.gp_score_slider.value = gp_score_raw;
+score += gp_score_computed;
+document.scoreEntry.score_gp_score.value = gp_score_computed;
+
+const verifiedLabel = document.getElementById('verify-score-label');
+if(Verified == 0) {
+  document.scoreEntry.Verified[0].checked = true;
+  verifiedLabel.classList.add('verify-score-unverified');
+  verifiedLabel.classList.remove('verify-score-verified');
+} else {
+  document.scoreEntry.Verified[1].checked = true;
+  verifiedLabel.classList.remove('verify-score-unverified');
+  verifiedLabel.classList.add('verify-score-verified');
+}
+
+
+  //check for minimum total score
+  if(score < 0.0) {
+    score = 0.0;
+  }
+
+  if(document.scoreEntry.totalScore) {
+    document.scoreEntry.totalScore.value = score;
+  }
+
+  check_restrictions();
+}
+
+function check_restrictions() {
+  var error_found = false;
+  removeChildren(document.getElementById("score-errors"));
+  
+  var m00_one_launch_area_error = false;
+  var m01_coral_tree_hanging_error = false;
+  var goal_2_error = false;
+  var m02_shark_not_touching_cave_error = false;
+  var m03_coral_reef_flipped_up_error = false;
+  var m03_count_reef_segments_error = false;
+  var m04_scuba_diver_not_touching_nursery_error = false;
+  var m05_angler_fish_latched_error = false;
+  var m06_shipwreck_mast_raised_error = false;
+  var m07_treasure_chest_removed_error = false;
+  var m08_count_stack_segments_error = false;
+  var m09_creature_released_error = false;
+  var m10_yellow_flag_down_error = false;
+  var m10_sub_closer_opposing_field_error = false;
+  var m11_count_whales_revealed_error = false;
+  var m11_count_krill_error = false;
+  var m13_new_shipping_lane_error = false;
+  var m14_water_sample_error = false;
+  var m14_seabed_sample_error = false;
+  var m14_plankton_sample_error = false;
+  var m14_one_trident_piece_error = false;
+  var m15b_water_sample_error = false;
+  var m15b_seabed_sample_error = false;
+  var m15b_plankton_sample_error = false;
+  var m15b_treasure_error = false;
+  var m15b_trident_error = false;
+  var goal_5_error = false;
+  var m16_precision_tokens_error = false;
+  var gp_score_error = false;
+  var restriction_0_value = parseInt(1.000000* m14_water_sample_raw + -1.000000* m15b_water_sample_raw);
+  if(restriction_0_value > 1.000000 || restriction_0_value < 0.000000) {
+    const restriction_0_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_0_error);
+    restriction_0_error.innerText = "Water Sample Not Removed from Water Sample Area";
+    error_found = true;
+    m14_water_sample_error = true;
+    m15b_water_sample_error = true;
+  }
+  var restriction_1_value = parseInt(1.000000* m14_seabed_sample_raw + -1.000000* m15b_seabed_sample_raw);
+  if(restriction_1_value > 1.000000 || restriction_1_value < 0.000000) {
+    const restriction_1_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_1_error);
+    restriction_1_error.innerText = "Seabed Sample Not Removed from Seabed";
+    error_found = true;
+    m14_seabed_sample_error = true;
+    m15b_seabed_sample_error = true;
+  }
+  var restriction_2_value = parseInt(1.000000* m14_plankton_sample_raw + -1.000000* m15b_plankton_sample_raw);
+  if(restriction_2_value > 1.000000 || restriction_2_value < 0.000000) {
+    const restriction_2_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_2_error);
+    restriction_2_error.innerText = "Plankton Sample Not Removed from Kelp Forest";
+    error_found = true;
+    m14_plankton_sample_error = true;
+    m15b_plankton_sample_error = true;
+  }
+  var restriction_3_value = parseInt(1.000000* m07_treasure_chest_removed_raw + -1.000000* m15b_treasure_raw);
+  if(restriction_3_value > 1.000000 || restriction_3_value < 0.000000) {
+    const restriction_3_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_3_error);
+    restriction_3_error.innerText = "Treasure Chest Not Removed from Kraken";
+    error_found = true;
+    m07_treasure_chest_removed_error = true;
+    m15b_treasure_error = true;
+  }
+  var restriction_4_value = parseInt(1.000000* m15b_trident_raw + -1.000000* m14_one_trident_piece_raw);
+  if(restriction_4_value > 0.000000 || restriction_4_value < -2.000000) {
+    const restriction_4_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_4_error);
+    restriction_4_error.innerText = "Trident Pieces Not Removed from Shipwreck";
+    error_found = true;
+    m15b_trident_error = true;
+    m14_one_trident_piece_error = true;
+  }
+if(m00_one_launch_area_error) {
+  const ele = document.getElementById("m00_one_launch_area_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m00_one_launch_area_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m01_coral_tree_hanging_error) {
+  const ele = document.getElementById("m01_coral_tree_hanging_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m01_coral_tree_hanging_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(goal_2_error) {
+  const ele = document.getElementById("goal_2_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("goal_2_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m02_shark_not_touching_cave_error) {
+  const ele = document.getElementById("m02_shark_not_touching_cave_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m02_shark_not_touching_cave_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m03_coral_reef_flipped_up_error) {
+  const ele = document.getElementById("m03_coral_reef_flipped_up_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m03_coral_reef_flipped_up_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m03_count_reef_segments_error) {
+  const ele = document.getElementById("m03_count_reef_segments_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m03_count_reef_segments_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m04_scuba_diver_not_touching_nursery_error) {
+  const ele = document.getElementById("m04_scuba_diver_not_touching_nursery_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m04_scuba_diver_not_touching_nursery_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m05_angler_fish_latched_error) {
+  const ele = document.getElementById("m05_angler_fish_latched_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m05_angler_fish_latched_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m06_shipwreck_mast_raised_error) {
+  const ele = document.getElementById("m06_shipwreck_mast_raised_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m06_shipwreck_mast_raised_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m07_treasure_chest_removed_error) {
+  const ele = document.getElementById("m07_treasure_chest_removed_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m07_treasure_chest_removed_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m08_count_stack_segments_error) {
+  const ele = document.getElementById("m08_count_stack_segments_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m08_count_stack_segments_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m09_creature_released_error) {
+  const ele = document.getElementById("m09_creature_released_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m09_creature_released_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m10_yellow_flag_down_error) {
+  const ele = document.getElementById("m10_yellow_flag_down_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m10_yellow_flag_down_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m10_sub_closer_opposing_field_error) {
+  const ele = document.getElementById("m10_sub_closer_opposing_field_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m10_sub_closer_opposing_field_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m11_count_whales_revealed_error) {
+  const ele = document.getElementById("m11_count_whales_revealed_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m11_count_whales_revealed_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m11_count_krill_error) {
+  const ele = document.getElementById("m11_count_krill_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m11_count_krill_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m13_new_shipping_lane_error) {
+  const ele = document.getElementById("m13_new_shipping_lane_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m13_new_shipping_lane_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m14_water_sample_error) {
+  const ele = document.getElementById("m14_water_sample_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m14_water_sample_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m14_seabed_sample_error) {
+  const ele = document.getElementById("m14_seabed_sample_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m14_seabed_sample_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m14_plankton_sample_error) {
+  const ele = document.getElementById("m14_plankton_sample_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m14_plankton_sample_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m14_one_trident_piece_error) {
+  const ele = document.getElementById("m14_one_trident_piece_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m14_one_trident_piece_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m15b_water_sample_error) {
+  const ele = document.getElementById("m15b_water_sample_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m15b_water_sample_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m15b_seabed_sample_error) {
+  const ele = document.getElementById("m15b_seabed_sample_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m15b_seabed_sample_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m15b_plankton_sample_error) {
+  const ele = document.getElementById("m15b_plankton_sample_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m15b_plankton_sample_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m15b_treasure_error) {
+  const ele = document.getElementById("m15b_treasure_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m15b_treasure_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m15b_trident_error) {
+  const ele = document.getElementById("m15b_trident_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m15b_trident_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(goal_5_error) {
+  const ele = document.getElementById("goal_5_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("goal_5_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m16_precision_tokens_error) {
+  const ele = document.getElementById("m16_precision_tokens_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m16_precision_tokens_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(gp_score_error) {
+  const ele = document.getElementById("gp_score_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("gp_score_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+
+
+  const submitScoreButton = document.getElementById("submit_score")
+  if(error_found) {
+    if(submitScoreButton) {
+      submitScoreButton.disabled = true;
+    }
+    document.getElementById("score-errors").classList.remove("fll-sw-ui-inactive");
+  } else {
+    if(submitScoreButton) {
+      submitScoreButton.disabled = false;
+    }
+    document.getElementById("score-errors").classList.add("fll-sw-ui-inactive");
+  }
+}
+
+function isConsistent() {
+  //m00_one_launch_area
+  if(m00_one_launch_area_raw < 0.0 || m00_one_launch_area_raw > 1.0) {
+    return false;
+  }
+
+  //m01_coral_tree_hanging
+   // nothing to check
+
+  //goal_2
+  if(goal_2_raw < 0.0 || goal_2_raw > 1.0) {
+    return false;
+  }
+
+  //m02_shark_not_touching_cave
+   // nothing to check
+
+  //m03_coral_reef_flipped_up
+  if(m03_coral_reef_flipped_up_raw < 0.0 || m03_coral_reef_flipped_up_raw > 1.0) {
+    return false;
+  }
+
+  //m03_count_reef_segments
+  if(m03_count_reef_segments_raw < 0.0 || m03_count_reef_segments_raw > 3.0) {
+    return false;
+  }
+
+  //m04_scuba_diver_not_touching_nursery
+   // nothing to check
+
+  //m05_angler_fish_latched
+  if(m05_angler_fish_latched_raw < 0.0 || m05_angler_fish_latched_raw > 1.0) {
+    return false;
+  }
+
+  //m06_shipwreck_mast_raised
+  if(m06_shipwreck_mast_raised_raw < 0.0 || m06_shipwreck_mast_raised_raw > 1.0) {
+    return false;
+  }
+
+  //m07_treasure_chest_removed
+  if(m07_treasure_chest_removed_raw < 0.0 || m07_treasure_chest_removed_raw > 1.0) {
+    return false;
+  }
+
+  //m08_count_stack_segments
+  if(m08_count_stack_segments_raw < 0.0 || m08_count_stack_segments_raw > 4.0) {
+    return false;
+  }
+
+  //m09_creature_released
+   // nothing to check
+
+  //m10_yellow_flag_down
+  if(m10_yellow_flag_down_raw < 0.0 || m10_yellow_flag_down_raw > 1.0) {
+    return false;
+  }
+
+  //m10_sub_closer_opposing_field
+  if(m10_sub_closer_opposing_field_raw < 0.0 || m10_sub_closer_opposing_field_raw > 1.0) {
+    return false;
+  }
+
+  //m11_count_whales_revealed
+   // nothing to check
+
+  //m11_count_krill
+  if(m11_count_krill_raw < 0.0 || m11_count_krill_raw > 5.0) {
+    return false;
+  }
+
+  //m13_new_shipping_lane
+  if(m13_new_shipping_lane_raw < 0.0 || m13_new_shipping_lane_raw > 1.0) {
+    return false;
+  }
+
+  //m14_water_sample
+  if(m14_water_sample_raw < 0.0 || m14_water_sample_raw > 1.0) {
+    return false;
+  }
+
+  //m14_seabed_sample
+  if(m14_seabed_sample_raw < 0.0 || m14_seabed_sample_raw > 1.0) {
+    return false;
+  }
+
+  //m14_plankton_sample
+  if(m14_plankton_sample_raw < 0.0 || m14_plankton_sample_raw > 1.0) {
+    return false;
+  }
+
+  //m14_one_trident_piece
+  if(m14_one_trident_piece_raw < 0.0 || m14_one_trident_piece_raw > 2.0) {
+    return false;
+  }
+
+  //m15b_water_sample
+  if(m15b_water_sample_raw < 0.0 || m15b_water_sample_raw > 1.0) {
+    return false;
+  }
+
+  //m15b_seabed_sample
+  if(m15b_seabed_sample_raw < 0.0 || m15b_seabed_sample_raw > 1.0) {
+    return false;
+  }
+
+  //m15b_plankton_sample
+  if(m15b_plankton_sample_raw < 0.0 || m15b_plankton_sample_raw > 1.0) {
+    return false;
+  }
+
+  //m15b_treasure
+  if(m15b_treasure_raw < 0.0 || m15b_treasure_raw > 1.0) {
+    return false;
+  }
+
+  //m15b_trident
+  if(m15b_trident_raw < 0.0 || m15b_trident_raw > 2.0) {
+    return false;
+  }
+
+  //goal_5
+  if(goal_5_raw < 0.0 || goal_5_raw > 1.0) {
+    return false;
+  }
+
+  //m16_precision_tokens
+   // nothing to check
+
+  //gp_score
+  if(gp_score_raw < 2.0 || gp_score_raw > 4.0) {
+    return false;
+  }
+
+  return true;
+}
+
+
+// m00_one_launch_area
+var m00_one_launch_area_raw;
+var m00_one_launch_area_computed;
+function set_m00_one_launch_area(newValue) {
+  var temp = m00_one_launch_area_raw;
+  m00_one_launch_area_raw = newValue;
+  if(!isConsistent()) {
+    m00_one_launch_area_raw = temp;
+  }
+  refresh();
+}
+function check_m00_one_launch_area() {
+  var str = document.scoreEntry.m00_one_launch_area.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m00_one_launch_area(num);
+  }
+  refresh();
+}
+
+
+// m01_coral_tree_hanging
+var m01_coral_tree_hanging_raw;
+var m01_coral_tree_hanging_computed;
+function set_m01_coral_tree_hanging(newValue) {
+  var temp = m01_coral_tree_hanging_raw;
+  m01_coral_tree_hanging_raw = newValue;
+  if(!isConsistent()) {
+    m01_coral_tree_hanging_raw = temp;
+  }
+  refresh();
+}
+function check_m01_coral_tree_hanging() {
+  var str = document.scoreEntry.m01_coral_tree_hanging.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m01_coral_tree_hanging(num);
+  }
+  refresh();
+}
+
+
+// goal_2
+var goal_2_raw;
+var goal_2_computed;
+function set_goal_2(newValue) {
+  var temp = goal_2_raw;
+  goal_2_raw = newValue;
+  if(!isConsistent()) {
+    goal_2_raw = temp;
+  }
+  refresh();
+}
+function check_goal_2() {
+  var str = document.scoreEntry.goal_2.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_goal_2(num);
+  }
+  refresh();
+}
+
+
+// m02_shark_not_touching_cave
+var m02_shark_not_touching_cave_raw;
+var m02_shark_not_touching_cave_computed;
+function set_m02_shark_not_touching_cave(newValue) {
+  var temp = m02_shark_not_touching_cave_raw;
+  m02_shark_not_touching_cave_raw = newValue;
+  if(!isConsistent()) {
+    m02_shark_not_touching_cave_raw = temp;
+  }
+  refresh();
+}
+function check_m02_shark_not_touching_cave() {
+  var str = document.scoreEntry.m02_shark_not_touching_cave.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m02_shark_not_touching_cave(num);
+  }
+  refresh();
+}
+
+
+// m03_coral_reef_flipped_up
+var m03_coral_reef_flipped_up_raw;
+var m03_coral_reef_flipped_up_computed;
+function set_m03_coral_reef_flipped_up(newValue) {
+  var temp = m03_coral_reef_flipped_up_raw;
+  m03_coral_reef_flipped_up_raw = newValue;
+  if(!isConsistent()) {
+    m03_coral_reef_flipped_up_raw = temp;
+  }
+  refresh();
+}
+function check_m03_coral_reef_flipped_up() {
+  var str = document.scoreEntry.m03_coral_reef_flipped_up.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m03_coral_reef_flipped_up(num);
+  }
+  refresh();
+}
+
+
+// m03_count_reef_segments
+var m03_count_reef_segments_raw;
+var m03_count_reef_segments_computed;
+function set_m03_count_reef_segments(newValue) {
+  var temp = m03_count_reef_segments_raw;
+  m03_count_reef_segments_raw = newValue;
+  if(!isConsistent()) {
+    m03_count_reef_segments_raw = temp;
+  }
+  refresh();
+}
+function check_m03_count_reef_segments() {
+  var str = document.scoreEntry.m03_count_reef_segments.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m03_count_reef_segments(num);
+  }
+  refresh();
+}
+function increment_m03_count_reef_segments(increment) {
+  var temp = m03_count_reef_segments_raw
+  m03_count_reef_segments_raw += increment;
+  if(m03_count_reef_segments_raw > 3.0) {
+    m03_count_reef_segments_raw = 3.0;
+   }
+  if(m03_count_reef_segments_raw < 0.0) {
+    m03_count_reef_segments_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m03_count_reef_segments_raw = temp;
+  }
+  refresh();
+}
+
+
+// m04_scuba_diver_not_touching_nursery
+var m04_scuba_diver_not_touching_nursery_raw;
+var m04_scuba_diver_not_touching_nursery_computed;
+function set_m04_scuba_diver_not_touching_nursery(newValue) {
+  var temp = m04_scuba_diver_not_touching_nursery_raw;
+  m04_scuba_diver_not_touching_nursery_raw = newValue;
+  if(!isConsistent()) {
+    m04_scuba_diver_not_touching_nursery_raw = temp;
+  }
+  refresh();
+}
+function check_m04_scuba_diver_not_touching_nursery() {
+  var str = document.scoreEntry.m04_scuba_diver_not_touching_nursery.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m04_scuba_diver_not_touching_nursery(num);
+  }
+  refresh();
+}
+
+
+// m05_angler_fish_latched
+var m05_angler_fish_latched_raw;
+var m05_angler_fish_latched_computed;
+function set_m05_angler_fish_latched(newValue) {
+  var temp = m05_angler_fish_latched_raw;
+  m05_angler_fish_latched_raw = newValue;
+  if(!isConsistent()) {
+    m05_angler_fish_latched_raw = temp;
+  }
+  refresh();
+}
+function check_m05_angler_fish_latched() {
+  var str = document.scoreEntry.m05_angler_fish_latched.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m05_angler_fish_latched(num);
+  }
+  refresh();
+}
+
+
+// m06_shipwreck_mast_raised
+var m06_shipwreck_mast_raised_raw;
+var m06_shipwreck_mast_raised_computed;
+function set_m06_shipwreck_mast_raised(newValue) {
+  var temp = m06_shipwreck_mast_raised_raw;
+  m06_shipwreck_mast_raised_raw = newValue;
+  if(!isConsistent()) {
+    m06_shipwreck_mast_raised_raw = temp;
+  }
+  refresh();
+}
+function check_m06_shipwreck_mast_raised() {
+  var str = document.scoreEntry.m06_shipwreck_mast_raised.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m06_shipwreck_mast_raised(num);
+  }
+  refresh();
+}
+
+
+// m07_treasure_chest_removed
+var m07_treasure_chest_removed_raw;
+var m07_treasure_chest_removed_computed;
+function set_m07_treasure_chest_removed(newValue) {
+  var temp = m07_treasure_chest_removed_raw;
+  m07_treasure_chest_removed_raw = newValue;
+  if(!isConsistent()) {
+    m07_treasure_chest_removed_raw = temp;
+  }
+  refresh();
+}
+function check_m07_treasure_chest_removed() {
+  var str = document.scoreEntry.m07_treasure_chest_removed.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m07_treasure_chest_removed(num);
+  }
+  refresh();
+}
+
+
+// m08_count_stack_segments
+var m08_count_stack_segments_raw;
+var m08_count_stack_segments_computed;
+function set_m08_count_stack_segments(newValue) {
+  var temp = m08_count_stack_segments_raw;
+  m08_count_stack_segments_raw = newValue;
+  if(!isConsistent()) {
+    m08_count_stack_segments_raw = temp;
+  }
+  refresh();
+}
+function check_m08_count_stack_segments() {
+  var str = document.scoreEntry.m08_count_stack_segments.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m08_count_stack_segments(num);
+  }
+  refresh();
+}
+function increment_m08_count_stack_segments(increment) {
+  var temp = m08_count_stack_segments_raw
+  m08_count_stack_segments_raw += increment;
+  if(m08_count_stack_segments_raw > 4.0) {
+    m08_count_stack_segments_raw = 4.0;
+   }
+  if(m08_count_stack_segments_raw < 0.0) {
+    m08_count_stack_segments_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m08_count_stack_segments_raw = temp;
+  }
+  refresh();
+}
+
+
+// m09_creature_released
+var m09_creature_released_raw;
+var m09_creature_released_computed;
+function set_m09_creature_released(newValue) {
+  var temp = m09_creature_released_raw;
+  m09_creature_released_raw = newValue;
+  if(!isConsistent()) {
+    m09_creature_released_raw = temp;
+  }
+  refresh();
+}
+function check_m09_creature_released() {
+  var str = document.scoreEntry.m09_creature_released.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m09_creature_released(num);
+  }
+  refresh();
+}
+
+
+// m10_yellow_flag_down
+var m10_yellow_flag_down_raw;
+var m10_yellow_flag_down_computed;
+function set_m10_yellow_flag_down(newValue) {
+  var temp = m10_yellow_flag_down_raw;
+  m10_yellow_flag_down_raw = newValue;
+  if(!isConsistent()) {
+    m10_yellow_flag_down_raw = temp;
+  }
+  refresh();
+}
+function check_m10_yellow_flag_down() {
+  var str = document.scoreEntry.m10_yellow_flag_down.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m10_yellow_flag_down(num);
+  }
+  refresh();
+}
+
+
+// m10_sub_closer_opposing_field
+var m10_sub_closer_opposing_field_raw;
+var m10_sub_closer_opposing_field_computed;
+function set_m10_sub_closer_opposing_field(newValue) {
+  var temp = m10_sub_closer_opposing_field_raw;
+  m10_sub_closer_opposing_field_raw = newValue;
+  if(!isConsistent()) {
+    m10_sub_closer_opposing_field_raw = temp;
+  }
+  refresh();
+}
+function check_m10_sub_closer_opposing_field() {
+  var str = document.scoreEntry.m10_sub_closer_opposing_field.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m10_sub_closer_opposing_field(num);
+  }
+  refresh();
+}
+
+
+// m11_count_whales_revealed
+var m11_count_whales_revealed_raw;
+var m11_count_whales_revealed_computed;
+function set_m11_count_whales_revealed(newValue) {
+  var temp = m11_count_whales_revealed_raw;
+  m11_count_whales_revealed_raw = newValue;
+  if(!isConsistent()) {
+    m11_count_whales_revealed_raw = temp;
+  }
+  refresh();
+}
+function check_m11_count_whales_revealed() {
+  var str = document.scoreEntry.m11_count_whales_revealed.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m11_count_whales_revealed(num);
+  }
+  refresh();
+}
+
+
+// m11_count_krill
+var m11_count_krill_raw;
+var m11_count_krill_computed;
+function set_m11_count_krill(newValue) {
+  var temp = m11_count_krill_raw;
+  m11_count_krill_raw = newValue;
+  if(!isConsistent()) {
+    m11_count_krill_raw = temp;
+  }
+  refresh();
+}
+function check_m11_count_krill() {
+  var str = document.scoreEntry.m11_count_krill.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m11_count_krill(num);
+  }
+  refresh();
+}
+function increment_m11_count_krill(increment) {
+  var temp = m11_count_krill_raw
+  m11_count_krill_raw += increment;
+  if(m11_count_krill_raw > 5.0) {
+    m11_count_krill_raw = 5.0;
+   }
+  if(m11_count_krill_raw < 0.0) {
+    m11_count_krill_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m11_count_krill_raw = temp;
+  }
+  refresh();
+}
+
+
+// m13_new_shipping_lane
+var m13_new_shipping_lane_raw;
+var m13_new_shipping_lane_computed;
+function set_m13_new_shipping_lane(newValue) {
+  var temp = m13_new_shipping_lane_raw;
+  m13_new_shipping_lane_raw = newValue;
+  if(!isConsistent()) {
+    m13_new_shipping_lane_raw = temp;
+  }
+  refresh();
+}
+function check_m13_new_shipping_lane() {
+  var str = document.scoreEntry.m13_new_shipping_lane.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m13_new_shipping_lane(num);
+  }
+  refresh();
+}
+
+
+// m14_water_sample
+var m14_water_sample_raw;
+var m14_water_sample_computed;
+function set_m14_water_sample(newValue) {
+  var temp = m14_water_sample_raw;
+  m14_water_sample_raw = newValue;
+  if(!isConsistent()) {
+    m14_water_sample_raw = temp;
+  }
+  refresh();
+}
+function check_m14_water_sample() {
+  var str = document.scoreEntry.m14_water_sample.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m14_water_sample(num);
+  }
+  refresh();
+}
+
+
+// m14_seabed_sample
+var m14_seabed_sample_raw;
+var m14_seabed_sample_computed;
+function set_m14_seabed_sample(newValue) {
+  var temp = m14_seabed_sample_raw;
+  m14_seabed_sample_raw = newValue;
+  if(!isConsistent()) {
+    m14_seabed_sample_raw = temp;
+  }
+  refresh();
+}
+function check_m14_seabed_sample() {
+  var str = document.scoreEntry.m14_seabed_sample.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m14_seabed_sample(num);
+  }
+  refresh();
+}
+
+
+// m14_plankton_sample
+var m14_plankton_sample_raw;
+var m14_plankton_sample_computed;
+function set_m14_plankton_sample(newValue) {
+  var temp = m14_plankton_sample_raw;
+  m14_plankton_sample_raw = newValue;
+  if(!isConsistent()) {
+    m14_plankton_sample_raw = temp;
+  }
+  refresh();
+}
+function check_m14_plankton_sample() {
+  var str = document.scoreEntry.m14_plankton_sample.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m14_plankton_sample(num);
+  }
+  refresh();
+}
+
+
+// m14_one_trident_piece
+var m14_one_trident_piece_raw;
+var m14_one_trident_piece_computed;
+function set_m14_one_trident_piece(newValue) {
+  var temp = m14_one_trident_piece_raw;
+  m14_one_trident_piece_raw = newValue;
+  if(!isConsistent()) {
+    m14_one_trident_piece_raw = temp;
+  }
+  refresh();
+}
+function check_m14_one_trident_piece() {
+  var str = document.scoreEntry.m14_one_trident_piece.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m14_one_trident_piece(num);
+  }
+  refresh();
+}
+function increment_m14_one_trident_piece(increment) {
+  var temp = m14_one_trident_piece_raw
+  m14_one_trident_piece_raw += increment;
+  if(m14_one_trident_piece_raw > 2.0) {
+    m14_one_trident_piece_raw = 2.0;
+   }
+  if(m14_one_trident_piece_raw < 0.0) {
+    m14_one_trident_piece_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m14_one_trident_piece_raw = temp;
+  }
+  refresh();
+}
+
+
+// m14_calculate_trident
+var m14_calculate_trident_computed;
+function compute_m14_calculate_trident() {
+  if(parseInt(1.000000* m14_one_trident_piece_raw) == parseInt(1.000000)) {
+    m14_calculate_trident_computed = parseInt(20.000000);
+  } else if(parseInt(1.000000* m14_one_trident_piece_raw) == parseInt(2.000000)) {
+    m14_calculate_trident_computed = parseInt(30.000000);
+  } else {
+    m14_calculate_trident_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_m14_calculate_trident.value = m14_calculate_trident_computed;
+}
+// m15b_water_sample
+var m15b_water_sample_raw;
+var m15b_water_sample_computed;
+function set_m15b_water_sample(newValue) {
+  var temp = m15b_water_sample_raw;
+  m15b_water_sample_raw = newValue;
+  if(!isConsistent()) {
+    m15b_water_sample_raw = temp;
+  }
+  refresh();
+}
+function check_m15b_water_sample() {
+  var str = document.scoreEntry.m15b_water_sample.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m15b_water_sample(num);
+  }
+  refresh();
+}
+
+
+// m15b_seabed_sample
+var m15b_seabed_sample_raw;
+var m15b_seabed_sample_computed;
+function set_m15b_seabed_sample(newValue) {
+  var temp = m15b_seabed_sample_raw;
+  m15b_seabed_sample_raw = newValue;
+  if(!isConsistent()) {
+    m15b_seabed_sample_raw = temp;
+  }
+  refresh();
+}
+function check_m15b_seabed_sample() {
+  var str = document.scoreEntry.m15b_seabed_sample.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m15b_seabed_sample(num);
+  }
+  refresh();
+}
+
+
+// m15b_plankton_sample
+var m15b_plankton_sample_raw;
+var m15b_plankton_sample_computed;
+function set_m15b_plankton_sample(newValue) {
+  var temp = m15b_plankton_sample_raw;
+  m15b_plankton_sample_raw = newValue;
+  if(!isConsistent()) {
+    m15b_plankton_sample_raw = temp;
+  }
+  refresh();
+}
+function check_m15b_plankton_sample() {
+  var str = document.scoreEntry.m15b_plankton_sample.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m15b_plankton_sample(num);
+  }
+  refresh();
+}
+
+
+// m15b_treasure
+var m15b_treasure_raw;
+var m15b_treasure_computed;
+function set_m15b_treasure(newValue) {
+  var temp = m15b_treasure_raw;
+  m15b_treasure_raw = newValue;
+  if(!isConsistent()) {
+    m15b_treasure_raw = temp;
+  }
+  refresh();
+}
+function check_m15b_treasure() {
+  var str = document.scoreEntry.m15b_treasure.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m15b_treasure(num);
+  }
+  refresh();
+}
+
+
+// m15b_trident
+var m15b_trident_raw;
+var m15b_trident_computed;
+function set_m15b_trident(newValue) {
+  var temp = m15b_trident_raw;
+  m15b_trident_raw = newValue;
+  if(!isConsistent()) {
+    m15b_trident_raw = temp;
+  }
+  refresh();
+}
+function check_m15b_trident() {
+  var str = document.scoreEntry.m15b_trident.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m15b_trident(num);
+  }
+  refresh();
+}
+function increment_m15b_trident(increment) {
+  var temp = m15b_trident_raw
+  m15b_trident_raw += increment;
+  if(m15b_trident_raw > 2.0) {
+    m15b_trident_raw = 2.0;
+   }
+  if(m15b_trident_raw < 0.0) {
+    m15b_trident_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m15b_trident_raw = temp;
+  }
+  refresh();
+}
+
+
+// goal_5
+var goal_5_raw;
+var goal_5_computed;
+function set_goal_5(newValue) {
+  var temp = goal_5_raw;
+  goal_5_raw = newValue;
+  if(!isConsistent()) {
+    goal_5_raw = temp;
+  }
+  refresh();
+}
+function check_goal_5() {
+  var str = document.scoreEntry.goal_5.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_goal_5(num);
+  }
+  refresh();
+}
+
+
+// m16_precision_tokens
+var m16_precision_tokens_raw;
+var m16_precision_tokens_computed;
+function set_m16_precision_tokens(newValue) {
+  var temp = m16_precision_tokens_raw;
+  m16_precision_tokens_raw = newValue;
+  if(!isConsistent()) {
+    m16_precision_tokens_raw = temp;
+  }
+  refresh();
+}
+function check_m16_precision_tokens() {
+  var str = document.scoreEntry.m16_precision_tokens.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m16_precision_tokens(num);
+  }
+  refresh();
+}
+
+
+// gp_score
+var gp_score_raw;
+var gp_score_computed;
+function set_gp_score(newValue) {
+  var temp = gp_score_raw;
+  gp_score_raw = newValue;
+  if(!isConsistent()) {
+    gp_score_raw = temp;
+  }
+  refresh();
+}
+function check_gp_score() {
+  var str = document.scoreEntry.gp_score.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_gp_score(num);
+  }
+  refresh();
+}
+function increment_gp_score(increment) {
+  var temp = gp_score_raw
+  gp_score_raw += increment;
+  if(gp_score_raw > 4.0) {
+    gp_score_raw = 4.0;
+   }
+  if(gp_score_raw < 2.0) {
+    gp_score_raw = 2.0;
+   }
+  if(!isConsistent()) {
+    gp_score_raw = temp;
+  }
+  refresh();
+}
+
+
+// Verified 
+var Verified;
+function set_Verified(newValue) {
+  Verified = newValue;
+  refresh();
+}
+
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const resetButton = document.getElementById("reset_score");
+  if(resetButton) {
+      resetButton.addEventListener('click', init);
+  }
+});
+
+</script>
+
+
+<script type="text/javascript" src="Score%20Entry_files/scoreEntry.js"></script>
+
+</head>
+
+<body>
+
+  <form action="SubmitScoreEntry" method="POST" name="scoreEntry" id="scoreEntry" class="fll-sw-ui-body">
+        
+            
+            
+                <input type="hidden" name="tablename" value="ALL">
+            
+        
+
+        <input type="hidden" id="NoShow" name="NoShow" value="false">
+    <input type="hidden" id="delete" name="delete" value="false">
+
+        <input type="hidden" name="EditFlag" id="EditFlag" value="false" readonly="readonly">
+
+        <input type="hidden" name="RunNumber" value="" readonly="readonly">
+        <input type="hidden" name="TeamNumber" value="" readonly="readonly">
+
+        <header>
+            <div id="floating-messages">
+                <div id="score-errors" class="fll-sw-ui-inactive"></div>
+                <div id="verification-warning" class="fll-sw-ui-inactive">Are you sure this
+                    score has been Verified? Normally scores are not
+                    verified on the initial entry.</div>
+            </div>
+
+            <!-- top info bar (team name etc) -->
+            <table id="top_info" border="1" cellpadding="0" cellspacing="0" width="100%">
+                <tbody><tr align="center" valign="middle">
+                    <td>
+
+                        <table border="0" cellpadding="5" cellspacing="0" width="90%">
+                            <!--  inner box on title -->
+                            <tbody><tr>
+                                <td valign="middle" align="center">
+                                    
+                                        
+                                        
+                                            <font face="Arial" size="4">Score
+                                                Entry</font>
+                                        
+                                    
+                                </td>
+                            </tr>
+                            <tr align="center">
+                                <td>
+                                    <font face="Arial" size="4" color="#0000ff">
+
+                                        
+                                            
+                      Practice
+                      
+                                            
+                                        
+                                    </font>
+                                </td>
+                            </tr>
+                        </tbody></table>
+                        <!--  end inner box on title -->
+
+                    </td>
+                </tr>
+                <!-- team info -->
+
+                
+
+            </tbody></table>
+            <!--  end info bar -->
+        </header>
+
+        <main id="review-mode_container">
+            <div id="review-mode_glasspane"></div>
+
+            <!-- score entry -->
+            <table class="score-entry">
+                <colgroup>
+                    <!--  goal -->
+                    <col width="50%">
+                    <!-- buttons -->
+                    <col width="30%">
+                    <!-- count -->
+                    <col width="10%">
+                    <!--  score -->
+                    <col width="10%">
+                </colgroup>
+                <tbody><tr>
+                    <td colspan="2">
+                        <font size="4">
+                            <u>Goal</u>
+                        </font>
+                    </td>
+                    <td align="right">
+                        <font size="4">
+                            <u>Count</u>
+                        </font>
+                    </td>
+                    <td align="right" class="score-cell">
+                        <font size="4">
+                            <u>Score</u>
+                        </font>
+                    </td>
+                </tr>
+
+                
+                    
+                    
+                        
+                        <tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M00 - EQUIPMENT INSPECTION BONUS</b></td>
+</tr>
+<!-- m00_one_launch_area -->
+<tr id="m00_one_launch_area_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ALL Equipment Fits in ONE Launch area under 12":
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m00_one_launch_area_no" name="m00_one_launch_area" value="0" onclick="set_m00_one_launch_area(0)" checked="checked">
+        <span id="m00_one_launch_area_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m00_one_launch_area_yes" name="m00_one_launch_area" value="1" onclick="set_m00_one_launch_area(1)">
+        <span id="m00_one_launch_area_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m00_one_launch_area_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m00_one_launch_area" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m00_one_launch_area -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>SM01 - CORAL NURSERY</b></td>
+</tr>
+<!-- m01_coral_tree_hanging -->
+<tr id="m01_coral_tree_hanging_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Coral Tree Hanging on Coral Tree Support - not touching equipment at end:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m01_coral_tree_hanging" value="zero" id="m01_coral_tree_hanging_zero" onclick='set_m01_coral_tree_hanging("zero")' checked="checked">
+        <span id="m01_coral_tree_hanging_zero_span">
+          Coral Tree Not Hanging
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m01_coral_tree_hanging" value="Hanging" id="m01_coral_tree_hanging_Hanging" onclick='set_m01_coral_tree_hanging("Hanging")'>
+        <span id="m01_coral_tree_hanging_Hanging_span">
+          Coral Tree Hanging on Coral Tree Support
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m01_coral_tree_hanging" value="Holder" id="m01_coral_tree_hanging_Holder" onclick='set_m01_coral_tree_hanging("Holder")'>
+        <span id="m01_coral_tree_hanging_Holder_span">
+          Coral Tree Hanging &amp; Bottom in Holder
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m01_coral_tree_hanging_radioValue" size="10" align="right" readonly="readonly" tabindex="-1" value="ZERO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m01_coral_tree_hanging" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m01_coral_tree_hanging -->
+
+<!-- goal_2 -->
+<tr id="goal_2_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Coral Buds Flipped Up - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="goal_2_no" name="goal_2" value="0" onclick="set_goal_2(0)" checked="checked">
+        <span id="goal_2_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="goal_2_yes" name="goal_2" value="1" onclick="set_goal_2(1)">
+        <span id="goal_2_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="goal_2_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_goal_2" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end goal_2 -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>SM02 - SHARK</b></td>
+</tr>
+<!-- m02_shark_not_touching_cave -->
+<tr id="m02_shark_not_touching_cave_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shark No Longer Touching Cave:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m02_shark_not_touching_cave" value="Cave" id="m02_shark_not_touching_cave_Cave" onclick='set_m02_shark_not_touching_cave("Cave")' checked="checked">
+        <span id="m02_shark_not_touching_cave_Cave_span">
+          Shark still in Cave
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m02_shark_not_touching_cave" value="Removed" id="m02_shark_not_touching_cave_Removed" onclick='set_m02_shark_not_touching_cave("Removed")'>
+        <span id="m02_shark_not_touching_cave_Removed_span">
+          Shark No Longer Touching Cave
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m02_shark_not_touching_cave" value="Habitat" id="m02_shark_not_touching_cave_Habitat" onclick='set_m02_shark_not_touching_cave("Habitat")'>
+        <span id="m02_shark_not_touching_cave_Habitat_span">
+          Shark Touching Mat at least Partly in Shark Habitat
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m02_shark_not_touching_cave_radioValue" size="10" align="right" readonly="readonly" tabindex="-1" value="CAVE">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m02_shark_not_touching_cave" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m02_shark_not_touching_cave -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>SM03 - CORAL REEF</b></td>
+</tr>
+<!-- m03_coral_reef_flipped_up -->
+<tr id="m03_coral_reef_flipped_up_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Coral Reef Flipped Up, not touching mat or equipment:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m03_coral_reef_flipped_up_no" name="m03_coral_reef_flipped_up" value="0" onclick="set_m03_coral_reef_flipped_up(0)" checked="checked">
+        <span id="m03_coral_reef_flipped_up_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m03_coral_reef_flipped_up_yes" name="m03_coral_reef_flipped_up" value="1" onclick="set_m03_coral_reef_flipped_up(1)">
+        <span id="m03_coral_reef_flipped_up_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m03_coral_reef_flipped_up_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m03_coral_reef_flipped_up" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m03_coral_reef_flipped_up -->
+
+<!-- m03_count_reef_segments -->
+<tr id="m03_count_reef_segments_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Reef Segments Standing Upright, 
+Touching Mat, Outside of Home - not touching eqiupment at end:
+  </td>
+  <td>
+<input type="range" min="0" max="3" class="slider" id="m03_count_reef_segments_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="33.33%" y="0" width="2" height="100%"></rect>
+<rect x="66.67%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m03_count_reef_segments" size="3" align="right" onchange="check_m03_count_reef_segments()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m03_count_reef_segments" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m03_count_reef_segments -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>SM04 - SCUBA DIVER</b></td>
+</tr>
+<!-- m04_scuba_diver_not_touching_nursery -->
+<tr id="m04_scuba_diver_not_touching_nursery_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scuba Diver No Longer Touching Coral Nursery:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m04_scuba_diver_not_touching_nursery" value="touching" id="m04_scuba_diver_not_touching_nursery_touching" onclick='set_m04_scuba_diver_not_touching_nursery("touching")' checked="checked">
+        <span id="m04_scuba_diver_not_touching_nursery_touching_span">
+          Scuba Diver Still Touching Coral Nursery
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m04_scuba_diver_not_touching_nursery" value="released" id="m04_scuba_diver_not_touching_nursery_released" onclick='set_m04_scuba_diver_not_touching_nursery("released")'>
+        <span id="m04_scuba_diver_not_touching_nursery_released_span">
+          Scuba Diver No Longer Touching Coral Nursery
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m04_scuba_diver_not_touching_nursery" value="hanging" id="m04_scuba_diver_not_touching_nursery_hanging" onclick='set_m04_scuba_diver_not_touching_nursery("hanging")'>
+        <span id="m04_scuba_diver_not_touching_nursery_hanging_span">
+          Suba Diver Hanging on Coral Reef Support
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m04_scuba_diver_not_touching_nursery_radioValue" size="10" align="right" readonly="readonly" tabindex="-1" value="TOUCHING">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m04_scuba_diver_not_touching_nursery" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m04_scuba_diver_not_touching_nursery -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>SM05 - ANGLER FISH</b></td>
+</tr>
+<!-- m05_angler_fish_latched -->
+<tr id="m05_angler_fish_latched_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Angler Fish Latched within Shipwreck:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m05_angler_fish_latched_no" name="m05_angler_fish_latched" value="0" onclick="set_m05_angler_fish_latched(0)" checked="checked">
+        <span id="m05_angler_fish_latched_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m05_angler_fish_latched_yes" name="m05_angler_fish_latched" value="1" onclick="set_m05_angler_fish_latched(1)">
+        <span id="m05_angler_fish_latched_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m05_angler_fish_latched_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m05_angler_fish_latched" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m05_angler_fish_latched -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>SM06 - RAISE THE MAST</b></td>
+</tr>
+<!-- m06_shipwreck_mast_raised -->
+<tr id="m06_shipwreck_mast_raised_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shipwreck's Mast Completely Raised - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m06_shipwreck_mast_raised_no" name="m06_shipwreck_mast_raised" value="0" onclick="set_m06_shipwreck_mast_raised(0)" checked="checked">
+        <span id="m06_shipwreck_mast_raised_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m06_shipwreck_mast_raised_yes" name="m06_shipwreck_mast_raised" value="1" onclick="set_m06_shipwreck_mast_raised(1)">
+        <span id="m06_shipwreck_mast_raised_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m06_shipwreck_mast_raised_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m06_shipwreck_mast_raised" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m06_shipwreck_mast_raised -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>SM07 - KRAKEN'S TREASURE</b></td>
+</tr>
+<!-- m07_treasure_chest_removed -->
+<tr id="m07_treasure_chest_removed_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Treasure Chest Completely Outside Kraken's Nest - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m07_treasure_chest_removed_no" name="m07_treasure_chest_removed" value="0" onclick="set_m07_treasure_chest_removed(0)" checked="checked">
+        <span id="m07_treasure_chest_removed_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m07_treasure_chest_removed_yes" name="m07_treasure_chest_removed" value="1" onclick="set_m07_treasure_chest_removed(1)">
+        <span id="m07_treasure_chest_removed_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m07_treasure_chest_removed_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m07_treasure_chest_removed" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m07_treasure_chest_removed -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>SM08 - ARTIFICIAL HABITAT</b></td>
+</tr>
+<!-- m08_count_stack_segments -->
+<tr id="m08_count_stack_segments_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Artificial Habitat Stack Segments 
+Completely Flat &amp; Upright - not touching eqiupment at end:
+  </td>
+  <td>
+<input type="range" min="0" max="4" class="slider" id="m08_count_stack_segments_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="25.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="75.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m08_count_stack_segments" size="3" align="right" onchange="check_m08_count_stack_segments()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m08_count_stack_segments" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m08_count_stack_segments -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>SM09 - UNEXPECTED ENCOUNTER</b></td>
+</tr>
+<!-- m09_creature_released -->
+<tr id="m09_creature_released_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Unknown Creature Released:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m09_creature_released" value="not" id="m09_creature_released_not" onclick='set_m09_creature_released("not")' checked="checked">
+        <span id="m09_creature_released_not_span">
+          Unknown Creature NOT Released
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m09_creature_released" value="released" id="m09_creature_released_released" onclick='set_m09_creature_released("released")'>
+        <span id="m09_creature_released_released_span">
+          Unknown Creature Released
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m09_creature_released" value="seep" id="m09_creature_released_seep" onclick='set_m09_creature_released("seep")'>
+        <span id="m09_creature_released_seep_span">
+          Unknow Creature at least Partly in Cold Seep
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m09_creature_released_radioValue" size="10" align="right" readonly="readonly" tabindex="-1" value="NOT">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m09_creature_released" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m09_creature_released -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>SM10 - SEND OVER THE SUBMERSIBLE</b></td>
+</tr>
+<!-- m10_yellow_flag_down -->
+<tr id="m10_yellow_flag_down_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your Team's Yellow Flag is Down - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m10_yellow_flag_down_no" name="m10_yellow_flag_down" value="0" onclick="set_m10_yellow_flag_down(0)" checked="checked">
+        <span id="m10_yellow_flag_down_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m10_yellow_flag_down_yes" name="m10_yellow_flag_down" value="1" onclick="set_m10_yellow_flag_down(1)">
+        <span id="m10_yellow_flag_down_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m10_yellow_flag_down_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m10_yellow_flag_down" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m10_yellow_flag_down -->
+
+<!-- m10_sub_closer_opposing_field -->
+<tr id="m10_sub_closer_opposing_field_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Submersible Clearly Closer to Opposing
+ Field - not touching equipment at end - team's may NOT block :
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m10_sub_closer_opposing_field_no" name="m10_sub_closer_opposing_field" value="0" onclick="set_m10_sub_closer_opposing_field(0)" checked="checked">
+        <span id="m10_sub_closer_opposing_field_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m10_sub_closer_opposing_field_yes" name="m10_sub_closer_opposing_field" value="1" onclick="set_m10_sub_closer_opposing_field(1)">
+        <span id="m10_sub_closer_opposing_field_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m10_sub_closer_opposing_field_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m10_sub_closer_opposing_field" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m10_sub_closer_opposing_field -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>SM11 - SONAR DISCOVERY</b></td>
+</tr>
+<!-- m11_count_whales_revealed -->
+<tr id="m11_count_whales_revealed_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Whales Revealed:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m11_count_whales_revealed" value="zero" id="m11_count_whales_revealed_zero" onclick='set_m11_count_whales_revealed("zero")' checked="checked">
+        <span id="m11_count_whales_revealed_zero_span">
+          0
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m11_count_whales_revealed" value="one" id="m11_count_whales_revealed_one" onclick='set_m11_count_whales_revealed("one")'>
+        <span id="m11_count_whales_revealed_one_span">
+          1
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m11_count_whales_revealed" value="two" id="m11_count_whales_revealed_two" onclick='set_m11_count_whales_revealed("two")'>
+        <span id="m11_count_whales_revealed_two_span">
+          2
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m11_count_whales_revealed_radioValue" size="10" align="right" readonly="readonly" tabindex="-1" value="ZERO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m11_count_whales_revealed" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m11_count_whales_revealed -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>SM12 - FEED THE WHALE</b></td>
+</tr>
+<!-- m11_count_krill -->
+<tr id="m11_count_krill_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Krill at least Partly in Whale's Mouth - not touching equipment at end:
+  </td>
+  <td>
+<input type="range" min="0" max="5" class="slider" id="m11_count_krill_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="20.00%" y="0" width="2" height="100%"></rect>
+<rect x="40.00%" y="0" width="2" height="100%"></rect>
+<rect x="60.00%" y="0" width="2" height="100%"></rect>
+<rect x="80.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m11_count_krill" size="3" align="right" onchange="check_m11_count_krill()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m11_count_krill" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m11_count_krill -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>SM13 - CHANGING SHIPPING LANES</b></td>
+</tr>
+<!-- m13_new_shipping_lane -->
+<tr id="m13_new_shipping_lane_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ship in New Shipping Lane, Touching the Mat:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m13_new_shipping_lane_no" name="m13_new_shipping_lane" value="0" onclick="set_m13_new_shipping_lane(0)" checked="checked">
+        <span id="m13_new_shipping_lane_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m13_new_shipping_lane_yes" name="m13_new_shipping_lane" value="1" onclick="set_m13_new_shipping_lane(1)">
+        <span id="m13_new_shipping_lane_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m13_new_shipping_lane_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m13_new_shipping_lane" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m13_new_shipping_lane -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>SM14 - SAMPLE COLLECTION</b></td>
+</tr>
+<!-- m14_water_sample -->
+<tr id="m14_water_sample_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Water Sample Completely Outside Water Sample Area:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m14_water_sample_no" name="m14_water_sample" value="0" onclick="set_m14_water_sample(0)" checked="checked">
+        <span id="m14_water_sample_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m14_water_sample_yes" name="m14_water_sample" value="1" onclick="set_m14_water_sample(1)">
+        <span id="m14_water_sample_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m14_water_sample_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m14_water_sample" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m14_water_sample -->
+
+<!-- m14_seabed_sample -->
+<tr id="m14_seabed_sample_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Seabed Sample No Longer Touching Seabed:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m14_seabed_sample_no" name="m14_seabed_sample" value="0" onclick="set_m14_seabed_sample(0)" checked="checked">
+        <span id="m14_seabed_sample_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m14_seabed_sample_yes" name="m14_seabed_sample" value="1" onclick="set_m14_seabed_sample(1)">
+        <span id="m14_seabed_sample_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m14_seabed_sample_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m14_seabed_sample" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m14_seabed_sample -->
+
+<!-- m14_plankton_sample -->
+<tr id="m14_plankton_sample_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Plankton Sample No Longer Touching Kelp Forest:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m14_plankton_sample_no" name="m14_plankton_sample" value="0" onclick="set_m14_plankton_sample(0)" checked="checked">
+        <span id="m14_plankton_sample_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m14_plankton_sample_yes" name="m14_plankton_sample" value="1" onclick="set_m14_plankton_sample(1)">
+        <span id="m14_plankton_sample_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m14_plankton_sample_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m14_plankton_sample" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m14_plankton_sample -->
+
+<!-- m14_one_trident_piece -->
+<tr id="m14_one_trident_piece_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Trident Pieces No Longer Touching Shipwreck:
+  </td>
+  <td>
+<input type="range" min="0" max="2" class="slider" id="m14_one_trident_piece_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m14_one_trident_piece" size="3" align="right" onchange="check_m14_one_trident_piece()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m14_one_trident_piece" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m14_one_trident_piece -->
+
+<!-- m14_calculate_trident -->
+<tr id="m14_calculate_trident_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Trident Pieces Score:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m14_calculate_trident" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m14_calculate_trident -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>SM15 - RESEARCH VESSEL</b></td>
+</tr>
+<!-- m15b_water_sample -->
+<tr id="m15b_water_sample_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Water sample - at least Partly in 
+Research Vessel's Cargo Area - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m15b_water_sample_no" name="m15b_water_sample" value="0" onclick="set_m15b_water_sample(0)" checked="checked">
+        <span id="m15b_water_sample_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m15b_water_sample_yes" name="m15b_water_sample" value="1" onclick="set_m15b_water_sample(1)">
+        <span id="m15b_water_sample_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m15b_water_sample_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m15b_water_sample" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m15b_water_sample -->
+
+<!-- m15b_seabed_sample -->
+<tr id="m15b_seabed_sample_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Seabed Sample - at least Partly in 
+Research Vessel's Cargo Area - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m15b_seabed_sample_no" name="m15b_seabed_sample" value="0" onclick="set_m15b_seabed_sample(0)" checked="checked">
+        <span id="m15b_seabed_sample_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m15b_seabed_sample_yes" name="m15b_seabed_sample" value="1" onclick="set_m15b_seabed_sample(1)">
+        <span id="m15b_seabed_sample_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m15b_seabed_sample_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m15b_seabed_sample" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m15b_seabed_sample -->
+
+<!-- m15b_plankton_sample -->
+<tr id="m15b_plankton_sample_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Plankton Sample - at least Partly in 
+Research Vessel's Cargo Area - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m15b_plankton_sample_no" name="m15b_plankton_sample" value="0" onclick="set_m15b_plankton_sample(0)" checked="checked">
+        <span id="m15b_plankton_sample_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m15b_plankton_sample_yes" name="m15b_plankton_sample" value="1" onclick="set_m15b_plankton_sample(1)">
+        <span id="m15b_plankton_sample_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m15b_plankton_sample_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m15b_plankton_sample" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m15b_plankton_sample -->
+
+<!-- m15b_treasure -->
+<tr id="m15b_treasure_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Treasure Chest - at least Partly in 
+Research Vessel's Cargo Area - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m15b_treasure_no" name="m15b_treasure" value="0" onclick="set_m15b_treasure(0)" checked="checked">
+        <span id="m15b_treasure_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m15b_treasure_yes" name="m15b_treasure" value="1" onclick="set_m15b_treasure(1)">
+        <span id="m15b_treasure_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m15b_treasure_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m15b_treasure" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m15b_treasure -->
+
+<!-- m15b_trident -->
+<tr id="m15b_trident_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#Trident Pieces - at least Partly in 
+Research Vessel's Cargo Area - not touching equipment at end:
+  </td>
+  <td>
+<input type="range" min="0" max="2" class="slider" id="m15b_trident_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m15b_trident" size="3" align="right" onchange="check_m15b_trident()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m15b_trident" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m15b_trident -->
+
+<!-- goal_5 -->
+<tr id="goal_5_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ports Latch at Least Partly in Research Vessel's Loop - not touching eqiupment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="goal_5_no" name="goal_5" value="0" onclick="set_goal_5(0)" checked="checked">
+        <span id="goal_5_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="goal_5_yes" name="goal_5" value="1" onclick="set_goal_5(1)">
+        <span id="goal_5_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="goal_5_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_goal_5" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end goal_5 -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>SM16 - Precision Tokens Remaining</b></td>
+</tr>
+<!-- m16_precision_tokens -->
+<tr id="m16_precision_tokens_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Precision Tokens Remaining on Field:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="zero" id="m16_precision_tokens_zero" onclick='set_m16_precision_tokens("zero")'>
+        <span id="m16_precision_tokens_zero_span">
+          Zero
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="one" id="m16_precision_tokens_one" onclick='set_m16_precision_tokens("one")'>
+        <span id="m16_precision_tokens_one_span">
+          1
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="two" id="m16_precision_tokens_two" onclick='set_m16_precision_tokens("two")'>
+        <span id="m16_precision_tokens_two_span">
+          2
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="three" id="m16_precision_tokens_three" onclick='set_m16_precision_tokens("three")'>
+        <span id="m16_precision_tokens_three_span">
+          3
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="four" id="m16_precision_tokens_four" onclick='set_m16_precision_tokens("four")'>
+        <span id="m16_precision_tokens_four_span">
+          4
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="five" id="m16_precision_tokens_five" onclick='set_m16_precision_tokens("five")'>
+        <span id="m16_precision_tokens_five_span">
+          5
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="six" id="m16_precision_tokens_six" onclick='set_m16_precision_tokens("six")' checked="checked">
+        <span id="m16_precision_tokens_six_span">
+          6
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m16_precision_tokens_radioValue" size="10" align="right" readonly="readonly" tabindex="-1" value="SIX">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m16_precision_tokens" size="3" align="right" readonly="readonly" tabindex="-1" value="50">
+  </td>
+</tr>
+<!-- end m16_precision_tokens -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>GRACIOUS PROFESSIONALISM DISPLAYED AT THE ROBOT GAME TABLE</b></td>
+</tr>
+<!-- gp_score -->
+<tr id="gp_score_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GP - Does not affect Robot Game Score:
+  </td>
+  <td>
+<input type="range" min="2" max="4" class="slider" id="gp_score_slider" value="3">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="gp_score" size="3" align="right" onchange="check_gp_score()" value="3">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_gp_score" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end gp_score -->
+
+
+
+                        <!-- Total Score -->
+                        <tr class="total-score-container">
+                            <td colspan="3" class="total-score-label">Total
+                                Score:</td>
+                            <td align="right" class="score-cell">
+                                <input type="text" name="totalScore" size="3" readonly="readonly" tabindex="-1" value="50">
+                            </td>
+                        </tr>
+                    
+                
+                <!-- end check for bye -->
+
+            </tbody></table>
+            <!-- end score entry table  -->
+        </main>
+
+        <footer>
+            <div class="score-entry buttonbox">
+
+                <button id="score-entry_toggle-review-mode" type="button" class="fll-sw-button">Review
+                    Toggle</button>
+
+                <!-- Score Verification -->
+      <span id="verify-score-label" class="float_right verify-score-unverified">
+Team Agrees with the above entries:
+</span>
+      <span class="verify-score-buttonbox">
+        <label class="y-n-button">
+          <input type="radio" id="Verified_no" name="Verified" value="0" onclick="set_Verified(0)" checked="checked">
+        <span id="Verified_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="Verified_yes" name="Verified" value="1" onclick="set_Verified(1)">
+        <span id="Verified_yes_span">Yes</span>
+        </label>
+      </span>
+
+            </div>
+
+            <div class="buttonbox score-entry-buttons">
+
+
+                <span id="challenge_revision">Challenge revision:
+                    8</span>
+                <span id="software_version">
+                    Software version:
+                    18.5.1-beta.243+g3464e32</span>
+
+                <span class="float_right">&nbsp;</span>
+                
+                    
+                        <button type="button" id="reset_score" class="fll-sw-button">Reset Form</button>
+                    
+                    
+                
+            </div>
+        </footer>
+
+    </form>
+    <!-- end score entry form -->
+
+
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="yesno-dialog">
+        <div>
+            <p id="yesno-dialog_text"></p>
+            <button type="button" id="yesno-dialog_yes">Yes</button>
+            <button type="button" id="yesno-dialog_no">No</button>
+        </div>
+    </div>
+
+
+
+</body></html>
