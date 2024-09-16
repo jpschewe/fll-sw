@@ -32,6 +32,7 @@ import fll.web.report.awards.HeadToHeadCategory;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 
 /**
  * Methods for working with the awards script.
@@ -2166,6 +2167,11 @@ public final class AwardsScript {
         awardOrder.add(ac);
       }
     }
+    for (final AwardCategory ac : description.getVirtualSubjectiveCategories()) {
+      if (!awardOrder.contains(ac)) {
+        awardOrder.add(ac);
+      }
+    }
     final List<NonNumericCategory> nonNumericCategories;
     if (GenerateDB.INTERNAL_TOURNAMENT_ID == tournamentId) {
       nonNumericCategories = description.getNonNumericCategories();
@@ -2210,13 +2216,18 @@ public final class AwardsScript {
       if (null != subjective) {
         return subjective;
       } else {
-        final @Nullable NonNumericCategory nonNumeric = description.getNonNumericCategoryByTitle(title);
-        if (null != nonNumeric) {
-          return nonNumeric;
+        final @Nullable VirtualSubjectiveScoreCategory virtSubjective = description.getVirtualSubjectiveCategoryByTitle(title);
+        if (null != virtSubjective) {
+          return virtSubjective;
         } else {
-          throw new FLLRuntimeException("Cannot find category with title '"
-              + title
-              + "'");
+          final @Nullable NonNumericCategory nonNumeric = description.getNonNumericCategoryByTitle(title);
+          if (null != nonNumeric) {
+            return nonNumeric;
+          } else {
+            throw new FLLRuntimeException("Cannot find category with title '"
+                + title
+                + "'");
+          }
         }
       }
     }
