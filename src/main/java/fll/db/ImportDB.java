@@ -744,6 +744,11 @@ public final class ImportDB {
       upgrade44To45(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 46) {
+      upgrade45to46(connection);
+    }
+
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -1536,6 +1541,18 @@ public final class ImportDB {
     }
 
     setDBVersion(connection, 45);
+  }
+
+  /**
+   * Add virtual category award winner table.
+   */
+  private static void upgrade45to46(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 45 to 46");
+
+    try (Statement stmt = connection.createStatement()) {
+      GenerateDB.createVirtualSubjectiveAwardWinnerTable(connection, false);
+    }
+    setDBVersion(connection, 46);
   }
 
   /**
