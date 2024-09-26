@@ -176,6 +176,7 @@ public class AwardsReport extends BaseFLLServlet {
 
     addSubjectiveChallengeWinners(connection, description, document, documentBody, tournament, sortedAwardGroups);
     addSubjectiveExtraWinners(connection, description, document, documentBody, tournament, sortedAwardGroups, false);
+    addVirtualSubjectiveWinners(connection, description, document, documentBody, tournament, sortedAwardGroups);
     addSubjectiveOverallWinners(connection, description, document, documentBody, tournament);
 
     final List<AdvancingTeam> advancing = AdvancingTeam.loadAdvancingTeams(connection, tournament.getTournamentID());
@@ -215,6 +216,23 @@ public class AwardsReport extends BaseFLLServlet {
                                              final List<String> sortedAwardGroups)
       throws SQLException {
     final List<AwardWinner> winners = AwardWinners.getSubjectiveAwardWinners(connection, tournament.getTournamentID());
+
+    final List<String> categoryOrder = description.getSubjectiveCategories().stream() //
+                                                  .map(SubjectiveScoreCategory::getTitle) //
+                                                  .collect(Collectors.toList());
+    addSubjectiveWinners(connection, description, document, documentBody, winners, sortedAwardGroups, categoryOrder,
+                         false);
+  }
+
+  private void addVirtualSubjectiveWinners(final Connection connection,
+                                           final ChallengeDescription description,
+                                           final Document document,
+                                           final Element documentBody,
+                                           final Tournament tournament,
+                                           final List<String> sortedAwardGroups)
+      throws SQLException {
+    final List<AwardWinner> winners = AwardWinners.getVirtualSubjectiveAwardWinners(connection,
+                                                                                    tournament.getTournamentID());
 
     final List<String> categoryOrder = description.getSubjectiveCategories().stream() //
                                                   .map(SubjectiveScoreCategory::getTitle) //
@@ -285,11 +303,10 @@ public class AwardsReport extends BaseFLLServlet {
                                                                                                         level, w))) //
                                                   .collect(Collectors.toList());
 
-    final List<String> categoryOrder = CategoriesIgnored.getNonNumericCategories(description, connection,
-                                                                                          tournament)
-                                                                 .stream() //
-                                                                 .map(NonNumericCategory::getTitle) //
-                                                                 .collect(Collectors.toList());
+    final List<String> categoryOrder = CategoriesIgnored.getNonNumericCategories(description, connection, tournament)
+                                                        .stream() //
+                                                        .map(NonNumericCategory::getTitle) //
+                                                        .collect(Collectors.toList());
 
     // show places when showing championship
     addSubjectiveWinners(connection, description, document, documentBody, winners, sortedAwardGroups, categoryOrder,
@@ -358,11 +375,10 @@ public class AwardsReport extends BaseFLLServlet {
     final Map<String, List<OverallAwardWinner>> organizedWinners = getNonNumericOverallWinners(description, connection,
                                                                                                tournament);
 
-    final List<String> categoryOrder = CategoriesIgnored.getNonNumericCategories(description, connection,
-                                                                                          tournament)
-                                                                 .stream() //
-                                                                 .map(NonNumericCategory::getTitle) //
-                                                                 .collect(Collectors.toList());
+    final List<String> categoryOrder = CategoriesIgnored.getNonNumericCategories(description, connection, tournament)
+                                                        .stream() //
+                                                        .map(NonNumericCategory::getTitle) //
+                                                        .collect(Collectors.toList());
     final List<String> fullOrder = new LinkedList<String>(categoryOrder);
     organizedWinners.keySet().forEach(c -> {
       if (!fullOrder.contains(c)) {
