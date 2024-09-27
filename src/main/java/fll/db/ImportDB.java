@@ -2237,6 +2237,12 @@ public final class ImportDB {
                             destTournamentLevelID, destTournamentID, "awards_script_subjective_presenter",
                             "category_name", "presenter");
     importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,
+                            destTournamentLevelID, destTournamentID, "awards_script_virt_subjective_text",
+                            "category_name", "text");
+    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,
+                            destTournamentLevelID, destTournamentID, "awards_script_virt_subjective_presenter",
+                            "category_name", "presenter");
+    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,
                             destTournamentLevelID, destTournamentID, "awards_script_nonnumeric_text", "category_title",
                             "text");
     importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,

@@ -1148,6 +1148,11 @@ public final class GenerateDB {
       sql.append(")");
       stmt.executeUpdate(sql.toString());
     }
+
+    createAwardsScriptTable(connection, createConstraints, "awards_script_virt_subjective_text", "category_name",
+                            "text", true);
+    createAwardsScriptTable(connection, createConstraints, "awards_script_virt_subjective_presenter", "category_name",
+                            "presenter", true);
   }
 
   /* package */ static void createAdvancingTeamsTable(final Connection connection,

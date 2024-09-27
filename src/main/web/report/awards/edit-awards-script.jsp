@@ -43,7 +43,13 @@ function pageInit() {
   
   awardsScriptModule.configurePresenterEntry("category_${category.name}", ${subjectiveCategoryPresenterSpecified[category]});
   </c:forEach>
+
+  <c:forEach items="${virtualSubjectiveCategories}" var="category">
+  awardsScriptModule.configureTextEntry(macros, "category_${category.name}", ${virtualSubjectiveCategorySpecified[category]});
   
+  awardsScriptModule.configurePresenterEntry("category_${category.name}", ${virtualSubjectiveCategoryPresenterSpecified[category]});
+  </c:forEach>
+
   <c:forEach items="${nonNumericCategories}" var="category">
   awardsScriptModule.configureTextEntry(macros, "category_${category.title}", ${nonNumericCategorySpecified[category]});
   
@@ -302,6 +308,24 @@ function pageInit() {
             </div>
             <c:set var="sectionName">category_${category.name}</c:set>
             <c:set var="sectionTextValue">${subjectiveCategoryText[category]}</c:set>
+            <%@ include file="edit-awards-script_textarea-macros.jspf"%>
+            <hr />
+        </c:forEach>
+
+        <c:forEach items="${virtualSubjectiveCategories}" var="category">
+            <h4>Category ${category.title}</h4>
+            <div>
+                Specify Presenter
+                <input type="checkbox"
+                    name="category_${category.name}_presenter_specified"
+                    id="category_${category.name}_presenter_specified" />
+                <input type="text"
+                    name="category_${category.name}_presenter_text"
+                    id="category_${category.name}_presenter_text"
+                    value="${virtualSubjectiveCategoryPresenter[category]}" />
+            </div>
+            <c:set var="sectionName">category_${category.name}</c:set>
+            <c:set var="sectionTextValue">${virtualSubjectiveCategoryText[category]}</c:set>
             <%@ include file="edit-awards-script_textarea-macros.jspf"%>
             <hr />
         </c:forEach>
