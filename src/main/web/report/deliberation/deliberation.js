@@ -562,6 +562,7 @@ const deliberationModule = {};
                 awardUrl = "NonNumericOverallAwardWinners";
                 awardGroup = null;
             } else if (category.numeric) {
+                // covers both subjective and virtual subjective
                 awardUrl = "SubjectiveAwardWinners";
                 awardGroup = finalist_module.getCurrentDivision();
             } else {
@@ -629,6 +630,7 @@ const deliberationModule = {};
     };
 
     function loadSubjectiveAwardWinners() {
+        // covers both subjective and virtual subjective
         return fetch("../../api/AwardsScript/SubjectiveAwardWinners").then(checkJsonResponse).then((result) => {
             processAwardWinners(result);
         });

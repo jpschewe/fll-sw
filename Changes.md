@@ -1,3 +1,4 @@
+* #1207 - Add virtual subjective categories to finalist scheduling and deliberations
 * #1204 - Allow sorting of virtual subjective categories for awards script
 * #1205 - Add virtual subjective categories to the awards script
 * #1203 - Add virtual subjective categories to the awards report

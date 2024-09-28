@@ -14,13 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,7 +27,15 @@ import fll.web.SessionAttributes;
 import fll.web.report.FinalComputedScores;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 import fll.xml.WinnerType;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Map of category title to team number to score.
@@ -72,6 +73,22 @@ public class NumericCategoryScoresServlet extends HttpServlet {
       final WinnerType winnerCriteria = description.getWinner();
       final List<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
       for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+        final String categoryTitle = category.getTitle();
+
+        final Map<Integer, Double> categoryScores = scores.computeIfAbsent(categoryTitle, k -> new HashMap<>());
+
+        for (final String judgingStation : judgingStations) {
+          FinalComputedScores.iterateOverSubjectiveScores(connection, category.getName(), winnerCriteria, tournament,
+                                                          judgingStation, (teamNumber,
+                                                                           score,
+                                                                           rank) -> {
+
+                                                            categoryScores.put(teamNumber, score);
+                                                          });
+        } // judging station
+      } // category
+
+      for (final VirtualSubjectiveScoreCategory category : description.getVirtualSubjectiveCategories()) {
         final String categoryTitle = category.getTitle();
 
         final Map<Integer, Double> categoryScores = scores.computeIfAbsent(categoryTitle, k -> new HashMap<>());
