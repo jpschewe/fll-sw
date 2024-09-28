@@ -57,6 +57,11 @@ public final class EditAwardWinners {
   public static final String SUBJECTIVE_AWARD_TYPE = "subjective";
 
   /**
+   * Award type for virtual subjective challenge awards.
+   */
+  public static final String VIRTUAL_SUBJECTIVE_AWARD_TYPE = "virtualSubjective";
+
+  /**
    * Setup variables for edit-award-winers.jsp.
    * 
    * @param application application variables
@@ -92,6 +97,17 @@ public final class EditAwardWinners {
       }
       page.setAttribute("subjectiveAwardWinners", subjectiveAwardWinners);
 
+      final List<AwardWinner> virtualSubjectiveAwardWinnersList = AwardWinners.getVirtualSubjectiveAwardWinners(connection,
+                                                                                                                tournament.getTournamentID());
+      // category -> awardGroup -> winners
+      final Map<String, Map<String, List<AwardWinner>>> virtualSubjectiveAwardWinners = new HashMap<>();
+      for (final AwardWinner winner : virtualSubjectiveAwardWinnersList) {
+        final Map<String, List<AwardWinner>> awardGroupToWinners = virtualSubjectiveAwardWinners.computeIfAbsent(winner.getName(),
+                                                                                                                 k -> new HashMap<>());
+        awardGroupToWinners.computeIfAbsent(winner.getAwardGroup(), k -> new LinkedList<>()).add(winner);
+      }
+      page.setAttribute("virtualSubjectiveAwardWinners", virtualSubjectiveAwardWinners);
+
       final List<AwardWinner> extraAwardWinnersList = AwardWinners.getNonNumericAwardWinners(connection,
                                                                                              tournament.getTournamentID());
       // category -> awardGroup -> winners
@@ -116,6 +132,7 @@ public final class EditAwardWinners {
       page.setAttribute("championshipAwardType", CHAMPIONSHIP_AWARD_TYPE);
       page.setAttribute("nonNumericAwardType", NON_NUMERIC_AWARD_TYPE);
       page.setAttribute("subjectiveAwardType", SUBJECTIVE_AWARD_TYPE);
+      page.setAttribute("virtualSubjectiveAwardType", VIRTUAL_SUBJECTIVE_AWARD_TYPE);
 
     } catch (final SQLException e) {
       LOGGER.error(e, e);

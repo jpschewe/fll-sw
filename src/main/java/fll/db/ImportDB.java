@@ -744,6 +744,11 @@ public final class ImportDB {
       upgrade44To45(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 46) {
+      upgrade45to46(connection);
+    }
+
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -1539,6 +1544,18 @@ public final class ImportDB {
   }
 
   /**
+   * Add virtual category award winner table.
+   */
+  private static void upgrade45to46(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 45 to 46");
+
+    try (Statement stmt = connection.createStatement()) {
+      GenerateDB.createVirtualSubjectiveAwardWinnerTable(connection, false);
+    }
+    setDBVersion(connection, 46);
+  }
+
+  /**
    * Check for a column in a table. This checks table names both upper and lower
    * case.
    * This also checks column names ignoring case.
@@ -2218,6 +2235,12 @@ public final class ImportDB {
                             "text");
     importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,
                             destTournamentLevelID, destTournamentID, "awards_script_subjective_presenter",
+                            "category_name", "presenter");
+    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,
+                            destTournamentLevelID, destTournamentID, "awards_script_virt_subjective_text",
+                            "category_name", "text");
+    importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,
+                            destTournamentLevelID, destTournamentID, "awards_script_virt_subjective_presenter",
                             "category_name", "presenter");
     importAwardsScriptTable(sourceConnection, destinationConnection, sourceTournamentLevelID, sourceTournamentID,
                             destTournamentLevelID, destTournamentID, "awards_script_nonnumeric_text", "category_title",

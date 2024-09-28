@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 45;
+  public static final int DATABASE_VERSION = 46;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -331,6 +331,7 @@ public final class GenerateDB {
       createOverallScoresTable(connection, true);
 
       createSubjectiveAwardWinnerTables(connection, true);
+      createVirtualSubjectiveAwardWinnerTable(connection, true);
       createAdvancingTeamsTable(connection, true);
 
       createAwardGroupOrder(connection, true);
@@ -1125,6 +1126,33 @@ public final class GenerateDB {
       subjectiveChallengeAward.append(")");
       stmt.executeUpdate(subjectiveChallengeAward.toString());
     }
+  }
+
+  /* package */ static void createVirtualSubjectiveAwardWinnerTable(final Connection connection,
+                                                                    final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE virt_subjective_challenge_award (");
+      sql.append("  tournament_id INTEGER NOT NULL");
+      sql.append(" ,name LONGVARCHAR NOT NULL");
+      sql.append(" ,team_number INTEGER NOT NULL");
+      sql.append(" ,description LONGVARCHAR");
+      sql.append(" ,award_group LONGVARCHAR NOT NULL");
+      sql.append(" ,place INTEGER NOT NULL");
+      if (createConstraints) {
+        sql.append(" ,CONSTRAINT virt_subjective_challenge_award_pk PRIMARY KEY (tournament_id, name, team_number)");
+        sql.append(" ,CONSTRAINT virt_subjective_challenge_award_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        sql.append(" ,CONSTRAINT virt_subjective_challenge_award_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+      }
+      sql.append(")");
+      stmt.executeUpdate(sql.toString());
+    }
+
+    createAwardsScriptTable(connection, createConstraints, "awards_script_virt_subjective_text", "category_name",
+                            "text", true);
+    createAwardsScriptTable(connection, createConstraints, "awards_script_virt_subjective_presenter", "category_name",
+                            "presenter", true);
   }
 
   /* package */ static void createAdvancingTeamsTable(final Connection connection,

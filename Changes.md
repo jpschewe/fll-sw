@@ -1,3 +1,6 @@
+* #1204 - Allow sorting of virtual subjective categories for awards script
+* #1205 - Add virtual subjective categories to the awards script
+* #1203 - Add virtual subjective categories to the awards report
 * Add CSV file of award winners
 * Add subjective schedule by time to the head judge page
 * Make HTML dialogs easier to see

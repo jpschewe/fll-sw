@@ -11,12 +11,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -33,6 +27,13 @@ import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Delete a team from an award.
@@ -49,7 +50,8 @@ public class DeleteAwardWinnner extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.JUDGE, UserRole.HEAD_JUDGE, UserRole.REPORT_GENERATOR), false)) {
+    if (!auth.requireRoles(request, response, session,
+                           Set.of(UserRole.JUDGE, UserRole.HEAD_JUDGE, UserRole.REPORT_GENERATOR), false)) {
       return;
     }
 
@@ -73,6 +75,19 @@ public class DeleteAwardWinnner extends BaseFLLServlet {
         }
 
         AwardWinners.deleteSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
+        LOGGER.info("Deleted team {} from {}", teamNumber, categoryTitle);
+        SessionAttributes.appendToMessage(session,
+                                          String.format("<div class='success'>Deleted team %d from award %s</div>",
+                                                        teamNumber, categoryTitle));
+      } else if (EditAwardWinners.VIRTUAL_SUBJECTIVE_AWARD_TYPE.equals(awardType)) {
+        final @Nullable VirtualSubjectiveScoreCategory category = challengeDescription.getVirtualSubjectiveCategoryByTitle(categoryTitle);
+        if (null == category) {
+          throw new FLLInternalException("Cannot find virtual subjective category with title '"
+              + categoryTitle
+              + "'");
+        }
+
+        AwardWinners.deleteVirtualSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle, teamNumber);
         LOGGER.info("Deleted team {} from {}", teamNumber, categoryTitle);
         SessionAttributes.appendToMessage(session,
                                           String.format("<div class='success'>Deleted team %d from award %s</div>",

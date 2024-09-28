@@ -32,6 +32,7 @@ import fll.web.report.awards.HeadToHeadCategory;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 
 /**
  * Methods for working with the awards script.
@@ -1293,12 +1294,113 @@ public final class AwardsScript {
     return getPresenterFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(), category);
   }
 
+  /**
+   * @param connection database connection
+   * @param category the category to check for
+   * @return if the presenter has a value for the season
+   * @throws SQLException on a database error
+   */
+  public static boolean isPresenterSpecifiedForSeason(final Connection connection,
+                                                      final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return isPresenterSpecifiedFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
+                                   GenerateDB.INTERNAL_TOURNAMENT_ID, category);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to check for
+   * @param level the tournament level
+   * @return if the presenter has a value for the specified tournament level
+   * @throws SQLException on a database error
+   */
+  public static boolean isPresenterSpecifiedForTournamentLevel(final Connection connection,
+                                                               final TournamentLevel level,
+                                                               final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return isPresenterSpecifiedFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, category);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to check for
+   * @param tournament the tournament
+   * @return if the presenter has a value for the specified tournament
+   * @throws SQLException on a database error
+   */
+  public static boolean isPresenterSpecifiedForTournament(final Connection connection,
+                                                          final Tournament tournament,
+                                                          final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return isPresenterSpecifiedFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                                   category);
+  }
+
+  private static boolean isPresenterSpecifiedFor(final Connection connection,
+                                                 final int tournamentLevelId,
+                                                 final int tournamentId,
+                                                 final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return isValueSpecifiedFor(connection, tournamentLevelId, tournamentId, "awards_script_subjective_presenter",
+                               "category_name", category.getName());
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to check for
+   * @return presenter for the season
+   * @throws SQLException on a database error
+   */
+  public static String getPresenterForSeason(final Connection connection,
+                                             final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return getPresenterFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                           category);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to check for
+   * @param level the tournament level
+   * @return presenter for the specified tournament level
+   * @throws SQLException on a database error
+   */
+  public static String getPresenterForTournamentLevel(final Connection connection,
+                                                      final TournamentLevel level,
+                                                      final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return getPresenterFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, category);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to check for
+   * @param tournament the tournament
+   * @return presenter for the specified tournament
+   * @throws SQLException on a database error
+   */
+  public static String getPresenterForTournament(final Connection connection,
+                                                 final Tournament tournament,
+                                                 final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return getPresenterFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(), category);
+  }
+
   private static String getPresenterFor(final Connection connection,
                                         final int tournamentLevelId,
                                         final int tournamentId,
                                         final SubjectiveScoreCategory category)
       throws SQLException {
     return getValueFor(connection, tournamentLevelId, tournamentId, "awards_script_subjective_presenter",
+                       "category_name", category.getName(), "presenter", "");
+  }
+
+  private static String getPresenterFor(final Connection connection,
+                                        final int tournamentLevelId,
+                                        final int tournamentId,
+                                        final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return getValueFor(connection, tournamentLevelId, tournamentId, "awards_script_virt_subjective_presenter",
                        "category_name", category.getName(), "presenter", "");
   }
 
@@ -1317,6 +1419,23 @@ public final class AwardsScript {
       throws SQLException {
     return getValue(connection, tournament, "awards_script_subjective_presenter", "category_name", category.getName(),
                     "presenter", "");
+  }
+
+  /**
+   * Get the presenter for a category of the awards script.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament that the script is being generated for
+   * @param category the category in the script
+   * @return the presenter
+   * @throws SQLException on a database error
+   */
+  public static String getPresenter(final Connection connection,
+                                    final Tournament tournament,
+                                    final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return getValue(connection, tournament, "awards_script_virt_subjective_presenter", "category_name",
+                    category.getName(), "presenter", "");
   }
 
   /**
@@ -1435,6 +1554,125 @@ public final class AwardsScript {
                                        final SubjectiveScoreCategory category)
       throws SQLException {
     return getValue(connection, tournament, "awards_script_subjective_text", "category_name", category.getName(),
+                    "text", "");
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to check for
+   * @return if the category text has a value for the season
+   * @throws SQLException on a database error
+   */
+  public static boolean isCategoryTextSpecifiedForSeason(final Connection connection,
+                                                         final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return isCategoryTextSpecifiedFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID,
+                                      GenerateDB.INTERNAL_TOURNAMENT_ID, category);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to check for
+   * @param level the tournament level
+   * @return if the category text has a value for the specified tournament level
+   * @throws SQLException on a database error
+   */
+  public static boolean isCategoryTextSpecifiedForTournamentLevel(final Connection connection,
+                                                                  final TournamentLevel level,
+                                                                  final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return isCategoryTextSpecifiedFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, category);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to check for
+   * @param tournament the tournament
+   * @return if the category text has a value for the specified tournament
+   * @throws SQLException on a database error
+   */
+  public static boolean isCategoryTextSpecifiedForTournament(final Connection connection,
+                                                             final Tournament tournament,
+                                                             final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return isCategoryTextSpecifiedFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                                      category);
+  }
+
+  private static boolean isCategoryTextSpecifiedFor(final Connection connection,
+                                                    final int tournamentLevelId,
+                                                    final int tournamentId,
+                                                    final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return isValueSpecifiedFor(connection, tournamentLevelId, tournamentId, "awards_script_subjective_text",
+                               "category_name", category.getName());
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to check for
+   * @return category text for the season
+   * @throws SQLException on a database error
+   */
+  public static String getCategoryTextForSeason(final Connection connection,
+                                                final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return getCategoryTextFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                              category);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to check for
+   * @param level the tournament level
+   * @return category text for the specified tournament level
+   * @throws SQLException on a database error
+   */
+  public static String getCategoryTextForTournamentLevel(final Connection connection,
+                                                         final TournamentLevel level,
+                                                         final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return getCategoryTextFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, category);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to check for
+   * @param tournament the tournament
+   * @return category text for the specified tournament
+   * @throws SQLException on a database error
+   */
+  public static String getCategoryTextForTournament(final Connection connection,
+                                                    final Tournament tournament,
+                                                    final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return getCategoryTextFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                              category);
+  }
+
+  private static String getCategoryTextFor(final Connection connection,
+                                           final int tournamentLevelId,
+                                           final int tournamentId,
+                                           final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return getValueFor(connection, tournamentLevelId, tournamentId, "awards_script_subjective_text", "category_name",
+                       category.getName(), "text", "");
+  }
+
+  /**
+   * Get the text for a category of the awards script.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament that the script is being generated for
+   * @param category the category in the script
+   * @return the category text
+   * @throws SQLException on a database error
+   */
+  public static String getCategoryText(final Connection connection,
+                                       final Tournament tournament,
+                                       final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    return getValue(connection, tournament, "awards_script_virt_subjective_text", "category_name", category.getName(),
                     "text", "");
   }
 
@@ -1739,6 +1977,63 @@ public final class AwardsScript {
    * @throws SQLException on a database error
    */
   public static void updateCategoryTextForSeason(final Connection connection,
+                                                 final VirtualSubjectiveScoreCategory category,
+                                                 final String text)
+      throws SQLException {
+    updateCategoryTextFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                          Layer.SEASON, category, text);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to update
+   * @param level the tournament level
+   * @param text the new text
+   * @throws SQLException on a database error
+   */
+  public static void updateCategoryTextForTournamentLevel(final Connection connection,
+                                                          final TournamentLevel level,
+                                                          final VirtualSubjectiveScoreCategory category,
+                                                          final String text)
+      throws SQLException {
+    updateCategoryTextFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, Layer.TOURNAMENT_LEVEL,
+                          category, text);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to update
+   * @param tournament the tournament
+   * @param text the new text
+   * @throws SQLException on a database error
+   */
+  public static void updateCategoryTextForTournament(final Connection connection,
+                                                     final Tournament tournament,
+                                                     final VirtualSubjectiveScoreCategory category,
+                                                     final String text)
+      throws SQLException {
+    updateCategoryTextFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                          Layer.TOURNAMENT, category, text);
+  }
+
+  private static void updateCategoryTextFor(final Connection connection,
+                                            final int tournamentLevelId,
+                                            final int tournamentId,
+                                            final Layer layer,
+                                            final VirtualSubjectiveScoreCategory category,
+                                            final @Nullable String text)
+      throws SQLException {
+    updateValueFor(connection, tournamentLevelId, tournamentId, layer, "awards_script_virt_subjective_text",
+                   "category_name", category.getName(), "text", text);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to update
+   * @param text the new text
+   * @throws SQLException on a database error
+   */
+  public static void updateCategoryTextForSeason(final Connection connection,
                                                  final NonNumericCategory category,
                                                  final String text)
       throws SQLException {
@@ -1853,6 +2148,63 @@ public final class AwardsScript {
    * @throws SQLException on a database error
    */
   public static void updatePresenterForSeason(final Connection connection,
+                                              final VirtualSubjectiveScoreCategory category,
+                                              final String presenter)
+      throws SQLException {
+    updatePresenterFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                       Layer.SEASON, category, presenter);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to update
+   * @param level the tournament level
+   * @param presenter the new presenter
+   * @throws SQLException on a database error
+   */
+  public static void updatePresenterForTournamentLevel(final Connection connection,
+                                                       final TournamentLevel level,
+                                                       final VirtualSubjectiveScoreCategory category,
+                                                       final String presenter)
+      throws SQLException {
+    updatePresenterFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, Layer.TOURNAMENT_LEVEL, category,
+                       presenter);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to update
+   * @param tournament the tournament
+   * @param presenter the new presenter
+   * @throws SQLException on a database error
+   */
+  public static void updatePresenterForTournament(final Connection connection,
+                                                  final Tournament tournament,
+                                                  final VirtualSubjectiveScoreCategory category,
+                                                  final String presenter)
+      throws SQLException {
+    updatePresenterFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                       Layer.TOURNAMENT, category, presenter);
+  }
+
+  private static void updatePresenterFor(final Connection connection,
+                                         final int tournamentLevelId,
+                                         final int tournamentId,
+                                         final Layer layer,
+                                         final VirtualSubjectiveScoreCategory category,
+                                         final @Nullable String presenter)
+      throws SQLException {
+    updateValueFor(connection, tournamentLevelId, tournamentId, layer, "awards_script_virt_subjective_presenter",
+                   "category_name", category.getName(), "presenter", presenter);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to update
+   * @param presenter the new presenter
+   * @throws SQLException on a database error
+   */
+  public static void updatePresenterForSeason(final Connection connection,
                                               final NonNumericCategory category,
                                               final String presenter)
       throws SQLException {
@@ -1949,6 +2301,46 @@ public final class AwardsScript {
    * @throws SQLException on a database error
    */
   public static void clearCategoryTextForSeason(final Connection connection,
+                                                final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    updateCategoryTextFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                          Layer.SEASON, category, null);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to clear text for
+   * @param level the tournament level
+   * @throws SQLException on a database error
+   */
+  public static void clearCategoryTextForTournamentLevel(final Connection connection,
+                                                         final TournamentLevel level,
+                                                         final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    updateCategoryTextFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, Layer.TOURNAMENT_LEVEL,
+                          category, null);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to clear text for
+   * @param tournament the tournament
+   * @throws SQLException on a database error
+   */
+  public static void clearCategoryTextForTournament(final Connection connection,
+                                                    final Tournament tournament,
+                                                    final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    updateCategoryTextFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                          Layer.TOURNAMENT, category, null);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to clear text for
+   * @throws SQLException on a database error
+   */
+  public static void clearCategoryTextForSeason(final Connection connection,
                                                 final NonNumericCategory category)
       throws SQLException {
     updateCategoryTextFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
@@ -2018,6 +2410,46 @@ public final class AwardsScript {
   public static void clearPresenterForTournament(final Connection connection,
                                                  final Tournament tournament,
                                                  final SubjectiveScoreCategory category)
+      throws SQLException {
+    updatePresenterFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
+                       Layer.TOURNAMENT, category, null);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to clear presenter for
+   * @throws SQLException on a database error
+   */
+  public static void clearPresenterForSeason(final Connection connection,
+                                             final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    updatePresenterFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, GenerateDB.INTERNAL_TOURNAMENT_ID,
+                       Layer.SEASON, category, null);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to clear presenter for
+   * @param level the tournament level
+   * @throws SQLException on a database error
+   */
+  public static void clearPresenterForTournamentLevel(final Connection connection,
+                                                      final TournamentLevel level,
+                                                      final VirtualSubjectiveScoreCategory category)
+      throws SQLException {
+    updatePresenterFor(connection, level.getId(), GenerateDB.INTERNAL_TOURNAMENT_ID, Layer.TOURNAMENT_LEVEL, category,
+                       null);
+  }
+
+  /**
+   * @param connection database connection
+   * @param category the category to clear presenter for
+   * @param tournament the tournament
+   * @throws SQLException on a database error
+   */
+  public static void clearPresenterForTournament(final Connection connection,
+                                                 final Tournament tournament,
+                                                 final VirtualSubjectiveScoreCategory category)
       throws SQLException {
     updatePresenterFor(connection, GenerateDB.INTERNAL_TOURNAMENT_LEVEL_ID, tournament.getTournamentID(),
                        Layer.TOURNAMENT, category, null);
@@ -2166,6 +2598,11 @@ public final class AwardsScript {
         awardOrder.add(ac);
       }
     }
+    for (final AwardCategory ac : description.getVirtualSubjectiveCategories()) {
+      if (!awardOrder.contains(ac)) {
+        awardOrder.add(ac);
+      }
+    }
     final List<NonNumericCategory> nonNumericCategories;
     if (GenerateDB.INTERNAL_TOURNAMENT_ID == tournamentId) {
       nonNumericCategories = description.getNonNumericCategories();
@@ -2210,13 +2647,18 @@ public final class AwardsScript {
       if (null != subjective) {
         return subjective;
       } else {
-        final @Nullable NonNumericCategory nonNumeric = description.getNonNumericCategoryByTitle(title);
-        if (null != nonNumeric) {
-          return nonNumeric;
+        final @Nullable VirtualSubjectiveScoreCategory virtSubjective = description.getVirtualSubjectiveCategoryByTitle(title);
+        if (null != virtSubjective) {
+          return virtSubjective;
         } else {
-          throw new FLLRuntimeException("Cannot find category with title '"
-              + title
-              + "'");
+          final @Nullable NonNumericCategory nonNumeric = description.getNonNumericCategoryByTitle(title);
+          if (null != nonNumeric) {
+            return nonNumeric;
+          } else {
+            throw new FLLRuntimeException("Cannot find category with title '"
+                + title
+                + "'");
+          }
         }
       }
     }

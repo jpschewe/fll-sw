@@ -35,6 +35,75 @@ public final class AwardWinners {
    * @param winner the winner to add
    * @throws SQLException on a database error
    */
+  public static void addVirtualSubjectiveAwardWinner(final Connection connection,
+                                                     final int tournamentId,
+                                                     final AwardWinner winner)
+      throws SQLException {
+    addAwardWinner(connection, tournamentId, winner, "virt_subjective_challenge_award");
+  }
+
+  /**
+   * @param connection where to store the data
+   * @param tournamentId the tournament
+   * @param winner the winner to add
+   * @throws SQLException on a database error
+   */
+  public static void updateVirtualSubjectiveAwardWinner(final Connection connection,
+                                                        final int tournamentId,
+                                                        final AwardWinner winner)
+      throws SQLException {
+    updateAwardWinner(connection, tournamentId, winner, "virt_subjective_challenge_award");
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournamentId tournament to work with
+   * @param name {@link AwardWinner#getName()}
+   * @param teamNumber {@link AwardWinner#getTeamNumber()}
+   * @throws SQLException on a database error
+   */
+  public static void deleteVirtualSubjectiveAwardWinner(final Connection connection,
+                                                        final int tournamentId,
+                                                        final String name,
+                                                        final int teamNumber)
+      throws SQLException {
+    deleteAwardWinner(connection, tournamentId, name, teamNumber, "virt_subjective_challenge_award");
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournamentId tournament to work with
+   * @param name {@link AwardWinner#getName()}
+   * @param teamNumber {@link AwardWinner#getTeamNumber()}
+   * @return the winner object or null if not found
+   * @throws SQLException on a database error
+   */
+  public static @Nullable AwardWinner getVirtualSubjectiveAwardWinner(final Connection connection,
+                                                                      final int tournamentId,
+                                                                      final String name,
+                                                                      final int teamNumber)
+      throws SQLException {
+    return getAwardWinner(connection, tournamentId, name, teamNumber, "virt_subjective_challenge_award");
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournamentId the tournament to get winners for
+   * @return the winners sorted by category, award group, place, team number
+   * @throws SQLException if an error occurs talking to the database
+   */
+  public static List<AwardWinner> getVirtualSubjectiveAwardWinners(final Connection connection,
+                                                                   final int tournamentId)
+      throws SQLException {
+    return getAwardWinners(connection, tournamentId, "virt_subjective_challenge_award");
+  }
+
+  /**
+   * @param connection where to store the data
+   * @param tournamentId the tournament
+   * @param winner the winner to add
+   * @throws SQLException on a database error
+   */
   public static void addSubjectiveAwardWinner(final Connection connection,
                                               final int tournamentId,
                                               final AwardWinner winner)
