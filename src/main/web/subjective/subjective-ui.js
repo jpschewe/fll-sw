@@ -1349,7 +1349,7 @@ function synchronizeData() {
         });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function setupAfterContentLoaded() {
     const sidePanel = document.getElementById("side-panel");
 
     // handlers for buttons and links that don't navigate to another page
@@ -1563,6 +1563,84 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // navigate to pages when the anchor changes
     window.addEventListener('hashchange', navigateToPage);
+}
+
+function preventMultipleWindows(successFunction, failureFunction) {
+    // don't let the user interact with things
+    const waitDialog = document.getElementById("wait-dialog");
+    waitDialog.classList.remove("fll-sw-ui-inactive");
+
+    const active_window_key = "fll-sw.subjective.active-window";
+
+    const uid = (Math.random() * 0xffffffff >>> 0);
+    const bc = new BroadcastChannel("fll-sw.subjective.unique");
+    let responseHandler = null;
+
+    bc.onmessage = (event) => {
+        const message = event.data;
+        if (message.msg == "ping" && message.uid == uid) {
+            const response = new Object();
+            response.msg = "pong";
+            response.uid = uid;
+            bc.postMessage(response);
+            alert("Please use this window");
+        } else if (message.msg == "pong" && message.uid != uid) {
+            console.log("Received response from: " + message.uid);
+            if (responseHandler) {
+                responseHandler();
+            }
+        }
+    };
+
+    window.addEventListener('pagehide', (_) => {
+        const otherUid = localStorage.getItem(active_window_key);
+        console.log("Unload called");
+        if (otherUid == uid) {
+            localStorage.removeItem(active_window_key);
+            console.log("Unload cleared window");
+        }
+        bc.close();
+    });
+
+    const success = function() {
+        localStorage.setItem(active_window_key, uid)
+        waitDialog.classList.add("fll-sw-ui-inactive");
+        successFunction();
+    }
+
+
+    const otherUid = localStorage.getItem(active_window_key);
+    if (typeof otherUid == 'undefined' || otherUid == 'undefined' || otherUid == null) {
+        console.log("No other window found");
+        success();
+    } else {
+        responseHandler = function() {
+            // clear the handler
+            responseHandler = null;
+
+            // tell the user something
+            console.log("Found other window: " + otherUid);
+            failureFunction();
+        };
+
+        const message = new Object();
+        message.uid = otherUid;
+        message.msg = "ping";
+        bc.postMessage(message);
+        // setup timeout for no response for 5 seconds
+        setTimeout(() => {
+            if (responseHandler) {
+                responseHandler = null;
+                console.log("Timed out waiting for response from other window, continuing with this window");
+                success();
+            }
+        }, 5000);
+
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    setupAfterContentLoaded();
 });
 
 function hideScoreEntryComments() {
@@ -1648,8 +1726,19 @@ function updateServerStatus() {
 
 // fires after DOMContentLoaded and all resources are loaded
 window.addEventListener('load', () => {
-    // initial state
-    updateMainHeader();
-    navigateToPage();
-    updateServerStatus();
+    preventMultipleWindows(() => {
+        // initial state
+        updateMainHeader();
+        navigateToPage();
+        updateServerStatus();
+    },
+        () => {
+            const message = "You already have the subjective application open in another window, this is not supported, please close this window!";
+            alert(message);
+            removeChildren(document.body);
+            const messageElement = document.createElement("div");
+            messageElement.innerText = message;
+            document.body.appendChild(messageElement);
+            window.close();
+        });
 });
