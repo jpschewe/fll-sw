@@ -169,6 +169,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <a class="wide" href="AwardsReport" target="_blank">Report of
         winners for the tournament. This can be published on the web.</a>
 
+    <a class="wide" href="Awards.csv">CSV file of award winners.</a>
+
     <a class="wide" target="_report"
         href="<c:url value='/report/awards/AwardsScriptReport'/>">Awards
         Script PDF </a>

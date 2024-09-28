@@ -11,13 +11,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -36,6 +29,14 @@ import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Support for add-award-winner.jsp.
@@ -92,6 +93,21 @@ public class AddAwardWinner extends BaseFLLServlet {
 
           winner = AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
                                                          teamNumber);
+          ranked = true;
+        } else if (EditAwardWinners.VIRTUAL_SUBJECTIVE_AWARD_TYPE.equals(awardType)) {
+          if (null == awardGroup) {
+            throw new FLLInternalException("Award group cannot be null for virtual subjective awards");
+          }
+
+          final @Nullable VirtualSubjectiveScoreCategory category = challengeDescription.getVirtualSubjectiveCategoryByTitle(categoryTitle);
+          if (null == category) {
+            throw new FLLInternalException("Cannot find virtual subjective category with title '"
+                + categoryTitle
+                + "'");
+          }
+
+          winner = AwardWinners.getVirtualSubjectiveAwardWinner(connection, tournament.getTournamentID(), categoryTitle,
+                                                                teamNumber);
           ranked = true;
         } else if (EditAwardWinners.NON_NUMERIC_AWARD_TYPE.equals(awardType)) {
           final @Nullable NonNumericCategory category = challengeDescription.getNonNumericCategoryByTitle(categoryTitle);
@@ -204,6 +220,43 @@ public class AddAwardWinner extends BaseFLLServlet {
             LOGGER.info("Added team {} to category {} place {}", winner.getTeamNumber(), winner.getName(),
                         winner.getPlace());
             AwardWinners.addSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
+            SessionAttributes.appendToMessage(session,
+                                              String.format("<div class='success'>Added team %d to award %s</div>",
+                                                            winner.getTeamNumber(), winner.getName()));
+          }
+        }
+      } else if (EditAwardWinners.VIRTUAL_SUBJECTIVE_AWARD_TYPE.equals(awardType)) {
+        if (null == awardGroup) {
+          throw new FLLInternalException("Award group cannot be null for virtual subjective awards");
+        }
+
+        final @Nullable VirtualSubjectiveScoreCategory category = challengeDescription.getVirtualSubjectiveCategoryByTitle(categoryTitle);
+        if (null == category) {
+          throw new FLLInternalException("Cannot find virtual subjective category with title '"
+              + categoryTitle
+              + "'");
+        }
+
+        final AwardWinner winner = new AwardWinner(categoryTitle, awardGroup, teamNumber, description, place);
+        if (edit) {
+          LOGGER.info("Updating team {} in category {} place {}", winner.getTeamNumber(), winner.getName(),
+                      winner.getPlace());
+          AwardWinners.updateVirtualSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
+          SessionAttributes.appendToMessage(session,
+                                            String.format("<div class='success'>Modified team %d in award %s</div>",
+                                                          winner.getTeamNumber(), winner.getName()));
+        } else {
+          if (null != AwardWinners.getVirtualSubjectiveAwardWinner(connection, tournament.getTournamentID(),
+                                                                   categoryTitle, teamNumber)) {
+            LOGGER.warn("Attempting duplicate add of team {} to category {} place {}", winner.getTeamNumber(),
+                        winner.getName(), winner.getPlace());
+            SessionAttributes.appendToMessage(session,
+                                              String.format("<div class='error'>Team %d is already receiving award %s, cannot add a second time.</div>",
+                                                            teamNumber, categoryTitle));
+          } else {
+            LOGGER.info("Added team {} to category {} place {}", winner.getTeamNumber(), winner.getName(),
+                        winner.getPlace());
+            AwardWinners.addVirtualSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
             SessionAttributes.appendToMessage(session,
                                               String.format("<div class='success'>Added team %d to award %s</div>",
                                                             winner.getTeamNumber(), winner.getName()));

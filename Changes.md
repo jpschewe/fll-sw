@@ -1,4 +1,10 @@
+* #1204 - Allow sorting of virtual subjective categories for awards script
+* #1205 - Add virtual subjective categories to the awards script
+* #1203 - Add virtual subjective categories to the awards report
 * #1199 - Prevent the user from opening the subjective scoring application twice
+* Add CSV file of award winners
+* Add subjective schedule by time to the head judge page
+* Make HTML dialogs easier to see
 * #1153 - Allow REPORT_GENERATOR to edit the awards presenters
 * #1202 - Add gear icons to rubrics when referenced by a virtual category
 * #1170 - Separate out finalist non-numeric nominees

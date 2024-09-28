@@ -53,6 +53,31 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
         </c:forEach>
         <!-- end subjective categories -->
 
+        <!-- virtual subjective categories -->
+        <c:forEach items="${challengeDescription.virtualSubjectiveCategories}"
+            var="category">
+
+            <c:set var="perAwardGroup" value="true" />
+
+            <h1>${category.title}</h1>
+            <c:forEach items="${awardGroups}" var="awardGroup">
+
+                <h2>${awardGroup}</h2>
+                <c:set var="winners"
+                    value="${virtualSubjectiveAwardWinners[category.title][awardGroup]}" />
+                <c:set var="categoryTitle" value="${category.title}" />
+                <c:set var="awardType" value="${virtualSubjectiveAwardType}" />
+                <c:set var="ranked" value="true" />
+
+                <%@ include file="edit-award-winners-table.jspf"%>
+
+            </c:forEach>
+            <%-- foreach award group --%>
+
+            <%-- foreach virtual subjective category --%>
+        </c:forEach>
+        <!-- end virtual subjective categories -->
+
         <c:forEach items="${nonNumericCategories}" var="category">
             <h1>${category.title}</h1>
 

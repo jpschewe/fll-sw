@@ -73,6 +73,7 @@ import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -386,6 +387,10 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                                                                        tournament.getTournamentID());
     final Map<String, Map<String, List<AwardWinner>>> organizedSubjectiveWinners = AwardsReport.organizeAwardWinners(subjectiveWinners);
 
+    final List<AwardWinner> virtualSubjectiveWinners = AwardWinners.getVirtualSubjectiveAwardWinners(connection,
+                                                                                                     tournament.getTournamentID());
+    final Map<String, Map<String, List<AwardWinner>>> organizedVirtualSubjectiveWinners = AwardsReport.organizeAwardWinners(virtualSubjectiveWinners);
+
     @Nullable
     AwardCategory prevCategory = null;
     final ListIterator<AwardCategory> iter = awardOrder.listIterator();
@@ -422,6 +427,12 @@ public class AwardsScriptReport extends BaseFLLServlet {
                                                             templateContext, awardGroupOrder,
                                                             (SubjectiveScoreCategory) category,
                                                             organizedSubjectiveWinners, finalistSchedulesPerAwardGroup);
+      } else if (category instanceof VirtualSubjectiveScoreCategory) {
+        categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, description, document,
+                                                            templateContext, awardGroupOrder,
+                                                            (VirtualSubjectiveScoreCategory) category,
+                                                            organizedVirtualSubjectiveWinners,
+                                                            finalistSchedulesPerAwardGroup);
       } else if (category instanceof ChampionshipCategory) {
         categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, description, document,
                                                             templateContext, awardGroupOrder, category,
@@ -484,6 +495,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final String rawText;
     if (category instanceof SubjectiveScoreCategory) {
       rawText = AwardsScript.getCategoryText(connection, tournament, (SubjectiveScoreCategory) category);
+    } else if (category instanceof VirtualSubjectiveScoreCategory) {
+      rawText = AwardsScript.getCategoryText(connection, tournament, (VirtualSubjectiveScoreCategory) category);
     } else if (category instanceof NonNumericCategory) {
       rawText = AwardsScript.getCategoryText(connection, tournament, (NonNumericCategory) category);
     } else if (category instanceof ChampionshipCategory) {
@@ -512,6 +525,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
       throws SQLException {
     if (category instanceof SubjectiveScoreCategory) {
       return AwardsScript.getPresenter(connection, tournament, (SubjectiveScoreCategory) category);
+    } else if (category instanceof VirtualSubjectiveScoreCategory) {
+      return AwardsScript.getPresenter(connection, tournament, (VirtualSubjectiveScoreCategory) category);
     } else if (category instanceof NonNumericCategory) {
       return AwardsScript.getPresenter(connection, tournament, (NonNumericCategory) category);
     } else if (category instanceof ChampionshipCategory) {
