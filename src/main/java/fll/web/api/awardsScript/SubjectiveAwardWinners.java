@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -30,6 +31,7 @@ import fll.web.SessionAttributes;
 import fll.web.api.ApiResult;
 import fll.web.api.awardsScript.AwardWinnerApiUtils.PutData;
 import fll.web.api.awardsScript.AwardWinnerApiUtils.PutPathInfo;
+import fll.xml.ChallengeDescription;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -39,7 +41,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
+ * Handles both regular and virtual subjective categories.
+ * 
  * @see AwardWinners#getSubjectiveAwardWinners(Connection, int)
+ * @see AwardWinners#getVirtualSubjectiveAwardWinners(Connection, int)
  */
 @WebServlet("/api/AwardsScript/SubjectiveAwardWinners/*")
 public class SubjectiveAwardWinners extends HttpServlet {
@@ -71,7 +76,10 @@ public class SubjectiveAwardWinners extends HttpServlet {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
       final List<AwardWinner> winners = AwardWinners.getSubjectiveAwardWinners(connection,
                                                                                tournament.getTournamentID());
-      jsonMapper.writeValue(writer, winners);
+      final List<AwardWinner> virtualWinners = AwardWinners.getVirtualSubjectiveAwardWinners(connection,
+                                                                                             tournament.getTournamentID());
+      final List<AwardWinner> allWinners = Stream.concat(winners.stream(), virtualWinners.stream()).toList();
+      jsonMapper.writeValue(writer, allWinners);
     } catch (final SQLException e) {
       throw new FLLRuntimeException(e);
     }
@@ -110,13 +118,17 @@ public class SubjectiveAwardWinners extends HttpServlet {
     final String awardGroup = data.awardGroup;
     if (null == awardGroup) {
       LOGGER.error("doPut: awardGroup cannot be null");
-      response.sendError(HttpServletResponse.SC_FORBIDDEN, "Must be ReportGenereator");
+      response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED, "Award group cannot be null");
       return;
     }
 
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
+
+      final boolean virtualCategory = description.getVirtualSubjectiveCategoryByTitle(putPathInfo.get()
+                                                                                                 .getCategoryName()) != null;
 
       final @Nullable AwardWinner existingWinner = AwardWinners.getSubjectiveAwardWinner(connection,
                                                                                          tournament.getTournamentID(),
@@ -127,15 +139,22 @@ public class SubjectiveAwardWinners extends HttpServlet {
       if (null == existingWinner) {
         final AwardWinner winner = new AwardWinner(putPathInfo.get().getCategoryName(), awardGroup,
                                                    putPathInfo.get().getTeamNumber(), data.description, data.place);
-        AwardWinners.addSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
+        if (virtualCategory) {
+          AwardWinners.addVirtualSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
+        } else {
+          AwardWinners.addSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
+        }
       } else {
         final AwardWinner winner = new AwardWinner(putPathInfo.get().getCategoryName(), awardGroup,
                                                    putPathInfo.get().getTeamNumber(),
                                                    data.descriptionSpecified ? data.description
                                                        : existingWinner.getDescription(),
                                                    data.place);
-        AwardWinners.updateSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
-
+        if (virtualCategory) {
+          AwardWinners.updateVirtualSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
+        } else {
+          AwardWinners.updateSubjectiveAwardWinner(connection, tournament.getTournamentID(), winner);
+        }
       }
 
       jsonMapper.writeValue(response.getWriter(), new ApiResult(true, Optional.empty()));

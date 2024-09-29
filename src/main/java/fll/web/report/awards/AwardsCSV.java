@@ -60,7 +60,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * Awards report.
+ * Awards CSV file for shipping awards.
  */
 @WebServlet("/report/Awards.csv")
 public class AwardsCSV extends BaseFLLServlet {
@@ -121,6 +121,7 @@ public class AwardsCSV extends BaseFLLServlet {
     }
 
     addSubjectiveChallengeWinners(connection, description, csv, tournament, sortedAwardGroups);
+    addVirtualSubjectiveChallengeWinners(connection, description, csv, tournament, sortedAwardGroups);
     addSubjectiveExtraWinners(connection, description, csv, tournament, sortedAwardGroups, false);
     addSubjectiveOverallWinners(connection, description, csv, tournament);
 
@@ -196,6 +197,21 @@ public class AwardsCSV extends BaseFLLServlet {
                                              final List<String> sortedAwardGroups)
       throws SQLException {
     final List<AwardWinner> winners = AwardWinners.getSubjectiveAwardWinners(connection, tournament.getTournamentID());
+
+    final List<String> categoryOrder = description.getSubjectiveCategories().stream() //
+                                                  .map(SubjectiveScoreCategory::getTitle) //
+                                                  .collect(Collectors.toList());
+    addSubjectiveWinners(connection, description, csv, winners, sortedAwardGroups, categoryOrder, false);
+  }
+
+  private void addVirtualSubjectiveChallengeWinners(final Connection connection,
+                                                    final ChallengeDescription description,
+                                                    final CSVWriter csv,
+                                                    final Tournament tournament,
+                                                    final List<String> sortedAwardGroups)
+      throws SQLException {
+    final List<AwardWinner> winners = AwardWinners.getVirtualSubjectiveAwardWinners(connection,
+                                                                                    tournament.getTournamentID());
 
     final List<String> categoryOrder = description.getSubjectiveCategories().stream() //
                                                   .map(SubjectiveScoreCategory::getTitle) //
