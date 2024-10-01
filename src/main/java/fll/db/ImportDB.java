@@ -749,6 +749,11 @@ public final class ImportDB {
       upgrade45to46(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 47) {
+      upgrade46to47(connection);
+    }
+
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -1556,6 +1561,18 @@ public final class ImportDB {
   }
 
   /**
+   * Add award determination order table.
+   */
+  private static void upgrade46to47(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 46 to 47");
+
+    try (Statement stmt = connection.createStatement()) {
+      GenerateDB.createAwardDeterminationTable(connection, false);
+    }
+    setDBVersion(connection, 47);
+  }
+
+  /**
    * Check for a column in a table. This checks table names both upper and lower
    * case.
    * This also checks column names ignoring case.
@@ -1960,6 +1977,7 @@ public final class ImportDB {
       throws SQLException {
 
     final ChallengeDescription description = GlobalParameters.getChallengeDescription(destinationConnection);
+    importGlobalData(sourceConnection, destinationConnection, description);
 
     final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournamentName);
     final int sourceTournamentID = sourceTournament.getTournamentID();
@@ -1991,6 +2009,19 @@ public final class ImportDB {
 
     // update score totals
     ScoreStandardization.updateScoreTotals(description, destinationConnection, destTournamentID);
+  }
+
+  private static void importGlobalData(final Connection sourceConnection,
+                                       final Connection destinationConnection,
+                                       final ChallengeDescription description)
+      throws SQLException {
+
+    // import the award determination order if it doesn't already exist at the
+    // destination
+    if (!AwardDeterminationOrder.dataExists(destinationConnection)) {
+      final List<AwardCategory> awardDeterminationOrder = AwardDeterminationOrder.get(sourceConnection, description);
+      AwardDeterminationOrder.save(destinationConnection, awardDeterminationOrder);
+    }
   }
 
   private static void importSubjectiveData(final Connection sourceConnection,
