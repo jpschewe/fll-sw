@@ -16,6 +16,8 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.db.AwardDeterminationOrder;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -95,8 +97,13 @@ public class EditAwardDeterminationOrder extends BaseFLLServlet {
 
       SessionAttributes.appendToMessage(session,
                                         "<div class='success'>Saved changes to award determination order</div>");
-      response.sendRedirect("index.jsp");
 
+      final @Nullable String referer = request.getParameter("referer");
+      if (null != referer) {
+        response.sendRedirect(response.encodeRedirectURL(referer));
+      } else {
+        response.sendRedirect(response.encodeRedirectURL("/report/index.jsp"));
+      }
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     }

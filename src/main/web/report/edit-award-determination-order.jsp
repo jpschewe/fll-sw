@@ -24,6 +24,7 @@ fll.web.report.EditAwardDeterminationOrder.populateContext(application, pageCont
 <body>
 
     <form method='POST' action='EditAwardDeterminationOrder'>
+        <input type="hidden" name="referer" value="${header. referer}" />
 
         <div id='award_order'>
             <c:forEach items="${awards}" var="award">
