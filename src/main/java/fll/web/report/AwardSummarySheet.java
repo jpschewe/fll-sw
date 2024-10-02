@@ -25,6 +25,7 @@ import org.w3c.dom.Element;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
+import fll.db.AwardDeterminationOrder;
 import fll.db.CategoriesIgnored;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
@@ -40,6 +41,8 @@ import fll.web.report.awards.AwardCategory;
 import fll.web.report.awards.ChampionshipCategory;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
+import fll.xml.NonNumericCategory;
+import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.VirtualSubjectiveScoreCategory;
 import fll.xml.WinnerType;
@@ -161,46 +164,72 @@ public class AwardSummarySheet extends BaseFLLServlet {
     groupSection.appendChild(document.createTextNode("Judging Group: "));
     groupSection.appendChild(document.createTextNode(groupName));
 
-    final Element champions = createChampionsBlock(document);
-    report.appendChild(champions);
-
-    report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
-
-    final AwardCategory performanceCategory = challengeDescription.getPerformance();
-    final Element performance = createPerformanceBlock(document, connection, challengeDescription, tournament,
-                                                       groupName, performanceCategory);
-    report.appendChild(performance);
-
-    for (final SubjectiveScoreCategory awardCategory : challengeDescription.getSubjectiveCategories()) {
-      final @Nullable Element subjectiveElement = createSubjectiveBlock(document, connection,
-                                                                        challengeDescription.getWinner(), tournament,
-                                                                        groupName, awardCategory.getName(),
-                                                                        awardCategory.getTitle());
-      if (null != subjectiveElement) {
-        report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
-
-        report.appendChild(subjectiveElement);
-
+    boolean first = true;
+    for (AwardCategory category : AwardDeterminationOrder.get(connection, challengeDescription)) {
+      switch (category) {
+      case PerformanceScoreCategory awardCategory -> {
+        final Element performance = createPerformanceBlock(document, connection, challengeDescription, tournament,
+                                                           groupName, category);
+        if (!first) {
+          report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+        } else {
+          first = false;
+        }
+        report.appendChild(performance);
       }
-    }
-    for (final VirtualSubjectiveScoreCategory awardCategory : challengeDescription.getVirtualSubjectiveCategories()) {
-      final @Nullable Element subjectiveElement = createSubjectiveBlock(document, connection,
-                                                                        challengeDescription.getWinner(), tournament,
-                                                                        groupName, awardCategory.getName(),
-                                                                        awardCategory.getTitle());
-      if (null != subjectiveElement) {
-        report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
-
-        report.appendChild(subjectiveElement);
-
+      case NonNumericCategory awardCategory -> {
+        if (CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournament.getLevel(), awardCategory)) {
+          if (!first) {
+            report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+          } else {
+            first = false;
+          }
+          final Element element = createNonNumericBlock(document, awardCategory);
+          report.appendChild(element);
+        }
       }
-    }
+      case SubjectiveScoreCategory awardCategory -> {
+        final @Nullable Element subjectiveElement = createSubjectiveBlock(document, connection,
+                                                                          challengeDescription.getWinner(), tournament,
+                                                                          groupName, awardCategory.getName(),
+                                                                          awardCategory.getTitle());
+        if (null != subjectiveElement) {
+          if (!first) {
+            report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+          } else {
+            first = false;
+          }
+          report.appendChild(subjectiveElement);
 
-    for (final AwardCategory awardCategory : CategoriesIgnored.getNonNumericCategories(challengeDescription, connection,
-                                                                                       tournament)) {
-      report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
-      final Element element = createNonNumericBlock(document, awardCategory);
-      report.appendChild(element);
+        }
+      }
+      case VirtualSubjectiveScoreCategory awardCategory -> {
+        final @Nullable Element subjectiveElement = createSubjectiveBlock(document, connection,
+                                                                          challengeDescription.getWinner(), tournament,
+                                                                          groupName, awardCategory.getName(),
+                                                                          awardCategory.getTitle());
+        if (null != subjectiveElement) {
+          if (!first) {
+            report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+          } else {
+            first = false;
+          }
+          report.appendChild(subjectiveElement);
+
+        }
+      }
+      case ChampionshipCategory awardCategory -> {
+        if (!first) {
+          report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+        } else {
+          first = false;
+        }
+        final Element champions = createChampionsBlock(document);
+        report.appendChild(champions);
+      }
+      default -> throw new RuntimeException("Unknown category type: "
+          + category.getClass());
+      }
     }
 
     return document;
