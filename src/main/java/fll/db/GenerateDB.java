@@ -1459,6 +1459,7 @@ public final class GenerateDB {
 
   }
 
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Building up SQL based on parameters")
   /* package */ static void createAwardDeterminationTable(final Connection connection,
                                                           final boolean createConstraints)
       throws SQLException {

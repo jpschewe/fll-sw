@@ -42,6 +42,7 @@ import org.w3c.dom.Element;
 
 import com.diffplug.common.base.Errors;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
@@ -353,6 +354,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
     return filteredAwardOrder;
   }
 
+  @SuppressFBWarnings(value = { "DLS_DEAD_LOCAL_STORE" }, justification = "Switch statement requires storing of variable")
   private void addAwards(final ChallengeDescription description,
                          final Connection connection,
                          final Document document,

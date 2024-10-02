@@ -22,6 +22,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
@@ -115,6 +116,7 @@ public class AwardSummarySheet extends BaseFLLServlet {
     }
   }
 
+  @SuppressFBWarnings(value = { "DLS_DEAD_LOCAL_STORE" }, justification = "Switch statement requires storing of variable")
   private Document generateReport(final Connection connection,
                                   final ChallengeDescription challengeDescription,
                                   final Tournament tournament,
