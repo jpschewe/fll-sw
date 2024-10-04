@@ -40,6 +40,7 @@ import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.web.report.awards.AwardCategory;
 import fll.web.report.awards.ChampionshipCategory;
+import fll.web.report.awards.HeadToHeadCategory;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
@@ -60,6 +61,8 @@ import net.mtu.eggplant.xml.XMLUtils;
  */
 @WebServlet("/report/AwardSummarySheet")
 public class AwardSummarySheet extends BaseFLLServlet {
+
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private static final int LINE_THICKNESS = 1;
 
@@ -180,7 +183,7 @@ public class AwardSummarySheet extends BaseFLLServlet {
         report.appendChild(performance);
       }
       case NonNumericCategory awardCategory -> {
-        if (CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournament.getLevel(), awardCategory)) {
+        if (!CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournament.getLevel(), awardCategory)) {
           if (!first) {
             report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
           } else {
@@ -228,6 +231,9 @@ public class AwardSummarySheet extends BaseFLLServlet {
         }
         final Element champions = createChampionsBlock(document);
         report.appendChild(champions);
+      }
+      case HeadToHeadCategory awardCategory -> {
+        LOGGER.debug("Skipping head to head category");
       }
       default -> throw new RuntimeException("Unknown category type: "
           + category.getClass());

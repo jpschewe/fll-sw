@@ -18,8 +18,10 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 
 import fll.web.report.awards.AwardCategory;
 import fll.web.report.awards.ChampionshipCategory;
+import fll.web.report.awards.HeadToHeadCategory;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
+import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.VirtualSubjectiveScoreCategory;
 
@@ -57,6 +59,10 @@ public final class AwardDeterminationOrder {
     if (!order.contains(ChampionshipCategory.INSTANCE)) {
       order.add(ChampionshipCategory.INSTANCE);
     }
+    final PerformanceScoreCategory performance = description.getPerformance();
+    if (!order.contains(performance)) {
+      order.add(performance);
+    }
     for (final VirtualSubjectiveScoreCategory cat : description.getVirtualSubjectiveCategories()) {
       if (!order.contains(cat)) {
         order.add(cat);
@@ -68,9 +74,13 @@ public final class AwardDeterminationOrder {
       }
     }
     for (final NonNumericCategory cat : description.getNonNumericCategories()) {
+      // add all categories, handle ignored categories on output
       if (!order.contains(cat)) {
         order.add(cat);
       }
+    }
+    if (!order.contains(HeadToHeadCategory.INSTANCE)) {
+      order.add(HeadToHeadCategory.INSTANCE);
     }
     return order;
   }
