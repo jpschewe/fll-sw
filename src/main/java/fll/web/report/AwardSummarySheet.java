@@ -173,14 +173,16 @@ public class AwardSummarySheet extends BaseFLLServlet {
     for (AwardCategory category : AwardDeterminationOrder.get(connection, challengeDescription)) {
       switch (category) {
       case PerformanceScoreCategory awardCategory -> {
-        final Element performance = createPerformanceBlock(document, connection, challengeDescription, tournament,
-                                                           groupName, category);
-        if (!first) {
-          report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
-        } else {
-          first = false;
+        final @Nullable Element performance = createPerformanceBlock(document, connection, challengeDescription,
+                                                                     tournament, groupName, category);
+        if (null != performance) {
+          if (!first) {
+            report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+          } else {
+            first = false;
+          }
+          report.appendChild(performance);
         }
-        report.appendChild(performance);
       }
       case NonNumericCategory awardCategory -> {
         if (!CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournament.getLevel(), awardCategory)) {
@@ -280,12 +282,12 @@ public class AwardSummarySheet extends BaseFLLServlet {
     return section;
   }
 
-  private Element createPerformanceBlock(final Document document,
-                                         final Connection connection,
-                                         final ChallengeDescription description,
-                                         final Tournament tournament,
-                                         final String groupName,
-                                         final AwardCategory awardCategory)
+  private @Nullable Element createPerformanceBlock(final Document document,
+                                                   final Connection connection,
+                                                   final ChallengeDescription description,
+                                                   final Tournament tournament,
+                                                   final String groupName,
+                                                   final AwardCategory awardCategory)
       throws SQLException {
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection,
                                                                                     tournament.getTournamentID());
@@ -324,6 +326,10 @@ public class AwardSummarySheet extends BaseFLLServlet {
     if (null == scores) {
       throw new FLLRuntimeException(String.format("Unable to find performance scores for Judging Station '%s'",
                                                   groupName));
+    }
+
+    if (scores.isEmpty()) {
+      return null;
     }
 
     for (final Top10.ScoreEntry entry : scores) {
