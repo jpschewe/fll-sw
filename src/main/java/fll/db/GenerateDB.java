@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 46;
+  public static final int DATABASE_VERSION = 47;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -348,6 +348,8 @@ public final class GenerateDB {
       createDeliberationCategoryOrder(connection, true);
 
       createVirtualSubjectiveCategoryTable(connection, true);
+      
+      createAwardDeterminationTable(connection, true);
 
       // --------------- create views ---------------
 
@@ -1455,6 +1457,23 @@ public final class GenerateDB {
       stmt.executeUpdate(sql.toString());
     }
 
+  }
+
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Building up SQL based on parameters")
+  /* package */ static void createAwardDeterminationTable(final Connection connection,
+                                                          final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      final Formatter sql = new Formatter();
+      sql.format("CREATE TABLE award_determination_order (");
+      sql.format("  award LONGVARCHAR NOT NULL");
+      sql.format(" ,determined_order INTEGER NOT NULL");
+      if (createConstraints) {
+        sql.format(" , CONSTRAINT award_determine_order_pk PRIMARY KEY (award)");
+      }
+      sql.format(")");
+      stmt.executeUpdate(sql.toString());
+    }
   }
 
   /**

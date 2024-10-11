@@ -42,6 +42,7 @@ import org.w3c.dom.Element;
 
 import com.diffplug.common.base.Errors;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
@@ -353,6 +354,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
     return filteredAwardOrder;
   }
 
+  @SuppressFBWarnings(value = { "DLS_DEAD_LOCAL_STORE" }, justification = "Switch statement requires storing of variable")
   private void addAwards(final ChallengeDescription description,
                          final Connection connection,
                          final Document document,
@@ -407,49 +409,56 @@ public class AwardsScriptReport extends BaseFLLServlet {
       }
 
       final Element categoryPage;
-      if (category instanceof PerformanceScoreCategory) {
+      switch (category) {
+      case PerformanceScoreCategory awardCategory -> {
         categoryPage = createPerformanceCategory(description, connection, tournament, document, templateContext,
                                                  awardGroupOrder, (PerformanceScoreCategory) category);
-      } else if (category instanceof NonNumericCategory) {
-        final NonNumericCategory nonNumericCategory = (NonNumericCategory) category;
+      }
+      case NonNumericCategory awardCategory -> {
         if (category.getPerAwardGroup()) {
           categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, description, document,
-                                                              templateContext, awardGroupOrder, nonNumericCategory,
+                                                              templateContext, awardGroupOrder, awardCategory,
                                                               organizedNonNumericPerAwardGroupWinners,
                                                               finalistSchedulesPerAwardGroup);
         } else {
           categoryPage = createNonNumericOverallCategory(connection, description, tournament, document, templateContext,
-                                                         nonNumericCategory, nonNumericOverallWinners,
+                                                         awardCategory, nonNumericOverallWinners,
                                                          finalistSchedulesPerAwardGroup);
         }
-      } else if (category instanceof SubjectiveScoreCategory) {
+      }
+      case SubjectiveScoreCategory awardCategory -> {
         categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, description, document,
                                                             templateContext, awardGroupOrder,
                                                             (SubjectiveScoreCategory) category,
                                                             organizedSubjectiveWinners, finalistSchedulesPerAwardGroup);
-      } else if (category instanceof VirtualSubjectiveScoreCategory) {
+      }
+      case VirtualSubjectiveScoreCategory awardCategory -> {
         categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, description, document,
                                                             templateContext, awardGroupOrder,
                                                             (VirtualSubjectiveScoreCategory) category,
                                                             organizedVirtualSubjectiveWinners,
                                                             finalistSchedulesPerAwardGroup);
-      } else if (category instanceof ChampionshipCategory) {
+      }
+      case ChampionshipCategory awardCategory -> {
         categoryPage = createNonNumericOrSubjectiveCategory(connection, tournament, description, document,
                                                             templateContext, awardGroupOrder, category,
                                                             organizedNonNumericPerAwardGroupWinners,
                                                             finalistSchedulesPerAwardGroup);
-      } else if (category instanceof HeadToHeadCategory) {
+      }
+      case HeadToHeadCategory awardCategory -> {
         if (TournamentParameters.getRunningHeadToHead(connection, tournament.getTournamentID())) {
           categoryPage = createHeadToHead(connection, tournament, description, document, templateContext,
                                           awardGroupOrder, category);
         } else {
           throw new FLLInternalException("Should have filtered out head to head category when not enabled in this tournament");
         }
-      } else {
+      }
+      default -> {
         categoryPage = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
         categoryPage.appendChild(document.createTextNode(String.format("Category %s is of an unknown type: %s",
                                                                        category.getTitle(),
                                                                        category.getClass().getName())));
+      }
       }
 
       if (null != categoryPage) {

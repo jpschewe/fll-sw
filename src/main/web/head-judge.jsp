@@ -64,6 +64,10 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         Match Play performance scores</a>
 
     <a class="wide"
+        href="<c:url value='/report/edit-award-determination-order.jsp' />">Edit
+        the order that awards are determined.</a>
+
+    <a class="wide"
         href="<c:url value='/report/edit-award-winners.jsp' />"
         target="_blank">Enter the winners of awards for use in the
         awards report</a>

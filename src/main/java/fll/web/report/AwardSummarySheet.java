@@ -22,9 +22,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
+import fll.db.AwardDeterminationOrder;
 import fll.db.CategoriesIgnored;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
@@ -38,8 +40,11 @@ import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.web.report.awards.AwardCategory;
 import fll.web.report.awards.ChampionshipCategory;
+import fll.web.report.awards.HeadToHeadCategory;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
+import fll.xml.NonNumericCategory;
+import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.VirtualSubjectiveScoreCategory;
 import fll.xml.WinnerType;
@@ -56,6 +61,8 @@ import net.mtu.eggplant.xml.XMLUtils;
  */
 @WebServlet("/report/AwardSummarySheet")
 public class AwardSummarySheet extends BaseFLLServlet {
+
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private static final int LINE_THICKNESS = 1;
 
@@ -112,6 +119,7 @@ public class AwardSummarySheet extends BaseFLLServlet {
     }
   }
 
+  @SuppressFBWarnings(value = { "DLS_DEAD_LOCAL_STORE" }, justification = "Switch statement requires storing of variable")
   private Document generateReport(final Connection connection,
                                   final ChallengeDescription challengeDescription,
                                   final Tournament tournament,
@@ -161,46 +169,77 @@ public class AwardSummarySheet extends BaseFLLServlet {
     groupSection.appendChild(document.createTextNode("Judging Group: "));
     groupSection.appendChild(document.createTextNode(groupName));
 
-    final Element champions = createChampionsBlock(document);
-    report.appendChild(champions);
-
-    report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
-
-    final AwardCategory performanceCategory = challengeDescription.getPerformance();
-    final Element performance = createPerformanceBlock(document, connection, challengeDescription, tournament,
-                                                       groupName, performanceCategory);
-    report.appendChild(performance);
-
-    for (final SubjectiveScoreCategory awardCategory : challengeDescription.getSubjectiveCategories()) {
-      final @Nullable Element subjectiveElement = createSubjectiveBlock(document, connection,
-                                                                        challengeDescription.getWinner(), tournament,
-                                                                        groupName, awardCategory.getName(),
-                                                                        awardCategory.getTitle());
-      if (null != subjectiveElement) {
-        report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
-
-        report.appendChild(subjectiveElement);
-
+    boolean first = true;
+    for (AwardCategory category : AwardDeterminationOrder.get(connection, challengeDescription)) {
+      switch (category) {
+      case PerformanceScoreCategory awardCategory -> {
+        final @Nullable Element performance = createPerformanceBlock(document, connection, challengeDescription,
+                                                                     tournament, groupName, category);
+        if (null != performance) {
+          if (!first) {
+            report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+          } else {
+            first = false;
+          }
+          report.appendChild(performance);
+        }
       }
-    }
-    for (final VirtualSubjectiveScoreCategory awardCategory : challengeDescription.getVirtualSubjectiveCategories()) {
-      final @Nullable Element subjectiveElement = createSubjectiveBlock(document, connection,
-                                                                        challengeDescription.getWinner(), tournament,
-                                                                        groupName, awardCategory.getName(),
-                                                                        awardCategory.getTitle());
-      if (null != subjectiveElement) {
-        report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
-
-        report.appendChild(subjectiveElement);
-
+      case NonNumericCategory awardCategory -> {
+        if (!CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournament.getLevel(), awardCategory)) {
+          if (!first) {
+            report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+          } else {
+            first = false;
+          }
+          final Element element = createNonNumericBlock(document, awardCategory);
+          report.appendChild(element);
+        }
       }
-    }
+      case SubjectiveScoreCategory awardCategory -> {
+        final @Nullable Element subjectiveElement = createSubjectiveBlock(document, connection,
+                                                                          challengeDescription.getWinner(), tournament,
+                                                                          groupName, awardCategory.getName(),
+                                                                          awardCategory.getTitle());
+        if (null != subjectiveElement) {
+          if (!first) {
+            report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+          } else {
+            first = false;
+          }
+          report.appendChild(subjectiveElement);
 
-    for (final AwardCategory awardCategory : CategoriesIgnored.getNonNumericCategories(challengeDescription, connection,
-                                                                                       tournament)) {
-      report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
-      final Element element = createNonNumericBlock(document, awardCategory);
-      report.appendChild(element);
+        }
+      }
+      case VirtualSubjectiveScoreCategory awardCategory -> {
+        final @Nullable Element subjectiveElement = createSubjectiveBlock(document, connection,
+                                                                          challengeDescription.getWinner(), tournament,
+                                                                          groupName, awardCategory.getName(),
+                                                                          awardCategory.getTitle());
+        if (null != subjectiveElement) {
+          if (!first) {
+            report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+          } else {
+            first = false;
+          }
+          report.appendChild(subjectiveElement);
+
+        }
+      }
+      case ChampionshipCategory awardCategory -> {
+        if (!first) {
+          report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
+        } else {
+          first = false;
+        }
+        final Element champions = createChampionsBlock(document);
+        report.appendChild(champions);
+      }
+      case HeadToHeadCategory awardCategory -> {
+        LOGGER.debug("Skipping head to head category");
+      }
+      default -> throw new RuntimeException("Unknown category type: "
+          + category.getClass());
+      }
     }
 
     return document;
@@ -243,12 +282,12 @@ public class AwardSummarySheet extends BaseFLLServlet {
     return section;
   }
 
-  private Element createPerformanceBlock(final Document document,
-                                         final Connection connection,
-                                         final ChallengeDescription description,
-                                         final Tournament tournament,
-                                         final String groupName,
-                                         final AwardCategory awardCategory)
+  private @Nullable Element createPerformanceBlock(final Document document,
+                                                   final Connection connection,
+                                                   final ChallengeDescription description,
+                                                   final Tournament tournament,
+                                                   final String groupName,
+                                                   final AwardCategory awardCategory)
       throws SQLException {
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection,
                                                                                     tournament.getTournamentID());
@@ -287,6 +326,10 @@ public class AwardSummarySheet extends BaseFLLServlet {
     if (null == scores) {
       throw new FLLRuntimeException(String.format("Unable to find performance scores for Judging Station '%s'",
                                                   groupName));
+    }
+
+    if (scores.isEmpty()) {
+      return null;
     }
 
     for (final Top10.ScoreEntry entry : scores) {

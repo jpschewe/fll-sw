@@ -17,6 +17,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.db.CategoriesIgnored;
+import fll.web.report.awards.AwardCategory;
+import fll.web.report.awards.ChampionshipCategory;
+import fll.web.report.awards.HeadToHeadCategory;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -82,7 +85,8 @@ public class ChallengeDescription implements Serializable {
 
     final List<SubjectiveScoreCategory> subjectiveCategoriesUnmodifiable = Collections.unmodifiableList(mSubjectiveCategories);
     for (final Element subjEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(VirtualSubjectiveScoreCategory.TAG_NAME))) {
-      final VirtualSubjectiveScoreCategory subj = new VirtualSubjectiveScoreCategory(subjEle, subjectiveCategoriesUnmodifiable);
+      final VirtualSubjectiveScoreCategory subj = new VirtualSubjectiveScoreCategory(subjEle,
+                                                                                     subjectiveCategoriesUnmodifiable);
       virtualSubjectiveCategories.add(subj);
     }
 
@@ -509,5 +513,38 @@ public class ChallengeDescription implements Serializable {
   public double getMaximumScore() {
     return Math.max(getPerformance().getMaximumScore(),
                     getSubjectiveCategories().stream().mapToDouble(ScoreCategory::getMaximumScore).max().orElse(0D));
+  }
+
+  /**
+   * @param title the title of the category to find
+   * @return the award category
+   * @throws IllegalArgumentException if a category cannot be found with the
+   *           specified title
+   */
+  public AwardCategory getCategoryByTitle(final String title) {
+    @Nullable
+    AwardCategory category = getVirtualSubjectiveCategoryByTitle(title);
+    if (null != category) {
+      return category;
+    }
+    category = getSubjectiveCategoryByTitle(title);
+    if (null != category) {
+      return category;
+    }
+    category = getNonNumericCategoryByTitle(title);
+    if (null != category) {
+      return category;
+    }
+    if (title.equals(PerformanceScoreCategory.CATEGORY_TITLE)) {
+      return getPerformance();
+    }
+    if (title.equals(ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE)) {
+      return ChampionshipCategory.INSTANCE;
+    }
+    if (title.equals(HeadToHeadCategory.AWARD_TITLE)) {
+      return HeadToHeadCategory.INSTANCE;
+    }
+
+    throw new IllegalArgumentException(String.format("No category can be found with the title '%s'", title));
   }
 }
