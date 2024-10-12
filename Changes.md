@@ -1,3 +1,5 @@
+Release 19.0.0
+==============
 * #1206 - Allow one to specify the order that awards are determined
 * #1207 - Add virtual subjective categories to finalist scheduling and deliberations
 * #1204 - Allow sorting of virtual subjective categories for awards script
