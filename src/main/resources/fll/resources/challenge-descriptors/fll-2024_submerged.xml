@@ -25,14 +25,14 @@
     <goalGroup title="SM03">
       <description>CORAL REEF</description>
       <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m03_coral_reef_flipped_up" required="false" scoreType="INTEGER" title="Coral Reef Flipped Up, not touching mat or equipment"/>
-      <goal initialValue="0.00" max="3.00" min="0.00" multiplier="5.00" name="m03_count_reef_segments" required="false" scoreType="INTEGER" title="# Reef Segments Standing Upright, Touching Mat, Outside of Home - not touching eqiupment at end"/>
+      <goal initialValue="0.00" max="3.00" min="0.00" multiplier="5.00" name="m03_count_reef_segments" required="false" scoreType="INTEGER" title="# Reef Segments Standing Upright, Touching Mat, Outside of Home - not touching equipment at end"/>
     </goalGroup>
     <goalGroup title="SM04">
       <description>SCUBA DIVER</description>
       <goal initialValue="0.00" multiplier="1.00" name="m04_scuba_diver_not_touching_nursery" required="false" scoreType="INTEGER" title="Scuba Diver No Longer Touching Coral Nursery">
         <value score="0.00" title="Scuba Diver Still Touching Coral Nursery" value="touching"/>
         <value score="20.00" title="Scuba Diver No Longer Touching Coral Nursery" value="released"/>
-        <value score="40.00" title="Suba Diver Hanging on Coral Reef Support" value="hanging"/>
+        <value score="40.00" title="Scuba Diver Hanging on Coral Reef Support" value="hanging"/>
       </goal>
     </goalGroup>
     <goalGroup title="SM05">
@@ -49,14 +49,14 @@
     </goalGroup>
     <goalGroup title="SM08">
       <description>ARTIFICIAL HABITAT</description>
-      <goal initialValue="0.00" max="4.00" min="0.00" multiplier="10.00" name="m08_count_stack_segments" required="false" scoreType="INTEGER" title="# Artificial Habitat Stack Segments Completely Flat &amp; Upright - not touching eqiupment at end"/>
+      <goal initialValue="0.00" max="4.00" min="0.00" multiplier="10.00" name="m08_count_stack_segments" required="false" scoreType="INTEGER" title="# Artificial Habitat Stack Segments Completely Flat &amp; Upright - not touching equipment at end"/>
     </goalGroup>
     <goalGroup title="SM09">
       <description>UNEXPECTED ENCOUNTER</description>
       <goal initialValue="0.00" multiplier="1.00" name="m09_creature_released" required="false" scoreType="INTEGER" title="Unknown Creature Released">
         <value score="0.00" title="Unknown Creature NOT Released" value="not"/>
         <value score="20.00" title="Unknown Creature Released" value="released"/>
-        <value score="30.00" title="Unknow Creature at least Partly in Cold Seep" value="seep"/>
+        <value score="30.00" title="Unknown Creature at least Partly in Cold Seep" value="seep"/>
       </goal>
     </goalGroup>
     <goalGroup title="SM10">
@@ -145,7 +145,7 @@
       <goal initialValue="0.00" max="1.00" min="0.00" multiplier="5.00" name="m15b_plankton_sample" required="false" scoreType="INTEGER" title="Plankton Sample - at least Partly in Research Vessel's Cargo Area - not touching equipment at end"/>
       <goal initialValue="0.00" max="1.00" min="0.00" multiplier="5.00" name="m15b_treasure" required="false" scoreType="INTEGER" title="Treasure Chest - at least Partly in Research Vessel's Cargo Area - not touching equipment at end"/>
       <goal initialValue="0.00" max="2.00" min="0.00" multiplier="5.00" name="m15b_trident" required="false" scoreType="INTEGER" title="#Trident Pieces - at least Partly in Research Vessel's Cargo Area - not touching equipment at end"/>
-      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="goal_5" required="false" scoreType="INTEGER" title="Ports Latch at Least Partly in Research Vessel's Loop - not touching eqiupment at end"/>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="goal_5" required="false" scoreType="INTEGER" title="Ports Latch at Least Partly in Research Vessel's Loop - not touching equipment at end"/>
     </goalGroup>
     <goalGroup title="SM16">
       <description>Precision Tokens Remaining</description>
