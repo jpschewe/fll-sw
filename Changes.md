@@ -1,3 +1,5 @@
+* #1209 - Clean up team from schedule table when deleting
+
 Release 19.0.0
 ==============
 * #1206 - Allow one to specify the order that awards are determined
