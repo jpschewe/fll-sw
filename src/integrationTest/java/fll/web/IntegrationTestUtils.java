@@ -1293,7 +1293,7 @@ public final class IntegrationTestUtils {
    * @return waiter for elements
    */
   public static WebDriverWait createWebDriverWait(final WebDriver selenium) {
-    return new WebDriverWait(selenium, WAIT_FOR_ELEMENT.getSeconds(), WAIT_FOR_ELEMENT_POLL_INTERVAL.toMillis());
+    return new WebDriverWait(selenium, WAIT_FOR_ELEMENT, WAIT_FOR_ELEMENT_POLL_INTERVAL);
   }
 
 }
