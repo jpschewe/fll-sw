@@ -1052,10 +1052,23 @@ public final class Queries {
     try {
       connection.setAutoCommit(false);
 
+      // delete from schedule
+      try (
+          PreparedStatement prep = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE team_number = ?")) {
+        prep.setInt(1, teamNumber);
+        prep.executeUpdate();
+      }
+      try (PreparedStatement prep = connection.prepareStatement("DELETE FROM sched_subjective WHERE team_number = ?")) {
+        prep.setInt(1, teamNumber);
+        prep.executeUpdate();
+      }
+      try (PreparedStatement prep = connection.prepareStatement("DELETE FROM schedule WHERE team_number = ?")) {
+        prep.setInt(1, teamNumber);
+        prep.executeUpdate();
+      }
+
+      // delete from TournamentTeams
       try (PreparedStatement prep = connection.prepareStatement("DELETE FROM TournamentTeams WHERE TeamNumber = ?")) {
-
-        // delete from TournamentTeams
-
         prep.setInt(1, teamNumber);
         prep.executeUpdate();
       }
