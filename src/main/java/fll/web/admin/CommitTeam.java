@@ -16,6 +16,8 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.base.Objects;
+
 import fll.Tournament;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
@@ -170,7 +172,7 @@ public class CommitTeam extends BaseFLLServlet {
                 Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
                                             judgingGroup, StringUtils.isBlank(wave) ? null : wave);
               } else {
-                // just update the division and judging station information
+                // just update the division and judging station information and wave
 
                 final String prevEventDivision = Queries.getEventDivision(connection, teamNumber,
                                                                           tournament.getTournamentID());
@@ -189,8 +191,14 @@ public class CommitTeam extends BaseFLLServlet {
                       + teamNumber);
                 }
                 if (!judgingGroup.equals(prevJudgingGroup)) {
-                  Queries.updateTeamJudgingGroups(connection, teamNumber, tournament.getTournamentID(), judgingGroup);
+                  Queries.updateTeamJudgingGroup(connection, teamNumber, tournament.getTournamentID(), judgingGroup);
                 }
+
+                final String prevWave = Queries.getWave(connection, teamNumber, tournament.getTournamentID());
+                if (!Objects.equal(prevWave, wave)) {
+                  Queries.updateTeamWave(connection, teamNumber, tournament.getTournamentID(), wave);
+                }
+
               }
 
             } else if (previouslyAssignedTournaments.contains(tournament.getTournamentID())) {

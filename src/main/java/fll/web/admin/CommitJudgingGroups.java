@@ -117,7 +117,7 @@ public class CommitJudgingGroups extends BaseFLLServlet {
                   Queries.deleteSubjectiveScores(connection, category.getName(), teamNumber, currentTournamentID);
                 }
 
-                Queries.updateTeamJudgingGroups(connection, teamNumber, currentTournamentID, newJudgingGroup);
+                Queries.updateTeamJudgingGroup(connection, teamNumber, currentTournamentID, newJudgingGroup);
               }
             }
           }
