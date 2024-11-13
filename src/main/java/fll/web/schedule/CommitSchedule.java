@@ -115,6 +115,7 @@ public class CommitSchedule extends BaseFLLServlet {
       final int teamNumber = si.getTeamNumber();
       Queries.updateTeamJudgingGroup(connection, teamNumber, tournamentID, group);
       Queries.updateTeamEventDivision(connection, teamNumber, tournamentID, si.getAwardGroup());
+      Queries.updateTeamWave(connection, teamNumber, tournamentID, si.getWave());
     }
 
   }
