@@ -1,3 +1,4 @@
+* Fix storing awards script text and presenters for virtual subjective categories
 * Allow score page text to be cleared
 * Properly import levels of tournaments
 * #1210 - overwrite wave information on schedule upload
