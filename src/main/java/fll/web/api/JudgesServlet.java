@@ -162,7 +162,6 @@ public class JudgesServlet extends HttpServlet {
         if (null != judge) {
           if (!currentJudges.contains(judge)) {
             LOGGER.trace("Adding judge: {}", judge.getId());
-
             insertJudge.setString(1, judge.getId());
             insertJudge.setString(2, judge.getCategory());
             insertJudge.setString(4, judge.getGroup());
@@ -170,11 +169,13 @@ public class JudgesServlet extends HttpServlet {
             insertJudge.executeUpdate();
             ++numNewJudges;
           } else {
-            updateJudge.setBoolean(1, judge.isFinalScores());
-            updateJudge.setString(2, judge.getId());
-            updateJudge.setString(3, judge.getCategory());
-            updateJudge.setString(5, judge.getGroup());
-            updateJudge.executeUpdate();
+            if (judge.isFinalScores()) {
+              updateJudge.setBoolean(1, judge.isFinalScores());
+              updateJudge.setString(2, judge.getId());
+              updateJudge.setString(3, judge.getCategory());
+              updateJudge.setString(5, judge.getGroup());
+              updateJudge.executeUpdate();
+            }
           }
         } // non-null judge
       } // foreach judge sent
