@@ -1341,7 +1341,7 @@ public final class AwardsScript {
                                                  final int tournamentId,
                                                  final VirtualSubjectiveScoreCategory category)
       throws SQLException {
-    return isValueSpecifiedFor(connection, tournamentLevelId, tournamentId, "awards_script_subjective_presenter",
+    return isValueSpecifiedFor(connection, tournamentLevelId, tournamentId, "awards_script_virt_subjective_presenter",
                                "category_name", category.getName());
   }
 
@@ -1604,7 +1604,7 @@ public final class AwardsScript {
                                                     final int tournamentId,
                                                     final VirtualSubjectiveScoreCategory category)
       throws SQLException {
-    return isValueSpecifiedFor(connection, tournamentLevelId, tournamentId, "awards_script_subjective_text",
+    return isValueSpecifiedFor(connection, tournamentLevelId, tournamentId, "awards_script_virt_subjective_text",
                                "category_name", category.getName());
   }
 
@@ -1655,8 +1655,8 @@ public final class AwardsScript {
                                            final int tournamentId,
                                            final VirtualSubjectiveScoreCategory category)
       throws SQLException {
-    return getValueFor(connection, tournamentLevelId, tournamentId, "awards_script_subjective_text", "category_name",
-                       category.getName(), "text", "");
+    return getValueFor(connection, tournamentLevelId, tournamentId, "awards_script_virt_subjective_text",
+                       "category_name", category.getName(), "text", "");
   }
 
   /**

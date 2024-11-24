@@ -404,8 +404,8 @@ const subjective_module = {}
         subjective_module.getServerTournament = function(doneCallback, failCallback) {
             return fetch("../api/Tournaments/current").then(checkJsonResponse).then(function(tournament) {
                 doneCallback(tournament);
-            }).catch(function() {
-                failCallback();
+            }).catch((error) => {
+                failCallback(error);
             });
         },
 
@@ -881,8 +881,8 @@ const subjective_module = {}
                                 Promise.all(waitList).then(function() {
                                     subjective_module.loadFromServer(function() {
                                         loadSuccess();
-                                    }, function() {
-                                        loadFail("Error getting updated scores");
+                                    }, function(error) {
+                                        loadFail(`Error getting updated scores: ${error}`);
                                     }, false);
                                 });
                             }

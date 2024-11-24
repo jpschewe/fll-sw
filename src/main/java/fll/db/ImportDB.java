@@ -252,8 +252,11 @@ public final class ImportDB {
     // add the tournament to the tournaments table if it doesn't already
     // exist
     if (!Tournament.doesTournamentExist(destConnection, sourceTournament.getName())) {
+      final TournamentLevel sourceLevel = sourceTournament.getLevel();
+      final TournamentLevel destLevel = TournamentLevel.getByName(destConnection, sourceLevel.getName());
+
       Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getDescription(),
-                                  sourceTournament.getDate(), sourceTournament.getLevel());
+                                  sourceTournament.getDate(), destLevel);
     }
   }
 

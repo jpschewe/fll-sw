@@ -40,8 +40,7 @@ public class ChangeScorePageText extends BaseFLLServlet {
     }
 
     final String newText = request.getParameter("ScorePageText");
-    if (null != newText
-        && !"".equals(newText)) {
+    if (null != newText) {
       application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, newText);
     }
 
