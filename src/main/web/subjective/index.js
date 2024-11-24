@@ -95,8 +95,8 @@ function checkTournament() {
         } else {
             promptForReload();
         }
-    }, function() {
-        document.getElementById('alert-dialog_text').innerText = "Error getting data from server";
+    }, function(error) {
+        document.getElementById('alert-dialog_text').innerText = `Error getting data from server: ${error}`;
         document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
     });
 }
