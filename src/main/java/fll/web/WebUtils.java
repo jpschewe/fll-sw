@@ -433,7 +433,7 @@ public final class WebUtils {
     final String redirect = SessionAttributes.getRedirectURL(session);
 
     // clear variable since it's been used
-    session.removeAttribute(SessionAttributes.REDIRECT_URL);
+    SessionAttributes.clearRedirectURL(session);
 
     sendRedirect(response, redirect);
   }
@@ -456,6 +456,7 @@ public final class WebUtils {
       whereTo = "/";
     }
 
+    LOGGER.trace("Redirecting to {}", redirect);
     response.sendRedirect(response.encodeRedirectURL(whereTo));
   }
 

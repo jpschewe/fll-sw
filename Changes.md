@@ -1,3 +1,4 @@
+* Clear redirect URL on logout
 * #1210 - overwrite wave information on schedule upload
 * #1210 - allow user to edit team wave information
 * #1209 - Clean up team from schedule table when deleting
