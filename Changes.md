@@ -1,3 +1,4 @@
+* Clear redirect URL on logout
 * Only store Judges final scores flag when final, don't allow it to be unset
 * Implement output of schedule for single team
 * Fix storing awards script text and presenters for virtual subjective categories

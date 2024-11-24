@@ -142,7 +142,6 @@ public class CreateTournament extends BaseFLLServlet {
     if (null == SessionAttributes.getRedirectURL(session)) {
       session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentExists");
     }
-
   }
 
   /**
