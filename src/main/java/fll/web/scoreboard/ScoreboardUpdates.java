@@ -199,7 +199,9 @@ public final class ScoreboardUpdates {
         for (final Map.Entry<String, Session> entry : ALL_CLIENTS.entrySet()) {
           try {
             final Session client = entry.getValue();
-            client.getBasicRemote().sendText(msg);
+            synchronized (client) {
+              client.getBasicRemote().sendText(msg);
+            }
           } catch (final EOFException e) {
             LOGGER.debug("Caught EOF writing to client, dropping: {}", entry.getKey(), e);
             toRemove.add(entry.getKey());
@@ -237,7 +239,9 @@ public final class ScoreboardUpdates {
         THREAD_POOL.execute(() -> {
           try {
             final Session client = entry.getValue();
-            client.getBasicRemote().sendText(msg);
+            synchronized (client) {
+              client.getBasicRemote().sendText(msg);
+            }
           } catch (final EOFException e) {
             LOGGER.debug("Caught EOF writing to client, dropping: {}", entry.getKey(), e);
             toRemove.add(entry.getKey());
@@ -365,7 +369,9 @@ public final class ScoreboardUpdates {
       if (!client.isOpen()) {
         throw new IOException("Client has closed the connection");
       }
-      client.getBasicRemote().sendText(data);
+      synchronized (client) {
+        client.getBasicRemote().sendText(data);
+      }
     }
   }
 

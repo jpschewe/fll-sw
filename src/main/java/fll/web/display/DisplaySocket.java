@@ -52,7 +52,9 @@ public class DisplaySocket {
         throw new IOException("Session is closed");
       } else {
         final String msg = jsonWriter.writeValueAsString(message);
-        session.getBasicRemote().sendText(msg);
+        synchronized (session) {
+          session.getBasicRemote().sendText(msg);
+        }
       }
     }
   }

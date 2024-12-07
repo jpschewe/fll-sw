@@ -161,7 +161,9 @@ public class H2HUpdateWebSocket {
           try {
             final String messageText = mapper.writeValueAsString(message);
             if (session.isOpen()) {
-              session.getBasicRemote().sendText(messageText);
+              synchronized (session) {
+                session.getBasicRemote().sendText(messageText);
+              }
             } else {
               throw new IOException("Session is closed");
             }
@@ -329,7 +331,9 @@ public class H2HUpdateWebSocket {
         try {
           final String allBracketInfoJson = jsonMapper.writeValueAsString(message);
 
-          session.getBasicRemote().sendText(allBracketInfoJson);
+          synchronized (session) {
+            session.getBasicRemote().sendText(allBracketInfoJson);
+          }
         } catch (final JsonProcessingException e) {
           throw new FLLInternalException("Error writing JSON for allBracketInfo", e);
         }
@@ -409,7 +413,9 @@ public class H2HUpdateWebSocket {
 
         if (session.isOpen()) {
           try {
-            session.getBasicRemote().sendText(messageText);
+            synchronized (session) {
+              session.getBasicRemote().sendText(messageText);
+            }
           } catch (final EOFException e) {
             LOGGER.debug("Caught EOF sending message to {}, dropping session", session.getId(), e);
             toRemove.add(uuid);

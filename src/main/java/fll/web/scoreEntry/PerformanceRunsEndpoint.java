@@ -194,7 +194,9 @@ public class PerformanceRunsEndpoint {
       throw new IOException("Client has closd the connection");
     }
     try {
-      client.getBasicRemote().sendText(message);
+      synchronized (client) {
+        client.getBasicRemote().sendText(message);
+      }
     } catch (final IllegalStateException e) {
       throw new IOException("Illegal state exception writing to client", e);
     }
