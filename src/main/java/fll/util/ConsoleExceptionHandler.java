@@ -7,6 +7,9 @@
 package fll.util;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -39,7 +42,22 @@ public class ConsoleExceptionHandler implements UncaughtExceptionHandler {
     final String message = String.format("An unexpected error occurred. Please send the log, this message and a description of what you were doing to the developer. Thread %s: %s",
                                          t.getName(), ex.getMessage());
     LOGGER.fatal(message, ex);
+    LOGGER.fatal(generateThreadDump());
     System.exit(1);
+  }
+
+  private static String generateThreadDump() {
+    final ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+    final ThreadInfo[] threadInfos = threadMXBean.dumpAllThreads(true, true);
+
+    final StringBuilder dump = new StringBuilder();
+    dump.append("Full thread dump:\n\n");
+
+    for (final ThreadInfo threadInfo : threadInfos) {
+      dump.append(threadInfo.toString()).append("\n");
+    }
+
+    return dump.toString();
   }
 
   /**
