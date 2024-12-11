@@ -153,7 +153,7 @@ const RELOAD_MESSAGE_TYPE = "${RELOAD_MESSAGE_TYPE}";
                                 test="${not empty sponsorLogos and (teamIndex mod teamsBetweenLogos) == 1}">
                                 <tr class='sponsor'>
                                     <td class="right sponsor_title">This
-                                        tournament sponsored by:&nbsp;</td>
+                                        season sponsored by:&nbsp;</td>
 
                                     <td class="left sponsor_logo">
                                         <img

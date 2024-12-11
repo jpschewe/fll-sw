@@ -19,7 +19,7 @@ fll.web.playoff.Sponsors.populateContext(application, session, pageContext);
             <tr>
                 <td width="50%"
                     style="text-align: right; vertical-align: middle">
-                    This tournament sponsored by:</td>
+                    This season sponsored by:</td>
                 <td width="50%"
                     style="text-align: left; vertical-align: middle">
                     <img src='<c:url value="/${imageFileName}"/>' />
