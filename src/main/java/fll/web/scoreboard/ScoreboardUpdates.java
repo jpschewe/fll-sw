@@ -6,7 +6,6 @@
 
 package fll.web.scoreboard;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -38,6 +37,7 @@ import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.WebUtils;
 import fll.web.display.DisplayHandler;
 import fll.web.display.DisplayInfo;
 import fll.web.display.UnknownDisplayException;
@@ -106,67 +106,61 @@ public final class ScoreboardUpdates {
     final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
     final PerformanceScoreCategory performanceElement = challengeDescription.getPerformance();
 
-    try {
-      try (Connection connection = datasource.getConnection()) {
-        final Tournament currentTournament = Tournament.getCurrentTournament(connection);
-        final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection,
-                                                                              currentTournament.getTournamentID());
-        final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
-                                                                                    currentTournament.getTournamentID());
-        final int maxRunNumberToDisplay = DelayedPerformance.getMaxRunNumberToDisplay(connection, currentTournament);
+    try (Connection connection = datasource.getConnection()) {
+      final Tournament currentTournament = Tournament.getCurrentTournament(connection);
+      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection,
+                                                                            currentTournament.getTournamentID());
+      final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
+                                                                                  currentTournament.getTournamentID());
+      final int maxRunNumberToDisplay = DelayedPerformance.getMaxRunNumberToDisplay(connection, currentTournament);
 
-        final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
-        final List<String> allAwardGroups = Queries.getAwardGroups(connection, currentTournament.getTournamentID());
-        final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
+      final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
+      final List<String> allAwardGroups = Queries.getAwardGroups(connection, currentTournament.getTournamentID());
+      final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
 
-        final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection,
-                                                                              currentTournament.getTournamentID());
+      final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection,
+                                                                            currentTournament.getTournamentID());
 
-        // get all scores in ascending order by time. This ensures that the most recent
-        // scores display sees the newest scores last
-        try (PreparedStatement prep = connection.prepareStatement("SELECT * from Performance" //
-            + " WHERE tournament = ?" //
-            + " ORDER BY TimeStamp ASC, TeamNumber ASC" //
-        )) {
-          prep.setInt(1, currentTournament.getTournamentID());
-          try (ResultSet rs = prep.executeQuery()) {
-            while (rs.next()) {
-              final int teamNumber = rs.getInt("teamNumber");
-              final int runNumber = rs.getInt("runNumber");
+      // get all scores in ascending order by time. This ensures that the most recent
+      // scores display sees the newest scores last
+      try (PreparedStatement prep = connection.prepareStatement("SELECT * from Performance" //
+          + " WHERE tournament = ?" //
+          + " ORDER BY TimeStamp ASC, TeamNumber ASC" //
+      )) {
+        prep.setInt(1, currentTournament.getTournamentID());
+        try (ResultSet rs = prep.executeQuery()) {
+          while (rs.next()) {
+            final int teamNumber = rs.getInt("teamNumber");
+            final int runNumber = rs.getInt("runNumber");
 
-              final @Nullable TournamentTeam team = teams.get(teamNumber);
-              if (null == team) {
-                LOGGER.error("Unable to find team {} in the list of teams while getting all scores to display, skipping",
-                             teamNumber);
-                continue;
+            final @Nullable TournamentTeam team = teams.get(teamNumber);
+            if (null == team) {
+              LOGGER.error("Unable to find team {} in the list of teams while getting all scores to display, skipping",
+                           teamNumber);
+              continue;
+            }
+
+            final TeamScore teamScore = new DatabaseTeamScore(teamNumber, runNumber, rs);
+            final double score = performanceElement.evaluate(teamScore);
+            final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
+            final ScoreUpdateMessage update = new ScoreUpdateMessage(team, score, formattedScore, teamScore);
+
+            try {
+              final String updateStr = jsonMapper.writeValueAsString(update);
+
+              if (!newScore(client, awardGroupsToDisplay, numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay,
+                            team, teamScore.getRunNumber(), updateStr)) {
+                removeClient(displayUuid);
               }
-
-              final TeamScore teamScore = new DatabaseTeamScore(teamNumber, runNumber, rs);
-              final double score = performanceElement.evaluate(teamScore);
-              final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-              final ScoreUpdateMessage update = new ScoreUpdateMessage(team, score, formattedScore, teamScore);
-
-              try {
-                final String updateStr = jsonMapper.writeValueAsString(update);
-
-                newScore(client, awardGroupsToDisplay, numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay, team,
-                         teamScore.getRunNumber(), updateStr);
-              } catch (final JsonProcessingException e) {
-                throw new FLLInternalException("Unable to format score update as JSON", e);
-              }
+            } catch (final JsonProcessingException e) {
+              throw new FLLInternalException("Unable to format score update as JSON", e);
             }
           }
         }
-
-      } catch (final SQLException e) {
-        throw new FLLRuntimeException("Error getting initial scores for display", e);
       }
-    } catch (final EOFException e) {
-      LOGGER.debug("Caught EOF  sending initial scores to client, dropping: {}", displayUuid, e);
-      removeClient(displayUuid);
-    } catch (final IOException e) {
-      LOGGER.error("Got error sending initial scores to client, dropping: {}", displayUuid, e);
-      removeClient(displayUuid);
+
+    } catch (final SQLException e) {
+      throw new FLLRuntimeException("Error getting initial scores for display", e);
     }
 
   }
@@ -197,19 +191,8 @@ public final class ScoreboardUpdates {
         final String msg = Utilities.createJsonMapper().writeValueAsString(message);
         final Set<String> toRemove = new HashSet<>();
         for (final Map.Entry<String, Session> entry : ALL_CLIENTS.entrySet()) {
-          try {
-            final Session client = entry.getValue();
-            synchronized (client) {
-              client.getBasicRemote().sendText(msg);
-            }
-          } catch (final EOFException e) {
-            LOGGER.debug("Caught EOF writing to client, dropping: {}", entry.getKey(), e);
-            toRemove.add(entry.getKey());
-          } catch (final IOException e) {
-            LOGGER.warn("Got error writing to client, dropping: {}", entry.getKey(), e);
-            toRemove.add(entry.getKey());
-          } catch (final IllegalStateException e) {
-            LOGGER.warn("Illegal state exception writing to client, dropping: {}", entry.getKey(), e);
+          final Session client = entry.getValue();
+          if (!WebUtils.sendWebsocketTextMessage(client, msg)) {
             toRemove.add(entry.getKey());
           }
         }
@@ -237,19 +220,8 @@ public final class ScoreboardUpdates {
       final Set<String> toRemove = new HashSet<>();
       for (final Map.Entry<String, Session> entry : ALL_CLIENTS.entrySet()) {
         THREAD_POOL.execute(() -> {
-          try {
-            final Session client = entry.getValue();
-            synchronized (client) {
-              client.getBasicRemote().sendText(msg);
-            }
-          } catch (final EOFException e) {
-            LOGGER.debug("Caught EOF writing to client, dropping: {}", entry.getKey(), e);
-            toRemove.add(entry.getKey());
-          } catch (final IOException e) {
-            LOGGER.warn("Got error writing to client, dropping: {}", entry.getKey(), e);
-            toRemove.add(entry.getKey());
-          } catch (final IllegalStateException e) {
-            LOGGER.warn("Illegal state exception writing to client, dropping: {}", entry.getKey(), e);
+          final Session client = entry.getValue();
+          if (!WebUtils.sendWebsocketTextMessage(client, msg)) {
             toRemove.add(entry.getKey());
           }
         });
@@ -311,13 +283,12 @@ public final class ScoreboardUpdates {
           final Set<String> toRemove = new HashSet<>();
           for (final Map.Entry<String, Session> entry : ALL_CLIENTS.entrySet()) {
             try {
-              newScore(numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay, allAwardGroups, entry.getKey(),
-                       entry.getValue(), update.getTeam(), update.getRunNumber(), updateStr);
-            } catch (final EOFException e) {
-              LOGGER.debug("Caught EOF writing to client, dropping: {}", entry.getKey(), e);
-              toRemove.add(entry.getKey());
-            } catch (final IOException | UnknownDisplayException e) {
-              LOGGER.warn("Got error writing to client, dropping: {}", entry.getKey(), e);
+              if (!newScore(numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay, allAwardGroups, entry.getKey(),
+                            entry.getValue(), update.getTeam(), update.getRunNumber(), updateStr)) {
+                toRemove.add(entry.getKey());
+              }
+            } catch (final UnknownDisplayException e) {
+              LOGGER.warn("Display {} is unknown", entry.getKey(), e);
               toRemove.add(entry.getKey());
             }
           }
@@ -336,42 +307,41 @@ public final class ScoreboardUpdates {
     });
   }
 
-  private static void newScore(final int numSeedingRounds,
-                               final boolean runningHeadToHead,
-                               final int maxRunNumberToDisplay,
-                               final List<String> allAwardGroups,
-                               final String displayUuid,
-                               final Session client,
-                               final TournamentTeam team,
-                               final int runNumber,
-                               final String data)
-      throws IOException, SQLException, UnknownDisplayException {
+  private static boolean newScore(final int numSeedingRounds,
+                                  final boolean runningHeadToHead,
+                                  final int maxRunNumberToDisplay,
+                                  final List<String> allAwardGroups,
+                                  final String displayUuid,
+                                  final Session client,
+                                  final TournamentTeam team,
+                                  final int runNumber,
+                                  final String data)
+      throws UnknownDisplayException {
     final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
     final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
 
-    newScore(client, awardGroupsToDisplay, numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay, team, runNumber,
-             data);
+    return newScore(client, awardGroupsToDisplay, numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay, team,
+                    runNumber, data);
   }
 
-  private static void newScore(final Session client,
-                               final Collection<String> awardGroupsToDisplay,
-                               final int numSeedingRounds,
-                               final boolean runningHeadToHead,
-                               final int maxRunNumberToDisplay,
-                               final TournamentTeam team,
-                               final int runNumber,
-                               final String data)
-      throws IOException {
+  /**
+   * @return false on an error sending data
+   */
+  private static boolean newScore(final Session client,
+                                  final Collection<String> awardGroupsToDisplay,
+                                  final int numSeedingRounds,
+                                  final boolean runningHeadToHead,
+                                  final int maxRunNumberToDisplay,
+                                  final TournamentTeam team,
+                                  final int runNumber,
+                                  final String data) {
     if (runNumber <= maxRunNumberToDisplay
         && awardGroupsToDisplay.contains(team.getAwardGroup())
         && (!runningHeadToHead
             || runNumber <= numSeedingRounds)) {
-      if (!client.isOpen()) {
-        throw new IOException("Client has closed the connection");
-      }
-      synchronized (client) {
-        client.getBasicRemote().sendText(data);
-      }
+      return WebUtils.sendWebsocketTextMessage(client, data);
+    } else {
+      return true;
     }
   }
 

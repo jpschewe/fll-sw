@@ -1,3 +1,4 @@
+* More consistent handling of websocket errors
 * Synchronize sending of messages to web sockets
 * Clear redirect URL on logout
 * Only store Judges final scores flag when final, don't allow it to be unset

@@ -40,6 +40,7 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.GetHttpSessionConfigurator;
+import fll.web.WebUtils;
 import fll.web.display.DisplayHandler;
 import fll.web.display.DisplayInfo;
 import fll.web.display.UnknownDisplayException;
@@ -124,14 +125,13 @@ public class H2HUpdateWebSocket {
         h2hUuid = displayUuid;
         try {
           final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
-          updateDisplayedBracket(displayInfo, session);
+          if (!updateDisplayedBracket(displayInfo, session)) {
+            removeH2HDisplay(h2hUuid);
+            DisplayHandler.removeDisplay(displayUuid);
+            return h2hUuid;
+          }
         } catch (final UnknownDisplayException e) {
           LOGGER.warn("Cannot find display {}, dropping from head to head", displayUuid);
-          removeH2HDisplay(h2hUuid);
-        } catch (final EOFException e) {
-          LOGGER.debug("Socket closed writing to new session, dropping display {}", displayUuid, e);
-        } catch (final IOException e) {
-          LOGGER.warn("Got error writing to new session, dropping display {}", displayUuid, e);
           removeH2HDisplay(h2hUuid);
           DisplayHandler.removeDisplay(displayUuid);
           return h2hUuid;
@@ -160,17 +160,11 @@ public class H2HUpdateWebSocket {
 
           try {
             final String messageText = mapper.writeValueAsString(message);
-            if (session.isOpen()) {
-              synchronized (session) {
-                session.getBasicRemote().sendText(messageText);
-              }
-            } else {
-              throw new IOException("Session is closed");
+            if (!WebUtils.sendWebsocketTextMessage(session, messageText)) {
+              removeH2HDisplay(h2hUuid);
             }
           } catch (final JsonProcessingException e) {
             throw new FLLRuntimeException("Error converting bracket update to JSON", e);
-          } catch (final IOException e) {
-            removeH2HDisplay(h2hUuid);
           }
         } // foreach update
 
@@ -282,13 +276,7 @@ public class H2HUpdateWebSocket {
           final @Nullable Session session = ALL_SESSIONS.get(h2hUuid);
           if (null != session) {
             THREAD_POOL.execute(() -> {
-              try {
-                updateDisplayedBracket(resolved, session);
-              } catch (final EOFException e) {
-                LOGGER.debug("Received EOF writing to {}, dropping", h2hUuid, e);
-                removeH2HDisplay(h2hUuid);
-              } catch (final IOException e) {
-                LOGGER.warn("Error writing to {}, dropping", h2hUuid, e);
+              if (!updateDisplayedBracket(resolved, session)) {
                 removeH2HDisplay(h2hUuid);
               }
             });
@@ -306,48 +294,33 @@ public class H2HUpdateWebSocket {
 
   /**
    * Notify a head to head display what brackets it should be displaying.
+   * 
+   * @return false if there was an error sending
    */
-  private static void updateDisplayedBracket(final DisplayInfo displayInfo,
-                                             final Session session)
-      throws IOException {
+  private static boolean updateDisplayedBracket(final DisplayInfo displayInfo,
+                                                final Session session) {
 
-    if (session.isOpen()) {
-      try {
-        final List<BracketInfo> allBracketInfo = new LinkedList<>();
+    final List<BracketInfo> allBracketInfo = new LinkedList<>();
 
-        for (final DisplayInfo.H2HBracketDisplay h2hBracket : displayInfo.getBrackets()) {
-          final BracketInfo bracketInfo = new BracketInfo(h2hBracket.getBracket(), h2hBracket.getFirstRound(),
-                                                          h2hBracket.getFirstRound()
-                                                              + RemoteControlBrackets.NUM_ROUNDS_TO_DISPLAY
-                                                              - 1);
+    for (final DisplayInfo.H2HBracketDisplay h2hBracket : displayInfo.getBrackets()) {
+      final BracketInfo bracketInfo = new BracketInfo(h2hBracket.getBracket(), h2hBracket.getFirstRound(),
+                                                      h2hBracket.getFirstRound()
+                                                          + RemoteControlBrackets.NUM_ROUNDS_TO_DISPLAY
+                                                          - 1);
 
-          allBracketInfo.add(bracketInfo);
-        } // foreach h2h bracket
+      allBracketInfo.add(bracketInfo);
+    } // foreach h2h bracket
 
-        final DisplayUpdateMessage message = new DisplayUpdateMessage(allBracketInfo);
+    final DisplayUpdateMessage message = new DisplayUpdateMessage(allBracketInfo);
 
-        // expose all bracketInfo to the javascript
-        final ObjectMapper jsonMapper = Utilities.createJsonMapper();
-        try {
-          final String allBracketInfoJson = jsonMapper.writeValueAsString(message);
+    // expose all bracketInfo to the javascript
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
+    try {
+      final String allBracketInfoJson = jsonMapper.writeValueAsString(message);
 
-          synchronized (session) {
-            session.getBasicRemote().sendText(allBracketInfoJson);
-          }
-        } catch (final JsonProcessingException e) {
-          throw new FLLInternalException("Error writing JSON for allBracketInfo", e);
-        }
-
-      } catch (final IllegalStateException e) {
-        throw new IOException("Got an illegal state exception, likely from an invalid HttpSession object, skipping update of session: "
-            + session.getId()
-            + " websocket session: "
-            + session.getId()
-            + " open: "
-            + session.isOpen(), e);
-      }
-    } else {
-      throw new IOException("Session is closed");
+      return WebUtils.sendWebsocketTextMessage(session, allBracketInfoJson);
+    } catch (final JsonProcessingException e) {
+      throw new FLLInternalException("Error writing JSON for allBracketInfo", e);
     }
   }
 
@@ -411,22 +384,7 @@ public class H2HUpdateWebSocket {
           continue;
         }
 
-        if (session.isOpen()) {
-          try {
-            synchronized (session) {
-              session.getBasicRemote().sendText(messageText);
-            }
-          } catch (final EOFException e) {
-            LOGGER.debug("Caught EOF sending message to {}, dropping session", session.getId(), e);
-            toRemove.add(uuid);
-          } catch (final IOException ioe) {
-            LOGGER.error("Got error sending message to session ({}), dropping session", session.getId(), ioe);
-            toRemove.add(uuid);
-          } catch (final IllegalStateException e) {
-            LOGGER.warn("Illegal state exception writing to client, dropping: {}", session.getId(), e);
-            toRemove.add(uuid);
-          }
-        } else {
+        if (!WebUtils.sendWebsocketTextMessage(session, messageText)) {
           toRemove.add(uuid);
         }
       } // foreach session

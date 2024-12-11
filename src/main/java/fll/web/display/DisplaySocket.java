@@ -10,9 +10,11 @@ import java.io.IOException;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
+import fll.web.WebUtils;
 import jakarta.websocket.Session;
 
 /**
@@ -44,18 +46,17 @@ public class DisplaySocket {
    * Send a message as JSON.
    * 
    * @param message the message to send
-   * @throws IOException when there is an error sending or ending as JSON
+   * @return true if the message was sent, false if not.
+   * @throws JsonProcessingException if the message cannot be written as JSON
    */
-  public void sendMessage(final Message message) throws IOException {
+  public boolean sendMessage(final Message message) throws JsonProcessingException {
     if (null != session) {
-      if (!session.isOpen()) {
-        throw new IOException("Session is closed");
-      } else {
-        final String msg = jsonWriter.writeValueAsString(message);
-        synchronized (session) {
-          session.getBasicRemote().sendText(msg);
-        }
-      }
+      final String msg = jsonWriter.writeValueAsString(message);
+
+      return WebUtils.sendWebsocketTextMessage(session, msg);
+    } else {
+      // no session, consider this a successful send
+      return true;
     }
   }
 

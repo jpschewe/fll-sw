@@ -6,6 +6,7 @@
 
 package fll.web;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -31,6 +32,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.websocket.Session;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
@@ -487,5 +489,36 @@ public final class WebUtils {
     final List<String> logoFiles = Utilities.getGraphicFiles(new File(imagePath));
 
     return logoFiles;
+  }
+
+  /**
+   * Send a text message to a client over the specified websocket.
+   * In most cases the websocket should be discarded if false is returned.
+   * 
+   * @param session the websocket
+   * @param messageText the message to send
+   * @return true if the message was sent, false if not.
+   */
+  public static boolean sendWebsocketTextMessage(final Session session,
+                                                 final String messageText) {
+    if (session.isOpen()) {
+      try {
+        synchronized (session) {
+          session.getBasicRemote().sendText(messageText);
+        }
+        return true;
+      } catch (final EOFException e) {
+        LOGGER.debug("Caught EOF sending message to {}, dropping session", session.getId(), e);
+        return false;
+      } catch (final IOException ioe) {
+        LOGGER.error("Got error sending message to session ({}), dropping session", session.getId(), ioe);
+        return false;
+      } catch (final IllegalStateException e) {
+        LOGGER.warn("Illegal state exception writing to client, dropping: {}", session.getId(), e);
+        return false;
+      }
+    } else {
+      return false;
+    }
   }
 }
