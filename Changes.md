@@ -1,3 +1,5 @@
+Release 19.1.0
+==============
 * More consistent handling of websocket errors
 * Synchronize sending of messages to web sockets
 * Clear redirect URL on logout
