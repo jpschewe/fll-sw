@@ -1,3 +1,4 @@
+* #1214 fix error merging databases when deleting teams
 * More consistent handling of websocket errors
 * Synchronize sending of messages to web sockets
 * Clear redirect URL on logout

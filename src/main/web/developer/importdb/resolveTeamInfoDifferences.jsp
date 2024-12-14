@@ -25,12 +25,15 @@
                 ${difference.teamNumber} differs
                 <br />
                 <input type='radio' name='${loopStatus.index}'
-                    value='source' checked />
-                Use source value of '${difference.sourceValue}'
+                    id='${loopStatus.index}_source' value='source'
+                    checked />
+                <label for='${loopStatus.index}_source'> Use
+                    source value of '${difference.sourceValue}'</label>
                 <br />
                 <input type='radio' name='${loopStatus.index}'
-                    value='dest' />
-                Use dest value of '${difference.destValue}'
+                    id='${loopStatus.index}_dest' value='dest' />
+                <label for='${loopStatus.index}_dest'> Use dest
+                    value of '${difference.destValue}'</label>
                 <br />
             </p>
         </c:forEach>

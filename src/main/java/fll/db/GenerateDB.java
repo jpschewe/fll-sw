@@ -884,7 +884,7 @@ public final class GenerateDB {
       if (createConstraints) {
         sql.append(" ,CONSTRAINT schedule_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
         sql.append(" ,CONSTRAINT schedule_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
-        sql.append(" ,CONSTRAINT schedule_fk3 FOREIGN KEY(tournament, team_number) REFERENCES TournamentTeams(tournament, TeamNumber)");
+        sql.append(" ,CONSTRAINT schedule_fk3 FOREIGN KEY(tournament, team_number) REFERENCES TournamentTeams(tournament, TeamNumber) ON DELETE CASCADE");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
@@ -899,7 +899,7 @@ public final class GenerateDB {
       perfRoundsSql.append(" ,practice BOOLEAN NOT NULL");
       perfRoundsSql.append(" ,CONSTRAINT sched_perf_rounds_pk PRIMARY KEY (tournament, team_number, perf_time)");
       if (createConstraints) {
-        perfRoundsSql.append(" ,CONSTRAINT sched_perf_rounds_fk1 FOREIGN KEY(tournament, team_number) REFERENCES schedule(tournament, team_number)");
+        perfRoundsSql.append(" ,CONSTRAINT sched_perf_rounds_fk1 FOREIGN KEY(tournament, team_number) REFERENCES schedule(tournament, team_number) ON DELETE CASCADE");
       }
       perfRoundsSql.append(")");
       stmt.executeUpdate(perfRoundsSql.toString());
@@ -912,7 +912,7 @@ public final class GenerateDB {
       subjectiveSql.append(" ,subj_time TIME NOT NULL");
       subjectiveSql.append(" ,CONSTRAINT sched_subjective_pk PRIMARY KEY (tournament, team_number, name)");
       if (createConstraints) {
-        subjectiveSql.append(" ,CONSTRAINT sched_subjective_fk1 FOREIGN KEY(tournament, team_number) REFERENCES schedule(tournament, team_number)");
+        subjectiveSql.append(" ,CONSTRAINT sched_subjective_fk1 FOREIGN KEY(tournament, team_number) REFERENCES schedule(tournament, team_number) ON DELETE CASCADE");
       }
       subjectiveSql.append(")");
       stmt.executeUpdate(subjectiveSql.toString());
