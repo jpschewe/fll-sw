@@ -168,3 +168,8 @@ footer button {
 #enter-score_score-table .odd {
     background-color: lightgrey;
 }
+
+#enter-score-note-button {
+    background-color: purple;
+    color: white;    
+}
