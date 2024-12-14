@@ -1,3 +1,4 @@
+* Make judge comment dialog height dependent on screen size 
 * More consistent handling of websocket errors
 * Synchronize sending of messages to web sockets
 * Clear redirect URL on logout
