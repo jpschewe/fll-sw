@@ -86,9 +86,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         can be published on the web or used for the awards ceremony.</a>
 
     <a class="wide" target="_report"
-        href="<c:url value='/report/awards/AwardsScriptReport'/>" />Awards
-    Script PDF
-    </a>
+        href="<c:url value='/report/awards/AwardsScriptReport'/>">Awards
+        Script PDF </a>
 
 
     <h2>Finalist scheduling</h2>
