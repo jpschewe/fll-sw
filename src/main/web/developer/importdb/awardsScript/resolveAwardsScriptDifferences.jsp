@@ -31,9 +31,13 @@ ResolveAwardsScriptDifferences.populateContext(pageContext);
             <p>${difference.description}</p>
             <c:forEach items="${awardsScriptDifferenceActionValues}"
                 var="differenceAction">
-                <input type='radio' name='difference_${loopStatus.index}'
+                <input type='radio'
+                    name='difference_${loopStatus.index}'
+                    id='difference_${loopStatus.index}_${differenceAction.name}'
                     value='${differenceAction.name}' required />
-                ${differenceAction.description}
+                <label
+                    for='difference_${loopStatus.index}_${differenceAction.name}'>
+                    ${differenceAction.description}</label>
                 <br />
             </c:forEach>
             <hr />
