@@ -732,7 +732,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           row2.appendChild(teamNameCol);
           FOPUtils.addBottomBorder(teamNameCol, row2BorderWidth, row2BorderColor);
 
-          /// judging group is empty in the second row
+          // judging group is empty in the second row
           final Element blankCell = FOPUtils.createTableCell(document, null, "");
           row2.appendChild(blankCell);
           FOPUtils.addBottomBorder(blankCell, row2BorderWidth, row2BorderColor);
