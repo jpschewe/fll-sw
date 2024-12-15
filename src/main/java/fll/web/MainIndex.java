@@ -9,13 +9,13 @@ package fll.web;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import fll.Tournament;
 import fll.db.Queries;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Code for /index.jsp.
@@ -31,7 +31,6 @@ public final class MainIndex {
    * pageContext:
    * <ul>
    * <li>tournament - current {@link Tournament} object</li>
-   * <li>urls - URLs to access the server - collection of string</li>
    * </ul>
    *
    * @param request the request object
@@ -50,7 +49,6 @@ public final class MainIndex {
       final Tournament tournament = Tournament.findTournamentByID(connection, tournamentId);
       pageContext.setAttribute("tournament", tournament);
 
-      pageContext.setAttribute("urls", WebUtils.getAllUrls(request, application));
     } catch (final SQLException sqle) {
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);

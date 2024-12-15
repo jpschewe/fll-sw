@@ -57,17 +57,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
             [${tournament.name}]</b>
     </p>
 
-    <h2>Server addresses</h2>
-    <p>These are the addresses that can be used on the judges
-        electronic devices to connect to this server.</p>
-    <ul>
-        <c:forEach items="${urls}" var="url">
-            <li>
-                <a href="${url }">${url }</a>
-            </li>
-        </c:forEach>
-    </ul>
-
     <h2>Tournament steps</h2>
     <ol>
 
@@ -132,8 +121,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
                 <li>Open Chrome (or other browser if Chrome is not
                     installed)</li>
                 <li>Put server address in the address bar and hit
-                    enter. This address is provided under the section
-                    Server Addresses on the Scoring Coordinator page.</li>
+                    enter.</li>
                 <li>Enter the username and password specified above
                     when running database setup.</li>
             </ol>
@@ -146,8 +134,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
                 <li>Open Chrome (or other browser if Chrome is not
                     installed)</li>
                 <li>Put server address in the address bar and hit
-                    enter. This address is provided under the section
-                    Server Addresses on the Scoring Coordinator page.</li>
+                    enter.</li>
                 <li>If you have more than one display, then name
                     the display computer. It is useful to use "Left" and
                     "Right" or "Lakes" and "Woods" depending on how you

@@ -14,25 +14,14 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
-import java.time.Duration;
-import java.time.LocalTime;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import jakarta.websocket.Session;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
@@ -40,6 +29,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fll.Utilities;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.websocket.Session;
 
 /**
  * Some utilities for dealing with the web.
@@ -96,86 +91,6 @@ public final class WebUtils {
     }
 
     response.sendRedirect(response.encodeRedirectURL(newURL));
-  }
-
-  /**
-   * The key to use with {@link ServletContext#getAttribute(String)} to find the
-   * list of hostnames.
-   * This is a collection of strings.
-   */
-  private static final String HOSTNAMES_KEY = "HOSTNAMES";
-
-  /**
-   * The key to use with {@link ServletContext#getAttribute(String)} to find when
-   * the hostname should expire.
-   * This is a {@link LocalTime} object.
-   */
-  private static final String HOSTNAMES_EXPIRATION_KEY = "HOSTNAMES_EXPIRATION";
-
-  /**
-   * How long to cache the hostnames.
-   */
-  private static final Duration HOSTNAME_LIFETIME = Duration.ofMinutes(5);
-
-  /**
-   * Compute the host names and store them in the application. This is done in the
-   * background to avoid issues with DNS timeouts.
-   *
-   * @param application where to store the hostnames
-   * @see #HOSTNAMES_KEY
-   * @see #HOSTNAMES_EXPIRATION_KEY
-   * @see #HOSTNAME_LIFETIME
-   */
-  public static void updateHostNamesInBackground(final ServletContext application) {
-    ForkJoinPool.commonPool().execute(() -> {
-      final Collection<String> urls = WebUtils.getAllHostNames();
-      application.setAttribute(HOSTNAMES_KEY, urls);
-      final LocalTime expire = LocalTime.now().plus(HOSTNAME_LIFETIME);
-      application.setAttribute(HOSTNAMES_EXPIRATION_KEY, expire);
-    });
-  }
-
-  /**
-   * Call {@link #updateHostNamesInBackground(ServletContext)} if the hostnames
-   * have expired or have not been set.
-   * 
-   * @param application application variable store
-   */
-  public static void scheduleHostnameUpdateIfNeeded(final ServletContext application) {
-    final LocalTime expiration = ApplicationAttributes.getAttribute(application, HOSTNAMES_EXPIRATION_KEY,
-                                                                    LocalTime.class);
-    if (null == expiration
-        || LocalTime.now().isAfter(expiration)) {
-      updateHostNamesInBackground(application);
-    }
-  }
-
-  /**
-   * Get all URLs that this host can be access via. The scheme of the URLs is
-   * determined by the scheme of the request.
-   *
-   * @param request the request
-   * @param application where to get the stored hostnames and optionally update
-   *          the hostnames
-   * @return the urls for this host
-   */
-  public static Collection<String> getAllUrls(final HttpServletRequest request,
-                                              final ServletContext application) {
-    scheduleHostnameUpdateIfNeeded(application);
-
-    @SuppressWarnings("unchecked") // can't store generics in ServletContext
-    final Collection<String> hostNames = ApplicationAttributes.getAttribute(application, HOSTNAMES_KEY,
-                                                                            Collection.class);
-    if (null == hostNames) {
-      // no data yet
-      return Collections.emptyList();
-    }
-
-    final Collection<String> urls = hostNames.stream().map(hostName -> {
-      return String.format("%s://%s:%d%s", request.getScheme(), hostName, request.getLocalPort(),
-                           request.getContextPath());
-    }).collect(Collectors.toList());
-    return urls;
   }
 
   /**

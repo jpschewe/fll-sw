@@ -30,17 +30,6 @@ fll.web.JudgeIndex.populateContext(application, pageContext);
             ${currentTournament.dateString} [${currentTournament.name}]</b>
     </p>
 
-    <h2>Server addresses</h2>
-    <p>These are the addresses that can be used on the judges
-        electronic devices to connect to this server.</p>
-    <ul>
-        <c:forEach items="${urls}" var="url">
-            <li class="no-marker">
-                <a class="wide" href="${url }">${url }</a>
-            </li>
-        </c:forEach>
-    </ul>
-
     <a class="wide" target="_subjective"
         href="<c:url value='/subjective/Auth' />"
         onclick="return openMinimalBrowser(this)">Enter subjective

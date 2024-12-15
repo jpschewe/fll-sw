@@ -33,17 +33,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
             [${tournament.name}]</b>
     </p>
 
-    <h2>Server addresses</h2>
-    <p>These are the addresses that can be used on the judges
-        electronic devices to connect to this server.</p>
-    <ul>
-        <c:forEach items="${urls}" var="url">
-            <li class="no-marker">
-                <a class="wide" href="${url }">${url }</a>
-            </li>
-        </c:forEach>
-    </ul>
-
 
     <h2>Tournament steps</h2>
     <a class="wide" target="_subjective"
