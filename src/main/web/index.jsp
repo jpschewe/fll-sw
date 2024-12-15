@@ -84,15 +84,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         </c:forEach>
     </c:if>
 
-    <c:if test="${authentication.admin}">
-        <h2>Server addresses</h2>
-        <p>These are needed for any computer connecting to the
-            software.</p>
-        <c:forEach items="${urls}" var="url">
-            <a class="wide" href="${url }">${url }</a>
-        </c:forEach>
-    </c:if>
-
     <h2>Other useful pages</h2>
 
     <a class="wide" href='scoreboard/index.jsp'>Score board</a>

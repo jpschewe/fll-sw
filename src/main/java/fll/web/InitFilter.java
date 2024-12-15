@@ -12,17 +12,6 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.annotation.WebFilter;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
@@ -34,6 +23,17 @@ import fll.db.GlobalParameters;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.xml.ChallengeDescription;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Initialize web attributes.
@@ -178,9 +178,6 @@ public class InitFilter implements Filter {
                                     final ServletContext application)
       throws IOException, RuntimeException {
     LOGGER.trace("Top of initialize");
-
-    // make sure hostname updates happen right away
-    WebUtils.scheduleHostnameUpdateIfNeeded(application);
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
