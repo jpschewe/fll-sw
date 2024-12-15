@@ -129,6 +129,7 @@ table.spacer img {
 #top_scores {
     top: 0;
     height: 40%;
+    overflow: hidden;
 }
 
 #most_recent_table,
