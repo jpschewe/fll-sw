@@ -139,10 +139,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * Used to specify the order of the report.
    */
   public enum SortOrder {
+    /** Sort the report by weighted rank. */
+    WEIGHTED_RANK,
     /** Sort the report by overall score. */
     OVERALL_SCORE,
-    /** Sort the report by weighted rank. */
-    WEIGHTED_RANK
   }
 
   /**
