@@ -697,6 +697,197 @@ public final class FinalComputedScores extends BaseFLLServlet {
     final PerformanceScoreCategory performanceCategory = description.getPerformance();
     final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
 
+    final List<TeamScoreData> reportData = gatherReportData(connection, awardOrder, description, groupName, selector,
+                                                            winnerCriteria, tournament, performanceCategory);
+
+    switch (sortOrder) {
+    case WEIGHTED_RANK:
+      Collections.sort(reportData, RANK_COMPARATOR);
+      break;
+    case OVERALL_SCORE:
+      Collections.sort(reportData, OVERALL_COMPARATOR);
+      break;
+    default:
+      LOGGER.warn("Got unknown sort for final computed scores report, falling back to overall score: {}", sortOrder);
+      Collections.sort(reportData, OVERALL_COMPARATOR);
+      break;
+    }
+
+    // write the report
+    for (final TeamScoreData teamScoreData : reportData) {
+      if (teamScoreData.subjectiveRawScoreData().size() != teamScoreData.subjectiveScaledScoreData().size()) {
+        throw new FLLInternalException(String.format("raw and scaled score data lists have different lengths: %d != %d",
+                                                     teamScoreData.subjectiveRawScoreData().size(),
+                                                     teamScoreData.subjectiveScaledScoreData().size()));
+      }
+
+      final int teamNumber = teamScoreData.teamNumber();
+      final String organization = teamScoreData.organization();
+      final String teamName = teamScoreData.teamName();
+      final String judgingGroup = teamScoreData.judgingGroup();
+
+      final double overallScore = teamScoreData.overallScore();
+
+      final Element row1 = FOPUtils.createTableRow(document);
+      tableBody.appendChild(row1);
+      row1.setAttribute("keep-with-next", "always");
+
+      // The first row of the team table...
+      // First column is organization name
+      row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, organization));
+
+      row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, judgingGroup));
+
+      row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Raw:"));
+
+      final List<ScoreData> rawSubjScoreData = teamScoreData.subjectiveRawScoreData();
+      for (final ScoreData sd : rawSubjScoreData) {
+        final Element subjCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, sd.scoreText());
+        if (sd.missing()) {
+          subjCell.setAttribute("color", "red");
+        }
+        row1.appendChild(subjCell);
+      }
+
+      final ScoreData perfRawScoreData = teamScoreData.performanceRawScoreData();
+      final Element cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, perfRawScoreData.scoreText());
+      row1.appendChild(cell);
+      if (perfRawScoreData.missing()) {
+        cell.setAttribute("color", "red");
+      }
+
+      // The "Overall score" column is not filled in for raw scores
+      row1.appendChild(FOPUtils.createTableCell(document, null, ""));
+
+      // The second row of the team table...
+      final Element row2 = FOPUtils.createTableRow(document);
+      tableBody.appendChild(row2);
+
+      // First column contains the team # and name
+      final String row2BorderColor = "gray";
+      final double row2BorderWidth = 0.5;
+
+      final Element teamNameCol = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                           String.format("%d %s", teamNumber, teamName));
+      row2.appendChild(teamNameCol);
+      FOPUtils.addBottomBorder(teamNameCol, row2BorderWidth, row2BorderColor);
+
+      // judging group is empty in the second row
+      final Element blankCell = FOPUtils.createTableCell(document, null, "");
+      row2.appendChild(blankCell);
+      FOPUtils.addBottomBorder(blankCell, row2BorderWidth, row2BorderColor);
+
+      // "Scaled:"
+      final Element scaledCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Scaled:");
+      row2.appendChild(scaledCell);
+      FOPUtils.addBottomBorder(scaledCell, row2BorderWidth, row2BorderColor);
+
+      // scaled subjective scores
+      for (final ScoreData subjScaledData : teamScoreData.subjectiveScaledScoreData()) {
+        final AwardCategory awardCategory = subjScaledData.category();
+        switch (awardCategory) {
+        case SubjectiveScoreCategory category -> {
+          final double catWeight = category.getWeight();
+          if (catWeight > 0.0) {
+
+            final Element subjCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                              subjScaledData.scoreText());
+            row2.appendChild(subjCell);
+            if (1 == subjScaledData.rank()) {
+              subjCell.setAttribute("font-weight", "bold");
+              subjCell.setAttribute("background-color", FOPUtils.renderColor(TOP_SCORE_BACKGROUND));
+            }
+            FOPUtils.addBottomBorder(subjCell, row2BorderWidth, row2BorderColor);
+            if (subjScaledData.missing()) {
+              subjCell.setAttribute("color", "red");
+            }
+          } // non-zero category weight
+        }
+        case VirtualSubjectiveScoreCategory category -> {
+          final double catWeight = category.getWeight();
+          if (catWeight > 0.0) {
+            final Element subjCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                              subjScaledData.scoreText());
+            row2.appendChild(subjCell);
+            if (1 == subjScaledData.rank()) {
+              subjCell.setAttribute("font-weight", "bold");
+              subjCell.setAttribute("background-color", FOPUtils.renderColor(TOP_SCORE_BACKGROUND));
+            }
+            FOPUtils.addBottomBorder(subjCell, row2BorderWidth, row2BorderColor);
+            if (subjScaledData.missing()) {
+              subjCell.setAttribute("color", "red");
+            }
+
+          } // non-zero category weight
+        }
+        default -> {
+          LOGGER.debug("Skipping category of type {}", awardCategory.getClass());
+        }
+        }
+      }
+
+      // 2nd to last column has the scaled performance score
+      final ScoreData perfData = teamScoreData.performanceScaledScoreData();
+      final int perfRank = perfData.rank();
+
+      final Element perfCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, perfData.scoreText());
+      row2.appendChild(perfCell);
+      if (1 == perfRank) {
+        perfCell.setAttribute("font-weight", "bold");
+        perfCell.setAttribute("background-color", FOPUtils.renderColor(TOP_SCORE_BACKGROUND));
+      }
+      FOPUtils.addBottomBorder(perfCell, row2BorderWidth, row2BorderColor);
+      if (perfData.missing()) {
+        perfCell.setAttribute("color", "red");
+      }
+
+      // insert weighted rank
+      final double weightedRank = teamScoreData.weightedRank();
+      final Element weightedRankCell;
+      if (Double.isNaN(weightedRank)) {
+        weightedRankCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Missing Score");
+        weightedRankCell.setAttribute("color", "red");
+      } else {
+        weightedRankCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                    Utilities.getFloatingPointNumberFormat().format(weightedRank));
+      }
+      row2.appendChild(weightedRankCell);
+      FOPUtils.addBottomBorder(weightedRankCell, row2BorderWidth, row2BorderColor);
+
+      // Last column contains the overall scaled score
+      final Element overallCell;
+      if (Double.isNaN(overallScore)) {
+        overallCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "No Score");
+        overallCell.setAttribute("color", "red");
+      } else {
+        final String overallScoreSuffix;
+        if (bestTeams.contains(teamNumber)) {
+          overallScoreSuffix = String.format("%1$s*", Utilities.NON_BREAKING_SPACE);
+        } else {
+          overallScoreSuffix = String.format("%1$s%1$s", Utilities.NON_BREAKING_SPACE);
+        }
+
+        overallCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                               Utilities.getFloatingPointNumberFormat().format(overallScore)
+                                                   + overallScoreSuffix);
+      }
+      row2.appendChild(overallCell);
+      FOPUtils.addBottomBorder(overallCell, row2BorderWidth, row2BorderColor);
+
+    }
+
+    return tableBody;
+  }
+
+  private List<TeamScoreData> gatherReportData(final Connection connection,
+                                               final List<AwardCategory> awardOrder,
+                                               final ChallengeDescription description,
+                                               final String groupName,
+                                               final ReportSelector selector,
+                                               final WinnerType winnerCriteria,
+                                               final Tournament tournament,
+                                               final PerformanceScoreCategory performanceCategory)
+      throws SQLException {
     final Map<AwardCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> teamSubjectiveRanks = gatherRankedSubjectiveTeams(connection,
                                                                                                                                           description,
                                                                                                                                           tournament);
@@ -706,6 +897,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                                                                            tournament,
                                                                                                            groupName,
                                                                                                            selector);
+
+    final List<TeamScoreData> reportData = new LinkedList<>();
 
     try (
         PreparedStatement overallPrep = connection.prepareStatement("SELECT Teams.Organization, Teams.TeamName, Teams.TeamNumber, overall_score, TournamentTeams.judging_station" //
@@ -723,7 +916,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
       overallPrep.setString(2, groupName);
 
       // compute data
-      final List<TeamScoreData> reportData = new LinkedList<>();
       try (ResultSet overallResult = overallPrep.executeQuery()) {
         while (overallResult.next()) {
           final int teamNumber = overallResult.getInt(3);
@@ -815,7 +1007,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
             }
           }
 
-          // 2nd to last column has the scaled performance score
           final ScoreData perfScaledData = computeCategoryScaledScore(performanceCategory, teamNumber,
                                                                       teamPerformanceRanks);
           final int perfRank = perfScaledData.rank();
@@ -845,209 +1036,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                                 weightedRank);
           reportData.add(teamScoreData);
         } // foreach score result
-
-        switch (sortOrder) {
-        case WEIGHTED_RANK:
-          Collections.sort(reportData, RANK_COMPARATOR);
-          break;
-        case OVERALL_SCORE:
-          Collections.sort(reportData, OVERALL_COMPARATOR);
-          break;
-        default:
-          LOGGER.warn("Got unknown sort for final computed scores report, falling back to overall score: {}",
-                      sortOrder);
-          Collections.sort(reportData, OVERALL_COMPARATOR);
-          break;
-        }
-
-        // write the report
-        for (final TeamScoreData teamScoreData : reportData) {
-          if (teamScoreData.subjectiveRawScoreData().size() != teamScoreData.subjectiveScaledScoreData().size()) {
-            throw new FLLInternalException(String.format("raw and scaled score data lists have different lengths: %d != %d",
-                                                         teamScoreData.subjectiveRawScoreData().size(),
-                                                         teamScoreData.subjectiveScaledScoreData().size()));
-          }
-
-          final int teamNumber = teamScoreData.teamNumber();
-          final String organization = teamScoreData.organization();
-          final String teamName = teamScoreData.teamName();
-          final String judgingGroup = teamScoreData.judgingGroup();
-
-          final double overallScore = teamScoreData.overallScore();
-
-          final Element row1 = FOPUtils.createTableRow(document);
-          tableBody.appendChild(row1);
-          row1.setAttribute("keep-with-next", "always");
-
-          // The first row of the team table...
-          // First column is organization name
-          row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, organization));
-
-          row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, judgingGroup));
-
-          row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Raw:"));
-
-          final List<ScoreData> rawSubjScoreData = teamScoreData.subjectiveRawScoreData();
-          for (final ScoreData sd : rawSubjScoreData) {
-            final Element subjCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, sd.scoreText());
-            if (sd.missing()) {
-              subjCell.setAttribute("color", "red");
-            }
-            row1.appendChild(subjCell);
-          }
-
-          final ScoreData perfRawScoreData = teamScoreData.performanceRawScoreData();
-          final Element cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                        perfRawScoreData.scoreText());
-          row1.appendChild(cell);
-          if (perfRawScoreData.missing()) {
-            cell.setAttribute("color", "red");
-          }
-
-          // The "Overall score" column is not filled in for raw scores
-          row1.appendChild(FOPUtils.createTableCell(document, null, ""));
-
-          // The second row of the team table...
-          final Element row2 = FOPUtils.createTableRow(document);
-          tableBody.appendChild(row2);
-
-          // First column contains the team # and name
-          final String row2BorderColor = "gray";
-          final double row2BorderWidth = 0.5;
-
-          final Element teamNameCol = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
-                                                               String.format("%d %s", teamNumber, teamName));
-          row2.appendChild(teamNameCol);
-          FOPUtils.addBottomBorder(teamNameCol, row2BorderWidth, row2BorderColor);
-
-          // judging group is empty in the second row
-          final Element blankCell = FOPUtils.createTableCell(document, null, "");
-          row2.appendChild(blankCell);
-          FOPUtils.addBottomBorder(blankCell, row2BorderWidth, row2BorderColor);
-
-          // "Scaled:"
-          final Element scaledCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Scaled:");
-          row2.appendChild(scaledCell);
-          FOPUtils.addBottomBorder(scaledCell, row2BorderWidth, row2BorderColor);
-
-          // scaled subjective scores
-          for (final ScoreData subjScaledData : teamScoreData.subjectiveScaledScoreData()) {
-            final AwardCategory awardCategory = subjScaledData.category();
-            switch (awardCategory) {
-            case SubjectiveScoreCategory category -> {
-              final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> catRanks = teamSubjectiveRanks.get(category);
-              if (null == catRanks) {
-                throw new FLLInternalException("team subjective rank data is not consistent with the subjective categories (catRanks). This suggests a bug in gatherRankedSubjectiveTeams.");
-              }
-
-              final Map<Integer, ImmutablePair<Integer, Double>> judgingRanks = catRanks.get(judgingGroup);
-              if (null == judgingRanks) {
-                throw new FLLInternalException("team subjective rank data is not consistent with the subjective categories (judgingRanks). This suggests a bug in gatherRankedSubjectiveTeams.");
-              }
-
-              final double catWeight = category.getWeight();
-              if (catWeight > 0.0) {
-
-                final Element subjCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                                  subjScaledData.scoreText());
-                row2.appendChild(subjCell);
-                if (1 == subjScaledData.rank()) {
-                  subjCell.setAttribute("font-weight", "bold");
-                  subjCell.setAttribute("background-color", FOPUtils.renderColor(TOP_SCORE_BACKGROUND));
-                }
-                FOPUtils.addBottomBorder(subjCell, row2BorderWidth, row2BorderColor);
-                if (subjScaledData.missing()) {
-                  subjCell.setAttribute("color", "red");
-                }
-              } // non-zero category weight
-            }
-            case VirtualSubjectiveScoreCategory category -> {
-              final Map<String, Map<Integer, ImmutablePair<Integer, Double>>> catRanks = teamSubjectiveRanks.get(category);
-              if (null == catRanks) {
-                throw new FLLInternalException("team subjective rank data is not consistent with the subjective categories (catRanks). This suggests a bug in gatherRankedSubjectiveTeams.");
-              }
-
-              final Map<Integer, ImmutablePair<Integer, Double>> judgingRanks = catRanks.get(judgingGroup);
-              if (null == judgingRanks) {
-                throw new FLLInternalException("team subjective rank data is not consistent with the subjective categories (judgingRanks). This suggests a bug in gatherRankedSubjectiveTeams.");
-              }
-
-              final double catWeight = category.getWeight();
-              if (catWeight > 0.0) {
-                final Element subjCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                                  subjScaledData.scoreText());
-                row2.appendChild(subjCell);
-                if (1 == subjScaledData.rank()) {
-                  subjCell.setAttribute("font-weight", "bold");
-                  subjCell.setAttribute("background-color", FOPUtils.renderColor(TOP_SCORE_BACKGROUND));
-                }
-                FOPUtils.addBottomBorder(subjCell, row2BorderWidth, row2BorderColor);
-                if (subjScaledData.missing()) {
-                  subjCell.setAttribute("color", "red");
-                }
-
-              } // non-zero category weight
-            }
-            default -> {
-              LOGGER.debug("Skipping category of type {}", awardCategory.getClass());
-            }
-            }
-          }
-
-          // 2nd to last column has the scaled performance score
-          final ScoreData perfData = teamScoreData.performanceScaledScoreData();
-          final int perfRank = perfData.rank();
-
-          final Element perfCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, perfData.scoreText());
-          row2.appendChild(perfCell);
-          if (1 == perfRank) {
-            perfCell.setAttribute("font-weight", "bold");
-            perfCell.setAttribute("background-color", FOPUtils.renderColor(TOP_SCORE_BACKGROUND));
-          }
-          FOPUtils.addBottomBorder(perfCell, row2BorderWidth, row2BorderColor);
-          if (perfData.missing()) {
-            perfCell.setAttribute("color", "red");
-          }
-
-          // insert weighted rank
-          final double weightedRank = teamScoreData.weightedRank();
-          final Element weightedRankCell;
-          if (Double.isNaN(weightedRank)) {
-            weightedRankCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Missing Score");
-            weightedRankCell.setAttribute("color", "red");
-          } else {
-            weightedRankCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                        Utilities.getFloatingPointNumberFormat().format(weightedRank));
-          }
-          row2.appendChild(weightedRankCell);
-          FOPUtils.addBottomBorder(weightedRankCell, row2BorderWidth, row2BorderColor);
-
-          // Last column contains the overall scaled score
-          final Element overallCell;
-          if (Double.isNaN(overallScore)) {
-            overallCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "No Score");
-            overallCell.setAttribute("color", "red");
-          } else {
-            final String overallScoreSuffix;
-            if (bestTeams.contains(teamNumber)) {
-              overallScoreSuffix = String.format("%1$s*", Utilities.NON_BREAKING_SPACE);
-            } else {
-              overallScoreSuffix = String.format("%1$s%1$s", Utilities.NON_BREAKING_SPACE);
-            }
-
-            overallCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                   Utilities.getFloatingPointNumberFormat().format(overallScore)
-                                                       + overallScoreSuffix);
-          }
-          row2.appendChild(overallCell);
-          FOPUtils.addBottomBorder(overallCell, row2BorderWidth, row2BorderColor);
-
-        }
-
       } // ResultSet
     } // PreparedStatement
-
-    return tableBody;
+    return reportData;
   }
 
   private ScoreData computeCategoryScaledScore(final AwardCategory category,
