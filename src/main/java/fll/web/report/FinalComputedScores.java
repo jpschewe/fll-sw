@@ -681,7 +681,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
     return retval;
   }
 
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
   private Element writeScores(final Connection connection,
                               final Document document,
                               final List<AwardCategory> awardOrder,
@@ -879,6 +878,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     return tableBody;
   }
 
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
   private List<TeamScoreData> gatherReportData(final Connection connection,
                                                final List<AwardCategory> awardOrder,
                                                final ChallengeDescription description,
