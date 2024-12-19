@@ -75,7 +75,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
             </select>
             <select name="sortOrder">
                 <c:forEach items="${sortOrders}" var="sortOrder">
-                    <option value="${sortOrder}">${sortOrder}</option>
+                    <option value="${sortOrder}">Sort by
+                        ${sortOrder}</option>
                 </c:forEach>
             </select>
             <input type="submit" value="Report by Award Group" />
