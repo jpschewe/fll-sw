@@ -1,3 +1,4 @@
+* Allow one to specify how final computed scores is sorted
 * Add regular match play vs. schedule to head judge links
 * Remove server links from judge page
 * Make judge comment dialog height dependent on screen size 
