@@ -202,6 +202,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     }
 
     final ReportSelector selector = ReportSelector.valueOf(WebUtils.getNonNullRequestParameter(request, "selector"));
+    final SortOrder sortOrder = SortOrder.valueOf(WebUtils.getNonNullRequestParameter(request, "sortOrder"));
     final String groupName = WebUtils.getNonNullRequestParameter(request, "groupName");
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -234,7 +235,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
       try {
         final Document document = generateReport(connection, challengeDescription, challengeTitle, tournament,
-                                                 bestTeams, percentageHurdle, groupName, selector);
+                                                 bestTeams, percentageHurdle, groupName, selector, sortOrder);
         final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
         FOPUtils.renderPdf(fopFactory, document, response.getOutputStream());
       } catch (FOPException | TransformerException e) {
@@ -321,7 +322,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                   final Set<Integer> bestTeams,
                                   final int percentageHurdle,
                                   final String groupName,
-                                  final ReportSelector selector)
+                                  final ReportSelector selector,
+                                  final SortOrder sortOrder)
       throws SQLException, IOException {
     if (tournament.getTournamentID() != Queries.getCurrentTournament(connection)) {
       throw new FLLRuntimeException("Cannot generate final score report for a tournament other than the current tournament");
@@ -362,7 +364,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
         final @Nullable Element pageSequence = createAwardGroupPageSequence(connection, document, awardOrder,
                                                                             challengeDescription, challengeTitle,
                                                                             winnerCriteria, tournament, pageMasterName,
-                                                                            legend, bestTeams, group, selector);
+                                                                            legend, bestTeams, group, selector,
+                                                                            sortOrder);
         if (null != pageSequence) {
           rootElement.appendChild(pageSequence);
         }
@@ -371,7 +374,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
       final @Nullable Element pageSequence = createAwardGroupPageSequence(connection, document, awardOrder,
                                                                           challengeDescription, challengeTitle,
                                                                           winnerCriteria, tournament, pageMasterName,
-                                                                          legend, bestTeams, groupName, selector);
+                                                                          legend, bestTeams, groupName, selector,
+                                                                          sortOrder);
       if (null != pageSequence) {
         rootElement.appendChild(pageSequence);
       }
@@ -391,7 +395,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                          final Element legend,
                                                          final Set<Integer> bestTeams,
                                                          final String groupName,
-                                                         final ReportSelector selector)
+                                                         final ReportSelector selector,
+                                                         final SortOrder sortOrder)
       throws SQLException {
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
 
@@ -431,9 +436,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
     final Element tableHeader = createTableHeader(document, challengeDescription, awardOrder);
     divTable.appendChild(tableHeader);
 
-    // FIXME get SortOrder
     final Element tableBody = writeScores(connection, document, awardOrder, challengeDescription, groupName, selector,
-                                          SortOrder.OVERALL_SCORE, winnerCriteria, tournament, bestTeams);
+                                          sortOrder, winnerCriteria, tournament, bestTeams);
     divTable.appendChild(tableBody);
 
     if (!tableBody.hasChildNodes()) {
