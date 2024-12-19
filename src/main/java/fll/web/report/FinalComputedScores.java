@@ -203,7 +203,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
         FOPUtils.renderPdf(fopFactory, document, response.getOutputStream());
       } catch (FOPException | TransformerException e) {
-        throw new FLLInternalException("Error creating the final scoresPDF", e);
+        throw new FLLInternalException("Error creating the final scores PDF", e);
       }
 
     } catch (final SQLException e) {
@@ -324,34 +324,39 @@ public final class FinalComputedScores extends BaseFLLServlet {
       }
 
       for (final String group : groups) {
-        final Element pageSequence = createAwardGroupPageSequence(connection, document, awardOrder,
-                                                                  challengeDescription, challengeTitle, winnerCriteria,
-                                                                  tournament, pageMasterName, legend, bestTeams, group,
-                                                                  selector);
-        rootElement.appendChild(pageSequence);
+        final @Nullable Element pageSequence = createAwardGroupPageSequence(connection, document, awardOrder,
+                                                                            challengeDescription, challengeTitle,
+                                                                            winnerCriteria, tournament, pageMasterName,
+                                                                            legend, bestTeams, group, selector);
+        if (null != pageSequence) {
+          rootElement.appendChild(pageSequence);
+        }
       }
     } else {
-      final Element pageSequence = createAwardGroupPageSequence(connection, document, awardOrder, challengeDescription,
-                                                                challengeTitle, winnerCriteria, tournament,
-                                                                pageMasterName, legend, bestTeams, groupName, selector);
-      rootElement.appendChild(pageSequence);
+      final @Nullable Element pageSequence = createAwardGroupPageSequence(connection, document, awardOrder,
+                                                                          challengeDescription, challengeTitle,
+                                                                          winnerCriteria, tournament, pageMasterName,
+                                                                          legend, bestTeams, groupName, selector);
+      if (null != pageSequence) {
+        rootElement.appendChild(pageSequence);
+      }
     }
 
     return document;
   }
 
-  private Element createAwardGroupPageSequence(final Connection connection,
-                                               final Document document,
-                                               final List<AwardCategory> awardOrder,
-                                               final ChallengeDescription challengeDescription,
-                                               final String challengeTitle,
-                                               final WinnerType winnerCriteria,
-                                               final Tournament tournament,
-                                               final String pageMasterName,
-                                               final Element legend,
-                                               final Set<Integer> bestTeams,
-                                               final String groupName,
-                                               final ReportSelector selector)
+  private @Nullable Element createAwardGroupPageSequence(final Connection connection,
+                                                         final Document document,
+                                                         final List<AwardCategory> awardOrder,
+                                                         final ChallengeDescription challengeDescription,
+                                                         final String challengeTitle,
+                                                         final WinnerType winnerCriteria,
+                                                         final Tournament tournament,
+                                                         final String pageMasterName,
+                                                         final Element legend,
+                                                         final Set<Integer> bestTeams,
+                                                         final String groupName,
+                                                         final ReportSelector selector)
       throws SQLException {
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
 
@@ -395,7 +400,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                           winnerCriteria, tournament, bestTeams);
     divTable.appendChild(tableBody);
 
-    return pageSequence;
+    if (!tableBody.hasChildNodes()) {
+      return null;
+    } else {
+      return pageSequence;
+    }
   }
 
   private Element createLegend(Document document,
