@@ -2,6 +2,9 @@
 * Add regular match play vs. schedule to head judge links
 * Remove server links from judge page
 * Make judge comment dialog height dependent on screen size 
+* #1217 - prefix rubric filenames with team number
+* Remove server address links
+* #1214 fix error merging databases when deleting teams
 * More consistent handling of websocket errors
 * Synchronize sending of messages to web sockets
 * Clear redirect URL on logout
