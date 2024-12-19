@@ -108,7 +108,7 @@ public class TeamResults extends BaseFLLServlet {
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
       final Collection<SubjectiveScore> scores = SubjectiveScore.getScoresForTeam(connection, category, tournament,
                                                                                   team);
-      final String filename = String.format("%s/%s.pdf", directory, category.getTitle());
+      final String filename = String.format("%s/%s_%s.pdf", directory, directory, category.getTitle());
 
       zipOut.putNextEntry(new ZipEntry(filename));
 
@@ -133,7 +133,7 @@ public class TeamResults extends BaseFLLServlet {
 
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
-      final String filename = String.format("%s/Performance.pdf", directory);
+      final String filename = String.format("%s/%s_Performance.pdf", directory, directory);
 
       zipOut.putNextEntry(new ZipEntry(filename));
 

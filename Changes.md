@@ -1,3 +1,4 @@
+* #1217 - prefix rubric filenames with team number
 * Remove server address links
 * #1214 fix error merging databases when deleting teams
 * More consistent handling of websocket errors
