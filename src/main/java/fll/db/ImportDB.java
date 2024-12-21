@@ -3228,6 +3228,8 @@ public final class ImportDB {
       throws SQLException {
     importSubjectiveAwardGroupWinners("subjective_challenge_award", sourceConnection, destinationConnection,
                                       sourceTournamentID, destTournamentID);
+    importSubjectiveAwardGroupWinners("virt_subjective_challenge_award", sourceConnection, destinationConnection,
+                                      sourceTournamentID, destTournamentID);
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Table name is passed in")
