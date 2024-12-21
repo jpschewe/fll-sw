@@ -447,6 +447,19 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges, rowClass) {
             });
 
             commentButton.addEventListener("click", function() {
+                // position the dialog so that it allows the judge to see the goal being commented on
+                const rowRect = row.getBoundingClientRect();
+                if (rowRect.top >= window.innerHeight / 2) {
+                    const height = rowRect.top - 140;
+                    popupContent.style.marginTop = "10px";
+                    popupContent.style.height = height + "px";
+                } else {
+                    const offset = rowRect.top + rowRect.height + 40;
+                    const height = window.innerHeight - offset - 40;
+                    popupContent.style.marginTop = offset + "px";
+                    popupContent.style.height = height + "px";
+                }
+                
                 popup.classList.remove("fll-sw-ui-inactive");
                 textarea.focus();
             });
