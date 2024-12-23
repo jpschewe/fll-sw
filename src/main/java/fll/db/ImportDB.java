@@ -120,9 +120,9 @@ public final class ImportDB {
    * @return the result of the import
    * @throws IOException if there is an error reading the dump file
    * @throws SQLException if there is an error importing the data
-   * @see ImportDB#loadDatabaseDump(ZipInputStream, Connection)
+   * @see ImportDB#loadDatabaseDump(ZipInputStream, Connection, boolean)
    * @see ImportDB#importDatabase(Connection, Connection, String, boolean,
-   *      boolean, boolean, boolean, boolean)
+   *      boolean, boolean, boolean)
    */
 
   public static ImportDB.ImportResult loadFromDumpIntoNewDB(final ZipInputStream zipfile,
