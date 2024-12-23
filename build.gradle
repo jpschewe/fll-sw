@@ -260,6 +260,9 @@ dependencies {
   // for templating reports
   implementation(group: "org.apache.velocity", name: "velocity-engine-core", version: "2.3")
   
+  // for comparing versions
+  implementation(group: "com.vdurmont", name: "semver4j", version: "3.1.0");
+  
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-api", version: project.junit_version)
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-params", version: project.junit_version)
   testRuntimeOnly(group: "org.junit.jupiter", name: "junit-jupiter-engine", version: project.junit_version)

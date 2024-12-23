@@ -26,11 +26,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -39,6 +41,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -69,10 +72,14 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.SideEffectFree;
+
+import com.vdurmont.semver4j.Semver;
+import com.vdurmont.semver4j.SemverException;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
@@ -1286,6 +1293,97 @@ public class Launcher extends JFrame {
     } catch (final IOException e) {
       throw new FLLRuntimeException("Error creating temporary file", e);
     }
+
+    final Path oldBaseDir = Paths.get(oldInstallationDirectory);
+    final @Nullable Semver sourceVersion = getVersion(oldBaseDir);
+    if (!sourceDumpsImages(sourceVersion)) {
+      final Path oldWebDir = oldBaseDir.resolve("web");
+
+      // copy sponsor logos
+      final Path oldSponsorLogos = oldWebDir.resolve(WebUtils.SPONSOR_LOGOS_PATH);
+      final Path newSponsorLogos = getSponsorLogosDirectory();
+      if (null == newSponsorLogos) {
+        throw new FLLRuntimeException("Unable to find current sponsor logos directory");
+      }
+      try {
+        FileUtils.copyDirectory(oldSponsorLogos.toFile(), newSponsorLogos.toFile());
+      } catch (final IOException e) {
+        throw new FLLRuntimeException("Error copying sponsor logos", e);
+      }
+
+      // copy custom images
+      final Path oldCustomImages = oldWebDir.resolve(WebUtils.CUSTOM_PATH);
+      final @Nullable Path newCustomImages = getCustomDirectory();
+      if (null == newCustomImages) {
+        throw new FLLRuntimeException("Unable to find current custom images directory");
+      }
+      try {
+        FileUtils.copyDirectory(oldCustomImages.toFile(), newCustomImages.toFile());
+      } catch (final IOException e) {
+        throw new FLLRuntimeException("Error copying custom images", e);
+      }
+
+      // copy slideshow
+      final Path oldSlideshow = oldWebDir.resolve(WebUtils.SLIDESHOW_PATH);
+      final Path newSlideshow = getSlideshowDirectory();
+      if (null == newSlideshow) {
+        throw new FLLRuntimeException("Unable to find current slideshow directory");
+      }
+      try {
+        FileUtils.copyDirectory(oldSlideshow.toFile(), newSlideshow.toFile());
+      } catch (final IOException e) {
+        throw new FLLRuntimeException("Error copying slideshow", e);
+      }
+
+      // copy user images
+      final Path oldUserImages = oldBaseDir.resolve(UserImages.getImagesPath());
+      if (Files.exists(oldUserImages)) {
+        final Path newUserImages = UserImages.getImagesPath();
+        try {
+          FileUtils.copyDirectory(oldUserImages.toFile(), newUserImages.toFile());
+        } catch (final IOException e) {
+          throw new FLLRuntimeException("Error copying user images", e);
+        }
+      }
+    }
+
   }
 
+  /**
+   * @param oldBaseDir the base directory of the installation
+   * @return null if the version cannot be determined
+   */
+  private static @Nullable Semver getVersion(final Path baseDir) {
+    final Path sourceVersionFile = baseDir.resolve("classes/fll/resources/git.properties");
+    if (!Files.exists(sourceVersionFile)) {
+      return null;
+    }
+
+    try (Reader reader = Files.newBufferedReader(sourceVersionFile)) {
+      final Properties versionProps = new Properties();
+      versionProps.load(reader);
+      final String version = versionProps.getProperty("git.build.version", "NO-PROPERTY");
+      return new Semver(version);
+    } catch (final IOException e) {
+      LOGGER.warn("Error loading version information from {}", baseDir, e);
+      return null;
+    } catch (final SemverException e) {
+      LOGGER.warn("Invalid semantic version found at {}", baseDir, e);
+      return null;
+    }
+  }
+
+  private static boolean sourceDumpsImages(final @Nullable Semver sourceVersion) {
+    if (null == sourceVersion) {
+      // assume that if the version didn't parse that the images need to be copied
+      // explictly
+      return false;
+    }
+    try {
+      return sourceVersion.satisfies(">= 19.1.0");
+    } catch (final SemverException e) {
+      LOGGER.debug("source version {} doesn't meet requirement for image dumps", sourceVersion, e);
+      return false;
+    }
+  }
 }
