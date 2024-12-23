@@ -211,11 +211,10 @@ public class TomcatLauncher {
       final Path web = classesPath.resolve(location);
       final Path check = web.resolve("fll.css");
       if (Files.exists(check)) {
+        LOGGER.debug("Found web root '{}'", web.toAbsolutePath());
         return web;
       } else {
-        LOGGER.debug("No web root at '"
-            + check.toAbsolutePath()
-            + "'");
+        LOGGER.debug("No web root at '{}'", check.toAbsolutePath());
       }
     }
     return null;
