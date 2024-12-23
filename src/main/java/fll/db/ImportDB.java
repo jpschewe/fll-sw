@@ -122,7 +122,7 @@ public final class ImportDB {
    * @throws SQLException if there is an error importing the data
    * @see ImportDB#loadDatabaseDump(ZipInputStream, Connection)
    * @see ImportDB#importDatabase(Connection, Connection, String, boolean,
-   *      boolean, boolean, boolean)
+   *      boolean, boolean, boolean, boolean)
    */
 
   public static ImportDB.ImportResult loadFromDumpIntoNewDB(final ZipInputStream zipfile,
