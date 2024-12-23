@@ -393,7 +393,7 @@ public final class WebUtils {
    * The path to the custom images relattive to the root of the web application.
    * Does not have a leading or trailing slash.
    */
-  public static final String CUSTOM_PATH = "custon";
+  public static final String CUSTOM_PATH = "custom";
 
   /**
    * Get the sponsor logo filenames.
