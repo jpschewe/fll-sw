@@ -10,8 +10,14 @@ import java.awt.Container;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
@@ -32,6 +38,8 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.sql.DataSource;
 import javax.swing.ImageIcon;
@@ -749,6 +757,56 @@ public final class Utilities {
       return "";
     } else {
       return value;
+    }
+  }
+
+  /**
+   * Add all files in the specified directory to a zip file. This does not recurse
+   * through sub-directories, only the files directly in the specified directory
+   * are included.
+   * 
+   * @param zipOut where to write the files
+   * @param zipPrefix the directory inside the zip file to put the files
+   * @param directory the directory to collect files from
+   * @throws IOException if there is an exception writing to the zip file or
+   *           reading the source files
+   */
+  public static void addFilesToZip(final ZipOutputStream zipOut,
+                                   final String zipPrefix,
+                                   final Path directory)
+      throws IOException {
+
+    // add directory entry
+    zipOut.putNextEntry(new ZipEntry(zipPrefix));
+
+    final Path zipPrefixPath = Paths.get(zipPrefix);
+
+    if (Files.exists(directory)
+        && Files.isDirectory(directory)) {
+      try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(directory)) {
+        for (final Path path : directoryStream) {
+          if (Files.isRegularFile(path)) {
+            final Path filenamePath = path.getFileName();
+            if (null != filenamePath) {
+              zipOut.putNextEntry(new ZipEntry(normalizeZipPathname(zipPrefixPath.resolve(filenamePath).toString())));
+              try (InputStream is = Files.newInputStream(path)) {
+                is.transferTo(zipOut);
+              }
+            } // valid path
+          } // regular file
+        } // foreach directory entry
+      } // allocate directory stream
+    } // logs directory exists
+  }
+
+  /**
+   * Handle windows path names and make them match the zip file spec which is '/'.
+   */
+  private static String normalizeZipPathname(final String name) {
+    if (File.separatorChar != '/') {
+      return name.replace('\\', '/');
+    } else {
+      return name;
     }
   }
 
