@@ -31,7 +31,6 @@ import java.net.URL;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -70,7 +69,6 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -1288,57 +1286,6 @@ public class Launcher extends JFrame {
     } catch (final IOException e) {
       throw new FLLRuntimeException("Error creating temporary file", e);
     }
-
-    final Path oldBaseDir = Paths.get(oldInstallationDirectory);
-    final Path oldWebDir = oldBaseDir.resolve("web");
-
-    // copy sponsor logos
-    final Path oldSponsorLogos = oldWebDir.resolve(WebUtils.SPONSOR_LOGOS_PATH);
-    final Path newSponsorLogos = getSponsorLogosDirectory();
-    if (null == newSponsorLogos) {
-      throw new FLLRuntimeException("Unable to find current sponsor logos directory");
-    }
-    try {
-      FileUtils.copyDirectory(oldSponsorLogos.toFile(), newSponsorLogos.toFile());
-    } catch (final IOException e) {
-      throw new FLLRuntimeException("Error copying sponsor logos", e);
-    }
-
-    // copy custom images
-    final Path oldCustomImages = oldWebDir.resolve(WebUtils.CUSTOM_PATH);
-    final @Nullable Path newCustomImages = getCustomDirectory();
-    if (null == newCustomImages) {
-      throw new FLLRuntimeException("Unable to find current custom images directory");
-    }
-    try {
-      FileUtils.copyDirectory(oldCustomImages.toFile(), newCustomImages.toFile());
-    } catch (final IOException e) {
-      throw new FLLRuntimeException("Error copying custom images", e);
-    }
-
-    // copy slideshow
-    final Path oldSlideshow = oldWebDir.resolve(WebUtils.SLIDESHOW_PATH);
-    final Path newSlideshow = getSlideshowDirectory();
-    if (null == newSlideshow) {
-      throw new FLLRuntimeException("Unable to find current slideshow directory");
-    }
-    try {
-      FileUtils.copyDirectory(oldSlideshow.toFile(), newSlideshow.toFile());
-    } catch (final IOException e) {
-      throw new FLLRuntimeException("Error copying slideshow", e);
-    }
-
-    // copy user images
-    final Path oldUserImages = oldBaseDir.resolve(UserImages.getImagesPath());
-    if (Files.exists(oldUserImages)) {
-      final Path newUserImages = UserImages.getImagesPath();
-      try {
-        FileUtils.copyDirectory(oldUserImages.toFile(), newUserImages.toFile());
-      } catch (final IOException e) {
-        throw new FLLRuntimeException("Error copying user images", e);
-      }
-    }
-
   }
 
 }
