@@ -1014,9 +1014,9 @@ public class Launcher extends JFrame {
   }
 
   /**
-   * @return the directory or null if not found
+   * @return the directory for slideshow or null if not found
    */
-  private static @Nullable Path getSlideshowDirectory() {
+  public static @Nullable Path getSlideshowDirectory() {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
     if (null == webroot) {
@@ -1033,9 +1033,9 @@ public class Launcher extends JFrame {
   }
 
   /**
-   * @return the directory or null if not found
+   * @return the directory for custom images or null if not found
    */
-  private @Nullable Path getCustomDirectory(@UnknownInitialization(Launcher.class) Launcher this) {
+  public @Nullable Path getCustomDirectory(@UnknownInitialization(Launcher.class) Launcher this) {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
     if (null == webroot) {

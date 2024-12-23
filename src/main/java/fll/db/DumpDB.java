@@ -32,6 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import com.opencsv.CSVWriter;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Launcher;
 import fll.Tournament;
 import fll.Utilities;
 import fll.web.ApplicationAttributes;
@@ -66,6 +67,13 @@ public final class DumpDB extends BaseFLLServlet {
    * appropriate for zip files.
    */
   public static final String BUGS_DIRECTORY = "bugs/";
+
+  /**
+   * Prefix used in the zip files for slideshow images. Has trailing Unix slash,
+   * which is also
+   * appropriate for zip files.
+   */
+  public static final String SLIDESHOW_IMAGES_DIRECTORY = "images/slideshow/";
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -241,7 +249,22 @@ public final class DumpDB extends BaseFLLServlet {
         addBugReports(output, application);
       }
 
+      addImages(output);
+
     } // stmt & outputWriter
+  }
+
+  private static void addImages(final ZipOutputStream output) throws IOException {
+    addSlideshowImages(output);
+  }
+
+  private static void addSlideshowImages(final ZipOutputStream output) throws IOException {
+    final @Nullable Path slideshowPath = Launcher.getSlideshowDirectory();
+    if (null == slideshowPath) {
+      return;
+    }
+
+    Utilities.addFilesToZip(output, SLIDESHOW_IMAGES_DIRECTORY, slideshowPath);
   }
 
   /**
