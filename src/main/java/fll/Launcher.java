@@ -995,9 +995,9 @@ public class Launcher extends JFrame {
   }
 
   /**
-   * @return the directory or null if not found
+   * @return the directory for sponsor logos or null if not found
    */
-  private static @Nullable Path getSponsorLogosDirectory() {
+  public static @Nullable Path getSponsorLogosDirectory() {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
     if (null == webroot) {
@@ -1035,13 +1035,13 @@ public class Launcher extends JFrame {
   /**
    * @return the directory for custom images or null if not found
    */
-  public @Nullable Path getCustomDirectory(@UnknownInitialization(Launcher.class) Launcher this) {
+  public static @Nullable Path getCustomDirectory() {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
     if (null == webroot) {
       return null;
     } else {
-      final Path check = webroot.resolve("custom");
+      final Path check = webroot.resolve(WebUtils.CUSTOM_PATH);
       if (Files.exists(check)
           && Files.isDirectory(check)) {
         return check.normalize();
@@ -1302,6 +1302,18 @@ public class Launcher extends JFrame {
       FileUtils.copyDirectory(oldSponsorLogos.toFile(), newSponsorLogos.toFile());
     } catch (final IOException e) {
       throw new FLLRuntimeException("Error copying sponsor logos", e);
+    }
+
+    // copy custom images
+    final Path oldCustomImages = oldWebDir.resolve(WebUtils.CUSTOM_PATH);
+    final @Nullable Path newCustomImages = getCustomDirectory();
+    if (null == newCustomImages) {
+      throw new FLLRuntimeException("Unable to find current custom images directory");
+    }
+    try {
+      FileUtils.copyDirectory(oldCustomImages.toFile(), newCustomImages.toFile());
+    } catch (final IOException e) {
+      throw new FLLRuntimeException("Error copying custom images", e);
     }
 
     // copy slideshow
