@@ -183,7 +183,7 @@ dependencies {
   implementation(group: "org.apache.tomcat", name: "tomcat-jsp-api", version: project.tomcat_version)
   
   // use explicit reference to servlet api to ensure that all libraries that depend on it are up to the current version
-  implementation(group: "jakarta.servlet", name: "jakarta.servlet-api", version: "6.0.0")
+  implementation(group: "jakarta.servlet", name: "jakarta.servlet-api", version: "6.1.0")
   
   implementation(group: "jakarta.servlet.jsp.jstl", name: "jakarta.servlet.jsp.jstl-api", version: "3.0.2")
   implementation(group: "org.glassfish.web", name: "jakarta.servlet.jsp.jstl", version: "3.0.1")
