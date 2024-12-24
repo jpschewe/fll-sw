@@ -99,6 +99,7 @@ public final class ReportIndex {
 
       pageContext.setAttribute("awardGroups", AwardsScriptReport.getAwardGroupOrder(connection, tournament));
       pageContext.setAttribute("judgingStations", Queries.getJudgingStations(connection, tournamentId));
+      pageContext.setAttribute("sortOrders", FinalComputedScores.SortOrder.values());
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     } catch (final JsonProcessingException e) {

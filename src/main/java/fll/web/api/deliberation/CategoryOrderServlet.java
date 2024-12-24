@@ -41,6 +41,7 @@ import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -225,6 +226,9 @@ public class CategoryOrderServlet extends HttpServlet {
     categoryNames.add(ChampionshipCategory.INSTANCE.getTitle());
 
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+      categoryNames.add(category.getTitle());
+    }
+    for (final VirtualSubjectiveScoreCategory category : description.getVirtualSubjectiveCategories()) {
       categoryNames.add(category.getTitle());
     }
     for (final NonNumericCategory category : CategoriesIgnored.getNonNumericCategories(description, connection,

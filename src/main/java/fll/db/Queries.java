@@ -876,6 +876,33 @@ public final class Queries {
   }
 
   /**
+   * Get the wave that a team is in for the specified tournament.
+   *
+   * @param connection database connection
+   * @param teamNumber the team's number
+   * @param tournamentID ID of tournament
+   * @return the wave for the team or null if not found or no wave is set
+   * @throws SQLException on a database error
+   */
+  public static @Nullable String getWave(final Connection connection,
+                                         final int teamNumber,
+                                         final int tournamentID)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT wave FROM TournamentTeams WHERE TeamNumber = ? AND Tournament = ?")) {
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, tournamentID);
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          return rs.getString(1);
+        } else {
+          return null;
+        }
+      }
+    }
+  }
+
+  /**
    * Get a list of team numbers that have fewer runs than seeding rounds. This
    * uses only verified performance scores, so scores that have not been
    * double-checked will show up in this report as not entered.
@@ -1052,10 +1079,23 @@ public final class Queries {
     try {
       connection.setAutoCommit(false);
 
+      // delete from schedule
+      try (
+          PreparedStatement prep = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE team_number = ?")) {
+        prep.setInt(1, teamNumber);
+        prep.executeUpdate();
+      }
+      try (PreparedStatement prep = connection.prepareStatement("DELETE FROM sched_subjective WHERE team_number = ?")) {
+        prep.setInt(1, teamNumber);
+        prep.executeUpdate();
+      }
+      try (PreparedStatement prep = connection.prepareStatement("DELETE FROM schedule WHERE team_number = ?")) {
+        prep.setInt(1, teamNumber);
+        prep.executeUpdate();
+      }
+
+      // delete from TournamentTeams
       try (PreparedStatement prep = connection.prepareStatement("DELETE FROM TournamentTeams WHERE TeamNumber = ?")) {
-
-        // delete from TournamentTeams
-
         prep.setInt(1, teamNumber);
         prep.executeUpdate();
       }
@@ -1166,14 +1206,39 @@ public final class Queries {
    *         tournament
    * @throws SQLException on a database error
    */
-  public static boolean updateTeamJudgingGroups(final Connection connection,
-                                                final int teamNumber,
-                                                final int tournamentID,
-                                                final String judgingStation)
+  public static boolean updateTeamJudgingGroup(final Connection connection,
+                                               final int teamNumber,
+                                               final int tournamentID,
+                                               final String judgingStation)
       throws SQLException {
     try (
         PreparedStatement prep = connection.prepareStatement("UPDATE TournamentTeams SET judging_station = ? WHERE TeamNumber = ? AND Tournament = ?")) {
       prep.setString(1, judgingStation);
+      prep.setInt(2, teamNumber);
+      prep.setInt(3, tournamentID);
+      return prep.executeUpdate() > 0;
+    }
+  }
+
+  /**
+   * Set the wave for a given team at the specified tournament.
+   *
+   * @param connection db connection
+   * @param teamNumber the team's number
+   * @param tournamentID the tournament
+   * @param wave the new wave
+   * @return true if the update occurred, false if the team isn't in the
+   *         tournament
+   * @throws SQLException on a database error
+   */
+  public static boolean updateTeamWave(final Connection connection,
+                                       final int teamNumber,
+                                       final int tournamentID,
+                                       final @Nullable String wave)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("UPDATE TournamentTeams SET wave = ? WHERE TeamNumber = ? AND Tournament = ?")) {
+      prep.setString(1, wave);
       prep.setInt(2, teamNumber);
       prep.setInt(3, tournamentID);
       return prep.executeUpdate() > 0;

@@ -71,6 +71,7 @@ html, body {
 
 .fll-sw-ui-dialog>div {
     width: 50%;
+    height: 50%;
     margin: 100px auto;
     background-color: #fff;
     border: 1px solid #000;

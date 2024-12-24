@@ -33,17 +33,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
             [${tournament.name}]</b>
     </p>
 
-    <h2>Server addresses</h2>
-    <p>These are the addresses that can be used on the judges
-        electronic devices to connect to this server.</p>
-    <ul>
-        <c:forEach items="${urls}" var="url">
-            <li class="no-marker">
-                <a class="wide" href="${url }">${url }</a>
-            </li>
-        </c:forEach>
-    </ul>
-
 
     <h2>Tournament steps</h2>
     <a class="wide" target="_subjective"
@@ -55,9 +44,21 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         href="<c:url value='/report/index.jsp' />">Generate reports
         - this is done once all of the subjective scores are in.</a>
 
+    <a class="wide" target="_subjectiveSchedule"
+        href="<c:url value='/admin/SubjectiveScheduleByTime'/>">Subjective
+        schedule sorted by time</a>
+
     <a class="wide"
         href="<c:url value='/report/regular-match-play-runs.jsp' />">Regular
         Match Play performance scores</a>
+
+    <a class="wide" target="_performanceVsSchedule"
+        href="<c:url value='/report/regular-match-play-vs-schedule.jsp'/>">
+        Regular Match Play runs compared with the schedule</a>
+
+    <a class="wide"
+        href="<c:url value='/report/edit-award-determination-order.jsp' />">Edit
+        the order that awards are determined.</a>
 
     <a class="wide"
         href="<c:url value='/report/edit-award-winners.jsp' />"
@@ -74,9 +75,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         can be published on the web or used for the awards ceremony.</a>
 
     <a class="wide" target="_report"
-        href="<c:url value='/report/awards/AwardsScriptReport'/>" />Awards
-    Script PDF
-    </a>
+        href="<c:url value='/report/awards/AwardsScriptReport'/>">Awards
+        Script PDF </a>
 
 
     <h2>Finalist scheduling</h2>

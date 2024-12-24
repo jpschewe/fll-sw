@@ -6,8 +6,6 @@
 
 package fll.web.display;
 
-import java.io.EOFException;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +20,10 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 import jakarta.websocket.Session;
 
 /**
@@ -217,15 +218,12 @@ public final class DisplayHandler {
                            final DisplaySocket socket,
                            final Message message) {
     try {
-      socket.sendMessage(message);
-    } catch (final EOFException e) {
-      LOGGER.debug("Caught EOF writing to {}", uuid, e);
-      removeDisplay(uuid);
-    } catch (final IOException e) {
-      LOGGER.warn("Error sending message, dropping display with uuid: {}", uuid, e);
-      removeDisplay(uuid);
+      if (!socket.sendMessage(message)) {
+        removeDisplay(uuid);
+      }
+    } catch (final JsonProcessingException e) {
+      throw new FLLRuntimeException(String.format("Unable to serialize message as JSON: %s", message), e);
     }
-
   }
 
   /**

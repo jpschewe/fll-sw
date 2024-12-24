@@ -1,3 +1,35 @@
+* #1212 - Export and import images with database dumps
+* #1218 - Make sure judges can see the goal they are commenting on
+* Properly import virtual subjective category winners
+* Allow one to specify how final computed scores is sorted
+* Add regular match play vs. schedule to head judge links
+* Remove server links from judge page
+* Make judge comment dialog height dependent on screen size 
+* #1217 - prefix rubric filenames with team number
+* Remove server address links
+* #1214 fix error merging databases when deleting teams
+* More consistent handling of websocket errors
+* Synchronize sending of messages to web sockets
+* Clear redirect URL on logout
+* Only store Judges final scores flag when final, don't allow it to be unset
+* Implement output of schedule for single team
+* Fix storing awards script text and presenters for virtual subjective categories
+* Allow score page text to be cleared
+* Properly import levels of tournaments
+* #1210 - overwrite wave information on schedule upload
+* #1210 - allow user to edit team wave information
+* #1209 - Clean up team from schedule table when deleting
+
+Release 19.0.0
+==============
+* #1206 - Allow one to specify the order that awards are determined
+* #1207 - Add virtual subjective categories to finalist scheduling and deliberations
+* #1204 - Allow sorting of virtual subjective categories for awards script
+* #1205 - Add virtual subjective categories to the awards script
+* #1203 - Add virtual subjective categories to the awards report
+* #1199 - Prevent the user from opening the subjective scoring application twice
+* Add CSV file of award winners
+* Add subjective schedule by time to the head judge page
 * Make HTML dialogs easier to see
 * #1153 - Allow REPORT_GENERATOR to edit the awards presenters
 * #1202 - Add gear icons to rubrics when referenced by a virtual category

@@ -68,6 +68,15 @@ public final class SessionAttributes {
   }
 
   /**
+   * Clear the redirect URL.
+   * 
+   * @param session what to modify
+   */
+  public static void clearRedirectURL(final HttpSession session) {
+    session.removeAttribute(REDIRECT_URL);
+  }
+
+  /**
    * Key in the session used to store the display name.
    *
    * @see fll.web.display.DisplayInfo

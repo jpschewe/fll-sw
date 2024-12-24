@@ -73,6 +73,12 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
                     <option value="${awardGroup}">${awardGroup}</option>
                 </c:forEach>
             </select>
+            <select name="sortOrder">
+                <c:forEach items="${sortOrders}" var="sortOrder">
+                    <option value="${sortOrder}">Sort by
+                        ${sortOrder}</option>
+                </c:forEach>
+            </select>
             <input type="submit" value="Report by Award Group" />
         </form>
 
@@ -88,6 +94,12 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
                     <option value="${judgingStation}">${judgingStation}</option>
                 </c:forEach>
             </select>
+            <select name="sortOrder">
+                <c:forEach items="${sortOrders}" var="sortOrder">
+                    <option value="${sortOrder}">Sort by
+                        ${sortOrder}</option>
+                </c:forEach>
+            </select>
             <input type="submit" value="Report by Judging Station" />
         </form>
     </div>
@@ -101,6 +113,12 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
                 <c:forEach items="${judgingStations}"
                     var="judgingStation">
                     <option value="${judgingStation}">${judgingStation}</option>
+                </c:forEach>
+            </select>
+            <select name="sortOrder">
+                <c:forEach items="${sortOrders}" var="sortOrder">
+                    <option value="${sortOrder}">Sort by
+                        ${sortOrder}</option>
                 </c:forEach>
             </select>
             <input type='submit' value='Create Sheet' />
@@ -168,6 +186,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
     <a class="wide" href="AwardsReport" target="_blank">Report of
         winners for the tournament. This can be published on the web.</a>
+
+    <a class="wide" href="Awards.csv">CSV file of award winners.</a>
 
     <a class="wide" target="_report"
         href="<c:url value='/report/awards/AwardsScriptReport'/>">Awards

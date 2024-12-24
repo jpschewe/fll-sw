@@ -106,7 +106,7 @@ public class ImportDBDump extends BaseFLLServlet {
             throw new MissingRequiredParameterException("dbdump");
           }
           try (ZipInputStream zipfile = new ZipInputStream(dumpFileItem.getInputStream())) {
-            final ImportDB.ImportResult importResult = ImportDB.loadDatabaseDump(zipfile, memConnection);
+            final ImportDB.ImportResult importResult = ImportDB.loadDatabaseDump(zipfile, memConnection, false);
 
             if (importResult.hasBugs()) {
               message.append("<p id='bugs_found' class='warning'>Bug reports found in the import.</p>");

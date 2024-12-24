@@ -114,7 +114,8 @@ pipeline {
           }
           callGradle('jacocoTestReport')
           junit testResults: "build/test-results/*est/TEST-*.xml", keepLongStdio: true
-          jacoco classPattern: 'build/classes/*/*', execPattern: 'build/jacoco/*.exec', sourcePattern: 'src/main/java,src/test/java,src/integrationTest/java'
+          // jacoco classPattern: 'build/classes/*/*', execPattern: 'build/jacoco/*.exec', sourcePattern: 'src/main/java,src/test/java,src/integrationTest/java'
+          recordCoverage sourceDirectories: [[path: 'src/integrationTest/java'], [path: 'src/main/java,src/test/java']], tools: [[pattern: 'build/reports/jacoco/**/*.xml']]
         }                
       }
     }

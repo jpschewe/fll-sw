@@ -51,6 +51,7 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.GetHttpSessionConfigurator;
+import fll.web.WebUtils;
 import fll.web.playoff.Playoff;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
@@ -80,27 +81,23 @@ public class PerformanceRunsEndpoint {
    */
   @OnOpen
   public void onOpen(final Session session) {
-    try {
-      final HttpSession httpSession = GetHttpSessionConfigurator.getHttpSession(session);
-      final ServletContext application = httpSession.getServletContext();
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      try (Connection connection = datasource.getConnection()) {
-        final Collection<UnverifiedRunData> unverifiedData = getUnverifiedRunData(connection);
-        final List<SelectTeamData> teamSelectData = getTeamSelectData(connection);
-        final PerformanceRunData runData = new PerformanceRunData(teamSelectData, unverifiedData);
-        final ObjectMapper jsonMapper = Utilities.createJsonMapper();
-        final String msg = jsonMapper.writeValueAsString(runData);
-        sendToClient(session, msg);
-      } catch (final SQLException e) {
-        throw new FLLRuntimeException("Error getting peprformance run data to send to client", e);
+    final HttpSession httpSession = GetHttpSessionConfigurator.getHttpSession(session);
+    final ServletContext application = httpSession.getServletContext();
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
+      final Collection<UnverifiedRunData> unverifiedData = getUnverifiedRunData(connection);
+      final List<SelectTeamData> teamSelectData = getTeamSelectData(connection);
+      final PerformanceRunData runData = new PerformanceRunData(teamSelectData, unverifiedData);
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
+      final String msg = jsonMapper.writeValueAsString(runData);
+      if (WebUtils.sendWebsocketTextMessage(session, msg)) {
+        this.uuid = UUID.randomUUID().toString();
+        ALL_SESSIONS.put(uuid, session);
       }
-
-      this.uuid = UUID.randomUUID().toString();
-      ALL_SESSIONS.put(uuid, session);
-    } catch (final EOFException e) {
-      LOGGER.debug("Got EOF sending intial message to client, not adding", e);
-    } catch (final IOException e) {
-      LOGGER.warn("Got error sending intial message to client, not adding", e);
+    } catch (final SQLException e) {
+      throw new FLLRuntimeException("Error getting performance run data to send to client", e);
+    } catch (final JsonProcessingException e) {
+      throw new FLLRuntimeException("Error converting performance run data to JSON", e);
     }
   }
 
@@ -166,13 +163,7 @@ public class PerformanceRunsEndpoint {
 
         for (final Map.Entry<String, Session> entry : ALL_SESSIONS.entrySet()) {
           final Session session = entry.getValue();
-          try {
-            sendToClient(session, msg);
-          } catch (final EOFException e) {
-            LOGGER.debug("Caught EOF sending to client: {}", e.getMessage(), e);
-            toRemove.add(entry.getKey());
-          } catch (final IOException e) {
-            LOGGER.warn("Error sending to client: {}", e.getMessage(), e);
+          if (!WebUtils.sendWebsocketTextMessage(session, msg)) {
             toRemove.add(entry.getKey());
           }
         } // foreach session
@@ -185,19 +176,6 @@ public class PerformanceRunsEndpoint {
         throw new FLLInternalException("Error converting message to JSON", e);
       }
     });
-  }
-
-  private static void sendToClient(final Session client,
-                                   final String message)
-      throws IOException {
-    if (!client.isOpen()) {
-      throw new IOException("Client has closd the connection");
-    }
-    try {
-      client.getBasicRemote().sendText(message);
-    } catch (final IllegalStateException e) {
-      throw new IOException("Illegal state exception writing to client", e);
-    }
   }
 
   private static List<SelectTeamData> getTeamSelectData(final Connection connection) throws SQLException {

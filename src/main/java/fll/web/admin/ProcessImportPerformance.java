@@ -86,7 +86,7 @@ public class ProcessImportPerformance extends BaseFLLServlet {
             throw new MissingRequiredParameterException("performanceFile");
           }
           try (ZipInputStream zipfile = new ZipInputStream(dumpFileItem.getInputStream())) {
-            ImportDB.loadDatabaseDump(zipfile, memConnection);
+            ImportDB.loadDatabaseDump(zipfile, memConnection, false);
 
             final String sourceTournamentName = Tournament.getCurrentTournament(memConnection).getName();
 

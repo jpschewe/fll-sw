@@ -317,21 +317,29 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                     <!-- Team schedules -->
                     <li>
                         <a href="<c:url value='/admin/TeamSchedules' />"
-                            target="_new">Team Schedules</a> Team
-                        schedule for
-                        <select name='TeamNumber'>
-                            <c:forEach items="${tournamentTeams}"
-                                var="team">
-                                <option
-                                    value='<c:out value="${team.teamNumber}"/>'>
-                                    <c:out value="${team.teamNumber}" />
-                                    -
-                                    <c:out value="${team.teamName}" />
-                                </option>
-                            </c:forEach>
-                        </select>
-                        <input type='submit' value='Output Schedule' />
-                        <!-- end Team schedules -->
+                            target="_new">Team Schedules</a>
+                    </li>
+                    <li>
+                        <form
+                            action="<c:url value='/admin/TeamSchedules' />"
+                            method="post">
+                            Team schedule for
+                            <select name='TeamNumber'>
+                                <c:forEach items="${tournamentTeams}"
+                                    var="team">
+                                    <option
+                                        value='<c:out value="${team.teamNumber}"/>'>
+                                        <c:out
+                                            value="${team.teamNumber}" />
+                                        -
+                                        <c:out value="${team.teamName}" />
+                                    </option>
+                                </c:forEach>
+                            </select>
+                            <input type='submit' value='Output Schedule' />
+                        </form>
+                    </li>
+                    <!-- end Team schedules -->
                 </ul>
             </c:if>
         </li>
@@ -521,12 +529,6 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
         <li>
             <a href='database.flldb'>Download database</a>
         </li>
-
-        <li>
-            <a href='<c:url value="/report/AwardsCsv"/>'>Awards CSV
-                file</a>
-        </li>
-
     </ul>
 
     <h2>User Management</h2>

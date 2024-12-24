@@ -103,15 +103,7 @@ public class DoLogin extends BaseFLLServlet {
         final AuthenticationContext newAuth = AuthenticationContext.loggedIn(user, roles);
         session.setAttribute(SessionAttributes.AUTHENTICATION, newAuth);
 
-        String redirect = SessionAttributes.getRedirectURL(session);
-        if (null == redirect) {
-          redirect = "/index.jsp";
-        }
-        // clear the attribute since it's been used
-        session.removeAttribute(SessionAttributes.REDIRECT_URL);
-
-        LOGGER.trace("Redirecting to {} with message '{}'", redirect, SessionAttributes.getMessage(session));
-        response.sendRedirect(response.encodeRedirectURL(redirect));
+        WebUtils.sendRedirect(response, session);
       } else {
         Authentication.recordFailedLogin(connection, user);
 

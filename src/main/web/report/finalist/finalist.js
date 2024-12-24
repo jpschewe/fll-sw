@@ -1467,7 +1467,7 @@ const finalist_module = {}
 
 
     /**
-      * Load the numeric categories in the challenge description from the server.
+      * Load the subjective categories in the challenge description from the server.
       * 
       * @return promise to execute
       */
@@ -1489,9 +1489,27 @@ const finalist_module = {}
                     false);
             }
             finalist_module.setCategoryScheduled(championship, true);
-
         });
     };
+
+    /**
+      * Load the virtual subjective categories in the challenge description from the server.
+      * 
+      * @return promise to execute
+      */
+    finalist_module.loadVirtualSubjectiveCategories = function() {
+        return fetch("../../api/ChallengeDescription/VirtualSubjectiveCategories").then(checkJsonResponse).then(function(subjectiveCategories) {
+            for (const categoryDescription of subjectiveCategories) {
+                const category = finalist_module.getCategoryByName(categoryDescription.title);
+                if (null == category) {
+                    const newCategory = finalist_module.addCategory(categoryDescription.title, true, false);
+                    // all subjective categories are scheduled
+                    finalist_module.setCategoryScheduled(newCategory, true);
+                }
+            }
+        });
+    };
+
 
     /**
       * Load the non-numeric categories in the challenge description from the server.
@@ -1635,6 +1653,12 @@ const finalist_module = {}
             failCallback("Numeric categories");
         });
         waitList1.push(numericCategoriesPromise);
+
+        const virtualSubjectiveCategoriesPromise = finalist_module.loadVirtualSubjectiveCategories();
+        virtualSubjectiveCategoriesPromise.catch(function() {
+            failCallback("Virtual subjective categories");
+        });
+        waitList1.push(virtualSubjectiveCategoriesPromise);
 
         const nonNumericCategoriesPromise = finalist_module.loadNonNumericCategories();
         nonNumericCategoriesPromise.catch(function() {
