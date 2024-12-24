@@ -79,7 +79,7 @@ eclipse {
 }
 
 dependencies {
-  jspc("org.apache.ant:ant:1.10.14")
+  jspc("org.apache.ant:ant:1.10.15")
 }
 
 testSets {
@@ -131,7 +131,7 @@ integrationTest {
 ext {
     jackson_version = "2.17.0"
     slf4j_version = "2.0.13"
-    tomcat_version = "10.1.20"
+    tomcat_version = "11.0.2"
     junit_version = "5.11.3"
     log4j_version = "2.23.1"
     spotbugs_version = "4.8.4"
@@ -185,7 +185,7 @@ dependencies {
   // use explicit reference to servlet api to ensure that all libraries that depend on it are up to the current version
   implementation(group: "jakarta.servlet", name: "jakarta.servlet-api", version: "6.0.0")
   
-  implementation(group: "jakarta.servlet.jsp.jstl", name: "jakarta.servlet.jsp.jstl-api", version: "3.0.0")
+  implementation(group: "jakarta.servlet.jsp.jstl", name: "jakarta.servlet.jsp.jstl-api", version: "3.0.2")
   implementation(group: "org.glassfish.web", name: "jakarta.servlet.jsp.jstl", version: "3.0.1")
   
   // JSP tags for formatting java.time objects

@@ -19,8 +19,6 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.JspWriter;
 import jakarta.servlet.jsp.PageContext;
-import jakarta.servlet.jsp.el.ExpressionEvaluator;
-import jakarta.servlet.jsp.el.VariableResolver;
 
 /**
  * Dummy PageContext for testing that does nothing. Subclasses override the
@@ -158,17 +156,7 @@ public class DummyPageContext extends PageContext {
   }
 
   @Override
-  public ExpressionEvaluator getExpressionEvaluator() {
-    return null;
-  }
-
-  @Override
   public ELContext getELContext() {
-    return null;
-  }
-
-  @Override
-  public VariableResolver getVariableResolver() {
     return null;
   }
 
