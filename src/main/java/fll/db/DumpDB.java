@@ -32,7 +32,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import com.opencsv.CSVWriter;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Launcher;
 import fll.Tournament;
+import fll.UserImages;
 import fll.Utilities;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -66,6 +68,34 @@ public final class DumpDB extends BaseFLLServlet {
    * appropriate for zip files.
    */
   public static final String BUGS_DIRECTORY = "bugs/";
+
+  /**
+   * Prefix used in the zip files for slideshow images. Has trailing Unix slash,
+   * which is also
+   * appropriate for zip files.
+   */
+  public static final String SLIDESHOW_IMAGES_DIRECTORY = "images/slideshow/";
+
+  /**
+   * Prefix used in the zip files for custom images. Has trailing Unix slash,
+   * which is also
+   * appropriate for zip files.
+   */
+  public static final String CUSTOM_IMAGES_DIRECTORY = "images/custom/";
+
+  /**
+   * Prefix used in the zip files for user images. Has trailing Unix slash,
+   * which is also
+   * appropriate for zip files.
+   */
+  public static final String USER_IMAGES_DIRECTORY = "images/user-images/";
+
+  /**
+   * Prefix used in the zip files for sponsor images. Has trailing Unix slash,
+   * which is also
+   * appropriate for zip files.
+   */
+  public static final String SPONSOR_IMAGES_DIRECTORY = "images/sponsor_logos/";
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -241,7 +271,47 @@ public final class DumpDB extends BaseFLLServlet {
         addBugReports(output, application);
       }
 
+      addImages(output);
+
     } // stmt & outputWriter
+  }
+
+  private static void addImages(final ZipOutputStream output) throws IOException {
+    addSlideshowImages(output);
+    addCustomImages(output);
+    addUserImages(output);
+    addSponsorImages(output);
+  }
+
+  private static void addSlideshowImages(final ZipOutputStream output) throws IOException {
+    final @Nullable Path slideshowPath = Launcher.getSlideshowDirectory();
+    if (null == slideshowPath) {
+      return;
+    }
+
+    Utilities.addFilesToZip(output, SLIDESHOW_IMAGES_DIRECTORY, slideshowPath);
+  }
+
+  private static void addCustomImages(final ZipOutputStream output) throws IOException {
+    final @Nullable Path path = Launcher.getCustomDirectory();
+    if (null == path) {
+      return;
+    }
+
+    Utilities.addFilesToZip(output, CUSTOM_IMAGES_DIRECTORY, path);
+  }
+
+  private static void addUserImages(final ZipOutputStream output) throws IOException {
+    Utilities.addFilesToZip(output, USER_IMAGES_DIRECTORY, UserImages.getImagesPath());
+  }
+
+  private static void addSponsorImages(final ZipOutputStream output) throws IOException {
+    final @Nullable Path path = Launcher.getSponsorLogosDirectory();
+    if (null == path) {
+      return;
+    }
+
+    Utilities.addFilesToZip(output, SPONSOR_IMAGES_DIRECTORY, path);
   }
 
   /**

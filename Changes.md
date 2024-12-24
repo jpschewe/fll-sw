@@ -1,3 +1,4 @@
+* #1212 - Export and import images with database dumps
 * #1218 - Make sure judges can see the goal they are commenting on
 * Properly import virtual subjective category winners
 * Allow one to specify how final computed scores is sorted

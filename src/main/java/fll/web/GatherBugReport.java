@@ -10,9 +10,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
@@ -88,8 +85,8 @@ public class GatherBugReport extends BaseFLLServlet {
 
         zipOut.putNextEntry(new ZipEntry("fll-sw_version.txt"));
         final String versionInfo = Version.getAllVersionInformation().entrySet().stream() //
-                                                     .map(e -> String.format("%s:%s", e.getKey(), e.getValue())) //
-                                                     .collect(Collectors.joining("\n"));
+                                          .map(e -> String.format("%s:%s", e.getKey(), e.getValue())) //
+                                          .collect(Collectors.joining("\n"));
         zipOut.write(versionInfo.getBytes(Utilities.DEFAULT_CHARSET));
 
         addDatabase(zipOut, connection, challengeDescription);
@@ -152,40 +149,9 @@ public class GatherBugReport extends BaseFLLServlet {
    *           stream
    */
   public static void addLogFiles(@Nonnull final ZipOutputStream zipOut) throws IOException {
-
-    // add directory entry for the logs
-    zipOut.putNextEntry(new ZipEntry(LOGS_DIRECTORY));
-
     // get logs from the application
     final Path logsDirectory = Paths.get("logs");
-    if (Files.exists(logsDirectory)
-        && Files.isDirectory(logsDirectory)) {
-      try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(logsDirectory)) {
-        for (final Path path : directoryStream) {
-          if (Files.isRegularFile(path)) {
-            final Path filenamePath = path.getFileName();
-            if (null != filenamePath) {
-              zipOut.putNextEntry(new ZipEntry(normalizePathname(logsDirectory.resolve(filenamePath).toString())));
-              try (InputStream is = Files.newInputStream(path)) {
-                is.transferTo(zipOut);
-              }
-            } // valid path
-          } // regular file
-        } // foreach directory entry
-      } // allocate directory stream
-    } // logs directory exists
-
-  }
-
-  /**
-   * Handle windows path names and make them match the zip file spec which is '/'.
-   */
-  private static String normalizePathname(final String name) {
-    if (File.separatorChar != '/') {
-      return name.replace('\\', '/');
-    } else {
-      return name;
-    }
+    Utilities.addFilesToZip(zipOut, LOGS_DIRECTORY, logsDirectory);
   }
 
 }

@@ -14,6 +14,7 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -54,12 +55,14 @@ import com.opencsv.exceptions.CsvValidationException;
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Launcher;
 import fll.ScoreStandardization;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
 import fll.TournamentLevel.NoSuchTournamentLevelException;
 import fll.TournamentTeam;
+import fll.UserImages;
 import fll.Utilities;
 import fll.db.AwardsScript.Macro;
 import fll.db.AwardsScript.Section;
@@ -110,13 +113,14 @@ public final class ImportDB {
    * <code>database</code>. Unlike
    * {@link #loadFromDumpIntoNewDB(ZipInputStream, Connection)}, this
    * will result in a database with all views and generated columns.
+   * This also loads all images from the dump into the application directory.
    *
    * @param zipfile the dump file to read
    * @param destConnection where to load the data
    * @return the result of the import
    * @throws IOException if there is an error reading the dump file
    * @throws SQLException if there is an error importing the data
-   * @see ImportDB#loadDatabaseDump(ZipInputStream, Connection)
+   * @see ImportDB#loadDatabaseDump(ZipInputStream, Connection, boolean)
    * @see ImportDB#importDatabase(Connection, Connection, String, boolean,
    *      boolean, boolean, boolean)
    */
@@ -130,7 +134,7 @@ public final class ImportDB {
     try (Connection sourceConnection = memSource.getConnection();
         Statement memStmt = sourceConnection.createStatement()) {
 
-      final ImportDB.ImportResult importResult = loadDatabaseDump(zipfile, sourceConnection);
+      final ImportDB.ImportResult importResult = loadDatabaseDump(zipfile, sourceConnection, true);
       final ChallengeDescription challengeDescription = GlobalParameters.getChallengeDescription(sourceConnection);
       GenerateDB.generateDB(challengeDescription, destConnection);
 
@@ -312,6 +316,8 @@ public final class ImportDB {
    *
    * @param zipfile the database dump
    * @param connection where to store the data
+   * @param loadImages if true, then load the images from the zip file, otherwise
+   *          they are ignored
    * @return the challenge document
    * @throws IOException if there is an error reading the zipfile
    * @throws SQLException if there is an error loading the data into the
@@ -319,7 +325,8 @@ public final class ImportDB {
    * @throws FLLRuntimeException if the database version in the dump is too new
    */
   public static ImportResult loadDatabaseDump(final ZipInputStream zipfile,
-                                              final Connection connection)
+                                              final Connection connection,
+                                              final boolean loadImages)
       throws IOException, SQLException {
     ChallengeDescription description = null;
     final Path importDirectory = Paths.get("import_"
@@ -366,13 +373,7 @@ public final class ImportDB {
         if (!entry.isDirectory()) {
           LOGGER.trace("Found log file "
               + name);
-
-          final Path outputFileName = importDirectory.resolve(name);
-          final Path outputParent = outputFileName.getParent();
-          if (null != outputParent) {
-            Files.createDirectories(outputParent);
-          }
-          Files.copy(zipfile, outputFileName);
+          writeFile(importDirectory, name, zipfile);
         }
       } else if (name.startsWith(DumpDB.BUGS_DIRECTORY)
           || name.startsWith(BUGS_DIRECTORY_WINDOWS)) {
@@ -381,12 +382,51 @@ public final class ImportDB {
               + name);
           hasBugs = true;
 
-          final Path outputFileName = importDirectory.resolve(name);
-          final Path outputParent = outputFileName.getParent();
-          if (null != outputParent) {
-            Files.createDirectories(outputParent);
+          writeFile(importDirectory, name, zipfile);
+        }
+      } else if (name.startsWith(DumpDB.CUSTOM_IMAGES_DIRECTORY)) {
+        if (loadImages) {
+          if (!entry.isDirectory()) {
+            LOGGER.trace("Found custom image {}", name);
+
+            final @Nullable Path outputDirectory = Launcher.getCustomDirectory();
+            writeFile(outputDirectory, name, zipfile);
+            if (null != outputDirectory) {
+              final Path outputFileName = outputDirectory.resolve(name);
+              final Path outputParent = outputFileName.getParent();
+              if (null != outputParent) {
+                Files.createDirectories(outputParent);
+              }
+              Files.copy(zipfile, outputFileName, StandardCopyOption.REPLACE_EXISTING);
+            }
           }
-          Files.copy(zipfile, outputFileName);
+        }
+      } else if (name.startsWith(DumpDB.SLIDESHOW_IMAGES_DIRECTORY)) {
+        if (loadImages) {
+          if (!entry.isDirectory()) {
+            LOGGER.trace("Found slideshow image {}", name);
+
+            final @Nullable Path outputDirectory = Launcher.getSlideshowDirectory();
+            writeFile(outputDirectory, name, zipfile);
+          }
+        }
+      } else if (name.startsWith(DumpDB.USER_IMAGES_DIRECTORY)) {
+        if (loadImages) {
+          if (!entry.isDirectory()) {
+            LOGGER.trace("Found user image {}", name);
+
+            final Path outputDirectory = UserImages.getImagesPath();
+            writeFile(outputDirectory, name, zipfile);
+          }
+        }
+      } else if (name.startsWith(DumpDB.SPONSOR_IMAGES_DIRECTORY)) {
+        if (loadImages) {
+          if (!entry.isDirectory()) {
+            LOGGER.trace("Found user image {}", name);
+
+            final @Nullable Path outputDirectory = Launcher.getSponsorLogosDirectory();
+            writeFile(outputDirectory, name, zipfile);
+          }
         }
       } else {
         LOGGER.warn("Unexpected file found in imported zip file, skipping: "
@@ -425,6 +465,24 @@ public final class ImportDB {
     upgradeDatabase(connection, description);
 
     return new ImportResult(importDirectory, hasBugs);
+  }
+
+  private static void writeFile(final @Nullable Path outputDirectory,
+                                final String name,
+                                final ZipInputStream zipfile)
+      throws IOException {
+    if (null != outputDirectory) {
+      final Path namePath = Paths.get(name);
+      final @Nullable Path filename = namePath.getFileName();
+      if (null != filename) {
+        final Path outputFileName = outputDirectory.resolve(filename);
+        final Path outputParent = outputFileName.getParent();
+        if (null != outputParent) {
+          Files.createDirectories(outputParent);
+        }
+        Files.copy(zipfile, outputFileName, StandardCopyOption.REPLACE_EXISTING);
+      }
+    }
   }
 
   /**
