@@ -25,7 +25,7 @@ plugins {
     id "org.unbroken-dome.test-sets" version "4.1.0"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
-    id "com.github.spotbugs" version "6.0.12"
+    id "com.github.spotbugs" version "6.0.27"
     id "de.aaschmid.cpd" version "3.5"
     id "edu.sc.seis.launch4j" version "3.0.6"
     id "com.github.ben-manes.versions" version "0.51.0" // adds dependencyUpdates task
@@ -134,7 +134,7 @@ ext {
     tomcat_version = "11.0.2"
     junit_version = "5.11.3"
     log4j_version = "2.24.3"
-    spotbugs_version = "4.8.4"
+    spotbugs_version = "4.8.6"
     checker_framework_version = "3.42.0"
 
     web_build_dir = new File(project.buildDir, "web")
