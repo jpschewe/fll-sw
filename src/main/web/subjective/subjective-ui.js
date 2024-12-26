@@ -459,7 +459,7 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges, rowClass) {
                     popupContent.style.marginTop = offset + "px";
                     popupContent.style.height = height + "px";
                 }
-                
+
                 popup.classList.remove("fll-sw-ui-inactive");
                 textarea.focus();
             });
@@ -1308,10 +1308,9 @@ function displayPageEnterScore() {
 function synchronizeData() {
     const waitDialog = document.getElementById("wait-dialog");
 
-    subjective_module.uploadData(function(result) {
+    subjective_module.uploadData(function(_) {
         // scoresSuccess
-        document.getElementById('alert-dialog_text').innerText = "Uploaded " + result.numModified + " scores."
-            + result.message;
+        document.getElementById('alert-dialog_text').innerText = "Successfully uploaded scores";
         document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
     }, //
         function(result) {
@@ -1327,10 +1326,9 @@ function synchronizeData() {
             document.getElementById('alert-dialog_text').innerText = "Failed to upload scores: " + message;
             document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
         }, //
-        function(result) {
+        function(_) {
             // judgesSuccess
-            subjective_module.log("Judges modified: " + result.numModifiedJudges
-                + " new: " + result.numNewJudges);
+            subjective_module.log("Successfully uploaded judges information");
         }
 
         ,//
