@@ -1306,6 +1306,7 @@ function displayPageEnterScore() {
 }
 
 function synchronizeData() {
+    // block the user while uploading
     const waitDialog = document.getElementById("wait-dialog");
     waitDialog.classList.remove("fll-sw-ui-inactive");
 
@@ -1418,10 +1419,6 @@ function setupAfterContentLoaded() {
         subjective_module.checkServerStatus(true, function() {
             server_online = true;
             postServerStatusCallback();
-
-            // block the user while uploading
-            const waitDialog = document.getElementById("wait-dialog");
-            waitDialog.classList.remove("fll-sw-ui-inactive");
             synchronizeData();
         },
             function() {
@@ -1709,11 +1706,11 @@ function postServerStatusCallback() {
         sidePanelServerStatus.classList.remove("online");
     }
 
-    // schedule another update check in 30 seconds
-    setTimeout(updateServerStatus, 30 * 1000);
 }
 
 function updateServerStatus() {
+    const SERVER_CHECK_FREQUENCY_SECONDS = 60;
+
     subjective_module.checkServerStatus(false,
         () => {
             if (!server_online) {
@@ -1721,6 +1718,7 @@ function updateServerStatus() {
             }
             server_online = true;
             postServerStatusCallback();
+            setTimeout(updateServerStatus, SERVER_CHECK_FREQUENCY_SECONDS * 1000);
         },
         () => {
             if (server_online) {
@@ -1728,6 +1726,7 @@ function updateServerStatus() {
             }
             server_online = false;
             postServerStatusCallback();
+            setTimeout(updateServerStatus, SERVER_CHECK_FREQUENCY_SECONDS * 1000);
         }
     );
 }
