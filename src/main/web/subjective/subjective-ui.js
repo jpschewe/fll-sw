@@ -459,7 +459,7 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges, rowClass) {
                     popupContent.style.marginTop = offset + "px";
                     popupContent.style.height = height + "px";
                 }
-                
+
                 popup.classList.remove("fll-sw-ui-inactive");
                 textarea.focus();
             });
@@ -727,6 +727,8 @@ function saveScore() {
             score.nonNumericNominations.push(nominate.nonNumericCategoryTitle);
         }
     });
+
+    backgroundScoreUpload();
 
     window.location = subjective_module.getScoreEntryBackPage();
 }
@@ -1305,61 +1307,87 @@ function displayPageEnterScore() {
     installWarnOnReload();
 }
 
-function synchronizeData() {
-    const waitDialog = document.getElementById("wait-dialog");
+/**
+ * Upload scores without alerting the user.
+ */
+function backgroundScoreUpload() {
+    if (!server_online) {
+        return;
+    }
 
-    subjective_module.uploadData(function(result) {
-        // scoresSuccess
-        document.getElementById('alert-dialog_text').innerText = "Uploaded " + result.numModified + " scores."
-            + result.message;
-        document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
-    }, //
-        function(result) {
-            // scoresFail
-
-            let message;
-            if (null == result) {
-                message = "Unknown server error";
-            } else {
-                message = result.message;
+    fetch("CheckAuth").
+        then(checkJsonResponse).
+        then(function(data) {
+            if (data.authenticated) {
+                // only upload if the judge is still logged in, we don't want to redirect them to the login page until they explicitly sync
+                subjective_module.uploadData(
+                    () => {
+                        // successCallback
+                        subjective_module.log("Background upload successful");
+                    }, //
+                    (result) => {
+                        subjective_module.log(`Background upload failed: ${JSON.stringify(result)}`);
+                    });
             }
-
-            document.getElementById('alert-dialog_text').innerText = "Failed to upload scores: " + message;
-            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
-        }, //
-        function(result) {
-            // judgesSuccess
-            subjective_module.log("Judges modified: " + result.numModifiedJudges
-                + " new: " + result.numNewJudges);
-        }
-
-        ,//
-        function(result) {
-            // judgesFail
-            let message;
-            if (null == result) {
-                message = "Unknown server error";
-            } else {
-                message = result.message;
-            }
-
-            document.getElementById('alert-dialog_text').innerText = "Failed to upload judges: " + message
-            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
-        }, //
-        function() {
-            // loadSuccess
-            populateChooseJudgingGroup();
-            waitDialog.classList.add("fll-sw-ui-inactive");
-        }, //
-        function(message) {
-            // loadFail
-            populateChooseJudgingGroup();
-
-            waitDialog.classList.add("fll-sw-ui-inactive");
-
-            document.getElementById('alert-dialog_text').innerText = "Failed to load scores from server: " + message
-            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+        }).
+        catch((err) => {
+            // Error: response error, request timeout or runtime error
+            subjective_module.log(`Background upload auth check failed: ${JSON.stringify(err)}`);
         });
+}
+
+function synchronizeData() {
+    // block the user while uploading
+    const waitDialog = document.getElementById("wait-dialog");
+    waitDialog.classList.remove("fll-sw-ui-inactive");
+
+    fetch("CheckAuth").then(checkJsonResponse).then(function(data) {
+        if (data.authenticated) {
+            subjective_module.uploadData(
+                () => {
+                    // successCallback
+
+                    // load most recent data from server
+                    subjective_module.loadFromServer(function() {
+                        // loadSuccess
+                        populateChooseJudgingGroup();
+                        waitDialog.classList.add("fll-sw-ui-inactive");
+
+
+                        document.getElementById('alert-dialog_text').innerText = "Successfully synchronized data";
+                        document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+                    }, function(error) {
+                        // loadFail
+                        populateChooseJudgingGroup();
+                        waitDialog.classList.add("fll-sw-ui-inactive");
+
+                        document.getElementById('alert-dialog_text').innerText = "Failed to load scores from server: " + error
+                        document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+                    }, false);
+
+                }, //
+                (result) => {
+                    // failCallback
+                    let message;
+                    if (null == result) {
+                        message = "Unknown server error";
+                    } else {
+                        message = result.message;
+                    }
+
+                    document.getElementById('alert-dialog_text').innerText = "Failed to upload data: " + message
+                    document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+                });
+        } else {
+            alertCallback = function() {
+                waitDialog.classList.add("fll-sw-ui-inactive");
+                window.open('../login.jsp', '_login');
+            }
+            document.getElementById("alert-dialog_text").innerText = "Your device has been logged out. A new window will be opened to the login page. Once you have logged in, close that window and synchronize again.";
+            document.getElementById("alert-dialog").classList.remove("fll-sw-ui-inactive");
+        }
+    });
+
 }
 
 function setupAfterContentLoaded() {
@@ -1422,10 +1450,6 @@ function setupAfterContentLoaded() {
         subjective_module.checkServerStatus(true, function() {
             server_online = true;
             postServerStatusCallback();
-
-            // block the user while uploading
-            const waitDialog = document.getElementById("wait-dialog");
-            waitDialog.classList.remove("fll-sw-ui-inactive");
             synchronizeData();
         },
             function() {
@@ -1713,11 +1737,11 @@ function postServerStatusCallback() {
         sidePanelServerStatus.classList.remove("online");
     }
 
-    // schedule another update check in 30 seconds
-    setTimeout(updateServerStatus, 30 * 1000);
 }
 
 function updateServerStatus() {
+    const SERVER_CHECK_FREQUENCY_SECONDS = 60;
+
     subjective_module.checkServerStatus(false,
         () => {
             if (!server_online) {
@@ -1725,6 +1749,7 @@ function updateServerStatus() {
             }
             server_online = true;
             postServerStatusCallback();
+            setTimeout(updateServerStatus, SERVER_CHECK_FREQUENCY_SECONDS * 1000);
         },
         () => {
             if (server_online) {
@@ -1732,6 +1757,7 @@ function updateServerStatus() {
             }
             server_online = false;
             postServerStatusCallback();
+            setTimeout(updateServerStatus, SERVER_CHECK_FREQUENCY_SECONDS * 1000);
         }
     );
 }

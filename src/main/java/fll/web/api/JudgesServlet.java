@@ -15,10 +15,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Optional;
 
 import javax.sql.DataSource;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -121,14 +120,14 @@ public class JudgesServlet extends HttpServlet {
 
       final int numNewJudges = processJudges(connection, currentTournament, judges);
 
-      final UploadResult result = new UploadResult(true, "Successfully uploaded judges", numNewJudges);
+      final UploadResult result = new UploadResult(true, Optional.of("Successfully uploaded judges"), numNewJudges);
       response.reset();
       jsonMapper.writeValue(writer, result);
 
     } catch (final SQLException e) {
       LOGGER.error("Error uploading judges", e);
 
-      final UploadResult result = new UploadResult(false, e.getMessage(), -1);
+      final UploadResult result = new UploadResult(false, Optional.ofNullable(e.getMessage()), -1);
       jsonMapper.writeValue(writer, result);
     }
   }
@@ -187,36 +186,17 @@ public class JudgesServlet extends HttpServlet {
   /**
    * The result of an upload.
    */
-  public static final class UploadResult {
+  public static final class UploadResult extends ApiResult {
     /**
      * @param success {@link #getSuccess()}
      * @param message {@link #getMessage()}
      * @param numNewJudges {@link #getNumNewJudges()}
      */
     public UploadResult(final boolean success,
-                        final @Nullable String message,
+                        final Optional<String> message,
                         final int numNewJudges) {
-      mSuccess = success;
-      mMessage = message;
+      super(success, message);
       mNumNewJudges = numNewJudges;
-    }
-
-    private final boolean mSuccess;
-
-    /**
-     * @return if the upload was successful
-     */
-    public boolean getSuccess() {
-      return mSuccess;
-    }
-
-    private final @Nullable String mMessage;
-
-    /**
-     * @return message for the user
-     */
-    public @Nullable String getMessage() {
-      return mMessage;
     }
 
     private final int mNumNewJudges;

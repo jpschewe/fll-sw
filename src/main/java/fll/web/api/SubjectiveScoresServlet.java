@@ -20,11 +20,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.sql.DataSource;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -161,7 +160,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
       final int numModified = processScores(connection, challengeDescription, currentTournament, allScores);
 
-      final UploadResult result = new UploadResult(true, "Successfully uploaded scores", numModified);
+      final UploadResult result = new UploadResult(true, Optional.of("Successfully uploaded scores"), numModified);
       response.reset();
       response.setContentType("application/json");
       final PrintWriter writer = response.getWriter();
@@ -170,7 +169,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
     } catch (final SQLException sqle) {
       LOGGER.error("Error uploading scores", sqle);
 
-      final UploadResult result = new UploadResult(false, sqle.getMessage(), -1);
+      final UploadResult result = new UploadResult(false, Optional.ofNullable(sqle.getMessage()), -1);
       response.reset();
       response.setContentType("application/json");
       final PrintWriter writer = response.getWriter();
@@ -446,7 +445,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
   /**
    * Result to send back after an upload.
    */
-  public static final class UploadResult {
+  public static final class UploadResult extends ApiResult {
 
     /**
      * @param success {@link #getSuccess()}
@@ -454,29 +453,10 @@ public class SubjectiveScoresServlet extends HttpServlet {
      * @param numModified {@link #getNumModified()}
      */
     public UploadResult(final boolean success,
-                        final @Nullable String message,
+                        final Optional<String> message,
                         final int numModified) {
-      mSuccess = success;
-      mMessage = message;
+      super(success, message);
       mNumModified = numModified;
-    }
-
-    private final boolean mSuccess;
-
-    /**
-     * @return if the upload was successful
-     */
-    public boolean getSuccess() {
-      return mSuccess;
-    }
-
-    private final @Nullable String mMessage;
-
-    /**
-     * @return message for the user
-     */
-    public @Nullable String getMessage() {
-      return mMessage;
     }
 
     private final int mNumModified;
