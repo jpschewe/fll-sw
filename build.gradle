@@ -57,6 +57,10 @@ configurations {
     jspc
 }
 
+tasks.withType(JavaCompile) {
+    options.deprecation = true
+}
+
 eclipse {
     classpath {
         file {
