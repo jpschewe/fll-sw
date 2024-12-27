@@ -728,6 +728,8 @@ function saveScore() {
         }
     });
 
+    backgroundScoreUpload();
+
     window.location = subjective_module.getScoreEntryBackPage();
 }
 
@@ -1303,6 +1305,35 @@ function displayPageEnterScore() {
 
     // needs to be after displayPage as that uninstalls the warning
     installWarnOnReload();
+}
+
+/**
+ * Upload scores without alerting the user.
+ */
+function backgroundScoreUpload() {
+    if (!server_online) {
+        return;
+    }
+
+    fetch("CheckAuth").
+        then(checkJsonResponse).
+        then(function(data) {
+            if (data.authenticated) {
+                // only upload if the judge is still logged in, we don't want to redirect them to the login page until they explicitly sync
+                subjective_module.uploadData(
+                    () => {
+                        // successCallback
+                        subjective_module.log("Background upload successful");
+                    }, //
+                    (result) => {
+                        subjective_module.log(`Background upload failed: ${JSON.stringify(result)}`);
+                    });
+            }
+        }).
+        catch((err) => {
+            // Error: response error, request timeout or runtime error
+            subjective_module.log(`Background upload auth check failed: ${JSON.stringify(err)}`);
+        });
 }
 
 function synchronizeData() {

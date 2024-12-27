@@ -1,3 +1,4 @@
+* #1123 - Upload subjective scores in the background
 * #1212 - Export and import images with database dumps
 * #1218 - Make sure judges can see the goal they are commenting on
 * Properly import virtual subjective category winners
