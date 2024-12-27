@@ -13,11 +13,6 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -26,7 +21,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.JspWriter;
 
 /**
  * Java code used in tables.jsp.
@@ -55,9 +54,7 @@ public final class Tables {
                                   final HttpServletResponse response)
       throws SQLException, IOException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
       final int tournament = Queries.getCurrentTournament(connection);
       final String submitButton = request.getParameter("submit_data");
 
@@ -107,20 +104,16 @@ public final class Tables {
         if (null == request.getParameter("SideA0")) {
           // this is the first time the page has been visited so we need to read
           // the table labels out of the DB
-          ResultSet rs = null;
-          PreparedStatement stmt = null;
-          try {
-            stmt = connection.prepareStatement("SELECT SideA,SideB FROM tablenames WHERE Tournament = ? ORDER BY PairID");
+          try (
+              PreparedStatement stmt = connection.prepareStatement("SELECT SideA,SideB FROM tablenames WHERE Tournament = ? ORDER BY PairID")) {
             stmt.setInt(1, tournament);
-            rs = stmt.executeQuery();
-            for (row = 0; rs.next(); row++) {
-              final String sideA = rs.getString(1);
-              final String sideB = rs.getString(2);
-              generateRow(out, row, sideA, sideB, "");
+            try (ResultSet rs = stmt.executeQuery()) {
+              for (row = 0; rs.next(); row++) {
+                final String sideA = rs.getString(1);
+                final String sideB = rs.getString(2);
+                generateRow(out, row, sideA, sideB, "");
+              }
             }
-          } finally {
-            SQLFunctions.close(rs);
-            SQLFunctions.close(stmt);
           }
         } else {
           // need to walk the parameters to see what we've been passed
@@ -154,8 +147,6 @@ public final class Tables {
       }
 
       out.println("</form>");
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
@@ -219,19 +210,19 @@ public final class Tables {
                                                 final int tournamentId,
                                                 final List<ImmutablePair<String, String>> tables)
       throws SQLException {
-    PreparedStatement deleteNames = null;
-    PreparedStatement deleteInfo = null;
-    PreparedStatement insert = null;
-    try {
-      deleteInfo = connection.prepareStatement("DELETE FROM table_division where Tournament = ?");
+    try (
+        PreparedStatement deleteInfo = connection.prepareStatement("DELETE FROM table_division where Tournament = ?")) {
       deleteInfo.setInt(1, tournamentId);
       deleteInfo.executeUpdate();
+    }
 
-      deleteNames = connection.prepareStatement("DELETE FROM tablenames where Tournament = ?");
+    try (PreparedStatement deleteNames = connection.prepareStatement("DELETE FROM tablenames where Tournament = ?")) {
       deleteNames.setInt(1, tournamentId);
       deleteNames.executeUpdate();
+    }
 
-      insert = connection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) VALUES(?, ?, ?, ?)");
+    try (
+        PreparedStatement insert = connection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) VALUES(?, ?, ?, ?)")) {
       insert.setInt(1, tournamentId);
       int pairId = 0;
       for (final ImmutablePair<String, String> tableInfo : tables) {
@@ -242,13 +233,7 @@ public final class Tables {
 
         ++pairId;
       }
-
-    } finally {
-      SQLFunctions.close(deleteInfo);
-      SQLFunctions.close(deleteNames);
-      SQLFunctions.close(insert);
     }
-
   }
 
   /**
