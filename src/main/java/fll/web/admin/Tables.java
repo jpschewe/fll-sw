@@ -98,7 +98,7 @@ public final class Tables {
               + "</font></p>");
         }
 
-        out.println("<p>Table labels should be unique. These labels must occur in pairs, where a label refers to a single side of a table. E.g. If the skirt of a table was red on one side and green on the other, the labels could be Red and Green, but if the table was red all around they could be Red1 and Red2.</p>");
+        out.println("<p>Table labels must be unique. These labels must occur in pairs, where a label refers to a single side of a table. The labels are expected to be of the form 'Color number' where 'number' is 1 or 2.</p>");
 
         out.println("<table border='1'><tr><th>Side A</th><th>Side B</th><th>Delete?</th></tr>");
 
