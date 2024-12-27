@@ -267,7 +267,7 @@ public final class TableInformation implements Serializable {
     final Collection<String> tables = new LinkedList<>();
 
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT sidea, sideb FROM tablenames WHERE tournament = ?")) {
+        PreparedStatement prep = connection.prepareStatement("SELECT sidea, sideb FROM tablenames WHERE tournament = ? ORDER BY sort_order")) {
       prep.setInt(1, tournament.getTournamentID());
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {

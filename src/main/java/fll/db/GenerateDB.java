@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 47;
+  public static final int DATABASE_VERSION = 48;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -157,11 +157,12 @@ public final class GenerateDB {
 
       // Table structure for table 'tablenames'
       stmt.executeUpdate("CREATE TABLE tablenames ("
-          + "  Tournament INTEGER NOT NULL," //
-          + "  PairID INTEGER NOT NULL," //
-          + "  SideA varchar(64) NOT NULL," //
-          + "  SideB varchar(64) NOT NULL," //
-          + "  CONSTRAINT tablenames_pk PRIMARY KEY (Tournament,PairID)" //
+          + "  Tournament INTEGER NOT NULL" //
+          + " ,PairID INTEGER NOT NULL" //
+          + " ,SideA varchar(64) NOT NULL" //
+          + " ,SideB varchar(64) NOT NULL" //
+          + " ,sort_order INTEGER NOT NULL" //
+          + " ,CONSTRAINT tablenames_pk PRIMARY KEY (Tournament,PairID)" //
           + " ,CONSTRAINT tablenames_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)"
           + ")");
 
@@ -348,7 +349,7 @@ public final class GenerateDB {
       createDeliberationCategoryOrder(connection, true);
 
       createVirtualSubjectiveCategoryTable(connection, true);
-      
+
       createAwardDeterminationTable(connection, true);
 
       // --------------- create views ---------------
