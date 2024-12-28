@@ -87,7 +87,7 @@ public class CommitSchedule extends BaseFLLServlet {
         // making the sort index the same for all tables causes the tables to be sorted
         // by table color
         final TableInformation table = new TableInformation(id++, String.format("%s 1", color),
-                                                            String.format("%s 2", color), 1, true);
+                                                            String.format("%s 2", color), 1);
         tables.add(table);
       }
       TableInformation.saveTournamentTableInformation(connection, tournament, tables);

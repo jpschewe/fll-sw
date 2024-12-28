@@ -122,7 +122,7 @@ public final class Tables extends BaseFLLServlet {
     }
 
     final int sortOrder = WebUtils.getIntRequestParameter(request, String.format("sortOrder%d", id));
-    final TableInformation table = new TableInformation(id, sideA, sideB, sortOrder, true);
+    final TableInformation table = new TableInformation(id, sideA, sideB, sortOrder);
     tables.add(table);
   }
 

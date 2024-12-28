@@ -81,16 +81,8 @@ fll.web.playoff.BracketParameters.populateContext(application, session, pageCont
                 <label for='${info.id }'>${info.sideA } /
                     ${info.sideB }</label>
 
-                <c:choose>
-                    <c:when test="${info.use }">
-                        <input type="checkbox" name='tables'
-                            value='${info.id}' checked />
-                    </c:when>
-                    <c:otherwise>
-                        <input type="checkbox" name='tables'
-                            value='${info.id}' />
-                    </c:otherwise>
-                </c:choose>
+                <input type="checkbox" name='tables' value='${info.id}'
+                    checked />
                 <br />
 
             </c:forEach>

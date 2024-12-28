@@ -30,25 +30,20 @@ import fll.Tournament;
  */
 public final class TableInformation implements Serializable, Comparable<TableInformation> {
 
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
   /**
    * @param id the id of the table information
    * @param sideA name of side A
    * @param sideB name of side B
    * @param sortOrder {@link #getSortOrder()}
-   * @param use true if this table should be used
    */
   public TableInformation(final int id,
                           final String sideA,
                           final String sideB,
-                          final int sortOrder,
-                          final boolean use) {
+                          final int sortOrder) {
     mId = id;
     mSideA = sideA;
     mSideB = sideB;
     this.sortOrder = sortOrder;
-    mUse = use;
   }
 
   private final int sortOrder;
@@ -78,18 +73,6 @@ public final class TableInformation implements Serializable, Comparable<TableInf
     return mSideB;
   }
 
-  private final boolean mUse;
-
-  /**
-   * @return if this table pair is to be used for playoffs, only properly
-   *         populated when
-   *         {@link #getTournamentTableInformationForPlayoff(Connection, int, String)}
-   *         is used to get the object
-   */
-  public boolean getUse() {
-    return mUse;
-  }
-
   private final int mId;
 
   /**
@@ -107,8 +90,8 @@ public final class TableInformation implements Serializable, Comparable<TableInf
         + getSideB()
         + " id: "
         + getId()
-        + " use: "
-        + getUse()
+        + " sortOrder: "
+        + getSortOrder()
         + "]";
   }
 
@@ -134,46 +117,79 @@ public final class TableInformation implements Serializable, Comparable<TableInf
   }
 
   /**
-   * Get the list of tables to use for the specified playoff bracket.
+   * Filter {@code tables} to those that are specified for us in the playoff
+   * bracket {@code bracket}.
    * 
-   * @param connection database connection
-   * @param tournament tournament identifier
-   * @param division playoff bracket name
-   * @return non-empty list of tables to use sorted by least used first
+   * @param tables the tables to filter, will not be modified
+   * @param connection database
+   * @param tournament the tournament
+   * @param bracket the bracket
+   * @return a new list of the tables to use
+   * @throws SQLException
+   */
+  public static List<TableInformation> filterToTablesForBracket(final List<TableInformation> tables,
+                                                                final Connection connection,
+                                                                final Tournament tournament,
+                                                                final String bracket)
+      throws SQLException {
+    final List<Integer> tableIdsForDivision = getTablesForDivision(connection, tournament.getTournamentID(), bracket);
+
+    final List<TableInformation> useTables = tables.stream().filter(table -> tableIdsForDivision.isEmpty()
+        || tableIdsForDivision.contains(table.getId())).collect(Collectors.toList());
+    return useTables;
+  }
+
+  /**
+   * Sort {@code tables} by usage from least used to most used.
+   * 
+   * @param tables the tables to sort, this list will be modified by sort
+   * @param connection the database
+   * @param tournament the tournament
    * @throws SQLException on a database error
    */
-  public static List<TableInformation> getTablesToUseForBracket(final Connection connection,
-                                                                final int tournament,
-                                                                final String division)
+  public static void sortByTableUsage(final List<TableInformation> tables,
+                                      final Connection connection,
+                                      final Tournament tournament)
       throws SQLException {
-    final List<TableInformation> tournamentTables = getTournamentTableInformationForPlayoff(connection, tournament,
-                                                                                            division);
 
-    final List<TableInformation> tablesToUse = tournamentTables.stream().filter(t -> t.getUse())
-                                                               .collect(Collectors.toList());
-    if (tablesToUse.isEmpty()
-        && !tournamentTables.isEmpty()) {
-      LOGGER.warn("Tables are defined, but none are set to be used by bracket "
-          + division
-          + ". This is unexpected, using all tables");
-      tablesToUse.addAll(tournamentTables);
-    }
+    // sort by the usage
+    final Map<Integer, Integer> tableUsage = new HashMap<>();
+    try (PreparedStatement prep = connection.prepareStatement("select tablenames.PairID, COUNT(tablenames.PairID) as c"//
+        + " FROM PlayoffTableData, tablenames" //
+        + " WHERE PlayoffTableData.Tournament = ?" //
+        + " AND PlayoffTableData.Tournament = tablenames.Tournament" //
+        + " AND AssignedTable IS NOT NULL" //
+        + " AND (PlayoffTableData.AssignedTable = tablenames.SideA OR PlayoffTableData.AssignedTable = tablenames.SideB)"//
+        + " GROUP BY tablenames.PairID")) {
+      prep.setInt(1, tournament.getTournamentID());
 
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Division: "
-          + division
-          + " all Tables: "
-          + tournamentTables
-          + " use tables: "
-          + tablesToUse);
-    }
+      // get table usage
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final int pairId = rs.getInt(1);
+          final int count = rs.getInt(2);
+          tableUsage.put(pairId, count);
+        }
+      } // result set
+    } // prepared statement
 
-    // Ensure that the list isn't empty
-    if (tablesToUse.isEmpty()) {
-      tablesToUse.add(new TableInformation(0, "Table 1", "Table 2", 0, true));
-    }
+    // sort by table usage
+    Collections.sort(tables, (one,
+                              two) -> {
+      final Integer oneUse = tableUsage.get(one.getId());
+      final Integer twoUse = tableUsage.get(two.getId());
+      if (null == oneUse
+          && null == twoUse) {
+        return 0;
+      } else if (null == oneUse) {
+        return -1;
+      } else if (null == twoUse) {
+        return 1;
+      } else {
+        return oneUse.compareTo(twoUse);
+      }
+    });
 
-    return tablesToUse;
   }
 
   /**
@@ -240,91 +256,13 @@ public final class TableInformation implements Serializable, Comparable<TableInf
           final String sideB = castNonNull(allTables.getString(3));
           final int sortOrder = allTables.getInt(4);
 
-          final TableInformation info = new TableInformation(pairId, sideA, sideB, sortOrder, true);
+          final TableInformation info = new TableInformation(pairId, sideA, sideB, sortOrder);
           tableInfo.add(info);
         } // foreach result
       } // allTables
     } // getAllTables
 
     Collections.sort(tableInfo);
-
-    return tableInfo;
-  }
-
-  /**
-   * Get table information for a tournament for playoffs.
-   *
-   * @param connection where to get the table information from
-   * @param tournament the tournament to get the information from
-   * @param division the award group to get the table information for
-   * @return Tables listed by least used first
-   * @throws SQLException if there is a database error
-   */
-  public static List<TableInformation> getTournamentTableInformationForPlayoff(final Connection connection,
-                                                                               final int tournament,
-                                                                               final String division)
-      throws SQLException {
-    final List<Integer> tableIdsForDivision = getTablesForDivision(connection, tournament, division);
-
-    final List<TableInformation> tableInfo = new LinkedList<>();
-    final Map<Integer, Integer> tableUsage = new HashMap<>();
-    try (
-        PreparedStatement getAllTables = connection.prepareStatement("select tablenames.PairID, tablenames.SideA, tablenames.SideB, sort_order" //
-            + " FROM tablenames" //
-            + " WHERE tablenames.Tournament = ?")) {
-      getAllTables.setInt(1, tournament);
-      try (ResultSet allTables = getAllTables.executeQuery()) {
-        while (allTables.next()) {
-          final int pairId = allTables.getInt(1);
-          final String sideA = castNonNull(allTables.getString(2));
-          final String sideB = castNonNull(allTables.getString(3));
-          final int sortOrder = allTables.getInt(4);
-
-          final boolean use = tableIdsForDivision.isEmpty()
-              || tableIdsForDivision.contains(pairId);
-
-          final TableInformation info = new TableInformation(pairId, sideA, sideB, sortOrder, use);
-          tableInfo.add(info);
-        } // foreach result
-      } // allTables
-    } // getAllTables
-
-    // sort by the usage
-    try (PreparedStatement prep = connection.prepareStatement("select tablenames.PairID, COUNT(tablenames.PairID) as c"//
-        + " FROM PlayoffTableData, tablenames" //
-        + " WHERE PlayoffTableData.Tournament = ?" //
-        + " AND PlayoffTableData.Tournament = tablenames.Tournament" //
-        + " AND AssignedTable IS NOT NULL" //
-        + " AND (PlayoffTableData.AssignedTable = tablenames.SideA OR PlayoffTableData.AssignedTable = tablenames.SideB)"//
-        + " GROUP BY tablenames.PairID")) {
-      prep.setInt(1, tournament);
-
-      // get table usage
-      try (ResultSet rs = prep.executeQuery()) {
-        while (rs.next()) {
-          final int pairId = rs.getInt(1);
-          final int count = rs.getInt(2);
-          tableUsage.put(pairId, count);
-        }
-      } // result set
-    } // prepared statement
-
-    // sort by table usage
-    Collections.sort(tableInfo, (one,
-                                 two) -> {
-      final Integer oneUse = tableUsage.get(one.getId());
-      final Integer twoUse = tableUsage.get(two.getId());
-      if (null == oneUse
-          && null == twoUse) {
-        return 0;
-      } else if (null == oneUse) {
-        return -1;
-      } else if (null == twoUse) {
-        return 1;
-      } else {
-        return oneUse.compareTo(twoUse);
-      }
-    });
 
     return tableInfo;
   }

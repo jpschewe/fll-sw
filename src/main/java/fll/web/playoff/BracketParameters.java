@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
+import fll.Tournament;
 import fll.db.Queries;
 import fll.db.TableInformation;
 import fll.util.FLLRuntimeException;
@@ -66,18 +67,16 @@ public class BracketParameters extends BaseFLLServlet {
       final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
                                                                             PlayoffSessionData.class);
 
-      final int currentTournament = data.getCurrentTournament().getTournamentID();
+      final Tournament currentTournament = data.getCurrentTournament();
 
       final String bracket = data.getBracket();
       if (null == bracket) {
         throw new FLLRuntimeException("Playoff session data has a null bracket");
       }
 
-      final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformationForPlayoff(connection,
-                                                                                              currentTournament,
-                                                                                              bracket);
+      final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection,
+                                                                                              currentTournament);
       pageContext.setAttribute("tableInfo", tableInfo);
-
     } catch (final SQLException e) {
       LOGGER.error(e, e);
       throw new RuntimeException(e);
