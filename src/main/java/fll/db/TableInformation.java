@@ -389,4 +389,25 @@ public final class TableInformation implements Serializable, Comparable<TableInf
     }
   }
 
+  @Override
+  public int hashCode() {
+    return getId();
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (o instanceof TableInformation) {
+      return this.equals((TableInformation) o);
+    } else {
+      return false;
+    }
+  }
+
+  public boolean equals(final TableInformation other) {
+    return getId() == other.getId() //
+        && getSortOrder() == other.getSortOrder() //
+        && getSideA().equals(other.getSideA()) //
+        && getSideB().equals(other.getSideB());
+  }
+
 }
