@@ -30,8 +30,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * @see ScheduleWriter#outputPerformanceScheduleByTime(TournamentSchedule,
- *      java.io.OutputStream)
+ * @see ScheduleWriter#outputPerformanceScheduleByTime(Connection, Tournament,
+ *      TournamentSchedule, java.io.OutputStream)
  */
 @WebServlet("/admin/PerformanceSchedule")
 public class PerformanceSchedule extends BaseFLLServlet {
