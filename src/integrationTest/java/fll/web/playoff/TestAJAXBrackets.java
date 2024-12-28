@@ -110,6 +110,9 @@ public class TestAJAXBrackets {
       IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
           + "admin/tables.jsp");
 
+      // make sure there is at least 1 row
+      selenium.findElement(By.id("add_row")).click();
+
       selenium.findElement(By.name("SideA1")).sendKeys("Blue 1");
       selenium.findElement(By.name("SideB1")).sendKeys("Table 2");
       selenium.findElement(By.id("finished")).click();
