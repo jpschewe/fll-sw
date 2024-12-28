@@ -990,9 +990,11 @@ public class FullTournamentTest {
                   // without
                   // losing focus
                   final String currentText = scoreInput.getDomAttribute("value");
-                  final String backSpaces = Keys.BACK_SPACE.toString().repeat(currentText.length());
-                  final CharSequence keys = String.format("%s%s", backSpaces, String.valueOf(value));
-                  scoreInput.sendKeys(keys);
+                  if (null != currentText) {
+                    final String backSpaces = Keys.BACK_SPACE.toString().repeat(currentText.length());
+                    final CharSequence keys = String.format("%s%s", backSpaces, String.valueOf(value));
+                    scoreInput.sendKeys(keys);
+                  }
                 }
               } // !computed
             } // foreach goal
