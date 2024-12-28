@@ -529,8 +529,8 @@ public class FullTournamentTest {
     IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
         + "admin/tables.jsp");
 
-    final WebElement sidea0 = selenium.findElement(By.name("SideA0"));
-    final WebElement sideb0 = selenium.findElement(By.name("SideB0"));
+    final WebElement sidea0 = selenium.findElement(By.name("SideA1"));
+    final WebElement sideb0 = selenium.findElement(By.name("SideB1"));
     if (StringUtils.isBlank(sidea0.getAttribute("value"))
         && StringUtils.isBlank(sideb0.getAttribute("value"))) {
       // Table labels should be assigned by the schedule, but may not be. If
