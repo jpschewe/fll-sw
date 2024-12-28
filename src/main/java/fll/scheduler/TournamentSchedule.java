@@ -779,12 +779,6 @@ public class TournamentSchedule implements Serializable {
       ScheduleWriter.outputPerformanceScheduleByTime(this, pdfFos);
     }
 
-    final File performancePerTable = new File(directory, baseFilename
-        + "-performancePerTable.pdf");
-    try (OutputStream pdfFos = new BufferedOutputStream(new FileOutputStream(performancePerTable))) {
-      ScheduleWriter.outputPerformanceSchedulePerTableByTime(this, pdfFos);
-    }
-
     final File teamSchedules = new File(directory, baseFilename
         + "-team-schedules.pdf");
     try (OutputStream pdfFos = new FileOutputStream(teamSchedules)) {
