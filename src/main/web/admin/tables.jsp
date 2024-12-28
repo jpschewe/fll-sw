@@ -13,6 +13,8 @@ fll.web.admin.Tables.populateContext(application, pageContext);
 <title>Table Labels</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
+
+<script type='text/javascript' src='tables.js'></script>
 </head>
 
 <body>
@@ -26,7 +28,7 @@ fll.web.admin.Tables.populateContext(application, pageContext);
 
 
     <form action="Tables" method="post">
-        <table>
+        <table id='tables_table'>
             <tr>
                 <th>Side A</th>
                 <th>Side B</th>
@@ -37,15 +39,18 @@ fll.web.admin.Tables.populateContext(application, pageContext);
             <c:forEach items="${tables}" var="table">
                 <tr>
                     <td>
-                        <input type='text' name='SideA${table.id}'
+                        <input class='SideA' type='text'
+                            name='SideA${table.id}'
                             value='${table.sideA}' />
                     </td>
                     <td>
-                        <input type='text' name='SideB${table.id}'
+                        <input class='SideB' type='text'
+                            name='SideB${table.id}'
                             value='${table.sideB}' />
                     </td>
                     <td>
-                        <input type='number' name='sortOrder${table.id}'
+                        <input class='SortOrder' type='number'
+                            name='sortOrder${table.id}'
                             value='${table.sortOrder}' />
                     </td>
                     <td>
@@ -56,6 +61,7 @@ fll.web.admin.Tables.populateContext(application, pageContext);
         </table>
 
         <button type='button' id='add_row'>Add Row</button>
+
         <input type='submit' name='submit_data' id='finished'
             value='Finished' />
 
