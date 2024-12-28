@@ -363,8 +363,9 @@ public final class ScheduleWriter {
   }
 
   /**
-   * Like {@link #outputPerformanceSchedulePerTableByTime(TournamentSchedule,
-   * OutputStream)}, only drops the award group column and adds a notes column.
+   * Like {@link #outputPerformanceSchedulePerTableByTime(Connection, Tournament,
+   * TournamentSchedule, OutputStream)}, only drops the award group column and
+   * adds a notes column.
    *
    * @param connection database
    * @param tournament the tournament
