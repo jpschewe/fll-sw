@@ -28,7 +28,7 @@ import fll.Tournament;
 /**
  * Information about a tournament table.
  */
-public final class TableInformation implements Serializable {
+public final class TableInformation implements Serializable, Comparable<TableInformation> {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -36,16 +36,28 @@ public final class TableInformation implements Serializable {
    * @param id the id of the table information
    * @param sideA name of side A
    * @param sideB name of side B
+   * @param sortOrder {@link #getSortOrder()}
    * @param use true if this table should be used
    */
   public TableInformation(final int id,
                           final String sideA,
                           final String sideB,
+                          final int sortOrder,
                           final boolean use) {
     mId = id;
     mSideA = sideA;
     mSideB = sideB;
+    this.sortOrder = sortOrder;
     mUse = use;
+  }
+
+  private final int sortOrder;
+
+  /**
+   * @return used to sort this table pair compared to other table pairs
+   */
+  public int getSortOrder() {
+    return sortOrder;
   }
 
   private final String mSideA;
@@ -69,7 +81,10 @@ public final class TableInformation implements Serializable {
   private final boolean mUse;
 
   /**
-   * @return if this table pair is to be used
+   * @return if this table pair is to be used for playoffs, only properly
+   *         populated when
+   *         {@link #getTournamentTableInformationForPlayoff(Connection, int, String)}
+   *         is used to get the object
    */
   public boolean getUse() {
     return mUse;
@@ -131,7 +146,8 @@ public final class TableInformation implements Serializable {
                                                                 final int tournament,
                                                                 final String division)
       throws SQLException {
-    final List<TableInformation> tournamentTables = getTournamentTableInformation(connection, tournament, division);
+    final List<TableInformation> tournamentTables = getTournamentTableInformationForPlayoff(connection, tournament,
+                                                                                            division);
 
     final List<TableInformation> tablesToUse = tournamentTables.stream().filter(t -> t.getUse())
                                                                .collect(Collectors.toList());
@@ -154,7 +170,7 @@ public final class TableInformation implements Serializable {
 
     // Ensure that the list isn't empty
     if (tablesToUse.isEmpty()) {
-      tablesToUse.add(new TableInformation(0, "Table 1", "Table 2", true));
+      tablesToUse.add(new TableInformation(0, "Table 1", "Table 2", 0, true));
     }
 
     return tablesToUse;
@@ -165,20 +181,55 @@ public final class TableInformation implements Serializable {
    *
    * @param connection where to get the table information from
    * @param tournament the tournament to get the information from
+   * @return tables sorted by {@link #compareTo(TableInformation)}
+   * @throws SQLException if there is a database error
+   */
+  public static List<TableInformation> getTournamentTableInformation(final Connection connection,
+                                                                     final Tournament tournament)
+      throws SQLException {
+    final List<TableInformation> tableInfo = new LinkedList<>();
+    try (
+        PreparedStatement getAllTables = connection.prepareStatement("select tablenames.PairID, tablenames.SideA, tablenames.SideB, sort_order" //
+            + " FROM tablenames" //
+            + " WHERE tablenames.Tournament = ?")) {
+      getAllTables.setInt(1, tournament.getTournamentID());
+      try (ResultSet allTables = getAllTables.executeQuery()) {
+        while (allTables.next()) {
+          final int pairId = allTables.getInt(1);
+          final String sideA = castNonNull(allTables.getString(2));
+          final String sideB = castNonNull(allTables.getString(3));
+          final int sortOrder = allTables.getInt(4);
+
+          final TableInformation info = new TableInformation(pairId, sideA, sideB, sortOrder, true);
+          tableInfo.add(info);
+        } // foreach result
+      } // allTables
+    } // getAllTables
+
+    Collections.sort(tableInfo);
+
+    return tableInfo;
+  }
+
+  /**
+   * Get table information for a tournament for playoffs.
+   *
+   * @param connection where to get the table information from
+   * @param tournament the tournament to get the information from
    * @param division the award group to get the table information for
    * @return Tables listed by least used first
    * @throws SQLException if there is a database error
    */
-  public static List<TableInformation> getTournamentTableInformation(final Connection connection,
-                                                                     final int tournament,
-                                                                     final String division)
+  public static List<TableInformation> getTournamentTableInformationForPlayoff(final Connection connection,
+                                                                               final int tournament,
+                                                                               final String division)
       throws SQLException {
     final List<Integer> tableIdsForDivision = getTablesForDivision(connection, tournament, division);
 
     final List<TableInformation> tableInfo = new LinkedList<>();
     final Map<Integer, Integer> tableUsage = new HashMap<>();
     try (
-        PreparedStatement getAllTables = connection.prepareStatement("select tablenames.PairID, tablenames.SideA, tablenames.SideB" //
+        PreparedStatement getAllTables = connection.prepareStatement("select tablenames.PairID, tablenames.SideA, tablenames.SideB, sort_order" //
             + " FROM tablenames" //
             + " WHERE tablenames.Tournament = ?")) {
       getAllTables.setInt(1, tournament);
@@ -187,11 +238,12 @@ public final class TableInformation implements Serializable {
           final int pairId = allTables.getInt(1);
           final String sideA = castNonNull(allTables.getString(2));
           final String sideB = castNonNull(allTables.getString(3));
+          final int sortOrder = allTables.getInt(4);
 
           final boolean use = tableIdsForDivision.isEmpty()
               || tableIdsForDivision.contains(pairId);
 
-          final TableInformation info = new TableInformation(pairId, sideA, sideB, use);
+          final TableInformation info = new TableInformation(pairId, sideA, sideB, sortOrder, use);
           tableInfo.add(info);
         } // foreach result
       } // allTables
@@ -267,7 +319,7 @@ public final class TableInformation implements Serializable {
     final Collection<String> tables = new LinkedList<>();
 
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT sidea, sideb FROM tablenames WHERE tournament = ? ORDER BY sort_order")) {
+        PreparedStatement prep = connection.prepareStatement("SELECT sidea, sideb FROM tablenames WHERE tournament = ? ORDER BY sort_order, SideA")) {
       prep.setInt(1, tournament.getTournamentID());
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
@@ -281,6 +333,20 @@ public final class TableInformation implements Serializable {
     } // prepared statement
 
     return tables;
+  }
+
+  /**
+   * Order first on {@link #getSortOrder()} and then on {@link #getSideA()}.
+   */
+  @Override
+  public int compareTo(final TableInformation o) {
+    if (getSortOrder() < o.getSortOrder()) {
+      return -1;
+    } else if (getSortOrder() > o.getSortOrder()) {
+      return 1;
+    } else {
+      return getSideA().compareTo(o.getSideA());
+    }
   }
 
 }

@@ -1392,7 +1392,7 @@ public final class BracketData extends BracketInfo {
                                                        final String division)
       throws SQLException {
     // Get the list of tournament tables
-    final List<TableInformation> tournamentTables = TableInformation.getTournamentTableInformation(pConnection,
+    final List<TableInformation> tournamentTables = TableInformation.getTournamentTableInformationForPlayoff(pConnection,
                                                                                                    tournament,
                                                                                                    division);
 

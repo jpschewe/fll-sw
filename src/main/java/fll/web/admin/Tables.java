@@ -18,22 +18,43 @@ import javax.sql.DataSource;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
+import fll.Tournament;
 import fll.db.Queries;
+import fll.db.TableInformation;
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import jakarta.servlet.ServletContext;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Java code used in tables.jsp.
  */
+@WebServlet("/admin/Tables")
 public final class Tables {
 
   private Tables() {
 
+  }
+
+  public static void populateContext(final ServletContext application,
+                                     final PageContext page) {
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
+      final Tournament tournament = Tournament.getCurrentTournament(connection);
+
+      final List<TableInformation> tables = TableInformation.getTournamentTableInformation(connection, tournament);
+      page.setAttribute("tables", tables);
+    } catch (final SQLException e) {
+      throw new FLLRuntimeException("Error talking to the database", e);
+    }
   }
 
   /**
@@ -109,18 +130,21 @@ public final class Tables {
             stmt.setInt(1, tournament);
             try (ResultSet rs = stmt.executeQuery()) {
               for (row = 0; rs.next(); row++) {
-                final String sideA = rs.getString(1);
-                final String sideB = rs.getString(2);
+                final String sideA = castNonNull(rs.getString(1));
+                final String sideB = castNonNull(rs.getString(2));
                 generateRow(out, row, sideA, sideB, "");
               }
             }
           }
         } else {
           // need to walk the parameters to see what we've been passed
+          @Nullable
           String sideA = request.getParameter("SideA"
               + row);
+          @Nullable
           String sideB = request.getParameter("SideB"
               + row);
+          @Nullable
           String delete = request.getParameter("delete"
               + row);
           while (null != sideA) {

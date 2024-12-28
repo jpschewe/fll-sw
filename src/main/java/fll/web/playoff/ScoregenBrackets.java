@@ -113,7 +113,7 @@ public final class ScoregenBrackets {
                                                                             firstRound, lastRound, print);
       pageContext.setAttribute("bracketInfo", bracketInfo);
 
-      final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection,
+      final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformationForPlayoff(connection,
                                                                                               currentTournament,
                                                                                               division);
       pageContext.setAttribute("tableInfo", tableInfo);
