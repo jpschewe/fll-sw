@@ -13,7 +13,7 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import fll.db.Queries;
+import fll.Tournament;
 import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
@@ -52,8 +52,9 @@ public class PerformanceSchedule extends BaseFLLServlet {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
+      final Tournament tournament = Tournament.getCurrentTournament(connection);
 
-      final int currentTournamentID = Queries.getCurrentTournament(connection);
+      final int currentTournamentID = tournament.getTournamentID();
 
       if (!TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID)) {
         SessionAttributes.appendToMessage(session, "<p class='error'>There is no schedule for this tournament.</p>");
@@ -66,7 +67,7 @@ public class PerformanceSchedule extends BaseFLLServlet {
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=performanceSchedule.pdf");
-      ScheduleWriter.outputPerformanceScheduleByTime(schedule, response.getOutputStream());
+      ScheduleWriter.outputPerformanceScheduleByTime(connection, tournament, schedule, response.getOutputStream());
 
     } catch (final SQLException sqle) {
       LOGGER.error(sqle.getMessage(), sqle);

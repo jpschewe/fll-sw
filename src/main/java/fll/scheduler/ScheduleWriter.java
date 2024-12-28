@@ -36,6 +36,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.diffplug.common.base.Errors;
+import com.google.common.collect.Iterables;
 
 import fll.Tournament;
 import fll.Utilities;
@@ -314,15 +315,20 @@ public final class ScheduleWriter {
   /**
    * Output the performance schedule, sorted by time.
    *
+   * @param connection database
+   * @param tournament the tournament, used to get table sort information
    * @param schedule the schedule to write
    * @param pdfFos where to write the schedule
    * @throws IOException error writing to the stream
    */
-  public static void outputPerformanceScheduleByTime(final TournamentSchedule schedule,
+  public static void outputPerformanceScheduleByTime(final Connection connection,
+                                                     final Tournament tournament,
+                                                     final TournamentSchedule schedule,
                                                      final OutputStream pdfFos)
-      throws IOException {
+      throws IOException, SQLException {
     try {
-      final Document performanceDoc = createPerformanceSchedule(schedule);
+      final List<TableInformation> tables = TableInformation.getTournamentTableInformation(connection, tournament);
+      final Document performanceDoc = createPerformanceSchedule(tables, schedule);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
       FOPUtils.renderPdf(fopFactory, performanceDoc, pdfFos);
@@ -422,16 +428,17 @@ public final class ScheduleWriter {
     pageSequence.appendChild(documentBody);
 
     tables.forEach(tableInfo -> {
-      addScheduleForTableSide(schedule, displayAwardGroup, displayNotes, performanceTimes, tableInfo.getSideA(),
+      addScheduleForTableSide(tables, schedule, displayAwardGroup, displayNotes, performanceTimes, tableInfo.getSideA(),
                               document, documentBody);
-      addScheduleForTableSide(schedule, displayAwardGroup, displayNotes, performanceTimes, tableInfo.getSideB(),
+      addScheduleForTableSide(tables, schedule, displayAwardGroup, displayNotes, performanceTimes, tableInfo.getSideB(),
                               document, documentBody);
     });
 
     return document;
   }
 
-  private static void addScheduleForTableSide(final TournamentSchedule schedule,
+  private static void addScheduleForTableSide(final List<TableInformation> tables,
+                                              final TournamentSchedule schedule,
                                               final boolean displayAwardGroup,
                                               final boolean displayNotes,
                                               final Map<PerformanceTime, TeamScheduleInfo> performanceTimes,
@@ -446,13 +453,14 @@ public final class ScheduleWriter {
                                                                                          .collect(Collectors.toMap(Map.Entry::getKey,
                                                                                                                    Map.Entry::getValue));
 
-    final Element ele = createPerformanceScheduleTable(schedule, headerText, document, tablePerformanceTimes,
+    final Element ele = createPerformanceScheduleTable(tables, schedule, headerText, document, tablePerformanceTimes,
                                                        displayAwardGroup, displayNotes);
     documentBody.appendChild(ele);
     ele.setAttribute("page-break-after", "always");
   }
 
-  private static Document createPerformanceSchedule(final TournamentSchedule schedule) {
+  private static Document createPerformanceSchedule(final List<TableInformation> tables,
+                                                    final TournamentSchedule schedule) {
     final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = new HashMap<>();
     for (final TeamScheduleInfo si : schedule.getSchedule()) {
       for (final PerformanceTime pt : si.getAllPerformances()) {
@@ -484,7 +492,8 @@ public final class ScheduleWriter {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    final Element ele = createPerformanceScheduleTable(schedule, headerText, document, performanceTimes, true, false);
+    final Element ele = createPerformanceScheduleTable(tables, schedule, headerText, document, performanceTimes, true,
+                                                       false);
     documentBody.appendChild(ele);
 
     return document;
@@ -493,22 +502,65 @@ public final class ScheduleWriter {
   private static final class PerformanceEntryComparator
       implements Comparator<Map.Entry<PerformanceTime, TeamScheduleInfo>>, Serializable {
 
-    static final PerformanceEntryComparator INSTANCE = new PerformanceEntryComparator();
+    /**
+     * @param tables sorted tables
+     */
+    PerformanceEntryComparator(final List<TableInformation> tables) {
+      this.tables = tables;
+    }
+
+    private final List<TableInformation> tables;
 
     @Override
     public int compare(final Map.Entry<PerformanceTime, TeamScheduleInfo> o1,
                        final Map.Entry<PerformanceTime, TeamScheduleInfo> o2) {
-      return o1.getKey().compareTo(o2.getKey());
+      final PerformanceTime perf1 = o1.getKey();
+      final PerformanceTime perf2 = o2.getKey();
+      // return perf1.compareTo(perf2);
+      final int timeCompare = perf1.getTime().compareTo(perf2.getTime());
+      if (0 != timeCompare) {
+        return timeCompare;
+      }
+
+      final int tableIndex1 = findTableSortIndex(tables, perf1);
+      final int tableIndex2 = findTableSortIndex(tables, perf2);
+      if (tableIndex1 != tableIndex2) {
+        return Integer.compare(tableIndex1, tableIndex2);
+      }
+
+      final int sideCompare = Integer.compare(perf1.getSide(), perf2.getSide());
+      if (sideCompare != 0) {
+        return sideCompare;
+      }
+
+      return Boolean.compare(perf1.isPractice(), perf2.isPractice());
+    }
+
+  }
+
+  /**
+   * Find the index of the table from {@code perfTime} in {@code tables}.
+   * 
+   * @param tables the table information in sorted order
+   * @return the index, {@link Integer#MAX_VALUE} if not found
+   */
+  private static int findTableSortIndex(final List<TableInformation> tables,
+                                        final PerformanceTime perfTime) {
+    final int index = Iterables.indexOf(tables, table -> table.getSideA().startsWith(perfTime.getTable()));
+    if (index < 0) {
+      return Integer.MAX_VALUE;
+    } else {
+      return index;
     }
   }
 
-  private static Element createPerformanceScheduleTable(final TournamentSchedule schedule,
+  private static Element createPerformanceScheduleTable(final List<TableInformation> tables,
+                                                        final TournamentSchedule schedule,
                                                         final String headerText,
                                                         final Document document,
                                                         final Map<PerformanceTime, TeamScheduleInfo> performanceTimes,
                                                         final boolean displayAwardGroup,
                                                         final boolean displayNotes) {
-
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
     final Element table = FOPUtils.createBasicTable(document);
@@ -575,7 +627,7 @@ public final class ScheduleWriter {
     LocalTime prevTime = null;
     Element prevRow = null;
     final List<Map.Entry<PerformanceTime, TeamScheduleInfo>> entries = new LinkedList<>(performanceTimes.entrySet());
-    Collections.sort(entries, PerformanceEntryComparator.INSTANCE);
+    Collections.sort(entries, new PerformanceEntryComparator(tables));
     for (final Map.Entry<PerformanceTime, TeamScheduleInfo> entry : entries) {
       final Element row = FOPUtils.createTableRow(document);
       tableBody.appendChild(row);

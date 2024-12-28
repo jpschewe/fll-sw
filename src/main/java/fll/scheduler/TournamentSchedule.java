@@ -5,7 +5,6 @@
  */
 package fll.scheduler;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -771,12 +770,6 @@ public class TournamentSchedule implements Serializable {
         + "-subjective-by-time.pdf");
     try (OutputStream pdfFos = new FileOutputStream(byTime)) {
       ScheduleWriter.outputSubjectiveSchedulesByTimeOnly(this, pdfFos);
-    }
-
-    final File performance = new File(directory, baseFilename
-        + "-performance.pdf");
-    try (OutputStream pdfFos = new BufferedOutputStream(new FileOutputStream(performance))) {
-      ScheduleWriter.outputPerformanceScheduleByTime(this, pdfFos);
     }
 
     final File teamSchedules = new File(directory, baseFilename
