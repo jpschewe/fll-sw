@@ -531,8 +531,8 @@ public class FullTournamentTest {
 
     final WebElement sidea0 = selenium.findElement(By.name("SideA1"));
     final WebElement sideb0 = selenium.findElement(By.name("SideB1"));
-    if (StringUtils.isBlank(sidea0.getDomAttribute("value"))
-        && StringUtils.isBlank(sideb0.getDomAttribute("value"))) {
+    if (StringUtils.isBlank(sidea0.getDomProperty("value"))
+        && StringUtils.isBlank(sideb0.getDomProperty("value"))) {
       // Table labels should be assigned by the schedule, but may not be. If
       // they're not assigned, then assign them.
       sidea0.sendKeys("red");
@@ -989,12 +989,10 @@ public class FullTournamentTest {
                   // setup backspace keys to delete all current text and then input the value
                   // without
                   // losing focus
-                  final String currentText = scoreInput.getDomAttribute("value");
-                  if (null != currentText) {
-                    final String backSpaces = Keys.BACK_SPACE.toString().repeat(currentText.length());
-                    final CharSequence keys = String.format("%s%s", backSpaces, String.valueOf(value));
-                    scoreInput.sendKeys(keys);
-                  }
+                  final String currentText = scoreInput.getDomProperty("value");
+                  final String backSpaces = Keys.BACK_SPACE.toString().repeat(currentText.length());
+                  final CharSequence keys = String.format("%s%s", backSpaces, String.valueOf(value));
+                  scoreInput.sendKeys(keys);
                 }
               } // !computed
             } // foreach goal
@@ -1064,7 +1062,7 @@ public class FullTournamentTest {
             final Select verifySelect = new Select(verifySelectElement);
             boolean found = false;
             for (final WebElement option : verifySelect.getOptions()) {
-              final String value = option.getDomAttribute("value");
+              final String value = option.getDomProperty("value");
               if (value.startsWith(teamNumber
                   + "-")) {
                 verifySelect.selectByValue(value);
@@ -1092,7 +1090,7 @@ public class FullTournamentTest {
                   final String value = rs.getString(name);
 
                   final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
-                                                   .getDomAttribute("value");
+                                                   .getDomProperty("value");
                   assertNotNull(formValue, "Null value for goal: "
                       + name);
 
@@ -1100,7 +1098,7 @@ public class FullTournamentTest {
                       + name);
                 } else if (goal.isYesNo()) {
                   final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
-                                                   .getDomAttribute("value");
+                                                   .getDomProperty("value");
                   assertNotNull(formValue, "Null value for goal: "
                       + name);
 
@@ -1115,7 +1113,7 @@ public class FullTournamentTest {
                   assertEquals(expectedValue.toLowerCase(), formValue.toLowerCase(), "Wrong value for goal: "
                       + name);
                 } else {
-                  final String formValue = selenium.findElement(By.name(name)).getDomAttribute("value");
+                  final String formValue = selenium.findElement(By.name(name)).getDomProperty("value");
                   assertNotNull(formValue, "Null value for goal: "
                       + name);
 

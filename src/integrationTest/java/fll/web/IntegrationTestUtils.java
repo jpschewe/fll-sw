@@ -659,7 +659,7 @@ public final class IntegrationTestUtils {
       if (text.endsWith("[ "
           + tournamentName
           + " ]")) {
-        tournamentID = option.getDomAttribute("value");
+        tournamentID = option.getDomProperty("value");
       }
     }
     assertNotNull(tournamentID, "Could not find tournament with name: "
@@ -935,7 +935,7 @@ public final class IntegrationTestUtils {
     final Select currentTournamentSel = new Select(currentTournament);
     for (final WebElement option : currentTournamentSel.getOptions()) {
       if (option.isSelected()) {
-        final String idStr = option.getDomAttribute("value");
+        final String idStr = option.getDomProperty("value");
         return Integer.parseInt(idStr);
       }
     }

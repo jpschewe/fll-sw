@@ -206,7 +206,7 @@ public class TestAJAXBrackets {
       final Select verifySelect = new Select(scoreEntryWindow.findElement(By.id("select-verify-teamnumber")));
       boolean found = false;
       for (final WebElement option : verifySelect.getOptions()) {
-        final String value = option.getDomAttribute("value");
+        final String value = option.getDomProperty("value");
         if (value.startsWith("4-")) {
           verifySelect.selectByValue(value);
           found = true;
