@@ -395,7 +395,7 @@ public final class TableInformation implements Serializable, Comparable<TableInf
   }
 
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(final @Nullable Object o) {
     if (o instanceof TableInformation) {
       return this.equals((TableInformation) o);
     } else {
