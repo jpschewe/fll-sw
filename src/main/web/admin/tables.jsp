@@ -20,6 +20,7 @@ fll.web.admin.Tables.populateContext(application, pageContext);
 <body>
 
     <h1>Table Labels</h1>
+
     <div>Table labels must be unique. These labels must occur in
         pairs, where a label refers to a single side of a table. The
         labels are expected to be of the form 'Color number' where

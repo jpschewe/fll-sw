@@ -177,6 +177,46 @@ public final class TableInformation implements Serializable, Comparable<TableInf
   }
 
   /**
+   * Replace the table information for the specified tournament.
+   * 
+   * @param connection the database
+   * @param tournament the tournament to replace information for
+   * @param tables the new table information
+   * @throws SQLException on a database error
+   */
+  public static void saveTournamentTableInformation(final Connection connection,
+                                                    final Tournament tournament,
+                                                    final Collection<TableInformation> tables)
+      throws SQLException {
+    final boolean autoCommit = connection.getAutoCommit();
+    try {
+      connection.setAutoCommit(false);
+
+      try (PreparedStatement delete = connection.prepareStatement("DELETE FROM tablenames WHERE tournament = ?")) {
+        delete.setInt(1, tournament.getTournamentID());
+        delete.executeUpdate();
+      }
+
+      try (
+          PreparedStatement prep = connection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB, sort_order) VALUES(?, ?, ?, ?, ?)")) {
+        prep.setInt(1, tournament.getTournamentID());
+
+        for (final TableInformation table : tables) {
+          prep.setInt(2, table.getId());
+          prep.setString(3, table.getSideA());
+          prep.setString(4, table.getSideB());
+          prep.setInt(5, table.getSortOrder());
+          prep.executeUpdate();
+        }
+      }
+
+      connection.commit();
+    } finally {
+      connection.setAutoCommit(autoCommit);
+    }
+  }
+
+  /**
    * Get table information for a tournament.
    *
    * @param connection where to get the table information from
