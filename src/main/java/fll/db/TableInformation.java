@@ -30,6 +30,8 @@ import fll.Tournament;
  */
 public final class TableInformation implements Serializable, Comparable<TableInformation> {
 
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
   /**
    * @param id the id of the table information
    * @param sideA name of side A
@@ -136,7 +138,14 @@ public final class TableInformation implements Serializable, Comparable<TableInf
 
     final List<TableInformation> useTables = tables.stream().filter(table -> tableIdsForDivision.isEmpty()
         || tableIdsForDivision.contains(table.getId())).collect(Collectors.toList());
-    return useTables;
+
+    if (useTables.isEmpty()
+        && !tables.isEmpty()) {
+      LOGGER.warn("Tables are defined, but none are set to be used by bracket {}. This is unexpected, using all tables");
+      return new LinkedList<>(tables);
+    } else {
+      return useTables;
+    }
   }
 
   /**
