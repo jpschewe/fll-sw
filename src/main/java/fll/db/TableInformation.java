@@ -274,10 +274,22 @@ public final class TableInformation implements Serializable, Comparable<TableInf
     Collections.sort(tableInfo);
 
     if (tableInfo.isEmpty()) {
-      return Collections.singletonList(new TableInformation(0, "Table 1", "Table 2", 0));
+      return setupDefaultTables(connection, tournament);
     }
 
     return tableInfo;
+  }
+
+  /**
+   * Create default table information and save to the database so that things
+   * work.
+   */
+  private static List<TableInformation> setupDefaultTables(final Connection connection,
+                                                           final Tournament tournament)
+      throws SQLException {
+    final List<TableInformation> tables = Collections.singletonList(new TableInformation(0, "Table 1", "Table 2", 0));
+    saveTournamentTableInformation(connection, tournament, tables);
+    return tables;
   }
 
   /**
