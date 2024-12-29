@@ -16,6 +16,13 @@ buildscript {
     configurations.classpath {
       exclude(group: "com.google.guava", module: "guava")
     }
+    
+    // https://github.com/one-dark/jetbrains-one-dark-theme/issues/345
+    configurations.all {
+      resolutionStrategy.dependencySubstitution {
+        substitute module("com.overzealous:remark:1.1.0") using module("com.wavefront:remark:2023-07.07") because "not available on maven central anymore"
+      }
+    }
 }    
 
 plugins {
