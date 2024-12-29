@@ -273,6 +273,10 @@ public final class TableInformation implements Serializable, Comparable<TableInf
 
     Collections.sort(tableInfo);
 
+    if (tableInfo.isEmpty()) {
+      return Collections.singletonList(new TableInformation(0, "Table 1", "Table 2", 0));
+    }
+
     return tableInfo;
   }
 
