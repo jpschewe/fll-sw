@@ -56,7 +56,7 @@ apply plugin: "com.cinnober.gradle.semver-git"
 repositories {
     mavenCentral()
     maven {
-      url "https://repo.mtu.net/releases"
+      url = "https://repo.mtu.net/releases"
     }
 }
 
