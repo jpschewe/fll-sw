@@ -439,7 +439,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                 <span class='completed'>DONE </span>
             </c:if>
             <a href='<c:url value="tables.jsp"/>'>Assign Table
-                Labels</a> (for scoresheet printing during head to head)
+                Labels</a>
         </li>
 
 

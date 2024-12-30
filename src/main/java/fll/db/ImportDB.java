@@ -815,6 +815,11 @@ public final class ImportDB {
       upgrade46to47(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 48) {
+      upgrade47to48(connection);
+    }
+
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -1631,6 +1636,35 @@ public final class ImportDB {
       GenerateDB.createAwardDeterminationTable(connection, false);
     }
     setDBVersion(connection, 47);
+  }
+
+  /**
+   * Add sort order to tablenames.
+   */
+  private static void upgrade47to48(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 47 to 48");
+
+    try (Statement stmt = connection.createStatement()) {
+      if (!checkForColumnInTable(connection, "tablenames", "sort_order")) {
+        stmt.executeUpdate("ALTER TABLE tablenames ADD COLUMN sort_order INTEGER DEFAULT NULL");
+        try (ResultSet rs = stmt.executeQuery("SELECT Tournament,PairID FROM tablenames ORDER BY Tournament, SideA");
+            PreparedStatement update = connection.prepareStatement("UPDATE tablenames SET sort_order = ? WHERE Tournament = ? AND PairID = ?")) {
+          // this code increments the sort order across all tournaments, which is fine as
+          // all we need is a unique order within a tournament, the actual values don't
+          // matter.
+          int sortOrder = 0;
+          while (rs.next()) {
+            final int tournamentId = rs.getInt(1);
+            final int pairId = rs.getInt(2);
+            update.setInt(1, sortOrder++);
+            update.setInt(2, tournamentId);
+            update.setInt(3, pairId);
+            update.executeUpdate();
+          }
+        }
+      }
+    }
+    setDBVersion(connection, 48);
   }
 
   /**
@@ -2513,10 +2547,10 @@ public final class ImportDB {
       destPrep.executeUpdate();
     }
 
-    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT PairID, SideA, SideB "
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT PairID, SideA, SideB, sort_order "
         + "FROM tablenames WHERE Tournament=?");
-        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) "
-            + "VALUES (?, ?, ?, ?)")) {
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB, sort_order) "
+            + "VALUES (?, ?, ?, ?, ?)")) {
 
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);

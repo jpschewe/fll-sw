@@ -56,12 +56,16 @@ apply plugin: "com.cinnober.gradle.semver-git"
 repositories {
     mavenCentral()
     maven {
-      url "https://repo.mtu.net/releases"
+      url = "https://repo.mtu.net/releases"
     }
 }
 
 configurations {
     jspc
+}
+
+tasks.withType(JavaCompile) {
+    options.deprecation = true
 }
 
 eclipse {

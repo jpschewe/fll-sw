@@ -1882,7 +1882,7 @@ public final class Playoff {
                                          final int dbLine)
       throws SQLException {
     final Tournament tournament = Tournament.findTournamentByID(connection, tournamentId);
-    
+
     LOGGER.trace("Assigning table label for bracket: {} tournament: {} playoffRound: {} dbLine: {}", bracketName,
                  tournamentId, playoffRound, dbLine);
 
@@ -1891,7 +1891,8 @@ public final class Playoff {
     if (Team.BYE_TEAM_NUMBER == getPlayoffTeamNumber(connection, tournament, bracketName, playoffRound, dbLine)) {
       LOGGER.trace("Not assigning table to bye round (this team).");
       return;
-    } else if(Team.BYE_TEAM_NUMBER == getPlayoffTeamNumber(connection, tournament, bracketName, playoffRound, getSiblingDbLine(dbLine))) {
+    } else if (Team.BYE_TEAM_NUMBER == getPlayoffTeamNumber(connection, tournament, bracketName, playoffRound,
+                                                            getSiblingDbLine(dbLine))) {
       LOGGER.trace("Not assigning table to bye round (sibling team).");
       return;
     }
@@ -1914,8 +1915,11 @@ public final class Playoff {
       // Setting both values in a transaction will ensure that the line isn't modified
       // elsewhere.
 
-      final List<TableInformation> tables = TableInformation.getTablesToUseForBracket(connection, tournamentId,
+      final List<TableInformation> allTables = TableInformation.getTournamentTableInformation(connection, tournament);
+      final List<TableInformation> tables = TableInformation.filterToTablesForBracket(allTables, connection, tournament,
                                                                                       bracketName);
+      TableInformation.sortByTableUsage(tables, connection, tournament);
+      
       final TableInformation tableInfo = tables.get(0);
 
       prep.setString(1, tableInfo.getSideA());

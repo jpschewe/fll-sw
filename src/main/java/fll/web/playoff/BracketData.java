@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
+import fll.Tournament;
 import fll.db.Queries;
 import fll.db.TableInformation;
 import fll.db.TournamentParameters;
@@ -634,12 +635,12 @@ public final class BracketData extends BracketInfo {
    * @param firstRound first round to display
    * @param lastRound last round to display
    * @param print if checkboxes should be displayed for printing scoresheets
-   * @param tournamentId ID of the tournament
+   * @param tournament tournament
    * @return the BracketData for display
    * @throws SQLException on a database error
    */
   public static BracketData constructScoregenBrackets(final Connection connection,
-                                                      final int tournamentId,
+                                                      final Tournament tournament,
                                                       final String bracketName,
                                                       final int firstRound,
                                                       final int lastRound,
@@ -648,7 +649,7 @@ public final class BracketData extends BracketInfo {
     final BracketData bracketInfo = new BracketData(connection, bracketName, firstRound, lastRound,
                                                     BracketData.DEFAULT_ROWS_PER_TEAM, true, false, print);
 
-    bracketInfo.addBracketLabelsAndScoreGenFormElements(connection, tournamentId, bracketName);
+    bracketInfo.addBracketLabelsAndScoreGenFormElements(connection, tournament, bracketName);
 
     bracketInfo.generateBracketOutput(connection, TopRightCornerStyle.MEET_BOTTOM_OF_CELL);
 
@@ -1388,16 +1389,14 @@ public final class BracketData extends BracketInfo {
    * @param division the bracket name
    */
   private void addBracketLabelsAndScoreGenFormElements(final Connection pConnection,
-                                                       final int tournament,
+                                                       final Tournament tournament,
                                                        final String division)
       throws SQLException {
     // Get the list of tournament tables
     final List<TableInformation> tournamentTables = TableInformation.getTournamentTableInformation(pConnection,
-                                                                                                   tournament,
-                                                                                                   division);
+                                                                                                   tournament);
 
-    final List<TableInformation> tablesToUse = TableInformation.getTablesToUseForBracket(pConnection, tournament,
-                                                                                         division);
+    final List<TableInformation> tablesToUse = TableInformation.filterToTablesForBracket(tournamentTables, pConnection, tournament, division);
 
     Iterator<TableInformation> tAssignIt = tablesToUse.iterator();
 

@@ -14,6 +14,7 @@ import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.Tournament;
 import fll.db.Queries;
 import fll.db.TableInformation;
 import fll.web.ApplicationAttributes;
@@ -107,15 +108,14 @@ public final class ScoregenBrackets {
       request.setAttribute("firstRound", Integer.valueOf(firstRound));
       request.setAttribute("lastRound", Integer.valueOf(lastRound));
 
-      final int currentTournament = Queries.getCurrentTournament(connection);
+      final Tournament currentTournament = Tournament.getCurrentTournament(connection);
 
       final BracketData bracketInfo = BracketData.constructScoregenBrackets(connection, currentTournament, division,
                                                                             firstRound, lastRound, print);
       pageContext.setAttribute("bracketInfo", bracketInfo);
 
       final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection,
-                                                                                              currentTournament,
-                                                                                              division);
+                                                                                              currentTournament);
       pageContext.setAttribute("tableInfo", tableInfo);
 
     } catch (final SQLException e) {

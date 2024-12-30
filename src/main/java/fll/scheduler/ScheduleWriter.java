@@ -9,6 +9,8 @@ package fll.scheduler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,15 +23,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.xml.transform.TransformerException;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -37,8 +36,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.diffplug.common.base.Errors;
+import com.google.common.collect.Iterables;
 
+import fll.Tournament;
 import fll.Utilities;
+import fll.db.TableInformation;
 import fll.scheduler.TournamentSchedule.SubjectiveComparatorByAwardGroup;
 import fll.scheduler.TournamentSchedule.SubjectiveComparatorByTime;
 import fll.util.FLLInternalException;
@@ -313,15 +315,20 @@ public final class ScheduleWriter {
   /**
    * Output the performance schedule, sorted by time.
    *
+   * @param connection database
+   * @param tournament the tournament, used to get table sort information
    * @param schedule the schedule to write
    * @param pdfFos where to write the schedule
    * @throws IOException error writing to the stream
    */
-  public static void outputPerformanceScheduleByTime(final TournamentSchedule schedule,
+  public static void outputPerformanceScheduleByTime(final Connection connection,
+                                                     final Tournament tournament,
+                                                     final TournamentSchedule schedule,
                                                      final OutputStream pdfFos)
-      throws IOException {
+      throws IOException, SQLException {
     try {
-      final Document performanceDoc = createPerformanceSchedule(schedule);
+      final List<TableInformation> tables = TableInformation.getTournamentTableInformation(connection, tournament);
+      final Document performanceDoc = createPerformanceSchedule(tables, schedule);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
       FOPUtils.renderPdf(fopFactory, performanceDoc, pdfFos);
@@ -333,15 +340,20 @@ public final class ScheduleWriter {
   /**
    * Output the performance schedule per table, sorted by time.
    *
+   * @param connection database
+   * @param tournament the tournament
    * @param schedule the schedule to write
    * @param pdfFos where to write the schedule
    * @throws IOException error writing to the stream
+   * @throws SQLException on a database error
    */
-  public static void outputPerformanceSchedulePerTableByTime(final TournamentSchedule schedule,
+  public static void outputPerformanceSchedulePerTableByTime(final Connection connection,
+                                                             final Tournament tournament,
+                                                             final TournamentSchedule schedule,
                                                              final OutputStream pdfFos)
-      throws IOException {
+      throws IOException, SQLException {
     try {
-      final Document performanceDoc = createPerformanceSchedulePerTable(schedule, true, false);
+      final Document performanceDoc = createPerformanceSchedulePerTable(connection, tournament, schedule, true, false);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
       FOPUtils.renderPdf(fopFactory, performanceDoc, pdfFos);
@@ -351,18 +363,24 @@ public final class ScheduleWriter {
   }
 
   /**
-   * Like {@link #outputPerformanceSchedulePerTableByTime(TournamentSchedule,
-   * OutputStream)}, only drops the award group column and adds a notes column.
+   * Like {@link #outputPerformanceSchedulePerTableByTime(Connection, Tournament,
+   * TournamentSchedule, OutputStream)}, only drops the award group column and
+   * adds a notes column.
    *
+   * @param connection database
+   * @param tournament the tournament
    * @param schedule the schedule to write
    * @param pdfFos where to write the schedule
    * @throws IOException error writing to the stream
+   * @throws SQLException on a database error
    */
-  public static void outputPerformanceSchedulePerTableByTimeForNotes(final TournamentSchedule schedule,
+  public static void outputPerformanceSchedulePerTableByTimeForNotes(final Connection connection,
+                                                                     final Tournament tournament,
+                                                                     final TournamentSchedule schedule,
                                                                      final OutputStream pdfFos)
-      throws IOException {
+      throws IOException, SQLException {
     try {
-      final Document performanceDoc = createPerformanceSchedulePerTable(schedule, false, true);
+      final Document performanceDoc = createPerformanceSchedulePerTable(connection, tournament, schedule, false, true);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
       FOPUtils.renderPdf(fopFactory, performanceDoc, pdfFos);
@@ -371,17 +389,19 @@ public final class ScheduleWriter {
     }
   }
 
-  private static Document createPerformanceSchedulePerTable(final TournamentSchedule schedule,
+  private static Document createPerformanceSchedulePerTable(final Connection connection,
+                                                            final Tournament tournament,
+                                                            final TournamentSchedule schedule,
                                                             final boolean displayAwardGroup,
-                                                            final boolean displayNotes) {
-    final SortedSet<ImmutablePair<String, Integer>> tables = new TreeSet<>();
+                                                            final boolean displayNotes)
+      throws SQLException {
+
+    final List<TableInformation> tables = TableInformation.getTournamentTableInformation(connection, tournament);
 
     final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = new HashMap<>();
     for (final TeamScheduleInfo si : schedule.getSchedule()) {
       for (final PerformanceTime pt : si.getAllPerformances()) {
         performanceTimes.put(pt, si);
-        final ImmutablePair<String, Integer> table = ImmutablePair.of(pt.getTable(), pt.getSide());
-        tables.add(table);
       }
     }
 
@@ -408,31 +428,40 @@ public final class ScheduleWriter {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    tables.forEach(pair -> {
-      final String table = pair.getLeft();
-      final int side = pair.getRight();
-
-      final String headerText = String.format("Tournament: %s Performance - %s %d", schedule.getName(), table, side);
-
-      final Map<PerformanceTime, TeamScheduleInfo> tablePerformanceTimes = performanceTimes.entrySet().stream() //
-                                                                                           .filter(e -> e.getKey()
-                                                                                                         .getTable()
-                                                                                                         .equals(table)
-                                                                                               && e.getKey()
-                                                                                                   .getSide() == side) //
-                                                                                           .collect(Collectors.toMap(Map.Entry::getKey,
-                                                                                                                     Map.Entry::getValue));
-
-      final Element ele = createPerformanceScheduleTable(schedule, headerText, document, tablePerformanceTimes,
-                                                         displayAwardGroup, displayNotes);
-      documentBody.appendChild(ele);
-      ele.setAttribute("page-break-after", "always");
+    tables.forEach(tableInfo -> {
+      addScheduleForTableSide(tables, schedule, displayAwardGroup, displayNotes, performanceTimes, tableInfo.getSideA(),
+                              document, documentBody);
+      addScheduleForTableSide(tables, schedule, displayAwardGroup, displayNotes, performanceTimes, tableInfo.getSideB(),
+                              document, documentBody);
     });
 
     return document;
   }
 
-  private static Document createPerformanceSchedule(final TournamentSchedule schedule) {
+  private static void addScheduleForTableSide(final List<TableInformation> tables,
+                                              final TournamentSchedule schedule,
+                                              final boolean displayAwardGroup,
+                                              final boolean displayNotes,
+                                              final Map<PerformanceTime, TeamScheduleInfo> performanceTimes,
+                                              final String tableSideName,
+                                              final Document document,
+                                              final Element documentBody) {
+    final String headerText = String.format("Tournament: %s Performance - %s", schedule.getName(), tableSideName);
+    final Map<PerformanceTime, TeamScheduleInfo> tablePerformanceTimes = performanceTimes.entrySet().stream() //
+                                                                                         .filter(e -> e.getKey()
+                                                                                                       .getTableAndSide()
+                                                                                                       .equals(tableSideName)) //
+                                                                                         .collect(Collectors.toMap(Map.Entry::getKey,
+                                                                                                                   Map.Entry::getValue));
+
+    final Element ele = createPerformanceScheduleTable(tables, schedule, headerText, document, tablePerformanceTimes,
+                                                       displayAwardGroup, displayNotes);
+    documentBody.appendChild(ele);
+    ele.setAttribute("page-break-after", "always");
+  }
+
+  private static Document createPerformanceSchedule(final List<TableInformation> tables,
+                                                    final TournamentSchedule schedule) {
     final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = new HashMap<>();
     for (final TeamScheduleInfo si : schedule.getSchedule()) {
       for (final PerformanceTime pt : si.getAllPerformances()) {
@@ -464,7 +493,8 @@ public final class ScheduleWriter {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    final Element ele = createPerformanceScheduleTable(schedule, headerText, document, performanceTimes, true, false);
+    final Element ele = createPerformanceScheduleTable(tables, schedule, headerText, document, performanceTimes, true,
+                                                       false);
     documentBody.appendChild(ele);
 
     return document;
@@ -473,22 +503,65 @@ public final class ScheduleWriter {
   private static final class PerformanceEntryComparator
       implements Comparator<Map.Entry<PerformanceTime, TeamScheduleInfo>>, Serializable {
 
-    static final PerformanceEntryComparator INSTANCE = new PerformanceEntryComparator();
+    /**
+     * @param tables sorted tables
+     */
+    PerformanceEntryComparator(final List<TableInformation> tables) {
+      this.tables = tables;
+    }
+
+    private final List<TableInformation> tables;
 
     @Override
     public int compare(final Map.Entry<PerformanceTime, TeamScheduleInfo> o1,
                        final Map.Entry<PerformanceTime, TeamScheduleInfo> o2) {
-      return o1.getKey().compareTo(o2.getKey());
+      final PerformanceTime perf1 = o1.getKey();
+      final PerformanceTime perf2 = o2.getKey();
+      // return perf1.compareTo(perf2);
+      final int timeCompare = perf1.getTime().compareTo(perf2.getTime());
+      if (0 != timeCompare) {
+        return timeCompare;
+      }
+
+      final int tableIndex1 = findTableSortIndex(tables, perf1);
+      final int tableIndex2 = findTableSortIndex(tables, perf2);
+      if (tableIndex1 != tableIndex2) {
+        return Integer.compare(tableIndex1, tableIndex2);
+      }
+
+      final int sideCompare = Integer.compare(perf1.getSide(), perf2.getSide());
+      if (sideCompare != 0) {
+        return sideCompare;
+      }
+
+      return Boolean.compare(perf1.isPractice(), perf2.isPractice());
+    }
+
+  }
+
+  /**
+   * Find the index of the table from {@code perfTime} in {@code tables}.
+   * 
+   * @param tables the table information in sorted order
+   * @return the index, {@link Integer#MAX_VALUE} if not found
+   */
+  private static int findTableSortIndex(final List<TableInformation> tables,
+                                        final PerformanceTime perfTime) {
+    final int index = Iterables.indexOf(tables, table -> table.getSideA().startsWith(perfTime.getTable()));
+    if (index < 0) {
+      return Integer.MAX_VALUE;
+    } else {
+      return index;
     }
   }
 
-  private static Element createPerformanceScheduleTable(final TournamentSchedule schedule,
+  private static Element createPerformanceScheduleTable(final List<TableInformation> tables,
+                                                        final TournamentSchedule schedule,
                                                         final String headerText,
                                                         final Document document,
                                                         final Map<PerformanceTime, TeamScheduleInfo> performanceTimes,
                                                         final boolean displayAwardGroup,
                                                         final boolean displayNotes) {
-
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
     final Element table = FOPUtils.createBasicTable(document);
@@ -555,7 +628,7 @@ public final class ScheduleWriter {
     LocalTime prevTime = null;
     Element prevRow = null;
     final List<Map.Entry<PerformanceTime, TeamScheduleInfo>> entries = new LinkedList<>(performanceTimes.entrySet());
-    Collections.sort(entries, PerformanceEntryComparator.INSTANCE);
+    Collections.sort(entries, new PerformanceEntryComparator(tables));
     for (final Map.Entry<PerformanceTime, TeamScheduleInfo> entry : entries) {
       final Element row = FOPUtils.createTableRow(document);
       tableBody.appendChild(row);

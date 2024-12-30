@@ -110,8 +110,11 @@ public class TestAJAXBrackets {
       IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
           + "admin/tables.jsp");
 
-      selenium.findElement(By.name("SideA0")).sendKeys("Blue 1");
-      selenium.findElement(By.name("SideB0")).sendKeys("Table 2");
+      // make sure there is at least 1 row
+      selenium.findElement(By.id("add_row")).click();
+
+      selenium.findElement(By.name("SideA1")).sendKeys("Blue 1");
+      selenium.findElement(By.name("SideB1")).sendKeys("Table 2");
       selenium.findElement(By.id("finished")).click();
 
       IntegrationTestUtils.changeNumSeedingRounds(selenium, seleniumWait, 0);
@@ -203,7 +206,7 @@ public class TestAJAXBrackets {
       final Select verifySelect = new Select(scoreEntryWindow.findElement(By.id("select-verify-teamnumber")));
       boolean found = false;
       for (final WebElement option : verifySelect.getOptions()) {
-        final String value = option.getAttribute("value");
+        final String value = option.getDomProperty("value");
         if (value.startsWith("4-")) {
           verifySelect.selectByValue(value);
           found = true;
