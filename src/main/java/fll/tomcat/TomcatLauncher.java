@@ -156,13 +156,16 @@ public class TomcatLauncher {
 
     Launcher.setupDataDirectories();
 
+    // serve servlets
     resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", classesPath.toAbsolutePath().toString(),
                                                  "/"));
 
+    // serve backup databases
     resources.addPreResources(new DirResourceSet(resources, "/"
         + DumpDB.getDatabaseBackupPath().getFileName(), DumpDB.getDatabaseBackupPath().toAbsolutePath().toString(),
                                                  "/"));
 
+    // serve user images
     resources.addPreResources(new DirResourceSet(resources, "/"
         + UserImages.getImagesPath().getFileName(), UserImages.getImagesPath().toAbsolutePath().toString(), "/"));
 
