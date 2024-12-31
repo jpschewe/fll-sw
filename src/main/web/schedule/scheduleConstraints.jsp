@@ -64,10 +64,10 @@ fll.web.schedule.ProcessScheduleConstraints.populateContext(application, pageCon
                 type="number" min="${numSeedingRounds}"
                 value="${numSeedingRounds}" required />
             <br />
-            <div>
+        </div>
 
 
-                <input type="submit" id='submit_data' value='Submit' />
+        <input type="submit" id='submit_data' value='Submit' />
     </form>
 
 </body>
