@@ -203,6 +203,7 @@ public class PitSigns extends BaseFLLServlet {
     final Element judgingGroupBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     page.appendChild(judgingGroupBlock);
     judgingGroupBlock.appendChild(document.createTextNode(String.format("Judging Group: %s", team.getJudgingGroup())));
+    judgingGroupBlock.setAttribute("font-size",  "22pt");
     final @Nullable String wave = team.getWave();
     if (null != wave) {
       final Element waveText = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
