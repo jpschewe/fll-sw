@@ -939,28 +939,6 @@ function populateScoreSummary() {
             window.location = "#enter-score";
         });
 
-        /*
-        const otherJudgeScores = subjective_module.getOtherJudgeScores(team.teamNumber);
-        for (const [otherJudgeId, otherScore] of otherJudgeScores) {
-            const otherScoreBlock = document.createElement("span");
-            rightBlock.appendChild(otherScoreBlock);
-            let otherScoreText;
-            if (null == otherScore) {
-                otherScoreText = "";
-            } else if (otherScore.noShow) {
-                otherScoreText = "No Show";
-                otherScoreBlock.classList.add("no-show");
-            } else {
-                if (subjective_module.isScoreCompleted(otherScore)) {
-                    otherScoreText = subjective_module.computeScore(otherScore);
-                } else {
-                    otherScoreText = "";
-                }
-            }
-            otherScoreBlock.innerText = otherJudgeId + " - " + otherScoreText;
-            otherScoreBlock.classList.add("score-summary-right-elements");
-        }
-        */
         const teamOtherJudgeScores = otherJudgesScores.get(team.teamNumber);
         for (const otherJudgeId of otherJudges) {
             const otherScoreBlock = document.createElement("span");
@@ -974,6 +952,7 @@ function populateScoreSummary() {
                 const otherScore = otherScoreData["score"];
                 if (otherScore.noShow) {
                     otherScoreBlock.innerHTML = centerText("No Show", otherJudgeIdLength);
+                    otherScoreBlock.classList.add("no-show");
                 } else {
                     const otherComputed = otherScoreData["computedScore"];
                     if (otherComputed) {
