@@ -819,8 +819,6 @@ function populateScoreSummary() {
                 if (subjective_module.isScoreCompleted(otherScore)) {
                     const otherComputedScore = subjective_module.computeScore(otherScore);
                     teamOtherJudgeScores.set(otherJudgeId, `${otherComputedScore} 1`);
-                } else {
-                    teamOtherJudgeScores.set(otherJudgeId, "&nbsp;");
                 }
             }
         }
@@ -959,11 +957,13 @@ function populateScoreSummary() {
             const otherScoreBlock = document.createElement("span");
             rightBlock.appendChild(otherScoreBlock);
 
+            const otherJudgeIdLength = otherJudgeId.length;
             const otherScoreText = teamOtherJudgeScores.get(otherJudgeId);
             if (otherScoreText) {
-                otherScoreBlock.innerHTML = centerText(otherScoreText, otherJudgeId.length);
+                otherScoreBlock.innerHTML = centerText(otherScoreText, otherJudgeIdLength);
             } else {
-                otherScoreBlock.innerHTML = "&nbsp;".repeat(otherJudgeId.length);
+                const str = "&nbsp;".repeat(otherJudgeIdLength);
+                otherScoreBlock.innerHTML = str;
             }
             otherScoreBlock.classList.add("score-summary-right-elements");
             otherScoreBlock.classList.add("other-judge");
