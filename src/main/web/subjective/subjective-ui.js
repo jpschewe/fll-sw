@@ -791,6 +791,7 @@ function populateScoreSummary() {
 
     const teamScores = {};
     const teamsWithScores = [];
+    const otherJudges = [];
 
     const teams = subjective_module.getCurrentTeams();
     for (const team of teams) {
@@ -800,14 +801,41 @@ function populateScoreSummary() {
 
             const computedScore = subjective_module.computeScore(score);
             teamScores[team.teamNumber] = computedScore;
+
+            const otherJudgeScores = subjective_module.getOtherJudgeScores(team.teamNumber);
+            for (const [otherJudgeId, otherScore] of otherJudgeScores) {
+                if (!otherJudges.includes(otherJudgeId)) {
+                    otherJudges.push(otherJudgeId);
+                }
+            }
         }
     }
+
+    otherJudges.sort();
 
     teamsWithScores.sort(function(a, b) {
         const scoreA = teamScores[a.teamNumber];
         const scoreB = teamScores[b.teamNumber];
         return scoreA < scoreB ? 1 : scoreA > scoreB ? -1 : 0;
     });
+
+    const headerRow = document.createElement("div");
+    scoreSummaryContent.appendChild(headerRow);
+
+    const headerRowSpacer = document.createElement("span");
+    headerRowSpacer.innerHTML = "&nbsp;";
+    headerRow.appendChild(headerRowSpacer);
+
+    const headerRowRightBlock = document.createElement("span");
+    headerRow.appendChild(headerRowRightBlock);
+    headerRowRightBlock.classList.add("right-align");
+
+    for (const judgeId of otherJudges) {
+        const judgeIdBlock = document.createElement("span");
+        headerRowRightBlock.appendChild(judgeIdBlock);
+        judgeIdBlock.classList.add("score-summary-right-elements");
+        judgeIdBlock.innerText = judgeId;
+    }
 
     let rank = 0;
     let rankOffset = 1;
@@ -886,6 +914,35 @@ function populateScoreSummary() {
             subjective_module.setScoreEntryBackPage("#score-summary");
             window.location = "#enter-score";
         });
+
+        /*
+        const otherJudgeScores = subjective_module.getOtherJudgeScores(team.teamNumber);
+        for (const [otherJudgeId, otherScore] of otherJudgeScores) {
+            const otherScoreBlock = document.createElement("span");
+            rightBlock.appendChild(otherScoreBlock);
+            let otherScoreText;
+            if (null == otherScore) {
+                otherScoreText = "";
+            } else if (otherScore.noShow) {
+                otherScoreText = "No Show";
+                otherScoreBlock.classList.add("no-show");
+            } else {
+                if (subjective_module.isScoreCompleted(otherScore)) {
+                    otherScoreText = subjective_module.computeScore(otherScore);
+                } else {
+                    otherScoreText = "";
+                }
+            }
+            otherScoreBlock.innerText = otherJudgeId + " - " + otherScoreText;
+            otherScoreBlock.classList.add("score-summary-right-elements");
+        }
+        */
+        for (const otherJudgeId of otherJudges) {
+            const otherScoreBlock = document.createElement("span");
+            rightBlock.appendChild(otherScoreBlock);
+            otherScoreBlock.innerText = "Rank score";
+            otherScoreBlock.classList.add("score-summary-right-elements");
+        }
 
 
         if (score && score.note) {
