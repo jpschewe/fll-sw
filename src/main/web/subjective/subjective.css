@@ -171,5 +171,11 @@ footer button {
 
 #enter-score-note-button {
     background-color: purple;
-    color: white;    
+    color: white;
+}
+
+/* make sure the other judge columns line up */
+.other-judge {
+    font-family: monospace;
+    font-size: larger;
 }

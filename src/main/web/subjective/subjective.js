@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2014 INSciTE.  All rights reserved
- * INSciTE is on the web at: http://www.hightechkids.org
- * This code is released under GPL; see LICENSE.txt for details.
- */
+* Copyright (c) 2014 INSciTE.  All rights reserved
+* INSciTE is on the web at: http://www.hightechkids.org
+* This code is released under GPL; see LICENSE.txt for details.
+*/
 
 "use strict";
 
@@ -27,6 +27,7 @@ const subjective_module = {}
     let _currentCategoryColumn;
     let _judges;
     let _currentJudgeId;
+    // category name -> judge -> teamNumber -> score object
     let _allScores;
     let _teamTimeCache;
     let _currentTeam;
@@ -659,6 +660,28 @@ const subjective_module = {}
             }
 
             return judgeScores[teamNumber];
+        },
+
+        /**
+         * Get all scores for the specified team.
+         * @param teamNumber number of the team to find
+         * @return map of judge id to score or null if no scores
+         */
+        subjective_module.getOtherJudgeScores = function(teamNumber) {
+            const categoryScores = _allScores[_currentCategory.name];
+            if (null == categoryScores) {
+                return null;
+            }
+
+            const otherJudgeScores = new Map();
+            for (const [judgeId, teamScores] of Object.entries(categoryScores)) {
+                for (const [tnum, score] of Object.entries(teamScores)) {
+                    if (tnum == teamNumber && judgeId != subjective_module.getCurrentJudgeId()) {
+                        otherJudgeScores.set(judgeId, score);
+                    }
+                }
+            }
+            return otherJudgeScores;
         },
 
         subjective_module.saveScore = function(score) {
