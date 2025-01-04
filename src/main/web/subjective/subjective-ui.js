@@ -804,8 +804,8 @@ function populateScoreSummary() {
     }
 
     teamsWithScores.sort(function(a, b) {
-        var scoreA = teamScores[a.teamNumber];
-        var scoreB = teamScores[b.teamNumber];
+        const scoreA = teamScores[a.teamNumber];
+        const scoreB = teamScores[b.teamNumber];
         return scoreA < scoreB ? 1 : scoreA > scoreB ? -1 : 0;
     });
 
