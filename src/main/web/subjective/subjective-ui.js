@@ -816,7 +816,9 @@ function populateScoreSummary() {
                     otherJudges.push(otherJudgeId);
                 }
 
-                if (subjective_module.isScoreCompleted(otherScore)) {
+                if (otherScore.noShow) {
+                    teamOtherJudgeScores.set(otherJudgeId, 'No Show');
+                } else if (subjective_module.isScoreCompleted(otherScore)) {
                     const otherComputedScore = subjective_module.computeScore(otherScore);
                     teamOtherJudgeScores.set(otherJudgeId, `${otherComputedScore} 1`);
                 }
