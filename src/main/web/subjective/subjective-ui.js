@@ -834,6 +834,69 @@ function populateScoreSummary() {
         otherJudgesScores.set(team.teamNumber, teamOtherJudgeScores);
     }
 
+    // collect score data by judge so that it can be sorted to compute ranks
+    const otherJudgeRank = new Map(); // judge id -> [ scoreData ]
+    for (const [_, judgeData] of otherJudgesScores) {
+        for (const [judgeId, scoreData] of judgeData) {
+            if (otherJudgeRank.has(judgeId)) {
+                otherJudgeRank.get(judgeId).push(scoreData);
+            } else {
+                otherJudgeRank.set(judgeId, [scoreData]);
+            }
+        }
+    }
+
+    // compute ranks for other judge scores
+    for (const [_, scoreDataList] of otherJudgeRank) {
+        scoreDataList.sort(function(a, b) {
+            const scoreA = a["computedScore"];
+            const scoreB = b["computedScore"];
+            if (!scoreA && !scoreB) {
+                return 0;
+            } else if (!scoreA && scoreB) {
+                return 1;
+            } else if (scoreA && !scoreB) {
+                return -1;
+            } else if (scoreA > scoreB) {
+                return -1;
+            } else if (scoreA < scoreB) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+        
+        // assign ranks
+        let rank = 0;
+        let rankOffset = 1;
+        for (let i = 0; i < scoreDataList.length; ++i) {
+            const scoreData = scoreDataList[i];
+            
+            if (i > 0) {
+                const prevScoreData = scoreDataList[i - 1];
+                if(scoreData["computedScore"] == prevScoreData["computedScore"]) {
+                    scoreData["tie"] = true;
+                    rankOffset = rankOffset + 1;
+                } else {
+                    rank = rank + rankOffset;
+                    rankOffset = 1;
+                }
+            } else {
+                rank = rank + rankOffset;
+                rankOffset = 1;
+            }
+
+            if (i + 1 < teamsWithScores.length) {
+                const nextScoreData = scoreDataList[i + 1];
+                if(scoreData["computedScore"] == nextScoreData["computedScore"]) {
+                    scoreData["tie"] = true;
+                }                
+            }
+            
+            scoreData["rank"] = rank;                        
+        }        
+    }
+
     otherJudges.sort();
 
     teamsWithScores.sort(function(a, b) {
@@ -954,9 +1017,14 @@ function populateScoreSummary() {
                     otherScoreBlock.innerHTML = centerText("No Show", otherJudgeIdLength);
                     otherScoreBlock.classList.add("no-show");
                 } else {
+                    if(otherScoreData["tie"]) {
+                        otherScoreBlock.classList.add("tie");
+                    }
+                    
                     const otherComputed = otherScoreData["computedScore"];
                     if (otherComputed) {
-                        otherScoreBlock.innerHTML = centerText(`${otherComputed} 1`, otherJudgeIdLength);
+                        const otherRank = otherScoreData["rank"];
+                        otherScoreBlock.innerHTML = centerText(`${otherComputed} ${otherRank}`, otherJudgeIdLength);
                     } else {
                         otherScoreBlock.innerHTML = "&nbsp;".repeat(otherJudgeIdLength);
                     }
