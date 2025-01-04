@@ -792,7 +792,8 @@ function populateScoreSummary() {
     const teamScores = {};
     const teamsWithScores = [];
     const otherJudges = [];
-    const otherJudgesScores = new Map(); // team number -> judge id -> score text
+    const otherJudgesScores = new Map(); // team number -> judge id -> score data
+    //const otherJudge
 
     const teams = subjective_module.getCurrentTeams();
     for (const team of teams) {
@@ -816,12 +817,18 @@ function populateScoreSummary() {
                     otherJudges.push(otherJudgeId);
                 }
 
-                if (otherScore.noShow) {
-                    teamOtherJudgeScores.set(otherJudgeId, 'No Show');
-                } else if (subjective_module.isScoreCompleted(otherScore)) {
-                    const otherComputedScore = subjective_module.computeScore(otherScore);
-                    teamOtherJudgeScores.set(otherJudgeId, `${otherComputedScore} 1`);
+                let scoreData;
+                if (teamOtherJudgeScores.has(otherJudgeId)) {
+                    scoreData = teamOtherJudgeScores.get(otherJudgeId);
+                } else {
+                    scoreData = {};
                 }
+                scoreData["score"] = otherScore;
+                if (subjective_module.isScoreCompleted(otherScore)) {
+                    const otherComputedScore = subjective_module.computeScore(otherScore);
+                    scoreData["computedScore"] = otherComputedScore;
+                }
+                teamOtherJudgeScores.set(otherJudgeId, scoreData);
             }
         }
         otherJudgesScores.set(team.teamNumber, teamOtherJudgeScores);
@@ -960,12 +967,22 @@ function populateScoreSummary() {
             rightBlock.appendChild(otherScoreBlock);
 
             const otherJudgeIdLength = otherJudgeId.length;
-            const otherScoreText = teamOtherJudgeScores.get(otherJudgeId);
-            if (otherScoreText) {
-                otherScoreBlock.innerHTML = centerText(otherScoreText, otherJudgeIdLength);
+            const otherScoreData = teamOtherJudgeScores.get(otherJudgeId);
+            if (!otherScoreData) {
+                otherScoreBlock.innerHTML = "&nbsp;".repeat(otherJudgeIdLength);
             } else {
-                const str = "&nbsp;".repeat(otherJudgeIdLength);
-                otherScoreBlock.innerHTML = str;
+                const otherScore = otherScoreData["score"];
+                if (otherScore.noShow) {
+                    otherScoreBlock.innerHTML = centerText("No Show", otherJudgeIdLength);
+                } else {
+                    const otherComputed = otherScoreData["computedScore"];
+                    if (otherComputed) {
+                        otherScoreBlock.innerHTML = centerText(`${otherComputed} 1`, otherJudgeIdLength);
+                    } else {
+                        otherScoreBlock.innerHTML = "&nbsp;".repeat(otherJudgeIdLength);
+                    }
+
+                }
             }
             otherScoreBlock.classList.add("score-summary-right-elements");
             otherScoreBlock.classList.add("other-judge");
