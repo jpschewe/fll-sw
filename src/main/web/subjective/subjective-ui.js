@@ -792,9 +792,17 @@ function populateScoreSummary() {
     const teamScores = {};
     const teamsWithScores = [];
     const otherJudges = [];
+    const otherJudgesScores = new Map(); // team number -> judge id -> score text
 
     const teams = subjective_module.getCurrentTeams();
     for (const team of teams) {
+        let teamOtherJudgeScores;
+        if (otherJudgesScores.has(team.teamNumber)) {
+            teamOtherJudgeScores = otherJudgesScores.get(team.teamNumber);
+        } else {
+            teamOtherJudgeScores = new Map();
+        }
+
         const score = subjective_module.getScore(team.teamNumber);
         if (subjective_module.isScoreCompleted(score)) {
             teamsWithScores.push(team);
@@ -807,8 +815,16 @@ function populateScoreSummary() {
                 if (!otherJudges.includes(otherJudgeId)) {
                     otherJudges.push(otherJudgeId);
                 }
+
+                if (subjective_module.isScoreCompleted(otherScore)) {
+                    const otherComputedScore = subjective_module.computeScore(otherScore);
+                    teamOtherJudgeScores.set(otherJudgeId, `${otherComputedScore} 1`);
+                } else {
+                    teamOtherJudgeScores.set(otherJudgeId, "&nbsp;");
+                }
             }
         }
+        otherJudgesScores.set(team.teamNumber, teamOtherJudgeScores);
     }
 
     otherJudges.sort();
@@ -834,6 +850,7 @@ function populateScoreSummary() {
         const judgeIdBlock = document.createElement("span");
         headerRowRightBlock.appendChild(judgeIdBlock);
         judgeIdBlock.classList.add("score-summary-right-elements");
+        judgeIdBlock.classList.add("other-judge");
         judgeIdBlock.innerText = judgeId;
     }
 
@@ -937,11 +954,19 @@ function populateScoreSummary() {
             otherScoreBlock.classList.add("score-summary-right-elements");
         }
         */
+        const teamOtherJudgeScores = otherJudgesScores.get(team.teamNumber);
         for (const otherJudgeId of otherJudges) {
             const otherScoreBlock = document.createElement("span");
             rightBlock.appendChild(otherScoreBlock);
-            otherScoreBlock.innerText = "Rank score";
+
+            const otherScoreText = teamOtherJudgeScores.get(otherJudgeId);
+            if (otherScoreText) {
+                otherScoreBlock.innerHTML = centerText(otherScoreText, otherJudgeId.length);
+            } else {
+                otherScoreBlock.innerHTML = "&nbsp;".repeat(otherJudgeId.length);
+            }
             otherScoreBlock.classList.add("score-summary-right-elements");
+            otherScoreBlock.classList.add("other-judge");
         }
 
 

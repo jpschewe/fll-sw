@@ -200,3 +200,20 @@ function uploadJsonData(url, method, payloadObject) {
         body: dataToUpload
     });
 }
+
+
+/**
+ * Center text within width with non-breaking spaces on either side.
+ * If text is wider than width, return text.
+ */
+function centerText(text, width) {
+    const spaceLength = width - text.length;
+    if (spaceLength > 0) {
+        const paddingLeft = Math.floor(spaceLength / 2);
+        const paddingRight = spaceLength - paddingLeft;
+        const paddedText = '&nbsp;'.repeat(paddingLeft) + text + '&nbsp;'.repeat(paddingRight);
+        return paddedText;
+    } else {
+        return text;
+    }
+}
